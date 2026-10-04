@@ -749,87 +749,295 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }}
+        .tracker-timer-box {{
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }}
+        .tracker-timer-label {{
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }}
+        .timer-display-workout {{
+            font-family: monospace;
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--cyan);
+            letter-spacing: 1px;
+            line-height: 1;
         }}
         .timer-display {{
             font-family: monospace;
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 900;
             color: var(--gold);
             letter-spacing: 1px;
+            line-height: 1;
         }}
         .timer-controls {{
             display: flex;
-            gap: 6px;
+            gap: 4px;
+            align-items: center;
+            flex-wrap: wrap;
         }}
         .btn-timer {{
             background: var(--bg-elevated);
             border: 1px solid var(--border);
             color: #fff;
-            font-size: 11.5px;
+            font-size: 11px;
             font-weight: 700;
-            padding: 6px 10px;
+            padding: 5px 8px;
             border-radius: 6px;
             cursor: pointer;
+            transition: all 0.2s;
         }}
         .btn-timer:hover {{
             border-color: var(--gold);
         }}
+        .btn-timer-sub {{
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 10.5px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 2px;
+            width: fit-content;
+            transition: all 0.2s;
+        }}
+        .btn-timer-sub:hover {{
+            border-color: var(--cyan);
+            color: var(--cyan);
+        }}
 
-        /* SET CHECKBOXES (PILLS) */
-        .set-pills-row {{
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
+        /* SETS MANAGEMENT WRAP & ROWS */
+        .sets-management-wrap {{
+            background: #090d16;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 8px 10px;
             margin-top: 10px;
         }}
-        .set-pill {{
-            background: var(--bg-elevated);
-            border: 1.5px solid var(--border);
-            border-radius: 8px;
-            padding: 6px 12px;
-            font-size: 12px;
+        .sets-header-row {{
+            display: grid;
+            grid-template-columns: 42px 65px 1fr 1fr 100px;
+            gap: 6px;
+            font-size: 10px;
             font-weight: 800;
             color: var(--text-secondary);
-            cursor: pointer;
+            text-transform: uppercase;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            text-align: center;
+        }}
+        .set-row {{
+            display: grid;
+            grid-template-columns: 42px 65px 1fr 1fr 100px;
+            gap: 6px;
+            align-items: center;
+            padding: 6px 2px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            border-radius: 6px;
+            transition: all 0.2s;
+        }}
+        .set-row:last-child {{
+            border-bottom: none;
+        }}
+        .set-row.set-completed {{
+            background: rgba(34, 197, 94, 0.12);
+            border: 1px solid rgba(34, 197, 94, 0.35);
+        }}
+        .set-row.set-active-target {{
+            border: 1px solid var(--gold);
+            background: rgba(245, 158, 11, 0.08);
+        }}
+        .set-badge {{
+            background: #1e293b;
+            color: #fff;
+            border-radius: 6px;
+            padding: 4px 6px;
+            font-size: 11px;
+            font-weight: 800;
+            text-align: center;
+            display: inline-block;
+        }}
+        .set-row.set-completed .set-badge {{
+            background: #16a34a;
+            color: #fff;
+        }}
+        .set-col-target {{
+            font-size: 11.5px;
+            color: var(--text-secondary);
+            text-align: center;
+            font-weight: 600;
+        }}
+        .set-col-input {{
             display: flex;
             align-items: center;
-            gap: 6px;
-            transition: all 0.2s;
-            user-select: none;
+            justify-content: center;
+            position: relative;
         }}
-        .set-pill.done {{
-            background: rgba(245, 158, 11, 0.2);
-            border-color: var(--gold);
-            color: #fff;
-            box-shadow: 0 0 10px var(--gold-glow);
-        }}
-        .set-pill input[type="checkbox"] {{
-            accent-color: var(--gold);
-            width: 14px;
-            height: 14px;
-            pointer-events: none;
-        }}
-
-        /* WEIGHT INPUT INSIDE EX CARD */
-        .weight-input-wrap {{
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background: var(--bg-elevated);
+        .set-input-weight, .set-input-reps {{
+            background: #0f172a;
             border: 1px solid var(--border);
             border-radius: 6px;
-            padding: 2px 6px;
-            margin-left: 8px;
-        }}
-        .weight-input-wrap input {{
-            width: 44px;
-            background: transparent;
-            border: none;
             color: #fff;
             font-weight: 800;
             font-size: 13px;
             text-align: center;
+            padding: 5px 2px;
+            width: 100%;
             outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }}
+        .set-input-weight:focus, .set-input-reps:focus {{
+            border-color: var(--gold);
+        }}
+        .set-row.set-completed .set-input-weight, .set-row.set-completed .set-input-reps {{
+            background: rgba(34, 197, 94, 0.08);
+            border-color: rgba(34, 197, 94, 0.3);
+            color: #86efac;
+        }}
+        .btn-set-status {{
+            width: 100%;
+            padding: 6px 4px;
+            font-size: 11px;
+            font-weight: 800;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }}
+        .btn-set-status.start {{
+            background: var(--gold);
+            color: #090d16;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+        }}
+        .btn-set-status.start:hover {{
+            background: #fbbf24;
+            transform: translateY(-1px);
+        }}
+        .btn-set-status.done {{
+            background: #16a34a;
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3);
+        }}
+        .btn-set-status.pending {{
+            background: rgba(255,255,255,0.06);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }}
+        .sets-footer-actions {{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            padding-top: 6px;
+            border-top: 1px dashed rgba(255,255,255,0.08);
+        }}
+        .btn-set-mini {{
+            background: transparent;
+            border: 1px dashed var(--border);
+            color: var(--text-secondary);
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }}
+        .btn-set-mini:hover {{
+            border-color: var(--cyan);
+            color: var(--cyan);
+        }}
+
+        /* LOG STATS & RICH HISTORY */
+        .log-stats-bar {{
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 10px;
+            margin: 10px 0;
+            text-align: center;
+        }}
+        .log-stat-item {{
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }}
+        .log-stat-label {{
+            font-size: 9.5px;
+            color: var(--text-secondary);
+            font-weight: 800;
+            text-transform: uppercase;
+        }}
+        .log-stat-val {{
+            font-size: 13.5px;
+            font-weight: 900;
+            color: var(--gold);
+        }}
+        .muscle-tag {{
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            color: var(--cyan);
+            border-radius: 6px;
+            font-size: 10.5px;
+            padding: 2px 7px;
+            font-weight: 700;
+            display: inline-block;
+        }}
+        .log-exercises-list {{
+            margin-top: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }}
+        .log-exercise-item {{
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 6px;
+            padding: 8px 10px;
+            border-left: 3px solid var(--gold);
+        }}
+        .log-sets-summary {{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 4px;
+        }}
+        .log-set-pill {{
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }}
+        .log-set-pill.completed {{
+            border-color: rgba(34, 197, 94, 0.5);
+            color: #86efac;
+            background: rgba(34, 197, 94, 0.08);
+        }}
+        .log-notes-box {{
+            font-size: 11.5px;
+            color: var(--text-secondary);
+            background: rgba(0,0,0,0.3);
+            padding: 6px 10px;
+            border-radius: 6px;
+            margin-top: 8px;
+            border-left: 3px solid var(--border);
         }}
 
         /* ==================== FORMS & BUTTONS ==================== */
@@ -1222,18 +1430,28 @@ HTML_CONTENT = f"""<!DOCTYPE html>
 
             <!-- ==================== TAB 2: ACTIVE LIVE WORKOUT TRACKER ==================== -->
             <div id="activeWorkoutTab" class="tab-content">
-                <!-- REST TIMER STICKY BAR -->
+                <!-- DUAL LIVE TRACKER STICKY BAR: WORKOUT ELAPSED TIMER + REST COUNTDOWN -->
                 <div class="live-tracker-bar">
-                    <div>
-                        <div style="font-size:10px; font-weight:800; color:var(--text-secondary); text-transform:uppercase;">⏱️ Dinlenme Sayacı</div>
-                        <div class="timer-display" id="timerDisplay">00:45</div>
+                    <!-- TOTAL ELAPSED WORKOUT TIME -->
+                    <div class="tracker-timer-box">
+                        <div class="tracker-timer-label">⏱️ TOPLAM SÜRE</div>
+                        <div class="timer-display-workout" id="workoutTotalTimerDisplay">00:00</div>
+                        <button class="btn-timer-sub" id="btnToggleWorkoutPause" onclick="toggleWorkoutPause()">⏸️ Duraklat</button>
                     </div>
-                    <div class="timer-controls">
-                        <button class="btn-timer" onclick="setTimerSecs(30)">30s</button>
-                        <button class="btn-timer" onclick="setTimerSecs(45)">45s</button>
-                        <button class="btn-timer" onclick="setTimerSecs(60)">60s</button>
-                        <button class="btn-timer" onclick="setTimerSecs(90)">90s</button>
-                        <button class="btn-timer" onclick="toggleTimer()" id="btnPlayPauseTimer" style="background:var(--gold); color:#090d16; font-weight:900;">▶ Başlat</button>
+
+                    <!-- REST TIMER COUNTDOWN -->
+                    <div class="tracker-timer-box" style="align-items:flex-end;">
+                        <div class="tracker-timer-label">⏳ DİNLENME SAYACI</div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <div class="timer-display" id="timerDisplay">00:45</div>
+                            <div class="timer-controls">
+                                <button class="btn-timer" onclick="setTimerSecs(30)">30s</button>
+                                <button class="btn-timer" onclick="setTimerSecs(45)">45s</button>
+                                <button class="btn-timer" onclick="setTimerSecs(60)">60s</button>
+                                <button class="btn-timer" onclick="setTimerSecs(90)">90s</button>
+                                <button class="btn-timer" onclick="toggleTimer()" id="btnPlayPauseTimer" style="background:var(--gold); color:#090d16; font-weight:900;">▶ Başlat</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1265,6 +1483,7 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
                         <h2 style="font-size:18px; font-weight:900; color:#fff;">📊 Antrenman Günlüğüm</h2>
                         <div style="display:flex; gap:6px;">
+                            <button class="btn btn-outline" style="font-size:11px; padding:6px 10px;" onclick="exportCSV()">📊 Excel / CSV</button>
                             <button class="btn btn-outline" style="font-size:11px; padding:6px 10px;" onclick="exportData()">💾 Yedek İndir</button>
                             <label class="btn btn-outline" style="font-size:11px; padding:6px 10px; cursor:pointer;">
                                 📥 Geri Yükle
@@ -1520,6 +1739,8 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                 <textarea id="logNotes" class="form-input" rows="3" placeholder="Örn: Squat 20 kg rahat çıktı, omuz presinde son sette zorlandım..."></textarea>
             </div>
 
+            <div id="logWorkoutSummaryHint"></div>
+
             <button class="btn btn-gold" style="width:100%; padding:14px; font-weight:900;" onclick="saveCompletedWorkout()">
                 ✅ GÜNLÜĞE KAYDET & SEANSI BİTİR
             </button>
@@ -1564,7 +1785,12 @@ HTML_CONTENT = f"""<!DOCTYPE html>
         let selectedEquipments = ['dumbbell', 'kettlebell', 'bodyweight'];
         let currentGeneratedWorkout = null;
         let activeWorkoutSession = null;
-        let activeWorkoutExerciseWeights = {{}};
+        let activeWorkoutStartTime = null;
+        let activeWorkoutIsPaused = false;
+        let activeWorkoutPausedAt = null;
+        let activeWorkoutTotalPausedMs = 0;
+        let activeWorkoutSetsData = {{}};
+        let workoutTimerInterval = null;
 
         // REST TIMER STATE
         let timerInterval = null;
@@ -2185,12 +2411,139 @@ HTML_CONTENT = f"""<!DOCTYPE html>
         function startActiveWorkoutFromGenerated() {{
             if (!currentGeneratedWorkout) return;
             activeWorkoutSession = JSON.parse(JSON.stringify(currentGeneratedWorkout));
-            activeWorkoutExerciseWeights = {{}};
+            activeWorkoutStartTime = Date.now();
+            activeWorkoutIsPaused = false;
+            activeWorkoutPausedAt = null;
+            activeWorkoutTotalPausedMs = 0;
+            activeWorkoutSetsData = {{}};
 
+            const user = getActiveUser();
+            const userWeights = user.weights || {{}};
+
+            activeWorkoutSession.exercises.forEach(ex => {{
+                const numSets = activeWorkoutSession.scheme.sets || 3;
+                let defaultReps = 10;
+                if (activeWorkoutSession.scheme.reps) {{
+                    const firstPart = String(activeWorkoutSession.scheme.reps).split('-')[0].trim();
+                    defaultReps = parseInt(firstPart) || 10;
+                }}
+                const defaultWeight = ex.weightKey && userWeights[ex.weightKey] ? (parseFloat(userWeights[ex.weightKey]) || '') : '';
+
+                activeWorkoutSetsData[ex.id] = [];
+                for (let s = 1; s <= numSets; s++) {{
+                    activeWorkoutSetsData[ex.id].push({{
+                        setNo: s,
+                        weight: defaultWeight,
+                        reps: defaultReps,
+                        completed: false,
+                        completedAt: null
+                    }});
+                }}
+            }});
+
+            saveActiveWorkoutStateToStorage();
+            startWorkoutTimer();
             renderActiveWorkout();
             switchTab('activeWorkoutTab');
             resetTimer(activeWorkoutSession.scheme.rest || 45);
             playAlertSound();
+        }}
+
+        function getWorkoutElapsedSeconds() {{
+            if (!activeWorkoutStartTime) return 0;
+            if (activeWorkoutIsPaused && activeWorkoutPausedAt) {{
+                return Math.max(0, Math.floor((activeWorkoutPausedAt - activeWorkoutStartTime - activeWorkoutTotalPausedMs) / 1000));
+            }}
+            return Math.max(0, Math.floor((Date.now() - activeWorkoutStartTime - activeWorkoutTotalPausedMs) / 1000));
+        }}
+
+        function formatSecondsToHMS(totalSecs) {{
+            const hrs = Math.floor(totalSecs / 3600);
+            const mins = Math.floor((totalSecs % 3600) / 60);
+            const secs = totalSecs % 60;
+            if (hrs > 0) {{
+                return `${{String(hrs).padStart(2, '0')}}:${{String(mins).padStart(2, '0')}}:${{String(secs).padStart(2, '0')}}`;
+            }}
+            return `${{String(mins).padStart(2, '0')}}:${{String(secs).padStart(2, '0')}}`;
+        }}
+
+        function updateWorkoutTimerDisplay() {{
+            const el = document.getElementById('workoutTotalTimerDisplay');
+            if (!el) return;
+            const secs = getWorkoutElapsedSeconds();
+            el.innerText = formatSecondsToHMS(secs);
+        }}
+
+        function startWorkoutTimer() {{
+            clearInterval(workoutTimerInterval);
+            updateWorkoutTimerDisplay();
+            workoutTimerInterval = setInterval(() => {{
+                if (!activeWorkoutIsPaused && activeWorkoutSession) {{
+                    updateWorkoutTimerDisplay();
+                }}
+            }}, 1000);
+        }}
+
+        function toggleWorkoutPause() {{
+            if (!activeWorkoutSession) return;
+            const btn = document.getElementById('btnToggleWorkoutPause');
+            if (!activeWorkoutIsPaused) {{
+                activeWorkoutIsPaused = true;
+                activeWorkoutPausedAt = Date.now();
+                if (btn) btn.innerText = "▶️ Devam Et";
+            }} else {{
+                activeWorkoutIsPaused = false;
+                if (activeWorkoutPausedAt) {{
+                    activeWorkoutTotalPausedMs += (Date.now() - activeWorkoutPausedAt);
+                    activeWorkoutPausedAt = null;
+                }}
+                if (btn) btn.innerText = "⏸️ Duraklat";
+            }}
+            saveActiveWorkoutStateToStorage();
+            updateWorkoutTimerDisplay();
+        }}
+
+        function saveActiveWorkoutStateToStorage() {{
+            const uid = getActiveUserId();
+            if (!activeWorkoutSession) {{
+                localStorage.removeItem(`celik_kodu_active_state_${{uid}}`);
+                return;
+            }}
+            const state = {{
+                session: activeWorkoutSession,
+                startTime: activeWorkoutStartTime,
+                isPaused: activeWorkoutIsPaused,
+                pausedAt: activeWorkoutPausedAt,
+                totalPausedMs: activeWorkoutTotalPausedMs,
+                setsData: activeWorkoutSetsData
+            }};
+            try {{
+                localStorage.setItem(`celik_kodu_active_state_${{uid}}`, JSON.stringify(state));
+            }} catch(e) {{}}
+        }}
+
+        function restoreActiveWorkoutStateFromStorage() {{
+            const uid = getActiveUserId();
+            try {{
+                const raw = localStorage.getItem(`celik_kodu_active_state_${{uid}}`);
+                if (!raw) return false;
+                const state = JSON.parse(raw);
+                if (state && state.session && state.startTime) {{
+                    activeWorkoutSession = state.session;
+                    activeWorkoutStartTime = state.startTime;
+                    activeWorkoutIsPaused = !!state.isPaused;
+                    activeWorkoutPausedAt = state.pausedAt || null;
+                    activeWorkoutTotalPausedMs = state.totalPausedMs || 0;
+                    activeWorkoutSetsData = state.setsData || {{}};
+
+                    renderActiveWorkout();
+                    startWorkoutTimer();
+                    const btn = document.getElementById('btnToggleWorkoutPause');
+                    if (btn) btn.innerText = activeWorkoutIsPaused ? "▶️ Devam Et" : "⏸️ Duraklat";
+                    return true;
+                }}
+            }} catch(e) {{}}
+            return false;
         }}
 
         function renderActiveWorkout() {{
@@ -2211,6 +2564,33 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             const user = getActiveUser();
             const weights = user.weights || {{}};
 
+            // Ensure setsData exists for each exercise
+            s.exercises.forEach(ex => {{
+                if (!activeWorkoutSetsData[ex.id]) {{
+                    const numSets = s.scheme.sets || 3;
+                    const defaultReps = parseInt(String(s.scheme.reps).split('-')[0].trim()) || 10;
+                    const defaultWeight = ex.weightKey && weights[ex.weightKey] ? (parseFloat(weights[ex.weightKey]) || '') : '';
+                    activeWorkoutSetsData[ex.id] = [];
+                    for (let st = 1; st <= numSets; st++) {{
+                        activeWorkoutSetsData[ex.id].push({{
+                            setNo: st,
+                            weight: defaultWeight,
+                            reps: defaultReps,
+                            completed: false,
+                            completedAt: null
+                        }});
+                    }}
+                }}
+            }});
+
+            const equipLabels = {{
+                dumbbell: 'Dambıl',
+                kettlebell: 'Kettlebell',
+                barbell: 'Barbell',
+                machine: 'Makine/Kablo',
+                bodyweight: 'Vücut Ağırlığı'
+            }};
+
             container.innerHTML = `
                 <div class="workout-header-card" style="margin-bottom:16px;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -2225,7 +2605,9 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                 </div>
 
                 ${{s.exercises.map((ex, idx) => {{
-                    const defaultW = ex.weightKey && weights[ex.weightKey] ? weights[ex.weightKey] : '';
+                    const sets = activeWorkoutSetsData[ex.id] || [];
+                    const nextUncompletedIdx = sets.findIndex(st => !st.completed);
+
                     return `
                         <div class="ex-card" data-exercise-id="${{ex.id}}">
                             <div class="ex-card-header">
@@ -2233,26 +2615,66 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                                     <span style="color:var(--gold); font-weight:900;">${{idx + 1}}.</span>
                                     <span>${{escapeHTML(ex.name)}}</span>
                                 </div>
-                                <div style="display:flex; align-items:center;">
-                                    <span style="font-size:11px; color:var(--text-secondary);">Kilo:</span>
-                                    <div class="weight-input-wrap">
-                                        <input type="number" value="${{defaultW}}" placeholder="kg" onchange="updateExerciseWeight('${{ex.id}}', this.value)">
-                                        <span style="font-size:11px; color:var(--text-secondary);">kg</span>
-                                    </div>
+                                <div class="ex-tag-group">
+                                    <span class="ex-badge badge-equip">${{equipLabels[ex.equipment] || ex.equipment}}</span>
+                                    <span class="ex-badge badge-muscle">${{escapeHTML(ex.muscle ? ex.muscle.split(',')[0] : '')}}</span>
                                 </div>
                             </div>
 
-                            <div style="font-size:12px; color:var(--gold-light); margin-bottom:8px;">
-                                🎯 Hedef: ${{s.scheme.sets}} Set x ${{s.scheme.reps}} Tekrar
+                            <div style="font-size:12px; color:var(--text-secondary); margin-bottom:6px;">
+                                🎯 Hedef Şema: <strong style="color:var(--gold);">${{s.scheme.sets}} Set x ${{s.scheme.reps}}</strong> • Dinlenme: ${{s.scheme.rest}}s
                             </div>
 
-                            <div class="set-pills-row">
-                                ${{Array.from({{ length: s.scheme.sets }}).map((_, setIdx) => `
-                                    <div class="set-pill" onclick="toggleSetPill(this, ${{s.scheme.rest}})">
-                                        <input type="checkbox">
-                                        <span>Set ${{setIdx + 1}}</span>
-                                    </div>
-                                `).join('')}}
+                            <!-- SET-BY-SET WORKFLOW TABLE -->
+                            <div class="sets-management-wrap">
+                                <div class="sets-header-row">
+                                    <span>SET</span>
+                                    <span>HEDEF</span>
+                                    <span>KİLO (KG)</span>
+                                    <span>TEKRAR</span>
+                                    <span>İŞLEM</span>
+                                </div>
+
+                                ${{sets.map((st, setIdx) => {{
+                                    const isTarget = setIdx === nextUncompletedIdx;
+                                    const rowClass = st.completed ? 'set-completed' : (isTarget ? 'set-active-target' : '');
+
+                                    return `
+                                        <div class="set-row ${{rowClass}}" id="setRow_${{ex.id}}_${{setIdx}}">
+                                            <div style="text-align:center;">
+                                                <span class="set-badge">${{st.setNo}}</span>
+                                            </div>
+                                            <div class="set-col-target">
+                                                ${{s.scheme.reps}}
+                                            </div>
+                                            <div class="set-col-input">
+                                                <input type="number" step="0.5" class="set-input-weight" 
+                                                       id="w_${{ex.id}}_${{setIdx}}" 
+                                                       value="${{st.weight !== '' && st.weight !== null ? st.weight : ''}}" 
+                                                       placeholder="kg" 
+                                                       oninput="onSetWeightInput('${{ex.id}}', ${{setIdx}}, this.value)">
+                                            </div>
+                                            <div class="set-col-input">
+                                                <input type="number" step="1" class="set-input-reps" 
+                                                       id="r_${{ex.id}}_${{setIdx}}" 
+                                                       value="${{st.reps !== '' && st.reps !== null ? st.reps : ''}}" 
+                                                       placeholder="tk" 
+                                                       oninput="onSetRepsInput('${{ex.id}}', ${{setIdx}}, this.value)">
+                                            </div>
+                                            <div>
+                                                ${{st.completed
+                                                    ? `<button class="btn-set-status done" onclick="toggleSetStatus('${{ex.id}}', ${{setIdx}})" title="Geri Al / Düzelt">✅ Bitti</button>`
+                                                    : `<button class="btn-set-status start" onclick="completeSetAndStartRest('${{ex.id}}', ${{setIdx}})">▶ Bitir & Dinlen</button>`
+                                                }}
+                                            </div>
+                                        </div>
+                                    `;
+                                }}).join('')}}
+
+                                <div class="sets-footer-actions">
+                                    <button class="btn-set-mini" onclick="addSetToExercise('${{ex.id}}')">➕ Set Ekle</button>
+                                    <button class="btn-set-mini" onclick="removeSetFromExercise('${{ex.id}}')">➖ Set Sil</button>
+                                </div>
                             </div>
 
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:8px; border-top:1px dashed var(--border);">
@@ -2286,21 +2708,81 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             `;
         }}
 
-        function toggleSetPill(pill, restSecs) {{
-            const cb = pill.querySelector('input[type="checkbox"]');
-            cb.checked = !cb.checked;
-            pill.classList.toggle('done', cb.checked);
-
-            if (cb.checked) {{
-                resetTimer(restSecs);
-                startTimer();
-                playAlertSound();
-                if (navigator.vibrate) navigator.vibrate(80);
-            }}
+        function onSetWeightInput(exId, setIdx, val) {{
+            if (!activeWorkoutSetsData[exId] || !activeWorkoutSetsData[exId][setIdx]) return;
+            activeWorkoutSetsData[exId][setIdx].weight = val;
+            saveActiveWorkoutStateToStorage();
         }}
 
-        function updateExerciseWeight(exId, val) {{
-            activeWorkoutExerciseWeights[exId] = val;
+        function onSetRepsInput(exId, setIdx, val) {{
+            if (!activeWorkoutSetsData[exId] || !activeWorkoutSetsData[exId][setIdx]) return;
+            activeWorkoutSetsData[exId][setIdx].reps = parseInt(val) || 0;
+            saveActiveWorkoutStateToStorage();
+        }}
+
+        function completeSetAndStartRest(exId, setIdx) {{
+            const sets = activeWorkoutSetsData[exId];
+            if (!sets || !sets[setIdx]) return;
+
+            const st = sets[setIdx];
+            const wInput = document.getElementById(`w_${{exId}}_${{setIdx}}`);
+            const rInput = document.getElementById(`r_${{exId}}_${{setIdx}}`);
+
+            if (wInput && wInput.value !== '') st.weight = parseFloat(wInput.value) || 0;
+            if (rInput && rInput.value !== '') st.reps = parseInt(rInput.value) || 0;
+
+            st.completed = true;
+            st.completedAt = Date.now();
+
+            // Auto-propagate weight to subsequent incomplete sets if they have no weight
+            for (let i = setIdx + 1; i < sets.length; i++) {{
+                if (!sets[i].completed && (sets[i].weight === '' || sets[i].weight === null || sets[i].weight === undefined)) {{
+                    sets[i].weight = st.weight;
+                }}
+            }}
+
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+
+            // TRIGGER REST TIMER
+            const restSecs = activeWorkoutSession && activeWorkoutSession.scheme ? (activeWorkoutSession.scheme.rest || 45) : 45;
+            resetTimer(restSecs);
+            startTimer();
+            playAlertSound();
+            if (navigator.vibrate) navigator.vibrate([120, 80, 120]);
+        }}
+
+        function toggleSetStatus(exId, setIdx) {{
+            const sets = activeWorkoutSetsData[exId];
+            if (!sets || !sets[setIdx]) return;
+            sets[setIdx].completed = !sets[setIdx].completed;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+        }}
+
+        function addSetToExercise(exId) {{
+            const sets = activeWorkoutSetsData[exId] || [];
+            const lastWeight = sets.length > 0 ? sets[sets.length - 1].weight : '';
+            const lastReps = sets.length > 0 ? sets[sets.length - 1].reps : 10;
+            sets.push({{
+                setNo: sets.length + 1,
+                weight: lastWeight,
+                reps: lastReps,
+                completed: false,
+                completedAt: null
+            }});
+            activeWorkoutSetsData[exId] = sets;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+        }}
+
+        function removeSetFromExercise(exId) {{
+            const sets = activeWorkoutSetsData[exId] || [];
+            if (sets.length > 1) {{
+                sets.pop();
+                saveActiveWorkoutStateToStorage();
+                renderActiveWorkout();
+            }}
         }}
 
         // REST TIMER LOGIC
@@ -2378,8 +2860,34 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                 alert("Aktif bir antrenman bulunmuyor.");
                 return;
             }}
+            const elapsedSecs = getWorkoutElapsedSeconds();
+            const elapsedMins = Math.max(1, Math.round(elapsedSecs / 60));
+
             document.getElementById('logProgramName').value = activeWorkoutSession.title;
-            document.getElementById('logDuration').value = activeWorkoutSession.duration || 45;
+            document.getElementById('logDuration').value = elapsedMins;
+
+            // Summary stats calculation
+            let totalCompletedSets = 0;
+            let totalVolume = 0;
+            activeWorkoutSession.exercises.forEach(ex => {{
+                const sets = activeWorkoutSetsData[ex.id] || [];
+                sets.forEach(st => {{
+                    if (st.completed) {{
+                        totalCompletedSets++;
+                        totalVolume += (parseFloat(st.weight) || 0) * (parseInt(st.reps) || 0);
+                    }}
+                }});
+            }});
+
+            const summaryHint = document.getElementById('logWorkoutSummaryHint');
+            if (summaryHint) {{
+                summaryHint.innerHTML = `
+                    <div style="background:rgba(245, 158, 11, 0.12); border:1px solid var(--gold); border-radius:8px; padding:10px 12px; margin-bottom:12px; font-size:12px; line-height:1.4;">
+                        ⚡ <strong>Seans Özeti:</strong> ${{formatSecondsToHMS(elapsedSecs)}} Süre • <strong>${{totalCompletedSets}}</strong> Tamamlanan Set • <strong>${{Math.round(totalVolume).toLocaleString('tr-TR')}} kg</strong> Toplam Tonaj
+                    </div>
+                `;
+            }}
+
             document.getElementById('completeModal').classList.add('active');
         }}
 
@@ -2388,18 +2896,77 @@ HTML_CONTENT = f"""<!DOCTYPE html>
         }}
 
         function saveCompletedWorkout() {{
-            const programName = document.getElementById('logProgramName').value;
-            const duration = document.getElementById('logDuration').value;
+            if (!activeWorkoutSession) return;
+
+            const programName = document.getElementById('logProgramName').value || activeWorkoutSession.title;
+            const duration = parseInt(document.getElementById('logDuration').value) || Math.max(1, Math.round(getWorkoutElapsedSeconds() / 60));
             const rpe = document.getElementById('logRpe').value;
             const notes = document.getElementById('logNotes').value;
+            const elapsedSecs = getWorkoutElapsedSeconds();
+
+            let totalVolume = 0;
+            let totalCompletedSets = 0;
+            let totalCompletedReps = 0;
+            const allMuscles = [];
+
+            const detailedExercises = activeWorkoutSession.exercises.map(ex => {{
+                const sets = (activeWorkoutSetsData[ex.id] || []).map(st => {{
+                    const w = parseFloat(st.weight) || 0;
+                    const r = parseInt(st.reps) || 0;
+                    if (st.completed) {{
+                        totalCompletedSets++;
+                        totalCompletedReps += r;
+                        totalVolume += (w * r);
+                    }}
+                    return {{
+                        setNo: st.setNo,
+                        weight: w,
+                        reps: r,
+                        completed: !!st.completed,
+                        volume: w * r
+                    }};
+                }});
+
+                if (ex.muscle) {{
+                    ex.muscle.split(',').forEach(m => {{
+                        const trimmed = m.trim();
+                        if (trimmed && !allMuscles.includes(trimmed)) {{
+                            allMuscles.push(trimmed);
+                        }}
+                    }});
+                }}
+
+                const maxWeight = sets.length > 0 ? Math.max(0, ...sets.map(st => st.weight)) : 0;
+                const exVolume = sets.reduce((sum, st) => sum + (st.completed ? st.volume : 0), 0);
+
+                return {{
+                    id: ex.id,
+                    name: ex.name,
+                    equipment: ex.equipment,
+                    category: ex.category,
+                    muscle: ex.muscle,
+                    cue: ex.cue || '',
+                    sets: sets,
+                    maxWeight: maxWeight,
+                    exerciseVolume: exVolume
+                }};
+            }});
 
             const newLog = {{
                 id: 'log_' + Date.now(),
                 date: new Date().toISOString().split('T')[0],
+                dateFormatted: new Intl.DateTimeFormat('tr-TR', {{ dateStyle: 'medium', timeStyle: 'short' }}).format(new Date()),
                 program: programName,
                 duration: duration,
+                durationFormatted: formatSecondsToHMS(elapsedSecs),
+                durationSecs: elapsedSecs,
                 rpe: rpe,
                 notes: notes,
+                totalVolumeKg: Math.round(totalVolume * 10) / 10,
+                totalSetsCompleted: totalCompletedSets,
+                totalRepsCompleted: totalCompletedReps,
+                muscleGroups: allMuscles,
+                exercises: detailedExercises,
                 timestamp: Date.now()
             }};
 
@@ -2407,11 +2974,22 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             logs.unshift(newLog);
             setWorkoutLogs(logs);
 
-            closeCompleteModal();
+            // Clear active workout session state
+            const uid = getActiveUserId();
+            localStorage.removeItem(`celik_kodu_active_state_${{uid}}`);
+            clearInterval(workoutTimerInterval);
+            clearInterval(timerInterval);
             activeWorkoutSession = null;
+            activeWorkoutStartTime = null;
+            activeWorkoutSetsData = {{}};
+
+            closeCompleteModal();
             renderActiveWorkout();
+            renderHistory();
             switchTab('historyTab');
-            alert("🎉 Tebrikler! Antrenman başarıyla günlüğe kaydedildi.");
+
+            playAlertSound();
+            alert(`🎉 TEBRİKLER ŞAMPİYON!\n\n${{duration}} dakikada toplam ${{Math.round(totalVolume).toLocaleString('tr-TR')}} kg tonaj kaldırıldı.\nAntrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedildi!`);
         }}
 
         // ==================== LIBRARY & SAVED PROGRAMS ====================
@@ -3073,21 +3651,123 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                 return;
             }}
 
-            container.innerHTML = logs.map(l => `
-                <div class="log-history-card">
-                    <div class="log-card-header">
-                        <span class="log-date">📅 ${{escapeHTML(l.date)}} (${{l.duration}} Dk)</span>
-                        <div style="display:flex; align-items:center; gap:6px;">
-                            <span class="ex-badge badge-equip">${{escapeHTML(l.rpe.split(' ')[0] + ' ' + l.rpe.split(' ')[1])}}</span>
-                            <button class="btn-delete-log" onclick="deleteLog('${{l.id}}')">✕</button>
+            container.innerHTML = logs.map(l => {{
+                const totalVol = l.totalVolumeKg ? `${{Math.round(l.totalVolumeKg).toLocaleString('tr-TR')}} kg` : 'Belirtilmedi';
+                const setsReps = l.totalSetsCompleted ? `${{l.totalSetsCompleted}} Set • ${{l.totalRepsCompleted || 0}} Tk` : '-';
+                const durStr = l.durationFormatted || `${{l.duration}} Dk`;
+                const rpeLabel = l.rpe ? (l.rpe.split(' ')[0] + ' ' + (l.rpe.split(' ')[1] || '')) : 'RPE 8';
+
+                return `
+                    <div class="log-history-card">
+                        <div class="log-card-header">
+                            <div>
+                                <span class="log-date">📅 ${{escapeHTML(l.dateFormatted || l.date)}}</span>
+                                <h3 style="font-size:14.5px; font-weight:800; color:#fff; margin-top:2px;">${{escapeHTML(l.program)}}</h3>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <span class="ex-badge badge-equip">${{escapeHTML(rpeLabel)}}</span>
+                                <button class="btn-delete-log" onclick="deleteLog('${{l.id}}')" title="Kaydı Sil">✕</button>
+                            </div>
                         </div>
+
+                        <!-- STATS ROW -->
+                        <div class="log-stats-bar">
+                            <div class="log-stat-item">
+                                <span class="log-stat-label">Toplam Tonaj</span>
+                                <span class="log-stat-val">🏋️ ${{totalVol}}</span>
+                            </div>
+                            <div class="log-stat-item">
+                                <span class="log-stat-label">Set / Tekrar</span>
+                                <span class="log-stat-val">🎯 ${{setsReps}}</span>
+                            </div>
+                            <div class="log-stat-item">
+                                <span class="log-stat-label">Toplam Süre</span>
+                                <span class="log-stat-val">⏱️ ${{durStr}}</span>
+                            </div>
+                        </div>
+
+                        <!-- MUSCLES WORKED -->
+                        ${{l.muscleGroups && l.muscleGroups.length > 0 ? `
+                            <div style="margin: 6px 0 8px; display:flex; flex-wrap:wrap; gap:4px;">
+                                ${{l.muscleGroups.map(m => `<span class="muscle-tag">${{escapeHTML(m)}}</span>`).join('')}}
+                            </div>
+                        ` : ''}}
+
+                        <!-- DETAILED EXERCISES & SETS -->
+                        ${{l.exercises && l.exercises.length > 0 ? `
+                            <div class="log-exercises-list">
+                                ${{l.exercises.map(ex => `
+                                    <div class="log-exercise-item">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                            <strong style="color:var(--gold-light); font-size:12px;">${{escapeHTML(ex.name)}}</strong>
+                                            <span style="font-size:11px; color:var(--text-secondary);">${{escapeHTML(ex.muscle ? ex.muscle.split(',')[0] : '')}}${{ex.exerciseVolume ? ` • ${{Math.round(ex.exerciseVolume).toLocaleString('tr-TR')}} kg` : ''}}</span>
+                                        </div>
+                                        <div class="log-sets-summary">
+                                            ${{(ex.sets || []).map(st => `
+                                                <span class="log-set-pill ${{st.completed ? 'completed' : ''}}">
+                                                    S${{st.setNo}}: <strong>${{st.weight || 0}}kg</strong> x ${{st.reps || 0}}
+                                                </span>
+                                            `).join('')}}
+                                        </div>
+                                    </div>
+                                `).join('')}}
+                            </div>
+                        ` : ''}}
+
+                        ${{l.notes ? `<div class="log-notes-box">📝 ${{escapeHTML(l.notes)}}</div>` : ''}}
                     </div>
-                    <div style="font-size:13px; font-weight:800; color:var(--gold-light); margin-bottom:4px;">
-                        ${{escapeHTML(l.program)}}
-                    </div>
-                    ${{l.notes ? `<div style="font-size:11.5px; color:var(--text-secondary); background:rgba(0,0,0,0.25); padding:6px 10px; border-radius:6px; margin-top:4px;">${{escapeHTML(l.notes)}}</div>` : ''}}
-                </div>
-            `).join('');
+                `;
+            }}).join('');
+        }}
+
+        function exportCSV() {{
+            const uid = getActiveUserId();
+            const logs = getWorkoutLogs();
+            if (logs.length === 0) {{
+                alert("Henüz dışa aktarılacak bir antrenman kaydınız bulunmuyor.");
+                return;
+            }}
+
+            const headers = ["Tarih", "Program", "Sure_Dk", "RPE", "Toplam_Tonaj_Kg", "Egzersiz", "Ekipman", "Kas_Grubu", "Set_No", "Kilo_Kg", "Tekrar", "Hacim_Kg"];
+            const rows = [headers.join(",")];
+
+            logs.forEach(l => {{
+                const date = `"${{l.dateFormatted || l.date}}"`;
+                const prog = `"${{l.program.replace(/"/g, '""')}}"`;
+                const dur = l.duration || '';
+                const rpe = `"${{(l.rpe || '').replace(/"/g, '""')}}"`;
+                const totalVol = l.totalVolumeKg || 0;
+
+                if (l.exercises && l.exercises.length > 0) {{
+                    l.exercises.forEach(ex => {{
+                        const exName = `"${{ex.name.replace(/"/g, '""')}}"`;
+                        const equip = `"${{ex.equipment || ''}}"`;
+                        const muscle = `"${{(ex.muscle || '').replace(/"/g, '""')}}"`;
+                        if (ex.sets && ex.sets.length > 0) {{
+                            ex.sets.forEach(st => {{
+                                const setNo = st.setNo;
+                                const w = st.weight || 0;
+                                const r = st.reps || 0;
+                                const v = w * r;
+                                rows.push([date, prog, dur, rpe, totalVol, exName, equip, muscle, setNo, w, r, v].join(","));
+                            }});
+                        }} else {{
+                            rows.push([date, prog, dur, rpe, totalVol, exName, equip, muscle, 1, 0, 0, 0].join(","));
+                        }}
+                    }});
+                }} else {{
+                    rows.push([date, prog, dur, rpe, totalVol, 'Genel', '', '', 1, 0, 0, 0].join(","));
+                }}
+            }});
+
+            const csvContent = "\\uFEFF" + rows.join("\\r\\n"); // UTF-8 BOM for Excel Turkish characters
+            const blob = new Blob([csvContent], {{ type: 'text/csv;charset=utf-8;' }});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `celik_kodu_antrenman_analiz_${{uid}}_${{new Date().toISOString().split('T')[0]}}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
         }}
 
         function exportData() {{
@@ -3126,6 +3806,18 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             reader.readAsText(file);
         }}
 
+        // RESUME / VISIBILITY LISTENERS
+        document.addEventListener('visibilitychange', () => {{
+            if (document.visibilityState === 'visible') {{
+                updateWorkoutTimerDisplay();
+                updateTimerDisplay();
+            }}
+        }});
+        window.addEventListener('pageshow', () => {{
+            updateWorkoutTimerDisplay();
+            updateTimerDisplay();
+        }});
+
         // PWA SERVICE WORKER
         if ('serviceWorker' in navigator) {{
             window.addEventListener('load', () => {{
@@ -3139,7 +3831,12 @@ HTML_CONTENT = f"""<!DOCTYPE html>
         window.addEventListener('DOMContentLoaded', () => {{
             initAuthDatabase();
             syncAppViewState();
-            renderActiveWorkout();
+            const hasRestored = restoreActiveWorkoutStateFromStorage();
+            if (hasRestored) {{
+                switchTab('activeWorkoutTab');
+            }} else {{
+                renderActiveWorkout();
+            }}
         }});
     </script>
 </body>
