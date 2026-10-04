@@ -1248,6 +1248,304 @@
             color: var(--cyan);
         }
 
+        /* WAKE LOCK PILL */
+        .wake-lock-pill {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            color: #86efac;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .wake-lock-pill:hover {
+            border-color: #86efac;
+        }
+        .wake-lock-pill.disabled {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.15);
+            color: var(--text-secondary);
+        }
+
+        /* VIEW MODE TOGGLE GROUP */
+        .view-mode-toggle-group {
+            display: inline-flex;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2px;
+            gap: 2px;
+        }
+        .btn-mode-toggle {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-mode-toggle.active {
+            background: var(--gold);
+            color: #090d16;
+            font-weight: 900;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+        }
+
+        /* LIVE PROGRESS BAR */
+        .live-progress-container {
+            width: 100%;
+            margin-top: 8px;
+            padding-top: 6px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .live-progress-track {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        .live-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold), var(--cyan));
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        /* STEPPER CONTROLS */
+        .stepper-wrap {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            width: 100%;
+        }
+        .stepper-btn {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 800;
+            width: 20px;
+            height: 28px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.15s;
+            flex-shrink: 0;
+            padding: 0;
+        }
+        .stepper-btn:hover {
+            border-color: var(--gold);
+            background: rgba(245, 158, 11, 0.15);
+        }
+        .stepper-btn:active {
+            transform: scale(0.92);
+        }
+
+        /* FOCUS MODE CARDS & CONTROLS */
+        .focus-workout-card {
+            background: var(--bg-card);
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            position: relative;
+        }
+        .focus-nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 8px;
+        }
+        .btn-focus-nav {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 11.5px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-focus-nav:hover:not(:disabled) {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+        .btn-focus-nav:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        .focus-set-hero {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.75), rgba(15, 23, 42, 0.95));
+            border: 2px solid var(--gold);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 12px 0;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+        }
+        .focus-breadcrumbs {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            margin: 10px 0;
+        }
+        .focus-crumb {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 11.5px;
+            font-weight: 800;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .focus-crumb.active {
+            background: rgba(245, 158, 11, 0.18);
+            border-color: var(--gold);
+            color: var(--gold);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.25);
+        }
+        .focus-crumb.done {
+            background: rgba(34, 197, 94, 0.15);
+            border-color: #22c55e;
+            color: #86efac;
+        }
+        .history-ghost-badge {
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px dashed rgba(56, 189, 248, 0.4);
+            border-radius: 8px;
+            padding: 7px 10px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 11.5px;
+            color: #bae6fd;
+        }
+        .btn-ghost-copy {
+            background: var(--cyan);
+            color: #090d16;
+            border: none;
+            border-radius: 5px;
+            font-size: 10.5px;
+            font-weight: 800;
+            padding: 3px 8px;
+            cursor: pointer;
+            transition: transform 0.15s;
+            white-space: nowrap;
+        }
+        .btn-ghost-copy:hover {
+            transform: scale(1.05);
+        }
+        .focus-input-large {
+            font-size: 18px !important;
+            font-weight: 900 !important;
+            padding: 6px 4px !important;
+            height: 40px;
+        }
+        .focus-weight-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 8px 0 12px;
+        }
+        .weight-chip {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: #e2e8f0;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 5px 9px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .weight-chip:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+        .weight-chip.selected {
+            background: var(--gold);
+            color: #090d16;
+            font-weight: 900;
+        }
+        .gym-flow-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.08);
+        }
+        .btn-gym-action {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 6px 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-gym-action:hover {
+            border-color: var(--cyan);
+            color: #fff;
+        }
+        .btn-gym-action.warn {
+            color: #f59e0b;
+            border-color: rgba(245, 158, 11, 0.35);
+        }
+        .btn-gym-action.warn:hover {
+            background: rgba(245, 158, 11, 0.15);
+        }
+        .btn-gym-action.danger {
+            color: #f87171;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+        .btn-gym-action.danger:hover {
+            background: rgba(239, 68, 68, 0.15);
+        }
+        .pr-celebration-banner {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(234, 179, 8, 0.06));
+            border: 1.5px solid var(--gold);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 14px;
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
+        }
+        .pr-badge-item {
+            font-size: 12px;
+            color: #fef08a;
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
         /* LOG STATS & RICH HISTORY */
         .log-stats-bar {
             display: grid;
@@ -1825,25 +2123,50 @@
             <div id="activeWorkoutTab" class="tab-content">
                 <!-- DUAL LIVE TRACKER STICKY BAR: WORKOUT ELAPSED TIMER + REST COUNTDOWN -->
                 <div class="live-tracker-bar">
-                    <!-- TOTAL ELAPSED WORKOUT TIME -->
-                    <div class="tracker-timer-box">
-                        <div class="tracker-timer-label">⏱️ TOPLAM SÜRE</div>
-                        <div class="timer-display-workout" id="workoutTotalTimerDisplay">00:00</div>
-                        <button class="btn-timer-sub" id="btnToggleWorkoutPause" onclick="toggleWorkoutPause()">⏸️ Duraklat</button>
+                    <!-- TOP ROW: Timers, WakeLock, Mode Switch -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; width:100%; gap:8px; flex-wrap:wrap;">
+                        <!-- TOTAL ELAPSED WORKOUT TIME -->
+                        <div class="tracker-timer-box">
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <span class="tracker-timer-label">⏱️ TOPLAM SÜRE</span>
+                                <button id="wakeLockStatusBtn" class="wake-lock-pill" onclick="toggleWakeLockManual()" title="Ekranı Açık Tut">🟢 Ekran Açık</button>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <div class="timer-display-workout" id="workoutTotalTimerDisplay">00:00</div>
+                                <button class="btn-timer-sub" id="btnToggleWorkoutPause" onclick="toggleWorkoutPause()">⏸️ Duraklat</button>
+                            </div>
+                        </div>
+
+                        <!-- VIEW MODE SWITCH: FOCUS VS LIST -->
+                        <div class="view-mode-toggle-group">
+                            <button id="btnViewFocus" class="btn-mode-toggle active" onclick="setActiveWorkoutViewMode('focus')">🎯 Odak Modu</button>
+                            <button id="btnViewList" class="btn-mode-toggle" onclick="setActiveWorkoutViewMode('list')">📋 Tüm Liste</button>
+                        </div>
+
+                        <!-- REST TIMER COUNTDOWN -->
+                        <div class="tracker-timer-box" style="align-items:flex-end;">
+                            <div class="tracker-timer-label">⏳ DİNLENME SAYACI</div>
+                            <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap; justify-content:flex-end;">
+                                <div class="timer-display" id="timerDisplay">00:45</div>
+                                <div class="timer-controls">
+                                    <button class="btn-timer" onclick="adjustTimerSecs(-15)" title="15 sn azalt">-15s</button>
+                                    <button class="btn-timer" onclick="adjustTimerSecs(15)" title="15 sn ekle">+15s</button>
+                                    <button class="btn-timer" onclick="adjustTimerSecs(30)" title="30 sn ekle">+30s</button>
+                                    <button class="btn-timer" onclick="skipRestTimer()" title="Dinlenmeyi bitirip hemen sete başla" style="color:var(--cyan); border-color:var(--cyan); font-weight:800;">⏭️ Atla</button>
+                                    <button class="btn-timer" onclick="toggleTimer()" id="btnPlayPauseTimer" style="background:var(--gold); color:#090d16; font-weight:900;">▶ Başlat</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- REST TIMER COUNTDOWN -->
-                    <div class="tracker-timer-box" style="align-items:flex-end;">
-                        <div class="tracker-timer-label">⏳ DİNLENME SAYACI</div>
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <div class="timer-display" id="timerDisplay">00:45</div>
-                            <div class="timer-controls">
-                                <button class="btn-timer" onclick="setTimerSecs(30)">30s</button>
-                                <button class="btn-timer" onclick="setTimerSecs(45)">45s</button>
-                                <button class="btn-timer" onclick="setTimerSecs(60)">60s</button>
-                                <button class="btn-timer" onclick="setTimerSecs(90)">90s</button>
-                                <button class="btn-timer" onclick="toggleTimer()" id="btnPlayPauseTimer" style="background:var(--gold); color:#090d16; font-weight:900;">▶ Başlat</button>
-                            </div>
+                    <!-- PROGRESS ROW -->
+                    <div class="live-progress-container" id="liveWorkoutProgressContainer">
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; margin-bottom:4px;">
+                            <span style="font-weight:800; color:var(--text-secondary);" id="liveProgressText">Set İlerlemesi: 0 / 0 (%0)</span>
+                            <span style="font-weight:800; color:var(--gold);" id="liveProgressDetail">Hazır</span>
+                        </div>
+                        <div class="live-progress-track">
+                            <div class="live-progress-fill" id="liveProgressBarFill" style="width:0%;"></div>
                         </div>
                     </div>
                 </div>
@@ -2575,6 +2898,11 @@
         let activeWorkoutTotalPausedMs = 0;
         let activeWorkoutSetsData = {};
         let workoutTimerInterval = null;
+        let activeWorkoutViewMode = 'focus'; // 'focus' | 'list'
+        let activeFocusExIndex = 0;
+        let activeFocusSetIndex = null;
+        let wakeLockSentinel = null;
+        let isWakeLockEnabled = true;
 
         // REST TIMER STATE
         let timerInterval = null;
@@ -2590,7 +2918,7 @@
         const THEMES = {
             gold: { gold: '#f59e0b', goldLight: '#fde68a', glow: 'rgba(245, 158, 11, 0.25)' },
             cyan: { gold: '#38bdf8', goldLight: '#bae6fd', glow: 'rgba(56, 189, 248, 0.25)' },
-            green: { gold: '#10b981', goldLight: '#a7f3d0', glow: 'rgba(16, 185, 129, 0.25)' },
+            green: { gold: '#10b981', goldLight: '#a7f3d0', glow: 'rgba(168, 85, 129, 0.25)' },
             red: { gold: '#f43f5e', goldLight: '#fecdd3', glow: 'rgba(244, 63, 94, 0.25)' },
             purple: { gold: '#a855f7', goldLight: '#e9d5ff', glow: 'rgba(168, 85, 247, 0.25)' }
         };
@@ -2609,6 +2937,10 @@
 
             const targetContent = document.getElementById(tabId);
             if (targetContent) targetContent.classList.add('active');
+
+            if (tabId === 'activeWorkoutTab' && activeWorkoutSession) {
+                requestWakeLock();
+            }
 
             if (tabId === 'libraryTab') renderLibrary();
             if (tabId === 'historyTab') renderHistory();
@@ -3540,6 +3872,241 @@
         }
 
         // ==================== ACTIVE LIVE WORKOUT TRACKER ====================
+        async function requestWakeLock() {
+            if (!isWakeLockEnabled) return;
+            if ('wakeLock' in navigator) {
+                try {
+                    wakeLockSentinel = await navigator.wakeLock.request('screen');
+                    updateWakeLockUI(true);
+                    wakeLockSentinel.addEventListener('release', () => {
+                        updateWakeLockUI(false);
+                    });
+                } catch (err) {
+                    console.warn("WakeLock alınamadı:", err);
+                    updateWakeLockUI(false);
+                }
+            }
+        }
+
+        function releaseWakeLock() {
+            if (wakeLockSentinel) {
+                wakeLockSentinel.release();
+                wakeLockSentinel = null;
+                updateWakeLockUI(false);
+            }
+        }
+
+        function toggleWakeLockManual() {
+            isWakeLockEnabled = !isWakeLockEnabled;
+            if (isWakeLockEnabled) {
+                requestWakeLock();
+            } else {
+                releaseWakeLock();
+            }
+        }
+
+        function updateWakeLockUI(active) {
+            const el = document.getElementById('wakeLockStatusBtn');
+            if (!el) return;
+            if (active) {
+                el.className = "wake-lock-pill";
+                el.innerHTML = "🟢 Ekran Açık";
+                el.title = "Ekranın otomatik kararması engelleniyor (Dokunarak kapatabilirsiniz)";
+            } else {
+                el.className = "wake-lock-pill disabled";
+                el.innerHTML = "⚪ Ekran Normal";
+                el.title = "Ekran normal zaman aşımında kapanacaktır (Dokunarak açık tutabilirsiniz)";
+            }
+        }
+
+        document.addEventListener('visibilitychange', async () => {
+            if (document.visibilityState === 'visible' && activeWorkoutSession && isWakeLockEnabled) {
+                await requestWakeLock();
+            }
+        });
+
+        function setActiveWorkoutViewMode(mode) {
+            activeWorkoutViewMode = mode;
+            const btnFocus = document.getElementById('btnViewFocus');
+            const btnList = document.getElementById('btnViewList');
+            if (btnFocus && btnList) {
+                btnFocus.classList.toggle('active', mode === 'focus');
+                btnList.classList.toggle('active', mode === 'list');
+            }
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+        }
+
+        function goToPrevExercise() {
+            if (!activeWorkoutSession || activeFocusExIndex <= 0) return;
+            activeFocusExIndex--;
+            activeFocusSetIndex = null;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function goToNextExercise() {
+            if (!activeWorkoutSession || activeFocusExIndex >= activeWorkoutSession.exercises.length - 1) return;
+            activeFocusExIndex++;
+            activeFocusSetIndex = null;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function selectFocusSet(exId, setIdx) {
+            activeFocusSetIndex = setIdx;
+            renderActiveWorkout();
+        }
+
+        let focusDiagramCollapsed = {};
+        function toggleFocusDiagram(exId) {
+            focusDiagramCollapsed[exId] = !focusDiagramCollapsed[exId];
+            renderActiveWorkout();
+        }
+
+        function getLastExercisePerformance(exIdOrName) {
+            const uid = getActiveUserId();
+            let history = [];
+            try {
+                const raw = localStorage.getItem(`celik_kodu_history_${uid}`);
+                if (raw) history = JSON.parse(raw) || [];
+            } catch(e) {}
+
+            for (const log of history) {
+                if (!log.detailedExercises || !Array.isArray(log.detailedExercises)) continue;
+                const found = log.detailedExercises.find(e => (e.id === exIdOrName || e.name === exIdOrName) && (e.completedSetsCount > 0 || (e.sets && e.sets.some(s => s.completed))));
+                if (found && found.sets) {
+                    const completedSets = found.sets.filter(s => s.completed && s.weight !== '' && s.weight !== null && s.weight !== undefined);
+                    if (completedSets.length > 0) {
+                        const heaviest = completedSets.reduce((prev, cur) => ((cur.weight || 0) > (prev.weight || 0) ? cur : prev), completedSets[0]);
+                        return {
+                            weight: heaviest.weight || 0,
+                            reps: heaviest.reps || 10,
+                            dateFormatted: log.dateFormatted || log.date || 'Önceki seans'
+                        };
+                    }
+                }
+            }
+            return null;
+        }
+
+        function copyLastPerformanceToCurrent(exId, weight, reps) {
+            const sets = activeWorkoutSetsData[exId];
+            if (!sets) return;
+            sets.forEach(st => {
+                if (!st.completed) {
+                    st.weight = weight;
+                    st.reps = reps;
+                }
+            });
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+            playAlertSound();
+        }
+
+        function stepSetWeight(exId, setIdx, delta) {
+            const sets = activeWorkoutSetsData[exId];
+            if (!sets || !sets[setIdx]) return;
+            let cur = parseFloat(sets[setIdx].weight);
+            if (isNaN(cur)) cur = 0;
+            cur = Math.max(0, Math.round((cur + delta) * 10) / 10);
+            sets[setIdx].weight = cur;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+        }
+
+        function setQuickWeight(exId, setIdx, weightVal) {
+            const sets = activeWorkoutSetsData[exId];
+            if (!sets || !sets[setIdx]) return;
+            sets[setIdx].weight = weightVal;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+        }
+
+        function stepSetReps(exId, setIdx, delta) {
+            const sets = activeWorkoutSetsData[exId];
+            if (!sets || !sets[setIdx]) return;
+            let cur = parseInt(sets[setIdx].reps);
+            if (isNaN(cur)) cur = 10;
+            cur = Math.max(1, cur + delta);
+            sets[setIdx].reps = cur;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+        }
+
+        function deferExerciseToEnd(exId) {
+            if (!activeWorkoutSession || !activeWorkoutSession.exercises) return;
+            const idx = activeWorkoutSession.exercises.findIndex(e => e.id === exId);
+            if (idx === -1 || activeWorkoutSession.exercises.length <= 1) return;
+            if (idx === activeWorkoutSession.exercises.length - 1) {
+                alert("Bu hareket zaten seansın en sonunda.");
+                return;
+            }
+            const [deferredEx] = activeWorkoutSession.exercises.splice(idx, 1);
+            activeWorkoutSession.exercises.push(deferredEx);
+            if (activeFocusExIndex >= activeWorkoutSession.exercises.length) {
+                activeFocusExIndex = activeWorkoutSession.exercises.length - 1;
+            }
+            activeFocusSetIndex = null;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+            playAlertSound();
+        }
+
+        function moveExerciseOrder(exId, direction) {
+            if (!activeWorkoutSession || !activeWorkoutSession.exercises) return;
+            const idx = activeWorkoutSession.exercises.findIndex(e => e.id === exId);
+            if (idx === -1) return;
+            const targetIdx = idx + direction;
+            if (targetIdx < 0 || targetIdx >= activeWorkoutSession.exercises.length) return;
+
+            const temp = activeWorkoutSession.exercises[idx];
+            activeWorkoutSession.exercises[idx] = activeWorkoutSession.exercises[targetIdx];
+            activeWorkoutSession.exercises[targetIdx] = temp;
+
+            if (activeWorkoutViewMode === 'focus') {
+                activeFocusExIndex = targetIdx;
+            }
+            activeFocusSetIndex = null;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+        }
+
+        function updateLiveProgressBar() {
+            const fill = document.getElementById('liveProgressBarFill');
+            const txt = document.getElementById('liveProgressText');
+            const detail = document.getElementById('liveProgressDetail');
+            if (!fill || !txt) return;
+
+            if (!activeWorkoutSession || !activeWorkoutSetsData) {
+                fill.style.width = '0%';
+                txt.innerText = 'Set İlerlemesi: 0 / 0 (%0)';
+                if (detail) detail.innerText = 'Hazır';
+                return;
+            }
+
+            let total = 0;
+            let completed = 0;
+            activeWorkoutSession.exercises.forEach(ex => {
+                const sets = activeWorkoutSetsData[ex.id] || [];
+                total += sets.length;
+                completed += sets.filter(s => s.completed).length;
+            });
+            const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+            fill.style.width = `${percent}%`;
+            txt.innerText = `Set İlerlemesi: ${completed} / ${total} Set (%${percent})`;
+            if (detail) {
+                if (percent === 100) detail.innerText = '🎉 Tamamlandı!';
+                else if (activeWorkoutViewMode === 'focus') {
+                    detail.innerText = `Egzersiz ${activeFocusExIndex + 1}/${activeWorkoutSession.exercises.length}`;
+                } else {
+                    detail.innerText = `%${percent} Bitti`;
+                }
+            }
+        }
+
         function startActiveWorkoutFromGenerated() {
             if (!currentGeneratedWorkout) return;
             activeWorkoutSession = JSON.parse(JSON.stringify(currentGeneratedWorkout));
@@ -3548,6 +4115,9 @@
             activeWorkoutPausedAt = null;
             activeWorkoutTotalPausedMs = 0;
             activeWorkoutSetsData = {};
+            activeWorkoutViewMode = 'focus';
+            activeFocusExIndex = 0;
+            activeFocusSetIndex = null;
 
             const user = getActiveUser();
             const userWeights = user.weights || {};
@@ -3579,6 +4149,7 @@
             switchTab('activeWorkoutTab');
             resetTimer(activeWorkoutSession.scheme.rest || 45);
             playAlertSound();
+            requestWakeLock();
         }
 
         function getWorkoutElapsedSeconds() {
@@ -3647,7 +4218,9 @@
                 isPaused: activeWorkoutIsPaused,
                 pausedAt: activeWorkoutPausedAt,
                 totalPausedMs: activeWorkoutTotalPausedMs,
-                setsData: activeWorkoutSetsData
+                setsData: activeWorkoutSetsData,
+                viewMode: activeWorkoutViewMode,
+                focusIndex: activeFocusExIndex
             };
             try {
                 localStorage.setItem(`celik_kodu_active_state_${uid}`, JSON.stringify(state));
@@ -3667,11 +4240,14 @@
                     activeWorkoutPausedAt = state.pausedAt || null;
                     activeWorkoutTotalPausedMs = state.totalPausedMs || 0;
                     activeWorkoutSetsData = state.setsData || {};
+                    if (state.viewMode) activeWorkoutViewMode = state.viewMode;
+                    if (typeof state.focusIndex === 'number') activeFocusExIndex = state.focusIndex;
 
                     renderActiveWorkout();
                     startWorkoutTimer();
                     const btn = document.getElementById('btnToggleWorkoutPause');
                     if (btn) btn.innerText = activeWorkoutIsPaused ? "▶️ Devam Et" : "⏸️ Duraklat";
+                    requestWakeLock();
                     return true;
                 }
             } catch(e) {}
@@ -3681,14 +4257,17 @@
         function renderActiveWorkout() {
             const container = document.getElementById('activeWorkoutContainer');
             if (!activeWorkoutSession || !container) {
-                container.innerHTML = `
-                    <div style="text-align:center; padding:40px 20px; color:var(--text-secondary);">
-                        <div style="font-size:40px; margin-bottom:10px;">🏋️</div>
-                        <h3>Aktif bir antrenman bulunmuyor.</h3>
-                        <p style="font-size:12px; margin-top:4px;">Program Oluştur sekmesinden bir program üretip "Antrenmanı Başlat"a basarak başlayabilirsiniz.</p>
-                        <button class="btn btn-gold" style="margin-top:16px; padding:10px 20px;" onclick="switchTab('generatorTab')">⚡ Program Oluştur</button>
-                    </div>
-                `;
+                if (container) {
+                    container.innerHTML = `
+                        <div style="text-align:center; padding:40px 20px; color:var(--text-secondary);">
+                            <div style="font-size:40px; margin-bottom:10px;">🏋️</div>
+                            <h3>Aktif bir antrenman bulunmuyor.</h3>
+                            <p style="font-size:12px; margin-top:4px;">Program Oluştur sekmesinden bir program üretip "Antrenmanı Başlat"a basarak başlayabilirsiniz.</p>
+                            <button class="btn btn-gold" style="margin-top:16px; padding:10px 20px;" onclick="switchTab('generatorTab')">⚡ Program Oluştur</button>
+                        </div>
+                    `;
+                }
+                updateLiveProgressBar();
                 return;
             }
 
@@ -3715,6 +4294,17 @@
                 }
             });
 
+            // Update top view toggle buttons
+            const btnFocus = document.getElementById('btnViewFocus');
+            const btnList = document.getElementById('btnViewList');
+            if (btnFocus && btnList) {
+                btnFocus.classList.toggle('active', activeWorkoutViewMode === 'focus');
+                btnList.classList.toggle('active', activeWorkoutViewMode === 'list');
+            }
+
+            // Update sticky progress bar
+            updateLiveProgressBar();
+
             const equipLabels = {
                 dumbbell: 'Dambıl',
                 kettlebell: 'Kettlebell',
@@ -3723,11 +4313,259 @@
                 bodyweight: 'Vücut Ağırlığı'
             };
 
+            // Clamp activeFocusExIndex
+            if (activeFocusExIndex < 0) activeFocusExIndex = 0;
+            if (activeFocusExIndex >= s.exercises.length) activeFocusExIndex = s.exercises.length - 1;
+
+            // ==================== MODE 1: CANLI ODAK MODU (FOCUS MODE) ====================
+            if (activeWorkoutViewMode === 'focus') {
+                const ex = s.exercises[activeFocusExIndex];
+                const sets = activeWorkoutSetsData[ex.id] || [];
+                const firstIncompleteIdx = sets.findIndex(st => !st.completed);
+                let currentSetIdx = (activeFocusSetIndex !== null && activeFocusSetIndex >= 0 && activeFocusSetIndex < sets.length)
+                    ? activeFocusSetIndex
+                    : (firstIncompleteIdx !== -1 ? firstIncompleteIdx : sets.length - 1);
+
+                const currentSet = sets[currentSetIdx];
+                const lastPerf = getLastExercisePerformance(ex.id) || getLastExercisePerformance(ex.name);
+                const isAllSetsDone = sets.length > 0 && sets.every(st => st.completed);
+
+                let allWorkoutDone = true;
+                s.exercises.forEach(e => {
+                    const eSets = activeWorkoutSetsData[e.id] || [];
+                    if (!eSets.every(st => st.completed)) allWorkoutDone = false;
+                });
+
+                container.innerHTML = `
+                    <div class="workout-header-card" style="margin-bottom:12px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <span class="badge-brand">CANLI ODAK MODU</span>
+                                <h2 style="font-size:17px; font-weight:800; color:#fff;">${escapeHTML(s.title)}</h2>
+                            </div>
+                            <button class="btn btn-gold" style="padding:9px 13px; font-size:12.5px;" onclick="openCompleteModal()">
+                                🏁 BİTİR & KAYDET
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- FOCUS CARD -->
+                    <div class="focus-workout-card">
+                        <!-- NAV STEPPER BAR -->
+                        <div class="focus-nav-bar">
+                            <button class="btn-focus-nav" onclick="goToPrevExercise()" ${activeFocusExIndex === 0 ? 'disabled' : ''}>
+                                ⬅️ Önceki
+                            </button>
+                            <div style="text-align:center;">
+                                <div style="font-size:11px; font-weight:900; color:var(--gold); text-transform:uppercase; letter-spacing:0.5px;">
+                                    EGZERSİZ ${activeFocusExIndex + 1} / ${s.exercises.length}
+                                </div>
+                                <div style="font-size:11.5px; font-weight:700; color:var(--text-secondary); margin-top:2px;">
+                                    ${activeFocusExIndex + 1 < s.exercises.length ? `Sıradaki: ${escapeHTML(s.exercises[activeFocusExIndex + 1].name.substring(0, 18))}...` : 'Son Egzersiz'}
+                                </div>
+                            </div>
+                            <button class="btn-focus-nav" onclick="goToNextExercise()" ${activeFocusExIndex === s.exercises.length - 1 ? 'disabled' : ''}>
+                                Sonraki ➡️
+                            </button>
+                        </div>
+
+                        <!-- EXERCISE INFO -->
+                        <div style="margin-bottom:10px;">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                                <h2 style="font-size:19px; font-weight:900; color:#fff; line-height:1.2;">
+                                    ${escapeHTML(ex.name)}
+                                </h2>
+                                <div style="display:flex; gap:4px; flex-shrink:0;">
+                                    <span class="ex-badge badge-equip">${equipLabels[ex.equipment] || ex.equipment}</span>
+                                    <span class="ex-badge badge-muscle">${escapeHTML(ex.muscle ? ex.muscle.split(',')[0] : '')}</span>
+                                </div>
+                            </div>
+                            <div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">
+                                🎯 Hedef: <strong style="color:var(--gold);">${s.scheme.sets} Set x ${s.scheme.reps}</strong> • Dinlenme: ${s.scheme.rest}s
+                            </div>
+                            <div style="font-size:11.5px; color:#cbd5e1; margin-top:4px; line-height:1.4;">
+                                💡 ${escapeHTML(ex.cue || 'Hareketi kontrollü ve tam eklem hareket açıklığında uygulayın.')}
+                            </div>
+                        </div>
+
+                        <!-- TOGGLE DIAGRAM -->
+                        <div style="margin-bottom:12px;">
+                            <button class="btn btn-outline" style="font-size:11px; padding:4px 10px;" onclick="toggleFocusDiagram('${ex.id}')">
+                                ${focusDiagramCollapsed[ex.id] ? '👁️ Form Çizimini ve Şemayı Göster' : '🙈 Form Çizimini Gizle'}
+                            </button>
+                            ${!focusDiagramCollapsed[ex.id] ? `<div style="margin-top:8px;">${renderExercisePositionsHtml(ex, `focus_${ex.id}`, false)}</div>` : ''}
+                        </div>
+
+                        <!-- SETS BREADCRUMBS -->
+                        <div style="margin-bottom:6px;">
+                            <div style="font-size:10px; font-weight:800; color:var(--text-secondary); text-transform:uppercase;">
+                                SET SEÇİMİ VE DURUMU:
+                            </div>
+                            <div class="focus-breadcrumbs">
+                                ${sets.map((st, sIdx) => {
+                                    const isDone = st.completed;
+                                    const isCurrent = sIdx === currentSetIdx;
+                                    const cls = isDone ? 'focus-crumb done' : (isCurrent ? 'focus-crumb active' : 'focus-crumb');
+                                    return `
+                                        <button type="button" class="${cls}" onclick="selectFocusSet('${ex.id}', ${sIdx})">
+                                            ${isDone ? '✓ ' : ''}Set ${st.setNo}${st.weight ? `: ${st.weight}kg` : ''} ${st.reps ? `× ${st.reps}` : ''}
+                                        </button>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+
+                        <!-- ACTIVE SET HERO SPOTLIGHT -->
+                        ${currentSet ? `
+                            <div class="focus-set-hero">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <span class="set-badge" style="font-size:13px; padding:4px 8px; background:var(--gold); color:#090d16; font-weight:900;">
+                                            SET ${currentSet.setNo}
+                                        </span>
+                                        <span style="font-size:12.5px; font-weight:800; color:#fff;">
+                                            ${currentSet.completed ? '✅ Tamamlandı' : '⚡ ŞİMDİKİ HEDEF'}
+                                        </span>
+                                    </div>
+                                    <div style="font-size:12px; color:var(--gold); font-weight:700;">
+                                        Hedef: ${s.scheme.reps} Tk
+                                    </div>
+                                </div>
+
+                                <!-- GHOST PERFORMANCE BADGE -->
+                                ${lastPerf ? `
+                                    <div class="history-ghost-badge">
+                                        <span>📌 <strong>Son Seans:</strong> ${lastPerf.weight} kg × ${lastPerf.reps} tk <span style="font-size:10px; opacity:0.8;">(${lastPerf.dateFormatted})</span></span>
+                                        <button type="button" class="btn-ghost-copy" onclick="copyLastPerformanceToCurrent('${ex.id}', ${lastPerf.weight}, ${lastPerf.reps})">⚡ Aynısını Al</button>
+                                    </div>
+                                ` : ''}
+
+                                <!-- WEIGHT INPUT & STEPPERS -->
+                                <div style="margin-bottom:14px;">
+                                    <label style="font-size:11px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; display:block; margin-bottom:4px;">
+                                        AĞIRLIK (KG)
+                                    </label>
+                                    <div style="display:flex; align-items:center; gap:4px;">
+                                        <button class="btn-timer" style="padding:8px 10px; font-size:12px; font-weight:900;" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, -2.5)">-2.5</button>
+                                        <button class="btn-timer" style="padding:8px 8px; font-size:12px; font-weight:900;" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, -1)">-1</button>
+                                        <input type="number" step="0.5" class="set-input-weight focus-input-large" 
+                                               id="w_${ex.id}_${currentSetIdx}" 
+                                               value="${currentSet.weight !== '' && currentSet.weight !== null ? currentSet.weight : ''}" 
+                                               placeholder="0 kg" 
+                                               oninput="onSetWeightInput('${ex.id}', ${currentSetIdx}, this.value)">
+                                        <button class="btn-timer" style="padding:8px 8px; font-size:12px; font-weight:900;" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, 1)">+1</button>
+                                        <button class="btn-timer" style="padding:8px 10px; font-size:12px; font-weight:900;" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, 2.5)">+2.5</button>
+                                    </div>
+
+                                    <!-- QUICK WEIGHT CHIPS -->
+                                    <div class="focus-weight-chips">
+                                        ${[7.5, 10, 12.5, 15, 17.5, 20, 22.5, 25, 30].map(wVal => `
+                                            <button type="button" class="weight-chip ${currentSet.weight == wVal ? 'selected' : ''}" onclick="setQuickWeight('${ex.id}', ${currentSetIdx}, ${wVal})">
+                                                ${wVal} kg
+                                            </button>
+                                        `).join('')}
+                                    </div>
+                                </div>
+
+                                <!-- REPS INPUT & STEPPERS -->
+                                <div style="margin-bottom:16px;">
+                                    <label style="font-size:11px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; display:block; margin-bottom:4px;">
+                                        YAPILAN TEKRAR SAYISI
+                                    </label>
+                                    <div style="display:flex; align-items:center; gap:4px;">
+                                        <button class="btn-timer" style="padding:8px 12px; font-size:13px; font-weight:900;" onclick="stepSetReps('${ex.id}', ${currentSetIdx}, -2)">-2</button>
+                                        <button class="btn-timer" style="padding:8px 10px; font-size:13px; font-weight:900;" onclick="stepSetReps('${ex.id}', ${currentSetIdx}, -1)">-1</button>
+                                        <input type="number" step="1" class="set-input-reps focus-input-large" 
+                                               id="r_${ex.id}_${currentSetIdx}" 
+                                               value="${currentSet.reps !== '' && currentSet.reps !== null ? currentSet.reps : ''}" 
+                                               placeholder="0 tk" 
+                                               oninput="onSetRepsInput('${ex.id}', ${currentSetIdx}, this.value)">
+                                        <button class="btn-timer" style="padding:8px 10px; font-size:13px; font-weight:900;" onclick="stepSetReps('${ex.id}', ${currentSetIdx}, 1)">+1</button>
+                                        <button class="btn-timer" style="padding:8px 12px; font-size:13px; font-weight:900;" onclick="stepSetReps('${ex.id}', ${currentSetIdx}, 2)">+2</button>
+                                    </div>
+                                </div>
+
+                                <!-- HERO COMPLETE SET ACTION -->
+                                ${currentSet.completed ? `
+                                    <button class="btn btn-outline" style="width:100%; padding:14px; font-size:13.5px; border-color:#22c55e; color:#86efac; font-weight:800;" onclick="toggleSetStatus('${ex.id}', ${currentSetIdx})">
+                                        ✅ Bu Set Tamamlandı (Düzeltmek İçin Dokun)
+                                    </button>
+                                ` : `
+                                    <button class="btn btn-gold" style="width:100%; padding:15px; font-size:15px; font-weight:900; box-shadow:0 4px 15px rgba(245,158,11,0.4);" onclick="completeSetAndStartRest('${ex.id}', ${currentSetIdx})">
+                                        ▶️ SETİ BİTİR & DİNLEN (${s.scheme.rest || 45}s)
+                                    </button>
+                                `}
+                            </div>
+                        ` : ''}
+
+                        <!-- EXERCISE COMPLETION BANNER -->
+                        ${isAllSetsDone ? `
+                            <div style="background:rgba(34, 197, 94, 0.12); border:1.5px solid #22c55e; border-radius:10px; padding:12px; text-align:center; color:#86efac; margin:12px 0;">
+                                <div style="font-weight:900; font-size:14px;">🎉 ${escapeHTML(ex.name)} Tüm Setleri Bitti!</div>
+                                ${activeFocusExIndex < s.exercises.length - 1 ? `
+                                    <button class="btn btn-gold" style="margin-top:8px; padding:8px 16px; font-size:12px;" onclick="goToNextExercise()">
+                                        Sıradaki Harekete Geç ➔
+                                    </button>
+                                ` : ''}
+                            </div>
+                        ` : ''}
+
+                        <!-- GYM FLOW & EQUIPMENT ACTIONS -->
+                        <div class="gym-flow-actions">
+                            <button class="btn-gym-action warn" onclick="deferExerciseToEnd('${ex.id}')" title="Bu alet veya dambıl şu an başkası tarafından kullanılıyorsa seansın sonuna ertele">
+                                ⏳ Alet Dolu (Sona Ertele)
+                            </button>
+                            <button class="btn-gym-action" onclick="moveExerciseOrder('${ex.id}', -1)" title="Sırayı bir öne al">
+                                ⬆️ Öne Al
+                            </button>
+                            <button class="btn-gym-action" onclick="moveExerciseOrder('${ex.id}', 1)" title="Sırayı bir arkaya al">
+                                ⬇️ Arkaya Al
+                            </button>
+                            <button class="btn-gym-action" onclick="openAlternativeModal('${ex.id}', 'active')" title="Biyomekanik alternatif seç">
+                                📋 Alternatif Seç
+                            </button>
+                            <button class="btn-gym-action" onclick="addSetToExercise('${ex.id}')">
+                                ➕ Set Ekle
+                            </button>
+                            <button class="btn-gym-action" onclick="removeSetFromExercise('${ex.id}')">
+                                ➖ Set Sil
+                            </button>
+                            <button class="btn-gym-action danger" onclick="removeExerciseFromWorkout('${ex.id}', 'active')">
+                                🗑️ Kaldır
+                            </button>
+                        </div>
+
+                        <!-- NAVIGATION FOOTER -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; gap:8px;">
+                            <button class="btn btn-outline" style="flex:1; padding:12px 8px; font-size:12px;" onclick="goToPrevExercise()" ${activeFocusExIndex === 0 ? 'disabled' : ''}>
+                                ⬅️ Önceki
+                            </button>
+                            <button class="btn btn-gold" style="flex:1.2; padding:12px 8px; font-size:12px; font-weight:900;" onclick="openCompleteModal()">
+                                🏁 Bitir & Kaydet
+                            </button>
+                            <button class="btn btn-outline" style="flex:1; padding:12px 8px; font-size:12px;" onclick="goToNextExercise()" ${activeFocusExIndex === s.exercises.length - 1 ? 'disabled' : ''}>
+                                Sonraki ➡️
+                            </button>
+                        </div>
+                    </div>
+
+                    ${allWorkoutDone ? `
+                        <div style="text-align:center; margin:24px 0;">
+                            <button class="btn btn-gold" style="padding:16px 28px; font-size:15px; font-weight:900; box-shadow:0 0 25px rgba(245,158,11,0.6);" onclick="openCompleteModal()">
+                                🏆 TEBRİKLER! TÜM SETLER BİTTİ • BİTİR & GÜNLÜĞE KAYDET
+                            </button>
+                        </div>
+                    ` : ''}
+                `;
+                return;
+            }
+
+            // ==================== MODE 2: TÜM LİSTE GÖRÜNÜMÜ (LIST VIEW) ====================
             container.innerHTML = `
                 <div class="workout-header-card" style="margin-bottom:16px;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div>
-                            <span class="badge-brand">CANLI SEANS</span>
+                            <span class="badge-brand">CANLI LİSTE</span>
                             <h2 style="font-size:18px; font-weight:800; color:#fff;">${escapeHTML(s.title)}</h2>
                         </div>
                         <button class="btn btn-gold" style="padding:10px 14px; font-size:13px;" onclick="openCompleteModal()">
@@ -3739,6 +4577,7 @@
                 ${s.exercises.map((ex, idx) => {
                     const sets = activeWorkoutSetsData[ex.id] || [];
                     const nextUncompletedIdx = sets.findIndex(st => !st.completed);
+                    const lastPerf = getLastExercisePerformance(ex.id) || getLastExercisePerformance(ex.name);
 
                     return `
                         <div class="ex-card" data-exercise-id="${ex.id}">
@@ -3756,6 +4595,13 @@
                             <div style="font-size:12px; color:var(--text-secondary); margin-bottom:6px;">
                                 🎯 Hedef Şema: <strong style="color:var(--gold);">${s.scheme.sets} Set x ${s.scheme.reps}</strong> • Dinlenme: ${s.scheme.rest}s
                             </div>
+
+                            ${lastPerf ? `
+                                <div class="history-ghost-badge">
+                                    <span>📌 <strong>Son:</strong> ${lastPerf.weight} kg × ${lastPerf.reps} tk</span>
+                                    <button type="button" class="btn-ghost-copy" onclick="copyLastPerformanceToCurrent('${ex.id}', ${lastPerf.weight}, ${lastPerf.reps})">⚡ Uygula</button>
+                                </div>
+                            ` : ''}
 
                             ${renderExercisePositionsHtml(ex, `active_${idx}`, false)}
 
@@ -3782,18 +4628,26 @@
                                                 ${s.scheme.reps}
                                             </div>
                                             <div class="set-col-input">
-                                                <input type="number" step="0.5" class="set-input-weight" 
-                                                       id="w_${ex.id}_${setIdx}" 
-                                                       value="${st.weight !== '' && st.weight !== null ? st.weight : ''}" 
-                                                       placeholder="kg" 
-                                                       oninput="onSetWeightInput('${ex.id}', ${setIdx}, this.value)">
+                                                <div class="stepper-wrap">
+                                                    <button class="stepper-btn" onclick="stepSetWeight('${ex.id}', ${setIdx}, -2.5)" title="-2.5 kg">-</button>
+                                                    <input type="number" step="0.5" class="set-input-weight" 
+                                                           id="w_${ex.id}_${setIdx}" 
+                                                           value="${st.weight !== '' && st.weight !== null ? st.weight : ''}" 
+                                                           placeholder="kg" 
+                                                           oninput="onSetWeightInput('${ex.id}', ${setIdx}, this.value)">
+                                                    <button class="stepper-btn" onclick="stepSetWeight('${ex.id}', ${setIdx}, 2.5)" title="+2.5 kg">+</button>
+                                                </div>
                                             </div>
                                             <div class="set-col-input">
-                                                <input type="number" step="1" class="set-input-reps" 
-                                                       id="r_${ex.id}_${setIdx}" 
-                                                       value="${st.reps !== '' && st.reps !== null ? st.reps : ''}" 
-                                                       placeholder="tk" 
-                                                       oninput="onSetRepsInput('${ex.id}', ${setIdx}, this.value)">
+                                                <div class="stepper-wrap">
+                                                    <button class="stepper-btn" onclick="stepSetReps('${ex.id}', ${setIdx}, -1)" title="-1 tekrar">-</button>
+                                                    <input type="number" step="1" class="set-input-reps" 
+                                                           id="r_${ex.id}_${setIdx}" 
+                                                           value="${st.reps !== '' && st.reps !== null ? st.reps : ''}" 
+                                                           placeholder="tk" 
+                                                           oninput="onSetRepsInput('${ex.id}', ${setIdx}, this.value)">
+                                                    <button class="stepper-btn" onclick="stepSetReps('${ex.id}', ${setIdx}, 1)" title="+1 tekrar">+</button>
+                                                </div>
                                             </div>
                                             <div>
                                                 ${st.completed
@@ -3811,16 +4665,24 @@
                                 </div>
                             </div>
 
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:8px; border-top:1px dashed var(--border);">
-                                <button class="btn-swap-ex" style="color:#f87171; border-color:rgba(239,68,68,0.3);" onclick="removeExerciseFromWorkout('${ex.id}', 'active')" title="Bu hareketi kaldır">
-                                    🗑️ Kaldır
-                                </button>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:8px; border-top:1px dashed var(--border); flex-wrap:wrap; gap:6px;">
+                                <div style="display:flex; gap:6px;">
+                                    <button class="btn-swap-ex" style="color:#f59e0b; border-color:rgba(245,158,11,0.4);" onclick="deferExerciseToEnd('${ex.id}')" title="Bu istasyon doluysa en sona at">
+                                        ⏳ Sona Ertele
+                                    </button>
+                                    <button class="btn-swap-ex" onclick="moveExerciseOrder('${ex.id}', -1)" title="Sırayı öne al">
+                                        ⬆️
+                                    </button>
+                                    <button class="btn-swap-ex" onclick="moveExerciseOrder('${ex.id}', 1)" title="Sırayı arkaya al">
+                                        ⬇️
+                                    </button>
+                                </div>
                                 <div style="display:flex; gap:6px;">
                                     <button class="btn-swap-ex" onclick="openAlternativeModal('${ex.id}', 'active')" title="Listeden alternatif seç">
                                         📋 Alternatif Seç
                                     </button>
-                                    <button class="btn-swap-ex" onclick="swapSingleExercise('${ex.id}', 'active')" title="Rastgele başka hareket ver">
-                                        🎲 Rastgele
+                                    <button class="btn-swap-ex" style="color:#f87171; border-color:rgba(239,68,68,0.3);" onclick="removeExerciseFromWorkout('${ex.id}', 'active')" title="Bu hareketi kaldır">
+                                        🗑️ Kaldır
                                     </button>
                                 </div>
                             </div>
@@ -3875,6 +4737,17 @@
                 }
             }
 
+            // In focus mode: if this was the last incomplete set of this exercise, advance focus to next exercise!
+            if (activeWorkoutViewMode === 'focus' && activeWorkoutSession) {
+                const allDoneForEx = sets.every(s => s.completed);
+                if (allDoneForEx && activeFocusExIndex < activeWorkoutSession.exercises.length - 1) {
+                    activeFocusExIndex++;
+                    activeFocusSetIndex = null;
+                } else {
+                    activeFocusSetIndex = null;
+                }
+            }
+
             saveActiveWorkoutStateToStorage();
             renderActiveWorkout();
 
@@ -3919,10 +4792,29 @@
             }
         }
 
-        // REST TIMER LOGIC
+        // REST TIMER LOGIC & ENHANCEMENTS
         function setTimerSecs(secs) {
             resetTimer(secs);
             startTimer();
+        }
+
+        function adjustTimerSecs(delta) {
+            timerRemaining = Math.max(0, timerRemaining + delta);
+            updateTimerDisplay();
+            if (!isTimerRunning && timerRemaining > 0) {
+                startTimer();
+            }
+        }
+
+        function skipRestTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            timerRemaining = 0;
+            updateTimerDisplay();
+            const btn = document.getElementById('btnPlayPauseTimer');
+            if (btn) btn.innerText = "▶ Başlat";
+            playAlertSound();
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
         }
 
         function resetTimer(secs) {
@@ -3938,7 +4830,8 @@
             if (isTimerRunning) {
                 clearInterval(timerInterval);
                 isTimerRunning = false;
-                document.getElementById('btnPlayPauseTimer').innerText = "▶ Başlat";
+                const btn = document.getElementById('btnPlayPauseTimer');
+                if (btn) btn.innerText = "▶ Başlat";
             } else {
                 startTimer();
             }
@@ -3947,16 +4840,24 @@
         function startTimer() {
             clearInterval(timerInterval);
             isTimerRunning = true;
-            document.getElementById('btnPlayPauseTimer').innerText = "⏸ Duraklat";
+            const btn = document.getElementById('btnPlayPauseTimer');
+            if (btn) btn.innerText = "⏸ Duraklat";
 
             timerInterval = setInterval(() => {
                 if (timerRemaining > 0) {
                     timerRemaining--;
                     updateTimerDisplay();
+
+                    // Rhythmic countdown beeps on last 3 seconds
+                    if (timerRemaining === 3) playCountdownBeep(520);
+                    else if (timerRemaining === 2) playCountdownBeep(520);
+                    else if (timerRemaining === 1) playCountdownBeep(660);
+
                 } else {
                     clearInterval(timerInterval);
                     isTimerRunning = false;
-                    document.getElementById('btnPlayPauseTimer').innerText = "▶ Başlat";
+                    const btn = document.getElementById('btnPlayPauseTimer');
+                    if (btn) btn.innerText = "▶ Başlat";
                     playAlertSound();
                     if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100]);
                 }
@@ -3969,6 +4870,22 @@
             const str = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
             const el = document.getElementById('timerDisplay');
             if (el) el.innerText = str;
+        }
+
+        function playCountdownBeep(freq = 600) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                gain.gain.setValueAtTime(0.12, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.12);
+            } catch(e) {}
         }
 
         function playAlertSound() {
@@ -4101,6 +5018,40 @@
             }
         }
 
+        function calculateWorkoutPRs(exerciseSummaries, uid) {
+            let history = [];
+            try {
+                const raw = localStorage.getItem(`celik_kodu_history_${uid}`);
+                if (raw) history = JSON.parse(raw) || [];
+            } catch(e) {}
+
+            const prs = [];
+            exerciseSummaries.forEach(ex => {
+                if (ex.completedCount === 0 || !ex.volume) return;
+                const currentMaxWeight = Math.max(0, ...ex.sets.filter(s => s.completed).map(s => s.weight));
+                if (currentMaxWeight <= 0) return;
+
+                let previousAllTimeMax = 0;
+                history.forEach(log => {
+                    if (!log.detailedExercises || !Array.isArray(log.detailedExercises)) return;
+                    const prevEx = log.detailedExercises.find(e => e.name === ex.name || (e.id && e.id === ex.id));
+                    if (prevEx && prevEx.maxWeight) {
+                        if (prevEx.maxWeight > previousAllTimeMax) previousAllTimeMax = prevEx.maxWeight;
+                    }
+                });
+
+                if (previousAllTimeMax > 0 && currentMaxWeight > previousAllTimeMax) {
+                    prs.push({
+                        name: ex.name,
+                        newWeight: currentMaxWeight,
+                        oldWeight: previousAllTimeMax,
+                        diff: Math.round((currentMaxWeight - previousAllTimeMax) * 10) / 10
+                    });
+                }
+            });
+            return prs;
+        }
+
         function openCompleteModal() {
             if (!activeWorkoutSession) {
                 alert("Aktif bir antrenman bulunmuyor.");
@@ -4150,6 +5101,9 @@
                 };
             });
 
+            const uid = getActiveUserId();
+            const prs = calculateWorkoutPRs(exerciseSummaries, uid);
+
             const summaryHint = document.getElementById('logWorkoutSummaryHint');
             if (summaryHint) {
                 summaryHint.innerHTML = `
@@ -4158,6 +5112,19 @@
                             <span style="font-size:11px; font-weight:800; color:var(--gold); text-transform:uppercase; letter-spacing:0.5px;">📋 Seans Özeti & Performans</span>
                             <span style="font-size:12px; font-weight:800; color:#fff;">⏱️ ${formatSecondsToHMS(elapsedSecs)}</span>
                         </div>
+
+                        ${prs.length > 0 ? `
+                            <div class="pr-celebration-banner">
+                                <div style="font-size:12.5px; font-weight:900; color:var(--gold); display:flex; align-items:center; gap:6px;">
+                                    🔥 BU SEANSTA YENİ REKOR(LAR) KIRDIN!
+                                </div>
+                                ${prs.map(p => `
+                                    <div class="pr-badge-item">
+                                        🏆 <strong>${escapeHTML(p.name)}:</strong> Yeni Ağırlık: <strong style="color:#fff;">${p.newWeight} kg</strong> (Eski Zirve: ${p.oldWeight} kg ➔ <strong style="color:var(--green-success);">+${p.diff} kg</strong> Artış!)
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
 
                         <!-- TOP STATS -->
                         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; margin-bottom:12px; text-align:center;">
@@ -4324,6 +5291,9 @@
             activeWorkoutSession = null;
             activeWorkoutStartTime = null;
             activeWorkoutSetsData = {};
+            activeFocusExIndex = 0;
+            activeFocusSetIndex = null;
+            releaseWakeLock();
 
             closeCompleteModal();
             renderActiveWorkout();
@@ -6457,6 +7427,9 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
             activeWorkoutPausedAt = null;
             activeWorkoutTotalPausedMs = 0;
             activeWorkoutSetsData = {};
+            activeWorkoutViewMode = 'focus';
+            activeFocusExIndex = 0;
+            activeFocusSetIndex = null;
 
             const user = getActiveUser();
             const userWeights = user.weights || {};
@@ -6488,6 +7461,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
             switchTab('activeWorkoutTab');
             resetTimer(rest);
             playAlertSound();
+            requestWakeLock();
         }
 
         // ==================== EXERCISE DETAIL MODAL LOGIC ====================
