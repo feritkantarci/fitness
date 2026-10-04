@@ -1,4 +1,4 @@
-const CACHE_NAME = 'celik-kodu-cache-v21';
+const CACHE_NAME = 'celik-kodu-cache-v22';
 const ASSETS = [
   './',
   './index.html',
@@ -53,6 +53,16 @@ const ASSETS = [
   './assets/guides/guide_kb_halo_form.jpg',
   './assets/guides/guide_kb_windmill_anatomi.jpg',
   './assets/guides/guide_kb_windmill_form.jpg',
+  './assets/guides/guide_mach_leg_press_anatomi.jpg',
+  './assets/guides/guide_mach_leg_press_form.jpg',
+  './assets/guides/guide_mach_leg_extension_anatomi.jpg',
+  './assets/guides/guide_mach_leg_extension_form.jpg',
+  './assets/guides/guide_mach_calf_raise_anatomi.jpg',
+  './assets/guides/guide_mach_calf_raise_form.jpg',
+  './assets/guides/guide_mach_leg_curl_anatomi.jpg',
+  './assets/guides/guide_mach_leg_curl_form.jpg',
+  './assets/guides/guide_mach_lat_pulldown_anatomi.jpg',
+  './assets/guides/guide_mach_lat_pulldown_form.jpg',
   './assets/guides/guide_kb_clean_anatomi.jpg',
   './assets/guides/guide_kb_clean_form.jpg',
   './assets/diagrams/seq_db_clean_squat.svg',
