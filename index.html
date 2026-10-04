@@ -3233,6 +3233,10 @@
                 <span>👤</span>
                 <span>Profil & Kilolarım</span>
             </div>
+            <div class="more-sheet-btn" onclick="closeMoreSheet(); forceAppUpdate();" style="border-color:rgba(56, 189, 248, 0.4); color:var(--cyan);">
+                <span>🔄</span>
+                <span>Sürümü Yenile (Cache)</span>
+            </div>
             <div class="more-sheet-btn" id="sheetAdminBtn" onclick="closeMoreSheet(); openAdminModal();" style="display:none;">
                 <span>👑</span>
                 <span>Sporcu Yönetimi</span>
@@ -7930,10 +7934,24 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
             updateTimerDisplay();
         });
 
-        // PWA SERVICE WORKER
+        // PWA SERVICE WORKER & FORCE CACHE CLEAR
+        async function forceAppUpdate() {
+            try {
+                if ('caches' in window) {
+                    const keys = await caches.keys();
+                    await Promise.all(keys.map(k => caches.delete(k)));
+                }
+                if ('serviceWorker' in navigator) {
+                    const regs = await navigator.serviceWorker.getRegistrations();
+                    for (const r of regs) await r.unregister();
+                }
+            } catch(e) {}
+            window.location.href = window.location.origin + window.location.pathname + '?v=' + Date.now();
+        }
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
+                navigator.serviceWorker.register('./sw.js?v=33')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
