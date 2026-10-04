@@ -12,6 +12,20 @@ MOBIL_FILE = "/Users/mrkantarci/Desktop/AI PROJELERI/FITNESS/salon_kilavuzu_mobi
 
 EXERCISES_JSON = json.dumps(EXERCISES, ensure_ascii=False)
 
+# Load all SVGs into a dictionary
+DIAGRAMS_MAP = {}
+diagram_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets", "diagrams")
+if os.path.isdir(diagram_dir):
+    for fn in sorted(os.listdir(diagram_dir)):
+        if fn.endswith(".svg"):
+            with open(os.path.join(diagram_dir, fn), "r", encoding="utf-8") as sf:
+                svg_str = sf.read().strip()
+                if svg_str.startswith("<?xml"):
+                    svg_str = svg_str[svg_str.find("?>")+2:].strip()
+                DIAGRAMS_MAP[fn] = svg_str
+
+DIAGRAMS_JSON = json.dumps(DIAGRAMS_MAP, ensure_ascii=False)
+
 HTML_CONTENT = f"""<!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -846,6 +860,15 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.08);
             padding: 8px;
+            overflow-x: auto;
+        }}
+        .pos-diagram-wrap svg {{
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            display: block;
+            margin: 0 auto;
         }}
         .pos-diagram-img {{
             max-width: 100%;
@@ -2146,6 +2169,7 @@ HTML_CONTENT = f"""<!DOCTYPE html>
     <script>
         // EXERCISE DATABASE
         const EXERCISES_DB = {EXERCISES_JSON};
+        const DIAGRAMS_SVG_DB = {DIAGRAMS_JSON};
 
         // GLOBAL APP STATE
         let selectedSplit = 'full_body';
@@ -2553,11 +2577,62 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                 `;
             }}).join('');
 
-            const diagramHtml = ex.diagram ? `
-                <div class="pos-diagram-wrap">
-                    <img src="${{ex.diagram}}" alt="${{escapeHTML(ex.name)}} Form Şeması" class="pos-diagram-img" loading="lazy">
-                </div>
-            ` : '';
+            let diagramHtml = '';
+            const diagramFallbackMap = {{
+                'db_goblet_squat': 'seq_db_squat.svg',
+                'db_squat': 'seq_db_squat.svg',
+                'kb_goblet_squat': 'seq_db_squat.svg',
+                'bw_air_squat': 'seq_db_squat.svg',
+                'db_front_squat': 'seq_db_clean_squat.svg',
+                'kb_clean': 'seq_db_clean_squat.svg',
+                'db_bench_press': 'seq_floor_press.svg',
+                'db_floor_press': 'seq_floor_press.svg',
+                'db_overhead_press': 'seq_db_press.svg',
+                'db_arnold_press': 'seq_db_press.svg',
+                'kb_press': 'seq_db_press.svg',
+                'db_lateral_raise': 'seq_lateral_raise.svg',
+                'db_skullcrusher': 'seq_skull_crusher.svg',
+                'db_saw_row': 'seq_db_row.svg',
+                'kb_gorilla_row': 'seq_db_row.svg',
+                'db_chest_supported_row': 'seq_incline_row.svg',
+                'db_renegade_row': 'seq_renegade_row.svg',
+                'db_walking_lunge': 'seq_db_lunge.svg',
+                'db_reverse_lunge': 'seq_db_lunge.svg',
+                'db_rdl': 'seq_db_rdl.svg',
+                'db_single_leg_rdl': 'seq_db_rdl.svg',
+                'db_swing': 'seq_db_swing.svg',
+                'kb_swing': 'seq_db_swing.svg',
+                'db_snatch': 'seq_db_snatch.svg',
+                'kb_half_snatch': 'seq_db_snatch.svg',
+                'db_farmers_walk': 'seq_farmers_walk.svg',
+                'db_suitcase_carry': 'seq_farmers_walk.svg',
+                'db_russian_twist': 'seq_russian_twist.svg',
+                'kb_windmill': 'seq_windmill.svg',
+                'kb_turkish_getup': 'seq_windmill.svg',
+                'kb_thruster': 'seq_thruster.svg',
+                'bw_pushup': 'seq_pushup.svg',
+                'bw_diamond_pushup': 'seq_diamond_pushup.svg',
+                'bw_hanging_knee_raise': 'seq_leg_raise.svg',
+                'bw_burpee': 'seq_escalera.svg',
+                'bw_plank': 'seq_plank_pull_through.svg'
+            }};
+
+            const targetFname = (ex.diagram ? ex.diagram.split('/').pop() : '') || diagramFallbackMap[ex.id] || '';
+            const inlineSvg = (typeof DIAGRAMS_SVG_DB !== 'undefined' && DIAGRAMS_SVG_DB[targetFname]) ? DIAGRAMS_SVG_DB[targetFname] : '';
+
+            if (inlineSvg) {{
+                diagramHtml = `
+                    <div class="pos-diagram-wrap">
+                        ${{inlineSvg}}
+                    </div>
+                `;
+            }} else if (ex.diagram) {{
+                diagramHtml = `
+                    <div class="pos-diagram-wrap">
+                        <img src="${{ex.diagram}}" alt="${{escapeHTML(ex.name)}} Form Şeması" class="pos-diagram-img" loading="lazy">
+                    </div>
+                `;
+            }}
 
             const contentClass = defaultCollapsed ? 'pos-guide-content collapsed' : 'pos-guide-content';
             const btnText = defaultCollapsed ? '📖 Formu Gör ▼' : '📖 Formu Gizle ▲';
