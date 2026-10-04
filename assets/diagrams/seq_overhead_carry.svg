@@ -47,7 +47,7 @@
     
             </g>
             
-            <!-- Step label & caption -->
+            <!-- Step label &amp; caption -->
             <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Baş Üstü Kilitlenme</text>
             <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Tek dambıl kulak hizasında tam kilitli</text>
         </g>
@@ -84,7 +84,7 @@
     
             </g>
             
-            <!-- Step label & caption -->
+            <!-- Step label &amp; caption -->
             <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Dik ve Ritmik Adımlar</text>
             <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Kaburga içeri, omuz ve dirsek kıpırdamaz</text>
         </g>
@@ -120,8 +120,8 @@
     
             </g>
             
-            <!-- Step label & caption -->
-            <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Kontrollü İndiriş & Diğer Kol</text>
+            <!-- Step label &amp; caption -->
+            <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Kontrollü İndiriş &amp; Diğer Kol</text>
             <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Omuza yumuşak indir, taraf değiştir</text>
         </g>
         

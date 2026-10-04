@@ -47,8 +47,8 @@
     
             </g>
             
-            <!-- Step label & caption -->
-            <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Düz Sırt & Sarkıtma</text>
+            <!-- Step label &amp; caption -->
+            <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Düz Sırt &amp; Sarkıtma</text>
             <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Gövde 45°, dambıl omuz altında serbest</text>
         </g>
         
@@ -84,7 +84,7 @@
     
             </g>
             
-            <!-- Step label & caption -->
+            <!-- Step label &amp; caption -->
             <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Kalça Cebine Çekiş</text>
             <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Dirsek geriye doğru yönlendirilir</text>
         </g>
@@ -122,7 +122,7 @@
     
             </g>
             
-            <!-- Step label & caption -->
+            <!-- Step label &amp; caption -->
             <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Zirve Lat Sıkıştırma</text>
             <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Dirsek kaburgaya yapışık, gövde dönmez</text>
         </g>

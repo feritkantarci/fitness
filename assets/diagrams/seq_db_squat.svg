@@ -48,7 +48,7 @@
     
             </g>
             
-            <!-- Step label & caption -->
+            <!-- Step label &amp; caption -->
             <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Dikey Goblet Tutuş</text>
             <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Dambıl göğüste, ayaklar omuz hizasında</text>
         </g>
@@ -84,7 +84,7 @@
     
             </g>
             
-            <!-- Step label & caption -->
+            <!-- Step label &amp; caption -->
             <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Kontrollü İniş (3 sn)</text>
             <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Kalça geriye, dizler parmak yönünde</text>
         </g>
@@ -121,8 +121,8 @@
     
             </g>
             
-            <!-- Step label & caption -->
-            <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Dip Nokta & Topuk İtişi</text>
+            <!-- Step label &amp; caption -->
+            <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Dip Nokta &amp; Topuk İtişi</text>
             <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Paralelin altında dik göğüs, tam kalkış</text>
         </g>
         

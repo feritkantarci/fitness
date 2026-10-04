@@ -48,8 +48,8 @@
     
             </g>
             
-            <!-- Step label & caption -->
-            <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Sırtüstü Yatış & Dirsek Yerde</text>
+            <!-- Step label &amp; caption -->
+            <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Sırtüstü Yatış &amp; Dirsek Yerde</text>
             <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Dirsekler yerde 45°, dambıllar göğüs üstünde</text>
         </g>
         
@@ -84,7 +84,7 @@
     
             </g>
             
-            <!-- Step label & caption -->
+            <!-- Step label &amp; caption -->
             <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Tavana Doğru Patlayıcı İtiş</text>
             <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Dirsekler yerden kalkar, göğüs kasılır</text>
         </g>
@@ -120,8 +120,8 @@
     
             </g>
             
-            <!-- Step label & caption -->
-            <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Tepe Kilit & 3 sn İniş</text>
+            <!-- Step label &amp; caption -->
+            <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Tepe Kilit &amp; 3 sn İniş</text>
             <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Göğüs maksimum sıkılır, dirsek kontrollü değer</text>
         </g>
         
