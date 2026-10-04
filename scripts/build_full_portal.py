@@ -760,6 +760,143 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             background: rgba(56, 189, 248, 0.1);
         }}
 
+        /* ==================== EXERCISE POSITIONS & BIOMECHANICAL FLOW ==================== */
+        .pos-guide-wrapper {{
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            margin: 10px 0 12px 0;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }}
+        .pos-guide-wrapper:hover {{
+            border-color: rgba(245, 158, 11, 0.25);
+        }}
+        .pos-guide-header {{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            cursor: pointer;
+            user-select: none;
+            gap: 6px;
+            flex-wrap: wrap;
+        }}
+        .pos-guide-header:hover {{
+            background: rgba(255, 255, 255, 0.06);
+        }}
+        .pos-type-badge {{
+            font-size: 10.5px;
+            font-weight: 800;
+            padding: 2.5px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.3px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }}
+        .pos-badge-complex {{
+            background: rgba(244, 63, 94, 0.18);
+            color: #fb7185;
+            border: 1px solid rgba(244, 63, 94, 0.38);
+            box-shadow: 0 0 10px rgba(244, 63, 94, 0.12);
+        }}
+        .pos-badge-standard {{
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.32);
+        }}
+        .pos-guide-hint {{
+            font-size: 11px;
+            color: var(--text-secondary);
+        }}
+        @media (max-width: 480px) {{
+            .pos-guide-hint {{
+                display: none;
+            }}
+        }}
+        .btn-toggle-guide {{
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            color: var(--gold-light);
+            font-size: 10.5px;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 3px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }}
+        .btn-toggle-guide:hover {{
+            background: rgba(245, 158, 11, 0.2);
+            border-color: var(--gold);
+        }}
+        .pos-guide-content {{
+            padding: 10px 12px;
+            display: block;
+        }}
+        .pos-guide-content.collapsed {{
+            display: none;
+        }}
+        .pos-diagram-wrap {{
+            margin-bottom: 10px;
+            text-align: center;
+            background: #090d16;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 8px;
+        }}
+        .pos-diagram-img {{
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            display: block;
+            margin: 0 auto;
+        }}
+        .pos-steps-grid {{
+            display: grid;
+            gap: 8px;
+            grid-template-columns: 1fr;
+        }}
+        @media (min-width: 680px) {{
+            .pos-steps-grid.cols-3 {{
+                grid-template-columns: repeat(3, 1fr);
+            }}
+            .pos-steps-grid.cols-4 {{
+                grid-template-columns: repeat(4, 1fr);
+            }}
+            .pos-steps-grid.cols-5 {{
+                grid-template-columns: repeat(5, 1fr);
+            }}
+        }}
+        .pos-step-card {{
+            background: rgba(0, 0, 0, 0.28);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            padding: 8px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }}
+        .pos-step-header {{
+            font-size: 10.5px;
+            font-weight: 800;
+            padding: 3px 7px;
+            border-radius: 4px;
+            border-width: 1px;
+            border-style: solid;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            width: fit-content;
+        }}
+        .pos-step-desc {{
+            font-size: 11.5px;
+            color: #cbd5e1;
+            line-height: 1.4;
+        }}
+
         /* ==================== LIVE WORKOUT TRACKER ==================== */
         .live-tracker-bar {{
             position: sticky;
@@ -2364,6 +2501,88 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             if (container.scrollIntoView) container.scrollIntoView({{ behavior: 'smooth' }});
         }}
 
+        function togglePosGuide(collapseId) {{
+            const el = document.getElementById(collapseId);
+            const btn = document.getElementById('icon_' + collapseId);
+            if (!el) return;
+            if (el.classList.contains('collapsed')) {{
+                el.classList.remove('collapsed');
+                if (btn) btn.innerText = '📖 Formu Gizle ▲';
+            }} else {{
+                el.classList.add('collapsed');
+                if (btn) btn.innerText = '📖 Formu Gör ▼';
+            }}
+        }}
+
+        function renderExercisePositionsHtml(exInput, uniquePrefix = '', defaultCollapsed = false) {{
+            if (!exInput) return '';
+            const ex = (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB)) 
+                ? (EXERCISES_DB.find(e => e.id === exInput.id) || exInput)
+                : exInput;
+
+            if (!ex.positions || !Array.isArray(ex.positions) || ex.positions.length === 0) {{
+                return '';
+            }}
+
+            const isComplex = !!ex.isComplex;
+            const badgeType = isComplex ? 'pos-badge-complex' : 'pos-badge-standard';
+            const typeLabel = isComplex 
+                ? `🔥 Kompleks Hareket (${{ex.positions.length}} Aşama)` 
+                : `📐 3 Aşamalı Form Kılavuzu`;
+
+            const collapseId = `posGuide_${{uniquePrefix}}_${{ex.id}}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+
+            const badgeStyles = {{
+                setup: {{ bg: 'rgba(56, 189, 248, 0.15)', text: '#38bdf8', border: 'rgba(56, 189, 248, 0.35)', icon: '🟢' }},
+                action: {{ bg: 'rgba(245, 158, 11, 0.15)', text: '#fbbf24', border: 'rgba(245, 158, 11, 0.35)', icon: '⚡' }},
+                trans: {{ bg: 'rgba(236, 72, 153, 0.15)', text: '#f472b6', border: 'rgba(236, 72, 153, 0.35)', icon: '🔄' }},
+                finish: {{ bg: 'rgba(16, 185, 129, 0.15)', text: '#34d399', border: 'rgba(16, 185, 129, 0.35)', icon: '🏁' }}
+            }};
+
+            const stepsHtml = ex.positions.map((p, idx) => {{
+                const style = badgeStyles[p.badge] || badgeStyles.setup;
+                return `
+                    <div class="pos-step-card">
+                        <div class="pos-step-header" style="background:${{style.bg}}; border-color:${{style.border}}; color:${{style.text}};">
+                            <span>${{style.icon}} ${{escapeHTML(p.phase)}}</span>
+                        </div>
+                        <div class="pos-step-desc">
+                            ${{escapeHTML(p.desc)}}
+                        </div>
+                    </div>
+                `;
+            }}).join('');
+
+            const diagramHtml = ex.diagram ? `
+                <div class="pos-diagram-wrap">
+                    <img src="${{ex.diagram}}" alt="${{escapeHTML(ex.name)}} Form Şeması" class="pos-diagram-img" loading="lazy">
+                </div>
+            ` : '';
+
+            const contentClass = defaultCollapsed ? 'pos-guide-content collapsed' : 'pos-guide-content';
+            const btnText = defaultCollapsed ? '📖 Formu Gör ▼' : '📖 Formu Gizle ▲';
+
+            return `
+                <div class="pos-guide-wrapper">
+                    <div class="pos-guide-header" onclick="event.stopPropagation(); togglePosGuide('${{collapseId}}')">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span class="pos-type-badge ${{badgeType}}">${{typeLabel}}</span>
+                            <span class="pos-guide-hint">Başlangıç • Ara Pozisyon • Bitiriş</span>
+                        </div>
+                        <button type="button" class="btn-toggle-guide" id="btn_${{collapseId}}" onclick="event.stopPropagation(); togglePosGuide('${{collapseId}}')">
+                            <span id="icon_${{collapseId}}">${{btnText}}</span>
+                        </button>
+                    </div>
+                    <div class="${{contentClass}}" id="${{collapseId}}">
+                        ${{diagramHtml}}
+                        <div class="pos-steps-grid cols-${{ex.positions.length}}">
+                            ${{stepsHtml}}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }}
+
         function renderSingleExerciseCard(ex, label, scheme, weights, scope = 'generated') {{
             const equipLabels = {{
                 dumbbell: 'Dambıl',
@@ -2397,6 +2616,8 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                     <div class="ex-cue-box">
                         💡 <strong>Altın Kural:</strong> ${{escapeHTML(ex.cue)}}
                     </div>
+
+                    ${{renderExercisePositionsHtml(ex, `${{scope}}_${{label}}`, false)}}
 
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:8px; border-top:1px dashed var(--border);">
                         <button class="btn-swap-ex" style="color:#f87171; border-color:rgba(239,68,68,0.3);" onclick="removeExerciseFromWorkout('${{ex.id}}', '${{scope}}')" title="Bu hareketi kaldır">
@@ -2544,9 +2765,10 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                             <span class="ex-badge badge-muscle">${{escapeHTML(ex.muscle.split(',')[0])}}</span>
                         </div>
                     </div>
-                    <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.3;">
+                    <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.3; margin-bottom:6px;">
                         💡 ${{escapeHTML(ex.cue)}}
                     </div>
+                    ${{renderExercisePositionsHtml(ex, `picker_${{ex.id}}`, true)}}
                     <div style="text-align:right; margin-top:6px;">
                         <button class="btn btn-gold" style="font-size:11px; padding:4px 10px;">
                             ${{pickerContext.mode === 'replace' ? '✓ Bu Alternatifi Seç' : '➕ Bu Hareketi Ekle'}}
@@ -2855,6 +3077,8 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                             <div style="font-size:12px; color:var(--text-secondary); margin-bottom:6px;">
                                 🎯 Hedef Şema: <strong style="color:var(--gold);">${{s.scheme.sets}} Set x ${{s.scheme.reps}}</strong> • Dinlenme: ${{s.scheme.rest}}s
                             </div>
+
+                            ${{renderExercisePositionsHtml(ex, `active_${{idx}}`, false)}}
 
                             <!-- SET-BY-SET WORKFLOW TABLE -->
                             <div class="sets-management-wrap">
