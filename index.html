@@ -5111,23 +5111,17 @@
                                     </div>
                                 </div>
 
-                                <!-- GİZLENEBİLİR / AÇILABİLİR HIZLI BUTONLAR (ÇOK İŞE YARAYAN HIZLI SEÇİCİ) -->
+                                <!-- HIZLI AĞIRLIK SEÇİMİ (SADE & KOMPAKT) -->
                                 <div class="tools-collapsible">
                                     <div class="tools-header-toggle" onclick="toggleExtraTools('${ex.id}')">
-                                        <div class="tools-title">
-                                            <span>⚡ Hızlı Kilo & Hassas Ayar Butonları</span>
-                                            <span class="tools-badge-count">9 Kilo + 8 Buton</span>
-                                        </div>
-                                        <span id="toolsArrow_${ex.id}" style="font-size:12px; color:var(--gold); font-weight:700;">
+                                        <span style="font-size:11.5px; font-weight:800; color:var(--gold);">⚡ Hızlı Ağırlıklar</span>
+                                        <span id="toolsArrow_${ex.id}" style="font-size:11.5px; color:var(--text-secondary); font-weight:700;">
                                             ${extraToolsOpen[ex.id] ? '▲ Kapat' : '▼ Aç'}
                                         </span>
                                     </div>
-                                    <div class="tools-body" id="toolsBody_${ex.id}" style="display:${extraToolsOpen[ex.id] ? 'block' : 'none'};">
+                                    <div class="tools-body" id="toolsBody_${ex.id}" style="display:${extraToolsOpen[ex.id] ? 'block' : 'none'}; padding:8px 10px;">
                                         <!-- HIZLI AĞIRLIK ÇİPLERİ -->
-                                        <div style="font-size:10px; font-weight:800; color:var(--text-secondary); margin-bottom:4px; text-transform:uppercase;">
-                                            TEK DOKUNUŞLA KİLO SEÇ:
-                                        </div>
-                                        <div class="focus-weight-chips" style="margin-top:2px; margin-bottom:8px;">
+                                        <div class="focus-weight-chips" style="margin:2px 0 8px;">
                                             ${[7.5, 10, 12.5, 15, 17.5, 20, 22.5, 25, 30].map(wVal => `
                                                 <button type="button" class="weight-chip ${currentSet.weight == wVal ? 'selected' : ''}" onclick="setQuickWeight('${ex.id}', ${currentSetIdx}, ${wVal})">
                                                     ${wVal} kg
@@ -5136,10 +5130,7 @@
                                         </div>
 
                                         <!-- HASSAS KİLO STEPPERLARI -->
-                                        <div style="font-size:10px; font-weight:800; color:var(--text-secondary); margin-bottom:4px; text-transform:uppercase;">
-                                            HASSAS KİLO ADIMI:
-                                        </div>
-                                        <div class="fine-steppers-row">
+                                        <div class="fine-steppers-row" style="margin-bottom:6px;">
                                             <button type="button" class="btn-fine-step" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, -2.5)">-2.5 kg</button>
                                             <button type="button" class="btn-fine-step" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, -1)">-1 kg</button>
                                             <button type="button" class="btn-fine-step" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, 1)">+1 kg</button>
@@ -5147,10 +5138,7 @@
                                         </div>
 
                                         <!-- HASSAS TEKRAR STEPPERLARI -->
-                                        <div style="font-size:10px; font-weight:800; color:var(--text-secondary); margin-bottom:4px; text-transform:uppercase;">
-                                            HASSAS TEKRAR ADIMI:
-                                        </div>
-                                        <div class="fine-steppers-row">
+                                        <div class="fine-steppers-row" style="margin-bottom:2px;">
                                             <button type="button" class="btn-fine-step" onclick="stepSetReps('${ex.id}', ${currentSetIdx}, -2)">-2 Tk</button>
                                             <button type="button" class="btn-fine-step" onclick="stepSetReps('${ex.id}', ${currentSetIdx}, -1)">-1 Tk</button>
                                             <button type="button" class="btn-fine-step" onclick="stepSetReps('${ex.id}', ${currentSetIdx}, 1)">+1 Tk</button>
