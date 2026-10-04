@@ -1,6 +1,22 @@
-const CACHE_NAME = 'celik-kodu-cache-v24';
+const CACHE_NAME = 'celik-kodu-cache-v25';
 const ASSETS = [
   './',
+  './assets/guides/guide_bw_air_squat_form.jpg',
+  './assets/guides/guide_bw_air_squat_anatomi.jpg',
+  './assets/guides/guide_kb_swing_form.jpg',
+  './assets/guides/guide_kb_swing_anatomi.jpg',
+  './assets/guides/guide_bw_glute_bridge_form.jpg',
+  './assets/guides/guide_bw_glute_bridge_anatomi.jpg',
+  './assets/guides/guide_mach_cable_woodchopper_form.jpg',
+  './assets/guides/guide_mach_cable_woodchopper_anatomi.jpg',
+  './assets/guides/guide_db_pullover_form.jpg',
+  './assets/guides/guide_db_pullover_anatomi.jpg',
+  './assets/guides/guide_bw_burpee_form.jpg',
+  './assets/guides/guide_bw_burpee_anatomi.jpg',
+  './assets/guides/guide_bw_mountain_climber_form.jpg',
+  './assets/guides/guide_bw_mountain_climber_anatomi.jpg',
+  './assets/guides/guide_bw_hollow_body_form.jpg',
+  './assets/guides/guide_bw_hollow_body_anatomi.jpg',
   './index.html',
   './manifest.json',
   './assets/guides/guide_db_skullcrusher_anatomi.jpg',
