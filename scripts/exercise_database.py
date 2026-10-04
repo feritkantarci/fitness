@@ -1,0 +1,863 @@
+#!/usr/bin/env python3
+import json
+
+EXERCISES = [
+    # ==================== DAMBIL (DUMBBELL) ====================
+    {
+        "id": "db_bench_press",
+        "name": "Dambıl Bench Press (Düz Sehpa)",
+        "equipment": "dumbbell",
+        "category": "push",
+        "muscle": "Göğüs, Ön Omuz & Triceps",
+        "mechanic": "compound",
+        "cue": "Dirsekleri 45° açıda tut, dambılları yukarıda birbirine çarpmadan göğüs kaslarını sıkarak kilitle.",
+        "weightKey": "press",
+        "tags": ["full_body", "upper_push", "upper"]
+    },
+    {
+        "id": "db_incline_press",
+        "name": "Eğimli Sehpa Dambıl Pres (Incline DB Press)",
+        "equipment": "dumbbell",
+        "category": "push",
+        "muscle": "Üst Göğüs & Ön Omuz",
+        "mechanic": "compound",
+        "cue": "Sehpa açısını 30° yap, omuz bıçaklarını sehpaya sabitle, tepe noktada üst göğsü sık.",
+        "weightKey": "press",
+        "tags": ["upper_push", "upper"]
+    },
+    {
+        "id": "db_floor_press",
+        "name": "Dambıl Yerden Pres (Floor Press)",
+        "equipment": "dumbbell",
+        "category": "push",
+        "muscle": "Göğüs & Triceps",
+        "mechanic": "compound",
+        "cue": "Yerde dirsekler zemine değdiği an durakla, patlayıcı şekilde yukarı it (omuzu korur).",
+        "weightKey": "press",
+        "tags": ["full_body", "upper_push", "upper"]
+    },
+    {
+        "id": "db_overhead_press",
+        "name": "Dambıl Ayakta Omuz Presi (Standing DB Press)",
+        "equipment": "dumbbell",
+        "category": "push",
+        "muscle": "Omuz & Triceps & Core",
+        "mechanic": "compound",
+        "cue": "Kalçayı ve karnı sık, omurgayı bükmeden dambılları baş üstüne dikey kilitle.",
+        "weightKey": "press",
+        "tags": ["full_body", "upper_push", "upper"]
+    },
+    {
+        "id": "db_arnold_press",
+        "name": "Arnold Pres (Rotasyonel Omuz Presi)",
+        "equipment": "dumbbell",
+        "category": "push",
+        "muscle": "Tüm Omuz Başları (Ön, Yan, Arka)",
+        "mechanic": "compound",
+        "cue": "Avuçlar yüzüne bakarak başla, preslerken bilekleri 180° çevirip baş üstüne kilitle.",
+        "weightKey": "press",
+        "tags": ["upper_push", "upper"]
+    },
+    {
+        "id": "db_lateral_raise",
+        "name": "Dambıl Yana Açış (Lateral Raise)",
+        "equipment": "dumbbell",
+        "category": "push",
+        "muscle": "Yan Omuz (Lateral Deltoid)",
+        "mechanic": "isolation",
+        "cue": "Dirsekleri hafif kırık tut, kolları omuz hizasına kadar sürahi döker gibi kaldır.",
+        "weightKey": "press",
+        "tags": ["upper_push", "upper"]
+    },
+    {
+        "id": "db_triceps_overhead",
+        "name": "Baş Üstü Çift Kol Dambıl Triceps Uzatma",
+        "equipment": "dumbbell",
+        "category": "push",
+        "muscle": "Arka Kol (Triceps Uzun Baş)",
+        "mechanic": "isolation",
+        "cue": "Dirsekleri başın iki yanında sabit tut, sadece ön kolları büküp uzat.",
+        "weightKey": "",
+        "tags": ["upper_push", "upper"]
+    },
+    {
+        "id": "db_skullcrusher",
+        "name": "Yatarak Dambıl Alına Pres (Skullcrusher)",
+        "equipment": "dumbbell",
+        "category": "push",
+        "muscle": "Arka Kol (Triceps)",
+        "mechanic": "isolation",
+        "cue": "Kolları dikey tut, dambılları şakak hizasına kontrollü indirip dirsekten kilitle.",
+        "weightKey": "",
+        "tags": ["upper_push", "upper"]
+    },
+    {
+        "id": "db_saw_row",
+        "name": "Dambıl Testere Çekiş (Single-Arm Row)",
+        "equipment": "dumbbell",
+        "category": "pull",
+        "muscle": "Geniş Sırt (Latissimus), Arka Omuz & Biceps",
+        "mechanic": "compound",
+        "cue": "Sırt düz, dambılı cebine doğru kavisli çek, tepe noktada kürek kemiğini sıkıştır.",
+        "weightKey": "row",
+        "tags": ["full_body", "upper_pull", "upper"]
+    },
+    {
+        "id": "db_chest_supported_row",
+        "name": "Sehpaya Dayalı Çift Dambıl Sırt Çekiş",
+        "equipment": "dumbbell",
+        "category": "pull",
+        "muscle": "Orta Sırt & Trapez & Rhomboid",
+        "mechanic": "compound",
+        "cue": "Göğsü eğimli sehpaya yasla, bellerden güç almadan sadece sırt kaslarıyla çek.",
+        "weightKey": "row",
+        "tags": ["upper_pull", "upper"]
+    },
+    {
+        "id": "db_renegade_row",
+        "name": "Dambıl Renegade Row (Şınav Pozisyonunda Çekiş)",
+        "equipment": "dumbbell",
+        "category": "pull",
+        "muscle": "Sırt & Anti-Rotasyonel Core",
+        "mechanic": "compound",
+        "cue": "Plank pozisyonunda kalçayı hiç sallamadan dambılları sırayla kaburgaya çek.",
+        "weightKey": "row",
+        "tags": ["full_body", "upper_pull", "core"]
+    },
+    {
+        "id": "db_pullover",
+        "name": "Dambıl Pullover (Göğüs Kafesi & Lat Açış)",
+        "equipment": "dumbbell",
+        "category": "pull",
+        "muscle": "Geniş Sırt & Göğüs & Serratus",
+        "mechanic": "compound",
+        "cue": "Sehpaya enlemesine yat, dambılı başının arkasına derin sarkıtıp lats ile yukarı çek.",
+        "weightKey": "",
+        "tags": ["upper_pull", "upper"]
+    },
+    {
+        "id": "db_hammer_curl",
+        "name": "Dambıl Çekiç Biceps Kıvırma (Hammer Curl)",
+        "equipment": "dumbbell",
+        "category": "pull",
+        "muscle": "Biceps & Brachialis & Ön Kol",
+        "mechanic": "isolation",
+        "cue": "Nötr tutuş (avuçlar birbirine baksın), sallanmadan tepe noktada sık.",
+        "weightKey": "",
+        "tags": ["upper_pull", "upper"]
+    },
+    {
+        "id": "db_incline_curl",
+        "name": "Eğimli Sehpa Dambıl Biceps Curl",
+        "equipment": "dumbbell",
+        "category": "pull",
+        "muscle": "Biceps Uzun Baş",
+        "mechanic": "isolation",
+        "cue": "Kollar geride başlar, tam esneme ve tepe noktada supinasyon (dışa çevirme) uygula.",
+        "weightKey": "",
+        "tags": ["upper_pull", "upper"]
+    },
+    {
+        "id": "db_goblet_squat",
+        "name": "Dambıl Goblet Squat",
+        "equipment": "dumbbell",
+        "category": "legs_quad",
+        "muscle": "Ön Bacak (Quad), Kalça & Core",
+        "mechanic": "compound",
+        "cue": "Dambılı dikey göğsünde tut, dirsekler dizlerin içine insin, topuklar yere çakılı kalsın.",
+        "weightKey": "squat",
+        "tags": ["full_body", "lower", "legs_quad"]
+    },
+    {
+        "id": "db_front_squat",
+        "name": "Çift Dambıl Ön Çömelme (DB Front Squat)",
+        "equipment": "dumbbell",
+        "category": "legs_quad",
+        "muscle": "Ön Bacak & Üst Sırt Zırhı",
+        "mechanic": "compound",
+        "cue": "İki dambılı omuzlarda taşı, göğsü dik tutarak 90 derece altına in.",
+        "weightKey": "squat",
+        "tags": ["full_body", "lower", "legs_quad"]
+    },
+    {
+        "id": "db_bulgarian_squat",
+        "name": "Bulgar Split Squat (Arka Ayak Sehpada)",
+        "equipment": "dumbbell",
+        "category": "legs_quad",
+        "muscle": "Tek Bacak Gücü, Quad & Glute",
+        "mechanic": "compound",
+        "cue": "Öndeki ayağın topuğundan güç alarak kalk, gövde hafif öne eğik kalsın.",
+        "weightKey": "squat",
+        "tags": ["lower", "legs_quad"]
+    },
+    {
+        "id": "db_walking_lunge",
+        "name": "Dambıl Yürüyen Lunge (Walking Lunge)",
+        "equipment": "dumbbell",
+        "category": "legs_quad",
+        "muscle": "Tüm Bacak, Kalça & Denge",
+        "mechanic": "compound",
+        "cue": "Adım atarken arka diz yere hafifçe değsin, ön diz ayak parmağını aşırı geçmesin.",
+        "weightKey": "lunge",
+        "tags": ["full_body", "lower", "legs_quad"]
+    },
+    {
+        "id": "db_reverse_lunge",
+        "name": "Dambıl Geriye Adım Lunge (Reverse Lunge)",
+        "equipment": "dumbbell",
+        "category": "legs_quad",
+        "muscle": "Ön Bacak & Diz Dostu Kalça",
+        "mechanic": "compound",
+        "cue": "Geriye büyük adım at, ön diz 90° bükülsün (diz ağrısı çekenler için en emniyetli form).",
+        "weightKey": "lunge",
+        "tags": ["lower", "legs_quad"]
+    },
+    {
+        "id": "db_rdl",
+        "name": "Dambıl Romanian Deadlift (RDL)",
+        "equipment": "dumbbell",
+        "category": "legs_hinge",
+        "muscle": "Hamstring (Arka Bacak) & Glute & Bel",
+        "mechanic": "compound",
+        "cue": "Dizler hafif bükülü kalır, kalçayı duvara değdirir gibi arkaya it, sırt dümdüz kalsın.",
+        "weightKey": "rdl",
+        "tags": ["full_body", "lower", "upper_pull"]
+    },
+    {
+        "id": "db_single_leg_rdl",
+        "name": "Tek Bacak Dambıl RDL (Single-Leg RDL)",
+        "equipment": "dumbbell",
+        "category": "legs_hinge",
+        "muscle": "Arka Bacak & Ayak Bileği Stabilitesi",
+        "mechanic": "compound",
+        "cue": "Arka bacak arkaya uzanırken gövde terazinin kolu gibi öne eğilsin.",
+        "weightKey": "rdl",
+        "tags": ["lower"]
+    },
+    {
+        "id": "db_swing",
+        "name": "İki Elle Dambıl Swing (DB Swing)",
+        "equipment": "dumbbell",
+        "category": "legs_hinge",
+        "muscle": "Kalça, Hamstring, Bel & Kardiyo",
+        "mechanic": "compound",
+        "cue": "Dambılı dikey tut, kalça menteşesiyle patlat, kollar sadece yönlendirsin.",
+        "weightKey": "swing",
+        "tags": ["full_body", "lower", "conditioning"]
+    },
+    {
+        "id": "db_snatch",
+        "name": "Tek Kol Dambıl Hang Snatch",
+        "equipment": "dumbbell",
+        "category": "legs_hinge",
+        "muscle": "Tüm Kinetik Zincir & Patlayıcı Güç",
+        "mechanic": "compound",
+        "cue": "Bacak arasından kalça itişiyle dambılı hızlandır, tek hamlede baş üstüne kilitle.",
+        "weightKey": "press",
+        "tags": ["full_body", "conditioning"]
+    },
+    {
+        "id": "db_farmers_walk",
+        "name": "Dambıl Çiftçi Yürüyüşü (Farmer's Walk)",
+        "equipment": "dumbbell",
+        "category": "core",
+        "muscle": "Kavrama Gücü, Trapez & Tüm Core",
+        "mechanic": "compound",
+        "cue": "Ağır dambılları al, omuzları geriye kilitle, dimdik ve sert adımlarla yürü.",
+        "weightKey": "row",
+        "tags": ["full_body", "core"]
+    },
+    {
+        "id": "db_suitcase_carry",
+        "name": "Dambıl Bavul Taşıma (Tek Taraflı Yürüyüş)",
+        "equipment": "dumbbell",
+        "category": "core",
+        "muscle": "Yan Karın (Obliques) & Anti-Lateral Fleksiyon",
+        "mechanic": "compound",
+        "cue": "Tek elinde ağır dambıl varken gövdenin o tarafa eğilmesine asla izin verme.",
+        "weightKey": "row",
+        "tags": ["core"]
+    },
+    {
+        "id": "db_russian_twist",
+        "name": "Dambıl Russian Twist (Oturarak Rotasyon)",
+        "equipment": "dumbbell",
+        "category": "core",
+        "muscle": "Karın & Rotasyonel Yan Duvar",
+        "mechanic": "isolation",
+        "cue": "Topuklar havada, dambılı sağdan sola kontrollü çevirerek karnı sıkıştır.",
+        "weightKey": "",
+        "tags": ["core"]
+    },
+
+    # ==================== KETTLEBELL (GİRYA) ====================
+    {
+        "id": "kb_swing",
+        "name": "İki Elle Kettlebell Swing (Russian Swing)",
+        "equipment": "kettlebell",
+        "category": "legs_hinge",
+        "muscle": "Kalça (Glute), Hamstring & Kalp Kondisyonu",
+        "mechanic": "compound",
+        "cue": "Kalça menteşesiyle patla, gülle göğüs hizasına kadar yükselsin, karın kilitlensin.",
+        "weightKey": "swing",
+        "tags": ["full_body", "lower", "conditioning"]
+    },
+    {
+        "id": "kb_clean",
+        "name": "Kettlebell Hang Clean (Göğse Çekiş)",
+        "equipment": "kettlebell",
+        "category": "legs_hinge",
+        "muscle": "Kalça, Sırt & Rack Pozisyonu Gücü",
+        "mechanic": "compound",
+        "cue": "Gülle ön kola çarpmasın; kalça patlamasından sonra eli gülleye fermuar gibi geçir.",
+        "weightKey": "row",
+        "tags": ["full_body", "upper_pull"]
+    },
+    {
+        "id": "kb_press",
+        "name": "Kettlebell Strict Overhead Press",
+        "equipment": "kettlebell",
+        "category": "push",
+        "muscle": "Omuz & Omuz Kuşağı Stabilitesi",
+        "mechanic": "compound",
+        "cue": "Rack pozisyonundan başla, baş üstüne preslerken gövdeyi geriye kaçırma.",
+        "weightKey": "press",
+        "tags": ["full_body", "upper_push", "upper"]
+    },
+    {
+        "id": "kb_goblet_squat",
+        "name": "Kettlebell Goblet Squat",
+        "equipment": "kettlebell",
+        "category": "legs_quad",
+        "muscle": "Ön Bacak & Göğüs Dikliği",
+        "mechanic": "compound",
+        "cue": "Kettlebell kulaklarından tut, göğsüne bastır, derin çömel.",
+        "weightKey": "squat",
+        "tags": ["full_body", "lower"]
+    },
+    {
+        "id": "kb_half_snatch",
+        "name": "Kettlebell Semi-Arranque (Half Snatch)",
+        "equipment": "kettlebell",
+        "category": "legs_hinge",
+        "muscle": "Tüm Kinetik Zincir & Omuz Kilitlenmesi",
+        "mechanic": "compound",
+        "cue": "Yerden tek patlamayla baş üstüne kilitlen, omuza yumuşak indirip tekrar başla.",
+        "weightKey": "press",
+        "tags": ["full_body", "conditioning"]
+    },
+    {
+        "id": "kb_gorilla_row",
+        "name": "Kettlebell Gorilla Row (Çift Gülle Çekiş)",
+        "equipment": "kettlebell",
+        "category": "pull",
+        "muscle": "Geniş Sırt & Rhomboids",
+        "mechanic": "compound",
+        "cue": "Geniş squat duruşunda kal, tek gülle yerde beklerken diğerini kaburgaya çek.",
+        "weightKey": "row",
+        "tags": ["upper_pull", "upper"]
+    },
+    {
+        "id": "kb_windmill",
+        "name": "Kettlebell Windmill (Rüzgar Gülü)",
+        "equipment": "kettlebell",
+        "category": "core",
+        "muscle": "Omuz Stabilitesi, Yan Karın & Hamstring Mobilite",
+        "mechanic": "compound",
+        "cue": "Kettlebell baş üstünde kilitli kalırken karşı elinle yere uzan, gözün hep güllede olsun.",
+        "weightKey": "",
+        "tags": ["core", "upper"]
+    },
+    {
+        "id": "kb_turkish_getup",
+        "name": "Kettlebell Turkish Get-Up (Türk Kalkışı)",
+        "equipment": "kettlebell",
+        "category": "core",
+        "muscle": "Tam Vücut Zırhı & Eklem Sağlığı",
+        "mechanic": "compound",
+        "cue": "Yerden ayağa 7 adımda kalkarken gülle hep tavana dikey kilitli kalsın.",
+        "weightKey": "",
+        "tags": ["full_body", "core"]
+    },
+    {
+        "id": "kb_halo",
+        "name": "Kettlebell Halo (Baş Çevresi Rotasyonu)",
+        "equipment": "kettlebell",
+        "category": "core",
+        "muscle": "Omuz Kapsülü & Üst Gövde Mobilite",
+        "mechanic": "isolation",
+        "cue": "Gülleyi ters çevirip başının çevresinde 360 derece dairesel döndür.",
+        "weightKey": "",
+        "tags": ["upper", "core"]
+    },
+    {
+        "id": "kb_thruster",
+        "name": "Kettlebell Thruster (Squat + Baş Üstü İtiş)",
+        "equipment": "kettlebell",
+        "category": "push",
+        "muscle": "Bacak & Omuz & Metabolik Ateş",
+        "mechanic": "compound",
+        "cue": "Derin squat'tan fırlarken bacak gücünü omuz presine kesintisiz aktar.",
+        "weightKey": "press",
+        "tags": ["full_body", "conditioning"]
+    },
+
+    # ==================== BARBELL (BAR & PLAKALAR) ====================
+    {
+        "id": "bb_bench_press",
+        "name": "Barbell Bench Press (Klasik Düz Sehpa)",
+        "equipment": "barbell",
+        "category": "push",
+        "muscle": "Büyük Göğüs Kası, Ön Omuz & Triceps",
+        "mechanic": "compound",
+        "cue": "Barı göğüs ucuna kontrollü indir, ayakları yere basarak patlayıcı şekilde yukarı bas.",
+        "weightKey": "press",
+        "tags": ["full_body", "upper_push", "upper"]
+    },
+    {
+        "id": "bb_incline_bench",
+        "name": "Eğimli Barbell Bench Press (Incline BB Press)",
+        "equipment": "barbell",
+        "category": "push",
+        "muscle": "Üst Göğüs & Omuz Önü",
+        "mechanic": "compound",
+        "cue": "Barı köprücük kemiğinin hemen altına indir, dirsekleri gövdeye 45° tut.",
+        "weightKey": "press",
+        "tags": ["upper_push", "upper"]
+    },
+    {
+        "id": "bb_overhead_press",
+        "name": "Barbell Askeri Pres (Military / Overhead Press)",
+        "equipment": "barbell",
+        "category": "push",
+        "muscle": "Tüm Omuz Kasları & Karın Zırhı",
+        "mechanic": "compound",
+        "cue": "Çeneyi hafif geriye çek, bar başı geçince kafayı öne verip tepe noktada kilitlen.",
+        "weightKey": "press",
+        "tags": ["full_body", "upper_push", "upper"]
+    },
+    {
+        "id": "bb_back_squat",
+        "name": "Barbell Back Squat (Sırtta Squat)",
+        "equipment": "barbell",
+        "category": "legs_quad",
+        "muscle": "Dört Başlı Ön Bacak (Quad), Kalça & Bel",
+        "mechanic": "compound",
+        "cue": "Barı trapeze oturt, dizleri dışa açarak kalçayı topukların arasına bırak, göğsü düşürme.",
+        "weightKey": "squat",
+        "tags": ["full_body", "lower", "legs_quad"]
+    },
+    {
+        "id": "bb_front_squat",
+        "name": "Barbell Front Squat (Önde Squat)",
+        "equipment": "barbell",
+        "category": "legs_quad",
+        "muscle": "Ön Bacak & Omurga Dikliği",
+        "mechanic": "compound",
+        "cue": "Dirsekleri yukarı paralel tut, gövdeyi dik tutarak derin çömel.",
+        "weightKey": "squat",
+        "tags": ["lower", "legs_quad"]
+    },
+    {
+        "id": "bb_deadlift",
+        "name": "Barbell Konvansiyonel Deadlift",
+        "equipment": "barbell",
+        "category": "legs_hinge",
+        "muscle": "Tüm Arka Zincir (Hamstring, Glute, Sırt, Trapez)",
+        "mechanic": "compound",
+        "cue": "Bar kaval kemiğine yapışık kalsın, yeri ayaklarınla iterek kalçayı öne kilitle.",
+        "weightKey": "rdl",
+        "tags": ["full_body", "lower", "upper_pull"]
+    },
+    {
+        "id": "bb_rdl",
+        "name": "Barbell Romanian Deadlift (RDL)",
+        "equipment": "barbell",
+        "category": "legs_hinge",
+        "muscle": "Arka Bacak (Hamstring) & Kalça",
+        "mechanic": "compound",
+        "cue": "Barı diz kapağının hemen altına kadar kalçayı geriye iterek indir, beli bükme.",
+        "weightKey": "rdl",
+        "tags": ["lower", "upper_pull"]
+    },
+    {
+        "id": "bb_hip_thrust",
+        "name": "Barbell Kalça İtişi (Barbell Hip Thrust)",
+        "equipment": "barbell",
+        "category": "legs_hinge",
+        "muscle": "Büyük Kalça Kası (Gluteus Maximus)",
+        "mechanic": "compound",
+        "cue": "Sırtı sehpaya daya, barı kalça kemiğine koy, tepe noktada kalçayı 2 sn sertçe sık.",
+        "weightKey": "squat",
+        "tags": ["lower"]
+    },
+    {
+        "id": "bb_bent_over_row",
+        "name": "Barbell Eğilerek Sırt Çekiş (Bent-Over Row)",
+        "equipment": "barbell",
+        "category": "pull",
+        "muscle": "Geniş Sırt, Rhomboid & Orta Sırt",
+        "mechanic": "compound",
+        "cue": "Gövdeyi 45° öne eğ, barı göbek deliğine doğru çekip kürek kemiklerini birbirine yapıştır.",
+        "weightKey": "row",
+        "tags": ["full_body", "upper_pull", "upper"]
+    },
+    {
+        "id": "bb_pendlay_row",
+        "name": "Pendlay Row (Yerden Patlayıcı Çekiş)",
+        "equipment": "barbell",
+        "category": "pull",
+        "muscle": "Üst Sırt Gücü & Lats",
+        "mechanic": "compound",
+        "cue": "Her tekrarda bar yere tam otursun, gövde yere paralelken patlayıcı çekiş yap.",
+        "weightKey": "row",
+        "tags": ["upper_pull", "upper"]
+    },
+    {
+        "id": "bb_biceps_curl",
+        "name": "Barbell Biceps Kıvırma (BB Curl)",
+        "equipment": "barbell",
+        "category": "pull",
+        "muscle": "Ön Kol & Biceps",
+        "mechanic": "isolation",
+        "cue": "Dirsekleri belin yanında sabitle, beli geriye atmadan barı omuz hizasına çek.",
+        "weightKey": "",
+        "tags": ["upper_pull", "upper"]
+    },
+    {
+        "id": "bb_close_grip_bench",
+        "name": "Dar Tutuş Bench Press (Close-Grip Bench)",
+        "equipment": "barbell",
+        "category": "push",
+        "muscle": "Arka Kol (Triceps) & İç Göğüs",
+        "mechanic": "compound",
+        "cue": "Elleri omuz genişliğinde tut, dirsekleri vücuda yapışık indirip tricepsle bas.",
+        "weightKey": "press",
+        "tags": ["upper_push", "upper"]
+    },
+
+    # ==================== SPOR SALONU MAKİNELERİ & KABLO ====================
+    {
+        "id": "mach_lat_pulldown",
+        "name": "Geniş Tutuş Lat Pulldown Makinesi",
+        "equipment": "machine",
+        "category": "pull",
+        "muscle": "Geniş Sırt (Kanat / Latissimus)",
+        "mechanic": "compound",
+        "cue": "Barı üst göğse doğru çek, dirsekleri arkaya değil aşağıya doğru yönlendir.",
+        "weightKey": "row",
+        "tags": ["full_body", "upper_pull", "upper"]
+    },
+    {
+        "id": "mach_cable_row",
+        "name": "Oturarak Kablo Sırt Çekiş (Seated Cable Row)",
+        "equipment": "machine",
+        "category": "pull",
+        "muscle": "Orta Sırt, Kanat & Rhomboid",
+        "mechanic": "compound",
+        "cue": "Sırtı dik tut, tutamacı göbeğe çekerken göğsü öne kabart, omuzları düşürme.",
+        "weightKey": "row",
+        "tags": ["full_body", "upper_pull", "upper"]
+    },
+    {
+        "id": "mach_face_pull",
+        "name": "Kablo Yüze Çekiş (Face Pull - Halat)",
+        "equipment": "machine",
+        "category": "pull",
+        "muscle": "Arka Omuz, Dış Rotatörler & Postür",
+        "mechanic": "isolation",
+        "cue": "Halatı göz hizasına çekerken elleri dışa aç, kürek kemiklerini birbirine kilitle.",
+        "weightKey": "",
+        "tags": ["upper_pull", "upper"]
+    },
+    {
+        "id": "mach_chest_press",
+        "name": "Makine Göğüs Presi (Machine Chest Press)",
+        "equipment": "machine",
+        "category": "push",
+        "muscle": "Büyük Göğüs Kası & Ön Omuz",
+        "mechanic": "compound",
+        "cue": "Koltuk yüksekliğini tutamaçlar göğüs ucuna gelecek şekilde ayarla, omuzları arkaya sabitle.",
+        "weightKey": "press",
+        "tags": ["full_body", "upper_push", "upper"]
+    },
+    {
+        "id": "mach_cable_crossover",
+        "name": "Kablo Göğüs Sıkıştırma (Cable Flyes / Crossover)",
+        "equipment": "machine",
+        "category": "push",
+        "muscle": "Göğüs İzolasyonu & İç Göğüs",
+        "mechanic": "isolation",
+        "cue": "Ağaca sarılır gibi geniş bir kavisle elleri önde buluştur, 1 saniye göğsü sık.",
+        "weightKey": "",
+        "tags": ["upper_push", "upper"]
+    },
+    {
+        "id": "mach_pec_deck",
+        "name": "Pec Deck Kelebek Makinesi",
+        "equipment": "machine",
+        "category": "push",
+        "muscle": "Göğüs Kası İzolasyonu",
+        "mechanic": "isolation",
+        "cue": "Dirsekleri hafif bükük tut, kolları önde kapatırken göğüs kaslarını ez.",
+        "weightKey": "",
+        "tags": ["upper_push", "upper"]
+    },
+    {
+        "id": "mach_triceps_pushdown",
+        "name": "Kablo Halat Triceps İtiş (Rope Pushdown)",
+        "equipment": "machine",
+        "category": "push",
+        "muscle": "Arka Kol (Triceps Yan & Dış Baş)",
+        "mechanic": "isolation",
+        "cue": "Dirsekleri kaburgaya sabitle, halatı aşağı iterken en altta iki ucu dışarı aç.",
+        "weightKey": "",
+        "tags": ["upper_push", "upper"]
+    },
+    {
+        "id": "mach_cable_biceps",
+        "name": "Kablo Düz Bar Biceps Curl",
+        "equipment": "machine",
+        "category": "pull",
+        "muscle": "Ön Kol & Biceps Sürekli Gerilim",
+        "mechanic": "isolation",
+        "cue": "Kablo sürekli gerginlik sağlar; iniş fazını 3 saniyede yavaşça tamamla.",
+        "weightKey": "",
+        "tags": ["upper_pull", "upper"]
+    },
+    {
+        "id": "mach_cable_lateral",
+        "name": "Kablo Tek Kol Yana Açış (Cable Lateral Raise)",
+        "equipment": "machine",
+        "category": "push",
+        "muscle": "Yan Omuz (İzole Gerilim)",
+        "mechanic": "isolation",
+        "cue": "Kabloyu bilek hizasından omuz hizasına kadar yana kaldır, gövdeyi eğme.",
+        "weightKey": "",
+        "tags": ["upper_push", "upper"]
+    },
+    {
+        "id": "mach_leg_press",
+        "name": "45° Bacak Pres Makinesi (Leg Press)",
+        "equipment": "machine",
+        "category": "legs_quad",
+        "muscle": "Ön Bacak (Quad) & Kalça Gücü",
+        "mechanic": "compound",
+        "cue": "Dizleri göğse doğru kontrollü çek, tepe noktada dizleri asla kitleyip kilitleme.",
+        "weightKey": "squat",
+        "tags": ["lower", "legs_quad"]
+    },
+    {
+        "id": "mach_leg_extension",
+        "name": "Bacak Uzatma Makinesi (Leg Extension)",
+        "equipment": "machine",
+        "category": "legs_quad",
+        "muscle": "Ön Bacak Dört Başlı Kas (Quad İzolasyonu)",
+        "mechanic": "isolation",
+        "cue": "Bacakları yukarı kilitlerken quad kaslarını sık, kontrollü yavaş indir.",
+        "weightKey": "",
+        "tags": ["lower", "legs_quad"]
+    },
+    {
+        "id": "mach_leg_curl",
+        "name": "Yatarak / Oturarak Arka Bacak Makinesi (Leg Curl)",
+        "equipment": "machine",
+        "category": "legs_hinge",
+        "muscle": "Arka Bacak (Hamstrings İzolasyonu)",
+        "mechanic": "isolation",
+        "cue": "Minderi topukların üstüne yerleştir, topukları kalçaya doğru sertçe çek.",
+        "weightKey": "",
+        "tags": ["lower"]
+    },
+    {
+        "id": "mach_calf_raise",
+        "name": "Baldır Makinesi (Standing / Seated Calf Raise)",
+        "equipment": "machine",
+        "category": "legs_quad",
+        "muscle": "Baldır Kasları (Gastrocnemius & Soleus)",
+        "mechanic": "isolation",
+        "cue": "Topukları olabildiğince aşağı sarkıtıp derin esnet, parmak uçlarında en tepeye yüksel.",
+        "weightKey": "",
+        "tags": ["lower"]
+    },
+    {
+        "id": "mach_cable_woodchopper",
+        "name": "Kablo Odun Kesme (Cable Woodchopper)",
+        "equipment": "machine",
+        "category": "core",
+        "muscle": "Rotasyonel Yan Karın & Güç İletimi",
+        "mechanic": "compound",
+        "cue": "Kolları düz tut, hareketi omuzla değil kalça ve karın rotasyonuyla üret.",
+        "weightKey": "",
+        "tags": ["core"]
+    },
+
+    # ==================== VÜCUT AĞIRLIĞI (BODYWEIGHT) ====================
+    {
+        "id": "bw_pushup",
+        "name": "Klasik Şınav (Floor Push-Up)",
+        "equipment": "bodyweight",
+        "category": "push",
+        "muscle": "Göğüs, Ön Omuz, Triceps & Core",
+        "mechanic": "compound",
+        "cue": "Vücut baştan topuğa tahta gibi kalsın, göğsü yere 2 cm kalana kadar indir.",
+        "weightKey": "press",
+        "tags": ["full_body", "upper_push", "upper"]
+    },
+    {
+        "id": "bw_decline_pushup",
+        "name": "Ayaklar Sehpada Şınav (Decline Push-Up)",
+        "equipment": "bodyweight",
+        "category": "push",
+        "muscle": "Üst Göğüs & Omuz",
+        "mechanic": "compound",
+        "cue": "Ayakları sehpaya koy, ağırlık üst göğse ve omuzlara binsin.",
+        "weightKey": "press",
+        "tags": ["upper_push", "upper"]
+    },
+    {
+        "id": "bw_diamond_pushup",
+        "name": "Elmas Şınav (Diamond Push-Up)",
+        "equipment": "bodyweight",
+        "category": "push",
+        "muscle": "Arka Kol (Triceps) & İç Göğüs",
+        "mechanic": "compound",
+        "cue": "Elleri göğüs altında baş parmak ve işaret parmakları birleştirerek üçgen yap.",
+        "weightKey": "",
+        "tags": ["upper_push", "upper"]
+    },
+    {
+        "id": "bw_dips",
+        "name": "Paralel Bar Dips (Vücut Ağırlığı)",
+        "equipment": "bodyweight",
+        "category": "push",
+        "muscle": "Alt Göğüs & Yoğun Triceps",
+        "mechanic": "compound",
+        "cue": "Hafif öne eğilerek göğse yük bindir, 90 derece bükülüp patlayıcı bas.",
+        "weightKey": "press",
+        "tags": ["upper_push", "upper"]
+    },
+    {
+        "id": "bw_pullup",
+        "name": "Barfiks (Geniş Tutuş Pull-Up)",
+        "equipment": "bodyweight",
+        "category": "pull",
+        "muscle": "Geniş Sırt (Lats), Biceps & Üst Gövde Gücü",
+        "mechanic": "compound",
+        "cue": "Kolları tam uzatıp başla, çeneyi barın üzerine çekip göğsü bara dokundur.",
+        "weightKey": "row",
+        "tags": ["full_body", "upper_pull", "upper"]
+    },
+    {
+        "id": "bw_chinup",
+        "name": "Ters Tutuş Barfiks (Chin-Up)",
+        "equipment": "bodyweight",
+        "category": "pull",
+        "muscle": "Biceps & Alt Sırt Kanatları",
+        "mechanic": "compound",
+        "cue": "Avuçlar yüzüne baksın, bicepsleri maksimum devreye sokarak yukarı çek.",
+        "weightKey": "row",
+        "tags": ["upper_pull", "upper"]
+    },
+    {
+        "id": "bw_inverted_row",
+        "name": "Yatay Barfiks (Inverted / Australian Row)",
+        "equipment": "bodyweight",
+        "category": "pull",
+        "muscle": "Orta Sırt & Kürek Kemikleri",
+        "mechanic": "compound",
+        "cue": "Alçak barın altına yat, topuklar yerde, göğsü bara doğru çek.",
+        "weightKey": "row",
+        "tags": ["upper_pull", "upper"]
+    },
+    {
+        "id": "bw_air_squat",
+        "name": "Vücut Ağırlığı Squat (Air Squat)",
+        "equipment": "bodyweight",
+        "category": "legs_quad",
+        "muscle": "Bacak, Kalça & Kalça Hareket Açıklığı",
+        "mechanic": "compound",
+        "cue": "Kolları öne uzatarak denge sağla, tam derinliğe in ve topuklardan kalk.",
+        "weightKey": "squat",
+        "tags": ["lower", "conditioning"]
+    },
+    {
+        "id": "bw_jump_squat",
+        "name": "Zıplayarak Squat (Jump Squat)",
+        "equipment": "bodyweight",
+        "category": "legs_quad",
+        "muscle": "Patlayıcı Bacak Gücü & Kalp Nabzı",
+        "mechanic": "compound",
+        "cue": "Derin çömelip havaya patla, inerken parmak ucundan topuğa yumuşak kon.",
+        "weightKey": "squat",
+        "tags": ["lower", "conditioning"]
+    },
+    {
+        "id": "bw_glute_bridge",
+        "name": "Yerde Kalça Kaldırma (Glute Bridge)",
+        "equipment": "bodyweight",
+        "category": "legs_hinge",
+        "muscle": "Büyük Kalça (Glute) & Bel Sağlığı",
+        "mechanic": "isolation",
+        "cue": "Topukları kalçaya yakın bas, kalçayı tavana itip 2 saniye kilitli tut.",
+        "weightKey": "",
+        "tags": ["lower"]
+    },
+    {
+        "id": "bw_hanging_knee_raise",
+        "name": "Barda Asılarak Dize Çekme (Hanging Knee Raise)",
+        "equipment": "bodyweight",
+        "category": "core",
+        "muscle": "Alt Karın & Kavrama Gücü",
+        "mechanic": "compound",
+        "cue": "Sallanmadan, kalçayı öne kıvırarak dizleri göğse doğru çek.",
+        "weightKey": "",
+        "tags": ["core"]
+    },
+    {
+        "id": "bw_hollow_body",
+        "name": "Hollow Body Hold (Jimnastik Karın Kilitlenmesi)",
+        "equipment": "bodyweight",
+        "category": "core",
+        "muscle": "Derin Karın Duvarı (Transverse Abdominis)",
+        "mechanic": "isolation",
+        "cue": "Alt beli yere yapıştır, bacakları ve kolları havada muz şeklinde tut.",
+        "weightKey": "",
+        "tags": ["core"]
+    },
+    {
+        "id": "bw_plank",
+        "name": "Dirsek Plank (Statik Gövde Kilidi)",
+        "equipment": "bodyweight",
+        "category": "core",
+        "muscle": "Tüm Karın, Omuz & Omurga Zırhı",
+        "mechanic": "isolation",
+        "cue": "Kalçayı ne yukarı kaldır ne aşağı düşür, tüm vücudu çelik gibi sık.",
+        "weightKey": "",
+        "tags": ["core"]
+    },
+    {
+        "id": "bw_burpee",
+        "name": "Klasik Burpee (Göğüs Yere Dokunmalı)",
+        "equipment": "bodyweight",
+        "category": "conditioning",
+        "muscle": "Tüm Vücut & Maksimum Kalori Yakımı",
+        "mechanic": "compound",
+        "cue": "Yere yat, patlayarak ayağa fırla ve eller baş üstünde zıpla.",
+        "weightKey": "",
+        "tags": ["full_body", "conditioning"]
+    },
+    {
+        "id": "bw_mountain_climber",
+        "name": "Dağ Tırmanışı (Mountain Climber)",
+        "equipment": "bodyweight",
+        "category": "core",
+        "muscle": "Karın Nabzı & Omuz Dayanıklılığı",
+        "mechanic": "compound",
+        "cue": "Plank duruşunda dizleri sırayla seri şekilde göğse çek.",
+        "weightKey": "",
+        "tags": ["core", "conditioning"]
+    }
+]
+
+print(f"Loaded {len(EXERCISES)} verified exercises across all equipment types.")

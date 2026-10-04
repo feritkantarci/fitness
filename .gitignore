@@ -6,3 +6,4 @@ source_archive/
 .env*
 *.key
 *.pem
+__pycache__/

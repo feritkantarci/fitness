@@ -1,4 +1,18 @@
-<!DOCTYPE html>
+#!/usr/bin/env python3
+import json
+import os
+import sys
+
+# Import exercises
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from exercise_database import EXERCISES
+
+INDEX_FILE = "/Users/mrkantarci/Desktop/AI PROJELERI/FITNESS/index.html"
+MOBIL_FILE = "/Users/mrkantarci/Desktop/AI PROJELERI/FITNESS/salon_kilavuzu_mobil.html"
+
+EXERCISES_JSON = json.dumps(EXERCISES, ensure_ascii=False)
+
+HTML_CONTENT = f"""<!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
@@ -15,7 +29,7 @@
     <link rel="icon" type="image/svg+xml" href="assets/diagrams/seq_db_press.svg">
 
     <style>
-        :root {
+        :root {{
             --bg-base: #090d16;
             --bg-surface: #0f172a;
             --bg-elevated: #1e293b;
@@ -34,16 +48,16 @@
             --radius-lg: 16px;
             --radius-md: 12px;
             --radius-sm: 8px;
-        }
+        }}
 
-        * {
+        * {{
             box-sizing: border-box;
             margin: 0;
             padding: 0;
             -webkit-tap-highlight-color: transparent;
-        }
+        }}
 
-        body {
+        body {{
             background-color: var(--bg-base);
             background-image: 
                 radial-gradient(circle at 50% 0%, #1e293b 0%, transparent 60%),
@@ -54,21 +68,21 @@
             line-height: 1.5;
             min-height: 100vh;
             padding-bottom: 90px;
-        }
+        }}
 
         /* ==================== LOGIN SCREEN ==================== */
-        #loginScreen {
+        #loginScreen {{
             display: none;
             min-height: 100vh;
             align-items: center;
             justify-content: center;
             padding: 20px;
             background: radial-gradient(circle at top center, #1e293b 0%, #090d16 80%);
-        }
-        #loginScreen.active {
+        }}
+        #loginScreen.active {{
             display: flex;
-        }
-        .login-card {
+        }}
+        .login-card {{
             background: rgba(19, 28, 46, 0.95);
             border: 1px solid var(--gold);
             border-radius: 20px;
@@ -78,25 +92,25 @@
             box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px var(--gold-glow);
             backdrop-filter: blur(16px);
             text-align: center;
-        }
-        .login-logo {
+        }}
+        .login-logo {{
             font-size: 44px;
             margin-bottom: 8px;
             display: inline-block;
-        }
-        .login-title {
+        }}
+        .login-title {{
             font-size: 22px;
             font-weight: 800;
             color: #fff;
             letter-spacing: 0.5px;
             margin-bottom: 4px;
-        }
-        .login-subtitle {
+        }}
+        .login-subtitle {{
             font-size: 13px;
             color: var(--gold-light);
             margin-bottom: 22px;
-        }
-        .login-error {
+        }}
+        .login-error {{
             background: rgba(225, 29, 72, 0.15);
             border-left: 4px solid var(--red-alert);
             color: #fecdd3;
@@ -106,12 +120,12 @@
             margin-bottom: 16px;
             text-align: left;
             display: none;
-        }
-        .login-field {
+        }}
+        .login-field {{
             margin-bottom: 16px;
             text-align: left;
-        }
-        .login-label {
+        }}
+        .login-label {{
             display: block;
             font-size: 11.5px;
             font-weight: 700;
@@ -119,8 +133,8 @@
             margin-bottom: 6px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-        }
-        .login-input {
+        }}
+        .login-input {{
             width: 100%;
             background: #090d16;
             border: 1px solid var(--border);
@@ -131,12 +145,12 @@
             outline: none;
             box-sizing: border-box;
             transition: all 0.2s;
-        }
-        .login-input:focus {
+        }}
+        .login-input:focus {{
             border-color: var(--gold);
             box-shadow: 0 0 10px var(--gold-glow);
-        }
-        .login-btn {
+        }}
+        .login-btn {{
             width: 100%;
             background: linear-gradient(135deg, var(--gold) 0%, #b45309 100%);
             border: none;
@@ -149,12 +163,12 @@
             box-shadow: 0 6px 18px rgba(245, 158, 11, 0.4);
             margin-top: 8px;
             transition: all 0.2s;
-        }
-        .login-btn:hover {
+        }}
+        .login-btn:hover {{
             transform: translateY(-1px);
             box-shadow: 0 8px 24px rgba(245, 158, 11, 0.6);
-        }
-        .login-hint {
+        }}
+        .login-hint {{
             margin-top: 18px;
             font-size: 11px;
             color: var(--text-secondary);
@@ -162,17 +176,17 @@
             padding: 8px 10px;
             border-radius: 8px;
             border: 1px solid rgba(255,255,255,0.05);
-        }
+        }}
 
         /* ==================== APP CONTAINER & HEADER ==================== */
-        .app-container {
+        .app-container {{
             max-width: 800px;
             margin: 0 auto;
             padding: 16px;
-        }
+        }}
 
         /* AUTH TOP BAR */
-        .auth-bar {
+        .auth-bar {{
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -182,14 +196,14 @@
             padding: 10px 14px;
             margin-bottom: 16px;
             backdrop-filter: blur(10px);
-        }
-        .auth-user-info {
+        }}
+        .auth-user-info {{
             display: flex;
             align-items: center;
             gap: 10px;
             cursor: pointer;
-        }
-        .auth-avatar {
+        }}
+        .auth-avatar {{
             font-size: 26px;
             background: var(--bg-elevated);
             width: 44px;
@@ -199,35 +213,35 @@
             justify-content: center;
             border-radius: 10px;
             border: 1.5px solid var(--gold);
-        }
-        .auth-name-title {
+        }}
+        .auth-name-title {{
             font-size: 14px;
             font-weight: 800;
             color: #fff;
-        }
-        .auth-role-tag {
+        }}
+        .auth-role-tag {{
             font-size: 9.5px;
             font-weight: 800;
             padding: 2px 6px;
             border-radius: 4px;
             text-transform: uppercase;
             margin-left: 4px;
-        }
-        .role-admin {
+        }}
+        .role-admin {{
             background: rgba(245, 158, 11, 0.2);
             color: var(--gold);
             border: 1px solid var(--gold);
-        }
-        .role-athlete {
+        }}
+        .role-athlete {{
             background: rgba(56, 189, 248, 0.2);
             color: #38bdf8;
             border: 1px solid #0284c7;
-        }
-        .auth-actions {
+        }}
+        .auth-actions {{
             display: flex;
             gap: 6px;
-        }
-        .btn-auth-action {
+        }}
+        .btn-auth-action {{
             background: var(--bg-elevated);
             border: 1px solid var(--border);
             color: var(--gold-light);
@@ -240,25 +254,25 @@
             align-items: center;
             gap: 4px;
             transition: all 0.2s;
-        }
-        .btn-auth-action:hover {
+        }}
+        .btn-auth-action:hover {{
             border-color: var(--gold);
-        }
-        .btn-logout {
+        }}
+        .btn-logout {{
             color: #f87171 !important;
             border-color: rgba(239, 68, 68, 0.4) !important;
-        }
-        .btn-logout:hover {
+        }}
+        .btn-logout:hover {{
             border-color: #ef4444 !important;
             background: rgba(239, 68, 68, 0.15) !important;
-        }
+        }}
 
         /* HERO BRANDING */
-        .hero-banner {
+        .hero-banner {{
             text-align: center;
             padding: 16px 12px 20px;
-        }
-        .badge-brand {
+        }}
+        .badge-brand {{
             display: inline-flex;
             align-items: center;
             gap: 6px;
@@ -272,24 +286,24 @@
             letter-spacing: 0.5px;
             margin-bottom: 8px;
             text-transform: uppercase;
-        }
-        .hero-title {
+        }}
+        .hero-title {{
             font-size: 24px;
             font-weight: 900;
             color: #fff;
             letter-spacing: 0.5px;
             text-shadow: 0 2px 10px rgba(0,0,0,0.5);
             margin-bottom: 6px;
-        }
-        .hero-subtitle {
+        }}
+        .hero-subtitle {{
             font-size: 13px;
             color: var(--text-secondary);
             max-width: 520px;
             margin: 0 auto;
-        }
+        }}
 
         /* NAVIGATION TABS */
-        .tab-nav {
+        .tab-nav {{
             display: flex;
             gap: 6px;
             background: rgba(15, 23, 42, 0.85);
@@ -300,11 +314,11 @@
             overflow-x: auto;
             scrollbar-width: none;
             backdrop-filter: blur(12px);
-        }
-        .tab-nav::-webkit-scrollbar {
+        }}
+        .tab-nav::-webkit-scrollbar {{
             display: none;
-        }
-        .tab-btn {
+        }}
+        .tab-btn {{
             flex: 1;
             min-width: 100px;
             background: transparent;
@@ -321,37 +335,37 @@
             gap: 6px;
             transition: all 0.2s;
             white-space: nowrap;
-        }
-        .tab-btn.active {
+        }}
+        .tab-btn.active {{
             background: var(--gold);
             color: #090d16;
             font-weight: 800;
             box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
-        }
+        }}
 
-        .tab-content {
+        .tab-content {{
             display: none;
-        }
-        .tab-content.active {
+        }}
+        .tab-content.active {{
             display: block;
             animation: fadeIn 0.25s ease-out;
-        }
+        }}
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeIn {{
+            from {{ opacity: 0; transform: translateY(6px); }}
+            to {{ opacity: 1; transform: translateY(0); }}
+        }}
 
         /* ==================== WORKOUT GENERATOR UI ==================== */
-        .generator-card {
+        .generator-card {{
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
             padding: 20px;
             margin-bottom: 20px;
             backdrop-filter: blur(10px);
-        }
-        .gen-step-title {
+        }}
+        .gen-step-title {{
             font-size: 15px;
             font-weight: 800;
             color: #fff;
@@ -359,8 +373,8 @@
             align-items: center;
             gap: 8px;
             margin-bottom: 12px;
-        }
-        .gen-step-badge {
+        }}
+        .gen-step-badge {{
             background: var(--gold);
             color: #090d16;
             font-size: 11px;
@@ -371,16 +385,16 @@
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-        }
+        }}
 
         /* SPLIT SELECTION GRID */
-        .split-grid {
+        .split-grid {{
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: 10px;
             margin-bottom: 16px;
-        }
-        .split-card {
+        }}
+        .split-card {{
             background: var(--bg-surface);
             border: 1.5px solid var(--border);
             border-radius: var(--radius-md);
@@ -388,40 +402,40 @@
             cursor: pointer;
             transition: all 0.2s;
             text-align: left;
-        }
-        .split-card:hover {
+        }}
+        .split-card:hover {{
             border-color: rgba(245, 158, 11, 0.5);
             transform: translateY(-2px);
-        }
-        .split-card.selected {
+        }}
+        .split-card.selected {{
             border-color: var(--gold);
             background: rgba(245, 158, 11, 0.12);
             box-shadow: 0 4px 16px var(--gold-glow);
-        }
-        .split-icon {
+        }}
+        .split-icon {{
             font-size: 24px;
             margin-bottom: 6px;
-        }
-        .split-name {
+        }}
+        .split-name {{
             font-size: 13.5px;
             font-weight: 800;
             color: #fff;
             margin-bottom: 2px;
-        }
-        .split-desc {
+        }}
+        .split-desc {{
             font-size: 10.5px;
             color: var(--text-secondary);
             line-height: 1.3;
-        }
+        }}
 
         /* EQUIPMENT CHIPS (MULTI-SELECT) */
-        .equip-chips-wrap {
+        .equip-chips-wrap {{
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
             margin-bottom: 12px;
-        }
-        .equip-chip {
+        }}
+        .equip-chip {{
             background: var(--bg-surface);
             border: 1.5px solid var(--border);
             border-radius: 20px;
@@ -435,23 +449,23 @@
             gap: 6px;
             transition: all 0.2s;
             user-select: none;
-        }
-        .equip-chip:hover {
+        }}
+        .equip-chip:hover {{
             border-color: var(--cyan);
-        }
-        .equip-chip.selected {
+        }}
+        .equip-chip.selected {{
             border-color: var(--cyan);
             background: rgba(56, 189, 248, 0.15);
             color: #fff;
             box-shadow: 0 2px 10px var(--cyan-glow);
-        }
-        .equip-quick-actions {
+        }}
+        .equip-quick-actions {{
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
             margin-bottom: 16px;
-        }
-        .btn-quick-equip {
+        }}
+        .btn-quick-equip {{
             background: transparent;
             border: 1px dashed var(--border);
             color: var(--text-secondary);
@@ -460,20 +474,20 @@
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s;
-        }
-        .btn-quick-equip:hover {
+        }}
+        .btn-quick-equip:hover {{
             border-color: var(--gold);
             color: var(--gold);
-        }
+        }}
 
         /* PARAMETERS ROW */
-        .param-grid {
+        .param-grid {{
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 12px;
             margin-bottom: 16px;
-        }
-        .param-group label {
+        }}
+        .param-group label {{
             display: block;
             font-size: 11px;
             font-weight: 700;
@@ -481,8 +495,8 @@
             text-transform: uppercase;
             margin-bottom: 6px;
             letter-spacing: 0.5px;
-        }
-        .param-select {
+        }}
+        .param-select {{
             width: 100%;
             background: var(--bg-surface);
             border: 1px solid var(--border);
@@ -492,13 +506,13 @@
             font-size: 13px;
             outline: none;
             cursor: pointer;
-        }
-        .param-select:focus {
+        }}
+        .param-select:focus {{
             border-color: var(--gold);
-        }
+        }}
 
         /* GENERATE CTA BUTTON */
-        .btn-generate-cta {
+        .btn-generate-cta {{
             width: 100%;
             background: linear-gradient(135deg, var(--gold) 0%, #b45309 100%);
             border: none;
@@ -515,43 +529,43 @@
             justify-content: center;
             gap: 8px;
             transition: all 0.2s;
-        }
-        .btn-generate-cta:hover {
+        }}
+        .btn-generate-cta:hover {{
             transform: translateY(-2px);
             box-shadow: 0 8px 28px rgba(245, 158, 11, 0.65);
-        }
+        }}
 
         /* ==================== GENERATED WORKOUT VIEW ==================== */
-        #generatedWorkoutOutput {
+        #generatedWorkoutOutput {{
             margin-top: 24px;
-        }
-        .workout-header-card {
+        }}
+        .workout-header-card {{
             background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
             border: 1.5px solid var(--gold);
             border-radius: var(--radius-lg);
             padding: 20px;
             margin-bottom: 20px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 20px var(--gold-glow);
-        }
-        .workout-title-row {
+        }}
+        .workout-title-row {{
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             margin-bottom: 12px;
             flex-wrap: wrap;
             gap: 10px;
-        }
-        .workout-main-title {
+        }}
+        .workout-main-title {{
             font-size: 20px;
             font-weight: 900;
             color: #fff;
-        }
-        .workout-meta-badges {
+        }}
+        .workout-meta-badges {{
             display: flex;
             gap: 6px;
             flex-wrap: wrap;
-        }
-        .meta-pill {
+        }}
+        .meta-pill {{
             font-size: 11px;
             font-weight: 800;
             padding: 4px 8px;
@@ -559,21 +573,21 @@
             background: rgba(255,255,255,0.06);
             border: 1px solid var(--border);
             color: var(--gold-light);
-        }
+        }}
 
         /* WORKOUT ACTION BUTTONS */
-        .workout-actions-bar {
+        .workout-actions-bar {{
             display: grid;
             grid-template-columns: 1.5fr 1fr 1fr;
             gap: 8px;
             margin-top: 16px;
-        }
-        @media (max-width: 600px) {
-            .workout-actions-bar {
+        }}
+        @media (max-width: 600px) {{
+            .workout-actions-bar {{
                 grid-template-columns: 1fr;
-            }
-        }
-        .btn-start-workout {
+            }}
+        }}
+        .btn-start-workout {{
             background: linear-gradient(135deg, var(--green-success) 0%, #047857 100%);
             border: none;
             color: #fff;
@@ -587,8 +601,8 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
-        }
-        .btn-action-secondary {
+        }}
+        .btn-action-secondary {{
             background: var(--bg-elevated);
             border: 1px solid var(--border);
             color: var(--text-primary);
@@ -602,14 +616,14 @@
             justify-content: center;
             gap: 6px;
             transition: all 0.2s;
-        }
-        .btn-action-secondary:hover {
+        }}
+        .btn-action-secondary:hover {{
             border-color: var(--gold);
             color: var(--gold);
-        }
+        }}
 
         /* EXERCISE CARDS */
-        .block-header {
+        .block-header {{
             font-size: 14px;
             font-weight: 800;
             color: var(--gold);
@@ -619,62 +633,62 @@
             display: flex;
             align-items: center;
             gap: 8px;
-        }
-        .block-header::after {
+        }}
+        .block-header::after {{
             content: '';
             flex: 1;
             height: 1px;
             background: linear-gradient(to right, var(--gold), transparent);
-        }
-        .ex-card {
+        }}
+        .ex-card {{
             background: var(--bg-surface);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
             padding: 14px 16px;
             margin-bottom: 12px;
             transition: all 0.2s;
-        }
-        .ex-card:hover {
+        }}
+        .ex-card:hover {{
             border-color: rgba(255, 255, 255, 0.2);
-        }
-        .ex-card-header {
+        }}
+        .ex-card-header {{
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 8px;
             flex-wrap: wrap;
             gap: 6px;
-        }
-        .ex-name {
+        }}
+        .ex-name {{
             font-size: 15px;
             font-weight: 800;
             color: #fff;
             display: flex;
             align-items: center;
             gap: 6px;
-        }
-        .ex-tag-group {
+        }}
+        .ex-tag-group {{
             display: flex;
             gap: 6px;
-        }
-        .ex-badge {
+        }}
+        .ex-badge {{
             font-size: 10px;
             font-weight: 800;
             padding: 2px 6px;
             border-radius: 4px;
             text-transform: uppercase;
-        }
-        .badge-equip {
+        }}
+        .badge-equip {{
             background: rgba(56, 189, 248, 0.15);
             color: var(--cyan);
             border: 1px solid rgba(56, 189, 248, 0.3);
-        }
-        .badge-muscle {
+        }}
+        .badge-muscle {{
             background: rgba(245, 158, 11, 0.15);
             color: var(--gold);
             border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-        .badge-target-weight {
+        }}
+        .badge-target-weight {{
             background: rgba(16, 185, 129, 0.15);
             color: var(--green-success);
             border: 1px solid var(--green-success);
@@ -682,16 +696,16 @@
             font-weight: 800;
             padding: 2px 6px;
             border-radius: 4px;
-        }
-        .ex-meta-row {
+        }}
+        .ex-meta-row {{
             display: flex;
             gap: 16px;
             font-size: 12px;
             color: var(--gold-light);
             font-weight: 700;
             margin-bottom: 8px;
-        }
-        .ex-cue-box {
+        }}
+        .ex-cue-box {{
             background: rgba(0, 0, 0, 0.3);
             border-left: 3px solid var(--gold);
             border-radius: 0 6px 6px 0;
@@ -700,8 +714,8 @@
             color: var(--text-secondary);
             margin-bottom: 10px;
             line-height: 1.4;
-        }
-        .btn-swap-ex {
+        }}
+        .btn-swap-ex {{
             background: transparent;
             border: 1px dashed var(--border);
             color: var(--cyan);
@@ -714,14 +728,14 @@
             align-items: center;
             gap: 4px;
             transition: all 0.2s;
-        }
-        .btn-swap-ex:hover {
+        }}
+        .btn-swap-ex:hover {{
             border-color: var(--cyan);
             background: rgba(56, 189, 248, 0.1);
-        }
+        }}
 
         /* ==================== LIVE WORKOUT TRACKER ==================== */
-        .live-tracker-bar {
+        .live-tracker-bar {{
             position: sticky;
             top: 10px;
             z-index: 100;
@@ -735,19 +749,19 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-        .timer-display {
+        }}
+        .timer-display {{
             font-family: monospace;
             font-size: 26px;
             font-weight: 900;
             color: var(--gold);
             letter-spacing: 1px;
-        }
-        .timer-controls {
+        }}
+        .timer-controls {{
             display: flex;
             gap: 6px;
-        }
-        .btn-timer {
+        }}
+        .btn-timer {{
             background: var(--bg-elevated);
             border: 1px solid var(--border);
             color: #fff;
@@ -756,19 +770,19 @@
             padding: 6px 10px;
             border-radius: 6px;
             cursor: pointer;
-        }
-        .btn-timer:hover {
+        }}
+        .btn-timer:hover {{
             border-color: var(--gold);
-        }
+        }}
 
         /* SET CHECKBOXES (PILLS) */
-        .set-pills-row {
+        .set-pills-row {{
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
             margin-top: 10px;
-        }
-        .set-pill {
+        }}
+        .set-pill {{
             background: var(--bg-elevated);
             border: 1.5px solid var(--border);
             border-radius: 8px;
@@ -782,22 +796,22 @@
             gap: 6px;
             transition: all 0.2s;
             user-select: none;
-        }
-        .set-pill.done {
+        }}
+        .set-pill.done {{
             background: rgba(245, 158, 11, 0.2);
             border-color: var(--gold);
             color: #fff;
             box-shadow: 0 0 10px var(--gold-glow);
-        }
-        .set-pill input[type="checkbox"] {
+        }}
+        .set-pill input[type="checkbox"] {{
             accent-color: var(--gold);
             width: 14px;
             height: 14px;
             pointer-events: none;
-        }
+        }}
 
         /* WEIGHT INPUT INSIDE EX CARD */
-        .weight-input-wrap {
+        .weight-input-wrap {{
             display: inline-flex;
             align-items: center;
             gap: 4px;
@@ -806,8 +820,8 @@
             border-radius: 6px;
             padding: 2px 6px;
             margin-left: 8px;
-        }
-        .weight-input-wrap input {
+        }}
+        .weight-input-wrap input {{
             width: 44px;
             background: transparent;
             border: none;
@@ -816,10 +830,10 @@
             font-size: 13px;
             text-align: center;
             outline: none;
-        }
+        }}
 
         /* ==================== FORMS & BUTTONS ==================== */
-        .btn {
+        .btn {{
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -829,29 +843,29 @@
             cursor: pointer;
             transition: all 0.2s;
             text-decoration: none;
-        }
-        .btn-gold {
+        }}
+        .btn-gold {{
             background: linear-gradient(135deg, var(--gold) 0%, #b45309 100%);
             border: none;
             color: #090d16;
             box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
-        }
-        .btn-gold:hover {
+        }}
+        .btn-gold:hover {{
             box-shadow: 0 6px 20px rgba(245, 158, 11, 0.55);
             transform: translateY(-1px);
-        }
-        .btn-outline {
+        }}
+        .btn-outline {{
             background: transparent;
             border: 1px solid var(--border);
             color: var(--text-primary);
-        }
-        .btn-outline:hover {
+        }}
+        .btn-outline:hover {{
             border-color: var(--gold);
             color: var(--gold);
-        }
+        }}
 
         /* MODALS */
-        .modal-overlay {
+        .modal-overlay {{
             display: none;
             position: fixed;
             top: 0;
@@ -864,11 +878,11 @@
             align-items: center;
             justify-content: center;
             padding: 16px;
-        }
-        .modal-overlay.active {
+        }}
+        .modal-overlay.active {{
             display: flex;
-        }
-        .modal-box {
+        }}
+        .modal-box {{
             background: #0f172a;
             border: 1px solid var(--gold);
             border-radius: var(--radius-lg);
@@ -878,38 +892,38 @@
             max-height: 90vh;
             overflow-y: auto;
             box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px var(--gold-glow);
-        }
-        .modal-header {
+        }}
+        .modal-header {{
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 16px;
-        }
-        .modal-title {
+        }}
+        .modal-title {{
             font-size: 16px;
             font-weight: 800;
             color: #fff;
-        }
-        .modal-close {
+        }}
+        .modal-close {{
             background: transparent;
             border: none;
             color: var(--text-secondary);
             font-size: 20px;
             cursor: pointer;
-        }
+        }}
 
-        .form-group {
+        .form-group {{
             margin-bottom: 14px;
-        }
-        .form-label {
+        }}
+        .form-label {{
             display: block;
             font-size: 11.5px;
             font-weight: 700;
             color: var(--text-secondary);
             margin-bottom: 6px;
             text-transform: uppercase;
-        }
-        .form-input, .form-select {
+        }}
+        .form-input, .form-select {{
             width: 100%;
             background: #090d16;
             border: 1px solid var(--border);
@@ -919,18 +933,18 @@
             font-size: 13.5px;
             outline: none;
             box-sizing: border-box;
-        }
-        .form-input:focus, .form-select:focus {
+        }}
+        .form-input:focus, .form-select:focus {{
             border-color: var(--gold);
-        }
+        }}
 
         /* AVATAR & THEME PICKERS */
-        .avatar-picker-grid {
+        .avatar-picker-grid {{
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 8px;
-        }
-        .avatar-choice {
+        }}
+        .avatar-choice {{
             background: var(--bg-surface);
             border: 1.5px solid var(--border);
             border-radius: 10px;
@@ -941,19 +955,19 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.2s;
-        }
-        .avatar-choice.selected {
+        }}
+        .avatar-choice.selected {{
             border-color: var(--gold);
             background: rgba(245, 158, 11, 0.2);
             transform: scale(1.05);
-        }
+        }}
 
-        .theme-picker-grid {
+        .theme-picker-grid {{
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
-        }
-        .theme-pill {
+        }}
+        .theme-pill {{
             padding: 6px 12px;
             border-radius: 20px;
             font-size: 11px;
@@ -961,48 +975,48 @@
             color: #fff;
             cursor: pointer;
             border: 2px solid transparent;
-        }
-        .theme-pill.selected {
+        }}
+        .theme-pill.selected {{
             border-color: #fff;
             box-shadow: 0 0 10px rgba(255,255,255,0.5);
-        }
+        }}
 
         /* LOG HISTORY CARDS */
-        .log-history-card {
+        .log-history-card {{
             background: var(--bg-surface);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
             padding: 12px 14px;
             margin-bottom: 10px;
-        }
-        .log-card-header {
+        }}
+        .log-card-header {{
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 4px;
-        }
-        .log-date {
+        }}
+        .log-date {{
             font-size: 12.5px;
             font-weight: 800;
             color: #fff;
-        }
-        .btn-delete-log {
+        }}
+        .btn-delete-log {{
             background: transparent;
             border: none;
             color: #ef4444;
             font-size: 14px;
             cursor: pointer;
             padding: 2px 6px;
-        }
+        }}
 
         /* ADMIN CARDS */
-        .admin-user-card {
+        .admin-user-card {{
             background: var(--bg-surface);
             border: 1px solid var(--border);
             border-radius: 10px;
             padding: 10px 12px;
             margin-bottom: 8px;
-        }
+        }}
     </style>
 </head>
 <body>
@@ -1515,14 +1529,14 @@
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
     <script>
         // EXERCISE DATABASE
-        const EXERCISES_DB = [{"id": "db_bench_press", "name": "Dambıl Bench Press (Düz Sehpa)", "equipment": "dumbbell", "category": "push", "muscle": "Göğüs, Ön Omuz & Triceps", "mechanic": "compound", "cue": "Dirsekleri 45° açıda tut, dambılları yukarıda birbirine çarpmadan göğüs kaslarını sıkarak kilitle.", "weightKey": "press", "tags": ["full_body", "upper_push", "upper"]}, {"id": "db_incline_press", "name": "Eğimli Sehpa Dambıl Pres (Incline DB Press)", "equipment": "dumbbell", "category": "push", "muscle": "Üst Göğüs & Ön Omuz", "mechanic": "compound", "cue": "Sehpa açısını 30° yap, omuz bıçaklarını sehpaya sabitle, tepe noktada üst göğsü sık.", "weightKey": "press", "tags": ["upper_push", "upper"]}, {"id": "db_floor_press", "name": "Dambıl Yerden Pres (Floor Press)", "equipment": "dumbbell", "category": "push", "muscle": "Göğüs & Triceps", "mechanic": "compound", "cue": "Yerde dirsekler zemine değdiği an durakla, patlayıcı şekilde yukarı it (omuzu korur).", "weightKey": "press", "tags": ["full_body", "upper_push", "upper"]}, {"id": "db_overhead_press", "name": "Dambıl Ayakta Omuz Presi (Standing DB Press)", "equipment": "dumbbell", "category": "push", "muscle": "Omuz & Triceps & Core", "mechanic": "compound", "cue": "Kalçayı ve karnı sık, omurgayı bükmeden dambılları baş üstüne dikey kilitle.", "weightKey": "press", "tags": ["full_body", "upper_push", "upper"]}, {"id": "db_arnold_press", "name": "Arnold Pres (Rotasyonel Omuz Presi)", "equipment": "dumbbell", "category": "push", "muscle": "Tüm Omuz Başları (Ön, Yan, Arka)", "mechanic": "compound", "cue": "Avuçlar yüzüne bakarak başla, preslerken bilekleri 180° çevirip baş üstüne kilitle.", "weightKey": "press", "tags": ["upper_push", "upper"]}, {"id": "db_lateral_raise", "name": "Dambıl Yana Açış (Lateral Raise)", "equipment": "dumbbell", "category": "push", "muscle": "Yan Omuz (Lateral Deltoid)", "mechanic": "isolation", "cue": "Dirsekleri hafif kırık tut, kolları omuz hizasına kadar sürahi döker gibi kaldır.", "weightKey": "press", "tags": ["upper_push", "upper"]}, {"id": "db_triceps_overhead", "name": "Baş Üstü Çift Kol Dambıl Triceps Uzatma", "equipment": "dumbbell", "category": "push", "muscle": "Arka Kol (Triceps Uzun Baş)", "mechanic": "isolation", "cue": "Dirsekleri başın iki yanında sabit tut, sadece ön kolları büküp uzat.", "weightKey": "", "tags": ["upper_push", "upper"]}, {"id": "db_skullcrusher", "name": "Yatarak Dambıl Alına Pres (Skullcrusher)", "equipment": "dumbbell", "category": "push", "muscle": "Arka Kol (Triceps)", "mechanic": "isolation", "cue": "Kolları dikey tut, dambılları şakak hizasına kontrollü indirip dirsekten kilitle.", "weightKey": "", "tags": ["upper_push", "upper"]}, {"id": "db_saw_row", "name": "Dambıl Testere Çekiş (Single-Arm Row)", "equipment": "dumbbell", "category": "pull", "muscle": "Geniş Sırt (Latissimus), Arka Omuz & Biceps", "mechanic": "compound", "cue": "Sırt düz, dambılı cebine doğru kavisli çek, tepe noktada kürek kemiğini sıkıştır.", "weightKey": "row", "tags": ["full_body", "upper_pull", "upper"]}, {"id": "db_chest_supported_row", "name": "Sehpaya Dayalı Çift Dambıl Sırt Çekiş", "equipment": "dumbbell", "category": "pull", "muscle": "Orta Sırt & Trapez & Rhomboid", "mechanic": "compound", "cue": "Göğsü eğimli sehpaya yasla, bellerden güç almadan sadece sırt kaslarıyla çek.", "weightKey": "row", "tags": ["upper_pull", "upper"]}, {"id": "db_renegade_row", "name": "Dambıl Renegade Row (Şınav Pozisyonunda Çekiş)", "equipment": "dumbbell", "category": "pull", "muscle": "Sırt & Anti-Rotasyonel Core", "mechanic": "compound", "cue": "Plank pozisyonunda kalçayı hiç sallamadan dambılları sırayla kaburgaya çek.", "weightKey": "row", "tags": ["full_body", "upper_pull", "core"]}, {"id": "db_pullover", "name": "Dambıl Pullover (Göğüs Kafesi & Lat Açış)", "equipment": "dumbbell", "category": "pull", "muscle": "Geniş Sırt & Göğüs & Serratus", "mechanic": "compound", "cue": "Sehpaya enlemesine yat, dambılı başının arkasına derin sarkıtıp lats ile yukarı çek.", "weightKey": "", "tags": ["upper_pull", "upper"]}, {"id": "db_hammer_curl", "name": "Dambıl Çekiç Biceps Kıvırma (Hammer Curl)", "equipment": "dumbbell", "category": "pull", "muscle": "Biceps & Brachialis & Ön Kol", "mechanic": "isolation", "cue": "Nötr tutuş (avuçlar birbirine baksın), sallanmadan tepe noktada sık.", "weightKey": "", "tags": ["upper_pull", "upper"]}, {"id": "db_incline_curl", "name": "Eğimli Sehpa Dambıl Biceps Curl", "equipment": "dumbbell", "category": "pull", "muscle": "Biceps Uzun Baş", "mechanic": "isolation", "cue": "Kollar geride başlar, tam esneme ve tepe noktada supinasyon (dışa çevirme) uygula.", "weightKey": "", "tags": ["upper_pull", "upper"]}, {"id": "db_goblet_squat", "name": "Dambıl Goblet Squat", "equipment": "dumbbell", "category": "legs_quad", "muscle": "Ön Bacak (Quad), Kalça & Core", "mechanic": "compound", "cue": "Dambılı dikey göğsünde tut, dirsekler dizlerin içine insin, topuklar yere çakılı kalsın.", "weightKey": "squat", "tags": ["full_body", "lower", "legs_quad"]}, {"id": "db_front_squat", "name": "Çift Dambıl Ön Çömelme (DB Front Squat)", "equipment": "dumbbell", "category": "legs_quad", "muscle": "Ön Bacak & Üst Sırt Zırhı", "mechanic": "compound", "cue": "İki dambılı omuzlarda taşı, göğsü dik tutarak 90 derece altına in.", "weightKey": "squat", "tags": ["full_body", "lower", "legs_quad"]}, {"id": "db_bulgarian_squat", "name": "Bulgar Split Squat (Arka Ayak Sehpada)", "equipment": "dumbbell", "category": "legs_quad", "muscle": "Tek Bacak Gücü, Quad & Glute", "mechanic": "compound", "cue": "Öndeki ayağın topuğundan güç alarak kalk, gövde hafif öne eğik kalsın.", "weightKey": "squat", "tags": ["lower", "legs_quad"]}, {"id": "db_walking_lunge", "name": "Dambıl Yürüyen Lunge (Walking Lunge)", "equipment": "dumbbell", "category": "legs_quad", "muscle": "Tüm Bacak, Kalça & Denge", "mechanic": "compound", "cue": "Adım atarken arka diz yere hafifçe değsin, ön diz ayak parmağını aşırı geçmesin.", "weightKey": "lunge", "tags": ["full_body", "lower", "legs_quad"]}, {"id": "db_reverse_lunge", "name": "Dambıl Geriye Adım Lunge (Reverse Lunge)", "equipment": "dumbbell", "category": "legs_quad", "muscle": "Ön Bacak & Diz Dostu Kalça", "mechanic": "compound", "cue": "Geriye büyük adım at, ön diz 90° bükülsün (diz ağrısı çekenler için en emniyetli form).", "weightKey": "lunge", "tags": ["lower", "legs_quad"]}, {"id": "db_rdl", "name": "Dambıl Romanian Deadlift (RDL)", "equipment": "dumbbell", "category": "legs_hinge", "muscle": "Hamstring (Arka Bacak) & Glute & Bel", "mechanic": "compound", "cue": "Dizler hafif bükülü kalır, kalçayı duvara değdirir gibi arkaya it, sırt dümdüz kalsın.", "weightKey": "rdl", "tags": ["full_body", "lower", "upper_pull"]}, {"id": "db_single_leg_rdl", "name": "Tek Bacak Dambıl RDL (Single-Leg RDL)", "equipment": "dumbbell", "category": "legs_hinge", "muscle": "Arka Bacak & Ayak Bileği Stabilitesi", "mechanic": "compound", "cue": "Arka bacak arkaya uzanırken gövde terazinin kolu gibi öne eğilsin.", "weightKey": "rdl", "tags": ["lower"]}, {"id": "db_swing", "name": "İki Elle Dambıl Swing (DB Swing)", "equipment": "dumbbell", "category": "legs_hinge", "muscle": "Kalça, Hamstring, Bel & Kardiyo", "mechanic": "compound", "cue": "Dambılı dikey tut, kalça menteşesiyle patlat, kollar sadece yönlendirsin.", "weightKey": "swing", "tags": ["full_body", "lower", "conditioning"]}, {"id": "db_snatch", "name": "Tek Kol Dambıl Hang Snatch", "equipment": "dumbbell", "category": "legs_hinge", "muscle": "Tüm Kinetik Zincir & Patlayıcı Güç", "mechanic": "compound", "cue": "Bacak arasından kalça itişiyle dambılı hızlandır, tek hamlede baş üstüne kilitle.", "weightKey": "press", "tags": ["full_body", "conditioning"]}, {"id": "db_farmers_walk", "name": "Dambıl Çiftçi Yürüyüşü (Farmer's Walk)", "equipment": "dumbbell", "category": "core", "muscle": "Kavrama Gücü, Trapez & Tüm Core", "mechanic": "compound", "cue": "Ağır dambılları al, omuzları geriye kilitle, dimdik ve sert adımlarla yürü.", "weightKey": "row", "tags": ["full_body", "core"]}, {"id": "db_suitcase_carry", "name": "Dambıl Bavul Taşıma (Tek Taraflı Yürüyüş)", "equipment": "dumbbell", "category": "core", "muscle": "Yan Karın (Obliques) & Anti-Lateral Fleksiyon", "mechanic": "compound", "cue": "Tek elinde ağır dambıl varken gövdenin o tarafa eğilmesine asla izin verme.", "weightKey": "row", "tags": ["core"]}, {"id": "db_russian_twist", "name": "Dambıl Russian Twist (Oturarak Rotasyon)", "equipment": "dumbbell", "category": "core", "muscle": "Karın & Rotasyonel Yan Duvar", "mechanic": "isolation", "cue": "Topuklar havada, dambılı sağdan sola kontrollü çevirerek karnı sıkıştır.", "weightKey": "", "tags": ["core"]}, {"id": "kb_swing", "name": "İki Elle Kettlebell Swing (Russian Swing)", "equipment": "kettlebell", "category": "legs_hinge", "muscle": "Kalça (Glute), Hamstring & Kalp Kondisyonu", "mechanic": "compound", "cue": "Kalça menteşesiyle patla, gülle göğüs hizasına kadar yükselsin, karın kilitlensin.", "weightKey": "swing", "tags": ["full_body", "lower", "conditioning"]}, {"id": "kb_clean", "name": "Kettlebell Hang Clean (Göğse Çekiş)", "equipment": "kettlebell", "category": "legs_hinge", "muscle": "Kalça, Sırt & Rack Pozisyonu Gücü", "mechanic": "compound", "cue": "Gülle ön kola çarpmasın; kalça patlamasından sonra eli gülleye fermuar gibi geçir.", "weightKey": "row", "tags": ["full_body", "upper_pull"]}, {"id": "kb_press", "name": "Kettlebell Strict Overhead Press", "equipment": "kettlebell", "category": "push", "muscle": "Omuz & Omuz Kuşağı Stabilitesi", "mechanic": "compound", "cue": "Rack pozisyonundan başla, baş üstüne preslerken gövdeyi geriye kaçırma.", "weightKey": "press", "tags": ["full_body", "upper_push", "upper"]}, {"id": "kb_goblet_squat", "name": "Kettlebell Goblet Squat", "equipment": "kettlebell", "category": "legs_quad", "muscle": "Ön Bacak & Göğüs Dikliği", "mechanic": "compound", "cue": "Kettlebell kulaklarından tut, göğsüne bastır, derin çömel.", "weightKey": "squat", "tags": ["full_body", "lower"]}, {"id": "kb_half_snatch", "name": "Kettlebell Semi-Arranque (Half Snatch)", "equipment": "kettlebell", "category": "legs_hinge", "muscle": "Tüm Kinetik Zincir & Omuz Kilitlenmesi", "mechanic": "compound", "cue": "Yerden tek patlamayla baş üstüne kilitlen, omuza yumuşak indirip tekrar başla.", "weightKey": "press", "tags": ["full_body", "conditioning"]}, {"id": "kb_gorilla_row", "name": "Kettlebell Gorilla Row (Çift Gülle Çekiş)", "equipment": "kettlebell", "category": "pull", "muscle": "Geniş Sırt & Rhomboids", "mechanic": "compound", "cue": "Geniş squat duruşunda kal, tek gülle yerde beklerken diğerini kaburgaya çek.", "weightKey": "row", "tags": ["upper_pull", "upper"]}, {"id": "kb_windmill", "name": "Kettlebell Windmill (Rüzgar Gülü)", "equipment": "kettlebell", "category": "core", "muscle": "Omuz Stabilitesi, Yan Karın & Hamstring Mobilite", "mechanic": "compound", "cue": "Kettlebell baş üstünde kilitli kalırken karşı elinle yere uzan, gözün hep güllede olsun.", "weightKey": "", "tags": ["core", "upper"]}, {"id": "kb_turkish_getup", "name": "Kettlebell Turkish Get-Up (Türk Kalkışı)", "equipment": "kettlebell", "category": "core", "muscle": "Tam Vücut Zırhı & Eklem Sağlığı", "mechanic": "compound", "cue": "Yerden ayağa 7 adımda kalkarken gülle hep tavana dikey kilitli kalsın.", "weightKey": "", "tags": ["full_body", "core"]}, {"id": "kb_halo", "name": "Kettlebell Halo (Baş Çevresi Rotasyonu)", "equipment": "kettlebell", "category": "core", "muscle": "Omuz Kapsülü & Üst Gövde Mobilite", "mechanic": "isolation", "cue": "Gülleyi ters çevirip başının çevresinde 360 derece dairesel döndür.", "weightKey": "", "tags": ["upper", "core"]}, {"id": "kb_thruster", "name": "Kettlebell Thruster (Squat + Baş Üstü İtiş)", "equipment": "kettlebell", "category": "push", "muscle": "Bacak & Omuz & Metabolik Ateş", "mechanic": "compound", "cue": "Derin squat'tan fırlarken bacak gücünü omuz presine kesintisiz aktar.", "weightKey": "press", "tags": ["full_body", "conditioning"]}, {"id": "bb_bench_press", "name": "Barbell Bench Press (Klasik Düz Sehpa)", "equipment": "barbell", "category": "push", "muscle": "Büyük Göğüs Kası, Ön Omuz & Triceps", "mechanic": "compound", "cue": "Barı göğüs ucuna kontrollü indir, ayakları yere basarak patlayıcı şekilde yukarı bas.", "weightKey": "press", "tags": ["full_body", "upper_push", "upper"]}, {"id": "bb_incline_bench", "name": "Eğimli Barbell Bench Press (Incline BB Press)", "equipment": "barbell", "category": "push", "muscle": "Üst Göğüs & Omuz Önü", "mechanic": "compound", "cue": "Barı köprücük kemiğinin hemen altına indir, dirsekleri gövdeye 45° tut.", "weightKey": "press", "tags": ["upper_push", "upper"]}, {"id": "bb_overhead_press", "name": "Barbell Askeri Pres (Military / Overhead Press)", "equipment": "barbell", "category": "push", "muscle": "Tüm Omuz Kasları & Karın Zırhı", "mechanic": "compound", "cue": "Çeneyi hafif geriye çek, bar başı geçince kafayı öne verip tepe noktada kilitlen.", "weightKey": "press", "tags": ["full_body", "upper_push", "upper"]}, {"id": "bb_back_squat", "name": "Barbell Back Squat (Sırtta Squat)", "equipment": "barbell", "category": "legs_quad", "muscle": "Dört Başlı Ön Bacak (Quad), Kalça & Bel", "mechanic": "compound", "cue": "Barı trapeze oturt, dizleri dışa açarak kalçayı topukların arasına bırak, göğsü düşürme.", "weightKey": "squat", "tags": ["full_body", "lower", "legs_quad"]}, {"id": "bb_front_squat", "name": "Barbell Front Squat (Önde Squat)", "equipment": "barbell", "category": "legs_quad", "muscle": "Ön Bacak & Omurga Dikliği", "mechanic": "compound", "cue": "Dirsekleri yukarı paralel tut, gövdeyi dik tutarak derin çömel.", "weightKey": "squat", "tags": ["lower", "legs_quad"]}, {"id": "bb_deadlift", "name": "Barbell Konvansiyonel Deadlift", "equipment": "barbell", "category": "legs_hinge", "muscle": "Tüm Arka Zincir (Hamstring, Glute, Sırt, Trapez)", "mechanic": "compound", "cue": "Bar kaval kemiğine yapışık kalsın, yeri ayaklarınla iterek kalçayı öne kilitle.", "weightKey": "rdl", "tags": ["full_body", "lower", "upper_pull"]}, {"id": "bb_rdl", "name": "Barbell Romanian Deadlift (RDL)", "equipment": "barbell", "category": "legs_hinge", "muscle": "Arka Bacak (Hamstring) & Kalça", "mechanic": "compound", "cue": "Barı diz kapağının hemen altına kadar kalçayı geriye iterek indir, beli bükme.", "weightKey": "rdl", "tags": ["lower", "upper_pull"]}, {"id": "bb_hip_thrust", "name": "Barbell Kalça İtişi (Barbell Hip Thrust)", "equipment": "barbell", "category": "legs_hinge", "muscle": "Büyük Kalça Kası (Gluteus Maximus)", "mechanic": "compound", "cue": "Sırtı sehpaya daya, barı kalça kemiğine koy, tepe noktada kalçayı 2 sn sertçe sık.", "weightKey": "squat", "tags": ["lower"]}, {"id": "bb_bent_over_row", "name": "Barbell Eğilerek Sırt Çekiş (Bent-Over Row)", "equipment": "barbell", "category": "pull", "muscle": "Geniş Sırt, Rhomboid & Orta Sırt", "mechanic": "compound", "cue": "Gövdeyi 45° öne eğ, barı göbek deliğine doğru çekip kürek kemiklerini birbirine yapıştır.", "weightKey": "row", "tags": ["full_body", "upper_pull", "upper"]}, {"id": "bb_pendlay_row", "name": "Pendlay Row (Yerden Patlayıcı Çekiş)", "equipment": "barbell", "category": "pull", "muscle": "Üst Sırt Gücü & Lats", "mechanic": "compound", "cue": "Her tekrarda bar yere tam otursun, gövde yere paralelken patlayıcı çekiş yap.", "weightKey": "row", "tags": ["upper_pull", "upper"]}, {"id": "bb_biceps_curl", "name": "Barbell Biceps Kıvırma (BB Curl)", "equipment": "barbell", "category": "pull", "muscle": "Ön Kol & Biceps", "mechanic": "isolation", "cue": "Dirsekleri belin yanında sabitle, beli geriye atmadan barı omuz hizasına çek.", "weightKey": "", "tags": ["upper_pull", "upper"]}, {"id": "bb_close_grip_bench", "name": "Dar Tutuş Bench Press (Close-Grip Bench)", "equipment": "barbell", "category": "push", "muscle": "Arka Kol (Triceps) & İç Göğüs", "mechanic": "compound", "cue": "Elleri omuz genişliğinde tut, dirsekleri vücuda yapışık indirip tricepsle bas.", "weightKey": "press", "tags": ["upper_push", "upper"]}, {"id": "mach_lat_pulldown", "name": "Geniş Tutuş Lat Pulldown Makinesi", "equipment": "machine", "category": "pull", "muscle": "Geniş Sırt (Kanat / Latissimus)", "mechanic": "compound", "cue": "Barı üst göğse doğru çek, dirsekleri arkaya değil aşağıya doğru yönlendir.", "weightKey": "row", "tags": ["full_body", "upper_pull", "upper"]}, {"id": "mach_cable_row", "name": "Oturarak Kablo Sırt Çekiş (Seated Cable Row)", "equipment": "machine", "category": "pull", "muscle": "Orta Sırt, Kanat & Rhomboid", "mechanic": "compound", "cue": "Sırtı dik tut, tutamacı göbeğe çekerken göğsü öne kabart, omuzları düşürme.", "weightKey": "row", "tags": ["full_body", "upper_pull", "upper"]}, {"id": "mach_face_pull", "name": "Kablo Yüze Çekiş (Face Pull - Halat)", "equipment": "machine", "category": "pull", "muscle": "Arka Omuz, Dış Rotatörler & Postür", "mechanic": "isolation", "cue": "Halatı göz hizasına çekerken elleri dışa aç, kürek kemiklerini birbirine kilitle.", "weightKey": "", "tags": ["upper_pull", "upper"]}, {"id": "mach_chest_press", "name": "Makine Göğüs Presi (Machine Chest Press)", "equipment": "machine", "category": "push", "muscle": "Büyük Göğüs Kası & Ön Omuz", "mechanic": "compound", "cue": "Koltuk yüksekliğini tutamaçlar göğüs ucuna gelecek şekilde ayarla, omuzları arkaya sabitle.", "weightKey": "press", "tags": ["full_body", "upper_push", "upper"]}, {"id": "mach_cable_crossover", "name": "Kablo Göğüs Sıkıştırma (Cable Flyes / Crossover)", "equipment": "machine", "category": "push", "muscle": "Göğüs İzolasyonu & İç Göğüs", "mechanic": "isolation", "cue": "Ağaca sarılır gibi geniş bir kavisle elleri önde buluştur, 1 saniye göğsü sık.", "weightKey": "", "tags": ["upper_push", "upper"]}, {"id": "mach_pec_deck", "name": "Pec Deck Kelebek Makinesi", "equipment": "machine", "category": "push", "muscle": "Göğüs Kası İzolasyonu", "mechanic": "isolation", "cue": "Dirsekleri hafif bükük tut, kolları önde kapatırken göğüs kaslarını ez.", "weightKey": "", "tags": ["upper_push", "upper"]}, {"id": "mach_triceps_pushdown", "name": "Kablo Halat Triceps İtiş (Rope Pushdown)", "equipment": "machine", "category": "push", "muscle": "Arka Kol (Triceps Yan & Dış Baş)", "mechanic": "isolation", "cue": "Dirsekleri kaburgaya sabitle, halatı aşağı iterken en altta iki ucu dışarı aç.", "weightKey": "", "tags": ["upper_push", "upper"]}, {"id": "mach_cable_biceps", "name": "Kablo Düz Bar Biceps Curl", "equipment": "machine", "category": "pull", "muscle": "Ön Kol & Biceps Sürekli Gerilim", "mechanic": "isolation", "cue": "Kablo sürekli gerginlik sağlar; iniş fazını 3 saniyede yavaşça tamamla.", "weightKey": "", "tags": ["upper_pull", "upper"]}, {"id": "mach_cable_lateral", "name": "Kablo Tek Kol Yana Açış (Cable Lateral Raise)", "equipment": "machine", "category": "push", "muscle": "Yan Omuz (İzole Gerilim)", "mechanic": "isolation", "cue": "Kabloyu bilek hizasından omuz hizasına kadar yana kaldır, gövdeyi eğme.", "weightKey": "", "tags": ["upper_push", "upper"]}, {"id": "mach_leg_press", "name": "45° Bacak Pres Makinesi (Leg Press)", "equipment": "machine", "category": "legs_quad", "muscle": "Ön Bacak (Quad) & Kalça Gücü", "mechanic": "compound", "cue": "Dizleri göğse doğru kontrollü çek, tepe noktada dizleri asla kitleyip kilitleme.", "weightKey": "squat", "tags": ["lower", "legs_quad"]}, {"id": "mach_leg_extension", "name": "Bacak Uzatma Makinesi (Leg Extension)", "equipment": "machine", "category": "legs_quad", "muscle": "Ön Bacak Dört Başlı Kas (Quad İzolasyonu)", "mechanic": "isolation", "cue": "Bacakları yukarı kilitlerken quad kaslarını sık, kontrollü yavaş indir.", "weightKey": "", "tags": ["lower", "legs_quad"]}, {"id": "mach_leg_curl", "name": "Yatarak / Oturarak Arka Bacak Makinesi (Leg Curl)", "equipment": "machine", "category": "legs_hinge", "muscle": "Arka Bacak (Hamstrings İzolasyonu)", "mechanic": "isolation", "cue": "Minderi topukların üstüne yerleştir, topukları kalçaya doğru sertçe çek.", "weightKey": "", "tags": ["lower"]}, {"id": "mach_calf_raise", "name": "Baldır Makinesi (Standing / Seated Calf Raise)", "equipment": "machine", "category": "legs_quad", "muscle": "Baldır Kasları (Gastrocnemius & Soleus)", "mechanic": "isolation", "cue": "Topukları olabildiğince aşağı sarkıtıp derin esnet, parmak uçlarında en tepeye yüksel.", "weightKey": "", "tags": ["lower"]}, {"id": "mach_cable_woodchopper", "name": "Kablo Odun Kesme (Cable Woodchopper)", "equipment": "machine", "category": "core", "muscle": "Rotasyonel Yan Karın & Güç İletimi", "mechanic": "compound", "cue": "Kolları düz tut, hareketi omuzla değil kalça ve karın rotasyonuyla üret.", "weightKey": "", "tags": ["core"]}, {"id": "bw_pushup", "name": "Klasik Şınav (Floor Push-Up)", "equipment": "bodyweight", "category": "push", "muscle": "Göğüs, Ön Omuz, Triceps & Core", "mechanic": "compound", "cue": "Vücut baştan topuğa tahta gibi kalsın, göğsü yere 2 cm kalana kadar indir.", "weightKey": "press", "tags": ["full_body", "upper_push", "upper"]}, {"id": "bw_decline_pushup", "name": "Ayaklar Sehpada Şınav (Decline Push-Up)", "equipment": "bodyweight", "category": "push", "muscle": "Üst Göğüs & Omuz", "mechanic": "compound", "cue": "Ayakları sehpaya koy, ağırlık üst göğse ve omuzlara binsin.", "weightKey": "press", "tags": ["upper_push", "upper"]}, {"id": "bw_diamond_pushup", "name": "Elmas Şınav (Diamond Push-Up)", "equipment": "bodyweight", "category": "push", "muscle": "Arka Kol (Triceps) & İç Göğüs", "mechanic": "compound", "cue": "Elleri göğüs altında baş parmak ve işaret parmakları birleştirerek üçgen yap.", "weightKey": "", "tags": ["upper_push", "upper"]}, {"id": "bw_dips", "name": "Paralel Bar Dips (Vücut Ağırlığı)", "equipment": "bodyweight", "category": "push", "muscle": "Alt Göğüs & Yoğun Triceps", "mechanic": "compound", "cue": "Hafif öne eğilerek göğse yük bindir, 90 derece bükülüp patlayıcı bas.", "weightKey": "press", "tags": ["upper_push", "upper"]}, {"id": "bw_pullup", "name": "Barfiks (Geniş Tutuş Pull-Up)", "equipment": "bodyweight", "category": "pull", "muscle": "Geniş Sırt (Lats), Biceps & Üst Gövde Gücü", "mechanic": "compound", "cue": "Kolları tam uzatıp başla, çeneyi barın üzerine çekip göğsü bara dokundur.", "weightKey": "row", "tags": ["full_body", "upper_pull", "upper"]}, {"id": "bw_chinup", "name": "Ters Tutuş Barfiks (Chin-Up)", "equipment": "bodyweight", "category": "pull", "muscle": "Biceps & Alt Sırt Kanatları", "mechanic": "compound", "cue": "Avuçlar yüzüne baksın, bicepsleri maksimum devreye sokarak yukarı çek.", "weightKey": "row", "tags": ["upper_pull", "upper"]}, {"id": "bw_inverted_row", "name": "Yatay Barfiks (Inverted / Australian Row)", "equipment": "bodyweight", "category": "pull", "muscle": "Orta Sırt & Kürek Kemikleri", "mechanic": "compound", "cue": "Alçak barın altına yat, topuklar yerde, göğsü bara doğru çek.", "weightKey": "row", "tags": ["upper_pull", "upper"]}, {"id": "bw_air_squat", "name": "Vücut Ağırlığı Squat (Air Squat)", "equipment": "bodyweight", "category": "legs_quad", "muscle": "Bacak, Kalça & Kalça Hareket Açıklığı", "mechanic": "compound", "cue": "Kolları öne uzatarak denge sağla, tam derinliğe in ve topuklardan kalk.", "weightKey": "squat", "tags": ["lower", "conditioning"]}, {"id": "bw_jump_squat", "name": "Zıplayarak Squat (Jump Squat)", "equipment": "bodyweight", "category": "legs_quad", "muscle": "Patlayıcı Bacak Gücü & Kalp Nabzı", "mechanic": "compound", "cue": "Derin çömelip havaya patla, inerken parmak ucundan topuğa yumuşak kon.", "weightKey": "squat", "tags": ["lower", "conditioning"]}, {"id": "bw_glute_bridge", "name": "Yerde Kalça Kaldırma (Glute Bridge)", "equipment": "bodyweight", "category": "legs_hinge", "muscle": "Büyük Kalça (Glute) & Bel Sağlığı", "mechanic": "isolation", "cue": "Topukları kalçaya yakın bas, kalçayı tavana itip 2 saniye kilitli tut.", "weightKey": "", "tags": ["lower"]}, {"id": "bw_hanging_knee_raise", "name": "Barda Asılarak Dize Çekme (Hanging Knee Raise)", "equipment": "bodyweight", "category": "core", "muscle": "Alt Karın & Kavrama Gücü", "mechanic": "compound", "cue": "Sallanmadan, kalçayı öne kıvırarak dizleri göğse doğru çek.", "weightKey": "", "tags": ["core"]}, {"id": "bw_hollow_body", "name": "Hollow Body Hold (Jimnastik Karın Kilitlenmesi)", "equipment": "bodyweight", "category": "core", "muscle": "Derin Karın Duvarı (Transverse Abdominis)", "mechanic": "isolation", "cue": "Alt beli yere yapıştır, bacakları ve kolları havada muz şeklinde tut.", "weightKey": "", "tags": ["core"]}, {"id": "bw_plank", "name": "Dirsek Plank (Statik Gövde Kilidi)", "equipment": "bodyweight", "category": "core", "muscle": "Tüm Karın, Omuz & Omurga Zırhı", "mechanic": "isolation", "cue": "Kalçayı ne yukarı kaldır ne aşağı düşür, tüm vücudu çelik gibi sık.", "weightKey": "", "tags": ["core"]}, {"id": "bw_burpee", "name": "Klasik Burpee (Göğüs Yere Dokunmalı)", "equipment": "bodyweight", "category": "conditioning", "muscle": "Tüm Vücut & Maksimum Kalori Yakımı", "mechanic": "compound", "cue": "Yere yat, patlayarak ayağa fırla ve eller baş üstünde zıpla.", "weightKey": "", "tags": ["full_body", "conditioning"]}, {"id": "bw_mountain_climber", "name": "Dağ Tırmanışı (Mountain Climber)", "equipment": "bodyweight", "category": "core", "muscle": "Karın Nabzı & Omuz Dayanıklılığı", "mechanic": "compound", "cue": "Plank duruşunda dizleri sırayla seri şekilde göğse çek.", "weightKey": "", "tags": ["core", "conditioning"]}];
+        const EXERCISES_DB = {EXERCISES_JSON};
 
         // GLOBAL APP STATE
         let selectedSplit = 'full_body';
         let selectedEquipments = ['dumbbell', 'kettlebell', 'bodyweight'];
         let currentGeneratedWorkout = null;
         let activeWorkoutSession = null;
-        let activeWorkoutExerciseWeights = {};
+        let activeWorkoutExerciseWeights = {{}};
 
         // REST TIMER STATE
         let timerInterval = null;
@@ -1535,16 +1549,16 @@
         let selectedAvatar = '🥋';
         let selectedTheme = 'gold';
 
-        const THEMES = {
-            gold: { gold: '#f59e0b', goldLight: '#fde68a', glow: 'rgba(245, 158, 11, 0.25)' },
-            cyan: { gold: '#38bdf8', goldLight: '#bae6fd', glow: 'rgba(56, 189, 248, 0.25)' },
-            green: { gold: '#10b981', goldLight: '#a7f3d0', glow: 'rgba(16, 185, 129, 0.25)' },
-            red: { gold: '#f43f5e', goldLight: '#fecdd3', glow: 'rgba(244, 63, 94, 0.25)' },
-            purple: { gold: '#a855f7', goldLight: '#e9d5ff', glow: 'rgba(168, 85, 247, 0.25)' }
-        };
+        const THEMES = {{
+            gold: {{ gold: '#f59e0b', goldLight: '#fde68a', glow: 'rgba(245, 158, 11, 0.25)' }},
+            cyan: {{ gold: '#38bdf8', goldLight: '#bae6fd', glow: 'rgba(56, 189, 248, 0.25)' }},
+            green: {{ gold: '#10b981', goldLight: '#a7f3d0', glow: 'rgba(16, 185, 129, 0.25)' }},
+            red: {{ gold: '#f43f5e', goldLight: '#fecdd3', glow: 'rgba(244, 63, 94, 0.25)' }},
+            purple: {{ gold: '#a855f7', goldLight: '#e9d5ff', glow: 'rgba(168, 85, 247, 0.25)' }}
+        }};
 
         // TAB SWITCHING
-        function switchTab(tabId) {
+        function switchTab(tabId) {{
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
@@ -1557,81 +1571,81 @@
             if (tabId === 'libraryTab') renderLibrary();
             if (tabId === 'historyTab') renderHistory();
 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+            window.scrollTo({{ top: 0, behavior: 'smooth' }});
+        }}
 
         // ==================== WORKOUT GENERATOR ENGINE ====================
-        function selectSplit(split) {
+        function selectSplit(split) {{
             selectedSplit = split;
-            document.querySelectorAll('#splitGrid .split-card').forEach(card => {
+            document.querySelectorAll('#splitGrid .split-card').forEach(card => {{
                 card.classList.toggle('selected', card.getAttribute('onclick').includes(split));
-            });
-        }
+            }});
+        }}
 
-        function toggleEquip(eq) {
+        function toggleEquip(eq) {{
             const idx = selectedEquipments.indexOf(eq);
-            if (idx > -1) {
-                if (selectedEquipments.length === 1) {
+            if (idx > -1) {{
+                if (selectedEquipments.length === 1) {{
                     alert("En az bir ekipman seçili olmalıdır!");
                     return;
-                }
+                }}
                 selectedEquipments.splice(idx, 1);
-            } else {
+            }} else {{
                 selectedEquipments.push(eq);
-            }
+            }}
             renderEquipChips();
-        }
+        }}
 
-        function setQuickEquip(type) {
-            if (type === 'all') {
+        function setQuickEquip(type) {{
+            if (type === 'all') {{
                 selectedEquipments = ['dumbbell', 'kettlebell', 'barbell', 'machine', 'bodyweight'];
-            } else if (type === 'db_only') {
+            }} else if (type === 'db_only') {{
                 selectedEquipments = ['dumbbell'];
-            } else if (type === 'db_kb_bw') {
+            }} else if (type === 'db_kb_bw') {{
                 selectedEquipments = ['dumbbell', 'kettlebell', 'bodyweight'];
-            } else if (type === 'bw_only') {
+            }} else if (type === 'bw_only') {{
                 selectedEquipments = ['bodyweight'];
-            }
+            }}
             renderEquipChips();
-        }
+        }}
 
-        function renderEquipChips() {
+        function renderEquipChips() {{
             const chips = document.querySelectorAll('#equipChipsWrap .equip-chip');
-            chips.forEach(chip => {
+            chips.forEach(chip => {{
                 const match = chip.getAttribute('onclick').match(/'([^']+)'/);
-                if (match) {
+                if (match) {{
                     chip.classList.toggle('selected', selectedEquipments.includes(match[1]));
-                }
-            });
-        }
+                }}
+            }});
+        }}
 
-        function getRepAndRestScheme(goal, style) {
-            if (goal === 'strength') {
-                return { sets: 4, reps: '4 - 6', rest: 90 };
-            } else if (goal === 'endurance') {
-                return { sets: 3, reps: '12 - 15', rest: 30 };
-            } else {
+        function getRepAndRestScheme(goal, style) {{
+            if (goal === 'strength') {{
+                return {{ sets: 4, reps: '4 - 6', rest: 90 }};
+            }} else if (goal === 'endurance') {{
+                return {{ sets: 3, reps: '12 - 15', rest: 30 }};
+            }} else {{
                 // hypertrophy
-                return { sets: 3, reps: '8 - 12', rest: style === 'superset' ? 45 : 60 };
-            }
-        }
+                return {{ sets: 3, reps: '8 - 12', rest: style === 'superset' ? 45 : 60 }};
+            }}
+        }}
 
-        function filterExercises(category, excludeIds = []) {
-            return EXERCISES_DB.filter(ex => {
+        function filterExercises(category, excludeIds = []) {{
+            return EXERCISES_DB.filter(ex => {{
                 if (excludeIds.includes(ex.id)) return false;
                 if (!selectedEquipments.includes(ex.equipment)) return false;
                 if (category === 'any') return true;
                 if (Array.isArray(category)) return category.includes(ex.category);
                 return ex.category === category;
-            });
-        }
+            }});
+        }}
 
-        function pickRandom(arr) {
+        function pickRandom(arr) {{
             if (!arr || arr.length === 0) return null;
             return arr[Math.floor(Math.random() * arr.length)];
-        }
+        }}
 
-        function handleGenerateWorkout() {
+        function handleGenerateWorkout() {{
             const style = document.getElementById('paramStyle').value;
             const goal = document.getElementById('paramGoal').value;
             const duration = parseInt(document.getElementById('paramDuration').value, 10);
@@ -1640,10 +1654,10 @@
             const chosenExercises = [];
             const usedIds = [];
 
-            function addEx(cat) {
+            function addEx(cat) {{
                 let pool = filterExercises(cat, usedIds);
                 let chosen = pickRandom(pool);
-                if (!chosen) {
+                if (!chosen) {{
                     let relatedCat = cat;
                     if (cat === 'push') relatedCat = ['push', 'core'];
                     else if (cat === 'pull') relatedCat = ['pull', 'core'];
@@ -1655,114 +1669,114 @@
                         (Array.isArray(relatedCat) ? relatedCat.includes(ex.category) : ex.category === relatedCat)
                     );
                     chosen = pickRandom(fallbackPool);
-                }
-                if (chosen) {
+                }}
+                if (chosen) {{
                     usedIds.push(chosen.id);
                     chosenExercises.push(chosen);
-                }
-            }
+                }}
+            }}
 
             // Split-based generation logic
-            if (selectedSplit === 'full_body') {
+            if (selectedSplit === 'full_body') {{
                 // Block A: Quad + Row/Pull
                 addEx('legs_quad');
                 addEx('pull');
                 // Block B: Hinge + Push
                 addEx('legs_hinge');
                 addEx('push');
-                if (duration >= 45) {
+                if (duration >= 45) {{
                     // Block C: Lunge/Single leg + Core/Arms
                     addEx(['legs_quad', 'legs_hinge']);
                     addEx('core');
-                }
-                if (duration >= 60) {
+                }}
+                if (duration >= 60) {{
                     // Block D: Push + Pull accessories
                     addEx('push');
                     addEx('pull');
-                }
-            } else if (selectedSplit === 'upper_push') {
+                }}
+            }} else if (selectedSplit === 'upper_push') {{
                 addEx('push');
                 addEx('push');
                 addEx('push');
                 addEx('core');
-                if (duration >= 45) {
+                if (duration >= 45) {{
                     addEx('push');
                     addEx('core');
-                }
-                if (duration >= 60) {
+                }}
+                if (duration >= 60) {{
                     addEx('push');
                     addEx('core');
-                }
-            } else if (selectedSplit === 'upper_pull') {
+                }}
+            }} else if (selectedSplit === 'upper_pull') {{
                 addEx('pull');
                 addEx('pull');
                 addEx(['legs_hinge', 'pull']);
                 addEx('core');
-                if (duration >= 45) {
+                if (duration >= 45) {{
                     addEx('pull');
                     addEx('core');
-                }
-                if (duration >= 60) {
+                }}
+                if (duration >= 60) {{
                     addEx('pull');
                     addEx('core');
-                }
-            } else if (selectedSplit === 'lower') {
+                }}
+            }} else if (selectedSplit === 'lower') {{
                 addEx('legs_quad');
                 addEx('legs_hinge');
                 addEx('legs_quad');
                 addEx('legs_hinge');
-                if (duration >= 45) {
+                if (duration >= 45) {{
                     addEx(['legs_quad', 'legs_hinge']);
                     addEx('core');
-                }
-                if (duration >= 60) {
+                }}
+                if (duration >= 60) {{
                     addEx(['legs_quad', 'legs_hinge']);
                     addEx('core');
-                }
-            } else if (selectedSplit === 'upper') {
+                }}
+            }} else if (selectedSplit === 'upper') {{
                 addEx('push');
                 addEx('pull');
                 addEx('push');
                 addEx('pull');
-                if (duration >= 45) {
+                if (duration >= 45) {{
                     addEx('push');
                     addEx('pull');
-                }
-                if (duration >= 60) {
+                }}
+                if (duration >= 60) {{
                     addEx('core');
                     addEx('core');
-                }
-            } else if (selectedSplit === 'core') {
-                for (let i = 0; i < (duration >= 45 ? 6 : 4); i++) {
+                }}
+            }} else if (selectedSplit === 'core') {{
+                for (let i = 0; i < (duration >= 45 ? 6 : 4); i++) {{
                     addEx('core');
-                }
-            }
+                }}
+            }}
 
             // Dynamic Warmups
             const warmups = [
-                { name: "Eklemsel CARs (Omuz & Kalça Dairesi)", dur: "90 sn", cue: "Tüm eklemleri kontrollü ve geniş dairelerle ısıt." },
-                { name: "World's Greatest Stretch (Kalça & Torasik Açış)", dur: "60 sn", cue: "Derin lunge pozisyonunda göğsü tavana doğru çevir." },
-                { name: "Kedi - Deve & Kuş Köpeği (Omurga Aktivasyonu)", dur: "60 sn", cue: "Nefes alarak beli çukurlaştır, nefes vererek sırtı kabart." }
+                {{ name: "Eklemsel CARs (Omuz & Kalça Dairesi)", dur: "90 sn", cue: "Tüm eklemleri kontrollü ve geniş dairelerle ısıt." }},
+                {{ name: "World's Greatest Stretch (Kalça & Torasik Açış)", dur: "60 sn", cue: "Derin lunge pozisyonunda göğsü tavana doğru çevir." }},
+                {{ name: "Kedi - Deve & Kuş Köpeği (Omurga Aktivasyonu)", dur: "60 sn", cue: "Nefes alarak beli çukurlaştır, nefes vererek sırtı kabart." }}
             ];
 
             // Finisher
             const finishers = [
-                { name: "3 Dk Tabata Balistik Bitiş", desc: "20 sn Maksimum Tempolu Swing / Burpee + 10 sn Dinlenme (4 Tur)" },
-                { name: "Çiftçi Taşıması (Farmer's Carry Burnout)", desc: "Mümkün olan en ağır dambıllarla 3 tur 40 metre kesintisiz yürüyüş." }
+                {{ name: "3 Dk Tabata Balistik Bitiş", desc: "20 sn Maksimum Tempolu Swing / Burpee + 10 sn Dinlenme (4 Tur)" }},
+                {{ name: "Çiftçi Taşıması (Farmer's Carry Burnout)", desc: "Mümkün olan en ağır dambıllarla 3 tur 40 metre kesintisiz yürüyüş." }}
             ];
 
-            const splitNames = {
+            const splitNames = {{
                 full_body: "Tüm Vücut (Full Body)",
                 upper_push: "Üst İtiş (Push)",
                 upper_pull: "Üst Çekiş (Pull)",
                 lower: "Alt Vücut & Bacak",
                 upper: "Tüm Üst Vücut",
                 core: "Karın & Core Zırhı"
-            };
+            }};
 
-            currentGeneratedWorkout = {
+            currentGeneratedWorkout = {{
                 id: 'gen_' + Date.now(),
-                title: `${splitNames[selectedSplit]} • ${style === 'superset' ? 'Süperset' : (style === 'emom' ? 'EMOM' : 'Klasik')}`,
+                title: `${{splitNames[selectedSplit]}} • ${{style === 'superset' ? 'Süperset' : (style === 'emom' ? 'EMOM' : 'Klasik')}}`,
                 split: selectedSplit,
                 splitName: splitNames[selectedSplit],
                 style,
@@ -1773,50 +1787,50 @@
                 exercises: chosenExercises,
                 finisher: finishers[Math.floor(Math.random() * finishers.length)],
                 createdAt: Date.now()
-            };
+            }};
 
             renderGeneratedWorkout();
             playAlertSound();
-        }
+        }}
 
-        function renderGeneratedWorkout() {
+        function renderGeneratedWorkout() {{
             const w = currentGeneratedWorkout;
             const container = document.getElementById('generatedWorkoutOutput');
             if (!w || !container) return;
 
             const user = getActiveUser();
-            const weights = user.weights || {};
+            const weights = user.weights || {{}};
 
             let blocksHtml = '';
-            if (w.style === 'superset') {
-                for (let i = 0; i < w.exercises.length; i += 2) {
+            if (w.style === 'superset') {{
+                for (let i = 0; i < w.exercises.length; i += 2) {{
                     const blockLetter = String.fromCharCode(65 + Math.floor(i / 2));
                     const ex1 = w.exercises[i];
                     const ex2 = w.exercises[i + 1];
 
                     blocksHtml += `
-                        <div class="block-header">SÜPERSET BLOK ${blockLetter} (Dinlenmeden Peş Peşe)</div>
-                        ${renderSingleExerciseCard(ex1, `${blockLetter}1`, w.scheme, weights)}
-                        ${ex2 ? renderSingleExerciseCard(ex2, `${blockLetter}2`, w.scheme, weights) : ''}
+                        <div class="block-header">SÜPERSET BLOK ${{blockLetter}} (Dinlenmeden Peş Peşe)</div>
+                        ${{renderSingleExerciseCard(ex1, `${{blockLetter}}1`, w.scheme, weights)}}
+                        ${{ex2 ? renderSingleExerciseCard(ex2, `${{blockLetter}}2`, w.scheme, weights) : ''}}
                     `;
-                }
-            } else {
-                w.exercises.forEach((ex, idx) => {
-                    blocksHtml += renderSingleExerciseCard(ex, `${idx + 1}`, w.scheme, weights);
-                });
-            }
+                }}
+            }} else {{
+                w.exercises.forEach((ex, idx) => {{
+                    blocksHtml += renderSingleExerciseCard(ex, `${{idx + 1}}`, w.scheme, weights);
+                }});
+            }}
 
             container.innerHTML = `
                 <div class="workout-header-card">
                     <div class="workout-title-row">
                         <div>
                             <div class="badge-brand">HAZIRLANAN ANTRENMAN</div>
-                            <h2 class="workout-main-title">${escapeHTML(w.title)}</h2>
+                            <h2 class="workout-main-title">${{escapeHTML(w.title)}}</h2>
                         </div>
                         <div class="workout-meta-badges">
-                            <span class="meta-pill">⏱️ ${w.duration} Dk</span>
-                            <span class="meta-pill">🎯 ${w.scheme.sets} Set x ${w.scheme.reps}</span>
-                            <span class="meta-pill">⏳ ${w.scheme.rest}s Dinlenme</span>
+                            <span class="meta-pill">⏱️ ${{w.duration}} Dk</span>
+                            <span class="meta-pill">🎯 ${{w.scheme.sets}} Set x ${{w.scheme.reps}}</span>
+                            <span class="meta-pill">⏳ ${{w.scheme.rest}}s Dinlenme</span>
                         </div>
                     </div>
 
@@ -1836,73 +1850,73 @@
                     <!-- WARMUP SECTION -->
                     <div class="block-header" style="margin-top:24px;">🧘 Dinamik Isınma & Mobilite (5 Dakika)</div>
                     <div style="background:rgba(0,0,0,0.25); border-radius:10px; padding:10px 14px;">
-                        ${w.warmups.map(wm => `
+                        ${{w.warmups.map(wm => `
                             <div style="font-size:12.5px; margin-bottom:6px;">
-                                <strong style="color:var(--gold-light);">${escapeHTML(wm.name)}</strong> (${wm.dur}): 
-                                <span style="color:var(--text-secondary);">${escapeHTML(wm.cue)}</span>
+                                <strong style="color:var(--gold-light);">${{escapeHTML(wm.name)}}</strong> (${{wm.dur}}): 
+                                <span style="color:var(--text-secondary);">${{escapeHTML(wm.cue)}}</span>
                             </div>
-                        `).join('')}
+                        `).join('')}}
                     </div>
 
                     <!-- MAIN EXERCISES -->
-                    ${blocksHtml}
+                    ${{blocksHtml}}
 
                     <!-- FINISHER -->
                     <div class="block-header">🔥 Balistik Bitiş / Finisher</div>
                     <div style="background:rgba(225, 29, 72, 0.1); border-left:4px solid var(--red-alert); border-radius:8px; padding:10px 14px;">
-                        <strong style="color:#fff; font-size:13px;">${escapeHTML(w.finisher.name)}</strong>
-                        <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">${escapeHTML(w.finisher.desc)}</div>
+                        <strong style="color:#fff; font-size:13px;">${{escapeHTML(w.finisher.name)}}</strong>
+                        <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">${{escapeHTML(w.finisher.desc)}}</div>
                     </div>
                 </div>
             `;
 
-            if (container.scrollIntoView) container.scrollIntoView({ behavior: 'smooth' });
-        }
+            if (container.scrollIntoView) container.scrollIntoView({{ behavior: 'smooth' }});
+        }}
 
-        function renderSingleExerciseCard(ex, label, scheme, weights) {
-            const equipLabels = {
+        function renderSingleExerciseCard(ex, label, scheme, weights) {{
+            const equipLabels = {{
                 dumbbell: 'Dambıl',
                 kettlebell: 'Kettlebell',
                 barbell: 'Barbell',
                 machine: 'Makine/Kablo',
                 bodyweight: 'Vücut Ağırlığı'
-            };
+            }};
 
             const targetW = ex.weightKey && weights[ex.weightKey] ? weights[ex.weightKey] : null;
 
             return `
-                <div class="ex-card" id="card_${ex.id}">
+                <div class="ex-card" id="card_${{ex.id}}">
                     <div class="ex-card-header">
                         <div class="ex-name">
-                            <span style="color:var(--gold); font-weight:900;">${label}.</span>
-                            <span>${escapeHTML(ex.name)}</span>
+                            <span style="color:var(--gold); font-weight:900;">${{label}}.</span>
+                            <span>${{escapeHTML(ex.name)}}</span>
                         </div>
                         <div class="ex-tag-group">
-                            <span class="ex-badge badge-equip">${equipLabels[ex.equipment] || ex.equipment}</span>
-                            <span class="ex-badge badge-muscle">${escapeHTML(ex.muscle.split(',')[0])}</span>
-                            ${targetW ? `<span class="badge-target-weight">🎯 Hedefin: ${targetW} kg</span>` : ''}
+                            <span class="ex-badge badge-equip">${{equipLabels[ex.equipment] || ex.equipment}}</span>
+                            <span class="ex-badge badge-muscle">${{escapeHTML(ex.muscle.split(',')[0])}}</span>
+                            ${{targetW ? `<span class="badge-target-weight">🎯 Hedefin: ${{targetW}} kg</span>` : ''}}
                         </div>
                     </div>
 
                     <div class="ex-meta-row">
-                        <span>📊 ${scheme.sets} Set x ${scheme.reps} Tekrar</span>
-                        <span>⏱️ Dinlenme: ${scheme.rest} sn</span>
+                        <span>📊 ${{scheme.sets}} Set x ${{scheme.reps}} Tekrar</span>
+                        <span>⏱️ Dinlenme: ${{scheme.rest}} sn</span>
                     </div>
 
                     <div class="ex-cue-box">
-                        💡 <strong>Altın Kural:</strong> ${escapeHTML(ex.cue)}
+                        💡 <strong>Altın Kural:</strong> ${{escapeHTML(ex.cue)}}
                     </div>
 
                     <div style="text-align:right;">
-                        <button class="btn-swap-ex" onclick="swapSingleExercise('${ex.id}')">
+                        <button class="btn-swap-ex" onclick="swapSingleExercise('${{ex.id}}')">
                             🔄 Başka Hareket Ver
                         </button>
                     </div>
                 </div>
             `;
-        }
+        }}
 
-        function swapSingleExercise(currentExId) {
+        function swapSingleExercise(currentExId) {{
             if (!currentGeneratedWorkout) return;
             const exIndex = currentGeneratedWorkout.exercises.findIndex(e => e.id === currentExId);
             if (exIndex === -1) return;
@@ -1913,35 +1927,35 @@
             // Pool of alternatives in the same category & available equipments
             const pool = filterExercises(currentEx.category, usedIds);
             let replacement = pickRandom(pool);
-            if (!replacement) {
+            if (!replacement) {{
                 // fallback to any exercise with active equipment
                 const fallback = EXERCISES_DB.filter(e => selectedEquipments.includes(e.equipment) && !usedIds.includes(e.id));
                 replacement = pickRandom(fallback);
-            }
+            }}
 
-            if (replacement) {
+            if (replacement) {{
                 currentGeneratedWorkout.exercises[exIndex] = replacement;
                 renderGeneratedWorkout();
-            } else {
+            }} else {{
                 alert("Seçili ekipman havuzunda bu kas grubu için başka alternatif bulunamadı.");
-            }
-        }
+            }}
+        }}
 
         // ==================== ACTIVE LIVE WORKOUT TRACKER ====================
-        function startActiveWorkoutFromGenerated() {
+        function startActiveWorkoutFromGenerated() {{
             if (!currentGeneratedWorkout) return;
             activeWorkoutSession = JSON.parse(JSON.stringify(currentGeneratedWorkout));
-            activeWorkoutExerciseWeights = {};
+            activeWorkoutExerciseWeights = {{}};
 
             renderActiveWorkout();
             switchTab('activeWorkoutTab');
             resetTimer(activeWorkoutSession.scheme.rest || 45);
             playAlertSound();
-        }
+        }}
 
-        function renderActiveWorkout() {
+        function renderActiveWorkout() {{
             const container = document.getElementById('activeWorkoutContainer');
-            if (!activeWorkoutSession || !container) {
+            if (!activeWorkoutSession || !container) {{
                 container.innerHTML = `
                     <div style="text-align:center; padding:40px 20px; color:var(--text-secondary);">
                         <div style="font-size:40px; margin-bottom:10px;">🏋️</div>
@@ -1951,18 +1965,18 @@
                     </div>
                 `;
                 return;
-            }
+            }}
 
             const s = activeWorkoutSession;
             const user = getActiveUser();
-            const weights = user.weights || {};
+            const weights = user.weights || {{}};
 
             container.innerHTML = `
                 <div class="workout-header-card" style="margin-bottom:16px;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div>
                             <span class="badge-brand">CANLI SEANS</span>
-                            <h2 style="font-size:18px; font-weight:800; color:#fff;">${escapeHTML(s.title)}</h2>
+                            <h2 style="font-size:18px; font-weight:800; color:#fff;">${{escapeHTML(s.title)}}</h2>
                         </div>
                         <button class="btn btn-gold" style="padding:10px 14px; font-size:13px;" onclick="openCompleteModal()">
                             🏁 BİTİR & KAYDET
@@ -1970,39 +1984,39 @@
                     </div>
                 </div>
 
-                ${s.exercises.map((ex, idx) => {
+                ${{s.exercises.map((ex, idx) => {{
                     const defaultW = ex.weightKey && weights[ex.weightKey] ? weights[ex.weightKey] : '';
                     return `
-                        <div class="ex-card" data-exercise-id="${ex.id}">
+                        <div class="ex-card" data-exercise-id="${{ex.id}}">
                             <div class="ex-card-header">
                                 <div class="ex-name">
-                                    <span style="color:var(--gold); font-weight:900;">${idx + 1}.</span>
-                                    <span>${escapeHTML(ex.name)}</span>
+                                    <span style="color:var(--gold); font-weight:900;">${{idx + 1}}.</span>
+                                    <span>${{escapeHTML(ex.name)}}</span>
                                 </div>
                                 <div style="display:flex; align-items:center;">
                                     <span style="font-size:11px; color:var(--text-secondary);">Kilo:</span>
                                     <div class="weight-input-wrap">
-                                        <input type="number" value="${defaultW}" placeholder="kg" onchange="updateExerciseWeight('${ex.id}', this.value)">
+                                        <input type="number" value="${{defaultW}}" placeholder="kg" onchange="updateExerciseWeight('${{ex.id}}', this.value)">
                                         <span style="font-size:11px; color:var(--text-secondary);">kg</span>
                                     </div>
                                 </div>
                             </div>
 
                             <div style="font-size:12px; color:var(--gold-light); margin-bottom:8px;">
-                                🎯 Hedef: ${s.scheme.sets} Set x ${s.scheme.reps} Tekrar
+                                🎯 Hedef: ${{s.scheme.sets}} Set x ${{s.scheme.reps}} Tekrar
                             </div>
 
                             <div class="set-pills-row">
-                                ${Array.from({ length: s.scheme.sets }).map((_, setIdx) => `
-                                    <div class="set-pill" onclick="toggleSetPill(this, ${s.scheme.rest})">
+                                ${{Array.from({{ length: s.scheme.sets }}).map((_, setIdx) => `
+                                    <div class="set-pill" onclick="toggleSetPill(this, ${{s.scheme.rest}})">
                                         <input type="checkbox">
-                                        <span>Set ${setIdx + 1}</span>
+                                        <span>Set ${{setIdx + 1}}</span>
                                     </div>
-                                `).join('')}
+                                `).join('')}}
                             </div>
                         </div>
                     `;
-                }).join('')}
+                }}).join('')}}
 
                 <div style="text-align:center; margin:30px 0;">
                     <button class="btn btn-gold" style="padding:16px 28px; font-size:15px;" onclick="openCompleteModal()">
@@ -2010,79 +2024,79 @@
                     </button>
                 </div>
             `;
-        }
+        }}
 
-        function toggleSetPill(pill, restSecs) {
+        function toggleSetPill(pill, restSecs) {{
             const cb = pill.querySelector('input[type="checkbox"]');
             cb.checked = !cb.checked;
             pill.classList.toggle('done', cb.checked);
 
-            if (cb.checked) {
+            if (cb.checked) {{
                 resetTimer(restSecs);
                 startTimer();
                 playAlertSound();
                 if (navigator.vibrate) navigator.vibrate(80);
-            }
-        }
+            }}
+        }}
 
-        function updateExerciseWeight(exId, val) {
+        function updateExerciseWeight(exId, val) {{
             activeWorkoutExerciseWeights[exId] = val;
-        }
+        }}
 
         // REST TIMER LOGIC
-        function setTimerSecs(secs) {
+        function setTimerSecs(secs) {{
             resetTimer(secs);
             startTimer();
-        }
+        }}
 
-        function resetTimer(secs) {
+        function resetTimer(secs) {{
             clearInterval(timerInterval);
             isTimerRunning = false;
             timerRemaining = secs;
             updateTimerDisplay();
             const btn = document.getElementById('btnPlayPauseTimer');
             if (btn) btn.innerText = "▶ Başlat";
-        }
+        }}
 
-        function toggleTimer() {
-            if (isTimerRunning) {
+        function toggleTimer() {{
+            if (isTimerRunning) {{
                 clearInterval(timerInterval);
                 isTimerRunning = false;
                 document.getElementById('btnPlayPauseTimer').innerText = "▶ Başlat";
-            } else {
+            }} else {{
                 startTimer();
-            }
-        }
+            }}
+        }}
 
-        function startTimer() {
+        function startTimer() {{
             clearInterval(timerInterval);
             isTimerRunning = true;
             document.getElementById('btnPlayPauseTimer').innerText = "⏸ Duraklat";
 
-            timerInterval = setInterval(() => {
-                if (timerRemaining > 0) {
+            timerInterval = setInterval(() => {{
+                if (timerRemaining > 0) {{
                     timerRemaining--;
                     updateTimerDisplay();
-                } else {
+                }} else {{
                     clearInterval(timerInterval);
                     isTimerRunning = false;
                     document.getElementById('btnPlayPauseTimer').innerText = "▶ Başlat";
                     playAlertSound();
                     if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100]);
-                }
-            }, 1000);
-        }
+                }}
+            }}, 1000);
+        }}
 
-        function updateTimerDisplay() {
+        function updateTimerDisplay() {{
             const mins = Math.floor(timerRemaining / 60);
             const secs = timerRemaining % 60;
-            const str = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            const str = `${{String(mins).padStart(2, '0')}}:${{String(secs).padStart(2, '0')}}`;
             const el = document.getElementById('timerDisplay');
             if (el) el.innerText = str;
-        }
+        }}
 
-        function playAlertSound() {
-            try {
+        function playAlertSound() {{
+            try {{
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
@@ -2095,31 +2109,31 @@
                 gain.connect(ctx.destination);
                 osc.start();
                 osc.stop(ctx.currentTime + 0.35);
-            } catch(e) {}
-        }
+            }} catch(e) {{}}
+        }}
 
         // ==================== COMPLETE & LOG WORKOUT ====================
-        function openCompleteModal() {
-            if (!activeWorkoutSession) {
+        function openCompleteModal() {{
+            if (!activeWorkoutSession) {{
                 alert("Aktif bir antrenman bulunmuyor.");
                 return;
-            }
+            }}
             document.getElementById('logProgramName').value = activeWorkoutSession.title;
             document.getElementById('logDuration').value = activeWorkoutSession.duration || 45;
             document.getElementById('completeModal').classList.add('active');
-        }
+        }}
 
-        function closeCompleteModal() {
+        function closeCompleteModal() {{
             document.getElementById('completeModal').classList.remove('active');
-        }
+        }}
 
-        function saveCompletedWorkout() {
+        function saveCompletedWorkout() {{
             const programName = document.getElementById('logProgramName').value;
             const duration = document.getElementById('logDuration').value;
             const rpe = document.getElementById('logRpe').value;
             const notes = document.getElementById('logNotes').value;
 
-            const newLog = {
+            const newLog = {{
                 id: 'log_' + Date.now(),
                 date: new Date().toISOString().split('T')[0],
                 program: programName,
@@ -2127,7 +2141,7 @@
                 rpe: rpe,
                 notes: notes,
                 timestamp: Date.now()
-            };
+            }};
 
             const logs = getWorkoutLogs();
             logs.unshift(newLog);
@@ -2138,19 +2152,19 @@
             renderActiveWorkout();
             switchTab('historyTab');
             alert("🎉 Tebrikler! Antrenman başarıyla günlüğe kaydedildi.");
-        }
+        }}
 
         // ==================== LIBRARY & SAVED PROGRAMS ====================
-        function saveGeneratedToLibrary() {
+        function saveGeneratedToLibrary() {{
             if (!currentGeneratedWorkout) return;
             const user = getActiveUser();
-            const key = `celik_kodu_custom_programs_${user.id}`;
+            const key = `celik_kodu_custom_programs_${{user.id}}`;
 
             let saved = [];
-            try {
+            try {{
                 const raw = localStorage.getItem(key);
                 if (raw) saved = JSON.parse(raw);
-            } catch(e) {}
+            }} catch(e) {{}}
 
             const name = prompt("Bu antrenman programı için bir isim verin:", currentGeneratedWorkout.title);
             if (!name) return;
@@ -2162,147 +2176,147 @@
             saved.unshift(programToSave);
             localStorage.setItem(key, JSON.stringify(saved));
             alert("✅ Program başarıyla kütüphanenize kaydedildi!");
-        }
+        }}
 
-        function renderLibrary() {
+        function renderLibrary() {{
             const user = getActiveUser();
-            const key = `celik_kodu_custom_programs_${user.id}`;
+            const key = `celik_kodu_custom_programs_${{user.id}}`;
             let saved = [];
-            try {
+            try {{
                 const raw = localStorage.getItem(key);
                 if (raw) saved = JSON.parse(raw);
-            } catch(e) {}
+            }} catch(e) {{}}
 
             const customContainer = document.getElementById('savedProgramsList');
-            if (saved.length === 0) {
+            if (saved.length === 0) {{
                 customContainer.innerHTML = `
                     <div style="background:var(--bg-surface); padding:16px; border-radius:10px; border:1px dashed var(--border); text-align:center; font-size:12px; color:var(--text-secondary);">
                         Henüz kayıtlı özel bir programınız yok. Program Oluşturucu ile bir program üretip "Kütüphaneye Kaydet" butonuna basabilirsiniz!
                     </div>
                 `;
-            } else {
+            }} else {{
                 customContainer.innerHTML = saved.map(p => `
                     <div class="log-history-card">
                         <div class="log-card-header">
-                            <strong style="color:#fff; font-size:14px;">${escapeHTML(p.title)}</strong>
+                            <strong style="color:#fff; font-size:14px;">${{escapeHTML(p.title)}}</strong>
                             <div style="display:flex; gap:6px;">
-                                <button class="btn btn-gold" style="font-size:11px; padding:4px 10px;" onclick="loadSavedProgram('${p.id}')">
+                                <button class="btn btn-gold" style="font-size:11px; padding:4px 10px;" onclick="loadSavedProgram('${{p.id}}')">
                                     ▶ Başlat
                                 </button>
-                                <button class="btn-delete-log" onclick="deleteSavedProgram('${p.id}')" title="Sil">✕</button>
+                                <button class="btn-delete-log" onclick="deleteSavedProgram('${{p.id}}')" title="Sil">✕</button>
                             </div>
                         </div>
                         <div style="font-size:11px; color:var(--text-secondary);">
-                            ${p.exercises.length} Egzersiz • ${p.duration} Dk • ${p.style === 'superset' ? 'Süperset' : 'Klasik'}
+                            ${{p.exercises.length}} Egzersiz • ${{p.duration}} Dk • ${{p.style === 'superset' ? 'Süperset' : 'Klasik'}}
                         </div>
                     </div>
                 `).join('');
-            }
+            }}
 
             // Render Official Classic Routines
             const officialContainer = document.getElementById('officialProgramsList');
             const officialRoutines = [
-                {
+                {{
                     id: 'la_forja_day1',
                     title: '⚔️ Çelik Kodu Gün 1: Omuz & Bacak Ön Zırhı',
                     desc: 'Omuz Presi + Goblet Squat (A1/A2), Clean Front Squat + Şınav (B1/B2), Halo + Core (C1/C2)',
                     exercises: ['db_overhead_press', 'db_goblet_squat', 'db_front_squat', 'bw_pushup', 'kb_halo', 'bw_hollow_body'],
                     style: 'superset',
                     duration: 45
-                },
-                {
+                }},
+                {{
                     id: 'la_forja_day2',
                     title: '⚔️ Çelik Kodu Gün 2: Sırt Çekiş & Balistik Güç',
                     desc: 'Ağır Testere Row + RDL (A1/A2), Patlayıcı Dambıl Swing + Barfiks (B1/B2), Çiftçi Yürüyüşü (C1)',
                     exercises: ['db_saw_row', 'db_rdl', 'db_swing', 'bw_pullup', 'db_farmers_walk', 'db_russian_twist'],
                     style: 'superset',
                     duration: 45
-                },
-                {
+                }},
+                {{
                     id: 'la_forja_day3',
                     title: '⚔️ Çelik Kodu Gün 3: Kompleks & Merdiven',
                     desc: 'Dambıl Snatch + Walking Lunge (A1/A2), 5-4-3-2 Merdiven Row-Clean-Squat, Burpee Finisher',
                     exercises: ['db_snatch', 'db_walking_lunge', 'db_saw_row', 'db_front_squat', 'bw_burpee'],
                     style: 'superset',
                     duration: 50
-                }
+                }}
             ];
 
             officialContainer.innerHTML = officialRoutines.map(r => `
                 <div class="log-history-card" style="border-color:var(--border-hover);">
                     <div class="log-card-header">
-                        <strong style="color:var(--gold-light); font-size:14px;">${escapeHTML(r.title)}</strong>
-                        <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; color:var(--gold); border-color:var(--gold);" onclick="loadOfficialRoutine('${r.id}')">
+                        <strong style="color:var(--gold-light); font-size:14px;">${{escapeHTML(r.title)}}</strong>
+                        <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; color:var(--gold); border-color:var(--gold);" onclick="loadOfficialRoutine('${{r.id}}')">
                             ▶ Bu Programı Yükle
                         </button>
                     </div>
                     <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
-                        ${escapeHTML(r.desc)}
+                        ${{escapeHTML(r.desc)}}
                     </div>
                 </div>
             `).join('');
-        }
+        }}
 
-        function loadSavedProgram(progId) {
+        function loadSavedProgram(progId) {{
             const user = getActiveUser();
-            const key = `celik_kodu_custom_programs_${user.id}`;
-            try {
+            const key = `celik_kodu_custom_programs_${{user.id}}`;
+            try {{
                 const saved = JSON.parse(localStorage.getItem(key) || '[]');
                 const found = saved.find(p => p.id === progId);
-                if (found) {
+                if (found) {{
                     currentGeneratedWorkout = found;
                     startActiveWorkoutFromGenerated();
-                }
-            } catch(e) {}
-        }
+                }}
+            }} catch(e) {{}}
+        }}
 
-        function deleteSavedProgram(progId) {
+        function deleteSavedProgram(progId) {{
             const user = getActiveUser();
-            const key = `celik_kodu_custom_programs_${user.id}`;
-            if (confirm("Bu kayıtlı programı silmek istediğinize emin misiniz?")) {
-                try {
+            const key = `celik_kodu_custom_programs_${{user.id}}`;
+            if (confirm("Bu kayıtlı programı silmek istediğinize emin misiniz?")) {{
+                try {{
                     let saved = JSON.parse(localStorage.getItem(key) || '[]');
                     saved = saved.filter(p => p.id !== progId);
                     localStorage.setItem(key, JSON.stringify(saved));
                     renderLibrary();
-                } catch(e) {}
-            }
-        }
+                }} catch(e) {{}}
+            }}
+        }}
 
-        function loadOfficialRoutine(routineId) {
-            const routines = {
-                la_forja_day1: {
+        function loadOfficialRoutine(routineId) {{
+            const routines = {{
+                la_forja_day1: {{
                     title: '⚔️ Çelik Kodu Gün 1: Omuz & Bacak Ön Zırhı',
                     split: 'upper_push',
                     style: 'superset',
                     duration: 45,
-                    scheme: { sets: 4, reps: '8 - 10', rest: 45 },
+                    scheme: {{ sets: 4, reps: '8 - 10', rest: 45 }},
                     exerciseIds: ['db_overhead_press', 'db_goblet_squat', 'db_front_squat', 'bw_pushup', 'kb_halo', 'bw_hollow_body']
-                },
-                la_forja_day2: {
+                }},
+                la_forja_day2: {{
                     title: '⚔️ Çelik Kodu Gün 2: Sırt Çekiş & Balistik Güç',
                     split: 'upper_pull',
                     style: 'superset',
                     duration: 45,
-                    scheme: { sets: 4, reps: '8 - 10', rest: 45 },
+                    scheme: {{ sets: 4, reps: '8 - 10', rest: 45 }},
                     exerciseIds: ['db_saw_row', 'db_rdl', 'db_swing', 'bw_pullup', 'db_farmers_walk', 'db_russian_twist']
-                },
-                la_forja_day3: {
+                }},
+                la_forja_day3: {{
                     title: '⚔️ Çelik Kodu Gün 3: Kompleks & Merdiven',
                     split: 'full_body',
                     style: 'superset',
                     duration: 50,
-                    scheme: { sets: 4, reps: '8 - 10', rest: 45 },
+                    scheme: {{ sets: 4, reps: '8 - 10', rest: 45 }},
                     exerciseIds: ['db_snatch', 'db_walking_lunge', 'db_saw_row', 'db_front_squat', 'bw_burpee']
-                }
-            };
+                }}
+            }};
 
             const target = routines[routineId];
             if (!target) return;
 
             const exercises = target.exerciseIds.map(id => EXERCISES_DB.find(e => e.id === id)).filter(Boolean);
 
-            currentGeneratedWorkout = {
+            currentGeneratedWorkout = {{
                 id: 'gen_' + Date.now(),
                 title: target.title,
                 split: target.split,
@@ -2312,28 +2326,28 @@
                 duration: target.duration,
                 scheme: target.scheme,
                 warmups: [
-                    { name: "Eklemsel CARs (Omuz & Kalça Dairesi)", dur: "90 sn", cue: "Tüm eklemleri kontrollü ve geniş dairelerle ısıt." },
-                    { name: "World's Greatest Stretch", dur: "60 sn", cue: "Derin lunge ile omurga rotasyonu." }
+                    {{ name: "Eklemsel CARs (Omuz & Kalça Dairesi)", dur: "90 sn", cue: "Tüm eklemleri kontrollü ve geniş dairelerle ısıt." }},
+                    {{ name: "World's Greatest Stretch", dur: "60 sn", cue: "Derin lunge ile omurga rotasyonu." }}
                 ],
                 exercises: exercises,
-                finisher: { name: "3 Dk Tabata Finisher", desc: "Patlayıcı kondisyon" },
+                finisher: {{ name: "3 Dk Tabata Finisher", desc: "Patlayıcı kondisyon" }},
                 createdAt: Date.now()
-            };
+            }};
 
             startActiveWorkoutFromGenerated();
-        }
+        }}
 
         // ==================== AUTHENTICATION & MULTI-USER SYSTEM ====================
-        function initAuthDatabase() {
+        function initAuthDatabase() {{
             let users = [];
-            try {
+            try {{
                 const raw = localStorage.getItem('celik_kodu_auth_users');
                 if (raw) users = JSON.parse(raw);
-            } catch(e) {}
+            }} catch(e) {{}}
 
-            if (!Array.isArray(users) || users.length === 0) {
+            if (!Array.isArray(users) || users.length === 0) {{
                 users = [
-                    {
+                    {{
                         id: 'usr_admin',
                         username: 'admin',
                         password: '123',
@@ -2343,10 +2357,10 @@
                         theme: 'gold',
                         level: 'İleri Seviye',
                         gender: 'Erkek',
-                        weights: { press: '16', squat: '22', row: '20', rdl: '24', swing: '18', lunge: '14' },
+                        weights: {{ press: '16', squat: '22', row: '20', rdl: '24', swing: '18', lunge: '14' }},
                         createdAt: Date.now()
-                    },
-                    {
+                    }},
+                    {{
                         id: 'usr_ferit',
                         username: 'ferit',
                         password: '123',
@@ -2356,10 +2370,10 @@
                         theme: 'gold',
                         level: 'İleri Seviye',
                         gender: 'Erkek',
-                        weights: { press: '16', squat: '22', row: '20', rdl: '24', swing: '18', lunge: '14' },
+                        weights: {{ press: '16', squat: '22', row: '20', rdl: '24', swing: '18', lunge: '14' }},
                         createdAt: Date.now()
-                    },
-                    {
+                    }},
+                    {{
                         id: 'usr_ismail',
                         username: 'ismail',
                         password: '123',
@@ -2369,66 +2383,66 @@
                         theme: 'cyan',
                         level: 'Orta Seviye',
                         gender: 'Erkek',
-                        weights: { press: '12', squat: '18', row: '16', rdl: '18', swing: '14', lunge: '12' },
+                        weights: {{ press: '12', squat: '18', row: '16', rdl: '18', swing: '14', lunge: '12' }},
                         createdAt: Date.now()
-                    }
+                    }}
                 ];
                 localStorage.setItem('celik_kodu_auth_users', JSON.stringify(users));
-            }
+            }}
             return users;
-        }
+        }}
 
-        function getAuthUsers() {
+        function getAuthUsers() {{
             return initAuthDatabase();
-        }
+        }}
 
-        function saveAuthUsers(users) {
+        function saveAuthUsers(users) {{
             localStorage.setItem('celik_kodu_auth_users', JSON.stringify(users));
-        }
+        }}
 
-        function getSession() {
-            try {
+        function getSession() {{
+            try {{
                 const raw = localStorage.getItem('celik_kodu_session');
                 return raw ? JSON.parse(raw) : null;
-            } catch(e) {
+            }} catch(e) {{
                 return null;
-            }
-        }
+            }}
+        }}
 
-        function setSession(session) {
+        function setSession(session) {{
             currentSession = session;
-            if (session) {
+            if (session) {{
                 localStorage.setItem('celik_kodu_session', JSON.stringify(session));
                 localStorage.setItem('celik_kodu_active_user_id', session.userId);
-            } else {
+            }} else {{
                 localStorage.removeItem('celik_kodu_session');
                 localStorage.removeItem('celik_kodu_active_user_id');
-            }
+            }}
             syncAppViewState();
-        }
+        }}
 
-        function getActiveUserId() {
+        function getActiveUserId() {{
             const session = getSession();
             if (session && session.userId) return session.userId;
             const fallback = localStorage.getItem('celik_kodu_active_user_id');
             return fallback || 'usr_admin';
-        }
+        }}
 
-        function getActiveUser() {
+        function getActiveUser() {{
             const uid = getActiveUserId();
             const users = getAuthUsers();
             return users.find(u => u.id === uid) || users[0];
-        }
+        }}
 
-        function syncAppViewState() {
+        function syncAppViewState() {{
             const session = getSession();
             const loginScreen = document.getElementById('loginScreen');
             const mainAppWrapper = document.getElementById('mainAppWrapper');
 
-            if (!session) {
+            if (!session) {{
                 if (loginScreen) loginScreen.classList.add('active');
                 if (mainAppWrapper) mainAppWrapper.style.display = 'none';
-            } else {
+            }} else {{
                 if (loginScreen) loginScreen.classList.remove('active');
                 if (mainAppWrapper) mainAppWrapper.style.display = 'block';
 
@@ -2441,16 +2455,16 @@
                 if (profileTabAdminBtn) profileTabAdminBtn.style.display = isAdmin ? 'inline-block' : 'none';
 
                 const roleBadge = document.getElementById('headerUserRoleBadge');
-                if (roleBadge) {
+                if (roleBadge) {{
                     roleBadge.innerText = isAdmin ? 'YÖNETİCİ' : 'SPORCU';
                     roleBadge.className = 'auth-role-tag ' + (isAdmin ? 'role-admin' : 'role-athlete');
-                }
+                }}
 
                 applyActiveUserProfile();
-            }
-        }
+            }}
+        }}
 
-        function handleAuthLogin(e) {
+        function handleAuthLogin(e) {{
             e.preventDefault();
             const usernameInput = document.getElementById('loginUsername');
             const passwordInput = document.getElementById('loginPassword');
@@ -2462,51 +2476,51 @@
             const users = getAuthUsers();
             const matched = users.find(u => u.username.toLowerCase() === uname && u.password === pass);
 
-            if (matched) {
+            if (matched) {{
                 errorBox.style.display = 'none';
-                setSession({
+                setSession({{
                     userId: matched.id,
                     username: matched.username,
                     role: matched.role,
                     name: matched.name
-                });
+                }});
                 usernameInput.value = "";
                 passwordInput.value = "";
-            } else {
+            }} else {{
                 errorBox.innerText = "❌ Hatalı kullanıcı adı veya şifre! (Varsayılan: admin / 123)";
                 errorBox.style.display = 'block';
-            }
-        }
+            }}
+        }}
 
-        function handleAuthLogout() {
-            if (confirm("Oturumu kapatmak istediğinize emin misiniz?")) {
+        function handleAuthLogout() {{
+            if (confirm("Oturumu kapatmak istediğinize emin misiniz?")) {{
                 setSession(null);
-            }
-        }
+            }}
+        }}
 
         // ADMIN PANEL
-        function openAdminModal() {
+        function openAdminModal() {{
             const session = getSession();
-            if (!session || session.role !== 'admin') {
+            if (!session || session.role !== 'admin') {{
                 alert("Bu alana sadece yöneticiler erişebilir.");
                 return;
-            }
+            }}
             renderAdminUserList();
             document.getElementById('adminModal').classList.add('active');
-        }
+        }}
 
-        function closeAdminModal() {
+        function closeAdminModal() {{
             document.getElementById('adminModal').classList.remove('active');
-        }
+        }}
 
-        function selectNewAvatar(av) {
+        function selectNewAvatar(av) {{
             selectedNewAvatar = av;
-            document.querySelectorAll('#newAvatarPicker .avatar-choice').forEach(el => {
+            document.querySelectorAll('#newAvatarPicker .avatar-choice').forEach(el => {{
                 el.classList.toggle('selected', el.innerText.trim() === av);
-            });
-        }
+            }});
+        }}
 
-        function handleCreateUser() {
+        function handleCreateUser() {{
             const uname = (document.getElementById('newUsername').value || '').trim().toLowerCase();
             const pass = (document.getElementById('newPassword').value || '').trim();
             const dname = (document.getElementById('newDisplayName').value || '').trim();
@@ -2514,18 +2528,18 @@
             const level = document.getElementById('newLevel').value;
             const gender = document.getElementById('newGender').value;
 
-            if (!uname || !pass || !dname) {
+            if (!uname || !pass || !dname) {{
                 alert("Lütfen tüm alanları doldurun.");
                 return;
-            }
+            }}
 
             const users = getAuthUsers();
-            if (users.some(u => u.username.toLowerCase() === uname)) {
+            if (users.some(u => u.username.toLowerCase() === uname)) {{
                 alert("Bu kullanıcı adı zaten kullanımda!");
                 return;
-            }
+            }}
 
-            const newUser = {
+            const newUser = {{
                 id: 'usr_' + Date.now(),
                 username: uname,
                 password: pass,
@@ -2535,9 +2549,9 @@
                 theme: role === 'admin' ? 'gold' : 'cyan',
                 level: level,
                 gender: gender,
-                weights: { press: '12', squat: '18', row: '16', rdl: '18', swing: '14', lunge: '12' },
+                weights: {{ press: '12', squat: '18', row: '16', rdl: '18', swing: '14', lunge: '12' }},
                 createdAt: Date.now()
-            };
+            }};
 
             users.push(newUser);
             saveAuthUsers(users);
@@ -2547,17 +2561,17 @@
             document.getElementById('newDisplayName').value = "";
 
             renderAdminUserList();
-            alert(`✅ ${dname} (@${uname}) başarıyla oluşturuldu!`);
-        }
+            alert(`✅ ${{dname}} (@${{uname}}) başarıyla oluşturuldu!`);
+        }}
 
-        function renderAdminUserList() {
+        function renderAdminUserList() {{
             const container = document.getElementById('adminUserListContainer');
             if (!container) return;
 
             const users = getAuthUsers();
             const session = getSession();
 
-            container.innerHTML = users.map(u => {
+            container.innerHTML = users.map(u => {{
                 const logs = getUserLogsById(u.id);
                 const streak = calculateStreakForLogs(logs);
                 const isSelf = session && session.userId === u.id;
@@ -2566,85 +2580,85 @@
                     <div class="admin-user-card">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                             <div style="display:flex; align-items:center; gap:8px;">
-                                <span style="font-size:20px;">${u.avatar || '🥋'}</span>
+                                <span style="font-size:20px;">${{u.avatar || '🥋'}}</span>
                                 <div>
-                                    <strong style="color:#fff; font-size:13px;">${escapeHTML(u.name)}</strong>
-                                    <span style="font-size:11px; color:var(--text-secondary);"> (@${escapeHTML(u.username)})</span>
+                                    <strong style="color:#fff; font-size:13px;">${{escapeHTML(u.name)}}</strong>
+                                    <span style="font-size:11px; color:var(--text-secondary);"> (@${{escapeHTML(u.username)}})</span>
                                 </div>
                             </div>
                             <div style="display:flex; gap:6px;">
-                                <button class="btn btn-outline" style="font-size:10px; padding:3px 8px; color:var(--gold);" onclick="adminSwitchToUser('${u.id}')">
-                                    ${isSelf ? 'Aktif' : 'Hesabına Geç'}
+                                <button class="btn btn-outline" style="font-size:10px; padding:3px 8px; color:var(--gold);" onclick="adminSwitchToUser('${{u.id}}')">
+                                    ${{isSelf ? 'Aktif' : 'Hesabına Geç'}}
                                 </button>
-                                ${!isSelf ? `
-                                    <button class="btn btn-outline" style="font-size:10px; padding:3px 8px; color:#ef4444; border-color:#ef4444;" onclick="adminDeleteUser('${u.id}')">
+                                ${{!isSelf ? `
+                                    <button class="btn btn-outline" style="font-size:10px; padding:3px 8px; color:#ef4444; border-color:#ef4444;" onclick="adminDeleteUser('${{u.id}}')">
                                         Sil
                                     </button>
-                                ` : ''}
+                                ` : ''}}
                             </div>
                         </div>
                         <div style="font-size:11px; color:var(--text-secondary); display:flex; justify-content:space-between;">
-                            <span>Şifre: <code style="color:var(--gold-light);">${escapeHTML(u.password)}</code></span>
-                            <span>${logs.length} Seans • Seri: ${streak} Gün</span>
+                            <span>Şifre: <code style="color:var(--gold-light);">${{escapeHTML(u.password)}}</code></span>
+                            <span>${{logs.length}} Seans • Seri: ${{streak}} Gün</span>
                         </div>
                     </div>
                 `;
-            }).join('');
-        }
+            }}).join('');
+        }}
 
-        function adminSwitchToUser(targetUserId) {
+        function adminSwitchToUser(targetUserId) {{
             const users = getAuthUsers();
             const target = users.find(u => u.id === targetUserId);
             if (!target) return;
 
-            setSession({
+            setSession({{
                 userId: target.id,
                 username: target.username,
                 role: target.role,
                 name: target.name
-            });
+            }});
             closeAdminModal();
-        }
+        }}
 
-        function adminDeleteUser(userId) {
+        function adminDeleteUser(userId) {{
             const users = getAuthUsers();
             const target = users.find(u => u.id === userId);
             if (!target) return;
 
-            if (confirm(`@${target.username} kullanıcısını silmek istediğinize emin misiniz?`)) {
-                localStorage.removeItem(`celik_kodu_history_${userId}`);
-                localStorage.removeItem(`celik_kodu_custom_programs_${userId}`);
+            if (confirm(`@${{target.username}} kullanıcısını silmek istediğinize emin misiniz?`)) {{
+                localStorage.removeItem(`celik_kodu_history_${{userId}}`);
+                localStorage.removeItem(`celik_kodu_custom_programs_${{userId}}`);
                 const updated = users.filter(u => u.id !== userId);
                 saveAuthUsers(updated);
                 renderAdminUserList();
-            }
-        }
+            }}
+        }}
 
         // PROFILE & THEME SETTINGS
-        function applyTheme(themeKey) {
+        function applyTheme(themeKey) {{
             const theme = THEMES[themeKey] || THEMES.gold;
             document.documentElement.style.setProperty('--gold', theme.gold);
             document.documentElement.style.setProperty('--gold-light', theme.goldLight);
             document.documentElement.style.setProperty('--gold-glow', theme.glow);
-        }
+        }}
 
-        function selectAvatar(avatar) {
+        function selectAvatar(avatar) {{
             selectedAvatar = avatar;
-            document.querySelectorAll('#avatarPicker .avatar-choice').forEach(el => {
+            document.querySelectorAll('#avatarPicker .avatar-choice').forEach(el => {{
                 el.classList.toggle('selected', el.innerText.trim() === avatar);
-            });
-        }
+            }});
+        }}
 
-        function selectTheme(themeKey) {
+        function selectTheme(themeKey) {{
             selectedTheme = themeKey;
-            document.querySelectorAll('#themePicker .theme-pill').forEach(el => {
+            document.querySelectorAll('#themePicker .theme-pill').forEach(el => {{
                 const isSelected = el.getAttribute('onclick') && el.getAttribute('onclick').includes(themeKey);
                 el.classList.toggle('selected', isSelected);
-            });
+            }});
             applyTheme(themeKey);
-        }
+        }}
 
-        function applyActiveUserProfile() {
+        function applyActiveUserProfile() {{
             const user = getActiveUser();
             if (!user) return;
 
@@ -2660,7 +2674,7 @@
             const cardName = document.getElementById('profileCardName');
             if (cardName) cardName.innerText = escapeHTML(user.name);
             const cardMeta = document.getElementById('profileCardMeta');
-            if (cardMeta) cardMeta.innerText = `${user.level} (${user.gender}) • Özel Kilo Programı`;
+            if (cardMeta) cardMeta.innerText = `${{user.level}} (${{user.gender}}) • Özel Kilo Programı`;
 
             const nameInput = document.getElementById('editUserName');
             if (nameInput) nameInput.value = user.name || '';
@@ -2672,7 +2686,7 @@
             selectAvatar(user.avatar || '🥋');
             selectTheme(user.theme || 'gold');
 
-            const w = user.weights || {};
+            const w = user.weights || {{}};
             if (document.getElementById('w_press')) document.getElementById('w_press').value = w.press || '';
             if (document.getElementById('w_squat')) document.getElementById('w_squat').value = w.squat || '';
             if (document.getElementById('w_row')) document.getElementById('w_row').value = w.row || '';
@@ -2681,9 +2695,9 @@
             if (document.getElementById('w_lunge')) document.getElementById('w_lunge').value = w.lunge || '';
 
             renderHistory();
-        }
+        }}
 
-        function saveCurrentProfile() {
+        function saveCurrentProfile() {{
             const user = getActiveUser();
             const nameInput = document.getElementById('editUserName');
             const newName = nameInput.value.trim() || 'Sporcu';
@@ -2693,14 +2707,14 @@
             user.theme = selectedTheme;
             user.level = document.getElementById('editUserLevel').value;
             user.gender = document.getElementById('editUserGender').value;
-            user.weights = {
+            user.weights = {{
                 press: document.getElementById('w_press').value,
                 squat: document.getElementById('w_squat').value,
                 row: document.getElementById('w_row').value,
                 rdl: document.getElementById('w_rdl').value,
                 swing: document.getElementById('w_swing').value,
                 lunge: document.getElementById('w_lunge').value
-            };
+            }};
 
             const users = getAuthUsers();
             const idx = users.findIndex(u => u.id === user.id);
@@ -2708,18 +2722,18 @@
             saveAuthUsers(users);
 
             const session = getSession();
-            if (session && session.userId === user.id) {
+            if (session && session.userId === user.id) {{
                 session.name = newName;
                 localStorage.setItem('celik_kodu_session', JSON.stringify(session));
-            }
+            }}
 
             applyActiveUserProfile();
             playAlertSound();
             alert("✅ Profiliniz ve çalışma kilolarınız başarıyla kaydedildi!");
-        }
+        }}
 
         // ==================== LOGS & STATS LOGIC ====================
-        function escapeHTML(str) {
+        function escapeHTML(str) {{
             if (!str) return '';
             return String(str)
                 .replace(/&/g, '&amp;')
@@ -2727,53 +2741,53 @@
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#039;');
-        }
+        }}
 
-        function getUserLogsById(userId) {
-            try {
-                const raw = localStorage.getItem(`celik_kodu_history_${userId}`);
+        function getUserLogsById(userId) {{
+            try {{
+                const raw = localStorage.getItem(`celik_kodu_history_${{userId}}`);
                 return raw ? JSON.parse(raw) : [];
-            } catch(e) {
+            }} catch(e) {{
                 return [];
-            }
-        }
+            }}
+        }}
 
-        function getWorkoutLogs() {
+        function getWorkoutLogs() {{
             const uid = getActiveUserId();
             return getUserLogsById(uid);
-        }
+        }}
 
-        function setWorkoutLogs(logs) {
+        function setWorkoutLogs(logs) {{
             const uid = getActiveUserId();
-            localStorage.setItem(`celik_kodu_history_${uid}`, JSON.stringify(logs));
-        }
+            localStorage.setItem(`celik_kodu_history_${{uid}}`, JSON.stringify(logs));
+        }}
 
-        function deleteLog(id) {
-            if (confirm("Bu antrenman kaydını silmek istediğinize emin misiniz?")) {
+        function deleteLog(id) {{
+            if (confirm("Bu antrenman kaydını silmek istediğinize emin misiniz?")) {{
                 let logs = getWorkoutLogs();
                 logs = logs.filter(l => l.id !== id);
                 setWorkoutLogs(logs);
                 renderHistory();
-            }
-        }
+            }}
+        }}
 
-        function calculateStreakForLogs(logs) {
+        function calculateStreakForLogs(logs) {{
             let streak = 0;
             const uniqueDates = [...new Set(logs.map(l => l.date))].sort().reverse();
             let checkDate = new Date();
-            for (let i = 0; i < 30; i++) {
+            for (let i = 0; i < 30; i++) {{
                 const dateStr = checkDate.toISOString().split('T')[0];
-                if (uniqueDates.includes(dateStr)) {
+                if (uniqueDates.includes(dateStr)) {{
                     streak++;
-                } else if (i > 0) {
+                }} else if (i > 0) {{
                     break;
-                }
+                }}
                 checkDate.setDate(checkDate.getDate() - 1);
-            }
+            }}
             return streak;
-        }
+        }}
 
-        function renderHistory() {
+        function renderHistory() {{
             const logs = getWorkoutLogs();
             const container = document.getElementById('logHistoryContainer');
             if (!container) return;
@@ -2787,86 +2801,95 @@
             const thisWeek = logs.filter(l => new Date(l.date) >= startOfWeek).length;
 
             if (document.getElementById('statTotalWorkouts')) document.getElementById('statTotalWorkouts').innerText = total;
-            if (document.getElementById('statWeekWorkouts')) document.getElementById('statWeekWorkouts').innerText = `${thisWeek}/3`;
+            if (document.getElementById('statWeekWorkouts')) document.getElementById('statWeekWorkouts').innerText = `${{thisWeek}}/3`;
             if (document.getElementById('statStreak')) document.getElementById('statStreak').innerText = streak;
 
-            if (logs.length === 0) {
+            if (logs.length === 0) {{
                 container.innerHTML = `
                     <div style="background:var(--bg-surface); padding:20px; text-align:center; border:1px dashed var(--border); border-radius:10px; color:var(--text-secondary); font-size:12px;">
                         Henüz kayıtlı antrenman seansınız yok. Bugün ilk antrenmanınızı yapıp kaydedin! 🚀
                     </div>
                 `;
                 return;
-            }
+            }}
 
             container.innerHTML = logs.map(l => `
                 <div class="log-history-card">
                     <div class="log-card-header">
-                        <span class="log-date">📅 ${escapeHTML(l.date)} (${l.duration} Dk)</span>
+                        <span class="log-date">📅 ${{escapeHTML(l.date)}} (${{l.duration}} Dk)</span>
                         <div style="display:flex; align-items:center; gap:6px;">
-                            <span class="ex-badge badge-equip">${escapeHTML(l.rpe.split(' ')[0] + ' ' + l.rpe.split(' ')[1])}</span>
-                            <button class="btn-delete-log" onclick="deleteLog('${l.id}')">✕</button>
+                            <span class="ex-badge badge-equip">${{escapeHTML(l.rpe.split(' ')[0] + ' ' + l.rpe.split(' ')[1])}}</span>
+                            <button class="btn-delete-log" onclick="deleteLog('${{l.id}}')">✕</button>
                         </div>
                     </div>
                     <div style="font-size:13px; font-weight:800; color:var(--gold-light); margin-bottom:4px;">
-                        ${escapeHTML(l.program)}
+                        ${{escapeHTML(l.program)}}
                     </div>
-                    ${l.notes ? `<div style="font-size:11.5px; color:var(--text-secondary); background:rgba(0,0,0,0.25); padding:6px 10px; border-radius:6px; margin-top:4px;">${escapeHTML(l.notes)}</div>` : ''}
+                    ${{l.notes ? `<div style="font-size:11.5px; color:var(--text-secondary); background:rgba(0,0,0,0.25); padding:6px 10px; border-radius:6px; margin-top:4px;">${{escapeHTML(l.notes)}}</div>` : ''}}
                 </div>
             `).join('');
-        }
+        }}
 
-        function exportData() {
+        function exportData() {{
             const uid = getActiveUserId();
             const logs = getWorkoutLogs();
-            const data = {
+            const data = {{
                 userId: uid,
                 history: logs,
                 exportDate: new Date().toISOString()
-            };
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            }};
+            const blob = new Blob([JSON.stringify(data, null, 2)], {{ type: 'application/json' }});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `celik_kodu_yedek_${uid}_${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `celik_kodu_yedek_${{uid}}_${{new Date().toISOString().split('T')[0]}}.json`;
             a.click();
             URL.revokeObjectURL(url);
-        }
+        }}
 
-        function importData(e) {
+        function importData(e) {{
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(evt) {
-                try {
+            reader.onload = function(evt) {{
+                try {{
                     const data = JSON.parse(evt.target.result);
-                    if (data.history && Array.isArray(data.history)) {
+                    if (data.history && Array.isArray(data.history)) {{
                         setWorkoutLogs(data.history);
                         renderHistory();
                         alert("✅ Antrenman geçmişi başarıyla yüklendi!");
-                    }
-                } catch(err) {
+                    }}
+                }} catch(err) {{
                     alert("❌ Hata: Geçersiz yedek dosyası!");
-                }
-            };
+                }}
+            }};
             reader.readAsText(file);
-        }
+        }}
 
         // PWA SERVICE WORKER
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
+        if ('serviceWorker' in navigator) {{
+            window.addEventListener('load', () => {{
                 navigator.serviceWorker.register('./sw.js')
                     .then(reg => console.log('SW scope:', reg.scope))
                     .catch(err => console.log('SW err:', err));
-            });
-        }
+            }});
+        }}
 
         // INITIALIZE APPLICATION
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', () => {{
             initAuthDatabase();
             syncAppViewState();
             renderActiveWorkout();
-        });
+        }});
     </script>
 </body>
 </html>
+"""
+
+with open(INDEX_FILE, 'w', encoding='utf-8') as f:
+    f.write(HTML_CONTENT)
+
+with open(MOBIL_FILE, 'w', encoding='utf-8') as f:
+    f.write(HTML_CONTENT)
+
+print("Both index.html and salon_kilavuzu_mobil.html built successfully!")
