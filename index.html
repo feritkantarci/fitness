@@ -4899,20 +4899,122 @@
 
         function renderActiveWorkout() {
             const container = document.getElementById('activeWorkoutContainer');
+            const liveTrackerBar = document.querySelector('.live-tracker-bar');
+
             if (!activeWorkoutSession || !container) {
+                if (liveTrackerBar) liveTrackerBar.style.display = 'none';
                 if (container) {
+                    const user = getActiveUser();
+                    const key = `celik_kodu_custom_programs_${user.id}`;
+                    let customSaved = [];
+                    try {
+                        const raw = localStorage.getItem(key);
+                        if (raw) customSaved = JSON.parse(raw);
+                    } catch(e) {}
+
                     container.innerHTML = `
-                        <div style="text-align:center; padding:40px 20px; color:var(--text-secondary);">
-                            <div style="font-size:40px; margin-bottom:10px;">🏋️</div>
-                            <h3>Aktif bir antrenman bulunmuyor.</h3>
-                            <p style="font-size:12px; margin-top:4px;">Program Oluştur sekmesinden bir program üretip "Antrenmanı Başlat"a basarak başlayabilirsiniz.</p>
-                            <button class="btn btn-gold" style="margin-top:16px; padding:10px 20px;" onclick="switchTab('generatorTab')">⚡ Program Oluştur</button>
+                        <div style="padding:10px 4px 30px;">
+                            <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:18px; margin-bottom:16px; text-align:center;">
+                                <div style="font-size:36px; margin-bottom:8px;">🏋️</div>
+                                <h2 style="font-size:19px; font-weight:900; color:#fff; margin-bottom:4px;">Canlı Antrenman Başlat</h2>
+                                <p style="font-size:12.5px; color:var(--text-secondary); line-height:1.4; max-width:380px; margin:0 auto 16px;">
+                                    Aşağıdaki hazır programlardan birini seçip tek dokunuşla canlı takibi başlatabilir veya sihirbazla özel program üretebilirsiniz.
+                                </p>
+                                <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+                                    <button class="btn btn-gold" style="padding:10px 16px; font-size:12.5px; font-weight:800;" onclick="switchTab('generatorTab')">
+                                        ⚡ Otomatik Sihirbaz
+                                    </button>
+                                    <button class="btn btn-outline" style="padding:10px 16px; font-size:12.5px; font-weight:800;" onclick="switchTab('studioTab')">
+                                        🎯 Bölge Atölyesi
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div style="font-size:12px; font-weight:900; color:var(--gold); margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+                                <span>⚔️ HAZIR ÇELİK KODU PROGRAMLARI</span>
+                            </div>
+
+                            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+                                <div class="log-history-card" style="padding:14px; margin-bottom:0;">
+                                    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+                                        <div>
+                                            <div style="font-size:14.5px; font-weight:800; color:#fff;">Gün 1: Omuz & Bacak Ön Zırhı</div>
+                                            <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
+                                                Press + Squat • Şınav + Front Squat • Core
+                                            </div>
+                                            <div style="font-size:11px; color:var(--cyan); margin-top:4px; font-weight:700;">
+                                                ⏱️ 45 Dk • 4 Set • Süperset
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-gold" style="padding:8px 14px; font-size:12px; font-weight:800; flex-shrink:0;" onclick="loadOfficialRoutine('la_forja_day1')">
+                                            ▶ Başlat
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="log-history-card" style="padding:14px; margin-bottom:0;">
+                                    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+                                        <div>
+                                            <div style="font-size:14.5px; font-weight:800; color:#fff;">Gün 2: Sırt Çekiş & Balistik Güç</div>
+                                            <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
+                                                Saw Row + RDL • Swing + Pullup • Çanta Taşıma
+                                            </div>
+                                            <div style="font-size:11px; color:var(--cyan); margin-top:4px; font-weight:700;">
+                                                ⏱️ 45 Dk • 4 Set • Süperset
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-gold" style="padding:8px 14px; font-size:12px; font-weight:800; flex-shrink:0;" onclick="loadOfficialRoutine('la_forja_day2')">
+                                            ▶ Başlat
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="log-history-card" style="padding:14px; margin-bottom:0;">
+                                    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+                                        <div>
+                                            <div style="font-size:14.5px; font-weight:800; color:#fff;">Gün 3: Kompleks & Merdiven</div>
+                                            <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
+                                                Snatch + Lunge • Row + Squat • Burpee Finisher
+                                            </div>
+                                            <div style="font-size:11px; color:var(--cyan); margin-top:4px; font-weight:700;">
+                                                ⏱️ 50 Dk • 4 Set • Süperset
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-gold" style="padding:8px 14px; font-size:12px; font-weight:800; flex-shrink:0;" onclick="loadOfficialRoutine('la_forja_day3')">
+                                            ▶ Başlat
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            ${customSaved.length > 0 ? `
+                                <div style="font-size:12px; font-weight:900; color:var(--gold); margin-bottom:10px;">
+                                    ⭐ KAYITLI ÖZEL PROGRAMLARIM
+                                </div>
+                                <div style="display:flex; flex-direction:column; gap:10px;">
+                                    ${customSaved.map(p => `
+                                        <div class="log-history-card" style="padding:14px; margin-bottom:0;">
+                                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                                <div>
+                                                    <div style="font-size:14px; font-weight:800; color:#fff;">${escapeHTML(p.title)}</div>
+                                                    <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">${(p.exercises || []).length} Hareket</div>
+                                                </div>
+                                                <button class="btn btn-gold" style="padding:8px 14px; font-size:12px; font-weight:800;" onclick="loadSavedProgram('${p.id}')">
+                                                    ▶ Başlat
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
                         </div>
                     `;
                 }
                 updateLiveProgressBar();
                 return;
             }
+
+            if (liveTrackerBar) liveTrackerBar.style.display = 'block';
 
             const s = activeWorkoutSession;
             const user = getActiveUser();
