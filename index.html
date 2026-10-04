@@ -2350,9 +2350,6 @@
                 <button class="tab-btn active" onclick="switchTab('generatorTab')">
                     <span>⚡ Otomatik</span>
                 </button>
-                <button class="tab-btn" onclick="switchTab('studioTab')" id="tabBtnStudio">
-                    <span>🎯 Atölye</span>
-                </button>
                 <button class="tab-btn" onclick="switchTab('activeWorkoutTab')" id="tabBtnActiveWorkout">
                     <span>🏋️ Antrenman</span>
                 </button>
@@ -2485,160 +2482,124 @@
                 </div>
             </div>
 
-            <!-- ==================== TAB: WORKOUT STUDIO & REGION ARCHITECT ==================== -->
-            <div id="studioTab" class="tab-content">
-                <div class="generator-card" style="border-color: rgba(245, 158, 11, 0.35);">
-                    
-                    <!-- TOP BAR: Title & Actions -->
-                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; border-bottom:1px solid var(--border); padding-bottom:12px;">
-                        <div>
-                            <h2 style="font-size:18px; font-weight:900; color:#fff;">Program Atölyesi</h2>
-                            <p style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Bölge seçin, hareketleri ekleyin, dengeyi görün.</p>
-                        </div>
-                        <div style="display:flex; gap:6px;">
-                            <button class="btn btn-outline" style="font-size:11px; padding:6px 10px;" onclick="resetCustomRoutine()">🗑️ Sıfırla</button>
-                            <button class="btn btn-gold" style="font-size:11px; padding:6px 12px; font-weight:800;" onclick="startActiveWorkoutFromCustom()">🏋️ Başlat</button>
-                        </div>
-                    </div>
-
-                    <!-- SECTION 1: HEDEF BÖLGELER (Region Selectors) -->
-                    <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:12px; margin-bottom:14px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                            <span style="font-size:12.5px; font-weight:800; color:#fff;">Hedef Bölgeler</span>
-                            <div style="display:flex; gap:6px;">
-                                <button class="btn btn-outline" style="font-size:10px; padding:3px 8px;" onclick="selectPresetRegions('all')">Tüm Vücut</button>
-                                <button class="btn btn-outline" style="font-size:10px; padding:3px 8px;" onclick="selectPresetRegions('clear')">Temizle</button>
-                            </div>
-                        </div>
-
-                        <!-- Multi-select Region Chips -->
-                        <div id="studioRegionChips" style="display:flex; flex-wrap:wrap; gap:6px;">
-                            <!-- Populated dynamically -->
-                        </div>
-                    </div>
-
-                    <!-- SECTION 2: BÖLGE DURUMU (Visual Progress: Seçildi / Kaldı) -->
-                    <div id="studioRegionStatusBox" style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:12px; margin-bottom:14px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                            <span style="font-size:12.5px; font-weight:800; color:#fff;">Bölge Durumu</span>
-                            <span id="studioRegionSummaryBadge" style="font-size:11px; font-weight:700;"></span>
-                        </div>
-                        <div id="studioRegionStatusGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:6px;">
-                            <!-- Populated dynamically -->
-                        </div>
-                    </div>
-
-                    <!-- SECTION 3: PROGRAM TASLAĞI -->
-                    <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:12px; margin-bottom:14px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                            <div style="display:flex; align-items:center; gap:6px;">
-                                <span style="font-size:12.5px; font-weight:800; color:var(--gold);">Program Taslağı</span>
-                                <span id="customRoutineCountBadge" class="auth-role-tag role-admin" style="font-size:10px;">0 Hareket</span>
-                            </div>
-                            <button class="btn btn-outline" style="font-size:10.5px; padding:4px 8px;" onclick="saveCustomRoutineToLibrary()">💾 Kaydet</button>
-                        </div>
-
-                        <div style="display:grid; grid-template-columns: 1fr auto; gap:8px; margin-bottom:10px;">
-                            <input type="text" id="customWorkoutTitleInput" class="form-input" style="font-weight:700; padding:8px 10px; font-size:12.5px;" placeholder="Program Adı (Örn: İtiş Zırhı)" value="Özel Çelik Programım">
-                            <select id="customWorkoutRestSelect" class="form-input" style="width:115px; padding:8px; font-size:12px;" onchange="updateCustomRoutineRest(this.value)">
-                                <option value="45">Dinlenme: 45s</option>
-                                <option value="60" selected>Dinlenme: 60s</option>
-                                <option value="90">Dinlenme: 90s</option>
-                                <option value="120">Dinlenme: 120s</option>
-                            </select>
-                        </div>
-
-                        <div id="customWorkoutExercisesList" style="display:flex; flex-direction:column; gap:6px;">
-                            <!-- Populated dynamically -->
-                        </div>
-                    </div>
-
-                    <!-- SECTION 4: UYGUN HAREKETLER -->
-                    <div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                            <div style="font-size:12.5px; font-weight:800; color:#fff;">
-                                Uygun Hareketler <span id="studioExTotalCount" style="color:var(--text-secondary); font-size:11px; font-weight:normal;"></span>
-                            </div>
-                            <label style="font-size:11px; color:var(--cyan); cursor:pointer; display:flex; align-items:center; gap:4px;">
-                                <input type="checkbox" id="chkShowAllExercises" onchange="renderStudioExerciseCatalog()"> Tümünü Göster
-                            </label>
-                        </div>
-
-                        <!-- Compact Search & Equipment Filter -->
-                        <div style="display:flex; gap:6px; margin-bottom:10px;">
-                            <input type="text" id="studioSearchInput" class="form-input" style="flex:1; padding:8px 10px; font-size:12px;" placeholder="🔍 Hareket ara..." oninput="renderStudioExerciseCatalog()">
-                            <select id="studioEquipFilter" class="form-input" style="width:auto; padding:8px; font-size:12px;" onchange="renderStudioExerciseCatalog()">
-                                <option value="all">Tüm Ekipmanlar</option>
-                                <option value="dumbbell">Dambıl</option>
-                                <option value="kettlebell">Kettlebell</option>
-                                <option value="bodyweight">Vücut Ağırlığı</option>
-                                <option value="barbell">Halter</option>
-                                <option value="machine">Makine</option>
-                            </select>
-                        </div>
-
-                        <div id="studioExercisesCatalog" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:8px; max-height:600px; overflow-y:auto; padding-right:4px;">
-                            <!-- Populated dynamically -->
-                        </div>
-                    </div>
-
+                <div id="activeWorkoutContainer">
+                    <!-- Populated dynamically when a workout is started -->
                 </div>
-            </div>
 
-            <!-- ==================== TAB 2: ACTIVE LIVE WORKOUT TRACKER ==================== -->
-            <div id="activeWorkoutTab" class="tab-content">
-                <!-- DUAL LIVE TRACKER STICKY BAR: WORKOUT ELAPSED TIMER + REST COUNTDOWN -->
-                <div class="live-tracker-bar">
-                    <!-- TOP ROW: Timers, WakeLock, Mode Switch -->
-                    <div style="display:flex; justify-content:space-between; align-items:center; width:100%; gap:8px; flex-wrap:wrap;">
-                        <!-- TOTAL ELAPSED WORKOUT TIME -->
-                        <div class="tracker-timer-box">
-                            <div style="display:flex; align-items:center; gap:6px;">
-                                <span class="tracker-timer-label">⏱️ TOPLAM SÜRE</span>
-                                <button id="wakeLockStatusBtn" class="wake-lock-pill" onclick="toggleWakeLockManual()" title="Ekranı Açık Tut">🟢 Ekran Açık</button>
+                <!-- EMBEDDED PROGRAM ATÖLYESİ (KENDİ PROGRAMINI TASARLA) -->
+                <div id="studioSectionInWorkout" style="display:none; margin-top:16px;">
+                    <div class="generator-card" style="border-color: rgba(245, 158, 11, 0.35); padding:16px;">
+                        
+                        <!-- ACCORDION HEADER -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleStudioAccordion()">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span style="font-size:24px;">🎯</span>
+                                <div>
+                                    <h3 style="font-size:15px; font-weight:900; color:var(--gold); margin:0;">Program Atölyesi (Kendi Hareketlerini Seç)</h3>
+                                    <p style="font-size:11.5px; color:var(--text-secondary); margin:2px 0 0;">Bölge seçin, hareket ekleyin ve kendi antrenmanınızı başlatın.</p>
+                                </div>
                             </div>
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <div class="timer-display-workout" id="workoutTotalTimerDisplay">00:00</div>
-                                <button class="btn-timer-sub" id="btnToggleWorkoutPause" onclick="toggleWorkoutPause()">⏸️ Duraklat</button>
-                            </div>
+                            <button type="button" class="btn btn-outline" id="btnToggleStudioAccordion" style="font-size:11px; padding:5px 12px; font-weight:800; border-color:var(--gold); color:var(--gold); flex-shrink:0;">
+                                <span id="studioAccordionArrow">▼ Aç</span>
+                            </button>
                         </div>
 
-                        <!-- VIEW MODE SWITCH: FOCUS VS LIST -->
-                        <div class="view-mode-toggle-group">
-                            <button id="btnViewFocus" class="btn-mode-toggle active" onclick="setActiveWorkoutViewMode('focus')">🎯 Odak Modu</button>
-                            <button id="btnViewList" class="btn-mode-toggle" onclick="setActiveWorkoutViewMode('list')">📋 Tüm Liste</button>
-                        </div>
+                        <!-- ACCORDION BODY -->
+                        <div id="studioAccordionBody" style="display:none; margin-top:16px; border-top:1px solid var(--border); padding-top:16px;">
+                            <!-- TOP BAR: Title & Actions -->
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; border-bottom:1px solid var(--border); padding-bottom:12px;">
+                                <div>
+                                    <span style="font-size:14px; font-weight:800; color:#fff;">Özel Antrenman Taslağı</span>
+                                    <p style="font-size:11px; color:var(--text-secondary); margin-top:2px;">Bölge seçin, hareketleri ekleyin, dengeyi görün.</p>
+                                </div>
+                                <div style="display:flex; gap:6px;">
+                                    <button class="btn btn-outline" style="font-size:11px; padding:6px 10px;" onclick="resetCustomRoutine()">🗑️ Sıfırla</button>
+                                    <button class="btn btn-gold" style="font-size:11px; padding:6px 14px; font-weight:800;" onclick="startActiveWorkoutFromCustom()">🏋️ Başlat</button>
+                                </div>
+                            </div>
 
-                        <!-- REST TIMER COUNTDOWN -->
-                        <div class="tracker-timer-box" style="align-items:flex-end;">
-                            <div class="tracker-timer-label">⏳ DİNLENME SAYACI</div>
-                            <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap; justify-content:flex-end;">
-                                <div class="timer-display" id="timerDisplay">00:45</div>
-                                <div class="timer-controls">
-                                    <button class="btn-timer" onclick="adjustTimerSecs(-15)" title="15 sn azalt">-15s</button>
-                                    <button class="btn-timer" onclick="adjustTimerSecs(15)" title="15 sn ekle">+15s</button>
-                                    <button class="btn-timer" onclick="adjustTimerSecs(30)" title="30 sn ekle">+30s</button>
-                                    <button class="btn-timer" onclick="skipRestTimer()" title="Dinlenmeyi bitirip hemen sete başla" style="color:var(--cyan); border-color:var(--cyan); font-weight:800;">⏭️ Atla</button>
-                                    <button class="btn-timer" onclick="toggleTimer()" id="btnPlayPauseTimer" style="background:var(--gold); color:#090d16; font-weight:900;">▶ Başlat</button>
+                            <!-- SECTION 1: HEDEF BÖLGELER (Region Selectors) -->
+                            <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:12px; margin-bottom:14px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                    <span style="font-size:12.5px; font-weight:800; color:#fff;">Hedef Bölgeler</span>
+                                    <div style="display:flex; gap:6px;">
+                                        <button class="btn btn-outline" style="font-size:10px; padding:3px 8px;" onclick="selectPresetRegions('all')">Tüm Vücut</button>
+                                        <button class="btn btn-outline" style="font-size:10px; padding:3px 8px;" onclick="selectPresetRegions('clear')">Temizle</button>
+                                    </div>
+                                </div>
+
+                                <!-- Multi-select Region Chips -->
+                                <div id="studioRegionChips" style="display:flex; flex-wrap:wrap; gap:6px;">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+
+                            <!-- SECTION 2: BÖLGE DURUMU (Visual Progress: Seçildi / Kaldı) -->
+                            <div id="studioRegionStatusBox" style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:12px; margin-bottom:14px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                    <span style="font-size:12.5px; font-weight:800; color:#fff;">Bölge Durumu</span>
+                                    <span id="studioRegionSummaryBadge" style="font-size:11px; font-weight:700;"></span>
+                                </div>
+                                <div id="studioRegionStatusGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:6px;">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+
+                            <!-- SECTION 3: PROGRAM TASLAĞI -->
+                            <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:12px; margin-bottom:14px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                    <div style="display:flex; align-items:center; gap:6px;">
+                                        <span style="font-size:12.5px; font-weight:800; color:var(--gold);">Program Taslağı</span>
+                                        <span id="customRoutineCountBadge" class="auth-role-tag role-admin" style="font-size:10px;">0 Hareket</span>
+                                    </div>
+                                    <button class="btn btn-outline" style="font-size:10.5px; padding:4px 8px;" onclick="saveCustomRoutineToLibrary()">💾 Kaydet</button>
+                                </div>
+
+                                <div style="display:grid; grid-template-columns: 1fr auto; gap:8px; margin-bottom:10px;">
+                                    <input type="text" id="customWorkoutTitleInput" class="form-input" style="font-weight:700; padding:8px 10px; font-size:12.5px;" placeholder="Program Adı (Örn: İtiş Zırhı)" value="Özel Çelik Programım">
+                                    <select id="customWorkoutRestSelect" class="form-input" style="width:115px; padding:8px; font-size:12px;" onchange="updateCustomRoutineRest(this.value)">
+                                        <option value="45">Dinlenme: 45s</option>
+                                        <option value="60" selected>Dinlenme: 60s</option>
+                                        <option value="90">Dinlenme: 90s</option>
+                                        <option value="120">Dinlenme: 120s</option>
+                                    </select>
+                                </div>
+
+                                <div id="customWorkoutExercisesList" style="display:flex; flex-direction:column; gap:6px;">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+
+                            <!-- SECTION 4: UYGUN HAREKETLER -->
+                            <div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                    <div style="font-size:12.5px; font-weight:800; color:#fff;">
+                                        Uygun Hareketler <span id="studioExTotalCount" style="color:var(--text-secondary); font-size:11px; font-weight:normal;"></span>
+                                    </div>
+                                    <label style="font-size:11px; color:var(--cyan); cursor:pointer; display:flex; align-items:center; gap:4px;">
+                                        <input type="checkbox" id="chkShowAllExercises" onchange="renderStudioExerciseCatalog()"> Tümünü Göster
+                                    </label>
+                                </div>
+
+                                <!-- Compact Search & Equipment Filter -->
+                                <div style="display:flex; gap:6px; margin-bottom:10px;">
+                                    <input type="text" id="studioSearchInput" class="form-input" style="flex:1; padding:8px 10px; font-size:12px;" placeholder="🔍 Hareket ara..." oninput="renderStudioExerciseCatalog()">
+                                    <select id="studioEquipFilter" class="form-input" style="width:auto; padding:8px; font-size:12px;" onchange="renderStudioExerciseCatalog()">
+                                        <option value="all">Tüm Ekipmanlar</option>
+                                        <option value="dumbbell">Dambıl</option>
+                                        <option value="kettlebell">Kettlebell</option>
+                                        <option value="bodyweight">Vücut Ağırlığı</option>
+                                        <option value="barbell">Halter</option>
+                                        <option value="machine">Makine</option>
+                                    </select>
+                                </div>
+
+                                <div id="studioExercisesCatalog" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:8px; max-height:600px; overflow-y:auto; padding-right:4px;">
+                                    <!-- Populated dynamically -->
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- PROGRESS ROW -->
-                    <div class="live-progress-container" id="liveWorkoutProgressContainer">
-                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; margin-bottom:4px;">
-                            <span style="font-weight:800; color:var(--text-secondary);" id="liveProgressText">Set İlerlemesi: 0 / 0 (%0)</span>
-                            <span style="font-weight:800; color:var(--gold);" id="liveProgressDetail">Hazır</span>
-                        </div>
-                        <div class="live-progress-track">
-                            <div class="live-progress-fill" id="liveProgressBarFill" style="width:0%;"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="activeWorkoutContainer">
-                    <!-- Populated dynamically when a workout is started -->
                 </div>
             </div>
 
@@ -3227,10 +3188,6 @@
                 <span class="nav-icon">⚡</span>
                 <span>Oluştur</span>
             </div>
-            <div class="bottom-nav-item" data-tab="studioTab" onclick="switchTab('studioTab')">
-                <span class="nav-icon">🎯</span>
-                <span>Atölye</span>
-            </div>
             <div class="bottom-nav-item" data-tab="activeWorkoutTab" onclick="switchTab('activeWorkoutTab')">
                 <span class="nav-icon">🏋️</span>
                 <span>Antrenman</span>
@@ -3260,6 +3217,10 @@
             <button onclick="closeMoreSheet()" style="background:none; border:none; color:var(--text-secondary); font-size:18px; cursor:pointer;">✕</button>
         </div>
         <div class="more-sheet-grid">
+            <div class="more-sheet-btn" onclick="closeMoreSheet(); switchTab('studioTab');">
+                <span>🎯</span>
+                <span>Program Atölyesi</span>
+            </div>
             <div class="more-sheet-btn" onclick="closeMoreSheet(); switchTab('libraryTab');">
                 <span>📚</span>
                 <span>Hazır Programlar</span>
@@ -3489,6 +3450,12 @@
 
         // TAB SWITCHING & BOTTOM NAV CONTROL
         function switchTab(tabId) {
+            let requestedStudio = false;
+            if (tabId === 'studioTab') {
+                tabId = 'activeWorkoutTab';
+                requestedStudio = true;
+            }
+
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
@@ -3503,22 +3470,27 @@
             // Close more sheet if open
             closeMoreSheet();
 
-            if (tabId === 'studioTab') {
-                initStudioTab();
-            }
-
             const targetContent = document.getElementById(tabId);
             if (targetContent) targetContent.classList.add('active');
 
-            if (tabId === 'activeWorkoutTab' && activeWorkoutSession) {
-                requestWakeLock();
+            if (tabId === 'activeWorkoutTab') {
+                renderActiveWorkout();
+                if (activeWorkoutSession) {
+                    requestWakeLock();
+                } else if (requestedStudio) {
+                    setTimeout(() => {
+                        openStudioAccordion();
+                    }, 120);
+                }
             }
 
             if (tabId === 'libraryTab') renderLibrary();
             if (tabId === 'historyTab') renderHistory();
             if (tabId === 'analyticsTab') renderAnalytics();
 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (!requestedStudio) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         }
 
         // ==================== BOTTOM BAR HIDE / SHOW & SHEET LOGIC ====================
@@ -4897,12 +4869,33 @@
             return false;
         }
 
+        function toggleStudioAccordion(forceOpen) {
+            const body = document.getElementById('studioAccordionBody');
+            const arrow = document.getElementById('studioAccordionArrow');
+            if (!body) return;
+            const isCurrentlyOpen = body.style.display !== 'none';
+            const shouldOpen = (forceOpen !== undefined) ? forceOpen : !isCurrentlyOpen;
+            body.style.display = shouldOpen ? 'block' : 'none';
+            if (arrow) arrow.innerText = shouldOpen ? '▲ Kapat' : '▼ Aç';
+            if (shouldOpen) {
+                initStudioTab();
+            }
+        }
+
+        function openStudioAccordion() {
+            toggleStudioAccordion(true);
+            const sec = document.getElementById('studioSectionInWorkout');
+            if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+        }
+
         function renderActiveWorkout() {
             const container = document.getElementById('activeWorkoutContainer');
             const liveTrackerBar = document.querySelector('.live-tracker-bar');
+            const studioSec = document.getElementById('studioSectionInWorkout');
 
             if (!activeWorkoutSession || !container) {
                 if (liveTrackerBar) liveTrackerBar.style.display = 'none';
+                if (studioSec) studioSec.style.display = 'block';
                 if (container) {
                     const user = getActiveUser();
                     const key = `celik_kodu_custom_programs_${user.id}`;
@@ -4913,19 +4906,19 @@
                     } catch(e) {}
 
                     container.innerHTML = `
-                        <div style="padding:10px 4px 30px;">
+                        <div style="padding:10px 4px 10px;">
                             <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:18px; margin-bottom:16px; text-align:center;">
                                 <div style="font-size:36px; margin-bottom:8px;">🏋️</div>
                                 <h2 style="font-size:19px; font-weight:900; color:#fff; margin-bottom:4px;">Canlı Antrenman Başlat</h2>
                                 <p style="font-size:12.5px; color:var(--text-secondary); line-height:1.4; max-width:380px; margin:0 auto 16px;">
-                                    Aşağıdaki hazır programlardan birini seçip tek dokunuşla canlı takibi başlatabilir veya sihirbazla özel program üretebilirsiniz.
+                                    Aşağıdaki hazır programlardan birini seçip tek dokunuşla canlı takibi başlatabilir veya Atölye'den kendi hareketlerinizi seçebilirsiniz.
                                 </p>
                                 <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
                                     <button class="btn btn-gold" style="padding:10px 16px; font-size:12.5px; font-weight:800;" onclick="switchTab('generatorTab')">
                                         ⚡ Otomatik Sihirbaz
                                     </button>
-                                    <button class="btn btn-outline" style="padding:10px 16px; font-size:12.5px; font-weight:800;" onclick="switchTab('studioTab')">
-                                        🎯 Bölge Atölyesi
+                                    <button class="btn btn-outline" style="padding:10px 16px; font-size:12.5px; font-weight:800;" onclick="openStudioAccordion()">
+                                        🎯 Kendin Tasarla (Atölye)
                                     </button>
                                 </div>
                             </div>
@@ -4934,7 +4927,7 @@
                                 <span>⚔️ HAZIR ÇELİK KODU PROGRAMLARI</span>
                             </div>
 
-                            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+                            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
                                 <div class="log-history-card" style="padding:14px; margin-bottom:0;">
                                     <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
                                         <div>
@@ -4991,7 +4984,7 @@
                                 <div style="font-size:12px; font-weight:900; color:var(--gold); margin-bottom:10px;">
                                     ⭐ KAYITLI ÖZEL PROGRAMLARIM
                                 </div>
-                                <div style="display:flex; flex-direction:column; gap:10px;">
+                                <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
                                     ${customSaved.map(p => `
                                         <div class="log-history-card" style="padding:14px; margin-bottom:0;">
                                             <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -5015,6 +5008,7 @@
             }
 
             if (liveTrackerBar) liveTrackerBar.style.display = 'block';
+            if (studioSec) studioSec.style.display = 'none';
 
             const s = activeWorkoutSession;
             const user = getActiveUser();
