@@ -1772,6 +1772,154 @@
             line-height: 1.4;
         }
 
+        /* ==================== WEEKLY SCHEDULE & PLANNER ==================== */
+        .weekly-planner-section {
+            background: #090e1a;
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+        .weekly-planner-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .weekly-strip {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+        @media (max-width: 600px) {
+            .weekly-strip {
+                display: flex;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                padding-bottom: 6px;
+                gap: 6px;
+                scroll-snap-type: x mandatory;
+            }
+            .weekly-day-pill {
+                min-width: 76px;
+                flex: 0 0 76px;
+                scroll-snap-align: start;
+            }
+        }
+        .weekly-day-pill {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 8px 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+        }
+        .weekly-day-pill:hover {
+            background: rgba(245, 158, 11, 0.12);
+            border-color: rgba(245, 158, 11, 0.4);
+            transform: translateY(-2px);
+        }
+        .weekly-day-pill.active-today {
+            background: rgba(245, 158, 11, 0.18);
+            border: 1.5px solid var(--gold);
+            box-shadow: 0 0 14px rgba(245, 158, 11, 0.3);
+        }
+        .weekly-day-pill.active-tomorrow {
+            background: rgba(56, 189, 248, 0.14);
+            border: 1.5px solid #38bdf8;
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+        }
+        .weekly-day-tag {
+            font-size: 8.5px;
+            font-weight: 800;
+            padding: 1px 4px;
+            border-radius: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .weekly-day-tag.today {
+            background: var(--gold);
+            color: #090d16;
+        }
+        .weekly-day-tag.tomorrow {
+            background: #38bdf8;
+            color: #090d16;
+        }
+        .weekly-day-name {
+            font-size: 11px;
+            font-weight: 800;
+            color: #fff;
+        }
+        .weekly-day-status {
+            font-size: 9.5px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        /* HERO SCHEDULED LAUNCH BANNER */
+        .hero-scheduled-banner {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
+            border: 1.5px solid var(--gold);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 14px;
+            position: relative;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 18px rgba(245, 158, 11, 0.15);
+        }
+        .hero-scheduled-badge {
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 6px;
+        }
+        .hero-scheduled-badge.today {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.5);
+        }
+        .hero-scheduled-badge.tomorrow {
+            background: rgba(56, 189, 248, 0.2);
+            color: #7dd3fc;
+            border: 1px solid rgba(56, 189, 248, 0.5);
+        }
+        .hero-scheduled-title {
+            font-size: 17px;
+            font-weight: 900;
+            color: #fff;
+            margin: 0 0 4px 0;
+            line-height: 1.2;
+        }
+        .hero-scheduled-desc {
+            font-size: 12px;
+            color: #cbd5e1;
+            margin: 0 0 12px 0;
+            line-height: 1.4;
+        }
+        .hero-scheduled-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
         /* ==================== LIVE WORKOUT TRACKER ==================== */
         .live-tracker-bar {
             position: sticky;
@@ -3254,6 +3402,37 @@
         </div>
     </div>
 
+    <!-- ==================== WEEKLY SCHEDULE DAY MODAL ==================== -->
+    <div id="scheduleDayModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 520px; max-height: 92vh; overflow-y: auto;">
+            <div class="modal-header">
+                <div>
+                    <span class="auth-role-tag role-admin" id="schedModalDayBadge" style="font-size:10px;">HAFTALIK PLAN</span>
+                    <h3 class="modal-title" id="schedModalDayTitle" style="font-size:16px; margin-top:4px;">Günü Programla</h3>
+                </div>
+                <button class="modal-close" onclick="closeScheduleDayModal()">✕</button>
+            </div>
+
+            <p style="font-size:12px; color:var(--text-secondary); margin:0 0 14px 0; line-height:1.4;">
+                Bu güne atamak istediğiniz antrenmanı seçin. Salona gittiğinizde tek dokunuşla başlatabileceksiniz.
+            </p>
+
+            <!-- OPTIONS LIST -->
+            <div id="schedModalOptionsList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">
+                <!-- Populated dynamically -->
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top:1px solid var(--border); padding-top:12px;">
+                <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 12px; color:#fca5a5; border-color:rgba(239,68,68,0.3);" onclick="setDayAsRest()">
+                    🧘 Dinlenme Günü Yap
+                </button>
+                <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 14px;" onclick="closeScheduleDayModal()">
+                    Kapat
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- ==================== LOG WORKOUT COMPLETE MODAL ==================== -->
     <div id="completeModal" class="modal-overlay">
         <div class="modal-box" style="max-width: 560px; max-height: 92vh; overflow-y: auto;">
@@ -4156,7 +4335,10 @@
                     <!-- ACTION BUTTONS -->
                     <div class="workout-actions-bar">
                         <button class="btn-start-workout" onclick="startActiveWorkoutFromGenerated()">
-                            <span>▶️ ANTRENMANI BAŞLAT (SAYAÇ & SETLER)</span>
+                            <span>▶️ ŞİMDİ BAŞLAT (SAYAÇ & SETLER)</span>
+                        </button>
+                        <button class="btn-action-secondary" style="border-color:var(--cyan); color:var(--cyan); font-weight:800;" onclick="scheduleTomorrowFromGenerated()">
+                            <span>📅 Yarın İçin Programla (Pazartesi)</span>
                         </button>
                         <button class="btn-action-secondary" onclick="saveGeneratedToLibrary()">
                             <span>💾 Programlarıma Kaydet</span>
@@ -5368,19 +5550,122 @@
                         if (raw) customSaved = JSON.parse(raw);
                     } catch(e) {}
 
+                    const todayIdx = new Date().getDay();
+                    const tomorrowIdx = (todayIdx + 1) % 7;
+                    const schedule = getWeeklySchedule();
+                    const todayPlan = schedule[todayIdx] || { id: 'rest', rest: true, title: 'Dinlenme & Aktif Toparlanma' };
+                    const tomorrowPlan = schedule[tomorrowIdx] || { id: 'rest', rest: true, title: 'Dinlenme & Aktif Toparlanma' };
+
+                    let heroBannerHtml = '';
+                    if (!todayPlan.rest) {
+                        heroBannerHtml = `
+                            <div class="hero-scheduled-banner">
+                                <div class="hero-scheduled-badge today">
+                                    🔥 BUGÜNÜN PROGRAMI (${DAY_NAMES_TR[todayIdx].toUpperCase()})
+                                </div>
+                                <h2 class="hero-scheduled-title">${escapeHTML(todayPlan.title)}</h2>
+                                <p class="hero-scheduled-desc">${escapeHTML(todayPlan.desc || 'Çelik Kodu seansın hazır. Hiçbir seçim yapmadan doğrudan başlayabilirsin.')}</p>
+                                <div class="hero-scheduled-actions">
+                                    <button class="btn btn-gold" style="padding:12px 22px; font-size:14px; font-weight:900; box-shadow:0 0 20px rgba(245,158,11,0.5);" onclick="startScheduledWorkoutForDay(${todayIdx})">
+                                        ▶️ TEK DOKUNUŞLA BAŞLAT
+                                    </button>
+                                    <button class="btn btn-outline" style="padding:11px 16px; font-size:12px;" onclick="openScheduleDayModal(${todayIdx})">
+                                        ✏️ Programı Değiştir
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        heroBannerHtml = `
+                            <div class="hero-scheduled-banner">
+                                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; flex-wrap:wrap; margin-bottom:6px;">
+                                    <div class="hero-scheduled-badge tomorrow">
+                                        📅 YARINKİ ANTRENMANIN (${DAY_NAMES_TR[tomorrowIdx].toUpperCase()})
+                                    </div>
+                                    <span style="font-size:11px; color:#94a3b8; font-weight:700;">Bugün (${DAY_NAMES_TR[todayIdx]}): 🧘 Dinlenme</span>
+                                </div>
+                                <h2 class="hero-scheduled-title">${escapeHTML(tomorrowPlan.title)}</h2>
+                                <p class="hero-scheduled-desc">${escapeHTML(tomorrowPlan.desc || 'Yarın salona girdiğinde hiçbir seçim yapmadan doğrudan başlayabilirsin.')}</p>
+                                <div class="hero-scheduled-actions">
+                                    <button class="btn btn-gold" style="padding:12px 20px; font-size:13.5px; font-weight:900; box-shadow:0 0 20px rgba(245,158,11,0.4);" onclick="startScheduledWorkoutForDay(${tomorrowIdx})">
+                                        ▶️ YARININ PROGRAMINI BAŞLAT
+                                    </button>
+                                    <button class="btn btn-outline" style="padding:11px 16px; font-size:12px;" onclick="openScheduleDayModal(${tomorrowIdx})">
+                                        ✏️ Yarını Değiştir / Programla
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    const daysSequence = [1, 2, 3, 4, 5, 6, 0];
+                    const weeklyStripHtml = daysSequence.map(d => {
+                        const plan = schedule[d] || { id: 'rest', rest: true, title: 'Dinlenme' };
+                        const isToday = d === todayIdx;
+                        const isTomorrow = d === tomorrowIdx;
+                        let pillClass = 'weekly-day-pill';
+                        if (isToday) pillClass += ' active-today';
+                        else if (isTomorrow) pillClass += ' active-tomorrow';
+
+                        let tagHtml = '';
+                        if (isToday) tagHtml = '<span class="weekly-day-tag today">BUGÜN</span>';
+                        else if (isTomorrow) tagHtml = '<span class="weekly-day-tag tomorrow">YARIN</span>';
+
+                        const icon = plan.rest ? '🧘' : '⚔️';
+                        const cleanTitle = (plan.title || '').replace(/⚔️|🧘|Çelik Kodu/g, '').trim();
+                        const shortTitle = plan.rest ? 'Dinlenme' : (cleanTitle.length > 13 ? cleanTitle.substring(0, 13) + '..' : cleanTitle);
+
+                        return `
+                            <div class="${pillClass}" onclick="openScheduleDayModal(${d})" title="${DAY_NAMES_TR[d]}: ${escapeHTML(plan.title)} (Değiştirmek için tıkla)">
+                                ${tagHtml}
+                                <span class="weekly-day-name">${DAY_SHORT_TR[d]}</span>
+                                <span style="font-size:15px; margin:2px 0;">${icon}</span>
+                                <span class="weekly-day-status">${escapeHTML(shortTitle)}</span>
+                            </div>
+                        `;
+                    }).join('');
+
                     container.innerHTML = `
                         <div style="padding:10px 4px 10px;">
-                            <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:18px; margin-bottom:16px; text-align:center;">
-                                <div style="font-size:36px; margin-bottom:8px;">🏋️</div>
-                                <h2 style="font-size:19px; font-weight:900; color:#fff; margin-bottom:4px;">Canlı Antrenman Başlat</h2>
-                                <p style="font-size:12.5px; color:var(--text-secondary); line-height:1.4; max-width:380px; margin:0 auto 16px;">
-                                    Aşağıdaki hazır programlardan birini seçip tek dokunuşla canlı takibi başlatabilir veya Atölye'den kendi hareketlerinizi seçebilirsiniz.
+                            <!-- 1. HERO SCHEDULED BANNER -->
+                            ${heroBannerHtml}
+
+                            <!-- 2. HAFTALIK ANTRENMAN TAKVİMİ -->
+                            <div class="weekly-planner-section">
+                                <div class="weekly-planner-header">
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <span style="font-size:20px;">📅</span>
+                                        <div>
+                                            <h3 style="font-size:14px; font-weight:900; color:#fff; margin:0;">Haftalık Antrenman Planım</h3>
+                                            <p style="font-size:11px; color:var(--text-secondary); margin:2px 0 0;">Güne dokunarak antrenmanını ata veya değiştir.</p>
+                                        </div>
+                                    </div>
+                                    <div style="display:flex; gap:6px;">
+                                        <button type="button" class="btn btn-outline" style="font-size:10.5px; padding:4px 8px;" onclick="resetWeeklyScheduleTemplate('standard_3day')" title="Standart 3 Günlük Çelik Şablonu">
+                                            ⚡ 3 Günlük Şablon
+                                        </button>
+                                        <button type="button" class="btn btn-outline" style="font-size:10.5px; padding:4px 8px;" onclick="resetWeeklyScheduleTemplate('split_4day')" title="4 Günlük Bölünmüş Şablon">
+                                            ⚡ 4 Günlük Şablon
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="weekly-strip">
+                                    ${weeklyStripHtml}
+                                </div>
+                            </div>
+
+                            <!-- 3. OTOMATİK SİHİRBAZ & ATÖLYE KART -->
+                            <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:16px; text-align:center;">
+                                <h3 style="font-size:14.5px; font-weight:900; color:#fff; margin-bottom:4px;">Özel Antrenman Oluştur veya Tasarla</h3>
+                                <p style="font-size:12px; color:var(--text-secondary); line-height:1.4; max-width:380px; margin:0 auto 14px;">
+                                    Sihirbaz ile bölge/hedef seçerek yapay zeka destekli yeni program üretebilir veya Atölye'den kendi setlerinizi kurabilirsiniz.
                                 </p>
                                 <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
-                                    <button class="btn btn-gold" style="padding:10px 16px; font-size:12.5px; font-weight:800;" onclick="switchTab('generatorTab')">
+                                    <button class="btn btn-gold" style="padding:9px 15px; font-size:12px; font-weight:800;" onclick="switchTab('generatorTab')">
                                         ⚡ Otomatik Sihirbaz
                                     </button>
-                                    <button class="btn btn-outline" style="padding:10px 16px; font-size:12.5px; font-weight:800;" onclick="openStudioAccordion()">
+                                    <button class="btn btn-outline" style="padding:9px 15px; font-size:12px; font-weight:800;" onclick="openStudioAccordion()">
                                         🎯 Kendin Tasarla (Atölye)
                                     </button>
                                 </div>
@@ -6586,7 +6871,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     <div class="log-history-card">
                         <div class="log-card-header">
                             <strong style="color:#fff; font-size:14px;">${escapeHTML(p.title)}</strong>
-                            <div style="display:flex; gap:6px;">
+                            <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                                <button class="btn btn-outline" style="font-size:11px; padding:4px 8px; color:var(--cyan); border-color:var(--cyan);" onclick="promptAssignToDay('${p.id}', '${escapeHTML(p.title).replace(/'/g, "\\'")}', 'custom_saved', '${p.exercises.length} Egzersiz')">
+                                    📅 Güne Planla
+                                </button>
                                 <button class="btn btn-gold" style="font-size:11px; padding:4px 10px;" onclick="loadSavedProgram('${p.id}')">
                                     ▶ Başlat
                                 </button>
@@ -6633,9 +6921,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 <div class="log-history-card" style="border-color:var(--border-hover);">
                     <div class="log-card-header">
                         <strong style="color:var(--gold-light); font-size:14px;">${escapeHTML(r.title)}</strong>
-                        <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; color:var(--gold); border-color:var(--gold);" onclick="loadOfficialRoutine('${r.id}')">
-                            ▶ Bu Programı Yükle
-                        </button>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                            <button class="btn btn-outline" style="font-size:11px; padding:4px 8px; color:var(--cyan); border-color:var(--cyan);" onclick="promptAssignToDay('${r.id}', '${escapeHTML(r.title).replace(/'/g, "\\'")}', 'official', '${escapeHTML(r.desc).replace(/'/g, "\\'")}')">
+                                📅 Güne Planla
+                            </button>
+                            <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; color:var(--gold); border-color:var(--gold);" onclick="loadOfficialRoutine('${r.id}')">
+                                ▶ Yükle
+                            </button>
+                        </div>
                     </div>
                     <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
                         ${escapeHTML(r.desc)}
@@ -6722,6 +7015,291 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             };
 
             startActiveWorkoutFromGenerated();
+        }
+
+        // ==================== WEEKLY SCHEDULE & PERIODIZATION ====================
+        const DAY_NAMES_TR = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+        const DAY_SHORT_TR = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+
+        function getDefaultWeeklySchedule() {
+            return {
+                1: { id: 'la_forja_day1', title: '⚔️ Gün 1: Omuz & Bacak Ön Zırhı', type: 'official', desc: 'Press + Squat • Şınav + Front Squat • Core', rest: false },
+                2: { id: 'rest', title: '🧘 Dinlenme & Aktif Toparlanma', type: 'rest', desc: 'Hafif yürüyüş, esneme veya tam istirahat', rest: true },
+                3: { id: 'la_forja_day2', title: '⚔️ Gün 2: Sırt Çekiş & Balistik Güç', type: 'official', desc: 'Saw Row + RDL • Swing + Pullup • Çanta Taşıma', rest: false },
+                4: { id: 'rest', title: '🧘 Dinlenme & Mobilite', type: 'rest', desc: 'Eklem mobilizasyonu, masaj rulosu', rest: true },
+                5: { id: 'la_forja_day3', title: '⚔️ Gün 3: Kompleks & Merdiven', type: 'official', desc: 'Snatch + Lunge • Row + Squat • Burpee Finisher', rest: false },
+                6: { id: 'rest', title: '🧘 Serbest Kardiyo / Core', type: 'rest', desc: '30 dk tempolu yürüyüş, bisiklet veya karın', rest: true },
+                0: { id: 'rest', title: '🧘 Tam Dinlenme & Zihinsel Hazırlık', type: 'rest', desc: 'Yeni haftaya kasları ve sinir sistemini dinlendirme', rest: true }
+            };
+        }
+
+        function getWeeklySchedule() {
+            const user = getActiveUser();
+            const uid = user ? user.id : 'default';
+            const key = `celik_kodu_weekly_schedule_${uid}`;
+            try {
+                const raw = localStorage.getItem(key);
+                if (raw) return JSON.parse(raw);
+            } catch(e) {}
+            const def = getDefaultWeeklySchedule();
+            saveWeeklySchedule(def);
+            return def;
+        }
+
+        function saveWeeklySchedule(schedule) {
+            const user = getActiveUser();
+            const uid = user ? user.id : 'default';
+            const key = `celik_kodu_weekly_schedule_${uid}`;
+            try {
+                localStorage.setItem(key, JSON.stringify(schedule));
+            } catch(e) {}
+        }
+
+        function startScheduledWorkoutForDay(dayIdx) {
+            const schedule = getWeeklySchedule();
+            const plan = schedule[dayIdx];
+            if (!plan || plan.rest) {
+                alert("Bu gün dinlenme günü olarak ayarlanmış. Bir antrenman başlatmak isterseniz aşağıdaki programlardan birini seçebilirsiniz.");
+                return;
+            }
+
+            if (plan.type === 'official') {
+                loadOfficialRoutine(plan.id);
+            } else if (plan.type === 'custom' || plan.type === 'custom_saved' || (plan.id && plan.id.startsWith('saved_'))) {
+                loadSavedProgram(plan.id);
+            } else if (plan.type === 'custom_generated' && plan.customWorkout) {
+                currentGeneratedWorkout = plan.customWorkout;
+                startActiveWorkoutFromGenerated();
+            } else {
+                loadOfficialRoutine('la_forja_day1');
+            }
+        }
+
+        let activeSchedulingDayIdx = null;
+
+        function openScheduleDayModal(dayIdx) {
+            activeSchedulingDayIdx = dayIdx;
+            const modal = document.getElementById('scheduleDayModal');
+            const dayTitle = document.getElementById('schedModalDayTitle');
+            const dayBadge = document.getElementById('schedModalDayBadge');
+            const optionsList = document.getElementById('schedModalOptionsList');
+            if (!modal) return;
+
+            const dayName = DAY_NAMES_TR[dayIdx];
+            const todayIdx = new Date().getDay();
+            const isToday = dayIdx === todayIdx;
+            const isTomorrow = dayIdx === ((todayIdx + 1) % 7);
+
+            if (dayTitle) dayTitle.innerText = `${dayName} Günü Antrenman Planı`;
+            if (dayBadge) {
+                dayBadge.innerText = isToday ? 'BUGÜNÜN PROGRAMI' : (isTomorrow ? 'YARINKİ PROGRAM' : 'HAFTALIK PLAN');
+            }
+
+            const schedule = getWeeklySchedule();
+            const currentPlan = schedule[dayIdx] || { id: 'rest', rest: true };
+
+            const user = getActiveUser();
+            const customKey = `celik_kodu_custom_programs_${user.id}`;
+            let customSaved = [];
+            try {
+                customSaved = JSON.parse(localStorage.getItem(customKey) || '[]');
+            } catch(e) {}
+
+            let html = `
+                <div style="font-size:11px; font-weight:800; color:var(--gold); text-transform:uppercase; margin-top:4px;">
+                    ⚔️ Çelik Kodu Klasik Programları
+                </div>
+                <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:${currentPlan.id === 'la_forja_day1' ? 'var(--gold)' : 'var(--border)'};" onclick="assignRoutineToActiveDay('la_forja_day1', '⚔️ Gün 1: Omuz & Bacak Ön Zırhı', 'official', 'Press + Squat • Şınav + Front Squat • Core')">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-size:13.5px; font-weight:800; color:#fff;">Gün 1: Omuz & Bacak Ön Zırhı</div>
+                            <div style="font-size:11px; color:var(--text-secondary);">Press + Squat • Şınav + Front Squat • Core</div>
+                        </div>
+                        ${currentPlan.id === 'la_forja_day1' ? '<span class="auth-role-tag role-admin" style="font-size:10px;">SEÇİLİ</span>' : '<span style="font-size:11px; color:var(--gold); font-weight:700;">Seç ➔</span>'}
+                    </div>
+                </div>
+
+                <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:${currentPlan.id === 'la_forja_day2' ? 'var(--gold)' : 'var(--border)'};" onclick="assignRoutineToActiveDay('la_forja_day2', '⚔️ Gün 2: Sırt Çekiş & Balistik Güç', 'official', 'Saw Row + RDL • Swing + Pullup • Çanta Taşıma')">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-size:13.5px; font-weight:800; color:#fff;">Gün 2: Sırt Çekiş & Balistik Güç</div>
+                            <div style="font-size:11px; color:var(--text-secondary);">Saw Row + RDL • Swing + Pullup • Çanta Taşıma</div>
+                        </div>
+                        ${currentPlan.id === 'la_forja_day2' ? '<span class="auth-role-tag role-admin" style="font-size:10px;">SEÇİLİ</span>' : '<span style="font-size:11px; color:var(--gold); font-weight:700;">Seç ➔</span>'}
+                    </div>
+                </div>
+
+                <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:${currentPlan.id === 'la_forja_day3' ? 'var(--gold)' : 'var(--border)'};" onclick="assignRoutineToActiveDay('la_forja_day3', '⚔️ Gün 3: Kompleks & Merdiven', 'official', 'Snatch + Lunge • Row + Squat • Burpee Finisher')">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-size:13.5px; font-weight:800; color:#fff;">Gün 3: Kompleks & Merdiven</div>
+                            <div style="font-size:11px; color:var(--text-secondary);">Snatch + Lunge • Row + Squat • Burpee Finisher</div>
+                        </div>
+                        ${currentPlan.id === 'la_forja_day3' ? '<span class="auth-role-tag role-admin" style="font-size:10px;">SEÇİLİ</span>' : '<span style="font-size:11px; color:var(--gold); font-weight:700;">Seç ➔</span>'}
+                    </div>
+                </div>
+            `;
+
+            if (currentGeneratedWorkout) {
+                html += `
+                    <div style="font-size:11px; font-weight:800; color:var(--cyan); text-transform:uppercase; margin-top:8px;">
+                        ⚡ Son Oluşturulan Sihirbaz Programı
+                    </div>
+                    <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:var(--cyan);" onclick="assignGeneratedToActiveDay()">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div style="font-size:13.5px; font-weight:800; color:#fff;">${escapeHTML(currentGeneratedWorkout.title)}</div>
+                                <div style="font-size:11px; color:var(--text-secondary);">${currentGeneratedWorkout.exercises.length} Hareket • ${currentGeneratedWorkout.duration} Dk</div>
+                            </div>
+                            <span style="font-size:11px; color:var(--cyan); font-weight:800;">Bu Güne Ata ➔</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (customSaved.length > 0) {
+                html += `
+                    <div style="font-size:11px; font-weight:800; color:var(--gold); text-transform:uppercase; margin-top:8px;">
+                        ⭐ Kayıtlı Özel Programlarım
+                    </div>
+                `;
+                customSaved.forEach(p => {
+                    const isSelected = currentPlan.id === p.id;
+                    html += `
+                        <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:${isSelected ? 'var(--gold)' : 'var(--border)'};" onclick="assignRoutineToActiveDay('${p.id}', '${escapeHTML(p.title)}', 'custom', '${(p.exercises || []).length} Hareket Özel Program')">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <div style="font-size:13.5px; font-weight:800; color:#fff;">${escapeHTML(p.title)}</div>
+                                    <div style="font-size:11px; color:var(--text-secondary);">${(p.exercises || []).length} Hareket • Özel Program</div>
+                                </div>
+                                ${isSelected ? '<span class="auth-role-tag role-admin" style="font-size:10px;">SEÇİLİ</span>' : '<span style="font-size:11px; color:var(--gold); font-weight:700;">Seç ➔</span>'}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            if (optionsList) optionsList.innerHTML = html;
+            modal.classList.add('active');
+        }
+
+        function closeScheduleDayModal() {
+            const modal = document.getElementById('scheduleDayModal');
+            if (modal) modal.classList.remove('active');
+            activeSchedulingDayIdx = null;
+        }
+
+        function assignRoutineToActiveDay(id, title, type, desc) {
+            if (activeSchedulingDayIdx === null) return;
+            const schedule = getWeeklySchedule();
+            schedule[activeSchedulingDayIdx] = {
+                id: id,
+                title: title,
+                type: type,
+                desc: desc || '',
+                rest: false
+            };
+            saveWeeklySchedule(schedule);
+            closeScheduleDayModal();
+            renderActiveWorkout();
+            playAlertSound();
+        }
+
+        function assignGeneratedToActiveDay() {
+            if (activeSchedulingDayIdx === null || !currentGeneratedWorkout) return;
+            const schedule = getWeeklySchedule();
+            schedule[activeSchedulingDayIdx] = {
+                id: currentGeneratedWorkout.id || ('gen_' + Date.now()),
+                title: currentGeneratedWorkout.title || 'Özel Sihirbaz Antrenmanı',
+                type: 'custom_generated',
+                desc: `${currentGeneratedWorkout.exercises.length} Hareket • ${currentGeneratedWorkout.duration} Dk`,
+                rest: false,
+                customWorkout: JSON.parse(JSON.stringify(currentGeneratedWorkout))
+            };
+            saveWeeklySchedule(schedule);
+            closeScheduleDayModal();
+            renderActiveWorkout();
+            playAlertSound();
+        }
+
+        function setDayAsRest() {
+            if (activeSchedulingDayIdx === null) return;
+            const schedule = getWeeklySchedule();
+            schedule[activeSchedulingDayIdx] = {
+                id: 'rest',
+                title: '🧘 Dinlenme & Aktif Toparlanma',
+                type: 'rest',
+                desc: 'Hafif yürüyüş, esneme veya tam istirahat',
+                rest: true
+            };
+            saveWeeklySchedule(schedule);
+            closeScheduleDayModal();
+            renderActiveWorkout();
+        }
+
+        function resetWeeklyScheduleTemplate(templateType = 'standard_3day') {
+            let sched;
+            if (templateType === 'standard_3day') {
+                sched = getDefaultWeeklySchedule();
+            } else if (templateType === 'split_4day') {
+                sched = {
+                    1: { id: 'la_forja_day1', title: '⚔️ Pzt: İtiş Zırhı (Omuz & Bacak)', type: 'official', desc: 'Pres + Squat • Şınav', rest: false },
+                    2: { id: 'la_forja_day2', title: '⚔️ Salı: Çekiş & Sırt (Row & RDL)', type: 'official', desc: 'Row + RDL • Pullup', rest: false },
+                    3: { id: 'rest', title: '🧘 Çarşamba: Dinlenme & Mobilite', type: 'rest', desc: 'Masaj rulosu & toparlanma', rest: true },
+                    4: { id: 'la_forja_day3', title: '⚔️ Perşembe: Kompleks Bacak & Kondisyon', type: 'official', desc: 'Squat + Lunge • Snatch', rest: false },
+                    5: { id: 'la_forja_day1', title: '⚔️ Cuma: Zırh Güçlendirme & Süperset', type: 'official', desc: 'Swing + Burpee Finisher', rest: false },
+                    6: { id: 'rest', title: '🧘 Cumartesi: Dinlenme / Kardiyo', type: 'rest', desc: 'Hafif aerobik seans', rest: true },
+                    0: { id: 'rest', title: '🧘 Pazar: Tam Dinlenme & Zihinsel Hazırlık', type: 'rest', desc: 'Yeni haftaya hazırlık', rest: true }
+                };
+            }
+            saveWeeklySchedule(sched);
+            renderActiveWorkout();
+            playAlertSound();
+            alert("✅ Haftalık antrenman şablonu güncellendi!");
+        }
+
+        function scheduleTomorrowFromGenerated() {
+            if (!currentGeneratedWorkout) return;
+            const todayIdx = new Date().getDay();
+            const tomorrowIdx = (todayIdx + 1) % 7;
+            const schedule = getWeeklySchedule();
+            schedule[tomorrowIdx] = {
+                id: currentGeneratedWorkout.id || ('gen_' + Date.now()),
+                title: currentGeneratedWorkout.title || 'Özel Sihirbaz Antrenmanı',
+                type: 'custom_generated',
+                desc: `${currentGeneratedWorkout.exercises.length} Hareket • ${currentGeneratedWorkout.duration} Dk`,
+                rest: false,
+                customWorkout: JSON.parse(JSON.stringify(currentGeneratedWorkout))
+            };
+            saveWeeklySchedule(schedule);
+            switchTab('activeWorkoutTab');
+            playAlertSound();
+            alert(`✅ Antrenman yarın (${DAY_NAMES_TR[tomorrowIdx]}) için hazırlandı!\n\nYarın akşam salona girdiğinizde hiçbir seçim yapmadan doğrudan "Antrenmanı Başlat" butonuna dokunarak başlayabilirsiniz.`);
+        }
+
+        function promptAssignToDay(id, title, type, desc) {
+            const todayIdx = new Date().getDay();
+            const tomorrowIdx = (todayIdx + 1) % 7;
+            const dayPrompt = `"${title}" programını haftanın hangi gününe planlamak istiyorsunuz?\n\n1: Pazartesi\n2: Salı\n3: Çarşamba\n4: Perşembe\n5: Cuma\n6: Cumartesi\n0: Pazar\n\n(Yarın ${DAY_NAMES_TR[tomorrowIdx]} için "${tomorrowIdx}" yazabilirsiniz):`;
+            const choice = prompt(dayPrompt, tomorrowIdx.toString());
+            if (choice === null) return;
+            const targetDay = parseInt(choice.trim(), 10);
+            if (isNaN(targetDay) || targetDay < 0 || targetDay > 6) {
+                alert("Geçersiz gün seçildi. Lütfen 0 ile 6 arasında bir sayı girin.");
+                return;
+            }
+            const schedule = getWeeklySchedule();
+            schedule[targetDay] = {
+                id: id,
+                title: title,
+                type: type || 'custom_saved',
+                desc: desc || '',
+                rest: false
+            };
+            saveWeeklySchedule(schedule);
+            playAlertSound();
+            alert(`✅ "${title}" programı ${DAY_NAMES_TR[targetDay]} gününe başarıyla planlandı!\n\n${DAY_NAMES_TR[targetDay]} günü salona gittiğinizde tek dokunuşla başlatabileceksiniz.`);
+            renderActiveWorkout();
         }
 
         // ==================== FIREBASE FIRESTORE CLOUD ENGINE ====================
@@ -8720,7 +9298,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=36')
+                navigator.serviceWorker.register('./sw.js?v=37')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
