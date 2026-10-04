@@ -329,6 +329,460 @@
             box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
         }
 
+        /* ==================== MODERN COMPACT APP BAR ==================== */
+        .modern-app-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 14px;
+            background: rgba(15, 23, 42, 0.92);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(14px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            margin: -16px -16px 14px -16px;
+        }
+        .modern-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .modern-brand-logo {
+            font-size: 20px;
+        }
+        .modern-brand-title {
+            font-size: 14px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            color: #fff;
+        }
+        .modern-user-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-elevated);
+            padding: 4px 10px 4px 6px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .modern-user-badge:hover {
+            border-color: var(--gold);
+        }
+        .modern-user-avatar {
+            font-size: 18px;
+            width: 28px;
+            height: 28px;
+            background: var(--bg-base);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--gold);
+        }
+        .modern-user-name {
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* ==================== HIDEABLE BOTTOM NAVIGATION ==================== */
+        .bottom-nav-wrapper {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 150;
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: transform;
+        }
+        .bottom-nav-wrapper.hidden {
+            transform: translateY(calc(100% - 14px));
+        }
+        .bottom-pull-handle {
+            width: 56px;
+            height: 14px;
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid var(--border);
+            border-bottom: none;
+            margin: 0 auto;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.4);
+            transition: background 0.2s;
+        }
+        .bottom-pull-handle::after {
+            content: '';
+            width: 22px;
+            height: 3px;
+            background: var(--gold);
+            border-radius: 2px;
+        }
+        .bottom-pull-handle:hover {
+            background: var(--gold);
+        }
+        .bottom-pull-handle:hover::after {
+            background: #090d16;
+        }
+        .bottom-nav-bar {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.97);
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 8px 6px calc(8px + env(safe-area-inset-bottom, 8px));
+            backdrop-filter: blur(18px);
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.6);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            color: var(--text-secondary);
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            padding: 4px 0;
+            border-radius: 8px;
+            position: relative;
+        }
+        .bottom-nav-item .nav-icon {
+            font-size: 19px;
+            transition: transform 0.2s;
+        }
+        .bottom-nav-item:hover {
+            color: #fff;
+        }
+        .bottom-nav-item.active {
+            color: var(--gold);
+        }
+        .bottom-nav-item.active .nav-icon {
+            transform: scale(1.15) translateY(-2px);
+        }
+        .bottom-nav-item.active::after {
+            content: '';
+            width: 4px;
+            height: 4px;
+            background: var(--gold);
+            border-radius: 50%;
+            position: absolute;
+            bottom: 0px;
+        }
+
+        /* FLOATING RESTORE PILL (WHEN BOTTOM BAR IS HIDDEN) */
+        .floating-restore-pill {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--gold);
+            color: #090d16;
+            font-size: 11.5px;
+            font-weight: 900;
+            padding: 8px 14px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            box-shadow: 0 4px 18px rgba(245, 158, 11, 0.5);
+            z-index: 140;
+            opacity: 0;
+            transform: scale(0.85);
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .floating-restore-pill.visible {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        /* ==================== MORE SHEET (BOTTOM DRAWER) ==================== */
+        .more-sheet-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .more-sheet-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .more-sheet {
+            position: fixed;
+            left: 0; right: 0; bottom: -450px;
+            background: #0f172a;
+            border-top: 1px solid rgba(255,255,255,0.18);
+            border-radius: 20px 20px 0 0;
+            padding: 16px 18px calc(20px + env(safe-area-inset-bottom, 12px));
+            z-index: 201;
+            transition: bottom 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 -15px 40px rgba(0,0,0,0.8);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .more-sheet.open {
+            bottom: 0;
+        }
+        .more-sheet-handle {
+            width: 36px;
+            height: 4px;
+            background: rgba(255,255,255,0.25);
+            border-radius: 2px;
+            margin: 0 auto 14px;
+        }
+        .more-sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        .more-sheet-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--gold);
+        }
+        .more-sheet-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .more-sheet-btn {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            padding: 12px 10px;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .more-sheet-btn:hover {
+            border-color: var(--gold);
+            background: rgba(245, 158, 11, 0.1);
+        }
+        .more-sheet-btn.logout {
+            grid-column: span 2;
+            background: rgba(225, 29, 72, 0.15);
+            border-color: rgba(225, 29, 72, 0.3);
+            color: #fca5a5;
+            justify-content: center;
+        }
+
+        /* ==================== WORKOUT FOCUS VISUAL & COLLAPSIBLE TOOLS ==================== */
+        .exercise-visual-card {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            backdrop-filter: blur(8px);
+        }
+        .visual-illustration {
+            width: 100px;
+            min-height: 80px;
+            background: #090d16;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            padding: 4px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+        .visual-illustration svg {
+            max-width: 100%;
+            height: auto;
+            max-height: 80px;
+        }
+        .visual-cue-info {
+            flex: 1;
+        }
+        .visual-cue-title {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--cyan);
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+        .visual-cue-text {
+            font-size: 11px;
+            color: #cbd5e1;
+            line-height: 1.35;
+        }
+
+        /* INPUT DUO GRID */
+        .input-duo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .input-duo-cell {
+            background: #090d16;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 8px 10px;
+            text-align: center;
+        }
+        .input-duo-label {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+        .input-stepper-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-step-mini {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-step-mini:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+        .input-huge-val {
+            width: 65px;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            font-weight: 900;
+            text-align: center;
+            outline: none;
+        }
+
+        /* COLLAPSIBLE TOOLS */
+        .tools-collapsible {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px dashed rgba(245, 158, 11, 0.4);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            transition: all 0.25s;
+        }
+        .tools-header-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            cursor: pointer;
+            user-select: none;
+            background: rgba(245, 158, 11, 0.05);
+        }
+        .tools-header-toggle:hover {
+            background: rgba(245, 158, 11, 0.12);
+        }
+        .tools-title {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tools-badge-count {
+            font-size: 9px;
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--gold-light);
+            padding: 1px 5px;
+            border-radius: 4px;
+        }
+        .tools-body {
+            padding: 10px;
+            border-top: 1px dashed rgba(255,255,255,0.08);
+            background: #090d16;
+        }
+        .fine-steppers-row {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+        .btn-fine-step {
+            flex: 1;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: #cbd5e1;
+            padding: 6px 2px;
+            border-radius: 6px;
+            font-size: 10.5px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-fine-step:hover {
+            border-color: var(--cyan);
+            color: var(--cyan);
+        }
+
+        /* RESPONSIVE TOGGLES: Desktop tabs vs Mobile Bottom Nav */
+        @media (max-width: 768px) {
+            .tab-nav {
+                display: none !important;
+            }
+            .hero-banner {
+                display: none !important;
+            }
+            .auth-bar {
+                display: none !important;
+            }
+            body {
+                padding-bottom: 90px !important;
+            }
+        }
+        @media (min-width: 769px) {
+            .bottom-nav-wrapper {
+                display: none !important;
+            }
+            .floating-restore-pill {
+                display: none !important;
+            }
+        }
+
         .tab-content {
             display: none;
         }
@@ -1849,14 +2303,26 @@
     <div id="mainAppWrapper" style="display:none;">
         <div class="app-container">
 
-            <!-- HEADER AUTH BAR -->
+            <!-- MODERN COMPACT APP BAR (MOBİL & GENEL) -->
+            <div class="modern-app-bar">
+                <div class="modern-brand" onclick="switchTab('generatorTab')">
+                    <span class="modern-brand-logo">⚔️</span>
+                    <span class="modern-brand-title">ÇELİK KODU</span>
+                </div>
+                <div class="modern-user-badge" onclick="openMoreSheet()" title="Profil & Menü">
+                    <span class="modern-user-avatar" id="headerUserAvatar">🥋</span>
+                    <span class="modern-user-name" id="headerUserName">Sporcu</span>
+                    <span class="auth-role-tag role-admin" id="headerUserRoleBadge">YÖNETİCİ</span>
+                </div>
+            </div>
+
+            <!-- HEADER AUTH BAR (DESKTOP) -->
             <div class="auth-bar">
                 <div class="auth-user-info" onclick="switchTab('profileTab')">
-                    <span class="auth-avatar" id="headerUserAvatar">🥋</span>
+                    <span class="auth-avatar">🥋</span>
                     <div>
                         <div style="display:flex; align-items:center; gap:4px;">
-                            <span class="auth-name-title" id="headerUserName">Ferit</span>
-                            <span class="auth-role-tag role-admin" id="headerUserRoleBadge">YÖNETİCİ</span>
+                            <span class="auth-name-title">Çelik Kodu</span>
                         </div>
                         <div style="font-size:11px; color:var(--text-secondary);" id="headerUserSub">🎯 Özel Kilolarım & Profil</div>
                     </div>
@@ -1872,7 +2338,7 @@
                 </div>
             </div>
 
-            <!-- HERO BRANDING -->
+            <!-- HERO BRANDING (DESKTOP ONLY) -->
             <div class="hero-banner">
                 <div class="badge-brand">⚔️ ÇELİK KODU • PROGRAM MİMARI</div>
                 <h1 class="hero-title">Kişisel Antrenmanını Oluştur</h1>
@@ -2753,6 +3219,70 @@
         </div>
     </div>
 
+    <!-- ==================== HIDEABLE BOTTOM NAVIGATION BAR ==================== -->
+    <div class="bottom-nav-wrapper" id="bottomNavWrapper">
+        <div class="bottom-pull-handle" onclick="toggleBottomBar()" title="Menüyü Gizle/Göster"></div>
+        <div class="bottom-nav-bar">
+            <div class="bottom-nav-item active" data-tab="generatorTab" onclick="switchTab('generatorTab')">
+                <span class="nav-icon">⚡</span>
+                <span>Oluştur</span>
+            </div>
+            <div class="bottom-nav-item" data-tab="studioTab" onclick="switchTab('studioTab')">
+                <span class="nav-icon">🎯</span>
+                <span>Atölye</span>
+            </div>
+            <div class="bottom-nav-item" data-tab="activeWorkoutTab" onclick="switchTab('activeWorkoutTab')">
+                <span class="nav-icon">🏋️</span>
+                <span>Antrenman</span>
+            </div>
+            <div class="bottom-nav-item" data-tab="historyTab" onclick="switchTab('historyTab')">
+                <span class="nav-icon">📋</span>
+                <span>Günlük</span>
+            </div>
+            <div class="bottom-nav-item" onclick="openMoreSheet()">
+                <span class="nav-icon">☰</span>
+                <span>Menü</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLOATING RESTORE PILL (GİZLİYKEN ÇIKAN DÜĞME) -->
+    <div class="floating-restore-pill" id="bottomRestorePill" onclick="showBottomBar()">
+        <span>▲ Menüyü Aç</span>
+    </div>
+
+    <!-- ==================== MORE SHEET (ALT ÇEKMECE) ==================== -->
+    <div class="more-sheet-overlay" id="moreSheetOverlay" onclick="closeMoreSheet()"></div>
+    <div class="more-sheet" id="moreBottomSheet">
+        <div class="more-sheet-handle"></div>
+        <div class="more-sheet-header">
+            <div class="more-sheet-title">⚡ Menü & Ayarlar</div>
+            <button onclick="closeMoreSheet()" style="background:none; border:none; color:var(--text-secondary); font-size:18px; cursor:pointer;">✕</button>
+        </div>
+        <div class="more-sheet-grid">
+            <div class="more-sheet-btn" onclick="closeMoreSheet(); switchTab('libraryTab');">
+                <span>📚</span>
+                <span>Hazır Programlar</span>
+            </div>
+            <div class="more-sheet-btn" onclick="closeMoreSheet(); switchTab('analyticsTab');">
+                <span>📈</span>
+                <span>Tartı & Analiz</span>
+            </div>
+            <div class="more-sheet-btn" onclick="closeMoreSheet(); switchTab('profileTab');">
+                <span>👤</span>
+                <span>Profil & Kilolarım</span>
+            </div>
+            <div class="more-sheet-btn" id="sheetAdminBtn" onclick="closeMoreSheet(); openAdminModal();" style="display:none;">
+                <span>👑</span>
+                <span>Sporcu Yönetimi</span>
+            </div>
+            <div class="more-sheet-btn logout" onclick="closeMoreSheet(); handleAuthLogout();">
+                <span>🚪</span>
+                <span>Oturumu Kapat</span>
+            </div>
+        </div>
+    </div>
+
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
     <script>
         // EXERCISE DATABASE
@@ -2957,13 +3487,21 @@
             purple: { gold: '#a855f7', goldLight: '#e9d5ff', glow: 'rgba(168, 85, 247, 0.25)' }
         };
 
-        // TAB SWITCHING
+        // TAB SWITCHING & BOTTOM NAV CONTROL
         function switchTab(tabId) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
             const targetBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes(tabId));
             if (targetBtn) targetBtn.classList.add('active');
+
+            // Sync bottom navigation items
+            document.querySelectorAll('.bottom-nav-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.tab === tabId);
+            });
+
+            // Close more sheet if open
+            closeMoreSheet();
 
             if (tabId === 'studioTab') {
                 initStudioTab();
@@ -2982,6 +3520,57 @@
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+
+        // ==================== BOTTOM BAR HIDE / SHOW & SHEET LOGIC ====================
+        function toggleBottomBar() {
+            const w = document.getElementById('bottomNavWrapper');
+            if (!w) return;
+            if (w.classList.contains('hidden')) {
+                showBottomBar();
+            } else {
+                hideBottomBar();
+            }
+        }
+
+        function hideBottomBar() {
+            const w = document.getElementById('bottomNavWrapper');
+            const pill = document.getElementById('bottomRestorePill');
+            if (w) w.classList.add('hidden');
+            if (pill) pill.classList.add('visible');
+        }
+
+        function showBottomBar() {
+            const w = document.getElementById('bottomNavWrapper');
+            const pill = document.getElementById('bottomRestorePill');
+            if (w) w.classList.remove('hidden');
+            if (pill) pill.classList.remove('visible');
+        }
+
+        function openMoreSheet() {
+            const overlay = document.getElementById('moreSheetOverlay');
+            const sheet = document.getElementById('moreBottomSheet');
+            if (overlay) overlay.classList.add('open');
+            if (sheet) sheet.classList.add('open');
+        }
+
+        function closeMoreSheet() {
+            const overlay = document.getElementById('moreSheetOverlay');
+            const sheet = document.getElementById('moreBottomSheet');
+            if (overlay) overlay.classList.remove('open');
+            if (sheet) sheet.classList.remove('open');
+        }
+
+        // Akıllı Scroll ile Otomatik Gizleme (Aşağı inerken gizle, yukarı çıkarken göster)
+        let lastWindowScrollTop = 0;
+        window.addEventListener('scroll', () => {
+            const st = window.pageYOffset || document.documentElement.scrollTop;
+            if (st > lastWindowScrollTop && st > 80) {
+                hideBottomBar();
+            } else if (st < lastWindowScrollTop) {
+                showBottomBar();
+            }
+            lastWindowScrollTop = st <= 0 ? 0 : st;
+        }, { passive: true });
 
         // ==================== WORKOUT GENERATOR ENGINE ====================
         function selectSplit(split) {
@@ -4008,6 +4597,18 @@
             renderActiveWorkout();
         }
 
+        let extraToolsOpen = {};
+        function toggleExtraTools(exId) {
+            extraToolsOpen[exId] = !extraToolsOpen[exId];
+            const body = document.getElementById('toolsBody_' + exId);
+            const arrow = document.getElementById('toolsArrow_' + exId);
+            if (body) {
+                const isOpen = body.style.display !== 'none';
+                body.style.display = isOpen ? 'none' : 'block';
+                if (arrow) arrow.innerText = isOpen ? '▼ Aç' : '▲ Kapat';
+            }
+        }
+
         function getLastExercisePerformance(exIdOrName) {
             const uid = getActiveUserId();
             let history = [];
@@ -4411,10 +5012,10 @@
                             </button>
                         </div>
 
-                        <!-- EXERCISE INFO -->
+                        <!-- EXERCISE INFO & TITLE (HER ZAMAN GÖRÜNÜR) -->
                         <div style="margin-bottom:10px;">
                             <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
-                                <h2 style="font-size:19px; font-weight:900; color:#fff; line-height:1.2;">
+                                <h2 style="font-size:20px; font-weight:900; color:#fff; line-height:1.2;">
                                     ${escapeHTML(ex.name)}
                                 </h2>
                                 <div style="display:flex; gap:4px; flex-shrink:0;">
@@ -4422,20 +5023,20 @@
                                     <span class="ex-badge badge-muscle">${escapeHTML(ex.muscle ? ex.muscle.split(',')[0] : '')}</span>
                                 </div>
                             </div>
-                            <div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">
+                            <div style="font-size:12px; color:var(--text-secondary); margin-top:3px;">
                                 🎯 Hedef: <strong style="color:var(--gold);">${s.scheme.sets} Set x ${s.scheme.reps}</strong> • Dinlenme: ${s.scheme.rest}s
-                            </div>
-                            <div style="font-size:11.5px; color:#cbd5e1; margin-top:4px; line-height:1.4;">
-                                💡 ${escapeHTML(ex.cue || 'Hareketi kontrollü ve tam eklem hareket açıklığında uygulayın.')}
                             </div>
                         </div>
 
-                        <!-- TOGGLE DIAGRAM -->
-                        <div style="margin-bottom:12px;">
-                            <button class="btn btn-outline" style="font-size:11px; padding:4px 10px;" onclick="toggleFocusDiagram('${ex.id}')">
-                                ${focusDiagramCollapsed[ex.id] ? '👁️ Form Çizimini ve Şemayı Göster' : '🙈 Form Çizimini Gizle'}
-                            </button>
-                            ${!focusDiagramCollapsed[ex.id] ? `<div style="margin-top:8px;">${renderExercisePositionsHtml(ex, `focus_${ex.id}`, false)}</div>` : ''}
+                        <!-- 2. ZARİF BİYOMEKANİK FORM & GÖRSEL KARTI (MUTLAKA GÖRÜNÜR) -->
+                        <div class="exercise-visual-card">
+                            <div class="visual-illustration">
+                                ${renderExercisePositionsHtml(ex, `focus_${ex.id}`, false)}
+                            </div>
+                            <div class="visual-cue-info">
+                                <div class="visual-cue-title">🎯 Biyomekanik İpucu</div>
+                                <div class="visual-cue-text">${escapeHTML(ex.cue || 'Hareketi kontrollü ve tam eklem hareket açıklığında uygulayın.')}</div>
+                            </div>
                         </div>
 
                         <!-- SETS BREADCRUMBS -->
@@ -4482,48 +5083,80 @@
                                     </div>
                                 ` : ''}
 
-                                <!-- WEIGHT INPUT & STEPPERS -->
-                                <div style="margin-bottom:14px;">
-                                    <label style="font-size:11px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; display:block; margin-bottom:4px;">
-                                        AĞIRLIK (KG)
-                                    </label>
-                                    <div style="display:flex; align-items:center; gap:4px;">
-                                        <button class="btn-timer" style="padding:8px 10px; font-size:12px; font-weight:900;" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, -2.5)">-2.5</button>
-                                        <button class="btn-timer" style="padding:8px 8px; font-size:12px; font-weight:900;" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, -1)">-1</button>
-                                        <input type="number" step="0.5" class="set-input-weight focus-input-large" 
-                                               id="w_${ex.id}_${currentSetIdx}" 
-                                               value="${currentSet.weight !== '' && currentSet.weight !== null ? currentSet.weight : ''}" 
-                                               placeholder="0 kg" 
-                                               oninput="onSetWeightInput('${ex.id}', ${currentSetIdx}, this.value)">
-                                        <button class="btn-timer" style="padding:8px 8px; font-size:12px; font-weight:900;" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, 1)">+1</button>
-                                        <button class="btn-timer" style="padding:8px 10px; font-size:12px; font-weight:900;" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, 2.5)">+2.5</button>
+                                <!-- SADELEŞTİRİLMİŞ KİLO & TEKRAR GİRİŞİ (YAN YANA DEV ALAN) -->
+                                <div class="input-duo-grid">
+                                    <div class="input-duo-cell">
+                                        <div class="input-duo-label">Ağırlık (KG)</div>
+                                        <div class="input-stepper-row">
+                                            <button type="button" class="btn-step-mini" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, -1)">-</button>
+                                            <input type="number" step="0.5" class="input-huge-val" 
+                                                   id="w_${ex.id}_${currentSetIdx}" 
+                                                   value="${currentSet.weight !== '' && currentSet.weight !== null ? currentSet.weight : ''}" 
+                                                   placeholder="0" 
+                                                   oninput="onSetWeightInput('${ex.id}', ${currentSetIdx}, this.value)">
+                                            <button type="button" class="btn-step-mini" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, 1)">+</button>
+                                        </div>
                                     </div>
 
-                                    <!-- QUICK WEIGHT CHIPS -->
-                                    <div class="focus-weight-chips">
-                                        ${[7.5, 10, 12.5, 15, 17.5, 20, 22.5, 25, 30].map(wVal => `
-                                            <button type="button" class="weight-chip ${currentSet.weight == wVal ? 'selected' : ''}" onclick="setQuickWeight('${ex.id}', ${currentSetIdx}, ${wVal})">
-                                                ${wVal} kg
-                                            </button>
-                                        `).join('')}
+                                    <div class="input-duo-cell">
+                                        <div class="input-duo-label">Tekrar Sayısı</div>
+                                        <div class="input-stepper-row">
+                                            <button type="button" class="btn-step-mini" onclick="stepSetReps('${ex.id}', ${currentSetIdx}, -1)">-</button>
+                                            <input type="number" step="1" class="input-huge-val" 
+                                                   id="r_${ex.id}_${currentSetIdx}" 
+                                                   value="${currentSet.reps !== '' && currentSet.reps !== null ? currentSet.reps : ''}" 
+                                                   placeholder="0" 
+                                                   oninput="onSetRepsInput('${ex.id}', ${currentSetIdx}, this.value)">
+                                            <button type="button" class="btn-step-mini" onclick="stepSetReps('${ex.id}', ${currentSetIdx}, 1)">+</button>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <!-- REPS INPUT & STEPPERS -->
-                                <div style="margin-bottom:16px;">
-                                    <label style="font-size:11px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; display:block; margin-bottom:4px;">
-                                        YAPILAN TEKRAR SAYISI
-                                    </label>
-                                    <div style="display:flex; align-items:center; gap:4px;">
-                                        <button class="btn-timer" style="padding:8px 12px; font-size:13px; font-weight:900;" onclick="stepSetReps('${ex.id}', ${currentSetIdx}, -2)">-2</button>
-                                        <button class="btn-timer" style="padding:8px 10px; font-size:13px; font-weight:900;" onclick="stepSetReps('${ex.id}', ${currentSetIdx}, -1)">-1</button>
-                                        <input type="number" step="1" class="set-input-reps focus-input-large" 
-                                               id="r_${ex.id}_${currentSetIdx}" 
-                                               value="${currentSet.reps !== '' && currentSet.reps !== null ? currentSet.reps : ''}" 
-                                               placeholder="0 tk" 
-                                               oninput="onSetRepsInput('${ex.id}', ${currentSetIdx}, this.value)">
-                                        <button class="btn-timer" style="padding:8px 10px; font-size:13px; font-weight:900;" onclick="stepSetReps('${ex.id}', ${currentSetIdx}, 1)">+1</button>
-                                        <button class="btn-timer" style="padding:8px 12px; font-size:13px; font-weight:900;" onclick="stepSetReps('${ex.id}', ${currentSetIdx}, 2)">+2</button>
+                                <!-- GİZLENEBİLİR / AÇILABİLİR HIZLI BUTONLAR (ÇOK İŞE YARAYAN HIZLI SEÇİCİ) -->
+                                <div class="tools-collapsible">
+                                    <div class="tools-header-toggle" onclick="toggleExtraTools('${ex.id}')">
+                                        <div class="tools-title">
+                                            <span>⚡ Hızlı Kilo & Hassas Ayar Butonları</span>
+                                            <span class="tools-badge-count">9 Kilo + 8 Buton</span>
+                                        </div>
+                                        <span id="toolsArrow_${ex.id}" style="font-size:12px; color:var(--gold); font-weight:700;">
+                                            ${extraToolsOpen[ex.id] ? '▲ Kapat' : '▼ Aç'}
+                                        </span>
+                                    </div>
+                                    <div class="tools-body" id="toolsBody_${ex.id}" style="display:${extraToolsOpen[ex.id] ? 'block' : 'none'};">
+                                        <!-- HIZLI AĞIRLIK ÇİPLERİ -->
+                                        <div style="font-size:10px; font-weight:800; color:var(--text-secondary); margin-bottom:4px; text-transform:uppercase;">
+                                            TEK DOKUNUŞLA KİLO SEÇ:
+                                        </div>
+                                        <div class="focus-weight-chips" style="margin-top:2px; margin-bottom:8px;">
+                                            ${[7.5, 10, 12.5, 15, 17.5, 20, 22.5, 25, 30].map(wVal => `
+                                                <button type="button" class="weight-chip ${currentSet.weight == wVal ? 'selected' : ''}" onclick="setQuickWeight('${ex.id}', ${currentSetIdx}, ${wVal})">
+                                                    ${wVal} kg
+                                                </button>
+                                            `).join('')}
+                                        </div>
+
+                                        <!-- HASSAS KİLO STEPPERLARI -->
+                                        <div style="font-size:10px; font-weight:800; color:var(--text-secondary); margin-bottom:4px; text-transform:uppercase;">
+                                            HASSAS KİLO ADIMI:
+                                        </div>
+                                        <div class="fine-steppers-row">
+                                            <button type="button" class="btn-fine-step" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, -2.5)">-2.5 kg</button>
+                                            <button type="button" class="btn-fine-step" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, -1)">-1 kg</button>
+                                            <button type="button" class="btn-fine-step" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, 1)">+1 kg</button>
+                                            <button type="button" class="btn-fine-step" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, 2.5)">+2.5 kg</button>
+                                        </div>
+
+                                        <!-- HASSAS TEKRAR STEPPERLARI -->
+                                        <div style="font-size:10px; font-weight:800; color:var(--text-secondary); margin-bottom:4px; text-transform:uppercase;">
+                                            HASSAS TEKRAR ADIMI:
+                                        </div>
+                                        <div class="fine-steppers-row">
+                                            <button type="button" class="btn-fine-step" onclick="stepSetReps('${ex.id}', ${currentSetIdx}, -2)">-2 Tk</button>
+                                            <button type="button" class="btn-fine-step" onclick="stepSetReps('${ex.id}', ${currentSetIdx}, -1)">-1 Tk</button>
+                                            <button type="button" class="btn-fine-step" onclick="stepSetReps('${ex.id}', ${currentSetIdx}, 1)">+1 Tk</button>
+                                            <button type="button" class="btn-fine-step" onclick="stepSetReps('${ex.id}', ${currentSetIdx}, 2)">+2 Tk</button>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -5645,6 +6278,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
                 const btnAdmin = document.getElementById('btnAdminPanel');
                 if (btnAdmin) btnAdmin.style.display = isAdmin ? 'flex' : 'none';
+
+                const sheetAdmin = document.getElementById('sheetAdminBtn');
+                if (sheetAdmin) sheetAdmin.style.display = isAdmin ? 'flex' : 'none';
 
                 const profileTabAdminBtn = document.getElementById('profileTabAdminBtn');
                 if (profileTabAdminBtn) profileTabAdminBtn.style.display = isAdmin ? 'inline-block' : 'none';
