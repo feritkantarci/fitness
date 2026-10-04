@@ -5028,15 +5028,14 @@
                             </div>
                         </div>
 
-                        <!-- 2. ZARİF BİYOMEKANİK FORM & GÖRSEL KARTI (MUTLAKA GÖRÜNÜR) -->
-                        <div class="exercise-visual-card">
-                            <div class="visual-illustration">
-                                ${renderExercisePositionsHtml(ex, `focus_${ex.id}`, false)}
-                            </div>
-                            <div class="visual-cue-info">
-                                <div class="visual-cue-title">🎯 Biyomekanik İpucu</div>
-                                <div class="visual-cue-text">${escapeHTML(ex.cue || 'Hareketi kontrollü ve tam eklem hareket açıklığında uygulayın.')}</div>
-                            </div>
+                        <!-- BİYOMEKANİK FORM, ANATOMİ VE GÖRSEL REHBERİ (TAM GENİŞLİK) -->
+                        <div style="margin-bottom:12px;">
+                            ${renderExercisePositionsHtml(ex, `focus_${ex.id}`, false)}
+                        </div>
+
+                        <!-- BİYOMEKANİK İPUCU -->
+                        <div style="font-size:12px; color:#cbd5e1; margin-bottom:12px; background:rgba(15, 23, 42, 0.8); border:1px solid var(--border); padding:10px 12px; border-radius:10px; border-left:3px solid var(--cyan); line-height:1.4;">
+                            💡 <strong>Biyomekanik İpucu:</strong> ${escapeHTML(ex.cue || 'Hareketi kontrollü ve tam eklem hareket açıklığında uygulayın.')}
                         </div>
 
                         <!-- SETS BREADCRUMBS -->
