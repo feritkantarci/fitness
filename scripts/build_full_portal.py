@@ -1714,8 +1714,45 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Antrenman Programı</label>
-                <input type="text" id="logProgramName" class="form-input" readonly>
+                <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>🏷️ Antrenman İsmi / Program Başlığı</span>
+                    <span style="font-size:11px; color:var(--text-secondary); font-weight:normal;">(Hatırlamak için özelleştirin)</span>
+                </label>
+                <input type="text" id="logProgramName" class="form-input" placeholder="Örn: Pazartesi Ağır Çelik, Rodium Bacak Günü...">
+            </div>
+
+            <!-- MEKAN & SALON LOKASYONU -->
+            <div class="form-group" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                <label class="form-label" style="margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                    <span>📍 Antrenman Nerede Yapıldı?</span>
+                    <span style="font-size:11px; color:var(--text-secondary); font-weight:normal;">(Mekan & Salon Analizi)</span>
+                </label>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div>
+                        <label style="font-size:11px; color:var(--text-secondary); font-weight:700; margin-bottom:4px; display:block;">Mekan Tipi</label>
+                        <select id="logLocationType" class="form-select" onchange="handleLocationTypeChange()">
+                            <option value="salon" selected>🏋️ Spor Salonu</option>
+                            <option value="ev">🏠 Ev</option>
+                            <option value="acik_hava">🌲 Açık Hava / Park</option>
+                        </select>
+                    </div>
+                    <div id="gymSelectGroup">
+                        <label style="font-size:11px; color:var(--text-secondary); font-weight:700; margin-bottom:4px; display:block;">Salon Seçimi</label>
+                        <select id="logGymSelect" class="form-select" onchange="handleGymSelectChange()">
+                            <option value="Rodium">Rodium</option>
+                            <option value="Sports & More">Sports & More</option>
+                            <option value="Samandağ">Samandağ</option>
+                            <option value="MACFit">MACFit</option>
+                            <option value="FitStop">FitStop</option>
+                            <option value="custom">✏️ Diğer / Yeni Salon Yaz...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="gymCustomGroup" style="margin-top: 10px;">
+                    <label id="gymCustomLabel" style="font-size:11px; color:var(--text-secondary); font-weight:700; margin-bottom:4px; display:block;">Salon / Konum Detayı</label>
+                    <input type="text" id="logLocationName" class="form-input" value="Rodium" placeholder="Salon veya konum adını giriniz...">
+                </div>
             </div>
 
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;" class="form-group">
@@ -2855,6 +2892,118 @@ HTML_CONTENT = f"""<!DOCTYPE html>
         }}
 
         // ==================== COMPLETE & LOG WORKOUT ====================
+        function getSavedGymsList() {{
+            const defaultGyms = ["Rodium", "Sports & More", "Samandağ", "MACFit", "FitStop"];
+            try {{
+                const stored = localStorage.getItem('celik_kodu_custom_gyms');
+                if (stored) {{
+                    const parsed = JSON.parse(stored);
+                    if (Array.isArray(parsed)) {{
+                        parsed.forEach(g => {{
+                            if (g && typeof g === 'string' && !defaultGyms.includes(g)) {{
+                                defaultGyms.push(g);
+                            }}
+                        }});
+                    }}
+                }}
+            }} catch(e) {{}}
+            return defaultGyms;
+        }}
+
+        function saveCustomGym(gymName) {{
+            if (!gymName || typeof gymName !== 'string') return;
+            const trimmed = gymName.trim();
+            if (!trimmed) return;
+            const defaultGyms = ["Rodium", "Sports & More", "Samandağ", "MACFit", "FitStop"];
+            try {{
+                let stored = [];
+                const existing = localStorage.getItem('celik_kodu_custom_gyms');
+                if (existing) stored = JSON.parse(existing) || [];
+                if (!defaultGyms.includes(trimmed) && !stored.includes(trimmed)) {{
+                    stored.push(trimmed);
+                    localStorage.setItem('celik_kodu_custom_gyms', JSON.stringify(stored));
+                }}
+            }} catch(e) {{}}
+        }}
+
+        function initCompleteModalLocation() {{
+            const gyms = getSavedGymsList();
+            const gymSelect = document.getElementById('logGymSelect');
+            if (gymSelect) {{
+                gymSelect.innerHTML = gyms.map(g => `<option value="${{escapeHTML(g)}}">${{escapeHTML(g)}}</option>`).join('') +
+                    `<option value="custom">✏️ Diğer / Yeni Salon Yaz...</option>`;
+            }}
+
+            const uid = getActiveUserId();
+            let lastLoc = null;
+            try {{
+                const s = localStorage.getItem(`celik_kodu_last_location_${{uid}}`);
+                if (s) lastLoc = JSON.parse(s);
+            }} catch(e) {{}}
+
+            const locType = lastLoc?.type || 'salon';
+            const locName = lastLoc?.name || 'Rodium';
+
+            const locTypeEl = document.getElementById('logLocationType');
+            if (locTypeEl) locTypeEl.value = locType;
+
+            if (locType === 'salon' && gymSelect) {{
+                if (gyms.includes(locName)) {{
+                    gymSelect.value = locName;
+                }} else {{
+                    gymSelect.value = 'custom';
+                }}
+            }}
+
+            const locNameEl = document.getElementById('logLocationName');
+            if (locNameEl) locNameEl.value = locName;
+
+            handleLocationTypeChange();
+        }}
+
+        function handleLocationTypeChange() {{
+            const locTypeEl = document.getElementById('logLocationType');
+            if (!locTypeEl) return;
+            const locType = locTypeEl.value;
+            const gymGroup = document.getElementById('gymSelectGroup');
+            const customLabel = document.getElementById('gymCustomLabel');
+            const locNameEl = document.getElementById('logLocationName');
+            const gymSelect = document.getElementById('logGymSelect');
+
+            if (locType === 'salon') {{
+                if (gymGroup) gymGroup.style.display = 'block';
+                if (customLabel) customLabel.innerText = 'Salon / Konum Detayı (Örn: Rodium, Sports & More...)';
+                if (gymSelect && gymSelect.value !== 'custom') {{
+                    locNameEl.value = gymSelect.value;
+                }} else if (!locNameEl.value || locNameEl.value === 'Ev' || locNameEl.value === 'Açık Hava / Park') {{
+                    locNameEl.value = 'Rodium';
+                    if (gymSelect) gymSelect.value = 'Rodium';
+                }}
+            }} else if (locType === 'ev') {{
+                if (gymGroup) gymGroup.style.display = 'none';
+                if (customLabel) customLabel.innerText = 'Ev Lokasyonu / Detay Notu';
+                locNameEl.value = 'Ev';
+            }} else if (locType === 'acik_hava') {{
+                if (gymGroup) gymGroup.style.display = 'none';
+                if (customLabel) customLabel.innerText = 'Açık Alan / Park İsmi';
+                locNameEl.value = 'Açık Hava / Park';
+            }}
+        }}
+
+        function handleGymSelectChange() {{
+            const gymSelect = document.getElementById('logGymSelect');
+            const locNameEl = document.getElementById('logLocationName');
+            if (!gymSelect || !locNameEl) return;
+
+            if (gymSelect.value === 'custom') {{
+                locNameEl.value = '';
+                locNameEl.placeholder = 'Yeni salon adını buraya yazınız...';
+                locNameEl.focus();
+            }} else {{
+                locNameEl.value = gymSelect.value;
+            }}
+        }}
+
         function openCompleteModal() {{
             if (!activeWorkoutSession) {{
                 alert("Aktif bir antrenman bulunmuyor.");
@@ -2863,8 +3012,9 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             const elapsedSecs = getWorkoutElapsedSeconds();
             const elapsedMins = Math.max(1, Math.round(elapsedSecs / 60));
 
-            document.getElementById('logProgramName').value = activeWorkoutSession.title;
+            document.getElementById('logProgramName').value = activeWorkoutSession.title || 'Çelik Kodu Antrenmanı';
             document.getElementById('logDuration').value = elapsedMins;
+            initCompleteModalLocation();
 
             // Summary stats & detailed exercise breakdown calculation
             let totalCompletedSets = 0;
@@ -2972,11 +3122,26 @@ HTML_CONTENT = f"""<!DOCTYPE html>
         function saveCompletedWorkout() {{
             if (!activeWorkoutSession) return;
 
-            const programName = document.getElementById('logProgramName').value || activeWorkoutSession.title;
+            const programNameInput = document.getElementById('logProgramName');
+            const programName = (programNameInput && programNameInput.value.trim()) ? programNameInput.value.trim() : (activeWorkoutSession.title || 'Çelik Kodu Antrenmanı');
             const duration = parseInt(document.getElementById('logDuration').value) || Math.max(1, Math.round(getWorkoutElapsedSeconds() / 60));
             const rpe = document.getElementById('logRpe').value;
             const notes = document.getElementById('logNotes').value;
             const elapsedSecs = getWorkoutElapsedSeconds();
+
+            const locTypeEl = document.getElementById('logLocationType');
+            const locType = locTypeEl ? locTypeEl.value : 'salon';
+            const locNameEl = document.getElementById('logLocationName');
+            let locName = (locNameEl && locNameEl.value.trim()) ? locNameEl.value.trim() : (locType === 'salon' ? 'Spor Salonu' : (locType === 'ev' ? 'Ev' : 'Açık Hava'));
+
+            if (locType === 'salon' && locName && locName !== 'Spor Salonu') {{
+                saveCustomGym(locName);
+            }}
+
+            const uid = getActiveUserId();
+            try {{
+                localStorage.setItem(`celik_kodu_last_location_${{uid}}`, JSON.stringify({{ type: locType, name: locName }}));
+            }} catch(e) {{}}
 
             let totalVolume = 0;
             let totalCompletedSets = 0;
@@ -3036,6 +3201,8 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                 date: new Date().toISOString().split('T')[0],
                 dateFormatted: new Intl.DateTimeFormat('tr-TR', {{ dateStyle: 'medium', timeStyle: 'short' }}).format(new Date()),
                 program: programName,
+                locationType: locType,
+                locationName: locName,
                 duration: duration,
                 durationFormatted: formatSecondsToHMS(elapsedSecs),
                 durationSecs: elapsedSecs,
@@ -3054,7 +3221,6 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             setWorkoutLogs(logs);
 
             // Clear active workout session state
-            const uid = getActiveUserId();
             localStorage.removeItem(`celik_kodu_active_state_${{uid}}`);
             clearInterval(workoutTimerInterval);
             clearInterval(timerInterval);
@@ -3704,24 +3870,31 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             return streak;
         }}
 
+        let currentHistoryLocationFilter = 'all';
+
+        function filterHistoryByLocation(loc) {{
+            currentHistoryLocationFilter = loc;
+            renderHistory();
+        }}
+
         function renderHistory() {{
-            const logs = getWorkoutLogs();
+            const allLogs = getWorkoutLogs();
             const container = document.getElementById('logHistoryContainer');
             if (!container) return;
 
-            const total = logs.length;
-            const streak = calculateStreakForLogs(logs);
+            const total = allLogs.length;
+            const streak = calculateStreakForLogs(allLogs);
 
             const now = new Date();
             const startOfWeek = new Date(now.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1)));
             startOfWeek.setHours(0,0,0,0);
-            const thisWeek = logs.filter(l => new Date(l.date) >= startOfWeek).length;
+            const thisWeek = allLogs.filter(l => new Date(l.date) >= startOfWeek).length;
 
             if (document.getElementById('statTotalWorkouts')) document.getElementById('statTotalWorkouts').innerText = total;
             if (document.getElementById('statWeekWorkouts')) document.getElementById('statWeekWorkouts').innerText = `${{thisWeek}}/3`;
             if (document.getElementById('statStreak')) document.getElementById('statStreak').innerText = streak;
 
-            if (logs.length === 0) {{
+            if (allLogs.length === 0) {{
                 container.innerHTML = `
                     <div style="background:var(--bg-surface); padding:20px; text-align:center; border:1px dashed var(--border); border-radius:10px; color:var(--text-secondary); font-size:12px;">
                         Henüz kayıtlı antrenman seansınız yok. Bugün ilk antrenmanınızı yapıp kaydedin! 🚀
@@ -3730,18 +3903,78 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                 return;
             }}
 
-            container.innerHTML = logs.map(l => {{
+            // Group by location for filtering & stats
+            const locationCounts = {{ 'all': allLogs.length }};
+            allLogs.forEach(l => {{
+                const locKey = l.locationName || (l.locationType === 'ev' ? 'Ev' : 'Spor Salonu');
+                locationCounts[locKey] = (locationCounts[locKey] || 0) + 1;
+            }});
+
+            const distinctLocations = Object.keys(locationCounts).filter(k => k !== 'all');
+
+            let filterBarHTML = '';
+            if (distinctLocations.length > 0) {{
+                filterBarHTML = `
+                    <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; margin-bottom:12px;" class="hide-scrollbar">
+                        <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; border-radius:20px; white-space:nowrap; ${{currentHistoryLocationFilter === 'all' ? 'background:var(--gold); color:#000; font-weight:800;' : ''}}" onclick="filterHistoryByLocation('all')">
+                            Tüm Mekanlar (${{locationCounts['all']}})
+                        </button>
+                        ${{distinctLocations.map(loc => {{
+                            const isEv = loc === 'Ev';
+                            const isPark = loc === 'Açık Hava / Park';
+                            const icon = isEv ? '🏠' : (isPark ? '🌲' : '🏋️');
+                            const isActive = currentHistoryLocationFilter === loc;
+                            return `
+                                <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; border-radius:20px; white-space:nowrap; ${{isActive ? 'background:var(--gold); color:#000; font-weight:800;' : ''}}" onclick="filterHistoryByLocation('${{escapeHTML(loc)}}')">
+                                    ${{icon}} ${{escapeHTML(loc)}} (${{locationCounts[loc]}})
+                                </button>
+                            `;
+                        }}).join('')}}
+                    </div>
+                `;
+            }}
+
+            const logs = currentHistoryLocationFilter === 'all'
+                ? allLogs
+                : allLogs.filter(l => (l.locationName || (l.locationType === 'ev' ? 'Ev' : 'Spor Salonu')) === currentHistoryLocationFilter);
+
+            if (logs.length === 0) {{
+                container.innerHTML = filterBarHTML + `
+                    <div style="background:var(--bg-surface); padding:16px; text-align:center; border:1px dashed var(--border); border-radius:10px; color:var(--text-secondary); font-size:12px;">
+                        "${{escapeHTML(currentHistoryLocationFilter)}}" mekanında kayıtlı antrenman seansı bulunamadı.
+                    </div>
+                `;
+                return;
+            }}
+
+            container.innerHTML = filterBarHTML + logs.map(l => {{
                 const totalVol = l.totalVolumeKg ? `${{Math.round(l.totalVolumeKg).toLocaleString('tr-TR')}} kg` : 'Belirtilmedi';
                 const setsReps = l.totalSetsCompleted ? `${{l.totalSetsCompleted}} Set • ${{l.totalRepsCompleted || 0}} Tk` : '-';
                 const durStr = l.durationFormatted || `${{l.duration}} Dk`;
                 const rpeLabel = l.rpe ? (l.rpe.split(' ')[0] + ' ' + (l.rpe.split(' ')[1] || '')) : 'RPE 8';
 
+                const locType = l.locationType || (l.locationName === 'Ev' ? 'ev' : 'salon');
+                const locName = l.locationName || (locType === 'ev' ? 'Ev' : 'Spor Salonu');
+                const isEv = locType === 'ev';
+                const isPark = locType === 'acik_hava';
+                const locIcon = isEv ? '🏠' : (isPark ? '🌲' : '🏋️');
+                const locBadgeStyle = isEv
+                    ? 'background:rgba(59, 130, 246, 0.15); border:1px solid rgba(59, 130, 246, 0.4); color:#93c5fd;'
+                    : (isPark
+                        ? 'background:rgba(16, 185, 129, 0.15); border:1px solid rgba(16, 185, 129, 0.4); color:#6ee7b7;'
+                        : 'background:rgba(217, 119, 6, 0.15); border:1px solid rgba(217, 119, 6, 0.4); color:#fcd34d;');
+
                 return `
                     <div class="log-history-card">
                         <div class="log-card-header">
                             <div>
-                                <span class="log-date">📅 ${{escapeHTML(l.dateFormatted || l.date)}}</span>
-                                <h3 style="font-size:14.5px; font-weight:800; color:#fff; margin-top:2px;">${{escapeHTML(l.program)}}</h3>
+                                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:4px;">
+                                    <span class="log-date">📅 ${{escapeHTML(l.dateFormatted || l.date)}}</span>
+                                    <span style="${{locBadgeStyle}} border-radius:4px; padding:2px 8px; font-size:11px; font-weight:700;">
+                                        ${{locIcon}} ${{escapeHTML(locName)}}
+                                    </span>
+                                </div>
+                                <h3 style="font-size:15px; font-weight:800; color:#fff; line-height:1.3;">${{escapeHTML(l.program)}}</h3>
                             </div>
                             <div style="display:flex; align-items:center; gap:6px;">
                                 <span class="ex-badge badge-equip">${{escapeHTML(rpeLabel)}}</span>
@@ -3811,12 +4044,14 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                 return;
             }}
 
-            const headers = ["Tarih", "Program", "Sure_Dk", "RPE", "Toplam_Tonaj_Kg", "Egzersiz", "Ekipman", "Kas_Grubu", "Set_No", "Kilo_Kg", "Tekrar", "Hacim_Kg", "Durum"];
+            const headers = ["Tarih", "Program", "Mekan_Tipi", "Salon_Adi", "Sure_Dk", "RPE", "Toplam_Tonaj_Kg", "Egzersiz", "Ekipman", "Kas_Grubu", "Set_No", "Kilo_Kg", "Tekrar", "Hacim_Kg", "Durum"];
             const rows = [headers.join(",")];
 
             logs.forEach(l => {{
                 const date = `"${{l.dateFormatted || l.date}}"`;
-                const prog = `"${{l.program.replace(/"/g, '""')}}"`;
+                const prog = `"${{(l.program || '').replace(/"/g, '""')}}"`;
+                const locType = `"${{(l.locationType === 'salon' ? 'Spor Salonu' : (l.locationType === 'ev' ? 'Ev' : (l.locationType === 'acik_hava' ? 'Açık Hava' : 'Diğer')))}}"`;
+                const locName = `"${{(l.locationName || (l.locationType === 'ev' ? 'Ev' : 'Salon')).replace(/"/g, '""')}}"`;
                 const dur = l.duration || '';
                 const rpe = `"${{(l.rpe || '').replace(/"/g, '""')}}"`;
                 const totalVol = l.totalVolumeKg || 0;
@@ -3834,14 +4069,14 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                                 const r = isDone ? (st.reps || 0) : 0;
                                 const v = isDone ? (w * r) : 0;
                                 const status = isDone ? '"Tamamlandı"' : '"Atlandı"';
-                                rows.push([date, prog, dur, rpe, totalVol, exName, equip, muscle, setNo, w, r, v, status].join(","));
+                                rows.push([date, prog, locType, locName, dur, rpe, totalVol, exName, equip, muscle, setNo, w, r, v, status].join(","));
                             }});
                         }} else {{
-                            rows.push([date, prog, dur, rpe, totalVol, exName, equip, muscle, 1, 0, 0, 0, '"Atlandı"'].join(","));
+                            rows.push([date, prog, locType, locName, dur, rpe, totalVol, exName, equip, muscle, 1, 0, 0, 0, '"Atlandı"'].join(","));
                         }}
                     }});
                 }} else {{
-                    rows.push([date, prog, dur, rpe, totalVol, 'Genel', '', '', 1, 0, 0, 0, '"Tamamlandı"'].join(","));
+                    rows.push([date, prog, locType, locName, dur, rpe, totalVol, 'Genel', '', '', 1, 0, 0, 0, '"Tamamlandı"'].join(","));
                 }}
             }});
 
