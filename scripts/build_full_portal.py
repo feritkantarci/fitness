@@ -2458,6 +2458,7 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             dips: {{ form: 'assets/guides/guide_bw_dips_form.jpg', anatomi: 'assets/guides/guide_bw_dips_anatomi.jpg' }},
             face_pull: {{ form: 'assets/guides/guide_mach_face_pull_form.jpg', anatomi: 'assets/guides/guide_mach_face_pull_anatomi.jpg' }},
             snatch: {{ form: 'assets/guides/guide_db_snatch_form.jpg', anatomi: 'assets/guides/guide_db_snatch_anatomi.jpg' }},
+            clean: {{ form: 'assets/guides/guide_kb_clean_form.jpg', anatomi: 'assets/guides/guide_kb_clean_anatomi.jpg' }},
             swing: {{ form: 'assets/guides/guide_db_swing_form.jpg', anatomi: 'assets/guides/guide_db_swing_anatomi.jpg' }},
             plank: {{ form: 'assets/guides/guide_bw_plank_form.jpg', anatomi: 'assets/guides/guide_bw_plank_anatomi.jpg' }},
             farmers_walk: {{ form: 'assets/guides/guide_db_farmers_walk_form.jpg', anatomi: 'assets/guides/guide_db_farmers_walk_anatomi.jpg' }},
@@ -2492,7 +2493,7 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             'kb_swing': guideLibrary.swing,
             'db_snatch': guideLibrary.snatch,
             'kb_half_snatch': guideLibrary.snatch,
-            'kb_clean': guideLibrary.snatch,
+            'kb_clean': guideLibrary.clean,
             'db_bench_press': guideLibrary.bench,
             'db_floor_press': guideLibrary.bench,
             'db_incline_press': guideLibrary.bench,
@@ -3035,6 +3036,7 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                 dips: {{ form: 'assets/guides/guide_bw_dips_form.jpg', anatomi: 'assets/guides/guide_bw_dips_anatomi.jpg' }},
                 face_pull: {{ form: 'assets/guides/guide_mach_face_pull_form.jpg', anatomi: 'assets/guides/guide_mach_face_pull_anatomi.jpg' }},
                 snatch: {{ form: 'assets/guides/guide_db_snatch_form.jpg', anatomi: 'assets/guides/guide_db_snatch_anatomi.jpg' }},
+            clean: {{ form: 'assets/guides/guide_kb_clean_form.jpg', anatomi: 'assets/guides/guide_kb_clean_anatomi.jpg' }},
                 swing: {{ form: 'assets/guides/guide_db_swing_form.jpg', anatomi: 'assets/guides/guide_db_swing_anatomi.jpg' }},
                 plank: {{ form: 'assets/guides/guide_bw_plank_form.jpg', anatomi: 'assets/guides/guide_bw_plank_anatomi.jpg' }},
                 farmers_walk: {{ form: 'assets/guides/guide_db_farmers_walk_form.jpg', anatomi: 'assets/guides/guide_db_farmers_walk_anatomi.jpg' }},
@@ -3076,7 +3078,7 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                 'kb_swing': guideLibrary.swing,
                 'db_snatch': guideLibrary.snatch,
                 'kb_half_snatch': guideLibrary.snatch,
-                'kb_clean': guideLibrary.snatch,
+                'kb_clean': guideLibrary.clean,
 
                 // Horizontal Chest Push
                 'db_bench_press': guideLibrary.bench,
