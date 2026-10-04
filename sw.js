@@ -1,4 +1,4 @@
-const CACHE_NAME = 'celik-kodu-cache-v35';
+const CACHE_NAME = 'celik-kodu-cache-v36';
 const ASSETS = [
   './',
   './assets/guides/guide_bw_air_squat_form.jpg',

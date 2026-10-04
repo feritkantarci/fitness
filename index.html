@@ -2407,6 +2407,16 @@
             border-color: var(--gold);
             color: var(--gold);
         }
+        .btn-danger-soft {
+            background: rgba(239, 68, 68, 0.14);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            color: #fca5a5;
+        }
+        .btn-danger-soft:hover {
+            background: rgba(239, 68, 68, 0.28);
+            border-color: rgba(239, 68, 68, 0.6);
+            color: #fff;
+        }
 
         /* MODALS */
         .modal-overlay {
@@ -2781,6 +2791,8 @@
                 </div>
             </div>
 
+            <!-- ==================== TAB 2: ACTIVE WORKOUT ==================== -->
+            <div id="activeWorkoutTab" class="tab-content">
                 <div id="activeWorkoutContainer">
                     <!-- Populated dynamically when a workout is started -->
                 </div>
@@ -3315,9 +3327,14 @@
 
             <div id="logWorkoutSummaryHint"></div>
 
-            <button class="btn btn-gold" style="width:100%; padding:14px; font-weight:900;" onclick="saveCompletedWorkout()">
-                ✅ GÜNLÜĞE KAYDET & SEANSI BİTİR
-            </button>
+            <div style="display:flex; gap:10px; margin-top:8px;">
+                <button type="button" class="btn btn-danger-soft" style="flex:1; padding:13px; font-weight:700; font-size:12.5px;" onclick="cancelActiveWorkout()">
+                    🛑 İptal Et
+                </button>
+                <button type="button" class="btn btn-gold" style="flex:2; padding:13px; font-weight:900; font-size:13px;" onclick="saveCompletedWorkout()">
+                    ✅ GÜNLÜĞE KAYDET
+                </button>
+            </div>
         </div>
     </div>
 
@@ -5523,14 +5540,19 @@
 
                 container.innerHTML = `
                     <div class="workout-header-card" style="margin-bottom:12px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
                             <div>
                                 <span class="badge-brand">CANLI ODAK MODU</span>
                                 <h2 style="font-size:17px; font-weight:800; color:#fff;">${escapeHTML(s.title)}</h2>
                             </div>
-                            <button class="btn btn-gold" style="padding:9px 13px; font-size:12.5px;" onclick="openCompleteModal()">
-                                🏁 BİTİR & KAYDET
-                            </button>
+                            <div style="display:flex; gap:6px; align-items:center;">
+                                <button class="btn btn-danger-soft" style="padding:8px 12px; font-size:12px; font-weight:700;" onclick="cancelActiveWorkout()" title="Antrenmanı sonlandır ve iptal et">
+                                    🛑 İptal Et
+                                </button>
+                                <button class="btn btn-gold" style="padding:9px 13px; font-size:12.5px;" onclick="openCompleteModal()">
+                                    🏁 BİTİR & KAYDET
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -5713,9 +5735,12 @@
                         </div>
 
                         <!-- NAVIGATION FOOTER -->
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; gap:8px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; gap:8px; flex-wrap:wrap;">
                             <button class="btn btn-outline" style="flex:1; padding:12px 8px; font-size:12px;" onclick="goToPrevExercise()" ${activeFocusExIndex === 0 ? 'disabled' : ''}>
                                 ⬅️ Önceki
+                            </button>
+                            <button class="btn btn-danger-soft" style="flex:1; padding:12px 8px; font-size:12px; font-weight:700;" onclick="cancelActiveWorkout()" title="Antrenmanı iptal et">
+                                🛑 İptal Et
                             </button>
                             <button class="btn btn-gold" style="flex:1.2; padding:12px 8px; font-size:12px; font-weight:900;" onclick="openCompleteModal()">
                                 🏁 Bitir & Kaydet
@@ -5740,14 +5765,19 @@
             // ==================== MODE 2: TÜM LİSTE GÖRÜNÜMÜ (LIST VIEW) ====================
             container.innerHTML = `
                 <div class="workout-header-card" style="margin-bottom:16px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
                         <div>
                             <span class="badge-brand">CANLI LİSTE</span>
                             <h2 style="font-size:18px; font-weight:800; color:#fff;">${escapeHTML(s.title)}</h2>
                         </div>
-                        <button class="btn btn-gold" style="padding:10px 14px; font-size:13px;" onclick="openCompleteModal()">
-                            🏁 BİTİR & KAYDET
-                        </button>
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <button class="btn btn-danger-soft" style="padding:9px 12px; font-size:12px; font-weight:700;" onclick="cancelActiveWorkout()" title="Antrenmanı sonlandır ve iptal et">
+                                🛑 İptal Et
+                            </button>
+                            <button class="btn btn-gold" style="padding:10px 14px; font-size:13px;" onclick="openCompleteModal()">
+                                🏁 BİTİR & KAYDET
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -5873,8 +5903,11 @@
                     </button>
                 </div>
 
-                <div style="text-align:center; margin:30px 0;">
-                    <button class="btn btn-gold" style="padding:16px 28px; font-size:15px;" onclick="openCompleteModal()">
+                <div style="display:flex; justify-content:center; gap:10px; margin:30px 0; flex-wrap:wrap;">
+                    <button class="btn btn-danger-soft" style="padding:15px 22px; font-size:14px; font-weight:700;" onclick="cancelActiveWorkout()">
+                        🛑 Antrenmanı İptal Et
+                    </button>
+                    <button class="btn btn-gold" style="padding:16px 28px; font-size:15px; font-weight:900;" onclick="openCompleteModal()">
                         🏁 ANTRENMANI TAMAMLA & GÜNLÜĞE KAYDET
                     </button>
                 </div>
@@ -6227,6 +6260,30 @@
                 }
             });
             return prs;
+        }
+
+        function cancelActiveWorkout() {
+            if (!activeWorkoutSession) return;
+            const ok = confirm("Antrenmanı iptal etmek istediğinize emin misiniz?\n\nBu seans sonlandırılacak ve yapılan ilerlemeler günlüğe kaydedilmeyecektir.");
+            if (!ok) return;
+
+            const user = getActiveUser();
+            const uid = user ? user.id : 'default';
+            localStorage.removeItem(`celik_kodu_active_state_${uid}`);
+            clearInterval(workoutTimerInterval);
+            clearInterval(timerInterval);
+            activeWorkoutSession = null;
+            activeWorkoutStartTime = null;
+            activeWorkoutIsPaused = false;
+            activeWorkoutPausedAt = null;
+            activeWorkoutTotalPausedMs = 0;
+            activeWorkoutSetsData = {};
+            activeFocusExIndex = 0;
+            activeFocusSetIndex = null;
+            releaseWakeLock();
+
+            closeCompleteModal();
+            renderActiveWorkout();
         }
 
         function openCompleteModal() {
@@ -8663,7 +8720,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=35')
+                navigator.serviceWorker.register('./sw.js?v=36')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
