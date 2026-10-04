@@ -1524,6 +1524,8 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                 ✅ GÜNLÜĞE KAYDET & SEANSI BİTİR
             </button>
         </div>
+    </div>
+
     <!-- ==================== EXERCISE PICKER & ALTERNATIVE MODAL ==================== -->
     <div id="exercisePickerModal" class="modal-overlay">
         <div class="modal-box" style="max-width: 600px;">
@@ -1836,13 +1838,13 @@ HTML_CONTENT = f"""<!DOCTYPE html>
 
                     blocksHtml += `
                         <div class="block-header">SÜPERSET BLOK ${{blockLetter}} (Dinlenmeden Peş Peşe)</div>
-                        ${{renderSingleExerciseCard(ex1, `${{blockLetter}}1`, w.scheme, weights)}}
-                        ${{ex2 ? renderSingleExerciseCard(ex2, `${{blockLetter}}2`, w.scheme, weights) : ''}}
+                        ${{renderSingleExerciseCard(ex1, `${{blockLetter}}1`, w.scheme, weights, 'generated')}}
+                        ${{ex2 ? renderSingleExerciseCard(ex2, `${{blockLetter}}2`, w.scheme, weights, 'generated') : ''}}
                     `;
                 }}
             }} else {{
                 w.exercises.forEach((ex, idx) => {{
-                    blocksHtml += renderSingleExerciseCard(ex, `${{idx + 1}}`, w.scheme, weights);
+                    blocksHtml += renderSingleExerciseCard(ex, `${{idx + 1}}`, w.scheme, weights, 'generated');
                 }});
             }}
 
