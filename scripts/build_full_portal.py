@@ -1524,6 +1524,32 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                 ✅ GÜNLÜĞE KAYDET & SEANSI BİTİR
             </button>
         </div>
+    <!-- ==================== EXERCISE PICKER & ALTERNATIVE MODAL ==================== -->
+    <div id="exercisePickerModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 600px;">
+            <div class="modal-header">
+                <span class="modal-title" id="pickerModalTitle">🔄 Alternatif Egzersiz Seç</span>
+                <button class="modal-close" onclick="closeExercisePickerModal()">✕</button>
+            </div>
+
+            <!-- SEARCH & FILTERS -->
+            <div style="margin-bottom: 10px;">
+                <input type="text" id="pickerSearchInput" class="form-input" placeholder="🔍 Egzersiz adı veya kas ara... (Örn: Bench, Squat, Omuz)" oninput="renderPickerList()">
+            </div>
+
+            <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;" id="pickerCategoryPills">
+                <button class="btn-quick-equip" id="pill_cat_all" onclick="setPickerCategory('all')">Tümü</button>
+                <button class="btn-quick-equip" id="pill_cat_push" onclick="setPickerCategory('push')">İtiş / Göğüs / Omuz</button>
+                <button class="btn-quick-equip" id="pill_cat_pull" onclick="setPickerCategory('pull')">Çekiş / Sırt / Biceps</button>
+                <button class="btn-quick-equip" id="pill_cat_legs_quad" onclick="setPickerCategory('legs_quad')">Ön Bacak / Quad</button>
+                <button class="btn-quick-equip" id="pill_cat_legs_hinge" onclick="setPickerCategory('legs_hinge')">Arka Bacak / Kalça</button>
+                <button class="btn-quick-equip" id="pill_cat_core" onclick="setPickerCategory('core')">Karın & Core</button>
+            </div>
+
+            <div style="max-height: 52vh; overflow-y: auto; padding-right: 4px;" id="pickerExercisesContainer">
+                <!-- Dynamically rendered list of exercises -->
+            </div>
+        </div>
     </div>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
@@ -1861,6 +1887,12 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                     <!-- MAIN EXERCISES -->
                     ${{blocksHtml}}
 
+                    <div style="text-align:center; margin:16px 0 24px;">
+                        <button class="btn btn-outline" style="border-style:dashed; border-color:var(--cyan); color:var(--cyan); font-size:12.5px; padding:10px 18px;" onclick="openAddExerciseModal('generated')">
+                            ➕ Bu Antrenmana Yeni Hareket Ekle
+                        </button>
+                    </div>
+
                     <!-- FINISHER -->
                     <div class="block-header">🔥 Balistik Bitiş / Finisher</div>
                     <div style="background:rgba(225, 29, 72, 0.1); border-left:4px solid var(--red-alert); border-radius:8px; padding:10px 14px;">
@@ -1873,7 +1905,7 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             if (container.scrollIntoView) container.scrollIntoView({{ behavior: 'smooth' }});
         }}
 
-        function renderSingleExerciseCard(ex, label, scheme, weights) {{
+        function renderSingleExerciseCard(ex, label, scheme, weights, scope = 'generated') {{
             const equipLabels = {{
                 dumbbell: 'Dambıl',
                 kettlebell: 'Kettlebell',
@@ -1907,35 +1939,241 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                         💡 <strong>Altın Kural:</strong> ${{escapeHTML(ex.cue)}}
                     </div>
 
-                    <div style="text-align:right;">
-                        <button class="btn-swap-ex" onclick="swapSingleExercise('${{ex.id}}')">
-                            🔄 Başka Hareket Ver
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:8px; border-top:1px dashed var(--border);">
+                        <button class="btn-swap-ex" style="color:#f87171; border-color:rgba(239,68,68,0.3);" onclick="removeExerciseFromWorkout('${{ex.id}}', '${{scope}}')" title="Bu hareketi kaldır">
+                            🗑️ Kaldır
                         </button>
+                        <div style="display:flex; gap:6px;">
+                            <button class="btn-swap-ex" onclick="openAlternativeModal('${{ex.id}}', '${{scope}}')" title="Listeden alternatif seç">
+                                📋 Alternatif Seç
+                            </button>
+                            <button class="btn-swap-ex" onclick="swapSingleExercise('${{ex.id}}', '${{scope}}')" title="Rastgele başka hareket ver">
+                                🎲 Rastgele
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
         }}
 
-        function swapSingleExercise(currentExId) {{
-            if (!currentGeneratedWorkout) return;
-            const exIndex = currentGeneratedWorkout.exercises.findIndex(e => e.id === currentExId);
+        // ==================== EXERCISE PICKER & ALTERNATIVE MODAL LOGIC ====================
+        let pickerContext = {{
+            mode: 'replace', // 'replace' or 'add'
+            targetExId: null,
+            scope: 'generated', // 'generated' or 'active'
+            categoryFilter: 'all'
+        }};
+
+        function openAlternativeModal(currentExId, scope = 'generated') {{
+            const workout = scope === 'active' ? activeWorkoutSession : currentGeneratedWorkout;
+            if (!workout) return;
+
+            const currentEx = workout.exercises.find(e => e.id === currentExId);
+            pickerContext = {{
+                mode: 'replace',
+                targetExId: currentExId,
+                scope: scope,
+                categoryFilter: currentEx ? currentEx.category : 'all'
+            }};
+
+            document.getElementById('pickerModalTitle').innerText = `🔄 "${{currentEx ? currentEx.name : 'Hareket'}}" İçin Alternatif Seç`;
+            document.getElementById('pickerSearchInput').value = '';
+            updatePickerCategoryPills();
+            renderPickerList();
+            document.getElementById('exercisePickerModal').classList.add('active');
+        }}
+
+        function openAddExerciseModal(scope = 'generated') {{
+            const workout = scope === 'active' ? activeWorkoutSession : currentGeneratedWorkout;
+            if (!workout) return;
+
+            pickerContext = {{
+                mode: 'add',
+                targetExId: null,
+                scope: scope,
+                categoryFilter: 'all'
+            }};
+
+            document.getElementById('pickerModalTitle').innerText = "➕ Antrenmana Yeni Hareket Ekle";
+            document.getElementById('pickerSearchInput').value = '';
+            updatePickerCategoryPills();
+            renderPickerList();
+            document.getElementById('exercisePickerModal').classList.add('active');
+        }}
+
+        function closeExercisePickerModal() {{
+            document.getElementById('exercisePickerModal').classList.remove('active');
+        }}
+
+        function setPickerCategory(cat) {{
+            pickerContext.categoryFilter = cat;
+            updatePickerCategoryPills();
+            renderPickerList();
+        }}
+
+        function updatePickerCategoryPills() {{
+            const cats = ['all', 'push', 'pull', 'legs_quad', 'legs_hinge', 'core'];
+            cats.forEach(c => {{
+                const el = document.getElementById('pill_cat_' + c);
+                if (el) {{
+                    if (pickerContext.categoryFilter === c) {{
+                        el.style.borderColor = 'var(--gold)';
+                        el.style.color = 'var(--gold)';
+                        el.style.background = 'rgba(245, 158, 11, 0.15)';
+                    }} else {{
+                        el.style.borderColor = 'var(--border)';
+                        el.style.color = 'var(--text-secondary)';
+                        el.style.background = 'transparent';
+                    }}
+                }}
+            }});
+        }}
+
+        function renderPickerList() {{
+            const container = document.getElementById('pickerExercisesContainer');
+            if (!container) return;
+
+            const q = (document.getElementById('pickerSearchInput').value || '').trim().toLowerCase();
+            const cat = pickerContext.categoryFilter;
+
+            const workout = pickerContext.scope === 'active' ? activeWorkoutSession : currentGeneratedWorkout;
+            const existingIds = workout ? workout.exercises.map(e => e.id) : [];
+
+            const equipLabels = {{
+                dumbbell: 'Dambıl',
+                kettlebell: 'Kettlebell',
+                barbell: 'Barbell',
+                machine: 'Makine/Kablo',
+                bodyweight: 'Vücut Ağırlığı'
+            }};
+
+            let filtered = EXERCISES_DB.filter(ex => {{
+                if (pickerContext.mode === 'replace' && ex.id === pickerContext.targetExId) return false;
+                if (pickerContext.mode === 'add' && existingIds.includes(ex.id)) return false;
+
+                // equipment filter
+                if (!selectedEquipments.includes(ex.equipment)) return false;
+
+                // category filter
+                if (cat !== 'all' && ex.category !== cat) return false;
+
+                // search text filter
+                if (q) {{
+                    const matchName = ex.name.toLowerCase().includes(q);
+                    const matchMuscle = ex.muscle.toLowerCase().includes(q);
+                    const matchEquip = (equipLabels[ex.equipment] || '').toLowerCase().includes(q);
+                    if (!matchName && !matchMuscle && !matchEquip) return false;
+                }}
+                return true;
+            }});
+
+            if (filtered.length === 0) {{
+                container.innerHTML = `
+                    <div style="text-align:center; padding:30px 10px; color:var(--text-secondary); font-size:12px;">
+                        Kriterlere uygun başka egzersiz bulunamadı. Filtreleri temizleyip tekrar arayabilirsiniz.
+                    </div>
+                `;
+                return;
+            }}
+
+            container.innerHTML = filtered.map(ex => `
+                <div class="ex-card" style="margin-bottom:8px; padding:10px 12px; cursor:pointer;" onclick="selectExerciseFromPicker('${{ex.id}}')">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <strong style="color:#fff; font-size:13.5px;">${{escapeHTML(ex.name)}}</strong>
+                        <div style="display:flex; gap:4px;">
+                            <span class="ex-badge badge-equip">${{equipLabels[ex.equipment] || ex.equipment}}</span>
+                            <span class="ex-badge badge-muscle">${{escapeHTML(ex.muscle.split(',')[0])}}</span>
+                        </div>
+                    </div>
+                    <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.3;">
+                        💡 ${{escapeHTML(ex.cue)}}
+                    </div>
+                    <div style="text-align:right; margin-top:6px;">
+                        <button class="btn btn-gold" style="font-size:11px; padding:4px 10px;">
+                            ${{pickerContext.mode === 'replace' ? '✓ Bu Alternatifi Seç' : '➕ Bu Hareketi Ekle'}}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }}
+
+        function selectExerciseFromPicker(newExId) {{
+            const newEx = EXERCISES_DB.find(e => e.id === newExId);
+            if (!newEx) return;
+
+            const workout = pickerContext.scope === 'active' ? activeWorkoutSession : currentGeneratedWorkout;
+            if (!workout) return;
+
+            if (pickerContext.mode === 'replace') {{
+                const idx = workout.exercises.findIndex(e => e.id === pickerContext.targetExId);
+                if (idx !== -1) {{
+                    workout.exercises[idx] = newEx;
+                }}
+            }} else if (pickerContext.mode === 'add') {{
+                workout.exercises.push(newEx);
+            }}
+
+            closeExercisePickerModal();
+
+            if (pickerContext.scope === 'active') {{
+                renderActiveWorkout();
+            }} else {{
+                renderGeneratedWorkout();
+            }}
+            playAlertSound();
+        }}
+
+        function removeExerciseFromWorkout(exId, scope = 'generated') {{
+            const workout = scope === 'active' ? activeWorkoutSession : currentGeneratedWorkout;
+            if (!workout) return;
+
+            if (workout.exercises.length <= 1) {{
+                alert("Antrenmanda en az 1 egzersiz kalmalıdır!");
+                return;
+            }}
+
+            const ex = workout.exercises.find(e => e.id === exId);
+            if (confirm(`"${{ex ? ex.name : 'Bu egzersizi'}}" antrenman programından kaldırmak istediğinize emin misiniz?`)) {{
+                workout.exercises = workout.exercises.filter(e => e.id !== exId);
+                if (scope === 'active') {{
+                    renderActiveWorkout();
+                }} else {{
+                    renderGeneratedWorkout();
+                }}
+            }}
+        }}
+
+        function swapSingleExercise(currentExId, scope = 'generated') {{
+            const workout = scope === 'active' ? activeWorkoutSession : currentGeneratedWorkout;
+            if (!workout) return;
+
+            const exIndex = workout.exercises.findIndex(e => e.id === currentExId);
             if (exIndex === -1) return;
 
-            const currentEx = currentGeneratedWorkout.exercises[exIndex];
-            const usedIds = currentGeneratedWorkout.exercises.map(e => e.id);
+            const currentEx = workout.exercises[exIndex];
+            const usedIds = workout.exercises.map(e => e.id);
 
             // Pool of alternatives in the same category & available equipments
             const pool = filterExercises(currentEx.category, usedIds);
             let replacement = pickRandom(pool);
             if (!replacement) {{
-                // fallback to any exercise with active equipment
-                const fallback = EXERCISES_DB.filter(e => selectedEquipments.includes(e.equipment) && !usedIds.includes(e.id));
+                let relatedCat = currentEx.category;
+                if (currentEx.category === 'push') relatedCat = ['push', 'core'];
+                else if (currentEx.category === 'pull') relatedCat = ['pull', 'core'];
+                else if (currentEx.category === 'legs_quad' || currentEx.category === 'legs_hinge') relatedCat = ['legs_quad', 'legs_hinge', 'core'];
+
+                const fallback = EXERCISES_DB.filter(e => selectedEquipments.includes(e.equipment) && !usedIds.includes(e.id) && (Array.isArray(relatedCat) ? relatedCat.includes(e.category) : e.category === relatedCat));
                 replacement = pickRandom(fallback);
             }}
 
             if (replacement) {{
-                currentGeneratedWorkout.exercises[exIndex] = replacement;
-                renderGeneratedWorkout();
+                workout.exercises[exIndex] = replacement;
+                if (scope === 'active') {{
+                    renderActiveWorkout();
+                }} else {{
+                    renderGeneratedWorkout();
+                }}
+                playAlertSound();
             }} else {{
                 alert("Seçili ekipman havuzunda bu kas grubu için başka alternatif bulunamadı.");
             }}
@@ -2014,9 +2252,29 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                                     </div>
                                 `).join('')}}
                             </div>
+
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:8px; border-top:1px dashed var(--border);">
+                                <button class="btn-swap-ex" style="color:#f87171; border-color:rgba(239,68,68,0.3);" onclick="removeExerciseFromWorkout('${{ex.id}}', 'active')" title="Bu hareketi kaldır">
+                                    🗑️ Kaldır
+                                </button>
+                                <div style="display:flex; gap:6px;">
+                                    <button class="btn-swap-ex" onclick="openAlternativeModal('${{ex.id}}', 'active')" title="Listeden alternatif seç">
+                                        📋 Alternatif Seç
+                                    </button>
+                                    <button class="btn-swap-ex" onclick="swapSingleExercise('${{ex.id}}', 'active')" title="Rastgele başka hareket ver">
+                                        🎲 Rastgele
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     `;
                 }}).join('')}}
+
+                <div style="text-align:center; margin:16px 0 24px;">
+                    <button class="btn btn-outline" style="border-style:dashed; border-color:var(--cyan); color:var(--cyan); font-size:12.5px; padding:10px 18px;" onclick="openAddExerciseModal('active')">
+                        ➕ Bu Antrenmana Yeni Hareket Ekle
+                    </button>
+                </div>
 
                 <div style="text-align:center; margin:30px 0;">
                     <button class="btn btn-gold" style="padding:16px 28px; font-size:15px;" onclick="openCompleteModal()">
