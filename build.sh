@@ -22,6 +22,8 @@ if [ -d "$HOME/Library/Mobile Documents/com~apple~CloudDocs" ]; then
     cp -f "$DIR/salon_kilavuzu.pdf" "$ICLOUD_DIR/"
     cp -f "$DIR/salon_kilavuzu_mobil.html" "$ICLOUD_DIR/"
     cp -f "$DIR/salon_kilavuzu.html" "$ICLOUD_DIR/"
+    cp -f "$DIR/index.html" "$ICLOUD_DIR/"
+    cp -f "$DIR/sw.js" "$ICLOUD_DIR/"
     cp -Rf "$DIR/assets/diagrams" "$ICLOUD_DIR/assets/" 2>/dev/null || true
     cp -f "$DIR/docs/"* "$ICLOUD_DIR/docs/" 2>/dev/null || true
     echo "   ✅ iCloud eşitlendi: $ICLOUD_DIR"

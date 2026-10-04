@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <!-- Security: CSP & Permissions -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://*; img-src 'self' data: blob: https://*; media-src 'self' data: blob: https://*;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://*; connect-src 'self' https://* wss://* data: blob:; img-src 'self' data: blob: https://*; media-src 'self' data: blob: https://*;">
     <meta name="theme-color" content="#090d16">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -222,6 +222,30 @@
             background: rgba(56, 189, 248, 0.2);
             color: #38bdf8;
             border: 1px solid #0284c7;
+        }
+        .cloud-sync-badge {
+            font-size: 9.5px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #6ee7b7;
+            letter-spacing: 0.3px;
+            transition: all 0.3s ease;
+        }
+        .cloud-sync-badge.syncing {
+            background: rgba(245, 158, 11, 0.15);
+            border-color: rgba(245, 158, 11, 0.4);
+            color: #fde68a;
+        }
+        .cloud-sync-badge.offline {
+            background: rgba(148, 163, 184, 0.15);
+            border-color: rgba(148, 163, 184, 0.3);
+            color: #cbd5e1;
         }
         .auth-actions {
             display: flex;
@@ -1411,11 +1435,84 @@
         .pos-diagram-wrap {
             margin-bottom: 10px;
             text-align: center;
-            background: #090d16;
+            background: #060911;
             border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 8px;
-            overflow-x: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 6px 6px 4px 6px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+        .pos-diagram-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 6px;
+            padding: 2px 2px 6px 2px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            margin-bottom: 6px;
+        }
+        .btn-diagram-tool {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #cbd5e1;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 9px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+        .btn-diagram-tool:hover {
+            background: rgba(245, 158, 11, 0.18);
+            border-color: rgba(245, 158, 11, 0.5);
+            color: #fbbf24;
+        }
+        .btn-diagram-tool.scroll-active {
+            background: rgba(245, 158, 11, 0.28);
+            border-color: #f59e0b;
+            color: #fde68a;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.25);
+        }
+        .pos-diagram-img-box {
+            position: relative;
+            display: block;
+            border-radius: 6px;
+            overflow: hidden;
+            cursor: zoom-in;
+            background: #020408;
+            transition: transform 0.15s ease;
+        }
+        .pos-diagram-img-box:hover .pos-diagram-zoom-hint {
+            opacity: 1;
+        }
+        .pos-diagram-zoom-hint {
+            position: absolute;
+            bottom: 6px;
+            right: 6px;
+            background: rgba(0, 0, 0, 0.82);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            color: #fbbf24;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 7px;
+            border-radius: 5px;
+            backdrop-filter: blur(4px);
+            opacity: 0.9;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+        .pos-diagram-img {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            display: block;
+            margin: 0 auto;
         }
         .pos-diagram-wrap svg {
             width: 100%;
@@ -1425,12 +1522,212 @@
             display: block;
             margin: 0 auto;
         }
-        .pos-diagram-img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 6px;
+        .pos-diagram-scroll-indicator {
+            display: none;
+            padding: 6px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #fbbf24;
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: 5px;
+            margin-top: 6px;
+            text-align: center;
+        }
+        /* ENLARGED SWIPEABLE HORIZONTAL SCROLL MODE */
+        .pos-diagram-wrap.enlarged {
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            padding: 6px 4px;
+            border-color: rgba(245, 158, 11, 0.45);
+            box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.6);
+        }
+        .pos-diagram-wrap.enlarged .pos-diagram-img-box {
+            min-width: 680px;
+            width: 185%;
+            cursor: grab;
+        }
+        .pos-diagram-wrap.enlarged .pos-diagram-img-box:active {
+            cursor: grabbing;
+        }
+        .pos-diagram-wrap.enlarged .pos-diagram-img {
+            max-width: none;
+            width: 100%;
+        }
+        .pos-diagram-wrap.enlarged .pos-diagram-scroll-indicator {
             display: block;
-            margin: 0 auto;
+            position: sticky;
+            left: 0;
+            right: 0;
+            width: 100%;
+        }
+
+        @media (max-width: 600px) {
+            .pos-guide-content {
+                padding: 8px 4px;
+            }
+            .pos-diagram-wrap {
+                padding: 4px 3px;
+                border-radius: 6px;
+            }
+            .pos-diagram-toolbar {
+                padding: 2px 2px 5px 2px;
+            }
+            .btn-diagram-tool {
+                font-size: 10px;
+                padding: 3px 7px;
+            }
+        }
+
+        /* FULLSCREEN HD LIGHTBOX MODAL */
+        .image-lightbox-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(3, 6, 12, 0.95);
+            backdrop-filter: blur(14px);
+            z-index: 100000;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .image-lightbox-modal.active {
+            display: flex;
+            animation: fadeInLightbox 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes fadeInLightbox {
+            from { opacity: 0; transform: scale(0.97); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .lightbox-content-box {
+            background: #090e1a;
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            border-radius: 14px;
+            width: 100%;
+            max-width: 1150px;
+            max-height: 94vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 35px rgba(245, 158, 11, 0.15);
+        }
+        .lightbox-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: rgba(15, 23, 42, 0.95);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            gap: 10px;
+        }
+        .lightbox-title-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow: hidden;
+        }
+        .lightbox-badge {
+            font-size: 9.5px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            padding: 3px 7px;
+            border-radius: 5px;
+            background: rgba(245, 158, 11, 0.16);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            white-space: nowrap;
+        }
+        .lightbox-title {
+            margin: 0;
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .lightbox-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .btn-lightbox-action {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: #f1f5f9;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 7px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.15s ease;
+        }
+        .btn-lightbox-action:hover, .btn-lightbox-action:active {
+            background: rgba(245, 158, 11, 0.22);
+            border-color: rgba(245, 158, 11, 0.6);
+            color: #fbbf24;
+        }
+        .btn-lightbox-close {
+            background: rgba(239, 68, 68, 0.18);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            color: #fca5a5;
+            font-size: 14px;
+            font-weight: 800;
+            width: 32px;
+            height: 32px;
+            border-radius: 7px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+        }
+        .btn-lightbox-close:hover {
+            background: rgba(239, 68, 68, 0.45);
+            color: #fff;
+        }
+        .lightbox-body {
+            position: relative;
+            flex: 1;
+            overflow: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #020408;
+            padding: 10px;
+            touch-action: pan-x pan-y pinch-zoom;
+            -webkit-overflow-scrolling: touch;
+        }
+        .lightbox-img {
+            max-width: 100%;
+            max-height: 74vh;
+            object-fit: contain;
+            border-radius: 6px;
+            transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), width 0.2s ease;
+            cursor: zoom-in;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+        .lightbox-img.zoomed {
+            max-width: none;
+            max-height: none;
+            width: 180%;
+            min-width: 700px;
+            cursor: zoom-out;
+        }
+        .lightbox-footer {
+            padding: 8px 14px;
+            background: rgba(10, 15, 26, 0.96);
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 11px;
+            color: #94a3b8;
+            text-align: center;
         }
         .pos-steps-grid {
             display: grid;
@@ -2310,6 +2607,7 @@
                     <span class="modern-brand-title">ÇELİK KODU</span>
                 </div>
                 <div class="modern-user-badge" onclick="openMoreSheet()" title="Profil & Menü">
+                    <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
                     <span class="modern-user-avatar" id="headerUserAvatar">🥋</span>
                     <span class="modern-user-name" id="headerUserName">Sporcu</span>
                     <span class="auth-role-tag role-admin" id="headerUserRoleBadge">YÖNETİCİ</span>
@@ -2329,6 +2627,7 @@
                 </div>
 
                 <div class="auth-actions">
+                    <span class="cloud-sync-badge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
                     <button class="btn-auth-action" id="btnAdminPanel" onclick="openAdminModal()" style="display:none;">
                         👑 Sporcular
                     </button>
@@ -2919,6 +3218,30 @@
         </div>
     </div>
 
+    <!-- ==================== HD EXERCISE IMAGE LIGHTBOX MODAL ==================== -->
+    <div id="imageLightboxModal" class="image-lightbox-modal" onclick="closeImageLightbox(event)">
+        <div class="lightbox-content-box" onclick="event.stopPropagation()">
+            <div class="lightbox-header">
+                <div class="lightbox-title-area">
+                    <span class="lightbox-badge">HD REHBER</span>
+                    <h4 id="lightboxTitle" class="lightbox-title">Egzersiz Formu</h4>
+                </div>
+                <div class="lightbox-actions">
+                    <button type="button" class="btn-lightbox-action" id="btnLightboxZoom" onclick="toggleLightboxZoom()" title="Görseli %180 büyüt veya sığdır">
+                        🔍 <span id="lightboxZoomText">Büyüt (%180)</span>
+                    </button>
+                    <button type="button" class="btn-lightbox-close" onclick="closeImageLightbox()" title="Kapat (ESC)">✕</button>
+                </div>
+            </div>
+            <div class="lightbox-body" id="lightboxBody">
+                <img id="lightboxImg" src="" alt="Detaylı Egzersiz Görseli" class="lightbox-img" onclick="toggleLightboxZoom()">
+            </div>
+            <div class="lightbox-footer">
+                <span>💡 İpucu: Görsele dokunarak büyütebilir veya telefonunuzu yatay çevirerek tam genişlikte inceleyebilirsiniz.</span>
+            </div>
+        </div>
+    </div>
+
     <!-- ==================== LOG WORKOUT COMPLETE MODAL ==================== -->
     <div id="completeModal" class="modal-overlay">
         <div class="modal-box" style="max-width: 560px; max-height: 92vh; overflow-y: auto;">
@@ -3247,6 +3570,11 @@
             </div>
         </div>
     </div>
+
+    <!-- ==================== FIREBASE CLOUD DATABASE SDK (COMPAT) ==================== -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
     <script>
@@ -3888,6 +4216,68 @@
             }
         }
 
+        function openImageLightbox(src, title) {
+            if (!src) return;
+            const modal = document.getElementById('imageLightboxModal');
+            const img = document.getElementById('lightboxImg');
+            const titleEl = document.getElementById('lightboxTitle');
+            const zoomText = document.getElementById('lightboxZoomText');
+            if (!modal || !img) return;
+
+            img.src = src;
+            img.classList.remove('zoomed');
+            if (titleEl) titleEl.textContent = title || 'Egzersiz Formu';
+            if (zoomText) zoomText.textContent = 'Büyüt (%180)';
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageLightbox(event) {
+            if (event && event.target && event.target.closest('.lightbox-content-box') && !event.target.classList.contains('btn-lightbox-close')) {
+                return;
+            }
+            const modal = document.getElementById('imageLightboxModal');
+            if (modal) {
+                modal.classList.remove('active');
+                const img = document.getElementById('lightboxImg');
+                if (img) img.classList.remove('zoomed');
+            }
+            document.body.style.overflow = '';
+        }
+
+        function toggleLightboxZoom() {
+            const img = document.getElementById('lightboxImg');
+            const zoomText = document.getElementById('lightboxZoomText');
+            if (!img) return;
+            const isZoomed = img.classList.toggle('zoomed');
+            if (zoomText) {
+                zoomText.textContent = isZoomed ? 'Sığdır' : 'Büyüt (%180)';
+            }
+        }
+
+        function toggleDiagramScroll(wrapId) {
+            const wrap = document.getElementById(wrapId);
+            if (!wrap) return;
+            const isEnlarged = wrap.classList.toggle('enlarged');
+            const btn = wrap.querySelector('.btn-scroll-toggle');
+            if (btn) {
+                btn.classList.toggle('scroll-active', isEnlarged);
+                const textSpan = btn.querySelector('.tool-text');
+                if (textSpan) {
+                    textSpan.textContent = isEnlarged ? 'Sığdır' : 'Kaydırarak Büyüt';
+                }
+            }
+        }
+
+        window.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('imageLightboxModal');
+                if (modal && modal.classList.contains('active')) {
+                    closeImageLightbox();
+                }
+            }
+        });
+
         function renderExercisePositionsHtml(exInput, uniquePrefix = '', defaultCollapsed = false) {
             if (!exInput) return '';
             const ex = (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB)) 
@@ -4093,8 +4483,22 @@
             let formVisualHtml = '';
             if (photoGuide && photoGuide.form) {
                 formVisualHtml = `
-                    <div class="pos-diagram-wrap">
-                        <img src="${photoGuide.form}" alt="${escapeHTML(ex.name)} Form Rehberi" class="pos-diagram-img" loading="lazy">
+                    <div class="pos-diagram-wrap" id="wrap_form_${collapseId}">
+                        <div class="pos-diagram-toolbar">
+                            <button type="button" class="btn-diagram-tool btn-scroll-toggle" onclick="event.stopPropagation(); toggleDiagramScroll('wrap_form_${collapseId}')" title="Genişlet ve parmakla sağa-sola kaydırarak incele">
+                                <span class="tool-icon">↔️</span> <span class="tool-text">Kaydırarak Büyüt</span>
+                            </button>
+                            <button type="button" class="btn-diagram-tool" onclick="event.stopPropagation(); openImageLightbox('${photoGuide.form}', '${escapeHTML(ex.name)} - Form Rehberi')" title="Tam ekran mod">
+                                <span class="tool-icon">⛶</span> <span class="tool-text">Tam Ekran</span>
+                            </button>
+                        </div>
+                        <div class="pos-diagram-img-box" onclick="event.stopPropagation(); openImageLightbox('${photoGuide.form}', '${escapeHTML(ex.name)} - Form Rehberi')">
+                            <img src="${photoGuide.form}" alt="${escapeHTML(ex.name)} Form Rehberi" class="pos-diagram-img" loading="lazy">
+                            <div class="pos-diagram-zoom-hint">🔍 Dokun: Büyüt</div>
+                        </div>
+                        <div class="pos-diagram-scroll-indicator">
+                            ↔️ Adımları yakından incelemek için sağa/sola kaydırın
+                        </div>
                     </div>
                 `;
             } else {
@@ -4124,14 +4528,38 @@
                 const inlineSvg = (typeof DIAGRAMS_SVG_DB !== 'undefined' && DIAGRAMS_SVG_DB[targetFname]) ? DIAGRAMS_SVG_DB[targetFname] : '';
                 if (inlineSvg) {
                     formVisualHtml = `
-                        <div class="pos-diagram-wrap">
-                            ${inlineSvg}
+                        <div class="pos-diagram-wrap" id="wrap_form_${collapseId}">
+                            <div class="pos-diagram-toolbar">
+                                <button type="button" class="btn-diagram-tool btn-scroll-toggle" onclick="event.stopPropagation(); toggleDiagramScroll('wrap_form_${collapseId}')" title="Genişlet">
+                                    <span class="tool-icon">↔️</span> <span class="tool-text">Kaydırarak Büyüt</span>
+                                </button>
+                            </div>
+                            <div class="pos-diagram-img-box">
+                                ${inlineSvg}
+                            </div>
+                            <div class="pos-diagram-scroll-indicator">
+                                ↔️ Şemayı incelemek için sağa/sola kaydırın
+                            </div>
                         </div>
                     `;
                 } else if (ex.diagram) {
                     formVisualHtml = `
-                        <div class="pos-diagram-wrap">
-                            <img src="${ex.diagram}" alt="${escapeHTML(ex.name)} Form Şeması" class="pos-diagram-img" loading="lazy">
+                        <div class="pos-diagram-wrap" id="wrap_form_${collapseId}">
+                            <div class="pos-diagram-toolbar">
+                                <button type="button" class="btn-diagram-tool btn-scroll-toggle" onclick="event.stopPropagation(); toggleDiagramScroll('wrap_form_${collapseId}')" title="Genişlet ve incele">
+                                    <span class="tool-icon">↔️</span> <span class="tool-text">Kaydırarak Büyüt</span>
+                                </button>
+                                <button type="button" class="btn-diagram-tool" onclick="event.stopPropagation(); openImageLightbox('${ex.diagram}', '${escapeHTML(ex.name)} - Form Şeması')" title="Tam ekran mod">
+                                    <span class="tool-icon">⛶</span> <span class="tool-text">Tam Ekran</span>
+                                </button>
+                            </div>
+                            <div class="pos-diagram-img-box" onclick="event.stopPropagation(); openImageLightbox('${ex.diagram}', '${escapeHTML(ex.name)} - Form Şeması')">
+                                <img src="${ex.diagram}" alt="${escapeHTML(ex.name)} Form Şeması" class="pos-diagram-img" loading="lazy">
+                                <div class="pos-diagram-zoom-hint">🔍 Dokun: Büyüt</div>
+                            </div>
+                            <div class="pos-diagram-scroll-indicator">
+                                ↔️ Adımları yakından incelemek için sağa/sola kaydırın
+                            </div>
                         </div>
                     `;
                 }
@@ -4140,8 +4568,22 @@
             let anatomiVisualHtml = '';
             if (hasAnatomy) {
                 anatomiVisualHtml = `
-                    <div class="pos-diagram-wrap">
-                        <img src="${photoGuide.anatomi}" alt="${escapeHTML(ex.name)} Hedef Kaslar" class="pos-diagram-img" loading="lazy">
+                    <div class="pos-diagram-wrap" id="wrap_anatomi_${collapseId}">
+                        <div class="pos-diagram-toolbar">
+                            <button type="button" class="btn-diagram-tool btn-scroll-toggle" onclick="event.stopPropagation(); toggleDiagramScroll('wrap_anatomi_${collapseId}')" title="Genişlet ve incele">
+                                <span class="tool-icon">↔️</span> <span class="tool-text">Kaydırarak Büyüt</span>
+                            </button>
+                            <button type="button" class="btn-diagram-tool" onclick="event.stopPropagation(); openImageLightbox('${photoGuide.anatomi}', '${escapeHTML(ex.name)} - Hedef Kas Anatomisi')" title="Tam ekran mod">
+                                <span class="tool-icon">⛶</span> <span class="tool-text">Tam Ekran</span>
+                            </button>
+                        </div>
+                        <div class="pos-diagram-img-box" onclick="event.stopPropagation(); openImageLightbox('${photoGuide.anatomi}', '${escapeHTML(ex.name)} - Hedef Kas Anatomisi')">
+                            <img src="${photoGuide.anatomi}" alt="${escapeHTML(ex.name)} Hedef Kaslar" class="pos-diagram-img" loading="lazy">
+                            <div class="pos-diagram-zoom-hint">🔍 Dokun: Büyüt</div>
+                        </div>
+                        <div class="pos-diagram-scroll-indicator">
+                            ↔️ Kas gruplarını incelemek için sağa/sola kaydırın
+                        </div>
                     </div>
                 `;
             } else {
@@ -6225,6 +6667,271 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             startActiveWorkoutFromGenerated();
         }
 
+        // ==================== FIREBASE FIRESTORE CLOUD ENGINE ====================
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyBieTQ50PsVTLW1gTfsx52l42RJJ63xNqo",
+            authDomain: "fitness-4f427.firebaseapp.com",
+            projectId: "fitness-4f427",
+            storageBucket: "fitness-4f427.firebasestorage.app",
+            messagingSenderId: "974918246558",
+            appId: "1:974918246558:web:200df22163c9d6f6271b8f",
+            measurementId: "G-Y9B0DFQZT5"
+        };
+
+        let fbApp = null;
+        let fbDb = null;
+        let isFirebaseReady = false;
+
+        function updateCloudSyncBadge(status, text) {
+            const badges = document.querySelectorAll('.cloud-sync-badge');
+            badges.forEach(badge => {
+                badge.className = 'cloud-sync-badge ' + (status || '');
+                if (status === 'synced') {
+                    badge.innerHTML = `🟢 ${text || 'Bulut Aktif'}`;
+                    badge.title = "Firebase Firestore canlı ve eşitlenmiş durumda";
+                } else if (status === 'syncing') {
+                    badge.innerHTML = `🔄 ${text || 'Eşitleniyor...'}`;
+                    badge.title = "Veriler Firebase bulutuna aktarılıyor...";
+                } else {
+                    badge.innerHTML = `☁️ ${text || 'Yerel Önbellek'}`;
+                    badge.title = "Çevrimdışı mod: Veriler cihazda güvende, internet olunca eşitlenecek";
+                }
+            });
+        }
+
+        function initFirebaseEngine() {
+            try {
+                if (typeof firebase === 'undefined') {
+                    console.warn("Firebase SDK yüklenemedi. Yerel modda devam ediliyor.");
+                    updateCloudSyncBadge('offline', 'Yerel Mod');
+                    return;
+                }
+
+                if (!firebase.apps || !firebase.apps.length) {
+                    fbApp = firebase.initializeApp(FIREBASE_CONFIG);
+                } else {
+                    fbApp = firebase.app();
+                }
+
+                fbDb = firebase.firestore();
+
+                // Çevrimdışı desteği (Offline-first IndexedDB önbellekleme)
+                fbDb.enablePersistence({ synchronizeTabs: true }).catch(err => {
+                    if (err.code === 'failed-precondition') {
+                        console.warn("Firestore çoklu sekme açık, önbellek tek sekmede çalışacak.");
+                    } else if (err.code === 'unimplemented') {
+                        console.warn("Mevcut tarayıcı IndexedDB kalıcılığını desteklemiyor.");
+                    }
+                });
+
+                isFirebaseReady = true;
+                updateCloudSyncBadge('synced', 'Bulut Aktif');
+                console.log("🔥 Firebase Firestore başarıyla bağlandı!");
+
+                // İlk bulut veri senkronizasyonunu başlat
+                syncAllFromCloud();
+
+            } catch (err) {
+                console.error("Firebase başlatma hatası:", err);
+                updateCloudSyncBadge('offline', 'Yerel Mod');
+            }
+        }
+
+        // Buluttan verileri çekme ve birleştirme (Merge)
+        async function syncAllFromCloud() {
+            if (!isFirebaseReady || !fbDb) return;
+            updateCloudSyncBadge('syncing', 'Eşitleniyor...');
+
+            try {
+                // 1. Kullanıcıları eşitle
+                await syncUsersFromCloud();
+
+                // 2. Aktif kullanıcının verilerini eşitle
+                const uid = getActiveUserId();
+                if (uid) {
+                    await syncUserWorkoutLogsFromCloud(uid);
+                    await syncUserScaleLogsFromCloud(uid);
+                    await syncUserMeasurementsFromCloud(uid);
+                }
+
+                updateCloudSyncBadge('synced', 'Bulut Aktif');
+            } catch (e) {
+                console.warn("Bulut eşitleme gecikti (çevrimdışı olabilir):", e);
+                updateCloudSyncBadge('offline', 'Çevrimdışı');
+            }
+        }
+
+        // KULLANICILAR BULUT EŞİTLEME
+        async function syncUsersFromCloud() {
+            if (!isFirebaseReady || !fbDb) return;
+            try {
+                const docRef = fbDb.collection('app_system').doc('users');
+                const doc = await docRef.get();
+                const localUsers = getAuthUsers();
+
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data && Array.isArray(data.users) && data.users.length > 0) {
+                        const mergedMap = new Map();
+                        localUsers.forEach(u => mergedMap.set(u.id, u));
+                        data.users.forEach(u => mergedMap.set(u.id, { ...(mergedMap.get(u.id) || {}), ...u }));
+                        const finalUsers = Array.from(mergedMap.values());
+                        localStorage.setItem('celik_kodu_auth_users', JSON.stringify(finalUsers));
+                        return finalUsers;
+                    }
+                } else {
+                    if (localUsers.length > 0) {
+                        await docRef.set({
+                            users: localUsers,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                }
+            } catch (err) {
+                console.warn("Kullanıcılar buluttan çekilemedi:", err);
+            }
+        }
+
+        async function syncUsersToCloud(users) {
+            if (!isFirebaseReady || !fbDb) return;
+            try {
+                updateCloudSyncBadge('syncing', 'Kaydediliyor...');
+                await fbDb.collection('app_system').doc('users').set({
+                    users: users,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                updateCloudSyncBadge('synced', 'Bulut Aktif');
+            } catch (err) {
+                console.warn("Kullanıcılar buluta yüklenemedi:", err);
+                updateCloudSyncBadge('offline', 'Kayıt Yerelde');
+            }
+        }
+
+        // ANTRENMAN GEÇMİŞİ BULUT EŞİTLEME
+        async function syncUserWorkoutLogsFromCloud(uid) {
+            if (!isFirebaseReady || !fbDb || !uid) return;
+            try {
+                const docRef = fbDb.collection('workout_logs').doc(uid);
+                const doc = await docRef.get();
+                const localLogs = getUserLogsById(uid);
+
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data && Array.isArray(data.logs)) {
+                        const logMap = new Map();
+                        localLogs.forEach(l => logMap.set(l.id, l));
+                        data.logs.forEach(l => logMap.set(l.id, l));
+                        const mergedLogs = Array.from(logMap.values());
+                        mergedLogs.sort((a, b) => new Date(b.date || b.timestamp) - new Date(a.date || a.timestamp));
+
+                        localStorage.setItem(`celik_kodu_history_${uid}`, JSON.stringify(mergedLogs));
+                        renderHistory();
+
+                        if (mergedLogs.length > data.logs.length) {
+                            await docRef.set({
+                                logs: mergedLogs,
+                                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                            }, { merge: true });
+                        }
+                        return;
+                    }
+                }
+
+                if (localLogs.length > 0) {
+                    await docRef.set({
+                        logs: localLogs,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+            } catch (err) {
+                console.warn("Antrenmanlar buluttan çekilemedi:", err);
+            }
+        }
+
+        async function syncWorkoutLogsToCloud(logs, uid) {
+            if (!isFirebaseReady || !fbDb || !uid) return;
+            try {
+                updateCloudSyncBadge('syncing', 'Kaydediliyor...');
+                await fbDb.collection('workout_logs').doc(uid).set({
+                    logs: logs,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                updateCloudSyncBadge('synced', 'Bulut Aktif');
+            } catch (err) {
+                console.warn("Antrenmanlar buluta aktarılamadı (çevrimdışı kaydedildi):", err);
+                updateCloudSyncBadge('offline', 'Kayıt Yerelde');
+            }
+        }
+
+        // TARTI & ÖLÇÜM BULUT EŞİTLEME
+        async function syncUserScaleLogsFromCloud(uid) {
+            if (!isFirebaseReady || !fbDb || !uid) return;
+            try {
+                const docRef = fbDb.collection('scale_logs').doc(uid);
+                const doc = await docRef.get();
+                const localLogs = getScaleLogs();
+
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data && Array.isArray(data.logs)) {
+                        const logMap = new Map();
+                        localLogs.forEach(l => logMap.set(l.id, l));
+                        data.logs.forEach(l => logMap.set(l.id, l));
+                        const merged = Array.from(logMap.values()).sort((a, b) => new Date(b.date) - new Date(a.date));
+                        localStorage.setItem(`celik_kodu_scale_${uid}`, JSON.stringify(merged));
+                        return;
+                    }
+                }
+                if (localLogs.length > 0) {
+                    await docRef.set({ logs: localLogs, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+                }
+            } catch(e) {}
+        }
+
+        async function syncScaleLogsToCloud(logs, uid) {
+            if (!isFirebaseReady || !fbDb || !uid) return;
+            try {
+                await fbDb.collection('scale_logs').doc(uid).set({
+                    logs: logs,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            } catch(e) {}
+        }
+
+        async function syncUserMeasurementsFromCloud(uid) {
+            if (!isFirebaseReady || !fbDb || !uid) return;
+            try {
+                const docRef = fbDb.collection('measurement_logs').doc(uid);
+                const doc = await docRef.get();
+                const localLogs = getMeasurementsLogs();
+
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data && Array.isArray(data.logs)) {
+                        const logMap = new Map();
+                        localLogs.forEach(l => logMap.set(l.id, l));
+                        data.logs.forEach(l => logMap.set(l.id, l));
+                        const merged = Array.from(logMap.values()).sort((a, b) => new Date(b.date) - new Date(a.date));
+                        localStorage.setItem(`celik_kodu_measurements_${uid}`, JSON.stringify(merged));
+                        return;
+                    }
+                }
+                if (localLogs.length > 0) {
+                    await docRef.set({ logs: localLogs, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+                }
+            } catch(e) {}
+        }
+
+        async function syncMeasurementLogsToCloud(logs, uid) {
+            if (!isFirebaseReady || !fbDb || !uid) return;
+            try {
+                await fbDb.collection('measurement_logs').doc(uid).set({
+                    logs: logs,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            } catch(e) {}
+        }
+
         // ==================== AUTHENTICATION & MULTI-USER SYSTEM ====================
         function initAuthDatabase() {
             let users = [];
@@ -6286,6 +6993,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         function saveAuthUsers(users) {
             localStorage.setItem('celik_kodu_auth_users', JSON.stringify(users));
+            syncUsersToCloud(users);
         }
 
         function getSession() {
@@ -6302,6 +7010,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (session) {
                 localStorage.setItem('celik_kodu_session', JSON.stringify(session));
                 localStorage.setItem('celik_kodu_active_user_id', session.userId);
+                syncAllFromCloud();
             } else {
                 localStorage.removeItem('celik_kodu_session');
                 localStorage.removeItem('celik_kodu_active_user_id');
@@ -6874,6 +7583,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         function setWorkoutLogs(logs) {
             const uid = getActiveUserId();
             localStorage.setItem(`celik_kodu_history_${uid}`, JSON.stringify(logs));
+            syncWorkoutLogsToCloud(logs, uid);
         }
 
         function deleteLog(id) {
@@ -7198,6 +7908,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         function setScaleLogs(logs) {
             const uid = getActiveUserId();
             localStorage.setItem(`celik_kodu_scale_${uid}`, JSON.stringify(logs));
+            syncScaleLogsToCloud(logs, uid);
         }
 
         function openScaleModal() {
@@ -7289,6 +8000,7 @@ Kilo: ${entry.weight} kg${entry.bodyFat ? ` • Yağ: %${entry.bodyFat}` : ''}${
         function setMeasurementsLogs(logs) {
             const uid = getActiveUserId();
             localStorage.setItem(`celik_kodu_measurements_${uid}`, JSON.stringify(logs));
+            syncMeasurementLogsToCloud(logs, uid);
         }
 
         function openMeasurementsModal() {
@@ -7951,7 +8663,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=33')
+                navigator.serviceWorker.register('./sw.js?v=35')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
@@ -7973,6 +8685,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
         // INITIALIZE APPLICATION
         window.addEventListener('DOMContentLoaded', () => {
             initAuthDatabase();
+            initFirebaseEngine();
             syncAppViewState();
             const hasRestored = restoreActiveWorkoutStateFromStorage();
             if (hasRestored) {

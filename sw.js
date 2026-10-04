@@ -1,4 +1,4 @@
-const CACHE_NAME = 'celik-kodu-cache-v33';
+const CACHE_NAME = 'celik-kodu-cache-v35';
 const ASSETS = [
   './',
   './assets/guides/guide_bw_air_squat_form.jpg',
@@ -133,6 +133,14 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  // Firebase Firestore ve Google API çağrılarını doğrudan ağa yönlendir
+  if (event.request.url.includes('googleapis.com') ||
+      event.request.url.includes('firebaseio.com') ||
+      event.request.url.includes('identitytoolkit') ||
+      event.request.url.includes('securetoken')) {
+    return;
+  }
+
   // Sayfa gezintileri (HTML) için Network-First stratejisi (Canlı güncellemeler anında yansısın)
   if (event.request.mode === 'navigate' || event.request.destination === 'document' || event.request.url.includes('index.html')) {
     event.respondWith(
