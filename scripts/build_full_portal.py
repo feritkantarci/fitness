@@ -390,6 +390,97 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             overflow: hidden;
             margin-top: 4px;
         }}
+        
+        /* ==================== WORKOUT STUDIO & MUSCLE RADAR ==================== */
+        .studio-mode-btn {{
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 11.5px;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }}
+        .studio-mode-btn.active {{
+            background: var(--gold);
+            color: #090d16;
+            font-weight: 800;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+        }}
+        .muscle-tile {{
+            background: var(--bg-card);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 9px 10px;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }}
+        .muscle-tile.covered {{
+            border-color: rgba(16, 185, 129, 0.7);
+            background: rgba(16, 185, 129, 0.08);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.15);
+        }}
+        .muscle-tile.missing {{
+            border-color: rgba(245, 158, 11, 0.4);
+            background: rgba(245, 158, 11, 0.03);
+        }}
+        .muscle-tile.warning {{
+            border-color: rgba(239, 68, 68, 0.7);
+            background: rgba(239, 68, 68, 0.08);
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
+        }}
+        .studio-ex-card {{
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s;
+        }}
+        .studio-ex-card:hover {{
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }}
+        .custom-routine-item {{
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            transition: all 0.2s;
+        }}
+        .custom-routine-item:hover {{
+            border-color: rgba(245, 158, 11, 0.3);
+        }}
+        .ex-thumb-wrap {{
+            width: 52px;
+            height: 52px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }}
+        .ex-thumb-img {{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }}
+
         .analytics-bar-fill {{
             height: 100%;
             border-radius: 6px;
@@ -1521,7 +1612,10 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             <!-- NAVIGATION TABS -->
             <div class="tab-nav">
                 <button class="tab-btn active" onclick="switchTab('generatorTab')">
-                    <span>⚡ Program</span>
+                    <span>⚡ Otomatik</span>
+                </button>
+                <button class="tab-btn" onclick="switchTab('studioTab')" id="tabBtnStudio">
+                    <span>🎯 Mimar & Kas Radarı</span>
                 </button>
                 <button class="tab-btn" onclick="switchTab('activeWorkoutTab')" id="tabBtnActiveWorkout">
                     <span>🏋️ Antrenman</span>
@@ -1652,6 +1746,122 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                 <!-- GENERATED WORKOUT CONTAINER -->
                 <div id="generatedWorkoutOutput">
                     <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- ==================== TAB: WORKOUT ARCHITECT & MUSCLE RADAR ==================== -->
+            <div id="studioTab" class="tab-content">
+                <div class="generator-card" style="border-color: rgba(245, 158, 11, 0.4); background: radial-gradient(circle at top right, rgba(245, 158, 11, 0.08), rgba(15, 23, 42, 0.95));">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+                        <div>
+                            <div class="badge-brand" style="background:rgba(245, 158, 11, 0.2); color:var(--gold); border:1px solid var(--gold); margin-bottom:6px;">🎯 HAREKET KÜTÜPHANESİ & ÖZEL PROGRAM MİMARI</div>
+                            <h2 style="font-size:20px; font-weight:900; color:#fff;">Tüm 77 Hareket & Canlı Kas Radarı</h2>
+                            <p style="font-size:12px; color:var(--text-secondary); margin-top:4px;">
+                                Tüm egzersizleri ve form görsellerini tek ekrandan inceleyin, kendi özel antrenmanınızı kurgulayın ve kas dengesini canlı takip edin.
+                            </p>
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn btn-outline" style="font-size:12px; padding:8px 12px;" onclick="resetCustomRoutine()">🗑️ Sıfırla</button>
+                            <button class="btn btn-gold" style="font-size:12px; padding:8px 14px; font-weight:800;" onclick="startActiveWorkoutFromCustom()">🏋️ Salonda Başlat</button>
+                        </div>
+                    </div>
+
+                    <!-- RADAR & MODE CONTROLS -->
+                    <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px; margin-bottom:16px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+                            <div style="font-size:13px; font-weight:800; color:#fff; display:flex; align-items:center; gap:6px;">
+                                <span>🧬 CANLI KAS KAPSAMA RADARI & ANATOMİK DENGE</span>
+                            </div>
+                            <div style="display:flex; gap:6px; background:rgba(0,0,0,0.4); padding:3px; border-radius:8px;">
+                                <button class="studio-mode-btn active" id="btnModeFullBody" onclick="setStudioMode('full_body')">🔘 Tüm Vücut</button>
+                                <button class="studio-mode-btn" id="btnModeSplit" onclick="setStudioMode('split')">⚪ Bölgesel (Split)</button>
+                            </div>
+                        </div>
+
+                        <!-- SPLIT SUB-SELECTORS (Shown when split mode is active) -->
+                        <div id="studioSplitSubtypes" style="display:none; margin-bottom:12px; padding:10px; background:rgba(0,0,0,0.3); border-radius:8px; border:1px dashed var(--border);">
+                            <div style="font-size:11px; color:var(--text-secondary); margin-bottom:6px; font-weight:700;">HEDEF BÖLGESEL SPLİTİ SEÇ:</div>
+                            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                                <button class="btn-quick-equip active" id="subSplit_push" onclick="setStudioSplitSubtype('push')">İtiş (Göğüs-Omuz-Triceps)</button>
+                                <button class="btn-quick-equip" id="subSplit_pull" onclick="setStudioSplitSubtype('pull')">Çekiş (Sırt-Biceps-Arka Omuz)</button>
+                                <button class="btn-quick-equip" id="subSplit_legs" onclick="setStudioSplitSubtype('legs')">Bacak & Kalça (Alt Vücut)</button>
+                                <button class="btn-quick-equip" id="subSplit_upper" onclick="setStudioSplitSubtype('upper')">Tüm Üst Vücut</button>
+                                <button class="btn-quick-equip" id="subSplit_arms" onclick="setStudioSplitSubtype('arms')">Kol & Omuz</button>
+                                <button class="btn-quick-equip" id="subSplit_core" onclick="setStudioSplitSubtype('core')">Karın & Core Zırhı</button>
+                            </div>
+                        </div>
+
+                        <!-- LIVE MUSCLE TILES GRID -->
+                        <div id="studioMuscleGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(135px, 1fr)); gap:8px; margin-bottom:12px;">
+                            <!-- Populated dynamically -->
+                        </div>
+
+                        <!-- AI COACH STATUS BANNER -->
+                        <div id="studioCoachBanner" style="padding:10px 14px; border-radius:8px; font-size:12px; font-weight:600; line-height:1.5;">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- CUSTOM WORKOUT BUILDER DRAFT -->
+                    <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px; margin-bottom:16px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="font-size:14px; font-weight:800; color:var(--gold);">🛠️ OLUŞTURULAN ÖZEL PROGRAM</span>
+                                <span id="customRoutineCountBadge" class="auth-role-tag role-admin" style="font-size:11px;">0 Hareket</span>
+                            </div>
+                            <div style="display:flex; gap:8px;">
+                                <button class="btn btn-outline" style="font-size:11px; padding:6px 10px;" onclick="saveCustomRoutineToLibrary()">💾 Programlarıma Kaydet</button>
+                            </div>
+                        </div>
+
+                        <div style="display:grid; grid-template-columns: 1fr auto; gap:10px; margin-bottom:12px;">
+                            <input type="text" id="customWorkoutTitleInput" class="form-input" style="font-weight:700;" placeholder="Program Adı (Örn: Pazartesi İtiş Zırhı)" value="Özel Çelik Programım">
+                            <select id="customWorkoutRestSelect" class="form-input" style="width:130px;" onchange="updateCustomRoutineRest(this.value)">
+                                <option value="45">Dinlenme: 45 sn</option>
+                                <option value="60" selected>Dinlenme: 60 sn</option>
+                                <option value="90">Dinlenme: 90 sn</option>
+                                <option value="120">Dinlenme: 120 sn</option>
+                            </select>
+                        </div>
+
+                        <div id="customWorkoutExercisesList" style="display:flex; flex-direction:column; gap:8px;">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- ALL 77 EXERCISES EXPLORER & AUDIT CATALOG -->
+                    <div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+                            <div style="font-size:14px; font-weight:800; color:#fff;">
+                                📚 TÜM HAREKETLER KATALOĞU <span id="studioExTotalCount" style="color:var(--text-secondary); font-size:12px; font-weight:normal;">(77 Hareket)</span>
+                            </div>
+                        </div>
+
+                        <!-- SEARCH & FILTERS -->
+                        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+                            <input type="text" id="studioSearchInput" class="form-input" style="flex:1; min-width:200px;" placeholder="🔍 Hareket, kas veya ekipman ara (Örn: Bench, Squat, Halo, Omuz)..." oninput="renderStudioExerciseCatalog()">
+                            <select id="studioEquipFilter" class="form-input" style="width:auto; min-width:140px;" onchange="renderStudioExerciseCatalog()">
+                                <option value="all">Tüm Ekipmanlar</option>
+                                <option value="dumbbell">Dambıl (Dumbbell)</option>
+                                <option value="kettlebell">Kettlebell</option>
+                                <option value="bodyweight">Vücut Ağırlığı</option>
+                                <option value="barbell">Halter (Barbell)</option>
+                                <option value="machine">Salon Makineleri</option>
+                            </select>
+                            <select id="studioCategoryFilter" class="form-input" style="width:auto; min-width:140px;" onchange="renderStudioExerciseCatalog()">
+                                <option value="all">Tüm Bölgeler</option>
+                                <option value="push">İtiş / Göğüs / Omuz</option>
+                                <option value="pull">Çekiş / Sırt / Biceps</option>
+                                <option value="legs_quad">Ön Bacak (Quad)</option>
+                                <option value="legs_hinge">Arka Bacak / Kalça</option>
+                                <option value="core">Karın & Core</option>
+                            </select>
+                        </div>
+
+                        <div id="studioExercisesCatalog" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:10px; max-height:650px; overflow-y:auto; padding-right:4px;">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -2175,6 +2385,41 @@ HTML_CONTENT = f"""<!DOCTYPE html>
         </div>
     </div>
 
+    <!-- ==================== EXERCISE DETAIL & FORM AUDIT MODAL ==================== -->
+    <div id="exerciseDetailModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 680px; max-height: 92vh; overflow-y: auto;">
+            <div class="modal-header">
+                <div>
+                    <span class="modal-title" id="exDetailModalTitle">Hareket Detayı</span>
+                    <div id="exDetailModalSubtitle" style="font-size:12px; color:var(--text-secondary); margin-top:2px;"></div>
+                </div>
+                <button class="modal-close" onclick="closeExerciseDetailModal()">✕</button>
+            </div>
+
+            <!-- TABS: 📸 Form Rehberi | 🧬 Kas Anatomisi | 📝 Adım Adım -->
+            <div style="display:flex; gap:6px; margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:8px;">
+                <button class="pos-tab-btn active" id="btnExDetailTabForm" onclick="switchExDetailTab('form')">📸 Form Rehberi</button>
+                <button class="pos-tab-btn" id="btnExDetailTabAnatomy" onclick="switchExDetailTab('anatomy')">🧬 Çalışan Kaslar</button>
+                <button class="pos-tab-btn" id="btnExDetailTabSteps" onclick="switchExDetailTab('steps')">📝 Adım Adım</button>
+            </div>
+
+            <div id="exDetailTabContentForm" class="ex-detail-tab-pane">
+                <!-- Form guide image -->
+            </div>
+            <div id="exDetailTabContentAnatomy" class="ex-detail-tab-pane" style="display:none;">
+                <!-- Anatomy image -->
+            </div>
+            <div id="exDetailTabContentSteps" class="ex-detail-tab-pane" style="display:none;">
+                <!-- Steps & Cue -->
+            </div>
+
+            <div style="margin-top:16px; display:flex; justify-content:space-between; gap:10px;">
+                <button class="btn btn-outline" style="flex:1;" onclick="closeExerciseDetailModal()">Kapat</button>
+                <button class="btn btn-gold" id="btnExDetailAdd" style="flex:1.5; font-weight:800;">➕ Bu Hareketi Programa Ekle</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ==================== EXERCISE PICKER & ALTERNATIVE MODAL ==================== -->
     <div id="exercisePickerModal" class="modal-overlay">
         <div class="modal-box" style="max-width: 600px;">
@@ -2208,6 +2453,152 @@ HTML_CONTENT = f"""<!DOCTYPE html>
         // EXERCISE DATABASE
         const EXERCISES_DB = {EXERCISES_JSON};
         const DIAGRAMS_SVG_DB = {DIAGRAMS_JSON};
+
+        // ==================== GLOBAL VISUAL GUIDES & ANATOMY LIBRARY ====================
+        const guideLibrary = {{
+            goblet_squat: {{ form: 'assets/guides/guide_db_goblet_squat_form.jpg', anatomi: 'assets/guides/guide_db_goblet_squat_anatomi.jpg' }},
+            back_squat: {{ form: 'assets/guides/guide_bb_back_squat_form.jpg', anatomi: 'assets/guides/guide_bb_back_squat_anatomi.jpg' }},
+            lunge: {{ form: 'assets/guides/guide_db_walking_lunge_form.jpg', anatomi: 'assets/guides/guide_db_walking_lunge_anatomi.jpg' }},
+            bulgarian_squat: {{ form: 'assets/guides/guide_db_bulgarian_squat_form.jpg', anatomi: 'assets/guides/guide_db_bulgarian_squat_anatomi.jpg' }},
+            deadlift: {{ form: 'assets/guides/guide_bb_deadlift_form.jpg', anatomi: 'assets/guides/guide_bb_deadlift_anatomi.jpg' }},
+            rdl: {{ form: 'assets/guides/guide_db_rdl_form.jpg', anatomi: 'assets/guides/guide_db_rdl_anatomi.jpg' }},
+            hip_thrust: {{ form: 'assets/guides/guide_bb_hip_thrust_form.jpg', anatomi: 'assets/guides/guide_bb_hip_thrust_anatomi.jpg' }},
+            bench: {{ form: 'assets/guides/guide_db_bench_press_form.jpg', anatomi: 'assets/guides/guide_db_bench_press_anatomi.jpg' }},
+            overhead: {{ form: 'assets/guides/guide_db_overhead_press_form.jpg', anatomi: 'assets/guides/guide_db_overhead_press_anatomi.jpg' }},
+            lateral_raise: {{ form: 'assets/guides/guide_db_lateral_raise_form.jpg', anatomi: 'assets/guides/guide_db_lateral_raise_anatomi.jpg' }},
+            saw_row: {{ form: 'assets/guides/guide_db_saw_row_form.jpg', anatomi: 'assets/guides/guide_db_saw_row_anatomi.jpg' }},
+            pullup: {{ form: 'assets/guides/guide_bw_pullup_form.jpg', anatomi: 'assets/guides/guide_bw_pullup_anatomi.jpg' }},
+            curl: {{ form: 'assets/guides/guide_db_biceps_curl_form.jpg', anatomi: 'assets/guides/guide_db_biceps_curl_anatomi.jpg' }},
+            triceps: {{ form: 'assets/guides/guide_mach_triceps_pushdown_form.jpg', anatomi: 'assets/guides/guide_mach_triceps_pushdown_anatomi.jpg' }},
+            pushup: {{ form: 'assets/guides/guide_bw_pushup_form.jpg', anatomi: 'assets/guides/guide_bw_pushup_anatomi.jpg' }},
+            dips: {{ form: 'assets/guides/guide_bw_dips_form.jpg', anatomi: 'assets/guides/guide_bw_dips_anatomi.jpg' }},
+            face_pull: {{ form: 'assets/guides/guide_mach_face_pull_form.jpg', anatomi: 'assets/guides/guide_mach_face_pull_anatomi.jpg' }},
+            snatch: {{ form: 'assets/guides/guide_db_snatch_form.jpg', anatomi: 'assets/guides/guide_db_snatch_anatomi.jpg' }},
+            swing: {{ form: 'assets/guides/guide_db_swing_form.jpg', anatomi: 'assets/guides/guide_db_swing_anatomi.jpg' }},
+            plank: {{ form: 'assets/guides/guide_bw_plank_form.jpg', anatomi: 'assets/guides/guide_bw_plank_anatomi.jpg' }},
+            farmers_walk: {{ form: 'assets/guides/guide_db_farmers_walk_form.jpg', anatomi: 'assets/guides/guide_db_farmers_walk_anatomi.jpg' }},
+            russian_twist: {{ form: 'assets/guides/guide_db_russian_twist_form.jpg', anatomi: 'assets/guides/guide_db_russian_twist_anatomi.jpg' }},
+            hanging_knee_raise: {{ form: 'assets/guides/guide_bw_hanging_knee_raise_form.jpg', anatomi: 'assets/guides/guide_bw_hanging_knee_raise_anatomi.jpg' }},
+            halo: {{ form: 'assets/guides/guide_kb_halo_form.jpg', anatomi: 'assets/guides/guide_kb_halo_anatomi.jpg' }},
+            windmill: {{ form: 'assets/guides/guide_kb_windmill_form.jpg', anatomi: 'assets/guides/guide_kb_windmill_anatomi.jpg' }}
+        }};
+
+        const exerciseGuideMap = {{
+            'db_goblet_squat': guideLibrary.goblet_squat,
+            'db_front_squat': guideLibrary.goblet_squat,
+            'kb_goblet_squat': guideLibrary.goblet_squat,
+            'bw_air_squat': guideLibrary.goblet_squat,
+            'bw_jump_squat': guideLibrary.goblet_squat,
+            'bb_back_squat': guideLibrary.back_squat,
+            'bb_front_squat': guideLibrary.back_squat,
+            'mach_leg_press': guideLibrary.back_squat,
+            'mach_leg_extension': guideLibrary.back_squat,
+            'mach_calf_raise': guideLibrary.back_squat,
+            'db_walking_lunge': guideLibrary.lunge,
+            'db_reverse_lunge': guideLibrary.lunge,
+            'db_bulgarian_squat': guideLibrary.bulgarian_squat,
+            'bb_deadlift': guideLibrary.deadlift,
+            'bb_rdl': guideLibrary.rdl,
+            'db_rdl': guideLibrary.rdl,
+            'db_single_leg_rdl': guideLibrary.rdl,
+            'mach_leg_curl': guideLibrary.rdl,
+            'bb_hip_thrust': guideLibrary.hip_thrust,
+            'bw_glute_bridge': guideLibrary.hip_thrust,
+            'db_swing': guideLibrary.swing,
+            'kb_swing': guideLibrary.swing,
+            'db_snatch': guideLibrary.snatch,
+            'kb_half_snatch': guideLibrary.snatch,
+            'kb_clean': guideLibrary.snatch,
+            'db_bench_press': guideLibrary.bench,
+            'db_floor_press': guideLibrary.bench,
+            'db_incline_press': guideLibrary.bench,
+            'bb_bench_press': guideLibrary.bench,
+            'bb_incline_bench': guideLibrary.bench,
+            'mach_chest_press': guideLibrary.bench,
+            'mach_cable_crossover': guideLibrary.bench,
+            'mach_pec_deck': guideLibrary.bench,
+            'bw_pushup': guideLibrary.pushup,
+            'bw_diamond_pushup': guideLibrary.pushup,
+            'bw_decline_pushup': guideLibrary.pushup,
+            'bw_dips': guideLibrary.dips,
+            'bw_burpee': guideLibrary.pushup,
+            'db_overhead_press': guideLibrary.overhead,
+            'db_arnold_press': guideLibrary.overhead,
+            'kb_press': guideLibrary.overhead,
+            'bb_overhead_press': guideLibrary.overhead,
+            'kb_thruster': guideLibrary.overhead,
+            'kb_halo': guideLibrary.halo,
+            'db_lateral_raise': guideLibrary.lateral_raise,
+            'mach_cable_lateral': guideLibrary.lateral_raise,
+            'mach_triceps_pushdown': guideLibrary.triceps,
+            'db_triceps_overhead': guideLibrary.triceps,
+            'db_skullcrusher': guideLibrary.triceps,
+            'bb_close_grip_bench': guideLibrary.triceps,
+            'db_saw_row': guideLibrary.saw_row,
+            'db_chest_supported_row': guideLibrary.saw_row,
+            'kb_gorilla_row': guideLibrary.saw_row,
+            'db_renegade_row': guideLibrary.saw_row,
+            'bb_bent_over_row': guideLibrary.saw_row,
+            'bb_pendlay_row': guideLibrary.saw_row,
+            'mach_cable_row': guideLibrary.saw_row,
+            'bw_inverted_row': guideLibrary.saw_row,
+            'db_pullover': guideLibrary.saw_row,
+            'bw_pullup': guideLibrary.pullup,
+            'bw_chinup': guideLibrary.pullup,
+            'mach_lat_pulldown': guideLibrary.pullup,
+            'mach_face_pull': guideLibrary.face_pull,
+            'db_hammer_curl': guideLibrary.curl,
+            'db_incline_curl': guideLibrary.curl,
+            'bb_biceps_curl': guideLibrary.curl,
+            'mach_cable_biceps': guideLibrary.curl,
+            'db_farmers_walk': guideLibrary.farmers_walk,
+            'db_suitcase_carry': guideLibrary.farmers_walk,
+            'db_russian_twist': guideLibrary.russian_twist,
+            'mach_cable_woodchopper': guideLibrary.russian_twist,
+            'bw_plank': guideLibrary.plank,
+            'bw_hollow_body': guideLibrary.plank,
+            'bw_mountain_climber': guideLibrary.plank,
+            'bw_hanging_knee_raise': guideLibrary.hanging_knee_raise,
+            'kb_windmill': guideLibrary.windmill,
+            'kb_turkish_getup': guideLibrary.windmill
+        }};
+
+        const categoryFallback = {{
+            'legs_quad': guideLibrary.goblet_squat,
+            'legs_hinge': guideLibrary.deadlift,
+            'push': guideLibrary.bench,
+            'pull': guideLibrary.saw_row,
+            'core': guideLibrary.plank,
+            'conditioning': guideLibrary.pushup
+        }};
+
+        // ==================== MUSCLE RADAR DEFINITIONS ====================
+        const MUSCLE_DEFS = {{
+            chest: {{ name: "Göğüs", icon: "🛡️", desc: "Pectoralis Major / Minor", color: "#38bdf8" }},
+            back: {{ name: "Sırt & Kanat", icon: "🏹", desc: "Latissimus, Rhomboid, Trapez", color: "#818cf8" }},
+            shoulders: {{ name: "Omuz (Deltoid)", icon: "⚔️", desc: "Ön, Yan, Arka Deltoid", color: "#f59e0b" }},
+            biceps: {{ name: "Biceps (Pazı)", icon: "💪", desc: "Biceps Brachii & Ön Kol", color: "#ec4899" }},
+            triceps: {{ name: "Triceps (Arka Kol)", icon: "⚡", desc: "Triceps Brachii (3 Baş)", color: "#10b981" }},
+            quads: {{ name: "Ön Bacak (Quad)", icon: "🦵", desc: "Quadriceps & Diz Ekstansiyonu", color: "#06b6d4" }},
+            hamstrings: {{ name: "Arka Bacak (Hamstring)", icon: "🦿", desc: "Biceps Femoris & Kalça Menteşesi", color: "#f97316" }},
+            glutes: {{ name: "Kalça (Glute)", icon: "🍑", desc: "Gluteus Maximus / Medius", color: "#a855f7" }},
+            core: {{ name: "Karın & Core", icon: "🧱", desc: "Rectus Abdominis & Oblikler", color: "#eab308" }},
+            calves_grip: {{ name: "Kalf & Kavrama", icon: "🦶", desc: "Gastrocnemius, Soleus & Bilek", color: "#94a3b8" }}
+        }};
+
+        // CUSTOM ROUTINE BUILDER STATE
+        let customRoutineState = {{
+            title: "Özel Çelik Programım",
+            rest: 60,
+            exercises: [] // Array of {{ exId, sets: 3, reps: '8-12', weight: '' }}
+        }};
+
+        let studioState = {{
+            mode: 'full_body', // 'full_body' or 'split'
+            splitSubtype: 'push', // push, pull, legs, upper, arms, core
+            currentInspectExId: null
+        }};
+
 
         // GLOBAL APP STATE
         let selectedSplit = 'full_body';
@@ -2247,6 +2638,10 @@ HTML_CONTENT = f"""<!DOCTYPE html>
 
             const targetBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes(tabId));
             if (targetBtn) targetBtn.classList.add('active');
+
+            if (tabId === 'studioTab') {{
+                initStudioTab();
+            }}
 
             const targetContent = document.getElementById(tabId);
             if (targetContent) targetContent.classList.add('active');
@@ -5649,6 +6044,632 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                 renderActiveWorkout();
             }}
         }});
+    
+
+        // ==================== WORKOUT STUDIO & MUSCLE RADAR ENGINE ====================
+
+        function initStudioTab() {{
+            renderMuscleRadar();
+            renderCustomRoutine();
+            renderStudioExerciseCatalog();
+        }}
+
+        function setStudioMode(mode) {{
+            studioState.mode = mode;
+            document.getElementById('btnModeFullBody').classList.toggle('active', mode === 'full_body');
+            document.getElementById('btnModeSplit').classList.toggle('active', mode === 'split');
+            
+            const splitSubtypesEl = document.getElementById('studioSplitSubtypes');
+            if (splitSubtypesEl) {{
+                splitSubtypesEl.style.display = (mode === 'split') ? 'block' : 'none';
+            }}
+            renderMuscleRadar();
+        }}
+
+        function setStudioSplitSubtype(subtype) {{
+            studioState.splitSubtype = subtype;
+            ['push', 'pull', 'legs', 'upper', 'arms', 'core'].forEach(s => {{
+                const el = document.getElementById('subSplit_' + s);
+                if (el) el.classList.toggle('active', s === subtype);
+            }});
+            renderMuscleRadar();
+        }}
+
+        function getExerciseMuscles(ex) {{
+            if (!ex) return [];
+            const text = (
+                (ex.muscle || '') + ' ' + 
+                (ex.name || '') + ' ' + 
+                (ex.category || '') + ' ' + 
+                ((ex.tags || []).join(' '))
+            ).toLowerCase();
+
+            const groups = [];
+            if (/göğüs|chest|bench|pushup|şınav|dips|pec deck|crossover/i.test(text)) groups.push('chest');
+            if (/sırt|kanat|back|row|pullup|barfiks|pulldown|kürek|pullover|chinup/i.test(text)) groups.push('back');
+            if (/omuz|shoulder|press|deltoid|halo|lateral|face pull|arnold|upright/i.test(text)) groups.push('shoulders');
+            if (/biceps|pazı|curl|chinup/i.test(text)) groups.push('biceps');
+            if (/triceps|arka kol|pushdown|skullcrusher|dips|diamond/i.test(text)) groups.push('triceps');
+            if (/ön bacak|quad|squat|lunge|leg press|leg extension|step/i.test(text)) groups.push('quads');
+            if (/arka bacak|hamstring|rdl|deadlift|leg curl|good morning/i.test(text)) groups.push('hamstrings');
+            if (/kalça|glute|thrust|bridge|swing|snatch/i.test(text)) groups.push('glutes');
+            if (/karın|core|plank|twist|knee raise|leg raise|woodchopper|hollow|climber/i.test(text)) groups.push('core');
+            if (/kalf|baldır|calf|ön kol|kavrama|farmers|suitcase|grip/i.test(text)) groups.push('calves_grip');
+
+            return groups.length > 0 ? groups : ['core'];
+        }}
+
+        function renderMuscleRadar() {{
+            const grid = document.getElementById('studioMuscleGrid');
+            const banner = document.getElementById('studioCoachBanner');
+            if (!grid || !banner) return;
+
+            // Tally exercises and sets for each muscle group
+            const muscleStats = {{}};
+            Object.keys(MUSCLE_DEFS).forEach(k => {{
+                muscleStats[k] = {{ count: 0, sets: 0 }};
+            }});
+
+            let totalSets = 0;
+            customRoutineState.exercises.forEach(item => {{
+                const ex = EXERCISES_DB.find(e => e.id === item.exId);
+                if (ex) {{
+                    const muscles = getExerciseMuscles(ex);
+                    const sets = parseInt(item.sets) || 3;
+                    totalSets += sets;
+                    muscles.forEach(m => {{
+                        if (muscleStats[m]) {{
+                            muscleStats[m].count += 1;
+                            muscleStats[m].sets += sets;
+                        }}
+                    }});
+                }}
+            }});
+
+            // Expected muscles depending on mode
+            let targetMuscles = [];
+            if (studioState.mode === 'full_body') {{
+                targetMuscles = ['chest', 'back', 'shoulders', 'biceps', 'triceps', 'quads', 'hamstrings', 'glutes', 'core', 'calves_grip'];
+            }} else {{
+                switch(studioState.splitSubtype) {{
+                    case 'push':
+                        targetMuscles = ['chest', 'shoulders', 'triceps'];
+                        break;
+                    case 'pull':
+                        targetMuscles = ['back', 'biceps', 'shoulders'];
+                        break;
+                    case 'legs':
+                        targetMuscles = ['quads', 'hamstrings', 'glutes', 'calves_grip'];
+                        break;
+                    case 'upper':
+                        targetMuscles = ['chest', 'back', 'shoulders', 'biceps', 'triceps'];
+                        break;
+                    case 'arms':
+                        targetMuscles = ['biceps', 'triceps', 'shoulders'];
+                        break;
+                    case 'core':
+                        targetMuscles = ['core'];
+                        break;
+                    default:
+                        targetMuscles = ['chest', 'shoulders', 'triceps'];
+                }}
+            }}
+
+            // Render muscle tiles
+            let tilesHtml = '';
+            Object.keys(MUSCLE_DEFS).forEach(key => {{
+                const def = MUSCLE_DEFS[key];
+                const stat = muscleStats[key];
+                const isTargeted = targetMuscles.includes(key);
+                const isCovered = stat.count > 0;
+
+                let tileClass = 'muscle-tile';
+                let statusBadge = '';
+
+                if (isCovered) {{
+                    tileClass += ' covered';
+                    statusBadge = `<span style="color:#10b981; font-weight:800; font-size:10.5px;">✅ ${{stat.count}} Egzersiz (${{stat.sets}} Set)</span>`;
+                }} else if (isTargeted) {{
+                    tileClass += ' warning';
+                    statusBadge = `<span style="color:#ef4444; font-weight:800; font-size:10.5px;">⚠️ Eksik (0 Set)</span>`;
+                }} else {{
+                    tileClass += ' missing';
+                    statusBadge = `<span style="color:var(--text-secondary); font-size:10px;">⚪ Hedef Dışı</span>`;
+                }}
+
+                tilesHtml += `
+                    <div class="${{tileClass}}">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                            <span style="font-size:18px;">${{def.icon}}</span>
+                            <span style="font-size:9px; color:var(--text-secondary); font-weight:700;">${{isTargeted ? 'HEDEF' : 'OPSİYONEL'}}</span>
+                        </div>
+                        <div style="margin: 6px 0 2px;">
+                            <div style="font-size:12px; font-weight:800; color:#fff;">${{def.name}}</div>
+                            <div style="font-size:9.5px; color:var(--text-secondary);">${{def.desc}}</div>
+                        </div>
+                        <div style="margin-top:4px;">${{statusBadge}}</div>
+                    </div>
+                `;
+            }});
+            grid.innerHTML = tilesHtml;
+
+            // Generate AI Coach Feedback Banner
+            const missingTargets = targetMuscles.filter(m => muscleStats[m].count === 0);
+            const missingNames = missingTargets.map(m => MUSCLE_DEFS[m].name);
+
+            if (customRoutineState.exercises.length === 0) {{
+                banner.style.background = 'rgba(245, 158, 11, 0.1)';
+                banner.style.border = '1px solid rgba(245, 158, 11, 0.3)';
+                banner.style.color = 'var(--gold-light)';
+                banner.innerHTML = `💡 <strong>Koç Tavsiyesi:</strong> Programınız henüz boş. Aşağıdaki 77 hareketlik katalogdan beğendiğiniz hareketleri <code>[ ➕ Programa Ekle ]</code> butonuna basarak ekleyin; radar kas dengesini anında hesaplayacaktır.`;
+            }} else if (studioState.mode === 'full_body') {{
+                if (missingTargets.length > 0) {{
+                    banner.style.background = 'rgba(239, 68, 68, 0.12)';
+                    banner.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+                    banner.style.color = '#fca5a5';
+                    banner.innerHTML = `⚠️ <strong>Tüm Vücut Dengesi Uyarısı:</strong> Şu an programınızda <strong>${{missingNames.join(', ')}}</strong> eksik kaldı! Kinetik zincirde postürel dengesizlik ve sakatlık riskini önlemek için bu bölgelerden de en az birer hareket eklemeniz önerilir. (Toplam Set: ${{totalSets}})`;
+                }} else {{
+                    banner.style.background = 'rgba(16, 185, 129, 0.12)';
+                    banner.style.border = '1px solid rgba(16, 185, 129, 0.4)';
+                    banner.style.color = '#6ee7b7';
+                    banner.innerHTML = `🎉 <strong>Kusursuz Tüm Vücut Dengesi!</strong> Vücudun tüm ana kas grupları (İtiş, Çekiş, Bacak, Core) eksiksiz kapsandı. Toplam ${{customRoutineState.exercises.length}} hareket ve ${{totalSets}} set ile mükemmel bir atletik seans!`;
+                }}
+            }} else {{
+                // Split Mode
+                let volumeComment = '';
+                if (totalSets < 10) {{
+                    volumeComment = `🟡 <strong>Düşük Hacim (${{totalSets}} Set):</strong> Bölgesel hipertrofi için hedef kas gruplarında 12-18 set aralığı önerilir.`;
+                }} else if (totalSets <= 18) {{
+                    volumeComment = `🎯 <strong>İdeal Hipertrofi Hacmi (${{totalSets}} Set):</strong> Kas liflerinin uyarılması ve toparlanma dengesi için kusursuz aralıktasınız!`;
+                }} else {{
+                    volumeComment = `⚠️ <strong>Yüksek Hacim (${{totalSets}} Set):</strong> Tek bölge gününde 18-20 setin üzerine çıkmak 'çöp hacim' (junk volume) riski oluşturabilir.`;
+                }}
+
+                if (missingTargets.length > 0) {{
+                    banner.style.background = 'rgba(245, 158, 11, 0.12)';
+                    banner.style.border = '1px solid rgba(245, 158, 11, 0.4)';
+                    banner.style.color = '#fde68a';
+                    banner.innerHTML = `⚠️ <strong>Bölgesel Split Uyarısı:</strong> Seçilen splitte hedeflenen <strong>${{missingNames.join(', ')}}</strong> için henüz hareket eklenmedi!<br>${{volumeComment}}`;
+                }} else {{
+                    banner.style.background = 'rgba(16, 185, 129, 0.12)';
+                    banner.style.border = '1px solid rgba(16, 185, 129, 0.4)';
+                    banner.style.color = '#6ee7b7';
+                    banner.innerHTML = `✨ <strong>Bölgesel Hedefler Tamamlandı!</strong> Seçtiğiniz splitin tüm kas grupları kapsandı.<br>${{volumeComment}}`;
+                }}
+            }}
+        }}
+
+        function renderCustomRoutine() {{
+            const container = document.getElementById('customWorkoutExercisesList');
+            const countBadge = document.getElementById('customRoutineCountBadge');
+            if (!container) return;
+
+            countBadge.innerText = `${{customRoutineState.exercises.length}} Hareket`;
+
+            if (customRoutineState.exercises.length === 0) {{
+                container.innerHTML = `
+                    <div style="text-align:center; padding:24px; color:var(--text-secondary); background:rgba(0,0,0,0.2); border-radius:8px; border:1px dashed var(--border);">
+                        <div style="font-size:24px; margin-bottom:6px;">📋</div>
+                        <div style="font-size:13px; font-weight:700; color:#fff;">Henüz hareket eklemediniz</div>
+                        <div style="font-size:11px; margin-top:4px;">Aşağıdaki hareket kütüphanesinden dilediğiniz egzersizin yanındaki <strong>[ ➕ Ekle ]</strong> butonuna tıklayarak listenizi oluşturun.</div>
+                    </div>
+                `;
+                return;
+            }}
+
+            let html = '';
+            customRoutineState.exercises.forEach((item, index) => {{
+                const ex = EXERCISES_DB.find(e => e.id === item.exId);
+                if (!ex) return;
+
+                const guide = exerciseGuideMap[ex.id] || categoryFallback[ex.category] || guideLibrary.goblet_squat;
+                const thumbImg = guide.form || '';
+
+                html += `
+                    <div class="custom-routine-item">
+                        <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:180px;">
+                            <span style="font-size:12px; font-weight:900; color:var(--gold); width:18px;">${{index + 1}}.</span>
+                            <div class="ex-thumb-wrap">
+                                ${{thumbImg ? `<img src="${{thumbImg}}" class="ex-thumb-img" alt="${{escapeHTML(ex.name)}}">` : '🏋️'}}
+                            </div>
+                            <div>
+                                <div style="font-size:13px; font-weight:800; color:#fff; cursor:pointer;" onclick="openExerciseDetailModal('${{ex.id}}')">
+                                    ${{escapeHTML(ex.name)}}
+                                </div>
+                                <div style="font-size:11px; color:var(--text-secondary);">
+                                    ${{escapeHTML(ex.muscle || '')}}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SETS & REPS CONTROLS -->
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <select class="form-input" style="padding:4px 6px; font-size:11.5px; width:72px;" onchange="updateCustomExerciseSets(${{index}}, this.value)">
+                                <option value="2" ${{item.sets == 2 ? 'selected' : ''}}>2 Set</option>
+                                <option value="3" ${{item.sets == 3 ? 'selected' : ''}}>3 Set</option>
+                                <option value="4" ${{item.sets == 4 ? 'selected' : ''}}>4 Set</option>
+                                <option value="5" ${{item.sets == 5 ? 'selected' : ''}}>5 Set</option>
+                                <option value="6" ${{item.sets == 6 ? 'selected' : ''}}>6 Set</option>
+                            </select>
+
+                            <select class="form-input" style="padding:4px 6px; font-size:11.5px; width:80px;" onchange="updateCustomExerciseReps(${{index}}, this.value)">
+                                <option value="6-8" ${{item.reps == '6-8' ? 'selected' : ''}}>6-8 Tek.</option>
+                                <option value="8-10" ${{item.reps == '8-10' ? 'selected' : ''}}>8-10 Tek.</option>
+                                <option value="10-12" ${{item.reps == '10-12' ? 'selected' : ''}}>10-12 Tek.</option>
+                                <option value="12-15" ${{item.reps == '12-15' ? 'selected' : ''}}>12-15 Tek.</option>
+                                <option value="Maks" ${{item.reps == 'Maks' ? 'selected' : ''}}>Maksimum</option>
+                            </select>
+
+                            <!-- ORDER BUTTONS -->
+                            <button class="btn btn-outline" style="padding:4px 6px; font-size:10px;" onclick="moveCustomRoutineExercise(${{index}}, -1)" ${{index === 0 ? 'disabled' : ''}}>▲</button>
+                            <button class="btn btn-outline" style="padding:4px 6px; font-size:10px;" onclick="moveCustomRoutineExercise(${{index}}, 1)" ${{index === customRoutineState.exercises.length - 1 ? 'disabled' : ''}}>▼</button>
+                            
+                            <!-- INSPECT & REMOVE -->
+                            <button class="btn btn-outline" style="padding:4px 8px; font-size:11px;" onclick="openExerciseDetailModal('${{ex.id}}')" title="Form ve Anatomi Görselini İncele">👁️</button>
+                            <button class="btn btn-outline" style="padding:4px 8px; font-size:11px; color:#ef4444; border-color:rgba(239,68,68,0.4);" onclick="removeExerciseFromCustomRoutine(${{index}})" title="Çıkar">✕</button>
+                        </div>
+                    </div>
+                `;
+            }});
+
+            container.innerHTML = html;
+        }}
+
+        function renderStudioExerciseCatalog() {{
+            const container = document.getElementById('studioExercisesCatalog');
+            const totalCountEl = document.getElementById('studioExTotalCount');
+            if (!container) return;
+
+            const q = (document.getElementById('studioSearchInput')?.value || '').toLowerCase().trim();
+            const equip = document.getElementById('studioEquipFilter')?.value || 'all';
+            const cat = document.getElementById('studioCategoryFilter')?.value || 'all';
+
+            const filtered = EXERCISES_DB.filter(ex => {{
+                if (equip !== 'all' && ex.equipment !== equip) return false;
+                if (cat !== 'all' && ex.category !== cat) return false;
+                if (q) {{
+                    const combined = (ex.name + ' ' + (ex.muscle || '') + ' ' + (ex.cue || '')).toLowerCase();
+                    if (!combined.includes(q)) return false;
+                }}
+                return true;
+            }});
+
+            if (totalCountEl) {{
+                totalCountEl.innerText = `(${{filtered.length}} / ${{EXERCISES_DB.length}} Hareket)`;
+            }}
+
+            if (filtered.length === 0) {{
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align:center; padding:32px; color:var(--text-secondary);">
+                        Arama kriterlerine uygun egzersiz bulunamadı.
+                    </div>
+                `;
+                return;
+            }}
+
+            let html = '';
+            filtered.forEach(ex => {{
+                const guide = exerciseGuideMap[ex.id] || categoryFallback[ex.category] || guideLibrary.goblet_squat;
+                const thumbImg = guide.form || '';
+                const isAlreadyInRoutine = customRoutineState.exercises.some(item => item.exId === ex.id);
+
+                const equipBadgeMap = {{
+                    dumbbell: '<span class="auth-role-tag role-admin" style="font-size:9.5px;">Dambıl</span>',
+                    kettlebell: '<span class="auth-role-tag role-admin" style="font-size:9.5px; background:rgba(234,179,8,0.2); color:#eab308; border-color:#eab308;">Kettlebell</span>',
+                    bodyweight: '<span class="auth-role-tag role-athlete" style="font-size:9.5px;">Vücut Ağırlığı</span>',
+                    barbell: '<span class="auth-role-tag role-admin" style="font-size:9.5px; background:rgba(239,68,68,0.2); color:#ef4444; border-color:#ef4444;">Halter</span>',
+                    machine: '<span class="auth-role-tag role-athlete" style="font-size:9.5px; background:rgba(168,85,247,0.2); color:#a855f7; border-color:#a855f7;">Makine</span>'
+                }};
+
+                html += `
+                    <div class="studio-ex-card">
+                        <div style="display:flex; gap:10px; align-items:flex-start; margin-bottom:10px;">
+                            <div class="ex-thumb-wrap" style="width:58px; height:58px; cursor:pointer;" onclick="openExerciseDetailModal('${{ex.id}}')">
+                                ${{thumbImg ? `<img src="${{thumbImg}}" class="ex-thumb-img" alt="${{escapeHTML(ex.name)}}" loading="lazy">` : '🏋️'}}
+                            </div>
+                            <div style="flex:1;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+                                    ${{equipBadgeMap[ex.equipment] || ''}}
+                                    <span style="font-size:9px; color:var(--text-secondary); text-transform:uppercase;">${{ex.mechanic || 'compound'}}</span>
+                                </div>
+                                <div style="font-size:13px; font-weight:800; color:#fff; line-height:1.3; cursor:pointer;" onclick="openExerciseDetailModal('${{ex.id}}')">
+                                    ${{escapeHTML(ex.name)}}
+                                </div>
+                                <div style="font-size:11px; color:var(--cyan); margin-top:2px;">
+                                    ${{escapeHTML(ex.muscle || '')}}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ACTIONS -->
+                        <div style="display:flex; gap:6px; margin-top:auto;">
+                            <button class="btn btn-outline" style="flex:1; font-size:11px; padding:6px 8px;" onclick="openExerciseDetailModal('${{ex.id}}')">
+                                👁️ İncele
+                            </button>
+                            <button class="btn ${{isAlreadyInRoutine ? 'btn-outline' : 'btn-gold'}}" style="flex:1.4; font-size:11px; padding:6px 8px; font-weight:800;" onclick="addExerciseToCustomRoutine('${{ex.id}}')">
+                                ${{isAlreadyInRoutine ? '➕ Tekrar Ekle' : '➕ Programa Ekle'}}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }});
+
+            container.innerHTML = html;
+        }}
+
+        function addExerciseToCustomRoutine(exId) {{
+            const ex = EXERCISES_DB.find(e => e.id === exId);
+            if (!ex) return;
+
+            customRoutineState.exercises.push({{
+                exId: exId,
+                sets: 3,
+                reps: '8-12',
+                weight: ''
+            }});
+
+            renderCustomRoutine();
+            renderMuscleRadar();
+            renderStudioExerciseCatalog();
+
+            const customTitleInput = document.getElementById('customWorkoutTitleInput');
+            if (customTitleInput) {{
+                customTitleInput.scrollIntoView({{ behavior: 'smooth', block: 'nearest' }});
+            }}
+        }}
+
+        function removeExerciseFromCustomRoutine(index) {{
+            customRoutineState.exercises.splice(index, 1);
+            renderCustomRoutine();
+            renderMuscleRadar();
+            renderStudioExerciseCatalog();
+        }}
+
+        function moveCustomRoutineExercise(index, direction) {{
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= customRoutineState.exercises.length) return;
+            const temp = customRoutineState.exercises[index];
+            customRoutineState.exercises[index] = customRoutineState.exercises[newIndex];
+            customRoutineState.exercises[newIndex] = temp;
+            renderCustomRoutine();
+        }}
+
+        function updateCustomExerciseSets(index, val) {{
+            if (customRoutineState.exercises[index]) {{
+                customRoutineState.exercises[index].sets = parseInt(val) || 3;
+                renderMuscleRadar();
+            }}
+        }}
+
+        function updateCustomExerciseReps(index, val) {{
+            if (customRoutineState.exercises[index]) {{
+                customRoutineState.exercises[index].reps = val;
+            }}
+        }}
+
+        function updateCustomRoutineRest(val) {{
+            customRoutineState.rest = parseInt(val) || 60;
+        }}
+
+        function resetCustomRoutine() {{
+            if (customRoutineState.exercises.length === 0) return;
+            if (confirm("Özel program taslağını sıfırlamak istediğinize emin misiniz?")) {{
+                customRoutineState.exercises = [];
+                renderCustomRoutine();
+                renderMuscleRadar();
+                renderStudioExerciseCatalog();
+            }}
+        }}
+
+        function saveCustomRoutineToLibrary() {{
+            if (customRoutineState.exercises.length === 0) {{
+                alert("Lütfen önce programınıza en az 1 egzersiz ekleyin.");
+                return;
+            }}
+
+            const title = (document.getElementById('customWorkoutTitleInput')?.value || '').trim() || "Özel Çelik Programım";
+            const rest = parseInt(document.getElementById('customWorkoutRestSelect')?.value) || 60;
+
+            const exercisesList = customRoutineState.exercises.map(item => {{
+                const ex = EXERCISES_DB.find(e => e.id === item.exId);
+                return ex ? Object.assign({{}}, ex, {{ targetSets: item.sets, targetReps: item.reps }}) : null;
+            }}).filter(Boolean);
+
+            const user = getActiveUser();
+            if (!user.savedWorkouts) user.savedWorkouts = [];
+
+            const newRoutine = {{
+                id: 'custom_' + Date.now(),
+                title: title,
+                split: studioState.mode === 'full_body' ? 'full_body' : studioState.splitSubtype,
+                splitName: title,
+                style: 'classic',
+                goal: 'hypertrophy',
+                duration: Math.round(exercisesList.length * 7),
+                scheme: {{ sets: 3, reps: '8-12', rest: rest }},
+                warmups: [
+                    {{ name: "Eklemsel CARs (Omuz & Kalça Dairesi)", dur: "90 sn", cue: "Tüm eklemleri kontrollü ve geniş dairelerle ısıt." }},
+                    {{ name: "World's Greatest Stretch", dur: "60 sn", cue: "Derin lunge pozisyonunda göğsü tavana çevir." }}
+                ],
+                exercises: exercisesList,
+                finisher: {{ name: "Balistik Bitiş", desc: "Maksimum tempolu 3 tur çiftçi taşıması veya swing." }},
+                createdAt: Date.now(),
+                isCustom: true
+            }};
+
+            user.savedWorkouts.unshift(newRoutine);
+            saveAthletesToStorage();
+
+            alert(`✅ "${{title}}" başarıyla kaydedildi! '📚 Programlar' sekmesinden istediğiniz zaman başlatabilirsiniz.`);
+            renderSavedProgramsList();
+        }}
+
+        function startActiveWorkoutFromCustom() {{
+            if (customRoutineState.exercises.length === 0) {{
+                alert("Lütfen antrenmanı başlatmadan önce en az 1 egzersiz ekleyin.");
+                return;
+            }}
+
+            const title = (document.getElementById('customWorkoutTitleInput')?.value || '').trim() || "Özel Çelik Programım";
+            const rest = parseInt(document.getElementById('customWorkoutRestSelect')?.value) || 60;
+
+            const exercisesList = customRoutineState.exercises.map(item => {{
+                const ex = EXERCISES_DB.find(e => e.id === item.exId);
+                return ex ? Object.assign({{}}, ex, {{ targetSets: item.sets, targetReps: item.reps }}) : null;
+            }}).filter(Boolean);
+
+            const sessionObj = {{
+                id: 'custom_' + Date.now(),
+                title: title,
+                split: studioState.mode === 'full_body' ? 'full_body' : studioState.splitSubtype,
+                splitName: title,
+                style: 'classic',
+                goal: 'hypertrophy',
+                duration: Math.round(exercisesList.length * 7),
+                scheme: {{ sets: 3, reps: '8-12', rest: rest }},
+                warmups: [
+                    {{ name: "Eklemsel CARs (Omuz & Kalça Dairesi)", dur: "90 sn", cue: "Tüm eklemleri kontrollü ve geniş dairelerle ısıt." }},
+                    {{ name: "World's Greatest Stretch", dur: "60 sn", cue: "Derin lunge pozisyonunda göğsü tavana çevir." }}
+                ],
+                exercises: exercisesList,
+                finisher: {{ name: "Balistik Bitiş", desc: "Maksimum tempolu 3 tur çiftçi taşıması veya swing." }},
+                createdAt: Date.now()
+            }};
+
+            activeWorkoutSession = sessionObj;
+            activeWorkoutStartTime = Date.now();
+            activeWorkoutIsPaused = false;
+            activeWorkoutPausedAt = null;
+            activeWorkoutTotalPausedMs = 0;
+            activeWorkoutSetsData = {{}};
+
+            const user = getActiveUser();
+            const userWeights = user.weights || {{}};
+
+            activeWorkoutSession.exercises.forEach(ex => {{
+                const numSets = ex.targetSets || 3;
+                let defaultReps = 10;
+                if (ex.targetReps) {{
+                    const firstPart = String(ex.targetReps).split('-')[0].trim();
+                    defaultReps = parseInt(firstPart) || 10;
+                }}
+                const defaultWeight = ex.weightKey && userWeights[ex.weightKey] ? (parseFloat(userWeights[ex.weightKey]) || '') : '';
+
+                activeWorkoutSetsData[ex.id] = [];
+                for (let s = 1; s <= numSets; s++) {{
+                    activeWorkoutSetsData[ex.id].push({{
+                        setNo: s,
+                        weight: defaultWeight,
+                        reps: defaultReps,
+                        completed: false,
+                        completedAt: null
+                    }});
+                }}
+            }});
+
+            saveActiveWorkoutStateToStorage();
+            startWorkoutTimer();
+            renderActiveWorkout();
+            switchTab('activeWorkoutTab');
+            resetTimer(rest);
+            playAlertSound();
+        }}
+
+        // ==================== EXERCISE DETAIL MODAL LOGIC ====================
+        function openExerciseDetailModal(exId) {{
+            const ex = EXERCISES_DB.find(e => e.id === exId);
+            if (!ex) return;
+
+            studioState.currentInspectExId = exId;
+            document.getElementById('exDetailModalTitle').innerText = ex.name;
+            document.getElementById('exDetailModalSubtitle').innerText = `${{ex.muscle || ''}} • ${{ex.equipment ? ex.equipment.toUpperCase() : ''}}`;
+
+            const guide = exerciseGuideMap[ex.id] || categoryFallback[ex.category] || guideLibrary.goblet_squat;
+
+            // Form Tab
+            const formContainer = document.getElementById('exDetailTabContentForm');
+            if (guide && guide.form) {{
+                formContainer.innerHTML = `
+                    <div style="text-align:center; background:#000; border-radius:10px; overflow:hidden; border:1px solid var(--border);">
+                        <img src="${{guide.form}}" style="max-width:100%; height:auto; display:block;" alt="${{escapeHTML(ex.name)}} Form">
+                    </div>
+                `;
+            }} else {{
+                formContainer.innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-secondary);">Form rehberi hazırlanıyor.</div>`;
+            }}
+
+            // Anatomy Tab
+            const anatomyContainer = document.getElementById('exDetailTabContentAnatomy');
+            if (guide && guide.anatomi) {{
+                anatomyContainer.innerHTML = `
+                    <div style="text-align:center; background:#000; border-radius:10px; overflow:hidden; border:1px solid var(--border);">
+                        <img src="${{guide.anatomi}}" style="max-width:100%; height:auto; display:block;" alt="${{escapeHTML(ex.name)}} Anatomi">
+                    </div>
+                `;
+            }} else {{
+                anatomyContainer.innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-secondary);">Kas anatomisi haritası yükleniyor.</div>`;
+            }}
+
+            // Steps Tab
+            const stepsContainer = document.getElementById('exDetailTabContentSteps');
+            let stepsHtml = '';
+            if (ex.positions && ex.positions.length > 0) {{
+                stepsHtml = ex.positions.map(p => {{
+                    const badgeStyles = {{
+                        setup: {{ bg: 'rgba(56, 189, 248, 0.2)', border: 'var(--cyan)', text: 'var(--cyan)', icon: '🟢' }},
+                        action: {{ bg: 'rgba(245, 158, 11, 0.2)', border: 'var(--gold)', text: 'var(--gold)', icon: '🟠' }},
+                        finish: {{ bg: 'rgba(16, 185, 129, 0.2)', border: 'var(--green-success)', text: 'var(--green-success)', icon: '🏁' }}
+                    }};
+                    const style = badgeStyles[p.badge] || badgeStyles.setup;
+                    return `
+                        <div class="pos-step-card" style="margin-bottom:10px;">
+                            <div class="pos-step-header" style="background:${{style.bg}}; border-color:${{style.border}}; color:${{style.text}};">
+                                <span>${{style.icon}} ${{escapeHTML(p.phase)}}</span>
+                            </div>
+                            <div class="pos-step-desc">
+                                ${{escapeHTML(p.desc)}}
+                            </div>
+                        </div>
+                    `;
+                }}).join('');
+            }}
+            if (ex.cue) {{
+                stepsHtml += `
+                    <div class="cue-box" style="margin-top:12px;">
+                        <span class="cue-icon">💡</span>
+                        <span><strong>Altın Kural:</strong> ${{escapeHTML(ex.cue)}}</span>
+                    </div>
+                `;
+            }}
+            stepsContainer.innerHTML = stepsHtml;
+
+            // Add button hook
+            const btnAdd = document.getElementById('btnExDetailAdd');
+            if (btnAdd) {{
+                btnAdd.onclick = () => {{
+                    addExerciseToCustomRoutine(exId);
+                    closeExerciseDetailModal();
+                }};
+            }}
+
+            switchExDetailTab('form');
+            document.getElementById('exerciseDetailModal').classList.add('active');
+        }}
+
+        function closeExerciseDetailModal() {{
+            document.getElementById('exerciseDetailModal').classList.remove('active');
+        }}
+
+        function switchExDetailTab(tab) {{
+            document.getElementById('btnExDetailTabForm').classList.toggle('active', tab === 'form');
+            document.getElementById('btnExDetailTabAnatomy').classList.toggle('active', tab === 'anatomy');
+            document.getElementById('btnExDetailTabSteps').classList.toggle('active', tab === 'steps');
+
+            document.getElementById('exDetailTabContentForm').style.display = (tab === 'form') ? 'block' : 'none';
+            document.getElementById('exDetailTabContentAnatomy').style.display = (tab === 'anatomy') ? 'block' : 'none';
+            document.getElementById('exDetailTabContentSteps').style.display = (tab === 'steps') ? 'block' : 'none';
+        }}
+
     </script>
 </body>
 </html>
