@@ -7,6 +7,9 @@
     <link rel="apple-touch-icon" href="assets/diagrams/seq_db_press.svg">
     <meta name="apple-mobile-web-app-title" content="Çelik Kodu">
     <meta name="application-name" content="Çelik Kodu">
+        <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self';">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -4018,10 +4021,24 @@
         updateDisplay(75);
         loadTrackerState();
 
-        // ==================== WORKOUT TRACKER & HISTORY ENGINE ====================
+        
+        // ==================== WORKOUT TRACKER & HISTORY ENGINE (SECURED) ====================
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         function getWorkoutLogs() {
             try {
-                return JSON.parse(localStorage.getItem('celik_kodu_history') || '[]');
+                const raw = localStorage.getItem('celik_kodu_history');
+                if (!raw) return [];
+                const parsed = JSON.parse(raw);
+                return Array.isArray(parsed) ? parsed : [];
             } catch(e) {
                 return [];
             }
@@ -4050,7 +4067,7 @@
             const notes = document.getElementById('logNotes').value.trim();
 
             const entry = {
-                id: 'log_' + Date.now(),
+                id: 'log_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
                 program: program,
                 date: date,
                 duration: duration,
@@ -4095,7 +4112,7 @@
             const thisWeekCount = logs.filter(l => new Date(l.date) >= startOfWeek).length;
             document.getElementById('statWeekWorkouts').innerText = thisWeekCount + '/3';
 
-            // Streak calculation (days with workouts in the last 14 days)
+            // Streak calculation (days with workouts in the last 30 days)
             let streak = 0;
             const uniqueDates = [...new Set(logs.map(l => l.date))].sort().reverse();
             let checkDate = new Date();
@@ -4119,20 +4136,32 @@
                 return;
             }
 
-            container.innerHTML = logs.map(log => `
-                <div class="log-history-card">
-                    <div class="log-card-header">
-                        <span class="log-date">📅 ${log.date} (${log.duration} Dk)</span>
-                        <div class="log-badges">
-                            <span class="badge-sub">${log.program.split(':')[0]}</span>
-                            <span class="badge-rpe">${log.rpe.split(' ')[0]} ${log.rpe.split(' ')[1]}</span>
-                            <button class="btn-delete" title="Sil" onclick="deleteLog('${log.id}')">✕</button>
+            container.innerHTML = logs.map(log => {
+                const safeId = encodeURIComponent(log.id || '');
+                const safeDate = escapeHTML(log.date || '');
+                const safeDuration = escapeHTML(log.duration || '45');
+                const safeProgram = escapeHTML(log.program || '');
+                const safeRpe = escapeHTML(log.rpe || '');
+                const safeNotes = escapeHTML(log.notes || '');
+
+                const programBadge = safeProgram.split(':')[0] || 'Antrenman';
+                const rpeBadge = safeRpe.split(' ')[0] + ' ' + (safeRpe.split(' ')[1] || '');
+
+                return `
+                    <div class="log-history-card">
+                        <div class="log-card-header">
+                            <span class="log-date">📅 ${safeDate} (${safeDuration} Dk)</span>
+                            <div class="log-badges">
+                                <span class="badge-sub">${programBadge}</span>
+                                <span class="badge-rpe">${rpeBadge}</span>
+                                <button class="btn-delete" title="Sil" onclick="deleteLog('${safeId}')">✕</button>
+                            </div>
                         </div>
+                        <div style="font-size:12px; font-weight:700; color:var(--gold-light); margin-bottom:4px;">${safeProgram}</div>
+                        ${safeNotes ? `<div class="log-notes">${safeNotes}</div>` : ''}
                     </div>
-                    <div style="font-size:12px; font-weight:700; color:var(--gold-light); margin-bottom:4px;">${log.program}</div>
-                    ${log.notes ? `<div class="log-notes">${log.notes}</div>` : ''}
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function exportData() {
@@ -4155,21 +4184,41 @@
         function importData(e) {
             const file = e.target.files[0];
             if (!file) return;
+
+            // Security check: File size limit (max 2 MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert("❌ Hata: Dosya boyutu çok büyük (Maksimum 2MB)!");
+                return;
+            }
+
             const reader = new FileReader();
             reader.onload = function(evt) {
                 try {
                     const data = JSON.parse(evt.target.result);
-                    if (data.history) {
-                        localStorage.setItem('celik_kodu_history', JSON.stringify(data.history));
+                    
+                    // Strict Schema Validation
+                    if (data.history && Array.isArray(data.history)) {
+                        const sanitizedHistory = data.history
+                            .filter(item => item && typeof item === 'object')
+                            .map(item => ({
+                                id: String(item.id || ('log_' + Date.now())).slice(0, 50),
+                                program: String(item.program || '').slice(0, 100),
+                                date: String(item.date || '').slice(0, 20),
+                                duration: String(item.duration || '').slice(0, 10),
+                                rpe: String(item.rpe || '').slice(0, 50),
+                                notes: String(item.notes || '').slice(0, 3000),
+                                timestamp: Number(item.timestamp) || Date.now()
+                            }));
+                        localStorage.setItem('celik_kodu_history', JSON.stringify(sanitizedHistory));
                     }
-                    if (data.checkboxState) {
+                    if (data.checkboxState && typeof data.checkboxState === 'object') {
                         localStorage.setItem('celik_kodu_workout_state', JSON.stringify(data.checkboxState));
                         loadTrackerState();
                     }
                     renderHistory();
-                    alert("✅ Veriler başarıyla geri yüklendi!");
+                    alert("✅ Veriler güvenli bir şekilde geri yüklendi!");
                 } catch(err) {
-                    alert("❌ Hata: Geçersiz yedek dosyası!");
+                    alert("❌ Hata: Geçersiz veya bozuk yedek dosyası!");
                 }
             };
             reader.readAsText(file);

@@ -1,3 +1,8 @@
 .DS_Store
 temp/
 *.log
+source_archive/
+*.gdoc
+.env*
+*.key
+*.pem
