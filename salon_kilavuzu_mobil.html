@@ -2609,33 +2609,129 @@
                 `;
             }).join('');
 
-            const guidePhotos = {
-                'db_goblet_squat': { form: 'assets/guides/guide_db_goblet_squat_form.jpg', anatomi: 'assets/guides/guide_db_goblet_squat_anatomi.jpg' },
-                'db_front_squat': { form: 'assets/guides/guide_db_goblet_squat_form.jpg', anatomi: 'assets/guides/guide_db_goblet_squat_anatomi.jpg' },
-                'kb_goblet_squat': { form: 'assets/guides/guide_db_goblet_squat_form.jpg', anatomi: 'assets/guides/guide_db_goblet_squat_anatomi.jpg' },
-                'bw_air_squat': { form: 'assets/guides/guide_db_goblet_squat_form.jpg', anatomi: 'assets/guides/guide_db_goblet_squat_anatomi.jpg' },
-                'db_bench_press': { form: 'assets/guides/guide_db_bench_press_form.jpg', anatomi: 'assets/guides/guide_db_bench_press_anatomi.jpg' },
-                'db_floor_press': { form: 'assets/guides/guide_db_bench_press_form.jpg', anatomi: 'assets/guides/guide_db_bench_press_anatomi.jpg' },
-                'db_incline_press': { form: 'assets/guides/guide_db_bench_press_form.jpg', anatomi: 'assets/guides/guide_db_bench_press_anatomi.jpg' },
-                'db_overhead_press': { form: 'assets/guides/guide_db_overhead_press_form.jpg', anatomi: 'assets/guides/guide_db_overhead_press_anatomi.jpg' },
-                'db_arnold_press': { form: 'assets/guides/guide_db_overhead_press_form.jpg', anatomi: 'assets/guides/guide_db_overhead_press_anatomi.jpg' },
-                'kb_press': { form: 'assets/guides/guide_db_overhead_press_form.jpg', anatomi: 'assets/guides/guide_db_overhead_press_anatomi.jpg' },
-                'db_saw_row': { form: 'assets/guides/guide_db_saw_row_form.jpg', anatomi: 'assets/guides/guide_db_saw_row_anatomi.jpg' },
-                'db_chest_supported_row': { form: 'assets/guides/guide_db_saw_row_form.jpg', anatomi: 'assets/guides/guide_db_saw_row_anatomi.jpg' },
-                'kb_gorilla_row': { form: 'assets/guides/guide_db_saw_row_form.jpg', anatomi: 'assets/guides/guide_db_saw_row_anatomi.jpg' },
-                'db_rdl': { form: 'assets/guides/guide_db_rdl_form.jpg', anatomi: 'assets/guides/guide_db_rdl_anatomi.jpg' },
-                'db_single_leg_rdl': { form: 'assets/guides/guide_db_rdl_form.jpg', anatomi: 'assets/guides/guide_db_rdl_anatomi.jpg' },
-                'db_walking_lunge': { form: 'assets/guides/guide_db_walking_lunge_form.jpg', anatomi: 'assets/guides/guide_db_walking_lunge_anatomi.jpg' },
-                'db_reverse_lunge': { form: 'assets/guides/guide_db_walking_lunge_form.jpg', anatomi: 'assets/guides/guide_db_walking_lunge_anatomi.jpg' },
-                'db_snatch': { form: 'assets/guides/guide_db_snatch_form.jpg', anatomi: 'assets/guides/guide_db_snatch_anatomi.jpg' },
-                'kb_half_snatch': { form: 'assets/guides/guide_db_snatch_form.jpg', anatomi: 'assets/guides/guide_db_snatch_anatomi.jpg' },
-                'db_swing': { form: 'assets/guides/guide_db_swing_form.jpg', anatomi: 'assets/guides/guide_db_swing_anatomi.jpg' },
-                'kb_swing': { form: 'assets/guides/guide_db_swing_form.jpg', anatomi: 'assets/guides/guide_db_swing_anatomi.jpg' },
-                'bw_pushup': { form: 'assets/guides/guide_bw_pushup_form.jpg', anatomi: 'assets/guides/guide_bw_pushup_anatomi.jpg' },
-                'bw_diamond_pushup': { form: 'assets/guides/guide_bw_pushup_form.jpg', anatomi: 'assets/guides/guide_bw_pushup_anatomi.jpg' }
+            const guideLibrary = {
+                squat: { form: 'assets/guides/guide_db_goblet_squat_form.jpg', anatomi: 'assets/guides/guide_db_goblet_squat_anatomi.jpg' },
+                bench: { form: 'assets/guides/guide_db_bench_press_form.jpg', anatomi: 'assets/guides/guide_db_bench_press_anatomi.jpg' },
+                overhead: { form: 'assets/guides/guide_db_overhead_press_form.jpg', anatomi: 'assets/guides/guide_db_overhead_press_anatomi.jpg' },
+                row: { form: 'assets/guides/guide_db_saw_row_form.jpg', anatomi: 'assets/guides/guide_db_saw_row_anatomi.jpg' },
+                rdl: { form: 'assets/guides/guide_db_rdl_form.jpg', anatomi: 'assets/guides/guide_db_rdl_anatomi.jpg' },
+                lunge: { form: 'assets/guides/guide_db_walking_lunge_form.jpg', anatomi: 'assets/guides/guide_db_walking_lunge_anatomi.jpg' },
+                snatch: { form: 'assets/guides/guide_db_snatch_form.jpg', anatomi: 'assets/guides/guide_db_snatch_anatomi.jpg' },
+                swing: { form: 'assets/guides/guide_db_swing_form.jpg', anatomi: 'assets/guides/guide_db_swing_anatomi.jpg' },
+                pushup: { form: 'assets/guides/guide_bw_pushup_form.jpg', anatomi: 'assets/guides/guide_bw_pushup_anatomi.jpg' },
+                pullup: { form: 'assets/guides/guide_bw_pullup_form.jpg', anatomi: 'assets/guides/guide_bw_pullup_anatomi.jpg' },
+                deadlift: { form: 'assets/guides/guide_bb_deadlift_form.jpg', anatomi: 'assets/guides/guide_bb_deadlift_anatomi.jpg' },
+                curl: { form: 'assets/guides/guide_db_biceps_curl_form.jpg', anatomi: 'assets/guides/guide_db_biceps_curl_anatomi.jpg' },
+                plank: { form: 'assets/guides/guide_bw_plank_form.jpg', anatomi: 'assets/guides/guide_bw_plank_anatomi.jpg' }
             };
 
-            const photoGuide = guidePhotos[ex.id];
+            const exerciseGuideMap = {
+                // Squat & Quad
+                'db_goblet_squat': guideLibrary.squat,
+                'db_front_squat': guideLibrary.squat,
+                'kb_goblet_squat': guideLibrary.squat,
+                'bw_air_squat': guideLibrary.squat,
+                'bb_back_squat': guideLibrary.squat,
+                'bb_front_squat': guideLibrary.squat,
+                'mach_leg_press': guideLibrary.squat,
+                'mach_leg_extension': guideLibrary.squat,
+                'mach_calf_raise': guideLibrary.squat,
+                'bw_jump_squat': guideLibrary.squat,
+
+                // Lunge & Unilateral Leg
+                'db_walking_lunge': guideLibrary.lunge,
+                'db_reverse_lunge': guideLibrary.lunge,
+                'db_bulgarian_squat': guideLibrary.lunge,
+
+                // Deadlift & Posterior Chain
+                'bb_deadlift': guideLibrary.deadlift,
+                'bb_hip_thrust': guideLibrary.deadlift,
+                'bw_glute_bridge': guideLibrary.deadlift,
+                'mach_leg_curl': guideLibrary.rdl,
+                'db_rdl': guideLibrary.rdl,
+                'db_single_leg_rdl': guideLibrary.rdl,
+                'bb_rdl': guideLibrary.rdl,
+
+                // Swing & Ballistic
+                'db_swing': guideLibrary.swing,
+                'kb_swing': guideLibrary.swing,
+                'kb_clean': guideLibrary.snatch,
+                'db_snatch': guideLibrary.snatch,
+                'kb_half_snatch': guideLibrary.snatch,
+
+                // Horizontal Push (Chest)
+                'db_bench_press': guideLibrary.bench,
+                'db_floor_press': guideLibrary.bench,
+                'db_incline_press': guideLibrary.bench,
+                'bb_bench_press': guideLibrary.bench,
+                'bb_incline_bench': guideLibrary.bench,
+                'bb_close_grip_bench': guideLibrary.bench,
+                'mach_chest_press': guideLibrary.bench,
+                'mach_cable_crossover': guideLibrary.bench,
+                'mach_pec_deck': guideLibrary.bench,
+                'bw_pushup': guideLibrary.pushup,
+                'bw_diamond_pushup': guideLibrary.pushup,
+                'bw_decline_pushup': guideLibrary.pushup,
+                'bw_dips': guideLibrary.pushup,
+
+                // Overhead Push & Shoulder & Triceps
+                'db_overhead_press': guideLibrary.overhead,
+                'db_arnold_press': guideLibrary.overhead,
+                'kb_press': guideLibrary.overhead,
+                'kb_thruster': guideLibrary.overhead,
+                'bb_overhead_press': guideLibrary.overhead,
+                'db_lateral_raise': guideLibrary.overhead,
+                'mach_cable_lateral': guideLibrary.overhead,
+                'db_triceps_overhead': guideLibrary.overhead,
+                'db_skullcrusher': guideLibrary.bench,
+                'mach_triceps_pushdown': guideLibrary.overhead,
+
+                // Horizontal Pull (Rows)
+                'db_saw_row': guideLibrary.row,
+                'db_chest_supported_row': guideLibrary.row,
+                'kb_gorilla_row': guideLibrary.row,
+                'db_renegade_row': guideLibrary.row,
+                'bb_bent_over_row': guideLibrary.row,
+                'bb_pendlay_row': guideLibrary.row,
+                'mach_cable_row': guideLibrary.row,
+                'mach_face_pull': guideLibrary.row,
+                'bw_inverted_row': guideLibrary.row,
+                'db_pullover': guideLibrary.pullup,
+
+                // Vertical Pull & Biceps
+                'bw_pullup': guideLibrary.pullup,
+                'bw_chinup': guideLibrary.pullup,
+                'mach_lat_pulldown': guideLibrary.pullup,
+                'db_hammer_curl': guideLibrary.curl,
+                'db_incline_curl': guideLibrary.curl,
+                'bb_biceps_curl': guideLibrary.curl,
+                'mach_cable_biceps': guideLibrary.curl,
+
+                // Core & Stability
+                'db_farmers_walk': guideLibrary.plank,
+                'db_suitcase_carry': guideLibrary.plank,
+                'db_russian_twist': guideLibrary.plank,
+                'kb_windmill': guideLibrary.overhead,
+                'kb_turkish_getup': guideLibrary.overhead,
+                'kb_halo': guideLibrary.overhead,
+                'mach_cable_woodchopper': guideLibrary.plank,
+                'bw_hanging_knee_raise': guideLibrary.pullup,
+                'bw_hollow_body': guideLibrary.plank,
+                'bw_plank': guideLibrary.plank,
+                'bw_burpee': guideLibrary.pushup,
+                'bw_mountain_climber': guideLibrary.plank
+            };
+
+            const categoryFallback = {
+                'legs_quad': guideLibrary.squat,
+                'legs_hinge': guideLibrary.deadlift,
+                'push': guideLibrary.bench,
+                'pull': guideLibrary.row,
+                'core': guideLibrary.plank,
+                'conditioning': guideLibrary.pushup
+            };
+
+            const photoGuide = exerciseGuideMap[ex.id] || categoryFallback[ex.category] || guideLibrary.squat;
             const hasAnatomy = !!(photoGuide && photoGuide.anatomi);
 
             let formVisualHtml = '';

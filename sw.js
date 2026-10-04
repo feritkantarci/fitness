@@ -1,4 +1,4 @@
-const CACHE_NAME = 'celik-kodu-cache-v13';
+const CACHE_NAME = 'celik-kodu-cache-v14';
 const ASSETS = [
   './',
   './index.html',
@@ -21,6 +21,14 @@ const ASSETS = [
   './assets/guides/guide_db_swing_form.jpg',
   './assets/guides/guide_db_walking_lunge_anatomi.jpg',
   './assets/guides/guide_db_walking_lunge_form.jpg',
+  './assets/guides/guide_bw_pullup_anatomi.jpg',
+  './assets/guides/guide_bw_pullup_form.jpg',
+  './assets/guides/guide_bb_deadlift_anatomi.jpg',
+  './assets/guides/guide_bb_deadlift_form.jpg',
+  './assets/guides/guide_db_biceps_curl_anatomi.jpg',
+  './assets/guides/guide_db_biceps_curl_form.jpg',
+  './assets/guides/guide_bw_plank_anatomi.jpg',
+  './assets/guides/guide_bw_plank_form.jpg',
   './assets/diagrams/seq_db_clean_squat.svg',
   './assets/diagrams/seq_db_lunge.svg',
   './assets/diagrams/seq_db_press.svg',
