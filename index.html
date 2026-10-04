@@ -5111,40 +5111,13 @@
                                     </div>
                                 </div>
 
-                                <!-- HIZLI AĞIRLIK SEÇİMİ (SADE & KOMPAKT) -->
-                                <div class="tools-collapsible">
-                                    <div class="tools-header-toggle" onclick="toggleExtraTools('${ex.id}')">
-                                        <span style="font-size:11.5px; font-weight:800; color:var(--gold);">⚡ Hızlı Ağırlıklar</span>
-                                        <span id="toolsArrow_${ex.id}" style="font-size:11.5px; color:var(--text-secondary); font-weight:700;">
-                                            ${extraToolsOpen[ex.id] ? '▲ Kapat' : '▼ Aç'}
-                                        </span>
-                                    </div>
-                                    <div class="tools-body" id="toolsBody_${ex.id}" style="display:${extraToolsOpen[ex.id] ? 'block' : 'none'}; padding:8px 10px;">
-                                        <!-- HIZLI AĞIRLIK ÇİPLERİ -->
-                                        <div class="focus-weight-chips" style="margin:2px 0 8px;">
-                                            ${[7.5, 10, 12.5, 15, 17.5, 20, 22.5, 25, 30].map(wVal => `
-                                                <button type="button" class="weight-chip ${currentSet.weight == wVal ? 'selected' : ''}" onclick="setQuickWeight('${ex.id}', ${currentSetIdx}, ${wVal})">
-                                                    ${wVal} kg
-                                                </button>
-                                            `).join('')}
-                                        </div>
-
-                                        <!-- HASSAS KİLO STEPPERLARI -->
-                                        <div class="fine-steppers-row" style="margin-bottom:6px;">
-                                            <button type="button" class="btn-fine-step" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, -2.5)">-2.5 kg</button>
-                                            <button type="button" class="btn-fine-step" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, -1)">-1 kg</button>
-                                            <button type="button" class="btn-fine-step" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, 1)">+1 kg</button>
-                                            <button type="button" class="btn-fine-step" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, 2.5)">+2.5 kg</button>
-                                        </div>
-
-                                        <!-- HASSAS TEKRAR STEPPERLARI -->
-                                        <div class="fine-steppers-row" style="margin-bottom:2px;">
-                                            <button type="button" class="btn-fine-step" onclick="stepSetReps('${ex.id}', ${currentSetIdx}, -2)">-2 Tk</button>
-                                            <button type="button" class="btn-fine-step" onclick="stepSetReps('${ex.id}', ${currentSetIdx}, -1)">-1 Tk</button>
-                                            <button type="button" class="btn-fine-step" onclick="stepSetReps('${ex.id}', ${currentSetIdx}, 1)">+1 Tk</button>
-                                            <button type="button" class="btn-fine-step" onclick="stepSetReps('${ex.id}', ${currentSetIdx}, 2)">+2 Tk</button>
-                                        </div>
-                                    </div>
+                                <!-- HIZLI AĞIRLIK SEÇİCİ (YALIN & BAŞLIKSIZ) -->
+                                <div class="focus-weight-chips" style="margin: 8px 0 12px;">
+                                    ${[7.5, 10, 12.5, 15, 17.5, 20, 22.5, 25, 30].map(wVal => `
+                                        <button type="button" class="weight-chip ${currentSet.weight == wVal ? 'selected' : ''}" onclick="setQuickWeight('${ex.id}', ${currentSetIdx}, ${wVal})">
+                                            ${wVal} kg
+                                        </button>
+                                    `).join('')}
                                 </div>
 
                                 <!-- HERO COMPLETE SET ACTION -->
@@ -7865,8 +7838,21 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('SW scope:', reg.scope))
+                    .then(reg => {
+                        console.log('SW scope:', reg.scope);
+                        // Yeni sürümü hemen kontrol et
+                        if (reg.update) reg.update();
+                    })
                     .catch(err => console.log('SW err:', err));
+            });
+
+            // Yeni SW devraldığında sayfayı yenileyerek güncel içeriği yükle
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    window.location.reload();
+                }
             });
         }
 

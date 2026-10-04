@@ -1,4 +1,4 @@
-const CACHE_NAME = 'celik-kodu-cache-v29';
+const CACHE_NAME = 'celik-kodu-cache-v30';
 const ASSETS = [
   './',
   './assets/guides/guide_bw_air_squat_form.jpg',
@@ -133,6 +133,27 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  // Sayfa gezintileri (HTML) için Network-First stratejisi (Canlı güncellemeler anında yansısın)
+  if (event.request.mode === 'navigate' || event.request.destination === 'document' || event.request.url.includes('index.html')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(() => {
+          return caches.match(event.request).then((cached) => cached || caches.match('./index.html'));
+        })
+    );
+    return;
+  }
+
+  // Statik medya ve varlıklar için Cache-First stratejisi
   event.respondWith(
     caches.match(event.request).then((response) => {
       if (response) {
