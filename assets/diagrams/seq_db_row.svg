@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 230" width="100%" height="auto" style="background:#090d16; border-radius:12px; font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;">
+<defs>
+        <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#fbbf24"/>
+            <stop offset="100%" stop-color="#d97706"/>
+        </linearGradient>
+        <linearGradient id="cyanGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#38bdf8"/>
+            <stop offset="100%" stop-color="#0284c7"/>
+        </linearGradient>
+        <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#f8fafc"/>
+            <stop offset="100%" stop-color="#94a3b8"/>
+        </linearGradient>
+        <marker id="arrowCyan" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#38bdf8"/>
+        </marker>
+        <marker id="arrowGold" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#f59e0b"/>
+        </marker>
+        <marker id="arrowGreen" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#10b981"/>
+        </marker>
+    </defs>
+
+        <g transform="translate(12, 10)">
+            <!-- Card background -->
+            <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+            <!-- Badge -->
+            <rect x="12" y="10" width="105" height="22" rx="4" fill="#38bdf8" fill-opacity="0.15" stroke="#38bdf8" stroke-width="1"/>
+            <text x="64" y="25" fill="#38bdf8" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">1. BAŞLANGIÇ</text>
+            
+            <!-- Graphic canvas area -->
+            <g transform="translate(120, 95)">
+                
+        <line x1="-75" y1="48" x2="75" y2="48" stroke="#334155" stroke-width="2" stroke-dasharray="4,4" stroke-linecap="round"/>
+        <polyline points="-18,45 -22,24 -8,12" stroke="#64748b" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <polyline points="8,45 12,24 2,12" stroke="#64748b" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <line x1="-3" y1="12" x2="22" y2="-6" stroke="url(#bodyGrad)" stroke-width="12" stroke-linecap="round"/>
+        <circle cx="30" cy="-12" r="9" fill="#cbd5e1"/>
+        <line x1="16" y1="-2" x2="16" y2="28" stroke="#94a3b8" stroke-width="5" stroke-linecap="round"/>
+        <g transform="translate(16,30) rotate(90) scale(1.0)">
+        <rect x="-8" y="-2.5" width="16" height="5" rx="1.5" fill="#fde68a"/>
+        <rect x="-13" y="-7" width="5.5" height="14" rx="2" fill="url(#goldGrad)" stroke="#b45309" stroke-width="0.5"/>
+        <rect x="7.5" y="-7" width="5.5" height="14" rx="2" fill="url(#goldGrad)" stroke="#b45309" stroke-width="0.5"/>
+    </g>
+    
+            </g>
+            
+            <!-- Step label & caption -->
+            <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Düz Sırt & Sarkıtma</text>
+            <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Gövde 45°, dambıl omuz altında serbest</text>
+        </g>
+        
+
+            <g transform="translate(253, 105)">
+                <circle cx="8" cy="0" r="9" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+                <path d="M6,-3 L10,0 L6,3" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+            
+
+        <g transform="translate(270, 10)">
+            <!-- Card background -->
+            <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+            <!-- Badge -->
+            <rect x="12" y="10" width="105" height="22" rx="4" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="1"/>
+            <text x="64" y="25" fill="#f59e0b" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">2. ARA GEÇİŞ</text>
+            
+            <!-- Graphic canvas area -->
+            <g transform="translate(120, 95)">
+                
+        <line x1="-75" y1="48" x2="75" y2="48" stroke="#334155" stroke-width="2" stroke-dasharray="4,4" stroke-linecap="round"/>
+        <polyline points="-18,45 -22,24 -8,12" stroke="#64748b" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <polyline points="8,45 12,24 2,12" stroke="#64748b" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <line x1="-3" y1="12" x2="22" y2="-6" stroke="url(#bodyGrad)" stroke-width="12" stroke-linecap="round"/>
+        <circle cx="30" cy="-12" r="9" fill="#cbd5e1"/>
+        <polyline points="16,-2 8,10 6,18" stroke="#f59e0b" stroke-width="5" stroke-linecap="round" fill="none"/>
+        <path d="M18,26 Q12,18 8,8" stroke="#f59e0b" stroke-width="2.5" marker-end="url(#arrowGold)" fill="none"/>
+        <g transform="translate(6,18) rotate(90) scale(1.0)">
+        <rect x="-8" y="-2.5" width="16" height="5" rx="1.5" fill="#fde68a"/>
+        <rect x="-13" y="-7" width="5.5" height="14" rx="2" fill="url(#goldGrad)" stroke="#b45309" stroke-width="0.5"/>
+        <rect x="7.5" y="-7" width="5.5" height="14" rx="2" fill="url(#goldGrad)" stroke="#b45309" stroke-width="0.5"/>
+    </g>
+    
+            </g>
+            
+            <!-- Step label & caption -->
+            <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Kalça Cebine Çekiş</text>
+            <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Dirsek geriye doğru yönlendirilir</text>
+        </g>
+        
+
+            <g transform="translate(511, 105)">
+                <circle cx="8" cy="0" r="9" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+                <path d="M6,-3 L10,0 L6,3" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+            
+
+        <g transform="translate(528, 10)">
+            <!-- Card background -->
+            <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+            <!-- Badge -->
+            <rect x="12" y="10" width="105" height="22" rx="4" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="1"/>
+            <text x="64" y="25" fill="#10b981" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">3. SON BİTİRİŞ</text>
+            
+            <!-- Graphic canvas area -->
+            <g transform="translate(120, 95)">
+                
+        <line x1="-75" y1="48" x2="75" y2="48" stroke="#334155" stroke-width="2" stroke-dasharray="4,4" stroke-linecap="round"/>
+        <polyline points="-18,45 -22,24 -8,12" stroke="#64748b" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <polyline points="8,45 12,24 2,12" stroke="#64748b" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <line x1="-3" y1="12" x2="22" y2="-6" stroke="url(#bodyGrad)" stroke-width="12" stroke-linecap="round"/>
+        <circle cx="30" cy="-12" r="9" fill="#cbd5e1"/>
+        <polyline points="16,-2 2,-8 2,4" stroke="#10b981" stroke-width="5" stroke-linecap="round" fill="none"/>
+        <!-- Lat glow -->
+        <circle cx="4" cy="2" r="14" fill="none" stroke="#10b981" stroke-width="1" stroke-dasharray="2,2"/>
+        <g transform="translate(2,6) rotate(90) scale(1.0)">
+        <rect x="-8" y="-2.5" width="16" height="5" rx="1.5" fill="#fde68a"/>
+        <rect x="-13" y="-7" width="5.5" height="14" rx="2" fill="url(#goldGrad)" stroke="#b45309" stroke-width="0.5"/>
+        <rect x="7.5" y="-7" width="5.5" height="14" rx="2" fill="url(#goldGrad)" stroke="#b45309" stroke-width="0.5"/>
+    </g>
+    
+            </g>
+            
+            <!-- Step label & caption -->
+            <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Zirve Lat Sıkıştırma</text>
+            <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Dirsek kaburgaya yapışık, gövde dönmez</text>
+        </g>
+        
+</svg>

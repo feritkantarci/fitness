@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 230" width="100%" height="auto" style="background:#090d16; border-radius:12px; font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;">
+<defs>
+        <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#fbbf24"/>
+            <stop offset="100%" stop-color="#d97706"/>
+        </linearGradient>
+        <linearGradient id="cyanGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#38bdf8"/>
+            <stop offset="100%" stop-color="#0284c7"/>
+        </linearGradient>
+        <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#f8fafc"/>
+            <stop offset="100%" stop-color="#94a3b8"/>
+        </linearGradient>
+        <marker id="arrowCyan" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#38bdf8"/>
+        </marker>
+        <marker id="arrowGold" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#f59e0b"/>
+        </marker>
+        <marker id="arrowGreen" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#10b981"/>
+        </marker>
+    </defs>
+
+        <g transform="translate(12, 10)">
+            <!-- Card background -->
+            <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+            <!-- Badge -->
+            <rect x="12" y="10" width="105" height="22" rx="4" fill="#38bdf8" fill-opacity="0.15" stroke="#38bdf8" stroke-width="1"/>
+            <text x="64" y="25" fill="#38bdf8" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">1. BAŞLANGIÇ</text>
+            
+            <!-- Graphic canvas area -->
+            <g transform="translate(120, 95)">
+                
+        <line x1="-75" y1="48" x2="75" y2="48" stroke="#334155" stroke-width="2" stroke-dasharray="4,4" stroke-linecap="round"/>
+        <line x1="-8" y1="45" x2="-4" y2="10" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
+        <line x1="8" y1="45" x2="4" y2="10" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
+        <line x1="0" y1="10" x2="0" y2="-22" stroke="url(#bodyGrad)" stroke-width="12" stroke-linecap="round"/>
+        <circle cx="0" cy="-35" r="9" fill="#cbd5e1"/>
+        <line x1="8" y1="-20" x2="10" y2="-55" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/>
+        <g transform="translate(10,-56) rotate(0) scale(1.0)">
+        <rect x="-8" y="-2.5" width="16" height="5" rx="1.5" fill="#fde68a"/>
+        <rect x="-13" y="-7" width="5.5" height="14" rx="2" fill="url(#goldGrad)" stroke="#b45309" stroke-width="0.5"/>
+        <rect x="7.5" y="-7" width="5.5" height="14" rx="2" fill="url(#goldGrad)" stroke="#b45309" stroke-width="0.5"/>
+    </g>
+    
+            </g>
+            
+            <!-- Step label & caption -->
+            <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Baş Üstü Kilitlenme</text>
+            <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Tek dambıl kulak hizasında tam kilitli</text>
+        </g>
+        
+
+            <g transform="translate(253, 105)">
+                <circle cx="8" cy="0" r="9" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+                <path d="M6,-3 L10,0 L6,3" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+            
+
+        <g transform="translate(270, 10)">
+            <!-- Card background -->
+            <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+            <!-- Badge -->
+            <rect x="12" y="10" width="105" height="22" rx="4" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="1"/>
+            <text x="64" y="25" fill="#f59e0b" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">2. ARA GEÇİŞ</text>
+            
+            <!-- Graphic canvas area -->
+            <g transform="translate(120, 95)">
+                
+        <line x1="-75" y1="48" x2="75" y2="48" stroke="#334155" stroke-width="2" stroke-dasharray="4,4" stroke-linecap="round"/>
+        <polyline points="-12,45 -8,25 -2,10" stroke="#64748b" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <polyline points="14,45 8,25 2,10" stroke="#64748b" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <line x1="0" y1="10" x2="0" y2="-22" stroke="url(#bodyGrad)" stroke-width="12" stroke-linecap="round"/>
+        <circle cx="0" cy="-35" r="9" fill="#cbd5e1"/>
+        <line x1="8" y1="-20" x2="10" y2="-55" stroke="#f59e0b" stroke-width="5" stroke-linecap="round"/>
+        <path d="M-20,40 L-6,40" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrowGold)"/>
+        <g transform="translate(10,-56) rotate(0) scale(1.0)">
+        <rect x="-8" y="-2.5" width="16" height="5" rx="1.5" fill="#fde68a"/>
+        <rect x="-13" y="-7" width="5.5" height="14" rx="2" fill="url(#goldGrad)" stroke="#b45309" stroke-width="0.5"/>
+        <rect x="7.5" y="-7" width="5.5" height="14" rx="2" fill="url(#goldGrad)" stroke="#b45309" stroke-width="0.5"/>
+    </g>
+    
+            </g>
+            
+            <!-- Step label & caption -->
+            <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Dik ve Ritmik Adımlar</text>
+            <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Kaburga içeri, omuz ve dirsek kıpırdamaz</text>
+        </g>
+        
+
+            <g transform="translate(511, 105)">
+                <circle cx="8" cy="0" r="9" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+                <path d="M6,-3 L10,0 L6,3" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+            
+
+        <g transform="translate(528, 10)">
+            <!-- Card background -->
+            <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+            <!-- Badge -->
+            <rect x="12" y="10" width="105" height="22" rx="4" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="1"/>
+            <text x="64" y="25" fill="#10b981" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">3. SON BİTİRİŞ</text>
+            
+            <!-- Graphic canvas area -->
+            <g transform="translate(120, 95)">
+                
+        <line x1="-75" y1="48" x2="75" y2="48" stroke="#334155" stroke-width="2" stroke-dasharray="4,4" stroke-linecap="round"/>
+        <line x1="-8" y1="45" x2="-4" y2="10" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
+        <line x1="8" y1="45" x2="4" y2="10" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
+        <line x1="0" y1="10" x2="0" y2="-22" stroke="#10b981" stroke-width="12" stroke-linecap="round"/>
+        <circle cx="0" cy="-35" r="9" fill="#cbd5e1"/>
+        <polyline points="8,-20 14,-22 10,-24" stroke="#10b981" stroke-width="5" stroke-linecap="round" fill="none"/>
+        <g transform="translate(10,-24) rotate(0) scale(1.0)">
+        <rect x="-8" y="-2.5" width="16" height="5" rx="1.5" fill="#fde68a"/>
+        <rect x="-13" y="-7" width="5.5" height="14" rx="2" fill="url(#goldGrad)" stroke="#b45309" stroke-width="0.5"/>
+        <rect x="7.5" y="-7" width="5.5" height="14" rx="2" fill="url(#goldGrad)" stroke="#b45309" stroke-width="0.5"/>
+    </g>
+    
+            </g>
+            
+            <!-- Step label & caption -->
+            <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Kontrollü İndiriş & Diğer Kol</text>
+            <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Omuza yumuşak indir, taraf değiştir</text>
+        </g>
+        
+</svg>
