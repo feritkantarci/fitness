@@ -2660,7 +2660,9 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                 plank: {{ form: 'assets/guides/guide_bw_plank_form.jpg', anatomi: 'assets/guides/guide_bw_plank_anatomi.jpg' }},
                 farmers_walk: {{ form: 'assets/guides/guide_db_farmers_walk_form.jpg', anatomi: 'assets/guides/guide_db_farmers_walk_anatomi.jpg' }},
                 russian_twist: {{ form: 'assets/guides/guide_db_russian_twist_form.jpg', anatomi: 'assets/guides/guide_db_russian_twist_anatomi.jpg' }},
-                hanging_knee_raise: {{ form: 'assets/guides/guide_bw_hanging_knee_raise_form.jpg', anatomi: 'assets/guides/guide_bw_hanging_knee_raise_anatomi.jpg' }}
+                hanging_knee_raise: {{ form: 'assets/guides/guide_bw_hanging_knee_raise_form.jpg', anatomi: 'assets/guides/guide_bw_hanging_knee_raise_anatomi.jpg' }},
+                halo: {{ form: 'assets/guides/guide_kb_halo_form.jpg', anatomi: 'assets/guides/guide_kb_halo_anatomi.jpg' }},
+                windmill: {{ form: 'assets/guides/guide_kb_windmill_form.jpg', anatomi: 'assets/guides/guide_kb_windmill_anatomi.jpg' }}
             }};
 
             const exerciseGuideMap = {{
@@ -2720,7 +2722,7 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                 'kb_press': guideLibrary.overhead,
                 'bb_overhead_press': guideLibrary.overhead,
                 'kb_thruster': guideLibrary.overhead,
-                'kb_halo': guideLibrary.overhead,
+                'kb_halo': guideLibrary.halo,
 
                 // Lateral Shoulder
                 'db_lateral_raise': guideLibrary.lateral_raise,
@@ -2766,8 +2768,8 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                 'bw_hollow_body': guideLibrary.plank,
                 'bw_mountain_climber': guideLibrary.plank,
                 'bw_hanging_knee_raise': guideLibrary.hanging_knee_raise,
-                'kb_windmill': guideLibrary.overhead,
-                'kb_turkish_getup': guideLibrary.overhead
+                'kb_windmill': guideLibrary.windmill,
+                'kb_turkish_getup': guideLibrary.windmill
             }};
 
             const categoryFallback = {{
