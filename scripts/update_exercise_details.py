@@ -443,7 +443,7 @@ EXERCISES_DATA = [
     },
     {
         'id': 'db_snatch',
-        'name': 'Dambıl Tek Kol Snatch (Koparma)',
+        'name': 'Dambıl Snatch',
         'equipment': 'dumbbell',
         'category': 'pull',
         'muscle': 'Tüm Arka Zincir, Omuz & Patlayıcı Güç',

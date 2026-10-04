@@ -613,7 +613,7 @@ EXERCISES = [   {   'category': 'push',
         'isComplex': True,
         'mechanic': 'compound',
         'muscle': 'Tüm Arka Zincir, Omuz & Patlayıcı Güç',
-        'name': 'Dambıl Tek Kol Snatch (Koparma)',
+        'name': 'Dambıl Snatch',
         'positions': [   {   'badge': 'setup',
                              'desc': 'Ayaklar omuzdan geniş. Dambıl bacak arasında, kalça geride, sırt düz ve göğüs '
                                      'karşıya açık.',
