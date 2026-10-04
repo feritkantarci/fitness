@@ -853,6 +853,44 @@ HTML_CONTENT = f"""<!DOCTYPE html>
         .pos-guide-content.collapsed {{
             display: none;
         }}
+        .guide-toggle-tabs {{
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 4px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }}
+        .btn-guide-tab {{
+            flex: 1;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 6px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }}
+        .btn-guide-tab:hover {{
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }}
+        .btn-guide-tab.active {{
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--gold-light);
+            border-color: rgba(245, 158, 11, 0.4);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.1);
+        }}
+        .guide-tab-panel {{
+            display: none;
+        }}
+        .guide-tab-panel.active {{
+            display: block;
+        }}
         .pos-diagram-wrap {{
             margin-bottom: 10px;
             text-align: center;
@@ -2525,6 +2563,28 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             if (container.scrollIntoView) container.scrollIntoView({{ behavior: 'smooth' }});
         }}
 
+        function switchGuideTab(collapseId, tabName) {{
+            const panels = ['form', 'anatomi', 'adimlar'];
+            panels.forEach(p => {{
+                const panelEl = document.getElementById(`panel_${{p}}_${{collapseId}}`);
+                const btnEl = document.getElementById(`tab_btn_${{p}}_${{collapseId}}`);
+                if (panelEl) {{
+                    if (p === tabName) {{
+                        panelEl.classList.add('active');
+                    }} else {{
+                        panelEl.classList.remove('active');
+                    }}
+                }}
+                if (btnEl) {{
+                    if (p === tabName) {{
+                        btnEl.classList.add('active');
+                    }} else {{
+                        btnEl.classList.remove('active');
+                    }}
+                }}
+            }});
+        }}
+
         function togglePosGuide(collapseId) {{
             const el = document.getElementById(collapseId);
             const btn = document.getElementById('icon_' + collapseId);
@@ -2577,59 +2637,93 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                 `;
             }}).join('');
 
-            let diagramHtml = '';
-            const diagramFallbackMap = {{
-                'db_goblet_squat': 'seq_db_squat.svg',
-                'db_squat': 'seq_db_squat.svg',
-                'kb_goblet_squat': 'seq_db_squat.svg',
-                'bw_air_squat': 'seq_db_squat.svg',
-                'db_front_squat': 'seq_db_clean_squat.svg',
-                'kb_clean': 'seq_db_clean_squat.svg',
-                'db_bench_press': 'seq_floor_press.svg',
-                'db_floor_press': 'seq_floor_press.svg',
-                'db_overhead_press': 'seq_db_press.svg',
-                'db_arnold_press': 'seq_db_press.svg',
-                'kb_press': 'seq_db_press.svg',
-                'db_lateral_raise': 'seq_lateral_raise.svg',
-                'db_skullcrusher': 'seq_skull_crusher.svg',
-                'db_saw_row': 'seq_db_row.svg',
-                'kb_gorilla_row': 'seq_db_row.svg',
-                'db_chest_supported_row': 'seq_incline_row.svg',
-                'db_renegade_row': 'seq_renegade_row.svg',
-                'db_walking_lunge': 'seq_db_lunge.svg',
-                'db_reverse_lunge': 'seq_db_lunge.svg',
-                'db_rdl': 'seq_db_rdl.svg',
-                'db_single_leg_rdl': 'seq_db_rdl.svg',
-                'db_swing': 'seq_db_swing.svg',
-                'kb_swing': 'seq_db_swing.svg',
-                'db_snatch': 'seq_db_snatch.svg',
-                'kb_half_snatch': 'seq_db_snatch.svg',
-                'db_farmers_walk': 'seq_farmers_walk.svg',
-                'db_suitcase_carry': 'seq_farmers_walk.svg',
-                'db_russian_twist': 'seq_russian_twist.svg',
-                'kb_windmill': 'seq_windmill.svg',
-                'kb_turkish_getup': 'seq_windmill.svg',
-                'kb_thruster': 'seq_thruster.svg',
-                'bw_pushup': 'seq_pushup.svg',
-                'bw_diamond_pushup': 'seq_diamond_pushup.svg',
-                'bw_hanging_knee_raise': 'seq_leg_raise.svg',
-                'bw_burpee': 'seq_escalera.svg',
-                'bw_plank': 'seq_plank_pull_through.svg'
+            const guidePhotos = {{
+                'db_goblet_squat': {{ form: 'assets/guides/guide_db_goblet_squat_form.jpg', anatomi: 'assets/guides/guide_db_goblet_squat_anatomi.jpg' }},
+                'db_front_squat': {{ form: 'assets/guides/guide_db_goblet_squat_form.jpg', anatomi: 'assets/guides/guide_db_goblet_squat_anatomi.jpg' }},
+                'kb_goblet_squat': {{ form: 'assets/guides/guide_db_goblet_squat_form.jpg', anatomi: 'assets/guides/guide_db_goblet_squat_anatomi.jpg' }},
+                'bw_air_squat': {{ form: 'assets/guides/guide_db_goblet_squat_form.jpg', anatomi: 'assets/guides/guide_db_goblet_squat_anatomi.jpg' }},
+                'db_bench_press': {{ form: 'assets/guides/guide_db_bench_press_form.jpg', anatomi: 'assets/guides/guide_db_bench_press_anatomi.jpg' }},
+                'db_floor_press': {{ form: 'assets/guides/guide_db_bench_press_form.jpg', anatomi: 'assets/guides/guide_db_bench_press_anatomi.jpg' }},
+                'db_incline_press': {{ form: 'assets/guides/guide_db_bench_press_form.jpg', anatomi: 'assets/guides/guide_db_bench_press_anatomi.jpg' }},
+                'db_overhead_press': {{ form: 'assets/guides/guide_db_overhead_press_form.jpg', anatomi: 'assets/guides/guide_db_overhead_press_anatomi.jpg' }},
+                'db_arnold_press': {{ form: 'assets/guides/guide_db_overhead_press_form.jpg', anatomi: 'assets/guides/guide_db_overhead_press_anatomi.jpg' }},
+                'kb_press': {{ form: 'assets/guides/guide_db_overhead_press_form.jpg', anatomi: 'assets/guides/guide_db_overhead_press_anatomi.jpg' }},
+                'db_saw_row': {{ form: 'assets/guides/guide_db_saw_row_form.jpg', anatomi: 'assets/guides/guide_db_saw_row_anatomi.jpg' }},
+                'db_chest_supported_row': {{ form: 'assets/guides/guide_db_saw_row_form.jpg', anatomi: 'assets/guides/guide_db_saw_row_anatomi.jpg' }},
+                'kb_gorilla_row': {{ form: 'assets/guides/guide_db_saw_row_form.jpg', anatomi: 'assets/guides/guide_db_saw_row_anatomi.jpg' }},
+                'db_rdl': {{ form: 'assets/guides/guide_db_rdl_form.jpg', anatomi: 'assets/guides/guide_db_rdl_anatomi.jpg' }},
+                'db_single_leg_rdl': {{ form: 'assets/guides/guide_db_rdl_form.jpg', anatomi: 'assets/guides/guide_db_rdl_anatomi.jpg' }},
+                'db_walking_lunge': {{ form: 'assets/guides/guide_db_walking_lunge_form.jpg', anatomi: 'assets/guides/guide_db_walking_lunge_anatomi.jpg' }},
+                'db_reverse_lunge': {{ form: 'assets/guides/guide_db_walking_lunge_form.jpg', anatomi: 'assets/guides/guide_db_walking_lunge_anatomi.jpg' }},
+                'db_snatch': {{ form: 'assets/guides/guide_db_snatch_form.jpg', anatomi: 'assets/guides/guide_db_snatch_anatomi.jpg' }},
+                'kb_half_snatch': {{ form: 'assets/guides/guide_db_snatch_form.jpg', anatomi: 'assets/guides/guide_db_snatch_anatomi.jpg' }},
+                'db_swing': {{ form: 'assets/guides/guide_db_swing_form.jpg', anatomi: 'assets/guides/guide_db_swing_anatomi.jpg' }},
+                'kb_swing': {{ form: 'assets/guides/guide_db_swing_form.jpg', anatomi: 'assets/guides/guide_db_swing_anatomi.jpg' }},
+                'bw_pushup': {{ form: 'assets/guides/guide_bw_pushup_form.jpg', anatomi: 'assets/guides/guide_bw_pushup_anatomi.jpg' }},
+                'bw_diamond_pushup': {{ form: 'assets/guides/guide_bw_pushup_form.jpg', anatomi: 'assets/guides/guide_bw_pushup_anatomi.jpg' }}
             }};
 
-            const targetFname = (ex.diagram ? ex.diagram.split('/').pop() : '') || diagramFallbackMap[ex.id] || '';
-            const inlineSvg = (typeof DIAGRAMS_SVG_DB !== 'undefined' && DIAGRAMS_SVG_DB[targetFname]) ? DIAGRAMS_SVG_DB[targetFname] : '';
+            const photoGuide = guidePhotos[ex.id];
+            const hasAnatomy = !!(photoGuide && photoGuide.anatomi);
 
-            if (inlineSvg) {{
-                diagramHtml = `
+            let formVisualHtml = '';
+            if (photoGuide && photoGuide.form) {{
+                formVisualHtml = `
                     <div class="pos-diagram-wrap">
-                        ${{inlineSvg}}
+                        <img src="${{photoGuide.form}}" alt="${{escapeHTML(ex.name)}} Form Rehberi" class="pos-diagram-img" loading="lazy">
                     </div>
                 `;
-            }} else if (ex.diagram) {{
-                diagramHtml = `
+            }} else {{
+                const diagramFallbackMap = {{
+                    'db_goblet_squat': 'seq_db_squat.svg',
+                    'db_front_squat': 'seq_db_clean_squat.svg',
+                    'kb_clean': 'seq_db_clean_squat.svg',
+                    'db_bench_press': 'seq_floor_press.svg',
+                    'db_floor_press': 'seq_floor_press.svg',
+                    'db_overhead_press': 'seq_db_press.svg',
+                    'db_saw_row': 'seq_db_row.svg',
+                    'db_rdl': 'seq_db_rdl.svg',
+                    'db_walking_lunge': 'seq_db_lunge.svg',
+                    'db_snatch': 'seq_db_snatch.svg',
+                    'db_swing': 'seq_db_swing.svg',
+                    'bw_pushup': 'seq_pushup.svg',
+                    'db_renegade_row': 'seq_renegade_row.svg',
+                    'db_farmers_walk': 'seq_farmers_walk.svg',
+                    'db_russian_twist': 'seq_russian_twist.svg',
+                    'kb_windmill': 'seq_windmill.svg',
+                    'kb_turkish_getup': 'seq_windmill.svg',
+                    'kb_thruster': 'seq_thruster.svg',
+                    'bw_burpee': 'seq_escalera.svg',
+                    'bw_plank': 'seq_plank_pull_through.svg'
+                }};
+                const targetFname = (ex.diagram ? ex.diagram.split('/').pop() : '') || diagramFallbackMap[ex.id] || '';
+                const inlineSvg = (typeof DIAGRAMS_SVG_DB !== 'undefined' && DIAGRAMS_SVG_DB[targetFname]) ? DIAGRAMS_SVG_DB[targetFname] : '';
+                if (inlineSvg) {{
+                    formVisualHtml = `
+                        <div class="pos-diagram-wrap">
+                            ${{inlineSvg}}
+                        </div>
+                    `;
+                }} else if (ex.diagram) {{
+                    formVisualHtml = `
+                        <div class="pos-diagram-wrap">
+                            <img src="${{ex.diagram}}" alt="${{escapeHTML(ex.name)}} Form Şeması" class="pos-diagram-img" loading="lazy">
+                        </div>
+                    `;
+                }}
+            }}
+
+            let anatomiVisualHtml = '';
+            if (hasAnatomy) {{
+                anatomiVisualHtml = `
                     <div class="pos-diagram-wrap">
-                        <img src="${{ex.diagram}}" alt="${{escapeHTML(ex.name)}} Form Şeması" class="pos-diagram-img" loading="lazy">
+                        <img src="${{photoGuide.anatomi}}" alt="${{escapeHTML(ex.name)}} Hedef Kaslar" class="pos-diagram-img" loading="lazy">
+                    </div>
+                `;
+            }} else {{
+                anatomiVisualHtml = `
+                    <div style="background:rgba(0,0,0,0.3); border-radius:8px; padding:16px; text-align:center; color:var(--text-secondary); font-size:12px;">
+                        🎯 <strong>Hedeflenen Kas Grubu:</strong> <span style="color:var(--gold); font-weight:800;">${{escapeHTML(ex.muscle || '')}}</span>
                     </div>
                 `;
             }}
@@ -2642,16 +2736,41 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                     <div class="pos-guide-header" onclick="event.stopPropagation(); togglePosGuide('${{collapseId}}')">
                         <div style="display:flex; align-items:center; gap:8px;">
                             <span class="pos-type-badge ${{badgeType}}">${{typeLabel}}</span>
-                            <span class="pos-guide-hint">Başlangıç • Ara Pozisyon • Bitiriş</span>
+                            <span class="pos-guide-hint">📸 Form • 🧬 Anatomi • 📝 Talimatlar</span>
                         </div>
                         <button type="button" class="btn-toggle-guide" id="btn_${{collapseId}}" onclick="event.stopPropagation(); togglePosGuide('${{collapseId}}')">
                             <span id="icon_${{collapseId}}">${{btnText}}</span>
                         </button>
                     </div>
                     <div class="${{contentClass}}" id="${{collapseId}}">
-                        ${{diagramHtml}}
-                        <div class="pos-steps-grid cols-${{ex.positions.length}}">
-                            ${{stepsHtml}}
+                        <!-- TABS SWITCHER -->
+                        <div class="guide-toggle-tabs">
+                            <button type="button" class="btn-guide-tab active" id="tab_btn_form_${{collapseId}}" onclick="event.stopPropagation(); switchGuideTab('${{collapseId}}', 'form')">
+                                📸 Form Rehberi
+                            </button>
+                            <button type="button" class="btn-guide-tab" id="tab_btn_anatomi_${{collapseId}}" onclick="event.stopPropagation(); switchGuideTab('${{collapseId}}', 'anatomi')">
+                                🧬 Çalışan Kaslar
+                            </button>
+                            <button type="button" class="btn-guide-tab" id="tab_btn_adimlar_${{collapseId}}" onclick="event.stopPropagation(); switchGuideTab('${{collapseId}}', 'adimlar')">
+                                📝 Adım Adım
+                            </button>
+                        </div>
+
+                        <!-- PANEL 1: FORM PHOTO / VECTOR -->
+                        <div class="guide-tab-panel active" id="panel_form_${{collapseId}}">
+                            ${{formVisualHtml}}
+                        </div>
+
+                        <!-- PANEL 2: ANATOMY PHOTO -->
+                        <div class="guide-tab-panel" id="panel_anatomi_${{collapseId}}">
+                            ${{anatomiVisualHtml}}
+                        </div>
+
+                        <!-- PANEL 3: STEP-BY-STEP CARDS -->
+                        <div class="guide-tab-panel" id="panel_adimlar_${{collapseId}}">
+                            <div class="pos-steps-grid cols-${{ex.positions.length}}">
+                                ${{stepsHtml}}
+                            </div>
                         </div>
                     </div>
                 </div>
