@@ -1615,7 +1615,7 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                     <span>⚡ Otomatik</span>
                 </button>
                 <button class="tab-btn" onclick="switchTab('studioTab')" id="tabBtnStudio">
-                    <span>🎯 Mimar & Kas Radarı</span>
+                    <span>🎯 Atölye</span>
                 </button>
                 <button class="tab-btn" onclick="switchTab('activeWorkoutTab')" id="tabBtnActiveWorkout">
                     <span>🏋️ Antrenman</span>
@@ -1749,119 +1749,103 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                 </div>
             </div>
 
-            <!-- ==================== TAB: WORKOUT ARCHITECT & MUSCLE RADAR ==================== -->
+            <!-- ==================== TAB: WORKOUT STUDIO & REGION ARCHITECT ==================== -->
             <div id="studioTab" class="tab-content">
-                <div class="generator-card" style="border-color: rgba(245, 158, 11, 0.4); background: radial-gradient(circle at top right, rgba(245, 158, 11, 0.08), rgba(15, 23, 42, 0.95));">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+                <div class="generator-card" style="border-color: rgba(245, 158, 11, 0.35);">
+                    
+                    <!-- TOP BAR: Title & Actions -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; border-bottom:1px solid var(--border); padding-bottom:12px;">
                         <div>
-                            <div class="badge-brand" style="background:rgba(245, 158, 11, 0.2); color:var(--gold); border:1px solid var(--gold); margin-bottom:6px;">🎯 HAREKET KÜTÜPHANESİ & ÖZEL PROGRAM MİMARI</div>
-                            <h2 style="font-size:20px; font-weight:900; color:#fff;">Tüm 77 Hareket & Canlı Kas Radarı</h2>
-                            <p style="font-size:12px; color:var(--text-secondary); margin-top:4px;">
-                                Tüm egzersizleri ve form görsellerini tek ekrandan inceleyin, kendi özel antrenmanınızı kurgulayın ve kas dengesini canlı takip edin.
-                            </p>
+                            <h2 style="font-size:18px; font-weight:900; color:#fff;">Program Atölyesi</h2>
+                            <p style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Bölge seçin, hareketleri ekleyin, dengeyi görün.</p>
                         </div>
-                        <div style="display:flex; gap:8px;">
-                            <button class="btn btn-outline" style="font-size:12px; padding:8px 12px;" onclick="resetCustomRoutine()">🗑️ Sıfırla</button>
-                            <button class="btn btn-gold" style="font-size:12px; padding:8px 14px; font-weight:800;" onclick="startActiveWorkoutFromCustom()">🏋️ Salonda Başlat</button>
+                        <div style="display:flex; gap:6px;">
+                            <button class="btn btn-outline" style="font-size:11px; padding:6px 10px;" onclick="resetCustomRoutine()">🗑️ Sıfırla</button>
+                            <button class="btn btn-gold" style="font-size:11px; padding:6px 12px; font-weight:800;" onclick="startActiveWorkoutFromCustom()">🏋️ Başlat</button>
                         </div>
                     </div>
 
-                    <!-- RADAR & MODE CONTROLS -->
-                    <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px; margin-bottom:16px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
-                            <div style="font-size:13px; font-weight:800; color:#fff; display:flex; align-items:center; gap:6px;">
-                                <span>🧬 CANLI KAS KAPSAMA RADARI & ANATOMİK DENGE</span>
-                            </div>
-                            <div style="display:flex; gap:6px; background:rgba(0,0,0,0.4); padding:3px; border-radius:8px;">
-                                <button class="studio-mode-btn active" id="btnModeFullBody" onclick="setStudioMode('full_body')">🔘 Tüm Vücut</button>
-                                <button class="studio-mode-btn" id="btnModeSplit" onclick="setStudioMode('split')">⚪ Bölgesel (Split)</button>
+                    <!-- SECTION 1: HEDEF BÖLGELER (Region Selectors) -->
+                    <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:12px; margin-bottom:14px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <span style="font-size:12.5px; font-weight:800; color:#fff;">Hedef Bölgeler</span>
+                            <div style="display:flex; gap:6px;">
+                                <button class="btn btn-outline" style="font-size:10px; padding:3px 8px;" onclick="selectPresetRegions('all')">Tüm Vücut</button>
+                                <button class="btn btn-outline" style="font-size:10px; padding:3px 8px;" onclick="selectPresetRegions('clear')">Temizle</button>
                             </div>
                         </div>
 
-                        <!-- SPLIT SUB-SELECTORS (Shown when split mode is active) -->
-                        <div id="studioSplitSubtypes" style="display:none; margin-bottom:12px; padding:10px; background:rgba(0,0,0,0.3); border-radius:8px; border:1px dashed var(--border);">
-                            <div style="font-size:11px; color:var(--text-secondary); margin-bottom:6px; font-weight:700;">HEDEF BÖLGESEL SPLİTİ SEÇ:</div>
-                            <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                                <button class="btn-quick-equip active" id="subSplit_push" onclick="setStudioSplitSubtype('push')">İtiş (Göğüs-Omuz-Triceps)</button>
-                                <button class="btn-quick-equip" id="subSplit_pull" onclick="setStudioSplitSubtype('pull')">Çekiş (Sırt-Biceps-Arka Omuz)</button>
-                                <button class="btn-quick-equip" id="subSplit_legs" onclick="setStudioSplitSubtype('legs')">Bacak & Kalça (Alt Vücut)</button>
-                                <button class="btn-quick-equip" id="subSplit_upper" onclick="setStudioSplitSubtype('upper')">Tüm Üst Vücut</button>
-                                <button class="btn-quick-equip" id="subSplit_arms" onclick="setStudioSplitSubtype('arms')">Kol & Omuz</button>
-                                <button class="btn-quick-equip" id="subSplit_core" onclick="setStudioSplitSubtype('core')">Karın & Core Zırhı</button>
-                            </div>
-                        </div>
-
-                        <!-- LIVE MUSCLE TILES GRID -->
-                        <div id="studioMuscleGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(135px, 1fr)); gap:8px; margin-bottom:12px;">
-                            <!-- Populated dynamically -->
-                        </div>
-
-                        <!-- AI COACH STATUS BANNER -->
-                        <div id="studioCoachBanner" style="padding:10px 14px; border-radius:8px; font-size:12px; font-weight:600; line-height:1.5;">
+                        <!-- Multi-select Region Chips -->
+                        <div id="studioRegionChips" style="display:flex; flex-wrap:wrap; gap:6px;">
                             <!-- Populated dynamically -->
                         </div>
                     </div>
 
-                    <!-- CUSTOM WORKOUT BUILDER DRAFT -->
-                    <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px; margin-bottom:16px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <span style="font-size:14px; font-weight:800; color:var(--gold);">🛠️ OLUŞTURULAN ÖZEL PROGRAM</span>
-                                <span id="customRoutineCountBadge" class="auth-role-tag role-admin" style="font-size:11px;">0 Hareket</span>
+                    <!-- SECTION 2: BÖLGE DURUMU (Visual Progress: Seçildi / Kaldı) -->
+                    <div id="studioRegionStatusBox" style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:12px; margin-bottom:14px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <span style="font-size:12.5px; font-weight:800; color:#fff;">Bölge Durumu</span>
+                            <span id="studioRegionSummaryBadge" style="font-size:11px; font-weight:700;"></span>
+                        </div>
+                        <div id="studioRegionStatusGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:6px;">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- SECTION 3: PROGRAM TASLAĞI -->
+                    <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:12px; margin-bottom:14px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <span style="font-size:12.5px; font-weight:800; color:var(--gold);">Program Taslağı</span>
+                                <span id="customRoutineCountBadge" class="auth-role-tag role-admin" style="font-size:10px;">0 Hareket</span>
                             </div>
-                            <div style="display:flex; gap:8px;">
-                                <button class="btn btn-outline" style="font-size:11px; padding:6px 10px;" onclick="saveCustomRoutineToLibrary()">💾 Programlarıma Kaydet</button>
-                            </div>
+                            <button class="btn btn-outline" style="font-size:10.5px; padding:4px 8px;" onclick="saveCustomRoutineToLibrary()">💾 Kaydet</button>
                         </div>
 
-                        <div style="display:grid; grid-template-columns: 1fr auto; gap:10px; margin-bottom:12px;">
-                            <input type="text" id="customWorkoutTitleInput" class="form-input" style="font-weight:700;" placeholder="Program Adı (Örn: Pazartesi İtiş Zırhı)" value="Özel Çelik Programım">
-                            <select id="customWorkoutRestSelect" class="form-input" style="width:130px;" onchange="updateCustomRoutineRest(this.value)">
-                                <option value="45">Dinlenme: 45 sn</option>
-                                <option value="60" selected>Dinlenme: 60 sn</option>
-                                <option value="90">Dinlenme: 90 sn</option>
-                                <option value="120">Dinlenme: 120 sn</option>
+                        <div style="display:grid; grid-template-columns: 1fr auto; gap:8px; margin-bottom:10px;">
+                            <input type="text" id="customWorkoutTitleInput" class="form-input" style="font-weight:700; padding:8px 10px; font-size:12.5px;" placeholder="Program Adı (Örn: İtiş Zırhı)" value="Özel Çelik Programım">
+                            <select id="customWorkoutRestSelect" class="form-input" style="width:115px; padding:8px; font-size:12px;" onchange="updateCustomRoutineRest(this.value)">
+                                <option value="45">Dinlenme: 45s</option>
+                                <option value="60" selected>Dinlenme: 60s</option>
+                                <option value="90">Dinlenme: 90s</option>
+                                <option value="120">Dinlenme: 120s</option>
                             </select>
                         </div>
 
-                        <div id="customWorkoutExercisesList" style="display:flex; flex-direction:column; gap:8px;">
+                        <div id="customWorkoutExercisesList" style="display:flex; flex-direction:column; gap:6px;">
                             <!-- Populated dynamically -->
                         </div>
                     </div>
 
-                    <!-- ALL 77 EXERCISES EXPLORER & AUDIT CATALOG -->
+                    <!-- SECTION 4: UYGUN HAREKETLER -->
                     <div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
-                            <div style="font-size:14px; font-weight:800; color:#fff;">
-                                📚 TÜM HAREKETLER KATALOĞU <span id="studioExTotalCount" style="color:var(--text-secondary); font-size:12px; font-weight:normal;">(77 Hareket)</span>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <div style="font-size:12.5px; font-weight:800; color:#fff;">
+                                Uygun Hareketler <span id="studioExTotalCount" style="color:var(--text-secondary); font-size:11px; font-weight:normal;"></span>
                             </div>
+                            <label style="font-size:11px; color:var(--cyan); cursor:pointer; display:flex; align-items:center; gap:4px;">
+                                <input type="checkbox" id="chkShowAllExercises" onchange="renderStudioExerciseCatalog()"> Tümünü Göster
+                            </label>
                         </div>
 
-                        <!-- SEARCH & FILTERS -->
-                        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
-                            <input type="text" id="studioSearchInput" class="form-input" style="flex:1; min-width:200px;" placeholder="🔍 Hareket, kas veya ekipman ara (Örn: Bench, Squat, Halo, Omuz)..." oninput="renderStudioExerciseCatalog()">
-                            <select id="studioEquipFilter" class="form-input" style="width:auto; min-width:140px;" onchange="renderStudioExerciseCatalog()">
+                        <!-- Compact Search & Equipment Filter -->
+                        <div style="display:flex; gap:6px; margin-bottom:10px;">
+                            <input type="text" id="studioSearchInput" class="form-input" style="flex:1; padding:8px 10px; font-size:12px;" placeholder="🔍 Hareket ara..." oninput="renderStudioExerciseCatalog()">
+                            <select id="studioEquipFilter" class="form-input" style="width:auto; padding:8px; font-size:12px;" onchange="renderStudioExerciseCatalog()">
                                 <option value="all">Tüm Ekipmanlar</option>
-                                <option value="dumbbell">Dambıl (Dumbbell)</option>
+                                <option value="dumbbell">Dambıl</option>
                                 <option value="kettlebell">Kettlebell</option>
                                 <option value="bodyweight">Vücut Ağırlığı</option>
-                                <option value="barbell">Halter (Barbell)</option>
-                                <option value="machine">Salon Makineleri</option>
-                            </select>
-                            <select id="studioCategoryFilter" class="form-input" style="width:auto; min-width:140px;" onchange="renderStudioExerciseCatalog()">
-                                <option value="all">Tüm Bölgeler</option>
-                                <option value="push">İtiş / Göğüs / Omuz</option>
-                                <option value="pull">Çekiş / Sırt / Biceps</option>
-                                <option value="legs_quad">Ön Bacak (Quad)</option>
-                                <option value="legs_hinge">Arka Bacak / Kalça</option>
-                                <option value="core">Karın & Core</option>
+                                <option value="barbell">Halter</option>
+                                <option value="machine">Makine</option>
                             </select>
                         </div>
 
-                        <div id="studioExercisesCatalog" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:10px; max-height:650px; overflow-y:auto; padding-right:4px;">
+                        <div id="studioExercisesCatalog" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:8px; max-height:600px; overflow-y:auto; padding-right:4px;">
                             <!-- Populated dynamically -->
                         </div>
                     </div>
+
                 </div>
             </div>
 
@@ -6048,193 +6032,144 @@ HTML_CONTENT = f"""<!DOCTYPE html>
 
         // ==================== WORKOUT STUDIO & MUSCLE RADAR ENGINE ====================
 
+        const STUDIO_REGION_MAP = {{
+            chest: {{ name: "Göğüs", icon: "🛡️" }},
+            back: {{ name: "Sırt", icon: "🏹" }},
+            shoulders: {{ name: "Omuz", icon: "⚔️" }},
+            biceps: {{ name: "Biceps", icon: "💪" }},
+            triceps: {{ name: "Triceps", icon: "⚡" }},
+            quads: {{ name: "Ön Bacak", icon: "🦵" }},
+            hamstrings: {{ name: "Arka Bacak", icon: "🦿" }},
+            glutes: {{ name: "Kalça", icon: "🍑" }},
+            core: {{ name: "Karın", icon: "🧱" }},
+            calves: {{ name: "Kalf", icon: "🦶" }}
+        }};
+
+        let selectedTargetMuscles = ['chest', 'triceps']; // Default sample split
+
         function initStudioTab() {{
-            renderMuscleRadar();
+            renderStudioRegionChips();
+            renderRegionStatus();
             renderCustomRoutine();
             renderStudioExerciseCatalog();
         }}
 
-        function setStudioMode(mode) {{
-            studioState.mode = mode;
-            document.getElementById('btnModeFullBody').classList.toggle('active', mode === 'full_body');
-            document.getElementById('btnModeSplit').classList.toggle('active', mode === 'split');
-            
-            const splitSubtypesEl = document.getElementById('studioSplitSubtypes');
-            if (splitSubtypesEl) {{
-                splitSubtypesEl.style.display = (mode === 'split') ? 'block' : 'none';
+        function renderStudioRegionChips() {{
+            const container = document.getElementById('studioRegionChips');
+            if (!container) return;
+
+            let html = '';
+            Object.keys(STUDIO_REGION_MAP).forEach(key => {{
+                const reg = STUDIO_REGION_MAP[key];
+                const isSelected = selectedTargetMuscles.includes(key);
+
+                html += `
+                    <button class="btn ${{isSelected ? 'btn-gold' : 'btn-outline'}}" 
+                            style="font-size:11px; padding:5px 10px; border-radius:6px; font-weight:700;" 
+                            onclick="toggleTargetMuscle('${{key}}')">
+                        ${{reg.icon}} ${{reg.name}}
+                    </button>
+                `;
+            }});
+
+            container.innerHTML = html;
+        }}
+
+        function toggleTargetMuscle(key) {{
+            const idx = selectedTargetMuscles.indexOf(key);
+            if (idx > -1) {{
+                selectedTargetMuscles.splice(idx, 1);
+            }} else {{
+                selectedTargetMuscles.push(key);
             }}
-            renderMuscleRadar();
+            renderStudioRegionChips();
+            renderRegionStatus();
+            renderStudioExerciseCatalog();
         }}
 
-        function setStudioSplitSubtype(subtype) {{
-            studioState.splitSubtype = subtype;
-            ['push', 'pull', 'legs', 'upper', 'arms', 'core'].forEach(s => {{
-                const el = document.getElementById('subSplit_' + s);
-                if (el) el.classList.toggle('active', s === subtype);
-            }});
-            renderMuscleRadar();
+        function selectPresetRegions(preset) {{
+            if (preset === 'all') {{
+                selectedTargetMuscles = Object.keys(STUDIO_REGION_MAP);
+            }} else if (preset === 'clear') {{
+                selectedTargetMuscles = [];
+            }}
+            renderStudioRegionChips();
+            renderRegionStatus();
+            renderStudioExerciseCatalog();
         }}
 
-        function getExerciseMuscles(ex) {{
-            if (!ex) return [];
-            const text = (
-                (ex.muscle || '') + ' ' + 
-                (ex.name || '') + ' ' + 
-                (ex.category || '') + ' ' + 
-                ((ex.tags || []).join(' '))
-            ).toLowerCase();
+        function renderRegionStatus() {{
+            const grid = document.getElementById('studioRegionStatusGrid');
+            const summaryBadge = document.getElementById('studioRegionSummaryBadge');
+            if (!grid) return;
 
-            const groups = [];
-            if (/göğüs|chest|bench|pushup|şınav|dips|pec deck|crossover/i.test(text)) groups.push('chest');
-            if (/sırt|kanat|back|row|pullup|barfiks|pulldown|kürek|pullover|chinup/i.test(text)) groups.push('back');
-            if (/omuz|shoulder|press|deltoid|halo|lateral|face pull|arnold|upright/i.test(text)) groups.push('shoulders');
-            if (/biceps|pazı|curl|chinup/i.test(text)) groups.push('biceps');
-            if (/triceps|arka kol|pushdown|skullcrusher|dips|diamond/i.test(text)) groups.push('triceps');
-            if (/ön bacak|quad|squat|lunge|leg press|leg extension|step/i.test(text)) groups.push('quads');
-            if (/arka bacak|hamstring|rdl|deadlift|leg curl|good morning/i.test(text)) groups.push('hamstrings');
-            if (/kalça|glute|thrust|bridge|swing|snatch/i.test(text)) groups.push('glutes');
-            if (/karın|core|plank|twist|knee raise|leg raise|woodchopper|hollow|climber/i.test(text)) groups.push('core');
-            if (/kalf|baldır|calf|ön kol|kavrama|farmers|suitcase|grip/i.test(text)) groups.push('calves_grip');
+            if (selectedTargetMuscles.length === 0) {{
+                grid.innerHTML = `<div style="grid-column:1/-1; font-size:11px; color:var(--text-secondary); text-align:center; padding:10px;">Henüz bölge seçilmedi. Yukarıdan çalışmak istediğiniz bölgelere tıklayın.</div>`;
+                if (summaryBadge) summaryBadge.innerHTML = '';
+                return;
+            }}
 
-            return groups.length > 0 ? groups : ['core'];
-        }}
-
-        function renderMuscleRadar() {{
-            const grid = document.getElementById('studioMuscleGrid');
-            const banner = document.getElementById('studioCoachBanner');
-            if (!grid || !banner) return;
-
-            // Tally exercises and sets for each muscle group
-            const muscleStats = {{}};
-            Object.keys(MUSCLE_DEFS).forEach(k => {{
-                muscleStats[k] = {{ count: 0, sets: 0 }};
+            // Tally exercises and sets for selected target muscles
+            const regionStats = {{}};
+            selectedTargetMuscles.forEach(m => {{
+                regionStats[m] = {{ count: 0, sets: 0 }};
             }});
 
-            let totalSets = 0;
             customRoutineState.exercises.forEach(item => {{
                 const ex = EXERCISES_DB.find(e => e.id === item.exId);
                 if (ex) {{
-                    const muscles = getExerciseMuscles(ex);
+                    const pList = ex.primaryMuscles || [];
+                    const sList = ex.secondaryMuscles || [];
                     const sets = parseInt(item.sets) || 3;
-                    totalSets += sets;
-                    muscles.forEach(m => {{
-                        if (muscleStats[m]) {{
-                            muscleStats[m].count += 1;
-                            muscleStats[m].sets += sets;
+                    
+                    selectedTargetMuscles.forEach(m => {{
+                        if (pList.includes(m) || sList.includes(m)) {{
+                            regionStats[m].count += 1;
+                            regionStats[m].sets += sets;
                         }}
                     }});
                 }}
             }});
 
-            // Expected muscles depending on mode
-            let targetMuscles = [];
-            if (studioState.mode === 'full_body') {{
-                targetMuscles = ['chest', 'back', 'shoulders', 'biceps', 'triceps', 'quads', 'hamstrings', 'glutes', 'core', 'calves_grip'];
-            }} else {{
-                switch(studioState.splitSubtype) {{
-                    case 'push':
-                        targetMuscles = ['chest', 'shoulders', 'triceps'];
-                        break;
-                    case 'pull':
-                        targetMuscles = ['back', 'biceps', 'shoulders'];
-                        break;
-                    case 'legs':
-                        targetMuscles = ['quads', 'hamstrings', 'glutes', 'calves_grip'];
-                        break;
-                    case 'upper':
-                        targetMuscles = ['chest', 'back', 'shoulders', 'biceps', 'triceps'];
-                        break;
-                    case 'arms':
-                        targetMuscles = ['biceps', 'triceps', 'shoulders'];
-                        break;
-                    case 'core':
-                        targetMuscles = ['core'];
-                        break;
-                    default:
-                        targetMuscles = ['chest', 'shoulders', 'triceps'];
-                }}
-            }}
+            let readyCount = 0;
+            let missingList = [];
+            let html = '';
 
-            // Render muscle tiles
-            let tilesHtml = '';
-            Object.keys(MUSCLE_DEFS).forEach(key => {{
-                const def = MUSCLE_DEFS[key];
-                const stat = muscleStats[key];
-                const isTargeted = targetMuscles.includes(key);
-                const isCovered = stat.count > 0;
+            selectedTargetMuscles.forEach(key => {{
+                const reg = STUDIO_REGION_MAP[key] || {{ name: key, icon: '🎯' }};
+                const stat = regionStats[key];
+                const isReady = stat.count > 0;
 
-                let tileClass = 'muscle-tile';
-                let statusBadge = '';
-
-                if (isCovered) {{
-                    tileClass += ' covered';
-                    statusBadge = `<span style="color:#10b981; font-weight:800; font-size:10.5px;">✅ ${{stat.count}} Egzersiz (${{stat.sets}} Set)</span>`;
-                }} else if (isTargeted) {{
-                    tileClass += ' warning';
-                    statusBadge = `<span style="color:#ef4444; font-weight:800; font-size:10.5px;">⚠️ Eksik (0 Set)</span>`;
+                if (isReady) {{
+                    readyCount++;
+                    html += `
+                        <div style="background:rgba(16, 185, 129, 0.1); border:1px solid #10b981; border-radius:6px; padding:6px 8px; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div style="font-size:11px; font-weight:800; color:#fff;">${{reg.icon}} ${{reg.name}}</div>
+                                <div style="font-size:9.5px; color:#10b981; font-weight:700;">✅ Seçildi (${{stat.count}} Hrk • ${{stat.sets}} Set)</div>
+                            </div>
+                        </div>
+                    `;
                 }} else {{
-                    tileClass += ' missing';
-                    statusBadge = `<span style="color:var(--text-secondary); font-size:10px;">⚪ Hedef Dışı</span>`;
+                    missingList.push(reg.name);
+                    html += `
+                        <div style="background:rgba(245, 158, 11, 0.1); border:1px solid var(--gold); border-radius:6px; padding:6px 8px; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div style="font-size:11px; font-weight:800; color:#fff;">${{reg.icon}} ${{reg.name}}</div>
+                                <div style="font-size:9.5px; color:var(--gold); font-weight:700;">⏳ Kaldı (0 Hareket)</div>
+                            </div>
+                        </div>
+                    `;
                 }}
-
-                tilesHtml += `
-                    <div class="${{tileClass}}">
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                            <span style="font-size:18px;">${{def.icon}}</span>
-                            <span style="font-size:9px; color:var(--text-secondary); font-weight:700;">${{isTargeted ? 'HEDEF' : 'OPSİYONEL'}}</span>
-                        </div>
-                        <div style="margin: 6px 0 2px;">
-                            <div style="font-size:12px; font-weight:800; color:#fff;">${{def.name}}</div>
-                            <div style="font-size:9.5px; color:var(--text-secondary);">${{def.desc}}</div>
-                        </div>
-                        <div style="margin-top:4px;">${{statusBadge}}</div>
-                    </div>
-                `;
             }});
-            grid.innerHTML = tilesHtml;
 
-            // Generate AI Coach Feedback Banner
-            const missingTargets = targetMuscles.filter(m => muscleStats[m].count === 0);
-            const missingNames = missingTargets.map(m => MUSCLE_DEFS[m].name);
+            grid.innerHTML = html;
 
-            if (customRoutineState.exercises.length === 0) {{
-                banner.style.background = 'rgba(245, 158, 11, 0.1)';
-                banner.style.border = '1px solid rgba(245, 158, 11, 0.3)';
-                banner.style.color = 'var(--gold-light)';
-                banner.innerHTML = `💡 <strong>Koç Tavsiyesi:</strong> Programınız henüz boş. Aşağıdaki 77 hareketlik katalogdan beğendiğiniz hareketleri <code>[ ➕ Programa Ekle ]</code> butonuna basarak ekleyin; radar kas dengesini anında hesaplayacaktır.`;
-            }} else if (studioState.mode === 'full_body') {{
-                if (missingTargets.length > 0) {{
-                    banner.style.background = 'rgba(239, 68, 68, 0.12)';
-                    banner.style.border = '1px solid rgba(239, 68, 68, 0.4)';
-                    banner.style.color = '#fca5a5';
-                    banner.innerHTML = `⚠️ <strong>Tüm Vücut Dengesi Uyarısı:</strong> Şu an programınızda <strong>${{missingNames.join(', ')}}</strong> eksik kaldı! Kinetik zincirde postürel dengesizlik ve sakatlık riskini önlemek için bu bölgelerden de en az birer hareket eklemeniz önerilir. (Toplam Set: ${{totalSets}})`;
+            if (summaryBadge) {{
+                if (readyCount === selectedTargetMuscles.length) {{
+                    summaryBadge.innerHTML = `<span style="color:#10b981;">🎉 Tüm hedefler hazır!</span>`;
                 }} else {{
-                    banner.style.background = 'rgba(16, 185, 129, 0.12)';
-                    banner.style.border = '1px solid rgba(16, 185, 129, 0.4)';
-                    banner.style.color = '#6ee7b7';
-                    banner.innerHTML = `🎉 <strong>Kusursuz Tüm Vücut Dengesi!</strong> Vücudun tüm ana kas grupları (İtiş, Çekiş, Bacak, Core) eksiksiz kapsandı. Toplam ${{customRoutineState.exercises.length}} hareket ve ${{totalSets}} set ile mükemmel bir atletik seans!`;
-                }}
-            }} else {{
-                // Split Mode
-                let volumeComment = '';
-                if (totalSets < 10) {{
-                    volumeComment = `🟡 <strong>Düşük Hacim (${{totalSets}} Set):</strong> Bölgesel hipertrofi için hedef kas gruplarında 12-18 set aralığı önerilir.`;
-                }} else if (totalSets <= 18) {{
-                    volumeComment = `🎯 <strong>İdeal Hipertrofi Hacmi (${{totalSets}} Set):</strong> Kas liflerinin uyarılması ve toparlanma dengesi için kusursuz aralıktasınız!`;
-                }} else {{
-                    volumeComment = `⚠️ <strong>Yüksek Hacim (${{totalSets}} Set):</strong> Tek bölge gününde 18-20 setin üzerine çıkmak 'çöp hacim' (junk volume) riski oluşturabilir.`;
-                }}
-
-                if (missingTargets.length > 0) {{
-                    banner.style.background = 'rgba(245, 158, 11, 0.12)';
-                    banner.style.border = '1px solid rgba(245, 158, 11, 0.4)';
-                    banner.style.color = '#fde68a';
-                    banner.innerHTML = `⚠️ <strong>Bölgesel Split Uyarısı:</strong> Seçilen splitte hedeflenen <strong>${{missingNames.join(', ')}}</strong> için henüz hareket eklenmedi!<br>${{volumeComment}}`;
-                }} else {{
-                    banner.style.background = 'rgba(16, 185, 129, 0.12)';
-                    banner.style.border = '1px solid rgba(16, 185, 129, 0.4)';
-                    banner.style.color = '#6ee7b7';
-                    banner.innerHTML = `✨ <strong>Bölgesel Hedefler Tamamlandı!</strong> Seçtiğiniz splitin tüm kas grupları kapsandı.<br>${{volumeComment}}`;
+                    summaryBadge.innerHTML = `<span style="color:var(--gold);">${{readyCount}} / ${{selectedTargetMuscles.length}} hazır • Eksik: ${{missingList.join(', ')}}</span>`;
                 }}
             }}
         }}
@@ -6248,10 +6183,9 @@ HTML_CONTENT = f"""<!DOCTYPE html>
 
             if (customRoutineState.exercises.length === 0) {{
                 container.innerHTML = `
-                    <div style="text-align:center; padding:24px; color:var(--text-secondary); background:rgba(0,0,0,0.2); border-radius:8px; border:1px dashed var(--border);">
-                        <div style="font-size:24px; margin-bottom:6px;">📋</div>
-                        <div style="font-size:13px; font-weight:700; color:#fff;">Henüz hareket eklemediniz</div>
-                        <div style="font-size:11px; margin-top:4px;">Aşağıdaki hareket kütüphanesinden dilediğiniz egzersizin yanındaki <strong>[ ➕ Ekle ]</strong> butonuna tıklayarak listenizi oluşturun.</div>
+                    <div style="text-align:center; padding:16px; color:var(--text-secondary); background:rgba(0,0,0,0.2); border-radius:6px; border:1px dashed var(--border);">
+                        <div style="font-size:11.5px; color:#fff; font-weight:700;">Henüz hareket eklenmedi</div>
+                        <div style="font-size:10.5px; margin-top:2px;">Aşağıdaki uygun hareketlerden <strong>[ ➕ Ekle ]</strong> butonuna basarak programınızı kurun.</div>
                     </div>
                 `;
                 return;
@@ -6266,47 +6200,43 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                 const thumbImg = guide.form || '';
 
                 html += `
-                    <div class="custom-routine-item">
-                        <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:180px;">
-                            <span style="font-size:12px; font-weight:900; color:var(--gold); width:18px;">${{index + 1}}.</span>
-                            <div class="ex-thumb-wrap">
+                    <div class="custom-routine-item" style="padding:6px 10px;">
+                        <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:140px;">
+                            <span style="font-size:11px; font-weight:900; color:var(--gold);">${{index + 1}}.</span>
+                            <div class="ex-thumb-wrap" style="width:40px; height:40px;">
                                 ${{thumbImg ? `<img src="${{thumbImg}}" class="ex-thumb-img" alt="${{escapeHTML(ex.name)}}">` : '🏋️'}}
                             </div>
                             <div>
-                                <div style="font-size:13px; font-weight:800; color:#fff; cursor:pointer;" onclick="openExerciseDetailModal('${{ex.id}}')">
+                                <div style="font-size:12px; font-weight:800; color:#fff; line-height:1.2; cursor:pointer;" onclick="openExerciseDetailModal('${{ex.id}}')">
                                     ${{escapeHTML(ex.name)}}
                                 </div>
-                                <div style="font-size:11px; color:var(--text-secondary);">
+                                <div style="font-size:10px; color:var(--text-secondary);">
                                     ${{escapeHTML(ex.muscle || '')}}
                                 </div>
                             </div>
                         </div>
 
-                        <!-- SETS & REPS CONTROLS -->
-                        <div style="display:flex; align-items:center; gap:6px;">
-                            <select class="form-input" style="padding:4px 6px; font-size:11.5px; width:72px;" onchange="updateCustomExerciseSets(${{index}}, this.value)">
+                        <!-- SETS & REPS -->
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <select class="form-input" style="padding:3px 5px; font-size:11px; width:64px;" onchange="updateCustomExerciseSets(${{index}}, this.value)">
                                 <option value="2" ${{item.sets == 2 ? 'selected' : ''}}>2 Set</option>
                                 <option value="3" ${{item.sets == 3 ? 'selected' : ''}}>3 Set</option>
                                 <option value="4" ${{item.sets == 4 ? 'selected' : ''}}>4 Set</option>
                                 <option value="5" ${{item.sets == 5 ? 'selected' : ''}}>5 Set</option>
-                                <option value="6" ${{item.sets == 6 ? 'selected' : ''}}>6 Set</option>
                             </select>
 
-                            <select class="form-input" style="padding:4px 6px; font-size:11.5px; width:80px;" onchange="updateCustomExerciseReps(${{index}}, this.value)">
-                                <option value="6-8" ${{item.reps == '6-8' ? 'selected' : ''}}>6-8 Tek.</option>
-                                <option value="8-10" ${{item.reps == '8-10' ? 'selected' : ''}}>8-10 Tek.</option>
-                                <option value="10-12" ${{item.reps == '10-12' ? 'selected' : ''}}>10-12 Tek.</option>
-                                <option value="12-15" ${{item.reps == '12-15' ? 'selected' : ''}}>12-15 Tek.</option>
-                                <option value="Maks" ${{item.reps == 'Maks' ? 'selected' : ''}}>Maksimum</option>
+                            <select class="form-input" style="padding:3px 5px; font-size:11px; width:72px;" onchange="updateCustomExerciseReps(${{index}}, this.value)">
+                                <option value="6-8" ${{item.reps == '6-8' ? 'selected' : ''}}>6-8 T.</option>
+                                <option value="8-10" ${{item.reps == '8-10' ? 'selected' : ''}}>8-10 T.</option>
+                                <option value="10-12" ${{item.reps == '10-12' ? 'selected' : ''}}>10-12 T.</option>
+                                <option value="12-15" ${{item.reps == '12-15' ? 'selected' : ''}}>12-15 T.</option>
+                                <option value="Maks" ${{item.reps == 'Maks' ? 'selected' : ''}}>Maks</option>
                             </select>
 
-                            <!-- ORDER BUTTONS -->
-                            <button class="btn btn-outline" style="padding:4px 6px; font-size:10px;" onclick="moveCustomRoutineExercise(${{index}}, -1)" ${{index === 0 ? 'disabled' : ''}}>▲</button>
-                            <button class="btn btn-outline" style="padding:4px 6px; font-size:10px;" onclick="moveCustomRoutineExercise(${{index}}, 1)" ${{index === customRoutineState.exercises.length - 1 ? 'disabled' : ''}}>▼</button>
-                            
-                            <!-- INSPECT & REMOVE -->
-                            <button class="btn btn-outline" style="padding:4px 8px; font-size:11px;" onclick="openExerciseDetailModal('${{ex.id}}')" title="Form ve Anatomi Görselini İncele">👁️</button>
-                            <button class="btn btn-outline" style="padding:4px 8px; font-size:11px; color:#ef4444; border-color:rgba(239,68,68,0.4);" onclick="removeExerciseFromCustomRoutine(${{index}})" title="Çıkar">✕</button>
+                            <button class="btn btn-outline" style="padding:3px 5px; font-size:9px;" onclick="moveCustomRoutineExercise(${{index}}, -1)" ${{index === 0 ? 'disabled' : ''}}>▲</button>
+                            <button class="btn btn-outline" style="padding:3px 5px; font-size:9px;" onclick="moveCustomRoutineExercise(${{index}}, 1)" ${{index === customRoutineState.exercises.length - 1 ? 'disabled' : ''}}>▼</button>
+                            <button class="btn btn-outline" style="padding:3px 6px; font-size:10px;" onclick="openExerciseDetailModal('${{ex.id}}')" title="İncele">👁️</button>
+                            <button class="btn btn-outline" style="padding:3px 6px; font-size:10px; color:#ef4444; border-color:rgba(239,68,68,0.4);" onclick="removeExerciseFromCustomRoutine(${{index}})" title="Çıkar">✕</button>
                         </div>
                     </div>
                 `;
@@ -6322,26 +6252,32 @@ HTML_CONTENT = f"""<!DOCTYPE html>
 
             const q = (document.getElementById('studioSearchInput')?.value || '').toLowerCase().trim();
             const equip = document.getElementById('studioEquipFilter')?.value || 'all';
-            const cat = document.getElementById('studioCategoryFilter')?.value || 'all';
+            const showAll = document.getElementById('chkShowAllExercises')?.checked;
 
             const filtered = EXERCISES_DB.filter(ex => {{
                 if (equip !== 'all' && ex.equipment !== equip) return false;
-                if (cat !== 'all' && ex.category !== cat) return false;
                 if (q) {{
                     const combined = (ex.name + ' ' + (ex.muscle || '') + ' ' + (ex.cue || '')).toLowerCase();
                     if (!combined.includes(q)) return false;
+                }}
+                // Target Region Filtering
+                if (!showAll && selectedTargetMuscles.length > 0) {{
+                    const pList = ex.primaryMuscles || [];
+                    const sList = ex.secondaryMuscles || [];
+                    const hits = pList.some(m => selectedTargetMuscles.includes(m)) || sList.some(m => selectedTargetMuscles.includes(m));
+                    if (!hits) return false;
                 }}
                 return true;
             }});
 
             if (totalCountEl) {{
-                totalCountEl.innerText = `(${{filtered.length}} / ${{EXERCISES_DB.length}} Hareket)`;
+                totalCountEl.innerText = `(${{filtered.length}} Hareket)`;
             }}
 
             if (filtered.length === 0) {{
                 container.innerHTML = `
-                    <div style="grid-column: 1 / -1; text-align:center; padding:32px; color:var(--text-secondary);">
-                        Arama kriterlerine uygun egzersiz bulunamadı.
+                    <div style="grid-column: 1 / -1; text-align:center; padding:24px; color:var(--text-secondary);">
+                        Seçili bölgelere uygun egzersiz bulunamadı. "Tümünü Göster" kutucuğunu işaretleyebilirsiniz.
                     </div>
                 `;
                 return;
@@ -6353,41 +6289,32 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                 const thumbImg = guide.form || '';
                 const isAlreadyInRoutine = customRoutineState.exercises.some(item => item.exId === ex.id);
 
-                const equipBadgeMap = {{
-                    dumbbell: '<span class="auth-role-tag role-admin" style="font-size:9.5px;">Dambıl</span>',
-                    kettlebell: '<span class="auth-role-tag role-admin" style="font-size:9.5px; background:rgba(234,179,8,0.2); color:#eab308; border-color:#eab308;">Kettlebell</span>',
-                    bodyweight: '<span class="auth-role-tag role-athlete" style="font-size:9.5px;">Vücut Ağırlığı</span>',
-                    barbell: '<span class="auth-role-tag role-admin" style="font-size:9.5px; background:rgba(239,68,68,0.2); color:#ef4444; border-color:#ef4444;">Halter</span>',
-                    machine: '<span class="auth-role-tag role-athlete" style="font-size:9.5px; background:rgba(168,85,247,0.2); color:#a855f7; border-color:#a855f7;">Makine</span>'
-                }};
+                const pNames = (ex.primaryMuscles || []).map(m => STUDIO_REGION_MAP[m]?.name || m).join(', ');
+                const sNames = (ex.secondaryMuscles || []).map(m => STUDIO_REGION_MAP[m]?.name || m).join(', ');
 
                 html += `
-                    <div class="studio-ex-card">
-                        <div style="display:flex; gap:10px; align-items:flex-start; margin-bottom:10px;">
-                            <div class="ex-thumb-wrap" style="width:58px; height:58px; cursor:pointer;" onclick="openExerciseDetailModal('${{ex.id}}')">
+                    <div class="studio-ex-card" style="padding:10px;">
+                        <div style="display:flex; gap:8px; align-items:flex-start; margin-bottom:8px;">
+                            <div class="ex-thumb-wrap" style="width:48px; height:48px; cursor:pointer;" onclick="openExerciseDetailModal('${{ex.id}}')">
                                 ${{thumbImg ? `<img src="${{thumbImg}}" class="ex-thumb-img" alt="${{escapeHTML(ex.name)}}" loading="lazy">` : '🏋️'}}
                             </div>
                             <div style="flex:1;">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
-                                    ${{equipBadgeMap[ex.equipment] || ''}}
-                                    <span style="font-size:9px; color:var(--text-secondary); text-transform:uppercase;">${{ex.mechanic || 'compound'}}</span>
-                                </div>
-                                <div style="font-size:13px; font-weight:800; color:#fff; line-height:1.3; cursor:pointer;" onclick="openExerciseDetailModal('${{ex.id}}')">
+                                <div style="font-size:12px; font-weight:800; color:#fff; line-height:1.2; cursor:pointer;" onclick="openExerciseDetailModal('${{ex.id}}')">
                                     ${{escapeHTML(ex.name)}}
                                 </div>
-                                <div style="font-size:11px; color:var(--cyan); margin-top:2px;">
-                                    ${{escapeHTML(ex.muscle || '')}}
+                                <div style="font-size:10px; color:var(--cyan); margin-top:2px;">
+                                    <strong>Primer:</strong> ${{pNames}}${{sNames ? ` • <span style="color:var(--text-secondary);">Sekonder: ${{sNames}}</span>` : ''}}
                                 </div>
                             </div>
                         </div>
 
                         <!-- ACTIONS -->
                         <div style="display:flex; gap:6px; margin-top:auto;">
-                            <button class="btn btn-outline" style="flex:1; font-size:11px; padding:6px 8px;" onclick="openExerciseDetailModal('${{ex.id}}')">
+                            <button class="btn btn-outline" style="flex:1; font-size:10px; padding:4px 6px;" onclick="openExerciseDetailModal('${{ex.id}}')">
                                 👁️ İncele
                             </button>
-                            <button class="btn ${{isAlreadyInRoutine ? 'btn-outline' : 'btn-gold'}}" style="flex:1.4; font-size:11px; padding:6px 8px; font-weight:800;" onclick="addExerciseToCustomRoutine('${{ex.id}}')">
-                                ${{isAlreadyInRoutine ? '➕ Tekrar Ekle' : '➕ Programa Ekle'}}
+                            <button class="btn ${{isAlreadyInRoutine ? 'btn-outline' : 'btn-gold'}}" style="flex:1.3; font-size:10px; padding:4px 6px; font-weight:800;" onclick="addExerciseToCustomRoutine('${{ex.id}}')">
+                                ${{isAlreadyInRoutine ? '➕ Tekrar Ekle' : '➕ Ekle'}}
                             </button>
                         </div>
                     </div>
@@ -6409,19 +6336,14 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             }});
 
             renderCustomRoutine();
-            renderMuscleRadar();
+            renderRegionStatus();
             renderStudioExerciseCatalog();
-
-            const customTitleInput = document.getElementById('customWorkoutTitleInput');
-            if (customTitleInput) {{
-                customTitleInput.scrollIntoView({{ behavior: 'smooth', block: 'nearest' }});
-            }}
         }}
 
         function removeExerciseFromCustomRoutine(index) {{
             customRoutineState.exercises.splice(index, 1);
             renderCustomRoutine();
-            renderMuscleRadar();
+            renderRegionStatus();
             renderStudioExerciseCatalog();
         }}
 
@@ -6437,7 +6359,7 @@ HTML_CONTENT = f"""<!DOCTYPE html>
         function updateCustomExerciseSets(index, val) {{
             if (customRoutineState.exercises[index]) {{
                 customRoutineState.exercises[index].sets = parseInt(val) || 3;
-                renderMuscleRadar();
+                renderRegionStatus();
             }}
         }}
 
@@ -6453,10 +6375,10 @@ HTML_CONTENT = f"""<!DOCTYPE html>
 
         function resetCustomRoutine() {{
             if (customRoutineState.exercises.length === 0) return;
-            if (confirm("Özel program taslağını sıfırlamak istediğinize emin misiniz?")) {{
+            if (confirm("Program taslağını sıfırlamak istediğinize emin misiniz?")) {{
                 customRoutineState.exercises = [];
                 renderCustomRoutine();
-                renderMuscleRadar();
+                renderRegionStatus();
                 renderStudioExerciseCatalog();
             }}
         }}
@@ -6481,18 +6403,17 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             const newRoutine = {{
                 id: 'custom_' + Date.now(),
                 title: title,
-                split: studioState.mode === 'full_body' ? 'full_body' : studioState.splitSubtype,
+                split: selectedTargetMuscles.join('_') || 'custom',
                 splitName: title,
                 style: 'classic',
                 goal: 'hypertrophy',
                 duration: Math.round(exercisesList.length * 7),
                 scheme: {{ sets: 3, reps: '8-12', rest: rest }},
                 warmups: [
-                    {{ name: "Eklemsel CARs (Omuz & Kalça Dairesi)", dur: "90 sn", cue: "Tüm eklemleri kontrollü ve geniş dairelerle ısıt." }},
-                    {{ name: "World's Greatest Stretch", dur: "60 sn", cue: "Derin lunge pozisyonunda göğsü tavana çevir." }}
+                    {{ name: "Eklemsel CARs", dur: "90 sn", cue: "Tüm eklemleri kontrollü ısıt." }}
                 ],
                 exercises: exercisesList,
-                finisher: {{ name: "Balistik Bitiş", desc: "Maksimum tempolu 3 tur çiftçi taşıması veya swing." }},
+                finisher: {{ name: "Balistik Bitiş", desc: "Maksimum tempolu taşıma veya swing." }},
                 createdAt: Date.now(),
                 isCustom: true
             }};
@@ -6500,13 +6421,13 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             user.savedWorkouts.unshift(newRoutine);
             saveAthletesToStorage();
 
-            alert(`✅ "${{title}}" başarıyla kaydedildi! '📚 Programlar' sekmesinden istediğiniz zaman başlatabilirsiniz.`);
+            alert(`✅ "${{title}}" kaydedildi! '📚 Programlar' sekmesinden başlatabilirsiniz.`);
             renderSavedProgramsList();
         }}
 
         function startActiveWorkoutFromCustom() {{
             if (customRoutineState.exercises.length === 0) {{
-                alert("Lütfen antrenmanı başlatmadan önce en az 1 egzersiz ekleyin.");
+                alert("Lütfen önce en az 1 egzersiz ekleyin.");
                 return;
             }}
 
@@ -6521,18 +6442,17 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             const sessionObj = {{
                 id: 'custom_' + Date.now(),
                 title: title,
-                split: studioState.mode === 'full_body' ? 'full_body' : studioState.splitSubtype,
+                split: selectedTargetMuscles.join('_') || 'custom',
                 splitName: title,
                 style: 'classic',
                 goal: 'hypertrophy',
                 duration: Math.round(exercisesList.length * 7),
                 scheme: {{ sets: 3, reps: '8-12', rest: rest }},
                 warmups: [
-                    {{ name: "Eklemsel CARs (Omuz & Kalça Dairesi)", dur: "90 sn", cue: "Tüm eklemleri kontrollü ve geniş dairelerle ısıt." }},
-                    {{ name: "World's Greatest Stretch", dur: "60 sn", cue: "Derin lunge pozisyonunda göğsü tavana çevir." }}
+                    {{ name: "Eklemsel CARs", dur: "90 sn", cue: "Tüm eklemleri kontrollü ısıt." }}
                 ],
                 exercises: exercisesList,
-                finisher: {{ name: "Balistik Bitiş", desc: "Maksimum tempolu 3 tur çiftçi taşıması veya swing." }},
+                finisher: {{ name: "Balistik Bitiş", desc: "Maksimum tempolu taşıma veya swing." }},
                 createdAt: Date.now()
             }};
 
@@ -6580,9 +6500,9 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             const ex = EXERCISES_DB.find(e => e.id === exId);
             if (!ex) return;
 
-            studioState.currentInspectExId = exId;
             document.getElementById('exDetailModalTitle').innerText = ex.name;
-            document.getElementById('exDetailModalSubtitle').innerText = `${{ex.muscle || ''}} • ${{ex.equipment ? ex.equipment.toUpperCase() : ''}}`;
+            const pNames = (ex.primaryMuscles || []).map(m => STUDIO_REGION_MAP[m]?.name || m).join(', ');
+            document.getElementById('exDetailModalSubtitle').innerText = `Hedef: ${{pNames}} • ${{ex.equipment ? ex.equipment.toUpperCase() : ''}}`;
 
             const guide = exerciseGuideMap[ex.id] || categoryFallback[ex.category] || guideLibrary.goblet_squat;
 
@@ -6590,7 +6510,7 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             const formContainer = document.getElementById('exDetailTabContentForm');
             if (guide && guide.form) {{
                 formContainer.innerHTML = `
-                    <div style="text-align:center; background:#000; border-radius:10px; overflow:hidden; border:1px solid var(--border);">
+                    <div style="text-align:center; background:#000; border-radius:8px; overflow:hidden; border:1px solid var(--border);">
                         <img src="${{guide.form}}" style="max-width:100%; height:auto; display:block;" alt="${{escapeHTML(ex.name)}} Form">
                     </div>
                 `;
@@ -6602,7 +6522,7 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             const anatomyContainer = document.getElementById('exDetailTabContentAnatomy');
             if (guide && guide.anatomi) {{
                 anatomyContainer.innerHTML = `
-                    <div style="text-align:center; background:#000; border-radius:10px; overflow:hidden; border:1px solid var(--border);">
+                    <div style="text-align:center; background:#000; border-radius:8px; overflow:hidden; border:1px solid var(--border);">
                         <img src="${{guide.anatomi}}" style="max-width:100%; height:auto; display:block;" alt="${{escapeHTML(ex.name)}} Anatomi">
                     </div>
                 `;
@@ -6622,7 +6542,7 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                     }};
                     const style = badgeStyles[p.badge] || badgeStyles.setup;
                     return `
-                        <div class="pos-step-card" style="margin-bottom:10px;">
+                        <div class="pos-step-card" style="margin-bottom:8px;">
                             <div class="pos-step-header" style="background:${{style.bg}}; border-color:${{style.border}}; color:${{style.text}};">
                                 <span>${{style.icon}} ${{escapeHTML(p.phase)}}</span>
                             </div>
@@ -6635,7 +6555,7 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             }}
             if (ex.cue) {{
                 stepsHtml += `
-                    <div class="cue-box" style="margin-top:12px;">
+                    <div class="cue-box" style="margin-top:10px;">
                         <span class="cue-icon">💡</span>
                         <span><strong>Altın Kural:</strong> ${{escapeHTML(ex.cue)}}</span>
                     </div>
@@ -6643,7 +6563,6 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             }}
             stepsContainer.innerHTML = stepsHtml;
 
-            // Add button hook
             const btnAdd = document.getElementById('btnExDetailAdd');
             if (btnAdd) {{
                 btnAdd.onclick = () => {{
