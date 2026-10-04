@@ -1707,7 +1707,7 @@ HTML_CONTENT = f"""<!DOCTYPE html>
 
     <!-- ==================== LOG WORKOUT COMPLETE MODAL ==================== -->
     <div id="completeModal" class="modal-overlay">
-        <div class="modal-box">
+        <div class="modal-box" style="max-width: 560px; max-height: 92vh; overflow-y: auto;">
             <div class="modal-header">
                 <span class="modal-title">🏁 Antrenmanı Tamamla & Kaydet</span>
                 <button class="modal-close" onclick="closeCompleteModal()">✕</button>
@@ -2866,24 +2866,98 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             document.getElementById('logProgramName').value = activeWorkoutSession.title;
             document.getElementById('logDuration').value = elapsedMins;
 
-            // Summary stats calculation
+            // Summary stats & detailed exercise breakdown calculation
             let totalCompletedSets = 0;
+            let totalReps = 0;
             let totalVolume = 0;
-            activeWorkoutSession.exercises.forEach(ex => {{
+
+            const exerciseSummaries = activeWorkoutSession.exercises.map(ex => {{
                 const sets = activeWorkoutSetsData[ex.id] || [];
-                sets.forEach(st => {{
+                let exVol = 0;
+                let exCompletedSets = 0;
+                const setSummaries = sets.map(st => {{
+                    const w = parseFloat(st.weight) || 0;
+                    const r = parseInt(st.reps) || 0;
                     if (st.completed) {{
                         totalCompletedSets++;
-                        totalVolume += (parseFloat(st.weight) || 0) * (parseInt(st.reps) || 0);
+                        exCompletedSets++;
+                        totalReps += r;
+                        totalVolume += (w * r);
+                        exVol += (w * r);
                     }}
+                    return {{
+                        setNo: st.setNo,
+                        weight: w,
+                        reps: r,
+                        completed: st.completed
+                    }};
                 }});
+
+                return {{
+                    name: ex.name,
+                    muscle: ex.muscle ? ex.muscle.split(',')[0].trim() : '',
+                    equipment: ex.equipment,
+                    sets: setSummaries,
+                    volume: exVol,
+                    completedCount: exCompletedSets
+                }};
             }});
 
             const summaryHint = document.getElementById('logWorkoutSummaryHint');
             if (summaryHint) {{
                 summaryHint.innerHTML = `
-                    <div style="background:rgba(245, 158, 11, 0.12); border:1px solid var(--gold); border-radius:8px; padding:10px 12px; margin-bottom:12px; font-size:12px; line-height:1.4;">
-                        ⚡ <strong>Seans Özeti:</strong> ${{formatSecondsToHMS(elapsedSecs)}} Süre • <strong>${{totalCompletedSets}}</strong> Tamamlanan Set • <strong>${{Math.round(totalVolume).toLocaleString('tr-TR')}} kg</strong> Toplam Tonaj
+                    <div style="background: rgba(15, 23, 42, 0.85); border: 1.5px solid var(--gold); border-radius: 10px; padding: 12px; margin-bottom: 14px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:8px;">
+                            <span style="font-size:11px; font-weight:800; color:var(--gold); text-transform:uppercase; letter-spacing:0.5px;">📋 Seans Özeti & Performans</span>
+                            <span style="font-size:12px; font-weight:800; color:#fff;">⏱️ ${{formatSecondsToHMS(elapsedSecs)}}</span>
+                        </div>
+
+                        <!-- TOP STATS -->
+                        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; margin-bottom:12px; text-align:center;">
+                            <div style="background:var(--bg-elevated); padding:8px 4px; border-radius:6px; border:1px solid var(--border);">
+                                <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">TOPLAM TONAJ</div>
+                                <div style="font-size:14px; font-weight:900; color:var(--gold); margin-top:2px;">🏋️ ${{Math.round(totalVolume).toLocaleString('tr-TR')}} kg</div>
+                            </div>
+                            <div style="background:var(--bg-elevated); padding:8px 4px; border-radius:6px; border:1px solid var(--border);">
+                                <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">SET SAYISI</div>
+                                <div style="font-size:14px; font-weight:900; color:var(--green-success); margin-top:2px;">✅ ${{totalCompletedSets}} Set</div>
+                            </div>
+                            <div style="background:var(--bg-elevated); padding:8px 4px; border-radius:6px; border:1px solid var(--border);">
+                                <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">TOPLAM TEKRAR</div>
+                                <div style="font-size:14px; font-weight:900; color:var(--cyan); margin-top:2px;">🎯 ${{totalReps}} Tk</div>
+                            </div>
+                        </div>
+
+                        <!-- EXERCISES & SETS BREAKDOWN -->
+                        <div style="font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase;">
+                            Yapılan Hareketler, Kilo & Tekrarlar:
+                        </div>
+                        <div style="max-height: 220px; overflow-y: auto; padding-right: 4px; display:flex; flex-direction:column; gap:6px;">
+                            ${{exerciseSummaries.map(ex => `
+                                <div style="background: rgba(0,0,0,0.3); border-radius: 6px; padding: 8px 10px; border-left: 3px solid ${{ex.completedCount > 0 ? 'var(--green-success)' : 'var(--border)'}};">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                        <div>
+                                            <strong style="color:#fff; font-size:12.5px;">${{escapeHTML(ex.name)}}</strong>
+                                            ${{ex.muscle ? `<span style="font-size:10.5px; color:var(--cyan); margin-left:6px;">[${{escapeHTML(ex.muscle)}}]</span>` : ''}}
+                                        </div>
+                                        <span style="font-size:11px; font-weight:800; color:var(--gold);">
+                                            ${{ex.volume > 0 ? `${{Math.round(ex.volume).toLocaleString('tr-TR')}} kg` : ''}}
+                                        </span>
+                                    </div>
+                                    <div style="display:flex; flex-wrap:wrap; gap:4px;">
+                                        ${{ex.sets.map(st => st.completed ? `
+                                            <span style="background:rgba(34, 197, 94, 0.12); border:1px solid rgba(34, 197, 94, 0.4); color:#86efac; border-radius:4px; padding:2px 6px; font-size:10.5px; font-weight:700;">
+                                                Set ${{st.setNo}}: <strong>${{st.weight || 0}} kg</strong> x ${{st.reps || 0}} ✓
+                                            </span>
+                                        ` : `
+                                            <span style="background:rgba(239, 68, 68, 0.08); border:1px dashed rgba(239, 68, 68, 0.3); color:#fca5a5; opacity:0.65; border-radius:4px; padding:2px 6px; font-size:10.5px; font-weight:600; text-decoration:line-through;" title="Bitir butonuna basılmadı">
+                                                Set ${{st.setNo}}: Atlandı
+                                            </span>
+                                        `).join('')}}
+                                    </div>
+                                </div>
+                            `).join('')}}
+                        </div>
                     </div>
                 `;
             }}
@@ -2911,23 +2985,27 @@ HTML_CONTENT = f"""<!DOCTYPE html>
 
             const detailedExercises = activeWorkoutSession.exercises.map(ex => {{
                 const sets = (activeWorkoutSetsData[ex.id] || []).map(st => {{
+                    const isDone = !!st.completed;
                     const w = parseFloat(st.weight) || 0;
                     const r = parseInt(st.reps) || 0;
-                    if (st.completed) {{
+                    if (isDone) {{
                         totalCompletedSets++;
                         totalCompletedReps += r;
                         totalVolume += (w * r);
                     }}
                     return {{
                         setNo: st.setNo,
-                        weight: w,
-                        reps: r,
-                        completed: !!st.completed,
-                        volume: w * r
+                        weight: isDone ? w : 0,
+                        reps: isDone ? r : 0,
+                        completed: isDone,
+                        volume: isDone ? (w * r) : 0
                     }};
                 }});
 
-                if (ex.muscle) {{
+                const completedSets = sets.filter(st => st.completed);
+
+                // Only credit muscle groups if at least one set of this exercise was actually completed
+                if (completedSets.length > 0 && ex.muscle) {{
                     ex.muscle.split(',').forEach(m => {{
                         const trimmed = m.trim();
                         if (trimmed && !allMuscles.includes(trimmed)) {{
@@ -2936,8 +3014,8 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                     }});
                 }}
 
-                const maxWeight = sets.length > 0 ? Math.max(0, ...sets.map(st => st.weight)) : 0;
-                const exVolume = sets.reduce((sum, st) => sum + (st.completed ? st.volume : 0), 0);
+                const maxWeight = completedSets.length > 0 ? Math.max(0, ...completedSets.map(st => st.weight)) : 0;
+                const exVolume = completedSets.reduce((sum, st) => sum + st.volume, 0);
 
                 return {{
                     id: ex.id,
@@ -2947,6 +3025,7 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                     muscle: ex.muscle,
                     cue: ex.cue || '',
                     sets: sets,
+                    completedSetsCount: completedSets.length,
                     maxWeight: maxWeight,
                     exerciseVolume: exVolume
                 }};
@@ -3703,9 +3782,13 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                                             <span style="font-size:11px; color:var(--text-secondary);">${{escapeHTML(ex.muscle ? ex.muscle.split(',')[0] : '')}}${{ex.exerciseVolume ? ` • ${{Math.round(ex.exerciseVolume).toLocaleString('tr-TR')}} kg` : ''}}</span>
                                         </div>
                                         <div class="log-sets-summary">
-                                            ${{(ex.sets || []).map(st => `
-                                                <span class="log-set-pill ${{st.completed ? 'completed' : ''}}">
-                                                    S${{st.setNo}}: <strong>${{st.weight || 0}}kg</strong> x ${{st.reps || 0}}
+                                            ${{(ex.sets || []).map(st => st.completed ? `
+                                                <span class="log-set-pill completed">
+                                                    S${{st.setNo}}: <strong>${{st.weight || 0}}kg</strong> x ${{st.reps || 0}} ✓
+                                                </span>
+                                            ` : `
+                                                <span class="log-set-pill" style="opacity:0.4; border-style:dashed; text-decoration:line-through;">
+                                                    S${{st.setNo}}: Atlandı
                                                 </span>
                                             `).join('')}}
                                         </div>
@@ -3728,7 +3811,7 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                 return;
             }}
 
-            const headers = ["Tarih", "Program", "Sure_Dk", "RPE", "Toplam_Tonaj_Kg", "Egzersiz", "Ekipman", "Kas_Grubu", "Set_No", "Kilo_Kg", "Tekrar", "Hacim_Kg"];
+            const headers = ["Tarih", "Program", "Sure_Dk", "RPE", "Toplam_Tonaj_Kg", "Egzersiz", "Ekipman", "Kas_Grubu", "Set_No", "Kilo_Kg", "Tekrar", "Hacim_Kg", "Durum"];
             const rows = [headers.join(",")];
 
             logs.forEach(l => {{
@@ -3746,17 +3829,19 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                         if (ex.sets && ex.sets.length > 0) {{
                             ex.sets.forEach(st => {{
                                 const setNo = st.setNo;
-                                const w = st.weight || 0;
-                                const r = st.reps || 0;
-                                const v = w * r;
-                                rows.push([date, prog, dur, rpe, totalVol, exName, equip, muscle, setNo, w, r, v].join(","));
+                                const isDone = !!st.completed;
+                                const w = isDone ? (st.weight || 0) : 0;
+                                const r = isDone ? (st.reps || 0) : 0;
+                                const v = isDone ? (w * r) : 0;
+                                const status = isDone ? '"Tamamlandı"' : '"Atlandı"';
+                                rows.push([date, prog, dur, rpe, totalVol, exName, equip, muscle, setNo, w, r, v, status].join(","));
                             }});
                         }} else {{
-                            rows.push([date, prog, dur, rpe, totalVol, exName, equip, muscle, 1, 0, 0, 0].join(","));
+                            rows.push([date, prog, dur, rpe, totalVol, exName, equip, muscle, 1, 0, 0, 0, '"Atlandı"'].join(","));
                         }}
                     }});
                 }} else {{
-                    rows.push([date, prog, dur, rpe, totalVol, 'Genel', '', '', 1, 0, 0, 0].join(","));
+                    rows.push([date, prog, dur, rpe, totalVol, 'Genel', '', '', 1, 0, 0, 0, '"Tamamlandı"'].join(","));
                 }}
             }});
 
