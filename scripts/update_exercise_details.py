@@ -119,7 +119,7 @@ EXERCISES_DATA = [
     },
     {
         'id': 'db_triceps_overhead',
-        'name': 'Baş Üstü Çift Kol Dambıl Triceps Uzatma',
+        'name': 'Dambıl Başüstü Triceps',
         'equipment': 'dumbbell',
         'category': 'push',
         'muscle': 'Arka Kol (Triceps Uzun Baş)',
@@ -137,7 +137,7 @@ EXERCISES_DATA = [
     },
     {
         'id': 'db_skullcrusher',
-        'name': 'Yatarak Dambıl Alına Pres (Skullcrusher)',
+        'name': 'Dambıl Skullcrusher',
         'equipment': 'dumbbell',
         'category': 'push',
         'muscle': 'Arka Kol (Triceps)',

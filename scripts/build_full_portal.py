@@ -2454,6 +2454,8 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             pullup: {{ form: 'assets/guides/guide_bw_pullup_form.jpg', anatomi: 'assets/guides/guide_bw_pullup_anatomi.jpg' }},
             curl: {{ form: 'assets/guides/guide_db_biceps_curl_form.jpg', anatomi: 'assets/guides/guide_db_biceps_curl_anatomi.jpg' }},
             triceps: {{ form: 'assets/guides/guide_mach_triceps_pushdown_form.jpg', anatomi: 'assets/guides/guide_mach_triceps_pushdown_anatomi.jpg' }},
+            skullcrusher: {{ form: 'assets/guides/guide_db_skullcrusher_form.jpg', anatomi: 'assets/guides/guide_db_skullcrusher_anatomi.jpg' }},
+            triceps_overhead: {{ form: 'assets/guides/guide_db_triceps_overhead_form.jpg', anatomi: 'assets/guides/guide_db_triceps_overhead_anatomi.jpg' }},
             pushup: {{ form: 'assets/guides/guide_bw_pushup_form.jpg', anatomi: 'assets/guides/guide_bw_pushup_anatomi.jpg' }},
             dips: {{ form: 'assets/guides/guide_bw_dips_form.jpg', anatomi: 'assets/guides/guide_bw_dips_anatomi.jpg' }},
             face_pull: {{ form: 'assets/guides/guide_mach_face_pull_form.jpg', anatomi: 'assets/guides/guide_mach_face_pull_anatomi.jpg' }},
@@ -2521,9 +2523,9 @@ HTML_CONTENT = f"""<!DOCTYPE html>
             'db_lateral_raise': guideLibrary.lateral_raise,
             'mach_cable_lateral': guideLibrary.lateral_raise,
             'mach_triceps_pushdown': guideLibrary.triceps,
-            'db_triceps_overhead': guideLibrary.triceps,
-            'db_skullcrusher': guideLibrary.triceps,
-            'bb_close_grip_bench': guideLibrary.triceps,
+            'db_triceps_overhead': guideLibrary.triceps_overhead,
+            'db_skullcrusher': guideLibrary.skullcrusher,
+            'bb_close_grip_bench': guideLibrary.bench,
             'db_saw_row': guideLibrary.saw_row,
             'db_chest_supported_row': guideLibrary.saw_row,
             'kb_gorilla_row': guideLibrary.saw_row,
@@ -3037,6 +3039,8 @@ HTML_CONTENT = f"""<!DOCTYPE html>
                 pullup: {{ form: 'assets/guides/guide_bw_pullup_form.jpg', anatomi: 'assets/guides/guide_bw_pullup_anatomi.jpg' }},
                 curl: {{ form: 'assets/guides/guide_db_biceps_curl_form.jpg', anatomi: 'assets/guides/guide_db_biceps_curl_anatomi.jpg' }},
                 triceps: {{ form: 'assets/guides/guide_mach_triceps_pushdown_form.jpg', anatomi: 'assets/guides/guide_mach_triceps_pushdown_anatomi.jpg' }},
+                skullcrusher: {{ form: 'assets/guides/guide_db_skullcrusher_form.jpg', anatomi: 'assets/guides/guide_db_skullcrusher_anatomi.jpg' }},
+                triceps_overhead: {{ form: 'assets/guides/guide_db_triceps_overhead_form.jpg', anatomi: 'assets/guides/guide_db_triceps_overhead_anatomi.jpg' }},
                 pushup: {{ form: 'assets/guides/guide_bw_pushup_form.jpg', anatomi: 'assets/guides/guide_bw_pushup_anatomi.jpg' }},
                 dips: {{ form: 'assets/guides/guide_bw_dips_form.jpg', anatomi: 'assets/guides/guide_bw_dips_anatomi.jpg' }},
                 face_pull: {{ form: 'assets/guides/guide_mach_face_pull_form.jpg', anatomi: 'assets/guides/guide_mach_face_pull_anatomi.jpg' }},
@@ -3121,9 +3125,9 @@ HTML_CONTENT = f"""<!DOCTYPE html>
 
                 // Triceps
                 'mach_triceps_pushdown': guideLibrary.triceps,
-                'db_triceps_overhead': guideLibrary.triceps,
-                'db_skullcrusher': guideLibrary.triceps,
-                'bb_close_grip_bench': guideLibrary.triceps,
+                'db_triceps_overhead': guideLibrary.triceps_overhead,
+                'db_skullcrusher': guideLibrary.skullcrusher,
+                'bb_close_grip_bench': guideLibrary.bench,
 
                 // Horizontal Pull (Rows) & Pullover
                 'db_saw_row': guideLibrary.saw_row,

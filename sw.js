@@ -1,8 +1,12 @@
-const CACHE_NAME = 'celik-kodu-cache-v22';
+const CACHE_NAME = 'celik-kodu-cache-v23';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
+  './assets/guides/guide_db_skullcrusher_anatomi.jpg',
+  './assets/guides/guide_db_skullcrusher_form.jpg',
+  './assets/guides/guide_db_triceps_overhead_anatomi.jpg',
+  './assets/guides/guide_db_triceps_overhead_form.jpg',
   './assets/guides/guide_bw_pushup_anatomi.jpg',
   './assets/guides/guide_bw_pushup_form.jpg',
   './assets/guides/guide_db_bench_press_anatomi.jpg',
