@@ -2004,6 +2004,380 @@
             color: var(--cyan);
         }
 
+        /* ==================== WORKOUT STICKY HUD (GİZLENEBİLİR & SABİT PENCERE) ==================== */
+        .workout-sticky-hud {
+            position: sticky;
+            top: 6px;
+            z-index: 120;
+            background: rgba(11, 17, 32, 0.94);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.65), 0 0 15px rgba(245, 158, 11, 0.12);
+            backdrop-filter: blur(14px);
+            transition: all 0.25s ease-in-out;
+        }
+        .workout-sticky-hud.collapsed {
+            padding: 6px 10px;
+            background: rgba(11, 17, 32, 0.98);
+            border-color: rgba(245, 158, 11, 0.35);
+        }
+        .workout-sticky-hud.collapsed .hud-collapsible-part {
+            display: none !important;
+        }
+        .hud-main-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .hud-timer-col {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            min-width: 80px;
+        }
+        .hud-label {
+            font-size: 9.5px;
+            font-weight: 800;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .hud-time-val {
+            font-family: monospace;
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--cyan);
+            letter-spacing: 0.8px;
+            line-height: 1.1;
+        }
+        .hud-rest-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            border-radius: 8px;
+            padding: 4px 10px;
+            min-width: 140px;
+        }
+        .hud-rest-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .hud-rest-tag {
+            font-size: 9px;
+            padding: 1px 5px;
+            border-radius: 4px;
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--gold);
+            font-weight: 800;
+        }
+        .hud-rest-val {
+            font-family: monospace;
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--gold);
+            letter-spacing: 1px;
+            line-height: 1.1;
+        }
+        .hud-rest-btns {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+            margin-top: 2px;
+        }
+        .btn-hud-tiny {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 6px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-hud-tiny:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+        .hud-meta-col {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-hud-collapse {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 900;
+            width: 30px;
+            height: 30px;
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-hud-collapse:hover {
+            color: #fff;
+            border-color: var(--gold);
+        }
+        .hud-progress-row {
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .hud-progress-track {
+            height: 5px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .hud-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold), var(--cyan));
+            transition: width 0.3s ease;
+        }
+        .hud-progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10.5px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        /* ==================== WORKOUT FLOATING BOTTOM DOCK ==================== */
+        .workout-floating-dock {
+            position: fixed;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 20px);
+            max-width: 580px;
+            z-index: 140;
+            background: rgba(15, 23, 42, 0.96);
+            border: 1.5px solid rgba(245, 158, 11, 0.5);
+            border-radius: 14px;
+            padding: 8px 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.85), 0 0 20px rgba(245, 158, 11, 0.25);
+            backdrop-filter: blur(16px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            animation: dockSlideUp 0.3s ease-out;
+        }
+        @media (max-width: 768px) {
+            .workout-floating-dock {
+                bottom: calc(66px + env(safe-area-inset-bottom, 6px));
+                z-index: 160;
+            }
+            #activeWorkoutContainer {
+                padding-bottom: 95px;
+            }
+        }
+        @keyframes dockSlideUp {
+            from { transform: translate(-50%, 40px); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+        .btn-dock-nav {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 9px 13px;
+            border-radius: 9px;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.15s;
+        }
+        .btn-dock-nav.next {
+            background: var(--gold);
+            color: #090d16;
+            border-color: var(--gold);
+            box-shadow: 0 0 14px rgba(245, 158, 11, 0.45);
+        }
+        .btn-dock-nav:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .dock-ex-title {
+            text-align: center;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            flex: 1;
+            min-width: 0;
+            padding: 0 4px;
+        }
+        .dock-ex-counter {
+            font-size: 9.5px;
+            font-weight: 900;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .dock-ex-name {
+            font-size: 13px;
+            font-weight: 800;
+            color: #fff;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        .btn-dock-add {
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid var(--cyan);
+            color: var(--cyan);
+            padding: 9px 11px;
+            border-radius: 9px;
+            font-size: 11.5px;
+            font-weight: 800;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.15s;
+        }
+        .btn-dock-add:hover {
+            background: rgba(56, 189, 248, 0.25);
+        }
+
+        /* ==================== HERO NEXT EXERCISE & REPORT BUTTONS ==================== */
+        .btn-hero-next-ex {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #090d16;
+            font-size: 15px;
+            font-weight: 900;
+            border: none;
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.45);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-hero-next-ex:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(245, 158, 11, 0.65);
+        }
+        .btn-report-mini {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 5px 9px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s;
+        }
+        .btn-report-mini:hover {
+            background: rgba(239, 68, 68, 0.25);
+            color: #fff;
+            border-color: #ef4444;
+        }
+        .btn-diagram-tool.btn-report-bug {
+            border-color: rgba(239, 68, 68, 0.45);
+            color: #fca5a5;
+            background: rgba(239, 68, 68, 0.12);
+        }
+        .btn-diagram-tool.btn-report-bug:hover {
+            background: rgba(239, 68, 68, 0.25);
+            color: #fff;
+        }
+
+        /* ==================== BUG REPORT & FINISHER MODAL STYLES ==================== */
+        .bug-cat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .bug-cat-chip {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            padding: 9px 10px;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 11.5px;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .bug-cat-chip.selected {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.18);
+            color: #fff;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+        }
+        .finisher-preset-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+        .finisher-preset-card:hover {
+            border-color: var(--gold);
+            background: rgba(245, 158, 11, 0.04);
+        }
+        .finisher-badge {
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--cyan);
+            display: inline-block;
+            margin-top: 3px;
+        }
+        .bug-pool-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        .bug-pool-card.pending {
+            border-left: 3px solid #f59e0b;
+        }
+        .bug-pool-card.processed {
+            border-left: 3px solid #38bdf8;
+        }
+        .bug-pool-card.resolved {
+            border-left: 3px solid #22c55e;
+            opacity: 0.8;
+        }
+
         /* SETS MANAGEMENT WRAP & ROWS */
         .sets-management-wrap {
             background: #090d16;
@@ -2786,6 +3160,9 @@
 
                 <div class="auth-actions">
                     <span class="cloud-sync-badge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
+                    <button class="btn-auth-action" onclick="openBugReportsPoolModal()" title="Egzersiz Hata Bildirim Havuzu" style="border-color:rgba(239, 68, 68, 0.45); color:#fca5a5;">
+                        ⚠️ Hata Havuzu
+                    </button>
                     <button class="btn-auth-action" id="btnAdminPanel" onclick="openAdminModal()" style="display:none;">
                         👑 Sporcular
                     </button>
@@ -2941,8 +3318,81 @@
 
             <!-- ==================== TAB 2: ACTIVE WORKOUT ==================== -->
             <div id="activeWorkoutTab" class="tab-content">
+
+                <!-- 1. WORKOUT STICKY HUD (GİZLENEBİLİR & SABİT PENCERE) -->
+                <div id="activeWorkoutHUD" class="workout-sticky-hud" style="display:none;">
+                    <div class="hud-main-bar">
+                        <!-- Sol: Toplam Süre -->
+                        <div class="hud-timer-col">
+                            <span class="hud-label">⏱️ TOPLAM SÜRE</span>
+                            <div class="hud-time-val" id="workoutTotalTimerDisplay">00:00</div>
+                            <div class="hud-collapsible-part" style="margin-top:2px;">
+                                <button type="button" class="btn-hud-tiny" id="btnToggleWorkoutPause" onclick="toggleWorkoutPause()">⏸️ Duraklat</button>
+                            </div>
+                        </div>
+
+                        <!-- Orta: Dinlenme Sayacı (Rest Timer) -->
+                        <div class="hud-rest-col" id="hudRestBox">
+                            <div class="hud-rest-header">
+                                <span class="hud-label" style="color:var(--gold);">⏳ DİNLENME</span>
+                                <span id="hudRestStatusBadge" class="hud-rest-tag">Hazır</span>
+                            </div>
+                            <div class="hud-rest-val" id="timerDisplay">00:45</div>
+                            <div class="hud-rest-btns hud-collapsible-part">
+                                <button type="button" class="btn-hud-tiny" onclick="adjustTimer(-15)" title="15 saniye azalt">-15s</button>
+                                <button type="button" class="btn-hud-tiny" id="btnPlayPauseTimer" onclick="toggleTimer()">▶ Başlat</button>
+                                <button type="button" class="btn-hud-tiny" onclick="adjustTimer(15)" title="15 saniye ekle">+15s</button>
+                                <button type="button" class="btn-hud-tiny" style="color:var(--cyan); border-color:rgba(56,189,248,0.4);" onclick="skipRestTimer()" title="Dinlenmeyi bitir">⏩ Geç</button>
+                            </div>
+                        </div>
+
+                        <!-- Sağ: Ekran Kilidi & Kontroller -->
+                        <div class="hud-meta-col">
+                            <button type="button" id="wakeLockStatusBtn" class="wake-lock-pill" onclick="toggleWakeLockManual()" title="Ekranı açık tut (Dokunarak değiştir)">
+                                🟢 Ekran Açık
+                            </button>
+                            <div class="hud-collapsible-part" style="display:flex; gap:4px;">
+                                <button type="button" class="btn-view-toggle active" id="btnViewFocus" onclick="setActiveWorkoutViewMode('focus')" title="Tek hareket odak modu">🎯 Odak</button>
+                                <button type="button" class="btn-view-toggle" id="btnViewList" onclick="setActiveWorkoutViewMode('list')" title="Tüm hareketler listesi">📋 Liste</button>
+                            </div>
+                            <!-- Gizle/Genişlet Butonu -->
+                            <button type="button" class="btn-hud-collapse" id="btnCollapseHUD" onclick="toggleHUDCollapse()" title="Paneli küçült veya genişlet">
+                                <span id="hudCollapseIcon">▲</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- İlerleme Çubuğu Satırı -->
+                    <div class="hud-progress-row hud-collapsible-part">
+                        <div class="hud-progress-track">
+                            <div class="hud-progress-fill" id="liveProgressBarFill" style="width:0%;"></div>
+                        </div>
+                        <div class="hud-progress-info">
+                            <span id="liveProgressText">Set İlerlemesi: 0 / 0 (%0)</span>
+                            <span id="liveProgressDetail" style="font-weight:700; color:var(--gold);">Hazır</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="activeWorkoutContainer">
                     <!-- Populated dynamically when a workout is started -->
+                </div>
+
+                <!-- FLOATING DOCK FOR QUICK WORKOUT NAVIGATION -->
+                <div id="workoutFloatingDock" class="workout-floating-dock" style="display:none;">
+                    <button type="button" class="btn-dock-nav" id="btnDockPrev" onclick="goToPrevExercise()">
+                        ⬅️ Önceki
+                    </button>
+                    <div class="dock-ex-title">
+                        <div class="dock-ex-counter" id="dockExCounter">EGZERSİZ 1/6</div>
+                        <div class="dock-ex-name" id="dockExName">Egzersiz Adı</div>
+                    </div>
+                    <button type="button" class="btn-dock-nav next" id="btnDockNext" onclick="goToNextExercise()">
+                        Sonraki ➡️
+                    </button>
+                    <button type="button" class="btn-dock-add" onclick="openAddFinisherModal()" title="İlave hareket veya finisher ekle">
+                        ➕ Ekle
+                    </button>
                 </div>
 
                 <!-- EMBEDDED PROGRAM ATÖLYESİ (KENDİ PROGRAMINI TASARLA) -->
@@ -3699,6 +4149,176 @@
         </div>
     </div>
 
+    <!-- ==================== EXERCISE BUG REPORT MODAL (HATA BİLDİRİMİ) ==================== -->
+    <div id="exerciseBugReportModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 520px;">
+            <div class="modal-header">
+                <span class="modal-title" style="color:#fca5a5;">⚠️ Egzersiz Hata Bildirimi</span>
+                <button class="modal-close" onclick="closeExerciseBugReportModal()">✕</button>
+            </div>
+
+            <!-- Egzersiz Künyesi & Görsel Özeti -->
+            <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:10px; padding:10px 12px; margin-bottom:12px; display:flex; align-items:center; gap:12px;">
+                <div id="bugReportImgPreviewBox" style="width:65px; height:65px; border-radius:8px; overflow:hidden; background:#000; flex-shrink:0; border:1px solid var(--border); display:flex; align-items:center; justify-content:center;">
+                    <img id="bugReportImgPreview" src="" alt="Önizleme" style="max-width:100%; max-height:100%; object-fit:contain;">
+                </div>
+                <div>
+                    <div style="font-size:14.5px; font-weight:900; color:#fff;" id="bugReportExName">Egzersiz Adı</div>
+                    <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;" id="bugReportExMeta">Ekipman • Kas</div>
+                    <div style="font-size:10.5px; color:var(--gold); margin-top:2px;">Bulut: Firebase Firestore Havuzuna Aktarılacak</div>
+                </div>
+            </div>
+
+            <!-- Hata Kategorisi Seçimi -->
+            <div style="margin-bottom:12px;">
+                <label class="form-label" style="margin-bottom:6px;">Hata Türünü Seçin:</label>
+                <div class="bug-cat-grid">
+                    <div class="bug-cat-chip selected" id="bugCat_image_mismatch" onclick="selectBugCategory('image_mismatch')">
+                        <span>🖼️</span> <span>Görsel Uyuşmuyor</span>
+                    </div>
+                    <div class="bug-cat-chip" id="bugCat_equipment_mismatch" onclick="selectBugCategory('equipment_mismatch')">
+                        <span>🏋️</span> <span>Ekipman / Pozisyon</span>
+                    </div>
+                    <div class="bug-cat-chip" id="bugCat_cue_technique" onclick="selectBugCategory('cue_technique')">
+                        <span>📝</span> <span>Form / İpucu Hatalı</span>
+                    </div>
+                    <div class="bug-cat-chip" id="bugCat_name_mismatch" onclick="selectBugCategory('name_mismatch')">
+                        <span>🏷️</span> <span>İsim / Adlandırma</span>
+                    </div>
+                    <div class="bug-cat-chip" id="bugCat_other" onclick="selectBugCategory('other')" style="grid-column: span 2;">
+                        <span>❓</span> <span>Diğer / Genel Aksaklık</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kullanıcı Notu -->
+            <div style="margin-bottom:14px;">
+                <label class="form-label" style="margin-bottom:4px;">Gözünüze çarpan detay (İsteğe bağlı):</label>
+                <textarea id="bugReportUserNote" class="form-input" style="height:70px; resize:none; font-size:12px; padding:8px 10px;" placeholder="Örn: Görselde omuz press yerine bench press gösteriliyor, ayakta dambıl omuz press görseli gelmeli."></textarea>
+            </div>
+
+            <!-- Aksiyon Butonları -->
+            <div style="display:flex; justify-content:flex-end; gap:8px;">
+                <button type="button" class="btn btn-outline" style="padding:9px 14px; font-size:12px;" onclick="closeExerciseBugReportModal()">Vazgeç</button>
+                <button type="button" class="btn btn-gold" id="btnSubmitBugReport" style="padding:9px 18px; font-size:12.5px; font-weight:800; background:#ef4444; border-color:#ef4444; color:#fff;" onclick="submitExerciseBugReport()">
+                    🚀 Firebase Havuzuna Gönder
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== BUG REPORTS POOL MODAL (HATA HAVUZU & AI ONAY) ==================== -->
+    <div id="bugReportsPoolModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 650px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:20px;">📋</span>
+                    <div>
+                        <h3 class="modal-title" style="font-size:15px; margin:0;">Egzersiz Hata Bildirim Havuzu</h3>
+                        <p style="font-size:11px; color:var(--text-secondary); margin:2px 0 0;">Firebase Firestore Canlı Veritabanı</p>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeBugReportsPoolModal()">✕</button>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.3); padding:10px 12px; border-radius:10px;">
+                <div>
+                    <span style="font-size:12.5px; font-weight:800; color:var(--gold);" id="bugPoolCountText">0 Bildirim Bekliyor</span>
+                    <p style="font-size:11px; color:var(--text-secondary); margin:2px 0 0;">AI düzeltme yaptıktan sonra benden okey aldığında silinir.</p>
+                </div>
+                <button type="button" class="btn btn-gold" style="font-size:11px; padding:7px 12px; font-weight:800;" onclick="copyBugReportsToClipboard()">
+                    🤖 AI İçin Görev Emri Kopyala
+                </button>
+            </div>
+
+            <!-- Liste Konteyneri -->
+            <div id="bugReportsPoolList" style="min-height:120px;">
+                <!-- Dynamically populated from Firestore -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== ADD FINISHER & EXTRA EXERCISES MODAL ==================== -->
+    <div id="addFinisherModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 580px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <div>
+                    <h3 class="modal-title" style="font-size:16px; margin:0;">➕ İlave Hareket & Finisher Ekle</h3>
+                    <p style="font-size:11px; color:var(--text-secondary); margin:2px 0 0;">Antrenman erken bittiğinde veya pump hissetmek istediğinizde seansa ekleyin.</p>
+                </div>
+                <button class="modal-close" onclick="closeAddFinisherModal()">✕</button>
+            </div>
+
+            <!-- 1. HIZLI FINISHER PAKETLERİ (TEK DOKUNUŞLA 3 SET) -->
+            <div style="font-size:12px; font-weight:900; color:var(--gold); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">
+                ⚡ Hızlı Finisher Paketleri (Tek Dokunuş):
+            </div>
+
+            <div class="finisher-preset-card">
+                <div>
+                    <div style="font-size:13.5px; font-weight:800; color:#fff;">🛡️ Core & Karın Çelik Zırhı</div>
+                    <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Plank + Hollow Body / Knee Raise</div>
+                    <span class="finisher-badge">3 Set • 30-45s / 12 Tk</span>
+                </div>
+                <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:8px 14px; font-weight:800;" onclick="addPresetFinisher('core_armor')">
+                    ➕ Ekle
+                </button>
+            </div>
+
+            <div class="finisher-preset-card">
+                <div>
+                    <div style="font-size:13.5px; font-weight:800; color:#fff;">🦾 Kol Pump Süperset</div>
+                    <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Dambıl Biceps Curl + Triceps Overhead</div>
+                    <span class="finisher-badge">3 Set • 10-12 Tekrar</span>
+                </div>
+                <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:8px 14px; font-weight:800;" onclick="addPresetFinisher('arms_pump')">
+                    ➕ Ekle
+                </button>
+            </div>
+
+            <div class="finisher-preset-card">
+                <div>
+                    <div style="font-size:13.5px; font-weight:800; color:#fff;">🦅 3D Omuz & Trapez Genişletme</div>
+                    <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Lateral Raise + Face Pull / Halo</div>
+                    <span class="finisher-badge">3 Set • 12-15 Tekrar</span>
+                </div>
+                <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:8px 14px; font-weight:800;" onclick="addPresetFinisher('shoulder_wings')">
+                    ➕ Ekle
+                </button>
+            </div>
+
+            <div class="finisher-preset-card">
+                <div>
+                    <div style="font-size:13.5px; font-weight:800; color:#fff;">🧳 Kavrama & Trapez: Çift Ağırlık Taşıma</div>
+                    <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Dambıl / Kettlebell Farmer's Walk</div>
+                    <span class="finisher-badge">3 Set • 45 Metre / Adım</span>
+                </div>
+                <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:8px 14px; font-weight:800;" onclick="addPresetFinisher('farmers_walk')">
+                    ➕ Ekle
+                </button>
+            </div>
+
+            <div class="finisher-preset-card">
+                <div>
+                    <div style="font-size:13.5px; font-weight:800; color:#fff;">🔥 Kalori & Patlayıcı Güç Finisher</div>
+                    <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Kettlebell / Dambıl Swing + Burpee</div>
+                    <span class="finisher-badge">3 Set • 15 Swing + 8 Burpee</span>
+                </div>
+                <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:8px 14px; font-weight:800;" onclick="addPresetFinisher('cardio_burn')">
+                    ➕ Ekle
+                </button>
+            </div>
+
+            <!-- 2. SERBEST EGZERSİZ SEÇİMİ -->
+            <div style="margin-top:16px; padding-top:14px; border-top:1px dashed var(--border); text-align:center;">
+                <div style="font-size:12px; color:var(--text-secondary); margin-bottom:8px;">Veya kütüphaneden tek tek hareket seçmek için:</div>
+                <button type="button" class="btn btn-outline" style="border-color:var(--cyan); color:var(--cyan); font-weight:800; padding:10px 18px; font-size:12.5px;" onclick="closeAddFinisherModal(); openAddExerciseModal('active');">
+                    🔍 Tüm Egzersiz Kütüphanesinden Seç
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- ==================== HIDEABLE BOTTOM NAVIGATION BAR ==================== -->
     <div class="bottom-nav-wrapper" id="bottomNavWrapper">
         <div class="bottom-pull-handle" onclick="toggleBottomBar()" title="Menüyü Gizle/Göster"></div>
@@ -3751,6 +4371,10 @@
             <div class="more-sheet-btn" onclick="closeMoreSheet(); switchTab('profileTab');">
                 <span>👤</span>
                 <span>Profil & Kilolarım</span>
+            </div>
+            <div class="more-sheet-btn" onclick="closeMoreSheet(); openBugReportsPoolModal();" style="border-color:rgba(239, 68, 68, 0.45); color:#fca5a5;">
+                <span>⚠️</span>
+                <span>Hata Havuzu</span>
             </div>
             <div class="more-sheet-btn" onclick="closeMoreSheet(); forceAppUpdate();" style="border-color:rgba(56, 189, 248, 0.4); color:var(--cyan);">
                 <span>🔄</span>
@@ -4690,6 +5314,9 @@
                             <button type="button" class="btn-diagram-tool" onclick="event.stopPropagation(); openImageLightbox('${photoGuide.form}', '${escapeHTML(ex.name)} - Form Rehberi')" title="Tam ekran mod">
                                 <span class="tool-icon">⛶</span> <span class="tool-text">Tam Ekran</span>
                             </button>
+                            <button type="button" class="btn-diagram-tool btn-report-bug" onclick="event.stopPropagation(); openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '${photoGuide.form}', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}')" title="Görsel veya hareket hatalıysa Firebase hata havuzuna bildir">
+                                <span class="tool-icon">⚠️</span> <span class="tool-text">Hata Bildir</span>
+                            </button>
                         </div>
                         <div class="pos-diagram-img-box" onclick="event.stopPropagation(); openImageLightbox('${photoGuide.form}', '${escapeHTML(ex.name)} - Form Rehberi')">
                             <img src="${photoGuide.form}" alt="${escapeHTML(ex.name)} Form Rehberi" class="pos-diagram-img" loading="lazy">
@@ -5051,16 +5678,376 @@
                 }
             } else if (pickerContext.mode === 'add') {
                 workout.exercises.push(newEx);
+                if (pickerContext.scope === 'active') {
+                    // Set focus to the newly added exercise so user can do it immediately
+                    activeFocusExIndex = workout.exercises.length - 1;
+                    activeFocusSetIndex = null;
+                }
             }
 
             closeExercisePickerModal();
 
             if (pickerContext.scope === 'active') {
+                saveActiveWorkoutStateToStorage();
                 renderActiveWorkout();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
                 renderGeneratedWorkout();
             }
             playAlertSound();
+        }
+
+        // ==================== FINISHER & EXTRA EXERCISES SYSTEM ====================
+        function openAddFinisherModal() {
+            if (!activeWorkoutSession) {
+                alert("Önce bir antrenman başlatmalısınız.");
+                return;
+            }
+            const modal = document.getElementById('addFinisherModal');
+            if (modal) modal.classList.add('active');
+        }
+
+        function closeAddFinisherModal() {
+            const modal = document.getElementById('addFinisherModal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        function addPresetFinisher(presetKey) {
+            if (!activeWorkoutSession) return;
+            const presets = {
+                core_armor: [
+                    { id: 'bw_plank', name: 'Plank', equipment: 'bodyweight', muscle: 'Core, Karın', cue: 'Karnı ve kalçayı sıkın, düz bir hat koruyun.', category: 'core', weightKey: 'bw' },
+                    { id: 'bw_hanging_knee_raise', name: 'Hanging Knee Raise', equipment: 'bodyweight', muscle: 'Alt Karın', cue: 'Salınım yapmadan dizleri göğse çekin.', category: 'core', weightKey: 'bw' }
+                ],
+                arms_pump: [
+                    { id: 'db_hammer_curl', name: 'Dambıl Hammer Curl', equipment: 'dumbbell', muscle: 'Biceps, Ön Kol', cue: 'Dirsekleri gövdeye sabitleyin, nötr tutuşla kaldırın.', category: 'pull', weightKey: 'db_curl' },
+                    { id: 'db_triceps_overhead', name: 'Dambıl Overhead Triceps', equipment: 'dumbbell', muscle: 'Triceps', cue: 'Dirsekleri açmadan baş arkasından yukarı itin.', category: 'push', weightKey: 'db_triceps' }
+                ],
+                shoulder_wings: [
+                    { id: 'db_lateral_raise', name: 'Dambıl Lateral Raise', equipment: 'dumbbell', muscle: 'Yan Omuz', cue: 'Dirsekleri hafif bükülü tutarak yana açın.', category: 'push', weightKey: 'db_lateral' },
+                    { id: 'mach_face_pull', name: 'Kablo / Lastik Face Pull', equipment: 'machine', muscle: 'Arka Omuz, Trapez', cue: 'Halatı alına doğru çekin, kürek kemiklerini sıkın.', category: 'pull', weightKey: 'mach_pull' }
+                ],
+                farmers_walk: [
+                    { id: 'db_farmers_walk', name: 'Dambıl Çift Yürüyüş (Farmer’s Carry)', equipment: 'dumbbell', muscle: 'Kavrama, Trapez, Core', cue: 'Omuzlar geride, göğüs dik, kontrollü adımlarla yürüyün.', category: 'core', weightKey: 'db_carry' }
+                ],
+                cardio_burn: [
+                    { id: 'db_swing', name: 'Dambıl / Kettlebell Swing', equipment: 'dumbbell', muscle: 'Kalça, Arka Bacak, Kondisyon', cue: 'Kalça menteşesiyle patlayıcı güç üretin.', category: 'legs_hinge', weightKey: 'db_swing' },
+                    { id: 'bw_burpee', name: 'Burpee Finisher', equipment: 'bodyweight', muscle: 'Tüm Vücut, Kalp-Damar', cue: 'Hızlıca şınav pozisyonuna inip sıçrayarak kalkın.', category: 'conditioning', weightKey: 'bw' }
+                ]
+            };
+
+            const selectedList = presets[presetKey];
+            if (!selectedList) return;
+
+            const user = getActiveUser();
+            const weights = user.weights || {};
+
+            selectedList.forEach(item => {
+                const found = EXERCISES_DB.find(e => e.id === item.id) || item;
+                const alreadyExists = activeWorkoutSession.exercises.some(e => e.id === found.id);
+                if (!alreadyExists) {
+                    activeWorkoutSession.exercises.push(found);
+                }
+
+                const defaultWeight = found.weightKey && weights[found.weightKey] ? (parseFloat(weights[found.weightKey]) || '') : '';
+                activeWorkoutSetsData[found.id] = [
+                    { setNo: 1, weight: defaultWeight, reps: 12, completed: false, completedAt: null },
+                    { setNo: 2, weight: defaultWeight, reps: 12, completed: false, completedAt: null },
+                    { setNo: 3, weight: defaultWeight, reps: 12, completed: false, completedAt: null }
+                ];
+            });
+
+            closeAddFinisherModal();
+            activeFocusExIndex = activeWorkoutSession.exercises.length - 1;
+            activeFocusSetIndex = 0;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+            playAlertSound();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            alert("🔥 İlave Finisher seansınıza eklendi! Son egzersiz olarak odaklandınız.");
+        }
+
+        // ==================== FIREBASE FIRESTORE BUG REPORT ENGINE ====================
+        let currentBugReportTarget = null;
+        let selectedBugCategory = 'image_mismatch';
+
+        function openExerciseBugReportModal(exId, exName, imageSrc, equip, muscle) {
+            currentBugReportTarget = {
+                id: exId,
+                name: exName,
+                imageSrc: imageSrc || '',
+                equipment: equip || '',
+                muscle: muscle || ''
+            };
+
+            const exNameEl = document.getElementById('bugReportExName');
+            const exMetaEl = document.getElementById('bugReportExMeta');
+            const imgEl = document.getElementById('bugReportImgPreview');
+            const imgBox = document.getElementById('bugReportImgPreviewBox');
+            const noteEl = document.getElementById('bugReportUserNote');
+
+            if (exNameEl) exNameEl.innerText = exName;
+            if (exMetaEl) exMetaEl.innerText = `${equip || 'Genel'} • ${muscle || 'Kas'}`;
+            if (noteEl) noteEl.value = '';
+
+            if (imgEl && imgBox) {
+                if (imageSrc) {
+                    imgEl.src = imageSrc;
+                    imgEl.style.display = 'block';
+                } else {
+                    imgEl.style.display = 'none';
+                    imgBox.innerHTML = '<span style="font-size:24px;">🏋️</span>';
+                }
+            }
+
+            selectBugCategory('image_mismatch');
+            const modal = document.getElementById('exerciseBugReportModal');
+            if (modal) modal.classList.add('active');
+        }
+
+        function closeExerciseBugReportModal() {
+            const modal = document.getElementById('exerciseBugReportModal');
+            if (modal) modal.classList.remove('active');
+            currentBugReportTarget = null;
+        }
+
+        function selectBugCategory(cat) {
+            selectedBugCategory = cat;
+            const cats = ['image_mismatch', 'equipment_mismatch', 'cue_technique', 'name_mismatch', 'other'];
+            cats.forEach(c => {
+                const el = document.getElementById('bugCat_' + c);
+                if (el) el.classList.toggle('selected', c === cat);
+            });
+        }
+
+        async function submitExerciseBugReport() {
+            if (!currentBugReportTarget) return;
+
+            const categoryLabels = {
+                image_mismatch: "Görsel Harekete Uymuyor",
+                equipment_mismatch: "Ekipman / Pozisyon Yanlış",
+                cue_technique: "Form / İpucu Hatalı",
+                name_mismatch: "İsim / Adlandırma Hatalı",
+                other: "Diğer / Genel Aksaklık"
+            };
+
+            const user = getActiveUser();
+            const noteVal = (document.getElementById('bugReportUserNote').value || '').trim();
+            const docId = `bug_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+            const report = {
+                id: docId,
+                exerciseId: currentBugReportTarget.id,
+                exerciseName: currentBugReportTarget.name,
+                category: selectedBugCategory,
+                categoryLabel: categoryLabels[selectedBugCategory] || selectedBugCategory,
+                userNote: noteVal,
+                currentImageSrc: currentBugReportTarget.imageSrc || '',
+                equipment: currentBugReportTarget.equipment || '',
+                muscle: currentBugReportTarget.muscle || '',
+                workoutTitle: (activeWorkoutSession && activeWorkoutSession.title) ? activeWorkoutSession.title : 'Serbest Seans',
+                userId: getActiveUserId(),
+                userName: user.name || 'Ferit',
+                status: 'pending_ai_review',
+                aiResolutionNote: '',
+                createdAt: new Date().toISOString(),
+                createdAtFormatted: new Date().toLocaleString('tr-TR')
+            };
+
+            try {
+                let localReports = [];
+                const raw = localStorage.getItem('celik_kodu_bug_reports');
+                if (raw) localReports = JSON.parse(raw) || [];
+                localReports.unshift(report);
+                localStorage.setItem('celik_kodu_bug_reports', JSON.stringify(localReports));
+            } catch(e) {}
+
+            let cloudSaved = false;
+            if (fbDb && isFirebaseReady) {
+                try {
+                    await fbDb.collection('exercise_bug_reports').doc(docId).set({
+                        ...report,
+                        serverTimestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    cloudSaved = true;
+                    console.log("🔥 Hata bildirimi Firestore'a yazıldı:", docId);
+                } catch(err) {
+                    console.warn("Firestore yazma hatası (Yerelde saklandı):", err);
+                }
+            }
+
+            closeExerciseBugReportModal();
+            playAlertSound();
+            alert(`✅ Bildiriminiz ${cloudSaved ? 'Firebase bulut havuzuna' : 'havuza'} kaydedildi!\n\nAI antrenörüne talimat verdiğinizde bu rapor doğrudan incelenecek ve siz onay verdikten sonra silinecektir.`);
+        }
+
+        async function openBugReportsPoolModal() {
+            const modal = document.getElementById('bugReportsPoolModal');
+            if (modal) modal.classList.add('active');
+
+            const listEl = document.getElementById('bugReportsPoolList');
+            const countEl = document.getElementById('bugPoolCountText');
+            if (listEl) listEl.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary);"><span style="font-size:24px;">🔄</span><br>Firebase veritabanı taranıyor...</div>`;
+
+            let reports = [];
+
+            if (fbDb && isFirebaseReady) {
+                try {
+                    const snap = await fbDb.collection('exercise_bug_reports').get();
+                    snap.forEach(doc => {
+                        const d = doc.data();
+                        d._docId = doc.id;
+                        reports.push(d);
+                    });
+                } catch(e) {
+                    console.warn("Firestore okuma hatası, yerele geçiliyor:", e);
+                }
+            }
+
+            if (reports.length === 0) {
+                try {
+                    const raw = localStorage.getItem('celik_kodu_bug_reports');
+                    if (raw) reports = JSON.parse(raw) || [];
+                } catch(e) {}
+            }
+
+            if (countEl) countEl.innerText = `${reports.length} Bildirim Havuzda`;
+
+            if (reports.length === 0) {
+                if (listEl) {
+                    listEl.innerHTML = `
+                        <div style="text-align:center; padding:40px 20px; color:var(--text-secondary);">
+                            <span style="font-size:36px;">🎉</span>
+                            <div style="font-size:14px; font-weight:800; color:#fff; margin-top:8px;">Hata Havuzu Tertemiz!</div>
+                            <p style="font-size:12px; margin-top:4px;">Şu an bekleyen veya bildirilmiş bir egzersiz hatası bulunmuyor.</p>
+                        </div>
+                    `;
+                }
+                return;
+            }
+
+            if (listEl) {
+                listEl.innerHTML = reports.map(r => {
+                    const docId = r._docId || r.id;
+                    const isPending = r.status === 'pending_ai_review';
+                    const isProcessed = r.status === 'ai_processed_awaiting_user_ok';
+                    const statusText = isPending ? '🟡 AI İncelemesi Bekliyor' : (isProcessed ? '🔵 AI Düzeltti (Onay Bekliyor)' : '🟢 Tamamlandı');
+
+                    return `
+                        <div class="bug-pool-card ${isPending ? 'pending' : (isProcessed ? 'processed' : 'resolved')}">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                                <div>
+                                    <div style="font-size:14px; font-weight:900; color:#fff;">
+                                        ${escapeHTML(r.exerciseName || r.exerciseId)}
+                                    </div>
+                                    <div style="font-size:11px; color:var(--gold); font-weight:700; margin-top:2px;">
+                                        ${escapeHTML(r.categoryLabel || r.category)}
+                                    </div>
+                                </div>
+                                <span style="font-size:10.5px; font-weight:800; padding:2px 7px; border-radius:4px; background:rgba(255,255,255,0.08);">
+                                    ${statusText}
+                                </span>
+                            </div>
+
+                            ${r.userNote ? `
+                                <div style="font-size:12px; color:#cbd5e1; margin-top:8px; background:rgba(0,0,0,0.3); padding:6px 10px; border-radius:6px; border-left:2px solid var(--cyan);">
+                                    💬 <em>"${escapeHTML(r.userNote)}"</em>
+                                </div>
+                            ` : ''}
+
+                            ${r.aiResolutionNote ? `
+                                <div style="font-size:11.5px; color:#86efac; margin-top:6px; background:rgba(34,197,94,0.1); padding:6px 10px; border-radius:6px;">
+                                    🤖 <strong>AI Notu:</strong> ${escapeHTML(r.aiResolutionNote)}
+                                </div>
+                            ` : ''}
+
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; font-size:10.5px; color:var(--text-secondary); flex-wrap:wrap; gap:6px;">
+                                <span>📅 ${escapeHTML(r.createdAtFormatted || (r.createdAt ? r.createdAt.substring(0, 16) : ''))}</span>
+                                <button type="button" class="btn btn-outline" style="border-color:#22c55e; color:#86efac; font-size:11px; padding:4px 10px; font-weight:800;" onclick="confirmAndDeleteBugReport('${docId}')">
+                                    ✅ Onayla & Havuzdan Sil
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function closeBugReportsPoolModal() {
+            const modal = document.getElementById('bugReportsPoolModal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        async function confirmAndDeleteBugReport(docId) {
+            if (!confirm("Bu hata düzeltmesini onaylıyor musunuz? Kayıt Firebase Firestore havuzundan kalıcı olarak silinecektir.")) {
+                return;
+            }
+
+            if (fbDb && isFirebaseReady) {
+                try {
+                    await fbDb.collection('exercise_bug_reports').doc(docId).delete();
+                    console.log("🔥 Firebase dokümanı silindi:", docId);
+                } catch(e) {
+                    console.warn("Firestore silme hatası:", e);
+                }
+            }
+
+            try {
+                const raw = localStorage.getItem('celik_kodu_bug_reports');
+                if (raw) {
+                    let list = JSON.parse(raw) || [];
+                    list = list.filter(r => (r._docId !== docId && r.id !== docId));
+                    localStorage.setItem('celik_kodu_bug_reports', JSON.stringify(list));
+                }
+            } catch(e) {}
+
+            alert("✅ Kayıt başarıyla silindi ve havuz güncellendi.");
+            openBugReportsPoolModal();
+        }
+
+        async function copyBugReportsToClipboard() {
+            let reports = [];
+            if (fbDb && isFirebaseReady) {
+                try {
+                    const snap = await fbDb.collection('exercise_bug_reports').get();
+                    snap.forEach(doc => {
+                        const d = doc.data();
+                        d._docId = doc.id;
+                        reports.push(d);
+                    });
+                } catch(e) {}
+            }
+            if (reports.length === 0) {
+                try {
+                    const raw = localStorage.getItem('celik_kodu_bug_reports');
+                    if (raw) reports = JSON.parse(raw) || [];
+                } catch(e) {}
+            }
+
+            if (reports.length === 0) {
+                alert("Havuzda bekleyen hata bildirimi bulunmuyor.");
+                return;
+            }
+
+            let text = "Antigravity AI Antrenörüne Görev Emri:\n";
+            text += "Aşağıdaki egzersiz hata bildirimleri antrenman esnasında Firebase havuzuna kaydedildi. Lütfen kodda ve görsellerde düzeltmeleri yap:\n\n";
+
+            reports.forEach((r, idx) => {
+                text += `${idx + 1}. [${r.exerciseId}] ${r.exerciseName}\n`;
+                text += `   - Hata Türü: ${r.categoryLabel || r.category}\n`;
+                text += `   - Kullanıcı Notu: ${r.userNote || 'Belirtilmedi'}\n`;
+                text += `   - Mevcut Görsel: ${r.currentImageSrc || 'Yok'}\n`;
+                text += `   - Rapor ID: ${r._docId || r.id}\n\n`;
+            });
+
+            text += "Düzeltmeleri tamamladıktan sonra bana rapor ver, benden onay aldıktan sonra bu kayıtları Firebase'den sileceğiz.";
+
+            try {
+                await navigator.clipboard.writeText(text);
+                alert("📋 Hazır AI Talimat Metni panoya kopyalandı!\n\nŞimdi sohbet alanına yapıştırıp gönderebilirsiniz.");
+            } catch(e) {
+                prompt("Aşağıdaki metni kopyalayıp AI sohbetine iletebilirsiniz:", text);
+            }
         }
 
         function removeExerciseFromWorkout(exId, scope = 'generated') {
@@ -5120,28 +6107,100 @@
         }
 
         // ==================== ACTIVE LIVE WORKOUT TRACKER ====================
+        let noSleepVideoEl = null;
+        let wakeLockKeepAliveTimer = null;
+        let isHUDCollapsed = false;
+
+        function initNoSleepVideoFallback() {
+            if (noSleepVideoEl) return;
+            try {
+                // 1x1 sessiz video akışı (Canvas captureStream ile oluşturulur, iOS Safari & Android WebViews ekranı kapatmaz)
+                const canvas = document.createElement('canvas');
+                canvas.width = 1;
+                canvas.height = 1;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(0, 0, 1, 1);
+                if (canvas.captureStream) {
+                    const stream = canvas.captureStream(1);
+                    noSleepVideoEl = document.createElement('video');
+                    noSleepVideoEl.setAttribute('playsinline', '');
+                    noSleepVideoEl.setAttribute('muted', '');
+                    noSleepVideoEl.setAttribute('loop', '');
+                    noSleepVideoEl.muted = true;
+                    noSleepVideoEl.loop = true;
+                    noSleepVideoEl.style.position = 'fixed';
+                    noSleepVideoEl.style.top = '-9999px';
+                    noSleepVideoEl.style.left = '-9999px';
+                    noSleepVideoEl.style.width = '1px';
+                    noSleepVideoEl.style.height = '1px';
+                    noSleepVideoEl.style.opacity = '0.01';
+                    noSleepVideoEl.style.pointerEvents = 'none';
+                    noSleepVideoEl.srcObject = stream;
+                    document.body.appendChild(noSleepVideoEl);
+                }
+            } catch(e) {
+                console.warn("NoSleep fallback init:", e);
+            }
+        }
+
         async function requestWakeLock() {
             if (!isWakeLockEnabled) return;
+            let ok = false;
             if ('wakeLock' in navigator) {
                 try {
                     wakeLockSentinel = await navigator.wakeLock.request('screen');
-                    updateWakeLockUI(true);
+                    ok = true;
                     wakeLockSentinel.addEventListener('release', () => {
-                        updateWakeLockUI(false);
+                        if (activeWorkoutSession && isWakeLockEnabled) {
+                            setTimeout(() => { if (activeWorkoutSession && isWakeLockEnabled) requestWakeLock(); }, 1500);
+                        } else {
+                            updateWakeLockUI(false);
+                        }
                     });
                 } catch (err) {
-                    console.warn("WakeLock alınamadı:", err);
-                    updateWakeLockUI(false);
+                    console.warn("WakeLock request:", err);
                 }
+            }
+
+            // Fallback video player (iOS Safari'de ekran kararmasını kesin olarak durdurur)
+            try {
+                if (!noSleepVideoEl) initNoSleepVideoFallback();
+                if (noSleepVideoEl) {
+                    noSleepVideoEl.play().then(() => { ok = true; }).catch(() => {});
+                }
+            } catch(e) {}
+
+            updateWakeLockUI(ok || ('wakeLock' in navigator));
+
+            // Periyodik kontrol: Antrenman devam ettiği sürece ekran kilidinin canlı olduğundan emin ol
+            if (!wakeLockKeepAliveTimer) {
+                wakeLockKeepAliveTimer = setInterval(() => {
+                    if (activeWorkoutSession && isWakeLockEnabled) {
+                        if (!wakeLockSentinel && 'wakeLock' in navigator) {
+                            requestWakeLock();
+                        }
+                    } else {
+                        clearInterval(wakeLockKeepAliveTimer);
+                        wakeLockKeepAliveTimer = null;
+                    }
+                }, 20000);
             }
         }
 
         function releaseWakeLock() {
             if (wakeLockSentinel) {
-                wakeLockSentinel.release();
+                try { wakeLockSentinel.release(); } catch(e) {}
                 wakeLockSentinel = null;
-                updateWakeLockUI(false);
             }
+            if (noSleepVideoEl && !noSleepVideoEl.paused) {
+                try { noSleepVideoEl.pause(); } catch(e) {}
+            }
+            if (wakeLockKeepAliveTimer) {
+                clearInterval(wakeLockKeepAliveTimer);
+                wakeLockKeepAliveTimer = null;
+            }
+            updateWakeLockUI(false);
         }
 
         function toggleWakeLockManual() {
@@ -5165,6 +6224,32 @@
                 el.innerHTML = "⚪ Ekran Normal";
                 el.title = "Ekran normal zaman aşımında kapanacaktır (Dokunarak açık tutabilirsiniz)";
             }
+        }
+
+        function toggleHUDCollapse() {
+            isHUDCollapsed = !isHUDCollapsed;
+            const hud = document.getElementById('activeWorkoutHUD');
+            const icon = document.getElementById('hudCollapseIcon');
+            if (hud) hud.classList.toggle('collapsed', isHUDCollapsed);
+            if (icon) icon.innerText = isHUDCollapsed ? '▼' : '▲';
+        }
+
+        function adjustTimer(deltaSec) {
+            timerRemaining = Math.max(0, timerRemaining + deltaSec);
+            updateTimerDisplay();
+            if (!isTimerRunning && timerRemaining > 0) {
+                startTimer();
+            }
+        }
+
+        function skipRestTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            timerRemaining = 0;
+            updateTimerDisplay();
+            playAlertSound();
+            const badge = document.getElementById('hudRestStatusBadge');
+            if (badge) badge.innerText = "Hazır";
         }
 
         document.addEventListener('visibilitychange', async () => {
@@ -5536,10 +6621,14 @@
         function renderActiveWorkout() {
             const container = document.getElementById('activeWorkoutContainer');
             const liveTrackerBar = document.querySelector('.live-tracker-bar');
+            const hud = document.getElementById('activeWorkoutHUD');
+            const dock = document.getElementById('workoutFloatingDock');
             const studioSec = document.getElementById('studioSectionInWorkout');
 
             if (!activeWorkoutSession || !container) {
                 if (liveTrackerBar) liveTrackerBar.style.display = 'none';
+                if (hud) hud.style.display = 'none';
+                if (dock) dock.style.display = 'none';
                 if (studioSec) studioSec.style.display = 'block';
                 if (container) {
                     const user = getActiveUser();
@@ -5756,6 +6845,7 @@
             }
 
             if (liveTrackerBar) liveTrackerBar.style.display = 'block';
+            if (hud) hud.style.display = 'block';
             if (studioSec) studioSec.style.display = 'none';
 
             const s = activeWorkoutSession;
@@ -5823,6 +6913,19 @@
                     if (!eSets.every(st => st.completed)) allWorkoutDone = false;
                 });
 
+                // Update and display floating bottom dock
+                if (dock) {
+                    dock.style.display = 'flex';
+                    const dockCounter = document.getElementById('dockExCounter');
+                    const dockName = document.getElementById('dockExName');
+                    const btnDockPrev = document.getElementById('btnDockPrev');
+                    const btnDockNext = document.getElementById('btnDockNext');
+                    if (dockCounter) dockCounter.innerText = `EGZERSİZ ${activeFocusExIndex + 1} / ${s.exercises.length}`;
+                    if (dockName) dockName.innerText = ex ? ex.name : '';
+                    if (btnDockPrev) btnDockPrev.disabled = (activeFocusExIndex === 0);
+                    if (btnDockNext) btnDockNext.disabled = (activeFocusExIndex === s.exercises.length - 1);
+                }
+
                 container.innerHTML = `
                     <div class="workout-header-card" style="margin-bottom:12px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
@@ -5867,9 +6970,12 @@
                                 <h2 style="font-size:20px; font-weight:900; color:#fff; line-height:1.2;">
                                     ${escapeHTML(ex.name)}
                                 </h2>
-                                <div style="display:flex; gap:4px; flex-shrink:0;">
+                                <div style="display:flex; gap:4px; flex-shrink:0; align-items:center;">
                                     <span class="ex-badge badge-equip">${equipLabels[ex.equipment] || ex.equipment}</span>
                                     <span class="ex-badge badge-muscle">${escapeHTML(ex.muscle ? ex.muscle.split(',')[0] : '')}</span>
+                                    <button type="button" class="btn-report-mini" onclick="openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}')" title="Bu egzersiz veya görsel hatalıysa bildir">
+                                        ⚠️ Bildir
+                                    </button>
                                 </div>
                             </div>
                             <div style="font-size:12px; color:var(--text-secondary); margin-top:3px;">
@@ -5971,9 +7077,14 @@
 
                                 <!-- HERO COMPLETE SET ACTION -->
                                 ${currentSet.completed ? `
-                                    <button class="btn btn-outline" style="width:100%; padding:14px; font-size:13.5px; border-color:#22c55e; color:#86efac; font-weight:800;" onclick="toggleSetStatus('${ex.id}', ${currentSetIdx})">
+                                    <button class="btn btn-outline" style="width:100%; padding:13px; font-size:13.5px; border-color:#22c55e; color:#86efac; font-weight:800;" onclick="toggleSetStatus('${ex.id}', ${currentSetIdx})">
                                         ✅ Bu Set Tamamlandı (Düzeltmek İçin Dokun)
                                     </button>
+                                    ${firstIncompleteIdx !== -1 ? `
+                                        <button class="btn btn-gold" style="width:100%; padding:14px; font-size:14.5px; font-weight:900; margin-top:8px; box-shadow:0 4px 15px rgba(245,158,11,0.4);" onclick="selectFocusSet('${ex.id}', ${firstIncompleteIdx})">
+                                            ▶️ Sıradaki Sete Geç (Set ${sets[firstIncompleteIdx].setNo})
+                                        </button>
+                                    ` : ''}
                                 ` : `
                                     <button class="btn btn-gold" style="width:100%; padding:15px; font-size:15px; font-weight:900; box-shadow:0 4px 15px rgba(245,158,11,0.4);" onclick="completeSetAndStartRest('${ex.id}', ${currentSetIdx})">
                                         ▶️ SETİ BİTİR & DİNLEN (${s.scheme.rest || 45}s)
@@ -5984,13 +7095,25 @@
 
                         <!-- EXERCISE COMPLETION BANNER -->
                         ${isAllSetsDone ? `
-                            <div style="background:rgba(34, 197, 94, 0.12); border:1.5px solid #22c55e; border-radius:10px; padding:12px; text-align:center; color:#86efac; margin:12px 0;">
-                                <div style="font-weight:900; font-size:14px;">🎉 ${escapeHTML(ex.name)} Tüm Setleri Bitti!</div>
+                            <div style="background:rgba(34, 197, 94, 0.15); border:1.5px solid #22c55e; border-radius:12px; padding:16px; text-align:center; color:#86efac; margin:14px 0;">
+                                <div style="font-weight:900; font-size:16px;">🎉 ${escapeHTML(ex.name)} Tüm Setleri Bitti!</div>
                                 ${activeFocusExIndex < s.exercises.length - 1 ? `
-                                    <button class="btn btn-gold" style="margin-top:8px; padding:8px 16px; font-size:12px;" onclick="goToNextExercise()">
-                                        Sıradaki Harekete Geç ➔
+                                    <button class="btn-hero-next-ex" onclick="goToNextExercise()">
+                                        Sıradaki Harekete Geç (${activeFocusExIndex + 2}/${s.exercises.length}) ➔
                                     </button>
-                                ` : ''}
+                                ` : `
+                                    <div style="margin-top:8px; font-size:12.5px; color:#fde68a;">
+                                        Tüm planlanan egzersizler bitti! İster ilave finisher ekleyin, ister günlüğe kaydedin.
+                                    </div>
+                                    <div style="display:flex; gap:8px; justify-content:center; margin-top:12px; flex-wrap:wrap;">
+                                        <button class="btn btn-outline" style="border-color:var(--cyan); color:var(--cyan); font-weight:800; font-size:12.5px; padding:11px 18px;" onclick="openAddFinisherModal()">
+                                            ➕ İlave Finisher Ekle
+                                        </button>
+                                        <button class="btn btn-gold" style="font-weight:900; font-size:13.5px; padding:11px 22px;" onclick="openCompleteModal()">
+                                            🏁 Antrenmanı Bitir & Kaydet
+                                        </button>
+                                    </div>
+                                `}
                             </div>
                         ` : ''}
 
@@ -5998,6 +7121,12 @@
                         <div class="gym-flow-actions">
                             <button class="btn-gym-action warn" onclick="deferExerciseToEnd('${ex.id}')" title="Bu alet veya dambıl şu an başkası tarafından kullanılıyorsa seansın sonuna ertele">
                                 ⏳ Alet Dolu (Sona Ertele)
+                            </button>
+                            <button class="btn-gym-action" style="border-color:rgba(56, 189, 248, 0.4); color:var(--cyan);" onclick="openAddFinisherModal()" title="İlave hareket ekle">
+                                ➕ İlave Egzersiz
+                            </button>
+                            <button class="btn-gym-action" style="border-color:rgba(239, 68, 68, 0.4); color:#fca5a5;" onclick="openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}')" title="Hata bildir">
+                                ⚠️ Hata Bildir
                             </button>
                             <button class="btn-gym-action" onclick="moveExerciseOrder('${ex.id}', -1)" title="Sırayı bir öne al">
                                 ⬆️ Öne Al
@@ -6048,6 +7177,8 @@
             }
 
             // ==================== MODE 2: TÜM LİSTE GÖRÜNÜMÜ (LIST VIEW) ====================
+            if (dock) dock.style.display = 'none';
+
             container.innerHTML = `
                 <div class="workout-header-card" style="margin-bottom:16px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
@@ -6081,6 +7212,9 @@
                                 <div class="ex-tag-group">
                                     <span class="ex-badge badge-equip">${equipLabels[ex.equipment] || ex.equipment}</span>
                                     <span class="ex-badge badge-muscle">${escapeHTML(ex.muscle ? ex.muscle.split(',')[0] : '')}</span>
+                                    <button type="button" class="btn-report-mini" onclick="openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}')" title="Bu egzersiz veya görsel hatalıysa bildir">
+                                        ⚠️ Bildir
+                                    </button>
                                 </div>
                             </div>
 
@@ -6182,9 +7316,12 @@
                     `;
                 }).join('')}
 
-                <div style="text-align:center; margin:16px 0 24px;">
-                    <button class="btn btn-outline" style="border-style:dashed; border-color:var(--cyan); color:var(--cyan); font-size:12.5px; padding:10px 18px;" onclick="openAddExerciseModal('active')">
-                        ➕ Bu Antrenmana Yeni Hareket Ekle
+                <div style="text-align:center; margin:16px 0 24px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                    <button class="btn btn-outline" style="border-style:dashed; border-color:var(--cyan); color:var(--cyan); font-size:12.5px; padding:10px 18px; font-weight:700;" onclick="openAddExerciseModal('active')">
+                        ➕ Yeni Hareket Ekle
+                    </button>
+                    <button class="btn btn-outline" style="border-color:var(--gold); color:var(--gold); font-size:12.5px; padding:10px 18px; font-weight:800;" onclick="openAddFinisherModal()">
+                        ⚡ Hızlı Finisher / İlave Set Ekle
                     </button>
                 </div>
 
@@ -6233,18 +7370,25 @@
             }
 
             // In focus mode: if this was the last incomplete set of this exercise, advance focus to next exercise!
+            let movedExercise = false;
             if (activeWorkoutViewMode === 'focus' && activeWorkoutSession) {
                 const allDoneForEx = sets.every(s => s.completed);
                 if (allDoneForEx && activeFocusExIndex < activeWorkoutSession.exercises.length - 1) {
                     activeFocusExIndex++;
                     activeFocusSetIndex = null;
+                    movedExercise = true;
                 } else {
-                    activeFocusSetIndex = null;
+                    const nextInc = sets.findIndex(s => !s.completed);
+                    activeFocusSetIndex = nextInc !== -1 ? nextInc : null;
                 }
             }
 
             saveActiveWorkoutStateToStorage();
             renderActiveWorkout();
+
+            if (movedExercise) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
 
             // TRIGGER REST TIMER
             const restSecs = activeWorkoutSession && activeWorkoutSession.scheme ? (activeWorkoutSession.scheme.rest || 45) : 45;
@@ -6252,6 +7396,9 @@
             startTimer();
             playAlertSound();
             if (navigator.vibrate) navigator.vibrate([120, 80, 120]);
+
+            // Ekran kilidini canlı tut
+            requestWakeLock();
         }
 
         function toggleSetStatus(exId, setIdx) {
