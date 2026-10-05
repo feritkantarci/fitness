@@ -79,15 +79,16 @@ def list_reports():
 
         print(f"\n📋 Firebase Hata Havuzu ({len(reports)} Bildirim):")
         print("=" * 80)
-        for i, r in enumerate(reports, 1):
             ex_id = r.get("exerciseId", "N/A")
             ex_name = r.get("exerciseName", "N/A")
             cat = r.get("categoryLabel") or r.get("category", "N/A")
             status = r.get("status", "pending_ai_review")
             user_note = r.get("userNote", "—")
+            source = r.get("sourceScreen") or r.get("workoutTitle", "Belirtilmedi")
             created = r.get("createdAt", "")[:19].replace("T", " ")
             print(f"[{i}] ID: {r['_doc_id']}")
             print(f"    Egzersiz : {ex_name} ({ex_id})")
+            print(f"    Ekran    : {source}")
             print(f"    Kategori : {cat}")
             print(f"    Durum    : {status}")
             print(f"    Not      : {user_note}")
@@ -145,6 +146,7 @@ def generate_ai_prompt():
     print("Aşağıdaki egzersiz hata bildirimleri antrenman esnasında kaydedildi. Lütfen kodda ve görsel eşleştirmelerinde gerekli düzeltmeleri yap:\n")
     for r in reports:
         print(f"- Egzersiz: {r.get('exerciseName')} (ID: {r.get('exerciseId')})")
+        print(f"  Bulunduğu Ekran: {r.get('sourceScreen', r.get('workoutTitle', 'Belirtilmedi'))}")
         print(f"  Hata Türü: {r.get('categoryLabel', r.get('category'))}")
         print(f"  Mevcut Görsel: {r.get('currentImageSrc', 'Yok')}")
         print(f"  Kullanıcı Notu: {r.get('userNote', 'Belirtilmedi')}")
