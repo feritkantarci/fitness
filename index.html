@@ -2962,10 +2962,10 @@
             z-index: 1050;
         }
         #exerciseDetailModal {
-            z-index: 1200;
+            z-index: 99999 !important;
         }
         #exerciseBugReportModal {
-            z-index: 1300;
+            z-index: 100001 !important;
         }
         .modal-box {
             background: #0f172a;
@@ -6126,14 +6126,14 @@
                 const pNames = (ex.primaryMuscles || []).map(m => (TARGET_REGIONS[m] ? TARGET_REGIONS[m].name : m)).join(', ') || ex.muscle || 'Kas Grubu';
 
                 return `
-                    <div class="ex-card" style="margin-bottom:8px; padding:9px 12px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; transition:border-color 0.2s;" onmouseenter="this.style.borderColor='rgba(245,158,11,0.4)'" onmouseleave="this.style.borderColor='var(--border)'">
+                    <div class="ex-card" style="margin-bottom:8px; padding:10px 12px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; transition:border-color 0.2s;" onmouseenter="this.style.borderColor='rgba(245,158,11,0.4)'" onmouseleave="this.style.borderColor='var(--border)'">
                         <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
-                            <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1;">
-                                <div style="width:40px; height:40px; border-radius:6px; background:#000; overflow:hidden; flex-shrink:0; border:1px solid var(--border); display:flex; align-items:center; justify-content:center;">
+                            <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1; cursor:pointer;" onclick="togglePickerExerciseForm('${ex.id}')">
+                                <div style="width:42px; height:42px; border-radius:6px; background:#000; overflow:hidden; flex-shrink:0; border:1px solid var(--border); display:flex; align-items:center; justify-content:center;">
                                     ${thumbImg ? `<img src="${thumbImg}" style="width:100%; height:100%; object-fit:contain;" alt="${escapeHTML(ex.name)}">` : '🏋️'}
                                 </div>
                                 <div style="min-width:0; flex:1;">
-                                    <div style="font-size:13px; font-weight:800; color:#fff; line-height:1.2; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
+                                    <div style="font-size:13.5px; font-weight:800; color:#fff; line-height:1.2;">
                                         ${escapeHTML(ex.name)}
                                     </div>
                                     <div style="display:flex; gap:4px; flex-wrap:wrap; margin-top:3px;">
@@ -6143,16 +6143,37 @@
                                 </div>
                             </div>
                             <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
-                                <button type="button" class="btn btn-outline" style="padding:3px 7px; font-size:10.5px;" onclick="event.stopPropagation(); openExerciseDetailModal('${ex.id}')" title="İncele">👁️</button>
+                                <button type="button" class="btn btn-outline" style="padding:4px 8px; font-size:11px; color:var(--cyan); border-color:rgba(56,189,248,0.5); font-weight:800; display:flex; align-items:center; gap:2px;" onclick="event.stopPropagation(); togglePickerExerciseForm('${ex.id}')" title="Formu Gör">
+                                    👁️ Form
+                                </button>
                                 <button type="button" class="btn-report-mini" onclick="event.stopPropagation(); openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '${thumbImg}', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}', 'Alternatif Seçici')" title="Bu harekette hata bildir">⚠️</button>
                             </div>
                         </div>
 
                         ${ex.cue ? `
-                            <div style="font-size:11px; color:var(--text-secondary); line-height:1.3; background:rgba(0,0,0,0.25); border-radius:4px; padding:4px 8px; margin-top:6px;">
+                            <div style="font-size:11px; color:var(--text-secondary); line-height:1.3; background:rgba(0,0,0,0.25); border-radius:4px; padding:5px 8px; margin-top:6px;">
                                 💡 ${escapeHTML(ex.cue)}
                             </div>
                         ` : ''}
+
+                        <!-- INLINE FORM EXPANDER -->
+                        <div id="picker_form_expand_${ex.id}" style="display:none; margin-top:8px; padding-top:8px; border-top:1px dashed rgba(255,255,255,0.12);">
+                            ${thumbImg ? `
+                                <div style="text-align:center; background:#000; border-radius:8px; overflow:hidden; border:1px solid var(--border); margin-bottom:8px; min-height:160px; display:flex; align-items:center; justify-content:center;">
+                                    <img src="${thumbImg}" style="max-width:100%; max-height:45vh; object-fit:contain; display:block; margin:0 auto;" alt="${escapeHTML(ex.name)} Form">
+                                </div>
+                            ` : `
+                                <div style="text-align:center; padding:16px; color:var(--text-secondary); font-size:11.5px;">Görsel form rehberi optimize ediliyor.</div>
+                            `}
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
+                                <button type="button" class="btn btn-outline" style="font-size:10.5px; padding:4px 9px; color:var(--cyan); border-color:var(--cyan); font-weight:700;" onclick="event.stopPropagation(); openExerciseDetailModal('${ex.id}')">
+                                    🔍 Tam Ekran & Anatomi
+                                </button>
+                                <button type="button" class="btn btn-outline" style="font-size:10.5px; padding:4px 9px;" onclick="event.stopPropagation(); togglePickerExerciseForm('${ex.id}')">
+                                    ▲ Kapat
+                                </button>
+                            </div>
+                        </div>
 
                         <div style="display:flex; justify-content:flex-end; margin-top:6px;">
                             <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:5px 14px; font-weight:800; box-shadow:0 0 10px rgba(245,158,11,0.25);" onclick="selectExerciseFromPicker('${ex.id}')">
@@ -6176,6 +6197,16 @@
             }
 
             container.innerHTML = cardsHtml;
+        }
+
+        function togglePickerExerciseForm(exId) {
+            const box = document.getElementById('picker_form_expand_' + exId);
+            if (!box) {
+                openExerciseDetailModal(exId);
+                return;
+            }
+            const isHidden = box.style.display === 'none' || !box.style.display;
+            box.style.display = isHidden ? 'block' : 'none';
         }
 
         function selectExerciseFromPicker(newExId) {
@@ -12138,7 +12169,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=37')
+                navigator.serviceWorker.register('./sw.js?v=47')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
