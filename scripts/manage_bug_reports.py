@@ -79,6 +79,7 @@ def list_reports():
 
         print(f"\n📋 Firebase Hata Havuzu ({len(reports)} Bildirim):")
         print("=" * 80)
+        for i, r in enumerate(reports, 1):
             ex_id = r.get("exerciseId", "N/A")
             ex_name = r.get("exerciseName", "N/A")
             cat = r.get("categoryLabel") or r.get("category", "N/A")
