@@ -3415,13 +3415,17 @@
 
                         <!-- ACCORDION BODY -->
                         <div id="studioAccordionBody" style="display:none; margin-top:16px; border-top:1px solid var(--border); padding-top:16px;">
+                            <!-- DYNAMIC EDITING DAY BANNER (Shown when editing a scheduled program) -->
+                            <div id="studioEditingBannerContainer"></div>
+
                             <!-- TOP BAR: Title & Actions -->
                             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; border-bottom:1px solid var(--border); padding-bottom:12px;">
                                 <div>
-                                    <span style="font-size:14px; font-weight:800; color:#fff;">Özel Antrenman Taslağı</span>
-                                    <p style="font-size:11px; color:var(--text-secondary); margin-top:2px;">Bölge seçin, hareketleri ekleyin, dengeyi görün.</p>
+                                    <span style="font-size:14px; font-weight:800; color:#fff;" id="studioHeaderTitle">Özel Antrenman Taslağı</span>
+                                    <p style="font-size:11px; color:var(--text-secondary); margin-top:2px;" id="studioHeaderSub">Bölge seçin, hareketleri ekleyin, dengeyi görün.</p>
                                 </div>
-                                <div style="display:flex; gap:6px;">
+                                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                                    <button class="btn btn-outline" style="font-size:11px; padding:6px 10px; color:var(--cyan); border-color:var(--cyan);" onclick="promptAssignStudioRoutineToDay()">📅 Güne Planla</button>
                                     <button class="btn btn-outline" style="font-size:11px; padding:6px 10px;" onclick="resetCustomRoutine()">🗑️ Sıfırla</button>
                                     <button class="btn btn-gold" style="font-size:11px; padding:6px 14px; font-weight:800;" onclick="startActiveWorkoutFromCustom()">🏋️ Başlat</button>
                                 </div>
@@ -3461,7 +3465,9 @@
                                         <span style="font-size:12.5px; font-weight:800; color:var(--gold);">Program Taslağı</span>
                                         <span id="customRoutineCountBadge" class="auth-role-tag role-admin" style="font-size:10px;">0 Hareket</span>
                                     </div>
-                                    <button class="btn btn-outline" style="font-size:10.5px; padding:4px 8px;" onclick="saveCustomRoutineToLibrary()">💾 Kaydet</button>
+                                    <div id="studioSaveActionsGroup" style="display:flex; gap:6px; flex-wrap:wrap;">
+                                        <button class="btn btn-outline" style="font-size:10.5px; padding:4px 8px;" onclick="saveCustomRoutineToLibrary()">💾 Kütüphaneye Kaydet</button>
+                                    </div>
                                 </div>
 
                                 <div style="display:grid; grid-template-columns: 1fr auto; gap:8px; margin-bottom:10px;">
@@ -3854,7 +3860,7 @@
 
     <!-- ==================== WEEKLY SCHEDULE DAY MODAL ==================== -->
     <div id="scheduleDayModal" class="modal-overlay">
-        <div class="modal-box" style="max-width: 520px; max-height: 92vh; overflow-y: auto;">
+        <div class="modal-box" style="max-width: 560px; max-height: 92vh; overflow-y: auto;">
             <div class="modal-header">
                 <div>
                     <span class="auth-role-tag role-admin" id="schedModalDayBadge" style="font-size:10px;">HAFTALIK PLAN</span>
@@ -3863,22 +3869,54 @@
                 <button class="modal-close" onclick="closeScheduleDayModal()">✕</button>
             </div>
 
-            <p style="font-size:12px; color:var(--text-secondary); margin:0 0 14px 0; line-height:1.4;">
-                Bu güne atamak istediğiniz antrenmanı seçin. Salona gittiğinizde tek dokunuşla başlatabileceksiniz.
+            <p id="schedModalDaySubDesc" style="font-size:12px; color:var(--text-secondary); margin:0 0 14px 0; line-height:1.4;">
+                Bu güne atanan antrenmanın içeriğini inceleyin, düzenleyin veya farklı bir program atayın.
             </p>
 
-            <!-- OPTIONS LIST -->
+            <!-- ASSIGNED WORKOUT DETAILED CONTENT SECTION -->
+            <div id="schedAssignedWorkoutSection" style="margin-bottom:14px;">
+                <!-- Populated dynamically: Shows assigned exercises, sets, reps, and direct edit button -->
+            </div>
+
+            <!-- OPTIONS LIST FOR REPLACING / SELECTING -->
             <div id="schedModalOptionsList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">
                 <!-- Populated dynamically -->
             </div>
 
-            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top:1px solid var(--border); padding-top:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top:1px solid var(--border); padding-top:12px; flex-wrap:wrap;">
                 <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 12px; color:#fca5a5; border-color:rgba(239,68,68,0.3);" onclick="setDayAsRest()">
                     🧘 Dinlenme Günü Yap
                 </button>
-                <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 14px;" onclick="closeScheduleDayModal()">
-                    Kapat
-                </button>
+                <div style="display:flex; gap:6px;">
+                    <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 14px;" onclick="closeScheduleDayModal()">
+                        Kapat
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== WORKOUT PREVIEW MODAL (PROGRAM İÇERİĞİ) ==================== -->
+    <div id="workoutPreviewModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 560px; max-height: 92vh; overflow-y: auto;">
+            <div class="modal-header">
+                <div>
+                    <span class="auth-role-tag role-admin" id="previewModalBadge" style="font-size:10px;">PROGRAM DETAYI</span>
+                    <h3 class="modal-title" id="previewModalTitle" style="font-size:16px; margin-top:4px;">Program Detayları</h3>
+                </div>
+                <button class="modal-close" onclick="closeWorkoutPreviewModal()">✕</button>
+            </div>
+
+            <div id="previewModalMeta" style="margin-bottom:12px;">
+                <!-- Meta pills: duration, exercises, rest, style -->
+            </div>
+
+            <div id="previewModalExercisesList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px; max-height:360px; overflow-y:auto; padding-right:4px;">
+                <!-- Populated dynamically with exercise cards -->
+            </div>
+
+            <div id="previewModalActions" style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top:1px solid var(--border); padding-top:12px; flex-wrap:wrap;">
+                <!-- Populated dynamically -->
             </div>
         </div>
     </div>
@@ -4934,6 +4972,10 @@
                 createdAt: Date.now()
             };
 
+            try {
+                localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(currentGeneratedWorkout));
+            } catch(e) {}
+
             renderGeneratedWorkout();
             playAlertSound();
         }
@@ -4945,6 +4987,8 @@
 
             const user = getActiveUser();
             const weights = user.weights || {};
+            const tomorrowIdx = (new Date().getDay() + 1) % 7;
+            const tomorrowName = DAY_NAMES_TR[tomorrowIdx] || 'Yarın';
 
             let blocksHtml = '';
             if (w.style === 'superset') {
@@ -4985,7 +5029,10 @@
                             <span>▶️ ŞİMDİ BAŞLAT (SAYAÇ & SETLER)</span>
                         </button>
                         <button class="btn-action-secondary" style="border-color:var(--cyan); color:var(--cyan); font-weight:800;" onclick="scheduleTomorrowFromGenerated()">
-                            <span>📅 Yarın İçin Programla (Pazartesi)</span>
+                            <span>📅 Yarın İçin Programla (${tomorrowName})</span>
+                        </button>
+                        <button class="btn-action-secondary" style="border-color:var(--gold); color:var(--gold); font-weight:800;" onclick="promptAssignGeneratedToAnyDay()">
+                            <span>📅 Haftanın Gününe Planla</span>
                         </button>
                         <button class="btn-action-secondary" onclick="saveGeneratedToLibrary()">
                             <span>💾 Programlarıma Kaydet</span>
@@ -6778,24 +6825,28 @@
 
                     let heroBannerHtml = '';
                     if (!todayPlan.rest) {
+                        const todayDetails = getWorkoutDetailsForPlan(todayPlan);
+                        const todayExCount = todayDetails && todayDetails.exercises ? todayDetails.exercises.length : null;
                         heroBannerHtml = `
                             <div class="hero-scheduled-banner">
                                 <div class="hero-scheduled-badge today">
                                     🔥 BUGÜNÜN PROGRAMI (${DAY_NAMES_TR[todayIdx].toUpperCase()})
                                 </div>
                                 <h2 class="hero-scheduled-title">${escapeHTML(todayPlan.title)}</h2>
-                                <p class="hero-scheduled-desc">${escapeHTML(todayPlan.desc || 'Çelik Kodu seansın hazır. Hiçbir seçim yapmadan doğrudan başlayabilirsin.')}</p>
+                                <p class="hero-scheduled-desc">${escapeHTML(todayPlan.desc || (todayExCount ? `${todayExCount} egzersiz hazır. Hiçbir seçim yapmadan doğrudan başlayabilirsin.` : 'Çelik Kodu seansın hazır. Hiçbir seçim yapmadan doğrudan başlayabilirsin.'))}</p>
                                 <div class="hero-scheduled-actions">
                                     <button class="btn btn-gold" style="padding:12px 22px; font-size:14px; font-weight:900; box-shadow:0 0 20px rgba(245,158,11,0.5);" onclick="startScheduledWorkoutForDay(${todayIdx})">
                                         ▶️ TEK DOKUNUŞLA BAŞLAT
                                     </button>
-                                    <button class="btn btn-outline" style="padding:11px 16px; font-size:12px;" onclick="openScheduleDayModal(${todayIdx})">
-                                        ✏️ Programı Değiştir
+                                    <button class="btn btn-outline" style="padding:11px 16px; font-size:12px; color:var(--cyan); border-color:var(--cyan); font-weight:700;" onclick="openScheduleDayModal(${todayIdx})">
+                                        👁️ ${todayExCount ? `${todayExCount} Hareket • İçerik & Düzenle` : 'İçeriği Gör & Düzenle'}
                                     </button>
                                 </div>
                             </div>
                         `;
                     } else {
+                        const tomorrowDetails = getWorkoutDetailsForPlan(tomorrowPlan);
+                        const tomorrowExCount = tomorrowDetails && tomorrowDetails.exercises ? tomorrowDetails.exercises.length : null;
                         heroBannerHtml = `
                             <div class="hero-scheduled-banner">
                                 <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; flex-wrap:wrap; margin-bottom:6px;">
@@ -6805,13 +6856,13 @@
                                     <span style="font-size:11px; color:#94a3b8; font-weight:700;">Bugün (${DAY_NAMES_TR[todayIdx]}): 🧘 Dinlenme</span>
                                 </div>
                                 <h2 class="hero-scheduled-title">${escapeHTML(tomorrowPlan.title)}</h2>
-                                <p class="hero-scheduled-desc">${escapeHTML(tomorrowPlan.desc || 'Yarın salona girdiğinde hiçbir seçim yapmadan doğrudan başlayabilirsin.')}</p>
+                                <p class="hero-scheduled-desc">${escapeHTML(tomorrowPlan.desc || (tomorrowExCount ? `${tomorrowExCount} egzersiz hazır. Salona girdiğinde doğrudan başlayabilirsin.` : 'Yarın salona girdiğinde hiçbir seçim yapmadan doğrudan başlayabilirsin.'))}</p>
                                 <div class="hero-scheduled-actions">
                                     <button class="btn btn-gold" style="padding:12px 20px; font-size:13.5px; font-weight:900; box-shadow:0 0 20px rgba(245,158,11,0.4);" onclick="startScheduledWorkoutForDay(${tomorrowIdx})">
                                         ▶️ YARININ PROGRAMINI BAŞLAT
                                     </button>
-                                    <button class="btn btn-outline" style="padding:11px 16px; font-size:12px;" onclick="openScheduleDayModal(${tomorrowIdx})">
-                                        ✏️ Yarını Değiştir / Programla
+                                    <button class="btn btn-outline" style="padding:11px 16px; font-size:12px; color:var(--cyan); border-color:var(--cyan); font-weight:700;" onclick="openScheduleDayModal(${tomorrowIdx})">
+                                        👁️ ${tomorrowExCount ? `${tomorrowExCount} Hareket • İçerik & Düzenle` : 'İçeriği Gör & Düzenle'}
                                     </button>
                                 </div>
                             </div>
@@ -6834,13 +6885,16 @@
                         const icon = plan.rest ? '🧘' : '⚔️';
                         const cleanTitle = (plan.title || '').replace(/⚔️|🧘|Çelik Kodu/g, '').trim();
                         const shortTitle = plan.rest ? 'Dinlenme' : (cleanTitle.length > 13 ? cleanTitle.substring(0, 13) + '..' : cleanTitle);
+                        const planDetails = getWorkoutDetailsForPlan(plan);
+                        const exCount = (!plan.rest && planDetails && planDetails.exercises) ? planDetails.exercises.length : null;
 
                         return `
-                            <div class="${pillClass}" onclick="openScheduleDayModal(${d})" title="${DAY_NAMES_TR[d]}: ${escapeHTML(plan.title)} (Değiştirmek için tıkla)">
+                            <div class="${pillClass}" onclick="openScheduleDayModal(${d})" title="${DAY_NAMES_TR[d]}: ${escapeHTML(plan.title)} (İçeriği görmek ve düzenlemek için tıkla)">
                                 ${tagHtml}
                                 <span class="weekly-day-name">${DAY_SHORT_TR[d]}</span>
                                 <span style="font-size:15px; margin:2px 0;">${icon}</span>
                                 <span class="weekly-day-status">${escapeHTML(shortTitle)}</span>
+                                ${exCount ? `<span style="font-size:9.5px; color:var(--gold); font-weight:800; margin-top:2px;">${exCount} Hrk</span>` : ''}
                             </div>
                         `;
                     }).join('');
@@ -6857,7 +6911,7 @@
                                         <span style="font-size:20px;">📅</span>
                                         <div>
                                             <h3 style="font-size:14px; font-weight:900; color:#fff; margin:0;">Haftalık Antrenman Planım</h3>
-                                            <p style="font-size:11px; color:var(--text-secondary); margin:2px 0 0;">Güne dokunarak antrenmanını ata veya değiştir.</p>
+                                            <p style="font-size:11px; color:var(--text-secondary); margin:2px 0 0;">Güne dokunarak antrenmanın içeriğini görün veya değiştirin.</p>
                                         </div>
                                     </div>
                                     <div style="display:flex; gap:6px;">
@@ -6907,9 +6961,14 @@
                                                 ⏱️ 45 Dk • 4 Set • Süperset
                                             </div>
                                         </div>
-                                        <button class="btn btn-gold" style="padding:8px 14px; font-size:12px; font-weight:800; flex-shrink:0;" onclick="loadOfficialRoutine('la_forja_day1')">
-                                            ▶ Başlat
-                                        </button>
+                                        <div style="display:flex; gap:6px; flex-shrink:0;">
+                                            <button class="btn btn-outline" style="padding:8px 11px; font-size:11.5px; color:var(--cyan); border-color:var(--cyan);" onclick="previewWorkoutModal('la_forja_day1')">
+                                                👁️ İncele
+                                            </button>
+                                            <button class="btn btn-gold" style="padding:8px 14px; font-size:12px; font-weight:800;" onclick="loadOfficialRoutine('la_forja_day1')">
+                                                ▶ Başlat
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -6924,9 +6983,14 @@
                                                 ⏱️ 45 Dk • 4 Set • Süperset
                                             </div>
                                         </div>
-                                        <button class="btn btn-gold" style="padding:8px 14px; font-size:12px; font-weight:800; flex-shrink:0;" onclick="loadOfficialRoutine('la_forja_day2')">
-                                            ▶ Başlat
-                                        </button>
+                                        <div style="display:flex; gap:6px; flex-shrink:0;">
+                                            <button class="btn btn-outline" style="padding:8px 11px; font-size:11.5px; color:var(--cyan); border-color:var(--cyan);" onclick="previewWorkoutModal('la_forja_day2')">
+                                                👁️ İncele
+                                            </button>
+                                            <button class="btn btn-gold" style="padding:8px 14px; font-size:12px; font-weight:800;" onclick="loadOfficialRoutine('la_forja_day2')">
+                                                ▶ Başlat
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -6941,9 +7005,14 @@
                                                 ⏱️ 50 Dk • 4 Set • Süperset
                                             </div>
                                         </div>
-                                        <button class="btn btn-gold" style="padding:8px 14px; font-size:12px; font-weight:800; flex-shrink:0;" onclick="loadOfficialRoutine('la_forja_day3')">
-                                            ▶ Başlat
-                                        </button>
+                                        <div style="display:flex; gap:6px; flex-shrink:0;">
+                                            <button class="btn btn-outline" style="padding:8px 11px; font-size:11.5px; color:var(--cyan); border-color:var(--cyan);" onclick="previewWorkoutModal('la_forja_day3')">
+                                                👁️ İncele
+                                            </button>
+                                            <button class="btn btn-gold" style="padding:8px 14px; font-size:12px; font-weight:800;" onclick="loadOfficialRoutine('la_forja_day3')">
+                                                ▶ Başlat
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -6955,14 +7024,22 @@
                                 <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
                                     ${customSaved.map(p => `
                                         <div class="log-history-card" style="padding:14px; margin-bottom:0;">
-                                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                                                 <div>
                                                     <div style="font-size:14px; font-weight:800; color:#fff;">${escapeHTML(p.title)}</div>
-                                                    <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">${(p.exercises || []).length} Hareket</div>
+                                                    <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">${(p.exercises || []).length} Hareket • ${p.duration || Math.round((p.exercises || []).length * 7)} Dk</div>
                                                 </div>
-                                                <button class="btn btn-gold" style="padding:8px 14px; font-size:12px; font-weight:800;" onclick="loadSavedProgram('${p.id}')">
-                                                    ▶ Başlat
-                                                </button>
+                                                <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
+                                                    <button class="btn btn-outline" style="padding:7px 10px; font-size:11px; color:var(--cyan); border-color:var(--cyan);" onclick="previewWorkoutModal('${p.id}')">
+                                                        👁️ İncele
+                                                    </button>
+                                                    <button class="btn btn-outline" style="padding:7px 10px; font-size:11px; color:var(--gold); border-color:var(--gold);" onclick="editSavedProgram('${p.id}')">
+                                                        ✏️ Düzenle
+                                                    </button>
+                                                    <button class="btn btn-gold" style="padding:7px 12px; font-size:11.5px; font-weight:800;" onclick="loadSavedProgram('${p.id}')">
+                                                        ▶ Başlat
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     `).join('')}
@@ -8148,19 +8225,27 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 customContainer.innerHTML = saved.map(p => `
                     <div class="log-history-card">
                         <div class="log-card-header">
-                            <strong style="color:#fff; font-size:14px;">${escapeHTML(p.title)}</strong>
+                            <div>
+                                <strong style="color:#fff; font-size:14px;">${escapeHTML(p.title)}</strong>
+                                <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
+                                    ${(p.exercises || []).length} Egzersiz • ${p.duration || Math.round((p.exercises || []).length * 7)} Dk • ${p.style === 'superset' ? 'Süperset' : 'Klasik'}
+                                </div>
+                            </div>
                             <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-                                <button class="btn btn-outline" style="font-size:11px; padding:4px 8px; color:var(--cyan); border-color:var(--cyan);" onclick="promptAssignToDay('${p.id}', '${escapeHTML(p.title).replace(/'/g, "\\'")}', 'custom_saved', '${p.exercises.length} Egzersiz')">
+                                <button class="btn btn-outline" style="font-size:11px; padding:4px 8px; color:var(--cyan); border-color:var(--cyan);" onclick="previewWorkoutModal('${p.id}')">
+                                    👁️ İçerik
+                                </button>
+                                <button class="btn btn-outline" style="font-size:11px; padding:4px 8px; color:var(--gold); border-color:var(--gold);" onclick="editSavedProgram('${p.id}')">
+                                    ✏️ Düzenle
+                                </button>
+                                <button class="btn btn-outline" style="font-size:11px; padding:4px 8px; color:var(--cyan); border-color:var(--cyan);" onclick="promptAssignToDay('${p.id}', '${escapeHTML(p.title).replace(/'/g, "\\'")}', 'custom_saved', '${(p.exercises || []).length} Egzersiz')">
                                     📅 Güne Planla
                                 </button>
-                                <button class="btn btn-gold" style="font-size:11px; padding:4px 10px;" onclick="loadSavedProgram('${p.id}')">
+                                <button class="btn btn-gold" style="font-size:11px; padding:4px 10px; font-weight:800;" onclick="loadSavedProgram('${p.id}')">
                                     ▶ Başlat
                                 </button>
                                 <button class="btn-delete-log" onclick="deleteSavedProgram('${p.id}')" title="Sil">✕</button>
                             </div>
-                        </div>
-                        <div style="font-size:11px; color:var(--text-secondary);">
-                            ${p.exercises.length} Egzersiz • ${p.duration} Dk • ${p.style === 'superset' ? 'Süperset' : 'Klasik'}
                         </div>
                     </div>
                 `).join('');
@@ -8200,10 +8285,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     <div class="log-card-header">
                         <strong style="color:var(--gold-light); font-size:14px;">${escapeHTML(r.title)}</strong>
                         <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                            <button class="btn btn-outline" style="font-size:11px; padding:4px 8px; color:var(--cyan); border-color:var(--cyan);" onclick="previewWorkoutModal('${r.id}')">
+                                👁️ İçerik
+                            </button>
                             <button class="btn btn-outline" style="font-size:11px; padding:4px 8px; color:var(--cyan); border-color:var(--cyan);" onclick="promptAssignToDay('${r.id}', '${escapeHTML(r.title).replace(/'/g, "\\'")}', 'official', '${escapeHTML(r.desc).replace(/'/g, "\\'")}')">
                                 📅 Güne Planla
                             </button>
-                            <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; color:var(--gold); border-color:var(--gold);" onclick="loadOfficialRoutine('${r.id}')">
+                            <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; color:var(--gold); border-color:var(--gold); font-weight:700;" onclick="loadOfficialRoutine('${r.id}')">
                                 ▶ Yükle
                             </button>
                         </div>
@@ -8333,11 +8421,224 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             } catch(e) {}
         }
 
+        // ==================== UNIVERSAL WORKOUT PLAN RESOLVER ====================
+        function saveAthletesToStorage() {
+            try {
+                const users = getAuthUsers();
+                if (typeof saveAuthUsers === 'function') {
+                    saveAuthUsers(users);
+                } else {
+                    localStorage.setItem('celik_kodu_auth_users', JSON.stringify(users));
+                }
+            } catch(e) {}
+        }
+
+        function getWorkoutDetailsForPlan(plan) {
+            if (!plan || plan.rest) return null;
+
+            // 1. Directly attached custom workout object
+            if (plan.customWorkout && Array.isArray(plan.customWorkout.exercises) && plan.customWorkout.exercises.length > 0) {
+                return plan.customWorkout;
+            }
+
+            // 2. Direct exercises array on plan
+            if (Array.isArray(plan.exercises) && plan.exercises.length > 0) {
+                return plan;
+            }
+
+            const planId = (plan.id || '').trim();
+            const planTitle = (plan.title || '').trim().toLowerCase();
+
+            // 3. Official classic routines
+            const officialRoutines = {
+                la_forja_day1: {
+                    id: 'la_forja_day1',
+                    title: '⚔️ Çelik Kodu Gün 1: Omuz & Bacak Ön Zırhı',
+                    split: 'upper_push',
+                    style: 'superset',
+                    duration: 45,
+                    scheme: { sets: 4, reps: '8 - 10', rest: 45 },
+                    exerciseIds: ['db_overhead_press', 'db_goblet_squat', 'db_front_squat', 'bw_pushup', 'kb_halo', 'bw_hollow_body']
+                },
+                la_forja_day2: {
+                    id: 'la_forja_day2',
+                    title: '⚔️ Çelik Kodu Gün 2: Sırt Çekiş & Balistik Güç',
+                    split: 'upper_pull',
+                    style: 'superset',
+                    duration: 45,
+                    scheme: { sets: 4, reps: '8 - 10', rest: 45 },
+                    exerciseIds: ['db_saw_row', 'db_rdl', 'db_swing', 'bw_pullup', 'db_farmers_walk', 'db_russian_twist']
+                },
+                la_forja_day3: {
+                    id: 'la_forja_day3',
+                    title: '⚔️ Çelik Kodu Gün 3: Kompleks & Merdiven',
+                    split: 'full_body',
+                    style: 'superset',
+                    duration: 50,
+                    scheme: { sets: 4, reps: '8 - 10', rest: 45 },
+                    exerciseIds: ['db_snatch', 'db_walking_lunge', 'db_saw_row', 'db_front_squat', 'bw_burpee']
+                }
+            };
+
+            const buildOfficial = (off) => {
+                const exercises = off.exerciseIds.map(id => EXERCISES_DB.find(e => e.id === id)).filter(Boolean);
+                return {
+                    id: off.id,
+                    title: off.title,
+                    split: off.split,
+                    style: off.style,
+                    duration: off.duration,
+                    scheme: off.scheme,
+                    exercises: exercises,
+                    isOfficial: true
+                };
+            };
+
+            if (officialRoutines[planId]) {
+                return buildOfficial(officialRoutines[planId]);
+            }
+            if (planTitle.includes('gün 1') || planTitle.includes('omuz')) {
+                return buildOfficial(officialRoutines.la_forja_day1);
+            }
+            if (planTitle.includes('gün 2') || planTitle.includes('sırt') || planTitle.includes('çekiş')) {
+                return buildOfficial(officialRoutines.la_forja_day2);
+            }
+            if (planTitle.includes('gün 3') || planTitle.includes('kompleks') || planTitle.includes('merdiven')) {
+                return buildOfficial(officialRoutines.la_forja_day3);
+            }
+
+            // 4. Currently generated workout in memory
+            if (currentGeneratedWorkout && Array.isArray(currentGeneratedWorkout.exercises) && currentGeneratedWorkout.exercises.length > 0) {
+                if (currentGeneratedWorkout.id === planId || planId.startsWith('gen_') || (planTitle && currentGeneratedWorkout.title && currentGeneratedWorkout.title.toLowerCase().includes(planTitle))) {
+                    return currentGeneratedWorkout;
+                }
+            }
+
+            // 5. Last generated workout persisted in localStorage
+            try {
+                const rawLastGen = localStorage.getItem('celik_kodu_last_generated_workout');
+                if (rawLastGen) {
+                    const lastGen = JSON.parse(rawLastGen);
+                    if (lastGen && Array.isArray(lastGen.exercises) && lastGen.exercises.length > 0) {
+                        if (lastGen.id === planId || planId.startsWith('gen_') || plan.type === 'custom_generated' || (planTitle && lastGen.title && lastGen.title.toLowerCase().includes(planTitle))) {
+                            return lastGen;
+                        }
+                    }
+                }
+            } catch(e) {}
+
+            // 6. Search ALL custom program keys in localStorage
+            try {
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    if (k && k.startsWith('celik_kodu_custom_programs')) {
+                        const saved = JSON.parse(localStorage.getItem(k) || '[]');
+                        if (Array.isArray(saved)) {
+                            let found = saved.find(p => p && p.id === planId);
+                            if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return found;
+                            if (planTitle) {
+                                found = saved.find(p => p && p.title && p.title.trim().toLowerCase() === planTitle);
+                                if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return found;
+                            }
+                        }
+                    }
+                }
+            } catch(e) {}
+
+            // 7. Search in all users' savedWorkouts
+            try {
+                const users = JSON.parse(localStorage.getItem('celik_kodu_auth_users') || '[]');
+                if (Array.isArray(users)) {
+                    for (const u of users) {
+                        if (u && Array.isArray(u.savedWorkouts)) {
+                            let found = u.savedWorkouts.find(p => p && p.id === planId);
+                            if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return found;
+                            if (planTitle) {
+                                found = u.savedWorkouts.find(p => p && p.title && p.title.trim().toLowerCase() === planTitle);
+                                if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return found;
+                            }
+                        }
+                    }
+                }
+            } catch(e) {}
+
+            // 8. If customRoutineState has exercises and matches
+            if (typeof customRoutineState !== 'undefined' && Array.isArray(customRoutineState.exercises) && customRoutineState.exercises.length > 0) {
+                const studioList = customRoutineState.exercises.map(item => {
+                    const ex = EXERCISES_DB.find(e => e.id === item.exId);
+                    return ex ? Object.assign({}, ex, { targetSets: item.sets, targetReps: item.reps }) : null;
+                }).filter(Boolean);
+                if (studioList.length > 0 && (planId.startsWith('custom_') || plan.type === 'custom' || plan.type === 'custom_saved')) {
+                    return {
+                        id: planId || ('custom_' + Date.now()),
+                        title: plan.title || 'Özel Çelik Programı',
+                        exercises: studioList,
+                        duration: Math.round(studioList.length * 7),
+                        scheme: { sets: 3, reps: '8-12', rest: customRoutineState.rest || 60 },
+                        isCustom: true
+                    };
+                }
+            }
+
+            // 9. Intelligent Functional Synthesis Fallback
+            // If the user assigned a program to this day (not rest), construct a full balanced workout matching the title/desc
+            if (!plan.rest) {
+                let poolIds = [];
+                if (planTitle.includes('itiş') || planTitle.includes('push') || planTitle.includes('omuz') || planTitle.includes('göğüs')) {
+                    poolIds = ['db_overhead_press', 'bw_pushup', 'db_goblet_squat', 'mach_cable_lateral', 'bw_diamond_pushup', 'bw_hollow_body'];
+                } else if (planTitle.includes('çekiş') || planTitle.includes('pull') || planTitle.includes('sırt')) {
+                    poolIds = ['db_saw_row', 'db_rdl', 'db_swing', 'bw_pullup', 'db_farmers_walk', 'db_russian_twist'];
+                } else if (planTitle.includes('bacak') || planTitle.includes('alt') || planTitle.includes('lower') || planTitle.includes('squat')) {
+                    poolIds = ['db_goblet_squat', 'db_rdl', 'db_walking_lunge', 'bw_air_squat', 'bw_glute_bridge', 'bw_plank'];
+                } else if (planTitle.includes('core') || planTitle.includes('karın')) {
+                    poolIds = ['bw_plank', 'bw_hollow_body', 'db_russian_twist', 'bw_mountain_climber', 'bw_glute_bridge', 'db_farmers_walk'];
+                } else {
+                    poolIds = ['db_overhead_press', 'db_goblet_squat', 'db_saw_row', 'db_rdl', 'bw_pushup', 'bw_hollow_body'];
+                }
+
+                const synthesizedExercises = poolIds.map(id => EXERCISES_DB.find(e => e.id === id)).filter(Boolean);
+                const synthesizedWorkout = {
+                    id: planId || ('synth_' + Date.now()),
+                    title: plan.title || 'Çelik Kodu Fonksiyonel Program',
+                    split: 'custom',
+                    style: 'classic',
+                    duration: 45,
+                    scheme: { sets: 3, reps: '8 - 12', rest: 60 },
+                    exercises: synthesizedExercises,
+                    isSynthesized: true
+                };
+
+                // Cache onto plan so it is immediately remembered
+                plan.customWorkout = synthesizedWorkout;
+                try {
+                    const sched = getWeeklySchedule();
+                    for (let d = 0; d < 7; d++) {
+                        if (sched[d] && sched[d].id === plan.id) {
+                            sched[d].customWorkout = synthesizedWorkout;
+                            sched[d].desc = `${synthesizedExercises.length} Hareket • 45 Dk`;
+                        }
+                    }
+                    saveWeeklySchedule(sched);
+                } catch(e) {}
+
+                return synthesizedWorkout;
+            }
+
+            return null;
+        }
+
         function startScheduledWorkoutForDay(dayIdx) {
             const schedule = getWeeklySchedule();
             const plan = schedule[dayIdx];
             if (!plan || plan.rest) {
                 alert("Bu gün dinlenme günü olarak ayarlanmış. Bir antrenman başlatmak isterseniz aşağıdaki programlardan birini seçebilirsiniz.");
+                return;
+            }
+
+            const details = getWorkoutDetailsForPlan(plan);
+            if (details && details.exercises && details.exercises.length > 0) {
+                currentGeneratedWorkout = JSON.parse(JSON.stringify(details));
+                startActiveWorkoutFromGenerated();
                 return;
             }
 
@@ -8360,6 +8661,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const modal = document.getElementById('scheduleDayModal');
             const dayTitle = document.getElementById('schedModalDayTitle');
             const dayBadge = document.getElementById('schedModalDayBadge');
+            const assignedSection = document.getElementById('schedAssignedWorkoutSection');
             const optionsList = document.getElementById('schedModalOptionsList');
             if (!modal) return;
 
@@ -8375,61 +8677,213 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             const schedule = getWeeklySchedule();
             const currentPlan = schedule[dayIdx] || { id: 'rest', rest: true };
+            const workoutDetails = getWorkoutDetailsForPlan(currentPlan);
 
+            // 1. RENDER ASSIGNED WORKOUT DETAILED CONTENT SECTION
+            if (assignedSection) {
+                if (!currentPlan.rest) {
+                    const details = workoutDetails || getWorkoutDetailsForPlan(currentPlan) || {};
+                    const exercises = details.exercises || [];
+                    const restSec = (details.scheme && details.scheme.rest) || details.rest || 60;
+                    const duration = details.duration || Math.round(exercises.length * 7) || 45;
+                    const schemeStr = details.scheme ? `${details.scheme.sets} Set x ${details.scheme.reps}` : `${exercises.length} Hareket`;
+                    const titleStr = details.title || currentPlan.title || 'Atanmış Antrenman';
+
+                    let exercisesHtml = '';
+                    if (exercises.length === 0) {
+                        exercisesHtml = `
+                            <div style="text-align:center; padding:16px 12px; font-size:12px; color:var(--text-secondary); background:rgba(0,0,0,0.25); border-radius:8px;">
+                                <div style="font-size:20px; margin-bottom:6px;">⚠️</div>
+                                Bu programın hareket detayları henüz yapılandırılmamış.
+                                <div style="margin-top:8px;">
+                                    <button type="button" class="btn btn-gold" style="font-size:11px; padding:6px 14px; font-weight:800;" onclick="editProgramForDay(${dayIdx})">
+                                        ➕ Hemen Hareket Ekle / Düzenle
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        exercisesHtml = exercises.map((ex, idx) => {
+                            const guide = exerciseGuideMap[ex.id] || categoryFallback[ex.category] || guideLibrary.goblet_squat || {};
+                            const thumb = guide.form || '';
+                            const sets = ex.targetSets || (details.scheme ? details.scheme.sets : 3);
+                            const reps = ex.targetReps || (details.scheme ? details.scheme.reps : '8-12');
+                            const pNames = (ex.primaryMuscles || []).map(m => (TARGET_REGIONS[m] ? TARGET_REGIONS[m].name : m)).join(', ') || ex.muscle || 'Kas Grubu';
+
+                            return `
+                                <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:7px 10px;">
+                                    <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:0;">
+                                        <span style="font-size:11.5px; font-weight:900; color:var(--gold); width:18px;">${idx + 1}.</span>
+                                        <div class="ex-thumb-wrap" style="width:38px; height:38px; border-radius:6px; flex-shrink:0;">
+                                            ${thumb ? `<img src="${thumb}" class="ex-thumb-img" alt="${escapeHTML(ex.name)}">` : '🏋️'}
+                                        </div>
+                                        <div style="min-width:0; flex:1;">
+                                            <div style="font-size:12.5px; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
+                                                ${escapeHTML(ex.name)}
+                                            </div>
+                                            <div style="font-size:10.5px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                                <span style="color:var(--cyan); font-weight:600;">${escapeHTML(pNames)}</span>
+                                                ${ex.equipment ? ` • ${escapeHTML(ex.equipment)}` : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                                        <span style="background:rgba(245,158,11,0.15); color:var(--gold); border:1px solid rgba(245,158,11,0.3); font-size:10.5px; font-weight:700; border-radius:4px; padding:2px 7px;">
+                                            ${sets} x ${reps}
+                                        </span>
+                                        <button type="button" class="btn btn-outline" style="padding:3px 7px; font-size:10px;" onclick="openExerciseDetailModal('${ex.id}')" title="İncele">👁️</button>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+
+                    assignedSection.innerHTML = `
+                        <div style="background:linear-gradient(135deg, rgba(245,158,11,0.12), rgba(0,0,0,0.45)); border:1.5px solid var(--gold); border-radius:12px; padding:14px; box-shadow:0 0 25px rgba(245,158,11,0.15);">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                                <div>
+                                    <span class="auth-role-tag role-admin" style="font-size:9.5px; background:var(--gold); color:#000; font-weight:900;">
+                                        📌 ${dayName.toUpperCase()} GÜNÜNE ATANMIŞ PROGRAM
+                                    </span>
+                                    <h3 style="font-size:16px; font-weight:900; color:#fff; margin:6px 0 2px;">
+                                        ${escapeHTML(titleStr)}
+                                    </h3>
+                                    <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
+                                        ⏱️ ${duration} Dk • 🎯 ${exercises.length} Hareket (${schemeStr}) • ⏳ ${restSec}s Dinlenme
+                                    </div>
+                                </div>
+                                <button class="btn btn-gold" style="padding:8px 14px; font-size:12px; font-weight:800; flex-shrink:0;" onclick="startScheduledWorkoutForDay(${dayIdx})">
+                                    ▶️ Başlat
+                                </button>
+                            </div>
+
+                            <!-- ACTIONS: EDIT & VIEW TOGGLE -->
+                            <div style="display:flex; gap:8px; margin:12px 0 10px; flex-wrap:wrap;">
+                                <button type="button" class="btn btn-gold" style="flex:1; min-width:180px; font-size:12px; padding:9px 12px; font-weight:900; box-shadow:0 0 15px rgba(245,158,11,0.3);" onclick="editProgramForDay(${dayIdx})">
+                                    ✏️ Bu Programı Düzenle / Düzelt
+                                </button>
+                                <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:8px 12px; color:var(--cyan); border-color:var(--cyan);" onclick="toggleSchedModalExerciseList()">
+                                    <span id="schedModalExListToggleBtn">👁️ Egzersizleri Gizle ▲</span>
+                                </button>
+                            </div>
+
+                            <!-- EXERCISES LIST CONTAINER -->
+                            <div id="schedModalAssignedExList" style="display:flex; flex-direction:column; gap:6px; max-height:280px; overflow-y:auto; padding-right:4px;">
+                                ${exercisesHtml}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    assignedSection.innerHTML = `
+                        <div style="background:rgba(148,163,184,0.06); border:1px dashed var(--border); border-radius:10px; padding:14px; text-align:center;">
+                            <div style="font-size:24px; margin-bottom:4px;">🧘</div>
+                            <div style="font-size:14px; font-weight:800; color:#fff;">${dayName} Günü Dinlenme Olarak Ayarlı</div>
+                            <div style="font-size:11.5px; color:var(--text-secondary); margin-top:3px;">
+                                Bu güne bir antrenman atamak için aşağıdaki programlardan birine dokunabilir veya yeni bir program tasarlayabilirsiniz.
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            // 2. RENDER REPLACEMENT / ASSIGNMENT OPTIONS
             const user = getActiveUser();
-            const customKey = `celik_kodu_custom_programs_${user.id}`;
             let customSaved = [];
             try {
-                customSaved = JSON.parse(localStorage.getItem(customKey) || '[]');
+                // Collect from all custom program storage keys
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    if (k && k.startsWith('celik_kodu_custom_programs')) {
+                        const list = JSON.parse(localStorage.getItem(k) || '[]');
+                        if (Array.isArray(list)) {
+                            list.forEach(item => {
+                                if (item && item.id && !customSaved.some(x => x.id === item.id)) {
+                                    customSaved.push(item);
+                                }
+                            });
+                        }
+                    }
+                }
             } catch(e) {}
 
             let html = `
-                <div style="font-size:11px; font-weight:800; color:var(--gold); text-transform:uppercase; margin-top:4px;">
-                    ⚔️ Çelik Kodu Klasik Programları
+                <div style="display:flex; justify-content:space-between; align-items:center; margin:16px 0 8px;">
+                    <div style="font-size:11.5px; font-weight:900; color:var(--gold); text-transform:uppercase;">
+                        🔄 Farklı Bir Programla Değiştir
+                    </div>
+                    <button type="button" class="btn btn-outline" style="font-size:10.5px; padding:3px 8px; color:var(--cyan); border-color:var(--cyan);" onclick="startNewStudioProgramForDay(${dayIdx})">
+                        ➕ Yeni Tasarla
+                    </button>
                 </div>
-                <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:${currentPlan.id === 'la_forja_day1' ? 'var(--gold)' : 'var(--border)'};" onclick="assignRoutineToActiveDay('la_forja_day1', '⚔️ Gün 1: Omuz & Bacak Ön Zırhı', 'official', 'Press + Squat • Şınav + Front Squat • Core')">
+
+                <div style="font-size:10.5px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:4px;">
+                    ⚔️ Çelik Kodu Klasik Serisi
+                </div>
+
+                <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:${currentPlan.id === 'la_forja_day1' ? 'var(--gold)' : 'var(--border)'};" onclick="assignRoutineToActiveDay('la_forja_day1', '⚔️ Gün 1: Omuz & Bacak Ön Zırhı', 'official', 'Press + Squat • Şınav + Front Squat • Core', true)">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div>
-                            <div style="font-size:13.5px; font-weight:800; color:#fff;">Gün 1: Omuz & Bacak Ön Zırhı</div>
+                            <div style="font-size:13px; font-weight:800; color:#fff;">Gün 1: Omuz & Bacak Ön Zırhı</div>
                             <div style="font-size:11px; color:var(--text-secondary);">Press + Squat • Şınav + Front Squat • Core</div>
                         </div>
-                        ${currentPlan.id === 'la_forja_day1' ? '<span class="auth-role-tag role-admin" style="font-size:10px;">SEÇİLİ</span>' : '<span style="font-size:11px; color:var(--gold); font-weight:700;">Seç ➔</span>'}
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 6px; color:var(--cyan); border-color:var(--cyan);" onclick="event.stopPropagation(); previewWorkoutModal('la_forja_day1')">👁️ İncele</button>
+                            ${currentPlan.id === 'la_forja_day1' ? '<span class="auth-role-tag role-admin" style="font-size:10px;">SEÇİLİ</span>' : '<span style="font-size:11px; color:var(--gold); font-weight:700;">Seç ➔</span>'}
+                        </div>
                     </div>
                 </div>
 
-                <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:${currentPlan.id === 'la_forja_day2' ? 'var(--gold)' : 'var(--border)'};" onclick="assignRoutineToActiveDay('la_forja_day2', '⚔️ Gün 2: Sırt Çekiş & Balistik Güç', 'official', 'Saw Row + RDL • Swing + Pullup • Çanta Taşıma')">
+                <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:${currentPlan.id === 'la_forja_day2' ? 'var(--gold)' : 'var(--border)'};" onclick="assignRoutineToActiveDay('la_forja_day2', '⚔️ Gün 2: Sırt Çekiş & Balistik Güç', 'official', 'Saw Row + RDL • Swing + Pullup • Çanta Taşıma', true)">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div>
-                            <div style="font-size:13.5px; font-weight:800; color:#fff;">Gün 2: Sırt Çekiş & Balistik Güç</div>
+                            <div style="font-size:13px; font-weight:800; color:#fff;">Gün 2: Sırt Çekiş & Balistik Güç</div>
                             <div style="font-size:11px; color:var(--text-secondary);">Saw Row + RDL • Swing + Pullup • Çanta Taşıma</div>
                         </div>
-                        ${currentPlan.id === 'la_forja_day2' ? '<span class="auth-role-tag role-admin" style="font-size:10px;">SEÇİLİ</span>' : '<span style="font-size:11px; color:var(--gold); font-weight:700;">Seç ➔</span>'}
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 6px; color:var(--cyan); border-color:var(--cyan);" onclick="event.stopPropagation(); previewWorkoutModal('la_forja_day2')">👁️ İncele</button>
+                            ${currentPlan.id === 'la_forja_day2' ? '<span class="auth-role-tag role-admin" style="font-size:10px;">SEÇİLİ</span>' : '<span style="font-size:11px; color:var(--gold); font-weight:700;">Seç ➔</span>'}
+                        </div>
                     </div>
                 </div>
 
-                <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:${currentPlan.id === 'la_forja_day3' ? 'var(--gold)' : 'var(--border)'};" onclick="assignRoutineToActiveDay('la_forja_day3', '⚔️ Gün 3: Kompleks & Merdiven', 'official', 'Snatch + Lunge • Row + Squat • Burpee Finisher')">
+                <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:${currentPlan.id === 'la_forja_day3' ? 'var(--gold)' : 'var(--border)'};" onclick="assignRoutineToActiveDay('la_forja_day3', '⚔️ Gün 3: Kompleks & Merdiven', 'official', 'Snatch + Lunge • Row + Squat • Burpee Finisher', true)">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div>
-                            <div style="font-size:13.5px; font-weight:800; color:#fff;">Gün 3: Kompleks & Merdiven</div>
+                            <div style="font-size:13px; font-weight:800; color:#fff;">Gün 3: Kompleks & Merdiven</div>
                             <div style="font-size:11px; color:var(--text-secondary);">Snatch + Lunge • Row + Squat • Burpee Finisher</div>
                         </div>
-                        ${currentPlan.id === 'la_forja_day3' ? '<span class="auth-role-tag role-admin" style="font-size:10px;">SEÇİLİ</span>' : '<span style="font-size:11px; color:var(--gold); font-weight:700;">Seç ➔</span>'}
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 6px; color:var(--cyan); border-color:var(--cyan);" onclick="event.stopPropagation(); previewWorkoutModal('la_forja_day3')">👁️ İncele</button>
+                            ${currentPlan.id === 'la_forja_day3' ? '<span class="auth-role-tag role-admin" style="font-size:10px;">SEÇİLİ</span>' : '<span style="font-size:11px; color:var(--gold); font-weight:700;">Seç ➔</span>'}
+                        </div>
                     </div>
                 </div>
             `;
 
-            if (currentGeneratedWorkout) {
+            // Active or last generated workout
+            let displayGen = currentGeneratedWorkout;
+            if (!displayGen) {
+                try {
+                    const raw = localStorage.getItem('celik_kodu_last_generated_workout');
+                    if (raw) displayGen = JSON.parse(raw);
+                } catch(e) {}
+            }
+
+            if (displayGen && Array.isArray(displayGen.exercises) && displayGen.exercises.length > 0) {
                 html += `
-                    <div style="font-size:11px; font-weight:800; color:var(--cyan); text-transform:uppercase; margin-top:8px;">
+                    <div style="font-size:10.5px; font-weight:800; color:var(--cyan); text-transform:uppercase; margin:10px 0 4px;">
                         ⚡ Son Oluşturulan Sihirbaz Programı
                     </div>
-                    <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:var(--cyan);" onclick="assignGeneratedToActiveDay()">
+                    <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:var(--cyan);" onclick="assignGeneratedToActiveDay(true)">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <div>
-                                <div style="font-size:13.5px; font-weight:800; color:#fff;">${escapeHTML(currentGeneratedWorkout.title)}</div>
-                                <div style="font-size:11px; color:var(--text-secondary);">${currentGeneratedWorkout.exercises.length} Hareket • ${currentGeneratedWorkout.duration} Dk</div>
+                                <div style="font-size:13px; font-weight:800; color:#fff;">${escapeHTML(displayGen.title)}</div>
+                                <div style="font-size:11px; color:var(--text-secondary);">${displayGen.exercises.length} Hareket • ${displayGen.duration} Dk</div>
                             </div>
-                            <span style="font-size:11px; color:var(--cyan); font-weight:800;">Bu Güne Ata ➔</span>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 6px; color:var(--cyan); border-color:var(--cyan);" onclick="event.stopPropagation(); previewWorkoutModal(displayGen)">👁️ İncele</button>
+                                <span style="font-size:11px; color:var(--cyan); font-weight:800;">Bu Güne Ata ➔</span>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -8437,20 +8891,25 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             if (customSaved.length > 0) {
                 html += `
-                    <div style="font-size:11px; font-weight:800; color:var(--gold); text-transform:uppercase; margin-top:8px;">
+                    <div style="font-size:10.5px; font-weight:800; color:var(--gold); text-transform:uppercase; margin:10px 0 4px;">
                         ⭐ Kayıtlı Özel Programlarım
                     </div>
                 `;
                 customSaved.forEach(p => {
                     const isSelected = currentPlan.id === p.id;
+                    const exCount = (p.exercises || []).length;
                     html += `
-                        <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:${isSelected ? 'var(--gold)' : 'var(--border)'};" onclick="assignRoutineToActiveDay('${p.id}', '${escapeHTML(p.title)}', 'custom', '${(p.exercises || []).length} Hareket Özel Program')">
+                        <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:${isSelected ? 'var(--gold)' : 'var(--border)'};" onclick="assignRoutineToActiveDay('${p.id}', '${escapeHTML(p.title)}', 'custom', '${exCount} Hareket Özel Program', true)">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <div>
-                                    <div style="font-size:13.5px; font-weight:800; color:#fff;">${escapeHTML(p.title)}</div>
-                                    <div style="font-size:11px; color:var(--text-secondary);">${(p.exercises || []).length} Hareket • Özel Program</div>
+                                    <div style="font-size:13px; font-weight:800; color:#fff;">${escapeHTML(p.title)}</div>
+                                    <div style="font-size:11px; color:var(--text-secondary);">${exCount} Hareket • Özel Program</div>
                                 </div>
-                                ${isSelected ? '<span class="auth-role-tag role-admin" style="font-size:10px;">SEÇİLİ</span>' : '<span style="font-size:11px; color:var(--gold); font-weight:700;">Seç ➔</span>'}
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 6px; color:var(--cyan); border-color:var(--cyan);" onclick="event.stopPropagation(); previewWorkoutModal('${p.id}')">👁️ İncele</button>
+                                    <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 6px; color:var(--gold); border-color:var(--gold);" onclick="event.stopPropagation(); editSavedProgram('${p.id}')">✏️ Düzenle</button>
+                                    ${isSelected ? '<span class="auth-role-tag role-admin" style="font-size:10px;">SEÇİLİ</span>' : '<span style="font-size:11px; color:var(--gold); font-weight:700;">Seç ➔</span>'}
+                                </div>
                             </div>
                         </div>
                     `;
@@ -8467,37 +8926,600 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             activeSchedulingDayIdx = null;
         }
 
-        function assignRoutineToActiveDay(id, title, type, desc) {
-            if (activeSchedulingDayIdx === null) return;
+        function toggleSchedModalExerciseList() {
+            const list = document.getElementById('schedModalAssignedExList');
+            const btn = document.getElementById('schedModalExListToggleBtn');
+            if (!list || !btn) return;
+            const isHidden = list.style.display === 'none';
+            list.style.display = isHidden ? 'flex' : 'none';
+            btn.innerText = isHidden ? '👁️ Egzersizleri Gizle ▲' : '👁️ Egzersizleri Göster ▼';
+        }
+
+        function editProgramForDay(dayIdx) {
             const schedule = getWeeklySchedule();
-            schedule[activeSchedulingDayIdx] = {
+            const plan = schedule[dayIdx];
+            if (!plan || plan.rest) return;
+
+            const details = getWorkoutDetailsForPlan(plan);
+            if (!details || !details.exercises || details.exercises.length === 0) {
+                alert("Bu programın egzersiz detayları bulunamadı. Lütfen yeni bir program oluşturun.");
+                return;
+            }
+
+            const cleanTitle = (details.title || plan.title || 'Özel Programım').replace(/⚔️|Çelik Kodu/g, '').trim();
+
+            customRoutineState = {
+                title: cleanTitle || "Özel Programım",
+                rest: (details.scheme && details.scheme.rest) || details.rest || 60,
+                exercises: details.exercises.map(ex => ({
+                    exId: ex.id,
+                    sets: ex.targetSets || (details.scheme ? details.scheme.sets : 3),
+                    reps: ex.targetReps || (details.scheme ? details.scheme.reps : '8-12'),
+                    weight: ''
+                })),
+                editingDayIdx: dayIdx,
+                editingProgramId: details.id || plan.id,
+                isEditingExisting: true
+            };
+
+            closeScheduleDayModal();
+            switchTab('activeWorkoutTab');
+            toggleStudioAccordion(true);
+
+            const titleInput = document.getElementById('customWorkoutTitleInput');
+            const restSelect = document.getElementById('customWorkoutRestSelect');
+            if (titleInput) titleInput.value = customRoutineState.title;
+            if (restSelect) restSelect.value = customRoutineState.rest;
+
+            renderCustomRoutine();
+            renderRegionStatus();
+            renderStudioExerciseCatalog();
+
+            updateStudioEditingBanner(dayIdx, customRoutineState.title);
+
+            setTimeout(() => {
+                const sec = document.getElementById('studioSectionInWorkout');
+                if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        }
+
+        function startNewStudioProgramForDay(dayIdx) {
+            customRoutineState = {
+                title: `${DAY_NAMES_TR[dayIdx]} Özel Antrenmanım`,
+                rest: 60,
+                exercises: [],
+                editingDayIdx: dayIdx,
+                editingProgramId: null,
+                isEditingExisting: true
+            };
+
+            closeScheduleDayModal();
+            switchTab('activeWorkoutTab');
+            toggleStudioAccordion(true);
+
+            const titleInput = document.getElementById('customWorkoutTitleInput');
+            const restSelect = document.getElementById('customWorkoutRestSelect');
+            if (titleInput) titleInput.value = customRoutineState.title;
+            if (restSelect) restSelect.value = customRoutineState.rest;
+
+            renderCustomRoutine();
+            renderRegionStatus();
+            renderStudioExerciseCatalog();
+
+            updateStudioEditingBanner(dayIdx, customRoutineState.title);
+
+            setTimeout(() => {
+                const sec = document.getElementById('studioSectionInWorkout');
+                if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        }
+
+        function saveEditingRoutineToDay() {
+            if (customRoutineState.editingDayIdx === null) {
+                saveCustomRoutineToLibrary();
+                return;
+            }
+
+            const dayIdx = customRoutineState.editingDayIdx;
+            if (customRoutineState.exercises.length === 0) {
+                alert("Lütfen önce programınıza en az 1 egzersiz ekleyin.");
+                return;
+            }
+
+            const title = (document.getElementById('customWorkoutTitleInput')?.value || '').trim() || `${DAY_NAMES_TR[dayIdx]} Özel Programım`;
+            const rest = parseInt(document.getElementById('customWorkoutRestSelect')?.value) || 60;
+
+            const exercisesList = customRoutineState.exercises.map(item => {
+                const ex = EXERCISES_DB.find(e => e.id === item.exId);
+                return ex ? Object.assign({}, ex, { targetSets: item.sets, targetReps: item.reps }) : null;
+            }).filter(Boolean);
+
+            const progId = customRoutineState.editingProgramId || ('custom_' + Date.now());
+
+            const updatedWorkout = {
+                id: progId,
+                title: title,
+                split: 'custom',
+                splitName: title,
+                style: 'classic',
+                goal: 'hypertrophy',
+                duration: Math.round(exercisesList.length * 7),
+                scheme: { sets: 3, reps: '8-12', rest: rest },
+                warmups: [
+                    { name: "Eklemsel CARs (Omuz & Kalça Dairesi)", dur: "90 sn", cue: "Tüm eklemleri kontrollü ve dairesel ısıt." },
+                    { name: "Dinamik Esneme", dur: "60 sn", cue: "Kalça menteşesi ve omurga rotasyonu." }
+                ],
+                exercises: exercisesList,
+                finisher: { name: "Balistik Bitiş / Finisher", desc: "Maksimum tempolu swing veya taşıma seansı." },
+                updatedAt: Date.now(),
+                isCustom: true
+            };
+
+            const schedule = getWeeklySchedule();
+            schedule[dayIdx] = {
+                id: progId,
+                title: title,
+                type: 'custom_generated',
+                desc: `${exercisesList.length} Hareket • ${updatedWorkout.duration} Dk`,
+                rest: false,
+                customWorkout: updatedWorkout
+            };
+            saveWeeklySchedule(schedule);
+
+            // Also update or add to custom programs in library
+            const user = getActiveUser();
+            const key = `celik_kodu_custom_programs_${user.id}`;
+            let saved = [];
+            try {
+                saved = JSON.parse(localStorage.getItem(key) || '[]');
+            } catch(e) {}
+
+            const existingIdx = saved.findIndex(p => p.id === progId);
+            if (existingIdx !== -1) {
+                saved[existingIdx] = updatedWorkout;
+            } else {
+                saved.unshift(updatedWorkout);
+            }
+            localStorage.setItem(key, JSON.stringify(saved));
+
+            if (!user.savedWorkouts) user.savedWorkouts = [];
+            const userSavedIdx = user.savedWorkouts.findIndex(p => p.id === progId);
+            if (userSavedIdx !== -1) {
+                user.savedWorkouts[userSavedIdx] = updatedWorkout;
+            } else {
+                user.savedWorkouts.unshift(updatedWorkout);
+            }
+            saveAthletesToStorage();
+
+            // Clear editing state
+            cancelStudioEditing(false);
+
+            renderActiveWorkout();
+            renderLibrary();
+            playAlertSound();
+            alert(`✅ "${title}" programı güncellendi ve ${DAY_NAMES_TR[dayIdx]} gününe başarıyla kaydedildi!\n\n(${exercisesList.length} Hareket)`);
+        }
+
+        function updateStudioEditingBanner(dayIdx, title) {
+            const container = document.getElementById('studioEditingBannerContainer');
+            if (!container) return;
+
+            if (dayIdx !== null && dayIdx !== undefined) {
+                container.innerHTML = `
+                    <div style="background:rgba(245,158,11,0.12); border:1.5px solid var(--gold); border-radius:10px; padding:12px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                        <div>
+                            <div style="font-size:10px; font-weight:900; color:var(--gold); text-transform:uppercase; letter-spacing:0.5px;">
+                                ✏️ ${DAY_NAMES_TR[dayIdx].toUpperCase()} GÜNÜ PROGRAMI DÜZENLENİYOR
+                            </div>
+                            <div style="font-size:14px; font-weight:800; color:#fff; margin-top:2px;">
+                                "${escapeHTML(title || '')}"
+                            </div>
+                            <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
+                                Hareketleri silebilir (✕), yenilerini ekleyebilir (➕), sıralamayı (▲/▼) veya set/tekrar sayılarını değiştirebilirsiniz.
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                            <button type="button" class="btn btn-gold" style="font-weight:900; font-size:12px; padding:8px 14px; box-shadow:0 0 15px rgba(245,158,11,0.4);" onclick="saveEditingRoutineToDay()">
+                                💾 ${DAY_NAMES_TR[dayIdx]} Gününe Kaydet
+                            </button>
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:8px 10px;" onclick="cancelStudioEditing(true)">
+                                Vazgeç
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (customRoutineState.editingProgramId) {
+                container.innerHTML = `
+                    <div style="background:rgba(56,189,248,0.12); border:1.5px solid var(--cyan); border-radius:10px; padding:12px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                        <div>
+                            <div style="font-size:10px; font-weight:900; color:var(--cyan); text-transform:uppercase; letter-spacing:0.5px;">
+                                ✏️ KAYITLI PROGRAM DÜZENLENİYOR
+                            </div>
+                            <div style="font-size:14px; font-weight:800; color:#fff; margin-top:2px;">
+                                "${escapeHTML(title || '')}"
+                            </div>
+                            <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
+                                Değişiklikleri tamamlayınca aşağıdaki veya buradaki butondan kütüphanenize kaydedin.
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                            <button type="button" class="btn btn-gold" style="font-weight:900; font-size:12px; padding:8px 14px; box-shadow:0 0 15px rgba(245,158,11,0.4);" onclick="saveCustomRoutineToLibrary()">
+                                💾 Değişiklikleri Kaydet
+                            </button>
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:8px 10px;" onclick="cancelStudioEditing(true)">
+                                Vazgeç
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = '';
+            }
+
+            updateStudioSaveActionsGroup();
+        }
+
+        function updateStudioSaveActionsGroup() {
+            const group = document.getElementById('studioSaveActionsGroup');
+            if (!group) return;
+
+            if (customRoutineState.editingDayIdx !== null && customRoutineState.editingDayIdx !== undefined) {
+                group.innerHTML = `
+                    <button class="btn btn-gold" style="font-size:11px; padding:5px 12px; font-weight:900; box-shadow:0 0 12px rgba(245,158,11,0.3);" onclick="saveEditingRoutineToDay()">
+                        💾 ${DAY_NAMES_TR[customRoutineState.editingDayIdx]} Gününe Kaydet
+                    </button>
+                    <button class="btn btn-outline" style="font-size:10.5px; padding:4px 8px;" onclick="saveCustomRoutineToLibrary()">
+                        💾 Kütüphaneye de Kaydet
+                    </button>
+                `;
+            } else if (customRoutineState.editingProgramId) {
+                group.innerHTML = `
+                    <button class="btn btn-gold" style="font-size:11px; padding:5px 12px; font-weight:900;" onclick="saveCustomRoutineToLibrary()">
+                        💾 Değişiklikleri Kaydet
+                    </button>
+                `;
+            } else {
+                group.innerHTML = `
+                    <button class="btn btn-outline" style="font-size:10.5px; padding:4px 8px;" onclick="saveCustomRoutineToLibrary()">
+                        💾 Kütüphaneye Kaydet
+                    </button>
+                `;
+            }
+        }
+
+        function cancelStudioEditing(promptConfirm = false) {
+            if (promptConfirm && !confirm("Düzenleme modundan çıkmak istediğinize emin misiniz?")) {
+                return;
+            }
+            customRoutineState.editingDayIdx = null;
+            customRoutineState.editingProgramId = null;
+            customRoutineState.isEditingExisting = false;
+            const container = document.getElementById('studioEditingBannerContainer');
+            if (container) container.innerHTML = '';
+            updateStudioSaveActionsGroup();
+            resetCustomRoutine();
+        }
+
+        function promptAssignStudioRoutineToDay() {
+            if (customRoutineState.exercises.length === 0) {
+                alert("Lütfen önce taslağınıza en az 1 egzersiz ekleyin.");
+                return;
+            }
+
+            const todayIdx = new Date().getDay();
+            const tomorrowIdx = (todayIdx + 1) % 7;
+            const title = (document.getElementById('customWorkoutTitleInput')?.value || '').trim() || "Özel Çelik Programım";
+            const rest = parseInt(document.getElementById('customWorkoutRestSelect')?.value) || 60;
+
+            const dayPrompt = `"${title}" programını haftanın hangi gününe atamak istiyorsunuz?\n\n1: Pazartesi\n2: Salı\n3: Çarşamba\n4: Perşembe\n5: Cuma\n6: Cumartesi\n0: Pazar\n\n(Yarın ${DAY_NAMES_TR[tomorrowIdx]} için "${tomorrowIdx}" yazabilirsiniz):`;
+            const choice = prompt(dayPrompt, tomorrowIdx.toString());
+            if (choice === null) return;
+            const targetDay = parseInt(choice.trim(), 10);
+            if (isNaN(targetDay) || targetDay < 0 || targetDay > 6) {
+                alert("Geçersiz gün seçildi. Lütfen 0 ile 6 arasında bir sayı girin.");
+                return;
+            }
+
+            const exercisesList = customRoutineState.exercises.map(item => {
+                const ex = EXERCISES_DB.find(e => e.id === item.exId);
+                return ex ? Object.assign({}, ex, { targetSets: item.sets, targetReps: item.reps }) : null;
+            }).filter(Boolean);
+
+            const progId = customRoutineState.editingProgramId || ('custom_' + Date.now());
+            const workoutObj = {
+                id: progId,
+                title: title,
+                split: 'custom',
+                splitName: title,
+                style: 'classic',
+                goal: 'hypertrophy',
+                duration: Math.round(exercisesList.length * 7),
+                scheme: { sets: 3, reps: '8-12', rest: rest },
+                warmups: [
+                    { name: "Eklemsel CARs (Omuz & Kalça Dairesi)", dur: "90 sn", cue: "Tüm eklemleri kontrollü ve dairesel ısıt." }
+                ],
+                exercises: exercisesList,
+                finisher: { name: "Balistik Bitiş", desc: "Maksimum tempolu swing veya taşıma." },
+                createdAt: Date.now(),
+                isCustom: true
+            };
+
+            const schedule = getWeeklySchedule();
+            schedule[targetDay] = {
+                id: progId,
+                title: title,
+                type: 'custom_generated',
+                desc: `${exercisesList.length} Hareket • ${workoutObj.duration} Dk`,
+                rest: false,
+                customWorkout: workoutObj
+            };
+            saveWeeklySchedule(schedule);
+
+            // Also save to library
+            const user = getActiveUser();
+            const key = `celik_kodu_custom_programs_${user.id}`;
+            let saved = [];
+            try { saved = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
+            const exIdx = saved.findIndex(p => p.id === progId);
+            if (exIdx !== -1) saved[exIdx] = workoutObj;
+            else saved.unshift(workoutObj);
+            localStorage.setItem(key, JSON.stringify(saved));
+
+            renderActiveWorkout();
+            renderLibrary();
+            playAlertSound();
+            alert(`✅ "${title}" programı ${DAY_NAMES_TR[targetDay]} gününe başarıyla atandı ve kütüphanenize kaydedildi!`);
+        }
+
+        // ==================== WORKOUT PREVIEW MODAL LOGIC ====================
+        function previewWorkoutModal(workoutOrId) {
+            let workout = null;
+            if (typeof workoutOrId === 'string') {
+                workout = getWorkoutDetailsForPlan({ id: workoutOrId });
+            } else if (typeof workoutOrId === 'object' && workoutOrId !== null) {
+                workout = workoutOrId;
+            }
+
+            if (!workout) {
+                alert("Program detayları bulunamadı.");
+                return;
+            }
+
+            const modal = document.getElementById('workoutPreviewModal');
+            const titleEl = document.getElementById('previewModalTitle');
+            const metaEl = document.getElementById('previewModalMeta');
+            const listEl = document.getElementById('previewModalExercisesList');
+            const actionsEl = document.getElementById('previewModalActions');
+            if (!modal) return;
+
+            const exercises = workout.exercises || [];
+            const rest = (workout.scheme && workout.scheme.rest) || workout.rest || 60;
+            const duration = workout.duration || Math.round(exercises.length * 7) || 45;
+            const setsReps = workout.scheme ? `${workout.scheme.sets} Set x ${workout.scheme.reps}` : '3 Set x 8-12 Tekrar';
+
+            if (titleEl) titleEl.innerText = workout.title || 'Program Detayı';
+            if (metaEl) {
+                metaEl.innerHTML = `
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                        <span class="meta-pill" style="font-size:11px; padding:4px 8px;">⏱️ ${duration} Dakika</span>
+                        <span class="meta-pill" style="font-size:11px; padding:4px 8px;">🎯 ${exercises.length} Hareket (${setsReps})</span>
+                        <span class="meta-pill" style="font-size:11px; padding:4px 8px;">⏳ ${rest}s Dinlenme</span>
+                        <span class="meta-pill" style="font-size:11px; padding:4px 8px;">🏋️ ${workout.style === 'superset' ? 'Süperset' : 'Klasik'}</span>
+                    </div>
+                `;
+            }
+
+            if (listEl) {
+                listEl.innerHTML = exercises.map((ex, idx) => {
+                    const guide = exerciseGuideMap[ex.id] || categoryFallback[ex.category] || guideLibrary.goblet_squat || {};
+                    const thumb = guide.form || '';
+                    const sets = ex.targetSets || (workout.scheme ? workout.scheme.sets : 3);
+                    const reps = ex.targetReps || (workout.scheme ? workout.scheme.reps : '8-12');
+                    const pNames = (ex.primaryMuscles || []).map(m => (TARGET_REGIONS[m] ? TARGET_REGIONS[m].name : m)).join(', ') || ex.muscle || '';
+
+                    return `
+                        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:8px 10px;">
+                            <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0;">
+                                <span style="font-size:12px; font-weight:900; color:var(--gold); width:18px;">${idx + 1}.</span>
+                                <div class="ex-thumb-wrap" style="width:42px; height:42px; border-radius:6px; flex-shrink:0;">
+                                    ${thumb ? `<img src="${thumb}" class="ex-thumb-img" alt="${escapeHTML(ex.name)}">` : '🏋️'}
+                                </div>
+                                <div style="min-width:0; flex:1;">
+                                    <div style="font-size:13px; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
+                                        ${escapeHTML(ex.name)}
+                                    </div>
+                                    <div style="font-size:11px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;">
+                                        <span style="color:var(--cyan); font-weight:600;">${escapeHTML(pNames)}</span>
+                                        ${ex.equipment ? ` • ${escapeHTML(ex.equipment)}` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                                <span style="background:rgba(245,158,11,0.15); color:var(--gold); border:1px solid rgba(245,158,11,0.3); font-size:11px; font-weight:700; border-radius:4px; padding:3px 7px;">
+                                    ${sets} x ${reps}
+                                </span>
+                                <button type="button" class="btn btn-outline" style="padding:4px 8px; font-size:11px;" onclick="openExerciseDetailModal('${ex.id}')" title="İncele">👁️</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            if (actionsEl) {
+                const escapedTitle = escapeHTML(workout.title || 'Program').replace(/'/g, "\\'");
+                const progId = workout.id || '';
+                const isSavedCustom = progId.startsWith('saved_') || progId.startsWith('custom_');
+
+                actionsEl.innerHTML = `
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                        <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 10px; color:var(--cyan); border-color:var(--cyan);" onclick="closeWorkoutPreviewModal(); promptAssignToDay('${progId}', '${escapedTitle}', '${isSavedCustom ? 'custom_saved' : 'official'}', '${exercises.length} Hareket')">
+                            📅 Güne Planla
+                        </button>
+                        ${isSavedCustom ? `
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 10px; color:var(--gold); border-color:var(--gold);" onclick="closeWorkoutPreviewModal(); editSavedProgram('${progId}')">
+                                ✏️ Düzenle
+                            </button>
+                        ` : ''}
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button type="button" class="btn btn-gold" style="font-size:12px; padding:8px 14px; font-weight:900;" onclick="closeWorkoutPreviewModal(); currentGeneratedWorkout = window._activePreviewWorkout; startActiveWorkoutFromGenerated();">
+                            ▶️ Şimdi Başlat
+                        </button>
+                        <button type="button" class="btn btn-outline" style="font-size:11px; padding:8px 12px;" onclick="closeWorkoutPreviewModal()">
+                            Kapat
+                        </button>
+                    </div>
+                `;
+            }
+
+            window._activePreviewWorkout = workout;
+            modal.classList.add('active');
+        }
+
+        function closeWorkoutPreviewModal() {
+            const modal = document.getElementById('workoutPreviewModal');
+            if (modal) modal.classList.remove('active');
+            window._activePreviewWorkout = null;
+        }
+
+        function editSavedProgram(progId) {
+            const prog = getWorkoutDetailsForPlan({ id: progId });
+            if (!prog) {
+                alert("Program detayları bulunamadı.");
+                return;
+            }
+
+            const cleanTitle = (prog.title || 'Özel Programım').replace(/⚔️|Çelik Kodu/g, '').trim();
+
+            customRoutineState = {
+                title: cleanTitle,
+                rest: (prog.scheme && prog.scheme.rest) || prog.rest || 60,
+                exercises: (prog.exercises || []).map(ex => ({
+                    exId: ex.id,
+                    sets: ex.targetSets || (prog.scheme ? prog.scheme.sets : 3),
+                    reps: ex.targetReps || (prog.scheme ? prog.scheme.reps : '8-12'),
+                    weight: ''
+                })),
+                editingDayIdx: null,
+                editingProgramId: progId,
+                isEditingExisting: true
+            };
+
+            switchTab('activeWorkoutTab');
+            toggleStudioAccordion(true);
+
+            const titleInput = document.getElementById('customWorkoutTitleInput');
+            const restSelect = document.getElementById('customWorkoutRestSelect');
+            if (titleInput) titleInput.value = customRoutineState.title;
+            if (restSelect) restSelect.value = customRoutineState.rest;
+
+            renderCustomRoutine();
+            renderRegionStatus();
+            renderStudioExerciseCatalog();
+
+            updateStudioEditingBanner(null, customRoutineState.title);
+
+            setTimeout(() => {
+                const sec = document.getElementById('studioSectionInWorkout');
+                if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        }
+
+        function assignRoutineToActiveDay(id, title, type, desc, keepModalOpen = false) {
+            if (activeSchedulingDayIdx === null) return;
+            const targetDay = activeSchedulingDayIdx;
+            const schedule = getWeeklySchedule();
+            const details = getWorkoutDetailsForPlan({ id: id, type: type, title: title });
+            schedule[targetDay] = {
                 id: id,
                 title: title,
                 type: type,
                 desc: desc || '',
-                rest: false
+                rest: false,
+                customWorkout: details ? JSON.parse(JSON.stringify(details)) : null
             };
             saveWeeklySchedule(schedule);
-            closeScheduleDayModal();
             renderActiveWorkout();
             playAlertSound();
+            if (keepModalOpen) {
+                openScheduleDayModal(targetDay);
+            } else {
+                closeScheduleDayModal();
+            }
         }
 
-        function assignGeneratedToActiveDay() {
-            if (activeSchedulingDayIdx === null || !currentGeneratedWorkout) return;
+        function assignGeneratedToActiveDay(keepModalOpen = false) {
+            if (activeSchedulingDayIdx === null) return;
+            const targetDay = activeSchedulingDayIdx;
+            let workoutToAssign = currentGeneratedWorkout;
+            if (!workoutToAssign) {
+                try {
+                    const raw = localStorage.getItem('celik_kodu_last_generated_workout');
+                    if (raw) workoutToAssign = JSON.parse(raw);
+                } catch(e) {}
+            }
+            if (!workoutToAssign) return;
+
             const schedule = getWeeklySchedule();
-            schedule[activeSchedulingDayIdx] = {
-                id: currentGeneratedWorkout.id || ('gen_' + Date.now()),
-                title: currentGeneratedWorkout.title || 'Özel Sihirbaz Antrenmanı',
+            schedule[targetDay] = {
+                id: workoutToAssign.id || ('gen_' + Date.now()),
+                title: workoutToAssign.title || 'Özel Sihirbaz Antrenmanı',
                 type: 'custom_generated',
-                desc: `${currentGeneratedWorkout.exercises.length} Hareket • ${currentGeneratedWorkout.duration} Dk`,
+                desc: `${workoutToAssign.exercises.length} Hareket • ${workoutToAssign.duration} Dk`,
                 rest: false,
-                customWorkout: JSON.parse(JSON.stringify(currentGeneratedWorkout))
+                customWorkout: JSON.parse(JSON.stringify(workoutToAssign))
             };
             saveWeeklySchedule(schedule);
-            closeScheduleDayModal();
             renderActiveWorkout();
             playAlertSound();
+            if (keepModalOpen) {
+                openScheduleDayModal(targetDay);
+            } else {
+                closeScheduleDayModal();
+            }
+        }
+
+        function promptAssignGeneratedToAnyDay() {
+            let workoutToAssign = currentGeneratedWorkout;
+            if (!workoutToAssign) {
+                try {
+                    const raw = localStorage.getItem('celik_kodu_last_generated_workout');
+                    if (raw) workoutToAssign = JSON.parse(raw);
+                } catch(e) {}
+            }
+            if (!workoutToAssign) {
+                alert("Önce bir program oluşturmanız gerekmektedir.");
+                return;
+            }
+
+            const todayIdx = new Date().getDay();
+            const tomorrowIdx = (todayIdx + 1) % 7;
+            const title = workoutToAssign.title || 'Sihirbaz Antrenmanı';
+            const dayPrompt = `"${title}" programını haftanın hangi gününe atamak istiyorsunuz?\n\n1: Pazartesi\n2: Salı\n3: Çarşamba\n4: Perşembe\n5: Cuma\n6: Cumartesi\n0: Pazar\n\n(Yarın ${DAY_NAMES_TR[tomorrowIdx]} için "${tomorrowIdx}" yazabilirsiniz):`;
+            const choice = prompt(dayPrompt, tomorrowIdx.toString());
+            if (choice === null) return;
+            const targetDay = parseInt(choice.trim(), 10);
+            if (isNaN(targetDay) || targetDay < 0 || targetDay > 6) {
+                alert("Geçersiz gün seçildi. Lütfen 0 ile 6 arasında bir sayı girin.");
+                return;
+            }
+
+            const schedule = getWeeklySchedule();
+            schedule[targetDay] = {
+                id: workoutToAssign.id || ('gen_' + Date.now()),
+                title: title,
+                type: 'custom_generated',
+                desc: `${workoutToAssign.exercises.length} Hareket • ${workoutToAssign.duration} Dk`,
+                rest: false,
+                customWorkout: JSON.parse(JSON.stringify(workoutToAssign))
+            };
+            saveWeeklySchedule(schedule);
+            try {
+                localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(workoutToAssign));
+            } catch(e) {}
+            renderActiveWorkout();
+            playAlertSound();
+            alert(`✅ "${title}" programı ${DAY_NAMES_TR[targetDay]} gününe başarıyla atandı!`);
         }
 
         function setDayAsRest() {
@@ -8537,19 +9559,30 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         }
 
         function scheduleTomorrowFromGenerated() {
-            if (!currentGeneratedWorkout) return;
+            let workoutToSchedule = currentGeneratedWorkout;
+            if (!workoutToSchedule) {
+                try {
+                    const raw = localStorage.getItem('celik_kodu_last_generated_workout');
+                    if (raw) workoutToSchedule = JSON.parse(raw);
+                } catch(e) {}
+            }
+            if (!workoutToSchedule) return;
+
             const todayIdx = new Date().getDay();
             const tomorrowIdx = (todayIdx + 1) % 7;
             const schedule = getWeeklySchedule();
             schedule[tomorrowIdx] = {
-                id: currentGeneratedWorkout.id || ('gen_' + Date.now()),
-                title: currentGeneratedWorkout.title || 'Özel Sihirbaz Antrenmanı',
+                id: workoutToSchedule.id || ('gen_' + Date.now()),
+                title: workoutToSchedule.title || 'Özel Sihirbaz Antrenmanı',
                 type: 'custom_generated',
-                desc: `${currentGeneratedWorkout.exercises.length} Hareket • ${currentGeneratedWorkout.duration} Dk`,
+                desc: `${workoutToSchedule.exercises.length} Hareket • ${workoutToSchedule.duration} Dk`,
                 rest: false,
-                customWorkout: JSON.parse(JSON.stringify(currentGeneratedWorkout))
+                customWorkout: JSON.parse(JSON.stringify(workoutToSchedule))
             };
             saveWeeklySchedule(schedule);
+            try {
+                localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(workoutToSchedule));
+            } catch(e) {}
             switchTab('activeWorkoutTab');
             playAlertSound();
             alert(`✅ Antrenman yarın (${DAY_NAMES_TR[tomorrowIdx]}) için hazırlandı!\n\nYarın akşam salona girdiğinizde hiçbir seçim yapmadan doğrudan "Antrenmanı Başlat" butonuna dokunarak başlayabilirsiniz.`);
@@ -8567,12 +9600,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 return;
             }
             const schedule = getWeeklySchedule();
+            const details = getWorkoutDetailsForPlan({ id: id, type: type, title: title });
             schedule[targetDay] = {
                 id: id,
                 title: title,
                 type: type || 'custom_saved',
                 desc: desc || '',
-                rest: false
+                rest: false,
+                customWorkout: details ? JSON.parse(JSON.stringify(details)) : null
             };
             saveWeeklySchedule(schedule);
             playAlertSound();
@@ -10756,6 +11791,9 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
         function renderCustomRoutine() {
             const container = document.getElementById('customWorkoutExercisesList');
             const countBadge = document.getElementById('customRoutineCountBadge');
+            if (typeof updateStudioSaveActionsGroup === 'function') {
+                updateStudioSaveActionsGroup();
+            }
             if (!container) return;
 
             countBadge.innerText = `${customRoutineState.exercises.length} Hareket`;
@@ -10981,10 +12019,10 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
             }).filter(Boolean);
 
             const user = getActiveUser();
-            if (!user.savedWorkouts) user.savedWorkouts = [];
+            const progId = customRoutineState.editingProgramId || ('custom_' + Date.now());
 
             const newRoutine = {
-                id: 'custom_' + Date.now(),
+                id: progId,
                 title: title,
                 split: selectedTargetMuscles.join('_') || 'custom',
                 splitName: title,
@@ -10993,19 +12031,44 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                 duration: Math.round(exercisesList.length * 7),
                 scheme: { sets: 3, reps: '8-12', rest: rest },
                 warmups: [
-                    { name: "Eklemsel CARs", dur: "90 sn", cue: "Tüm eklemleri kontrollü ısıt." }
+                    { name: "Eklemsel CARs (Omuz & Kalça Dairesi)", dur: "90 sn", cue: "Tüm eklemleri kontrollü ısıt." }
                 ],
                 exercises: exercisesList,
                 finisher: { name: "Balistik Bitiş", desc: "Maksimum tempolu taşıma veya swing." },
-                createdAt: Date.now(),
+                updatedAt: Date.now(),
                 isCustom: true
             };
 
-            user.savedWorkouts.unshift(newRoutine);
+            const key = `celik_kodu_custom_programs_${user.id}`;
+            let saved = [];
+            try {
+                saved = JSON.parse(localStorage.getItem(key) || '[]');
+            } catch(e) {}
+
+            const existingIdx = saved.findIndex(p => p.id === progId);
+            if (existingIdx !== -1) {
+                saved[existingIdx] = newRoutine;
+            } else {
+                saved.unshift(newRoutine);
+            }
+            localStorage.setItem(key, JSON.stringify(saved));
+
+            if (!user.savedWorkouts) user.savedWorkouts = [];
+            const userSavedIdx = user.savedWorkouts.findIndex(p => p.id === progId);
+            if (userSavedIdx !== -1) {
+                user.savedWorkouts[userSavedIdx] = newRoutine;
+            } else {
+                user.savedWorkouts.unshift(newRoutine);
+            }
             saveAthletesToStorage();
 
-            alert(`✅ "${title}" kaydedildi! '📚 Programlar' sekmesinden başlatabilirsiniz.`);
-            renderSavedProgramsList();
+            if (typeof cancelStudioEditing === 'function') {
+                cancelStudioEditing(false);
+            }
+
+            alert(`✅ "${title}" kaydedildi! '📚 Programlar' sekmesinden veya Haftalık Plandan başlatabilirsiniz.`);
+            renderLibrary();
+            renderActiveWorkout();
         }
 
         function startActiveWorkoutFromCustom() {
