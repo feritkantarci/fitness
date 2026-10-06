@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 230" width="100%" height="auto" style="background:#090d16; border-radius:12px; font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;">
+<defs>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#fbbf24"/>
+        <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#f8fafc"/>
+        <stop offset="100%" stop-color="#94a3b8"/>
+    </linearGradient>
+    <marker id="arrowCyan" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrowGold" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="#f59e0b"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="#10b981"/>
+    </marker>
+</defs>
+
+    <!-- PANEL 1 -->
+    <g transform="translate(12, 10)">
+        <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+        <rect x="12" y="10" width="115" height="22" rx="4" fill="#38bdf8" fill-opacity="0.15" stroke="#38bdf8" stroke-width="1"/>
+        <text x="69" y="25" fill="#38bdf8" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">1. TAM ESNEME</text>
+        <g transform="translate(120, 85)">
+            <!-- Head & Torso reclined/seated -->
+            <line x1="-15" y1="-20" x2="5" y2="25" stroke="url(#bodyGrad)" stroke-width="9" stroke-linecap="round"/>
+            <circle cx="-18" cy="-28" r="7.5" fill="#cbd5e1"/>
+            <!-- Legs seated -->
+            <polyline points="5,25 25,32 30,60" stroke="#64748b" stroke-width="5" stroke-linecap="round" fill="none"/>
+            <!-- Arm hanging back -->
+            <line x1="-10" y1="-12" x2="-14" y2="12" stroke="#94a3b8" stroke-width="4.5" stroke-linecap="round"/>
+            <line x1="-14" y1="12" x2="-16" y2="34" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+            <!-- Dumbbell -->
+            <g transform="translate(-16,36) rotate(15) scale(0.9)">
+                <rect x="-8" y="-2" width="16" height="4" rx="1" fill="#fde68a"/>
+                <rect x="-12" y="-6" width="5" height="12" rx="1.5" fill="url(#goldGrad)" stroke="#b45309" stroke-width="0.5"/>
+                <rect x="7" y="-6" width="5" height="12" rx="1.5" fill="url(#goldGrad)" stroke="#b45309" stroke-width="0.5"/>
+            </g>
+        </g>
+        <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Geride Tam Esneme</text>
+        <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Kollar arkada serbest, uzun baş gergin</text>
+    </g>
+
+    <!-- TRANSITION 1 -->
+    <g transform="translate(253, 105)">
+        <circle cx="8" cy="0" r="9" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+        <path d="M6,-3 L10,0 L6,3" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <!-- PANEL 2 -->
+    <g transform="translate(270, 10)">
+        <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+        <rect x="12" y="10" width="115" height="22" rx="4" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="1"/>
+        <text x="69" y="25" fill="#f59e0b" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">2. SUPİNASYONLU BÜKÜŞ</text>
+        <g transform="translate(120, 85)">
+            <line x1="-15" y1="-20" x2="5" y2="25" stroke="url(#bodyGrad)" stroke-width="9" stroke-linecap="round"/>
+            <circle cx="-18" cy="-28" r="7.5" fill="#cbd5e1"/>
+            <polyline points="5,25 25,32 30,60" stroke="#64748b" stroke-width="5" stroke-linecap="round" fill="none"/>
+            <!-- Arm flexing 90 deg -->
+            <line x1="-10" y1="-12" x2="-14" y2="12" stroke="#f59e0b" stroke-width="4.5" stroke-linecap="round"/>
+            <line x1="-14" y1="12" x2="6" y2="8" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/>
+            <path d="M-14,24 Q-2,20 4,12" stroke="#f59e0b" stroke-width="1.8" marker-end="url(#arrowGold)" fill="none"/>
+            <!-- Dumbbell -->
+            <g transform="translate(8,8) rotate(45) scale(0.9)">
+                <rect x="-8" y="-2" width="16" height="4" rx="1" fill="#fde68a"/>
+                <rect x="-12" y="-6" width="5" height="12" rx="1.5" fill="url(#goldGrad)" stroke="#b45309" stroke-width="0.5"/>
+                <rect x="7" y="-6" width="5" height="12" rx="1.5" fill="url(#goldGrad)" stroke="#b45309" stroke-width="0.5"/>
+            </g>
+        </g>
+        <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Dirsek Sabit Kıvırma</text>
+        <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Bileği dışa çevir, dirseği öne savurma</text>
+    </g>
+
+    <!-- TRANSITION 2 -->
+    <g transform="translate(511, 105)">
+        <circle cx="8" cy="0" r="9" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+        <path d="M6,-3 L10,0 L6,3" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <!-- PANEL 3 -->
+    <g transform="translate(528, 10)">
+        <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+        <rect x="12" y="10" width="115" height="22" rx="4" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="1"/>
+        <text x="69" y="25" fill="#10b981" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">3. ZİRVE SIKIŞTIRMA</text>
+        <g transform="translate(120, 85)">
+            <line x1="-15" y1="-20" x2="5" y2="25" stroke="#10b981" stroke-width="9" stroke-linecap="round"/>
+            <circle cx="-18" cy="-28" r="7.5" fill="#cbd5e1"/>
+            <polyline points="5,25 25,32 30,60" stroke="#64748b" stroke-width="5" stroke-linecap="round" fill="none"/>
+            <!-- Fully flexed biceps peak -->
+            <line x1="-10" y1="-12" x2="-14" y2="12" stroke="#10b981" stroke-width="4.5" stroke-linecap="round"/>
+            <line x1="-14" y1="12" x2="-6" y2="-10" stroke="#10b981" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="-10" cy="0" r="10" fill="none" stroke="#10b981" stroke-width="1" stroke-dasharray="2,2"/>
+            <!-- Dumbbell near shoulder -->
+            <g transform="translate(-4,-12) rotate(80) scale(0.9)">
+                <rect x="-8" y="-2" width="16" height="4" rx="1" fill="#fde68a"/>
+                <rect x="-12" y="-6" width="5" height="12" rx="1.5" fill="url(#goldGrad)" stroke="#b45309" stroke-width="0.5"/>
+                <rect x="7" y="-6" width="5" height="12" rx="1.5" fill="url(#goldGrad)" stroke="#b45309" stroke-width="0.5"/>
+            </g>
+        </g>
+        <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Zirve Biceps Kasılması</text>
+        <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Tepe noktada 1 sn sık, yavaşça indir</text>
+    </g>
+</svg>
