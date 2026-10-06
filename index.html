@@ -4597,7 +4597,24 @@
             'conditioning': guideLibrary.pushup
         };
 
-        // ==================== MUSCLE RADAR DEFINITIONS ====================
+        // ==================== MUSCLE RADAR & REGION DEFINITIONS ====================
+        const TARGET_REGIONS = {
+            chest: { name: "Göğüs" },
+            back: { name: "Sırt" },
+            shoulders: { name: "Omuz" },
+            biceps: { name: "Biceps" },
+            triceps: { name: "Triceps" },
+            quads: { name: "Ön Bacak" },
+            hamstrings: { name: "Arka Bacak" },
+            glutes: { name: "Kalça" },
+            core: { name: "Karın & Core" },
+            calves: { name: "Kalf" },
+            calves_grip: { name: "Kalf & Kavrama" },
+            full_body: { name: "Tüm Vücut" },
+            legs: { name: "Bacak" },
+            arms: { name: "Kol" }
+        };
+
         const MUSCLE_DEFS = {
             chest: { name: "Göğüs", icon: "🛡️", desc: "Pectoralis Major / Minor", color: "#38bdf8" },
             back: { name: "Sırt & Kanat", icon: "🏹", desc: "Latissimus, Rhomboid, Trapez", color: "#818cf8" },
