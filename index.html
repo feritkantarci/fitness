@@ -3250,6 +3250,11 @@
                             <div class="split-name">Karın & Core Zırhı</div>
                             <div class="split-desc">Merkez bölge, rotasyonel güç ve omurga stabilitesi.</div>
                         </div>
+                        <div class="split-card" onclick="selectSplit('functional')">
+                            <div class="split-icon">⚡</div>
+                            <div class="split-name">Fonksiyonel Fitness & Kondisyon</div>
+                            <div class="split-desc">Serbest ağırlık bileşikleri, metabolik güç, taşıma ve rotasyon.</div>
+                        </div>
                     </div>
 
                     <!-- STEP 2: AVAILABLE EQUIPMENT -->
@@ -5063,6 +5068,19 @@
                 for (let i = 0; i < (duration >= 45 ? 6 : 4); i++) {
                     addEx('core');
                 }
+            } else if (selectedSplit === 'functional') {
+                // Functional Compound & Conditioning circuit
+                addEx(['push', 'legs_quad']); // Thruster / Push Press / Goblet
+                addEx(['pull', 'legs_hinge']); // Clean & Press / Swing / Gorilla
+                addEx('core'); // Woodchopper / Bear crawl / Plank pull through
+                addEx(['legs_quad', 'conditioning']); // Lunge twist / Step up press / Manmaker
+                if (duration >= 45) {
+                    addEx('core'); // Carries / Rotations
+                    addEx(['pull', 'push']); // Renegade pushup / Dips / Rows
+                }
+                if (duration >= 60) {
+                    addEx(['conditioning', 'core']); // Finisher compound
+                }
             }
 
             // Dynamic Warmups
@@ -5084,7 +5102,8 @@
                 upper_pull: "Üst Çekiş (Pull)",
                 lower: "Alt Vücut & Bacak",
                 upper: "Tüm Üst Vücut",
-                core: "Karın & Core Zırhı"
+                core: "Karın & Core Zırhı",
+                functional: "Fonksiyonel Fitness & Kondisyon"
             };
 
             currentGeneratedWorkout = {
@@ -13773,6 +13792,17 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                 btnReport.onclick = () => openExerciseBugReportModal(ex.id, ex.name, (guide && guide.form) ? guide.form : '', ex.equipment || '', ex.muscle || '', 'Egzersiz Detayı');
             }
 
+            // Muscle breakdown helper
+            const pMuscleLabels = (ex.primaryMuscles || []).map(m => {
+                const conf = WEEKLY_MUSCLE_CONFIG.find(w => w.id === m);
+                return `<span style="background:rgba(245,158,11,0.2); color:var(--gold); border:1px solid rgba(245,158,11,0.4); padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800;">${conf ? conf.icon + ' ' + conf.name : m} (Primer)</span>`;
+            }).join(' ');
+
+            const sMuscleLabels = (ex.secondaryMuscles || []).map(m => {
+                const conf = WEEKLY_MUSCLE_CONFIG.find(w => w.id === m);
+                return `<span style="background:rgba(56,189,248,0.15); color:var(--cyan); border:1px solid rgba(56,189,248,0.35); padding:3px 8px; border-radius:12px; font-size:11px; font-weight:700;">${conf ? conf.icon + ' ' + conf.name : m} (Sekonder)</span>`;
+            }).join(' ');
+
             // Form Tab
             const formContainer = document.getElementById('exDetailTabContentForm');
             if (guide && guide.form) {
@@ -13780,10 +13810,17 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                     <div style="text-align:center; background:#000; border-radius:8px; overflow:hidden; border:1px solid var(--border); margin-bottom:12px; min-height:160px; display:flex; align-items:center; justify-content:center;">
                         <img src="${guide.form}" style="max-width:100%; max-height:48vh; object-fit:contain; display:block; margin:0 auto;" alt="${escapeHTML(ex.name)} Form">
                     </div>
+                    <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-bottom:10px;">
+                        <div style="font-size:11px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:6px;">🎯 Çalıştırılan Kas Grupları:</div>
+                        <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                            ${pMuscleLabels}
+                            ${sMuscleLabels || '<span style="font-size:11px; color:var(--text-secondary);">İzole hareket (saf primer odak)</span>'}
+                        </div>
+                    </div>
                     ${ex.cue ? `
                         <div class="cue-box" style="margin-top:6px;">
-                            <span class="cue-icon">💡</span>
-                            <span><strong>Altın Kural:</strong> ${escapeHTML(ex.cue)}</span>
+                            <span class="cue-icon">⚠️</span>
+                            <span><strong>Kritik Form & Güvenlik Uyarısı:</strong> ${escapeHTML(ex.cue)}</span>
                         </div>
                     ` : ''}
                 `;
@@ -13793,7 +13830,11 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                         <div style="font-size:24px; margin-bottom:6px;">🏋️</div>
                         <div style="font-weight:700; color:#fff; font-size:13.5px;">${escapeHTML(ex.name)}</div>
                         <div style="color:var(--text-secondary); font-size:11.5px; margin-top:4px;">Görsel form rehberi optimize ediliyor.</div>
-                        ${ex.cue ? `<div class="cue-box" style="margin-top:12px; text-align:left;"><span class="cue-icon">💡</span><span>${escapeHTML(ex.cue)}</span></div>` : ''}
+                        <div style="margin-top:10px; display:flex; justify-content:center; gap:6px; flex-wrap:wrap;">
+                            ${pMuscleLabels}
+                            ${sMuscleLabels}
+                        </div>
+                        ${ex.cue ? `<div class="cue-box" style="margin-top:12px; text-align:left;"><span class="cue-icon">⚠️</span><span><strong>Güvenlik Uyarısı:</strong> ${escapeHTML(ex.cue)}</span></div>` : ''}
                     </div>
                 `;
             }
@@ -13805,9 +13846,25 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                     <div style="text-align:center; background:#000; border-radius:8px; overflow:hidden; border:1px solid var(--border); min-height:160px; display:flex; align-items:center; justify-content:center;">
                         <img src="${guide.anatomi}" style="max-width:100%; max-height:48vh; object-fit:contain; display:block; margin:0 auto;" alt="${escapeHTML(ex.name)} Anatomi">
                     </div>
+                    <div style="background:rgba(0,0,0,0.35); border:1px solid var(--border); border-radius:8px; padding:12px; margin-top:10px;">
+                        <div style="font-size:12px; font-weight:800; color:#fff; margin-bottom:6px;">🧬 Kas Biyomekaniği & Yük Dağılımı:</div>
+                        <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.5;">
+                            • <strong>Birincil Hedef (Primer - 1.0x):</strong> ${pMuscleLabels}<br>
+                            • <strong>Destekleyici (Sekonder - 0.5x):</strong> ${sMuscleLabels || 'Yok (Saf İzolasyon)'}<br>
+                            • <strong>Mekanik Yapı:</strong> ${ex.mechanic === 'compound' ? '⚡ Çok Eklemli (Bileşik / Compound)' : '🎯 Tek Eklemli (İzolasyon)'}
+                        </div>
+                    </div>
                 `;
             } else {
-                anatomyContainer.innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-secondary);">Kas anatomisi haritası yükleniyor.</div>`;
+                anatomyContainer.innerHTML = `
+                    <div style="padding:20px; text-align:center; background:rgba(0,0,0,0.3); border-radius:8px;">
+                        <div style="font-size:13px; font-weight:800; color:#fff; margin-bottom:6px;">🧬 Hedef Kaslar:</div>
+                        <div style="display:flex; justify-content:center; gap:6px; flex-wrap:wrap; margin-top:6px;">
+                            ${pMuscleLabels}
+                            ${sMuscleLabels}
+                        </div>
+                    </div>
+                `;
             }
 
             // Steps Tab
