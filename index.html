@@ -11775,7 +11775,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
             { id: 'biceps', name: 'Biceps (Pazı)', icon: '💪', optimalMin: 6, optimalMax: 16, desc: 'Biceps Brachii & Kol Çekiş' },
             { id: 'triceps', name: 'Triceps (Arka Kol)', icon: '⚡', optimalMin: 6, optimalMax: 16, desc: 'Triceps Brachii & Kol İtiş' },
             { id: 'core', name: 'Karın & Core', icon: '🧱', optimalMin: 6, optimalMax: 16, desc: 'Rectus Abdominis & Oblikler' },
-            { id: 'calves', name: 'Kalf & Alt Bacak', icon: '🦶', optimalMin: 4, optimalMax: 14, desc: 'Gastrocnemius & Soleus' }
+            { id: 'calves', name: 'Kalf & Alt Bacak', icon: '🦶', optimalMin: 3, optimalMax: 12, desc: 'Gastrocnemius & Soleus' }
         ];
 
         let currentWeeklyMuscleFilter = 'all'; // 'all', 'optimal', 'insufficient', 'unworked'
@@ -13119,7 +13119,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=51')
+                navigator.serviceWorker.register('./sw.js?v=52')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
