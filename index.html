@@ -6282,68 +6282,96 @@
             }
 
             // 2. DAY SCHEDULE MODAL SCOPE
-            if (pickerContext.scope === 'day_schedule' && pickerContext.dayIdx !== null) {
+            if (pickerContext.scope === 'day_schedule' && pickerContext.dayIdx !== null && pickerContext.dayIdx !== undefined) {
                 const dayIdx = pickerContext.dayIdx;
                 const schedule = getWeeklySchedule();
                 const plan = schedule[dayIdx];
 
                 if (plan && !plan.rest) {
-                    const details = getWorkoutDetailsForPlan(plan);
+                    const details = getWorkoutDetailsForPlan(plan) || {};
                     const user = getActiveUser();
                     const key = `celik_kodu_custom_programs_${user.id}`;
                     let saved = [];
                     try { saved = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
 
-                    // Check if it's an existing custom program
-                    const existingIdx = saved.findIndex(p => p.id === (details.id || plan.id));
-                    if (existingIdx !== -1) {
-                        const targetItemIdx = pickerContext.scheduleExIndex !== null ? pickerContext.scheduleExIndex : 0;
-                        if (saved[existingIdx].exercises && saved[existingIdx].exercises[targetItemIdx]) {
-                            saved[existingIdx].exercises[targetItemIdx].exId = newEx.id;
-                            saved[existingIdx].updatedAt = Date.now();
-                            localStorage.setItem(key, JSON.stringify(saved));
-                            if (user.savedWorkouts) {
-                                const uIdx = user.savedWorkouts.findIndex(p => p.id === saved[existingIdx].id);
-                                if (uIdx !== -1) user.savedWorkouts[uIdx] = saved[existingIdx];
-                                saveAthletesToStorage();
-                            }
+                    const targetItemIdx = pickerContext.scheduleExIndex !== null ? pickerContext.scheduleExIndex : 0;
+                    const currentExs = (details && Array.isArray(details.exercises)) ? details.exercises : [];
+
+                    // Build updated full exercises array
+                    const newExercises = currentExs.map((e, idx) => {
+                        if (idx === targetItemIdx) {
+                            return Object.assign({}, newEx, {
+                                targetSets: e.targetSets || e.sets || (details.scheme ? details.scheme.sets : 3),
+                                targetReps: e.targetReps || e.reps || (details.scheme ? details.scheme.reps : '8-12'),
+                                logs: []
+                            });
                         }
+                        const exId = e.id || e.exId;
+                        const dbMatch = EXERCISES_DB.find(x => x.id === exId);
+                        return Object.assign({}, dbMatch || e, {
+                            id: exId,
+                            targetSets: e.targetSets || e.sets || (details.scheme ? details.scheme.sets : 3),
+                            targetReps: e.targetReps || e.reps || (details.scheme ? details.scheme.reps : '8-12')
+                        });
+                    });
+
+                    const cleanTitle = (details.title || plan.title || 'Özel Program').replace(/⚔️|Çelik Kodu/g, '').trim();
+                    const progId = (plan.id && plan.id.startsWith('custom_')) ? plan.id : ('custom_day_' + dayIdx + '_' + Date.now());
+
+                    const updatedWorkout = {
+                        id: progId,
+                        title: cleanTitle,
+                        split: details.split || 'custom',
+                        style: details.style || 'classic',
+                        goal: 'hypertrophy',
+                        duration: Math.round(newExercises.length * 7) || 45,
+                        scheme: details.scheme || { sets: 3, reps: '8-12', rest: details.rest || 60 },
+                        rest: details.rest || 60,
+                        warmups: details.warmups || [
+                            { name: "Eklemsel CARs (Omuz & Kalça Dairesi)", dur: "90 sn", cue: "Tüm eklemleri kontrollü ısıt." }
+                        ],
+                        exercises: newExercises,
+                        finisher: details.finisher || { name: "Balistik Bitiş", desc: "Maksimum tempolu seans." },
+                        updatedAt: Date.now(),
+                        isCustom: true
+                    };
+
+                    // 1. Direct update on the weekly schedule
+                    schedule[dayIdx] = {
+                        id: progId,
+                        title: cleanTitle,
+                        type: 'custom_saved',
+                        desc: `${newExercises.length} Hareket • ${updatedWorkout.duration} Dk`,
+                        rest: false,
+                        customWorkout: updatedWorkout
+                    };
+                    saveWeeklySchedule(schedule);
+
+                    // 2. Also persist in custom programs library
+                    const existingIdx = saved.findIndex(p => p.id === progId);
+                    if (existingIdx !== -1) {
+                        saved[existingIdx] = updatedWorkout;
                     } else {
-                        // Official routine: clone as custom program for this day
-                        const newProgId = 'custom_day_' + dayIdx + '_' + Date.now();
-                        const currentExs = (details && details.exercises) ? details.exercises : [];
-                        const targetItemIdx = pickerContext.scheduleExIndex !== null ? pickerContext.scheduleExIndex : 0;
-                        const newExercises = currentExs.map((e, idx) => ({
-                            exId: idx === targetItemIdx ? newEx.id : e.id,
-                            sets: e.targetSets || 3,
-                            reps: e.targetReps || '8-12',
-                            weight: ''
-                        }));
-
-                        const cleanTitle = (details.title || plan.title || 'Özel Program').replace(/⚔️|Çelik Kodu/g, '').trim() + " (Özelleştirilmiş)";
-                        const newProg = {
-                            id: newProgId,
-                            title: cleanTitle,
-                            rest: details.rest || 60,
-                            exercises: newExercises,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: Date.now(),
-                            isCustom: true
-                        };
-                        saved.unshift(newProg);
-                        localStorage.setItem(key, JSON.stringify(saved));
-                        if (!user.savedWorkouts) user.savedWorkouts = [];
-                        user.savedWorkouts.unshift(newProg);
-                        saveAthletesToStorage();
-
-                        // Assign to day
-                        assignRoutineToActiveDay(newProgId, cleanTitle, 'custom', `${newExercises.length} Hareket`, false);
+                        saved.unshift(updatedWorkout);
                     }
+                    localStorage.setItem(key, JSON.stringify(saved));
+
+                    if (!user.savedWorkouts) user.savedWorkouts = [];
+                    const userSavedIdx = user.savedWorkouts.findIndex(p => p.id === progId);
+                    if (userSavedIdx !== -1) {
+                        user.savedWorkouts[userSavedIdx] = updatedWorkout;
+                    } else {
+                        user.savedWorkouts.unshift(updatedWorkout);
+                    }
+                    saveAthletesToStorage();
+
+                    // 3. Update active day and calendar view
+                    renderActiveWorkout();
                 }
 
                 closeExercisePickerModal();
                 openScheduleDayModal(dayIdx);
-                showToast(`✅ "${newEx.name}" güncellendi!`);
+                showToast(`✅ "${newEx.name}" güncellendi ve kaydedildi!`);
                 playAlertSound();
                 return;
             }
@@ -9038,14 +9066,35 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         function getWorkoutDetailsForPlan(plan) {
             if (!plan || plan.rest) return null;
 
+            const normalizeExerciseItem = (e) => {
+                if (!e) return null;
+                const exId = e.id || e.exId;
+                const dbEx = EXERCISES_DB.find(x => x.id === exId);
+                return Object.assign({}, dbEx || e, {
+                    id: exId,
+                    targetSets: e.targetSets || e.sets || 3,
+                    targetReps: e.targetReps || e.reps || '8-12',
+                    logs: e.logs || []
+                });
+            };
+
+            const normalizeWorkout = (w) => {
+                if (!w) return null;
+                const clone = Object.assign({}, w);
+                if (Array.isArray(clone.exercises)) {
+                    clone.exercises = clone.exercises.map(normalizeExerciseItem).filter(Boolean);
+                }
+                return clone;
+            };
+
             // 1. Directly attached custom workout object
             if (plan.customWorkout && Array.isArray(plan.customWorkout.exercises) && plan.customWorkout.exercises.length > 0) {
-                return plan.customWorkout;
+                return normalizeWorkout(plan.customWorkout);
             }
 
             // 2. Direct exercises array on plan
             if (Array.isArray(plan.exercises) && plan.exercises.length > 0) {
-                return plan;
+                return normalizeWorkout(plan);
             }
 
             const planId = (plan.id || '').trim();
@@ -9137,10 +9186,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         const saved = JSON.parse(localStorage.getItem(k) || '[]');
                         if (Array.isArray(saved)) {
                             let found = saved.find(p => p && p.id === planId);
-                            if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return found;
+                            if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return normalizeWorkout(found);
                             if (planTitle) {
                                 found = saved.find(p => p && p.title && p.title.trim().toLowerCase() === planTitle);
-                                if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return found;
+                                if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return normalizeWorkout(found);
                             }
                         }
                     }
@@ -9154,10 +9203,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     for (const u of users) {
                         if (u && Array.isArray(u.savedWorkouts)) {
                             let found = u.savedWorkouts.find(p => p && p.id === planId);
-                            if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return found;
+                            if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return normalizeWorkout(found);
                             if (planTitle) {
                                 found = u.savedWorkouts.find(p => p && p.title && p.title.trim().toLowerCase() === planTitle);
-                                if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return found;
+                                if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return normalizeWorkout(found);
                             }
                         }
                     }
@@ -9555,11 +9604,11 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 title: cleanTitle || "Özel Programım",
                 rest: (details.scheme && details.scheme.rest) || details.rest || 60,
                 exercises: details.exercises.map(ex => ({
-                    exId: ex.id,
-                    sets: ex.targetSets || (details.scheme ? details.scheme.sets : 3),
-                    reps: ex.targetReps || (details.scheme ? details.scheme.reps : '8-12'),
+                    exId: ex.id || ex.exId,
+                    sets: ex.targetSets || ex.sets || (details.scheme ? details.scheme.sets : 3),
+                    reps: ex.targetReps || ex.reps || (details.scheme ? details.scheme.reps : '8-12'),
                     weight: ''
-                })),
+                })).filter(item => Boolean(item.exId)),
                 editingDayIdx: dayIdx,
                 editingProgramId: details.id || plan.id,
                 isEditingExisting: true
@@ -9618,7 +9667,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         }
 
         function saveEditingRoutineToDay() {
-            if (customRoutineState.editingDayIdx === null) {
+            if (customRoutineState.editingDayIdx === null || customRoutineState.editingDayIdx === undefined) {
                 saveCustomRoutineToLibrary();
                 return;
             }
@@ -9637,7 +9686,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 return ex ? Object.assign({}, ex, { targetSets: item.sets, targetReps: item.reps }) : null;
             }).filter(Boolean);
 
-            const progId = customRoutineState.editingProgramId || ('custom_' + Date.now());
+            const progId = (customRoutineState.editingProgramId && customRoutineState.editingProgramId.startsWith('custom_')) 
+                ? customRoutineState.editingProgramId 
+                : ('custom_day_' + dayIdx + '_' + Date.now());
 
             const updatedWorkout = {
                 id: progId,
@@ -9662,7 +9713,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             schedule[dayIdx] = {
                 id: progId,
                 title: title,
-                type: 'custom_generated',
+                type: 'custom_saved',
                 desc: `${exercisesList.length} Hareket • ${updatedWorkout.duration} Dk`,
                 rest: false,
                 customWorkout: updatedWorkout
@@ -9694,12 +9745,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
             saveAthletesToStorage();
 
-            // Clear editing state
-            cancelStudioEditing(false);
+            // Clear editing state cleanly without prompt
+            cancelStudioEditingSilent();
 
             renderActiveWorkout();
             renderLibrary();
             playAlertSound();
+            showToast(`✅ "${title}" ${DAY_NAMES_TR[dayIdx]} gününe kaydedildi!`);
             alert(`✅ "${title}" programı güncellendi ve ${DAY_NAMES_TR[dayIdx]} gününe başarıyla kaydedildi!\n\n(${exercisesList.length} Hareket)`);
         }
 
@@ -9790,17 +9842,24 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
         }
 
+        function cancelStudioEditingSilent() {
+            customRoutineState.editingDayIdx = null;
+            customRoutineState.editingProgramId = null;
+            customRoutineState.isEditingExisting = false;
+            customRoutineState.exercises = [];
+            const container = document.getElementById('studioEditingBannerContainer');
+            if (container) container.innerHTML = '';
+            updateStudioSaveActionsGroup();
+            renderCustomRoutine();
+            renderRegionStatus();
+            renderStudioExerciseCatalog();
+        }
+
         function cancelStudioEditing(promptConfirm = false) {
             if (promptConfirm && !confirm("Düzenleme modundan çıkmak istediğinize emin misiniz?")) {
                 return;
             }
-            customRoutineState.editingDayIdx = null;
-            customRoutineState.editingProgramId = null;
-            customRoutineState.isEditingExisting = false;
-            const container = document.getElementById('studioEditingBannerContainer');
-            if (container) container.innerHTML = '';
-            updateStudioSaveActionsGroup();
-            resetCustomRoutine();
+            cancelStudioEditingSilent();
         }
 
         function promptAssignStudioRoutineToDay() {
@@ -9998,11 +10057,11 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 title: cleanTitle,
                 rest: (prog.scheme && prog.scheme.rest) || prog.rest || 60,
                 exercises: (prog.exercises || []).map(ex => ({
-                    exId: ex.id,
-                    sets: ex.targetSets || (prog.scheme ? prog.scheme.sets : 3),
-                    reps: ex.targetReps || (prog.scheme ? prog.scheme.reps : '8-12'),
+                    exId: ex.id || ex.exId,
+                    sets: ex.targetSets || ex.sets || (prog.scheme ? prog.scheme.sets : 3),
+                    reps: ex.targetReps || ex.reps || (prog.scheme ? prog.scheme.reps : '8-12'),
                     weight: ''
-                })),
+                })).filter(item => Boolean(item.exId)),
                 editingDayIdx: null,
                 editingProgramId: progId,
                 isEditingExisting: true
@@ -12214,7 +12273,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=48')
+                navigator.serviceWorker.register('./sw.js?v=49')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
@@ -12464,6 +12523,39 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                 `;
             });
 
+            if (customRoutineState.exercises.length > 0) {
+                const dayIdx = customRoutineState.editingDayIdx;
+                const isDayEdit = dayIdx !== null && dayIdx !== undefined;
+                const isProgEdit = Boolean(customRoutineState.editingProgramId);
+
+                html += `
+                    <div style="margin-top:12px; padding:10px 12px; background:rgba(0,0,0,0.3); border:1px solid rgba(245,158,11,0.3); border-radius:8px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; box-shadow:0 0 15px rgba(245,158,11,0.1);">
+                        ${isDayEdit ? `
+                            <button type="button" class="btn btn-gold" style="flex:1; min-width:200px; font-size:12.5px; padding:10px 16px; font-weight:900; box-shadow:0 0 15px rgba(245,158,11,0.35);" onclick="saveEditingRoutineToDay()">
+                                💾 Değişiklikleri ${DAY_NAMES_TR[dayIdx]} Gününe Kaydet
+                            </button>
+                            <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:10px 14px;" onclick="cancelStudioEditing(true)">
+                                Vazgeç
+                            </button>
+                        ` : (isProgEdit ? `
+                            <button type="button" class="btn btn-gold" style="flex:1; min-width:200px; font-size:12.5px; padding:10px 16px; font-weight:900; box-shadow:0 0 15px rgba(245,158,11,0.35);" onclick="saveCustomRoutineToLibrary()">
+                                💾 Değişiklikleri Kaydet
+                            </button>
+                            <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:10px 14px;" onclick="cancelStudioEditing(true)">
+                                Vazgeç
+                            </button>
+                        ` : `
+                            <button type="button" class="btn btn-gold" style="flex:1; min-width:160px; font-size:12px; padding:9px 14px; font-weight:900;" onclick="saveCustomRoutineToLibrary()">
+                                💾 Programı Kütüphaneye Kaydet
+                            </button>
+                            <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:9px 12px; color:var(--cyan); border-color:var(--cyan);" onclick="promptAssignStudioRoutineToDay()">
+                                📅 Güne Planla
+                            </button>
+                        `)}
+                    </div>
+                `;
+            }
+
             container.innerHTML = html;
         }
 
@@ -12614,6 +12706,12 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                 return;
             }
 
+            // If we are editing a day's program, save to that day as well!
+            if (customRoutineState.editingDayIdx !== null && customRoutineState.editingDayIdx !== undefined) {
+                saveEditingRoutineToDay();
+                return;
+            }
+
             const title = (document.getElementById('customWorkoutTitleInput')?.value || '').trim() || "Özel Çelik Programım";
             const rest = parseInt(document.getElementById('customWorkoutRestSelect')?.value) || 60;
 
@@ -12666,10 +12764,26 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
             }
             saveAthletesToStorage();
 
-            if (typeof cancelStudioEditing === 'function') {
-                cancelStudioEditing(false);
+            // Synchronize any day in weeklySchedule using this program
+            const schedule = getWeeklySchedule();
+            let schedChanged = false;
+            for (let d = 0; d < 7; d++) {
+                if (schedule[d] && (schedule[d].id === progId || (schedule[d].customWorkout && schedule[d].customWorkout.id === progId))) {
+                    schedule[d].title = title;
+                    schedule[d].desc = `${exercisesList.length} Hareket • ${newRoutine.duration} Dk`;
+                    schedule[d].customWorkout = newRoutine;
+                    schedChanged = true;
+                }
+            }
+            if (schedChanged) {
+                saveWeeklySchedule(schedule);
             }
 
+            if (typeof cancelStudioEditingSilent === 'function') {
+                cancelStudioEditingSilent();
+            }
+
+            showToast(`✅ "${title}" kaydedildi!`);
             alert(`✅ "${title}" kaydedildi! '📚 Programlar' sekmesinden veya Haftalık Plandan başlatabilirsiniz.`);
             renderLibrary();
             renderActiveWorkout();
