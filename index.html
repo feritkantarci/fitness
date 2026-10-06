@@ -4276,6 +4276,7 @@
                     <button class="btn-quick-equip" id="pill_cat_legs_quad" onclick="setPickerCategory('legs_quad')">Ön Bacak / Quad</button>
                     <button class="btn-quick-equip" id="pill_cat_legs_hinge" onclick="setPickerCategory('legs_hinge')">Arka Bacak / Kalça</button>
                     <button class="btn-quick-equip" id="pill_cat_core" onclick="setPickerCategory('core')">Karın & Core</button>
+                    <button class="btn-quick-equip" id="pill_cat_conditioning" onclick="setPickerCategory('conditioning')">⚡ Fonksiyonel & Kondisyon</button>
                 </div>
             </div>
 
@@ -6114,7 +6115,7 @@
         }
 
         function updatePickerCategoryPills() {
-            const cats = ['all', 'push', 'pull', 'legs_quad', 'legs_hinge', 'core'];
+            const cats = ['all', 'push', 'pull', 'legs_quad', 'legs_hinge', 'core', 'conditioning'];
             cats.forEach(c => {
                 const el = document.getElementById('pill_cat_' + c);
                 if (el) {
