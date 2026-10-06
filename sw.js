@@ -1,6 +1,9 @@
-const CACHE_NAME = 'celik-kodu-cache-v54';
+const CACHE_NAME = 'celik-kodu-cache-v55';
 const ASSETS = [
   './',
+  './assets/guides/guide_half_kneeling_plate_chop_form.jpg',
+  './assets/guides/guide_half_kneeling_plate_chop_anatomi.jpg',
+  './assets/diagrams/seq_half_kneeling_plate_chop.svg',
   './assets/guides/guide_kneeling_plate_front_raise_form.jpg',
   './assets/guides/guide_kneeling_plate_front_raise_anatomi.jpg',
   './assets/diagrams/seq_kneeling_plate_front_raise.svg',
