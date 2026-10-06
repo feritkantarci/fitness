@@ -3867,6 +3867,22 @@
         </div>
     </div>
 
+    <!-- ==================== QUICK ADD TO DAY MODAL (FROM ANALYTICS) ==================== -->
+    <div id="quickAddToDayModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 480px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <div>
+                    <span class="auth-role-tag role-admin" style="font-size:10px; background:rgba(245,158,11,0.2); color:var(--gold);">⚡ HIZLI KAS DENGESİ</span>
+                    <h3 class="modal-title" id="quickAddModalTitle" style="font-size:16px; margin-top:4px;">Egzersizi Güne Ekle</h3>
+                </div>
+                <button class="modal-close" onclick="closeQuickAddToDayModal()">✕</button>
+            </div>
+            <div id="quickAddModalBody" style="margin-top: 14px;">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
     <!-- ==================== WEEKLY SCHEDULE DAY MODAL ==================== -->
     <div id="scheduleDayModal" class="modal-overlay">
         <div class="modal-box" style="max-width: 560px; max-height: 92vh; overflow-y: auto;">
@@ -11826,7 +11842,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                     scheduledTotalSets: 0,
                     scheduledSecondarySets: 0,
                     doneExercises: new Set(),
-                    plannedExercises: new Set()
+                    plannedExercises: new Map()
                 };
             });
 
@@ -11896,7 +11912,12 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                             map[m].scheduledTotalSets += pSets;
                             if (isRemaining || sourceMode === 'schedule_full') {
                                 map[m].planDirectSets += pSets;
-                                map[m].plannedExercises.add(ex.name || dbEx?.name || 'Egzersiz');
+                                map[m].plannedExercises.set(`${ex.name}_${dKey}`, {
+                                    name: ex.name || dbEx?.name || 'Egzersiz',
+                                    dayIdx: dKey,
+                                    dayName: (typeof DAY_NAMES_TR !== 'undefined') ? DAY_NAMES_TR[dKey] : `Gün ${dKey}`,
+                                    sets: pSets
+                                });
                             }
                         }
                     });
@@ -11999,7 +12020,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                     statusBg,
                     statusDesc,
                     doneExercises: Array.from(data.doneExercises),
-                    plannedExercises: Array.from(data.plannedExercises)
+                    plannedExercises: Array.from(data.plannedExercises.values())
                 };
             });
 
@@ -12035,6 +12056,215 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
             currentWeeklyMuscleWeekOffset = offset;
             if (typeof renderAnalytics === 'function') {
                 renderAnalytics();
+            }
+        }
+
+        // ==================== WORKOUT QUICK-ADD & COMPILE HELPERS ====================
+        let activeQuickAddExId = null;
+
+        function addExerciseToDaySchedule(dayIdx, exId, targetSets = 3, targetReps = '8-12') {
+            const ex = EXERCISES_DB.find(e => e.id === exId);
+            if (!ex) return false;
+
+            const schedule = getWeeklySchedule();
+            const plan = schedule[dayIdx] || { id: 'rest', title: 'Dinlenme', rest: true };
+
+            const details = (typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(plan) : null;
+            let existingExercises = (details && Array.isArray(details.exercises))
+                ? details.exercises.map(e => ({
+                    id: e.id || e.exId,
+                    name: e.name,
+                    targetSets: e.targetSets || (details.scheme ? details.scheme.sets : 3),
+                    targetReps: e.targetReps || (details.scheme ? details.scheme.reps : '8-12')
+                })).filter(e => Boolean(e.id))
+                : [];
+
+            existingExercises.push({
+                id: ex.id,
+                name: ex.name,
+                targetSets: parseInt(targetSets) || 3,
+                targetReps: targetReps || '8-12'
+            });
+
+            const progId = 'custom_day_' + dayIdx + '_' + Date.now();
+            const dayName = (typeof DAY_NAMES_TR !== 'undefined') ? DAY_NAMES_TR[dayIdx] : `Gün ${dayIdx}`;
+            const title = plan.rest ? `${dayName} Özel Programı` : (plan.title || `${dayName} Programı`);
+
+            const customWorkout = {
+                id: progId,
+                title: title,
+                split: 'custom',
+                splitName: title,
+                style: 'classic',
+                goal: 'hypertrophy',
+                duration: Math.round(existingExercises.length * 8),
+                scheme: { sets: 3, reps: '8-12', rest: (details && details.scheme ? details.scheme.rest : 60) },
+                warmups: [
+                    { name: "Eklemsel CARs (Omuz & Kalça Dairesi)", dur: "90 sn", cue: "Tüm eklemleri kontrollü ısıt." }
+                ],
+                exercises: existingExercises.map(e => {
+                    const dbEx = EXERCISES_DB.find(x => x.id === e.id);
+                    return Object.assign({}, dbEx || {}, e);
+                }),
+                finisher: { name: "Balistik Bitiş", desc: "Tempolu taşıma veya swing." },
+                updatedAt: Date.now(),
+                isCustom: true
+            };
+
+            schedule[dayIdx] = {
+                id: progId,
+                title: title,
+                type: 'custom_saved',
+                desc: `${existingExercises.length} Hareket • ${customWorkout.duration} Dk`,
+                rest: false,
+                customWorkout: customWorkout
+            };
+
+            saveWeeklySchedule(schedule);
+
+            try {
+                const user = getActiveUser();
+                const key = `celik_kodu_custom_programs_${user.id}`;
+                let saved = [];
+                try { saved = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
+                saved.unshift(customWorkout);
+                localStorage.setItem(key, JSON.stringify(saved));
+            } catch(e) {}
+
+            return true;
+        }
+
+        function openQuickAddToDayModal(exId) {
+            activeQuickAddExId = exId;
+            const ex = EXERCISES_DB.find(e => e.id === exId);
+            if (!ex) return;
+
+            const modal = document.getElementById('quickAddToDayModal');
+            const titleEl = document.getElementById('quickAddModalTitle');
+            const bodyEl = document.getElementById('quickAddModalBody');
+            if (!modal || !bodyEl) return;
+
+            const pNames = (ex.primaryMuscles || []).map(m => (TARGET_REGIONS[m] ? TARGET_REGIONS[m].name : m)).join(', ') || ex.muscle || '';
+
+            if (titleEl) {
+                titleEl.innerHTML = `➕ ${escapeHTML(ex.name)}`;
+            }
+
+            const schedule = getWeeklySchedule();
+            const allLogs = getWorkoutLogs();
+            const bounds = getWeeklyMuscleBounds(0);
+            const weekLogs = allLogs.filter(l => {
+                const dt = new Date(l.date);
+                return dt >= bounds.monday && dt <= bounds.sunday;
+            });
+            const loggedDays = new Set(weekLogs.map(l => new Date(l.date).getDay()));
+            const todayDay = (new Date()).getDay();
+            const getIsoDay = (d) => d === 0 ? 7 : d;
+            const todayIso = getIsoDay(todayDay);
+
+            const dayKeys = [1, 2, 3, 4, 5, 6, 0];
+            let daysHTML = '';
+
+            dayKeys.forEach(dKey => {
+                const dayName = DAY_NAMES_TR[dKey];
+                const planIso = getIsoDay(dKey);
+                const isCompleted = loggedDays.has(dKey);
+                const isPast = !isCompleted && planIso < todayIso;
+                const isAvailable = !isCompleted && planIso >= todayIso;
+
+                const plan = schedule[dKey];
+                const details = (typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(plan) : null;
+                const exCount = (details && details.exercises) ? details.exercises.length : 0;
+                const planTitle = plan ? plan.title : 'Dinlenme';
+
+                let statusBadge = '';
+                let canAdd = false;
+
+                if (isCompleted) {
+                    statusBadge = `<span style="font-size:10px; color:#10b981; font-weight:700;">✅ Seans Tamamlandı</span>`;
+                } else if (isPast) {
+                    statusBadge = `<span style="font-size:10px; color:var(--text-secondary);">Günü Geçti</span>`;
+                    canAdd = true;
+                } else {
+                    statusBadge = `<span style="font-size:10px; color:var(--gold); font-weight:700;">⏳ Kalan Plan</span>`;
+                    canAdd = true;
+                }
+
+                daysHTML += `
+                    <div style="background:rgba(0,0,0,0.3); border:1px solid ${isAvailable ? 'rgba(245,158,11,0.35)' : 'var(--border)'}; border-radius:10px; padding:10px 12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                        <div>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <strong style="font-size:13px; color:#fff;">${dayName}</strong>
+                                ${statusBadge}
+                            </div>
+                            <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
+                                ${escapeHTML(planTitle)} • ${plan && plan.rest ? 'İstirahat Günü' : `${exCount} Egzersiz`}
+                            </div>
+                        </div>
+
+                        ${canAdd ? `
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <select id="quickAddSetsSelect_${dKey}" style="background:#111; color:#fff; border:1px solid var(--border); font-size:11px; padding:4px 6px; border-radius:6px;">
+                                    <option value="3" selected>3 Set</option>
+                                    <option value="4">4 Set</option>
+                                    <option value="5">5 Set</option>
+                                    <option value="2">2 Set</option>
+                                </select>
+                                <button class="btn btn-gold" style="font-size:11px; padding:5px 12px; font-weight:800; border-radius:6px;" onclick="applyQuickAddExerciseToDay(${dKey}, '${ex.id}')">
+                                    ➕ Ekle
+                                </button>
+                            </div>
+                        ` : `
+                            <button class="btn btn-outline" style="font-size:10px; padding:4px 8px; opacity:0.6;" disabled>
+                                Seans Bitti
+                            </button>
+                        `}
+                    </div>
+                `;
+            });
+
+            bodyEl.innerHTML = `
+                <div style="background:rgba(245,158,11,0.06); border:1px solid rgba(245,158,11,0.25); border-radius:8px; padding:10px 12px; margin-bottom:12px;">
+                    <div style="font-size:11.5px; color:#fde68a;">
+                        <strong>Hedef Kas:</strong> ${escapeHTML(pNames)} • <strong>Ekipman:</strong> ${ex.equipment ? ex.equipment.toUpperCase() : 'SERBEST'}
+                    </div>
+                    <div style="font-size:10.5px; color:var(--text-secondary); margin-top:2px;">
+                        Bu hareketi haftanın kalan günlerinden birine eklediğinizde, haftalık kas dengeniz ve yeterlilik karneniz anında yeniden hesaplanır.
+                    </div>
+                </div>
+
+                <div style="font-size:11.5px; font-weight:800; color:var(--text-secondary); margin-bottom:8px; text-transform:uppercase;">
+                    Egzersizin Ekleneceği Günü Seçin:
+                </div>
+                ${daysHTML}
+            `;
+
+            modal.classList.add('active');
+        }
+
+        function closeQuickAddToDayModal() {
+            const modal = document.getElementById('quickAddToDayModal');
+            if (modal) modal.classList.remove('active');
+            activeQuickAddExId = null;
+        }
+
+        function applyQuickAddExerciseToDay(dayIdx, exId) {
+            const selectEl = document.getElementById(`quickAddSetsSelect_${dayIdx}`);
+            const targetSets = selectEl ? parseInt(selectEl.value) || 3 : 3;
+            const ex = EXERCISES_DB.find(e => e.id === exId);
+
+            const ok = addExerciseToDaySchedule(dayIdx, exId, targetSets, '8-12');
+            if (ok) {
+                closeQuickAddToDayModal();
+                showToast(`✅ "${ex ? ex.name : 'Egzersiz'}" ${DAY_NAMES_TR[dayIdx]} gününe ${targetSets} set olarak eklendi!`);
+                if (typeof renderAnalytics === 'function') {
+                    renderAnalytics();
+                }
+                if (typeof renderWeeklyScheduleView === 'function') {
+                    renderWeeklyScheduleView();
+                }
+            } else {
+                alert("Egzersiz eklenirken bir hata oluştu.");
             }
         }
 
@@ -12094,7 +12324,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                     <div style="background:rgba(239, 68, 68, 0.08); border:1px solid rgba(239, 68, 68, 0.3); border-radius:10px; padding:10px 12px; margin-top:12px; display:flex; align-items:flex-start; gap:8px;">
                         <span style="font-size:16px;">🚨</span>
                         <div style="font-size:11.5px; color:#fca5a5; line-height:1.4;">
-                            <strong>Atlanan / Çalıştırılmayan Kaslar:</strong> Bu hafta <strong>${escapeHTML(analysis.unworkedNames.join(', '))}</strong> bölgesi için henüz antrenman hacmi bulunmuyor. Kas dengesizliğini ve sakatlık riskini önlemek için aşağıda önerilen egzersizleri programınıza ekleyebilirsiniz.
+                            <strong>Atlanan / Çalıştırılmayan Kaslar:</strong> Bu hafta <strong>${escapeHTML(analysis.unworkedNames.join(', '))}</strong> bölgesi için henüz antrenman hacmi bulunmuyor. Kas dengesizliğini ve sakatlık riskini önlemek için aşağıda önerilen hareketleri kalan günlere ekleyebilirsiniz.
                         </div>
                     </div>
                 `;
@@ -12103,7 +12333,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                     <div style="background:rgba(245, 158, 11, 0.08); border:1px solid rgba(245, 158, 11, 0.3); border-radius:10px; padding:10px 12px; margin-top:12px; display:flex; align-items:flex-start; gap:8px;">
                         <span style="font-size:16px;">⚠️</span>
                         <div style="font-size:11.5px; color:#fde68a; line-height:1.4;">
-                            <strong>Düşük Hacim Uyarısı:</strong> <strong>${escapeHTML(analysis.insufficientNames.join(', '))}</strong> bölgesi minimum gelişim eşiğinin altında kaldı. Birkaç set ekleyerek hipertrofi eşiğine ulaşabilirsiniz.
+                            <strong>Düşük Hacim Uyarısı:</strong> <strong>${escapeHTML(analysis.insufficientNames.join(', '))}</strong> bölgesi minimum gelişim eşiğinin altında kaldı. Kalan günlere hareket veya set ekleyerek hipertrofi eşiğine ulaşabilirsiniz.
                         </div>
                     </div>
                 `;
@@ -12117,6 +12347,82 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                     </div>
                 `;
             }
+
+            // Build Upcoming Days cards for current week
+            const schedule = (typeof getWeeklySchedule === 'function') ? getWeeklySchedule() : {};
+            const allLogs = (typeof getWorkoutLogs === 'function') ? getWorkoutLogs() : [];
+            const weekLogs = allLogs.filter(l => {
+                const dt = new Date(l.date);
+                return dt >= bounds.monday && dt <= bounds.sunday;
+            });
+            const loggedDays = new Set(weekLogs.map(l => new Date(l.date).getDay()));
+            const todayDay = (new Date()).getDay();
+            const getIsoDay = (d) => d === 0 ? 7 : d;
+            const todayIso = getIsoDay(todayDay);
+            const dayKeys = [1, 2, 3, 4, 5, 6, 0];
+
+            const upcomingDaysList = [];
+            if (bounds.isCurrentWeek) {
+                dayKeys.forEach(dKey => {
+                    const isCompleted = loggedDays.has(dKey);
+                    const planIso = getIsoDay(dKey);
+                    if (!isCompleted && planIso >= todayIso) {
+                        const plan = schedule[dKey];
+                        const isRest = !plan || plan.rest;
+                        const details = isRest ? null : ((typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(plan) : null);
+                        const exCount = (details && details.exercises) ? details.exercises.length : 0;
+                        upcomingDaysList.push({
+                            dayIdx: dKey,
+                            dayName: DAY_NAMES_TR[dKey],
+                            isToday: planIso === todayIso,
+                            isRest,
+                            plan,
+                            details,
+                            exCount
+                        });
+                    }
+                });
+            }
+
+            const upcomingDaysHTML = (bounds.isCurrentWeek && upcomingDaysList.length > 0) ? `
+                <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(245,158,11,0.25); border-radius:10px; padding:12px; margin-top:14px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <span style="font-size:16px;">🗓️</span>
+                            <span style="font-size:12.5px; font-weight:800; color:#fff;">Bu Haftanın Kalan Günleri & Hızlı Program Derleme</span>
+                        </div>
+                        <span style="font-size:10px; color:var(--gold); font-weight:700;">Doğrudan Stüdyoda Düzenleyin</span>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:8px;">
+                        ${upcomingDaysList.map(item => `
+                            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                                <div>
+                                    <div style="display:flex; align-items:center; gap:6px;">
+                                        <strong style="font-size:12px; color:#fff;">${item.dayName}</strong>
+                                        ${item.isToday ? '<span style="font-size:9.5px; background:var(--gold); color:#000; font-weight:800; padding:1px 5px; border-radius:4px;">BUGÜN</span>' : ''}
+                                    </div>
+                                    <div style="font-size:10.5px; color:var(--text-secondary); margin-top:2px;">
+                                        ${item.isRest ? '🧘 Dinlenme Günü' : `${escapeHTML(item.plan.title || 'Program')} (${item.exCount} Hrk)`}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    ${!item.isRest ? `
+                                        <button class="btn btn-outline" style="font-size:10.5px; padding:4px 8px; color:var(--gold); border-color:rgba(245,158,11,0.5); font-weight:700;" onclick="editProgramForDay(${item.dayIdx})" title="Bu programı stüdyoda derle ve düzenle">
+                                            ✏️ Derle / Düzenle
+                                        </button>
+                                    ` : `
+                                        <button class="btn btn-outline" style="font-size:10.5px; padding:4px 8px; color:var(--cyan); border-color:rgba(56,189,248,0.4);" onclick="startNewStudioProgramForDay(${item.dayIdx})" title="Bu güne yeni antrenman programı ata">
+                                            ➕ Antrenman Ata
+                                        </button>
+                                    `}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : '';
 
             // Muscle Cards HTML
             const muscleCardsHTML = filteredMuscles.length === 0 ? `
@@ -12175,9 +12481,15 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                                     ` : ''}
 
                                     ${m.plannedExercises.length > 0 ? `
-                                        <div style="font-size:11px; margin-top:2px;">
+                                        <div style="font-size:11px; margin-top:4px;">
                                             <span style="color:var(--text-secondary);">📋 Kalan Planda Olanlar:</span>
-                                            <span style="color:#fcd34d; font-weight:600;">${m.plannedExercises.map(escapeHTML).join(', ')}</span>
+                                            <div style="display:inline-flex; flex-wrap:wrap; gap:4px; margin-top:2px;">
+                                                ${m.plannedExercises.map(pe => `
+                                                    <button class="btn btn-outline" style="font-size:10px; padding:2px 6px; border-radius:6px; color:#fcd34d; border-color:rgba(245,158,11,0.4); background:rgba(0,0,0,0.3);" onclick="editProgramForDay(${pe.dayIdx})" title="Bu antrenmanı stüdyoda derle & düzenle">
+                                                        ${escapeHTML(pe.name)} <span style="opacity:0.75;">(${pe.dayName}) ✏️</span>
+                                                    </button>
+                                                `).join('')}
+                                            </div>
                                         </div>
                                     ` : ''}
                                 </div>
@@ -12190,9 +12502,14 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                                         </div>
                                         <div style="display:flex; gap:6px; flex-wrap:wrap;">
                                             ${recs.map(r => `
-                                                <button class="btn btn-outline" style="font-size:10.5px; padding:3px 8px; border-radius:6px; background:rgba(0,0,0,0.4); border-color:var(--border);" onclick="openExerciseDetailModal('${r.id}')" title="Form ve Detayları Gör">
-                                                    🏋️ ${escapeHTML(r.name)} <span style="color:var(--text-secondary); font-size:9.5px;">(${r.equipment})</span>
-                                                </button>
+                                                <div style="display:inline-flex; align-items:center; background:rgba(0,0,0,0.4); border:1px solid var(--border); border-radius:6px; overflow:hidden;">
+                                                    <button class="btn btn-outline" style="font-size:10px; padding:3px 7px; border:none; border-right:1px solid rgba(255,255,255,0.08);" onclick="openExerciseDetailModal('${r.id}')" title="Form ve Detayları Gör">
+                                                        🏋️ ${escapeHTML(r.name)} <span style="color:var(--text-secondary); font-size:9px;">(${r.equipment})</span>
+                                                    </button>
+                                                    <button class="btn btn-gold" style="font-size:9.5px; padding:3px 7px; border-radius:0; font-weight:800;" onclick="openQuickAddToDayModal('${r.id}')" title="Bu egzersizi haftanın kalan bir gününe ekle">
+                                                        ➕ Güne Ekle
+                                                    </button>
+                                                </div>
                                             `).join('')}
                                         </div>
                                     </div>
@@ -12256,6 +12573,9 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
 
                     <!-- COACH ALERT BOX -->
                     ${coachAlertHTML}
+
+                    <!-- BU HAFTANIN KALAN GÜNLERİ & HIZLI PROGRAM DERLEME -->
+                    ${upcomingDaysHTML}
 
                     <!-- FILTER BUTTONS -->
                     <div style="margin-top:14px;">
@@ -12799,7 +13119,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=50')
+                navigator.serviceWorker.register('./sw.js?v=51')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
