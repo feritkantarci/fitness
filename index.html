@@ -5897,7 +5897,7 @@
 
             if (pickerContext.mode === 'replace' && currentEx) {
                 if (titleEl) titleEl.innerText = `🔄 "${currentEx.name}" İçin Alternatif Seç`;
-                if (subEl) subEl.innerText = "Aynı kas grubuna farklı ekipmanla veya başka bir bölgeye geçiş yapın";
+                if (subEl) subEl.innerHTML = `<span style="color:var(--text-secondary);">Aynı kas grubuna farklı ekipmanla veya başka bir bölgeye geçiş yapın.</span> <span style="display:inline-block; font-size:10.5px; color:var(--gold); background:rgba(245,158,11,0.12); padding:2px 7px; border-radius:4px; border:1px solid rgba(245,158,11,0.25); margin-left:4px; font-weight:700;">🛡️ Listenizdeki hareketler hariç tutuldu</span>`;
                 if (banner) banner.style.display = 'flex';
 
                 const guide = exerciseGuideMap[currentEx.id] || categoryFallback[currentEx.category] || guideLibrary.goblet_squat;
@@ -6052,12 +6052,52 @@
             renderPickerList();
         }
 
+        function getExercisesInCurrentScope(ctx) {
+            if (!ctx) return [];
+            let list = [];
+            const scope = ctx.scope;
+
+            if (scope === 'studio') {
+                if (typeof customRoutineState !== 'undefined' && customRoutineState && Array.isArray(customRoutineState.exercises)) {
+                    list = customRoutineState.exercises.map(e => e.exId || e.id).filter(Boolean);
+                }
+            } else if (scope === 'day_schedule' && ctx.dayIdx !== null && ctx.dayIdx !== undefined) {
+                const sched = typeof getWeeklySchedule === 'function' ? getWeeklySchedule() : [];
+                const plan = sched[ctx.dayIdx];
+                if (plan && !plan.rest) {
+                    const det = typeof getWorkoutDetailsForPlan === 'function' ? getWorkoutDetailsForPlan(plan) : null;
+                    if (det && Array.isArray(det.exercises)) {
+                        list = det.exercises.map(e => e.id || e.exId).filter(Boolean);
+                    }
+                }
+            } else if (scope === 'active') {
+                if (typeof activeWorkoutSession !== 'undefined' && activeWorkoutSession && Array.isArray(activeWorkoutSession.exercises)) {
+                    list = activeWorkoutSession.exercises.map(e => e.id || e.exId).filter(Boolean);
+                }
+            } else {
+                // 'generated' or general workout
+                if (typeof currentGeneratedWorkout !== 'undefined' && currentGeneratedWorkout && Array.isArray(currentGeneratedWorkout.exercises)) {
+                    list = currentGeneratedWorkout.exercises.map(e => e.id || e.exId).filter(Boolean);
+                }
+            }
+
+            // In replace mode, ensure target exercise is also included in exclusion list
+            if (ctx.mode === 'replace' && ctx.targetExId) {
+                if (!list.includes(ctx.targetExId)) {
+                    list.push(ctx.targetExId);
+                }
+            }
+
+            return list;
+        }
+
         function renderPickerList() {
             const container = document.getElementById('pickerExercisesContainer');
             if (!container) return;
 
             const tab = pickerContext.currentTab;
             const currentEx = pickerContext.targetExId ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
+            const existingIds = getExercisesInCurrentScope(pickerContext);
             let filtered = [];
 
             if (tab === 'same_muscle') {
@@ -6066,7 +6106,8 @@
                 const cat = currentEx ? currentEx.category : null;
 
                 filtered = EXERCISES_DB.filter(ex => {
-                    if (pickerContext.mode === 'replace' && currentEx && ex.id === currentEx.id) return false;
+                    // Exclude all exercises already in current routine
+                    if (existingIds.includes(ex.id)) return false;
 
                     // Match same muscle or same movement category
                     const hasPrimaryHit = pMuscles.some(m => (ex.primaryMuscles || []).includes(m));
@@ -6084,7 +6125,9 @@
             } else if (tab === 'other_muscle') {
                 const targetM = pickerContext.otherSelectedMuscle;
                 filtered = EXERCISES_DB.filter(ex => {
-                    if (pickerContext.mode === 'replace' && currentEx && ex.id === currentEx.id) return false;
+                    // Exclude all exercises already in current routine
+                    if (existingIds.includes(ex.id)) return false;
+
                     const hit = (ex.primaryMuscles || []).includes(targetM) || (ex.secondaryMuscles || []).includes(targetM);
                     return hit;
                 });
@@ -6094,7 +6137,9 @@
                 const cat = pickerContext.categoryFilter;
 
                 filtered = EXERCISES_DB.filter(ex => {
-                    if (pickerContext.mode === 'replace' && currentEx && ex.id === currentEx.id) return false;
+                    // Exclude all exercises already in current routine
+                    if (existingIds.includes(ex.id)) return false;
+
                     if (cat !== 'all' && ex.category !== cat) return false;
                     if (q) {
                         const eqLabel = (EQUIP_LABELS[ex.equipment]?.label || '').toLowerCase();
@@ -6110,7 +6155,7 @@
                     <div style="text-align:center; padding:32px 14px; background:rgba(0,0,0,0.25); border-radius:8px; border:1px dashed var(--border);">
                         <div style="font-size:20px; margin-bottom:6px;">🔍</div>
                         <div style="font-size:12.5px; font-weight:700; color:#fff;">Bu kriterlere uygun başka egzersiz bulunamadı</div>
-                        <div style="font-size:11px; color:var(--text-secondary); margin:4px 0 12px;">Farklı bir ekipman filtresi seçebilir veya tüm kataloğu inceleyebilirsiniz.</div>
+                        <div style="font-size:11px; color:var(--text-secondary); margin:4px 0 12px;">Mevcut listenizde yer almayan alternatifler için farklı bir ekipman filtresi seçebilir veya tüm kataloğu inceleyebilirsiniz.</div>
                         <button type="button" class="btn btn-gold" style="font-size:11px; padding:6px 14px; font-weight:800;" onclick="switchPickerTab('catalog')">
                             ➕ Diğer (Tüm Egzersiz Kataloğunu Aç)
                         </button>
@@ -12169,7 +12214,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=47')
+                navigator.serviceWorker.register('./sw.js?v=48')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et

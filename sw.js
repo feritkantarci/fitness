@@ -1,4 +1,4 @@
-const CACHE_NAME = 'celik-kodu-cache-v47';
+const CACHE_NAME = 'celik-kodu-cache-v48';
 const ASSETS = [
   './',
   './assets/guides/guide_bb_pendlay_row_anatomi.jpg',
