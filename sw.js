@@ -1,6 +1,17 @@
-const CACHE_NAME = 'celik-kodu-cache-v55';
+const CACHE_NAME = 'celik-kodu-cache-v56';
 const ASSETS = [
   './',
+  './assets/guides/guide_db_thruster_form.jpg',
+  './assets/guides/guide_db_thruster_anatomi.jpg',
+  './assets/guides/guide_db_push_press_form.jpg',
+  './assets/guides/guide_db_renegade_pushup_form.jpg',
+  './assets/guides/guide_bear_crawl_pull_through_form.jpg',
+  './assets/guides/guide_db_clean_and_press_form.jpg',
+  './assets/guides/guide_db_manmaker_form.jpg',
+  './assets/guides/guide_waiters_carry_form.jpg',
+  './assets/guides/guide_cross_body_carry_form.jpg',
+  './assets/guides/guide_lunge_with_twist_form.jpg',
+  './assets/guides/guide_step_up_press_form.jpg',
   './assets/guides/guide_half_kneeling_plate_chop_form.jpg',
   './assets/guides/guide_half_kneeling_plate_chop_anatomi.jpg',
   './assets/diagrams/seq_half_kneeling_plate_chop.svg',
