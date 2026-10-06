@@ -4157,36 +4157,100 @@
                 <!-- Steps & Cue -->
             </div>
 
-            <div style="margin-top:16px; display:flex; justify-content:space-between; gap:10px;">
+            <div style="margin-top:16px; display:flex; justify-content:space-between; gap:8px;">
                 <button class="btn btn-outline" style="flex:1;" onclick="closeExerciseDetailModal()">Kapat</button>
-                <button class="btn btn-gold" id="btnExDetailAdd" style="flex:1.5; font-weight:800;">➕ Bu Hareketi Programa Ekle</button>
+                <button class="btn btn-outline" id="btnExDetailAlt" style="flex:1.2; color:var(--cyan); border-color:var(--cyan); font-weight:800;">🔄 Alternatifler</button>
+                <button class="btn btn-gold" id="btnExDetailAdd" style="flex:1.5; font-weight:800;">➕ Bu Hareketi Ekle</button>
             </div>
         </div>
     </div>
 
     <!-- ==================== EXERCISE PICKER & ALTERNATIVE MODAL ==================== -->
     <div id="exercisePickerModal" class="modal-overlay">
-        <div class="modal-box" style="max-width: 600px;">
-            <div class="modal-header">
-                <span class="modal-title" id="pickerModalTitle">🔄 Alternatif Egzersiz Seç</span>
+        <div class="modal-box" style="max-width: 640px; max-height: 92vh; display: flex; flex-direction: column;">
+            <div class="modal-header" style="margin-bottom: 8px;">
+                <div>
+                    <span class="modal-title" id="pickerModalTitle">🔄 Alternatif Egzersiz Seçici</span>
+                    <div id="pickerModalSubtitle" style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">
+                        Mevcut hareketi aynı veya farklı kas grubu / ekipmanla değiştirin
+                    </div>
+                </div>
                 <button class="modal-close" onclick="closeExercisePickerModal()">✕</button>
             </div>
 
-            <!-- SEARCH & FILTERS -->
-            <div style="margin-bottom: 10px;">
-                <input type="text" id="pickerSearchInput" class="form-input" placeholder="🔍 Egzersiz adı veya kas ara... (Örn: Bench, Squat, Omuz)" oninput="renderPickerList()">
+            <!-- CURRENT EXERCISE CONTEXT BANNER -->
+            <div id="pickerCurrentExBanner" style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+                    <div id="pickerCurrentExThumb" style="width:38px; height:38px; border-radius:6px; background:#000; overflow:hidden; flex-shrink:0; border:1px solid var(--border); display:flex; align-items:center; justify-content:center;">
+                        🏋️
+                    </div>
+                    <div style="min-width:0;">
+                        <div style="font-size:10px; color:var(--gold); font-weight:800; text-transform:uppercase;">Değiştirilecek Hareket</div>
+                        <div id="pickerCurrentExName" style="font-size:13px; font-weight:900; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                            -
+                        </div>
+                    </div>
+                </div>
+                <div id="pickerCurrentExBadges" style="display:flex; gap:4px; flex-shrink:0;">
+                    <!-- badges injected dynamically -->
+                </div>
             </div>
 
-            <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;" id="pickerCategoryPills">
-                <button class="btn-quick-equip" id="pill_cat_all" onclick="setPickerCategory('all')">Tümü</button>
-                <button class="btn-quick-equip" id="pill_cat_push" onclick="setPickerCategory('push')">İtiş / Göğüs / Omuz</button>
-                <button class="btn-quick-equip" id="pill_cat_pull" onclick="setPickerCategory('pull')">Çekiş / Sırt / Biceps</button>
-                <button class="btn-quick-equip" id="pill_cat_legs_quad" onclick="setPickerCategory('legs_quad')">Ön Bacak / Quad</button>
-                <button class="btn-quick-equip" id="pill_cat_legs_hinge" onclick="setPickerCategory('legs_hinge')">Arka Bacak / Kalça</button>
-                <button class="btn-quick-equip" id="pill_cat_core" onclick="setPickerCategory('core')">Karın & Core</button>
+            <!-- 3 SMART TABS -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 10px; background: rgba(0,0,0,0.3); padding: 4px; border-radius: 8px; border: 1px solid var(--border);">
+                <button type="button" class="btn btn-outline" id="pickerTabBtnSame" style="padding: 7px 4px; font-size: 11px; font-weight: 800; border-radius: 6px; border-color: transparent;" onclick="switchPickerTab('same_muscle')">
+                    🎯 Aynı Kas Grubu
+                </button>
+                <button type="button" class="btn btn-outline" id="pickerTabBtnOther" style="padding: 7px 4px; font-size: 11px; font-weight: 800; border-radius: 6px; border-color: transparent;" onclick="switchPickerTab('other_muscle')">
+                    🧬 Başka Kas Grubu
+                </button>
+                <button type="button" class="btn btn-outline" id="pickerTabBtnCatalog" style="padding: 7px 4px; font-size: 11px; font-weight: 800; border-radius: 6px; border-color: transparent;" onclick="switchPickerTab('catalog')">
+                    ➕ Diğer (Tüm Katalog)
+                </button>
             </div>
 
-            <div style="max-height: 52vh; overflow-y: auto; padding-right: 4px;" id="pickerExercisesContainer">
+            <!-- TAB 1: AYNI KAS GRUBU (Farklı Ekipman İkameleri) -->
+            <div id="pickerSubPanelSame" style="margin-bottom:8px;">
+                <div style="font-size:11px; color:var(--text-secondary); margin-bottom:6px;">
+                    ⚡ <span id="pickerSameMuscleLabel" style="color:var(--cyan); font-weight:700;">Aynı kas grubunu</span> hedefleyen alternatif ekipmanlar:
+                </div>
+                <div style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:6px;" id="pickerSameEquipPills">
+                    <button class="btn-quick-equip" id="pill_seq_all" onclick="setSameEquipFilter('all')">Tüm Ekipmanlar</button>
+                    <button class="btn-quick-equip" id="pill_seq_dumbbell" onclick="setSameEquipFilter('dumbbell')">🏋️ Dambıl</button>
+                    <button class="btn-quick-equip" id="pill_seq_kettlebell" onclick="setSameEquipFilter('kettlebell')">🔔 Kettlebell</button>
+                    <button class="btn-quick-equip" id="pill_seq_barbell" onclick="setSameEquipFilter('barbell')">⚡ Barbell</button>
+                    <button class="btn-quick-equip" id="pill_seq_machine" onclick="setSameEquipFilter('machine')">⚙️ Makine / Kablo</button>
+                    <button class="btn-quick-equip" id="pill_seq_bodyweight" onclick="setSameEquipFilter('bodyweight')">🤸 Vücut Ağırlığı</button>
+                </div>
+            </div>
+
+            <!-- TAB 2: BAŞKA KAS GRUBU SEÇİMİ -->
+            <div id="pickerSubPanelOther" style="display:none; margin-bottom:8px;">
+                <div style="font-size:11px; color:var(--text-secondary); margin-bottom:6px;">
+                    🧬 Çalıştırmak istediğiniz alternatif kas grubunu seçin:
+                </div>
+                <div style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:6px;" id="pickerMuscleGrid">
+                    <!-- Dynamic Muscle Buttons -->
+                </div>
+            </div>
+
+            <!-- TAB 3: DİĞER (GENİŞLETİLMİŞ KATALOG VE SERBEST ARAMA) -->
+            <div id="pickerSubPanelCatalog" style="display:none; margin-bottom:8px;">
+                <div style="margin-bottom:6px;">
+                    <input type="text" id="pickerSearchInput" class="form-input" placeholder="🔍 Egzersiz adı, kas veya ipucu ara..." oninput="handlePickerSearchInput()">
+                </div>
+                <div style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:4px;" id="pickerCategoryPills">
+                    <button class="btn-quick-equip" id="pill_cat_all" onclick="setPickerCategory('all')">Tüm Kategoriler</button>
+                    <button class="btn-quick-equip" id="pill_cat_push" onclick="setPickerCategory('push')">İtiş / Göğüs / Omuz</button>
+                    <button class="btn-quick-equip" id="pill_cat_pull" onclick="setPickerCategory('pull')">Çekiş / Sırt / Biceps</button>
+                    <button class="btn-quick-equip" id="pill_cat_legs_quad" onclick="setPickerCategory('legs_quad')">Ön Bacak / Quad</button>
+                    <button class="btn-quick-equip" id="pill_cat_legs_hinge" onclick="setPickerCategory('legs_hinge')">Arka Bacak / Kalça</button>
+                    <button class="btn-quick-equip" id="pill_cat_core" onclick="setPickerCategory('core')">Karın & Core</button>
+                </div>
+            </div>
+
+            <!-- EXERCISE LIST CONTAINER -->
+            <div style="flex:1; max-height: 48vh; overflow-y: auto; padding-right: 4px;" id="pickerExercisesContainer">
                 <!-- Dynamically rendered list of exercises -->
             </div>
         </div>
@@ -5631,52 +5695,324 @@
         }
 
         // ==================== EXERCISE PICKER & ALTERNATIVE MODAL LOGIC ====================
+        const PICKER_MUSCLE_GROUPS = [
+            { key: 'chest', name: 'Göğüs', icon: '🛡️', category: 'push' },
+            { key: 'back', name: 'Sırt & Kanat', icon: '🏹', category: 'pull' },
+            { key: 'shoulders', name: 'Omuz', icon: '⚔️', category: 'push' },
+            { key: 'quads', name: 'Ön Bacak (Quad)', icon: '🦵', category: 'legs_quad' },
+            { key: 'hamstrings', name: 'Arka Bacak (Hamstring)', icon: '🦿', category: 'legs_hinge' },
+            { key: 'glutes', name: 'Kalça (Glute)', icon: '🍑', category: 'legs_hinge' },
+            { key: 'biceps', name: 'Biceps (Pazı)', icon: '💪', category: 'pull' },
+            { key: 'triceps', name: 'Triceps (Arka Kol)', icon: '⚡', category: 'push' },
+            { key: 'core', name: 'Karın & Core', icon: '🧱', category: 'core' },
+            { key: 'calves', name: 'Kalf & Alt Bacak', icon: '🦶', category: 'legs' }
+        ];
+
+        const EQUIP_LABELS = {
+            dumbbell: { label: 'Dambıl', icon: '🏋️' },
+            kettlebell: { label: 'Kettlebell', icon: '🔔' },
+            barbell: { label: 'Barbell', icon: '⚡' },
+            machine: { label: 'Makine/Kablo', icon: '⚙️' },
+            bodyweight: { label: 'Vücut Ağırlığı', icon: '🤸' }
+        };
+
         let pickerContext = {
             mode: 'replace', // 'replace' or 'add'
             targetExId: null,
-            scope: 'generated', // 'generated' or 'active'
-            categoryFilter: 'all'
+            scope: 'studio', // 'studio', 'day_schedule', 'generated', 'active'
+            studioIndex: null,
+            dayIdx: null,
+            scheduleExIndex: null,
+            currentTab: 'same_muscle', // 'same_muscle', 'other_muscle', 'catalog'
+            sameEquipFilter: 'all',
+            otherSelectedMuscle: 'chest',
+            categoryFilter: 'all',
+            searchQuery: ''
         };
 
-        function openAlternativeModal(currentExId, scope = 'generated') {
-            const workout = scope === 'active' ? activeWorkoutSession : currentGeneratedWorkout;
-            if (!workout) return;
+        function showToast(msg, type = 'success') {
+            let toast = document.getElementById('appGlobalToast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'appGlobalToast';
+                toast.style.cssText = `
+                    position: fixed;
+                    bottom: 24px;
+                    left: 50%;
+                    transform: translateX(-50%) translateY(100px);
+                    background: rgba(15, 23, 42, 0.95);
+                    border: 1px solid var(--gold);
+                    color: #fff;
+                    padding: 10px 18px;
+                    border-radius: 30px;
+                    font-size: 13px;
+                    font-weight: 700;
+                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(245, 158, 11, 0.3);
+                    z-index: 100000;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                    pointer-events: none;
+                    backdrop-filter: blur(8px);
+                `;
+                document.body.appendChild(toast);
+            }
+            if (type === 'info') {
+                toast.style.borderColor = 'var(--cyan)';
+                toast.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.3)';
+            } else {
+                toast.style.borderColor = 'var(--gold)';
+                toast.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(245, 158, 11, 0.3)';
+            }
+            toast.innerHTML = msg;
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateX(-50%) translateY(0)';
 
-            const currentEx = workout.exercises.find(e => e.id === currentExId);
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(-50%) translateY(40px)';
+            }, 3000);
+        }
+
+        function openStudioExerciseAlternativeModal(studioIndex) {
+            const item = customRoutineState.exercises[studioIndex];
+            if (!item) return;
+            const currentEx = EXERCISES_DB.find(e => e.id === item.exId);
+            if (!currentEx) return;
+
+            const primaryM = (currentEx.primaryMuscles && currentEx.primaryMuscles[0]) || 'chest';
+
             pickerContext = {
                 mode: 'replace',
-                targetExId: currentExId,
-                scope: scope,
-                categoryFilter: currentEx ? currentEx.category : 'all'
+                targetExId: currentEx.id,
+                scope: 'studio',
+                studioIndex: studioIndex,
+                dayIdx: null,
+                scheduleExIndex: null,
+                currentTab: 'same_muscle',
+                sameEquipFilter: 'all',
+                otherSelectedMuscle: primaryM,
+                categoryFilter: 'all',
+                searchQuery: ''
             };
 
-            document.getElementById('pickerModalTitle').innerText = `🔄 "${currentEx ? currentEx.name : 'Hareket'}" İçin Alternatif Seç`;
-            document.getElementById('pickerSearchInput').value = '';
-            updatePickerCategoryPills();
-            renderPickerList();
+            setupAlternativeModalUI(currentEx);
+            document.getElementById('exercisePickerModal').classList.add('active');
+        }
+
+        function openScheduleExerciseAlternativeModal(dayIdx, currentExId, exIdx) {
+            const currentEx = EXERCISES_DB.find(e => e.id === currentExId);
+            if (!currentEx) return;
+
+            const primaryM = (currentEx.primaryMuscles && currentEx.primaryMuscles[0]) || 'chest';
+
+            pickerContext = {
+                mode: 'replace',
+                targetExId: currentEx.id,
+                scope: 'day_schedule',
+                studioIndex: null,
+                dayIdx: dayIdx,
+                scheduleExIndex: exIdx,
+                currentTab: 'same_muscle',
+                sameEquipFilter: 'all',
+                otherSelectedMuscle: primaryM,
+                categoryFilter: 'all',
+                searchQuery: ''
+            };
+
+            setupAlternativeModalUI(currentEx);
+            document.getElementById('exercisePickerModal').classList.add('active');
+        }
+
+        function openAlternativeModal(currentExId, scope = 'generated') {
+            let currentEx = null;
+            if (scope === 'active' && activeWorkoutSession) {
+                currentEx = activeWorkoutSession.exercises.find(e => e.id === currentExId);
+            } else if (scope === 'generated' && currentGeneratedWorkout) {
+                currentEx = currentGeneratedWorkout.exercises.find(e => e.id === currentExId);
+            } else {
+                currentEx = EXERCISES_DB.find(e => e.id === currentExId);
+            }
+            if (!currentEx) return;
+
+            const primaryM = (currentEx.primaryMuscles && currentEx.primaryMuscles[0]) || 'chest';
+
+            pickerContext = {
+                mode: 'replace',
+                targetExId: currentEx.id,
+                scope: scope,
+                studioIndex: null,
+                dayIdx: null,
+                scheduleExIndex: null,
+                currentTab: 'same_muscle',
+                sameEquipFilter: 'all',
+                otherSelectedMuscle: primaryM,
+                categoryFilter: 'all',
+                searchQuery: ''
+            };
+
+            setupAlternativeModalUI(currentEx);
             document.getElementById('exercisePickerModal').classList.add('active');
         }
 
         function openAddExerciseModal(scope = 'generated') {
-            const workout = scope === 'active' ? activeWorkoutSession : currentGeneratedWorkout;
-            if (!workout) return;
-
             pickerContext = {
                 mode: 'add',
                 targetExId: null,
                 scope: scope,
-                categoryFilter: 'all'
+                studioIndex: null,
+                dayIdx: null,
+                scheduleExIndex: null,
+                currentTab: 'catalog',
+                sameEquipFilter: 'all',
+                otherSelectedMuscle: 'chest',
+                categoryFilter: 'all',
+                searchQuery: ''
             };
 
-            document.getElementById('pickerModalTitle').innerText = "➕ Antrenmana Yeni Hareket Ekle";
-            document.getElementById('pickerSearchInput').value = '';
-            updatePickerCategoryPills();
-            renderPickerList();
+            setupAlternativeModalUI(null);
             document.getElementById('exercisePickerModal').classList.add('active');
         }
 
+        function setupAlternativeModalUI(currentEx) {
+            const titleEl = document.getElementById('pickerModalTitle');
+            const subEl = document.getElementById('pickerModalSubtitle');
+            const banner = document.getElementById('pickerCurrentExBanner');
+            const nameEl = document.getElementById('pickerCurrentExName');
+            const thumbEl = document.getElementById('pickerCurrentExThumb');
+            const badgesEl = document.getElementById('pickerCurrentExBadges');
+            const sameMuscleLabel = document.getElementById('pickerSameMuscleLabel');
+            const muscleGrid = document.getElementById('pickerMuscleGrid');
+
+            if (pickerContext.mode === 'replace' && currentEx) {
+                if (titleEl) titleEl.innerText = `🔄 "${currentEx.name}" İçin Alternatif Seç`;
+                if (subEl) subEl.innerText = "Aynı kas grubuna farklı ekipmanla veya başka bir bölgeye geçiş yapın";
+                if (banner) banner.style.display = 'flex';
+
+                const guide = exerciseGuideMap[currentEx.id] || categoryFallback[currentEx.category] || guideLibrary.goblet_squat;
+                const thumbImg = (guide && guide.form) ? guide.form : '';
+                if (thumbEl) {
+                    thumbEl.innerHTML = thumbImg ? `<img src="${thumbImg}" style="width:100%; height:100%; object-fit:contain;" alt="${escapeHTML(currentEx.name)}">` : '🏋️';
+                }
+                if (nameEl) nameEl.innerText = currentEx.name;
+
+                const eqMeta = EQUIP_LABELS[currentEx.equipment] || { label: currentEx.equipment || '', icon: '🏋️' };
+                const pName = (currentEx.primaryMuscles && currentEx.primaryMuscles[0] && TARGET_REGIONS[currentEx.primaryMuscles[0]] ? TARGET_REGIONS[currentEx.primaryMuscles[0]].name : currentEx.muscle) || 'Kas Grubu';
+                if (badgesEl) {
+                    badgesEl.innerHTML = `
+                        <span class="ex-badge badge-equip">${eqMeta.icon} ${eqMeta.label}</span>
+                        <span class="ex-badge badge-muscle">${escapeHTML(pName)}</span>
+                    `;
+                }
+                if (sameMuscleLabel) {
+                    sameMuscleLabel.innerText = `"${pName}" kas grubunu`;
+                }
+            } else {
+                if (titleEl) titleEl.innerText = "➕ Antrenmana Yeni Hareket Ekle";
+                if (subEl) subEl.innerText = "Katalogdan veya kas grubuna göre arayarak hareket ekleyin";
+                if (banner) banner.style.display = 'none';
+            }
+
+            // Render muscle selection grid for Tab 2
+            if (muscleGrid) {
+                muscleGrid.innerHTML = PICKER_MUSCLE_GROUPS.map(m => `
+                    <button type="button" class="btn-quick-equip" id="pill_picker_m_${m.key}" onclick="setOtherMuscle('${m.key}')" style="display:flex; align-items:center; gap:4px; font-weight:700;">
+                        <span>${m.icon}</span> <span>${m.name}</span>
+                    </button>
+                `).join('');
+            }
+
+            // Clear search input
+            const searchInput = document.getElementById('pickerSearchInput');
+            if (searchInput) searchInput.value = '';
+
+            switchPickerTab(pickerContext.currentTab);
+        }
+
         function closeExercisePickerModal() {
-            document.getElementById('exercisePickerModal').classList.remove('active');
+            const modal = document.getElementById('exercisePickerModal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        function switchPickerTab(tab) {
+            pickerContext.currentTab = tab;
+
+            const btnSame = document.getElementById('pickerTabBtnSame');
+            const btnOther = document.getElementById('pickerTabBtnOther');
+            const btnCatalog = document.getElementById('pickerTabBtnCatalog');
+
+            const panSame = document.getElementById('pickerSubPanelSame');
+            const panOther = document.getElementById('pickerSubPanelOther');
+            const panCatalog = document.getElementById('pickerSubPanelCatalog');
+
+            const activeStyle = "padding:7px 4px; font-size:11px; font-weight:800; border-radius:6px; border-color:var(--gold); color:var(--gold); background:rgba(245, 158, 11, 0.15); box-shadow:0 0 10px rgba(245,158,11,0.2);";
+            const inactiveStyle = "padding:7px 4px; font-size:11px; font-weight:800; border-radius:6px; border-color:transparent; color:var(--text-secondary); background:transparent;";
+
+            if (btnSame) btnSame.style.cssText = tab === 'same_muscle' ? activeStyle : inactiveStyle;
+            if (btnOther) btnOther.style.cssText = tab === 'other_muscle' ? activeStyle : inactiveStyle;
+            if (btnCatalog) btnCatalog.style.cssText = tab === 'catalog' ? activeStyle : inactiveStyle;
+
+            if (panSame) panSame.style.display = tab === 'same_muscle' ? 'block' : 'none';
+            if (panOther) panOther.style.display = tab === 'other_muscle' ? 'block' : 'none';
+            if (panCatalog) panCatalog.style.display = tab === 'catalog' ? 'block' : 'none';
+
+            updateSameEquipPills();
+            updateOtherMusclePills();
+            updatePickerCategoryPills();
+            renderPickerList();
+        }
+
+        function setSameEquipFilter(equip) {
+            pickerContext.sameEquipFilter = equip;
+            updateSameEquipPills();
+            renderPickerList();
+        }
+
+        function updateSameEquipPills() {
+            const equips = ['all', 'dumbbell', 'kettlebell', 'barbell', 'machine', 'bodyweight'];
+            equips.forEach(eq => {
+                const el = document.getElementById('pill_seq_' + eq);
+                if (el) {
+                    if (pickerContext.sameEquipFilter === eq) {
+                        el.style.borderColor = 'var(--cyan)';
+                        el.style.color = 'var(--cyan)';
+                        el.style.background = 'rgba(56, 189, 248, 0.18)';
+                        el.style.fontWeight = '800';
+                    } else {
+                        el.style.borderColor = 'var(--border)';
+                        el.style.color = 'var(--text-secondary)';
+                        el.style.background = 'transparent';
+                        el.style.fontWeight = '500';
+                    }
+                }
+            });
+        }
+
+        function setOtherMuscle(mKey) {
+            pickerContext.otherSelectedMuscle = mKey;
+            updateOtherMusclePills();
+            renderPickerList();
+        }
+
+        function updateOtherMusclePills() {
+            PICKER_MUSCLE_GROUPS.forEach(m => {
+                const el = document.getElementById('pill_picker_m_' + m.key);
+                if (el) {
+                    if (pickerContext.otherSelectedMuscle === m.key) {
+                        el.style.borderColor = 'var(--gold)';
+                        el.style.color = 'var(--gold)';
+                        el.style.background = 'rgba(245, 158, 11, 0.18)';
+                        el.style.fontWeight = '800';
+                    } else {
+                        el.style.borderColor = 'var(--border)';
+                        el.style.color = 'var(--text-secondary)';
+                        el.style.background = 'transparent';
+                        el.style.fontWeight = '500';
+                    }
+                }
+            });
         }
 
         function setPickerCategory(cat) {
@@ -5703,94 +6039,256 @@
             });
         }
 
+        function handlePickerSearchInput() {
+            renderPickerList();
+        }
+
         function renderPickerList() {
             const container = document.getElementById('pickerExercisesContainer');
             if (!container) return;
 
-            const q = (document.getElementById('pickerSearchInput').value || '').trim().toLowerCase();
-            const cat = pickerContext.categoryFilter;
+            const tab = pickerContext.currentTab;
+            const currentEx = pickerContext.targetExId ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
+            let filtered = [];
 
-            const workout = pickerContext.scope === 'active' ? activeWorkoutSession : currentGeneratedWorkout;
-            const existingIds = workout ? workout.exercises.map(e => e.id) : [];
+            if (tab === 'same_muscle') {
+                const pMuscles = (currentEx && currentEx.primaryMuscles) ? currentEx.primaryMuscles : [];
+                const sMuscles = (currentEx && currentEx.secondaryMuscles) ? currentEx.secondaryMuscles : [];
+                const cat = currentEx ? currentEx.category : null;
 
-            const equipLabels = {
-                dumbbell: 'Dambıl',
-                kettlebell: 'Kettlebell',
-                barbell: 'Barbell',
-                machine: 'Makine/Kablo',
-                bodyweight: 'Vücut Ağırlığı'
-            };
+                filtered = EXERCISES_DB.filter(ex => {
+                    if (pickerContext.mode === 'replace' && currentEx && ex.id === currentEx.id) return false;
 
-            let filtered = EXERCISES_DB.filter(ex => {
-                if (pickerContext.mode === 'replace' && ex.id === pickerContext.targetExId) return false;
-                if (pickerContext.mode === 'add' && existingIds.includes(ex.id)) return false;
+                    // Match same muscle or same movement category
+                    const hasPrimaryHit = pMuscles.some(m => (ex.primaryMuscles || []).includes(m));
+                    const hasSecondaryHit = pMuscles.some(m => (ex.secondaryMuscles || []).includes(m));
+                    const hasCatHit = cat && ex.category === cat;
 
-                // equipment filter
-                if (!selectedEquipments.includes(ex.equipment)) return false;
+                    if (!hasPrimaryHit && !hasSecondaryHit && !hasCatHit) return false;
 
-                // category filter
-                if (cat !== 'all' && ex.category !== cat) return false;
+                    // Equipment filter
+                    if (pickerContext.sameEquipFilter !== 'all' && ex.equipment !== pickerContext.sameEquipFilter) {
+                        return false;
+                    }
+                    return true;
+                });
+            } else if (tab === 'other_muscle') {
+                const targetM = pickerContext.otherSelectedMuscle;
+                filtered = EXERCISES_DB.filter(ex => {
+                    if (pickerContext.mode === 'replace' && currentEx && ex.id === currentEx.id) return false;
+                    const hit = (ex.primaryMuscles || []).includes(targetM) || (ex.secondaryMuscles || []).includes(targetM);
+                    return hit;
+                });
+            } else {
+                // 'catalog' / 'diğer' tab
+                const q = (document.getElementById('pickerSearchInput')?.value || '').trim().toLowerCase();
+                const cat = pickerContext.categoryFilter;
 
-                // search text filter
-                if (q) {
-                    const matchName = ex.name.toLowerCase().includes(q);
-                    const matchMuscle = ex.muscle.toLowerCase().includes(q);
-                    const matchEquip = (equipLabels[ex.equipment] || '').toLowerCase().includes(q);
-                    if (!matchName && !matchMuscle && !matchEquip) return false;
-                }
-                return true;
-            });
+                filtered = EXERCISES_DB.filter(ex => {
+                    if (pickerContext.mode === 'replace' && currentEx && ex.id === currentEx.id) return false;
+                    if (cat !== 'all' && ex.category !== cat) return false;
+                    if (q) {
+                        const eqLabel = (EQUIP_LABELS[ex.equipment]?.label || '').toLowerCase();
+                        const combined = (ex.name + ' ' + (ex.muscle || '') + ' ' + (ex.cue || '') + ' ' + eqLabel).toLowerCase();
+                        if (!combined.includes(q)) return false;
+                    }
+                    return true;
+                });
+            }
 
             if (filtered.length === 0) {
                 container.innerHTML = `
-                    <div style="text-align:center; padding:30px 10px; color:var(--text-secondary); font-size:12px;">
-                        Kriterlere uygun başka egzersiz bulunamadı. Filtreleri temizleyip tekrar arayabilirsiniz.
+                    <div style="text-align:center; padding:32px 14px; background:rgba(0,0,0,0.25); border-radius:8px; border:1px dashed var(--border);">
+                        <div style="font-size:20px; margin-bottom:6px;">🔍</div>
+                        <div style="font-size:12.5px; font-weight:700; color:#fff;">Bu kriterlere uygun başka egzersiz bulunamadı</div>
+                        <div style="font-size:11px; color:var(--text-secondary); margin:4px 0 12px;">Farklı bir ekipman filtresi seçebilir veya tüm kataloğu inceleyebilirsiniz.</div>
+                        <button type="button" class="btn btn-gold" style="font-size:11px; padding:6px 14px; font-weight:800;" onclick="switchPickerTab('catalog')">
+                            ➕ Diğer (Tüm Egzersiz Kataloğunu Aç)
+                        </button>
                     </div>
                 `;
                 return;
             }
 
-            container.innerHTML = filtered.map(ex => `
-                <div class="ex-card" style="margin-bottom:8px; padding:10px 12px; cursor:pointer;" onclick="selectExerciseFromPicker('${ex.id}')">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                        <strong style="color:#fff; font-size:13.5px;">${escapeHTML(ex.name)}</strong>
-                        <div style="display:flex; gap:4px; align-items:center;">
-                            <span class="ex-badge badge-equip">${equipLabels[ex.equipment] || ex.equipment}</span>
-                            <span class="ex-badge badge-muscle">${escapeHTML(ex.muscle.split(',')[0])}</span>
-                            <button type="button" class="btn-report-mini" onclick="event.stopPropagation(); openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}', 'Alternatif Seçici')" title="Bu egzersiz veya görsel hatalıysa bildir">
-                                ⚠️ Bildir
+            let cardsHtml = filtered.map(ex => {
+                const guide = exerciseGuideMap[ex.id] || categoryFallback[ex.category] || guideLibrary.goblet_squat;
+                const thumbImg = (guide && guide.form) ? guide.form : '';
+                const eqMeta = EQUIP_LABELS[ex.equipment] || { label: ex.equipment || '', icon: '🏋️' };
+                const pNames = (ex.primaryMuscles || []).map(m => (TARGET_REGIONS[m] ? TARGET_REGIONS[m].name : m)).join(', ') || ex.muscle || 'Kas Grubu';
+
+                return `
+                    <div class="ex-card" style="margin-bottom:8px; padding:9px 12px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; transition:border-color 0.2s;" onmouseenter="this.style.borderColor='rgba(245,158,11,0.4)'" onmouseleave="this.style.borderColor='var(--border)'">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                            <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1;">
+                                <div style="width:40px; height:40px; border-radius:6px; background:#000; overflow:hidden; flex-shrink:0; border:1px solid var(--border); display:flex; align-items:center; justify-content:center;">
+                                    ${thumbImg ? `<img src="${thumbImg}" style="width:100%; height:100%; object-fit:contain;" alt="${escapeHTML(ex.name)}">` : '🏋️'}
+                                </div>
+                                <div style="min-width:0; flex:1;">
+                                    <div style="font-size:13px; font-weight:800; color:#fff; line-height:1.2; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
+                                        ${escapeHTML(ex.name)}
+                                    </div>
+                                    <div style="display:flex; gap:4px; flex-wrap:wrap; margin-top:3px;">
+                                        <span class="ex-badge badge-equip">${eqMeta.icon} ${eqMeta.label}</span>
+                                        <span class="ex-badge badge-muscle">${escapeHTML(pNames)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
+                                <button type="button" class="btn btn-outline" style="padding:3px 7px; font-size:10.5px;" onclick="event.stopPropagation(); openExerciseDetailModal('${ex.id}')" title="İncele">👁️</button>
+                                <button type="button" class="btn-report-mini" onclick="event.stopPropagation(); openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '${thumbImg}', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}', 'Alternatif Seçici')" title="Bu harekette hata bildir">⚠️</button>
+                            </div>
+                        </div>
+
+                        ${ex.cue ? `
+                            <div style="font-size:11px; color:var(--text-secondary); line-height:1.3; background:rgba(0,0,0,0.25); border-radius:4px; padding:4px 8px; margin-top:6px;">
+                                💡 ${escapeHTML(ex.cue)}
+                            </div>
+                        ` : ''}
+
+                        <div style="display:flex; justify-content:flex-end; margin-top:6px;">
+                            <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:5px 14px; font-weight:800; box-shadow:0 0 10px rgba(245,158,11,0.25);" onclick="selectExerciseFromPicker('${ex.id}')">
+                                ${pickerContext.mode === 'replace' ? '✓ Bununla Değiştir' : '➕ Programa Ekle'}
                             </button>
                         </div>
                     </div>
-                    <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.3; margin-bottom:6px;">
-                        💡 ${escapeHTML(ex.cue)}
-                    </div>
-                    ${renderExercisePositionsHtml(ex, `picker_${ex.id}`, true)}
-                    <div style="text-align:right; margin-top:6px;">
-                        <button class="btn btn-gold" style="font-size:11px; padding:4px 10px;">
-                            ${pickerContext.mode === 'replace' ? '✓ Bu Alternatifi Seç' : '➕ Bu Hareketi Ekle'}
+                `;
+            }).join('');
+
+            // If in tab 1 or 2, add the helpful "Diğer" shortcut banner at bottom
+            if (tab === 'same_muscle' || tab === 'other_muscle') {
+                cardsHtml += `
+                    <div style="text-align:center; padding:12px; margin-top:8px; border-top:1px dashed var(--border); background:rgba(0,0,0,0.2); border-radius:8px;">
+                        <div style="font-size:11px; color:var(--text-secondary); margin-bottom:6px;">Aradığınız hareketi bulamadınız mı?</div>
+                        <button type="button" class="btn btn-outline" style="color:var(--gold); border-color:var(--gold); font-size:11.5px; padding:5px 12px; font-weight:800;" onclick="switchPickerTab('catalog')">
+                            ➕ Diğer (Genişletilmiş Tüm Kataloğu Aç) ➔
                         </button>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }
+
+            container.innerHTML = cardsHtml;
         }
 
         function selectExerciseFromPicker(newExId) {
             const newEx = EXERCISES_DB.find(e => e.id === newExId);
             if (!newEx) return;
 
+            // 1. STUDIO SCOPE (Custom Routine Builder)
+            if (pickerContext.scope === 'studio') {
+                if (pickerContext.mode === 'replace' && pickerContext.studioIndex !== null) {
+                    if (customRoutineState && customRoutineState.exercises && customRoutineState.exercises[pickerContext.studioIndex]) {
+                        customRoutineState.exercises[pickerContext.studioIndex].exId = newEx.id;
+                    }
+                } else {
+                    customRoutineState.exercises.push({
+                        exId: newEx.id,
+                        sets: 3,
+                        reps: '8-12',
+                        weight: ''
+                    });
+                }
+
+                closeExercisePickerModal();
+                renderCustomRoutine();
+                renderRegionStatus();
+                showToast(`✅ "${newEx.name}" programa eklendi!`);
+                playAlertSound();
+                return;
+            }
+
+            // 2. DAY SCHEDULE MODAL SCOPE
+            if (pickerContext.scope === 'day_schedule' && pickerContext.dayIdx !== null) {
+                const dayIdx = pickerContext.dayIdx;
+                const schedule = getWeeklySchedule();
+                const plan = schedule[dayIdx];
+
+                if (plan && !plan.rest) {
+                    const details = getWorkoutDetailsForPlan(plan);
+                    const user = getActiveUser();
+                    const key = `celik_kodu_custom_programs_${user.id}`;
+                    let saved = [];
+                    try { saved = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
+
+                    // Check if it's an existing custom program
+                    const existingIdx = saved.findIndex(p => p.id === (details.id || plan.id));
+                    if (existingIdx !== -1) {
+                        const targetItemIdx = pickerContext.scheduleExIndex !== null ? pickerContext.scheduleExIndex : 0;
+                        if (saved[existingIdx].exercises && saved[existingIdx].exercises[targetItemIdx]) {
+                            saved[existingIdx].exercises[targetItemIdx].exId = newEx.id;
+                            saved[existingIdx].updatedAt = Date.now();
+                            localStorage.setItem(key, JSON.stringify(saved));
+                            if (user.savedWorkouts) {
+                                const uIdx = user.savedWorkouts.findIndex(p => p.id === saved[existingIdx].id);
+                                if (uIdx !== -1) user.savedWorkouts[uIdx] = saved[existingIdx];
+                                saveAthletesToStorage();
+                            }
+                        }
+                    } else {
+                        // Official routine: clone as custom program for this day
+                        const newProgId = 'custom_day_' + dayIdx + '_' + Date.now();
+                        const currentExs = (details && details.exercises) ? details.exercises : [];
+                        const targetItemIdx = pickerContext.scheduleExIndex !== null ? pickerContext.scheduleExIndex : 0;
+                        const newExercises = currentExs.map((e, idx) => ({
+                            exId: idx === targetItemIdx ? newEx.id : e.id,
+                            sets: e.targetSets || 3,
+                            reps: e.targetReps || '8-12',
+                            weight: ''
+                        }));
+
+                        const cleanTitle = (details.title || plan.title || 'Özel Program').replace(/⚔️|Çelik Kodu/g, '').trim() + " (Özelleştirilmiş)";
+                        const newProg = {
+                            id: newProgId,
+                            title: cleanTitle,
+                            rest: details.rest || 60,
+                            exercises: newExercises,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: Date.now(),
+                            isCustom: true
+                        };
+                        saved.unshift(newProg);
+                        localStorage.setItem(key, JSON.stringify(saved));
+                        if (!user.savedWorkouts) user.savedWorkouts = [];
+                        user.savedWorkouts.unshift(newProg);
+                        saveAthletesToStorage();
+
+                        // Assign to day
+                        assignRoutineToActiveDay(newProgId, cleanTitle, 'custom', `${newExercises.length} Hareket`, false);
+                    }
+                }
+
+                closeExercisePickerModal();
+                openScheduleDayModal(dayIdx);
+                showToast(`✅ "${newEx.name}" güncellendi!`);
+                playAlertSound();
+                return;
+            }
+
+            // 3. ACTIVE WORKOUT OR GENERATED WORKOUT SCOPE
             const workout = pickerContext.scope === 'active' ? activeWorkoutSession : currentGeneratedWorkout;
-            if (!workout) return;
+            if (!workout) {
+                closeExercisePickerModal();
+                return;
+            }
 
             if (pickerContext.mode === 'replace') {
                 const idx = workout.exercises.findIndex(e => e.id === pickerContext.targetExId);
                 if (idx !== -1) {
-                    workout.exercises[idx] = newEx;
+                    const oldEx = workout.exercises[idx];
+                    workout.exercises[idx] = {
+                        ...newEx,
+                        targetSets: oldEx.targetSets || 3,
+                        targetReps: oldEx.targetReps || '8-12',
+                        logs: oldEx.logs || []
+                    };
                 }
             } else if (pickerContext.mode === 'add') {
-                workout.exercises.push(newEx);
+                workout.exercises.push({
+                    ...newEx,
+                    targetSets: 3,
+                    targetReps: '8-12',
+                    logs: []
+                });
                 if (pickerContext.scope === 'active') {
-                    // Set focus to the newly added exercise so user can do it immediately
                     activeFocusExIndex = workout.exercises.length - 1;
                     activeFocusSetIndex = null;
                 }
@@ -5802,8 +6300,10 @@
                 saveActiveWorkoutStateToStorage();
                 renderActiveWorkout();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+                showToast(`✅ Aktif antrenmanda "${newEx.name}" alternatifi seçildi!`);
             } else {
                 renderGeneratedWorkout();
+                showToast(`✅ "${newEx.name}" alternatifi seçildi!`);
             }
             playAlertSound();
         }
@@ -8744,10 +9244,11 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                             </div>
                                         </div>
                                     </div>
-                                    <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                                    <div style="display:flex; align-items:center; gap:5px; flex-shrink:0;">
                                         <span style="background:rgba(245,158,11,0.15); color:var(--gold); border:1px solid rgba(245,158,11,0.3); font-size:10.5px; font-weight:700; border-radius:4px; padding:2px 7px;">
                                             ${sets} x ${reps}
                                         </span>
+                                        <button type="button" class="btn btn-outline" style="padding:3px 7px; font-size:10px; color:var(--cyan); border-color:rgba(56,189,248,0.4); font-weight:700;" onclick="openScheduleExerciseAlternativeModal(${dayIdx}, '${ex.id}', ${idx})" title="Bu hareket için alternatif bul">🔄 Alternatif</button>
                                         <button type="button" class="btn btn-outline" style="padding:3px 7px; font-size:10px;" onclick="openExerciseDetailModal('${ex.id}')" title="İncele">👁️</button>
                                     </div>
                                 </div>
@@ -11869,6 +12370,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
 
                             <button type="button" class="btn btn-outline" style="padding:3px 5px; font-size:9px;" onclick="moveCustomRoutineExercise(${index}, -1)" ${index === 0 ? 'disabled' : ''}>▲</button>
                             <button type="button" class="btn btn-outline" style="padding:3px 5px; font-size:9px;" onclick="moveCustomRoutineExercise(${index}, 1)" ${index === customRoutineState.exercises.length - 1 ? 'disabled' : ''}>▼</button>
+                            <button type="button" class="btn btn-outline" style="padding:3px 7px; font-size:10px; color:var(--cyan); border-color:rgba(56,189,248,0.4); font-weight:700;" onclick="openStudioExerciseAlternativeModal(${index})" title="Bu hareket için alternatif bul">🔄 Alternatif</button>
                             <button type="button" class="btn btn-outline" style="padding:3px 6px; font-size:10px;" onclick="openExerciseDetailModal('${ex.id}')" title="İncele">👁️</button>
                             <button type="button" class="btn btn-outline" style="padding:3px 6px; font-size:10px; color:#fca5a5; border-color:rgba(239,68,68,0.3);" onclick="event.stopPropagation(); openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '${thumbImg}', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}', 'Atölye Seçilenler')" title="Bu harekette hata bildir">⚠️</button>
                             <button type="button" class="btn btn-outline" style="padding:3px 6px; font-size:10px; color:#ef4444; border-color:rgba(239,68,68,0.4);" onclick="removeExerciseFromCustomRoutine(${index})" title="Çıkar">✕</button>
@@ -12240,6 +12742,14 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                 btnAdd.onclick = () => {
                     addExerciseToCustomRoutine(exId);
                     closeExerciseDetailModal();
+                };
+            }
+
+            const btnAlt = document.getElementById('btnExDetailAlt');
+            if (btnAlt) {
+                btnAlt.onclick = () => {
+                    closeExerciseDetailModal();
+                    openAlternativeModal(exId, pickerContext.scope || 'studio');
                 };
             }
 
