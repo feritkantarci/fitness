@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 230" width="100%" height="auto" style="background:#090d16; border-radius:12px; font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;">
+    <defs>
+        <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#fbbf24"/>
+            <stop offset="100%" stop-color="#d97706"/>
+        </linearGradient>
+        <linearGradient id="cyanGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#38bdf8"/>
+            <stop offset="100%" stop-color="#0284c7"/>
+        </linearGradient>
+        <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#f8fafc"/>
+            <stop offset="100%" stop-color="#94a3b8"/>
+        </linearGradient>
+        <marker id="arrowCyan" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#38bdf8"/>
+        </marker>
+        <marker id="arrowGold" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#f59e0b"/>
+        </marker>
+        <marker id="arrowGreen" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#10b981"/>
+        </marker>
+    </defs>
+
+    <!-- STEP 1: KURULUM & DİZ ÜSTÜ DURUŞ -->
+    <g transform="translate(12, 10)">
+        <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+        <rect x="12" y="10" width="125" height="22" rx="4" fill="#38bdf8" fill-opacity="0.15" stroke="#38bdf8" stroke-width="1"/>
+        <text x="74" y="25" fill="#38bdf8" font-size="10" font-weight="800" text-anchor="middle" letter-spacing="0.5">1. DİZ ÜSTÜ KURULUM</text>
+        
+        <!-- Canvas -->
+        <g transform="translate(120, 105)">
+            <!-- Zemin Çizgisi -->
+            <line x1="-70" y1="35" x2="70" y2="35" stroke="#334155" stroke-width="2" stroke-linecap="round"/>
+            <rect x="-45" y="32" width="75" height="6" rx="3" fill="#1e293b"/>
+            <!-- Bacaklar (Diz üstü L duruş) -->
+            <polyline points="20,35 -15,35 -15,0" stroke="#64748b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <!-- Gövde Dik -->
+            <line x1="-15" y1="0" x2="-15" y2="-40" stroke="url(#bodyGrad)" stroke-width="12" stroke-linecap="round"/>
+            <!-- Kafa -->
+            <circle cx="-15" cy="-52" r="9" fill="#cbd5e1"/>
+            <!-- Ön Omuz Vurgusu (Setup) -->
+            <circle cx="-10" cy="-36" r="4.5" fill="#38bdf8" opacity="0.6"/>
+            <!-- Kollar aşağıda düz -->
+            <line x1="-12" y1="-35" x2="6" y2="-5" stroke="#94a3b8" stroke-width="5" stroke-linecap="round"/>
+            <!-- Plaka aşağıda -->
+            <g transform="translate(10, 0)">
+                <circle cx="0" cy="0" r="14" fill="#1e293b" stroke="url(#cyanGrad)" stroke-width="2.5"/>
+                <circle cx="0" cy="0" r="3.5" fill="#090d16"/>
+            </g>
+        </g>
+        <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Dizler Yerde, Gövde Dimdik</text>
+        <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Plaka iki elle uyluk önünde</text>
+    </g>
+
+    <!-- STEP 2: KALDIRIŞ FAZI -->
+    <g transform="translate(270, 10)">
+        <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+        <rect x="12" y="10" width="125" height="22" rx="4" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="1"/>
+        <text x="74" y="25" fill="#f59e0b" font-size="10" font-weight="800" text-anchor="middle" letter-spacing="0.5">2. DÜZ KOL KALDIRIŞI</text>
+        
+        <!-- Canvas -->
+        <g transform="translate(120, 105)">
+            <!-- Zemin Çizgisi -->
+            <line x1="-70" y1="35" x2="70" y2="35" stroke="#334155" stroke-width="2" stroke-linecap="round"/>
+            <rect x="-45" y="32" width="75" height="6" rx="3" fill="#1e293b"/>
+            <!-- Bacaklar -->
+            <polyline points="20,35 -15,35 -15,0" stroke="#64748b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <!-- Gövde Dimdik (Savurma yok) -->
+            <line x1="-15" y1="0" x2="-15" y2="-40" stroke="url(#bodyGrad)" stroke-width="12" stroke-linecap="round"/>
+            <!-- Kafa -->
+            <circle cx="-15" cy="-52" r="9" fill="#cbd5e1"/>
+            <!-- Hareket Oku (Yukarı yay) -->
+            <path d="M 12,-5 Q 35,-15 32,-30" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#arrowGold)"/>
+            <!-- Kollar 45 derece yukarıda -->
+            <line x1="-12" y1="-35" x2="22" y2="-25" stroke="#94a3b8" stroke-width="5" stroke-linecap="round"/>
+            <!-- Plaka -->
+            <g transform="translate(28, -25)">
+                <circle cx="0" cy="0" r="14" fill="#1e293b" stroke="url(#goldGrad)" stroke-width="2.5"/>
+                <circle cx="0" cy="0" r="3.5" fill="#090d16"/>
+            </g>
+            <!-- Core Zırhı Göstergesi -->
+            <line x1="-14" y1="-20" x2="-14" y2="-8" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+        </g>
+        <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Momentumsuz Kontrollü Yükseliş</text>
+        <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Dirsekler kilitli düz, karın sıkı</text>
+    </g>
+
+    <!-- STEP 3: OMUZ HİZASINDA KİLİT -->
+    <g transform="translate(528, 10)">
+        <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+        <rect x="12" y="10" width="135" height="22" rx="4" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="1"/>
+        <text x="79" y="25" fill="#10b981" font-size="10" font-weight="800" text-anchor="middle" letter-spacing="0.5">3. OMUZ HİZASI (90°) ZİRVE</text>
+        
+        <!-- Canvas -->
+        <g transform="translate(120, 105)">
+            <!-- Zemin Çizgisi -->
+            <line x1="-70" y1="35" x2="70" y2="35" stroke="#334155" stroke-width="2" stroke-linecap="round"/>
+            <rect x="-45" y="32" width="75" height="6" rx="3" fill="#1e293b"/>
+            <!-- Bacaklar -->
+            <polyline points="20,35 -15,35 -15,0" stroke="#64748b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <!-- Gövde Dimdik -->
+            <line x1="-15" y1="0" x2="-15" y2="-40" stroke="url(#bodyGrad)" stroke-width="12" stroke-linecap="round"/>
+            <!-- Kafa -->
+            <circle cx="-15" cy="-52" r="9" fill="#cbd5e1"/>
+            <!-- Aktif Ön Omuz Kırmızı/Altın Işıma -->
+            <circle cx="-12" cy="-35" r="6" fill="#f59e0b" opacity="0.8"/>
+            <!-- Kollar Tam Yatay Paralel (90 derece) -->
+            <line x1="-12" y1="-35" x2="35" y2="-35" stroke="#f8fafc" stroke-width="5" stroke-linecap="round"/>
+            <!-- Plaka Tepe Noktada -->
+            <g transform="translate(42, -35)">
+                <circle cx="0" cy="0" r="14" fill="#1e293b" stroke="url(#goldGrad)" stroke-width="3"/>
+                <circle cx="0" cy="0" r="3.5" fill="#090d16"/>
+            </g>
+            <!-- 90 Derece İpuç çizgisi -->
+            <line x1="-12" y1="-35" x2="58" y2="-35" stroke="#38bdf8" stroke-width="1" stroke-dasharray="2,2"/>
+        </g>
+        <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Tepe Noktada 1 Sn Sıkıştırma</text>
+        <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Omuz hizasını geçmeden yavaş iniş</text>
+    </g>
+</svg>
