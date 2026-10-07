@@ -2804,6 +2804,181 @@
         .btn-gym-action.danger:hover {
             background: rgba(239, 68, 68, 0.15);
         }
+
+        /* EXTENDED STEPPERS & PHONE UI ENHANCEMENTS */
+        .stepper-extended {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .btn-step-delta {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: #fff;
+            min-width: 38px;
+            height: 36px;
+            padding: 0 4px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s;
+            user-select: none;
+        }
+        .btn-step-delta:active {
+            transform: scale(0.94);
+        }
+        .btn-step-delta.pos {
+            color: var(--gold);
+            border-color: rgba(245, 158, 11, 0.4);
+        }
+        .btn-step-delta.pos:hover {
+            background: rgba(245, 158, 11, 0.2);
+        }
+        .btn-step-delta.neg {
+            color: #94a3b8;
+        }
+        .btn-step-delta.neg:hover {
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.4);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* SET STEPPER CONTROL BAR */
+        .set-stepper-control-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 7px 10px;
+            margin: 8px 0 10px;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .set-control-title {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-secondary);
+        }
+        .set-delta-buttons {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+        .btn-set-step-delta {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 5px 9px;
+            cursor: pointer;
+            transition: all 0.15s;
+            color: #e2e8f0;
+            user-select: none;
+        }
+        .btn-set-step-delta:active {
+            transform: scale(0.94);
+        }
+        .btn-set-step-delta.pos {
+            color: var(--gold);
+            border-color: rgba(245, 158, 11, 0.4);
+            background: rgba(245, 158, 11, 0.08);
+        }
+        .btn-set-step-delta.pos:hover {
+            background: rgba(245, 158, 11, 0.2);
+        }
+        .btn-set-step-delta.neg {
+            color: #94a3b8;
+        }
+        .btn-set-step-delta.neg:hover {
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.4);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* WORKOUT MORE ACTIONS DRAWER & TOGGLE */
+        .workout-more-actions-wrapper {
+            margin-top: 14px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.1);
+            padding-top: 10px;
+        }
+        .btn-workout-more-toggle {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 700;
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-workout-more-toggle:hover {
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .more-toggle-icon {
+            font-size: 14px;
+            letter-spacing: 2px;
+            font-weight: 900;
+            color: var(--gold);
+        }
+        .workout-more-actions-drawer {
+            background: rgba(9, 13, 22, 0.95);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 8px;
+        }
+        .more-drawer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 8px;
+        }
+        .btn-drawer-action {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: #cbd5e1;
+            font-size: 11.5px;
+            font-weight: 700;
+            padding: 9px 10px;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s;
+        }
+        .btn-drawer-action:hover {
+            border-color: var(--gold);
+            color: #fff;
+            background: rgba(245, 158, 11, 0.1);
+        }
+        .btn-drawer-action.warn {
+            color: #f59e0b;
+            border-color: rgba(245, 158, 11, 0.35);
+        }
+        .btn-drawer-action.danger {
+            color: #f87171;
+            border-color: rgba(239, 68, 68, 0.35);
+        }
+        .btn-drawer-action.danger:hover {
+            background: rgba(239, 68, 68, 0.15);
+        }
+
         .pr-celebration-banner {
             background: linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(234, 179, 8, 0.06));
             border: 1.5px solid var(--gold);
@@ -7418,6 +7593,62 @@
             renderActiveWorkout();
         }
 
+        function stepExerciseSets(exId, delta) {
+            if (!activeWorkoutSetsData[exId]) {
+                activeWorkoutSetsData[exId] = [];
+            }
+            const sets = activeWorkoutSetsData[exId];
+            if (delta > 0) {
+                for (let i = 0; i < delta; i++) {
+                    const lastWeight = sets.length > 0 ? sets[sets.length - 1].weight : '';
+                    const lastReps = sets.length > 0 ? sets[sets.length - 1].reps : 10;
+                    sets.push({
+                        setNo: sets.length + 1,
+                        weight: lastWeight,
+                        reps: lastReps,
+                        completed: false,
+                        completedAt: null
+                    });
+                }
+                showToast(`➕ ${delta} set eklendi (Toplam: ${sets.length} Set)`);
+            } else if (delta < 0) {
+                const removeCount = Math.abs(delta);
+                let removed = 0;
+                for (let i = 0; i < removeCount; i++) {
+                    if (sets.length > 1) {
+                        sets.pop();
+                        removed++;
+                    }
+                }
+                if (removed > 0) {
+                    showToast(`➖ ${removed} set çıkarıldı (Kalan: ${sets.length} Set)`);
+                } else {
+                    showToast(`⚠️ En az 1 set bulunmalıdır.`);
+                }
+            }
+            if (activeFocusSetIndex !== null && activeFocusSetIndex >= sets.length) {
+                activeFocusSetIndex = sets.length - 1;
+            }
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+        }
+
+        let activeWorkoutMoreDrawersState = {};
+        function toggleExerciseMoreActions(exId) {
+            activeWorkoutMoreDrawersState[exId] = !activeWorkoutMoreDrawersState[exId];
+            const drawer = document.getElementById(`moreActionsDrawer_${exId}`);
+            const btn = document.getElementById(`btnMoreActions_${exId}`);
+            if (drawer) {
+                const isOpen = activeWorkoutMoreDrawersState[exId];
+                drawer.style.display = isOpen ? 'block' : 'none';
+                if (btn) {
+                    btn.classList.toggle('active', isOpen);
+                    const icon = btn.querySelector('.more-toggle-icon');
+                    if (icon) icon.innerText = isOpen ? '▲ Kapat' : '•••';
+                }
+            }
+        }
+
         function deferExerciseToEnd(exId) {
             if (!activeWorkoutSession || !activeWorkoutSession.exercises) return;
             const idx = activeWorkoutSession.exercises.findIndex(e => e.id === exId);
@@ -7998,13 +8229,10 @@
                         <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
                             <div>
                                 <span class="badge-brand">CANLI ODAK MODU</span>
-                                <h2 style="font-size:17px; font-weight:800; color:#fff;">${escapeHTML(s.title)}</h2>
+                                <h2 style="font-size:16.5px; font-weight:800; color:#fff; margin:2px 0 0;">${escapeHTML(s.title)}</h2>
                             </div>
                             <div style="display:flex; gap:6px; align-items:center;">
-                                <button class="btn btn-danger-soft" style="padding:8px 12px; font-size:12px; font-weight:700;" onclick="cancelActiveWorkout()" title="Antrenmanı sonlandır ve iptal et">
-                                    🛑 İptal Et
-                                </button>
-                                <button class="btn btn-gold" style="padding:9px 13px; font-size:12.5px;" onclick="openCompleteModal()">
+                                <button class="btn btn-gold" style="padding:9px 15px; font-size:12.5px; font-weight:900;" onclick="openCompleteModal()">
                                     🏁 BİTİR & KAYDET
                                 </button>
                             </div>
@@ -8040,13 +8268,10 @@
                                 <div style="display:flex; gap:4px; flex-shrink:0; align-items:center;">
                                     <span class="ex-badge badge-equip">${equipLabels[ex.equipment] || ex.equipment}</span>
                                     <span class="ex-badge badge-muscle">${escapeHTML(ex.muscle ? ex.muscle.split(',')[0] : '')}</span>
-                                    <button type="button" class="btn-report-mini" onclick="openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}')" title="Bu egzersiz veya görsel hatalıysa bildir">
-                                        ⚠️ Bildir
-                                    </button>
                                 </div>
                             </div>
                             <div style="font-size:12px; color:var(--text-secondary); margin-top:3px;">
-                                🎯 Hedef: <strong style="color:var(--gold);">${s.scheme.sets} Set x ${s.scheme.reps}</strong> • Dinlenme: ${s.scheme.rest}s
+                                🎯 Hedef: <strong style="color:var(--gold);">${sets.length} Set x ${s.scheme.reps}</strong> • Dinlenme: ${s.scheme.rest}s
                             </div>
                         </div>
 
@@ -8060,11 +8285,19 @@
                             💡 <strong>Biyomekanik İpucu:</strong> ${escapeHTML(ex.cue || 'Hareketi kontrollü ve tam eklem hareket açıklığında uygulayın.')}
                         </div>
 
+                        <!-- SET YÖNETİMİ (+-1, +-2 SET DÜZENLEYİCİ) -->
+                        <div class="set-stepper-control-bar">
+                            <span class="set-control-title">Set Sayısı (${sets.length} Set):</span>
+                            <div class="set-delta-buttons">
+                                <button type="button" class="btn-set-step-delta neg" onclick="stepExerciseSets('${ex.id}', -2)" title="2 Set Eksilt">-2 Set</button>
+                                <button type="button" class="btn-set-step-delta neg" onclick="stepExerciseSets('${ex.id}', -1)" title="1 Set Eksilt">-1 Set</button>
+                                <button type="button" class="btn-set-step-delta pos" onclick="stepExerciseSets('${ex.id}', 1)" title="1 Set Ekle">+1 Set</button>
+                                <button type="button" class="btn-set-step-delta pos" onclick="stepExerciseSets('${ex.id}', 2)" title="2 Set Ekle">+2 Set</button>
+                            </div>
+                        </div>
+
                         <!-- SETS BREADCRUMBS -->
                         <div style="margin-bottom:6px;">
-                            <div style="font-size:10px; font-weight:800; color:var(--text-secondary); text-transform:uppercase;">
-                                SET SEÇİMİ VE DURUMU:
-                            </div>
                             <div class="focus-breadcrumbs">
                                 ${sets.map((st, sIdx) => {
                                     const isDone = st.completed;
@@ -8108,14 +8341,16 @@
                                 <div class="input-duo-grid">
                                     <div class="input-duo-cell">
                                         <div class="input-duo-label">Ağırlık (KG)</div>
-                                        <div class="input-stepper-row">
-                                            <button type="button" class="btn-step-mini" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, -1)">-</button>
+                                        <div class="stepper-extended">
+                                            <button type="button" class="btn-step-delta neg" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, -2.5)" title="-2.5 kg">-2.5</button>
+                                            <button type="button" class="btn-step-delta neg" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, -1)" title="-1 kg">-1</button>
                                             <input type="number" step="0.5" class="input-huge-val" 
                                                    id="w_${ex.id}_${currentSetIdx}" 
                                                    value="${currentSet.weight !== '' && currentSet.weight !== null ? currentSet.weight : ''}" 
                                                    placeholder="0" 
                                                    oninput="onSetWeightInput('${ex.id}', ${currentSetIdx}, this.value)">
-                                            <button type="button" class="btn-step-mini" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, 1)">+</button>
+                                            <button type="button" class="btn-step-delta pos" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, 1)" title="+1 kg">+1</button>
+                                            <button type="button" class="btn-step-delta pos" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, 2.5)" title="+2.5 kg">+2.5</button>
                                         </div>
                                     </div>
 
@@ -8184,49 +8419,51 @@
                             </div>
                         ` : ''}
 
-                        <!-- GYM FLOW & EQUIPMENT ACTIONS -->
-                        <div class="gym-flow-actions">
-                            <button class="btn-gym-action warn" onclick="deferExerciseToEnd('${ex.id}')" title="Bu alet veya dambıl şu an başkası tarafından kullanılıyorsa seansın sonuna ertele">
-                                ⏳ Alet Dolu (Sona Ertele)
+                        <!-- GİZLENEBİLİR DİĞER İŞLEMLER PANELİ (...) -->
+                        <div class="workout-more-actions-wrapper">
+                            <button type="button" class="btn-workout-more-toggle" onclick="toggleExerciseMoreActions('${ex.id}')" id="btnMoreActions_${ex.id}">
+                                <span>⚙️ Diğer Seçenekler (Alternatif, Alet, Sıralama...)</span>
+                                <span class="more-toggle-icon">${activeWorkoutMoreDrawersState[ex.id] ? '▲ Kapat' : '•••'}</span>
                             </button>
-                            <button class="btn-gym-action" style="border-color:rgba(56, 189, 248, 0.4); color:var(--cyan);" onclick="openAddFinisherModal()" title="İlave hareket ekle">
-                                ➕ İlave Egzersiz
-                            </button>
-                            <button class="btn-gym-action" style="border-color:rgba(239, 68, 68, 0.4); color:#fca5a5;" onclick="openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}')" title="Hata bildir">
-                                ⚠️ Hata Bildir
-                            </button>
-                            <button class="btn-gym-action" onclick="moveExerciseOrder('${ex.id}', -1)" title="Sırayı bir öne al">
-                                ⬆️ Öne Al
-                            </button>
-                            <button class="btn-gym-action" onclick="moveExerciseOrder('${ex.id}', 1)" title="Sırayı bir arkaya al">
-                                ⬇️ Arkaya Al
-                            </button>
-                            <button class="btn-gym-action" onclick="openAlternativeModal('${ex.id}', 'active')" title="Biyomekanik alternatif seç">
-                                📋 Alternatif Seç
-                            </button>
-                            <button class="btn-gym-action" onclick="addSetToExercise('${ex.id}')">
-                                ➕ Set Ekle
-                            </button>
-                            <button class="btn-gym-action" onclick="removeSetFromExercise('${ex.id}')">
-                                ➖ Set Sil
-                            </button>
-                            <button class="btn-gym-action danger" onclick="removeExerciseFromWorkout('${ex.id}', 'active')">
-                                🗑️ Kaldır
-                            </button>
+                            <div class="workout-more-actions-drawer" id="moreActionsDrawer_${ex.id}" style="display:${activeWorkoutMoreDrawersState[ex.id] ? 'block' : 'none'};">
+                                <div class="more-drawer-grid">
+                                    <button class="btn-drawer-action" onclick="openAlternativeModal('${ex.id}', 'active')">
+                                        📋 Alternatif Hareket
+                                    </button>
+                                    <button class="btn-drawer-action warn" onclick="deferExerciseToEnd('${ex.id}')">
+                                        ⏳ Alet Dolu (Sona Ertele)
+                                    </button>
+                                    <button class="btn-drawer-action" onclick="moveExerciseOrder('${ex.id}', -1)">
+                                        ⬆️ Sırayı Öne Al
+                                    </button>
+                                    <button class="btn-drawer-action" onclick="moveExerciseOrder('${ex.id}', 1)">
+                                        ⬇️ Sırayı Arkaya Al
+                                    </button>
+                                    <button class="btn-drawer-action" onclick="openAddFinisherModal()">
+                                        ➕ Finisher / İlave Egzersiz
+                                    </button>
+                                    <button class="btn-drawer-action" onclick="openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}')">
+                                        ⚠️ Hata Bildir
+                                    </button>
+                                    <button class="btn-drawer-action danger" onclick="removeExerciseFromWorkout('${ex.id}', 'active')">
+                                        🗑️ Hareketi Kaldır
+                                    </button>
+                                    <button class="btn-drawer-action danger" onclick="cancelActiveWorkout()">
+                                        🛑 Antrenmanı İptal Et
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- NAVIGATION FOOTER -->
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; gap:8px; flex-wrap:wrap;">
-                            <button class="btn btn-outline" style="flex:1; padding:12px 8px; font-size:12px;" onclick="goToPrevExercise()" ${activeFocusExIndex === 0 ? 'disabled' : ''}>
+                        <!-- NAVIGATION FOOTER (SADELEŞTİRİLMİŞ MOBİL ERİŞİM) -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; gap:8px;">
+                            <button class="btn btn-outline" style="flex:1; padding:12px 6px; font-size:12px; font-weight:800;" onclick="goToPrevExercise()" ${activeFocusExIndex === 0 ? 'disabled' : ''}>
                                 ⬅️ Önceki
                             </button>
-                            <button class="btn btn-danger-soft" style="flex:1; padding:12px 8px; font-size:12px; font-weight:700;" onclick="cancelActiveWorkout()" title="Antrenmanı iptal et">
-                                🛑 İptal Et
-                            </button>
-                            <button class="btn btn-gold" style="flex:1.2; padding:12px 8px; font-size:12px; font-weight:900;" onclick="openCompleteModal()">
+                            <button class="btn btn-gold" style="flex:1.4; padding:12px 8px; font-size:12.5px; font-weight:900;" onclick="openCompleteModal()">
                                 🏁 Bitir & Kaydet
                             </button>
-                            <button class="btn btn-outline" style="flex:1; padding:12px 8px; font-size:12px;" onclick="goToNextExercise()" ${activeFocusExIndex === s.exercises.length - 1 ? 'disabled' : ''}>
+                            <button class="btn btn-outline" style="flex:1; padding:12px 6px; font-size:12px; font-weight:800;" onclick="goToNextExercise()" ${activeFocusExIndex === s.exercises.length - 1 ? 'disabled' : ''}>
                                 Sonraki ➡️
                             </button>
                         </div>
@@ -8322,13 +8559,15 @@
                                             </div>
                                             <div class="set-col-input">
                                                 <div class="stepper-wrap">
-                                                    <button class="stepper-btn" onclick="stepSetWeight('${ex.id}', ${setIdx}, -2.5)" title="-2.5 kg">-</button>
+                                                    <button class="stepper-btn" onclick="stepSetWeight('${ex.id}', ${setIdx}, -2.5)" title="-2.5 kg" style="padding:2px 4px; font-size:10px;">-2.5</button>
+                                                    <button class="stepper-btn" onclick="stepSetWeight('${ex.id}', ${setIdx}, -1)" title="-1 kg" style="padding:2px 4px; font-size:10px;">-1</button>
                                                     <input type="number" step="0.5" class="set-input-weight" 
                                                            id="w_${ex.id}_${setIdx}" 
                                                            value="${st.weight !== '' && st.weight !== null ? st.weight : ''}" 
                                                            placeholder="kg" 
                                                            oninput="onSetWeightInput('${ex.id}', ${setIdx}, this.value)">
-                                                    <button class="stepper-btn" onclick="stepSetWeight('${ex.id}', ${setIdx}, 2.5)" title="+2.5 kg">+</button>
+                                                    <button class="stepper-btn" onclick="stepSetWeight('${ex.id}', ${setIdx}, 1)" title="+1 kg" style="padding:2px 4px; font-size:10px;">+1</button>
+                                                    <button class="stepper-btn" onclick="stepSetWeight('${ex.id}', ${setIdx}, 2.5)" title="+2.5 kg" style="padding:2px 4px; font-size:10px;">+2.5</button>
                                                 </div>
                                             </div>
                                             <div class="set-col-input">
@@ -8353,8 +8592,10 @@
                                 }).join('')}
 
                                 <div class="sets-footer-actions">
-                                    <button class="btn-set-mini" onclick="addSetToExercise('${ex.id}')">➕ Set Ekle</button>
-                                    <button class="btn-set-mini" onclick="removeSetFromExercise('${ex.id}')">➖ Set Sil</button>
+                                    <button class="btn-set-mini" onclick="stepExerciseSets('${ex.id}', -2)" title="2 Set Çıkar">-2 Set</button>
+                                    <button class="btn-set-mini" onclick="stepExerciseSets('${ex.id}', -1)" title="1 Set Çıkar">-1 Set</button>
+                                    <button class="btn-set-mini" onclick="stepExerciseSets('${ex.id}', 1)" title="1 Set Ekle">+1 Set</button>
+                                    <button class="btn-set-mini" onclick="stepExerciseSets('${ex.id}', 2)" title="2 Set Ekle">+2 Set</button>
                                 </div>
                             </div>
 
@@ -12427,11 +12668,20 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
             return { monday, sunday, label, isCurrentWeek: weekOffset === 0 };
         }
 
-        function getRecommendationsForMuscle(muscleId, max = 3) {
+        function getRecommendationsForMuscle(muscleId, max = 4) {
             if (!Array.isArray(EXERCISES_DB)) return [];
-            const list = EXERCISES_DB.filter(e => (e.primaryMuscles || []).includes(muscleId));
+            let list = EXERCISES_DB.filter(e => (e.primaryMuscles || []).includes(muscleId));
+            if (list.length < max) {
+                const secondary = EXERCISES_DB.filter(e => 
+                    !list.includes(e) && (
+                        (e.secondaryMuscles || []).includes(muscleId) ||
+                        (e.muscle && typeof e.muscle === 'string' && e.muscle.toLowerCase().includes(muscleId.toLowerCase()))
+                    )
+                );
+                list = list.concat(secondary);
+            }
             list.sort((a, b) => {
-                const score = (x) => (x.equipment === 'dumbbell' ? 2 : (x.equipment === 'bodyweight' ? 1 : 0));
+                const score = (x) => (x.equipment === 'dumbbell' ? 3 : (x.equipment === 'kettlebell' ? 2 : (x.equipment === 'bodyweight' ? 1 : 0)));
                 return score(b) - score(a);
             });
             return list.slice(0, max);
@@ -12714,7 +12964,10 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
 
             const progId = 'custom_day_' + dayIdx + '_' + Date.now();
             const dayName = (typeof DAY_NAMES_TR !== 'undefined') ? DAY_NAMES_TR[dayIdx] : `Gün ${dayIdx}`;
-            const title = plan.rest ? `${dayName} Özel Programı` : (plan.title || `${dayName} Programı`);
+            const muscleName = (ex.primaryMuscles && ex.primaryMuscles[0] && TARGET_REGIONS[ex.primaryMuscles[0]])
+                ? TARGET_REGIONS[ex.primaryMuscles[0]].name
+                : '';
+            const title = plan.rest ? `${dayName} ${muscleName ? muscleName + ' ' : ''}Takviye Seansı` : (plan.title || `${dayName} Programı`);
 
             const customWorkout = {
                 id: progId,
@@ -12799,63 +13052,92 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                 const isAvailable = !isCompleted && planIso >= todayIso;
 
                 const plan = schedule[dKey];
-                const details = (typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(plan) : null;
+                const isRest = !plan || plan.rest;
+                const details = (!isRest && typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(plan) : null;
                 const exCount = (details && details.exercises) ? details.exercises.length : 0;
-                const planTitle = plan ? plan.title : 'Dinlenme';
+                const planTitle = isRest ? 'Dinlenme Günü' : (plan.title || 'Antrenman');
 
                 let statusBadge = '';
-                let canAdd = false;
+                let subtitleText = '';
+                let buttonHtml = '';
 
                 if (isCompleted) {
-                    statusBadge = `<span style="font-size:10px; color:#10b981; font-weight:700;">✅ Seans Tamamlandı</span>`;
-                } else if (isPast) {
-                    statusBadge = `<span style="font-size:10px; color:var(--text-secondary);">Günü Geçti</span>`;
-                    canAdd = true;
+                    statusBadge = `<span style="font-size:10px; color:#10b981; font-weight:800; background:rgba(16,185,129,0.12); padding:2px 6px; border-radius:4px;">✅ Seans Tamamlandı</span>`;
+                    subtitleText = `${escapeHTML(planTitle)} • Tamamlanmış seans`;
+                    buttonHtml = `
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <select id="quickAddSetsSelect_${dKey}" style="background:#111; color:#fff; border:1px solid var(--border); font-size:11px; padding:4px 6px; border-radius:6px;">
+                                <option value="3" selected>3 Set</option>
+                                <option value="4">4 Set</option>
+                                <option value="5">5 Set</option>
+                                <option value="2">2 Set</option>
+                            </select>
+                            <button class="btn btn-outline" style="font-size:10.5px; padding:4px 8px; opacity:0.85;" onclick="applyQuickAddExerciseToDay(${dKey}, '${ex.id}')">
+                                ➕ Yine de Ekle
+                            </button>
+                        </div>
+                    `;
+                } else if (isRest) {
+                    statusBadge = `<span style="font-size:10px; color:var(--cyan); font-weight:800; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.3); padding:2px 6px; border-radius:4px;">🧘 Dinlenme Günü (Boş)</span>`;
+                    subtitleText = `⚡ Eklendiğinde bu güne yeni bir Özel Takviye Seansı açılır`;
+                    buttonHtml = `
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <select id="quickAddSetsSelect_${dKey}" style="background:#111; color:#fff; border:1px solid var(--border); font-size:11px; padding:4px 6px; border-radius:6px;">
+                                <option value="3" selected>3 Set</option>
+                                <option value="4">4 Set</option>
+                                <option value="5">5 Set</option>
+                                <option value="2">2 Set</option>
+                            </select>
+                            <button class="btn btn-outline" style="font-size:11px; padding:5px 12px; font-weight:800; border-radius:6px; color:var(--cyan); border-color:var(--cyan); background:rgba(56,189,248,0.08);" onclick="applyQuickAddExerciseToDay(${dKey}, '${ex.id}')" title="Bu dinlenme gününü takviye seansına dönüştür">
+                                ⚡ Yeni Seans Aç
+                            </button>
+                        </div>
+                    `;
                 } else {
-                    statusBadge = `<span style="font-size:10px; color:var(--gold); font-weight:700;">⏳ Kalan Plan</span>`;
-                    canAdd = true;
+                    statusBadge = `<span style="font-size:10px; color:var(--gold); font-weight:800; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.3); padding:2px 6px; border-radius:4px;">🏋️ Planlı Antrenman</span>`;
+                    subtitleText = `${escapeHTML(planTitle)} • ${exCount} Hareket Mevcut (Sonuna eklenir)`;
+                    buttonHtml = `
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <select id="quickAddSetsSelect_${dKey}" style="background:#111; color:#fff; border:1px solid var(--border); font-size:11px; padding:4px 6px; border-radius:6px;">
+                                <option value="3" selected>3 Set</option>
+                                <option value="4">4 Set</option>
+                                <option value="5">5 Set</option>
+                                <option value="2">2 Set</option>
+                            </select>
+                            <button class="btn btn-gold" style="font-size:11px; padding:5px 12px; font-weight:800; border-radius:6px;" onclick="applyQuickAddExerciseToDay(${dKey}, '${ex.id}')" title="Mevcut antrenmanın sonuna ilave hareket olarak ekle">
+                                ➕ Antrenmana Ekle
+                            </button>
+                        </div>
+                    `;
                 }
 
                 daysHTML += `
-                    <div style="background:rgba(0,0,0,0.3); border:1px solid ${isAvailable ? 'rgba(245,158,11,0.35)' : 'var(--border)'}; border-radius:10px; padding:10px 12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                    <div style="background:rgba(0,0,0,0.3); border:1px solid ${isRest ? 'rgba(56,189,248,0.25)' : (isAvailable ? 'rgba(245,158,11,0.35)' : 'var(--border)')}; border-radius:10px; padding:10px 12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                         <div>
                             <div style="display:flex; align-items:center; gap:6px;">
                                 <strong style="font-size:13px; color:#fff;">${dayName}</strong>
                                 ${statusBadge}
+                                ${planIso === todayIso ? '<span style="font-size:9px; background:var(--gold); color:#000; font-weight:900; padding:1px 4px; border-radius:3px;">BUGÜN</span>' : ''}
                             </div>
-                            <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
-                                ${escapeHTML(planTitle)} • ${plan && plan.rest ? 'İstirahat Günü' : `${exCount} Egzersiz`}
+                            <div style="font-size:11px; color:var(--text-secondary); margin-top:3px;">
+                                ${subtitleText}
                             </div>
                         </div>
 
-                        ${canAdd ? `
-                            <div style="display:flex; align-items:center; gap:6px;">
-                                <select id="quickAddSetsSelect_${dKey}" style="background:#111; color:#fff; border:1px solid var(--border); font-size:11px; padding:4px 6px; border-radius:6px;">
-                                    <option value="3" selected>3 Set</option>
-                                    <option value="4">4 Set</option>
-                                    <option value="5">5 Set</option>
-                                    <option value="2">2 Set</option>
-                                </select>
-                                <button class="btn btn-gold" style="font-size:11px; padding:5px 12px; font-weight:800; border-radius:6px;" onclick="applyQuickAddExerciseToDay(${dKey}, '${ex.id}')">
-                                    ➕ Ekle
-                                </button>
-                            </div>
-                        ` : `
-                            <button class="btn btn-outline" style="font-size:10px; padding:4px 8px; opacity:0.6;" disabled>
-                                Seans Bitti
-                            </button>
-                        `}
+                        ${buttonHtml}
                     </div>
                 `;
             });
 
             bodyEl.innerHTML = `
-                <div style="background:rgba(245,158,11,0.06); border:1px solid rgba(245,158,11,0.25); border-radius:8px; padding:10px 12px; margin-bottom:12px;">
-                    <div style="font-size:11.5px; color:#fde68a;">
-                        <strong>Hedef Kas:</strong> ${escapeHTML(pNames)} • <strong>Ekipman:</strong> ${ex.equipment ? ex.equipment.toUpperCase() : 'SERBEST'}
+                <div style="background:rgba(245,158,11,0.06); border:1px solid rgba(245,158,11,0.25); border-radius:10px; padding:12px; margin-bottom:14px;">
+                    <div style="font-size:12px; color:#fde68a;">
+                        <strong>Hedef Kas Grubu:</strong> ${escapeHTML(pNames)} • <strong>Ekipman:</strong> ${ex.equipment ? ex.equipment.toUpperCase() : 'SERBEST'}
                     </div>
-                    <div style="font-size:10.5px; color:var(--text-secondary); margin-top:2px;">
-                        Bu hareketi haftanın kalan günlerinden birine eklediğinizde, haftalık kas dengeniz ve yeterlilik karneniz anında yeniden hesaplanır.
+                    <div style="font-size:11px; color:#cbd5e1; margin-top:8px; line-height:1.45; background:rgba(0,0,0,0.25); padding:8px 10px; border-radius:6px;">
+                        💡 <strong>Nasıl Çalışır?</strong>
+                        <br>• <strong>Antrenman olan gün:</strong> Hareketi mevcut seansın sonuna (${ex.name}) olarak ilave eder.
+                        <br>• <strong>Dinlenme günü:</strong> O gün dinlenmeden çıkar ve bu hareketle başlayan yeni bir <em>"Takviye Seansı"</em>na dönüşür. (Dinlenmenizi korumak istiyorsanız antrenman olan günleri tercih edebilirsiniz.)
                     </div>
                 </div>
 
@@ -12878,11 +13160,18 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
             const selectEl = document.getElementById(`quickAddSetsSelect_${dayIdx}`);
             const targetSets = selectEl ? parseInt(selectEl.value) || 3 : 3;
             const ex = EXERCISES_DB.find(e => e.id === exId);
+            const schedule = getWeeklySchedule();
+            const plan = schedule[dayIdx];
+            const wasRest = !plan || plan.rest;
 
             const ok = addExerciseToDaySchedule(dayIdx, exId, targetSets, '8-12');
             if (ok) {
                 closeQuickAddToDayModal();
-                showToast(`✅ "${ex ? ex.name : 'Egzersiz'}" ${DAY_NAMES_TR[dayIdx]} gününe ${targetSets} set olarak eklendi!`);
+                if (wasRest) {
+                    showToast(`⚡ ${DAY_NAMES_TR[dayIdx]} gününe yeni Takviye Antrenmanı açıldı ve "${ex ? ex.name : 'Egzersiz'}" (${targetSets} set) eklendi!`);
+                } else {
+                    showToast(`✅ "${ex ? ex.name : 'Egzersiz'}", ${DAY_NAMES_TR[dayIdx]} antrenmanının sonuna ${targetSets} set olarak eklendi!`);
+                }
                 if (typeof renderAnalytics === 'function') {
                     renderAnalytics();
                 }
@@ -13062,7 +13351,11 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                         const donePct = Math.min(100, Math.round((m.effectiveDone / maxBar) * 100));
                         const planPct = Math.min(100 - donePct, Math.round((m.effectivePlan / maxBar) * 100));
 
-                        const recs = (m.status === 'unworked' || m.status === 'insufficient') ? getRecommendationsForMuscle(m.id, 3) : [];
+                        const recs = getRecommendationsForMuscle(m.id, 4);
+                        const isWeak = (m.status === 'unworked' || m.status === 'insufficient');
+                        const recTitle = isWeak 
+                            ? '💡 Koç Tavsiyesi (Eksik Bölge Takviyesi) — Önerilen Egzersizler:'
+                            : '✨ Bu Bölgeyi Takviye Et / Güne Ekle:';
 
                         return `
                             <div style="background:rgba(0,0,0,0.3); border:1px solid ${m.statusColor}33; border-left:4px solid ${m.statusColor}; border-radius:10px; padding:12px 14px;">
@@ -13120,11 +13413,11 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                                     ` : ''}
                                 </div>
 
-                                <!-- RECOMMENDATIONS FOR UNWORKED / INSUFFICIENT -->
+                                <!-- RECOMMENDATIONS FOR ALL MUSCLES (UNWORKED, INSUFFICIENT OR OPTIMAL) -->
                                 ${recs.length > 0 ? `
                                     <div style="margin-top:10px; padding-top:8px; border-top:1px dashed rgba(255,255,255,0.1);">
-                                        <div style="font-size:10.5px; color:var(--gold); font-weight:700; margin-bottom:6px;">
-                                            💡 Koç Tavsiyesi — Bu Bölge İçin Önerilen Egzersizler:
+                                        <div style="font-size:10.5px; color:${isWeak ? 'var(--gold)' : 'var(--cyan)'}; font-weight:700; margin-bottom:6px;">
+                                            ${recTitle}
                                         </div>
                                         <div style="display:flex; gap:6px; flex-wrap:wrap;">
                                             ${recs.map(r => `
@@ -13132,7 +13425,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                                                     <button class="btn btn-outline" style="font-size:10px; padding:3px 7px; border:none; border-right:1px solid rgba(255,255,255,0.08);" onclick="openExerciseDetailModal('${r.id}')" title="Form ve Detayları Gör">
                                                         🏋️ ${escapeHTML(r.name)} <span style="color:var(--text-secondary); font-size:9px;">(${r.equipment})</span>
                                                     </button>
-                                                    <button class="btn btn-gold" style="font-size:9.5px; padding:3px 7px; border-radius:0; font-weight:800;" onclick="openQuickAddToDayModal('${r.id}')" title="Bu egzersizi haftanın kalan bir gününe ekle">
+                                                    <button class="btn ${isWeak ? 'btn-gold' : 'btn-outline'}" style="font-size:9.5px; padding:3px 8px; border-radius:0; font-weight:800; ${!isWeak ? 'color:var(--cyan); border-color:var(--cyan);' : ''}" onclick="openQuickAddToDayModal('${r.id}')" title="Bu egzersizi haftanın bir gününe ekle">
                                                         ➕ Güne Ekle
                                                     </button>
                                                 </div>
@@ -14018,7 +14311,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=66')
+                navigator.serviceWorker.register('./sw.js?v=67')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
