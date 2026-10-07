@@ -1577,6 +1577,36 @@
             width: 100%;
         }
 
+        /* GİZLENEBİLİR FORM VE KAS BİLGİLENDİRME PANELİ */
+        .pos-extra-info-container {
+            margin-top: 6px;
+        }
+        .btn-toggle-pos-info {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px dashed rgba(245, 158, 11, 0.35);
+            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 6px 10px;
+            border-radius: 7px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-toggle-pos-info:hover, .btn-toggle-pos-info:active {
+            background: rgba(245, 158, 11, 0.12);
+            border-color: var(--gold);
+            color: #fff;
+        }
+        .pos-info-arrow {
+            font-size: 10.5px;
+            font-weight: 800;
+            color: var(--gold);
+        }
+
         @media (max-width: 600px) {
             .pos-guide-content {
                 padding: 8px 4px;
@@ -3346,7 +3376,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v69</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v70</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3382,7 +3412,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" title="Uygulama Canlı Sürümü">v69</span>
+                    <span class="app-version-badge" id="appVersionBadge" title="Uygulama Canlı Sürümü">v70</span>
                 </div>
                 <div class="modern-user-badge" onclick="openMoreSheet()" title="Profil & Menü">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -3399,7 +3429,7 @@
                     <div>
                         <div style="display:flex; align-items:center; gap:6px;">
                             <span class="auth-name-title">Çelik Kodu</span>
-                            <span class="app-version-badge">v69</span>
+                            <span class="app-version-badge">v70</span>
                         </div>
                         <div style="font-size:11px; color:var(--text-secondary);" id="headerUserSub">🎯 Özel Kilolarım & Profil</div>
                     </div>
@@ -3421,7 +3451,7 @@
 
             <!-- HERO BRANDING (DESKTOP ONLY) -->
             <div class="hero-banner">
-                <div class="badge-brand">⚔️ ÇELİK KODU • PROGRAM MİMARI • v69</div>
+                <div class="badge-brand">⚔️ ÇELİK KODU • PROGRAM MİMARI • v70</div>
                 <h1 class="hero-title">Kişisel Antrenmanını Oluştur</h1>
                 <p class="hero-subtitle">Çalıştırmak istediğin bölgeyi ve elindeki ekipmanları seç, sana özel bilimsel antrenman programını anında hazırla.</p>
             </div>
@@ -5556,6 +5586,22 @@
             }
         }
 
+        function togglePosExtraInfo(infoId) {
+            const body = document.getElementById('body_' + infoId);
+            const arrow = document.getElementById('arrow_' + infoId);
+            if (!body) return;
+            const isHidden = (body.style.display === 'none' || body.classList.contains('collapsed'));
+            if (isHidden) {
+                body.style.display = 'block';
+                body.classList.remove('collapsed');
+                if (arrow) arrow.innerHTML = '▲ Gizle';
+            } else {
+                body.style.display = 'none';
+                body.classList.add('collapsed');
+                if (arrow) arrow.innerHTML = '▼ Göster';
+            }
+        }
+
         function openImageLightbox(src, title) {
             if (!src) return;
             const modal = document.getElementById('imageLightboxModal');
@@ -5862,6 +5908,33 @@
             const photoGuide = exerciseGuideMap[ex.id] || categoryFallback[ex.category] || guideLibrary.goblet_squat;
             const hasAnatomy = !!(photoGuide && photoGuide.anatomi);
 
+            const extraInfoId = `extra_info_${collapseId}`;
+            const extraInfoHtml = `
+                <div class="pos-extra-info-container">
+                    <button type="button" class="btn-toggle-pos-info" onclick="event.stopPropagation(); togglePosExtraInfo('${extraInfoId}')" id="btn_${extraInfoId}">
+                        <span>ℹ️ Kas Grupları &amp; Form / Güvenlik İpuçları</span>
+                        <span class="pos-info-arrow" id="arrow_${extraInfoId}">▼ Göster</span>
+                    </button>
+                    <div class="pos-extra-info-body" id="body_${extraInfoId}" style="display:none; margin-top:8px;">
+                        <div style="font-size:10.5px; color:var(--text-secondary); text-align:center; margin:4px 0 8px 0; line-height:1.35;">
+                            💡 <em>Görseller yapay zeka çizimidir. Aşağıdaki Türkçe hedefler ve güvenlik kuralları esastır.</em>
+                        </div>
+                        <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:8px; padding:8px 10px; margin-bottom:8px;">
+                            <div style="font-size:10.5px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:5px;">🎯 Çalıştırılan Kas Grupları:</div>
+                            <div style="display:flex; flex-wrap:wrap; gap:5px;">
+                                ${(ex.primaryMuscles || []).map(m => `<span style="background:rgba(245,158,11,0.2); color:var(--gold); border:1px solid rgba(245,158,11,0.4); padding:2px 7px; border-radius:10px; font-size:10.5px; font-weight:800;">${(typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m] ? STUDIO_REGION_MAP[m].icon + ' ' + STUDIO_REGION_MAP[m].name : m)} (Primer)</span>`).join('')}
+                                ${(ex.secondaryMuscles || []).map(m => `<span style="background:rgba(56,189,248,0.15); color:var(--cyan); border:1px solid rgba(56,189,248,0.35); padding:2px 7px; border-radius:10px; font-size:10.5px; font-weight:700;">${(typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m] ? STUDIO_REGION_MAP[m].icon + ' ' + STUDIO_REGION_MAP[m].name : m)} (Sekonder)</span>`).join('')}
+                            </div>
+                        </div>
+                        ${ex.cue ? `
+                            <div style="font-size:11.5px; color:#fde047; background:rgba(234,179,8,0.12); border-left:3px solid #eab308; padding:7px 10px; border-radius:6px; margin-bottom:6px; line-height:1.4;">
+                                ⚠️ <strong>Kritik Form &amp; Güvenlik Uyarısı:</strong> ${escapeHTML(ex.cue)}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+
             let formVisualHtml = '';
             if (photoGuide && photoGuide.form) {
                 formVisualHtml = `
@@ -5885,21 +5958,7 @@
                             ↔️ Adımları yakından incelemek için sağa/sola kaydırın
                         </div>
                     </div>
-                    <div style="font-size:10.5px; color:var(--text-secondary); text-align:center; margin:6px 0 8px 0; line-height:1.35;">
-                        💡 <em>Görseller yapay zeka çizimidir. Aşağıdaki Türkçe hedefler ve güvenlik kuralları esastır.</em>
-                    </div>
-                    <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:8px; padding:8px 10px; margin-bottom:8px;">
-                        <div style="font-size:10.5px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:5px;">🎯 Çalıştırılan Kas Grupları:</div>
-                        <div style="display:flex; flex-wrap:wrap; gap:5px;">
-                            ${(ex.primaryMuscles || []).map(m => `<span style="background:rgba(245,158,11,0.2); color:var(--gold); border:1px solid rgba(245,158,11,0.4); padding:2px 7px; border-radius:10px; font-size:10.5px; font-weight:800;">${(typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m] ? STUDIO_REGION_MAP[m].icon + ' ' + STUDIO_REGION_MAP[m].name : m)} (Primer)</span>`).join('')}
-                            ${(ex.secondaryMuscles || []).map(m => `<span style="background:rgba(56,189,248,0.15); color:var(--cyan); border:1px solid rgba(56,189,248,0.35); padding:2px 7px; border-radius:10px; font-size:10.5px; font-weight:700;">${(typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m] ? STUDIO_REGION_MAP[m].icon + ' ' + STUDIO_REGION_MAP[m].name : m)} (Sekonder)</span>`).join('')}
-                        </div>
-                    </div>
-                    ${ex.cue ? `
-                        <div style="font-size:11.5px; color:#fde047; background:rgba(234,179,8,0.12); border-left:3px solid #eab308; padding:7px 10px; border-radius:4px; margin-bottom:6px; line-height:1.4;">
-                            ⚠️ <strong>Kritik Form &amp; Güvenlik Uyarısı:</strong> ${escapeHTML(ex.cue)}
-                        </div>
-                    ` : ''}
+                    ${extraInfoHtml}
                 `;
             } else {
                 const diagramFallbackMap = {
@@ -5941,6 +6000,7 @@
                                 ↔️ Şemayı incelemek için sağa/sola kaydırın
                             </div>
                         </div>
+                        ${extraInfoHtml}
                     `;
                 } else if (ex.diagram) {
                     formVisualHtml = `
@@ -5961,6 +6021,7 @@
                                 ↔️ Adımları yakından incelemek için sağa/sola kaydırın
                             </div>
                         </div>
+                        ${extraInfoHtml}
                     `;
                 }
             }
@@ -8296,13 +8357,8 @@
                         </div>
 
                         <!-- BİYOMEKANİK FORM, ANATOMİ VE GÖRSEL REHBERİ (TAM GENİŞLİK) -->
-                        <div style="margin-bottom:12px;">
+                        <div style="margin-bottom:8px;">
                             ${renderExercisePositionsHtml(ex, `focus_${ex.id}`, false)}
-                        </div>
-
-                        <!-- BİYOMEKANİK İPUCU -->
-                        <div style="font-size:12px; color:#cbd5e1; margin-bottom:12px; background:rgba(15, 23, 42, 0.8); border:1px solid var(--border); padding:10px 12px; border-radius:10px; border-left:3px solid var(--cyan); line-height:1.4;">
-                            💡 <strong>Biyomekanik İpucu:</strong> ${escapeHTML(ex.cue || 'Hareketi kontrollü ve tam eklem hareket açıklığında uygulayın.')}
                         </div>
 
                         <!-- SETS BREADCRUMBS & SET ARTIŞ/AZALIŞ STEPPER BAR (YAN YANA) -->
@@ -14326,7 +14382,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=69')
+                navigator.serviceWorker.register('./sw.js?v=70')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
