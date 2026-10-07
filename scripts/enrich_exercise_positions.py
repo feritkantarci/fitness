@@ -21,7 +21,7 @@ DIAGRAMS = {
     "db_walking_lunge": "assets/diagrams/seq_db_lunge.svg",
     "db_reverse_lunge": "assets/diagrams/seq_db_lunge.svg",
     "db_rdl": "assets/diagrams/seq_db_rdl.svg",
-    "db_single_leg_rdl": "assets/diagrams/seq_db_rdl.svg",
+    "db_single_leg_rdl": "assets/diagrams/seq_db_single_leg_rdl.svg",
     "db_swing": "assets/diagrams/seq_db_swing.svg",
     "db_snatch": "assets/diagrams/seq_db_snatch.svg",
     "db_farmers_walk": "assets/diagrams/seq_farmers_walk.svg",

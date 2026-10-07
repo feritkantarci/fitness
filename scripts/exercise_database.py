@@ -355,7 +355,7 @@ EXERCISES = [   {   'category': 'push',
     {   'category': 'legs_hinge',
         'cue': 'Destek ayağının dizini hafif bük, serbest bacağı arkaya cetvel gibi uzatırken dambılı kaval kemiğine '
                'indir.',
-        'diagram': 'assets/diagrams/seq_db_rdl.svg',
+        'diagram': 'assets/diagrams/seq_db_single_leg_rdl.svg',
         'equipment': 'dumbbell',
         'id': 'db_single_leg_rdl',
         'isComplex': False,
