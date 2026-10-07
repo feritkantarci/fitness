@@ -1,6 +1,11 @@
-const CACHE_NAME = 'celik-kodu-cache-v80';
+const CACHE_NAME = 'celik-kodu-cache-v81';
 const ASSETS = [
   './',
+  './assets/guides/guide_bb_thruster_form.png',
+  './assets/guides/guide_bb_hang_power_clean_form.png',
+  './assets/guides/guide_bb_push_press_form.png',
+  './assets/guides/guide_bb_zercher_squat_form.png',
+  './assets/guides/guide_bb_landmine_squat_press_form.png',
   './assets/guides/guide_db_thruster_form.jpg',
   './assets/guides/guide_db_thruster_anatomi.jpg',
   './assets/guides/guide_db_push_press_form.jpg',
