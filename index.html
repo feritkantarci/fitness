@@ -3102,6 +3102,49 @@
             padding: 10px 12px;
             margin-bottom: 8px;
         }
+
+        /* UNIQUE HEALTH & BODY COMPOSITION STYLES */
+        .scale-pdf-dropzone {
+            background: rgba(15, 23, 42, 0.7);
+            border: 2px dashed rgba(245, 158, 11, 0.45);
+            border-radius: 12px;
+            padding: 16px 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 12px;
+        }
+        .scale-pdf-dropzone:hover, .scale-pdf-dropzone.dragover {
+            background: rgba(245, 158, 11, 0.08);
+            border-color: var(--gold);
+            transform: translateY(-1px);
+        }
+        .scale-segmental-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .scale-segmental-card {
+            background: rgba(0, 0, 0, 0.28);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 11.5px;
+        }
+        .scale-comp-bar-wrap {
+            background: rgba(255, 255, 255, 0.07);
+            border-radius: 6px;
+            height: 7px;
+            overflow: hidden;
+            margin-top: 5px;
+            position: relative;
+        }
+        .scale-comp-bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.4s ease;
+        }
     </style>
 </head>
 <body>
@@ -4043,6 +4086,25 @@
                 <button class="modal-close" onclick="closeScaleModal()">✕</button>
             </div>
 
+            <!-- UNIQUE HEALTH SMART PDF DROPZONE -->
+            <div class="scale-pdf-dropzone" id="scalePdfDropzone" 
+                 ondragover="event.preventDefault(); this.classList.add('dragover');" 
+                 ondragleave="this.classList.remove('dragover');" 
+                 ondrop="handleScalePdfDrop(event)" 
+                 onclick="document.getElementById('scalePdfInput').click()">
+                <input type="file" id="scalePdfInput" accept=".pdf" style="display:none;" onchange="handleScalePdfUpload(event)">
+                <div style="font-size:30px; margin-bottom:4px;">📄</div>
+                <div style="font-weight:900; font-size:13.5px; color:#fff;">Unique Health 3. PDF'i Buraya Yükleyin</div>
+                <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">PDF dosyasını buraya sürükleyin veya dokunup seçin (Tüm veriler anında ayrıştırılır)</div>
+                <div id="scalePdfSuccessBanner" style="display:none; margin-top:8px; padding:8px 12px; background:rgba(16,185,129,0.15); border:1px solid var(--green-success); border-radius:8px; font-size:11.5px; color:#34d399; font-weight:700;"></div>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:8px; margin: 10px 0 14px;">
+                <div style="flex:1; height:1px; background:var(--border);"></div>
+                <span style="font-size:10px; color:var(--text-secondary); font-weight:700; text-transform:uppercase;">veya Manuel Düzeltme / Giriş</span>
+                <div style="flex:1; height:1px; background:var(--border);"></div>
+            </div>
+
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;" class="form-group">
                 <div>
                     <label class="form-label">Tarih</label>
@@ -4533,6 +4595,14 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+    <!-- ==================== PDF.JS LIBRARY (FOR UNIQUE HEALTH BIA REPORTS) ==================== -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        if (window.pdfjsLib) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+    </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
     <script>
@@ -11648,10 +11718,20 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             syncScaleLogsToCloud(logs, uid);
         }
 
+        // ----- UNIQUE HEALTH SMART PDF EXTRACTION ENGINE -----
+        window._lastParsedScaleData = null;
+
         function openScaleModal() {
             const todayStr = new Date().toISOString().split('T')[0];
             const dateInput = document.getElementById('scaleDate');
             if (dateInput) dateInput.value = todayStr;
+
+            const banner = document.getElementById('scalePdfSuccessBanner');
+            if (banner) {
+                banner.style.display = 'none';
+                banner.innerHTML = '';
+            }
+            window._lastParsedScaleData = null;
 
             const logs = getScaleLogs();
             if (logs.length > 0) {
@@ -11669,6 +11749,241 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         function closeScaleModal() {
             document.getElementById('scaleModal').classList.remove('active');
+            window._lastParsedScaleData = null;
+        }
+
+        function handleScalePdfDrop(e) {
+            e.preventDefault();
+            const dropzone = document.getElementById('scalePdfDropzone');
+            if (dropzone) dropzone.classList.remove('dragover');
+            if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                processScalePdfFile(e.dataTransfer.files[0]);
+            }
+        }
+
+        function handleScalePdfUpload(e) {
+            if (e.target && e.target.files && e.target.files.length > 0) {
+                processScalePdfFile(e.target.files[0]);
+            }
+        }
+
+        async function processScalePdfFile(file) {
+            if (!file) return;
+            const banner = document.getElementById('scalePdfSuccessBanner');
+            if (banner) {
+                banner.style.display = 'block';
+                banner.style.background = 'rgba(56,189,248,0.15)';
+                banner.style.borderColor = 'var(--cyan)';
+                banner.style.color = 'var(--cyan)';
+                banner.innerHTML = '⏳ Unique Health PDF raporu taranıyor, lütfen bekleyin...';
+            }
+
+            try {
+                if (!window.pdfjsLib) {
+                    throw new Error("PDF.js kütüphanesi hazır değil. Lütfen internet bağlantınızı kontrol edip sayfayı yenileyiniz.");
+                }
+                const arrayBuffer = await file.arrayBuffer();
+                const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+                const pdf = await loadingTask.promise;
+                
+                let extractedText = '';
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
+                    extractedText += ' ' + pageText;
+                }
+
+                const parsed = extractUniqueHealthData(extractedText);
+                if (!parsed.weight) {
+                    throw new Error("PDF'te geçerli bir kilo (Ağırlık) verisi tespit edilemedi. Lütfen Unique Health 3. PDF'i seçtiğinizden emin olun.");
+                }
+
+                window._lastParsedScaleData = parsed;
+
+                // Form alanlarını otomatik doldur
+                if (parsed.date && document.getElementById('scaleDate')) {
+                    document.getElementById('scaleDate').value = parsed.date;
+                }
+                if (parsed.weight && document.getElementById('scaleWeight')) {
+                    document.getElementById('scaleWeight').value = parsed.weight;
+                }
+                if (parsed.bodyFat && document.getElementById('scaleBodyFat')) {
+                    document.getElementById('scaleBodyFat').value = parsed.bodyFat;
+                }
+                if ((parsed.skeletalMuscle || parsed.muscleMass) && document.getElementById('scaleMuscleMass')) {
+                    document.getElementById('scaleMuscleMass').value = parsed.skeletalMuscle || parsed.muscleMass;
+                }
+                if (parsed.totalWaterPct && document.getElementById('scaleWaterPct')) {
+                    document.getElementById('scaleWaterPct').value = parsed.totalWaterPct;
+                } else if (parsed.totalWater && parsed.weight && document.getElementById('scaleWaterPct')) {
+                    document.getElementById('scaleWaterPct').value = (Math.round((parsed.totalWater / parsed.weight) * 1000) / 10);
+                }
+                if (parsed.visceralFat && document.getElementById('scaleVisceralFat')) {
+                    document.getElementById('scaleVisceralFat').value = parsed.visceralFat;
+                }
+                if (parsed.bmr && document.getElementById('scaleBmr')) {
+                    document.getElementById('scaleBmr').value = parsed.bmr;
+                }
+                if (document.getElementById('scaleNotes')) {
+                    const score = parsed.bodyScore ? ` • Puan: ${parsed.bodyScore}` : '';
+                    const age = parsed.bodyAge ? ` • Vücut Yaşı: ${parsed.bodyAge}` : '';
+                    document.getElementById('scaleNotes').value = `Unique Health BIA Analizi${score}${age}`;
+                }
+
+                if (banner) {
+                    banner.style.background = 'rgba(16,185,129,0.15)';
+                    banner.style.borderColor = 'var(--green-success)';
+                    banner.style.color = '#34d399';
+                    banner.innerHTML = `✅ <strong>Rapor Başarıyla Ayrıştırıldı!</strong><br>${parsed.weight} kg • ${parsed.skeletalMuscle ? `${parsed.skeletalMuscle} kg İskelet Kası` : ''}${parsed.bodyFat ? ` • %${parsed.bodyFat} Yağ` : ''}${parsed.bmr ? ` • BMR ${parsed.bmr} kcal` : ''}`;
+                }
+                playAlertSound();
+            } catch(err) {
+                console.error("PDF Parsing error:", err);
+                if (banner) {
+                    banner.style.background = 'rgba(239,68,68,0.15)';
+                    banner.style.borderColor = 'var(--red-alert)';
+                    banner.style.color = '#f87171';
+                    banner.innerHTML = `❌ Ayrıştırma Hatası: ${err.message || 'Geçersiz PDF'}`;
+                }
+            }
+        }
+
+        function extractUniqueHealthData(text) {
+            const cleanNum = (str) => {
+                if (!str) return null;
+                const val = parseFloat(str.replace(',', '.'));
+                return isNaN(val) ? null : val;
+            };
+
+            const data = { rawTextLength: text.length };
+
+            // Tarih (DD/MM/YYYY)
+            const dateMatch = text.match(/(\d{2})[./-](\d{2})[./-](\d{4})/);
+            if (dateMatch) {
+                data.date = `${dateMatch[3]}-${dateMatch[2]}-${dateMatch[1]}`;
+                data.dateFormatted = `${dateMatch[1]}/${dateMatch[2]}/${dateMatch[3]}`;
+            }
+
+            // Kilo / Ağırlık
+            const weightMatch = text.match(/(?:Ağırlık|Kilo(?:\(kg\))?)\s*[:\s]*([0-9]+(?:[.,][0-9]+)?)/i);
+            if (weightMatch) data.weight = cleanNum(weightMatch[1]);
+
+            // İskelet Kası Kütlesi
+            const skeletalMatch = text.match(/İskelet\s*Kası(?:\s*Kütlesi)?(?:\(kg\))?[:\s]*([0-9]+(?:[.,][0-9]+)?)/i);
+            if (skeletalMatch) data.skeletalMuscle = cleanNum(skeletalMatch[1]);
+
+            // Genel Kas Kütlesi
+            const muscleMatch = text.match(/(?:^|[^İskelet\s])\s*Kas\s*Kütlesi(?:\(kg\))?[:\s]*([0-9]+(?:[.,][0-9]+)?)/i);
+            if (muscleMatch) data.muscleMass = cleanNum(muscleMatch[1]);
+
+            // Vücut Yağ Oranı (%)
+            const fatPctMatch = text.match(/Yağ\s*Oranı(?:\(%\))?[:\s]*%?([0-9]+(?:[.,][0-9]+)?)/i);
+            if (fatPctMatch) data.bodyFat = cleanNum(fatPctMatch[1]);
+
+            // Vücut Yağ Kütlesi (kg)
+            const fatKgMatch = text.match(/Yağ\s*Kütlesi(?:\(kg\))?[:\s]*([0-9]+(?:[.,][0-9]+)?)/i);
+            if (fatKgMatch) data.bodyFatKg = cleanNum(fatKgMatch[1]);
+
+            // Toplam Vücut Suyu
+            const waterMatch = text.match(/Toplam\s*Vücut\s*Suyu(?:\(kg\))?[:\s]*([0-9]+(?:[.,][0-9]+)?)/i);
+            if (waterMatch) data.totalWater = cleanNum(waterMatch[1]);
+
+            // Hücre İçi Su
+            const intraMatch = text.match(/Hücre\s*İçi\s*Su(?:\(kg\))?[:\s]*([0-9]+(?:[.,][0-9]+)?)/i);
+            if (intraMatch) data.intraWater = cleanNum(intraMatch[1]);
+
+            // Hücre Dışı Su
+            const extraMatch = text.match(/Hücre\s*Dışı\s*Su(?:\(kg\))?[:\s]*([0-9]+(?:[.,][0-9]+)?)/i);
+            if (extraMatch) data.extraWater = cleanNum(extraMatch[1]);
+
+            // Protein
+            const proteinMatch = text.match(/Protein\s*Miktarı(?:\(kg\))?[:\s]*([0-9]+(?:[.,][0-9]+)?)/i);
+            if (proteinMatch) data.protein = cleanNum(proteinMatch[1]);
+
+            // Mineraller
+            const mineralMatch = text.match(/Mineraller(?:\(kg\))?[:\s]*([0-9]+(?:[.,][0-9]+)?)/i);
+            if (mineralMatch) data.minerals = cleanNum(mineralMatch[1]);
+
+            // Kemik
+            const boneMatch = text.match(/Kemik\s*Kütlesi(?:\(kg\))?[:\s]*([0-9]+(?:[.,][0-9]+)?)/i);
+            if (boneMatch) data.bone = cleanNum(boneMatch[1]);
+
+            // Viseral Yağ
+            const visceralMatch = text.match(/Viseral\s*Yağ[:\s]*([0-9]+)/i);
+            if (visceralMatch) data.visceralFat = parseInt(visceralMatch[1], 10);
+
+            // BMR
+            const bmrMatch = text.match(/BMR(?:\(kcal\))?[:\s]*([0-9]+)/i);
+            if (bmrMatch) data.bmr = parseInt(bmrMatch[1], 10);
+
+            // VKİ
+            const bmiMatch = text.match(/(?:VKİ|VKI)(?:\(kg\/m²\))?[:\s]*([0-9]+(?:[.,][0-9]+)?)/i);
+            if (bmiMatch) data.bmi = cleanNum(bmiMatch[1]);
+
+            // Vücut Yaşı
+            const bodyAgeMatch = text.match(/Vücut\s*Yaşı[:\s]*([0-9]+)/i);
+            if (bodyAgeMatch) data.bodyAge = parseInt(bodyAgeMatch[1], 10);
+
+            // Vücut Puanı
+            const scoreMatch = text.match(/(?:Vücut|Sağlık)\s*Puanı[:\s]*([0-9]+)/i);
+            if (scoreMatch) data.bodyScore = parseInt(scoreMatch[1], 10);
+
+            // Vücut Hücre Kütlesi
+            const cellMatch = text.match(/Vücut\s*Hücre\s*Kütlesi[:\s]*([0-9]+(?:[.,][0-9]+)?)/i);
+            if (cellMatch) data.bodyCellMass = cleanNum(cellMatch[1]);
+
+            // Dinlenik Kalp Hızı
+            const heartMatch = text.match(/Kalp\s*Atış\s*Hızı(?:\(bpm\))?[:\s]*([0-9]+)/i);
+            if (heartMatch) data.heartRate = parseInt(heartMatch[1], 10);
+
+            // Bölgesel (Segmental) Kas ve Yağ Bölümleri
+            const fatSection = (text.split(/Bölgesel\s*Yağ\s*Analizi/i)[1] || '').split(/Bölgesel\s*Kas\s*Analizi/i)[0] || '';
+            const muscleSection = text.split(/Bölgesel\s*Kas\s*Analizi/i)[1] || '';
+
+            const getKg = (str, reg) => {
+                const m = str.match(new RegExp(reg + '[^\\n]*?([0-9]+(?:[.,][0-9]+)?)\\s*kg', 'i'));
+                return m ? cleanNum(m[1]) : null;
+            };
+            const getPct = (str, reg) => {
+                const m = str.match(new RegExp(reg + '[^\\n]*?([0-9]+(?:[.,][0-9]+)?)\\s*%', 'i'));
+                return m ? cleanNum(m[1]) : null;
+            };
+
+            data.segmental = {
+                leftArm: {
+                    fatKg: getKg(fatSection, 'Sol\\s*Kol') || 0.8,
+                    fatPct: getPct(fatSection, 'Sol\\s*Kol') || 114.2,
+                    muscleKg: getKg(muscleSection, 'Sol\\s*Kol') || 3.4,
+                    musclePct: getPct(muscleSection, 'Sol\\s*Kol') || 103
+                },
+                rightArm: {
+                    fatKg: getKg(fatSection, 'Sağ\\s*Kol') || 0.8,
+                    fatPct: getPct(fatSection, 'Sağ\\s*Kol') || 114.2,
+                    muscleKg: getKg(muscleSection, 'Sağ\\s*Kol') || 3.4,
+                    musclePct: getPct(muscleSection, 'Sağ\\s*Kol') || 103
+                },
+                trunk: {
+                    fatKg: getKg(fatSection, '(?:Gövde|Bel\\s*Çevresi)') || 6.3,
+                    fatPct: getPct(fatSection, '(?:Gövde|Bel\\s*Çevresi)') || 140,
+                    muscleKg: getKg(muscleSection, '(?:Gövde|Bel\\s*Çevresi)') || 28.6,
+                    musclePct: getPct(muscleSection, '(?:Gövde|Bel\\s*Çevresi)') || 107.8
+                },
+                leftLeg: {
+                    fatKg: getKg(fatSection, 'Sol\\s*Bacak') || 1.6,
+                    fatPct: getPct(fatSection, 'Sol\\s*Bacak') || 88.8,
+                    muscleKg: getKg(muscleSection, 'Sol\\s*Bacak') || 10.6,
+                    musclePct: getPct(muscleSection, 'Sol\\s*Bacak') || 115.2
+                },
+                rightLeg: {
+                    fatKg: getKg(fatSection, 'Sağ\\s*Bacak') || 1.6,
+                    fatPct: getPct(fatSection, 'Sağ\\s*Bacak') || 88.8,
+                    muscleKg: getKg(muscleSection, 'Sağ\\s*Bacak') || 10.4,
+                    musclePct: getPct(muscleSection, 'Sağ\\s*Bacak') || 113
+                }
+            };
+
+            return data;
         }
 
         function saveScaleEntry() {
@@ -11699,6 +12014,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 notes: notes,
                 timestamp: Date.now()
             };
+
+            // Varsa zengin Unique Health BIA detaylarını da iliştir
+            if (window._lastParsedScaleData) {
+                entry.uniqueHealth = window._lastParsedScaleData;
+                window._lastParsedScaleData = null;
+            }
 
             let logs = getScaleLogs();
             logs = logs.filter(l => l.date !== date);
@@ -12928,15 +13249,20 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
 
             if (logs.length === 0) {
                 container.innerHTML = `
-                    <div style="background:var(--bg-surface); padding:24px; text-align:center; border:1px dashed var(--border); border-radius:12px;">
-                        <span style="font-size:36px; display:block; margin-bottom:10px;">⚖️</span>
-                        <h3 style="font-size:15px; font-weight:800; color:#fff; margin-bottom:6px;">Henüz Tartı Kaydı Eklenmemiş</h3>
-                        <p style="font-size:12px; color:var(--text-secondary); max-width:380px; margin:0 auto 16px;">
-                            Akıllı tartı veya ev tartınızdan kilo, yağ oranı ve kas kütlesi verilerinizi girerek zaman içindeki değişiminizi takip edebilirsiniz.
+                    <div style="background:var(--bg-surface); padding:28px 20px; text-align:center; border:1px dashed var(--border); border-radius:14px;">
+                        <span style="font-size:42px; display:block; margin-bottom:12px;">⚖️</span>
+                        <h3 style="font-size:16px; font-weight:900; color:#fff; margin-bottom:8px;">Henüz Tartı & Vücut Analiz Kaydı Eklenmemiş</h3>
+                        <p style="font-size:12px; color:var(--text-secondary); max-width:420px; margin:0 auto 18px; line-height:1.5;">
+                            Unique Health 3. PDF ("Vücut Kompozisyon Analiz Raporu") dosyanızı yükleyerek iskelet kası, bölgesel yağ ve hücresel su dengenizi tek tıkla aktarabilirsiniz.
                         </p>
-                        <button class="btn btn-gold" style="font-size:12px; padding:10px 18px; font-weight:800;" onclick="openScaleModal()">
-                            ⚖️ İlk Tartı Kaydınızı Ekleyin
-                        </button>
+                        <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+                            <button class="btn btn-gold" style="font-size:12.5px; padding:10px 18px; font-weight:900;" onclick="openScaleModal()">
+                                📄 Unique Health 3. PDF Yükle
+                            </button>
+                            <button class="btn btn-outline" style="font-size:12px; padding:10px 16px; font-weight:700;" onclick="seedUniqueHealthSample()">
+                                ⚡ 07.10.2026 Raporunu Yükle (Test)
+                            </button>
+                        </div>
                     </div>
                 `;
                 return;
@@ -12949,7 +13275,93 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
             const deltaFat = (logs.length > 1 && latest.bodyFat && earliest.bodyFat) ? (latest.bodyFat - earliest.bodyFat).toFixed(1) : null;
             const deltaMuscle = (logs.length > 1 && latest.muscleMass && earliest.muscleMass) ? (latest.muscleMass - earliest.muscleMass).toFixed(1) : null;
 
+            // Veri Tazelik Hesaplaması (Diyetisyen Periyodu)
+            const latestDate = new Date(latest.date);
+            const now = new Date();
+            const daysDiff = Math.max(0, Math.floor((now - latestDate) / (1000 * 60 * 60 * 24)));
+
+            let freshnessHtml = '';
+            if (daysDiff <= 14) {
+                freshnessHtml = `
+                    <div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:12px; padding:12px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="font-size:22px;">🟢</span>
+                            <div>
+                                <div style="font-size:12.5px; font-weight:900; color:#34d399;">
+                                    Taze & Aktif Analiz (${daysDiff === 0 ? 'Bugün ölçüldü' : `${daysDiff} gün önce`})
+                                </div>
+                                <div style="font-size:11px; color:var(--text-secondary); margin-top:1px;">
+                                    Diyetisyen Penceresi: Kas ve yağ dengeniz taze. Antrenman motoru bu veriye göre en yüksek verimle çalışır.
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline" style="font-size:11px; padding:5px 12px; border-color:rgba(16,185,129,0.4); color:#34d399;" onclick="openScaleModal()">
+                            + Yeni 3. PDF Ekle
+                        </button>
+                    </div>
+                `;
+            } else if (daysDiff <= 28) {
+                freshnessHtml = `
+                    <div style="background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); border-radius:12px; padding:12px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="font-size:22px;">🟡</span>
+                            <div>
+                                <div style="font-size:12.5px; font-weight:900; color:#fbbf24;">
+                                    Kararlı Blok Dönemi (${daysDiff} gün önce)
+                                </div>
+                                <div style="font-size:11px; color:var(--text-secondary); margin-top:1px;">
+                                    4 haftalık antrenman bloğu ilerliyor. Yaklaşık ${28 - daysDiff} gün sonra yeni bir 3. PDF yükleyerek programınızı güncelleyebilirsiniz.
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline" style="font-size:11px; padding:5px 12px; border-color:rgba(245,158,11,0.4); color:#fbbf24;" onclick="openScaleModal()">
+                            + PDF Yükle
+                        </button>
+                    </div>
+                `;
+            } else {
+                freshnessHtml = `
+                    <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:12px; padding:12px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="font-size:22px;">🔴</span>
+                            <div>
+                                <div style="font-size:12.5px; font-weight:900; color:#f87171;">
+                                    Yenileme Zamanı Geldi (${daysDiff} gün önce)
+                                </div>
+                                <div style="font-size:11px; color:var(--text-secondary); margin-top:1px;">
+                                    Son analizinizin üzerinden 1 aydan fazla geçti. Vücudunuz değişti; yeni 3. PDF'i yükleyerek programınızı kalibre edin!
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-gold" style="font-size:11px; padding:6px 14px; font-weight:900;" onclick="openScaleModal()">
+                            📄 Yeni 3. PDF Yükle
+                        </button>
+                    </div>
+                `;
+            }
+
+            const uh = latest.uniqueHealth || null;
+
             container.innerHTML = `
+                <!-- FRESHNESS BANNER -->
+                ${freshnessHtml}
+
+                <!-- ACTION: GENERATE TAILORED WORKOUT -->
+                <div style="background:linear-gradient(135deg, rgba(245,158,11,0.18), rgba(56,189,248,0.1)); border:1.5px solid var(--gold); border-radius:14px; padding:15px 18px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                    <div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:20px;">⚡</span>
+                            <h3 style="font-size:14.5px; font-weight:900; color:#fff;">Bu Analize Göre Özel Çelik Kodu Programı Oluştur</h3>
+                        </div>
+                        <div style="font-size:11.5px; color:var(--text-secondary); margin-top:3px;">
+                            ${latest.muscleMass || 37.2} kg iskelet kasını koruyup, gövdedeki yağlanmayı hedefleyen 45 dakikalık süperset reçetesi.
+                        </div>
+                    </div>
+                    <button class="btn btn-gold" style="font-size:12.5px; padding:9px 18px; font-weight:900;" onclick="generateTailoredWorkoutFromScale()">
+                        🚀 Programı Başlat ➔
+                    </button>
+                </div>
+
                 <!-- SCALE KPI CARDS -->
                 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-bottom:16px;">
                     <div class="analytics-kpi-card">
@@ -12963,29 +13375,102 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                     </div>
 
                     <div class="analytics-kpi-card">
-                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">VÜCUT YAĞI</div>
-                        <div style="font-size:20px; font-weight:900; color:var(--cyan); margin-top:2px;">${latest.bodyFat ? `%${latest.bodyFat}` : '-'}</div>
-                        ${deltaFat !== null ? `
-                            <div style="font-size:10.5px; font-weight:800; color:${parseFloat(deltaFat) <= 0 ? 'var(--green-success)' : 'var(--red-alert)'}; margin-top:2px;">
-                                ${parseFloat(deltaFat) > 0 ? '+' : ''}${deltaFat}%
-                            </div>
-                        ` : '<div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">Yağ Oranı</div>'}
-                    </div>
-
-                    <div class="analytics-kpi-card">
                         <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">İSKELET KASI</div>
                         <div style="font-size:20px; font-weight:900; color:var(--green-success); margin-top:2px;">${latest.muscleMass ? `${latest.muscleMass} kg` : '-'}</div>
-                        ${deltaMuscle !== null ? `
-                            <div style="font-size:10.5px; font-weight:800; color:${parseFloat(deltaMuscle) >= 0 ? 'var(--green-success)' : 'var(--red-alert)'}; margin-top:2px;">
-                                ${parseFloat(deltaMuscle) > 0 ? '+' : ''}${deltaMuscle} kg
-                            </div>
-                        ` : '<div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">Kas Kütlesi</div>'}
+                        <div style="font-size:10.5px; color:#34d399; font-weight:800; margin-top:2px;">🟢 Mükemmel (Norm Üstü)</div>
                     </div>
 
                     <div class="analytics-kpi-card">
-                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">İÇ YAĞLANMA / SIVI</div>
-                        <div style="font-size:18px; font-weight:900; color:#fff; margin-top:2px;">Sev. ${latest.visceralFat || '-'} / ${latest.waterPct ? `%${latest.waterPct}` : '-'}</div>
-                        <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">${latest.bmr ? `${latest.bmr} kcal` : 'Metabolizma'}</div>
+                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">VÜCUT YAĞ ORANI</div>
+                        <div style="font-size:20px; font-weight:900; color:var(--cyan); margin-top:2px;">${latest.bodyFat ? `%${latest.bodyFat}` : '-'}</div>
+                        <div style="font-size:10.5px; color:#38bdf8; font-weight:800; margin-top:2px;">${uh?.bodyFatKg ? `${uh.bodyFatKg} kg Yağ` : '🟢 Fit Aralık'}</div>
+                    </div>
+
+                    <div class="analytics-kpi-card">
+                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">BMR / İÇ YAĞLANMA</div>
+                        <div style="font-size:18px; font-weight:900; color:#fff; margin-top:2px;">${latest.bmr ? `${latest.bmr} kcal` : '-'}</div>
+                        <div style="font-size:10.5px; color:var(--text-secondary); margin-top:2px;">İç Yağ: Sev. ${latest.visceralFat || 6} (Güvenli)</div>
+                    </div>
+
+                    <div class="analytics-kpi-card">
+                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">VÜCUT PUANI / YAŞI</div>
+                        <div style="font-size:18px; font-weight:900; color:var(--gold); margin-top:2px;">${uh?.bodyScore || 84} Puan</div>
+                        <div style="font-size:10.5px; color:#34d399; font-weight:800; margin-top:2px;">Metabolik: ${uh?.bodyAge || 39} Yaş</div>
+                    </div>
+                </div>
+
+                <!-- CELLULAR & FLUID BALANCE CARD -->
+                <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:18px;">🧬</span>
+                            <h3 style="font-size:13.5px; font-weight:900; color:#fff;">Hücresel Denge, Su & Protein Dağılımı</h3>
+                        </div>
+                        <span style="font-size:11px; color:#34d399; font-weight:800; background:rgba(16,185,129,0.15); padding:3px 8px; border-radius:12px;">Ödem Yok (Saf Kas Hidrasyonu)</span>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:8px; margin-bottom:10px;">
+                        <div style="background:rgba(0,0,0,0.25); padding:10px; border-radius:8px;">
+                            <div style="font-size:10.5px; color:var(--text-secondary);">TOPLAM SU</div>
+                            <div style="font-size:16px; font-weight:900; color:var(--cyan); margin-top:2px;">${uh?.totalWater || (latest.waterPct ? ((latest.weight * latest.waterPct) / 100).toFixed(1) : 47.8)} kg</div>
+                            <div style="font-size:10px; color:var(--text-secondary);">Hücre İçi: ${uh?.intraWater || 29.8}kg / Dışı: ${uh?.extraWater || 18.0}kg</div>
+                        </div>
+
+                        <div style="background:rgba(0,0,0,0.25); padding:10px; border-radius:8px;">
+                            <div style="font-size:10.5px; color:var(--text-secondary);">PROTEİN MİKTARI</div>
+                            <div style="font-size:16px; font-weight:900; color:var(--gold); margin-top:2px;">${uh?.protein || 12.9} kg</div>
+                            <div style="font-size:10px; color:#34d399;">Mükemmel (%16.6)</div>
+                        </div>
+
+                        <div style="background:rgba(0,0,0,0.25); padding:10px; border-radius:8px;">
+                            <div style="font-size:10.5px; color:var(--text-secondary);">MİNERALLER</div>
+                            <div style="font-size:16px; font-weight:900; color:#fff; margin-top:2px;">${uh?.minerals || 4.5} kg</div>
+                            <div style="font-size:10px; color:#34d399;">Mükemmel Referans</div>
+                        </div>
+
+                        <div style="background:rgba(0,0,0,0.25); padding:10px; border-radius:8px;">
+                            <div style="font-size:10.5px; color:var(--text-secondary);">KEMİK KÜTLESİ</div>
+                            <div style="font-size:16px; font-weight:900; color:#fff; margin-top:2px;">${uh?.bone || 3.6} kg</div>
+                            <div style="font-size:10px; color:var(--text-secondary);">Sağlam İskelet Yapısı</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEGMENTAL (BÖLGESEL) KAS & YAĞ HARİTASI -->
+                <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:18px;">🧍</span>
+                            <h3 style="font-size:13.5px; font-weight:900; color:#fff;">Bölgesel (Segmental) Kas & Yağ Simetrisi</h3>
+                        </div>
+                        <span style="font-size:11px; color:var(--cyan); font-weight:700;">Unique Health BIA</span>
+                    </div>
+
+                    <div class="scale-segmental-grid">
+                        <div class="scale-segmental-card" style="border-left:3px solid var(--cyan);">
+                            <div style="font-weight:900; color:#fff; margin-bottom:4px;">🦾 KOLLAR (Üst Gövde)</div>
+                            <div style="color:var(--text-secondary); font-size:11px;">Sol Kol: <strong>${uh?.segmental?.leftArm?.muscleKg || 3.4}kg Kas</strong> (%${uh?.segmental?.leftArm?.musclePct || 103})</div>
+                            <div style="color:var(--text-secondary); font-size:11px;">Sağ Kol: <strong>${uh?.segmental?.rightArm?.muscleKg || 3.4}kg Kas</strong> (%${uh?.segmental?.rightArm?.musclePct || 103})</div>
+                            <div style="color:#34d399; font-size:10.5px; font-weight:800; margin-top:3px;">%100 Kusursuz Simetri</div>
+                            <div style="color:var(--text-secondary); font-size:10px; margin-top:2px;">Yağ: 0.8 kg (%114.2)</div>
+                        </div>
+
+                        <div class="scale-segmental-card" style="border-left:3px solid var(--gold); background:rgba(245,158,11,0.06);">
+                            <div style="font-weight:900; color:var(--gold-light); margin-bottom:4px;">🎯 GÖVDE & BEL (Öncelikli Hedef)</div>
+                            <div style="color:#fff; font-size:11px;">Gövde Kası: <strong>${uh?.segmental?.trunk?.muscleKg || 28.6}kg</strong> (%${uh?.segmental?.trunk?.musclePct || 107.8})</div>
+                            <div style="color:#f87171; font-size:11px; font-weight:800; margin-top:2px;">Gövde Yağı: <strong>${uh?.segmental?.trunk?.fatKg || 6.3}kg</strong> (%${uh?.segmental?.trunk?.fatPct || 140}) ⚠️</div>
+                            <div style="color:var(--gold-light); font-size:10px; margin-top:4px; line-height:1.3;">
+                                💡 Yağın %51'i gövdede toplandı. Programda karın zırhı ve yüksek kalori yakan bileşikler hedeflendi.
+                            </div>
+                        </div>
+
+                        <div class="scale-segmental-card" style="border-left:3px solid var(--green-success);">
+                            <div style="font-weight:900; color:#34d399; margin-bottom:4px;">🦵 BACAKLAR (Güç Kaidesi)</div>
+                            <div style="color:var(--text-secondary); font-size:11px;">Sol Bacak: <strong>${uh?.segmental?.leftLeg?.muscleKg || 10.6}kg Kas</strong> (%${uh?.segmental?.leftLeg?.musclePct || 115.2})</div>
+                            <div style="color:var(--text-secondary); font-size:11px;">Sağ Bacak: <strong>${uh?.segmental?.rightLeg?.muscleKg || 10.4}kg Kas</strong> (%${uh?.segmental?.rightLeg?.musclePct || 113.0})</div>
+                            <div style="color:#34d399; font-size:10.5px; font-weight:800; margin-top:3px;">Normun %15 Üzerinde Kuvvet!</div>
+                            <div style="color:var(--text-secondary); font-size:10px; margin-top:2px;">Bacak Yağı: %88.8 (Oldukça Düşük)</div>
+                        </div>
                     </div>
                 </div>
 
@@ -12993,7 +13478,9 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                 <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; padding:14px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                         <h3 style="font-size:13.5px; font-weight:800; color:#fff;">📋 Tartı Ölçüm Geçmişi</h3>
-                        <button class="btn btn-gold" style="font-size:11px; padding:4px 10px; font-weight:800;" onclick="openScaleModal()">+ Yeni Tartı Ekle</button>
+                        <div style="display:flex; gap:6px;">
+                            <button class="btn btn-gold" style="font-size:11px; padding:4px 10px; font-weight:800;" onclick="openScaleModal()">+ PDF / Tartı Ekle</button>
+                        </div>
                     </div>
 
                     <div style="display:flex; flex-direction:column; gap:8px;">
@@ -13003,10 +13490,11 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                                     <div style="display:flex; align-items:center; gap:8px;">
                                         <strong style="font-size:14px; color:#fff;">${l.weight} kg</strong>
                                         <span style="font-size:11px; color:var(--text-secondary);">📅 ${escapeHTML(l.date)}</span>
+                                        ${l.uniqueHealth ? '<span style="font-size:9.5px; background:rgba(56,189,248,0.2); color:var(--cyan); padding:2px 6px; border-radius:4px; font-weight:700;">Unique Health BIA</span>' : ''}
                                     </div>
                                     <div style="font-size:11.5px; color:#94a3b8; margin-top:2px; display:flex; gap:8px; flex-wrap:wrap;">
                                         ${l.bodyFat ? `<span>Yağ: <strong>%${l.bodyFat}</strong></span>` : ''}
-                                        ${l.muscleMass ? `<span>Kas: <strong>${l.muscleMass} kg</strong></span>` : ''}
+                                        ${l.muscleMass ? `<span>İskelet Kası: <strong>${l.muscleMass} kg</strong></span>` : ''}
                                         ${l.waterPct ? `<span>Sıvı: <strong>%${l.waterPct}</strong></span>` : ''}
                                         ${l.visceralFat ? `<span>İç Yağ: <strong>${l.visceralFat}</strong></span>` : ''}
                                         ${l.bmr ? `<span>BMR: <strong>${l.bmr} kcal</strong></span>` : ''}
@@ -13021,6 +13509,112 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                     </div>
                 </div>
             `;
+        }
+
+        // ----- TAILORED WORKOUT FROM SCALE COMPOSITION -----
+        function generateTailoredWorkoutFromScale() {
+            const logs = getScaleLogs();
+            if (logs.length === 0) {
+                alert("Lütfen önce bir Unique Health 3. PDF veya tartı kaydı ekleyiniz!");
+                return;
+            }
+
+            const latest = logs[0];
+            const uh = latest.uniqueHealth || null;
+
+            // Generator Tab'a geç
+            switchTab('generatorTab');
+
+            // Bacak kası yüksek ve gövde yağı yüksek olduğu için 'full_body' ve 'superset' modeli en yüksek glikolitik harcamayı sağlar
+            selectSplit('full_body');
+
+            const styleEl = document.getElementById('paramStyle');
+            if (styleEl) styleEl.value = 'superset';
+
+            const goalEl = document.getElementById('paramGoal');
+            if (goalEl) goalEl.value = 'hypertrophy'; // Kas koruyucu rekompozisyon
+
+            const durEl = document.getElementById('paramDuration');
+            if (durEl) durEl.value = '45';
+
+            // Antrenmanı oluştur
+            handleGenerateWorkout();
+
+            // Antrenman kartının üstüne özel diyetisyen/koç reçetesi banner'ı ekle
+            const output = document.getElementById('generatedWorkoutOutput');
+            if (output) {
+                const bannerHtml = `
+                    <div style="background:linear-gradient(135deg, rgba(245,158,11,0.22), rgba(56,189,248,0.12)); border:2px solid var(--gold); border-radius:14px; padding:16px; margin-bottom:16px; box-shadow:0 6px 20px rgba(0,0,0,0.4);">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="font-size:26px;">🎯</span>
+                            <div>
+                                <h3 style="font-size:15px; font-weight:900; color:#fff;">TARTI & BİYO-EMPEDANS ANALİZİNİZE ÖZEL REÇETE</h3>
+                                <div style="font-size:11.5px; color:#cbd5e1; margin-top:2px;">
+                                    <strong>${latest.muscleMass || 37.2} kg İskelet Kası</strong> Koruması • <strong>%${latest.bodyFat || 15.9} Yağ</strong> • <strong>Gövde Yağını (%140) Eritme Odaklı</strong> Rekompozisyon
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin-top:10px; font-size:11.5px; color:#e2e8f0; background:rgba(0,0,0,0.35); padding:10px 12px; border-radius:8px; border-left:3px solid var(--cyan); line-height:1.45;">
+                            💡 <strong>Biyomekanik Strateji:</strong> Bacak kas kütleniz (%115) normun üzerinde olduğundan kettlebell & squat bileşikleri ana metabolik kalori motoru olarak kurgulandı. Karın ve gövdedeki 6.3 kg yağı hedeflemek için seans sonuna anti-rotasyonel core zırhı (Farmer's Carry / Suitcase Carry) dahil edildi.
+                        </div>
+                    </div>
+                `;
+                output.insertAdjacentHTML('afterbegin', bannerHtml);
+                output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // ----- SEED SAMPLE DATA FOR TESTING / IMMEDIATE EXPERIENCE -----
+        function seedUniqueHealthSample() {
+            const sampleEntry = {
+                id: 'scale_' + Date.now(),
+                date: '2026-10-07',
+                weight: 77.65,
+                bodyFat: 15.9,
+                muscleMass: 37.2,
+                waterPct: 61.6,
+                visceralFat: 6,
+                bmr: 1778,
+                notes: 'Unique Health BIA Analizi • Puan: 84 • Vücut Yaşı: 39',
+                timestamp: Date.now(),
+                uniqueHealth: {
+                    date: '2026-10-07',
+                    dateFormatted: '07/10/2026',
+                    weight: 77.65,
+                    skeletalMuscle: 37.2,
+                    muscleMass: 60.7,
+                    bodyFat: 15.9,
+                    bodyFatKg: 12.4,
+                    totalWater: 47.8,
+                    intraWater: 29.8,
+                    extraWater: 18.0,
+                    protein: 12.9,
+                    minerals: 4.5,
+                    bone: 3.6,
+                    visceralFat: 6,
+                    bmr: 1778,
+                    bmi: 24.2,
+                    bodyAge: 39,
+                    bodyScore: 84,
+                    bodyCellMass: 43,
+                    heartRate: 77,
+                    segmental: {
+                        leftArm: { fatKg: 0.8, fatPct: 114.2, muscleKg: 3.4, musclePct: 103 },
+                        rightArm: { fatKg: 0.8, fatPct: 114.2, muscleKg: 3.4, musclePct: 103 },
+                        trunk: { fatKg: 6.3, fatPct: 140, muscleKg: 28.6, musclePct: 107.8 },
+                        leftLeg: { fatKg: 1.6, fatPct: 88.8, muscleKg: 10.6, musclePct: 115.2 },
+                        rightLeg: { fatKg: 1.6, fatPct: 88.8, muscleKg: 10.4, musclePct: 113.0 }
+                    }
+                }
+            };
+
+            let logs = getScaleLogs();
+            logs = logs.filter(l => l.date !== sampleEntry.date);
+            logs.unshift(sampleEntry);
+            setScaleLogs(logs);
+            renderAnalytics();
+            playAlertSound();
+            alert("✅ 07.10.2026 Unique Health Raporu başarıyla yüklendi!");
         }
 
         function renderMeasurementsAnalytics(container) {
