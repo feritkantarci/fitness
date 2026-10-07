@@ -3396,7 +3396,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v75</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v76</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3432,7 +3432,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" title="Uygulama Canlı Sürümü">v75</span>
+                    <span class="app-version-badge" id="appVersionBadge" title="Uygulama Canlı Sürümü">v76</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -3855,18 +3855,15 @@
                     <!-- HEADER & ACTION BUTTONS -->
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
                         <div>
-                            <h2 style="font-size:18px; font-weight:900; color:#fff;">📈 Gelişim, Kas Yükü & Tartı Analizi</h2>
-                            <p style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Biyomekanik kas tonajı, akıllı tartı kompozisyonu ve vücut ölçüleri takibi</p>
+                            <h2 style="font-size:18px; font-weight:900; color:#fff;">📈 Gelişim, Kas Yükü & Vücut Analizi</h2>
+                            <p style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Biyomekanik kas tonajı, akıllı tartı kompozisyonu ve mezura ölçüleri takibi</p>
                         </div>
                         <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                            <button class="btn btn-gold" style="font-size:11px; padding:6px 12px; font-weight:800;" onclick="openScaleModal()">
-                                ⚖️ Tartı Ekle
+                            <button class="btn btn-gold" style="font-size:11.5px; padding:7px 14px; font-weight:900;" onclick="openScaleModal()">
+                                ➕ Vücut Analizi & Ölçüm Ekle
                             </button>
-                            <button class="btn btn-outline" style="font-size:11px; padding:6px 12px; font-weight:800;" onclick="openMeasurementsModal()">
-                                📏 Ölçüm Ekle
-                            </button>
-                            <button class="btn btn-outline" style="font-size:11px; padding:6px 10px;" onclick="exportAnalyticsCSV()" title="Tartı & Ölçüm Verilerini İndir">
-                                📊 CSV
+                            <button class="btn btn-outline" style="font-size:11px; padding:6px 12px; font-weight:700;" onclick="exportAnalyticsCSV()" title="Tartı & Ölçüm Verilerini İndir">
+                                📊 CSV İndir
                             </button>
                         </div>
                     </div>
@@ -3877,10 +3874,7 @@
                             💪 Kas Yükü & Biyomekanik
                         </button>
                         <button class="btn btn-outline analytics-subtab-btn" id="btnSubAnalyticsScale" style="font-size:11.5px; padding:6px 12px; border-radius:20px; white-space:nowrap;" onclick="switchAnalyticsSubView('scale')">
-                            ⚖️ Tartı & Yağ / Kas Oranı
-                        </button>
-                        <button class="btn btn-outline analytics-subtab-btn" id="btnSubAnalyticsMeasurements" style="font-size:11.5px; padding:6px 12px; border-radius:20px; white-space:nowrap;" onclick="switchAnalyticsSubView('measurements')">
-                            📏 Mezura Ölçüleri (cm)
+                            ⚖️📏 Vücut Analizi & Ölçüler
                         </button>
                         <button class="btn btn-outline analytics-subtab-btn" id="btnSubAnalyticsCombined" style="font-size:11.5px; padding:6px 12px; border-radius:20px; white-space:nowrap;" onclick="switchAnalyticsSubView('combined')">
                             🧠 Akıllı Koç Raporu
@@ -4302,7 +4296,7 @@
     <div id="scaleModal" class="modal-overlay">
         <div class="modal-box" style="max-width: 520px; max-height: 90vh; overflow-y: auto;">
             <div class="modal-header">
-                <span class="modal-title">⚖️ Tartı & Vücut Analizi Ekle</span>
+                <span class="modal-title">⚖️📏 Vücut Analizi & Mezura Ölçümü Ekle</span>
                 <button class="modal-close" onclick="closeScaleModal()">✕</button>
             </div>
 
@@ -4349,7 +4343,7 @@
 
             <div style="display:flex; align-items:center; gap:8px; margin: 10px 0 14px;">
                 <div style="flex:1; height:1px; background:var(--border);"></div>
-                <span style="font-size:10px; color:var(--text-secondary); font-weight:700; text-transform:uppercase;">veya Manuel Düzeltme / Giriş</span>
+                <span style="font-size:10px; color:var(--text-secondary); font-weight:700; text-transform:uppercase;">⚖️ Tartı & Biyo-Empedans Verileri</span>
                 <div style="flex:1; height:1px; background:var(--border);"></div>
             </div>
 
@@ -4391,13 +4385,60 @@
                 <input type="number" id="scaleBmr" class="form-input" placeholder="Örn: 1850">
             </div>
 
+            <!-- MEZURA VÜCUT ÖLÇÜLERİ (OPSİYONEL) -->
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-size:12px; font-weight:800; color:var(--cyan); display:flex; align-items:center; gap:6px;">
+                        <span>📏 Mezura Vücut Ölçüleri (cm)</span>
+                    </span>
+                    <span style="font-size:10px; color:var(--text-secondary);">(İsteğe Bağlı / Opsiyonel)</span>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;" class="form-group">
+                    <div>
+                        <label class="form-label">Bel Çevresi (cm)</label>
+                        <input type="number" id="scaleWaist" class="form-input" step="0.5" placeholder="Göbek hizası (Örn: 84)">
+                    </div>
+                    <div>
+                        <label class="form-label">Göğüs Çevresi (cm)</label>
+                        <input type="number" id="scaleChest" class="form-input" step="0.5" placeholder="Meme hizası (Örn: 104)">
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;" class="form-group">
+                    <div>
+                        <label class="form-label">Omuz Çevresi (cm)</label>
+                        <input type="number" id="scaleShoulder" class="form-input" step="0.5" placeholder="Deltoid tepe (Örn: 122)">
+                    </div>
+                    <div>
+                        <label class="form-label">Kol / Pazı (cm)</label>
+                        <input type="number" id="scaleArms" class="form-input" step="0.5" placeholder="Biceps tepe (Örn: 38)">
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px;" class="form-group">
+                    <div>
+                        <label class="form-label">Bacak (cm)</label>
+                        <input type="number" id="scaleThigh" class="form-input" step="0.5" placeholder="Uyluk (Örn: 58)">
+                    </div>
+                    <div>
+                        <label class="form-label">Kalça (cm)</label>
+                        <input type="number" id="scaleHips" class="form-input" step="0.5" placeholder="Glute (Örn: 100)">
+                    </div>
+                    <div>
+                        <label class="form-label">Boyun (cm)</label>
+                        <input type="number" id="scaleNeck" class="form-input" step="0.5" placeholder="Örn: 39">
+                    </div>
+                </div>
+            </div>
+
             <div class="form-group">
-                <label class="form-label">Tartı Notu & Koşullar</label>
+                <label class="form-label">Notlar & Koşullar</label>
                 <input type="text" id="scaleNotes" class="form-input" placeholder="Örn: Sabah aç karna, tuvalet sonrası...">
             </div>
 
             <button class="btn btn-gold" style="width:100%; padding:13px; font-weight:900;" onclick="saveScaleEntry()">
-                💾 TARTI KAYDINI KAYDET
+                💾 TÜM VÜCUT KAYDINI KAYDET
             </button>
         </div>
     </div>
@@ -11979,11 +12020,11 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         let currentAnalyticsPeriodDays = 30;
 
         function switchAnalyticsSubView(view) {
+            if (view === 'measurements') view = 'scale';
             currentAnalyticsSubView = view;
             const subBtns = [
                 { id: 'btnSubAnalyticsMuscle', view: 'muscle' },
                 { id: 'btnSubAnalyticsScale', view: 'scale' },
-                { id: 'btnSubAnalyticsMeasurements', view: 'measurements' },
                 { id: 'btnSubAnalyticsCombined', view: 'combined' }
             ];
             subBtns.forEach(b => {
@@ -12042,6 +12083,18 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 if (document.getElementById('scaleWaterPct')) document.getElementById('scaleWaterPct').value = last.waterPct || '';
                 if (document.getElementById('scaleVisceralFat')) document.getElementById('scaleVisceralFat').value = last.visceralFat || '';
                 if (document.getElementById('scaleBmr')) document.getElementById('scaleBmr').value = last.bmr || '';
+            }
+
+            const measLogs = getMeasurementsLogs();
+            if (measLogs.length > 0) {
+                const lastM = measLogs[0];
+                if (document.getElementById('scaleWaist')) document.getElementById('scaleWaist').value = lastM.waist || '';
+                if (document.getElementById('scaleChest')) document.getElementById('scaleChest').value = lastM.chest || '';
+                if (document.getElementById('scaleShoulder')) document.getElementById('scaleShoulder').value = lastM.shoulder || '';
+                if (document.getElementById('scaleArms')) document.getElementById('scaleArms').value = lastM.arms || '';
+                if (document.getElementById('scaleThigh')) document.getElementById('scaleThigh').value = lastM.thigh || '';
+                if (document.getElementById('scaleHips')) document.getElementById('scaleHips').value = lastM.hips || '';
+                if (document.getElementById('scaleNeck')) document.getElementById('scaleNeck').value = lastM.neck || '';
             }
 
             document.getElementById('scaleModal').classList.add('active');
@@ -12570,53 +12623,172 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             return data;
         }
 
+        // ----- UNIFIED BODY COMPOSITION & MEASUREMENTS MODEL -----
+        function getUnifiedBodyLogs() {
+            const scaleLogs = getScaleLogs();
+            const measLogs = getMeasurementsLogs();
+            const map = new Map();
+
+            scaleLogs.forEach(s => {
+                map.set(s.date, {
+                    date: s.date,
+                    id: s.id,
+                    timestamp: s.timestamp || new Date(s.date).getTime(),
+                    weight: s.weight,
+                    bodyFat: s.bodyFat,
+                    muscleMass: s.muscleMass,
+                    waterPct: s.waterPct,
+                    visceralFat: s.visceralFat,
+                    bmr: s.bmr,
+                    uniqueHealth: s.uniqueHealth || null,
+                    notes: s.notes || '',
+                    scaleId: s.id
+                });
+            });
+
+            measLogs.forEach(m => {
+                if (map.has(m.date)) {
+                    const existing = map.get(m.date);
+                    existing.measId = m.id;
+                    existing.waist = m.waist;
+                    existing.chest = m.chest;
+                    existing.shoulder = m.shoulder;
+                    existing.arms = m.arms;
+                    existing.thigh = m.thigh;
+                    existing.hips = m.hips;
+                    existing.neck = m.neck;
+                    if (m.notes && !existing.notes) existing.notes = m.notes;
+                    else if (m.notes && existing.notes && !existing.notes.includes(m.notes)) existing.notes += ` | ${m.notes}`;
+                } else {
+                    map.set(m.date, {
+                        date: m.date,
+                        id: m.id,
+                        timestamp: m.timestamp || new Date(m.date).getTime(),
+                        waist: m.waist,
+                        chest: m.chest,
+                        shoulder: m.shoulder,
+                        arms: m.arms,
+                        thigh: m.thigh,
+                        hips: m.hips,
+                        neck: m.neck,
+                        notes: m.notes || '',
+                        measId: m.id
+                    });
+                }
+            });
+
+            return Array.from(map.values()).sort((a, b) => new Date(b.date) - new Date(a.date));
+        }
+
+        function deleteUnifiedBodyEntry(date, scaleId, measId) {
+            if (confirm(`${date} tarihli vücut ve ölçüm kaydını silmek istediğinize emin misiniz?`)) {
+                if (scaleId) {
+                    let sLogs = getScaleLogs().filter(l => l.id !== scaleId && l.date !== date);
+                    setScaleLogs(sLogs);
+                } else {
+                    let sLogs = getScaleLogs().filter(l => l.date !== date);
+                    setScaleLogs(sLogs);
+                }
+                if (measId) {
+                    let mLogs = getMeasurementsLogs().filter(l => l.id !== measId && l.date !== date);
+                    setMeasurementsLogs(mLogs);
+                } else {
+                    let mLogs = getMeasurementsLogs().filter(l => l.date !== date);
+                    setMeasurementsLogs(mLogs);
+                }
+                renderAnalytics();
+            }
+        }
+
         function saveScaleEntry() {
             const date = document.getElementById('scaleDate').value || new Date().toISOString().split('T')[0];
             const weightVal = parseFloat(document.getElementById('scaleWeight').value);
+            const waistVal = parseFloat(document.getElementById('scaleWaist') ? document.getElementById('scaleWaist').value : '');
 
-            if (!weightVal || isNaN(weightVal) || weightVal <= 0) {
-                alert("Lütfen geçerli bir kilo (kg) değeri giriniz!");
+            // En azından kilo veya bel girilmeli
+            if ((!weightVal || isNaN(weightVal) || weightVal <= 0) && (!waistVal || isNaN(waistVal) || waistVal <= 0)) {
+                alert("Lütfen en azından Kilo (kg) veya Bel Çevresi (cm) değerini giriniz!");
                 return;
             }
 
-            const bodyFat = parseFloat(document.getElementById('scaleBodyFat').value) || null;
-            const muscleMass = parseFloat(document.getElementById('scaleMuscleMass').value) || null;
-            const waterPct = parseFloat(document.getElementById('scaleWaterPct').value) || null;
-            const visceralFat = parseInt(document.getElementById('scaleVisceralFat').value) || null;
-            const bmr = parseInt(document.getElementById('scaleBmr').value) || null;
-            const notes = document.getElementById('scaleNotes').value.trim();
+            let scaleSummary = '';
+            let measSummary = '';
 
-            const entry = {
-                id: 'scale_' + Date.now(),
-                date: date,
-                weight: Math.round(weightVal * 10) / 10,
-                bodyFat: bodyFat ? Math.round(bodyFat * 10) / 10 : null,
-                muscleMass: muscleMass ? Math.round(muscleMass * 10) / 10 : null,
-                waterPct: waterPct ? Math.round(waterPct * 10) / 10 : null,
-                visceralFat: visceralFat,
-                bmr: bmr,
-                notes: notes,
-                timestamp: Date.now()
-            };
+            // Tartı / Kompozisyon Kaydı
+            if (weightVal && !isNaN(weightVal) && weightVal > 0) {
+                const bodyFat = parseFloat(document.getElementById('scaleBodyFat').value) || null;
+                const muscleMass = parseFloat(document.getElementById('scaleMuscleMass').value) || null;
+                const waterPct = parseFloat(document.getElementById('scaleWaterPct').value) || null;
+                const visceralFat = parseInt(document.getElementById('scaleVisceralFat').value) || null;
+                const bmr = parseInt(document.getElementById('scaleBmr').value) || null;
+                const notes = document.getElementById('scaleNotes').value.trim();
 
-            // Varsa zengin Unique Health BIA detaylarını da iliştir
-            if (window._lastParsedScaleData) {
-                entry.uniqueHealth = window._lastParsedScaleData;
-                window._lastParsedScaleData = null;
+                const entry = {
+                    id: 'scale_' + Date.now(),
+                    date: date,
+                    weight: Math.round(weightVal * 10) / 10,
+                    bodyFat: bodyFat ? Math.round(bodyFat * 10) / 10 : null,
+                    muscleMass: muscleMass ? Math.round(muscleMass * 10) / 10 : null,
+                    waterPct: waterPct ? Math.round(waterPct * 10) / 10 : null,
+                    visceralFat: visceralFat,
+                    bmr: bmr,
+                    notes: notes,
+                    timestamp: Date.now()
+                };
+
+                if (window._lastParsedScaleData) {
+                    entry.uniqueHealth = window._lastParsedScaleData;
+                    window._lastParsedScaleData = null;
+                }
+
+                let logs = getScaleLogs();
+                logs = logs.filter(l => l.date !== date);
+                logs.unshift(entry);
+                logs.sort((a, b) => new Date(b.date) - new Date(a.date));
+                setScaleLogs(logs);
+                scaleSummary = `Kilo: ${entry.weight} kg${entry.bodyFat ? ` • Yağ: %${entry.bodyFat}` : ''}${entry.muscleMass ? ` • Kas: ${entry.muscleMass} kg` : ''}`;
             }
 
-            let logs = getScaleLogs();
-            logs = logs.filter(l => l.date !== date);
-            logs.unshift(entry);
-            logs.sort((a, b) => new Date(b.date) - new Date(a.date));
-            setScaleLogs(logs);
+            // Mezura Ölçü Kaydı
+            const chest = parseFloat(document.getElementById('scaleChest')?.value) || null;
+            const shoulder = parseFloat(document.getElementById('scaleShoulder')?.value) || null;
+            const arms = parseFloat(document.getElementById('scaleArms')?.value) || null;
+            const thigh = parseFloat(document.getElementById('scaleThigh')?.value) || null;
+            const hips = parseFloat(document.getElementById('scaleHips')?.value) || null;
+            const neck = parseFloat(document.getElementById('scaleNeck')?.value) || null;
+            const notes = document.getElementById('scaleNotes').value.trim();
+
+            if (waistVal || chest || shoulder || arms || thigh || hips || neck) {
+                const measEntry = {
+                    id: 'meas_' + Date.now(),
+                    date: date,
+                    waist: waistVal ? Math.round(waistVal * 10) / 10 : null,
+                    chest: chest ? Math.round(chest * 10) / 10 : null,
+                    shoulder: shoulder ? Math.round(shoulder * 10) / 10 : null,
+                    arms: arms ? Math.round(arms * 10) / 10 : null,
+                    thigh: thigh ? Math.round(thigh * 10) / 10 : null,
+                    hips: hips ? Math.round(hips * 10) / 10 : null,
+                    neck: neck ? Math.round(neck * 10) / 10 : null,
+                    notes: notes,
+                    timestamp: Date.now()
+                };
+
+                let mLogs = getMeasurementsLogs();
+                mLogs = mLogs.filter(l => l.date !== date);
+                mLogs.unshift(measEntry);
+                mLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
+                setMeasurementsLogs(mLogs);
+                measSummary = `${measEntry.waist ? `Bel: ${measEntry.waist} cm` : ''}${measEntry.arms ? ` • Kol: ${measEntry.arms} cm` : ''}${measEntry.chest ? ` • Göğüs: ${measEntry.chest} cm` : ''}`;
+            }
 
             closeScaleModal();
             renderAnalytics();
             playAlertSound();
-            alert(`⚖️ Tartı kaydı kaydedildi!
 
-Kilo: ${entry.weight} kg${entry.bodyFat ? ` • Yağ: %${entry.bodyFat}` : ''}${entry.muscleMass ? ` • Kas: ${entry.muscleMass} kg` : ''}`);
+            let msg = "⚖️📏 Vücut ve ölçüm kaydı başarıyla kaydedildi!\n\n";
+            if (scaleSummary) msg += scaleSummary + "\n";
+            if (measSummary) msg += measSummary;
+            alert(msg.trim());
         }
 
         function deleteScaleEntry(id) {
@@ -12646,72 +12818,17 @@ Kilo: ${entry.weight} kg${entry.bodyFat ? ` • Yağ: %${entry.bodyFat}` : ''}${
         }
 
         function openMeasurementsModal() {
-            const todayStr = new Date().toISOString().split('T')[0];
-            const dateInput = document.getElementById('measureDate');
-            if (dateInput) dateInput.value = todayStr;
-
-            const logs = getMeasurementsLogs();
-            if (logs.length > 0) {
-                const last = logs[0];
-                if (document.getElementById('measureWaist')) document.getElementById('measureWaist').value = last.waist || '';
-                if (document.getElementById('measureChest')) document.getElementById('measureChest').value = last.chest || '';
-                if (document.getElementById('measureShoulder')) document.getElementById('measureShoulder').value = last.shoulder || '';
-                if (document.getElementById('measureArms')) document.getElementById('measureArms').value = last.arms || '';
-                if (document.getElementById('measureThigh')) document.getElementById('measureThigh').value = last.thigh || '';
-                if (document.getElementById('measureHips')) document.getElementById('measureHips').value = last.hips || '';
-                if (document.getElementById('measureNeck')) document.getElementById('measureNeck').value = last.neck || '';
-            }
-
-            document.getElementById('measurementsModal').classList.add('active');
+            openScaleModal();
         }
 
         function closeMeasurementsModal() {
-            document.getElementById('measurementsModal').classList.remove('active');
+            closeScaleModal();
+            const m = document.getElementById('measurementsModal');
+            if (m) m.classList.remove('active');
         }
 
         function saveMeasurementsEntry() {
-            const date = document.getElementById('measureDate').value || new Date().toISOString().split('T')[0];
-            const waistVal = parseFloat(document.getElementById('measureWaist').value);
-
-            if (!waistVal || isNaN(waistVal) || waistVal <= 0) {
-                alert("Lütfen en azından Bel Çevresi (cm) değerini giriniz!");
-                return;
-            }
-
-            const chest = parseFloat(document.getElementById('measureChest').value) || null;
-            const shoulder = parseFloat(document.getElementById('measureShoulder').value) || null;
-            const arms = parseFloat(document.getElementById('measureArms').value) || null;
-            const thigh = parseFloat(document.getElementById('measureThigh').value) || null;
-            const hips = parseFloat(document.getElementById('measureHips').value) || null;
-            const neck = parseFloat(document.getElementById('measureNeck').value) || null;
-            const notes = document.getElementById('measureNotes').value.trim();
-
-            const entry = {
-                id: 'meas_' + Date.now(),
-                date: date,
-                waist: Math.round(waistVal * 10) / 10,
-                chest: chest ? Math.round(chest * 10) / 10 : null,
-                shoulder: shoulder ? Math.round(shoulder * 10) / 10 : null,
-                arms: arms ? Math.round(arms * 10) / 10 : null,
-                thigh: thigh ? Math.round(thigh * 10) / 10 : null,
-                hips: hips ? Math.round(hips * 10) / 10 : null,
-                neck: neck ? Math.round(neck * 10) / 10 : null,
-                notes: notes,
-                timestamp: Date.now()
-            };
-
-            let logs = getMeasurementsLogs();
-            logs = logs.filter(l => l.date !== date);
-            logs.unshift(entry);
-            logs.sort((a, b) => new Date(b.date) - new Date(a.date));
-            setMeasurementsLogs(logs);
-
-            closeMeasurementsModal();
-            renderAnalytics();
-            playAlertSound();
-            alert(`📏 Vücut ölçüleri kaydedildi!
-
-Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${entry.arms ? ` • Kol: ${entry.arms} cm` : ''}`);
+            saveScaleEntry();
         }
 
         function deleteMeasurementsEntry(id) {
@@ -12754,11 +12871,12 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
             const container = document.getElementById('analyticsContentContainer');
             if (!container) return;
 
+            if (currentAnalyticsSubView === 'measurements') currentAnalyticsSubView = 'scale';
+
             // Highlight subview tab buttons
             const subBtns = [
                 { id: 'btnSubAnalyticsMuscle', view: 'muscle' },
                 { id: 'btnSubAnalyticsScale', view: 'scale' },
-                { id: 'btnSubAnalyticsMeasurements', view: 'measurements' },
                 { id: 'btnSubAnalyticsCombined', view: 'combined' }
             ];
             subBtns.forEach(b => {
@@ -12771,12 +12889,10 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
 
             if (currentAnalyticsSubView === 'muscle') {
                 renderMuscleAnalytics(container);
-            } else if (currentAnalyticsSubView === 'scale') {
-                renderScaleAnalytics(container);
-            } else if (currentAnalyticsSubView === 'measurements') {
-                renderMeasurementsAnalytics(container);
             } else if (currentAnalyticsSubView === 'combined') {
                 renderCombinedCoachReport(container);
+            } else {
+                renderScaleAnalytics(container);
             }
         }
 
@@ -13881,19 +13997,21 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
         }
 
         function renderScaleAnalytics(container) {
-            const logs = getScaleLogs();
+            const unified = getUnifiedBodyLogs();
+            const scaleLogs = getScaleLogs();
+            const measLogs = getMeasurementsLogs();
 
-            if (logs.length === 0) {
+            if (unified.length === 0) {
                 container.innerHTML = `
                     <div style="background:var(--bg-surface); padding:28px 20px; text-align:center; border:1px dashed var(--border); border-radius:14px;">
-                        <span style="font-size:42px; display:block; margin-bottom:12px;">⚖️</span>
-                        <h3 style="font-size:16px; font-weight:900; color:#fff; margin-bottom:8px;">Henüz Tartı & Vücut Analiz Kaydı Eklenmemiş</h3>
+                        <span style="font-size:42px; display:block; margin-bottom:12px;">⚖️📏</span>
+                        <h3 style="font-size:16px; font-weight:900; color:#fff; margin-bottom:8px;">Henüz Vücut Analizi & Ölçüm Kaydı Eklenmemiş</h3>
                         <p style="font-size:12px; color:var(--text-secondary); max-width:420px; margin:0 auto 18px; line-height:1.5;">
-                            Unique Health 3. PDF ("Vücut Kompozisyon Analiz Raporu") dosyanızı yükleyerek iskelet kası, bölgesel yağ ve hücresel su dengenizi tek tıkla aktarabilirsiniz.
+                            Unique Health 3. PDF raporunuzu yükleyerek veya manuel kilo ve mezura ölçülerinizi girerek gelişim eğrinizi tek ekranda takip edebilirsiniz.
                         </p>
                         <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
                             <button class="btn btn-gold" style="font-size:12.5px; padding:10px 18px; font-weight:900;" onclick="openScaleModal()">
-                                📄 Unique Health 3. PDF Yükle
+                                ➕ İlk Vücut Analizini / Ölçümünü Ekle
                             </button>
                             <button class="btn btn-outline" style="font-size:12px; padding:10px 16px; font-weight:700;" onclick="seedUniqueHealthSample()">
                                 ⚡ 07.10.2026 Raporunu Yükle (Test)
@@ -13904,84 +14022,82 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                 return;
             }
 
-            const latest = logs[0];
-            const earliest = logs[logs.length - 1];
+            const latestScale = scaleLogs.length > 0 ? scaleLogs[0] : null;
+            const earliestScale = scaleLogs.length > 0 ? scaleLogs[scaleLogs.length - 1] : null;
+            const deltaWeight = (scaleLogs.length > 1 && latestScale) ? (latestScale.weight - earliestScale.weight).toFixed(1) : null;
+            const deltaFat = (scaleLogs.length > 1 && latestScale?.bodyFat && earliestScale?.bodyFat) ? (latestScale.bodyFat - earliestScale.bodyFat).toFixed(1) : null;
+            const deltaMuscle = (scaleLogs.length > 1 && latestScale?.muscleMass && earliestScale?.muscleMass) ? (latestScale.muscleMass - earliestScale.muscleMass).toFixed(1) : null;
 
-            const deltaWeight = logs.length > 1 ? (latest.weight - earliest.weight).toFixed(1) : null;
-            const deltaFat = (logs.length > 1 && latest.bodyFat && earliest.bodyFat) ? (latest.bodyFat - earliest.bodyFat).toFixed(1) : null;
-            const deltaMuscle = (logs.length > 1 && latest.muscleMass && earliest.muscleMass) ? (latest.muscleMass - earliest.muscleMass).toFixed(1) : null;
+            const latestMeas = measLogs.length > 0 ? measLogs[0] : null;
+            const earliestMeas = measLogs.length > 0 ? measLogs[measLogs.length - 1] : null;
+            const deltaWaist = (measLogs.length > 1 && latestMeas?.waist && earliestMeas?.waist) ? (latestMeas.waist - earliestMeas.waist).toFixed(1) : null;
+            const deltaArms = (measLogs.length > 1 && latestMeas?.arms && earliestMeas?.arms) ? (latestMeas.arms - earliestMeas.arms).toFixed(1) : null;
 
             // Veri Tazelik Hesaplaması (Diyetisyen Periyodu)
-            const latestDate = new Date(latest.date);
-            const now = new Date();
-            const daysDiff = Math.max(0, Math.floor((now - latestDate) / (1000 * 60 * 60 * 24)));
-
             let freshnessHtml = '';
-            if (daysDiff <= 14) {
-                freshnessHtml = `
-                    <div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:12px; padding:12px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <span style="font-size:22px;">🟢</span>
-                            <div>
-                                <div style="font-size:12.5px; font-weight:900; color:#34d399;">
-                                    Taze & Aktif Analiz (${daysDiff === 0 ? 'Bugün ölçüldü' : `${daysDiff} gün önce`})
-                                </div>
-                                <div style="font-size:11px; color:var(--text-secondary); margin-top:1px;">
-                                    Diyetisyen Penceresi: Kas ve yağ dengeniz taze. Antrenman motoru bu veriye göre en yüksek verimle çalışır.
-                                </div>
-                            </div>
-                        </div>
-                        <button class="btn btn-outline" style="font-size:11px; padding:5px 12px; border-color:rgba(16,185,129,0.4); color:#34d399;" onclick="openScaleModal()">
-                            + Yeni 3. PDF Ekle
-                        </button>
-                    </div>
-                `;
-            } else if (daysDiff <= 28) {
-                freshnessHtml = `
-                    <div style="background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); border-radius:12px; padding:12px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <span style="font-size:22px;">🟡</span>
-                            <div>
-                                <div style="font-size:12.5px; font-weight:900; color:#fbbf24;">
-                                    Kararlı Blok Dönemi (${daysDiff} gün önce)
-                                </div>
-                                <div style="font-size:11px; color:var(--text-secondary); margin-top:1px;">
-                                    4 haftalık antrenman bloğu ilerliyor. Yaklaşık ${28 - daysDiff} gün sonra yeni bir 3. PDF yükleyerek programınızı güncelleyebilirsiniz.
+            if (latestScale) {
+                const latestDate = new Date(latestScale.date);
+                const now = new Date();
+                const daysDiff = Math.max(0, Math.floor((now - latestDate) / (1000 * 60 * 60 * 24)));
+
+                if (daysDiff <= 14) {
+                    freshnessHtml = `
+                        <div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:12px; padding:12px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span style="font-size:22px;">🟢</span>
+                                <div>
+                                    <div style="font-size:12.5px; font-weight:900; color:#34d399;">
+                                        Taze & Aktif Analiz (${daysDiff === 0 ? 'Bugün ölçüldü' : `${daysDiff} gün önce`})
+                                    </div>
+                                    <div style="font-size:11px; color:var(--text-secondary); margin-top:1px;">
+                                        Diyetisyen Penceresi: Kas ve yağ dengeniz taze. Antrenman motoru bu veriye göre en yüksek verimle çalışır.
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <button class="btn btn-outline" style="font-size:11px; padding:5px 12px; border-color:rgba(245,158,11,0.4); color:#fbbf24;" onclick="openScaleModal()">
-                            + PDF Yükle
-                        </button>
-                    </div>
-                `;
-            } else {
-                freshnessHtml = `
-                    <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:12px; padding:12px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <span style="font-size:22px;">🔴</span>
-                            <div>
-                                <div style="font-size:12.5px; font-weight:900; color:#f87171;">
-                                    Yenileme Zamanı Geldi (${daysDiff} gün önce)
-                                </div>
-                                <div style="font-size:11px; color:var(--text-secondary); margin-top:1px;">
-                                    Son analizinizin üzerinden 1 aydan fazla geçti. Vücudunuz değişti; yeni 3. PDF'i yükleyerek programınızı kalibre edin!
+                    `;
+                } else if (daysDiff <= 28) {
+                    freshnessHtml = `
+                        <div style="background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); border-radius:12px; padding:12px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span style="font-size:22px;">🟡</span>
+                                <div>
+                                    <div style="font-size:12.5px; font-weight:900; color:#fbbf24;">
+                                        Kararlı Blok Dönemi (${daysDiff} gün önce)
+                                    </div>
+                                    <div style="font-size:11px; color:var(--text-secondary); margin-top:1px;">
+                                        4 haftalık antrenman bloğu ilerliyor. Yaklaşık ${28 - daysDiff} gün sonra yeni bir analiz yükleyebilirsiniz.
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <button class="btn btn-gold" style="font-size:11px; padding:6px 14px; font-weight:900;" onclick="openScaleModal()">
-                            📄 Yeni 3. PDF Yükle
-                        </button>
-                    </div>
-                `;
+                    `;
+                } else {
+                    freshnessHtml = `
+                        <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:12px; padding:12px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span style="font-size:22px;">🔴</span>
+                                <div>
+                                    <div style="font-size:12.5px; font-weight:900; color:#f87171;">
+                                        Yenileme Zamanı Geldi (${daysDiff} gün önce)
+                                    </div>
+                                    <div style="font-size:11px; color:var(--text-secondary); margin-top:1px;">
+                                        Son analizinizin üzerinden 1 aydan fazla geçti. Vücudunuz değişti; yeni 3. PDF'i yükleyerek programınızı kalibre edin!
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
             }
 
-            const uh = latest.uniqueHealth || null;
+            const uh = latestScale?.uniqueHealth || null;
 
             container.innerHTML = `
                 <!-- FRESHNESS BANNER -->
                 ${freshnessHtml}
 
+                ${latestScale ? `
                 <!-- ACTION: GENERATE TAILORED WORKOUT -->
                 <div style="background:linear-gradient(135deg, rgba(245,158,11,0.18), rgba(56,189,248,0.1)); border:1.5px solid var(--gold); border-radius:14px; padding:15px 18px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                     <div>
@@ -13990,51 +14106,75 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                             <h3 style="font-size:14.5px; font-weight:900; color:#fff;">Bu Analize Göre Özel Çelik Kodu Programı Oluştur</h3>
                         </div>
                         <div style="font-size:11.5px; color:var(--text-secondary); margin-top:3px;">
-                            ${latest.muscleMass || 37.2} kg iskelet kasını koruyup, gövdedeki yağlanmayı hedefleyen 45 dakikalık süperset reçetesi.
+                            ${latestScale.muscleMass || 37.2} kg iskelet kasını koruyup, gövdedeki yağlanmayı hedefleyen 45 dakikalık süperset reçetesi.
                         </div>
                     </div>
                     <button class="btn btn-gold" style="font-size:12.5px; padding:9px 18px; font-weight:900;" onclick="generateTailoredWorkoutFromScale()">
                         🚀 Programı Başlat ➔
                     </button>
                 </div>
+                ` : ''}
 
-                <!-- SCALE KPI CARDS -->
+                <!-- UNIFIED KPI CARDS -->
                 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-bottom:16px;">
                     <div class="analytics-kpi-card">
                         <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">SON KİLO</div>
-                        <div style="font-size:20px; font-weight:900; color:var(--gold); margin-top:2px;">${latest.weight} kg</div>
+                        <div style="font-size:20px; font-weight:900; color:var(--gold); margin-top:2px;">
+                            ${latestScale ? `${latestScale.weight} kg` : '-'}
+                        </div>
                         ${deltaWeight !== null ? `
                             <div style="font-size:10.5px; font-weight:800; color:${parseFloat(deltaWeight) <= 0 ? 'var(--green-success)' : 'var(--red-alert)'}; margin-top:2px;">
                                 ${parseFloat(deltaWeight) > 0 ? '+' : ''}${deltaWeight} kg
                             </div>
-                        ` : '<div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">İlk Ölçüm</div>'}
+                        ` : '<div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">Kilo Takibi</div>'}
                     </div>
 
                     <div class="analytics-kpi-card">
                         <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">İSKELET KASI</div>
-                        <div style="font-size:20px; font-weight:900; color:var(--green-success); margin-top:2px;">${latest.muscleMass ? `${latest.muscleMass} kg` : '-'}</div>
-                        <div style="font-size:10.5px; color:#34d399; font-weight:800; margin-top:2px;">🟢 Mükemmel (Norm Üstü)</div>
+                        <div style="font-size:20px; font-weight:900; color:var(--green-success); margin-top:2px;">
+                            ${latestScale?.muscleMass ? `${latestScale.muscleMass} kg` : '-'}
+                        </div>
+                        <div style="font-size:10.5px; color:#34d399; font-weight:800; margin-top:2px;">
+                            ${latestScale?.muscleMass ? '🟢 Kas Kütlesi' : 'Analiz Bekleniyor'}
+                        </div>
                     </div>
 
                     <div class="analytics-kpi-card">
                         <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">VÜCUT YAĞ ORANI</div>
-                        <div style="font-size:20px; font-weight:900; color:var(--cyan); margin-top:2px;">${latest.bodyFat ? `%${latest.bodyFat}` : '-'}</div>
-                        <div style="font-size:10.5px; color:#38bdf8; font-weight:800; margin-top:2px;">${uh?.bodyFatKg ? `${uh.bodyFatKg} kg Yağ` : '🟢 Fit Aralık'}</div>
+                        <div style="font-size:20px; font-weight:900; color:var(--cyan); margin-top:2px;">
+                            ${latestScale?.bodyFat ? `%${latestScale.bodyFat}` : '-'}
+                        </div>
+                        <div style="font-size:10.5px; color:#38bdf8; font-weight:800; margin-top:2px;">
+                            ${uh?.bodyFatKg ? `${uh.bodyFatKg} kg Yağ` : (latestScale?.bodyFat ? 'Fit Aralık' : '-')}
+                        </div>
                     </div>
 
                     <div class="analytics-kpi-card">
-                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">BMR / İÇ YAĞLANMA</div>
-                        <div style="font-size:18px; font-weight:900; color:#fff; margin-top:2px;">${latest.bmr ? `${latest.bmr} kcal` : '-'}</div>
-                        <div style="font-size:10.5px; color:var(--text-secondary); margin-top:2px;">İç Yağ: Sev. ${latest.visceralFat || 6} (Güvenli)</div>
+                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">BEL ÇEVRESİ</div>
+                        <div style="font-size:20px; font-weight:900; color:var(--gold); margin-top:2px;">
+                            ${latestMeas?.waist ? `${latestMeas.waist} cm` : '-'}
+                        </div>
+                        ${deltaWaist !== null ? `
+                            <div style="font-size:10.5px; font-weight:800; color:${parseFloat(deltaWaist) <= 0 ? 'var(--green-success)' : 'var(--red-alert)'}; margin-top:2px;">
+                                ${parseFloat(deltaWaist) > 0 ? '+' : ''}${deltaWaist} cm ${parseFloat(deltaWaist) <= 0 ? '📉' : '📈'}
+                            </div>
+                        ` : '<div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">Mezura Takibi</div>'}
                     </div>
 
                     <div class="analytics-kpi-card">
-                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">VÜCUT PUANI / YAŞI</div>
-                        <div style="font-size:18px; font-weight:900; color:var(--gold); margin-top:2px;">${uh?.bodyScore || 84} Puan</div>
-                        <div style="font-size:10.5px; color:#34d399; font-weight:800; margin-top:2px;">Metabolik: ${uh?.bodyAge || 39} Yaş</div>
+                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">KOL / OMUZ</div>
+                        <div style="font-size:18px; font-weight:900; color:#fff; margin-top:2px;">
+                            ${(latestMeas?.arms || latestMeas?.shoulder) ? `${latestMeas.arms || '-'} / ${latestMeas.shoulder || '-'} cm` : '-'}
+                        </div>
+                        ${deltaArms !== null ? `
+                            <div style="font-size:10.5px; font-weight:800; color:${parseFloat(deltaArms) >= 0 ? 'var(--green-success)' : 'var(--text-secondary)'}; margin-top:2px;">
+                                Kol: ${parseFloat(deltaArms) > 0 ? '+' : ''}${deltaArms} cm
+                            </div>
+                        ` : '<div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">Hipertrofi</div>'}
                     </div>
                 </div>
 
+                ${uh ? `
                 <!-- CELLULAR & FLUID BALANCE CARD -->
                 <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:16px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -14048,7 +14188,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:8px; margin-bottom:10px;">
                         <div style="background:rgba(0,0,0,0.25); padding:10px; border-radius:8px;">
                             <div style="font-size:10.5px; color:var(--text-secondary);">TOPLAM SU</div>
-                            <div style="font-size:16px; font-weight:900; color:var(--cyan); margin-top:2px;">${uh?.totalWater || (latest.waterPct ? ((latest.weight * latest.waterPct) / 100).toFixed(1) : 47.8)} kg</div>
+                            <div style="font-size:16px; font-weight:900; color:var(--cyan); margin-top:2px;">${uh?.totalWater || (latestScale?.waterPct ? ((latestScale.weight * latestScale.waterPct) / 100).toFixed(1) : 47.8)} kg</div>
                             <div style="font-size:10px; color:var(--text-secondary);">Hücre İçi: ${uh?.intraWater || 29.8}kg / Dışı: ${uh?.extraWater || 18.0}kg</div>
                         </div>
 
@@ -14109,36 +14249,54 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
                         </div>
                     </div>
                 </div>
+                ` : ''}
 
-                <!-- SCALE HISTORY LIST -->
+                <!-- UNIFIED BODY COMPOSITION & MEASUREMENTS HISTORY LIST -->
                 <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; padding:14px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                        <h3 style="font-size:13.5px; font-weight:800; color:#fff;">📋 Tartı Ölçüm Geçmişi</h3>
-                        <div style="display:flex; gap:6px;">
-                            <button class="btn btn-gold" style="font-size:11px; padding:4px 10px; font-weight:800;" onclick="openScaleModal()">+ PDF / Tartı Ekle</button>
-                        </div>
+                        <h3 style="font-size:13.5px; font-weight:800; color:#fff;">📋 Vücut Kompozisyonu & Mezura Ölçüm Geçmişi (${unified.length} Kayıt)</h3>
                     </div>
 
-                    <div style="display:flex; flex-direction:column; gap:8px;">
-                        ${logs.map((l, idx) => `
-                            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:10px 12px; border-radius:8px; border-left:3px solid var(--gold);">
-                                <div>
-                                    <div style="display:flex; align-items:center; gap:8px;">
-                                        <strong style="font-size:14px; color:#fff;">${l.weight} kg</strong>
-                                        <span style="font-size:11px; color:var(--text-secondary);">📅 ${escapeHTML(l.date)}</span>
-                                        ${l.uniqueHealth ? '<span style="font-size:9.5px; background:rgba(56,189,248,0.2); color:var(--cyan); padding:2px 6px; border-radius:4px; font-weight:700;">Unique Health BIA</span>' : ''}
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        ${unified.map((u, idx) => `
+                            <div style="background:rgba(0,0,0,0.3); padding:12px 14px; border-radius:10px; border-left:4px solid ${u.weight ? 'var(--gold)' : 'var(--cyan)'};">
+                                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                                    <div>
+                                        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                            <span style="font-size:12px; color:var(--text-secondary); font-weight:700;">📅 ${escapeHTML(u.date)}</span>
+                                            ${u.weight ? `<strong style="font-size:15px; color:#fff;">${u.weight} kg</strong>` : ''}
+                                            ${u.waist ? `<span style="font-size:13px; color:var(--cyan); font-weight:800; background:rgba(56,189,248,0.12); padding:2px 8px; border-radius:6px;">📏 Bel: ${u.waist} cm</span>` : ''}
+                                            ${u.uniqueHealth ? '<span style="font-size:9.5px; background:rgba(56,189,248,0.2); color:var(--cyan); padding:2px 6px; border-radius:4px; font-weight:700;">Unique Health BIA</span>' : ''}
+                                        </div>
+
+                                        <!-- SCALE METRICS PILLS -->
+                                        ${(u.bodyFat || u.muscleMass || u.waterPct || u.visceralFat || u.bmr) ? `
+                                            <div style="font-size:11.5px; color:#cbd5e1; margin-top:5px; display:flex; gap:8px; flex-wrap:wrap;">
+                                                ${u.bodyFat ? `<span>Yağ: <strong>%${u.bodyFat}</strong></span>` : ''}
+                                                ${u.muscleMass ? `<span>İskelet Kası: <strong>${u.muscleMass} kg</strong></span>` : ''}
+                                                ${u.waterPct ? `<span>Sıvı: <strong>%${u.waterPct}</strong></span>` : ''}
+                                                ${u.visceralFat ? `<span>İç Yağ: <strong>${u.visceralFat}</strong></span>` : ''}
+                                                ${u.bmr ? `<span>BMR: <strong>${u.bmr} kcal</strong></span>` : ''}
+                                            </div>
+                                        ` : ''}
+
+                                        <!-- MEZURA METRICS PILLS -->
+                                        ${(u.chest || u.shoulder || u.arms || u.thigh || u.hips || u.neck) ? `
+                                            <div style="font-size:11.5px; color:var(--cyan); margin-top:4px; display:flex; gap:8px; flex-wrap:wrap;">
+                                                ${u.arms ? `<span>Kol: <strong>${u.arms} cm</strong></span>` : ''}
+                                                ${u.chest ? `<span>Göğüs: <strong>${u.chest} cm</strong></span>` : ''}
+                                                ${u.shoulder ? `<span>Omuz: <strong>${u.shoulder} cm</strong></span>` : ''}
+                                                ${u.thigh ? `<span>Bacak: <strong>${u.thigh} cm</strong></span>` : ''}
+                                                ${u.hips ? `<span>Kalça: <strong>${u.hips} cm</strong></span>` : ''}
+                                                ${u.neck ? `<span>Boyun: <strong>${u.neck} cm</strong></span>` : ''}
+                                            </div>
+                                        ` : ''}
+
+                                        ${u.notes ? `<div style="font-size:11px; color:var(--gold-light); margin-top:4px;">📝 ${escapeHTML(u.notes)}</div>` : ''}
                                     </div>
-                                    <div style="font-size:11.5px; color:#94a3b8; margin-top:2px; display:flex; gap:8px; flex-wrap:wrap;">
-                                        ${l.bodyFat ? `<span>Yağ: <strong>%${l.bodyFat}</strong></span>` : ''}
-                                        ${l.muscleMass ? `<span>İskelet Kası: <strong>${l.muscleMass} kg</strong></span>` : ''}
-                                        ${l.waterPct ? `<span>Sıvı: <strong>%${l.waterPct}</strong></span>` : ''}
-                                        ${l.visceralFat ? `<span>İç Yağ: <strong>${l.visceralFat}</strong></span>` : ''}
-                                        ${l.bmr ? `<span>BMR: <strong>${l.bmr} kcal</strong></span>` : ''}
+                                    <div>
+                                        <button class="btn-delete-log" onclick="deleteUnifiedBodyEntry('${u.date}', '${u.scaleId || ''}', '${u.measId || ''}')" title="Kaydı Sil">✕</button>
                                     </div>
-                                    ${l.notes ? `<div style="font-size:11px; color:var(--gold-light); margin-top:3px;">📝 ${escapeHTML(l.notes)}</div>` : ''}
-                                </div>
-                                <div>
-                                    <button class="btn-delete-log" onclick="deleteScaleEntry('${l.id}')" title="Kaydı Sil">✕</button>
                                 </div>
                             </div>
                         `).join('')}
@@ -14254,104 +14412,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
         }
 
         function renderMeasurementsAnalytics(container) {
-            const logs = getMeasurementsLogs();
-
-            if (logs.length === 0) {
-                container.innerHTML = `
-                    <div style="background:var(--bg-surface); padding:24px; text-align:center; border:1px dashed var(--border); border-radius:12px;">
-                        <span style="font-size:36px; display:block; margin-bottom:10px;">📏</span>
-                        <h3 style="font-size:15px; font-weight:800; color:#fff; margin-bottom:6px;">Henüz Vücut Ölçüsü Eklenmemiş</h3>
-                        <p style="font-size:12px; color:var(--text-secondary); max-width:380px; margin:0 auto 16px;">
-                            Mezura ile Bel, Göğüs, Omuz ve Kol çevrelerinizi santimetre (cm) cinsinden kaydederek bölgesel yağ yakımı ve kas büyümesini somut olarak görebilirsiniz.
-                        </p>
-                        <button class="btn btn-gold" style="font-size:12px; padding:10px 18px; font-weight:800;" onclick="openMeasurementsModal()">
-                            📏 İlk Vücut Ölçünüzü Ekleyin
-                        </button>
-                    </div>
-                `;
-                return;
-            }
-
-            const latest = logs[0];
-            const earliest = logs[logs.length - 1];
-
-            const deltaWaist = (logs.length > 1 && latest.waist && earliest.waist) ? (latest.waist - earliest.waist).toFixed(1) : null;
-            const deltaChest = (logs.length > 1 && latest.chest && earliest.chest) ? (latest.chest - earliest.chest).toFixed(1) : null;
-            const deltaArms = (logs.length > 1 && latest.arms && earliest.arms) ? (latest.arms - earliest.arms).toFixed(1) : null;
-
-            container.innerHTML = `
-                <!-- MEASUREMENTS KPI CARDS -->
-                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-bottom:16px;">
-                    <div class="analytics-kpi-card">
-                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">BEL ÇEVRESİ</div>
-                        <div style="font-size:20px; font-weight:900; color:var(--gold); margin-top:2px;">${latest.waist} cm</div>
-                        ${deltaWaist !== null ? `
-                            <div style="font-size:10.5px; font-weight:800; color:${parseFloat(deltaWaist) <= 0 ? 'var(--green-success)' : 'var(--red-alert)'}; margin-top:2px;">
-                                ${parseFloat(deltaWaist) > 0 ? '+' : ''}${deltaWaist} cm ${parseFloat(deltaWaist) <= 0 ? '📉' : '📈'}
-                            </div>
-                        ` : '<div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">Göbek Hattı</div>'}
-                    </div>
-
-                    <div class="analytics-kpi-card">
-                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">GÖĞÜS ÇEVRESİ</div>
-                        <div style="font-size:20px; font-weight:900; color:var(--cyan); margin-top:2px;">${latest.chest ? `${latest.chest} cm` : '-'}</div>
-                        ${deltaChest !== null ? `
-                            <div style="font-size:10.5px; font-weight:800; color:${parseFloat(deltaChest) >= 0 ? 'var(--green-success)' : 'var(--text-secondary)'}; margin-top:2px;">
-                                ${parseFloat(deltaChest) > 0 ? '+' : ''}${deltaChest} cm
-                            </div>
-                        ` : '<div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">Üst Gövde</div>'}
-                    </div>
-
-                    <div class="analytics-kpi-card">
-                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">OMUZ & KOL</div>
-                        <div style="font-size:18px; font-weight:900; color:var(--green-success); margin-top:2px;">${latest.shoulder || '-'} / ${latest.arms || '-'} cm</div>
-                        ${deltaArms !== null ? `
-                            <div style="font-size:10.5px; font-weight:800; color:${parseFloat(deltaArms) >= 0 ? 'var(--green-success)' : 'var(--text-secondary)'}; margin-top:2px;">
-                                Kol: ${parseFloat(deltaArms) > 0 ? '+' : ''}${deltaArms} cm
-                            </div>
-                        ` : '<div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">Hipertrofi</div>'}
-                    </div>
-
-                    <div class="analytics-kpi-card">
-                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">BACAK & KALÇA</div>
-                        <div style="font-size:18px; font-weight:900; color:#fff; margin-top:2px;">${latest.thigh || '-'} / ${latest.hips || '-'} cm</div>
-                        <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">Alt Vücut</div>
-                    </div>
-                </div>
-
-                <!-- MEASUREMENTS HISTORY LIST -->
-                <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; padding:14px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                        <h3 style="font-size:13.5px; font-weight:800; color:#fff;">📋 Vücut Ölçüleri Geçmişi</h3>
-                        <button class="btn btn-gold" style="font-size:11px; padding:4px 10px; font-weight:800;" onclick="openMeasurementsModal()">+ Yeni Ölçüm Ekle</button>
-                    </div>
-
-                    <div style="display:flex; flex-direction:column; gap:8px;">
-                        ${logs.map((m, idx) => `
-                            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:10px 12px; border-radius:8px; border-left:3px solid var(--cyan);">
-                                <div>
-                                    <div style="display:flex; align-items:center; gap:8px;">
-                                        <strong style="font-size:14px; color:#fff;">Bel: ${m.waist} cm</strong>
-                                        <span style="font-size:11px; color:var(--text-secondary);">📅 ${escapeHTML(m.date)}</span>
-                                    </div>
-                                    <div style="font-size:11.5px; color:#94a3b8; margin-top:3px; display:flex; gap:8px; flex-wrap:wrap;">
-                                        ${m.chest ? `<span>Göğüs: <strong>${m.chest} cm</strong></span>` : ''}
-                                        ${m.shoulder ? `<span>Omuz: <strong>${m.shoulder} cm</strong></span>` : ''}
-                                        ${m.arms ? `<span>Kol: <strong>${m.arms} cm</strong></span>` : ''}
-                                        ${m.thigh ? `<span>Bacak: <strong>${m.thigh} cm</strong></span>` : ''}
-                                        ${m.hips ? `<span>Kalça: <strong>${m.hips} cm</strong></span>` : ''}
-                                        ${m.neck ? `<span>Boyun: <strong>${m.neck} cm</strong></span>` : ''}
-                                    </div>
-                                    ${m.notes ? `<div style="font-size:11px; color:var(--gold-light); margin-top:3px;">📝 ${escapeHTML(m.notes)}</div>` : ''}
-                                </div>
-                                <div>
-                                    <button class="btn-delete-log" onclick="deleteMeasurementsEntry('${m.id}')" title="Kaydı Sil">✕</button>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
+            renderScaleAnalytics(container);
         }
 
         function renderCombinedCoachReport(container) {
