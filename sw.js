@@ -1,4 +1,4 @@
-const CACHE_NAME = 'celik-kodu-cache-v72';
+const CACHE_NAME = 'celik-kodu-cache-v73';
 const ASSETS = [
   './',
   './assets/guides/guide_db_thruster_form.jpg',
@@ -187,11 +187,14 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Firebase Firestore ve Google API çağrılarını doğrudan ağa yönlendir
+  // Firebase Firestore, Google API ve OCR CDN çağrılarını doğrudan ağa yönlendir
   if (event.request.url.includes('googleapis.com') ||
       event.request.url.includes('firebaseio.com') ||
       event.request.url.includes('identitytoolkit') ||
-      event.request.url.includes('securetoken')) {
+      event.request.url.includes('securetoken') ||
+      event.request.url.includes('jsdelivr') ||
+      event.request.url.includes('tesseract') ||
+      event.request.url.includes('tessdata')) {
     return;
   }
 

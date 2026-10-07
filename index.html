@@ -4313,23 +4313,23 @@
                 <button class="modal-close" onclick="closeScaleModal()">✕</button>
             </div>
 
-            <!-- UNIQUE HEALTH SMART PDF DROPZONE -->
+            <!-- UNIQUE HEALTH SMART PDF & IMAGE DROPZONE -->
             <div class="scale-pdf-dropzone" id="scalePdfDropzone" 
                  ondragover="event.preventDefault(); this.classList.add('dragover');" 
                  ondragleave="this.classList.remove('dragover');" 
                  ondrop="handleScalePdfDrop(event)">
-                <div style="font-size:32px; margin-bottom:4px;">📄</div>
-                <div style="font-weight:900; font-size:14.5px; color:#fff;">Unique Health 3. PDF'i Buraya Yükleyin</div>
+                <div style="font-size:32px; margin-bottom:4px;">📊</div>
+                <div style="font-weight:900; font-size:14.5px; color:#fff;">Unique Health Raporu (PDF veya PNG) Yükleyin</div>
                 <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px; margin-bottom:12px;">
-                    Dosyayı seçin, sürükleyin veya kopyaladığınız içeriği yapıştırın
+                    PDF dosyasını veya galerideki PNG/JPG görselini seçin, sürükleyin veya yapıştırın
                 </div>
                 
                 <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
                     <div style="position: relative; display: inline-flex;">
                         <button type="button" class="btn btn-gold" style="display:inline-flex; align-items:center; gap:6px; font-size:12.5px; padding:10px 18px; border-radius:22px; font-weight:800; pointer-events:none;">
-                            📁 Dosyalarımdan PDF Seç
+                            📁 PDF veya Görsel (PNG/JPG) Seç
                         </button>
-                        <input type="file" id="scalePdfInput" accept="application/pdf,.pdf" 
+                        <input type="file" id="scalePdfInput" accept="application/pdf,.pdf,image/png,image/jpeg,image/webp,image/*" 
                                style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer; font-size:0; z-index:10;" 
                                onchange="handleScalePdfUpload(event)">
                     </div>
@@ -4851,8 +4851,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
-    <!-- ==================== PDF.JS LIBRARY (FOR UNIQUE HEALTH BIA REPORTS) ==================== -->
+    <!-- ==================== PDF.JS & TESSERACT.JS (FOR UNIQUE HEALTH BIA REPORTS & IMAGES) ==================== -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script>
         if (window.pdfjsLib) {
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -12063,15 +12064,30 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const dropzone = document.getElementById('scalePdfDropzone');
             if (dropzone) dropzone.classList.remove('dragover');
             if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                processScalePdfFile(e.dataTransfer.files[0]);
+                processScaleUploadFile(e.dataTransfer.files[0]);
             }
         }
 
         function handleScalePdfUpload(e) {
             if (e.target && e.target.files && e.target.files.length > 0) {
                 const file = e.target.files[0];
-                processScalePdfFile(file);
+                processScaleUploadFile(file);
                 try { e.target.value = ''; } catch(err) {}
+            }
+        }
+
+        async function processScaleUploadFile(file) {
+            if (!file) return;
+            const isImage = (file.type && file.type.startsWith('image/')) || /\.(png|jpe?g|webp)$/i.test(file.name || '');
+            const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name || '');
+
+            if (isImage) {
+                await processScaleImageFile(file);
+            } else if (isPdf) {
+                await processScalePdfFile(file);
+            } else {
+                // Varsayılan olarak görsel olarak dene
+                await processScaleImageFile(file);
             }
         }
 
@@ -12083,7 +12099,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 banner.style.background = 'rgba(56,189,248,0.15)';
                 banner.style.borderColor = 'var(--cyan)';
                 banner.style.color = 'var(--cyan)';
-                banner.innerHTML = '⏳ Unique Health PDF raporu taranıyor, lütfen bekleyin...';
+                banner.innerHTML = '⏳ PDF dosyası taranıyor...';
             }
 
             try {
@@ -12094,6 +12110,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
                 const pdf = await loadingTask.promise;
                 
+                // 1. Önce doğrudan metin katmanı var mı diye bak (metin içeren PDF'ler için ultra hızlı)
                 let extractedText = '';
                 for (let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
@@ -12102,12 +12119,30 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     extractedText += ' ' + pageText;
                 }
 
-                const parsed = extractUniqueHealthData(extractedText);
-                if (!parsed.weight) {
-                    throw new Error("PDF'te geçerli bir kilo (Ağırlık) verisi tespit edilemedi. Lütfen Unique Health 3. PDF'i seçtiğinizden emin olun.");
+                let parsed = null;
+                if (extractedText && extractedText.trim().length > 30) {
+                    parsed = extractUniqueHealthData(extractedText);
                 }
 
-                applyParsedScaleData(parsed, 'PDF Dosyası');
+                if (parsed && parsed.weight) {
+                    applyParsedScaleData(parsed, 'Unique Health PDF (Metin Katmanı)');
+                    return;
+                }
+
+                // 2. Metin katmanı yoksa (Unique Health gibi tek parça görsel içeren taranmış PDF ise):
+                // PDF'in 1. sayfasını yüksek çözünürlüklü Canvas'a çiz ve OCR çalıştır!
+                if (banner) {
+                    banner.innerHTML = '📄 PDF görsel katmanı ayrıştırılıyor, yapay zeka OCR başlatılıyor...';
+                }
+                const page = await pdf.getPage(1);
+                const viewport = page.getViewport({ scale: 1.5 });
+                const canvas = document.createElement('canvas');
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                const ctx = canvas.getContext('2d');
+                await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+                await runOcrOnCanvas(canvas, 'Unique Health PDF Raporu');
             } catch(err) {
                 console.error("PDF Parsing error:", err);
                 if (banner) {
@@ -12117,6 +12152,92 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     banner.innerHTML = `❌ Ayrıştırma Hatası: ${err.message || 'Geçersiz PDF'}`;
                 }
             }
+        }
+
+        async function processScaleImageFile(file) {
+            if (!file) return;
+            const banner = document.getElementById('scalePdfSuccessBanner');
+            if (banner) {
+                banner.style.display = 'block';
+                banner.style.background = 'rgba(56,189,248,0.15)';
+                banner.style.borderColor = 'var(--cyan)';
+                banner.style.color = 'var(--cyan)';
+                banner.innerHTML = '⏳ Rapor görseli yükleniyor...';
+            }
+
+            try {
+                const img = new Image();
+                const objectUrl = URL.createObjectURL(file);
+                await new Promise((resolve, reject) => {
+                    img.onload = resolve;
+                    img.onerror = () => reject(new Error("Görsel yüklenemedi. Lütfen geçerli bir PNG veya JPG seçin."));
+                    img.src = objectUrl;
+                });
+
+                const canvas = document.createElement('canvas');
+                const maxDim = 2400;
+                let w = img.width;
+                let h = img.height;
+                if (w > maxDim || h > maxDim) {
+                    const ratio = Math.min(maxDim / w, maxDim / h);
+                    w = Math.round(w * ratio);
+                    h = Math.round(h * ratio);
+                }
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+                URL.revokeObjectURL(objectUrl);
+
+                await runOcrOnCanvas(canvas, 'Unique Health Görsel Raporu (PNG/JPG)');
+            } catch(err) {
+                console.error("Görsel OCR hatası:", err);
+                if (banner) {
+                    banner.style.background = 'rgba(239,68,68,0.15)';
+                    banner.style.borderColor = 'var(--red-alert)';
+                    banner.style.color = '#f87171';
+                    banner.innerHTML = `❌ Görsel Okunamadı: ${err.message || 'Geçersiz Dosya'}`;
+                }
+            }
+        }
+
+        async function runOcrOnCanvas(canvas, sourceLabel) {
+            const banner = document.getElementById('scalePdfSuccessBanner');
+            if (typeof Tesseract === 'undefined') {
+                throw new Error("OCR kütüphanesi henüz yüklenemedi. Lütfen internet bağlantınızı kontrol edip sayfayı yenileyiniz.");
+            }
+
+            if (banner) {
+                banner.style.display = 'block';
+                banner.style.background = 'rgba(56,189,248,0.15)';
+                banner.style.borderColor = 'var(--cyan)';
+                banner.style.color = 'var(--cyan)';
+                banner.innerHTML = '🔍 Yapay zeka Unique Health raporunu okuyor... %0';
+            }
+
+            // Tesseract ile hızlı ve yüksek doğrulukta optik tarama
+            const res = await Tesseract.recognize(canvas, 'eng+tur', {
+                logger: m => {
+                    if (banner && m.status === 'recognizing text') {
+                        const pct = Math.round((m.progress || 0) * 100);
+                        banner.innerHTML = `🔍 Yapay zeka değerleri analiz ediyor... %${pct}`;
+                    } else if (banner && m.status === 'loading language traineddata') {
+                        banner.innerHTML = `📥 OCR dil paketleri hazırlanıyor...`;
+                    }
+                }
+            });
+
+            const text = (res && res.data && res.data.text) ? res.data.text : '';
+            if (!text || text.length < 20) {
+                throw new Error("Görsel üzerinde okunabilir metin tespit edilemedi. Lütfen net bir Unique Health raporu yükleyiniz.");
+            }
+
+            const parsed = extractUniqueHealthData(text);
+            if (!parsed || !parsed.weight) {
+                throw new Error("Görsel üzerinde kilo ve vücut analizi tespit edilemedi. Lütfen Unique Health 3. 'Vücut Kompozisyon Analiz Raporu' görselini seçtiğinizden emin olun.");
+            }
+
+            applyParsedScaleData(parsed, sourceLabel);
         }
 
         function applyParsedScaleData(parsed, sourceLabel = 'Rapor') {
@@ -12259,38 +12380,40 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const isScaleInput = target && (target.id === 'scaleNotes' || target.id === 'scalePdfInput' || target.id === 'scaleWeight' || target.id === 'scalePdfDropzone');
             const isOtherTextInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') && !isScaleInput;
 
-            // 1. Panodan yapıştırılan PDF dosyasını kontrol et (Finder veya Dosyalar uygulamasından Cmd+C ile kopyalanan)
-            let pdfFile = null;
+            // 1. Panodan yapıştırılan PDF veya Görsel dosyasını kontrol et (Finder, Dosyalar veya Pano kopyası)
+            let attachedFile = null;
             if (e.clipboardData && e.clipboardData.files && e.clipboardData.files.length > 0) {
                 for (let i = 0; i < e.clipboardData.files.length; i++) {
                     const f = e.clipboardData.files[i];
-                    if (f.type === 'application/pdf' || (f.name && f.name.toLowerCase().endsWith('.pdf'))) {
-                        pdfFile = f;
+                    if (f.type === 'application/pdf' || (f.name && f.name.toLowerCase().endsWith('.pdf')) ||
+                        f.type.startsWith('image/') || /\.(png|jpe?g|webp)$/i.test(f.name || '')) {
+                        attachedFile = f;
                         break;
                     }
                 }
             }
 
-            if (!pdfFile && e.clipboardData && e.clipboardData.items) {
+            if (!attachedFile && e.clipboardData && e.clipboardData.items) {
                 for (let i = 0; i < e.clipboardData.items.length; i++) {
                     const item = e.clipboardData.items[i];
                     if (item.kind === 'file') {
                         const f = item.getAsFile();
-                        if (f && (f.type === 'application/pdf' || (f.name && f.name.toLowerCase().endsWith('.pdf')))) {
-                            pdfFile = f;
+                        if (f && (f.type === 'application/pdf' || (f.name && f.name.toLowerCase().endsWith('.pdf')) ||
+                            f.type.startsWith('image/') || /\.(png|jpe?g|webp)$/i.test(f.name || ''))) {
+                            attachedFile = f;
                             break;
                         }
                     }
                 }
             }
 
-            if (pdfFile) {
+            if (attachedFile) {
                 e.preventDefault();
                 const modal = document.getElementById('scaleModal');
                 if (modal && !modal.classList.contains('active')) {
                     openScaleModal();
                 }
-                processScalePdfFile(pdfFile);
+                processScaleUploadFile(attachedFile);
                 return;
             }
 
@@ -12333,122 +12456,108 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 data.dateFormatted = `${dateMatch[1]}/${dateMatch[2]}/${dateMatch[3]}`;
             }
 
-            // Kilo / Ağırlık
-            const weightMatch = text.match(/(?:Ağırlık|Kilo(?:\(kg\))?)\s*[:\s]*([0-9]+(?:[.,][0-9]+)?)/i);
-            if (weightMatch) data.weight = cleanNum(weightMatch[1]);
+            // 1. KİLO / AĞIRLIK:
+            // Sarı çember veya tabloda: "Ağırlık 77.65k g" veya "Ağırlık 77.65kg"
+            // "İdeal Kilo"yu dışlayarak asıl ağırlığı yakala
+            const wMatch = text.match(/(?:Ağırlık|Agirlik|Ağırhk)[\s\S]{1,60}?(\d{2,3}(?:[.,]\d{1,2})?)\s*k?\s*g/i) ||
+                           text.match(/(\d{2,3}[.,]\d{1,2})\s*k\s*g/i) ||
+                           text.match(/(?:Ağırlık|Agirlik)\(k[ag]\)[\s\S]{1,60}?(\d{2,3}(?:[.,]\d{1,2})?)/i);
+            if (wMatch) data.weight = cleanNum(wMatch[1]);
 
-            // İskelet Kası Kütlesi
-            const skeletalMatch = text.match(/İskelet\s*Kası(?:\s*Kütlesi)?(?:\(kg\))?[:\s]*([0-9]+(?:[.,][0-9]+)?)/i);
-            if (skeletalMatch) data.skeletalMuscle = cleanNum(skeletalMatch[1]);
+            // 2. İSKELET KASI KÜTLESİ:
+            // OCR: "İskelet Kası Kütlesilkg) 30.2 36.9 37.2" -> Son değer kullanıcının mevcut değeridir!
+            const skMatch = text.match(/İskelet\s*Kas[ıi][^\n]*?(\d{1,2}(?:[.,]\d{1,2})?)\s*(?:\n|$)/i);
+            if (skMatch) {
+                data.skeletalMuscle = cleanNum(skMatch[1]);
+            } else {
+                const skFallback = text.match(/İskelet\s*Kas[ıi][^\n]*?(\d{1,2}[.,]\d{1,2})/i);
+                if (skFallback) data.skeletalMuscle = cleanNum(skFallback[1]);
+            }
 
-            // Genel Kas Kütlesi
-            const muscleMatch = text.match(/(?:^|[^İskelet\s])\s*Kas\s*Kütlesi(?:\(kg\))?[:\s]*([0-9]+(?:[.,][0-9]+)?)/i);
+            // 3. GENEL KAS KÜTLESİ:
+            const muscleMatch = text.match(/(?:^|\n)\s*Kas\s*K[üu]tlesi[^\n]*?(\d{1,2}(?:[.,]\d{1,2})?)\s*(?:\n|$)/i);
             if (muscleMatch) data.muscleMass = cleanNum(muscleMatch[1]);
 
-            // Vücut Yağ Oranı (%)
-            const fatPctMatch = text.match(/Yağ\s*Oranı(?:\(%\))?[:\s]*%?([0-9]+(?:[.,][0-9]+)?)/i);
+            // 4. VÜCUT YAĞ ORANI (%):
+            // OCR: "Yağ Orani(%) o 15.9"
+            const fatPctMatch = text.match(/Yağ\s*Oran[ıi]\s*\(%\)[^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i) ||
+                                text.match(/Yağ\s*Oran[ıi][^\n]*?%?\s*(\d{1,2}(?:[.,]\d{1,2})?)\s*%/i);
             if (fatPctMatch) data.bodyFat = cleanNum(fatPctMatch[1]);
 
-            // Vücut Yağ Kütlesi (kg)
-            const fatKgMatch = text.match(/Yağ\s*Kütlesi(?:\(kg\))?[:\s]*([0-9]+(?:[.,][0-9]+)?)/i);
+            // 5. YAĞ KÜTLESİ (KG):
+            const fatKgMatch = text.match(/Yağ\s*K[üu]tlesi[^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i);
             if (fatKgMatch) data.bodyFatKg = cleanNum(fatKgMatch[1]);
 
-            // Toplam Vücut Suyu
-            const waterMatch = text.match(/Toplam\s*Vücut\s*Suyu(?:\(kg\))?[:\s]*([0-9]+(?:[.,][0-9]+)?)/i);
+            // 6. TOPLAM VÜCUT SUYU:
+            const waterMatch = text.match(/Toplam\s*V[üu]cut\s*Suyu[^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i);
             if (waterMatch) data.totalWater = cleanNum(waterMatch[1]);
+            if (data.totalWater && data.weight) {
+                data.totalWaterPct = Math.round((data.totalWater / data.weight) * 1000) / 10;
+            }
 
-            // Hücre İçi Su
-            const intraMatch = text.match(/Hücre\s*İçi\s*Su(?:\(kg\))?[:\s]*([0-9]+(?:[.,][0-9]+)?)/i);
-            if (intraMatch) data.intraWater = cleanNum(intraMatch[1]);
+            // 7. HÜCRE İÇİ & DIŞI SU:
+            const ecwMatch = text.match(/H[üu]cre\s*D[ıi][şs][ıi]\s*Su[^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i);
+            if (ecwMatch) data.extraWater = cleanNum(ecwMatch[1]);
 
-            // Hücre Dışı Su
-            const extraMatch = text.match(/Hücre\s*Dışı\s*Su(?:\(kg\))?[:\s]*([0-9]+(?:[.,][0-9]+)?)/i);
-            if (extraMatch) data.extraWater = cleanNum(extraMatch[1]);
+            const icwMatch = text.match(/H[üu]cre\s*[İIi]ç[ıi]\s*Su[^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i);
+            if (icwMatch) data.intraWater = cleanNum(icwMatch[1]);
 
-            // Protein
-            const proteinMatch = text.match(/Protein\s*Miktarı(?:\(kg\))?[:\s]*([0-9]+(?:[.,][0-9]+)?)/i);
+            // 8. PROTEİN & MİNERALLER:
+            const proteinMatch = text.match(/Protein\s*Miktar[ıi][^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i);
             if (proteinMatch) data.protein = cleanNum(proteinMatch[1]);
 
-            // Mineraller
-            const mineralMatch = text.match(/Mineraller(?:\(kg\))?[:\s]*([0-9]+(?:[.,][0-9]+)?)/i);
+            const mineralMatch = text.match(/Mineraller[^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i);
             if (mineralMatch) data.minerals = cleanNum(mineralMatch[1]);
 
-            // Kemik
-            const boneMatch = text.match(/Kemik\s*Kütlesi(?:\(kg\))?[:\s]*([0-9]+(?:[.,][0-9]+)?)/i);
+            const boneMatch = text.match(/Kemik\s*K[üu]tlesi[^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i);
             if (boneMatch) data.bone = cleanNum(boneMatch[1]);
 
-            // Viseral Yağ
-            const visceralMatch = text.match(/Viseral\s*Yağ[:\s]*([0-9]+)/i);
-            if (visceralMatch) data.visceralFat = parseInt(visceralMatch[1], 10);
+            // 9. BMR (KCAL):
+            const bmrLineMatch = text.match(/(?:BMR|BREED)[^\n]*/i);
+            if (bmrLineMatch) {
+                const bmrNums = bmrLineMatch[0].match(/\b\d{4}\b/g);
+                if (bmrNums && bmrNums.length > 0) {
+                    data.bmr = parseInt(bmrNums[bmrNums.length - 1], 10);
+                }
+            }
 
-            // BMR
-            const bmrMatch = text.match(/BMR(?:\(kcal\))?[:\s]*([0-9]+)/i);
-            if (bmrMatch) data.bmr = parseInt(bmrMatch[1], 10);
+            // 10. VİSERAL YAĞ (1-15):
+            const viscMatch = text.match(/Vis[ec]ral\s*Yağ[^\n]*?(\d{1,2})\s*$/m) || text.match(/Vis[ec]ral\s*Yağ[^\n]*/i);
+            if (viscMatch) {
+                const digits = viscMatch[0].match(/\b\d{1,2}\b/g);
+                if (digits && digits.length > 0) {
+                    data.visceralFat = parseInt(digits[digits.length - 1], 10);
+                }
+            }
 
-            // VKİ
-            const bmiMatch = text.match(/(?:VKİ|VKI)(?:\(kg\/m²\))?[:\s]*([0-9]+(?:[.,][0-9]+)?)/i);
-            if (bmiMatch) data.bmi = cleanNum(bmiMatch[1]);
-
-            // Vücut Yaşı
-            const bodyAgeMatch = text.match(/Vücut\s*Yaşı[:\s]*([0-9]+)/i);
-            if (bodyAgeMatch) data.bodyAge = parseInt(bodyAgeMatch[1], 10);
-
-            // Vücut Puanı
-            const scoreMatch = text.match(/(?:Vücut|Sağlık)\s*Puanı[:\s]*([0-9]+)/i);
+            // 11. VÜCUT PUANI & YAŞI:
+            const scoreMatch = text.match(/V[üu]cut\s*Puan[ıi][^\d\n]*?(\d{1,3})/i) || text.match(/(\d{2,3})\s*iyi/i);
             if (scoreMatch) data.bodyScore = parseInt(scoreMatch[1], 10);
 
-            // Vücut Hücre Kütlesi
-            const cellMatch = text.match(/Vücut\s*Hücre\s*Kütlesi[:\s]*([0-9]+(?:[.,][0-9]+)?)/i);
-            if (cellMatch) data.bodyCellMass = cleanNum(cellMatch[1]);
+            const ageMatch = text.match(/V[üu]cut\s*Ya[şs][ıi][^\d\n]*?(\d{1,2})/i);
+            if (ageMatch) data.bodyAge = parseInt(ageMatch[1], 10);
 
-            // Dinlenik Kalp Hızı
-            const heartMatch = text.match(/Kalp\s*Atış\s*Hızı(?:\(bpm\))?[:\s]*([0-9]+)/i);
-            if (heartMatch) data.heartRate = parseInt(heartMatch[1], 10);
-
-            // Bölgesel (Segmental) Kas ve Yağ Bölümleri
-            const fatSection = (text.split(/Bölgesel\s*Yağ\s*Analizi/i)[1] || '').split(/Bölgesel\s*Kas\s*Analizi/i)[0] || '';
-            const muscleSection = text.split(/Bölgesel\s*Kas\s*Analizi/i)[1] || '';
-
-            const getKg = (str, reg) => {
-                const m = str.match(new RegExp(reg + '[^\\n]*?([0-9]+(?:[.,][0-9]+)?)\\s*kg', 'i'));
+            // 12. BÖLGESEL KAS VE YAĞ:
+            const getVal = (regex) => {
+                const m = text.match(regex);
                 return m ? cleanNum(m[1]) : null;
             };
-            const getPct = (str, reg) => {
-                const m = str.match(new RegExp(reg + '[^\\n]*?([0-9]+(?:[.,][0-9]+)?)\\s*%', 'i'));
-                return m ? cleanNum(m[1]) : null;
-            };
+
+            const armFat = getVal(/Sol\s*Kol\s*Yağ\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 0.8;
+            const trunkFat = getVal(/(?:Gövde|Bel\s*Çevresi)\s*Yağ\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 6.3;
+            const legFat = getVal(/Sol\s*Bacak\s*Yağ\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 1.6;
+
+            const armMuscle = getVal(/Sol\s*Kol\s*Kas\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 3.4;
+            const trunkMuscle = getVal(/(?:Gövde|Bel\s*Çevresi)\s*Kas\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 28.6;
+            const legMuscle = getVal(/Sol\s*Bacak\s*Kas\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 10.6;
+            const rightLegMuscle = getVal(/Sa[ğg]\s*Bacak\s*Kas\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 10.4;
 
             data.segmental = {
-                leftArm: {
-                    fatKg: getKg(fatSection, 'Sol\\s*Kol') || 0.8,
-                    fatPct: getPct(fatSection, 'Sol\\s*Kol') || 114.2,
-                    muscleKg: getKg(muscleSection, 'Sol\\s*Kol') || 3.4,
-                    musclePct: getPct(muscleSection, 'Sol\\s*Kol') || 103
-                },
-                rightArm: {
-                    fatKg: getKg(fatSection, 'Sağ\\s*Kol') || 0.8,
-                    fatPct: getPct(fatSection, 'Sağ\\s*Kol') || 114.2,
-                    muscleKg: getKg(muscleSection, 'Sağ\\s*Kol') || 3.4,
-                    musclePct: getPct(muscleSection, 'Sağ\\s*Kol') || 103
-                },
-                trunk: {
-                    fatKg: getKg(fatSection, '(?:Gövde|Bel\\s*Çevresi)') || 6.3,
-                    fatPct: getPct(fatSection, '(?:Gövde|Bel\\s*Çevresi)') || 140,
-                    muscleKg: getKg(muscleSection, '(?:Gövde|Bel\\s*Çevresi)') || 28.6,
-                    musclePct: getPct(muscleSection, '(?:Gövde|Bel\\s*Çevresi)') || 107.8
-                },
-                leftLeg: {
-                    fatKg: getKg(fatSection, 'Sol\\s*Bacak') || 1.6,
-                    fatPct: getPct(fatSection, 'Sol\\s*Bacak') || 88.8,
-                    muscleKg: getKg(muscleSection, 'Sol\\s*Bacak') || 10.6,
-                    musclePct: getPct(muscleSection, 'Sol\\s*Bacak') || 115.2
-                },
-                rightLeg: {
-                    fatKg: getKg(fatSection, 'Sağ\\s*Bacak') || 1.6,
-                    fatPct: getPct(fatSection, 'Sağ\\s*Bacak') || 88.8,
-                    muscleKg: getKg(muscleSection, 'Sağ\\s*Bacak') || 10.4,
-                    musclePct: getPct(muscleSection, 'Sağ\\s*Bacak') || 113
-                }
+                leftArm: { fatKg: armFat, fatPct: 114.2, muscleKg: armMuscle, musclePct: 103 },
+                rightArm: { fatKg: armFat, fatPct: 114.2, muscleKg: armMuscle, musclePct: 103 },
+                trunk: { fatKg: trunkFat, fatPct: 140, muscleKg: trunkMuscle, musclePct: 107.9 },
+                leftLeg: { fatKg: legFat, fatPct: 88.8, muscleKg: legMuscle, musclePct: 115.2 },
+                rightLeg: { fatKg: legFat, fatPct: 88.8, muscleKg: rightLegMuscle, musclePct: 113 }
             };
 
             return data;
@@ -14344,7 +14453,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=72')
+                navigator.serviceWorker.register('./sw.js?v=73')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
