@@ -4100,9 +4100,14 @@
                        onchange="handleScalePdfUpload(event)">
                 <div style="font-size:32px; margin-bottom:4px;">📄</div>
                 <div style="font-weight:900; font-size:14px; color:#fff;">Unique Health 3. PDF'i Buraya Yükleyin</div>
-                <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">PDF dosyasını seçmek için dokunun veya buraya sürükleyin</div>
-                <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(245,158,11,0.18); border:1px solid var(--gold); color:var(--gold-light); padding:6px 14px; border-radius:20px; font-size:11.5px; font-weight:800; margin-top:8px;">
-                    📁 Dosyalarımdan PDF Seç
+                <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">PDF'i seçmek için dokunun, sürükleyin veya <strong>Cmd+V / Ctrl+V</strong> ile yapıştırın</div>
+                <div style="display:flex; justify-content:center; gap:8px; margin-top:8px; flex-wrap:wrap;">
+                    <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(245,158,11,0.18); border:1px solid var(--gold); color:var(--gold-light); padding:6px 14px; border-radius:20px; font-size:11.5px; font-weight:800;">
+                        📁 Dosyalarımdan PDF Seç
+                    </div>
+                    <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(56,189,248,0.15); border:1px solid var(--cyan); color:var(--cyan); padding:6px 14px; border-radius:20px; font-size:11.5px; font-weight:800;">
+                        📋 Cmd+V ile Yapıştır
+                    </div>
                 </div>
                 <div id="scalePdfSuccessBanner" style="display:none; margin-top:10px; padding:8px 12px; background:rgba(16,185,129,0.15); border:1px solid var(--green-success); border-radius:8px; font-size:11.5px; color:#34d399; font-weight:700;"></div>
             </label>
@@ -11809,45 +11814,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     throw new Error("PDF'te geçerli bir kilo (Ağırlık) verisi tespit edilemedi. Lütfen Unique Health 3. PDF'i seçtiğinizden emin olun.");
                 }
 
-                window._lastParsedScaleData = parsed;
-
-                // Form alanlarını otomatik doldur
-                if (parsed.date && document.getElementById('scaleDate')) {
-                    document.getElementById('scaleDate').value = parsed.date;
-                }
-                if (parsed.weight && document.getElementById('scaleWeight')) {
-                    document.getElementById('scaleWeight').value = parsed.weight;
-                }
-                if (parsed.bodyFat && document.getElementById('scaleBodyFat')) {
-                    document.getElementById('scaleBodyFat').value = parsed.bodyFat;
-                }
-                if ((parsed.skeletalMuscle || parsed.muscleMass) && document.getElementById('scaleMuscleMass')) {
-                    document.getElementById('scaleMuscleMass').value = parsed.skeletalMuscle || parsed.muscleMass;
-                }
-                if (parsed.totalWaterPct && document.getElementById('scaleWaterPct')) {
-                    document.getElementById('scaleWaterPct').value = parsed.totalWaterPct;
-                } else if (parsed.totalWater && parsed.weight && document.getElementById('scaleWaterPct')) {
-                    document.getElementById('scaleWaterPct').value = (Math.round((parsed.totalWater / parsed.weight) * 1000) / 10);
-                }
-                if (parsed.visceralFat && document.getElementById('scaleVisceralFat')) {
-                    document.getElementById('scaleVisceralFat').value = parsed.visceralFat;
-                }
-                if (parsed.bmr && document.getElementById('scaleBmr')) {
-                    document.getElementById('scaleBmr').value = parsed.bmr;
-                }
-                if (document.getElementById('scaleNotes')) {
-                    const score = parsed.bodyScore ? ` • Puan: ${parsed.bodyScore}` : '';
-                    const age = parsed.bodyAge ? ` • Vücut Yaşı: ${parsed.bodyAge}` : '';
-                    document.getElementById('scaleNotes').value = `Unique Health BIA Analizi${score}${age}`;
-                }
-
-                if (banner) {
-                    banner.style.background = 'rgba(16,185,129,0.15)';
-                    banner.style.borderColor = 'var(--green-success)';
-                    banner.style.color = '#34d399';
-                    banner.innerHTML = `✅ <strong>Rapor Başarıyla Ayrıştırıldı!</strong><br>${parsed.weight} kg • ${parsed.skeletalMuscle ? `${parsed.skeletalMuscle} kg İskelet Kası` : ''}${parsed.bodyFat ? ` • %${parsed.bodyFat} Yağ` : ''}${parsed.bmr ? ` • BMR ${parsed.bmr} kcal` : ''}`;
-                }
-                playAlertSound();
+                applyParsedScaleData(parsed, 'PDF Dosyası');
             } catch(err) {
                 console.error("PDF Parsing error:", err);
                 if (banner) {
@@ -11858,6 +11825,116 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 }
             }
         }
+
+        function applyParsedScaleData(parsed, sourceLabel = 'Rapor') {
+            if (!parsed || !parsed.weight) return;
+            window._lastParsedScaleData = parsed;
+
+            // Form alanlarını otomatik doldur
+            if (parsed.date && document.getElementById('scaleDate')) {
+                document.getElementById('scaleDate').value = parsed.date;
+            }
+            if (parsed.weight && document.getElementById('scaleWeight')) {
+                document.getElementById('scaleWeight').value = parsed.weight;
+            }
+            if (parsed.bodyFat && document.getElementById('scaleBodyFat')) {
+                document.getElementById('scaleBodyFat').value = parsed.bodyFat;
+            }
+            if ((parsed.skeletalMuscle || parsed.muscleMass) && document.getElementById('scaleMuscleMass')) {
+                document.getElementById('scaleMuscleMass').value = parsed.skeletalMuscle || parsed.muscleMass;
+            }
+            if (parsed.totalWaterPct && document.getElementById('scaleWaterPct')) {
+                document.getElementById('scaleWaterPct').value = parsed.totalWaterPct;
+            } else if (parsed.totalWater && parsed.weight && document.getElementById('scaleWaterPct')) {
+                document.getElementById('scaleWaterPct').value = (Math.round((parsed.totalWater / parsed.weight) * 1000) / 10);
+            }
+            if (parsed.visceralFat && document.getElementById('scaleVisceralFat')) {
+                document.getElementById('scaleVisceralFat').value = parsed.visceralFat;
+            }
+            if (parsed.bmr && document.getElementById('scaleBmr')) {
+                document.getElementById('scaleBmr').value = parsed.bmr;
+            }
+            if (document.getElementById('scaleNotes')) {
+                const score = parsed.bodyScore ? ` • Puan: ${parsed.bodyScore}` : '';
+                const age = parsed.bodyAge ? ` • Vücut Yaşı: ${parsed.bodyAge}` : '';
+                document.getElementById('scaleNotes').value = `Unique Health BIA Analizi${score}${age}`;
+            }
+
+            const banner = document.getElementById('scalePdfSuccessBanner');
+            if (banner) {
+                banner.style.display = 'block';
+                banner.style.background = 'rgba(16,185,129,0.15)';
+                banner.style.borderColor = 'var(--green-success)';
+                banner.style.color = '#34d399';
+                banner.innerHTML = `✅ <strong>${sourceLabel} Başarıyla Ayrıştırıldı!</strong><br>${parsed.weight} kg • ${parsed.skeletalMuscle ? `${parsed.skeletalMuscle} kg İskelet Kası` : ''}${parsed.bodyFat ? ` • %${parsed.bodyFat} Yağ` : ''}${parsed.bmr ? ` • BMR ${parsed.bmr} kcal` : ''}`;
+            }
+            playAlertSound();
+        }
+
+        // ----- GLOBAL CMD+V / CTRL+V PASTE LISTENER -----
+        window.addEventListener('paste', async function(e) {
+            // Eğer kullanıcı arama veya başka bir metin kutusuna yazıyorsa ve bu scale modal değilse es geç
+            const target = e.target;
+            const isScaleInput = target && (target.id === 'scaleNotes' || target.id === 'scalePdfInput' || target.id === 'scaleWeight' || target.id === 'scalePdfDropzone');
+            const isOtherTextInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') && !isScaleInput;
+
+            // 1. Panodan yapıştırılan PDF dosyasını kontrol et (Finder veya Dosyalar uygulamasından Cmd+C ile kopyalanan)
+            let pdfFile = null;
+            if (e.clipboardData && e.clipboardData.files && e.clipboardData.files.length > 0) {
+                for (let i = 0; i < e.clipboardData.files.length; i++) {
+                    const f = e.clipboardData.files[i];
+                    if (f.type === 'application/pdf' || (f.name && f.name.toLowerCase().endsWith('.pdf'))) {
+                        pdfFile = f;
+                        break;
+                    }
+                }
+            }
+
+            if (!pdfFile && e.clipboardData && e.clipboardData.items) {
+                for (let i = 0; i < e.clipboardData.items.length; i++) {
+                    const item = e.clipboardData.items[i];
+                    if (item.kind === 'file') {
+                        const f = item.getAsFile();
+                        if (f && (f.type === 'application/pdf' || (f.name && f.name.toLowerCase().endsWith('.pdf')))) {
+                            pdfFile = f;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (pdfFile) {
+                e.preventDefault();
+                const modal = document.getElementById('scaleModal');
+                if (modal && !modal.classList.contains('active')) {
+                    openScaleModal();
+                }
+                processScalePdfFile(pdfFile);
+                return;
+            }
+
+            // 2. Panodan kopyalanan rapor metnini kontrol et (PDF içinden metin kopyalanıp Cmd+V yapıldıysa)
+            if (!isOtherTextInput && e.clipboardData) {
+                const pastedText = e.clipboardData.getData('text') || '';
+                if (pastedText && (
+                    pastedText.includes('Unique Health') || 
+                    pastedText.includes('Vücut Kompozisyon') || 
+                    pastedText.includes('İskelet Kası') || 
+                    (pastedText.includes('Yağ') && pastedText.includes('Kilo')) ||
+                    pastedText.includes('BMR')
+                )) {
+                    e.preventDefault();
+                    const parsed = extractUniqueHealthData(pastedText);
+                    if (parsed && parsed.weight) {
+                        const modal = document.getElementById('scaleModal');
+                        if (modal && !modal.classList.contains('active')) {
+                            openScaleModal();
+                        }
+                        applyParsedScaleData(parsed, 'Panodan Yapıştırılan Metin');
+                    }
+                }
+            }
+        });
 
         function extractUniqueHealthData(text) {
             const cleanNum = (str) => {
