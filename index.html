@@ -933,6 +933,113 @@
             border-color: var(--border-hover);
             transform: translateY(-2px);
         }
+        .library-subnav {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 5px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        .lib-subtab-btn {
+            flex: 1;
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--text-secondary);
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .lib-subtab-btn:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .lib-subtab-btn.active {
+            background: var(--gold);
+            color: #000;
+            box-shadow: 0 2px 10px rgba(245, 158, 11, 0.35);
+        }
+        .lib-ex-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+        }
+        @media (max-width: 640px) {
+            .lib-ex-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .lib-ex-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+        .lib-ex-card:hover {
+            border-color: var(--gold);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+        .ex-chip-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .ex-chip-badge.equip {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--gold);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        .ex-chip-badge.muscle {
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--cyan);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+        }
+        .ex-chip-badge.mechanic {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+        .add-to-prog-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .add-to-prog-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--gold);
+            transform: translateY(-1px);
+        }
+        .add-to-prog-card.active-workout-highlight {
+            border-color: rgba(245, 158, 11, 0.5);
+            background: rgba(245, 158, 11, 0.08);
+        }
+        .add-to-prog-card.active-workout-highlight:hover {
+            border-color: var(--gold);
+            background: rgba(245, 158, 11, 0.14);
+        }
         .custom-routine-item {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -3396,7 +3503,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v77</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v78</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3432,7 +3539,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v77</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v78</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -3462,7 +3569,7 @@
                     <span>🏋️ Antrenman</span>
                 </button>
                 <button class="tab-btn" onclick="switchTab('libraryTab')">
-                    <span>📚 Programlar</span>
+                    <span>📚 Program & Hareketler</span>
                 </button>
                 <button class="tab-btn" onclick="switchTab('historyTab')">
                     <span>📋 Günlük</span>
@@ -3789,19 +3896,93 @@
                 </div>
             </div>
 
-            <!-- ==================== TAB 3: PROGRAM LIBRARY ==================== -->
+            <!-- ==================== TAB 3: PROGRAM LIBRARY & EXERCISE ARCHIVE ==================== -->
             <div id="libraryTab" class="tab-content">
                 <div class="generator-card">
-                    <h2 style="font-size:18px; font-weight:900; color:#fff; margin-bottom:12px;">📚 Kayıtlı ve Hazır Programlar</h2>
-                    
-                    <h3 style="font-size:13px; font-weight:800; color:var(--gold); margin-bottom:10px;">⭐ Kişisel Kayıtlı Programlarım</h3>
-                    <div id="savedProgramsList">
-                        <!-- Populated dynamically -->
+                    <!-- SUB-TAB SWITCHER -->
+                    <div class="library-subnav">
+                        <button type="button" id="libSubTabProgramsBtn" class="lib-subtab-btn active" onclick="switchLibrarySubTab('programs')">
+                            📋 Hazır Programlar
+                        </button>
+                        <button type="button" id="libSubTabExercisesBtn" class="lib-subtab-btn" onclick="switchLibrarySubTab('exercises')">
+                            📖 Egzersiz Kütüphanesi
+                        </button>
                     </div>
 
-                    <h3 style="font-size:13px; font-weight:800; color:var(--gold); margin:24px 0 10px;">⚔️ Resmi Çelik Kodu (La Forja) Klasik Serisi</h3>
-                    <div id="officialProgramsList">
-                        <!-- Classic La Forja templates -->
+                    <!-- PANE 1: HAZIR VE KAYITLI PROGRAMLAR -->
+                    <div id="libPanePrograms">
+                        <h2 style="font-size:18px; font-weight:900; color:#fff; margin-bottom:12px;">📚 Kayıtlı ve Hazır Programlar</h2>
+                        
+                        <h3 style="font-size:13px; font-weight:800; color:var(--gold); margin-bottom:10px;">⭐ Kişisel Kayıtlı Programlarım</h3>
+                        <div id="savedProgramsList">
+                            <!-- Populated dynamically -->
+                        </div>
+
+                        <h3 style="font-size:13px; font-weight:800; color:var(--gold); margin:24px 0 10px;">⚔️ Resmi Çelik Kodu (La Forja) Klasik Serisi</h3>
+                        <div id="officialProgramsList">
+                            <!-- Classic La Forja templates -->
+                        </div>
+                    </div>
+
+                    <!-- PANE 2: EGZERSİZ KÜTÜPHANESİ VE HAREKET REHBERİ -->
+                    <div id="libPaneExercises" style="display:none;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+                            <div>
+                                <h2 style="font-size:18px; font-weight:900; color:#fff; margin:0;">📖 Egzersiz Kütüphanesi & Rehber</h2>
+                                <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
+                                    Tüm hareketleri inceleyin, form ipuçlarına bakın veya doğrudan programınıza ekleyin.
+                                </div>
+                            </div>
+                            <span id="libExCountBadge" class="auth-role-tag role-admin" style="font-size:11px; padding:4px 10px; background:rgba(245,158,11,0.15); color:var(--gold); border:1px solid rgba(245,158,11,0.3);">
+                                89 Egzersiz
+                            </span>
+                        </div>
+
+                        <!-- SEARCH & FILTERS -->
+                        <div style="background:rgba(0,0,0,0.25); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:16px;">
+                            <!-- Search bar -->
+                            <div style="position:relative; margin-bottom:10px;">
+                                <input type="text" id="libExSearchInput" class="form-input" 
+                                       style="width:100%; padding:10px 36px 10px 36px; font-size:12.5px; border-radius:8px; background:rgba(0,0,0,0.5);" 
+                                       placeholder="🔍 Hareket, kas grubu veya ipucu ara (Örn: Bench, Kettlebell, Squat, Omuz)..." 
+                                       oninput="renderLibraryExerciseCatalog()">
+                                <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:14px; opacity:0.6;">🔍</span>
+                                <button id="libExClearSearchBtn" type="button" onclick="clearLibExSearch()" style="display:none; position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-secondary); font-size:16px; cursor:pointer;">✕</button>
+                            </div>
+
+                            <!-- Filter Selectors -->
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                                <div>
+                                    <label style="font-size:10.5px; font-weight:800; color:var(--text-secondary); display:block; margin-bottom:4px;">🎯 KAS GRUBU</label>
+                                    <select id="libExMuscleFilter" class="form-input" style="padding:8px 10px; font-size:12px;" onchange="renderLibraryExerciseCatalog()">
+                                        <option value="all">Tüm Kas Grupları</option>
+                                        <option value="chest">Göğüs</option>
+                                        <option value="back">Sırt & Kanat</option>
+                                        <option value="shoulders">Omuz & Trapez</option>
+                                        <option value="legs">Bacak & Kalça</option>
+                                        <option value="core">Core & Karın</option>
+                                        <option value="arms">Kollar (Biceps / Triceps)</option>
+                                        <option value="conditioning">Fonksiyonel & Kondisyon</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="font-size:10.5px; font-weight:800; color:var(--text-secondary); display:block; margin-bottom:4px;">⚙️ EKİPMAN</label>
+                                    <select id="libExEquipFilter" class="form-input" style="padding:8px 10px; font-size:12px;" onchange="renderLibraryExerciseCatalog()">
+                                        <option value="all">Tüm Ekipmanlar</option>
+                                        <option value="dumbbell">🏋️ Dambıl (Dumbbell)</option>
+                                        <option value="kettlebell">🔔 Kettlebell (Girya)</option>
+                                        <option value="barbell">⚡ Halter (Barbell)</option>
+                                        <option value="machine">⚙️ Makine & Kablo</option>
+                                        <option value="bodyweight">🤸 Vücut Ağırlığı</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- EXERCISES GRID -->
+                        <div id="libExercisesCatalogGrid" class="lib-ex-grid">
+                            <!-- Populated dynamically -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -4119,6 +4300,23 @@
             </div>
             <div class="lightbox-footer">
                 <span>💡 İpucu: Görsele dokunarak büyütebilir veya telefonunuzu yatay çevirerek tam genişlikte inceleyebilirsiniz.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== ADD TO PROGRAM OPTIONS MODAL ==================== -->
+    <div id="addToProgramOptionsModal" class="modal-overlay" onclick="if(event.target === this) closeAddToProgramOptionsModal()">
+        <div class="modal-box" style="max-width: 520px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <div>
+                    <span class="auth-role-tag role-admin" style="font-size:10px; background:rgba(245,158,11,0.2); color:var(--gold);">⚡ PROGRAMA EKLE</span>
+                    <h3 class="modal-title" id="addToProgModalTitle" style="font-size:16px; margin-top:4px;">Egzersizi Ekle</h3>
+                    <div id="addToProgModalSubtitle" style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;"></div>
+                </div>
+                <button class="modal-close" onclick="closeAddToProgramOptionsModal()">✕</button>
+            </div>
+            <div id="addToProgModalBody" style="margin-top: 14px;">
+                <!-- Populated dynamically -->
             </div>
         </div>
     </div>
@@ -4843,9 +5041,13 @@
                 <span>🎯</span>
                 <span>Program Atölyesi</span>
             </div>
-            <div class="more-sheet-btn" onclick="closeMoreSheet(); switchTab('libraryTab');">
+            <div class="more-sheet-btn" onclick="closeMoreSheet(); switchTab('libraryTab'); switchLibrarySubTab('programs');">
                 <span>📚</span>
                 <span>Hazır Programlar</span>
+            </div>
+            <div class="more-sheet-btn" onclick="closeMoreSheet(); openExerciseLibraryTab();" style="border-color:rgba(245, 158, 11, 0.4); color:var(--gold);">
+                <span>📖</span>
+                <span>Egzersiz Kütüphanesi</span>
             </div>
             <div class="more-sheet-btn" onclick="closeMoreSheet(); switchTab('analyticsTab');">
                 <span>📈</span>
@@ -9367,7 +9569,406 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             alert("✅ Program başarıyla kütüphanenize kaydedildi!");
         }
 
+        // ==================== LIBRARY SUB-TABS & EXERCISE CATALOG ====================
+        let currentLibrarySubTab = 'programs';
+
+        function switchLibrarySubTab(tab) {
+            currentLibrarySubTab = tab;
+            const btnProg = document.getElementById('libSubTabProgramsBtn');
+            const btnEx = document.getElementById('libSubTabExercisesBtn');
+            const paneProg = document.getElementById('libPanePrograms');
+            const paneEx = document.getElementById('libPaneExercises');
+
+            if (btnProg) btnProg.classList.toggle('active', tab === 'programs');
+            if (btnEx) btnEx.classList.toggle('active', tab === 'exercises');
+            if (paneProg) paneProg.style.display = (tab === 'programs') ? 'block' : 'none';
+            if (paneEx) paneEx.style.display = (tab === 'exercises') ? 'block' : 'none';
+
+            if (tab === 'exercises') {
+                renderLibraryExerciseCatalog();
+            } else if (tab === 'programs') {
+                renderLibrary();
+            }
+        }
+
+        function openExerciseLibraryTab(searchQuery = '') {
+            switchTab('libraryTab');
+            switchLibrarySubTab('exercises');
+            if (searchQuery) {
+                const inp = document.getElementById('libExSearchInput');
+                if (inp) inp.value = searchQuery;
+            }
+            renderLibraryExerciseCatalog();
+        }
+
+        function clearLibExSearch() {
+            const inp = document.getElementById('libExSearchInput');
+            if (inp) inp.value = '';
+            renderLibraryExerciseCatalog();
+        }
+
+        function renderLibraryExerciseCatalog() {
+            const container = document.getElementById('libExercisesCatalogGrid');
+            const countBadge = document.getElementById('libExCountBadge');
+            const clearBtn = document.getElementById('libExClearSearchBtn');
+            if (!container) return;
+
+            const q = (document.getElementById('libExSearchInput')?.value || '').toLowerCase().trim();
+            const muscle = document.getElementById('libExMuscleFilter')?.value || 'all';
+            const equip = document.getElementById('libExEquipFilter')?.value || 'all';
+
+            if (clearBtn) {
+                clearBtn.style.display = q ? 'block' : 'none';
+            }
+
+            const filtered = EXERCISES_DB.filter(ex => {
+                if (equip !== 'all' && ex.equipment !== equip) return false;
+
+                if (muscle !== 'all') {
+                    const p = ex.primaryMuscles || [];
+                    const s = ex.secondaryMuscles || [];
+                    const allM = [...p, ...s];
+
+                    if (muscle === 'chest') {
+                        if (!allM.includes('chest') && ex.category !== 'push') return false;
+                    } else if (muscle === 'back') {
+                        if (!allM.includes('back') && ex.category !== 'pull') return false;
+                    } else if (muscle === 'shoulders') {
+                        if (!allM.includes('shoulders')) return false;
+                    } else if (muscle === 'legs') {
+                        const legMuscles = ['quads', 'hamstrings', 'glutes', 'calves'];
+                        if (!allM.some(m => legMuscles.includes(m)) && !['legs_quad', 'legs_hinge'].includes(ex.category)) return false;
+                    } else if (muscle === 'core') {
+                        if (!allM.includes('core') && ex.category !== 'core') return false;
+                    } else if (muscle === 'arms') {
+                        if (!allM.some(m => ['biceps', 'triceps'].includes(m))) return false;
+                    } else if (muscle === 'conditioning') {
+                        if (ex.category !== 'conditioning' && !(ex.tags || []).includes('conditioning') && !ex.isComplex) return false;
+                    }
+                }
+
+                if (q) {
+                    const combined = (
+                        (ex.name || '') + ' ' + 
+                        (ex.muscle || '') + ' ' + 
+                        (ex.cue || '') + ' ' + 
+                        (ex.equipment || '') + ' ' + 
+                        (ex.category || '')
+                    ).toLowerCase();
+                    if (!combined.includes(q)) return false;
+                }
+
+                return true;
+            });
+
+            if (countBadge) {
+                countBadge.innerText = `${filtered.length} Egzersiz`;
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align:center; padding:32px 16px; background:rgba(0,0,0,0.2); border-radius:12px; border:1px dashed var(--border);">
+                        <div style="font-size:28px; margin-bottom:8px;">🔍</div>
+                        <div style="font-size:13.5px; font-weight:800; color:#fff; margin-bottom:4px;">Aramanıza Uygun Egzersiz Bulunamadı</div>
+                        <div style="font-size:12px; color:var(--text-secondary); margin-bottom:12px;">Filtreleri veya arama kelimesini değiştirerek tekrar deneyebilirsiniz.</div>
+                        <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 12px;" onclick="document.getElementById('libExSearchInput').value=''; document.getElementById('libExMuscleFilter').value='all'; document.getElementById('libExEquipFilter').value='all'; renderLibraryExerciseCatalog();">
+                            Filtreleri Sıfırla
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            filtered.forEach(ex => {
+                const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) 
+                    || (typeof categoryFallback !== 'undefined' && categoryFallback[ex.category]) 
+                    || (typeof guideLibrary !== 'undefined' ? guideLibrary.goblet_squat : null);
+                const thumbImg = guide?.form || ex.diagram || '';
+                
+                const eqInfo = (typeof EQUIP_LABELS !== 'undefined' && EQUIP_LABELS[ex.equipment]) 
+                    ? `${EQUIP_LABELS[ex.equipment].icon} ${EQUIP_LABELS[ex.equipment].label}` 
+                    : (ex.equipment || 'Serbest');
+
+                const pNames = (ex.primaryMuscles || []).map(m => (typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m]?.name) || m).join(', ');
+
+                html += `
+                    <div class="lib-ex-card">
+                        <div style="display:flex; gap:10px; align-items:flex-start;">
+                            <div class="ex-thumb-wrap" style="width:56px; height:56px; flex-shrink:0; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')" title="Form ve Detayı İncele">
+                                ${thumbImg ? `<img src="${thumbImg}" class="ex-thumb-img" alt="${escapeHTML(ex.name)}" loading="lazy">` : '🏋️'}
+                            </div>
+                            <div style="flex:1; min-width:0;">
+                                <div style="font-size:13.5px; font-weight:800; color:#fff; line-height:1.25; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
+                                    ${escapeHTML(ex.name)}
+                                </div>
+                                <div style="display:flex; gap:4px; flex-wrap:wrap; margin-top:5px;">
+                                    <span class="ex-chip-badge equip">${escapeHTML(eqInfo)}</span>
+                                    ${pNames ? `<span class="ex-chip-badge muscle">🎯 ${escapeHTML(pNames)}</span>` : ''}
+                                    <span class="ex-chip-badge mechanic">${ex.mechanic === 'compound' ? '⚡ Bileşik' : '🎯 İzolasyon'}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        ${ex.cue ? `
+                            <div style="font-size:11px; color:#cbd5e1; margin-top:8px; line-height:1.35; background:rgba(0,0,0,0.25); padding:6px 8px; border-radius:6px; border-left:2px solid var(--gold);">
+                                💡 <em>${escapeHTML(ex.cue.length > 90 ? ex.cue.substring(0, 90) + '...' : ex.cue)}</em>
+                            </div>
+                        ` : ''}
+
+                        <div style="display:flex; gap:6px; margin-top:10px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06);">
+                            <button type="button" class="btn btn-outline" style="flex:1; font-size:11px; padding:6px 8px;" onclick="openExerciseDetailModal('${ex.id}')">
+                                👁️ Form & Detay
+                            </button>
+                            <button type="button" class="btn btn-gold" style="flex:1.3; font-size:11px; padding:6px 8px; font-weight:800;" onclick="openAddToProgramOptions('${ex.id}')">
+                                ➕ Programa Ekle
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // ==================== ADD TO PROGRAM OPTIONS MODAL LOGIC ====================
+        function openAddToProgramOptions(exId) {
+            const ex = EXERCISES_DB.find(e => e.id === exId);
+            if (!ex) return;
+
+            activeQuickAddExId = exId;
+            const modal = document.getElementById('addToProgramOptionsModal');
+            if (!modal) return;
+
+            const titleEl = document.getElementById('addToProgModalTitle');
+            const subEl = document.getElementById('addToProgModalSubtitle');
+            const dynamicBody = document.getElementById('addToProgModalBody');
+
+            if (titleEl) titleEl.innerText = `➕ ${ex.name}`;
+            const pNames = (ex.primaryMuscles || []).map(m => (typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m]?.name) || m).join(', ');
+            const eqInfo = (typeof EQUIP_LABELS !== 'undefined' && EQUIP_LABELS[ex.equipment]) 
+                ? `${EQUIP_LABELS[ex.equipment].icon} ${EQUIP_LABELS[ex.equipment].label}` 
+                : (ex.equipment || 'Serbest');
+
+            if (subEl) subEl.innerHTML = `<strong>Hedef:</strong> ${escapeHTML(pNames || ex.muscle || '')} • <strong>Ekipman:</strong> ${escapeHTML(eqInfo)}`;
+
+            const isWorkoutActive = Boolean(activeWorkoutSession && Array.isArray(activeWorkoutSession.exercises));
+
+            let html = `
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <!-- SEÇENEK 1: HAFTALIK PROGRAMIMA / GÜNE PLANLA -->
+                    <div class="add-to-prog-card" onclick="closeAddToProgramOptionsModal(); openQuickAddToDayModal('${ex.id}');">
+                        <div style="font-size:24px; flex-shrink:0;">📅</div>
+                        <div style="flex:1;">
+                            <div style="font-size:13px; font-weight:800; color:#fff;">Haftalık Programıma Planla</div>
+                            <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
+                                Pazartesi-Pazar günlerinden birine ilave hareket veya yeni takviye seansı olarak bağlayın.
+                            </div>
+                        </div>
+                        <div style="font-size:12px; color:var(--gold); font-weight:800;">Güne Ata ➔</div>
+                    </div>
+
+                    <!-- SEÇENEK 2: PROGRAM ATÖLYESİNE EKLE -->
+                    <div class="add-to-prog-card" style="cursor:default; align-items:flex-start;">
+                        <div style="font-size:24px; flex-shrink:0; margin-top:2px;">🎯</div>
+                        <div style="flex:1;">
+                            <div style="font-size:13px; font-weight:800; color:#fff;">Program Atölyesi Taslağına Ekle</div>
+                            <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
+                                Kendi özel programınızı kurduğunuz Atölye taslağına ilave eder.
+                            </div>
+                            <div style="display:flex; align-items:center; gap:6px; margin-top:8px; flex-wrap:wrap;">
+                                <select id="addToStudioSetsSelect" style="background:#111; color:#fff; border:1px solid var(--border); font-size:11px; padding:5px 8px; border-radius:6px;">
+                                    <option value="3" selected>3 Set</option>
+                                    <option value="4">4 Set</option>
+                                    <option value="5">5 Set</option>
+                                    <option value="2">2 Set</option>
+                                </select>
+                                <select id="addToStudioRepsSelect" style="background:#111; color:#fff; border:1px solid var(--border); font-size:11px; padding:5px 8px; border-radius:6px;">
+                                    <option value="8-12" selected>8-12 Tekrar</option>
+                                    <option value="4-6">4-6 Tekrar</option>
+                                    <option value="12-15">12-15 Tekrar</option>
+                                    <option value="15-20">15-20 Tekrar</option>
+                                </select>
+                                <button type="button" class="btn btn-gold" style="font-size:11px; padding:5px 12px; font-weight:800;" onclick="applyAddToStudioRoutine('${ex.id}')">
+                                    ➕ Atölyeye Ekle
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+            `;
+
+            if (isWorkoutActive) {
+                html += `
+                    <!-- SEÇENEK 3: AKTİF CANLI ANTRENMANA EKLE -->
+                    <div class="add-to-prog-card active-workout-highlight" onclick="applyAddToActiveWorkout('${ex.id}')">
+                        <div style="font-size:24px; flex-shrink:0;">🏋️</div>
+                        <div style="flex:1;">
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <span style="font-size:13px; font-weight:800; color:var(--gold);">Şu Anki Aktif Antrenmana Ekle</span>
+                                <span style="font-size:9px; background:var(--green-success); color:#000; font-weight:900; padding:1px 5px; border-radius:3px;">CANLI</span>
+                            </div>
+                            <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
+                                Devam eden antrenmanınıza bu hareketi ilave egzersiz olarak sıraya alır.
+                            </div>
+                        </div>
+                        <div style="font-size:12px; color:var(--gold); font-weight:800;">Hemen Ekle ➔</div>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <!-- SEÇENEK 3 (BOŞTA): BU HAREKETLE HIZLI SEANS BAŞLAT -->
+                    <div class="add-to-prog-card" onclick="startQuickWorkoutWithExercise('${ex.id}')">
+                        <div style="font-size:24px; flex-shrink:0;">⚡</div>
+                        <div style="flex:1;">
+                            <div style="font-size:13px; font-weight:800; color:var(--cyan);">Bu Hareketle Hızlı Seans Başlat</div>
+                            <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
+                                Bu egzersizi başlangıç alarak hemen canlı bir serbest antrenman başlatın.
+                            </div>
+                        </div>
+                        <div style="font-size:12px; color:var(--cyan); font-weight:800;">Başlat ➔</div>
+                    </div>
+                `;
+            }
+
+            html += `</div>`;
+            dynamicBody.innerHTML = html;
+            modal.classList.add('active');
+        }
+
+        function closeAddToProgramOptionsModal() {
+            const modal = document.getElementById('addToProgramOptionsModal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        function applyAddToStudioRoutine(exId) {
+            const sets = parseInt(document.getElementById('addToStudioSetsSelect')?.value) || 3;
+            const reps = document.getElementById('addToStudioRepsSelect')?.value || '8-12';
+            
+            const ex = EXERCISES_DB.find(e => e.id === exId);
+            if (!ex) return;
+
+            if (!customRoutineState.exercises) customRoutineState.exercises = [];
+            customRoutineState.exercises.push({
+                exId: exId,
+                sets: sets,
+                reps: reps,
+                weight: ''
+            });
+
+            closeAddToProgramOptionsModal();
+            if (typeof renderCustomRoutine === 'function') renderCustomRoutine();
+            if (typeof renderRegionStatus === 'function') renderRegionStatus();
+            
+            showToast(`✅ "${ex.name}" Program Atölyesi taslağınıza eklendi! (Toplam ${customRoutineState.exercises.length} hareket)`);
+            playAlertSound();
+        }
+
+        function applyAddToActiveWorkout(exId) {
+            const ex = EXERCISES_DB.find(e => e.id === exId);
+            if (!ex || !activeWorkoutSession) return;
+
+            activeWorkoutSession.exercises.push({
+                ...ex,
+                targetSets: 3,
+                targetReps: '8-12',
+                logs: []
+            });
+
+            if (!activeWorkoutSetsData[ex.id]) {
+                activeWorkoutSetsData[ex.id] = [];
+                const user = getActiveUser();
+                const userWeights = user?.weights || {};
+                const defaultWeight = ex.weightKey && userWeights[ex.weightKey] ? (parseFloat(userWeights[ex.weightKey]) || '') : '';
+                for (let s = 1; s <= 3; s++) {
+                    activeWorkoutSetsData[ex.id].push({
+                        setNo: s,
+                        weight: defaultWeight,
+                        reps: 10,
+                        completed: false,
+                        completedAt: null
+                    });
+                }
+            }
+
+            activeFocusExIndex = activeWorkoutSession.exercises.length - 1;
+            activeFocusSetIndex = null;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+            
+            closeAddToProgramOptionsModal();
+            switchTab('activeWorkoutTab');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            showToast(`✅ "${ex.name}" canlı antrenmanınıza eklendi!`);
+            playAlertSound();
+        }
+
+        function startQuickWorkoutWithExercise(exId) {
+            const ex = EXERCISES_DB.find(e => e.id === exId);
+            if (!ex) return;
+
+            const sessionObj = {
+                id: 'quick_' + Date.now(),
+                title: `${ex.name} Odaklı Seans`,
+                split: 'custom',
+                splitName: ex.name,
+                style: 'classic',
+                goal: 'hypertrophy',
+                duration: 30,
+                scheme: { sets: 3, reps: '8-12', rest: 60 },
+                warmups: [
+                    { name: "Eklemsel CARs (Dinamik Isınma)", dur: "90 sn", cue: "Eklem kapsüllerini uyar ve ısıt." }
+                ],
+                exercises: [{
+                    ...ex,
+                    targetSets: 3,
+                    targetReps: '8-12',
+                    logs: []
+                }],
+                finisher: { name: "Balistik Bitiş", desc: "Tempolu taşıma veya swing." },
+                createdAt: Date.now()
+            };
+
+            activeWorkoutSession = sessionObj;
+            activeWorkoutStartTime = Date.now();
+            activeWorkoutIsPaused = false;
+            activeWorkoutPausedAt = null;
+            activeWorkoutTotalPausedMs = 0;
+            activeWorkoutSetsData = {};
+            activeWorkoutViewMode = 'focus';
+            activeFocusExIndex = 0;
+            activeFocusSetIndex = null;
+
+            const user = getActiveUser();
+            const userWeights = user?.weights || {};
+            const defaultWeight = ex.weightKey && userWeights[ex.weightKey] ? (parseFloat(userWeights[ex.weightKey]) || '') : '';
+
+            activeWorkoutSetsData[ex.id] = [];
+            for (let s = 1; s <= 3; s++) {
+                activeWorkoutSetsData[ex.id].push({
+                    setNo: s,
+                    weight: defaultWeight,
+                    reps: 10,
+                    completed: false,
+                    completedAt: null
+                });
+            }
+
+            closeAddToProgramOptionsModal();
+            saveActiveWorkoutStateToStorage();
+            startWorkoutTimer();
+            renderActiveWorkout();
+            switchTab('activeWorkoutTab');
+            resetTimer(60);
+            playAlertSound();
+            requestWakeLock();
+            showToast(`🚀 "${ex.name}" ile canlı antrenman başladı!`);
+        }
+
         function renderLibrary() {
+            if (currentLibrarySubTab === 'exercises') {
+                renderLibraryExerciseCatalog();
+                return;
+            }
             const user = getActiveUser();
             const key = `celik_kodu_custom_programs_${user.id}`;
             let saved = [];
@@ -14515,7 +15116,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=77')
+                navigator.serviceWorker.register('./sw.js?v=78')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
@@ -15265,10 +15866,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     };
                 }
                 if (btnAdd) {
-                    btnAdd.innerText = '➕ Bu Hareketi Ekle';
+                    btnAdd.innerText = '➕ Programa Ekle';
                     btnAdd.onclick = () => {
-                        addExerciseToCustomRoutine(exId);
                         closeExerciseDetailModal();
+                        openAddToProgramOptions(exId);
                     };
                 }
             }

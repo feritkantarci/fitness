@@ -1,4 +1,4 @@
-const CACHE_NAME = 'celik-kodu-cache-v77';
+const CACHE_NAME = 'celik-kodu-cache-v78';
 const ASSETS = [
   './',
   './assets/guides/guide_db_thruster_form.jpg',
