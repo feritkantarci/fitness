@@ -3386,7 +3386,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v71</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v72</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3422,7 +3422,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" title="Uygulama Canlı Sürümü">v71</span>
+                    <span class="app-version-badge" id="appVersionBadge" title="Uygulama Canlı Sürümü">v72</span>
                 </div>
                 <div class="modern-user-badge" onclick="openMoreSheet()" title="Profil & Menü">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -3439,7 +3439,7 @@
                     <div>
                         <div style="display:flex; align-items:center; gap:6px;">
                             <span class="auth-name-title">Çelik Kodu</span>
-                            <span class="app-version-badge">v71</span>
+                            <span class="app-version-badge">v72</span>
                         </div>
                         <div style="font-size:11px; color:var(--text-secondary);" id="headerUserSub">🎯 Özel Kilolarım & Profil</div>
                     </div>
@@ -3461,7 +3461,7 @@
 
             <!-- HERO BRANDING (DESKTOP ONLY) -->
             <div class="hero-banner">
-                <div class="badge-brand">⚔️ ÇELİK KODU • PROGRAM MİMARI • v71</div>
+                <div class="badge-brand">⚔️ ÇELİK KODU • PROGRAM MİMARI • v72</div>
                 <h1 class="hero-title">Kişisel Antrenmanını Oluştur</h1>
                 <p class="hero-subtitle">Çalıştırmak istediğin bölgeyi ve elindeki ekipmanları seç, sana özel bilimsel antrenman programını anında hazırla.</p>
             </div>
@@ -3611,56 +3611,47 @@
             <!-- ==================== TAB 2: ACTIVE WORKOUT ==================== -->
             <div id="activeWorkoutTab" class="tab-content">
 
-                <!-- 1. WORKOUT STICKY HUD (GİZLENEBİLİR & SABİT PENCERE) -->
-                <div id="activeWorkoutHUD" class="workout-sticky-hud" style="display:none;">
-                    <div class="hud-main-bar">
+                <!-- 1. WORKOUT STICKY HUD (SADELEŞTİRİLMİŞ & KOMPAKT) -->
+                <div id="activeWorkoutHUD" class="workout-sticky-hud" style="display:none; padding:6px 10px; margin-bottom:8px;">
+                    <div class="hud-main-bar" style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:nowrap;">
                         <!-- Sol: Toplam Süre -->
-                        <div class="hud-timer-col">
-                            <span class="hud-label">⏱️ TOPLAM SÜRE</span>
-                            <div class="hud-time-val" id="workoutTotalTimerDisplay">00:00</div>
-                            <div class="hud-collapsible-part" style="margin-top:2px; display:flex; gap:3px;">
-                                <button type="button" class="btn-hud-tiny" id="btnToggleWorkoutPause" onclick="toggleWorkoutPause()">⏸️ Duraklat</button>
-                                <button type="button" class="btn-hud-tiny" style="color:#fca5a5; border-color:rgba(239,68,68,0.4);" onclick="cancelActiveWorkout()" title="Antrenmanı sonlandır ve iptal et">🛑 İptal</button>
-                            </div>
+                        <div class="hud-timer-col" style="display:flex; flex-direction:row; align-items:center; gap:5px; min-width:auto;">
+                            <span style="font-size:12px;">⏱️</span>
+                            <div class="hud-time-val" id="workoutTotalTimerDisplay" style="font-size:16px;">00:00</div>
+                            <button type="button" class="btn-hud-tiny" id="btnToggleWorkoutPause" onclick="toggleWorkoutPause()" title="Duraklat / Sürdür" style="padding:3px 6px; font-size:11px;">⏸️</button>
                         </div>
 
                         <!-- Orta: Dinlenme Sayacı (Rest Timer) -->
-                        <div class="hud-rest-col" id="hudRestBox">
-                            <div class="hud-rest-header">
-                                <span class="hud-label" style="color:var(--gold);">⏳ DİNLENME</span>
-                                <span id="hudRestStatusBadge" class="hud-rest-tag">Hazır</span>
-                            </div>
-                            <div class="hud-rest-val" id="timerDisplay">00:45</div>
-                            <div class="hud-rest-btns hud-collapsible-part">
-                                <button type="button" class="btn-hud-tiny" onclick="adjustTimer(-15)" title="15 saniye azalt">-15s</button>
-                                <button type="button" class="btn-hud-tiny" id="btnPlayPauseTimer" onclick="toggleTimer()">▶ Başlat</button>
-                                <button type="button" class="btn-hud-tiny" onclick="adjustTimer(15)" title="15 saniye ekle">+15s</button>
-                                <button type="button" class="btn-hud-tiny" style="color:var(--cyan); border-color:rgba(56,189,248,0.4);" onclick="skipRestTimer()" title="Dinlenmeyi bitir">⏩ Geç</button>
+                        <div class="hud-rest-col" id="hudRestBox" style="display:flex; flex-direction:row; align-items:center; gap:5px; padding:3px 8px; min-width:auto;">
+                            <span style="font-size:12px; color:var(--gold);">⏳</span>
+                            <div class="hud-rest-val" id="timerDisplay" style="font-size:17px;">00:45</div>
+                            <span id="hudRestStatusBadge" style="display:none;">Hazır</span>
+                            <div class="hud-rest-btns" style="display:flex; gap:3px; margin:0;">
+                                <button type="button" class="btn-hud-tiny" id="btnPlayPauseTimer" onclick="toggleTimer()" title="Başlat / Duraklat" style="padding:3px 7px; font-weight:800;">▶</button>
+                                <button type="button" class="btn-hud-tiny" onclick="adjustTimer(15)" title="15 saniye ekle" style="padding:3px 5px; font-size:9.5px;">+15s</button>
+                                <button type="button" class="btn-hud-tiny" style="color:var(--cyan); border-color:rgba(56,189,248,0.4); padding:3px 6px;" onclick="skipRestTimer()" title="Dinlenmeyi bitir">⏩</button>
                             </div>
                         </div>
 
-                        <!-- Sağ: Ekran Kilidi & Kontroller -->
-                        <div class="hud-meta-col">
-                            <button type="button" id="wakeLockStatusBtn" class="wake-lock-pill" onclick="toggleWakeLockManual()" title="Ekranı açık tut (Dokunarak değiştir)">
-                                🟢 Ekran Açık
-                            </button>
-                            <div class="hud-collapsible-part" style="display:flex; gap:4px;">
-                                <button type="button" class="btn-view-toggle active" id="btnViewFocus" onclick="setActiveWorkoutViewMode('focus')" title="Tek hareket odak modu">🎯 Odak</button>
-                                <button type="button" class="btn-view-toggle" id="btnViewList" onclick="setActiveWorkoutViewMode('list')" title="Tüm hareketler listesi">📋 Liste</button>
+                        <!-- Sağ: Görünüm & Ekran Kilidi -->
+                        <div class="hud-meta-col" style="display:flex; align-items:center; gap:4px;">
+                            <div style="display:flex; gap:2px; background:rgba(0,0,0,0.35); border-radius:6px; padding:2px;">
+                                <button type="button" class="btn-view-toggle active" id="btnViewFocus" onclick="setActiveWorkoutViewMode('focus')" title="Tek hareket odak modu" style="padding:4px 7px; font-size:12px;">🎯</button>
+                                <button type="button" class="btn-view-toggle" id="btnViewList" onclick="setActiveWorkoutViewMode('list')" title="Tüm hareketler listesi" style="padding:4px 7px; font-size:12px;">📋</button>
                             </div>
-                            <!-- Gizle/Genişlet Butonu -->
-                            <button type="button" class="btn-hud-collapse" id="btnCollapseHUD" onclick="toggleHUDCollapse()" title="Paneli küçült veya genişlet">
-                                <span id="hudCollapseIcon">▲</span>
+                            <button type="button" id="wakeLockStatusBtn" class="wake-lock-pill" onclick="toggleWakeLockManual()" title="Ekranı açık tut" style="padding:3px 6px; font-size:11px; margin:0;">
+                                🟢
                             </button>
+                            <span id="btnCollapseHUD" style="display:none;"><span id="hudCollapseIcon"></span></span>
                         </div>
                     </div>
 
-                    <!-- İlerleme Çubuğu Satırı -->
-                    <div class="hud-progress-row hud-collapsible-part">
-                        <div class="hud-progress-track">
+                    <!-- İnce İlerleme Çubuğu Satırı -->
+                    <div class="hud-progress-row" style="margin-top:4px;">
+                        <div class="hud-progress-track" style="height:3px;">
                             <div class="hud-progress-fill" id="liveProgressBarFill" style="width:0%;"></div>
                         </div>
-                        <div class="hud-progress-info">
+                        <div class="hud-progress-info" style="font-size:9.5px; margin-top:2px; display:flex; justify-content:space-between;">
                             <span id="liveProgressText">Set İlerlemesi: 0 / 0 (%0)</span>
                             <span id="liveProgressDetail" style="font-weight:700; color:var(--gold);">Hazır</span>
                         </div>
@@ -6070,26 +6061,23 @@
 
             return `
                 <div class="pos-guide-wrapper">
-                    <div class="pos-guide-header" onclick="event.stopPropagation(); togglePosGuide('${collapseId}')">
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <span class="pos-type-badge ${badgeType}">${typeLabel}</span>
-                            <span class="pos-guide-hint">📸 Form • 🧬 Anatomi • 📝 Talimatlar</span>
-                        </div>
-                        <button type="button" class="btn-toggle-guide" id="btn_${collapseId}" onclick="event.stopPropagation(); togglePosGuide('${collapseId}')">
+                    <div class="pos-guide-header" onclick="event.stopPropagation(); togglePosGuide('${collapseId}')" style="padding:6px 10px;">
+                        <span class="pos-type-badge ${badgeType}" style="padding:3px 8px; font-size:11px;">📐 Form Kılavuzu</span>
+                        <button type="button" class="btn-toggle-guide" id="btn_${collapseId}" onclick="event.stopPropagation(); togglePosGuide('${collapseId}')" style="padding:3px 8px; font-size:11.5px;">
                             <span id="icon_${collapseId}">${btnText}</span>
                         </button>
                     </div>
                     <div class="${contentClass}" id="${collapseId}">
-                        <!-- TABS SWITCHER -->
-                        <div class="guide-toggle-tabs">
-                            <button type="button" class="btn-guide-tab active" id="tab_btn_form_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'form')">
-                                📸 Form Rehberi
+                        <!-- TABS SWITCHER (BASİT İKONLAR) -->
+                        <div class="guide-toggle-tabs" style="display:flex; justify-content:center; gap:6px; padding:4px;">
+                            <button type="button" class="btn-guide-tab active" id="tab_btn_form_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'form')" title="Form Rehberi" style="padding:5px 12px; font-size:12px; font-weight:800;">
+                                📸 Form
                             </button>
-                            <button type="button" class="btn-guide-tab" id="tab_btn_anatomi_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'anatomi')">
-                                🧬 Çalışan Kaslar
+                            <button type="button" class="btn-guide-tab" id="tab_btn_anatomi_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'anatomi')" title="Çalışan Kaslar" style="padding:5px 12px; font-size:12px; font-weight:800;">
+                                🧬 Kaslar
                             </button>
-                            <button type="button" class="btn-guide-tab" id="tab_btn_adimlar_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'adimlar')">
-                                📝 Adım Adım
+                            <button type="button" class="btn-guide-tab" id="tab_btn_adimlar_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'adimlar')" title="Adım Adım Talimatlar" style="padding:5px 12px; font-size:12px; font-weight:800;">
+                                📝 Adımlar
                             </button>
                         </div>
 
@@ -8313,23 +8301,6 @@
                 }
 
                 container.innerHTML = `
-                    <div class="workout-header-card" style="margin-bottom:12px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
-                            <div>
-                                <span class="badge-brand">CANLI ODAK MODU</span>
-                                <h2 style="font-size:16.5px; font-weight:800; color:#fff; margin:2px 0 0;">${escapeHTML(s.title)}</h2>
-                            </div>
-                            <div style="display:flex; gap:6px; align-items:center;">
-                                <button class="btn btn-danger-soft" style="padding:9px 12px; font-size:12px; font-weight:700;" onclick="cancelActiveWorkout()" title="Antrenmanı sonlandır ve iptal et">
-                                    🛑 İptal Et
-                                </button>
-                                <button class="btn btn-gold" style="padding:9px 15px; font-size:12.5px; font-weight:900;" onclick="openCompleteModal()">
-                                    🏁 BİTİR & KAYDET
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- FOCUS CARD -->
                     <div class="focus-workout-card">
                         <!-- NAV STEPPER BAR -->
@@ -8351,17 +8322,16 @@
                         </div>
 
                         <!-- EXERCISE INFO & TITLE (HER ZAMAN GÖRÜNÜR) -->
-                        <div style="margin-bottom:10px;">
-                            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
-                                <h2 style="font-size:20px; font-weight:900; color:#fff; line-height:1.2;">
+                        <div style="margin-bottom:8px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                                <h2 style="font-size:19px; font-weight:900; color:#fff; line-height:1.2; margin:0;">
                                     ${escapeHTML(ex.name)}
                                 </h2>
                                 <div style="display:flex; gap:4px; flex-shrink:0; align-items:center;">
                                     <span class="ex-badge badge-equip">${equipLabels[ex.equipment] || ex.equipment}</span>
-                                    <span class="ex-badge badge-muscle">${escapeHTML(ex.muscle ? ex.muscle.split(',')[0] : '')}</span>
                                 </div>
                             </div>
-                            <div style="font-size:12px; color:var(--text-secondary); margin-top:3px;">
+                            <div style="font-size:11.5px; color:var(--text-secondary); margin-top:3px;">
                                 🎯 Hedef: <strong style="color:var(--gold);">${sets.length} Set x ${s.scheme.reps}</strong> • Dinlenme: ${s.scheme.rest}s
                             </div>
                         </div>
@@ -8567,23 +8537,6 @@
             if (dock) dock.style.display = 'none';
 
             container.innerHTML = `
-                <div class="workout-header-card" style="margin-bottom:16px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
-                        <div>
-                            <span class="badge-brand">CANLI LİSTE</span>
-                            <h2 style="font-size:18px; font-weight:800; color:#fff;">${escapeHTML(s.title)}</h2>
-                        </div>
-                        <div style="display:flex; gap:6px; align-items:center;">
-                            <button class="btn btn-danger-soft" style="padding:9px 12px; font-size:12px; font-weight:700;" onclick="cancelActiveWorkout()" title="Antrenmanı sonlandır ve iptal et">
-                                🛑 İptal Et
-                            </button>
-                            <button class="btn btn-gold" style="padding:10px 14px; font-size:13px;" onclick="openCompleteModal()">
-                                🏁 BİTİR & KAYDET
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
                 ${s.exercises.map((ex, idx) => {
                     const sets = activeWorkoutSetsData[ex.id] || [];
                     const nextUncompletedIdx = sets.findIndex(st => !st.completed);
@@ -8598,7 +8551,6 @@
                                 </div>
                                 <div class="ex-tag-group">
                                     <span class="ex-badge badge-equip">${equipLabels[ex.equipment] || ex.equipment}</span>
-                                    <span class="ex-badge badge-muscle">${escapeHTML(ex.muscle ? ex.muscle.split(',')[0] : '')}</span>
                                     <button type="button" class="btn-report-mini" onclick="openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}')" title="Bu egzersiz veya görsel hatalıysa bildir">
                                         ⚠️ Bildir
                                     </button>
@@ -14392,7 +14344,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=71')
+                navigator.serviceWorker.register('./sw.js?v=72')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
