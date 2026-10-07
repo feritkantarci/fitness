@@ -382,6 +382,20 @@
             letter-spacing: 0.5px;
             color: #fff;
         }
+        .app-version-badge {
+            font-size: 10px;
+            font-weight: 900;
+            color: var(--gold);
+            background: rgba(245, 158, 11, 0.16);
+            border: 1px solid rgba(245, 158, 11, 0.45);
+            padding: 2px 7px;
+            border-radius: 10px;
+            letter-spacing: 0.5px;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.2);
+        }
         .modern-user-badge {
             display: flex;
             align-items: center;
@@ -3332,7 +3346,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v67</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3368,6 +3382,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
+                    <span class="app-version-badge" id="appVersionBadge" title="Uygulama Canlı Sürümü">v67</span>
                 </div>
                 <div class="modern-user-badge" onclick="openMoreSheet()" title="Profil & Menü">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -3382,8 +3397,9 @@
                 <div class="auth-user-info" onclick="switchTab('profileTab')">
                     <span class="auth-avatar">🥋</span>
                     <div>
-                        <div style="display:flex; align-items:center; gap:4px;">
+                        <div style="display:flex; align-items:center; gap:6px;">
                             <span class="auth-name-title">Çelik Kodu</span>
+                            <span class="app-version-badge">v67</span>
                         </div>
                         <div style="font-size:11px; color:var(--text-secondary);" id="headerUserSub">🎯 Özel Kilolarım & Profil</div>
                     </div>
@@ -3405,7 +3421,7 @@
 
             <!-- HERO BRANDING (DESKTOP ONLY) -->
             <div class="hero-banner">
-                <div class="badge-brand">⚔️ ÇELİK KODU • PROGRAM MİMARI</div>
+                <div class="badge-brand">⚔️ ÇELİK KODU • PROGRAM MİMARI • v67</div>
                 <h1 class="hero-title">Kişisel Antrenmanını Oluştur</h1>
                 <p class="hero-subtitle">Çalıştırmak istediğin bölgeyi ve elindeki ekipmanları seç, sana özel bilimsel antrenman programını anında hazırla.</p>
             </div>
