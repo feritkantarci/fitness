@@ -4102,14 +4102,30 @@
                 </div>
                 
                 <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
-                    <label for="scalePdfInput" class="btn btn-gold" style="display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:9px 18px; border-radius:20px; font-weight:800; cursor:pointer; margin:0;">
-                        📁 Dosyalarımdan PDF Seç
-                    </label>
-                    <input type="file" id="scalePdfInput" accept="application/pdf,.pdf" style="display:none;" onchange="handleScalePdfUpload(event)">
+                    <div style="position: relative; display: inline-flex;">
+                        <button type="button" class="btn btn-gold" style="display:inline-flex; align-items:center; gap:6px; font-size:12.5px; padding:10px 18px; border-radius:22px; font-weight:800; pointer-events:none;">
+                            📁 Dosyalarımdan PDF Seç
+                        </button>
+                        <input type="file" id="scalePdfInput" accept="application/pdf,.pdf" 
+                               style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer; font-size:0; z-index:10;" 
+                               onchange="handleScalePdfUpload(event)">
+                    </div>
                     
-                    <button type="button" class="btn btn-outline" style="display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:9px 18px; border-radius:20px; font-weight:800; border-color:var(--cyan); color:var(--cyan); cursor:pointer; background:rgba(56,189,248,0.12);" onclick="pasteFromClipboard(event)">
-                        📋 Panodan Yapıştır (Paste)
+                    <button type="button" class="btn btn-outline" style="display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:10px 16px; border-radius:22px; font-weight:800; border-color:var(--cyan); color:var(--cyan); background:rgba(56,189,248,0.12); cursor:pointer;" onclick="pasteFromClipboard(event)">
+                        📋 Panodan / Metinle Yapıştır
                     </button>
+                </div>
+
+                <div id="scaleManualPasteContainer" style="display:none; margin-top:12px; text-align:left; background:rgba(15,23,42,0.9); border:1px solid var(--border); border-radius:10px; padding:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <span style="font-size:11.5px; font-weight:800; color:var(--cyan);">📋 Rapor Metnini Yapıştırın</span>
+                        <button type="button" onclick="toggleScalePasteBox(false)" style="background:none; border:none; color:var(--text-secondary); font-size:14px; cursor:pointer;">✕</button>
+                    </div>
+                    <textarea id="scalePasteArea" class="form-input" style="width:100%; height:85px; font-size:11px; padding:8px; border-radius:8px; resize:vertical; font-family:monospace;" placeholder="Unique Health raporundan kopyaladığınız metni buraya yapıştırın (veya parmağınızı basılı tutup 'Yapıştır' seçin)..."></textarea>
+                    <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
+                        <button type="button" class="btn btn-outline" style="font-size:11px; padding:5px 12px;" onclick="toggleScalePasteBox(false)">İptal</button>
+                        <button type="button" class="btn btn-gold" style="font-size:11px; padding:5px 14px; font-weight:800;" onclick="parseScaleFromPastedTextarea()">⚡ Verileri Çek ve Doldur</button>
+                    </div>
                 </div>
 
                 <div id="scalePdfSuccessBanner" style="display:none; margin-top:12px; padding:8px 12px; background:rgba(16,185,129,0.15); border:1px solid var(--green-success); border-radius:8px; font-size:11.5px; color:#34d399; font-weight:700;"></div>
@@ -11874,7 +11890,21 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             playAlertSound();
         }
 
-        // ----- MOBILE & BUTTON PASTE (CLIPBOARD API) -----
+        // ----- MOBILE & BUTTON PASTE (CLIPBOARD API & INLINE BOX) -----
+        function toggleScalePasteBox(forceShow) {
+            const box = document.getElementById('scaleManualPasteContainer');
+            if (!box) return;
+            const isVisible = box.style.display !== 'none';
+            const show = forceShow !== undefined ? forceShow : !isVisible;
+            box.style.display = show ? 'block' : 'none';
+            if (show) {
+                const ta = document.getElementById('scalePasteArea');
+                if (ta) {
+                    ta.focus();
+                }
+            }
+        }
+
         async function pasteFromClipboard(e) {
             if (e) {
                 e.stopPropagation();
@@ -11882,27 +11912,22 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
             const banner = document.getElementById('scalePdfSuccessBanner');
 
-            try {
-                if (!navigator.clipboard) {
-                    alert("Tarayıcınız panoya doğrudan erişimi desteklemiyor. Lütfen 'Dosyalarımdan PDF Seç' butonunu kullanınız.");
-                    return;
-                }
-
-                if (banner) {
-                    banner.style.display = 'block';
-                    banner.style.background = 'rgba(56,189,248,0.15)';
-                    banner.style.borderColor = 'var(--cyan)';
-                    banner.style.color = 'var(--cyan)';
-                    banner.innerHTML = '⏳ Panodaki içerik taranıyor...';
-                }
-
-                // 1. Panodaki dosya / blob öğelerini kontrol et
+            // 1. Önce modern tarayıcı panosundan otomatik okumayı dene (Masaüstü Chrome/Edge vb.)
+            if (navigator.clipboard) {
+                // PDF Dosyası kontrolü (Cmd+C ile kopyalanan dosya)
                 if (navigator.clipboard.read) {
                     try {
                         const items = await navigator.clipboard.read();
                         for (const item of items) {
                             for (const type of item.types) {
                                 if (type === 'application/pdf' || type.includes('pdf')) {
+                                    if (banner) {
+                                        banner.style.display = 'block';
+                                        banner.style.background = 'rgba(56,189,248,0.15)';
+                                        banner.style.borderColor = 'var(--cyan)';
+                                        banner.style.color = 'var(--cyan)';
+                                        banner.innerHTML = '⏳ Panodaki PDF taranıyor...';
+                                    }
                                     const blob = await item.getType(type);
                                     const file = new File([blob], "unique_health_pasted.pdf", { type: 'application/pdf' });
                                     await processScalePdfFile(file);
@@ -11911,37 +11936,46 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             }
                         }
                     } catch(readErr) {
-                        console.log("clipboard.read items fallback:", readErr);
+                        console.log("clipboard.read fallback:", readErr);
                     }
                 }
 
-                // 2. Panodaki metni kontrol et
+                // Metin kontrolü (PDF içinden seçilip kopyalanan metin)
                 if (navigator.clipboard.readText) {
-                    const text = await navigator.clipboard.readText();
-                    if (text && text.trim().length > 0) {
-                        const parsed = extractUniqueHealthData(text);
-                        if (parsed && parsed.weight) {
-                            applyParsedScaleData(parsed, 'Panodan Yapıştırılan');
-                            return;
+                    try {
+                        const text = await navigator.clipboard.readText();
+                        if (text && text.trim().length > 0) {
+                            const parsed = extractUniqueHealthData(text);
+                            if (parsed && parsed.weight) {
+                                applyParsedScaleData(parsed, 'Panodan Okunan Metin');
+                                return;
+                            }
                         }
+                    } catch(textErr) {
+                        console.log("clipboard.readText fallback:", textErr);
                     }
-                }
-
-                if (banner) {
-                    banner.style.background = 'rgba(245,158,11,0.15)';
-                    banner.style.borderColor = 'var(--gold)';
-                    banner.style.color = 'var(--gold-light)';
-                    banner.innerHTML = '⚠️ Panoda geçerli bir Unique Health PDF veya ölçüm verisi bulunamadı. Lütfen önce PDF dosyanızı kopyalayın veya <strong>"Dosyalarımdan PDF Seç"</strong> butonuna dokunun.';
-                }
-            } catch(err) {
-                console.warn("Pano erişim hatası:", err);
-                if (banner) {
-                    banner.style.background = 'rgba(239,68,68,0.15)';
-                    banner.style.borderColor = 'var(--red-alert)';
-                    banner.style.color = '#f87171';
-                    banner.innerHTML = '❌ Pano erişim izni verilmedi veya desteklenmiyor. Lütfen <strong>"Dosyalarımdan PDF Seç"</strong> butonunu kullanarak PDF dosyanızı doğrudan seçiniz.';
                 }
             }
+
+            // 2. Mobil tarayıcıda veya panoya doğrudan erişilemeyen durumlarda:
+            // Hata vermek yerine doğrudan metin yapıştırma kutusunu aç!
+            toggleScalePasteBox(true);
+        }
+
+        function parseScaleFromPastedTextarea() {
+            const ta = document.getElementById('scalePasteArea');
+            if (!ta || !ta.value.trim()) {
+                alert("Lütfen kopyaladığınız rapor metnini kutucuğa yapıştırınız.");
+                return;
+            }
+            const parsed = extractUniqueHealthData(ta.value);
+            if (!parsed || !parsed.weight) {
+                alert("Metin içinde geçerli kilo (ağırlık) verisi tespit edilemedi.\n\nEn kolay yöntem: 'Dosyalarımdan PDF Seç' butonuna dokunarak PDF dosyasını doğrudan seçebilirsiniz.");
+                return;
+            }
+            applyParsedScaleData(parsed, 'Yapıştırılan Metin');
+            toggleScalePasteBox(false);
+            ta.value = '';
         }
 
         // ----- GLOBAL CMD+V / CTRL+V PASTE LISTENER -----
