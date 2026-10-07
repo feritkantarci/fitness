@@ -396,6 +396,11 @@
             align-items: center;
             box-shadow: 0 0 8px rgba(245, 158, 11, 0.2);
         }
+        .modern-bar-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
         .modern-user-badge {
             display: flex;
             align-items: center;
@@ -425,6 +430,11 @@
             font-size: 12px;
             font-weight: 700;
             color: #fff;
+        }
+        @media (max-width: 768px) {
+            .desktop-only-action {
+                display: none !important;
+            }
         }
 
         /* ==================== HIDEABLE BOTTOM NAVIGATION ==================== */
@@ -3386,7 +3396,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v74</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v75</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3417,51 +3427,34 @@
     <div id="mainAppWrapper" style="display:none;">
         <div class="app-container">
 
-            <!-- MODERN COMPACT APP BAR (MOBİL & GENEL) -->
+            <!-- MODERN UNIFIED APP BAR -->
             <div class="modern-app-bar">
-                <div class="modern-brand" onclick="switchTab('generatorTab')">
+                <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" title="Uygulama Canlı Sürümü">v74</span>
+                    <span class="app-version-badge" id="appVersionBadge" title="Uygulama Canlı Sürümü">v75</span>
                 </div>
-                <div class="modern-user-badge" onclick="openMoreSheet()" title="Profil & Menü">
+                <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
-                    <span class="modern-user-avatar" id="headerUserAvatar">🥋</span>
-                    <span class="modern-user-name" id="headerUserName">Sporcu</span>
-                    <span class="auth-role-tag role-admin" id="headerUserRoleBadge">YÖNETİCİ</span>
-                </div>
-            </div>
-
-            <!-- HEADER AUTH BAR (DESKTOP) -->
-            <div class="auth-bar">
-                <div class="auth-user-info" onclick="switchTab('profileTab')">
-                    <span class="auth-avatar">🥋</span>
-                    <div>
-                        <div style="display:flex; align-items:center; gap:6px;">
-                            <span class="auth-name-title">Çelik Kodu</span>
-                            <span class="app-version-badge">v74</span>
-                        </div>
-                        <div style="font-size:11px; color:var(--text-secondary);" id="headerUserSub">🎯 Özel Kilolarım & Profil</div>
+                    <button class="btn-auth-action desktop-only-action" onclick="openBugReportsPoolModal()" title="Egzersiz Hata Bildirim Havuzu" style="border-color:rgba(239, 68, 68, 0.45); color:#fca5a5;">
+                        ⚠️ <span>Hata Havuzu</span>
+                    </button>
+                    <button class="btn-auth-action desktop-only-action" id="btnAdminPanel" onclick="openAdminModal()" style="display:none;">
+                        👑 <span>Sporcular</span>
+                    </button>
+                    <div class="modern-user-badge" onclick="if(window.innerWidth <= 768){ openMoreSheet(); } else { switchTab('profileTab'); }" title="Profil & Menü">
+                        <span class="modern-user-avatar" id="headerUserAvatar">🥋</span>
+                        <span class="modern-user-name" id="headerUserName">Sporcu</span>
+                        <span class="auth-role-tag role-admin" id="headerUserRoleBadge">YÖNETİCİ</span>
                     </div>
-                </div>
-
-                <div class="auth-actions">
-                    <span class="cloud-sync-badge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
-                    <button class="btn-auth-action" onclick="openBugReportsPoolModal()" title="Egzersiz Hata Bildirim Havuzu" style="border-color:rgba(239, 68, 68, 0.45); color:#fca5a5;">
-                        ⚠️ Hata Havuzu
-                    </button>
-                    <button class="btn-auth-action" id="btnAdminPanel" onclick="openAdminModal()" style="display:none;">
-                        👑 Sporcular
-                    </button>
-                    <button class="btn-auth-action btn-logout" onclick="handleAuthLogout()" title="Oturumu Kapat">
-                        🚪 Çıkış
+                    <button class="btn-auth-action btn-logout desktop-only-action" onclick="handleAuthLogout()" title="Oturumu Kapat">
+                        🚪 <span>Çıkış</span>
                     </button>
                 </div>
             </div>
 
             <!-- HERO BRANDING (DESKTOP ONLY) -->
             <div class="hero-banner">
-                <div class="badge-brand">⚔️ ÇELİK KODU • PROGRAM MİMARI • v74</div>
                 <h1 class="hero-title">Kişisel Antrenmanını Oluştur</h1>
                 <p class="hero-subtitle">Çalıştırmak istediğin bölgeyi ve elindeki ekipmanları seç, sana özel bilimsel antrenman programını anında hazırla.</p>
             </div>
