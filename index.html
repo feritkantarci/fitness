@@ -3346,7 +3346,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v68</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v69</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3382,7 +3382,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" title="Uygulama Canlı Sürümü">v68</span>
+                    <span class="app-version-badge" id="appVersionBadge" title="Uygulama Canlı Sürümü">v69</span>
                 </div>
                 <div class="modern-user-badge" onclick="openMoreSheet()" title="Profil & Menü">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -3399,7 +3399,7 @@
                     <div>
                         <div style="display:flex; align-items:center; gap:6px;">
                             <span class="auth-name-title">Çelik Kodu</span>
-                            <span class="app-version-badge">v68</span>
+                            <span class="app-version-badge">v69</span>
                         </div>
                         <div style="font-size:11px; color:var(--text-secondary);" id="headerUserSub">🎯 Özel Kilolarım & Profil</div>
                     </div>
@@ -3421,7 +3421,7 @@
 
             <!-- HERO BRANDING (DESKTOP ONLY) -->
             <div class="hero-banner">
-                <div class="badge-brand">⚔️ ÇELİK KODU • PROGRAM MİMARI • v68</div>
+                <div class="badge-brand">⚔️ ÇELİK KODU • PROGRAM MİMARI • v69</div>
                 <h1 class="hero-title">Kişisel Antrenmanını Oluştur</h1>
                 <p class="hero-subtitle">Çalıştırmak istediğin bölgeyi ve elindeki ekipmanları seç, sana özel bilimsel antrenman programını anında hazırla.</p>
             </div>
@@ -3578,8 +3578,9 @@
                         <div class="hud-timer-col">
                             <span class="hud-label">⏱️ TOPLAM SÜRE</span>
                             <div class="hud-time-val" id="workoutTotalTimerDisplay">00:00</div>
-                            <div class="hud-collapsible-part" style="margin-top:2px;">
+                            <div class="hud-collapsible-part" style="margin-top:2px; display:flex; gap:3px;">
                                 <button type="button" class="btn-hud-tiny" id="btnToggleWorkoutPause" onclick="toggleWorkoutPause()">⏸️ Duraklat</button>
+                                <button type="button" class="btn-hud-tiny" style="color:#fca5a5; border-color:rgba(239,68,68,0.4);" onclick="cancelActiveWorkout()" title="Antrenmanı sonlandır ve iptal et">🛑 İptal</button>
                             </div>
                         </div>
 
@@ -8248,6 +8249,9 @@
                                 <h2 style="font-size:16.5px; font-weight:800; color:#fff; margin:2px 0 0;">${escapeHTML(s.title)}</h2>
                             </div>
                             <div style="display:flex; gap:6px; align-items:center;">
+                                <button class="btn btn-danger-soft" style="padding:9px 12px; font-size:12px; font-weight:700;" onclick="cancelActiveWorkout()" title="Antrenmanı sonlandır ve iptal et">
+                                    🛑 İptal Et
+                                </button>
                                 <button class="btn btn-gold" style="padding:9px 15px; font-size:12.5px; font-weight:900;" onclick="openCompleteModal()">
                                     🏁 BİTİR & KAYDET
                                 </button>
@@ -8316,20 +8320,19 @@
                                 }).join('')}
                             </div>
 
-                            <!-- SET ARTIŞ / AZALIŞ BUTONLARI -->
-                            <div style="display:inline-flex; align-items:center; gap:4px; background:rgba(15, 23, 42, 0.9); border:1px solid var(--border); padding:3px 6px; border-radius:8px;">
-                                <span style="font-size:10.5px; font-weight:900; color:var(--text-secondary); text-transform:uppercase; margin-right:2px;">Set:</span>
-                                <button type="button" class="btn-step-delta neg" onclick="stepExerciseSets('${ex.id}', -2)" title="2 Set Çıkar">-2</button>
-                                <button type="button" class="btn-step-delta neg" onclick="stepExerciseSets('${ex.id}', -1)" title="1 Set Çıkar">-1</button>
-                                <button type="button" class="btn-step-delta pos" onclick="stepExerciseSets('${ex.id}', 1)" title="1 Set Ekle">+1</button>
-                                <button type="button" class="btn-step-delta pos" onclick="stepExerciseSets('${ex.id}', 2)" title="2 Set Ekle">+2</button>
+                            <!-- BASİT SET ARTIŞ / AZALIŞ (+-1 SET) -->
+                            <div style="display:inline-flex; align-items:center; gap:5px; background:rgba(15, 23, 42, 0.9); border:1px solid var(--border); padding:3px 8px; border-radius:8px;">
+                                <span style="font-size:11px; font-weight:800; color:var(--text-secondary);">Set:</span>
+                                <button type="button" class="btn-step-mini" style="width:28px; height:28px; font-size:14px;" onclick="stepExerciseSets('${ex.id}', -1)" title="1 Set Çıkar">-</button>
+                                <span style="font-size:12px; font-weight:900; color:var(--gold); min-width:16px; text-align:center;">${sets.length}</span>
+                                <button type="button" class="btn-step-mini" style="width:28px; height:28px; font-size:14px;" onclick="stepExerciseSets('${ex.id}', 1)" title="1 Set Ekle">+</button>
                             </div>
                         </div>
 
                         <!-- ACTIVE SET HERO SPOTLIGHT -->
                         ${currentSet ? `
                             <div class="focus-set-hero">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:6px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                                     <div style="display:flex; align-items:center; gap:8px;">
                                         <span class="set-badge" style="font-size:13px; padding:4px 8px; background:var(--gold); color:#090d16; font-weight:900;">
                                             SET ${currentSet.setNo}
@@ -8338,15 +8341,8 @@
                                             ${currentSet.completed ? '✅ Tamamlandı' : '⚡ ŞİMDİKİ HEDEF'}
                                         </span>
                                     </div>
-                                    <div style="display:flex; align-items:center; gap:8px;">
-                                        <div style="display:inline-flex; align-items:center; gap:3px; background:rgba(0,0,0,0.35); border:1px solid rgba(245,158,11,0.35); padding:2px 5px; border-radius:6px;">
-                                            <span style="font-size:10px; font-weight:800; color:var(--gold); margin-right:2px;">Top. ${sets.length} Set</span>
-                                            <button type="button" class="btn-step-delta neg" style="min-width:30px; height:26px; font-size:10px;" onclick="stepExerciseSets('${ex.id}', -1)" title="1 Set Eksilt">-1</button>
-                                            <button type="button" class="btn-step-delta pos" style="min-width:30px; height:26px; font-size:10px;" onclick="stepExerciseSets('${ex.id}', 1)" title="1 Set Ekle">+1</button>
-                                        </div>
-                                        <div style="font-size:12px; color:var(--gold); font-weight:700;">
-                                            Hedef: ${s.scheme.reps} Tk
-                                        </div>
+                                    <div style="font-size:12px; color:var(--gold); font-weight:700;">
+                                        Hedef: ${s.scheme.reps} Tk
                                     </div>
                                 </div>
 
@@ -8479,10 +8475,19 @@
                                 Sonraki ➡️
                             </button>
                         </div>
+                        <!-- ODAK MODU ALT İPTAL BUTONU -->
+                        <div style="display:flex; justify-content:center; margin-top:16px; padding-top:14px; border-top:1px dashed var(--border);">
+                            <button type="button" class="btn btn-danger-soft" style="padding:10px 20px; font-size:12.5px; font-weight:700;" onclick="cancelActiveWorkout()">
+                                🛑 Antrenmanı İptal Et
+                            </button>
+                        </div>
                     </div>
 
                     ${allWorkoutDone ? `
-                        <div style="text-align:center; margin:24px 0;">
+                        <div style="text-align:center; margin:24px 0; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                            <button class="btn btn-danger-soft" style="padding:14px 20px; font-size:13.5px; font-weight:700;" onclick="cancelActiveWorkout()">
+                                🛑 İptal Et
+                            </button>
                             <button class="btn btn-gold" style="padding:16px 28px; font-size:15px; font-weight:900; box-shadow:0 0 25px rgba(245,158,11,0.6);" onclick="openCompleteModal()">
                                 🏆 TEBRİKLER! TÜM SETLER BİTTİ • BİTİR & GÜNLÜĞE KAYDET
                             </button>
@@ -8604,10 +8609,8 @@
                                 }).join('')}
 
                                 <div class="sets-footer-actions">
-                                    <button class="btn-set-mini" onclick="stepExerciseSets('${ex.id}', -2)" title="2 Set Çıkar">-2 Set</button>
-                                    <button class="btn-set-mini" onclick="stepExerciseSets('${ex.id}', -1)" title="1 Set Çıkar">-1 Set</button>
-                                    <button class="btn-set-mini" onclick="stepExerciseSets('${ex.id}', 1)" title="1 Set Ekle">+1 Set</button>
-                                    <button class="btn-set-mini" onclick="stepExerciseSets('${ex.id}', 2)" title="2 Set Ekle">+2 Set</button>
+                                    <button class="btn-set-mini" onclick="stepExerciseSets('${ex.id}', -1)" title="1 Set Çıkar">➖ 1 Set Çıkar</button>
+                                    <button class="btn-set-mini" onclick="stepExerciseSets('${ex.id}', 1)" title="1 Set Ekle">➕ 1 Set Ekle</button>
                                 </div>
                             </div>
 
@@ -14323,7 +14326,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=68')
+                navigator.serviceWorker.register('./sw.js?v=69')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
