@@ -15,11 +15,12 @@ Bu kurallar, projedeki her değişiklikten sonra canlıya alma (deployment) sür
 
 Herhangi bir kod, stil veya arayüz değişikliği yapıldığında istisnasız şu adımlar sırasıyla uygulanmalıdır:
 
-### Adım 1: Sürüm Numarasını (Version Bump) Eşitle
-Aşağıdaki 3 noktadaki sürüm numarası bir üst sürüme (örn. `v75` -> `v76`) BİREBİR AYNI ANDA güncellenmelidir:
+### Adım 1: Sürüm Numarasını (Version Bump) 4 Noktada Eşitle
+Aşağıdaki 4 noktadaki sürüm numarası bir üst sürüme (örn. `v75` -> `v76`) BİREBİR AYNI ANDA güncellenmelidir:
 1. `index.html` Giriş Ekranı Rozeti: `<div class="badge-brand">... • vXX</div>`
 2. `index.html` Üst Bar Rozeti: `<span class="app-version-badge" id="appVersionBadge">vXX</span>`
 3. `sw.js` Service Worker Önbellek Adı: `const CACHE_NAME = 'celik-kodu-cache-vXX';`
+4. `index.html` Service Worker Kayıt Parametresi: `navigator.serviceWorker.register('./sw.js?v=XX')`
 *(Bu adım, mobil cihazlarda ve tarayıcılarda PWA Service Worker'ın eski sayfayı önbellekten vermesini engeller ve güncellemeyi anında tetikler).*
 
 ### Adım 2: Sözdizimi (Syntax) ve Bütünlük Kontrolü
