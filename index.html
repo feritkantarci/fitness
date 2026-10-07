@@ -677,58 +677,68 @@
         }
 
         /* INPUT DUO GRID */
+        /* INPUT DUO GRID */
         .input-duo-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
             gap: 10px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+        }
+        @media (min-width: 680px) {
+            .input-duo-grid {
+                grid-template-columns: 1.25fr 1fr;
+            }
         }
         .input-duo-cell {
             background: #090d16;
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 8px 10px;
+            padding: 10px 12px;
             text-align: center;
         }
         .input-duo-label {
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 800;
             color: var(--text-secondary);
             text-transform: uppercase;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             letter-spacing: 0.5px;
         }
         .input-stepper-row {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 12px;
         }
         .btn-step-mini {
             background: var(--bg-elevated);
             border: 1px solid var(--border);
             color: #fff;
-            width: 32px;
-            height: 32px;
+            width: 44px;
+            height: 38px;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 800;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.15s;
+            user-select: none;
         }
         .btn-step-mini:hover {
             border-color: var(--gold);
             color: var(--gold);
         }
+        .btn-step-mini:active {
+            transform: scale(0.92);
+        }
         .input-huge-val {
-            width: 65px;
+            width: 75px;
             background: transparent;
             border: none;
             color: #fff;
-            font-size: 20px;
+            font-size: 24px;
             font-weight: 900;
             text-align: center;
             outline: none;
@@ -2854,17 +2864,17 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
+            gap: 6px;
         }
         .btn-step-delta {
             background: var(--bg-elevated);
             border: 1px solid var(--border);
             color: #fff;
-            min-width: 38px;
-            height: 36px;
-            padding: 0 4px;
+            min-width: 44px;
+            height: 38px;
+            padding: 0 6px;
             border-radius: 8px;
-            font-size: 11px;
+            font-size: 12.5px;
             font-weight: 800;
             display: inline-flex;
             align-items: center;
@@ -3376,7 +3386,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v70</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v71</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3412,7 +3422,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" title="Uygulama Canlı Sürümü">v70</span>
+                    <span class="app-version-badge" id="appVersionBadge" title="Uygulama Canlı Sürümü">v71</span>
                 </div>
                 <div class="modern-user-badge" onclick="openMoreSheet()" title="Profil & Menü">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -3429,7 +3439,7 @@
                     <div>
                         <div style="display:flex; align-items:center; gap:6px;">
                             <span class="auth-name-title">Çelik Kodu</span>
-                            <span class="app-version-badge">v70</span>
+                            <span class="app-version-badge">v71</span>
                         </div>
                         <div style="font-size:11px; color:var(--text-secondary);" id="headerUserSub">🎯 Özel Kilolarım & Profil</div>
                     </div>
@@ -3451,7 +3461,7 @@
 
             <!-- HERO BRANDING (DESKTOP ONLY) -->
             <div class="hero-banner">
-                <div class="badge-brand">⚔️ ÇELİK KODU • PROGRAM MİMARI • v70</div>
+                <div class="badge-brand">⚔️ ÇELİK KODU • PROGRAM MİMARI • v71</div>
                 <h1 class="hero-title">Kişisel Antrenmanını Oluştur</h1>
                 <p class="hero-subtitle">Çalıştırmak istediğin bölgeyi ve elindeki ekipmanları seç, sana özel bilimsel antrenman programını anında hazırla.</p>
             </div>
@@ -8413,7 +8423,7 @@
                                 <!-- SADELEŞTİRİLMİŞ KİLO & TEKRAR GİRİŞİ (YAN YANA DEV ALAN) -->
                                 <div class="input-duo-grid">
                                     <div class="input-duo-cell">
-                                        <div class="input-duo-label">Ağırlık (KG)</div>
+                                        <div class="input-duo-label">⚖️ Ağırlık (KG)</div>
                                         <div class="stepper-extended">
                                             <button type="button" class="btn-step-delta neg" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, -2.5)" title="-2.5 kg">-2.5</button>
                                             <button type="button" class="btn-step-delta neg" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, -1)" title="-1 kg">-1</button>
@@ -8428,7 +8438,7 @@
                                     </div>
 
                                     <div class="input-duo-cell">
-                                        <div class="input-duo-label">Tekrar Sayısı</div>
+                                        <div class="input-duo-label">🔄 Tekrar Sayısı</div>
                                         <div class="input-stepper-row">
                                             <button type="button" class="btn-step-mini" onclick="stepSetReps('${ex.id}', ${currentSetIdx}, -1)">-</button>
                                             <input type="number" step="1" class="input-huge-val" 
@@ -14382,7 +14392,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=70')
+                navigator.serviceWorker.register('./sw.js?v=71')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
