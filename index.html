@@ -3503,7 +3503,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v78</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v79</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3539,7 +3539,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v78</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v79</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -3572,7 +3572,7 @@
                     <span>📚 Program & Hareketler</span>
                 </button>
                 <button class="tab-btn" onclick="switchTab('historyTab')">
-                    <span>📋 Günlük</span>
+                    <span>📋 Geçmiş</span>
                 </button>
                 <button class="tab-btn" onclick="switchTab('analyticsTab')">
                     <span>📈 Analiz & Tartı</span>
@@ -3991,7 +3991,7 @@
             <div id="historyTab" class="tab-content">
                 <div class="generator-card">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                        <h2 style="font-size:18px; font-weight:900; color:#fff;">📊 Antrenman Günlüğüm</h2>
+                        <h2 style="font-size:18px; font-weight:900; color:#fff;">📊 Antrenman Geçmişim</h2>
                         <div style="display:flex; gap:6px;">
                             <button class="btn btn-outline" style="font-size:11px; padding:6px 10px;" onclick="exportCSV()">📊 Excel / CSV</button>
                             <button class="btn btn-outline" style="font-size:11px; padding:6px 10px;" onclick="exportData()">💾 Yedek İndir</button>
@@ -5014,7 +5014,7 @@
             </div>
             <div class="bottom-nav-item" data-tab="historyTab" onclick="switchTab('historyTab')">
                 <span class="nav-icon">📋</span>
-                <span>Günlük</span>
+                <span>Geçmiş</span>
             </div>
             <div class="bottom-nav-item" onclick="openMoreSheet()">
                 <span class="nav-icon">☰</span>
@@ -7234,7 +7234,7 @@
                     if (activeTab) {
                         if (activeTab.id === 'generatorTab') autoScreen = 'Sihirbaz (Oluştur Sekmesi)';
                         else if (activeTab.id === 'activeWorkoutTab') autoScreen = 'Antrenman / Atölye';
-                        else if (activeTab.id === 'historyTab') autoScreen = 'Geçmiş / Günlük';
+                        else if (activeTab.id === 'historyTab') autoScreen = 'Geçmiş';
                         else if (activeTab.id === 'libraryTab') autoScreen = 'Kütüphane';
                         else autoScreen = activeTab.id;
                     } else {
@@ -15116,7 +15116,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=78')
+                navigator.serviceWorker.register('./sw.js?v=79')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
