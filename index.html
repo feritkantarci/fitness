@@ -12135,7 +12135,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     banner.innerHTML = '📄 PDF görsel katmanı ayrıştırılıyor, yapay zeka OCR başlatılıyor...';
                 }
                 const page = await pdf.getPage(1);
-                const viewport = page.getViewport({ scale: 1.5 });
+                const baseViewport = page.getViewport({ scale: 1.0 });
+                const targetScale = Math.min(2.0, Math.max(1.0, 2000 / (baseViewport.width || 1000)));
+                const viewport = page.getViewport({ scale: targetScale });
                 const canvas = document.createElement('canvas');
                 canvas.width = viewport.width;
                 canvas.height = viewport.height;
@@ -12443,7 +12445,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         function extractUniqueHealthData(text) {
             const cleanNum = (str) => {
                 if (!str) return null;
-                const val = parseFloat(str.replace(',', '.'));
+                const cleanStr = str.toString().replace(/\s+/g, '').replace(',', '.');
+                const val = parseFloat(cleanStr);
                 return isNaN(val) ? null : val;
             };
 
@@ -12457,12 +12460,23 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
 
             // 1. KİLO / AĞIRLIK:
-            // Sarı çember veya tabloda: "Ağırlık 77.65k g" veya "Ağırlık 77.65kg"
-            // "İdeal Kilo"yu dışlayarak asıl ağırlığı yakala
-            const wMatch = text.match(/(?:Ağırlık|Agirlik|Ağırhk)[\s\S]{1,60}?(\d{2,3}(?:[.,]\d{1,2})?)\s*k?\s*g/i) ||
-                           text.match(/(\d{2,3}[.,]\d{1,2})\s*k\s*g/i) ||
-                           text.match(/(?:Ağırlık|Agirlik)\(k[ag]\)[\s\S]{1,60}?(\d{2,3}(?:[.,]\d{1,2})?)/i);
-            if (wMatch) data.weight = cleanNum(wMatch[1]);
+            // "77. 65kg" veya "77.65k g" gibi OCR ayrışma durumlarında 65 yerine 77.65 almak için
+            let weightVal = null;
+            const twoPartMatch = text.match(/(?:Ağırlık|Agirlik|Ağırhk)[\s\S]{0,60}?\b(\d{2,3})\s*[.,]\s*(\d{1,2})\s*k?\s*g/i) ||
+                                 text.match(/Standart[^\n]*?\b(\d{2,3})\s*[.,]\s*(\d{1,2})\s*k?\s*g/i) ||
+                                 text.match(/\b([5-9]\d)\s*[.,]\s*(\d{2})\s*k?\s*g/i);
+            if (twoPartMatch) {
+                weightVal = parseFloat(twoPartMatch[1] + '.' + twoPartMatch[2]);
+            } else {
+                const singleMatch = text.match(/(?:Ağırlık|Agirlik|Ağırhk)[\s\S]{0,60}?\b(\d{2,3}(?:[.,]\d{1,2})?)\s*k?\s*g/i) ||
+                                    text.match(/\b(\d{2,3}[.,]\d{1,2})\s*k\s*g/i);
+                if (singleMatch) {
+                    weightVal = cleanNum(singleMatch[1]);
+                }
+            }
+            if (weightVal && weightVal > 30 && weightVal < 250) {
+                data.weight = Math.round(weightVal * 100) / 100;
+            }
 
             // 2. İSKELET KASI KÜTLESİ:
             // OCR: "İskelet Kası Kütlesilkg) 30.2 36.9 37.2" -> Son değer kullanıcının mevcut değeridir!
@@ -14453,7 +14467,7 @@ Bel: ${entry.waist} cm${entry.chest ? ` • Göğüs: ${entry.chest} cm` : ''}${
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=73')
+                navigator.serviceWorker.register('./sw.js?v=74')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et

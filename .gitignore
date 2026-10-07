@@ -7,3 +7,4 @@ source_archive/
 *.key
 *.pem
 __pycache__/
+*.traineddata
