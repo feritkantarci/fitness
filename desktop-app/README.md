@@ -1,6 +1,6 @@
-# ⚡ ÇELİK KODU - AKADEMİK SPOR BİLİMİ & AI KOÇ İSTASYONU (Masaüstü Uygulaması)
+# 🔬 FitLAB - AKADEMİK SPOR BİLİMİ & AI İSTASYONU (Masaüstü Uygulaması)
 
-Bu masaüstü programı, **Çelik Kodu Web Uygulamasından (fitness.kantarci.io)** bağımsız çalışan, ancak **Firebase Firestore bulut veritabanı** üzerinden sporcunun tüm geçmişini anlık okuyan, akademik spor bilimi modelleri ve Google Gemini AI ile analiz eden ve web uygulamasına uzaktan direktif/program gönderen profesyonel bir koç istasyonudur.
+Bu masaüstü programı, **Web Uygulamasından (fitness.kantarci.io)** bağımsız çalışan, ancak **Firebase Firestore bulut veritabanı** üzerinden sporcunun tüm geçmişini anlık okuyan, akademik spor bilimi modelleri ve Google Gemini AI ile analiz eden ve web uygulamasına uzaktan direktif/program gönderen profesyonel bir performans istasyonudur.
 
 ---
 
@@ -31,7 +31,7 @@ Terminalden `desktop-app` klasörüne girip:
 npm start
 ```
 Veya doğrudan derlenmiş Mac uygulamasını çift tıklayarak açabilirsiniz:
-> `desktop-app/dist/mac-arm64/Celik Kodu.app`
+> `desktop-app/dist/mac-arm64/FitLAB.app`
 
 ---
 

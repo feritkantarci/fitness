@@ -3503,7 +3503,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v82</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v83</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3539,7 +3539,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v82</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v83</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -11752,7 +11752,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             <div style="display:flex; align-items:center; gap:8px;">
                                 <span style="font-size:18px;">🎓</span>
                                 <span style="font-size:11px; font-weight:900; color:var(--gold); letter-spacing:0.5px; text-transform:uppercase;">
-                                    ${escapeHTML(dir.title || 'AKADEMİK KOÇ DİREKTİFİ')}
+                                    ${escapeHTML(dir.title || 'FitLAB DİREKTİFİ')}
                                 </span>
                             </div>
                             <button type="button" onclick="dismissCoachStationDirective('${uid}')" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size:15px; padding:2px 6px;" title="Kapat">✕</button>
@@ -15241,7 +15241,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=82')
+                navigator.serviceWorker.register('./sw.js?v=83')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
@@ -16025,8 +16025,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 <div style="display:flex; align-items:center; gap:10px;">
                     <span style="font-size:22px;">🔬</span>
                     <div>
-                        <h3 style="font-size:15px; font-weight:900; color:var(--gold, #eab308); margin:0;">Akademik Spor Bilimi ve Koçluk Raporu</h3>
-                        <span style="font-size:11px; color:var(--text-secondary, #94a3b8);">Masaüstü Koç İstasyonu Tarafından Üretildi</span>
+                        <h3 style="font-size:15px; font-weight:900; color:var(--gold, #eab308); margin:0;">FitLAB Spor Bilimi ve Analiz Raporu</h3>
+                        <span style="font-size:11px; color:var(--text-secondary, #94a3b8);">FitLAB İstasyonu Tarafından Üretildi</span>
                     </div>
                 </div>
                 <button type="button" onclick="document.getElementById('academicReportModal').style.display='none'" style="background:transparent; border:none; color:var(--text-secondary); font-size:20px; cursor:pointer; padding:4px 8px;">✕</button>

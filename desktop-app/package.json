@@ -1,23 +1,23 @@
 {
-  "name": "celik-kodu-coach-station",
+  "name": "fitlab",
   "version": "1.0.0",
-  "description": "Çelik Kodu - Akademik Spor Bilimi ve AI Koç İstasyonu (Masaüstü)",
+  "description": "FitLAB - Akademik Spor Bilimi ve AI İstasyonu (Masaüstü)",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "pack": "electron-builder --dir && find \"dist/mac-arm64/Celik Kodu.app\" -print0 | xargs -0 xattr -c && codesign --force --deep --sign - --entitlements build/entitlements.mac.plist \"dist/mac-arm64/Celik Kodu.app\"",
+    "pack": "electron-builder --dir && dot_clean \"dist/mac-arm64/FitLAB.app\" && xattr -cr \"dist/mac-arm64/FitLAB.app\" && codesign --force --deep --sign - --entitlements build/entitlements.mac.plist \"dist/mac-arm64/FitLAB.app\"",
     "dist": "electron-builder",
     "dist:mac": "electron-builder --mac",
     "dist:win": "electron-builder --win"
   },
   "keywords": [
-    "fitness",
+    "fitlab",
     "sports-science",
     "electron",
     "ai-coach",
     "hypertrophy"
   ],
-  "author": "Çelik Kodu",
+  "author": "FitLAB",
   "license": "MIT",
   "devDependencies": {
     "electron": "^33.2.0",
@@ -29,8 +29,8 @@
     "firebase": "^10.14.1"
   },
   "build": {
-    "appId": "io.kantarci.celikkodu.coach",
-    "productName": "Celik Kodu",
+    "appId": "io.kantarci.fitlab",
+    "productName": "FitLAB",
     "directories": {
       "output": "dist"
     },

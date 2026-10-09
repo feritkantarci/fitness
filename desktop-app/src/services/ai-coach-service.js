@@ -30,7 +30,7 @@ async function generateAcademicPrescription(athleteProfile, academicData, userCu
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     const systemPrompt = `
-Sen "Çelik Kodu" sisteminin Baş Spor Bilimcisi ve Elit Performans Koçusun.
+Sen "FitLAB" sisteminin Baş Spor Bilimcisi ve Elit Performans Koçusun.
 Analizlerini ve programlarını doğrudan şu akademik literatüre dayandırırsın:
 - Dr. Brad Schoenfeld: Kas hipertrofisi mekanizmaları (Mekanik Gerilim, Hacim-Doz İlişkisi)
 - Dr. Mike Israetel (Renaissance Periodization): Hacim Eşikleri (MEV: Asgari Etkili, MAV: Optimal Gelişim, MRV: Aşırı Yük/Toparlanamama)

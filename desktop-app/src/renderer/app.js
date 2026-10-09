@@ -405,11 +405,11 @@ async function pushDirectiveToAthleteWeb() {
     }
 
     const payload = {
-        title: '🎓 Akademik Koç İstasyonu Direktifi',
+        title: '🎓 FitLAB Direktifi',
         text: directiveText,
         fullReport: state.lastAiReport.rawReport,
         targetAthlete: state.selectedUser.name,
-        badge: 'Akademik Spor Bilimi',
+        badge: 'FitLAB Spor Bilimi',
         active: true,
         sentAt: new Date().toISOString()
     };
@@ -419,7 +419,7 @@ async function pushDirectiveToAthleteWeb() {
         showToast(`🚀 Direktif web uygulamasına iletildi! ${state.selectedUser.name} telefonunda görecek.`);
         window.coachAPI.showNotification(
             '📱 Web Direktifi Gönderildi',
-            `${state.selectedUser.name} telefonundaki web uygulamasını açtığında koç direktifini görecek.`
+            `${state.selectedUser.name} telefonundaki web uygulamasını açtığında FitLAB direktifini görecek.`
         );
     } else {
         alert(`Gönderim hatası: ${res.error}`);
@@ -439,9 +439,9 @@ async function pushProgramToAthleteWeb() {
     }
 
     const payload = {
-        title: `Akademik Hipertrofi & Güç Programı (${state.selectedUser.name})`,
+        title: `FitLAB Hipertrofi & Güç Programı (${state.selectedUser.name})`,
         programText: programSection,
-        author: 'Çelik Kodu AI Koç İstasyonu',
+        author: 'FitLAB AI Engine',
         assignedTo: state.selectedUserId,
         active: true,
         assignedAt: new Date().toISOString()
