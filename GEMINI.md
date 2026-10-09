@@ -35,3 +35,15 @@ Aşağıdaki 4 noktadaki sürüm numarası bir üst sürüme (örn. `v75` -> `v7
 ### Adım 4: Kullanıcıya Canlı Doğrulama Bilgisi Ver
 * Canlıya çıkan sürüm numarasını belirt (örn. `v76`).
 * PWA önbellek yenilemesi için gerekirse sayfayı yenilemelerini veya "Uygulamayı Güncelle / Önbelleği Temizle" butonunu kullanabileceklerini hatırlat.
+
+---
+
+## 3. Havuz Mimarisi: Değişmez Ana Havuz (Master Pool) ve Kişisel Görünürlük Yasası
+* **Ana Havuz Dokunulmazlığı (Master Immutability):**
+  Platformdaki ana egzersiz havuzu (`EXERCISES_DB`, `academic-engine`, `STATIC_FALLBACK_CATALOG`), tüm bilimsel parametreleri, form rehberleri ve anatomik etki modelleriyle sistemin **değişmez tek doğruluk kaynağıdır (SSOT)**.
+  Kullanıcının kendi salonunda bir makine/ekipman olmaması veya bir hareketi yapmak istememesi durumunda hareket **kaynak koddan ya da ana kütüphaneden ASLA silinmez**.
+* **Kullanıcı Önü Filtreleme (Kişisel Havuz Gizleme / Exclusion):**
+  Kullanıcı herhangi bir hareketi "Havuzumdan Kaldır / Gizle" dediğinde, bu hareket yalnızca kullanıcının yerel tercihlerinde (`localStorage`) devre dışı bırakılır ve kullanıcının önüne düşen aktif listelerden (Lab listesi, Egzersiz Seçici, Kütüphane, Rutin Oluşturucu vb.) anında filtrelenip gizlenir.
+* **Geri Alınabilirlik (Restore) & Şeffaf Yönetim:**
+  Kullanıcı istediği zaman "Gizlenen Egzersizler" görünümünden veya hareket detayından gizlediği hareketleri görebilmeli ve tek tıkla ("Havuza Geri Ekle / Aktif Et") aktif havuzuna geri döndürebilmelidir.
+

@@ -220,6 +220,7 @@
                 <button class="filter-chip" data-filter="Kol">Kol (Bi/Tri)</button>
                 <button class="filter-chip" data-filter="Karın/Core">Karın / Core</button>
                 <button class="filter-chip" data-filter="Kondisyon / Kardiyo">⚡ Kondisyon</button>
+                <button class="filter-chip chip-excluded" data-filter="EXCLUDED" id="chipLabExcluded" title="Kişisel havuzunuzdan gizlediğiniz egzersizleri görüntüleyin ve geri alın">👁️ Gizlenenler (<span id="labExcludedBadgeCount">0</span>)</button>
             </div>
 
             <!-- Egzersiz Grid Kartları -->
@@ -248,7 +249,13 @@
                         <span class="badge-type" id="inspTypeBadge">Ağır Serbest Ağırlık Bileşik</span>
                         <span class="badge-sfr" id="inspSfrBadge">SFR: Yüksek</span>
                     </div>
-                    <button class="btn-close-inspector" id="btnCloseInspector" title="Pencereyi Kapat">✕</button>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <button class="btn-toggle-exclude" id="btnToggleHideExercise" title="Kişisel havuzunuzdan gizleyin veya geri alın">
+                            <span id="btnToggleHideIcon">👁️‍🗨️</span>
+                            <span id="btnToggleHideText">Havuzumdan Kaldır / Gizle</span>
+                        </button>
+                        <button class="btn-close-inspector" id="btnCloseInspector" title="Pencereyi Kapat">✕</button>
+                    </div>
                 </div>
 
                 <h2 class="inspector-title" id="inspTitle">Dambıl Bench Press</h2>

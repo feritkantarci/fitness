@@ -3503,7 +3503,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v84</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v85</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3539,7 +3539,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v84</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v85</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -3976,6 +3976,14 @@
                                         <option value="bodyweight">🤸 Vücut Ağırlığı</option>
                                     </select>
                                 </div>
+                            </div>
+
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding:0 2px;">
+                                <div style="font-size:11px; font-weight:700; color:var(--text-secondary);" id="libExCountBadge">93 Egzersiz</div>
+                                <label style="font-size:11px; font-weight:700; color:#fca5a5; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+                                    <input type="checkbox" id="chkLibShowExcluded" onchange="renderLibraryExerciseCatalog()" style="cursor:pointer; accent-color:#ef4444;">
+                                    <span>👁️ Gizlenenleri Göster (<span id="libExcludedCount">0</span>)</span>
+                                </label>
                             </div>
                         </div>
 
@@ -4730,10 +4738,11 @@
                 <!-- Steps & Cue -->
             </div>
 
-            <div style="margin-top:16px; display:flex; justify-content:space-between; gap:8px;">
-                <button class="btn btn-outline" style="flex:1;" onclick="closeExerciseDetailModal()">Kapat</button>
-                <button class="btn btn-outline" id="btnExDetailAlt" style="flex:1.2; color:var(--cyan); border-color:var(--cyan); font-weight:800;">🔄 Alternatifler</button>
-                <button class="btn btn-gold" id="btnExDetailAdd" style="flex:1.5; font-weight:800;">➕ Bu Hareketi Ekle</button>
+            <div style="margin-top:16px; display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px;">
+                <button class="btn btn-outline" style="flex:1; min-width:80px;" onclick="closeExerciseDetailModal()">Kapat</button>
+                <button class="btn btn-outline" id="btnExDetailToggleHide" style="flex:1.2; min-width:130px; font-weight:700; transition:all 0.2s;" title="Kişisel havuzunuzdan gizleyin veya geri getirin">👁️‍🗨️ Havuzdan Gizle</button>
+                <button class="btn btn-outline" id="btnExDetailAlt" style="flex:1.2; min-width:110px; color:var(--cyan); border-color:var(--cyan); font-weight:800;">🔄 Alternatifler</button>
+                <button class="btn btn-gold" id="btnExDetailAdd" style="flex:1.5; min-width:130px; font-weight:800;">➕ Bu Hareketi Ekle</button>
             </div>
         </div>
     </div>
@@ -5524,8 +5533,88 @@
             }
         }
 
+        // ==================== KULLANICI ÖZEL HAVUZ & GİZLEME YASASI ====================
+        function getUserExcludedExerciseIds() {
+            try {
+                return JSON.parse(localStorage.getItem('celik_excluded_exercises') || '[]');
+            } catch(e) {
+                return [];
+            }
+        }
+
+        function setUserExcludedExerciseIds(arr) {
+            try {
+                localStorage.setItem('celik_excluded_exercises', JSON.stringify(arr));
+            } catch(e) {}
+        }
+
+        function isExerciseExcludedByUser(exId) {
+            if (!exId) return false;
+            const excluded = getUserExcludedExerciseIds();
+            return excluded.includes(exId);
+        }
+
+        function toggleExerciseExclusionAndRefresh(exId) {
+            if (!exId) return false;
+            const ex = EXERCISES_DB.find(e => e.id === exId);
+            const exName = ex ? ex.name : exId;
+            let list = getUserExcludedExerciseIds();
+            const idx = list.indexOf(exId);
+            let isNowExcluded = false;
+
+            if (idx >= 0) {
+                list.splice(idx, 1);
+                isNowExcluded = false;
+                if (typeof showToast === 'function') {
+                    showToast(`✅ "${exName}" aktif havuzunuza geri eklendi.`);
+                }
+            } else {
+                list.push(exId);
+                isNowExcluded = true;
+                if (typeof showToast === 'function') {
+                    showToast(`👁️‍🗨️ "${exName}" kişisel havuzunuzdan gizlendi.`);
+                }
+            }
+
+            setUserExcludedExerciseIds(list);
+
+            if (typeof updateExDetailModalHideButton === 'function') {
+                updateExDetailModalHideButton(exId);
+            }
+            if (typeof renderLibraryExerciseCatalog === 'function') {
+                renderLibraryExerciseCatalog();
+            }
+            if (typeof renderStudioExerciseCatalog === 'function') {
+                renderStudioExerciseCatalog();
+            }
+            if (typeof renderExercisePicker === 'function' && document.getElementById('exercisePickerModal')?.classList.contains('active')) {
+                renderExercisePicker();
+            }
+            return isNowExcluded;
+        }
+
+        function updateExDetailModalHideButton(exId) {
+            const btn = document.getElementById('btnExDetailToggleHide');
+            if (!btn) return;
+            const isExcluded = isExerciseExcludedByUser(exId);
+            if (isExcluded) {
+                btn.innerHTML = '🔄 Havuza Geri Ekle';
+                btn.style.color = '#34d399';
+                btn.style.borderColor = '#10b981';
+                btn.style.background = 'rgba(16, 185, 129, 0.15)';
+                btn.title = 'Bu hareketi aktif havuzunuza geri getirin';
+            } else {
+                btn.innerHTML = '👁️‍🗨️ Havuzdan Gizle';
+                btn.style.color = '#f87171';
+                btn.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+                btn.style.background = 'rgba(239, 68, 68, 0.1)';
+                btn.title = 'Bu hareketi kişisel havuzunuzdan gizleyin';
+            }
+        }
+
         function filterExercises(category, excludeIds = []) {
             return EXERCISES_DB.filter(ex => {
+                if (isExerciseExcludedByUser(ex.id)) return false;
                 if (excludeIds.includes(ex.id)) return false;
                 if (!selectedEquipments.includes(ex.equipment)) return false;
                 if (category === 'any') return true;
@@ -5558,6 +5647,7 @@
                     else if (cat === 'legs_quad' || cat === 'legs_hinge') relatedCat = ['legs_quad', 'legs_hinge', 'core'];
 
                     const fallbackPool = EXERCISES_DB.filter(ex => 
+                        !isExerciseExcludedByUser(ex.id) &&
                         selectedEquipments.includes(ex.equipment) && 
                         !usedIds.includes(ex.id) &&
                         (Array.isArray(relatedCat) ? relatedCat.includes(ex.category) : ex.category === relatedCat)
@@ -6812,6 +6902,8 @@
                 const cat = currentEx ? currentEx.category : null;
 
                 filtered = EXERCISES_DB.filter(ex => {
+                    // Exclude hidden exercises
+                    if (isExerciseExcludedByUser(ex.id)) return false;
                     // Exclude all exercises already in current routine
                     if (existingIds.includes(ex.id)) return false;
 
@@ -6831,6 +6923,8 @@
             } else if (tab === 'other_muscle') {
                 const targetM = pickerContext.otherSelectedMuscle;
                 filtered = EXERCISES_DB.filter(ex => {
+                    // Exclude hidden exercises
+                    if (isExerciseExcludedByUser(ex.id)) return false;
                     // Exclude all exercises already in current routine
                     if (existingIds.includes(ex.id)) return false;
 
@@ -6843,6 +6937,8 @@
                 const cat = pickerContext.categoryFilter;
 
                 filtered = EXERCISES_DB.filter(ex => {
+                    // Exclude hidden exercises
+                    if (isExerciseExcludedByUser(ex.id)) return false;
                     // Exclude all exercises already in current routine
                     if (existingIds.includes(ex.id)) return false;
 
@@ -7628,7 +7724,7 @@
                 else if (currentEx.category === 'pull') relatedCat = ['pull', 'core'];
                 else if (currentEx.category === 'legs_quad' || currentEx.category === 'legs_hinge') relatedCat = ['legs_quad', 'legs_hinge', 'core'];
 
-                const fallback = EXERCISES_DB.filter(e => selectedEquipments.includes(e.equipment) && !usedIds.includes(e.id) && (Array.isArray(relatedCat) ? relatedCat.includes(e.category) : e.category === relatedCat));
+                const fallback = EXERCISES_DB.filter(e => !isExerciseExcludedByUser(e.id) && selectedEquipments.includes(e.equipment) && !usedIds.includes(e.id) && (Array.isArray(relatedCat) ? relatedCat.includes(e.category) : e.category === relatedCat));
                 replacement = pickRandom(fallback);
             }
 
@@ -9634,17 +9730,28 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const container = document.getElementById('libExercisesCatalogGrid');
             const countBadge = document.getElementById('libExCountBadge');
             const clearBtn = document.getElementById('libExClearSearchBtn');
+            const excludedCountEl = document.getElementById('libExcludedCount');
             if (!container) return;
 
             const q = (document.getElementById('libExSearchInput')?.value || '').toLowerCase().trim();
             const muscle = document.getElementById('libExMuscleFilter')?.value || 'all';
             const equip = document.getElementById('libExEquipFilter')?.value || 'all';
+            const showExcluded = !!document.getElementById('chkLibShowExcluded')?.checked;
+            const excludedIds = getUserExcludedExerciseIds();
+
+            if (excludedCountEl) {
+                excludedCountEl.innerText = excludedIds.length;
+            }
 
             if (clearBtn) {
                 clearBtn.style.display = q ? 'block' : 'none';
             }
 
             const filtered = EXERCISES_DB.filter(ex => {
+                const isExcluded = excludedIds.includes(ex.id);
+                // Gizlenenler modunda sadece gizlenenleri, normal modda ise gizlenmeyenleri göster
+                if (showExcluded ? !isExcluded : isExcluded) return false;
+
                 if (equip !== 'all' && ex.equipment !== equip) return false;
 
                 if (muscle !== 'all') {
@@ -9685,18 +9792,16 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             });
 
             if (countBadge) {
-                countBadge.innerText = `${filtered.length} Egzersiz`;
+                countBadge.innerText = `${filtered.length} Egzersiz ${showExcluded ? '(Gizlenenler)' : ''}`;
             }
 
             if (filtered.length === 0) {
                 container.innerHTML = `
                     <div style="grid-column: 1 / -1; text-align:center; padding:32px 16px; background:rgba(0,0,0,0.2); border-radius:12px; border:1px dashed var(--border);">
-                        <div style="font-size:28px; margin-bottom:8px;">🔍</div>
-                        <div style="font-size:13.5px; font-weight:800; color:#fff; margin-bottom:4px;">Aramanıza Uygun Egzersiz Bulunamadı</div>
-                        <div style="font-size:12px; color:var(--text-secondary); margin-bottom:12px;">Filtreleri veya arama kelimesini değiştirerek tekrar deneyebilirsiniz.</div>
-                        <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 12px;" onclick="document.getElementById('libExSearchInput').value=''; document.getElementById('libExMuscleFilter').value='all'; document.getElementById('libExEquipFilter').value='all'; renderLibraryExerciseCatalog();">
-                            Filtreleri Sıfırla
-                        </button>
+                        <div style="font-size:28px; margin-bottom:8px;">${showExcluded ? '✨' : '🔍'}</div>
+                        <div style="font-size:13.5px; font-weight:800; color:#fff; margin-bottom:4px;">${showExcluded ? 'Kişisel Havuzunuzdan Gizlenmiş Egzersiz Yok' : 'Aramanıza Uygun Egzersiz Bulunamadı'}</div>
+                        <div style="font-size:12px; color:var(--text-secondary); margin-bottom:12px;">${showExcluded ? 'Bir hareketi istemediğinizde "👁️‍🗨️ Gizle" butonuna basarak bu listeye alabilirsiniz.' : 'Filtreleri veya arama kelimesini değiştirerek tekrar deneyebilirsiniz.'}</div>
+                        ${!showExcluded ? `<button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 12px;" onclick="document.getElementById('libExSearchInput').value=''; document.getElementById('libExMuscleFilter').value='all'; document.getElementById('libExEquipFilter').value='all'; renderLibraryExerciseCatalog();">Filtreleri Sıfırla</button>` : ''}
                     </div>
                 `;
                 return;
@@ -9704,6 +9809,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             let html = '';
             filtered.forEach(ex => {
+                const isExcluded = excludedIds.includes(ex.id);
                 const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) 
                     || (typeof categoryFallback !== 'undefined' && categoryFallback[ex.category]) 
                     || (typeof guideLibrary !== 'undefined' ? guideLibrary.goblet_squat : null);
@@ -9716,7 +9822,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 const pNames = (ex.primaryMuscles || []).map(m => (typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m]?.name) || m).join(', ');
 
                 html += `
-                    <div class="lib-ex-card">
+                    <div class="lib-ex-card" style="${isExcluded ? 'border-color:rgba(239,68,68,0.4); background:rgba(239,68,68,0.04);' : ''}">
                         <div style="display:flex; gap:10px; align-items:flex-start;">
                             <div class="ex-thumb-wrap" style="width:56px; height:56px; flex-shrink:0; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')" title="Form ve Detayı İncele">
                                 ${thumbImg ? `<img src="${thumbImg}" class="ex-thumb-img" alt="${escapeHTML(ex.name)}" loading="lazy">` : '🏋️'}
@@ -9724,6 +9830,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             <div style="flex:1; min-width:0;">
                                 <div style="font-size:13.5px; font-weight:800; color:#fff; line-height:1.25; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
                                     ${escapeHTML(ex.name)}
+                                    ${isExcluded ? '<span style="background:rgba(239,68,68,0.25); color:#fca5a5; font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px; margin-left:6px; vertical-align:middle;">Gizlendi</span>' : ''}
                                 </div>
                                 <div style="display:flex; gap:4px; flex-wrap:wrap; margin-top:5px;">
                                     <span class="ex-chip-badge equip">${escapeHTML(eqInfo)}</span>
@@ -9741,11 +9848,16 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
                         <div style="display:flex; gap:6px; margin-top:10px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06);">
                             <button type="button" class="btn btn-outline" style="flex:1; font-size:11px; padding:6px 8px;" onclick="openExerciseDetailModal('${ex.id}')">
-                                👁️ Form & Detay
+                                👁️ Detay
                             </button>
-                            <button type="button" class="btn btn-gold" style="flex:1.3; font-size:11px; padding:6px 8px; font-weight:800;" onclick="openAddToProgramOptions('${ex.id}')">
-                                ➕ Programa Ekle
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 8px; ${isExcluded ? 'color:#34d399; border-color:#10b981; background:rgba(16,185,129,0.12);' : 'color:#fca5a5; border-color:rgba(239,68,68,0.35);'}" onclick="event.stopPropagation(); toggleExerciseExclusionAndRefresh('${ex.id}')" title="${isExcluded ? 'Aktif havuzunuza geri ekleyin' : 'Kişisel havuzunuzdan gizleyin'}">
+                                ${isExcluded ? '🔄 Geri Al' : '👁️‍🗨️ Gizle'}
                             </button>
+                            ${!isExcluded ? `
+                                <button type="button" class="btn btn-gold" style="flex:1.2; font-size:11px; padding:6px 8px; font-weight:800;" onclick="openAddToProgramOptions('${ex.id}')">
+                                    ➕ Ekle
+                                </button>
+                            ` : ''}
                         </div>
                     </div>
                 `;
@@ -15237,7 +15349,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=84')
+                navigator.serviceWorker.register('./sw.js?v=85')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
@@ -15533,6 +15645,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const showAll = document.getElementById('chkShowAllExercises')?.checked;
 
             const filtered = EXERCISES_DB.filter(ex => {
+                // Gizlenen hareketleri stüdyo kataloğunda gösterme
+                if (isExerciseExcludedByUser(ex.id)) return false;
                 if (equip !== 'all' && ex.equipment !== equip) return false;
                 if (q) {
                     const combined = (ex.name + ' ' + (ex.muscle || '') + ' ' + (ex.cue || '')).toLowerCase();
@@ -15841,6 +15955,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const btnReport = document.getElementById('btnExDetailReport');
             if (btnReport) {
                 btnReport.onclick = () => openExerciseBugReportModal(ex.id, ex.name, (guide && guide.form) ? guide.form : '', ex.equipment || '', ex.muscle || '', 'Egzersiz Detayı');
+            }
+
+            const btnHide = document.getElementById('btnExDetailToggleHide');
+            if (btnHide) {
+                btnHide.onclick = () => toggleExerciseExclusionAndRefresh(ex.id);
+                updateExDetailModalHideButton(ex.id);
             }
 
             // Muscle breakdown helper

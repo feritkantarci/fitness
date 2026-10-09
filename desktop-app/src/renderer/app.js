@@ -21,7 +21,8 @@ let state = {
     selectedExercise: null,
     visualTab: 'form', // 'form' | 'anatomi'
     labFilter: 'ALL',
-    labSearch: ''
+    labSearch: '',
+    excludedExerciseIds: JSON.parse(localStorage.getItem('fitlab_excluded_exercises') || '[]')
 };
 
 // DOM Elemanları
@@ -60,12 +61,17 @@ const el = {
     btnClearLabSearch: document.getElementById('btnClearLabSearch'),
     labExerciseCount: document.getElementById('labExerciseCount'),
     labFilterBar: document.getElementById('labFilterBar'),
+    chipLabExcluded: document.getElementById('chipLabExcluded'),
+    labExcludedBadgeCount: document.getElementById('labExcludedBadgeCount'),
     labGrid: document.getElementById('labGrid'),
     labInspector: document.getElementById('labInspector'),
     inspectorPlaceholder: document.getElementById('inspectorPlaceholder'),
     inspectorContent: document.getElementById('inspectorContent'),
     inspTypeBadge: document.getElementById('inspTypeBadge'),
     inspSfrBadge: document.getElementById('inspSfrBadge'),
+    btnToggleHideExercise: document.getElementById('btnToggleHideExercise'),
+    btnToggleHideIcon: document.getElementById('btnToggleHideIcon'),
+    btnToggleHideText: document.getElementById('btnToggleHideText'),
     btnCloseInspector: document.getElementById('btnCloseInspector'),
     inspTitle: document.getElementById('inspTitle'),
     inspMuscleTag: document.getElementById('inspMuscleTag'),
@@ -186,6 +192,14 @@ function setupEventListeners() {
     });
 
     // Lab Inspector Kontrolleri
+    if (el.btnToggleHideExercise) {
+        el.btnToggleHideExercise.addEventListener('click', () => {
+            if (state.selectedExercise) {
+                toggleExerciseExclusion(state.selectedExercise.id);
+            }
+        });
+    }
+
     el.btnCloseInspector.addEventListener('click', () => {
         closeInspector();
     });
@@ -640,7 +654,21 @@ function applyLabFilters() {
     const q = state.labSearch;
     const f = state.labFilter;
 
+    // Gizlenen egzersiz sayacını güncelle
+    if (el.labExcludedBadgeCount) {
+        el.labExcludedBadgeCount.textContent = (state.excludedExerciseIds || []).length;
+    }
+
     let filtered = state.catalog.filter(item => {
+        const isExcluded = (state.excludedExerciseIds || []).includes(item.id);
+
+        // Gizlenenler modunda sadece gizlenenler, diğer modlarda gizlenmeyenler listelenir
+        if (f === 'EXCLUDED') {
+            if (!isExcluded) return false;
+        } else {
+            if (isExcluded) return false;
+        }
+
         // Arama filtresi
         const matchesQuery = !q || 
             item.name.toLowerCase().includes(q) || 
@@ -651,7 +679,7 @@ function applyLabFilters() {
         if (!matchesQuery) return false;
 
         // Kategori filtresi
-        if (f === 'ALL') return true;
+        if (f === 'ALL' || f === 'EXCLUDED') return true;
         if (f === 'Kol') return item.primary === 'Biceps' || item.primary === 'Triceps';
         return item.primary.includes(f) || (item.sec && Object.keys(item.sec).some(k => k.includes(f)));
     });
@@ -663,10 +691,11 @@ function applyLabFilters() {
 
 function renderLabGrid(exercises) {
     if (!exercises || exercises.length === 0) {
+        const isExcludedView = state.labFilter === 'EXCLUDED';
         el.labGrid.innerHTML = `
             <div style="grid-column: 1 / -1; text-align: center; padding: 50px 20px; color: var(--text-muted);">
-                <div style="font-size: 36px; margin-bottom: 10px;">🔍</div>
-                <p style="font-size: 14px;">Aradığınız kriterlere uygun egzersiz bulunamadı.</p>
+                <div style="font-size: 36px; margin-bottom: 10px;">${isExcludedView ? '✨' : '🔍'}</div>
+                <p style="font-size: 14px;">${isExcludedView ? 'Kişisel havuzunuzdan gizlenmiş hiçbir hareket yok. Tüm egzersizler aktif!' : 'Aradığınız kriterlere uygun egzersiz bulunamadı.'}</p>
             </div>
         `;
         return;
@@ -674,6 +703,7 @@ function renderLabGrid(exercises) {
 
     el.labGrid.innerHTML = exercises.map(ex => {
         const isActive = state.selectedExercise && state.selectedExercise.id === ex.id;
+        const isExcluded = (state.excludedExerciseIds || []).includes(ex.id);
         const pFactor = typeof ex.pFactor === 'number' ? ex.pFactor : 1.0;
         
         let mtfPillHtml = '';
@@ -688,9 +718,9 @@ function renderLabGrid(exercises) {
         const typeLabel = ex.typeLabel ? ex.typeLabel.split(' ')[0] : 'Kuvvet';
 
         return `
-            <div class="lab-card ${isActive ? 'active' : ''}" data-id="${ex.id}">
+            <div class="lab-card ${isActive ? 'active' : ''} ${isExcluded ? 'is-card-excluded' : ''}" data-id="${ex.id}">
                 <div class="lab-card-header">
-                    <div class="lab-card-title">${ex.name}</div>
+                    <div class="lab-card-title">${ex.name} ${isExcluded ? '<span style="color:#f87171; font-size:10px; font-weight:800; margin-left:4px;">[GİZLENDİ]</span>' : ''}</div>
                 </div>
                 <div class="lab-card-tags">
                     <span class="muscle-pill">${ex.primary}</span>
@@ -713,6 +743,47 @@ function renderLabGrid(exercises) {
     });
 }
 
+function updateExcludeButtonState(exId) {
+    if (!el.btnToggleHideExercise) return;
+    const isExcluded = (state.excludedExerciseIds || []).includes(exId);
+    if (isExcluded) {
+        el.btnToggleHideExercise.className = 'btn-toggle-exclude is-excluded';
+        if (el.btnToggleHideIcon) el.btnToggleHideIcon.textContent = '🔄';
+        if (el.btnToggleHideText) el.btnToggleHideText.textContent = 'Havuza Geri Ekle (Aktif Et)';
+        el.btnToggleHideExercise.title = 'Bu egzersizi aktif havuzunuza geri ekleyin';
+    } else {
+        el.btnToggleHideExercise.className = 'btn-toggle-exclude';
+        if (el.btnToggleHideIcon) el.btnToggleHideIcon.textContent = '👁️‍🗨️';
+        if (el.btnToggleHideText) el.btnToggleHideText.textContent = 'Havuzumdan Kaldır / Gizle';
+        el.btnToggleHideExercise.title = 'Bu egzersizi kişisel havuzunuzdan gizleyin';
+    }
+}
+
+function toggleExerciseExclusion(exId) {
+    if (!exId) return;
+    const ex = state.catalog.find(c => c.id === exId);
+    const exName = ex ? ex.name : exId;
+    
+    let list = state.excludedExerciseIds || [];
+    const idx = list.indexOf(exId);
+
+    if (idx >= 0) {
+        list.splice(idx, 1);
+        showToast(`✅ "${exName}" aktif havuzunuza geri eklendi.`);
+    } else {
+        list.push(exId);
+        showToast(`👁️‍🗨️ "${exName}" kişisel havuzunuzdan gizlendi.`);
+    }
+
+    state.excludedExerciseIds = list;
+    try {
+        localStorage.setItem('fitlab_excluded_exercises', JSON.stringify(list));
+    } catch(e) {}
+
+    updateExcludeButtonState(exId);
+    applyLabFilters();
+}
+
 function selectLabExercise(ex) {
     state.selectedExercise = ex;
 
@@ -724,6 +795,9 @@ function selectLabExercise(ex) {
     // Inspector paneli göster
     el.inspectorPlaceholder.style.display = 'none';
     el.inspectorContent.style.display = 'flex';
+
+    // Gizle / Geri Getir butonunu güncelle
+    updateExcludeButtonState(ex.id);
 
     // Başlık ve Etiketler
     el.inspTitle.textContent = ex.name;

@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "pack": "rm -rf dist /tmp/fitlab-dist && electron-builder --dir && cp -R dist/mac-arm64/FitLAB.app /tmp/fitlab-dist && dot_clean /tmp/fitlab-dist/FitLAB.app && xattr -cr /tmp/fitlab-dist/FitLAB.app && codesign --force --deep --sign - --entitlements build/entitlements.mac.plist /tmp/fitlab-dist/FitLAB.app && rm -rf dist/mac-arm64/FitLAB.app && cp -a /tmp/fitlab-dist/FitLAB.app dist/mac-arm64/FitLAB.app",
+    "pack": "rm -rf dist /tmp/fitlab-dist && electron-builder --dir && mkdir -p /tmp/fitlab-dist && cp -R dist/mac-arm64/FitLAB.app /tmp/fitlab-dist/ && dot_clean /tmp/fitlab-dist/FitLAB.app && xattr -cr /tmp/fitlab-dist/FitLAB.app && codesign --force --deep --sign - --entitlements build/entitlements.mac.plist /tmp/fitlab-dist/FitLAB.app && rm -rf dist/mac-arm64/FitLAB.app && cp -a /tmp/fitlab-dist/FitLAB.app dist/mac-arm64/FitLAB.app",
     "dist": "electron-builder",
     "dist:mac": "electron-builder --mac",
     "dist:win": "electron-builder --win"
