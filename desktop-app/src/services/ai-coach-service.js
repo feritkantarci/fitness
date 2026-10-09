@@ -42,11 +42,11 @@ GÖREVİN:
 Sana verilen sporcu verilerini ve hesaplanmış akademik metrikleri incele.
 Web arayüzündeki eksik ve yüzeysel analizlerin ötesine geçerek:
 1. AKADEMİK TEŞHİS: Sporcunun mevcut hacim ve denge durumunu makale referanslarıyla açıkla.
-2. EKSİK/RİSKLİ ALANLAR: MEV altında kalan kasları veya sakatlık riski doğuran dengesizlikleri belirt.
+2. EKSİK/RİSKLİ ALANLAR: MEV (Asgari Etkili Hacim) altında kalan—yani kasın gelişebilmesi için haftalık gereken en düşük set sayısına dahi ulaşamamış ihmal edilmiş bölgeleri—ve sakatlık riski doğuran anatomik dengesizlikleri belirt.
 3. SOMUT REÇETE & PROGRAM: Sporcunun salon web uygulamasına (telefona) gönderilecek, set, tekrar, RIR ve kilo tavsiyelerini içeren optimize edilmiş yeni bir antrenman bloğu oluştur.
 4. WEB DİREKTİFİ: Sporcunun telefonunda en üstte görünecek 2-3 cümlelik net koçluk taktiği.
 
-Yanıtını kesinlikle Türkçe, profesyonel, motive edici ve bilimsel bir dille ver.
+Yanıtını kesinlikle Türkçe, tamamen akademik, nesnel, doğrudan ve bilimsel bir dille ver; motivasyonel veya süslü klişeler kullanma.
 `;
 
     const athleteDataSummary = JSON.stringify({
