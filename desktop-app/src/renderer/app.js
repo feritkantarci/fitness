@@ -57,10 +57,13 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     // Canlı antrenman dinleyicisi
     if (window.coachAPI && window.coachAPI.onLiveWorkoutUpdated) {
-        window.coachAPI.onLiveWorkoutUpdated((data) => {
+        window.coachAPI.onLiveWorkoutUpdated(async (data) => {
             if (data.uid === state.selectedUserId) {
                 showToast(`⚡ Canlı Bildirim: ${state.selectedUser?.name || 'Sporcu'} yeni antrenman kaydetti!`);
-                refreshAthleteData();
+                state.workoutLogs = data.logs || [];
+                const analysis = await window.coachAPI.analyzeHistory(state.workoutLogs, state.selectedUser);
+                state.academicAnalysis = analysis;
+                renderDashboard(analysis);
             }
         });
     }
@@ -267,8 +270,23 @@ function renderVolumeChart(muscleBreakdown) {
     const mavLimits = muscles.map(m => muscleBreakdown[m].limits.MAV_MIN);
     const mrvLimits = muscles.map(m => muscleBreakdown[m].limits.MRV);
 
+    const backgroundColors = actualSets.map((s, idx) => {
+        if (s === 0) return 'rgba(239, 68, 68, 0.7)'; // Atlandı
+        if (s < mevLimits[idx]) return 'rgba(245, 158, 11, 0.7)'; // MEV Altı
+        if (s > mrvLimits[idx]) return 'rgba(239, 68, 68, 0.9)'; // Aşırı Yük
+        return 'rgba(234, 179, 8, 0.85)'; // Optimal
+    });
+
+    // Eğer grafik zaten varsa, yok edip baştan oluşturmak yerine yerinde pürüzsüz güncelle (titremeyi önler)
     if (state.volumeChart) {
-        state.volumeChart.destroy();
+        state.volumeChart.data.labels = muscles;
+        state.volumeChart.data.datasets[0].data = actualSets;
+        state.volumeChart.data.datasets[0].backgroundColor = backgroundColors;
+        state.volumeChart.data.datasets[1].data = mevLimits;
+        state.volumeChart.data.datasets[2].data = mavLimits;
+        state.volumeChart.data.datasets[3].data = mrvLimits;
+        state.volumeChart.update('none');
+        return;
     }
 
     const ctx = el.volumeChartCanvas.getContext('2d');
@@ -280,12 +298,7 @@ function renderVolumeChart(muscleBreakdown) {
                 {
                     label: 'Yapılan Set',
                     data: actualSets,
-                    backgroundColor: actualSets.map((s, idx) => {
-                        if (s === 0) return 'rgba(239, 68, 68, 0.7)'; // Atlandı
-                        if (s < mevLimits[idx]) return 'rgba(245, 158, 11, 0.7)'; // MEV Altı
-                        if (s > mrvLimits[idx]) return 'rgba(239, 68, 68, 0.9)'; // Aşırı Yük
-                        return 'rgba(234, 179, 8, 0.85)'; // Optimal
-                    }),
+                    backgroundColor: backgroundColors,
                     borderRadius: 6,
                     barPercentage: 0.6
                 },
@@ -323,20 +336,14 @@ function renderVolumeChart(muscleBreakdown) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        afterLabel: function(context) {
-                            const muscle = muscles[context.dataIndex];
-                            return muscleBreakdown[muscle].recommendation;
-                        }
-                    }
-                }
+            animation: {
+                duration: 500,
+                easing: 'easeOutQuart'
             },
             scales: {
                 y: {
                     beginAtZero: true,
+                    suggestedMax: 25,
                     grid: { color: 'rgba(255, 255, 255, 0.05)' },
                     ticks: { color: '#94a3b8', font: { size: 10 } },
                     title: { display: true, text: 'Haftalık Hard Set Sayısı', color: '#64748b', font: { size: 11 } }

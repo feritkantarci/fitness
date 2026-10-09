@@ -92,6 +92,37 @@ app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit();
 });
 
+let activeAthleteUnsub = null;
+let currentListeningUid = null;
+
+function subscribeToAthlete(uid) {
+    if (!uid || currentListeningUid === uid) return;
+    if (activeAthleteUnsub) {
+        try { activeAthleteUnsub(); } catch(e) {}
+        activeAthleteUnsub = null;
+    }
+    currentListeningUid = uid;
+
+    let isFirstSnapshot = true;
+    activeAthleteUnsub = firebaseService.listenToAthleteWorkouts(uid, (newLogs) => {
+        // İlk anlık snapshot'ı yoksay (çünkü getWorkoutLogs zaten veriyi ilk kez çekti)
+        if (isFirstSnapshot) {
+            isFirstSnapshot = false;
+            return;
+        }
+
+        if (mainWindow && !mainWindow.isDestroyed()) {
+            mainWindow.webContents.send('live:workoutUpdated', { uid, logs: newLogs });
+            if (Notification.isSupported()) {
+                new Notification({
+                    title: '⚡ Canlı Antrenman Bildirimi',
+                    body: `Sporcu salonda yeni bir antrenman tamamladı! Akademik analiz güncellendi.`
+                }).show();
+            }
+        }
+    });
+}
+
 // ==================== IPC HANDLERS ====================
 
 // Firebase İşlemleri
@@ -101,22 +132,7 @@ ipcMain.handle('firebase:getUsers', async () => {
 
 ipcMain.handle('firebase:getWorkoutLogs', async (event, uid) => {
     const logs = await firebaseService.fetchWorkoutLogs(uid);
-
-    // Canlı dinleyiciyi de bağla
-    const unsub = firebaseService.listenToAthleteWorkouts(uid, (newLogs) => {
-        if (mainWindow && !mainWindow.isDestroyed()) {
-            mainWindow.webContents.send('live:workoutUpdated', { uid, logs: newLogs });
-            // Masaüstü uyarısı fırlat
-            if (Notification.isSupported()) {
-                new Notification({
-                    title: '⚡ Canlı Antrenman Bildirimi',
-                    body: `Sporcu salonda yeni bir antrenman tamamladı! Akademik analiz güncellendi.`
-                }).show();
-            }
-        }
-    });
-    activeLiveUnsubs.push(unsub);
-
+    subscribeToAthlete(uid);
     return logs;
 });
 
