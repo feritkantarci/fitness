@@ -228,13 +228,16 @@
             </div>
         </div>
 
+        <!-- Genişlik Ayar Çubuğu (Sürüklenebilir Resizer) -->
+        <div class="lab-resizer" id="labResizer" title="Pencere genişliğini ayarlamak için iki yana sürükleyin"></div>
+
         <!-- Sağ Taraf: Egzersiz Biyomekanik İnceleme Penceresi (Drawer/Inspector) -->
         <aside class="lab-inspector" id="labInspector">
             <!-- Boş Durum (Egzersiz seçilmediğinde) -->
             <div class="inspector-placeholder" id="inspectorPlaceholder">
                 <div class="placeholder-icon">🔬</div>
                 <h3>Biyomekanik İnceleme Masası</h3>
-                <p>Sol taraftaki egzersiz kütüphanesinden bir harekete tıklayarak görselini, kas aktivasyon yüzdelerini, MTF ve SFR değerlerini inceleyin.</p>
+                <p>Sol taraftaki listeden herhangi bir harekete tıklayarak detaylı tekniğini, kas aktivasyonunu ve MTF etki katsayısını inceleyin.</p>
                 <div class="placeholder-hint">💡 <i>Tüm veriler Schoenfeld, Beardsley ve Israetel akademik katsayı modelleriyle eşleşmiştir.</i></div>
             </div>
 
@@ -256,8 +259,8 @@
 
                 <!-- Görsel Sekmeleri (Form & Anatomi) -->
                 <div class="visual-tabs">
-                    <button class="vtab-btn active" id="btnTabForm" data-tab="form">📐 Form & Uygulama</button>
-                    <button class="vtab-btn" id="btnTabAnatomi" data-tab="anatomi">🧬 Kas Anatomisi</button>
+                    <button class="vtab-btn active" id="btnTabForm" data-tab="form">📐 Form & Uygulama Kılavuzu</button>
+                    <button class="vtab-btn" id="btnTabAnatomi" data-tab="anatomi">🧬 Kas Anatomisi & Odak</button>
                 </div>
 
                 <!-- Görsel Alanı -->
@@ -271,15 +274,20 @@
 
                 <!-- Bilimsel Biyomekanik Parametre Kartları -->
                 <div class="inspector-kpi-grid">
-                    <div class="insp-kpi-card">
-                        <span class="insp-kpi-label">Mekanik Gerilim (MTF)</span>
-                        <span class="insp-kpi-val" id="inspValMtf">1.0x</span>
-                        <small class="insp-kpi-sub" id="inspSubMtf">Maksimal Gerilim Çarpanı</small>
+                    <div class="insp-kpi-card mtf-main-card">
+                        <div class="insp-kpi-header-row">
+                            <span class="insp-kpi-label">Mekanik Gerilim (MTF)</span>
+                            <span class="insp-kpi-pill" id="inspPillMtf">%100 Tam Yük</span>
+                        </div>
+                        <span class="insp-kpi-val" id="inspValMtf">1.00x</span>
+                        <p class="insp-kpi-desc" id="inspDescMtf">Hedef kasa doğrudan %100 mekanik yük biner. Yapılan 1 set = 1 tam set hipertrofi olarak sayılır.</p>
                     </div>
                     <div class="insp-kpi-card">
-                        <span class="insp-kpi-label">Uzamışta Yüklenme</span>
+                        <div class="insp-kpi-header-row">
+                            <span class="insp-kpi-label">Uzamışta Yüklenme</span>
+                        </div>
                         <span class="insp-kpi-val" id="inspValLengthened">Evet ✅</span>
-                        <small class="insp-kpi-sub">Stretch-Mediated Hipertrofi</small>
+                        <p class="insp-kpi-desc" id="inspDescLengthened">Kasın en gergin pozisyonunda maksimum direnç oluşur (Stretch-Mediated Hipertrofi).</p>
                     </div>
                 </div>
 

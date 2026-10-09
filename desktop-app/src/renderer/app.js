@@ -75,8 +75,11 @@ const el = {
     inspImage: document.getElementById('inspImage'),
     inspImageFallback: document.getElementById('inspImageFallback'),
     inspValMtf: document.getElementById('inspValMtf'),
-    inspSubMtf: document.getElementById('inspSubMtf'),
     inspValLengthened: document.getElementById('inspValLengthened'),
+    labResizer: document.getElementById('labResizer'),
+    inspPillMtf: document.getElementById('inspPillMtf'),
+    inspDescMtf: document.getElementById('inspDescMtf'),
+    inspDescLengthened: document.getElementById('inspDescLengthened'),
     inspActivationBars: document.getElementById('inspActivationBars'),
     inspCueText: document.getElementById('inspCueText'),
 
@@ -194,6 +197,9 @@ function setupEventListeners() {
     el.btnTabAnatomi.addEventListener('click', () => {
         setVisualTab('anatomi');
     });
+
+    // Resizer (Sürüklenebilir Genişlik Ayarı)
+    setupLabResizer();
 }
 
 // ==================== DATA LOADING ====================
@@ -658,9 +664,9 @@ function applyLabFilters() {
 function renderLabGrid(exercises) {
     if (!exercises || exercises.length === 0) {
         el.labGrid.innerHTML = `
-            <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-muted);">
-                <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
-                <p>Aradığınız kriterlere uygun egzersiz bulunamadı.</p>
+            <div style="grid-column: 1 / -1; text-align: center; padding: 50px 20px; color: var(--text-muted);">
+                <div style="font-size: 36px; margin-bottom: 10px;">🔍</div>
+                <p style="font-size: 14px;">Aradığınız kriterlere uygun egzersiz bulunamadı.</p>
             </div>
         `;
         return;
@@ -669,19 +675,27 @@ function renderLabGrid(exercises) {
     el.labGrid.innerHTML = exercises.map(ex => {
         const isActive = state.selectedExercise && state.selectedExercise.id === ex.id;
         const pFactor = typeof ex.pFactor === 'number' ? ex.pFactor : 1.0;
-        const mtfClass = pFactor >= 0.85 ? 'high' : (pFactor === 0 ? 'zero' : '');
-        const mtfText = pFactor === 0 ? 'Kondisyon (0 MTF)' : `MTF: ${pFactor.toFixed(2)}x`;
+        
+        let mtfPillHtml = '';
+        if (pFactor === 0 || ex.type === 'CONDITIONING') {
+            mtfPillHtml = `<span class="mtf-pill mtf-cardio">🏃 Kondisyon (0 Yük)</span>`;
+        } else if (pFactor >= 0.85) {
+            mtfPillHtml = `<span class="mtf-pill mtf-full">⚡ %${Math.round(pFactor * 100)} Tam Yük</span>`;
+        } else {
+            mtfPillHtml = `<span class="mtf-pill mtf-partial">⚡ %${Math.round(pFactor * 100)} Kısmi Yük</span>`;
+        }
+
+        const typeLabel = ex.typeLabel ? ex.typeLabel.split(' ')[0] : 'Kuvvet';
 
         return `
             <div class="lab-card ${isActive ? 'active' : ''}" data-id="${ex.id}">
-                <div class="lab-card-thumb">
-                    <img src="${ex.formImage || ex.anatomiImage || ''}" alt="${ex.name}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                    <span class="lab-card-thumb-placeholder" style="display:none;">🏋️</span>
+                <div class="lab-card-header">
+                    <div class="lab-card-title">${ex.name}</div>
                 </div>
-                <div class="lab-card-name" title="${ex.name}">${ex.name}</div>
-                <div class="lab-card-meta">
-                    <span class="lab-card-muscle">${ex.primary}</span>
-                    <span class="lab-card-mtf ${mtfClass}">${mtfText}</span>
+                <div class="lab-card-tags">
+                    <span class="muscle-pill">${ex.primary}</span>
+                    <span class="type-pill">${typeLabel}</span>
+                    ${mtfPillHtml}
                 </div>
             </div>
         `;
@@ -721,15 +735,51 @@ function selectLabExercise(ex) {
     el.inspSfrBadge.textContent = `SFR: ${ex.sfrLabel || ex.sfr || 'N/A'}`;
     el.inspSfrBadge.className = `badge-sfr ${ex.sfr === 'N/A' ? 'na' : ''}`;
 
-    // MTF KPI
+    // MTF Değer ve Açıklama Hesaplama
     const pFactor = typeof ex.pFactor === 'number' ? ex.pFactor : 1.0;
-    el.inspValMtf.textContent = pFactor === 0 ? '0.00x' : `${pFactor.toFixed(2)}x`;
-    el.inspSubMtf.textContent = pFactor === 0 
-        ? 'Hipertrofi Sayılmaz (Kondisyon)' 
-        : (pFactor >= 0.85 ? 'Yüksek Mekanik Gerilim' : 'Modere / İzole Gerilim');
+    const inspPill = document.getElementById('inspPillMtf');
+    const inspDesc = document.getElementById('inspDescMtf');
+    const inspDescLengthened = document.getElementById('inspDescLengthened');
+
+    if (pFactor === 0 || ex.type === 'CONDITIONING') {
+        el.inspValMtf.textContent = '0.00x';
+        if (inspPill) {
+            inspPill.textContent = '0 Yük / Kondisyon';
+            inspPill.style.background = 'rgba(148, 163, 184, 0.2)';
+            inspPill.style.color = '#94a3b8';
+        }
+        if (inspDesc) {
+            inspDesc.textContent = 'Metabolik dayanıklılık ve kardiyo hareketi. Kalp ritmini ve kalori tüketimini artırır; ancak kas hipertrofisine doğrudan 0 set olarak işlenir.';
+        }
+    } else if (pFactor >= 0.85) {
+        el.inspValMtf.textContent = `${pFactor.toFixed(2)}x`;
+        if (inspPill) {
+            inspPill.textContent = `%${Math.round(pFactor * 100)} Tam Mekanik Yük`;
+            inspPill.style.background = 'rgba(16, 185, 129, 0.2)';
+            inspPill.style.color = '#10b981';
+        }
+        if (inspDesc) {
+            inspDesc.textContent = `Ağır serbest ağırlık veya doğrudan yüklenme. Kas liflerine %100 mekanik gerilim biner; yapılan 1 set tam ${pFactor.toFixed(2)} setlik hipertrofi sayılır.`;
+        }
+    } else {
+        el.inspValMtf.textContent = `${pFactor.toFixed(2)}x`;
+        if (inspPill) {
+            inspPill.textContent = `%${Math.round(pFactor * 100)} Kısmi Mekanik Yük`;
+            inspPill.style.background = 'rgba(234, 179, 8, 0.2)';
+            inspPill.style.color = 'var(--gold)';
+        }
+        if (inspDesc) {
+            inspDesc.textContent = `Yük vücut ağırlığıyla paylaşılır veya açı gereği kas gerilimi kısmi kalır. Bu nedenle 1 tam set = ${pFactor.toFixed(2)} setlik efektif hipertrofi olarak hesaba katılır.`;
+        }
+    }
 
     // Lengthened Overload
     el.inspValLengthened.textContent = ex.lengthened ? 'Evet ✅' : 'Hayır ❌';
+    if (inspDescLengthened) {
+        inspDescLengthened.textContent = ex.lengthened
+            ? 'Kas lifleri gerilmiş (uzamış) pozisyondayken maksimum mekanik gerilim üretir (Stretch-Mediated Hipertrofi avantajı).'
+            : 'Hareket tepe sıkıştırma veya kısalmış pozisyon odaklıdır; uzamış aşırı yüklenme etkisi sınırlıdır.';
+    }
 
     // Biyomekanik Form Cues
     el.inspCueText.textContent = ex.cue || 'Standart biyomekanik form ve eklem hizalanmasına dikkat edin.';
@@ -839,4 +889,51 @@ function closeInspector() {
     el.inspectorContent.style.display = 'none';
     el.labGrid.querySelectorAll('.lab-card').forEach(card => card.classList.remove('active'));
 }
+
+function setupLabResizer() {
+    const resizer = document.getElementById('labResizer');
+    const inspector = document.getElementById('labInspector');
+    if (!resizer || !inspector) return;
+
+    // Kaydedilmiş genişlik varsa uygula (Varsayılan 560px)
+    const savedWidth = localStorage.getItem('fitlab_inspector_width');
+    if (savedWidth) {
+        const parsed = parseInt(savedWidth, 10);
+        if (parsed >= 420 && parsed <= 900) {
+            inspector.style.width = `${parsed}px`;
+        }
+    }
+
+    let isResizing = false;
+
+    resizer.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        resizer.classList.add('resizing');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+        // Ekranın sağ kenarından fareye olan mesafe = inspector genişliği
+        const newWidth = window.innerWidth - e.clientX;
+        if (newWidth >= 420 && newWidth <= 920) {
+            inspector.style.width = `${newWidth}px`;
+        }
+    });
+
+    window.addEventListener('mouseup', () => {
+        if (isResizing) {
+            isResizing = false;
+            resizer.classList.remove('resizing');
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            const finalWidth = parseInt(inspector.style.width, 10);
+            if (finalWidth) {
+                localStorage.setItem('fitlab_inspector_width', finalWidth);
+            }
+        }
+    });
+}
+
 
