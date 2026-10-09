@@ -3503,7 +3503,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v93</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v94</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3539,7 +3539,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v93</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v94</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -14794,6 +14794,231 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
         }
 
+        const MUSCLE_DIAGRAM_DEFS = {
+            shoulders: {
+                title: 'OMUZ',
+                columns: [
+                    { key: 'front', label: 'ÖN DELTOİT', subKeys: ['shoulders_front'], recId: 'db_overhead_press', recName: 'Omuz Presi', keywords: ['ön omuz', 'front delt', 'overhead', 'arnold', 'press', 'snatch'] },
+                    { key: 'side', label: 'YAN DELTOİT', subKeys: ['shoulders_side'], recId: 'db_lateral_raise', recName: 'Lateral Raise', keywords: ['yan omuz', 'side delt', 'lateral'] },
+                    { key: 'rear', label: 'ARKA DELTOİT', subKeys: ['shoulders_rear'], recId: 'mach_face_pull', recName: 'Face Pull', keywords: ['arka omuz', 'rear delt', 'face pull', 'halo'] }
+                ]
+            },
+            back: {
+                title: 'SIRT',
+                columns: [
+                    { key: 'lats', label: 'LATİSSİMUS (KANAT)', subKeys: ['back_lats'], recId: 'mach_lat_pulldown', recName: 'Lat Pulldown', keywords: ['kanat', 'lats', 'latissimus', 'pulldown', 'pullup', 'chinup', 'saw row', 'pullover'] },
+                    { key: 'mid', label: 'RHOMBOİD (ORTA SIRT)', subKeys: ['back_mid'], recId: 'db_chest_supported_row', recName: 'Göğüs Destekli Row', keywords: ['orta sırt', 'rhomboid', 'row', 'kürek', 'pendlay', 'renegade row'] },
+                    { key: 'traps', label: 'TRAPEZ (ÜST SIRT)', subKeys: ['traps'], recId: 'mach_face_pull', recName: 'Face Pull / Shrug', keywords: ['trapez', 'shrug', 'face pull', 'clean', 'farmers', 'halo', 'deadlift'] }
+                ]
+            },
+            chest: {
+                title: 'GÖĞÜS',
+                columns: [
+                    { key: 'upper', label: 'ÜST GÖĞÜS (CLAVICULAR)', subKeys: ['chest_upper'], recId: 'db_incline_press', recName: 'Incline Press', keywords: ['üst göğüs', 'incline', 'decline pushup', 'landmine'] },
+                    { key: 'mid', label: 'ORTA GÖĞÜS (STERNAL)', subKeys: ['chest_mid'], recId: 'db_bench_press', recName: 'Bench Press', keywords: ['orta göğüs', 'bench press', 'floor press', 'pushup', 'şınav', 'pec deck', 'crossover', 'renegade'] },
+                    { key: 'lower', label: 'ALT GÖĞÜS (COSTAL)', subKeys: ['chest_lower'], recId: 'bw_dips', recName: 'Dips', keywords: ['alt göğüs', 'dips', 'crossover alt'] }
+                ]
+            },
+            quads: {
+                title: 'ÖN BACAK (QUADRICEPS)',
+                columns: [
+                    { key: 'vastus_lat', label: 'VASTUS LATERALIS (DIŞ)', subKeys: ['legs_quad'], recId: 'bb_back_squat', recName: 'Squat', keywords: ['squat', 'leg press', 'front squat', 'goblet'] },
+                    { key: 'vastus_med', label: 'VASTUS MEDIALIS (GÖZYAŞI)', subKeys: ['legs_quad'], recId: 'db_bulgarian_squat', recName: 'Bulgarian Split Squat', keywords: ['bulgarian', 'lunge', 'step up', 'zercher'] },
+                    { key: 'rectus_fem', label: 'RECTUS FEMORIS (DÜZ)', subKeys: ['legs_quad'], recId: 'mach_leg_extension', recName: 'Leg Extension', keywords: ['leg extension', 'quad izole', 'jump'] }
+                ]
+            },
+            hamstrings: {
+                title: 'ARKA BACAK (POSTERIOR CHAIN)',
+                columns: [
+                    { key: 'biceps_fem', label: 'BICEPS FEMORIS (DIŞ)', subKeys: ['legs_hamstrings'], recId: 'mach_leg_curl', recName: 'Leg Curl', keywords: ['leg curl', 'curl', 'arka bacak'] },
+                    { key: 'semitend', label: 'SEMİTENDİNOSUS (İÇ)', subKeys: ['legs_hamstrings'], recId: 'db_rdl', recName: 'Romanian Deadlift (RDL)', keywords: ['rdl', 'romanian', 'deadlift'] },
+                    { key: 'hinge_chain', label: 'POSTERIOR HİNGE ZİNCİRİ', subKeys: ['legs_hamstrings'], recId: 'db_swing', recName: 'Kettlebell Swing', keywords: ['swing', 'single leg rdl', 'good morning'] }
+                ]
+            },
+            glutes: {
+                title: 'KALÇA (GLUTEUS)',
+                columns: [
+                    { key: 'maximus', label: 'GLUTEUS MAXIMUS (BÜYÜK)', subKeys: ['legs_glutes'], recId: 'bb_hip_thrust', recName: 'Hip Thrust', keywords: ['hip thrust', 'glute bridge', 'deadlift', 'squat'] },
+                    { key: 'medius', label: 'GLUTEUS MEDIUS (YAN/DENGE)', subKeys: ['legs_glutes'], recId: 'db_bulgarian_squat', recName: 'Bulgarian Split Squat', keywords: ['bulgarian', 'lunge', 'abduction', 'tek bacak', 'denge'] },
+                    { key: 'minimus', label: 'PELVİK & ROTATÖR STABİLİTE', subKeys: ['legs_glutes'], recId: 'db_single_leg_rdl', recName: 'Tek Bacak RDL', keywords: ['single leg', 'rotatör', 'pelvik'] }
+                ]
+            },
+            biceps: {
+                title: 'BICEPS & ÖN KOL',
+                columns: [
+                    { key: 'long_head', label: 'UZUN BAŞ (DIŞ/ZİRVE)', subKeys: ['biceps'], recId: 'db_incline_curl', recName: 'Incline Curl', keywords: ['incline curl', 'pazu tepe', 'uzun baş'] },
+                    { key: 'short_head', label: 'KISA BAŞ (İÇ KÜTLE)', subKeys: ['biceps'], recId: 'bb_biceps_curl', recName: 'Barbell / Biceps Curl', keywords: ['biceps curl', 'barbell curl', 'cable curl'] },
+                    { key: 'brachialis', label: 'BRACHIALIS & ÖN KOL', subKeys: ['biceps'], recId: 'db_hammer_curl', recName: 'Hammer Curl', keywords: ['hammer', 'chinup', 'ön kol', 'kavrama', 'brachialis'] }
+                ]
+            },
+            triceps: {
+                title: 'TRICEPS (ARKA KOL)',
+                columns: [
+                    { key: 'long', label: 'UZUN BAŞ (BAŞÜSTÜ)', subKeys: ['triceps_long'], recId: 'db_triceps_overhead', recName: 'Overhead Triceps', keywords: ['overhead', 'skullcrusher', 'french', 'uzun baş'] },
+                    { key: 'lateral', label: 'YAN/DIŞ BAŞ (AT NALI)', subKeys: ['triceps_lateral'], recId: 'mach_triceps_pushdown', recName: 'Triceps Pushdown', keywords: ['pushdown', 'close grip', 'cable triceps'] },
+                    { key: 'medial', label: 'MEDİAL BAŞ (DİRSEK KİLİT)', subKeys: ['triceps_lateral'], recId: 'bw_diamond_pushup', recName: 'Diamond Pushup / Dips', keywords: ['dips', 'diamond', 'bench', 'itiş'] }
+                ]
+            },
+            core: {
+                title: 'KARIN & MERKEZ (CORE)',
+                columns: [
+                    { key: 'rectus', label: 'REKTUS ABDOMİNİS (ÖN DUVAR)', subKeys: ['core_front'], recId: 'bw_hanging_knee_raise', recName: 'Hanging Knee Raise', keywords: ['plank', 'hanging', 'hollow', 'crunch', 'mountain'] },
+                    { key: 'obliques', label: 'OBLİKLER (YAN KARIN/ROTASYON)', subKeys: ['core_obliques'], recId: 'db_russian_twist', recName: 'Russian Twist', keywords: ['twist', 'woodchopper', 'suitcase', 'oblik', 'renegade', 'chop'] },
+                    { key: 'transverse', label: 'TRANSVERSUS & DERİN ZIRH', subKeys: ['core_front'], recId: 'db_farmers_walk', recName: 'Farmers Walk', keywords: ['farmers', 'carry', 'bear crawl', 'stabilite', 'zırh'] }
+                ]
+            },
+            calves: {
+                title: 'BALDIR & KALF',
+                columns: [
+                    { key: 'gastrocnemius', label: 'GASTROCNEMİUS (AYAKTA)', subKeys: ['legs_calves'], recId: 'mach_calf_raise', recName: 'Ayakta Calf Raise', keywords: ['standing calf', 'calf raise', 'zıplama', 'jump'] },
+                    { key: 'soleus', label: 'SOLEUS (OTURARAK)', subKeys: ['legs_calves'], recId: 'mach_calf_raise', recName: 'Oturarak Calf Raise', keywords: ['seated calf', 'baldır'] },
+                    { key: 'tibialis', label: 'TİBİALİS ANTERİOR (KAVAL)', subKeys: ['legs_calves'], recId: 'mach_calf_raise', recName: 'Kaval & Denge', keywords: ['ayak bileği', 'kaval', 'yürüme'] }
+                ]
+            }
+        };
+
+        function getExerciseCompartmentForMuscle(muscleId, exNameOrId) {
+            const def = MUSCLE_DIAGRAM_DEFS[muscleId];
+            if (!def) return null;
+
+            const dbEx = (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB))
+                ? EXERCISES_DB.find(e => e.id === exNameOrId || (e.name && e.name.toLowerCase() === (exNameOrId || '').toLowerCase()))
+                : null;
+            const exId = dbEx ? dbEx.id : exNameOrId;
+            const anat = (typeof EXERCISE_ANATOMY_MAP !== 'undefined') ? EXERCISE_ANATOMY_MAP[exId] : null;
+
+            const textToSearch = [
+                exNameOrId || '',
+                dbEx ? dbEx.name : '',
+                anat ? anat.primary : '',
+                anat ? anat.secondary : '',
+                anat ? anat.subKey : ''
+            ].join(' ').toLowerCase();
+
+            if (anat && anat.subKey) {
+                for (const col of def.columns) {
+                    if (col.subKeys && col.subKeys.includes(anat.subKey)) {
+                        return col.key;
+                    }
+                }
+            }
+
+            for (const col of def.columns) {
+                for (const kw of col.keywords) {
+                    if (textToSearch.includes(kw.toLowerCase())) {
+                        return col.key;
+                    }
+                }
+            }
+
+            return def.columns[0].key;
+        }
+
+        function renderMuscleCompartmentDiagram(m) {
+            const def = MUSCLE_DIAGRAM_DEFS[m.id];
+            if (!def) return '';
+
+            const compMap = {};
+            def.columns.forEach(col => {
+                compMap[col.key] = {
+                    col,
+                    earnedSets: 0,
+                    plannedCount: 0,
+                    doneExs: new Set(),
+                    plannedExs: new Set()
+                };
+            });
+
+            (m.contributions || []).forEach(c => {
+                const cKey = getExerciseCompartmentForMuscle(m.id, c.exercise);
+                if (cKey && compMap[cKey]) {
+                    compMap[cKey].earnedSets += (Number(c.earnedSets) || 0);
+                    compMap[cKey].doneExs.add(c.exercise);
+                }
+            });
+
+            if ((!m.contributions || m.contributions.length === 0) && m.doneExercises && Array.isArray(m.doneExercises)) {
+                m.doneExercises.forEach(exName => {
+                    const cKey = getExerciseCompartmentForMuscle(m.id, exName);
+                    if (cKey && compMap[cKey]) {
+                        compMap[cKey].doneExs.add(exName);
+                        if (compMap[cKey].earnedSets === 0) compMap[cKey].earnedSets = 1;
+                    }
+                });
+            }
+
+            (m.plannedExercises || []).forEach(pe => {
+                const cKey = getExerciseCompartmentForMuscle(m.id, pe.name);
+                if (cKey && compMap[cKey]) {
+                    compMap[cKey].plannedCount += 1;
+                    compMap[cKey].plannedExs.add(pe.name);
+                }
+            });
+
+            const columnsHTML = def.columns.map(col => {
+                const data = compMap[col.key];
+                const isDone = data.earnedSets > 0;
+                const isPlanned = !isDone && data.plannedExs.size > 0;
+
+                let statusBadge = '';
+                let contentHTML = '';
+                let cellBg = 'rgba(255,255,255,0.02)';
+                let cellBorder = '1px solid rgba(255,255,255,0.07)';
+
+                if (isDone) {
+                    cellBg = 'rgba(16, 185, 129, 0.07)';
+                    cellBorder = '1px solid rgba(16, 185, 129, 0.28)';
+                    statusBadge = `<span style="display:inline-block; font-size:10px; font-weight:800; color:#34d399; background:rgba(16,185,129,0.18); border:1px solid rgba(16,185,129,0.35); border-radius:4px; padding:2px 6px;">✅ ${data.earnedSets.toFixed(1)} Set</span>`;
+                    const exList = Array.from(data.doneExs).map(escapeHTML).join(', ');
+                    const planList = data.plannedExs.size > 0 ? `<div style="font-size:9.5px; color:#fcd34d; margin-top:3px;">+ ${Array.from(data.plannedExs).map(escapeHTML).join(', ')} (Planda)</div>` : '';
+                    contentHTML = `<div style="font-size:10px; color:#cbd5e1; margin-top:4px; line-height:1.35;"><strong>${exList}</strong>${planList}</div>`;
+                } else if (isPlanned) {
+                    cellBg = 'rgba(245, 158, 11, 0.07)';
+                    cellBorder = '1px solid rgba(245, 158, 11, 0.28)';
+                    statusBadge = `<span style="display:inline-block; font-size:10px; font-weight:800; color:#fbbf24; background:rgba(245,158,11,0.18); border:1px solid rgba(245,158,11,0.35); border-radius:4px; padding:2px 6px;">🟡 Planda (${data.plannedCount} Hrk)</span>`;
+                    const planList = Array.from(data.plannedExs).map(escapeHTML).join(', ');
+                    contentHTML = `<div style="font-size:10px; color:#fde68a; margin-top:4px; line-height:1.35;">${planList}</div>`;
+                } else {
+                    cellBg = 'rgba(239, 68, 68, 0.06)';
+                    cellBorder = '1px solid rgba(239, 68, 68, 0.28)';
+                    statusBadge = `<span style="display:inline-block; font-size:9.5px; font-weight:800; color:#f87171; background:rgba(239,68,68,0.16); border:1px solid rgba(239,68,68,0.32); border-radius:4px; padding:2px 5px;">⚠️ 0 Set (Boşta!)</span>`;
+                    contentHTML = `
+                        <div style="margin-top:6px;">
+                            <button class="btn btn-outline" style="font-size:9.5px; padding:3px 6px; border-radius:5px; color:var(--gold); border-color:rgba(245,158,11,0.5); width:100%; text-align:center; font-weight:700; background:rgba(0,0,0,0.4);" onclick="openQuickAddToDayModal('${col.recId}')" title="Bu başı çalıştırmak için ${col.recName} ekle">
+                                ➕ ${escapeHTML(col.recName)} Ekle
+                            </button>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div style="background:${cellBg}; border:${cellBorder}; border-radius:6px; padding:8px; display:flex; flex-direction:column; justify-content:space-between;">
+                        <div>
+                            <div style="font-size:10.5px; font-weight:800; color:#fff; margin-bottom:5px; letter-spacing:0.3px;">${escapeHTML(col.label)}</div>
+                            <div>${statusBadge}</div>
+                        </div>
+                        ${contentHTML}
+                    </div>
+                `;
+            }).join('');
+
+            return `
+                <div style="margin-top:10px; border:1px solid rgba(255,255,255,0.12); border-radius:8px; overflow:hidden; background:rgba(0,0,0,0.35);">
+                    <div style="background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.1); padding:6px 10px; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:11px; font-weight:900; letter-spacing:0.8px; color:var(--gold); text-transform:uppercase;">
+                            📐 ${escapeHTML(def.title)} — ANATOMİK ALT BÖLGE DAĞILIMI
+                        </span>
+                        <span style="font-size:9.5px; color:var(--text-secondary);">
+                            Hangi Baş Çalıştı?
+                        </span>
+                    </div>
+                    <div style="padding:8px; display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:6px;">
+                        ${columnsHTML}
+                    </div>
+                </div>
+            `;
+        }
+
         function renderWeeklyMuscleSufficiencySection() {
             const analysis = calculateWeeklyMuscleSufficiency(currentWeeklyMuscleSource, currentWeeklyMuscleWeekOffset);
             const filter = currentWeeklyMuscleFilter;
@@ -14975,7 +15200,6 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                         <div style="display:flex; align-items:center; gap:6px;">
                                             <span style="font-size:18px;">${m.icon}</span>
                                             <h4 style="font-size:14px; font-weight:800; color:#fff; margin:0;">${m.name}</h4>
-                                            <span style="font-size:10.5px; color:var(--text-secondary); margin-left:4px;">${m.desc}</span>
                                         </div>
                                     </div>
                                     <span class="badge" style="background:${m.statusBg}; color:${m.statusColor}; border:1px solid ${m.statusColor}44; font-size:11px; padding:3px 10px; font-weight:800; border-radius:12px;">
@@ -14995,6 +15219,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                         <span>🎯 Hedef: <strong style="color:var(--gold);">${m.optimalMin}-${m.optimalMax} set/hf</strong></span>
                                     </div>
                                 </div>
+
+                                <!-- KULLANICI ANATOMİK DİYAGRAMI (ALT BÖLGE DAĞILIMI) -->
+                                ${renderMuscleCompartmentDiagram(m)}
 
                                 <!-- STATUS DESCRIPTION & EXERCISES -->
                                 <div style="margin-top:8px; font-size:11.5px; color:#cbd5e1; display:flex; flex-direction:column; gap:4px;">
@@ -15932,7 +16159,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=93')
+                navigator.serviceWorker.register('./sw.js?v=94')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
