@@ -18,6 +18,14 @@ function getApiKey() {
     return activeApiKey;
 }
 
+// Desteklenen ve öncelikli model adayları
+const CANDIDATE_MODELS = [
+    'gemini-3.8-flash',
+    'gemini-flash-latest',
+    'gemini-2.5-flash-lite',
+    'gemini-2.5-pro'
+];
+
 /**
  * Sporcu verilerini ve akademik motor sonuçlarını alıp derinlemesine AI analizi ve programı üretir.
  */
@@ -27,7 +35,6 @@ async function generateAcademicPrescription(athleteProfile, academicData, userCu
     }
 
     const genAI = new GoogleGenerativeAI(activeApiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     const systemPrompt = `
 Sen "FitLAB" sisteminin Baş Spor Bilimcisi ve Elit Biyomekanik Koçusun.
@@ -81,8 +88,60 @@ Lütfen yanıtını şu 3 ana bölümde sun:
 (Web uygulamasına yüklenebilecek gün gün veya egzersiz egzersiz set, tekrar, hedef RIR ve kilo tavsiyeleri)
 `;
 
-    const result = await model.generateContent([systemPrompt, userPrompt]);
-    const responseText = result.response.text();
+    let responseText = '';
+    let lastError = null;
+
+    // Öncelikli aday modelleri sırayla dene
+    for (const modelName of CANDIDATE_MODELS) {
+        try {
+            console.log(`[FitLAB AI] '${modelName}' modeli deneniyor...`);
+            const model = genAI.getGenerativeModel({ model: modelName });
+            const result = await model.generateContent([systemPrompt, userPrompt]);
+            responseText = result.response.text();
+            if (responseText) {
+                console.log(`[FitLAB AI] '${modelName}' ile başarıyla reçete üretildi.`);
+                break;
+            }
+        } catch (err) {
+            console.warn(`[FitLAB AI] '${modelName}' başarısız oldu:`, err.message);
+            lastError = err;
+        }
+    }
+
+    // Adaylar başarısız olursa API'den dinamik desteklenen modelleri listele ve dene
+    if (!responseText) {
+        try {
+            const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + activeApiKey);
+            if (res.ok) {
+                const data = await res.json();
+                const availableModels = (data.models || [])
+                    .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
+                    .map(m => m.name.replace('models/', ''))
+                    .filter(name => !CANDIDATE_MODELS.includes(name) && (name.includes('flash') || name.includes('pro')));
+
+                for (const dynModel of availableModels) {
+                    try {
+                        console.log(`[FitLAB AI] Dinamik model deneniyor: ${dynModel}`);
+                        const model = genAI.getGenerativeModel({ model: dynModel });
+                        const result = await model.generateContent([systemPrompt, userPrompt]);
+                        responseText = result.response.text();
+                        if (responseText) {
+                            console.log(`[FitLAB AI] '${dynModel}' dinamik modeli ile başarıyla üretildi.`);
+                            break;
+                        }
+                    } catch (e) {
+                        // Bir sonraki modeli dene
+                    }
+                }
+            }
+        } catch (fetchErr) {
+            console.warn('[FitLAB AI] Dinamik model sorgulama hatası:', fetchErr.message);
+        }
+    }
+
+    if (!responseText) {
+        throw lastError || new Error('Uygun bir Google Gemini AI modeli ile bağlantı kurulamadı. Lütfen API anahtarınızı kontrol edin.');
+    }
 
     return {
         timestamp: new Date().toISOString(),
