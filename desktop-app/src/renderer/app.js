@@ -22,7 +22,12 @@ let state = {
     visualTab: 'form', // 'form' | 'anatomi'
     labFilter: 'ALL',
     labSearch: '',
-    excludedExerciseIds: JSON.parse(localStorage.getItem('fitlab_excluded_exercises') || '[]')
+    excludedExerciseIds: JSON.parse(localStorage.getItem('fitlab_excluded_exercises') || '[]'),
+    // Analytics Durumu (Web İle Birebir Eşit)
+    currentWeeklyMuscleSource: 'week_projected',
+    currentWeeklyMuscleFilter: 'all',
+    currentWeeklyMuscleWeekOffset: 0,
+    currentAnalyticsPeriodDays: 7
 };
 
 // DOM Elemanları
@@ -30,8 +35,11 @@ const el = {
     // Navigasyon & Görünümler
     viewDashboard: document.getElementById('viewDashboard'),
     viewLab: document.getElementById('viewLab'),
+    viewAnalytics: document.getElementById('viewAnalytics'),
     tabBtnDashboard: document.getElementById('tabBtnDashboard'),
     tabBtnLab: document.getElementById('tabBtnLab'),
+    tabBtnAnalytics: document.getElementById('tabBtnAnalytics'),
+    desktopAnalyticsContainer: document.getElementById('desktopAnalyticsContainer'),
 
     // Dashboard Elemanları
     athleteSelect: document.getElementById('athleteSelect'),
@@ -111,6 +119,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                 const analysis = await window.coachAPI.analyzeHistory(state.workoutLogs, state.selectedUser);
                 state.academicAnalysis = analysis;
                 renderDashboard(analysis);
+                renderDesktopAnalytics();
             }
         });
     }
@@ -163,6 +172,9 @@ function setupEventListeners() {
     // Görünüm / Sekme Değişimi
     el.tabBtnDashboard.addEventListener('click', () => switchView('dashboard'));
     el.tabBtnLab.addEventListener('click', () => switchView('lab'));
+    if (el.tabBtnAnalytics) {
+        el.tabBtnAnalytics.addEventListener('click', () => switchView('analytics'));
+    }
 
     // Arama ve Filtreler
     el.labSearchInput.addEventListener('input', (e) => {
@@ -313,6 +325,7 @@ async function refreshAthleteData() {
 
         // Arayüzü Güncelle
         renderDashboard(analysis);
+        renderDesktopAnalytics();
     } catch (err) {
         console.error("Antrenman verisi yenilenirken hata:", err);
     } finally {
@@ -616,24 +629,37 @@ function showToast(msg) {
     }, 4000);
 }
 
-// ==================== LAB (BİYOMEKANİK ATLAS) MODÜLÜ ====================
+// ==================== VIEW CONTROLLER ====================
 function switchView(viewName) {
     state.currentView = viewName;
     if (viewName === 'dashboard') {
         el.viewDashboard.style.display = 'flex';
         el.viewLab.style.display = 'none';
+        if (el.viewAnalytics) el.viewAnalytics.style.display = 'none';
         el.tabBtnDashboard.classList.add('active');
         el.tabBtnLab.classList.remove('active');
+        if (el.tabBtnAnalytics) el.tabBtnAnalytics.classList.remove('active');
+    } else if (viewName === 'analytics') {
+        el.viewDashboard.style.display = 'none';
+        el.viewLab.style.display = 'none';
+        if (el.viewAnalytics) el.viewAnalytics.style.display = 'flex';
+        el.tabBtnDashboard.classList.remove('active');
+        el.tabBtnLab.classList.remove('active');
+        if (el.tabBtnAnalytics) el.tabBtnAnalytics.classList.add('active');
+        renderDesktopAnalytics();
     } else {
         el.viewDashboard.style.display = 'none';
         el.viewLab.style.display = 'flex';
+        if (el.viewAnalytics) el.viewAnalytics.style.display = 'none';
         el.tabBtnDashboard.classList.remove('active');
         el.tabBtnLab.classList.add('active');
+        if (el.tabBtnAnalytics) el.tabBtnAnalytics.classList.remove('active');
         if (state.catalog.length === 0) {
             loadExerciseCatalog();
         }
     }
 }
+window.switchView = switchView;
 
 async function loadExerciseCatalog() {
     try {
@@ -972,5 +998,766 @@ function setupLabResizer() {
         }
     });
 }
+
+// ==================== BİYOMEKANİK ANALİZ & ÇUBUKLAR MODÜLÜ (WEB İLE BİREBİR EŞİT) ====================
+
+function escapeHTML(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+window.escapeHTML = escapeHTML;
+
+const ACADEMIC_MUSCLE_TO_ID = {
+    'Göğüs': 'chest',
+    'Sırt': 'back',
+    'Omuz': 'shoulders',
+    'Ön Bacak': 'quads',
+    'Arka Bacak': 'hamstrings',
+    'Glute': 'glutes',
+    'Kalça': 'glutes',
+    'Biceps': 'biceps',
+    'Triceps': 'triceps',
+    'Karın/Core': 'core',
+    'Karın': 'core',
+    'Core': 'core',
+    'Kalf': 'calves',
+    'chest': 'chest',
+    'back': 'back',
+    'shoulders': 'shoulders',
+    'quads': 'quads',
+    'hamstrings': 'hamstrings',
+    'glutes': 'glutes',
+    'biceps': 'biceps',
+    'triceps': 'triceps',
+    'core': 'core',
+    'calves': 'calves'
+};
+
+const WEEKLY_MUSCLE_CONFIG = [
+    { id: 'chest', name: 'Göğüs', icon: '🛡️', optimalMin: 8, optimalMax: 18, desc: 'Pectoralis Major & Minor' },
+    { id: 'back', name: 'Sırt & Kanat', icon: '🏹', optimalMin: 8, optimalMax: 20, desc: 'Latissimus, Rhomboid, Trapez' },
+    { id: 'shoulders', name: 'Omuz', icon: '⚔️', optimalMin: 8, optimalMax: 18, desc: 'Ön, Yan, Arka Deltoid' },
+    { id: 'quads', name: 'Ön Bacak', icon: '🦵', optimalMin: 8, optimalMax: 18, desc: 'Quadriceps (Squat/Lunge)' },
+    { id: 'hamstrings', name: 'Arka Bacak', icon: '🦿', optimalMin: 6, optimalMax: 16, desc: 'Biceps Femoris (RDL/Hinge)' },
+    { id: 'glutes', name: 'Kalça', icon: '🍑', optimalMin: 6, optimalMax: 16, desc: 'Gluteus Maximus / Medius' },
+    { id: 'biceps', name: 'Biceps (Pazı)', icon: '💪', optimalMin: 6, optimalMax: 16, desc: 'Biceps Brachii & Kol Çekiş' },
+    { id: 'triceps', name: 'Triceps (Arka Kol)', icon: '⚡', optimalMin: 6, optimalMax: 16, desc: 'Triceps Brachii & Kol İtiş' },
+    { id: 'core', name: 'Karın & Core', icon: '🧱', optimalMin: 6, optimalMax: 16, desc: 'Rectus Abdominis & Oblikler' },
+    { id: 'calves', name: 'Kalf & Alt Bacak', icon: '🦶', optimalMin: 3, optimalMax: 12, desc: 'Gastrocnemius & Soleus' }
+];
+
+function resolveExerciseBiomechanics(rawName, muscleHint, categoryHint) {
+    if (!rawName) return { primary: 'Göğüs', pFactor: 0.5, sec: {}, type: 'HYBRID', sfr: 'MODERATE', lengthened: false };
+    const normKey = String(rawName).trim().toLowerCase();
+
+    // 1. Katalogda ara
+    if (state.catalog && state.catalog.length > 0) {
+        const found = state.catalog.find(c => c.name.toLowerCase() === normKey || c.rawKey === normKey || (c.id && normKey.includes(c.id)));
+        if (found) {
+            return {
+                primary: found.primary,
+                pFactor: typeof found.pFactor === 'number' ? found.pFactor : 1.0,
+                sec: found.sec || {},
+                type: found.type || 'STRENGTH',
+                sfr: found.sfr || 'MODERATE',
+                lengthened: Boolean(found.lengthened)
+            };
+        }
+    }
+
+    // 2. Kural Tabanlı Fallback
+    const text = normKey;
+    if (text.includes('burpee') || text.includes('mountain') || text.includes('jumping') || text.includes('cardio') || text.includes('koşu') || text.includes('ip atlama')) {
+        return { primary: 'Kondisyon / Kardiyo', pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'LOW', lengthened: false };
+    }
+    if (text.includes('bench') || text.includes('şınav') || text.includes('push-up') || text.includes('chest') || text.includes('göğüs')) {
+        const isBw = text.includes('şınav') || text.includes('push-up');
+        return { primary: 'Göğüs', pFactor: isBw ? 0.65 : 1.0, sec: { 'Omuz': 0.35, 'Triceps': 0.35 }, type: isBw ? 'BODYWEIGHT_STRENGTH' : 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true };
+    }
+    if (text.includes('row') || text.includes('lat') || text.includes('barfiks') || text.includes('pull-up') || text.includes('çekiş') || text.includes('sırt')) {
+        return { primary: 'Sırt', pFactor: 1.0, sec: { 'Biceps': 0.40 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true };
+    }
+    if (text.includes('press') && (text.includes('omuz') || text.includes('overhead') || text.includes('arnold'))) {
+        return { primary: 'Omuz', pFactor: 1.0, sec: { 'Triceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true };
+    }
+    if (text.includes('squat') || text.includes('lunge') || text.includes('bacak') || text.includes('quad')) {
+        return { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.40 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true };
+    }
+    if (text.includes('rdl') || text.includes('deadlift') || text.includes('hamstring') || (text.includes('curl') && text.includes('leg'))) {
+        return { primary: 'Arka Bacak', pFactor: 1.0, sec: { 'Glute': 0.50 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true };
+    }
+    if (text.includes('swing') || text.includes('thrust') || text.includes('glute') || text.includes('kalça')) {
+        return { primary: 'Glute', pFactor: 0.60, sec: { 'Arka Bacak': 0.40 }, type: 'BALLISTIC_POWER', sfr: 'HIGH', lengthened: false };
+    }
+    if (text.includes('curl') || text.includes('biceps')) {
+        return { primary: 'Biceps', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: false };
+    }
+    if (text.includes('triceps') || text.includes('pushdown') || text.includes('skull')) {
+        return { primary: 'Triceps', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true };
+    }
+    if (text.includes('calf') || text.includes('kalf') || text.includes('baldır')) {
+        return { primary: 'Kalf', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true };
+    }
+    if (text.includes('plank') || text.includes('core') || text.includes('karın') || text.includes('twist') || text.includes('crunch')) {
+        return { primary: 'Karın/Core', pFactor: 0.60, sec: {}, type: 'CORE', sfr: 'MODERATE', lengthened: false };
+    }
+    return { primary: muscleHint || 'Göğüs', pFactor: 0.70, sec: {}, type: 'HYBRID', sfr: 'MODERATE', lengthened: false };
+}
+
+function getWeeklyMuscleBounds(weekOffset = 0) {
+    const d = new Date();
+    d.setDate(d.getDate() + (weekOffset * 7));
+    const day = d.getDay();
+    const diffToMonday = day === 0 ? -6 : 1 - day;
+    const monday = new Date(d);
+    monday.setDate(d.getDate() + diffToMonday);
+    monday.setHours(0, 0, 0, 0);
+
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    sunday.setHours(23, 59, 59, 999);
+
+    const months = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+    const label = `${monday.getDate()} ${months[monday.getMonth()]} - ${sunday.getDate()} ${months[sunday.getMonth()]} ${sunday.getFullYear()}`;
+
+    return { monday, sunday, label, isCurrentWeek: weekOffset === 0 };
+}
+
+function getDesktopRecommendationsForMuscle(muscleId, max = 4) {
+    if (!Array.isArray(state.catalog) || state.catalog.length === 0) return [];
+    const cfg = WEEKLY_MUSCLE_CONFIG.find(m => m.id === muscleId);
+    const mName = cfg ? cfg.name : muscleId;
+
+    let list = state.catalog.filter(e => {
+        const pId = ACADEMIC_MUSCLE_TO_ID[e.primary] || e.primary;
+        return pId === muscleId || (e.primary && e.primary.includes(mName));
+    });
+
+    if (list.length < max) {
+        const secList = state.catalog.filter(e => {
+            if (list.includes(e)) return false;
+            if (e.sec && typeof e.sec === 'object') {
+                return Object.keys(e.sec).some(k => {
+                    const sId = ACADEMIC_MUSCLE_TO_ID[k] || k;
+                    return sId === muscleId || k.includes(mName);
+                });
+            }
+            return false;
+        });
+        list = list.concat(secList);
+    }
+
+    return list.slice(0, max);
+}
+
+function openLabExerciseFromAnalytics(exId) {
+    if (!exId) return;
+    const found = (state.catalog || []).find(c => c.id === exId) || (state.catalog || []).find(c => c.name.toLowerCase() === exId.toLowerCase());
+    if (found) {
+        switchView('lab');
+        selectLabExercise(found);
+    }
+}
+window.openLabExerciseFromAnalytics = openLabExerciseFromAnalytics;
+
+function calculateDesktopWeeklyMuscleSufficiency(sourceMode = 'week_projected', weekOffset = 0) {
+    const bounds = getWeeklyMuscleBounds(weekOffset);
+    const allLogs = state.workoutLogs || [];
+
+    const weekLogs = allLogs.filter(l => {
+        let dt = new Date(l.date);
+        if (isNaN(dt.getTime()) && typeof l.timestamp === 'number') {
+            dt = new Date(l.timestamp);
+        }
+        return dt >= bounds.monday && dt <= bounds.sunday;
+    });
+
+    const map = {};
+    WEEKLY_MUSCLE_CONFIG.forEach(m => {
+        map[m.id] = {
+            id: m.id,
+            name: m.name,
+            icon: m.icon,
+            desc: m.desc,
+            optimalMin: m.optimalMin,
+            optimalMax: m.optimalMax,
+            doneDirectSets: 0,
+            doneSecondarySets: 0,
+            planDirectSets: 0,
+            planSecondarySets: 0,
+            scheduledTotalSets: 0,
+            scheduledSecondarySets: 0,
+            doneExercises: new Set(),
+            plannedExercises: new Map()
+        };
+    });
+
+    // 1. Gerçekleşen Antrenman Loglarını Biyomekanik Katsayılarla İşle
+    weekLogs.forEach(log => {
+        if (!log.exercises || !Array.isArray(log.exercises)) return;
+        log.exercises.forEach(ex => {
+            const cSets = Number(ex.completedSetsCount) || 
+                (Array.isArray(ex.sets) ? ex.sets.filter(s => s.completed || parseInt(s.reps, 10) > 0).length : 0) || 
+                Number(ex.targetSets) || Number(ex.sets) || 0;
+            if (cSets <= 0) return;
+
+            const spec = resolveExerciseBiomechanics(ex.name, ex.muscle, ex.category);
+            if (!spec || spec.type === 'CONDITIONING' || spec.pFactor === 0) {
+                return;
+            }
+
+            // Birincil Hedef Kas Grubu
+            const primId = ACADEMIC_MUSCLE_TO_ID[spec.primary] || spec.primary;
+            if (primId && map[primId] && spec.pFactor > 0) {
+                const directAdd = cSets * spec.pFactor;
+                map[primId].doneDirectSets += directAdd;
+                map[primId].doneExercises.add(ex.name);
+            }
+
+            // İkincil / Sinerjist Kas Grupları
+            if (spec.sec && typeof spec.sec === 'object') {
+                Object.entries(spec.sec).forEach(([secName, secFactor]) => {
+                    const secId = ACADEMIC_MUSCLE_TO_ID[secName] || secName;
+                    if (secId && map[secId] && secFactor > 0) {
+                        map[secId].doneSecondarySets += (cSets * secFactor);
+                    }
+                });
+            }
+        });
+    });
+
+    // 2. Metrikleri ve Kademeli Hipertrofi Değerlendirmesini Sonuçlandır
+    const summary = {
+        totalMuscles: WEEKLY_MUSCLE_CONFIG.length,
+        workedCount: 0,
+        optimalCount: 0,
+        insufficientCount: 0,
+        unworkedCount: 0,
+        highCount: 0
+    };
+
+    const unworkedNames = [];
+    const insufficientNames = [];
+    const optimalNames = [];
+
+    const muscles = WEEKLY_MUSCLE_CONFIG.map(cfg => {
+        const data = map[cfg.id];
+        const effectiveDone = Math.round((data.doneDirectSets + data.doneSecondarySets) * 10) / 10;
+        const effectivePlan = Math.round((data.planDirectSets + data.planSecondarySets) * 10) / 10;
+        const effectiveProjected = Math.round((effectiveDone + effectivePlan) * 10) / 10;
+
+        let evalVolume = effectiveDone;
+        if (effectiveDone > 0) summary.workedCount++;
+
+        let status = 'unworked';
+        let statusBadge = '❌ Hiç Çalıştırılmadı';
+        let statusColor = '#ef4444';
+        let statusBg = 'rgba(239, 68, 68, 0.12)';
+        let statusDesc = 'Bu kas grubu için antrenman hacmi bulunmuyor.';
+
+        if (evalVolume === 0) {
+            status = 'unworked';
+            summary.unworkedCount++;
+            unworkedNames.push(cfg.name);
+        } else if (evalVolume < cfg.optimalMin) {
+            status = 'insufficient';
+            statusBadge = '⚠️ Yetersiz Hacim';
+            statusColor = '#f59e0b';
+            statusBg = 'rgba(245, 158, 11, 0.12)';
+            statusDesc = `Minimum gelişim eşiğinin altında (${evalVolume.toFixed(1)}/${cfg.optimalMin} set).`;
+            summary.insufficientCount++;
+            insufficientNames.push(cfg.name);
+        } else if (evalVolume <= cfg.optimalMax) {
+            status = 'optimal';
+            statusBadge = '✅ Yeterli & Optimal';
+            statusColor = '#10b981';
+            statusBg = 'rgba(16, 185, 129, 0.12)';
+            statusDesc = `İdeal hipertrofi & adaptasyon aralığında (${evalVolume.toFixed(1)} set).`;
+            summary.optimalCount++;
+            optimalNames.push(cfg.name);
+        } else {
+            status = 'high';
+            statusBadge = '🔥 Yüksek Hacim';
+            statusColor = '#818cf8';
+            statusBg = 'rgba(129, 140, 248, 0.12)';
+            statusDesc = `Yoğun aşırı yükleme (${evalVolume.toFixed(1)} set); toparlanmaya özen gösterin.`;
+            summary.highCount++;
+            optimalNames.push(cfg.name);
+        }
+
+        return {
+            id: cfg.id,
+            name: cfg.name,
+            icon: cfg.icon,
+            desc: cfg.desc,
+            optimalMin: cfg.optimalMin,
+            optimalMax: cfg.optimalMax,
+            doneDirectSets: Math.round(data.doneDirectSets * 10) / 10,
+            doneSecondarySets: Math.round(data.doneSecondarySets * 10) / 10,
+            effectiveDone,
+            planDirectSets: Math.round(data.planDirectSets * 10) / 10,
+            planSecondarySets: Math.round(data.planSecondarySets * 10) / 10,
+            effectivePlan,
+            projectedSets: effectiveProjected,
+            effectiveTotal: evalVolume,
+            status,
+            statusBadge,
+            statusColor,
+            statusBg,
+            statusDesc,
+            doneExercises: Array.from(data.doneExercises)
+        };
+    });
+
+    return {
+        bounds,
+        sourceMode,
+        weekOffset,
+        totalDoneSessions: weekLogs.length,
+        summary,
+        unworkedNames,
+        insufficientNames,
+        optimalNames,
+        muscles
+    };
+}
+
+function setDesktopWeeklyMuscleFilter(f) {
+    state.currentWeeklyMuscleFilter = f;
+    renderDesktopAnalytics();
+}
+window.setDesktopWeeklyMuscleFilter = setDesktopWeeklyMuscleFilter;
+
+function setDesktopWeeklyMuscleSource(s) {
+    state.currentWeeklyMuscleSource = s;
+    renderDesktopAnalytics();
+}
+window.setDesktopWeeklyMuscleSource = setDesktopWeeklyMuscleSource;
+
+function setDesktopWeeklyMuscleOffset(o) {
+    state.currentWeeklyMuscleWeekOffset = o;
+    renderDesktopAnalytics();
+}
+window.setDesktopWeeklyMuscleOffset = setDesktopWeeklyMuscleOffset;
+
+function setDesktopAnalyticsPeriod(p) {
+    state.currentAnalyticsPeriodDays = p;
+    renderDesktopAnalytics();
+}
+window.setDesktopAnalyticsPeriod = setDesktopAnalyticsPeriod;
+
+function renderDesktopAnalytics() {
+    if (!el.desktopAnalyticsContainer) return;
+
+    if (!state.selectedUserId) {
+        el.desktopAnalyticsContainer.innerHTML = `
+            <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+                <div style="font-size: 40px; margin-bottom: 12px;">👤</div>
+                <h3 style="font-size: 16px; color: #fff;">Sporcu Seçilmedi</h3>
+                <p style="font-size: 13px; margin-top: 4px;">Sol panelden bir sporcu seçerek biyomekanik analiz çubuklarını ve karnesini görüntüleyin.</p>
+            </div>
+        `;
+        return;
+    }
+
+    const analysis = calculateDesktopWeeklyMuscleSufficiency(state.currentWeeklyMuscleSource, state.currentWeeklyMuscleWeekOffset);
+    const filter = state.currentWeeklyMuscleFilter;
+
+    let filteredMuscles = analysis.muscles;
+    if (filter === 'optimal') {
+        filteredMuscles = analysis.muscles.filter(m => m.status === 'optimal' || m.status === 'high');
+    } else if (filter === 'insufficient') {
+        filteredMuscles = analysis.muscles.filter(m => m.status === 'insufficient');
+    } else if (filter === 'unworked') {
+        filteredMuscles = analysis.muscles.filter(m => m.status === 'unworked');
+    }
+
+    const { summary, bounds, sourceMode, weekOffset } = analysis;
+    const optimalTotal = summary.optimalCount + summary.highCount;
+
+    // Filter pills
+    const filterPills = `
+        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:10px;">
+            <button class="btn-outline" style="font-size:11px; padding:5px 12px; border-radius:16px; ${filter === 'all' ? 'background:#38bdf8; color:#000; font-weight:800;' : ''}" onclick="setDesktopWeeklyMuscleFilter('all')">
+                Tümü (${summary.totalMuscles})
+            </button>
+            <button class="btn-outline" style="font-size:11px; padding:5px 12px; border-radius:16px; ${filter === 'optimal' ? 'background:#10b981; color:#000; font-weight:800;' : ''}" onclick="setDesktopWeeklyMuscleFilter('optimal')">
+                ✅ Yeterli / Optimal (${optimalTotal})
+            </button>
+            <button class="btn-outline" style="font-size:11px; padding:5px 12px; border-radius:16px; ${filter === 'insufficient' ? 'background:#f59e0b; color:#000; font-weight:800;' : ''}" onclick="setDesktopWeeklyMuscleFilter('insufficient')">
+                ⚠️ Yetersiz Hacim (${summary.insufficientCount})
+            </button>
+            <button class="btn-outline" style="font-size:11px; padding:5px 12px; border-radius:16px; ${filter === 'unworked' ? 'background:#ef4444; color:#fff; font-weight:800;' : ''}" onclick="setDesktopWeeklyMuscleFilter('unworked')">
+                ❌ Çalıştırılmayan (${summary.unworkedCount})
+            </button>
+        </div>
+    `;
+
+    // Diagnostic coach alert
+    let coachAlertHTML = '';
+    if (summary.unworkedCount > 0) {
+        coachAlertHTML = `
+            <div style="background:rgba(239, 68, 68, 0.08); border:1px solid rgba(239, 68, 68, 0.3); border-radius:10px; padding:10px 14px; margin-top:12px; display:flex; align-items:flex-start; gap:10px;">
+                <span style="font-size:18px;">🚨</span>
+                <div style="font-size:12px; color:#fca5a5; line-height:1.45;">
+                    <strong>Atlanan / Çalıştırılmayan Kaslar:</strong> Bu hafta <strong>${escapeHTML(analysis.unworkedNames.join(', '))}</strong> bölgesi için henüz antrenman hacmi bulunmuyor. Kas dengesizliğini ve sakatlık riskini önlemek için aşağıda listelenen hareketleri programa dahil edebilirsiniz.
+                </div>
+            </div>
+        `;
+    } else if (summary.insufficientCount > 0) {
+        coachAlertHTML = `
+            <div style="background:rgba(245, 158, 11, 0.08); border:1px solid rgba(245, 158, 11, 0.3); border-radius:10px; padding:10px 14px; margin-top:12px; display:flex; align-items:flex-start; gap:10px;">
+                <span style="font-size:18px;">⚠️</span>
+                <div style="font-size:12px; color:#fde68a; line-height:1.45;">
+                    <strong>Düşük Hacim Uyarısı:</strong> <strong>${escapeHTML(analysis.insufficientNames.join(', '))}</strong> bölgesi minimum gelişim eşiğinin (MEV) altında kaldı. İlgili hareketlerin setlerini artırarak hipertrofi eşiğine ulaşabilirsiniz.
+                </div>
+            </div>
+        `;
+    } else {
+        coachAlertHTML = `
+            <div style="background:rgba(16, 185, 129, 0.08); border:1px solid rgba(16, 185, 129, 0.3); border-radius:10px; padding:10px 14px; margin-top:12px; display:flex; align-items:flex-start; gap:10px;">
+                <span style="font-size:18px;">🏆</span>
+                <div style="font-size:12px; color:#6ee7b7; line-height:1.45;">
+                    <strong>Kusursuz Kas Dengesi!</strong> Tüm kas grupları bu hafta bilimsel olarak önerilen optimal hipertrofi ve güç kazanım aralığında yer alıyor.
+                </div>
+            </div>
+        `;
+    }
+
+    // Muscle Cards HTML
+    const muscleCardsHTML = filteredMuscles.length === 0 ? `
+        <div style="text-align:center; padding:24px; color:var(--text-muted); font-size:12px; background:rgba(0,0,0,0.2); border-radius:8px; margin-top:10px;">
+            Bu filtreye uyan kas grubu bulunamadı.
+        </div>
+    ` : `
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap:12px; margin-top:12px;">
+            ${filteredMuscles.map(m => {
+                const maxBar = Math.max(22, m.optimalMax + 4);
+                const donePct = Math.min(100, Math.round((m.effectiveDone / maxBar) * 100));
+                const recs = getDesktopRecommendationsForMuscle(m.id, 3);
+                const isWeak = (m.status === 'unworked' || m.status === 'insufficient');
+
+                return `
+                    <div style="background:var(--bg-surface); border:1px solid ${m.statusColor}33; border-left:4px solid ${m.statusColor}; border-radius:10px; padding:14px;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
+                            <div>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <span style="font-size:18px;">${m.icon}</span>
+                                    <h4 style="font-size:14px; font-weight:800; color:#fff; margin:0;">${m.name}</h4>
+                                    <span style="font-size:11px; color:var(--text-secondary); margin-left:4px;">${m.desc}</span>
+                                </div>
+                            </div>
+                            <span class="badge" style="background:${m.statusBg}; color:${m.statusColor}; border:1px solid ${m.statusColor}44; font-size:11px; padding:3px 10px; font-weight:800; border-radius:12px;">
+                                ${m.statusBadge}
+                            </span>
+                        </div>
+
+                        <!-- PROGRESS BAR & BENCHMARK -->
+                        <div style="margin-top:10px;">
+                            <div style="position:relative; height:12px; background:rgba(255,255,255,0.06); border-radius:6px; overflow:hidden; display:flex;">
+                                <div style="width:${donePct}%; background:${m.statusColor}; height:100%; transition:width 0.4s ease;" title="Yapılan: ${m.effectiveDone.toFixed(1)} Efektif Set"></div>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; font-size:10.5px; color:var(--text-secondary); margin-top:4px; flex-wrap:wrap; gap:4px;">
+                                <span>🟢 Yapılan: <strong style="color:#fff;">${m.effectiveDone.toFixed(1)}</strong> set <span style="font-size:9.5px; opacity:0.8;">(${m.doneDirectSets.toFixed(1)} ana + ${m.doneSecondarySets.toFixed(1)} destek)</span></span>
+                                <span>🎯 Hedef: <strong style="color:var(--gold);">${m.optimalMin}-${m.optimalMax} set/hf</strong></span>
+                            </div>
+                        </div>
+
+                        <!-- STATUS DESCRIPTION & EXERCISES -->
+                        <div style="margin-top:8px; font-size:11.5px; color:#cbd5e1; display:flex; flex-direction:column; gap:4px;">
+                            <div>
+                                <span style="color:${m.statusColor}; font-weight:700;">${m.statusDesc}</span>
+                                <span style="color:var(--text-secondary);"> (Toplam Efektif: <strong style="color:#fff;">${m.effectiveTotal.toFixed(1)} set</strong>)</span>
+                            </div>
+
+                            ${m.doneExercises.length > 0 ? `
+                                <div style="font-size:11px; margin-top:2px;">
+                                    <span style="color:var(--text-secondary);">✅ Bu Hafta Yapılanlar:</span>
+                                    <span style="color:#fff; font-weight:600;">${m.doneExercises.map(escapeHTML).join(', ')}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <!-- RECOMMENDATIONS / DRILL-DOWN INTO LAB -->
+                        ${recs.length > 0 ? `
+                            <div style="margin-top:10px; padding-top:8px; border-top:1px dashed rgba(255,255,255,0.1);">
+                                <div style="font-size:10.5px; color:${isWeak ? 'var(--gold)' : 'var(--cyan)'}; font-weight:700; margin-bottom:6px;">
+                                    ${isWeak ? '💡 Koç Tavsiyesi (Eksik Bölge Takviyesi) — Lab Atlasında İncele:' : '✨ Bu Bölgenin Lab Egzersizleri:'}
+                                </div>
+                                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                                    ${recs.map(r => `
+                                        <button class="btn-outline" style="font-size:10.5px; padding:3px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;" onclick="openLabExerciseFromAnalytics('${r.id}')" title="Lab Atlasında 3D / Anatomi / Formunu Aç">
+                                            🏋️ ${escapeHTML(r.name)} <span style="color:var(--gold); font-size:9.5px; font-weight:800;">➔</span>
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
+
+    // 2. KÜMÜLATİF ANALİZ VE 5 SÜTUN YÜK DAĞILIMI
+    const allLogs = state.workoutLogs || [];
+    const days = state.currentAnalyticsPeriodDays || 7;
+    const now = new Date();
+    const cutoff = days > 0 ? new Date(now.getTime() - (days * 24 * 60 * 60 * 1000)) : null;
+
+    const filteredLogs = cutoff ? allLogs.filter(l => {
+        let dt = new Date(l.date);
+        if (isNaN(dt.getTime()) && typeof l.timestamp === 'number') dt = new Date(l.timestamp);
+        return dt >= cutoff;
+    }) : allLogs;
+
+    let totalVolume = 0;
+    let totalSets = 0;
+    let totalReps = 0;
+
+    const pillars = {
+        legs: { label: 'Bacak & Kalça (Alt Vücut)', icon: '🦵', color: '#10b981', volume: 0, sets: 0 },
+        back: { label: 'Sırt & Çekiş (Posterior Zincir)', icon: '🛡️', color: '#38bdf8', volume: 0, sets: 0 },
+        chest: { label: 'Göğüs & İtiş (Anterior Zincir)', icon: '⚔️', color: '#f59e0b', volume: 0, sets: 0 },
+        arms: { label: 'Kollar (Biceps & Triceps)', icon: '💪', color: '#a855f7', volume: 0, sets: 0 },
+        core: { label: 'Karın & Core Zırhı', icon: '⚡', color: '#f43f5e', volume: 0, sets: 0 }
+    };
+
+    const prMap = {};
+
+    filteredLogs.forEach(log => {
+        totalVolume += (log.totalVolumeKg || 0);
+        totalSets += (log.totalSetsCompleted || 0);
+        totalReps += (log.totalRepsCompleted || 0);
+
+        if (log.exercises && log.exercises.length > 0) {
+            log.exercises.forEach(ex => {
+                const exVol = ex.exerciseVolume || 0;
+                const cSets = ex.completedSetsCount || (Array.isArray(ex.sets) ? ex.sets.filter(s => s.completed || parseInt(s.reps, 10) > 0).length : 0) || 0;
+                if (cSets === 0 && exVol === 0) return;
+
+                const spec = resolveExerciseBiomechanics(ex.name, ex.muscle, ex.category);
+                const shares = [];
+                if (spec.primary && spec.pFactor > 0) {
+                    shares.push({ muscle: spec.primary, factor: spec.pFactor });
+                }
+                if (spec.sec && typeof spec.sec === 'object') {
+                    Object.entries(spec.sec).forEach(([mName, factor]) => {
+                        if (factor > 0) shares.push({ muscle: mName, factor: factor });
+                    });
+                }
+
+                const sumFactor = shares.reduce((acc, s) => acc + s.factor, 0);
+
+                if (sumFactor > 0) {
+                    shares.forEach(s => {
+                        const ratio = s.factor / sumFactor;
+                        const mId = ACADEMIC_MUSCLE_TO_ID[s.muscle] || s.muscle;
+                        let targetPillar = null;
+                        if (['quads', 'hamstrings', 'glutes', 'calves'].includes(mId)) targetPillar = pillars.legs;
+                        else if (mId === 'back') targetPillar = pillars.back;
+                        else if (['chest', 'shoulders'].includes(mId)) targetPillar = pillars.chest;
+                        else if (['biceps', 'triceps'].includes(mId)) targetPillar = pillars.arms;
+                        else if (mId === 'core') targetPillar = pillars.core;
+
+                        if (targetPillar) {
+                            targetPillar.volume += (exVol * ratio);
+                            targetPillar.sets += Math.round((cSets * ratio) * 10) / 10;
+                        }
+                    });
+                } else if (spec.type === 'CONDITIONING') {
+                    const pKeys = Object.keys(pillars);
+                    pKeys.forEach(k => {
+                        pillars[k].volume += (exVol / pKeys.length);
+                        pillars[k].sets += Math.round((cSets / pKeys.length) * 10) / 10;
+                    });
+                } else {
+                    pillars.legs.volume += (exVol * 0.5);
+                    pillars.back.volume += (exVol * 0.5);
+                    pillars.legs.sets += (cSets * 0.5);
+                    pillars.back.sets += (cSets * 0.5);
+                }
+
+                // Track PRs
+                if (ex.maxWeight && ex.maxWeight > 0) {
+                    if (!prMap[ex.name] || ex.maxWeight > prMap[ex.name].weight) {
+                        prMap[ex.name] = { weight: ex.maxWeight, date: log.dateFormatted || log.date, muscle: ex.muscle || spec.primary || '' };
+                    }
+                }
+            });
+        }
+    });
+
+    const sessionsCount = filteredLogs.length;
+    const avgSessionVol = sessionsCount > 0 ? Math.round(totalVolume / sessionsCount) : 0;
+    const totalPillarsVol = Object.values(pillars).reduce((sum, p) => sum + p.volume, 0) || 1;
+
+    // Push vs Pull ratio
+    const pushTotal = pillars.chest.volume + (pillars.arms.volume * 0.4);
+    const pullTotal = pillars.back.volume + (pillars.arms.volume * 0.6);
+    const pushPullRatio = pushTotal > 0 ? (pullTotal / pushTotal).toFixed(2) : '1.00';
+
+    let balanceBadge = '✅ Mükemmel Denge';
+    let balanceColor = '#10b981';
+    let balanceDesc = 'İtiş ve çekiş hacminiz dengeli; omuz ve omurga sağlığınız korunuyor.';
+    if (pushPullRatio < 0.85) {
+        balanceBadge = '⚠️ İtiş Hacmi Baskın';
+        balanceColor = '#f59e0b';
+        balanceDesc = 'Göğüs ve omuz itiş tonajınız sırttan yüksek. Omuz sakatlığı riskini önlemek için sırt ve kürek hareketlerine ağırlık verin.';
+    } else if (pushPullRatio > 1.35) {
+        balanceBadge = '⚠️ Çekiş Hacmi Baskın';
+        balanceColor = '#38bdf8';
+        balanceDesc = 'Sırt çekiş hacminiz itişten belirgin şekilde fazla. İtiş egzersizlerinizi artırabilirsiniz.';
+    }
+
+    const sortedPrs = Object.keys(prMap).map(k => ({ name: k, ...prMap[k] })).sort((a,b) => b.weight - a.weight).slice(0, 6);
+
+    // Kümülatif Periyot Butonları
+    const periodButtonsHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-top:24px; margin-bottom:14px; background:rgba(0,0,0,0.25); padding:10px 14px; border-radius:10px; border:1px solid var(--border-subtle);">
+            <div>
+                <span style="font-size:13px; font-weight:800; color:#fff; display:block;">📊 Kümülatif Tonaj & Biyomekanik Geçmişi</span>
+                <span style="font-size:11px; color:var(--text-secondary);">Sporcunun tüm seanslarının bilimsel kümülatif analizi</span>
+            </div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="btn-outline" style="font-size:11px; padding:4px 10px; border-radius:16px; ${days === 7 ? 'background:var(--gold); color:#000; font-weight:800;' : ''}" onclick="setDesktopAnalyticsPeriod(7)">Son 7 Gün</button>
+                <button class="btn-outline" style="font-size:11px; padding:4px 10px; border-radius:16px; ${days === 30 ? 'background:var(--gold); color:#000; font-weight:800;' : ''}" onclick="setDesktopAnalyticsPeriod(30)">Son 30 Gün</button>
+                <button class="btn-outline" style="font-size:11px; padding:4px 10px; border-radius:16px; ${days === 90 ? 'background:var(--gold); color:#000; font-weight:800;' : ''}" onclick="setDesktopAnalyticsPeriod(90)">Son 90 Gün</button>
+                <button class="btn-outline" style="font-size:11px; padding:4px 10px; border-radius:16px; ${days === 0 ? 'background:var(--gold); color:#000; font-weight:800;' : ''}" onclick="setDesktopAnalyticsPeriod(0)">Tüm Zamanlar</button>
+            </div>
+        </div>
+    `;
+
+    // Render Full Container
+    el.desktopAnalyticsContainer.innerHTML = `
+        <!-- 1. HAFTALIK KAS DENGESİ & YETERLİLİK KARNESİ -->
+        <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:14px; padding:18px; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+            <!-- HEADER & WEEK SELECTOR -->
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+                <div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:22px;">🧬</span>
+                        <h3 style="font-size:16px; font-weight:800; color:#fff; margin:0;">Haftalık Kas Dengesi & Yeterlilik Karnesi</h3>
+                    </div>
+                    <p style="font-size:12px; color:var(--text-secondary); margin:4px 0 0 0;">
+                        Tamamlanan seansların her kas grubuna mekanik gerilim ve sinerjist katsayılarıyla katkısı (Dr. Mike Israetel / Schoenfeld modeli).
+                    </p>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:6px; background:rgba(0,0,0,0.3); padding:4px 8px; border-radius:20px; border:1px solid var(--border-subtle);">
+                    <button class="btn-outline" style="font-size:11px; padding:2px 8px; border-radius:12px;" onclick="setDesktopWeeklyMuscleOffset(${weekOffset - 1})" title="Önceki Hafta">◀</button>
+                    <span style="font-size:11px; font-weight:800; color:var(--gold); padding:0 4px;">${bounds.label} ${bounds.isCurrentWeek ? '<span style="color:#10b981;">(Bu Hafta)</span>' : ''}</span>
+                    <button class="btn-outline" style="font-size:11px; padding:2px 8px; border-radius:12px;" onclick="setDesktopWeeklyMuscleOffset(${weekOffset + 1})" title="Sonraki Hafta">▶</button>
+                    ${!bounds.isCurrentWeek ? `<button class="btn-outline" style="font-size:10px; padding:2px 6px; border-radius:10px; color:var(--cyan);" onclick="setDesktopWeeklyMuscleOffset(0)">Bu Hafta</button>` : ''}
+                </div>
+            </div>
+
+            ${filterPills}
+            ${coachAlertHTML}
+            ${muscleCardsHTML}
+        </div>
+
+        <!-- 2. KÜMÜLATİF ANALİZ VE 5 SÜTUN YÜK DAĞILIMI -->
+        ${periodButtonsHTML}
+
+        <!-- KPI STATS -->
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:12px; margin-bottom:16px;">
+            <div class="analytics-kpi-card">
+                <div style="font-size:11px; color:var(--text-secondary); font-weight:700;">TOPLAM TONAJ</div>
+                <div style="font-size:20px; font-weight:900; color:var(--gold); margin-top:2px;">🏋️ ${Math.round(totalVolume).toLocaleString('tr-TR')} kg</div>
+                <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">${sessionsCount} Seans</div>
+            </div>
+            <div class="analytics-kpi-card">
+                <div style="font-size:11px; color:var(--text-secondary); font-weight:700;">SEANS BAŞI ORTALAMA</div>
+                <div style="font-size:20px; font-weight:900; color:var(--cyan); margin-top:2px;">⚡ ${avgSessionVol.toLocaleString('tr-TR')} kg</div>
+                <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">Yoğunluk</div>
+            </div>
+            <div class="analytics-kpi-card">
+                <div style="font-size:11px; color:var(--text-secondary); font-weight:700;">SET & TEKRAR</div>
+                <div style="font-size:20px; font-weight:900; color:#10b981; margin-top:2px;">🎯 ${totalSets} / ${totalReps}</div>
+                <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">Toplam Hacim</div>
+            </div>
+            <div class="analytics-kpi-card">
+                <div style="font-size:11px; color:var(--text-secondary); font-weight:700;">İTİŞ / ÇEKİŞ ORANI</div>
+                <div style="font-size:20px; font-weight:900; color:${balanceColor}; margin-top:2px;">⚖️ ${pushPullRatio}</div>
+                <div style="font-size:11px; color:${balanceColor}; margin-top:2px;">${balanceBadge}</div>
+            </div>
+        </div>
+
+        <!-- 5-PILLAR MUSCLE GROUP TONAJ & HACİM DAĞILIMI -->
+        <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:12px; padding:16px; margin-bottom:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                <h3 style="font-size:14px; font-weight:800; color:#fff;">🧬 5 Temel Sütun Tonaj & Hacim Dağılımı</h3>
+                <span style="font-size:11.5px; color:var(--gold); font-weight:700;">Kümülatif Yük</span>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:14px;">
+                ${Object.keys(pillars).map(key => {
+                    const p = pillars[key];
+                    const pct = Math.round((p.volume / totalPillarsVol) * 100);
+                    return `
+                        <div>
+                            <div style="display:flex; justify-content:space-between; font-size:12.5px; font-weight:700;">
+                                <span style="color:#fff;">${p.icon} ${p.label}</span>
+                                <span style="color:${p.color};">${Math.round(p.volume).toLocaleString('tr-TR')} kg <span style="color:var(--text-secondary); font-size:11.5px;">(%${pct})</span></span>
+                            </div>
+                            <div class="analytics-bar-bg">
+                                <div class="analytics-bar-fill" style="width:${Math.min(100, Math.max(4, pct))}%; background:${p.color};"></div>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-size:10.5px; color:var(--text-secondary); margin-top:3px;">
+                                <span>Tamamlanan Efektif Set: ${(Math.round(p.sets * 10) / 10).toFixed(1)}</span>
+                                <span>Ortalama Yük: ${p.sets > 0 ? Math.round(p.volume / p.sets) : 0} kg/set</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+
+        <!-- BIOMECHANICAL BALANCE & COACH INSIGHT -->
+        <div style="background:rgba(245, 158, 11, 0.04); border:1px solid rgba(245, 158, 11, 0.25); border-radius:12px; padding:16px; margin-bottom:16px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                <span style="font-size:20px;">🩺</span>
+                <h3 style="font-size:14px; font-weight:800; color:var(--gold);">Biyomekanik Postür & Sakatlık Önleme Raporu</h3>
+            </div>
+            <p style="font-size:12.5px; color:#cbd5e1; line-height:1.55; margin-bottom:8px;">
+                ${balanceDesc} Çekiş hacmi: <strong>${Math.round(pullTotal).toLocaleString('tr-TR')} kg</strong>, İtiş hacmi: <strong>${Math.round(pushTotal).toLocaleString('tr-TR')} kg</strong>.
+            </p>
+            <div style="font-size:11.5px; color:var(--text-secondary); background:rgba(0,0,0,0.25); padding:8px 12px; border-radius:8px;">
+                💡 <strong>Koç Tavsiyesi:</strong> Bacak ve arka zincir kasları metabolik motorunuzdur. Her seans öncesi kalça ve omuz mobilite protokolünü (CARs) eksiksiz uygulayarak eklem hareket açıklığınızı maksimize edin.
+            </div>
+        </div>
+
+        <!-- PR RECORDS TABLE -->
+        ${sortedPrs.length > 0 ? `
+            <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:12px; padding:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <h3 style="font-size:14px; font-weight:800; color:#fff;">🏆 Kişisel Ağırlık Rekorları (PR)</h3>
+                    <span style="font-size:11.5px; color:var(--cyan); font-weight:700;">Zirve Kilolar</span>
+                </div>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:8px;">
+                    ${sortedPrs.map((pr, idx) => `
+                        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.25); padding:10px 12px; border-radius:8px; border-left:3px solid var(--gold);">
+                            <div>
+                                <div style="font-size:13px; font-weight:800; color:#fff;">#${idx+1} ${escapeHTML(pr.name)}</div>
+                                <div style="font-size:11px; color:var(--text-secondary);">${escapeHTML(pr.muscle || '')} • ${escapeHTML(pr.date)}</div>
+                            </div>
+                            <div style="font-size:16px; font-weight:900; color:var(--gold);">
+                                ${pr.weight} kg
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        ` : ''}
+    `;
+}
+window.renderDesktopAnalytics = renderDesktopAnalytics;
+
 
 

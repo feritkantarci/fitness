@@ -20,7 +20,10 @@
 
         <nav class="app-nav-tabs">
             <button class="nav-tab-btn active" id="tabBtnDashboard" data-view="dashboard">
-                <span class="icon">📊</span> Kokpit & Analiz
+                <span class="icon">📊</span> Kokpit
+            </button>
+            <button class="nav-tab-btn" id="tabBtnAnalytics" data-view="analytics">
+                <span class="icon">🧬</span> Biyomekanik Analiz & Çubuklar
             </button>
             <button class="nav-tab-btn" id="tabBtnLab" data-view="lab">
                 <span class="icon">🔬</span> Lab (Biyomekanik Atlas)
@@ -152,6 +155,20 @@
                 </div>
             </div>
 
+            <!-- Web Analiz ve Çubuklar Hızlı Erişim Kartı -->
+            <div class="dashboard-analytics-preview-card" style="background: linear-gradient(135deg, rgba(234,179,8,0.08), rgba(56,189,248,0.04)); border: 1px solid rgba(234,179,8,0.3); border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 26px;">🧬</span>
+                    <div>
+                        <h4 style="font-size: 14px; font-weight: 800; color: #fff; margin: 0;">Biyomekanik Analiz, Kas Yeterlilik Karnesi & Dağılım Çubukları</h4>
+                        <p style="font-size: 11.5px; color: var(--text-secondary); margin: 3px 0 0 0;">Web uygulamasındaki haftalık dinamik kas doluluk çubukları, set/hacim oranları ve 5 sütun yük dağılımı.</p>
+                    </div>
+                </div>
+                <button class="btn-action" style="background: var(--gold); color: #000; font-weight: 800; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 12px;" onclick="switchView('analytics')">
+                    🧬 Tam Analiz Çubuklarını Aç ➔
+                </button>
+            </div>
+
             <!-- AI Akademik Koçluk ve Web Reçete Merkezi -->
             <div class="ai-console-box">
                 <div class="ai-console-header">
@@ -192,6 +209,13 @@
             </div>
         </section>
     </main>
+
+    <!-- Biyomekanik Analiz ve Gelişim Çubukları Bölümü (Web PWA ile Birebir Eşit) -->
+    <section class="analytics-layout" id="viewAnalytics" style="display: none;">
+        <div id="desktopAnalyticsContainer" class="desktop-analytics-scroll">
+            <!-- Dinamik Olarak Web Analiz Çubukları ve Karnesi Doldurulacak -->
+        </div>
+    </section>
  
     <!-- Lab Bölümü (Biyomekanik Atlas ve Egzersiz Detay Masası) -->
     <section class="lab-layout" id="viewLab" style="display: none;">
