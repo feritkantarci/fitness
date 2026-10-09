@@ -129,19 +129,33 @@ async function loadAthletes() {
     try {
         el.athleteSelect.innerHTML = '<option value="">Sporcular yükleniyor...</option>';
         const users = await window.coachAPI.getUsers();
-        state.users = users;
 
         if (!users || users.length === 0) {
             el.athleteSelect.innerHTML = '<option value="">Sporcu Bulunamadı</option>';
             return;
         }
 
-        el.athleteSelect.innerHTML = users.map(u => 
-            `<option value="${u.id}">${u.name || u.username} (${u.role === 'admin' ? 'Admin' : 'Sporcu'})</option>`
+        // Her kullanıcının antrenman kayıt sayısını öğren
+        const usersWithCounts = await Promise.all(users.map(async u => {
+            try {
+                const logs = await window.coachAPI.getWorkoutLogs(u.id);
+                const validCount = (logs || []).filter(l => l.totalSetsCompleted > 0 || (l.exercises || []).some(ex => (ex.sets || []).some(s => s.completed || parseInt(s.reps, 10) > 0))).length;
+                return { ...u, validLogCount: validCount };
+            } catch(e) {
+                return { ...u, validLogCount: 0 };
+            }
+        }));
+
+        // En çok antrenmanı olan kullanıcıyı en başa al (Örn: Ferit (Admin) 8 antrenmanla başa gelir)
+        usersWithCounts.sort((a, b) => b.validLogCount - a.validLogCount);
+        state.users = usersWithCounts;
+
+        el.athleteSelect.innerHTML = usersWithCounts.map(u => 
+            `<option value="${u.id}">${u.name || u.username} • ${u.validLogCount > 0 ? `${u.validLogCount} Antrenman Kaydı` : 'Kayıt Yok'} (${u.role === 'admin' ? 'Admin' : 'Sporcu'})</option>`
         ).join('');
 
-        // İlk kullanıcıyı seç (varsayılan Ferit veya ilk kullanıcı)
-        const defaultUser = users.find(u => u.username === 'ferit') || users[0];
+        // İlk kullanıcıyı seç (En çok antrenman kaydı olan sporcu)
+        const defaultUser = usersWithCounts[0];
         el.athleteSelect.value = defaultUser.id;
         await selectAthlete(defaultUser.id);
     } catch (err) {
@@ -244,11 +258,12 @@ function renderDashboard(analysis) {
     }
 
     // 3. Hacim Açıkları (MEV Altı Kaslar)
+    const formatSetNum = (s) => (s % 1 === 0 ? s : s.toFixed(1));
     if (deficits && deficits.length > 0) {
         el.deficitList.innerHTML = deficits.map(d => `
             <div class="deficit-item">
                 <span class="name">${d.muscle}</span>
-                <span class="tag">${d.actual} / ${d.target} Set (${d.status})</span>
+                <span class="tag">${formatSetNum(d.actual)} / ${d.target} Set (${d.status})</span>
             </div>
         `).join('');
     } else {
@@ -339,6 +354,23 @@ function renderVolumeChart(muscleBreakdown) {
             animation: {
                 duration: 500,
                 easing: 'easeOutQuart'
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const muscle = muscles[context.dataIndex];
+                            const s = muscleBreakdown[muscle].sets;
+                            const formatted = s % 1 === 0 ? s : s.toFixed(1);
+                            return ` ${context.dataset.label}: ${formatted} Hard Set`;
+                        },
+                        afterLabel: function(context) {
+                            const muscle = muscles[context.dataIndex];
+                            return `${muscleBreakdown[muscle].recommendation}`;
+                        }
+                    }
+                }
             },
             scales: {
                 y: {
