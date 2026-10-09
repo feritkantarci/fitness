@@ -1168,6 +1168,16 @@ function openLabExerciseFromAnalytics(exId) {
 }
 window.openLabExerciseFromAnalytics = openLabExerciseFromAnalytics;
 
+function formatDateTr(rawDate) {
+    if (!rawDate) return '-';
+    const dt = new Date(rawDate);
+    if (isNaN(dt.getTime())) return String(rawDate);
+    const days = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+    const months = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+    return `${dt.getDate()} ${months[dt.getMonth()]} ${days[dt.getDay()]}`;
+}
+window.formatDateTr = formatDateTr;
+
 function calculateDesktopWeeklyMuscleSufficiency(sourceMode = 'week_projected', weekOffset = 0) {
     const bounds = getWeeklyMuscleBounds(weekOffset);
     const allLogs = state.workoutLogs || [];
@@ -1196,13 +1206,17 @@ function calculateDesktopWeeklyMuscleSufficiency(sourceMode = 'week_projected', 
             scheduledTotalSets: 0,
             scheduledSecondarySets: 0,
             doneExercises: new Set(),
-            plannedExercises: new Map()
+            plannedExercises: new Map(),
+            contributions: []
         };
     });
 
     // 1. Gerçekleşen Antrenman Loglarını Biyomekanik Katsayılarla İşle
     weekLogs.forEach(log => {
         if (!log.exercises || !Array.isArray(log.exercises)) return;
+        const dateStr = log.dateFormatted || formatDateTr(log.date || log.timestamp);
+        const sessionTitle = log.title || log.workoutName || 'Antrenman Seansı';
+
         log.exercises.forEach(ex => {
             const cSets = Number(ex.completedSetsCount) || 
                 (Array.isArray(ex.sets) ? ex.sets.filter(s => s.completed || parseInt(s.reps, 10) > 0).length : 0) || 
@@ -1220,6 +1234,16 @@ function calculateDesktopWeeklyMuscleSufficiency(sourceMode = 'week_projected', 
                 const directAdd = cSets * spec.pFactor;
                 map[primId].doneDirectSets += directAdd;
                 map[primId].doneExercises.add(ex.name);
+
+                map[primId].contributions.push({
+                    date: dateStr,
+                    sessionTitle: sessionTitle,
+                    exercise: ex.name,
+                    rawSets: cSets,
+                    role: 'Birincil',
+                    factor: spec.pFactor,
+                    earnedSets: Math.round(directAdd * 10) / 10
+                });
             }
 
             // İkincil / Sinerjist Kas Grupları
@@ -1227,7 +1251,18 @@ function calculateDesktopWeeklyMuscleSufficiency(sourceMode = 'week_projected', 
                 Object.entries(spec.sec).forEach(([secName, secFactor]) => {
                     const secId = ACADEMIC_MUSCLE_TO_ID[secName] || secName;
                     if (secId && map[secId] && secFactor > 0) {
-                        map[secId].doneSecondarySets += (cSets * secFactor);
+                        const secAdd = cSets * secFactor;
+                        map[secId].doneSecondarySets += secAdd;
+
+                        map[secId].contributions.push({
+                            date: dateStr,
+                            sessionTitle: sessionTitle,
+                            exercise: ex.name,
+                            rawSets: cSets,
+                            role: 'Sinerjist / Destek',
+                            factor: secFactor,
+                            earnedSets: Math.round(secAdd * 10) / 10
+                        });
                     }
                 });
             }
@@ -1313,7 +1348,8 @@ function calculateDesktopWeeklyMuscleSufficiency(sourceMode = 'week_projected', 
             statusColor,
             statusBg,
             statusDesc,
-            doneExercises: Array.from(data.doneExercises)
+            doneExercises: Array.from(data.doneExercises),
+            contributions: data.contributions || []
         };
     });
 
@@ -1484,6 +1520,51 @@ function renderDesktopAnalytics() {
                                     <span style="color:#fff; font-weight:600;">${m.doneExercises.map(escapeHTML).join(', ')}</span>
                                 </div>
                             ` : ''}
+                        </div>
+
+                        <!-- BİYOMEKANİK KAYNAK & KATKI DÖKÜMÜ (DRILL-DOWN) -->
+                        <div style="margin-top:10px; padding-top:8px; border-top:1px dashed rgba(255,255,255,0.1);">
+                            <button id="lineage_btn_${m.id}" class="btn-outline" style="width:100%; font-size:11px; padding:6px 10px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); border-color:rgba(255,255,255,0.12); cursor:pointer;" onclick="toggleMuscleLineage('${m.id}')">
+                                <span>🔬 Hangi Seans & Hareketten Geldi? (${(m.contributions || []).length} Kayıt)</span>
+                                <span style="color:var(--gold); font-size:10px; font-weight:800;">▼ Detay</span>
+                            </button>
+
+                            <div id="lineage_box_${m.id}" data-count="${(m.contributions || []).length}" style="display:none; margin-top:8px; background:rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:10px;">
+                                ${(m.contributions && m.contributions.length > 0) ? `
+                                    <div style="display:flex; flex-direction:column; gap:6px;">
+                                        <div style="font-size:10.5px; color:var(--text-secondary); margin-bottom:2px; font-weight:700;">
+                                            📋 Tamamlanan Seanslar & Puan Katkısı:
+                                        </div>
+                                        ${m.contributions.map(c => `
+                                            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:6px 10px; font-size:11px;">
+                                                <div>
+                                                    <div style="display:flex; align-items:center; gap:6px;">
+                                                        <strong style="color:#fff;">${escapeHTML(c.exercise)}</strong>
+                                                        <span style="font-size:9.5px; padding:1px 5px; border-radius:4px; font-weight:700; ${c.role === 'Birincil' ? 'background:rgba(234,179,8,0.18); color:var(--gold);' : 'background:rgba(6,182,212,0.18); color:#06b6d4;'}">
+                                                            ${c.role} (${c.factor}x)
+                                                        </span>
+                                                    </div>
+                                                    <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">
+                                                        📅 ${escapeHTML(c.date)} • ${escapeHTML(c.sessionTitle)}
+                                                    </div>
+                                                </div>
+                                                <div style="text-align:right;">
+                                                    <div style="font-size:12.5px; font-weight:900; color:#10b981;">+${c.earnedSets.toFixed(1)} Set</div>
+                                                    <div style="font-size:9.5px; color:var(--text-secondary);">${c.rawSets} Set Yapıldı</div>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                        <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 4px 2px 4px; border-top:1px dashed rgba(255,255,255,0.1); font-size:11px;">
+                                            <span style="color:var(--text-secondary);">Haftalık Toplam Katkı:</span>
+                                            <strong style="color:var(--gold); font-size:12px;">${m.effectiveDone.toFixed(1)} Efektif Set</strong>
+                                        </div>
+                                    </div>
+                                ` : `
+                                    <div style="font-size:11px; color:var(--text-secondary); text-align:center; padding:8px 6px;">
+                                        Bu hafta bu kas grubu için henüz tamamlanmış bir seans kaydı bulunmuyor.
+                                    </div>
+                                `}
+                            </div>
                         </div>
 
                         <!-- RECOMMENDATIONS / DRILL-DOWN INTO LAB -->
@@ -1761,6 +1842,22 @@ function renderDesktopAnalytics() {
     `;
 }
 window.renderDesktopAnalytics = renderDesktopAnalytics;
+
+function toggleMuscleLineage(muscleId) {
+    const elBox = document.getElementById(`lineage_box_${muscleId}`);
+    const elBtn = document.getElementById(`lineage_btn_${muscleId}`);
+    if (!elBox) return;
+    const isHidden = elBox.style.display === 'none';
+    elBox.style.display = isHidden ? 'block' : 'none';
+    if (elBtn) {
+        const count = elBox.dataset.count || 0;
+        elBtn.innerHTML = isHidden 
+            ? `<span>🔬 Hangi Seans & Hareketten Geldi? (${count} Kayıt)</span><span style="color:var(--gold); font-size:10px; font-weight:800;">▲ Kapat</span>`
+            : `<span>🔬 Hangi Seans & Hareketten Geldi? (${count} Kayıt)</span><span style="color:var(--gold); font-size:10px; font-weight:800;">▼ Detay</span>`;
+    }
+}
+window.toggleMuscleLineage = toggleMuscleLineage;
+
 
 
 
