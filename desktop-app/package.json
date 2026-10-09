@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "pack": "electron-builder --dir && (xattr -dr com.apple.FinderInfo \"dist/mac-arm64/FitLAB.app\" 2>/dev/null || true) && xattr -cr \"dist/mac-arm64/FitLAB.app\" && dot_clean \"dist/mac-arm64/FitLAB.app\" && codesign --force --deep --sign - --entitlements build/entitlements.mac.plist \"dist/mac-arm64/FitLAB.app\"",
+    "pack": "electron-builder --dir && dot_clean \"dist/mac-arm64/FitLAB.app\" && xattr -cr \"dist/mac-arm64/FitLAB.app\" && codesign --force --deep --sign - --entitlements build/entitlements.mac.plist \"dist/mac-arm64/FitLAB.app\"",
     "dist": "electron-builder",
     "dist:mac": "electron-builder --mac",
     "dist:win": "electron-builder --win"
