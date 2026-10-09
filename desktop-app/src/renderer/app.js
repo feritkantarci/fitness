@@ -80,12 +80,8 @@ const el = {
     btnTabAnatomi: document.getElementById('btnTabAnatomi'),
     inspImage: document.getElementById('inspImage'),
     inspImageFallback: document.getElementById('inspImageFallback'),
-    inspValMtf: document.getElementById('inspValMtf'),
-    inspValLengthened: document.getElementById('inspValLengthened'),
+    inspLengthenedBadge: document.getElementById('inspLengthenedBadge'),
     labResizer: document.getElementById('labResizer'),
-    inspPillMtf: document.getElementById('inspPillMtf'),
-    inspDescMtf: document.getElementById('inspDescMtf'),
-    inspDescLengthened: document.getElementById('inspDescLengthened'),
     inspActivationBars: document.getElementById('inspActivationBars'),
     inspCueText: document.getElementById('inspCueText'),
 
@@ -704,28 +700,16 @@ function renderLabGrid(exercises) {
     el.labGrid.innerHTML = exercises.map(ex => {
         const isActive = state.selectedExercise && state.selectedExercise.id === ex.id;
         const isExcluded = (state.excludedExerciseIds || []).includes(ex.id);
-        const pFactor = typeof ex.pFactor === 'number' ? ex.pFactor : 1.0;
-        
-        let mtfPillHtml = '';
-        if (pFactor === 0 || ex.type === 'CONDITIONING') {
-            mtfPillHtml = `<span class="mtf-pill mtf-cardio">🏃 Kondisyon (0 Yük)</span>`;
-        } else if (pFactor >= 0.85) {
-            mtfPillHtml = `<span class="mtf-pill mtf-full">⚡ %${Math.round(pFactor * 100)} Tam Yük</span>`;
-        } else {
-            mtfPillHtml = `<span class="mtf-pill mtf-partial">⚡ %${Math.round(pFactor * 100)} Kısmi Yük</span>`;
-        }
-
         const typeLabel = ex.typeLabel ? ex.typeLabel.split(' ')[0] : 'Kuvvet';
 
         return `
             <div class="lab-card ${isActive ? 'active' : ''} ${isExcluded ? 'is-card-excluded' : ''}" data-id="${ex.id}">
                 <div class="lab-card-header">
-                    <div class="lab-card-title">${ex.name} ${isExcluded ? '<span style="color:#f87171; font-size:10px; font-weight:800; margin-left:4px;">[GİZLENDİ]</span>' : ''}</div>
+                    <div class="lab-card-title">${ex.name} ${isExcluded ? '<span style="color:#f87171; font-size:10px; font-weight:800; margin-left:4px;">[GİZLİ]</span>' : ''}</div>
                 </div>
                 <div class="lab-card-tags">
                     <span class="muscle-pill">${ex.primary}</span>
                     <span class="type-pill">${typeLabel}</span>
-                    ${mtfPillHtml}
                 </div>
             </div>
         `;
@@ -821,50 +805,13 @@ function selectLabExercise(ex) {
     el.inspSfrBadge.className = `badge-sfr ${ex.sfr === 'N/A' ? 'na' : ''}`;
     el.inspSfrBadge.title = ex.sfrLabel || `SFR Seviyesi: ${shortSfr}`;
 
-    // MTF Değer ve Açıklama Hesaplama
-    const pFactor = typeof ex.pFactor === 'number' ? ex.pFactor : 1.0;
-    const inspPill = document.getElementById('inspPillMtf');
-    const inspDesc = document.getElementById('inspDescMtf');
-    const inspDescLengthened = document.getElementById('inspDescLengthened');
-
-    if (pFactor === 0 || ex.type === 'CONDITIONING') {
-        el.inspValMtf.textContent = '0.00x';
-        if (inspPill) {
-            inspPill.textContent = '0 Yük / Kondisyon';
-            inspPill.style.background = 'rgba(148, 163, 184, 0.2)';
-            inspPill.style.color = '#94a3b8';
-        }
-        if (inspDesc) {
-            inspDesc.textContent = 'Metabolik dayanıklılık ve kardiyo hareketi. Kalp ritmini ve kalori tüketimini artırır; ancak kas hipertrofisine doğrudan 0 set olarak işlenir.';
-        }
-    } else if (pFactor >= 0.85) {
-        el.inspValMtf.textContent = `${pFactor.toFixed(2)}x`;
-        if (inspPill) {
-            inspPill.textContent = `%${Math.round(pFactor * 100)} Tam Mekanik Yük`;
-            inspPill.style.background = 'rgba(16, 185, 129, 0.2)';
-            inspPill.style.color = '#10b981';
-        }
-        if (inspDesc) {
-            inspDesc.textContent = `Ağır serbest ağırlık veya doğrudan yüklenme. Kas liflerine %100 mekanik gerilim biner; yapılan 1 set tam ${pFactor.toFixed(2)} setlik hipertrofi sayılır.`;
-        }
-    } else {
-        el.inspValMtf.textContent = `${pFactor.toFixed(2)}x`;
-        if (inspPill) {
-            inspPill.textContent = `%${Math.round(pFactor * 100)} Kısmi Mekanik Yük`;
-            inspPill.style.background = 'rgba(234, 179, 8, 0.2)';
-            inspPill.style.color = 'var(--gold)';
-        }
-        if (inspDesc) {
-            inspDesc.textContent = `Yük vücut ağırlığıyla paylaşılır veya açı gereği kas gerilimi kısmi kalır. Bu nedenle 1 tam set = ${pFactor.toFixed(2)} setlik efektif hipertrofi olarak hesaba katılır.`;
-        }
-    }
-
-    // Lengthened Overload
-    el.inspValLengthened.textContent = ex.lengthened ? 'Evet ✅' : 'Hayır ❌';
-    if (inspDescLengthened) {
-        inspDescLengthened.textContent = ex.lengthened
-            ? 'Kas lifleri gerilmiş (uzamış) pozisyondayken maksimum mekanik gerilim üretir (Stretch-Mediated Hipertrofi avantajı).'
-            : 'Hareket tepe sıkıştırma veya kısalmış pozisyon odaklıdır; uzamış aşırı yüklenme etkisi sınırlıdır.';
+    // Uzamışta Gerilim Rozeti
+    if (el.inspLengthenedBadge) {
+        el.inspLengthenedBadge.textContent = ex.lengthened ? 'Uzamış Gerilim: Var' : 'Uzamış Gerilim: Yok';
+        el.inspLengthenedBadge.className = `badge-lengthened ${ex.lengthened ? '' : 'no'}`;
+        el.inspLengthenedBadge.title = ex.lengthened 
+            ? 'Kas gergin pozisyondayken maksimum mekanik gerilim üretir (Stretch-Mediated Hipertrofi).'
+            : 'Hareket tepe sıkıştırma veya kısalmış pozisyon odaklıdır.';
     }
 
     // Biyomekanik Form Cues
@@ -955,18 +902,22 @@ function renderActivationBars(ex) {
                 <span class="act-name">
                     ${item.muscle}
                     <span class="role-pill ${item.isPrimary ? 'role-primary' : 'role-sec'}">
-                        ${item.isPrimary ? 'Birincil Hedef (1.0x)' : 'Sinerjist Destek'}
+                        ${item.isPrimary ? 'Ana Kas' : 'Destek Kas'}
                     </span>
                 </span>
-                <span class="act-factor" style="color: ${item.color};">
-                    ${(item.factor * 100).toFixed(0)}% (${item.factor.toFixed(2)} Set Katkısı)
+                <span class="act-factor" style="color: ${item.color}; font-weight: 800;">
+                    +${item.factor.toFixed(2)} Set (%${Math.round(item.factor * 100)})
                 </span>
             </div>
             <div class="act-bar-track">
                 <div class="act-bar-fill" style="width: ${Math.min(100, item.factor * 100)}%; background: ${item.color};"></div>
             </div>
         </div>
-    `).join('');
+    `).join('') + `
+        <div style="margin-top: 14px; padding: 10px 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 11.5px; color: var(--text-muted); line-height: 1.45;">
+            💡 <em>Bu egzersizden yapacağınız her 1 çalışma seti, kas gruplarınıza yukarıdaki oranlarda eklenir (Örn: 4 set = her kas için set × oran).</em>
+        </div>
+    `;
 }
 
 function closeInspector() {

@@ -246,8 +246,9 @@
             <div class="inspector-content" id="inspectorContent" style="display: none;">
                 <div class="inspector-header">
                     <div class="header-badges">
-                        <span class="badge-type" id="inspTypeBadge">Ağır Serbest Ağırlık Bileşik</span>
+                        <span class="badge-type" id="inspTypeBadge">Ağır Bileşik</span>
                         <span class="badge-sfr" id="inspSfrBadge">SFR: Yüksek</span>
+                        <span class="badge-lengthened" id="inspLengthenedBadge">Uzamış Gerilim: Var</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <button class="btn-toggle-exclude" id="btnToggleHideExercise" title="Kişisel havuzunuzdan gizleyin">
@@ -279,32 +280,13 @@
                     </div>
                 </div>
 
-                <!-- Bilimsel Biyomekanik Parametre Kartları -->
-                <div class="inspector-kpi-grid">
-                    <div class="insp-kpi-card mtf-main-card">
-                        <div class="insp-kpi-header-row">
-                            <span class="insp-kpi-label">Mekanik Gerilim (MTF)</span>
-                            <span class="insp-kpi-pill" id="inspPillMtf">%100 Tam Yük</span>
-                        </div>
-                        <span class="insp-kpi-val" id="inspValMtf">1.00x</span>
-                        <p class="insp-kpi-desc" id="inspDescMtf">Hedef kasa doğrudan %100 mekanik yük biner. Yapılan 1 set = 1 tam set hipertrofi olarak sayılır.</p>
-                    </div>
-                    <div class="insp-kpi-card">
-                        <div class="insp-kpi-header-row">
-                            <span class="insp-kpi-label">Uzamışta Yüklenme</span>
-                        </div>
-                        <span class="insp-kpi-val" id="inspValLengthened">Evet ✅</span>
-                        <p class="insp-kpi-desc" id="inspDescLengthened">Kasın en gergin pozisyonunda maksimum direnç oluşur (Stretch-Mediated Hipertrofi).</p>
-                    </div>
-                </div>
-
                 <!-- Kas Aktivasyon & Etki Dağılımı (Akademik Kademeli Etki Barları) -->
                 <div class="inspector-section">
                     <div class="section-title-wrap">
-                        <h4>🎯 Kas Aktivasyon & Etki Dağılımı</h4>
+                        <h4>🎯 1 Çalışma Setinin Kaslara Dağılımı</h4>
                         <span class="methodology-badge">Schoenfeld & RP Modeli</span>
                     </div>
-                    <p class="section-desc">Bu hareketin 1 tam çalışma seti tamamlandığında kas gruplarına sayılan efektif hacim oranı:</p>
+                    <p class="section-desc">1 set yapıldığında her bir kas grubuna yazılan efektif hipertrofi hacmi:</p>
                     
                     <div class="activation-bars" id="inspActivationBars">
                         <!-- Dinamik doldurulacak -->
