@@ -3503,7 +3503,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v92</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v93</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3539,7 +3539,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v92</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v93</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -5331,6 +5331,174 @@
             calves_grip: { name: "Kalf & Kavrama", icon: "🦶", desc: "Gastrocnemius, Soleus & Bilek", color: "#94a3b8" }
         };
 
+        // ==================== BİYOMEKANİK HASSAS ANATOMİ HARİTASI (SSOT) ====================
+        const EXERCISE_ANATOMY_MAP = {
+            // CHEST / GÖĞÜS
+            db_bench_press: { primary: 'Orta Göğüs', secondary: 'Ön Omuz, Triceps', subKey: 'chest_mid' },
+            db_incline_press: { primary: 'Üst Göğüs', secondary: 'Ön Omuz, Triceps', subKey: 'chest_upper' },
+            db_floor_press: { primary: 'Orta Göğüs', secondary: 'Triceps, Ön Omuz', subKey: 'chest_mid' },
+            bb_bench_press: { primary: 'Orta Göğüs', secondary: 'Ön Omuz, Triceps', subKey: 'chest_mid' },
+            bb_incline_bench: { primary: 'Üst Göğüs', secondary: 'Ön Omuz, Triceps', subKey: 'chest_upper' },
+            bb_close_grip_bench: { primary: 'Triceps (İtiş)', secondary: 'İç & Orta Göğüs, Ön Omuz', subKey: 'triceps_lateral' },
+            mach_cable_crossover: { primary: 'İç & Orta Göğüs', secondary: 'Ön Omuz', subKey: 'chest_mid' },
+            mach_pec_deck: { primary: 'Orta Göğüs (İzole)', secondary: 'Ön Omuz', subKey: 'chest_mid' },
+            bw_pushup: { primary: 'Orta Göğüs', secondary: 'Ön Omuz, Triceps, Core', subKey: 'chest_mid' },
+            bw_decline_pushup: { primary: 'Üst Göğüs', secondary: 'Ön Omuz, Triceps', subKey: 'chest_upper' },
+            bw_diamond_pushup: { primary: 'Triceps (İtiş)', secondary: 'İç Göğüs, Ön Omuz', subKey: 'triceps_lateral' },
+            bw_dips: { primary: 'Alt Göğüs', secondary: 'Triceps, Ön Omuz', subKey: 'chest_lower' },
+            db_renegade_pushup: { primary: 'Orta Göğüs & Sırt', secondary: 'Triceps, Yan Karın (Oblik)', subKey: 'chest_mid' },
+
+            // SHOULDERS / OMUZ
+            db_overhead_press: { primary: 'Ön Omuz', secondary: 'Triceps, Üst Göğüs, Core', subKey: 'shoulders_front' },
+            db_arnold_press: { primary: 'Tüm Omuz (Ön & Yan)', secondary: 'Triceps, Üst Göğüs', subKey: 'shoulders_front' },
+            db_lateral_raise: { primary: 'Yan Omuz', secondary: 'Üst Trapez', subKey: 'shoulders_side' },
+            mach_cable_lateral: { primary: 'Yan Omuz (İzole)', secondary: 'Üst Trapez', subKey: 'shoulders_side' },
+            mach_face_pull: { primary: 'Arka Omuz', secondary: 'Üst Sırt (Trapez/Rhomboid), Dış Rotatör', subKey: 'shoulders_rear' },
+            kneeling_plate_front_raise: { primary: 'Ön Omuz', secondary: 'Üst Göğüs, Core', subKey: 'shoulders_front' },
+            kb_press: { primary: 'Ön Omuz', secondary: 'Triceps, Core, Kalça', subKey: 'shoulders_front' },
+            bb_overhead_press: { primary: 'Ön Omuz', secondary: 'Triceps, Üst Göğüs, Core', subKey: 'shoulders_front' },
+            bb_push_press: { primary: 'Ön Omuz & Güç', secondary: 'Triceps, Ön Bacak, Core', subKey: 'shoulders_front' },
+            db_push_press: { primary: 'Ön Omuz & Güç', secondary: 'Triceps, Ön Bacak, Core', subKey: 'shoulders_front' },
+            kb_halo: { primary: 'Omuz Kapsülü (Mobilite)', secondary: 'Üst Sırt, Core', subKey: 'shoulders_rear' },
+            waiters_carry: { primary: 'Omuz Stabilitesi', secondary: 'Trapez, Derin Core', subKey: 'shoulders_front' },
+
+            // BACK / SIRT
+            db_saw_row: { primary: 'Kanat (Geniş Sırt)', secondary: 'Biceps, Arka Omuz, Rhomboid', subKey: 'back_lats' },
+            db_chest_supported_row: { primary: 'Orta Sırt (Kalınlık)', secondary: 'Rhomboid, Arka Omuz, Biceps', subKey: 'back_mid' },
+            db_renegade_row: { primary: 'Orta Sırt & Kanat', secondary: 'Derin Karın (Oblik), Arka Omuz', subKey: 'back_mid' },
+            db_pullover: { primary: 'Kanat (Geniş Sırt)', secondary: 'Üst Göğüs, Triceps Uzun Baş, Serratus', subKey: 'back_lats' },
+            mach_lat_pulldown: { primary: 'Kanat (Geniş Sırt)', secondary: 'Biceps, Arka Omuz, Ön Kol', subKey: 'back_lats' },
+            mach_cable_row: { primary: 'Orta Sırt (Kalınlık)', secondary: 'Rhomboid, Kanat, Biceps', subKey: 'back_mid' },
+            bw_pullup: { primary: 'Kanat (Geniş Sırt)', secondary: 'Biceps, Arka Omuz, Core', subKey: 'back_lats' },
+            bw_chinup: { primary: 'Kanat & Biceps', secondary: 'Arka Omuz, Ön Kol', subKey: 'back_lats' },
+            bw_inverted_row: { primary: 'Orta Sırt (Kalınlık)', secondary: 'Rhomboid, Biceps, Arka Omuz', subKey: 'back_mid' },
+            bb_bent_over_row: { primary: 'Orta Sırt (Kalınlık)', secondary: 'Kanat, Biceps, Alt Bel', subKey: 'back_mid' },
+            bb_pendlay_row: { primary: 'Orta Sırt (Patlayıcı)', secondary: 'Rhomboid, Kanat, Alt Bel', subKey: 'back_mid' },
+            kb_gorilla_row: { primary: 'Kanat & Orta Sırt', secondary: 'Biceps, Arka Omuz, Statik Bacak', subKey: 'back_mid' },
+
+            // LEGS - QUADS / ÖN BACAK
+            db_goblet_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Büyük Kalça (Glute), Core', subKey: 'legs_quad' },
+            db_front_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Büyük Kalça, Üst Sırt, Core', subKey: 'legs_quad' },
+            db_bulgarian_squat: { primary: 'Ön Bacak & Kalça', secondary: 'Arka Bacak, Denge/Adduktor', subKey: 'legs_quad' },
+            db_walking_lunge: { primary: 'Ön Bacak (Quad)', secondary: 'Kalça, Arka Bacak, Baldır', subKey: 'legs_quad' },
+            db_reverse_lunge: { primary: 'Ön Bacak & Kalça', secondary: 'Arka Bacak, Diz Stabilitesi', subKey: 'legs_quad' },
+            kb_goblet_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Kalça, Core, Ayak Bileği', subKey: 'legs_quad' },
+            bb_back_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Büyük Kalça, Alt Bel, Core', subKey: 'legs_quad' },
+            bb_front_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Büyük Kalça, Üst Sırt Dikliği', subKey: 'legs_quad' },
+            bb_zercher_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Kalça, Ön Karın Zırhı, Üst Sırt', subKey: 'legs_quad' },
+            mach_leg_press: { primary: 'Ön Bacak (Quad)', secondary: 'Büyük Kalça', subKey: 'legs_quad' },
+            mach_leg_extension: { primary: 'Ön Bacak (Quad İzole)', secondary: 'Gözyaşı Kası (VMO)', subKey: 'legs_quad' },
+            bw_air_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Kalça, Ayak Bileği Açıklığı', subKey: 'legs_quad' },
+            bw_jump_squat: { primary: 'Ön Bacak & Patlayıcı', secondary: 'Kalça, Baldır (Kalf)', subKey: 'legs_quad' },
+            lunge_with_twist: { primary: 'Ön Bacak & Kalça', secondary: 'Yan Karın (Oblik), Denge', subKey: 'legs_quad' },
+            step_up_press: { primary: 'Ön Bacak & Omuz', secondary: 'Kalça, Triceps, Denge', subKey: 'legs_quad' },
+
+            // LEGS - HAMSTRINGS & GLUTES / ARKA BACAK & KALÇA
+            db_rdl: { primary: 'Arka Bacak (Hamstring)', secondary: 'Büyük Kalça (Glute), Alt Bel', subKey: 'legs_hamstrings' },
+            db_single_leg_rdl: { primary: 'Arka Bacak (Hamstring)', secondary: 'Kalça, Ayak Bileği Stabilitesi', subKey: 'legs_hamstrings' },
+            bb_rdl: { primary: 'Arka Bacak (Hamstring)', secondary: 'Büyük Kalça, Alt Bel', subKey: 'legs_hamstrings' },
+            mach_leg_curl: { primary: 'Arka Bacak (Hamstring İzole)', secondary: 'Baldır Üst Kısmı', subKey: 'legs_hamstrings' },
+            bb_deadlift: { primary: 'Tüm Arka Zincir (Hamstring & Kalça)', secondary: 'Alt Bel, Üst Sırt (Trapez), Ön Kol', subKey: 'legs_hamstrings' },
+            bb_hip_thrust: { primary: 'Büyük Kalça (Glute)', secondary: 'Arka Bacak, Core', subKey: 'legs_glutes' },
+            bw_glute_bridge: { primary: 'Büyük Kalça (Glute)', secondary: 'Arka Bacak, Pelvik Denge', subKey: 'legs_glutes' },
+            mach_calf_raise: { primary: 'Baldır (Kalf)', secondary: 'Aşil Tendonu, Ayak Tabanı', subKey: 'legs_calves' },
+
+            // ARMS - TRICEPS & BICEPS / ARKA KOL & ÖN KOL
+            db_triceps_overhead: { primary: 'Triceps (Uzun Baş)', secondary: 'Triceps Yan Baş, Core', subKey: 'triceps_long' },
+            db_skullcrusher: { primary: 'Triceps (Orta/Uzun Baş)', secondary: 'Triceps Yan Baş', subKey: 'triceps_long' },
+            mach_triceps_pushdown: { primary: 'Triceps (Yan/Dış Baş)', secondary: 'Triceps Medial Baş, Ön Kol', subKey: 'triceps_lateral' },
+            db_biceps_curl: { primary: 'Biceps (Pazu)', secondary: 'Ön Kol (Brachioradialis)', subKey: 'biceps' },
+            db_hammer_curl: { primary: 'Biceps & Ön Kol (Brachialis)', secondary: 'Kavrama Gücü', subKey: 'biceps' },
+            db_incline_curl: { primary: 'Biceps (Uzun Baş / Tepe)', secondary: 'Ön Omuz Esnemesi', subKey: 'biceps' },
+            bb_biceps_curl: { primary: 'Biceps (Genel Kütle)', secondary: 'Ön Kol, Kavrama Gücü', subKey: 'biceps' },
+            mach_cable_biceps: { primary: 'Biceps (Sürekli Gerilim)', secondary: 'Ön Kol', subKey: 'biceps' },
+
+            // CORE & CARRIES / KARIN & TAŞIMALAR
+            db_suitcase_carry: { primary: 'Yan Karın (Oblik)', secondary: 'Kavrama Gücü, Omuz, Kalça', subKey: 'core_obliques' },
+            db_farmers_walk: { primary: 'Tüm Core & Kavrama', secondary: 'Üst Trapez, Ön Kol, Baldır', subKey: 'core_front' },
+            db_russian_twist: { primary: 'Yan Karın (Oblik)', secondary: 'Ön Karın, Kalça Fleksör', subKey: 'core_obliques' },
+            mach_cable_woodchopper: { primary: 'Yan Karın (Oblik Rotasyon)', secondary: 'Omuz, Kalça, Serratus', subKey: 'core_obliques' },
+            half_kneeling_plate_chop: { primary: 'Yan Karın (Oblik Rotasyon)', secondary: 'Omuz, Kalça Stabilitesi', subKey: 'core_obliques' },
+            bw_plank: { primary: 'Ön Karın (Core Zırhı)', secondary: 'Omuz, Kalça, Dört Başlı Kas', subKey: 'core_front' },
+            bw_hollow_body: { primary: 'Derin Karın Duvarı', secondary: 'Kalça Fleksör, Serratus', subKey: 'core_front' },
+            bw_hanging_knee_raise: { primary: 'Alt Karın & Core', secondary: 'Kavrama Gücü, Kalça Fleksör', subKey: 'core_front' },
+            bw_mountain_climber: { primary: 'Ön Karın & Nabız', secondary: 'Omuz, Kalça Fleksör', subKey: 'core_front' },
+            bear_crawl_pull_through: { primary: 'Derin Core (Rotasyon Direnci)', secondary: 'Omuz Zırhı, Kalça', subKey: 'core_obliques' },
+            cross_body_carry: { primary: 'Yan Karın & Omuz', secondary: 'Trapez, Denge', subKey: 'core_obliques' },
+
+            // BALLISTIC & FUNCTIONAL POWER / BALİSTİK & BİLEŞİK
+            db_swing: { primary: 'Büyük Kalça & Arka Bacak', secondary: 'Alt Bel, Core, Kavrama', subKey: 'legs_hamstrings' },
+            kb_swing: { primary: 'Büyük Kalça & Arka Bacak', secondary: 'Alt Bel, Core, Kavrama', subKey: 'legs_hamstrings' },
+            kb_clean: { primary: 'Kalça & Sırt Patlaması', secondary: 'Ön Kol, Omuz Rack, Core', subKey: 'back_mid' },
+            kb_half_snatch: { primary: 'Tüm Arka Zincir & Omuz', secondary: 'Kalça, Sırt, Nabız', subKey: 'shoulders_front' },
+            db_snatch: { primary: 'Tüm Arka Zincir & Omuz', secondary: 'Kalça, Sırt, Patlayıcı Güç', subKey: 'shoulders_front' },
+            kb_windmill: { primary: 'Yan Karın & Omuz Stabilitesi', secondary: 'Arka Bacak Esnekliği', subKey: 'core_obliques' },
+            kb_turkish_getup: { primary: 'Tüm Vücut & Omuz Stabilitesi', secondary: 'Kalça, Core, Ön Bacak', subKey: 'shoulders_front' },
+            db_thruster: { primary: 'Ön Bacak & Omuz', secondary: 'Triceps, Kalça, Core', subKey: 'shoulders_front' },
+            kb_thruster: { primary: 'Ön Bacak & Omuz', secondary: 'Triceps, Kalça, Core', subKey: 'shoulders_front' },
+            bb_thruster: { primary: 'Ön Bacak & Omuz', secondary: 'Triceps, Kalça, Core', subKey: 'shoulders_front' },
+            db_clean_and_press: { primary: 'Kalça, Sırt & Omuz', secondary: 'Triceps, Arka Bacak', subKey: 'shoulders_front' },
+            db_manmaker: { primary: 'Tüm Vücut Zırhı', secondary: 'Göğüs, Sırt, Omuz, Bacak, Core', subKey: 'chest_mid' },
+            bb_hang_power_clean: { primary: 'Kalça & Üst Sırt (Trapez)', secondary: 'Arka Bacak, Ön Kol, Omuz', subKey: 'back_mid' },
+            bb_landmine_squat_press: { primary: 'Ön Bacak, Omuz & Üst Göğüs', secondary: 'Triceps, Kalça, Core', subKey: 'chest_upper' },
+            bw_burpee: { primary: 'Tüm Vücut Kondisyonu', secondary: 'Göğüs, Bacak, Core, Nabız', subKey: 'chest_mid' }
+        };
+
+        const STUDIO_SUB_REGIONS = {
+            chest: [
+                { key: 'chest_upper', name: 'Üst Göğüs' },
+                { key: 'chest_mid', name: 'Orta Göğüs' },
+                { key: 'chest_lower', name: 'Alt Göğüs' }
+            ],
+            shoulders: [
+                { key: 'shoulders_front', name: 'Ön Omuz' },
+                { key: 'shoulders_side', name: 'Yan Omuz' },
+                { key: 'shoulders_rear', name: 'Arka Omuz' }
+            ],
+            back: [
+                { key: 'back_lats', name: 'Kanat (Genişlik)' },
+                { key: 'back_mid', name: 'Orta Sırt (Kalınlık)' }
+            ],
+            quads: [
+                { key: 'legs_quad', name: 'Ön Bacak (Quad)' }
+            ],
+            hamstrings: [
+                { key: 'legs_hamstrings', name: 'Arka Bacak (Hamstring)' }
+            ],
+            glutes: [
+                { key: 'legs_glutes', name: 'Büyük Kalça (Glute)' }
+            ],
+            triceps: [
+                { key: 'triceps_long', name: 'Uzun Baş (Başüstü)' },
+                { key: 'triceps_lateral', name: 'Yan/Dış Baş (İtiş)' }
+            ],
+            biceps: [
+                { key: 'biceps', name: 'Biceps & Ön Kol' }
+            ],
+            core: [
+                { key: 'core_front', name: 'Ön Karın' },
+                { key: 'core_obliques', name: 'Yan Karın (Oblik)' }
+            ],
+            calves: [
+                { key: 'legs_calves', name: 'Baldır (Kalf)' }
+            ]
+        };
+
+        function getExerciseAnatomy(ex) {
+            if (!ex) return { primary: 'Kas Grubu', secondary: '', subKey: '' };
+            const id = ex.id || ex.exId;
+            if (EXERCISE_ANATOMY_MAP[id]) {
+                return EXERCISE_ANATOMY_MAP[id];
+            }
+            const pNames = (ex.primaryMuscles || []).map(m => (typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m]?.name) || m).join(', ');
+            const sNames = (ex.secondaryMuscles || []).map(m => (typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m]?.name) || m).join(', ');
+            return {
+                primary: pNames || ex.muscle || 'Kas Grubu',
+                secondary: sNames || '',
+                subKey: (ex.primaryMuscles && ex.primaryMuscles[0]) || 'general'
+            };
+        }
+
         // CUSTOM ROUTINE BUILDER STATE
         let customRoutineState = {
             title: "Özel Çelik Programım",
@@ -6452,6 +6620,7 @@
                 bodyweight: 'Vücut Ağırlığı'
             };
 
+            const anatomy = getExerciseAnatomy(ex);
             const targetW = ex.weightKey && weights[ex.weightKey] ? weights[ex.weightKey] : null;
 
             return `
@@ -6463,7 +6632,8 @@
                         </div>
                         <div class="ex-tag-group">
                             <span class="ex-badge badge-equip">${equipLabels[ex.equipment] || ex.equipment}</span>
-                            <span class="ex-badge badge-muscle">${escapeHTML(ex.muscle.split(',')[0])}</span>
+                            <span class="ex-badge badge-muscle" style="color:var(--gold); font-weight:800;">🎯 ${escapeHTML(anatomy.primary)}</span>
+                            ${anatomy.secondary ? `<span class="ex-badge" style="background:rgba(56,189,248,0.12); color:var(--cyan); border:1px solid rgba(56,189,248,0.3); font-size:10px; font-weight:700;">⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''}
                             ${targetW ? `<span class="badge-target-weight">🎯 Hedefin: ${targetW} kg</span>` : ''}
                             <button type="button" class="btn-report-mini" onclick="event.stopPropagation(); openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}', 'Sihirbaz (Oluştur)')" title="Bu egzersiz veya görsel hatalıysa bildir">
                                 ⚠️ Bildir
@@ -6704,15 +6874,16 @@
                 if (nameEl) nameEl.innerText = currentEx.name;
 
                 const eqMeta = EQUIP_LABELS[currentEx.equipment] || { label: currentEx.equipment || '', icon: '🏋️' };
-                const pName = (currentEx.primaryMuscles && currentEx.primaryMuscles[0] && TARGET_REGIONS[currentEx.primaryMuscles[0]] ? TARGET_REGIONS[currentEx.primaryMuscles[0]].name : currentEx.muscle) || 'Kas Grubu';
+                const anatomy = getExerciseAnatomy(currentEx);
                 if (badgesEl) {
                     badgesEl.innerHTML = `
                         <span class="ex-badge badge-equip">${eqMeta.icon} ${eqMeta.label}</span>
-                        <span class="ex-badge badge-muscle">${escapeHTML(pName)}</span>
+                        <span class="ex-badge badge-muscle" style="color:var(--gold); font-weight:800;">🎯 ${escapeHTML(anatomy.primary)}</span>
+                        ${anatomy.secondary ? `<span class="ex-badge" style="background:rgba(56,189,248,0.12); color:var(--cyan); border:1px solid rgba(56,189,248,0.3); font-size:10px; font-weight:700;">⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''}
                     `;
                 }
                 if (sameMuscleLabel) {
-                    sameMuscleLabel.innerText = `"${pName}" kas grubunu`;
+                    sameMuscleLabel.innerText = `"${anatomy.primary}" bölgesini`;
                 }
             } else {
                 if (titleEl) titleEl.innerText = "➕ Antrenmana Yeni Hareket Ekle";
@@ -6970,7 +7141,7 @@
                 const guide = exerciseGuideMap[ex.id] || categoryFallback[ex.category] || guideLibrary.goblet_squat;
                 const thumbImg = (guide && guide.form) ? guide.form : '';
                 const eqMeta = EQUIP_LABELS[ex.equipment] || { label: ex.equipment || '', icon: '🏋️' };
-                const pNames = (ex.primaryMuscles || []).map(m => (TARGET_REGIONS[m] ? TARGET_REGIONS[m].name : m)).join(', ') || ex.muscle || 'Kas Grubu';
+                const anatomy = getExerciseAnatomy(ex);
 
                 return `
                     <div class="ex-card" style="margin-bottom:8px; padding:10px 12px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; transition:border-color 0.2s;" onmouseenter="this.style.borderColor='rgba(245,158,11,0.4)'" onmouseleave="this.style.borderColor='var(--border)'">
@@ -6985,7 +7156,8 @@
                                     </div>
                                     <div style="display:flex; gap:4px; flex-wrap:wrap; margin-top:3px;">
                                         <span class="ex-badge badge-equip">${eqMeta.icon} ${eqMeta.label}</span>
-                                        <span class="ex-badge badge-muscle">${escapeHTML(pNames)}</span>
+                                        <span class="ex-badge badge-muscle" style="color:var(--gold); font-weight:800;">🎯 ${escapeHTML(anatomy.primary)}</span>
+                                        ${anatomy.secondary ? `<span class="ex-badge" style="background:rgba(56,189,248,0.12); color:var(--cyan); border:1px solid rgba(56,189,248,0.3); font-size:10px; font-weight:700;">⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''}
                                     </div>
                                 </div>
                             </div>
@@ -9819,7 +9991,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     ? `${EQUIP_LABELS[ex.equipment].icon} ${EQUIP_LABELS[ex.equipment].label}` 
                     : (ex.equipment || 'Serbest');
 
-                const pNames = (ex.primaryMuscles || []).map(m => (typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m]?.name) || m).join(', ');
+                const anatomy = getExerciseAnatomy(ex);
 
                 html += `
                     <div class="lib-ex-card" style="${isExcluded ? 'border-color:rgba(239,68,68,0.4); background:rgba(239,68,68,0.04);' : ''}">
@@ -9834,7 +10006,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 </div>
                                 <div style="display:flex; gap:4px; flex-wrap:wrap; margin-top:5px;">
                                     <span class="ex-chip-badge equip">${escapeHTML(eqInfo)}</span>
-                                    ${pNames ? `<span class="ex-chip-badge muscle">🎯 ${escapeHTML(pNames)}</span>` : ''}
+                                    <span class="ex-chip-badge muscle" style="background:rgba(245, 158, 11, 0.15); border:1px solid rgba(245, 158, 11, 0.4); color:var(--gold); font-weight:800;">🎯 ${escapeHTML(anatomy.primary)}</span>
+                                    ${anatomy.secondary ? `<span class="ex-chip-badge" style="background:rgba(56, 189, 248, 0.1); border:1px solid rgba(56, 189, 248, 0.3); color:var(--cyan); font-weight:700;">⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''}
                                     <span class="ex-chip-badge mechanic">${ex.mechanic === 'compound' ? '⚡ Bileşik' : '🎯 İzolasyon'}</span>
                                 </div>
                             </div>
@@ -9880,12 +10053,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const dynamicBody = document.getElementById('addToProgModalBody');
 
             if (titleEl) titleEl.innerText = `➕ ${ex.name}`;
-            const pNames = (ex.primaryMuscles || []).map(m => (typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m]?.name) || m).join(', ');
+            const anatomy = getExerciseAnatomy(ex);
             const eqInfo = (typeof EQUIP_LABELS !== 'undefined' && EQUIP_LABELS[ex.equipment]) 
                 ? `${EQUIP_LABELS[ex.equipment].icon} ${EQUIP_LABELS[ex.equipment].label}` 
                 : (ex.equipment || 'Serbest');
 
-            if (subEl) subEl.innerHTML = `<strong>Hedef:</strong> ${escapeHTML(pNames || ex.muscle || '')} • <strong>Ekipman:</strong> ${escapeHTML(eqInfo)}`;
+            if (subEl) subEl.innerHTML = `<strong style="color:var(--gold);">🎯 Ana:</strong> ${escapeHTML(anatomy.primary)}${anatomy.secondary ? ` • <strong style="color:var(--cyan);">⚡ Destek:</strong> ${escapeHTML(anatomy.secondary)}` : ''} • <strong>Ekipman:</strong> ${escapeHTML(eqInfo)}`;
 
             const isWorkoutActive = Boolean(activeWorkoutSession && Array.isArray(activeWorkoutSession.exercises));
 
@@ -10627,7 +10800,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             const thumb = guide.form || '';
                             const sets = ex.targetSets || (details.scheme ? details.scheme.sets : 3);
                             const reps = ex.targetReps || (details.scheme ? details.scheme.reps : '8-12');
-                            const pNames = (ex.primaryMuscles || []).map(m => (TARGET_REGIONS[m] ? TARGET_REGIONS[m].name : m)).join(', ') || ex.muscle || 'Kas Grubu';
+                            const anatomy = getExerciseAnatomy(ex);
 
                             return `
                                 <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:7px 10px;">
@@ -10640,9 +10813,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                             <div style="font-size:12.5px; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
                                                 ${escapeHTML(ex.name)}
                                             </div>
-                                            <div style="font-size:10.5px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                                                <span style="color:var(--cyan); font-weight:600;">${escapeHTML(pNames)}</span>
-                                                ${ex.equipment ? ` • ${escapeHTML(ex.equipment)}` : ''}
+                                            <div style="font-size:10.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;">
+                                                <span style="color:var(--gold); font-weight:800;">🎯 ${escapeHTML(anatomy.primary)}</span>
+                                                ${anatomy.secondary ? `<span style="color:var(--cyan); font-weight:600;"> • ⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''}
+                                                ${ex.equipment ? ` • <span style="color:var(--text-secondary);">${escapeHTML(ex.equipment)}</span>` : ''}
                                             </div>
                                         </div>
                                     </div>
@@ -15758,7 +15932,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=92')
+                navigator.serviceWorker.register('./sw.js?v=93')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
@@ -15871,8 +16045,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 return;
             }
 
-            // Tally exercises and sets for selected target muscles
+            // Tally exercises and sets for selected target muscles & collect covered subKeys
             const regionStats = {};
+            const coveredSubKeys = new Set();
             selectedTargetMuscles.forEach(m => {
                 regionStats[m] = { count: 0, sets: 0 };
             });
@@ -15880,6 +16055,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             customRoutineState.exercises.forEach(item => {
                 const ex = EXERCISES_DB.find(e => e.id === item.exId);
                 if (ex) {
+                    const anatomy = getExerciseAnatomy(ex);
+                    if (anatomy.subKey) {
+                        coveredSubKeys.add(anatomy.subKey);
+                    }
                     const pList = ex.primaryMuscles || [];
                     const sList = ex.secondaryMuscles || [];
                     const sets = parseInt(item.sets) || 3;
@@ -15895,31 +16074,61 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             let readyCount = 0;
             let missingList = [];
+            let missingSubList = [];
             let html = '';
 
             selectedTargetMuscles.forEach(key => {
                 const reg = STUDIO_REGION_MAP[key] || { name: key, icon: '🎯' };
                 const stat = regionStats[key];
                 const isReady = stat.count > 0;
+                const subDefs = STUDIO_SUB_REGIONS[key] || [];
+
+                let subPillsHtml = '';
+                let hasUncoveredSub = false;
+
+                if (subDefs.length > 0) {
+                    subPillsHtml = `
+                        <div style="display:flex; flex-wrap:wrap; gap:3px; margin-top:4px;">
+                            ${subDefs.map(sub => {
+                                const isCovered = coveredSubKeys.has(sub.key);
+                                if (!isCovered && isReady) {
+                                    hasUncoveredSub = true;
+                                    missingSubList.push(`${reg.name}: ${sub.name}`);
+                                }
+                                return `
+                                    <span style="font-size:8.5px; font-weight:800; padding:1px 5px; border-radius:4px; ${isCovered ? 'background:rgba(16,185,129,0.25); color:#10b981; border:1px solid rgba(16,185,129,0.45);' : 'background:rgba(239,68,68,0.18); color:#fca5a5; border:1px solid rgba(239,68,68,0.35);'}">
+                                        ${sub.name} ${isCovered ? '✅' : '⚠️'}
+                                    </span>
+                                `;
+                            }).join('')}
+                        </div>
+                    `;
+                }
 
                 if (isReady) {
                     readyCount++;
+                    const cardBorder = hasUncoveredSub ? 'rgba(245, 158, 11, 0.6)' : '#10b981';
+                    const cardBg = hasUncoveredSub ? 'rgba(245, 158, 11, 0.08)' : 'rgba(16, 185, 129, 0.1)';
                     html += `
-                        <div style="background:rgba(16, 185, 129, 0.1); border:1px solid #10b981; border-radius:6px; padding:6px 8px; display:flex; justify-content:space-between; align-items:center;">
-                            <div>
+                        <div style="background:${cardBg}; border:1px solid ${cardBorder}; border-radius:6px; padding:6px 8px; display:flex; flex-direction:column; justify-content:space-between;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <div style="font-size:11px; font-weight:800; color:#fff;">${reg.icon} ${reg.name}</div>
-                                <div style="font-size:9.5px; color:#10b981; font-weight:700;">✅ Seçildi (${stat.count} Hrk • ${stat.sets} Set)</div>
+                                <div style="font-size:9.5px; color:${hasUncoveredSub ? 'var(--gold)' : '#10b981'}; font-weight:700;">
+                                    ${hasUncoveredSub ? '⚠️ Kısmi' : '✅ Tam'} (${stat.count} Hrk • ${stat.sets} Set)
+                                </div>
                             </div>
+                            ${subPillsHtml}
                         </div>
                     `;
                 } else {
                     missingList.push(reg.name);
                     html += `
-                        <div style="background:rgba(245, 158, 11, 0.1); border:1px solid var(--gold); border-radius:6px; padding:6px 8px; display:flex; justify-content:space-between; align-items:center;">
-                            <div>
+                        <div style="background:rgba(245, 158, 11, 0.06); border:1px dashed var(--gold); border-radius:6px; padding:6px 8px; display:flex; flex-direction:column; justify-content:space-between;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <div style="font-size:11px; font-weight:800; color:#fff;">${reg.icon} ${reg.name}</div>
                                 <div style="font-size:9.5px; color:var(--gold); font-weight:700;">⏳ Kaldı (0 Hareket)</div>
                             </div>
+                            ${subPillsHtml}
                         </div>
                     `;
                 }
@@ -15928,10 +16137,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             grid.innerHTML = html;
 
             if (summaryBadge) {
-                if (readyCount === selectedTargetMuscles.length) {
-                    summaryBadge.innerHTML = `<span style="color:#10b981;">🎉 Tüm hedefler hazır!</span>`;
+                if (readyCount === selectedTargetMuscles.length && missingSubList.length === 0) {
+                    summaryBadge.innerHTML = `<span style="color:#10b981; font-weight:800;">🎉 Tüm açılar ve alt bölgeler eksiksiz!</span>`;
+                } else if (missingList.length > 0) {
+                    summaryBadge.innerHTML = `<span style="color:var(--gold);">${readyCount} / ${selectedTargetMuscles.length} bölge hazır • Eksik: ${missingList.join(', ')}</span>`;
                 } else {
-                    summaryBadge.innerHTML = `<span style="color:var(--gold);">${readyCount} / ${selectedTargetMuscles.length} hazır • Eksik: ${missingList.join(', ')}</span>`;
+                    summaryBadge.innerHTML = `<span style="color:#fca5a5; font-weight:700;">⚠️ Boşta Kalan Alt Bölgeler: ${missingSubList.slice(0, 3).join(', ')}${missingSubList.length > 3 ? '...' : ''}</span>`;
                 }
             }
         }
@@ -15964,6 +16175,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 const guide = exerciseGuideMap[ex.id] || categoryFallback[ex.category] || guideLibrary.goblet_squat;
                 const thumbImg = guide.form || '';
 
+                const anatomy = getExerciseAnatomy(ex);
+
                 html += `
                     <div class="custom-routine-item" style="padding:6px 10px;">
                         <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:140px;">
@@ -15975,8 +16188,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 <div style="font-size:12px; font-weight:800; color:#fff; line-height:1.2; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
                                     ${escapeHTML(ex.name)}
                                 </div>
-                                <div style="font-size:10px; color:var(--text-secondary);">
-                                    ${escapeHTML(ex.muscle || '')}
+                                <div style="font-size:10px; margin-top:2px;">
+                                    <span style="color:var(--gold); font-weight:800;">🎯 ${escapeHTML(anatomy.primary)}</span>
+                                    ${anatomy.secondary ? `<span style="color:var(--cyan); font-weight:600;"> • ⚡ ${escapeHTML(anatomy.secondary)}</span>` : ''}
                                 </div>
                             </div>
                         </div>
@@ -16091,8 +16305,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 const thumbImg = guide.form || '';
                 const isAlreadyInRoutine = customRoutineState.exercises.some(item => item.exId === ex.id);
 
-                const pNames = (ex.primaryMuscles || []).map(m => STUDIO_REGION_MAP[m]?.name || m).join(', ');
-                const sNames = (ex.secondaryMuscles || []).map(m => STUDIO_REGION_MAP[m]?.name || m).join(', ');
+                const anatomy = getExerciseAnatomy(ex);
 
                 html += `
                     <div class="studio-ex-card" style="padding:10px;">
@@ -16104,8 +16317,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 <div style="font-size:12px; font-weight:800; color:#fff; line-height:1.2; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
                                     ${escapeHTML(ex.name)}
                                 </div>
-                                <div style="font-size:10px; color:var(--cyan); margin-top:2px;">
-                                    <strong>Primer:</strong> ${pNames}${sNames ? ` • <span style="color:var(--text-secondary);">Sekonder: ${sNames}</span>` : ''}
+                                <div style="font-size:10px; margin-top:3px; line-height:1.35;">
+                                    <span style="color:var(--gold); font-weight:800;">🎯 Ana: ${escapeHTML(anatomy.primary)}</span>
+                                    ${anatomy.secondary ? `<span style="color:var(--cyan); font-weight:600;"> • ⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''}
                                 </div>
                             </div>
                         </div>
@@ -16271,8 +16485,34 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 cancelStudioEditingSilent();
             }
 
+            // Check for missing sub-regions for friendly coach advice:
+            const coveredSubKeys = new Set();
+            customRoutineState.exercises.forEach(item => {
+                const ex = EXERCISES_DB.find(e => e.id === item.exId);
+                if (ex) {
+                    const anatomy = getExerciseAnatomy(ex);
+                    if (anatomy.subKey) coveredSubKeys.add(anatomy.subKey);
+                }
+            });
+            let missingSubTips = [];
+            selectedTargetMuscles.forEach(key => {
+                const subDefs = (typeof STUDIO_SUB_REGIONS !== 'undefined' && STUDIO_SUB_REGIONS[key]) || [];
+                subDefs.forEach(sub => {
+                    if (!coveredSubKeys.has(sub.key)) {
+                        const mName = (typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[key]?.name) || key;
+                        missingSubTips.push(`${mName}: ${sub.name}`);
+                    }
+                });
+            });
+
             showToast(`✅ "${title}" kaydedildi!`);
-            alert(`✅ "${title}" kaydedildi! '📚 Programlar' sekmesinden veya Haftalık Plandan başlatabilirsiniz.`);
+            let alertMsg = `✅ "${title}" kaydedildi! '📚 Programlar' sekmesinden veya Haftalık Plandan başlatabilirsiniz.`;
+            if (missingSubTips.length > 0) {
+                alertMsg += `\n\n💡 Koç Notu: Seçtiğiniz hedeflerde şu alt bölgeler boşta kaldı:\n• ${missingSubTips.slice(0, 4).join('\n• ')}\n\nSonraki antrenmanınızda bu açıları da ekleyerek tam denge sağlayabilirsiniz.`;
+            } else if (selectedTargetMuscles.length > 0) {
+                alertMsg += `\n\n🎉 Kusursuz! Seçilen tüm kas bölgeleri ve açıları eksiksiz kapsandı.`;
+            }
+            alert(alertMsg);
             renderLibrary();
             renderActiveWorkout();
         }
@@ -16357,8 +16597,11 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (!ex) return;
 
             document.getElementById('exDetailModalTitle').innerText = ex.name;
-            const pNames = (ex.primaryMuscles || []).map(m => STUDIO_REGION_MAP[m]?.name || m).join(', ');
-            document.getElementById('exDetailModalSubtitle').innerText = `Hedef: ${pNames} • ${ex.equipment ? ex.equipment.toUpperCase() : ''}`;
+            const anatomy = getExerciseAnatomy(ex);
+            const subTitleEl = document.getElementById('exDetailModalSubtitle');
+            if (subTitleEl) {
+                subTitleEl.innerHTML = `<span style="color:var(--gold); font-weight:800;">🎯 Ana: ${escapeHTML(anatomy.primary)}</span>${anatomy.secondary ? ` • <span style="color:var(--cyan); font-weight:700;">⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''} • <span style="color:var(--text-secondary);">${ex.equipment ? ex.equipment.toUpperCase() : ''}</span>`;
+            }
 
             const guide = exerciseGuideMap[ex.id] || categoryFallback[ex.category] || guideLibrary.goblet_squat;
 
