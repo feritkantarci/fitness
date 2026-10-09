@@ -8,10 +8,18 @@
         <stop offset="0%" stop-color="#38bdf8"/>
         <stop offset="100%" stop-color="#0284c7"/>
     </linearGradient>
+    <linearGradient id="greenGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#34d399"/>
+        <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
     <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stop-color="#f8fafc"/>
         <stop offset="100%" stop-color="#94a3b8"/>
     </linearGradient>
+    <filter id="glowGreen" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="3" result="blur"/>
+        <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
     <marker id="arrowCyan" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
         <path d="M0,0 L6,3 L0,6 Z" fill="#38bdf8"/>
     </marker>
@@ -23,96 +31,185 @@
     </marker>
 </defs>
 
-    <!-- PANEL 1: KURULUM &amp; ESNEME -->
+    <!-- ==================== PANEL 1: TABAN / BAŞLANGIÇ ESNEMESİ ==================== -->
     <g transform="translate(12, 10)">
         <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
-        <rect x="12" y="10" width="105" height="22" rx="4" fill="#38bdf8" fill-opacity="0.15" stroke="#38bdf8" stroke-width="1"/>
-        <text x="64" y="25" fill="#38bdf8" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">1. BAŞLANGIÇ</text>
+        <!-- Top Badge -->
+        <rect x="12" y="10" width="115" height="22" rx="4" fill="#38bdf8" fill-opacity="0.15" stroke="#38bdf8" stroke-width="1"/>
+        <text x="69" y="25" fill="#38bdf8" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">1. TABAN ESNEMESİ</text>
+
+        <!-- Visual Canvas -->
         <g transform="translate(120, 95)">
-            <!-- Platform &amp; Floor -->
-            <rect x="-65" y="46" width="70" height="8" rx="2" fill="#334155" stroke="#475569" stroke-width="1"/>
-            <line x1="-75" y1="54" x2="75" y2="54" stroke="#1e293b" stroke-width="2" stroke-dasharray="4,4"/>
-            <!-- Body standing -->
-            <line x1="-15" y1="46" x2="-15" y2="12" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
-            <line x1="-5" y1="46" x2="-5" y2="12" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
-            <!-- Dropped heel indicator -->
-            <line x1="-20" y1="50" x2="-12" y2="46" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
-            <line x1="-10" y1="12" x2="-10" y2="-22" stroke="url(#bodyGrad)" stroke-width="12" stroke-linecap="round"/>
-            <circle cx="-10" cy="-35" r="9" fill="#cbd5e1"/>
-            <!-- Arms holding dumbbell -->
-            <line x1="-10" y1="-16" x2="-2" y2="4" stroke="#94a3b8" stroke-width="4.5" stroke-linecap="round"/>
-            <g transform="translate(-2,6) scale(0.85)">
-                <rect x="-6" y="-2" width="12" height="4" rx="1" fill="#fde68a"/>
-                <rect x="-10" y="-6" width="4" height="12" rx="1.5" fill="url(#goldGrad)"/>
-                <rect x="6" y="-6" width="4" height="12" rx="1.5" fill="url(#goldGrad)"/>
+            <!-- Full Body Standing (Left side mini) -->
+            <g transform="translate(-62, -5)">
+                <line x1="-5" y1="35" x2="-5" y2="10" stroke="#64748b" stroke-width="4" stroke-linecap="round"/>
+                <line x1="5" y1="35" x2="5" y2="10" stroke="#64748b" stroke-width="4" stroke-linecap="round"/>
+                <line x1="0" y1="10" x2="0" y2="-18" stroke="url(#bodyGrad)" stroke-width="9" stroke-linecap="round"/>
+                <circle cx="0" cy="-28" r="7" fill="#cbd5e1"/>
+                <line x1="-4" y1="-12" x2="-8" y2="4" stroke="#94a3b8" stroke-width="3.5" stroke-linecap="round"/>
+                <line x1="4" y1="-12" x2="8" y2="4" stroke="#94a3b8" stroke-width="3.5" stroke-linecap="round"/>
+                <!-- Mini Dumbbells -->
+                <rect x="-11" y="2" width="6" height="12" rx="1.5" fill="url(#goldGrad)"/>
+                <rect x="5" y="2" width="6" height="12" rx="1.5" fill="url(#goldGrad)"/>
+            </g>
+
+            <!-- Divider / Zoom Frame -->
+            <line x1="-20" y1="-35" x2="-20" y2="48" stroke="#25334d" stroke-width="1" stroke-dasharray="3,3"/>
+
+            <!-- ZOOMED-IN FOOT & CALF (Right side focused) -->
+            <g transform="translate(35, 0)">
+                <!-- Ground line -->
+                <line x1="-45" y1="40" x2="45" y2="40" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
+                
+                <!-- Lower Leg / Shin (Tibia) -->
+                <path d="M-8,-40 L-8,15 L-6,28" stroke="#94a3b8" stroke-width="7" stroke-linecap="round" fill="none"/>
+                <!-- Calf Muscle (Gastrocnemius - Neutral length) -->
+                <path d="M-12,-38 Q-26,-15 -14,10" stroke="#64748b" stroke-width="7" stroke-linecap="round" fill="none"/>
+                <!-- Achilles Tendon -->
+                <line x1="-12" y1="10" x2="-16" y2="34" stroke="#38bdf8" stroke-width="4" stroke-linecap="round"/>
+                
+                <!-- FOOT: Flat on ground (Taban Düz) -->
+                <!-- Heel (-24,38) to Toe (22,38) flat -->
+                <path d="M-22,38 L18,38 Q24,38 24,34 L14,30 L-6,28 L-18,32 Z" fill="#1e293b" stroke="#94a3b8" stroke-width="2.5" stroke-linejoin="round"/>
+                <!-- Shoe sole -->
+                <line x1="-22" y1="40" x2="22" y2="40" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+                
+                <!-- Flat indicator tag -->
+                <rect x="-25" y="-18" width="50" height="16" rx="3" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
+                <text x="0" y="-6" fill="#38bdf8" font-size="9" font-weight="800" text-anchor="middle">TABAN YERDE</text>
             </g>
         </g>
-        <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Topuklar Tabanda / Esneme</text>
-        <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Ayak kökleri platformda, aşil gergin</text>
+
+        <!-- Bottom text -->
+        <text x="120" y="174" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">1. Düz Taban &amp; Dik Duruş</text>
+        <text x="120" y="193" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Ayak kökleri yerde, omurga kilitli</text>
     </g>
 
-    <!-- ARROW 1 -->
+    <!-- STEP ARROW 1 -->
     <g transform="translate(253, 105)">
-        <circle cx="8" cy="0" r="9" fill="#1e293b" stroke="#334155" stroke-width="1"/>
-        <path d="M6,-3 L10,0 L6,3" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="8" cy="0" r="10" fill="#131c2e" stroke="#f59e0b" stroke-width="1.5"/>
+        <path d="M5,-4 L10,0 L5,4" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
     </g>
 
-    <!-- PANEL 2: PARMAK UCUNDA PATLAMA -->
+    <!-- ==================== PANEL 2: PARMAK UCUNDA PATLAMA (MAKSİMUM YÜKSELME) ==================== -->
     <g transform="translate(270, 10)">
-        <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
-        <rect x="12" y="10" width="105" height="22" rx="4" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="1"/>
-        <text x="64" y="25" fill="#10b981" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">2. TEPE KİLİT</text>
-        <g transform="translate(120, 85)">
-            <rect x="-65" y="56" width="70" height="8" rx="2" fill="#334155" stroke="#475569" stroke-width="1"/>
-            <!-- Elevated calf body -->
-            <line x1="-15" y1="46" x2="-15" y2="2" stroke="#10b981" stroke-width="7" stroke-linecap="round"/>
-            <line x1="-5" y1="46" x2="-5" y2="2" stroke="#10b981" stroke-width="7" stroke-linecap="round"/>
-            <!-- High toe tiptoe angle -->
-            <line x1="-17" y1="56" x2="-14" y2="46" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/>
-            <line x1="-7" y1="56" x2="-4" y2="46" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/>
-            <line x1="-10" y1="2" x2="-10" y2="-32" stroke="url(#bodyGrad)" stroke-width="12" stroke-linecap="round"/>
-            <circle cx="-10" cy="-45" r="9" fill="#cbd5e1"/>
-            <!-- Up arrow indicator -->
-            <path d="M18,35 L18,5" stroke="#10b981" stroke-width="2.5" marker-end="url(#arrowGreen)" stroke-linecap="round"/>
-            <!-- Arms holding dumbbell -->
-            <line x1="-10" y1="-26" x2="-2" y2="-6" stroke="#94a3b8" stroke-width="4.5" stroke-linecap="round"/>
-            <g transform="translate(-2,-4) scale(0.85)">
-                <rect x="-6" y="-2" width="12" height="4" rx="1" fill="#fde68a"/>
-                <rect x="-10" y="-6" width="4" height="12" rx="1.5" fill="url(#goldGrad)"/>
-                <rect x="6" y="-6" width="4" height="12" rx="1.5" fill="url(#goldGrad)"/>
+        <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#10b981" stroke-width="2"/>
+        <!-- Top Badge -->
+        <rect x="12" y="10" width="125" height="22" rx="4" fill="#10b981" fill-opacity="0.2" stroke="#10b981" stroke-width="1.5"/>
+        <text x="74" y="25" fill="#34d399" font-size="10.5" font-weight="900" text-anchor="middle" letter-spacing="0.5">2. PARMAK UCUNDA!</text>
+
+        <!-- Visual Canvas -->
+        <g transform="translate(120, 95)">
+            <!-- Full Body Standing High (Left side mini - elevated) -->
+            <g transform="translate(-62, -16)">
+                <line x1="-5" y1="35" x2="-5" y2="10" stroke="#10b981" stroke-width="4" stroke-linecap="round"/>
+                <line x1="5" y1="35" x2="5" y2="10" stroke="#10b981" stroke-width="4" stroke-linecap="round"/>
+                <line x1="0" y1="10" x2="0" y2="-18" stroke="url(#bodyGrad)" stroke-width="9" stroke-linecap="round"/>
+                <circle cx="0" cy="-28" r="7" fill="#cbd5e1"/>
+                <line x1="-4" y1="-12" x2="-8" y2="4" stroke="#94a3b8" stroke-width="3.5" stroke-linecap="round"/>
+                <line x1="4" y1="-12" x2="8" y2="4" stroke="#94a3b8" stroke-width="3.5" stroke-linecap="round"/>
+                <rect x="-11" y="2" width="6" height="12" rx="1.5" fill="url(#goldGrad)"/>
+                <rect x="5" y="2" width="6" height="12" rx="1.5" fill="url(#goldGrad)"/>
+                <!-- Mini up arrow -->
+                <path d="M0,42 L0,28" stroke="#10b981" stroke-width="2" marker-end="url(#arrowGreen)"/>
+            </g>
+
+            <!-- Divider -->
+            <line x1="-20" y1="-35" x2="-20" y2="48" stroke="#25334d" stroke-width="1" stroke-dasharray="3,3"/>
+
+            <!-- ZOOMED-IN FOOT & CALF (UP ON TIPTOES / 65 DEGREE PLANTARFLEXION) -->
+            <g transform="translate(35, -4)">
+                <!-- Ground line -->
+                <line x1="-45" y1="44" x2="45" y2="44" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
+
+                <!-- Leg elevated high -->
+                <path d="M-2,-50 L-2,5 L10,20" stroke="url(#bodyGrad)" stroke-width="7.5" stroke-linecap="round" fill="none"/>
+                
+                <!-- Massive Flexed Calf Muscle (Gastrocnemius Ball) with Green Glow -->
+                <path d="M-6,-48 Q-28,-28 -8,-2" stroke="#10b981" stroke-width="9" stroke-linecap="round" fill="none" filter="url(#glowGreen)"/>
+                <!-- Calf peak pulse badge -->
+                <circle cx="-18" cy="-28" r="5" fill="#34d399"/>
+                <text x="-27" y="-25" fill="#34d399" font-size="9" font-weight="900" text-anchor="end">KALF KİLİT!</text>
+
+                <!-- Achilles Tendon tightly stretched -->
+                <line x1="-8" y1="-2" x2="-1" y2="16" stroke="#f59e0b" stroke-width="4.5" stroke-linecap="round"/>
+
+                <!-- HIGH FOOT AT 60° TIPTOE ANGLE -->
+                <!-- Ball of foot firmly anchored at (18, 44), Heel elevated to (-8, 12) -->
+                <path d="M-8,14 L12,32 L22,44 L14,44 L-4,24 L-12,16 Z" fill="#1e293b" stroke="#34d399" stroke-width="2.5" stroke-linejoin="round"/>
+                
+                <!-- Pressure point at toes -->
+                <ellipse cx="18" cy="44" rx="7" ry="2.5" fill="#f59e0b" fill-opacity="0.7"/>
+                <circle cx="18" cy="43" r="3" fill="#fbbf24"/>
+
+                <!-- ELEVATION MEASUREMENT MARKER -->
+                <!-- Dotted line showing ground level for heel -->
+                <line x1="-25" y1="44" x2="-8" y2="44" stroke="#64748b" stroke-width="1.5" stroke-dasharray="2,2"/>
+                <!-- Double vertical arrow showing heel height -->
+                <path d="M-18,44 L-18,16" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrowGold)" stroke-linecap="round"/>
+                <text x="-22" y="30" fill="#fbbf24" font-size="9" font-weight="900" text-anchor="end">TOPUK HAVADA</text>
+
+                <!-- Big Upward Thrust Arrows -->
+                <path d="M28,34 L28,6" stroke="#10b981" stroke-width="3" marker-end="url(#arrowGreen)" stroke-linecap="round"/>
             </g>
         </g>
-        <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Parmak Ucunda Tepe Nokta</text>
-        <text x="120" y="195" fill="#10b981" font-size="10" font-weight="600" text-anchor="middle">Maksimum yüksel, 2 sn kalfı sık</text>
+
+        <!-- Bottom text -->
+        <text x="120" y="174" fill="#34d399" font-size="12" font-weight="800" text-anchor="middle">2. Parmak Ucunda Zirve!</text>
+        <text x="120" y="193" fill="#cbd5e1" font-size="10" font-weight="600" text-anchor="middle">Topukları göğe dik, kalfı 2 sn sık</text>
     </g>
 
-    <!-- ARROW 2 -->
+    <!-- STEP ARROW 2 -->
     <g transform="translate(511, 105)">
-        <circle cx="8" cy="0" r="9" fill="#1e293b" stroke="#334155" stroke-width="1"/>
-        <path d="M6,-3 L10,0 L6,3" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="8" cy="0" r="10" fill="#131c2e" stroke="#f59e0b" stroke-width="1.5"/>
+        <path d="M5,-4 L10,0 L5,4" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
     </g>
 
-    <!-- PANEL 3: KONTROLLÜ NEGATİF İNİŞ -->
+    <!-- ==================== PANEL 3: KONTROLLÜ YAVAŞ İNİŞ (NEGATİF) ==================== -->
     <g transform="translate(528, 10)">
         <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
-        <rect x="12" y="10" width="105" height="22" rx="4" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="1"/>
-        <text x="64" y="25" fill="#f59e0b" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">3. YAVAŞ İNİŞ</text>
+        <!-- Top Badge -->
+        <rect x="12" y="10" width="115" height="22" rx="4" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="1"/>
+        <text x="69" y="25" fill="#f59e0b" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">3. NEGATİF İNİŞ</text>
+
+        <!-- Visual Canvas -->
         <g transform="translate(120, 95)">
-            <rect x="-65" y="46" width="70" height="8" rx="2" fill="#334155" stroke="#475569" stroke-width="1"/>
-            <line x1="-15" y1="46" x2="-15" y2="12" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
-            <line x1="-5" y1="46" x2="-5" y2="12" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
-            <line x1="-10" y1="12" x2="-10" y2="-22" stroke="url(#bodyGrad)" stroke-width="12" stroke-linecap="round"/>
-            <circle cx="-10" cy="-35" r="9" fill="#cbd5e1"/>
-            <!-- Down arrow indicator -->
-            <path d="M18,10 L18,38" stroke="#f59e0b" stroke-width="2.5" marker-end="url(#arrowGold)" stroke-linecap="round"/>
-            <line x1="-10" y1="-16" x2="-2" y2="4" stroke="#94a3b8" stroke-width="4.5" stroke-linecap="round"/>
-            <g transform="translate(-2,6) scale(0.85)">
-                <rect x="-6" y="-2" width="12" height="4" rx="1" fill="#fde68a"/>
-                <rect x="-10" y="-6" width="4" height="12" rx="1.5" fill="url(#goldGrad)"/>
-                <rect x="6" y="-6" width="4" height="12" rx="1.5" fill="url(#goldGrad)"/>
+            <!-- Full Body Standing (Left side mini - descending) -->
+            <g transform="translate(-62, -5)">
+                <line x1="-5" y1="35" x2="-5" y2="10" stroke="#64748b" stroke-width="4" stroke-linecap="round"/>
+                <line x1="5" y1="35" x2="5" y2="10" stroke="#64748b" stroke-width="4" stroke-linecap="round"/>
+                <line x1="0" y1="10" x2="0" y2="-18" stroke="url(#bodyGrad)" stroke-width="9" stroke-linecap="round"/>
+                <circle cx="0" cy="-28" r="7" fill="#cbd5e1"/>
+                <line x1="-4" y1="-12" x2="-8" y2="4" stroke="#94a3b8" stroke-width="3.5" stroke-linecap="round"/>
+                <line x1="4" y1="-12" x2="8" y2="4" stroke="#94a3b8" stroke-width="3.5" stroke-linecap="round"/>
+                <rect x="-11" y="2" width="6" height="12" rx="1.5" fill="url(#goldGrad)"/>
+                <rect x="5" y="2" width="6" height="12" rx="1.5" fill="url(#goldGrad)"/>
+                <!-- Mini down arrow -->
+                <path d="M0,28 L0,42" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrowGold)"/>
+            </g>
+
+            <!-- Divider -->
+            <line x1="-20" y1="-35" x2="-20" y2="48" stroke="#25334d" stroke-width="1" stroke-dasharray="3,3"/>
+
+            <!-- ZOOMED-IN FOOT & CALF (Controlled Eccentric Lowering) -->
+            <g transform="translate(35, 0)">
+                <line x1="-45" y1="40" x2="45" y2="40" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
+
+                <path d="M-6,-42 L-6,12 L-4,24" stroke="#94a3b8" stroke-width="7" stroke-linecap="round" fill="none"/>
+                <path d="M-10,-40 Q-24,-18 -12,8" stroke="#f59e0b" stroke-width="7" stroke-linecap="round" fill="none"/>
+                <line x1="-10" y1="8" x2="-10" y2="28" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+
+                <!-- Foot descending halfway (20° angle) -->
+                <path d="M-16,28 L8,36 L18,40 L10,40 L-10,32 L-18,28 Z" fill="#1e293b" stroke="#f59e0b" stroke-width="2.5" stroke-linejoin="round"/>
+
+                <!-- Downward smooth movement arrow -->
+                <path d="M-14,20 L-14,36" stroke="#f59e0b" stroke-width="2.5" marker-end="url(#arrowGold)" stroke-linecap="round"/>
+                <text x="-20" y="16" fill="#f59e0b" font-size="9" font-weight="800" text-anchor="end">3 SN YAVAŞ</text>
             </g>
         </g>
-        <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">3 Saniye Negatif İniş</text>
-        <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Zıplamadan kontrollü derin esneme</text>
+
+        <!-- Bottom text -->
+        <text x="120" y="174" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">3. 3 Saniye Yavaş İniş</text>
+        <text x="120" y="193" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Zıplamadan kontrollü tabana dönüş</text>
     </g>
 </svg>
