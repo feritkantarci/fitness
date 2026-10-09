@@ -3503,7 +3503,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v85</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v86</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3539,7 +3539,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v85</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v86</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -4740,7 +4740,7 @@
 
             <div style="margin-top:16px; display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px;">
                 <button class="btn btn-outline" style="flex:1; min-width:80px;" onclick="closeExerciseDetailModal()">Kapat</button>
-                <button class="btn btn-outline" id="btnExDetailToggleHide" style="flex:1.2; min-width:130px; font-weight:700; transition:all 0.2s;" title="Kişisel havuzunuzdan gizleyin veya geri getirin">👁️‍🗨️ Havuzdan Gizle</button>
+                <button class="btn btn-outline" id="btnExDetailToggleHide" style="flex:1; min-width:90px; font-weight:700; transition:all 0.2s;" title="Kişisel havuzunuzdan gizleyin">👁️ Gizle</button>
                 <button class="btn btn-outline" id="btnExDetailAlt" style="flex:1.2; min-width:110px; color:var(--cyan); border-color:var(--cyan); font-weight:800;">🔄 Alternatifler</button>
                 <button class="btn btn-gold" id="btnExDetailAdd" style="flex:1.5; min-width:130px; font-weight:800;">➕ Bu Hareketi Ekle</button>
             </div>
@@ -5566,13 +5566,13 @@
                 list.splice(idx, 1);
                 isNowExcluded = false;
                 if (typeof showToast === 'function') {
-                    showToast(`✅ "${exName}" aktif havuzunuza geri eklendi.`);
+                    showToast(`✅ "${exName}" geri alındı.`);
                 }
             } else {
                 list.push(exId);
                 isNowExcluded = true;
                 if (typeof showToast === 'function') {
-                    showToast(`👁️‍🗨️ "${exName}" kişisel havuzunuzdan gizlendi.`);
+                    showToast(`👁️ "${exName}" gizlendi.`);
                 }
             }
 
@@ -5598,17 +5598,17 @@
             if (!btn) return;
             const isExcluded = isExerciseExcludedByUser(exId);
             if (isExcluded) {
-                btn.innerHTML = '🔄 Havuza Geri Ekle';
+                btn.innerHTML = '🔄 Geri Al';
                 btn.style.color = '#34d399';
                 btn.style.borderColor = '#10b981';
                 btn.style.background = 'rgba(16, 185, 129, 0.15)';
-                btn.title = 'Bu hareketi aktif havuzunuza geri getirin';
+                btn.title = 'Aktif havuzunuza geri ekleyin';
             } else {
-                btn.innerHTML = '👁️‍🗨️ Havuzdan Gizle';
+                btn.innerHTML = '👁️ Gizle';
                 btn.style.color = '#f87171';
                 btn.style.borderColor = 'rgba(239, 68, 68, 0.4)';
                 btn.style.background = 'rgba(239, 68, 68, 0.1)';
-                btn.title = 'Bu hareketi kişisel havuzunuzdan gizleyin';
+                btn.title = 'Kişisel havuzunuzdan gizleyin';
             }
         }
 
@@ -9830,7 +9830,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             <div style="flex:1; min-width:0;">
                                 <div style="font-size:13.5px; font-weight:800; color:#fff; line-height:1.25; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
                                     ${escapeHTML(ex.name)}
-                                    ${isExcluded ? '<span style="background:rgba(239,68,68,0.25); color:#fca5a5; font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px; margin-left:6px; vertical-align:middle;">Gizlendi</span>' : ''}
+                                    ${isExcluded ? '<span style="background:rgba(239,68,68,0.25); color:#fca5a5; font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px; margin-left:6px; vertical-align:middle;">Gizli</span>' : ''}
                                 </div>
                                 <div style="display:flex; gap:4px; flex-wrap:wrap; margin-top:5px;">
                                     <span class="ex-chip-badge equip">${escapeHTML(eqInfo)}</span>
@@ -9851,7 +9851,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 👁️ Detay
                             </button>
                             <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 8px; ${isExcluded ? 'color:#34d399; border-color:#10b981; background:rgba(16,185,129,0.12);' : 'color:#fca5a5; border-color:rgba(239,68,68,0.35);'}" onclick="event.stopPropagation(); toggleExerciseExclusionAndRefresh('${ex.id}')" title="${isExcluded ? 'Aktif havuzunuza geri ekleyin' : 'Kişisel havuzunuzdan gizleyin'}">
-                                ${isExcluded ? '🔄 Geri Al' : '👁️‍🗨️ Gizle'}
+                                ${isExcluded ? '🔄 Geri Al' : '👁️ Gizle'}
                             </button>
                             ${!isExcluded ? `
                                 <button type="button" class="btn btn-gold" style="flex:1.2; font-size:11px; padding:6px 8px; font-weight:800;" onclick="openAddToProgramOptions('${ex.id}')">
@@ -15349,7 +15349,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=85')
+                navigator.serviceWorker.register('./sw.js?v=86')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et

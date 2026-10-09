@@ -749,13 +749,13 @@ function updateExcludeButtonState(exId) {
     if (isExcluded) {
         el.btnToggleHideExercise.className = 'btn-toggle-exclude is-excluded';
         if (el.btnToggleHideIcon) el.btnToggleHideIcon.textContent = '🔄';
-        if (el.btnToggleHideText) el.btnToggleHideText.textContent = 'Havuza Geri Ekle (Aktif Et)';
-        el.btnToggleHideExercise.title = 'Bu egzersizi aktif havuzunuza geri ekleyin';
+        if (el.btnToggleHideText) el.btnToggleHideText.textContent = 'Geri Al';
+        el.btnToggleHideExercise.title = 'Aktif havuzunuza geri ekleyin';
     } else {
         el.btnToggleHideExercise.className = 'btn-toggle-exclude';
-        if (el.btnToggleHideIcon) el.btnToggleHideIcon.textContent = '👁️‍🗨️';
-        if (el.btnToggleHideText) el.btnToggleHideText.textContent = 'Havuzumdan Kaldır / Gizle';
-        el.btnToggleHideExercise.title = 'Bu egzersizi kişisel havuzunuzdan gizleyin';
+        if (el.btnToggleHideIcon) el.btnToggleHideIcon.textContent = '👁️';
+        if (el.btnToggleHideText) el.btnToggleHideText.textContent = 'Gizle';
+        el.btnToggleHideExercise.title = 'Kişisel havuzunuzdan gizleyin';
     }
 }
 
@@ -769,10 +769,10 @@ function toggleExerciseExclusion(exId) {
 
     if (idx >= 0) {
         list.splice(idx, 1);
-        showToast(`✅ "${exName}" aktif havuzunuza geri eklendi.`);
+        showToast(`✅ "${exName}" geri alındı.`);
     } else {
         list.push(exId);
-        showToast(`👁️‍🗨️ "${exName}" kişisel havuzunuzdan gizlendi.`);
+        showToast(`👁️ "${exName}" gizlendi.`);
     }
 
     state.excludedExerciseIds = list;
@@ -803,11 +803,23 @@ function selectLabExercise(ex) {
     el.inspTitle.textContent = ex.name;
     el.inspKeyTag.textContent = ex.rawKey || ex.id;
     el.inspMuscleTag.textContent = `${ex.primary} Odaklı`;
-    el.inspTypeBadge.textContent = ex.typeLabel || ex.type || 'Egzersiz';
+
+    // Tip Rozeti (Kısa ve net)
+    let shortType = ex.typeLabel || ex.type || 'Egzersiz';
+    if (shortType.includes('Ağır Serbest Ağırlık Bileşik')) shortType = 'Ağır Bileşik';
+    else if (shortType.includes('Bileşik')) shortType = 'Bileşik';
+    else if (shortType.includes('İzolasyon')) shortType = 'İzolasyon';
+    else if (shortType.includes('Kondisyon')) shortType = 'Kondisyon';
+    el.inspTypeBadge.textContent = shortType;
     
-    // SFR Badge
-    el.inspSfrBadge.textContent = `SFR: ${ex.sfrLabel || ex.sfr || 'N/A'}`;
+    // SFR Rozeti (Kısa ve net)
+    let shortSfr = 'N/A';
+    if (ex.sfr === 'HIGH' || (ex.sfrLabel && ex.sfrLabel.includes('Yüksek'))) shortSfr = 'Yüksek';
+    else if (ex.sfr === 'MODERATE' || (ex.sfrLabel && ex.sfrLabel.includes('Orta'))) shortSfr = 'Orta';
+    else if (ex.sfr === 'LOW' || (ex.sfrLabel && ex.sfrLabel.includes('Düşük'))) shortSfr = 'Düşük';
+    el.inspSfrBadge.textContent = `SFR: ${shortSfr}`;
     el.inspSfrBadge.className = `badge-sfr ${ex.sfr === 'N/A' ? 'na' : ''}`;
+    el.inspSfrBadge.title = ex.sfrLabel || `SFR Seviyesi: ${shortSfr}`;
 
     // MTF Değer ve Açıklama Hesaplama
     const pFactor = typeof ex.pFactor === 'number' ? ex.pFactor : 1.0;
