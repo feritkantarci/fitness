@@ -3503,7 +3503,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v91</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v92</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3539,7 +3539,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v91</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v92</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -11706,6 +11706,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
                         localStorage.setItem(`celik_kodu_history_${uid}`, JSON.stringify(mergedLogs));
                         renderHistory();
+                        applyWednesdayHammerCurlPatch();
 
                         if (mergedLogs.length > data.logs.length) {
                             await docRef.set({
@@ -11723,6 +11724,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
                 }
+                applyWednesdayHammerCurlPatch();
             } catch (err) {
                 console.warn("Antrenmanlar buluttan çekilemedi:", err);
             }
@@ -11740,6 +11742,90 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             } catch (err) {
                 console.warn("Antrenmanlar buluta aktarılamadı (çevrimdışı kaydedildi):", err);
                 updateCloudSyncBadge('offline', 'Kayıt Yerelde');
+            }
+        }
+
+        // ==================== 7 EKİM 2026 ÇARŞAMBA DÖNÜK VERİ ENJEKSİYONU ====================
+        function applyWednesdayHammerCurlPatch() {
+            try {
+                let anyModified = false;
+                const targetDate = '2026-10-07';
+
+                // Tüm kullanıcı geçmiş kayıtlarını tara ve eşitle
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (!key || !key.startsWith('celik_kodu_history_')) continue;
+
+                    const uid = key.replace('celik_kodu_history_', '');
+                    let logs = [];
+                    try { logs = JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) { logs = []; }
+                    if (!Array.isArray(logs) || logs.length === 0) continue;
+
+                    let fileModified = false;
+                    logs.forEach(log => {
+                        const logDate = String(log.date || '').split('T')[0];
+                        const isWed = (logDate === targetDate) || 
+                                      (log.dateFormatted && log.dateFormatted.includes('7 Eki 2026')) ||
+                                      (log.dateFormatted && log.dateFormatted.includes('07.10.2026'));
+
+                        if (isWed) {
+                            if (!Array.isArray(log.exercises)) log.exercises = [];
+                            const alreadyHasHammer = log.exercises.some(e => 
+                                e.id === 'db_hammer_curl' || 
+                                (e.name && e.name.toLowerCase().includes('hammer curl'))
+                            );
+
+                            if (!alreadyHasHammer) {
+                                const hammerEx = {
+                                    id: 'db_hammer_curl',
+                                    name: 'Dambıl Hammer Curl',
+                                    equipment: 'dumbbell',
+                                    category: 'pull',
+                                    muscle: 'Biceps, Ön Kol',
+                                    cue: 'Dirsekleri gövdeye sabitleyin, nötr tutuşla kaldırın.',
+                                    sets: [
+                                        { setNo: 1, weight: 10, reps: 12, completed: true, volume: 120 },
+                                        { setNo: 2, weight: 10, reps: 12, completed: true, volume: 120 },
+                                        { setNo: 3, weight: 15, reps: 12, completed: true, volume: 180 }
+                                    ],
+                                    completedSetsCount: 3,
+                                    maxWeight: 15,
+                                    exerciseVolume: 420
+                                };
+
+                                log.exercises.push(hammerEx);
+                                log.totalVolumeKg = Math.round(((log.totalVolumeKg || 0) + 420) * 10) / 10;
+                                log.totalSetsCompleted = (log.totalSetsCompleted || 0) + 3;
+                                log.totalRepsCompleted = (log.totalRepsCompleted || 0) + 36;
+
+                                if (!Array.isArray(log.muscleGroups)) log.muscleGroups = [];
+                                if (!log.muscleGroups.includes('Biceps')) log.muscleGroups.push('Biceps');
+                                if (!log.muscleGroups.includes('Ön Kol')) log.muscleGroups.push('Ön Kol');
+
+                                fileModified = true;
+                                anyModified = true;
+                            }
+                        }
+                    });
+
+                    if (fileModified) {
+                        localStorage.setItem(key, JSON.stringify(logs));
+                        if (typeof syncWorkoutLogsToCloud === 'function') {
+                            syncWorkoutLogsToCloud(logs, uid);
+                        }
+                    }
+                }
+
+                if (anyModified) {
+                    console.log("🦾 7 Ekim 2026 Çarşamba seansına Dambıl Hammer Curl (3 set: 10kg, 10kg, 15kg) başarıyla eklendi.");
+                    if (typeof renderHistory === 'function') renderHistory();
+                    if (typeof renderMuscleAnalytics === 'function') {
+                        const container = document.getElementById('muscleAnalyticsContainer');
+                        if (container) renderMuscleAnalytics(container);
+                    }
+                }
+            } catch (err) {
+                console.warn("Hammer curl patch error:", err);
             }
         }
 
@@ -15672,7 +15758,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=91')
+                navigator.serviceWorker.register('./sw.js?v=92')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
@@ -15696,6 +15782,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             initAuthDatabase();
             initFirebaseEngine();
             syncAppViewState();
+            applyWednesdayHammerCurlPatch();
             const hasRestored = restoreActiveWorkoutStateFromStorage();
             if (hasRestored) {
                 switchTab('activeWorkoutTab');
