@@ -85,7 +85,19 @@ Lütfen yanıtını şu 3 ana bölümde sun:
 (Sporcunun salonda telefonunu açtığında göreceği net, vurucu koç yönergesi)
 
 ### 3. 📋 OPTİMİZE EDİLMİŞ BİLİMSEL ANTRENMAN PROGRAMI
-(Web uygulamasına yüklenebilecek gün gün veya egzersiz egzersiz set, tekrar, hedef RIR ve kilo tavsiyeleri)
+Antrenman programını haftanın günlerine (örneğin 3 günlük program için Gün 1 / Pazartesi, Gün 2 / Çarşamba, Gün 3 / Cuma) KESİNLİKLE AYRI GÜNLER HALİNDE VER.
+Her gün için başlığı MUTLAKA şu standart formatta başlat ve altına egzersiz tablosunu koy:
+
+#### GÜN 1: [Antrenman Başlığı & Odak Kas Grupları]
+| Egzersiz | Hedef Mekanizma & Biyomekanik | Set | Tekrar | RIR | Yük Önerisi / Not |
+
+#### GÜN 2: [Antrenman Başlığı & Odak Kas Grupları]
+| Egzersiz | Hedef Mekanizma & Biyomekanik | Set | Tekrar | RIR | Yük Önerisi / Not |
+
+#### GÜN 3: [Antrenman Başlığı & Odak Kas Grupları]
+| Egzersiz | Hedef Mekanizma & Biyomekanik | Set | Tekrar | RIR | Yük Önerisi / Not |
+
+(Haftalık toplam hacim veya özet analizi varsa bunları antrenman tablolarının altına ayrı bir başlık altında ekle).
 `;
 
     let responseText = '';

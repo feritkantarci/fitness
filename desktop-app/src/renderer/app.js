@@ -582,13 +582,19 @@ async function pushDirectiveToAthleteWeb() {
 
 function parseMarkdownProgram(text) {
     if (!text) return [];
-    const days = [];
-    const dayRegex = /(?:^|\n)(?:#{1,4}\s*|\*{0,2})(GÜN\s*\d+|PAZARTESİ|SALI|ÇARŞAMBA|PERŞEMBE|CUMA|CUMARTESİ|PAZAR)[^\n]*/gi;
+    
+    // Day header regex matching GÜN, SEANS, DAY, ANTRENMAN, or WEEKDAYS
+    const dayRegex = /(?:^|\n)(?:#{1,4}\s*|\*{0,2})(?:[0-9]\.\s*)?(GÜN\s*[0-9A-ZÇĞİÖŞÜ]+|SEANS\s*[0-9A-ZÇĞİÖŞÜ]+|DAY\s*[0-9A-Z]+|ANTRENMAN\s*[0-9A-ZÇĞİÖŞÜ]+|PAZARTESİ|SALI|ÇARŞAMBA|PERŞEMBE|CUMA|CUMARTESİ|PAZAR)[^\n]*/gi;
     
     const matches = [];
     let match;
     while ((match = dayRegex.exec(text)) !== null) {
-        matches.push({ title: match[0].trim().replace(/^#+\s*/, '').replace(/\*+/g, ''), index: match.index });
+        const fullTitle = match[0].trim().replace(/^#+\s*/, '').replace(/\*+/g, '');
+        // Filter out summary / analysis tables
+        const lower = fullTitle.toLowerCase();
+        if (!lower.includes('hacim') && !lower.includes('özet') && !lower.includes('tablo') && !lower.includes('değişim')) {
+            matches.push({ title: fullTitle, index: match.index });
+        }
     }
 
     const extractExercisesFromBlock = (block) => {
@@ -596,7 +602,9 @@ function parseMarkdownProgram(text) {
         const lines = block.split('\n');
         for (const line of lines) {
             const trimmed = line.trim();
-            if (trimmed.startsWith('|') && trimmed.endsWith('|') && !trimmed.includes('---') && !trimmed.toLowerCase().includes('egzersiz')) {
+            if (trimmed.startsWith('|') && trimmed.endsWith('|') && !trimmed.includes('---')) {
+                const lower = trimmed.toLowerCase();
+                if (lower.includes('egzersiz') || lower.includes('hareket') || lower.includes('kas grubu')) continue;
                 const cells = trimmed.split('|').map(c => c.trim()).filter(Boolean);
                 if (cells.length >= 3) {
                     const rawName = cells[0].replace(/\*+/g, '').trim();
@@ -612,7 +620,7 @@ function parseMarkdownProgram(text) {
                 }
             } else if (trimmed.startsWith('-') || trimmed.startsWith('*')) {
                 const bulletMatch = trimmed.match(/^[-*]\s*\*{0,2}(.*?)\*{0,2}\s*:\s*(.*)/);
-                if (bulletMatch) {
+                if (bulletMatch && !bulletMatch[1].toLowerCase().includes('hacim')) {
                     list.push({
                         name: bulletMatch[1].trim(),
                         targetSets: 3,
@@ -626,19 +634,40 @@ function parseMarkdownProgram(text) {
     };
 
     if (matches.length === 0) {
+        // Fallback: search for any ### or #### header
+        const genericHeaderRegex = /(?:^|\n)(#{3,4}\s+[^\n]+)/g;
+        let gMatch;
+        while ((gMatch = genericHeaderRegex.exec(text)) !== null) {
+            const title = gMatch[1].replace(/^#+\s*/, '').trim();
+            const lower = title.toLowerCase();
+            if (!lower.includes('hacim') && !lower.includes('özet') && !lower.includes('reçete')) {
+                matches.push({ title: title, index: gMatch.index });
+            }
+        }
+    }
+
+    if (matches.length === 0) {
         return [{ dayTitle: 'FitLAB AI Antrenmanı', exercises: extractExercisesFromBlock(text) }];
     }
 
+    const days = [];
     for (let i = 0; i < matches.length; i++) {
         const start = matches[i].index;
         const end = (i + 1 < matches.length) ? matches[i + 1].index : text.length;
         const block = text.substring(start, end);
         const exercises = extractExercisesFromBlock(block);
-        days.push({
-            dayTitle: matches[i].title,
-            exercises: exercises
-        });
+        if (exercises.length > 0) {
+            days.push({
+                dayTitle: matches[i].title,
+                exercises: exercises
+            });
+        }
     }
+
+    if (days.length === 0) {
+        return [{ dayTitle: 'FitLAB AI Antrenmanı', exercises: extractExercisesFromBlock(text) }];
+    }
+
     return days;
 }
 

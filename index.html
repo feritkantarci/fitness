@@ -3551,7 +3551,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v103</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v104</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3587,7 +3587,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v103</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v104</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -10626,27 +10626,44 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const user = getActiveUser();
             const uid = targetUid || (user ? user.id : 'default');
             const key = `celik_kodu_next_weekly_schedule_${uid}`;
+            let existing = null;
             try {
                 const raw = localStorage.getItem(key);
-                if (raw) return JSON.parse(raw);
+                if (raw) existing = JSON.parse(raw);
             } catch(e) {}
 
-            // Eğer kaydedilmiş takvim yoksa ama AI'dan gelen program varsa dönüştür
-            try {
-                const aiRaw = localStorage.getItem(`celik_kodu_ai_program_${uid}`);
-                if (aiRaw) {
-                    const aiData = JSON.parse(aiRaw);
-                    let days = aiData.structuredDays;
-                    if (!Array.isArray(days) || days.length === 0) {
-                        days = parseMarkdownProgramClient(aiData.programText);
-                    }
-                    if (Array.isArray(days) && days.length > 0) {
-                        const converted = convertParsedDaysToWeeklySchedule(days);
-                        saveNextWeeklySchedule(converted, uid);
-                        return converted;
-                    }
+            // Eski ayrıştırma hatası tespiti: Eğer 1. güne (Pzt) 8'den fazla egzersiz yığılmış ve Çar/Cum boş kalmışsa
+            let isCorruptedSingleDay = false;
+            if (existing) {
+                const day1 = existing[1];
+                const day3 = existing[3];
+                const day5 = existing[5];
+                if (day1 && Array.isArray(day1.exercises) && day1.exercises.length > 8 && day3 && day3.rest && day5 && day5.rest) {
+                    isCorruptedSingleDay = true;
                 }
-            } catch(e) {}
+            }
+
+            if (!existing || isCorruptedSingleDay) {
+                try {
+                    const aiRaw = localStorage.getItem(`celik_kodu_ai_program_${uid}`);
+                    if (aiRaw) {
+                        const aiData = JSON.parse(aiRaw);
+                        let days = parseMarkdownProgramClient(aiData.programText);
+                        if (!Array.isArray(days) || days.length <= 1) {
+                            if (Array.isArray(aiData.structuredDays) && aiData.structuredDays.length > 1) {
+                                days = aiData.structuredDays;
+                            }
+                        }
+                        if (Array.isArray(days) && days.length > 0) {
+                            const converted = convertParsedDaysToWeeklySchedule(days);
+                            saveNextWeeklySchedule(converted, uid);
+                            return converted;
+                        }
+                    }
+                } catch(e) {}
+            }
+
+            if (existing && !isCorruptedSingleDay) return existing;
 
             // Varsayılan: Mevcut haftanın temiz bir kopyasını aç
             const current = getWeeklySchedule(uid);
@@ -10697,13 +10714,19 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         function parseMarkdownProgramClient(text) {
             if (!text) return [];
-            const days = [];
-            const dayRegex = /(?:^|\n)(?:#{1,4}\s*|\*{0,2})(GÜN\s*\d+|PAZARTESİ|SALI|ÇARŞAMBA|PERŞEMBE|CUMA|CUMARTESİ|PAZAR)[^\n]*/gi;
+            
+            // GÜN, SEANS, DAY, ANTRENMAN veya gün isimleri yakalama
+            const dayRegex = /(?:^|\n)(?:#{1,4}\s*|\*{0,2})(?:[0-9]\.\s*)?(GÜN\s*[0-9A-ZÇĞİÖŞÜ]+|SEANS\s*[0-9A-ZÇĞİÖŞÜ]+|DAY\s*[0-9A-Z]+|ANTRENMAN\s*[0-9A-ZÇĞİÖŞÜ]+|PAZARTESİ|SALI|ÇARŞAMBA|PERŞEMBE|CUMA|CUMARTESİ|PAZAR)[^\n]*/gi;
             
             const matches = [];
             let match;
             while ((match = dayRegex.exec(text)) !== null) {
-                matches.push({ title: match[0].trim().replace(/^#+\s*/, '').replace(/\*+/g, ''), index: match.index });
+                const fullTitle = match[0].trim().replace(/^#+\s*/, '').replace(/\*+/g, '');
+                const lower = fullTitle.toLowerCase();
+                // Hacim/değişim/özet tablolarını gün olarak algılamayı engelle
+                if (!lower.includes('hacim') && !lower.includes('özet') && !lower.includes('tablo') && !lower.includes('değişim')) {
+                    matches.push({ title: fullTitle, index: match.index });
+                }
             }
 
             const extractExercisesFromBlock = (block) => {
@@ -10711,7 +10734,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 const lines = block.split('\n');
                 for (const line of lines) {
                     const trimmed = line.trim();
-                    if (trimmed.startsWith('|') && trimmed.endsWith('|') && !trimmed.includes('---') && !trimmed.toLowerCase().includes('egzersiz')) {
+                    if (trimmed.startsWith('|') && trimmed.endsWith('|') && !trimmed.includes('---')) {
+                        const lower = trimmed.toLowerCase();
+                        if (lower.includes('egzersiz') || lower.includes('hareket') || lower.includes('kas grubu')) continue;
                         const cells = trimmed.split('|').map(c => c.trim()).filter(Boolean);
                         if (cells.length >= 3) {
                             const rawName = cells[0].replace(/\*+/g, '').trim();
@@ -10727,7 +10752,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         }
                     } else if (trimmed.startsWith('-') || trimmed.startsWith('*')) {
                         const bulletMatch = trimmed.match(/^[-*]\s*\*{0,2}(.*?)\*{0,2}\s*:\s*(.*)/);
-                        if (bulletMatch) {
+                        if (bulletMatch && !bulletMatch[1].toLowerCase().includes('hacim')) {
                             list.push({
                                 name: bulletMatch[1].trim(),
                                 targetSets: 3,
@@ -10741,19 +10766,40 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             };
 
             if (matches.length === 0) {
+                // Fallback: search for any generic ### or #### header
+                const genericHeaderRegex = /(?:^|\n)(#{3,4}\s+[^\n]+)/g;
+                let gMatch;
+                while ((gMatch = genericHeaderRegex.exec(text)) !== null) {
+                    const title = gMatch[1].replace(/^#+\s*/, '').trim();
+                    const lower = title.toLowerCase();
+                    if (!lower.includes('hacim') && !lower.includes('özet') && !lower.includes('reçete')) {
+                        matches.push({ title: title, index: gMatch.index });
+                    }
+                }
+            }
+
+            if (matches.length === 0) {
                 return [{ dayTitle: 'FitLAB AI Antrenmanı', exercises: extractExercisesFromBlock(text) }];
             }
 
+            const days = [];
             for (let i = 0; i < matches.length; i++) {
                 const start = matches[i].index;
                 const end = (i + 1 < matches.length) ? matches[i + 1].index : text.length;
                 const block = text.substring(start, end);
                 const exercises = extractExercisesFromBlock(block);
-                days.push({
-                    dayTitle: matches[i].title,
-                    exercises: exercises
-                });
+                if (exercises.length > 0) {
+                    days.push({
+                        dayTitle: matches[i].title,
+                        exercises: exercises
+                    });
+                }
             }
+
+            if (days.length === 0) {
+                return [{ dayTitle: 'FitLAB AI Antrenmanı', exercises: extractExercisesFromBlock(text) }];
+            }
+
             return days;
         }
 
@@ -16608,7 +16654,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=103')
+                navigator.serviceWorker.register('./sw.js?v=104')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
