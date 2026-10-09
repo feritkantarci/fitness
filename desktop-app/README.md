@@ -30,7 +30,8 @@ Terminalden `desktop-app` klasörüne girip:
 ```bash
 npm start
 ```
-Uygulama penceresi Mac'inizde anında açılacaktır.
+Veya doğrudan derlenmiş Mac uygulamasını çift tıklayarak açabilirsiniz:
+> `desktop-app/dist/mac-arm64/Celik Kodu.app`
 
 ---
 
