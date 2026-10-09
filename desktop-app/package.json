@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "pack": "electron-builder --dir",
+    "pack": "electron-builder --dir && find \"dist/mac-arm64/Celik Kodu Koc Istasyonu.app\" -exec xattr -c {} + 2>/dev/null && codesign --force --deep --sign - --entitlements build/entitlements.mac.plist \"dist/mac-arm64/Celik Kodu Koc Istasyonu.app\"",
     "dist": "electron-builder",
     "dist:mac": "electron-builder --mac",
     "dist:win": "electron-builder --win"
@@ -30,13 +30,18 @@
   },
   "build": {
     "appId": "io.kantarci.celikkodu.coach",
-    "productName": "Çelik Kodu Koç İstasyonu",
+    "productName": "Celik Kodu Koc Istasyonu",
     "directories": {
       "output": "dist"
     },
     "mac": {
       "category": "public.app-category.sports",
+      "identity": null,
+      "hardenedRuntime": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
       "target": [
+        "dir",
         "dmg"
       ]
     },

@@ -9,6 +9,7 @@ source_archive/
 **/node_modules/
 **/dist/
 **/build/
+!desktop-app/build/entitlements.mac.plist
 *.dmg
 *.exe
 **/__pycache__/
