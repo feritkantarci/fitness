@@ -3503,7 +3503,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v94</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v95</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3539,7 +3539,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v94</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v95</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -15296,23 +15296,32 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                     </div>
                                 </div>
 
-                                <!-- RECOMMENDATIONS FOR ALL MUSCLES (UNWORKED, INSUFFICIENT OR OPTIMAL) -->
+                                <!-- RECOMMENDATIONS ACCORDION (GİZLENEBİLİR / AÇILABİLİR) -->
                                 ${recs.length > 0 ? `
                                     <div style="margin-top:10px; padding-top:8px; border-top:1px dashed rgba(255,255,255,0.1);">
-                                        <div style="font-size:10.5px; color:${isWeak ? 'var(--gold)' : 'var(--cyan)'}; font-weight:700; margin-bottom:6px;">
-                                            ${recTitle}
-                                        </div>
-                                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                                            ${recs.map(r => `
-                                                <div style="display:inline-flex; align-items:center; background:rgba(0,0,0,0.4); border:1px solid var(--border); border-radius:6px; overflow:hidden;">
-                                                    <button class="btn btn-outline" style="font-size:10px; padding:3px 7px; border:none; border-right:1px solid rgba(255,255,255,0.08);" onclick="openExerciseDetailModal('${r.id}')" title="Form ve Detayları Gör">
-                                                        🏋️ ${escapeHTML(r.name)} <span style="color:var(--text-secondary); font-size:9px;">(${r.equipment})</span>
-                                                    </button>
-                                                    <button class="btn ${isWeak ? 'btn-gold' : 'btn-outline'}" style="font-size:9.5px; padding:3px 8px; border-radius:0; font-weight:800; ${!isWeak ? 'color:var(--cyan); border-color:var(--cyan);' : ''}" onclick="openQuickAddToDayModal('${r.id}')" title="Bu egzersizi haftanın bir gününe ekle">
-                                                        ➕ Güne Ekle
-                                                    </button>
-                                                </div>
-                                            `).join('')}
+                                        <button id="recs_btn_${m.id}" class="btn btn-outline" style="width:100%; font-size:11px; padding:6px 10px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); border-color:rgba(255,255,255,0.12); cursor:pointer;" onclick="toggleMuscleRecommendations('${m.id}')">
+                                            <span style="color:${isWeak ? 'var(--gold)' : 'var(--cyan)'}; font-weight:700;">
+                                                ${isWeak ? '💡 Koç Tavsiyesi (Eksik Bölge Takviyesi)' : '✨ Bu Bölgeyi Takviye Et'} (${recs.length} Öneri)
+                                            </span>
+                                            <span id="recs_icon_${m.id}" style="color:var(--gold); font-size:10px; font-weight:800;">▼ Göster</span>
+                                        </button>
+
+                                        <div id="recs_box_${m.id}" style="display:none; margin-top:8px; background:rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:10px;">
+                                            <div style="font-size:10.5px; color:${isWeak ? 'var(--gold)' : 'var(--cyan)'}; font-weight:700; margin-bottom:8px;">
+                                                ${recTitle}
+                                            </div>
+                                            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                                                ${recs.map(r => `
+                                                    <div style="display:inline-flex; align-items:center; background:rgba(0,0,0,0.4); border:1px solid var(--border); border-radius:6px; overflow:hidden;">
+                                                        <button class="btn btn-outline" style="font-size:10px; padding:3px 7px; border:none; border-right:1px solid rgba(255,255,255,0.08);" onclick="openExerciseDetailModal('${r.id}')" title="Form ve Detayları Gör">
+                                                            🏋️ ${escapeHTML(r.name)} <span style="color:var(--text-secondary); font-size:9px;">(${r.equipment})</span>
+                                                        </button>
+                                                        <button class="btn ${isWeak ? 'btn-gold' : 'btn-outline'}" style="font-size:9.5px; padding:3px 8px; border-radius:0; font-weight:800; ${!isWeak ? 'color:var(--cyan); border-color:var(--cyan);' : ''}" onclick="openQuickAddToDayModal('${r.id}')" title="Bu egzersizi haftanın bir gününe ekle">
+                                                            ➕ Güne Ekle
+                                                        </button>
+                                                    </div>
+                                                `).join('')}
+                                            </div>
                                         </div>
                                     </div>
                                 ` : ''}
@@ -15402,6 +15411,17 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 elBtn.innerHTML = isHidden 
                     ? `<span>🔬 Hangi Seans & Hareketten Geldi? (${count} Kayıt)</span><span style="color:var(--gold); font-size:10px; font-weight:800;">▲ Kapat</span>`
                     : `<span>🔬 Hangi Seans & Hareketten Geldi? (${count} Kayıt)</span><span style="color:var(--gold); font-size:10px; font-weight:800;">▼ Detay</span>`;
+            }
+        }
+
+        function toggleMuscleRecommendations(muscleId) {
+            const elBox = document.getElementById(`recs_box_${muscleId}`);
+            const elIcon = document.getElementById(`recs_icon_${muscleId}`);
+            if (!elBox) return;
+            const isHidden = elBox.style.display === 'none';
+            elBox.style.display = isHidden ? 'block' : 'none';
+            if (elIcon) {
+                elIcon.textContent = isHidden ? '▲ Gizle' : '▼ Göster';
             }
         }
 
@@ -16159,7 +16179,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=94')
+                navigator.serviceWorker.register('./sw.js?v=95')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
