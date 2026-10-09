@@ -580,7 +580,51 @@ async function pushDirectiveToAthleteWeb() {
     }
 }
 
-function parseMarkdownProgram(text) {
+function normalizeExerciseName(str) {
+    if (!str) return '';
+    return String(str).toLowerCase()
+        .replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ı/g, 'i').replace(/i̇/g, 'i')
+        .replace(/ö/g, 'o').replace(/ş/g, 's').replace(/ü/g, 'u')
+        .replace(/\(.*?\)/g, '')
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function findBestExerciseMatch(rawName, customCatalog) {
+    if (!rawName) return null;
+    const catalog = customCatalog || state.catalog || [];
+    if (!Array.isArray(catalog) || catalog.length === 0) return null;
+
+    const cleanRaw = String(rawName).replace(/\*+/g, '').trim();
+    let match = catalog.find(e => e.id === cleanRaw || (e.name && e.name.toLowerCase() === cleanRaw.toLowerCase()));
+    if (match) return match;
+
+    const normRaw = normalizeExerciseName(cleanRaw);
+    match = catalog.find(e => normalizeExerciseName(e.name) === normRaw);
+    if (match) return match;
+
+    const rawTokens = normRaw.split(' ').filter(t => t.length > 2);
+    let bestMatch = null;
+    let maxScore = 0;
+
+    for (const ex of catalog) {
+        const normEx = normalizeExerciseName(ex.name) + ' ' + (ex.id || '').replace(/_/g, ' ');
+        let score = 0;
+        for (const token of rawTokens) {
+            if (normEx.includes(token)) {
+                score += (token.length > 4 ? 2 : 1);
+            }
+        }
+        if (score > maxScore && score >= 2) {
+            maxScore = score;
+            bestMatch = ex;
+        }
+    }
+    return bestMatch;
+}
+
+function parseMarkdownProgram(text, catalog) {
     if (!text) return [];
     
     // Day header regex matching GÜN, SEANS, DAY, ANTRENMAN, or WEEKDAYS
@@ -611,21 +655,39 @@ function parseMarkdownProgram(text) {
                     const sets = parseInt(cells[2]) || 3;
                     const reps = cells[3] || '8-12';
                     const note = cells[cells.length - 1] || '';
+                    const matchedDb = findBestExerciseMatch(rawName, catalog);
+                    const slugId = matchedDb ? matchedDb.id : ('ai_' + rawName.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, ''));
+
                     list.push({
-                        name: rawName,
+                        id: slugId,
+                        name: matchedDb ? matchedDb.name : rawName,
+                        originalAiName: rawName,
                         targetSets: sets,
                         targetReps: reps,
-                        note: note
+                        note: note,
+                        cue: note ? (note + (matchedDb && matchedDb.cue ? ' • ' + matchedDb.cue : '')) : (matchedDb ? matchedDb.cue : ''),
+                        muscle: matchedDb ? matchedDb.muscle : 'Genel Kas Gelişimi & Fonksiyonel Güç',
+                        equipment: matchedDb ? matchedDb.equipment : 'dumbbell',
+                        diagram: matchedDb ? matchedDb.diagram : null
                     });
                 }
             } else if (trimmed.startsWith('-') || trimmed.startsWith('*')) {
                 const bulletMatch = trimmed.match(/^[-*]\s*\*{0,2}(.*?)\*{0,2}\s*:\s*(.*)/);
                 if (bulletMatch && !bulletMatch[1].toLowerCase().includes('hacim')) {
+                    const rawName = bulletMatch[1].trim();
+                    const matchedDb = findBestExerciseMatch(rawName, catalog);
+                    const slugId = matchedDb ? matchedDb.id : ('ai_' + rawName.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, ''));
                     list.push({
-                        name: bulletMatch[1].trim(),
+                        id: slugId,
+                        name: matchedDb ? matchedDb.name : rawName,
+                        originalAiName: rawName,
                         targetSets: 3,
                         targetReps: '8-12',
-                        note: bulletMatch[2].trim()
+                        note: bulletMatch[2].trim(),
+                        cue: bulletMatch[2].trim(),
+                        muscle: matchedDb ? matchedDb.muscle : 'Genel Kas Gelişimi & Fonksiyonel Güç',
+                        equipment: matchedDb ? matchedDb.equipment : 'dumbbell',
+                        diagram: matchedDb ? matchedDb.diagram : null
                     });
                 }
             }
@@ -677,13 +739,19 @@ async function pushProgramToAthleteWeb() {
         return;
     }
 
+    if (!Array.isArray(state.catalog) || state.catalog.length === 0) {
+        try {
+            state.catalog = await window.coachAPI.getExerciseCatalog() || [];
+        } catch(e) {}
+    }
+
     let programSection = state.lastAiReport.rawReport;
     const match = programSection.match(/### 3\..*?\n([\s\S]*?)$/i);
     if (match && match[1]) {
         programSection = match[1].trim();
     }
 
-    const structuredDays = parseMarkdownProgram(programSection);
+    const structuredDays = parseMarkdownProgram(programSection, state.catalog);
 
     const payload = {
         title: `FitLAB Hipertrofi & Güç Programı (${state.selectedUser.name})`,

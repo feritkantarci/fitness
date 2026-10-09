@@ -3551,7 +3551,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v104</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v105</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3587,7 +3587,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v104</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v105</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -10632,27 +10632,38 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 if (raw) existing = JSON.parse(raw);
             } catch(e) {}
 
-            // Eski ayrıştırma hatası tespiti: Eğer 1. güne (Pzt) 8'den fazla egzersiz yığılmış ve Çar/Cum boş kalmışsa
-            let isCorruptedSingleDay = false;
+            // Eski ayrıştırma hatası veya slot çakışması tespiti:
+            let shouldReconvert = !existing;
             if (existing) {
                 const day1 = existing[1];
                 const day3 = existing[3];
                 const day5 = existing[5];
+                // 1) Tek güne yığılma (eski v103 bug'ı)
                 if (day1 && Array.isArray(day1.exercises) && day1.exercises.length > 8 && day3 && day3.rest && day5 && day5.rest) {
-                    isCorruptedSingleDay = true;
+                    shouldReconvert = true;
                 }
-            }
-
-            if (!existing || isCorruptedSingleDay) {
+                // 2) AI verisi 3 günlük olduğu halde schedule'da 3'ten az çalışma günü kalması (slot çakışması bug'ı)
                 try {
                     const aiRaw = localStorage.getItem(`celik_kodu_ai_program_${uid}`);
                     if (aiRaw) {
                         const aiData = JSON.parse(aiRaw);
-                        let days = parseMarkdownProgramClient(aiData.programText);
-                        if (!Array.isArray(days) || days.length <= 1) {
-                            if (Array.isArray(aiData.structuredDays) && aiData.structuredDays.length > 1) {
-                                days = aiData.structuredDays;
-                            }
+                        const expectedDayCount = (aiData.structuredDays && aiData.structuredDays.length > 1) ? aiData.structuredDays.length : 3;
+                        const activeWorkoutDaysCount = [1, 2, 3, 4, 5, 6, 0].filter(s => existing[s] && !existing[s].rest).length;
+                        if (activeWorkoutDaysCount < expectedDayCount) {
+                            shouldReconvert = true;
+                        }
+                    }
+                } catch(e) {}
+            }
+
+            if (shouldReconvert) {
+                try {
+                    const aiRaw = localStorage.getItem(`celik_kodu_ai_program_${uid}`);
+                    if (aiRaw) {
+                        const aiData = JSON.parse(aiRaw);
+                        let days = Array.isArray(aiData.structuredDays) && aiData.structuredDays.length > 1 ? aiData.structuredDays : null;
+                        if (!days) {
+                            days = parseMarkdownProgramClient(aiData.programText);
                         }
                         if (Array.isArray(days) && days.length > 0) {
                             const converted = convertParsedDaysToWeeklySchedule(days);
@@ -10663,7 +10674,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 } catch(e) {}
             }
 
-            if (existing && !isCorruptedSingleDay) return existing;
+            if (existing && !shouldReconvert) return existing;
 
             // Varsayılan: Mevcut haftanın temiz bir kopyasını aç
             const current = getWeeklySchedule(uid);
@@ -10803,6 +10814,88 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             return days;
         }
 
+        function normalizeExerciseName(str) {
+            if (!str) return '';
+            return String(str).toLowerCase()
+                .replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ı/g, 'i').replace(/i̇/g, 'i')
+                .replace(/ö/g, 'o').replace(/ş/g, 's').replace(/ü/g, 'u')
+                .replace(/\(.*?\)/g, '')
+                .replace(/[^a-z0-9\s]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function findBestExerciseMatch(rawName, customCatalog) {
+            if (!rawName) return null;
+            const catalog = customCatalog || (typeof EXERCISES_DB !== 'undefined' ? EXERCISES_DB : []);
+            if (!Array.isArray(catalog) || catalog.length === 0) return null;
+
+            const cleanRaw = String(rawName).replace(/\*+/g, '').trim();
+            // 1. Doğrudan ID veya İsim Eşleşmesi
+            let match = catalog.find(e => e.id === cleanRaw || (e.name && e.name.toLowerCase() === cleanRaw.toLowerCase()));
+            if (match) return match;
+
+            const normRaw = normalizeExerciseName(cleanRaw);
+            // 2. Normalleştirilmiş isim eşleşmesi
+            match = catalog.find(e => normalizeExerciseName(e.name) === normRaw);
+            if (match) return match;
+
+            // 3. Kelime/Token skoru eşleşmesi
+            const rawTokens = normRaw.split(' ').filter(t => t.length > 2);
+            let bestMatch = null;
+            let maxScore = 0;
+
+            for (const ex of catalog) {
+                const normEx = normalizeExerciseName(ex.name) + ' ' + (ex.id || '').replace(/_/g, ' ');
+                let score = 0;
+                for (const token of rawTokens) {
+                    if (normEx.includes(token)) {
+                        score += (token.length > 4 ? 2 : 1);
+                    }
+                }
+                if (score > maxScore && score >= 2) {
+                    maxScore = score;
+                    bestMatch = ex;
+                }
+            }
+            return bestMatch;
+        }
+
+        function resolveDaySlot(dayTitle, dayIndex, totalDays) {
+            const slotMap = { 1: [1], 2: [1, 4], 3: [1, 3, 5], 4: [1, 2, 4, 5], 5: [1, 2, 3, 4, 5], 6: [1, 2, 3, 4, 5, 6] };
+            const defaultSlots = slotMap[totalDays] || [1, 2, 3, 4, 5, 6, 0];
+            let slot = defaultSlots[dayIndex] !== undefined ? defaultSlots[dayIndex] : (dayIndex + 1);
+
+            const title = (dayTitle || '').toLowerCase();
+
+            // 1. Açık GÜN 1..7 / DAY 1..7 / SEANS 1..7 tespiti
+            const numMatch = title.match(/(?:gün|seans|day|antrenman)\s*([1-7])/i);
+            if (numMatch) {
+                const num = parseInt(numMatch[1], 10);
+                if (num >= 1 && num <= totalDays) {
+                    return defaultSlots[num - 1] !== undefined ? defaultSlots[num - 1] : slot;
+                }
+            }
+            const letterMatch = title.match(/seans\s*([a-c])/i);
+            if (letterMatch) {
+                const charCode = letterMatch[1].charCodeAt(0) - 97;
+                if (charCode >= 0 && charCode < totalDays) {
+                    return defaultSlots[charCode] !== undefined ? defaultSlots[charCode] : slot;
+                }
+            }
+
+            // 2. Katı kelime sınırı kontrolü (hipertrofi içindeki 'per' veya aksiyel içindeki 'sal' asla gün tetiklemez!)
+            if (/\b(pazartesi|pzt)\b/i.test(title)) return 1;
+            if (/\b(salı|sal)\b/i.test(title)) return 2;
+            if (/\b(çarşamba|çar)\b/i.test(title)) return 3;
+            if (/\b(perşembe|per)\b/i.test(title)) return 4;
+            if (/\b(cuma|cum)\b/i.test(title) && !title.includes('cumartesi')) return 5;
+            if (/\b(cumartesi|cmt)\b/i.test(title)) return 6;
+            if (/\b(pazar|paz)\b/i.test(title) && !title.includes('pazartesi')) return 0;
+
+            return slot;
+        }
+
         function convertParsedDaysToWeeklySchedule(parsedDays) {
             const schedule = {
                 1: { id: 'rest', title: '🧘 Dinlenme & Aktif Toparlanma', type: 'rest', rest: true, desc: 'Hafif yürüyüş, esneme veya tam istirahat' },
@@ -10814,20 +10907,54 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 0: { id: 'rest', title: '🧘 Tam Dinlenme & Zihinsel Hazırlık', type: 'rest', rest: true, desc: 'Yeni haftaya kasları ve sinir sistemini dinlendirme' }
             };
             if (!Array.isArray(parsedDays) || parsedDays.length === 0) return schedule;
-            const slotMap = { 1: [1], 2: [1, 4], 3: [1, 3, 5], 4: [1, 2, 4, 5], 5: [1, 2, 3, 4, 5] };
-            const targetSlots = slotMap[parsedDays.length] || [1, 2, 3, 4, 5];
-            parsedDays.forEach((pDay, idx) => {
-                let slot = targetSlots[idx] || (idx + 1);
-                const tLower = (pDay.dayTitle || '').toLowerCase();
-                if (tLower.includes('pazartesi') || tLower.includes('pzt')) slot = 1;
-                else if (tLower.includes('salı') || tLower.includes('sal')) slot = 2;
-                else if (tLower.includes('çarşamba') || tLower.includes('çar')) slot = 3;
-                else if (tLower.includes('perşembe') || tLower.includes('per')) slot = 4;
-                else if (tLower.includes('cuma') || tLower.includes('cum')) slot = 5;
-                else if (tLower.includes('cumartesi') || tLower.includes('cmt')) slot = 6;
-                else if (tLower.includes('pazar') || tLower.includes('paz')) slot = 0;
 
-                const exNames = (pDay.exercises || []).map(e => e.name).join(' • ');
+            const occupiedSlots = new Set();
+            parsedDays.forEach((pDay, idx) => {
+                let slot = resolveDaySlot(pDay.dayTitle, idx, parsedDays.length);
+                if (occupiedSlots.has(slot)) {
+                    const fallbackOrder = [1, 3, 5, 2, 4, 6, 0];
+                    const nextFree = fallbackOrder.find(s => !occupiedSlots.has(s));
+                    if (nextFree !== undefined) slot = nextFree;
+                }
+                occupiedSlots.add(slot);
+
+                // Her egzersizi EXERCISES_DB kütüphanesiyle zenginleştir ve garantili ID bağla
+                const enrichedExercises = (pDay.exercises || []).map((rawEx, eIdx) => {
+                    const rawName = (rawEx.name || '').replace(/\*+/g, '').trim();
+                    const matchedDb = findBestExerciseMatch(rawName);
+                    const sets = rawEx.targetSets || rawEx.sets || 3;
+                    const reps = rawEx.targetReps || rawEx.reps || '8-12';
+                    const note = rawEx.note || rawEx.cue || '';
+
+                    if (matchedDb) {
+                        return Object.assign({}, matchedDb, {
+                            id: matchedDb.id,
+                            name: matchedDb.name,
+                            originalAiName: rawName,
+                            targetSets: sets,
+                            targetReps: reps,
+                            note: note,
+                            cue: note ? (note + (matchedDb.cue ? ' • ' + matchedDb.cue : '')) : (matchedDb.cue || '')
+                        });
+                    }
+
+                    const slugId = 'ai_' + (rawName || ('ex_' + eIdx)).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+                    return {
+                        id: slugId,
+                        name: rawName || 'Özel Hipertrofi Hareketi',
+                        originalAiName: rawName,
+                        targetSets: sets,
+                        targetReps: reps,
+                        note: note,
+                        muscle: rawEx.muscle || 'Genel Kas Gelişimi & Fonksiyonel Güç',
+                        primaryMuscles: ['full_body'],
+                        equipment: 'dumbbell',
+                        cue: note || 'FitLAB AI Koçu tarafından sporcuya özel reçete edilen hareket.',
+                        isCustomAi: true
+                    };
+                });
+
+                const exNames = enrichedExercises.map(e => e.name).join(' • ');
                 schedule[slot] = {
                     id: 'fitlab_ai_day_' + slot,
                     title: '🔬 ' + (pDay.dayTitle || ('Gün ' + (idx + 1))),
@@ -10835,7 +10962,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     type: 'custom_ai',
                     rest: false,
                     source: 'FitLAB AI',
-                    exercises: pDay.exercises || []
+                    exercises: enrichedExercises
                 };
             });
             return schedule;
@@ -10926,11 +11053,19 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const normalizeExerciseItem = (e) => {
                 if (!e) return null;
                 const exId = e.id || e.exId;
-                const dbEx = EXERCISES_DB.find(x => x.id === exId);
+                let dbEx = EXERCISES_DB.find(x => x.id === exId);
+                if (!dbEx && (e.name || exId)) {
+                    dbEx = findBestExerciseMatch(e.name || exId);
+                }
+                const resolvedId = (dbEx ? dbEx.id : exId) || ('ai_' + (e.name || 'ex').toLowerCase().replace(/[^a-z0-9]+/g, '_'));
                 return Object.assign({}, dbEx || e, {
-                    id: exId,
+                    id: resolvedId,
+                    name: (dbEx ? dbEx.name : e.name) || 'Egzersiz',
+                    originalAiName: e.originalAiName || e.name,
                     targetSets: e.targetSets || e.sets || 3,
                     targetReps: e.targetReps || e.reps || '8-12',
+                    note: e.note || e.cue || '',
+                    cue: e.note || e.cue || (dbEx ? dbEx.cue : ''),
                     logs: e.logs || []
                 });
             };
@@ -10956,6 +11091,19 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             const planId = (plan.id || '').trim();
             const planTitle = (plan.title || '').trim().toLowerCase();
+
+            // FitLAB AI plan lookup from schedule
+            if (planId.startsWith('fitlab_ai_day_')) {
+                const slot = parseInt(planId.replace('fitlab_ai_day_', ''), 10);
+                const nextSched = typeof getNextWeeklySchedule === 'function' ? getNextWeeklySchedule() : null;
+                if (nextSched && nextSched[slot] && Array.isArray(nextSched[slot].exercises) && nextSched[slot].exercises.length > 0) {
+                    return normalizeWorkout(nextSched[slot]);
+                }
+                const currSched = typeof getWeeklySchedule === 'function' ? getWeeklySchedule() : null;
+                if (currSched && currSched[slot] && Array.isArray(currSched[slot].exercises) && currSched[slot].exercises.length > 0) {
+                    return normalizeWorkout(currSched[slot]);
+                }
+            }
 
             // 3. Official classic routines
             const officialRoutines = {
@@ -11226,7 +11374,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                             ${thumb ? `<img src="${thumb}" class="ex-thumb-img" alt="${escapeHTML(ex.name)}">` : '🏋️'}
                                         </div>
                                         <div style="min-width:0; flex:1;">
-                                            <div style="font-size:12.5px; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
+                                            <div style="font-size:12.5px; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id || escapeHTML(ex.name)}')">
                                                 ${escapeHTML(ex.name)}
                                             </div>
                                             <div style="font-size:10.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;">
@@ -11240,8 +11388,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                         <span style="background:rgba(245,158,11,0.15); color:var(--gold); border:1px solid rgba(245,158,11,0.3); font-size:10.5px; font-weight:700; border-radius:4px; padding:2px 7px;">
                                             ${sets} x ${reps}
                                         </span>
-                                        <button type="button" class="btn btn-outline" style="padding:3px 7px; font-size:10px; color:var(--cyan); border-color:rgba(56,189,248,0.4); font-weight:700;" onclick="openScheduleExerciseAlternativeModal(${dayIdx}, '${ex.id}', ${idx})" title="Bu hareket için alternatif bul">🔄 Alternatif</button>
-                                        <button type="button" class="btn btn-outline" style="padding:3px 7px; font-size:10px;" onclick="openExerciseDetailModal('${ex.id}')" title="İncele">👁️</button>
+                                        <button type="button" class="btn btn-outline" style="padding:3px 7px; font-size:10px; color:var(--cyan); border-color:rgba(56,189,248,0.4); font-weight:700;" onclick="openScheduleExerciseAlternativeModal(${dayIdx}, '${ex.id || escapeHTML(ex.name)}', ${idx})" title="Bu hareket için alternatif bul">🔄 Alternatif</button>
+                                        <button type="button" class="btn btn-outline" style="padding:3px 7px; font-size:10px;" onclick="openExerciseDetailModal('${ex.id || escapeHTML(ex.name)}')" title="İncele">👁️</button>
                                     </div>
                                 </div>
                             `;
@@ -16654,7 +16802,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=104')
+                navigator.serviceWorker.register('./sw.js?v=105')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
@@ -17322,8 +17470,51 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         }
 
         // ==================== EXERCISE DETAIL MODAL LOGIC ====================
-        function openExerciseDetailModal(exId) {
-            const ex = EXERCISES_DB.find(e => e.id === exId);
+        function openExerciseDetailModal(exIdOrObj) {
+            let ex = null;
+            if (typeof exIdOrObj === 'object' && exIdOrObj !== null) {
+                ex = exIdOrObj;
+            } else if (typeof exIdOrObj === 'string' && exIdOrObj.trim() && exIdOrObj !== 'undefined' && exIdOrObj !== 'null') {
+                const query = exIdOrObj.trim();
+                ex = EXERCISES_DB.find(e => e.id === query);
+                if (!ex) ex = EXERCISES_DB.find(e => e.name && e.name.toLowerCase() === query.toLowerCase());
+                if (!ex) ex = findBestExerciseMatch(query);
+                if (!ex) {
+                    const nextSched = typeof getNextWeeklySchedule === 'function' ? getNextWeeklySchedule() : null;
+                    if (nextSched) {
+                        for (let d = 0; d < 7; d++) {
+                            const p = nextSched[d];
+                            if (p && Array.isArray(p.exercises)) {
+                                const found = p.exercises.find(x => x && (x.id === query || x.name === query || x.originalAiName === query));
+                                if (found) { ex = found; break; }
+                            }
+                        }
+                    }
+                }
+                if (!ex) {
+                    const currSched = typeof getWeeklySchedule === 'function' ? getWeeklySchedule() : null;
+                    if (currSched) {
+                        for (let d = 0; d < 7; d++) {
+                            const p = currSched[d];
+                            if (p && Array.isArray(p.exercises)) {
+                                const found = p.exercises.find(x => x && (x.id === query || x.name === query || x.originalAiName === query));
+                                if (found) { ex = found; break; }
+                            }
+                        }
+                    }
+                }
+                if (!ex) {
+                    ex = {
+                        id: 'ai_' + query.toLowerCase().replace(/[^a-z0-9]+/g, '_'),
+                        name: query,
+                        muscle: 'Genel Kas Gelişimi & Fonksiyonel Güç',
+                        primaryMuscles: ['full_body'],
+                        equipment: 'dumbbell',
+                        cue: 'FitLAB AI Koçu tarafından sporcuya özel reçete edilen egzersiz.',
+                        isCustomAi: true
+                    };
+                }
+            }
             if (!ex) return;
 
             document.getElementById('exDetailModalTitle').innerText = ex.name;
