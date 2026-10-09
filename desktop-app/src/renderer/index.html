@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Çelik Kodu - Akademik Spor Bilimi ve AI Koç İstasyonu</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- Pencere Üst Barı (Mac & Windows Titlebar) -->
+    <header class="app-header">
+        <div class="header-left">
+            <div class="logo-mark">⚡</div>
+            <div class="brand-title">
+                <h1>ÇELİK KODU</h1>
+                <span class="subtitle">Akademik Spor Bilimi & AI Koç İstasyonu • v1.0</span>
+            </div>
+        </div>
+
+        <div class="header-center">
+            <div class="athlete-selector-wrap">
+                <label for="athleteSelect">Aktif Sporcu:</label>
+                <select id="athleteSelect">
+                    <option value="">Yükleniyor...</option>
+                </select>
+            </div>
+            <button class="btn-refresh" id="btnRefresh" title="Verileri Firebase'den Canlı Yenile">
+                <span class="icon">🔄</span> Yenile
+            </button>
+        </div>
+
+        <div class="header-right">
+            <div class="status-pill status-firebase" id="firebaseStatusPill" title="Firebase Firestore Canlı Köprü">
+                <span class="dot"></span> Bulut: Canlı
+            </div>
+            <div class="status-pill status-ai" id="aiStatusPill" title="Google Gemini AI Spor Bilimci Motoru">
+                <span class="dot"></span> AI: Hazır
+            </div>
+            <button class="btn-settings" id="btnOpenSettings" title="Ayarlar ve API Anahtarı">⚙️</button>
+        </div>
+    </header>
+
+    <!-- Ana Çalışma Alanı -->
+    <main class="main-layout">
+        <!-- Sol Taraf: Sporcu Bilgisi ve Akademik Özet -->
+        <aside class="sidebar">
+            <div class="athlete-card">
+                <div class="athlete-avatar" id="athleteAvatar">🥋</div>
+                <div class="athlete-info">
+                    <h2 id="athleteName">Sporcu Seçilmedi</h2>
+                    <span class="badge-level" id="athleteLevel">-</span>
+                </div>
+            </div>
+
+            <!-- Temel Ağırlıklar Tablosu -->
+            <div class="panel-box">
+                <div class="panel-box-header">
+                    <h3>🏋️ Referans Ağırlıklar</h3>
+                </div>
+                <div class="weights-grid" id="weightsGrid">
+                    <!-- Dinamik yüklenecek -->
+                </div>
+            </div>
+
+            <!-- Biyomekanik Uyarılar -->
+            <div class="panel-box">
+                <div class="panel-box-header">
+                    <h3>⚖️ Yapısal & Biyomekanik Denge</h3>
+                </div>
+                <div class="biomech-alerts" id="biomechAlerts">
+                    <div class="empty-state">Antrenman verisi taranıyor...</div>
+                </div>
+            </div>
+
+            <!-- Hacim Açıkları / Atlanan Kaslar -->
+            <div class="panel-box">
+                <div class="panel-box-header">
+                    <h3>🚨 Hacim Açıkları (MEV Altı)</h3>
+                </div>
+                <div class="deficit-list" id="deficitList">
+                    <!-- Dinamik -->
+                </div>
+            </div>
+        </aside>
+
+        <!-- Orta Taraf: KPI'lar, Akademik Grafikler ve Analiz -->
+        <section class="content-area">
+            <!-- Üst KPI Kartları -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-icon">📊</div>
+                    <div class="kpi-meta">
+                        <span class="kpi-label">Haftalık Tonaj</span>
+                        <span class="kpi-val" id="valWeeklyTonnage">0 kg</span>
+                        <span class="kpi-sub">Kaldırılan Toplam Yük</span>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-icon">🎯</div>
+                    <div class="kpi-meta">
+                        <span class="kpi-label">Efektif Tekrar (Beardsley)</span>
+                        <span class="kpi-val" id="valEffectiveReps">0</span>
+                        <span class="kpi-sub">Gerçek Mekanik Gerilim</span>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-icon">⚖️</div>
+                    <div class="kpi-meta">
+                        <span class="kpi-label">İtiş / Çekiş Oranı</span>
+                        <span class="kpi-val" id="valPushPull">1.00</span>
+                        <span class="kpi-sub">İdeal: 1.0 - 1.2</span>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-icon">🧹</div>
+                    <div class="kpi-meta">
+                        <span class="kpi-label">Çöp Hacim (Junk Volume)</span>
+                        <span class="kpi-val" id="valJunkVolume">0 Set</span>
+                        <span class="kpi-sub">RIR > 4 veya Aşırı Set</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Akademik Hacim Eşikleri Grafiği (Dr. Mike Israetel Kriterleri) -->
+            <div class="chart-container-box">
+                <div class="chart-header">
+                    <div>
+                        <h3>🔬 Haftalık Kas Hacmi vs. Bilimsel Eşikler</h3>
+                        <p class="chart-desc">Schoenfeld & Israetel Hacim Sınırları: MEV (Asgari), MAV (Optimal Büyüme), MRV (Aşırı Yük Tavanı)</p>
+                    </div>
+                    <div class="chart-legend-custom">
+                        <span class="legend-badge legend-mev">MEV Eşiği</span>
+                        <span class="legend-badge legend-mav">MAV Altın Oranı</span>
+                        <span class="legend-badge legend-mrv">MRV Tavanı</span>
+                    </div>
+                </div>
+                <div class="canvas-wrap">
+                    <canvas id="volumeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- AI Akademik Koçluk ve Web Reçete Merkezi -->
+            <div class="ai-console-box">
+                <div class="ai-console-header">
+                    <div class="ai-title-wrap">
+                        <span class="ai-sparkle">✨</span>
+                        <div>
+                            <h3>Google Gemini Spor Bilimci & Reçete Motoru</h3>
+                            <p>Sporcunun verilerini akademik makaleler ışığında analiz edip web uygulamasına yönerge ve program hazırlar.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-input-row">
+                    <input type="text" id="aiCustomPrompt" placeholder="Antrenör Notu (Örn: Bu hafta göğüste platoyu kıracak dalgalı yüklenme planla, RIR 2 hedefle...)" />
+                    <button class="btn-primary" id="btnRunAiAnalysis">
+                        <span class="icon">🧠</span> Akademik Analiz & Reçete Üret
+                    </button>
+                </div>
+
+                <!-- AI Çıktı ve Web Gönderim Alanı -->
+                <div class="ai-output-wrap" id="aiOutputWrap" style="display:none;">
+                    <div class="ai-output-actions">
+                        <span class="badge-status-ready">✅ Akademik Reçete Hazır</span>
+                        <div class="action-btn-group">
+                            <button class="btn-action btn-send-directive" id="btnPushDirectiveToWeb" title="Sporcunun telefonundaki web uygulamasına anında koç yönergesi olarak fırlat">
+                                📱 Web'e Koç Yönergesi Gönder
+                            </button>
+                            <button class="btn-action btn-send-program" id="btnPushProgramToWeb" title="Web uygulamasına yeni bilimsel antrenman programı şablonu ata">
+                                📋 Web'e Yeni Programı Yükle
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="ai-report-content" id="aiReportContent">
+                        <!-- AI Çıktısı Buraya Gelecek -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Ayarlar Modalı -->
+    <div class="modal-backdrop" id="settingsModal" style="display:none;">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>⚙️ Sistem ve AI Ayarları</h3>
+                <button class="btn-close" id="btnCloseSettings">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="inputApiKey">Google Gemini API Anahtarı:</label>
+                    <input type="password" id="inputApiKey" placeholder="AIzaSy..." />
+                    <small>Spor bilimi analizi ve program üretimi için Google Generative AI (Gemini) API anahtarınızı girin.</small>
+                </div>
+                <div class="form-group">
+                    <label>Firebase Firestore Projesi:</label>
+                    <input type="text" value="fitness-4f427 (Canlı Bulut Veritabanı)" disabled />
+                    <small>Web uygulaması (fitness.kantarci.io) ile eşleşmiş durumdadır.</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="btnCancelSettings">İptal</button>
+                <button class="btn-primary" id="btnSaveSettings">Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bildirim Toast -->
+    <div class="toast-notification" id="toastNotification"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

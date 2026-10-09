@@ -6,5 +6,9 @@ source_archive/
 .env*
 *.key
 *.pem
-__pycache__/
-*.traineddata
+**/node_modules/
+**/dist/
+**/build/
+*.dmg
+*.exe
+**/__pycache__/

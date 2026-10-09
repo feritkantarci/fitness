@@ -1,0 +1,49 @@
+{
+  "name": "celik-kodu-coach-station",
+  "version": "1.0.0",
+  "description": "Çelik Kodu - Akademik Spor Bilimi ve AI Koç İstasyonu (Masaüstü)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win"
+  },
+  "keywords": [
+    "fitness",
+    "sports-science",
+    "electron",
+    "ai-coach",
+    "hypertrophy"
+  ],
+  "author": "Çelik Kodu",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "chart.js": "^4.4.7",
+    "firebase": "^10.14.1"
+  },
+  "build": {
+    "appId": "io.kantarci.celikkodu.coach",
+    "productName": "Çelik Kodu Koç İstasyonu",
+    "directories": {
+      "output": "dist"
+    },
+    "mac": {
+      "category": "public.app-category.sports",
+      "target": [
+        "dmg"
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    }
+  }
+}
