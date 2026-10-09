@@ -7,17 +7,32 @@
 
 // Uygulama Durumu
 let state = {
+    currentView: 'dashboard',
     users: [],
     selectedUserId: null,
     selectedUser: null,
     workoutLogs: [],
     academicAnalysis: null,
     lastAiReport: null,
-    volumeChart: null
+    volumeChart: null,
+    // Lab Durumu
+    catalog: [],
+    labFiltered: [],
+    selectedExercise: null,
+    visualTab: 'form', // 'form' | 'anatomi'
+    labFilter: 'ALL',
+    labSearch: ''
 };
 
 // DOM Elemanları
 const el = {
+    // Navigasyon & Görünümler
+    viewDashboard: document.getElementById('viewDashboard'),
+    viewLab: document.getElementById('viewLab'),
+    tabBtnDashboard: document.getElementById('tabBtnDashboard'),
+    tabBtnLab: document.getElementById('tabBtnLab'),
+
+    // Dashboard Elemanları
     athleteSelect: document.getElementById('athleteSelect'),
     btnRefresh: document.getElementById('btnRefresh'),
     athleteAvatar: document.getElementById('athleteAvatar'),
@@ -40,6 +55,32 @@ const el = {
     btnPushDirectiveToWeb: document.getElementById('btnPushDirectiveToWeb'),
     btnPushProgramToWeb: document.getElementById('btnPushProgramToWeb'),
 
+    // Lab Elemanları
+    labSearchInput: document.getElementById('labSearchInput'),
+    btnClearLabSearch: document.getElementById('btnClearLabSearch'),
+    labExerciseCount: document.getElementById('labExerciseCount'),
+    labFilterBar: document.getElementById('labFilterBar'),
+    labGrid: document.getElementById('labGrid'),
+    labInspector: document.getElementById('labInspector'),
+    inspectorPlaceholder: document.getElementById('inspectorPlaceholder'),
+    inspectorContent: document.getElementById('inspectorContent'),
+    inspTypeBadge: document.getElementById('inspTypeBadge'),
+    inspSfrBadge: document.getElementById('inspSfrBadge'),
+    btnCloseInspector: document.getElementById('btnCloseInspector'),
+    inspTitle: document.getElementById('inspTitle'),
+    inspMuscleTag: document.getElementById('inspMuscleTag'),
+    inspKeyTag: document.getElementById('inspKeyTag'),
+    btnTabForm: document.getElementById('btnTabForm'),
+    btnTabAnatomi: document.getElementById('btnTabAnatomi'),
+    inspImage: document.getElementById('inspImage'),
+    inspImageFallback: document.getElementById('inspImageFallback'),
+    inspValMtf: document.getElementById('inspValMtf'),
+    inspSubMtf: document.getElementById('inspSubMtf'),
+    inspValLengthened: document.getElementById('inspValLengthened'),
+    inspActivationBars: document.getElementById('inspActivationBars'),
+    inspCueText: document.getElementById('inspCueText'),
+
+    // Sistem & Ayarlar
     btnOpenSettings: document.getElementById('btnOpenSettings'),
     settingsModal: document.getElementById('settingsModal'),
     btnCloseSettings: document.getElementById('btnCloseSettings'),
@@ -54,6 +95,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     setupEventListeners();
     await loadApiKey();
     await loadAthletes();
+    loadExerciseCatalog(); // Egzersiz atlasını arka planda hazırla
 
     // Canlı antrenman dinleyicisi
     if (window.coachAPI && window.coachAPI.onLiveWorkoutUpdated) {
@@ -110,6 +152,47 @@ function setupEventListeners() {
         await window.coachAPI.saveApiKey(key);
         showToast('✅ Gemini API Anahtarı başarıyla kaydedildi!');
         el.settingsModal.style.display = 'none';
+    });
+
+    // ==================== LAB EVENT LISTENERS ====================
+    // Görünüm / Sekme Değişimi
+    el.tabBtnDashboard.addEventListener('click', () => switchView('dashboard'));
+    el.tabBtnLab.addEventListener('click', () => switchView('lab'));
+
+    // Arama ve Filtreler
+    el.labSearchInput.addEventListener('input', (e) => {
+        state.labSearch = e.target.value.trim().toLowerCase();
+        el.btnClearLabSearch.style.display = state.labSearch ? 'block' : 'none';
+        applyLabFilters();
+    });
+
+    el.btnClearLabSearch.addEventListener('click', () => {
+        el.labSearchInput.value = '';
+        state.labSearch = '';
+        el.btnClearLabSearch.style.display = 'none';
+        applyLabFilters();
+    });
+
+    el.labFilterBar.addEventListener('click', (e) => {
+        const btn = e.target.closest('.filter-chip');
+        if (!btn) return;
+        el.labFilterBar.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.labFilter = btn.dataset.filter;
+        applyLabFilters();
+    });
+
+    // Lab Inspector Kontrolleri
+    el.btnCloseInspector.addEventListener('click', () => {
+        closeInspector();
+    });
+
+    el.btnTabForm.addEventListener('click', () => {
+        setVisualTab('form');
+    });
+
+    el.btnTabAnatomi.addEventListener('click', () => {
+        setVisualTab('anatomi');
     });
 }
 
@@ -516,3 +599,244 @@ function showToast(msg) {
         el.toastNotification.style.display = 'none';
     }, 4000);
 }
+
+// ==================== LAB (BİYOMEKANİK ATLAS) MODÜLÜ ====================
+function switchView(viewName) {
+    state.currentView = viewName;
+    if (viewName === 'dashboard') {
+        el.viewDashboard.style.display = 'flex';
+        el.viewLab.style.display = 'none';
+        el.tabBtnDashboard.classList.add('active');
+        el.tabBtnLab.classList.remove('active');
+    } else {
+        el.viewDashboard.style.display = 'none';
+        el.viewLab.style.display = 'flex';
+        el.tabBtnDashboard.classList.remove('active');
+        el.tabBtnLab.classList.add('active');
+        if (state.catalog.length === 0) {
+            loadExerciseCatalog();
+        }
+    }
+}
+
+async function loadExerciseCatalog() {
+    try {
+        const catalog = await window.coachAPI.getExerciseCatalog();
+        state.catalog = catalog || [];
+        applyLabFilters();
+    } catch (err) {
+        console.error("Katalog yüklenemedi:", err);
+        showToast('⚠️ Egzersiz atlası yüklenirken hata oluştu.');
+    }
+}
+
+function applyLabFilters() {
+    const q = state.labSearch;
+    const f = state.labFilter;
+
+    let filtered = state.catalog.filter(item => {
+        // Arama filtresi
+        const matchesQuery = !q || 
+            item.name.toLowerCase().includes(q) || 
+            item.rawKey.toLowerCase().includes(q) || 
+            item.primary.toLowerCase().includes(q) ||
+            (item.typeLabel && item.typeLabel.toLowerCase().includes(q));
+
+        if (!matchesQuery) return false;
+
+        // Kategori filtresi
+        if (f === 'ALL') return true;
+        if (f === 'Kol') return item.primary === 'Biceps' || item.primary === 'Triceps';
+        return item.primary.includes(f) || (item.sec && Object.keys(item.sec).some(k => k.includes(f)));
+    });
+
+    state.labFiltered = filtered;
+    el.labExerciseCount.textContent = filtered.length;
+    renderLabGrid(filtered);
+}
+
+function renderLabGrid(exercises) {
+    if (!exercises || exercises.length === 0) {
+        el.labGrid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-muted);">
+                <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
+                <p>Aradığınız kriterlere uygun egzersiz bulunamadı.</p>
+            </div>
+        `;
+        return;
+    }
+
+    el.labGrid.innerHTML = exercises.map(ex => {
+        const isActive = state.selectedExercise && state.selectedExercise.id === ex.id;
+        const pFactor = typeof ex.pFactor === 'number' ? ex.pFactor : 1.0;
+        const mtfClass = pFactor >= 0.85 ? 'high' : (pFactor === 0 ? 'zero' : '');
+        const mtfText = pFactor === 0 ? 'Kondisyon (0 MTF)' : `MTF: ${pFactor.toFixed(2)}x`;
+
+        return `
+            <div class="lab-card ${isActive ? 'active' : ''}" data-id="${ex.id}">
+                <div class="lab-card-thumb">
+                    <img src="${ex.formImage || ex.anatomiImage || ''}" alt="${ex.name}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span class="lab-card-thumb-placeholder" style="display:none;">🏋️</span>
+                </div>
+                <div class="lab-card-name" title="${ex.name}">${ex.name}</div>
+                <div class="lab-card-meta">
+                    <span class="lab-card-muscle">${ex.primary}</span>
+                    <span class="lab-card-mtf ${mtfClass}">${mtfText}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // Kart tıklama dinleyicileri
+    el.labGrid.querySelectorAll('.lab-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const id = card.dataset.id;
+            const found = state.catalog.find(c => c.id === id);
+            if (found) {
+                selectLabExercise(found);
+            }
+        });
+    });
+}
+
+function selectLabExercise(ex) {
+    state.selectedExercise = ex;
+
+    // Aktif kart vurgusu
+    el.labGrid.querySelectorAll('.lab-card').forEach(card => {
+        card.classList.toggle('active', card.dataset.id === ex.id);
+    });
+
+    // Inspector paneli göster
+    el.inspectorPlaceholder.style.display = 'none';
+    el.inspectorContent.style.display = 'flex';
+
+    // Başlık ve Etiketler
+    el.inspTitle.textContent = ex.name;
+    el.inspKeyTag.textContent = ex.rawKey || ex.id;
+    el.inspMuscleTag.textContent = `${ex.primary} Odaklı`;
+    el.inspTypeBadge.textContent = ex.typeLabel || ex.type || 'Egzersiz';
+    
+    // SFR Badge
+    el.inspSfrBadge.textContent = `SFR: ${ex.sfrLabel || ex.sfr || 'N/A'}`;
+    el.inspSfrBadge.className = `badge-sfr ${ex.sfr === 'N/A' ? 'na' : ''}`;
+
+    // MTF KPI
+    const pFactor = typeof ex.pFactor === 'number' ? ex.pFactor : 1.0;
+    el.inspValMtf.textContent = pFactor === 0 ? '0.00x' : `${pFactor.toFixed(2)}x`;
+    el.inspSubMtf.textContent = pFactor === 0 
+        ? 'Hipertrofi Sayılmaz (Kondisyon)' 
+        : (pFactor >= 0.85 ? 'Yüksek Mekanik Gerilim' : 'Modere / İzole Gerilim');
+
+    // Lengthened Overload
+    el.inspValLengthened.textContent = ex.lengthened ? 'Evet ✅' : 'Hayır ❌';
+
+    // Biyomekanik Form Cues
+    el.inspCueText.textContent = ex.cue || 'Standart biyomekanik form ve eklem hizalanmasına dikkat edin.';
+
+    // Görseli Güncelle
+    updateInspectorImage();
+
+    // Kas Aktivasyon Barlarını Oluştur
+    renderActivationBars(ex);
+}
+
+function setVisualTab(tabName) {
+    state.visualTab = tabName;
+    el.btnTabForm.classList.toggle('active', tabName === 'form');
+    el.btnTabAnatomi.classList.toggle('active', tabName === 'anatomi');
+    updateInspectorImage();
+}
+
+function updateInspectorImage() {
+    if (!state.selectedExercise) return;
+    const ex = state.selectedExercise;
+    const imgSrc = state.visualTab === 'form' ? ex.formImage : ex.anatomiImage;
+
+    el.inspImageFallback.style.display = 'none';
+    el.inspImage.style.display = 'block';
+
+    if (imgSrc) {
+        el.inspImage.onerror = () => {
+            el.inspImage.style.display = 'none';
+            el.inspImageFallback.style.display = 'flex';
+        };
+        el.inspImage.onload = () => {
+            el.inspImage.style.display = 'block';
+            el.inspImageFallback.style.display = 'none';
+        };
+        el.inspImage.src = imgSrc;
+    } else {
+        el.inspImage.style.display = 'none';
+        el.inspImageFallback.style.display = 'flex';
+    }
+}
+
+function renderActivationBars(ex) {
+    const barsContainer = el.inspActivationBars;
+    barsContainer.innerHTML = '';
+
+    const pFactor = typeof ex.pFactor === 'number' ? ex.pFactor : 1.0;
+
+    if (pFactor === 0 || ex.type === 'CONDITIONING') {
+        barsContainer.innerHTML = `
+            <div style="background: rgba(148, 163, 184, 0.1); border: 1px dashed rgba(148, 163, 184, 0.3); border-radius: 8px; padding: 12px; font-size: 11.5px; color: #94a3b8; line-height: 1.5;">
+                ⚡ <strong>Metabolik / Kardiyo Protokolü:</strong><br>
+                Bu hareket kardiyovasküler dayanıklılık ve kalori harcaması sağlar. Brad Schoenfeld ve RP katsayı modelinde hipertrofik kas büyümesine doğrudan <strong>0 set</strong> olarak etki eder.
+            </div>
+        `;
+        return;
+    }
+
+    const items = [];
+
+    // Birincil Kas
+    items.push({
+        muscle: ex.primary,
+        factor: pFactor,
+        isPrimary: true,
+        color: '#eab308' // Gold
+    });
+
+    // İkincil / Sinerjist Kaslar
+    if (ex.sec && typeof ex.sec === 'object') {
+        const secColors = ['#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#10b981'];
+        let colorIdx = 0;
+        for (const [secMuscle, factor] of Object.entries(ex.sec)) {
+            items.push({
+                muscle: secMuscle,
+                factor: factor,
+                isPrimary: false,
+                color: secColors[colorIdx % secColors.length]
+            });
+            colorIdx++;
+        }
+    }
+
+    barsContainer.innerHTML = items.map(item => `
+        <div class="act-row">
+            <div class="act-header">
+                <span class="act-name">
+                    ${item.muscle}
+                    <span class="role-pill ${item.isPrimary ? 'role-primary' : 'role-sec'}">
+                        ${item.isPrimary ? 'Birincil Hedef (1.0x)' : 'Sinerjist Destek'}
+                    </span>
+                </span>
+                <span class="act-factor" style="color: ${item.color};">
+                    ${(item.factor * 100).toFixed(0)}% (${item.factor.toFixed(2)} Set Katkısı)
+                </span>
+            </div>
+            <div class="act-bar-track">
+                <div class="act-bar-fill" style="width: ${Math.min(100, item.factor * 100)}%; background: ${item.color};"></div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function closeInspector() {
+    state.selectedExercise = null;
+    el.inspectorPlaceholder.style.display = 'flex';
+    el.inspectorContent.style.display = 'none';
+    el.labGrid.querySelectorAll('.lab-card').forEach(card => card.classList.remove('active'));
+}
+

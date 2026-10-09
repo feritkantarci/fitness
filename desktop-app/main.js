@@ -13,6 +13,7 @@ const fs = require('fs');
 const firebaseService = require('./src/services/firebase-service');
 const academicEngine = require('./src/services/academic-engine');
 const aiCoachService = require('./src/services/ai-coach-service');
+const exerciseCatalog = require('./src/services/exercise-catalog');
 
 // API Anahtarı Saklama Dosyası (Local config)
 const CONFIG_PATH = path.join(app.getPath('userData'), 'coach_config.json');
@@ -148,9 +149,13 @@ ipcMain.handle('firebase:sendProgram', async (event, { uid, program }) => {
     return await firebaseService.sendCustomProgramToWeb(uid, program);
 });
 
-// Akademik Spor Bilimi Motoru
+// Akademik Spor Bilimi Motoru & Egzersiz Atlası
 ipcMain.handle('academic:analyze', async (event, { logs, profile }) => {
     return academicEngine.analyzeAthleteHistory(logs, profile);
+});
+
+ipcMain.handle('catalog:getExercises', async () => {
+    return exerciseCatalog.getFullCatalog();
 });
 
 // AI Koçluk

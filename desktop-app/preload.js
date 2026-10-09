@@ -15,8 +15,9 @@ contextBridge.exposeInMainWorld('coachAPI', {
     sendDirectiveToWeb: (uid, directive) => ipcRenderer.invoke('firebase:sendDirective', { uid, directive }),
     sendProgramToWeb: (uid, program) => ipcRenderer.invoke('firebase:sendProgram', { uid, program }),
 
-    // Akademik Spor Bilimi Analizi
+    // Akademik Spor Bilimi Analizi & Biyomekanik Atlas
     analyzeHistory: (logs, profile) => ipcRenderer.invoke('academic:analyze', { logs, profile }),
+    getExerciseCatalog: () => ipcRenderer.invoke('catalog:getExercises'),
 
     // AI Koçluk & Gemini Reçete
     generatePrescription: (payload) => ipcRenderer.invoke('ai:generatePrescription', payload),

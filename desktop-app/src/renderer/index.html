@@ -18,6 +18,15 @@
             </div>
         </div>
 
+        <nav class="app-nav-tabs">
+            <button class="nav-tab-btn active" id="tabBtnDashboard" data-view="dashboard">
+                <span class="icon">📊</span> Kokpit & Analiz
+            </button>
+            <button class="nav-tab-btn" id="tabBtnLab" data-view="lab">
+                <span class="icon">🔬</span> Lab (Biyomekanik Atlas)
+            </button>
+        </nav>
+
         <div class="header-center">
             <div class="athlete-selector-wrap">
                 <label for="athleteSelect">Aktif Sporcu:</label>
@@ -41,8 +50,8 @@
         </div>
     </header>
 
-    <!-- Ana Çalışma Alanı -->
-    <main class="main-layout">
+    <!-- Ana Çalışma Alanı: Dashboard & Kokpit -->
+    <main class="main-layout" id="viewDashboard">
         <!-- Sol Taraf: Sporcu Bilgisi ve Akademik Özet -->
         <aside class="sidebar">
             <div class="athlete-card">
@@ -183,6 +192,121 @@
             </div>
         </section>
     </main>
+ 
+    <!-- Lab Bölümü (Biyomekanik Atlas ve Egzersiz Detay Masası) -->
+    <section class="lab-layout" id="viewLab" style="display: none;">
+        <!-- Sol/Orta Alan: Egzersiz Listesi ve Filtreleme -->
+        <div class="lab-main-area">
+            <div class="lab-toolbar">
+                <div class="lab-search-wrap">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="labSearchInput" placeholder="Egzersiz ara (örn: Bench, Squat, Burpee, Swing, Şınav)..." autocomplete="off" />
+                    <button class="btn-clear-search" id="btnClearLabSearch" style="display: none;">✕</button>
+                </div>
+                <div class="lab-stats-badge" id="labStatsBadge">
+                    <span class="count" id="labExerciseCount">94</span> egzersiz listeleniyor
+                </div>
+            </div>
+
+            <!-- Kas Grubu / Tip Filtre Çipleri -->
+            <div class="lab-filter-bar" id="labFilterBar">
+                <button class="filter-chip active" data-filter="ALL">Tümü</button>
+                <button class="filter-chip" data-filter="Göğüs">Göğüs</button>
+                <button class="filter-chip" data-filter="Sırt">Sırt</button>
+                <button class="filter-chip" data-filter="Omuz">Omuz</button>
+                <button class="filter-chip" data-filter="Ön Bacak">Ön Bacak</button>
+                <button class="filter-chip" data-filter="Arka Bacak">Arka Bacak</button>
+                <button class="filter-chip" data-filter="Glute">Kalça / Glute</button>
+                <button class="filter-chip" data-filter="Kol">Kol (Bi/Tri)</button>
+                <button class="filter-chip" data-filter="Karın/Core">Karın / Core</button>
+                <button class="filter-chip" data-filter="Kondisyon / Kardiyo">⚡ Kondisyon</button>
+            </div>
+
+            <!-- Egzersiz Grid Kartları -->
+            <div class="lab-grid" id="labGrid">
+                <!-- Dinamik JavaScript ile doldurulacak -->
+            </div>
+        </div>
+
+        <!-- Sağ Taraf: Egzersiz Biyomekanik İnceleme Penceresi (Drawer/Inspector) -->
+        <aside class="lab-inspector" id="labInspector">
+            <!-- Boş Durum (Egzersiz seçilmediğinde) -->
+            <div class="inspector-placeholder" id="inspectorPlaceholder">
+                <div class="placeholder-icon">🔬</div>
+                <h3>Biyomekanik İnceleme Masası</h3>
+                <p>Sol taraftaki egzersiz kütüphanesinden bir harekete tıklayarak görselini, kas aktivasyon yüzdelerini, MTF ve SFR değerlerini inceleyin.</p>
+                <div class="placeholder-hint">💡 <i>Tüm veriler Schoenfeld, Beardsley ve Israetel akademik katsayı modelleriyle eşleşmiştir.</i></div>
+            </div>
+
+            <!-- Aktif Egzersiz Detay İçeriği -->
+            <div class="inspector-content" id="inspectorContent" style="display: none;">
+                <div class="inspector-header">
+                    <div class="header-badges">
+                        <span class="badge-type" id="inspTypeBadge">Ağır Serbest Ağırlık Bileşik</span>
+                        <span class="badge-sfr" id="inspSfrBadge">SFR: Yüksek</span>
+                    </div>
+                    <button class="btn-close-inspector" id="btnCloseInspector" title="Pencereyi Kapat">✕</button>
+                </div>
+
+                <h2 class="inspector-title" id="inspTitle">Dambıl Bench Press</h2>
+                <div class="inspector-subtitle">
+                    <span class="tag-muscle" id="inspMuscleTag">Göğüs & İtiş</span>
+                    <span class="tag-key" id="inspKeyTag">ex_bench_press</span>
+                </div>
+
+                <!-- Görsel Sekmeleri (Form & Anatomi) -->
+                <div class="visual-tabs">
+                    <button class="vtab-btn active" id="btnTabForm" data-tab="form">📐 Form & Uygulama</button>
+                    <button class="vtab-btn" id="btnTabAnatomi" data-tab="anatomi">🧬 Kas Anatomisi</button>
+                </div>
+
+                <!-- Görsel Alanı -->
+                <div class="inspector-image-container">
+                    <img id="inspImage" src="" alt="Egzersiz Görseli" />
+                    <div class="image-fallback" id="inspImageFallback" style="display: none;">
+                        <span>📷</span>
+                        <p>Görsel Hazırlanıyor</p>
+                    </div>
+                </div>
+
+                <!-- Bilimsel Biyomekanik Parametre Kartları -->
+                <div class="inspector-kpi-grid">
+                    <div class="insp-kpi-card">
+                        <span class="insp-kpi-label">Mekanik Gerilim (MTF)</span>
+                        <span class="insp-kpi-val" id="inspValMtf">1.0x</span>
+                        <small class="insp-kpi-sub" id="inspSubMtf">Maksimal Gerilim Çarpanı</small>
+                    </div>
+                    <div class="insp-kpi-card">
+                        <span class="insp-kpi-label">Uzamışta Yüklenme</span>
+                        <span class="insp-kpi-val" id="inspValLengthened">Evet ✅</span>
+                        <small class="insp-kpi-sub">Stretch-Mediated Hipertrofi</small>
+                    </div>
+                </div>
+
+                <!-- Kas Aktivasyon & Etki Dağılımı (Akademik Kademeli Etki Barları) -->
+                <div class="inspector-section">
+                    <div class="section-title-wrap">
+                        <h4>🎯 Kas Aktivasyon & Etki Dağılımı</h4>
+                        <span class="methodology-badge">Schoenfeld & RP Modeli</span>
+                    </div>
+                    <p class="section-desc">Bu hareketin 1 tam çalışma seti tamamlandığında kas gruplarına sayılan efektif hacim oranı:</p>
+                    
+                    <div class="activation-bars" id="inspActivationBars">
+                        <!-- Dinamik doldurulacak -->
+                    </div>
+                </div>
+
+                <!-- Koçluk & Form Talimatları -->
+                <div class="inspector-section">
+                    <h4>📋 Biyomekanik İpucu & Form Rehberi</h4>
+                    <div class="cue-box" id="inspCueBox">
+                        <p id="inspCueText">-</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </section>
+
 
     <!-- Ayarlar Modalı -->
     <div class="modal-backdrop" id="settingsModal" style="display:none;">
