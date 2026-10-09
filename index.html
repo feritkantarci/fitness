@@ -2039,6 +2039,54 @@
             max-width: 100%;
         }
 
+        /* WEEK SELECTOR TABS (BU HAFTA / GELECEK HAFTA) */
+        .weekly-week-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            background: rgba(0, 0, 0, 0.45);
+            padding: 4px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 12px;
+        }
+        .weekly-week-tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 11.5px;
+            font-weight: 700;
+            padding: 8px 12px;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .weekly-week-tab-btn:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .weekly-week-tab-btn.active {
+            background: linear-gradient(135deg, #d97706, #f59e0b);
+            color: #090d16;
+            font-weight: 900;
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.35);
+        }
+
+        /* INCOMING FITLAB AI PROGRAM BANNER */
+        .incoming-program-banner {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.14), rgba(15, 23, 42, 0.95), rgba(6, 182, 212, 0.08));
+            border: 1.5px solid rgba(245, 158, 11, 0.45);
+            border-radius: 16px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+            animation: fadeIn 0.3s ease-out;
+        }
+
         /* HERO SCHEDULED LAUNCH BANNER */
         .hero-scheduled-banner {
             background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
@@ -3503,7 +3551,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v101</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v102</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3539,7 +3587,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v101</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v102</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -8519,12 +8567,41 @@
 
                     const todayIdx = new Date().getDay();
                     const tomorrowIdx = (todayIdx + 1) % 7;
-                    const schedule = getWeeklySchedule();
+                    const isNextWeek = activePlannerWeek === 'next';
+                    const schedule = isNextWeek ? getNextWeeklySchedule(user.id) : getWeeklySchedule(user.id);
                     const todayPlan = schedule[todayIdx] || { id: 'rest', rest: true, title: 'Dinlenme & Aktif Toparlanma' };
                     const tomorrowPlan = schedule[tomorrowIdx] || { id: 'rest', rest: true, title: 'Dinlenme & Aktif Toparlanma' };
 
+                    let aiProgData = null;
+                    try {
+                        const rawAi = localStorage.getItem(`celik_kodu_ai_program_${user.id}`);
+                        if (rawAi) aiProgData = JSON.parse(rawAi);
+                    } catch(e) {}
+                    const hasIncomingAi = !!(aiProgData && aiProgData.active);
+
                     let heroBannerHtml = '';
-                    if (!todayPlan.rest) {
+                    if (isNextWeek) {
+                        heroBannerHtml = `
+                            <div class="hero-scheduled-banner" style="border-color:var(--cyan); background:linear-gradient(135deg, rgba(6,182,212,0.12), rgba(15,23,42,0.95)); box-shadow:0 8px 24px rgba(0,0,0,0.5), 0 0 18px rgba(6,182,212,0.15);">
+                                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; flex-wrap:wrap; margin-bottom:6px;">
+                                    <div class="hero-scheduled-badge" style="background:var(--cyan); color:#090d16;">
+                                        🚀 GELECEK HAFTA ANTRENMAN PLANI (ÖNİZLEME)
+                                    </div>
+                                    <span style="font-size:11px; color:var(--cyan); font-weight:800;">${hasIncomingAi ? '🔬 FitLAB AI Spor Bilimi Reçetesi' : 'Planlanan Yeni Döngü'}</span>
+                                </div>
+                                <h2 class="hero-scheduled-title">Gelecek Haftaya Özel Hipertrofi Bloğu</h2>
+                                <p class="hero-scheduled-desc">Masaüstü istasyonundan gelen bilimsel reçete gün gün takviminize işlendi. Salona girmeden önce günlerin içeriğini inceleyebilir veya tek dokunuşla bu planı aktif haftanız olarak başlatabilirsiniz.</p>
+                                <div class="hero-scheduled-actions">
+                                    <button class="btn btn-gold" style="padding:12px 22px; font-size:14px; font-weight:900; box-shadow:0 0 20px rgba(245,158,11,0.5);" onclick="promoteNextWeekToCurrent('${user.id}')">
+                                        ⚡ BU PROGRAMI AKTİF HAFTAM YAP
+                                    </button>
+                                    <button class="btn btn-outline" style="padding:11px 16px; font-size:12px; color:var(--cyan); border-color:var(--cyan); font-weight:700;" onclick="switchPlannerWeek('current')">
+                                        ⬅️ Bu Haftaya Dön
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    } else if (!todayPlan.rest) {
                         const todayDetails = getWorkoutDetailsForPlan(todayPlan);
                         const todayExCount = todayDetails && todayDetails.exercises ? todayDetails.exercises.length : null;
                         heroBannerHtml = `
@@ -8572,8 +8649,8 @@
                     const daysSequence = [1, 2, 3, 4, 5, 6, 0];
                     const weeklyStripHtml = daysSequence.map(d => {
                         const plan = schedule[d] || { id: 'rest', rest: true, title: 'Dinlenme' };
-                        const isToday = d === todayIdx;
-                        const isTomorrow = d === tomorrowIdx;
+                        const isToday = !isNextWeek && d === todayIdx;
+                        const isTomorrow = !isNextWeek && d === tomorrowIdx;
                         let pillClass = 'weekly-day-pill';
                         if (isToday) pillClass += ' active-today';
                         else if (isTomorrow) pillClass += ' active-tomorrow';
@@ -8581,9 +8658,10 @@
                         let tagHtml = '';
                         if (isToday) tagHtml = '<span class="weekly-day-tag today">BUGÜN</span>';
                         else if (isTomorrow) tagHtml = '<span class="weekly-day-tag tomorrow">YARIN</span>';
+                        else if (isNextWeek && !plan.rest) tagHtml = '<span class="weekly-day-tag" style="background:var(--cyan); color:#090d16;">GELECEK</span>';
 
-                        const icon = plan.rest ? '🧘' : '⚔️';
-                        const cleanTitle = (plan.title || '').replace(/⚔️|🧘|Çelik Kodu/g, '').trim();
+                        const icon = plan.rest ? '🧘' : (plan.source === 'FitLAB AI' ? '🔬' : '⚔️');
+                        const cleanTitle = (plan.title || '').replace(/⚔️|🧘|🔬|Çelik Kodu/g, '').trim();
                         const shortTitle = plan.rest ? 'Dinlenme' : (cleanTitle.length > 13 ? cleanTitle.substring(0, 13) + '..' : cleanTitle);
                         const planDetails = getWorkoutDetailsForPlan(plan);
                         const exCount = (!plan.rest && planDetails && planDetails.exercises) ? planDetails.exercises.length : null;
@@ -8601,6 +8679,9 @@
 
                     container.innerHTML = `
                         <div style="padding:10px 4px 10px;">
+                            <!-- FİTLAB MASAÜSTÜ YENİ PROGRAM BİLDİRİMİ -->
+                            ${getFitLabIncomingProgramHtml(user.id)}
+
                             <!-- AKADEMİK KOÇ İSTASYONU DİREKTİFİ -->
                             ${getCoachStationDirectiveHtml(user.id)}
 
@@ -8613,7 +8694,7 @@
                                     <div style="display:flex; align-items:center; gap:8px;">
                                         <span style="font-size:20px;">📅</span>
                                         <div>
-                                            <h3 style="font-size:14px; font-weight:900; color:#fff; margin:0;">Haftalık Antrenman Planım</h3>
+                                            <h3 style="font-size:14px; font-weight:900; color:#fff; margin:0;">${isNextWeek ? 'Gelecek Hafta Antrenman Planım' : 'Haftalık Antrenman Planım'}</h3>
                                             <p style="font-size:11px; color:var(--text-secondary); margin:2px 0 0;">Güne dokunarak antrenmanın içeriğini görün veya değiştirin.</p>
                                         </div>
                                     </div>
@@ -8626,6 +8707,25 @@
                                         </button>
                                     </div>
                                 </div>
+
+                                <!-- BU HAFTA / GELECEK HAFTA SEGMENTED SWITCHER -->
+                                <div class="weekly-week-tabs">
+                                    <button type="button" class="weekly-week-tab-btn ${!isNextWeek ? 'active' : ''}" onclick="switchPlannerWeek('current')">
+                                        📅 BU HAFTA (Aktif)
+                                    </button>
+                                    <button type="button" class="weekly-week-tab-btn ${isNextWeek ? 'active' : ''}" onclick="switchPlannerWeek('next')">
+                                        🚀 GELECEK HAFTA ${hasIncomingAi ? '<span style="width:7px; height:7px; border-radius:50%; background:var(--gold); display:inline-block;"></span>' : ''}
+                                    </button>
+                                </div>
+
+                                ${isNextWeek ? `
+                                    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(6,182,212,0.1); border:1px solid rgba(6,182,212,0.3); border-radius:10px; padding:10px 14px; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+                                        <span style="font-size:12px; color:#e0f2fe; font-weight:700;">🚀 Gelecek Hafta Takvimi (${hasIncomingAi ? '🔬 FitLAB AI Biyomekanik Reçetesi' : 'Planlanan Döngü'})</span>
+                                        <button type="button" class="btn btn-gold" style="font-size:11px; padding:6px 14px; font-weight:900;" onclick="promoteNextWeekToCurrent('${user.id}')">
+                                            ⚡ Aktif Haftam Yap
+                                        </button>
+                                    </div>
+                                ` : ''}
 
                                 <div class="weekly-strip">
                                     ${weeklyStripHtml}
@@ -10473,6 +10573,15 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         const DAY_NAMES_TR = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
         const DAY_SHORT_TR = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
 
+        let activePlannerWeek = 'current'; // 'current' | 'next'
+
+        function switchPlannerWeek(week) {
+            activePlannerWeek = week;
+            if (typeof renderActiveWorkout === 'function') {
+                renderActiveWorkout();
+            }
+        }
+
         function getDefaultWeeklySchedule() {
             return {
                 1: { id: 'la_forja_day1', title: '⚔️ Gün 1: Omuz & Bacak Ön Zırhı', type: 'official', desc: 'Press + Squat • Şınav + Front Squat • Core', rest: false },
@@ -10485,26 +10594,267 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             };
         }
 
-        function getWeeklySchedule() {
+        function getWeeklySchedule(targetUid) {
             const user = getActiveUser();
-            const uid = user ? user.id : 'default';
+            const uid = targetUid || (user ? user.id : 'default');
             const key = `celik_kodu_weekly_schedule_${uid}`;
             try {
                 const raw = localStorage.getItem(key);
                 if (raw) return JSON.parse(raw);
             } catch(e) {}
             const def = getDefaultWeeklySchedule();
-            saveWeeklySchedule(def);
+            saveWeeklySchedule(def, uid);
             return def;
         }
 
-        function saveWeeklySchedule(schedule) {
+        function saveWeeklySchedule(schedule, targetUid) {
             const user = getActiveUser();
-            const uid = user ? user.id : 'default';
+            const uid = targetUid || (user ? user.id : 'default');
             const key = `celik_kodu_weekly_schedule_${uid}`;
             try {
                 localStorage.setItem(key, JSON.stringify(schedule));
             } catch(e) {}
+        }
+
+        // ==================== GELECEK HAFTA & AI REÇETE KÖPRÜSÜ ====================
+        function getNextWeeklySchedule(targetUid) {
+            const user = getActiveUser();
+            const uid = targetUid || (user ? user.id : 'default');
+            const key = `celik_kodu_next_weekly_schedule_${uid}`;
+            try {
+                const raw = localStorage.getItem(key);
+                if (raw) return JSON.parse(raw);
+            } catch(e) {}
+
+            // Eğer kaydedilmiş takvim yoksa ama AI'dan gelen program varsa dönüştür
+            try {
+                const aiRaw = localStorage.getItem(`celik_kodu_ai_program_${uid}`);
+                if (aiRaw) {
+                    const aiData = JSON.parse(aiRaw);
+                    let days = aiData.structuredDays;
+                    if (!Array.isArray(days) || days.length === 0) {
+                        days = parseMarkdownProgramClient(aiData.programText);
+                    }
+                    if (Array.isArray(days) && days.length > 0) {
+                        const converted = convertParsedDaysToWeeklySchedule(days);
+                        saveNextWeeklySchedule(converted, uid);
+                        return converted;
+                    }
+                }
+            } catch(e) {}
+
+            // Varsayılan: Mevcut haftanın temiz bir kopyasını aç
+            const current = getWeeklySchedule(uid);
+            const clone = JSON.parse(JSON.stringify(current));
+            saveNextWeeklySchedule(clone, uid);
+            return clone;
+        }
+
+        function saveNextWeeklySchedule(schedule, targetUid) {
+            const user = getActiveUser();
+            const uid = targetUid || (user ? user.id : 'default');
+            const key = `celik_kodu_next_weekly_schedule_${uid}`;
+            try {
+                localStorage.setItem(key, JSON.stringify(schedule));
+            } catch(e) {}
+        }
+
+        function promoteNextWeekToCurrent(targetUid) {
+            const user = getActiveUser();
+            const uid = targetUid || (user ? user.id : 'default');
+            try {
+                const nextSchedule = getNextWeeklySchedule(uid);
+                saveWeeklySchedule(nextSchedule, uid);
+
+                // AI Program bayrağını "uygulandı" olarak güncelle
+                const aiRaw = localStorage.getItem(`celik_kodu_ai_program_${uid}`);
+                if (aiRaw) {
+                    const aiData = JSON.parse(aiRaw);
+                    aiData.applied = true;
+                    aiData.dismissed = true;
+                    localStorage.setItem(`celik_kodu_ai_program_${uid}`, JSON.stringify(aiData));
+                }
+
+                activePlannerWeek = 'current';
+                if (typeof renderActiveWorkout === 'function') {
+                    renderActiveWorkout();
+                }
+
+                if (typeof showSystemNotice === 'function') {
+                    showSystemNotice("🎉 Harika!", "Gelecek hafta için hazırlanan program başarıyla aktif haftalık antrenman planınız yapıldı.");
+                } else {
+                    alert("🎉 Harika! Gelecek hafta programı başarıyla aktif haftalık antrenman planınız yapıldı.");
+                }
+            } catch(e) {
+                console.error("Gelecek hafta aktarılırken hata:", e);
+            }
+        }
+
+        function parseMarkdownProgramClient(text) {
+            if (!text) return [];
+            const days = [];
+            const dayRegex = /(?:^|\n)(?:#{1,4}\s*|\*{0,2})(GÜN\s*\d+|PAZARTESİ|SALI|ÇARŞAMBA|PERŞEMBE|CUMA|CUMARTESİ|PAZAR)[^\n]*/gi;
+            
+            const matches = [];
+            let match;
+            while ((match = dayRegex.exec(text)) !== null) {
+                matches.push({ title: match[0].trim().replace(/^#+\s*/, '').replace(/\*+/g, ''), index: match.index });
+            }
+
+            const extractExercisesFromBlock = (block) => {
+                const list = [];
+                const lines = block.split('\n');
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (trimmed.startsWith('|') && trimmed.endsWith('|') && !trimmed.includes('---') && !trimmed.toLowerCase().includes('egzersiz')) {
+                        const cells = trimmed.split('|').map(c => c.trim()).filter(Boolean);
+                        if (cells.length >= 3) {
+                            const rawName = cells[0].replace(/\*+/g, '').trim();
+                            const sets = parseInt(cells[2]) || 3;
+                            const reps = cells[3] || '8-12';
+                            const note = cells[cells.length - 1] || '';
+                            list.push({
+                                name: rawName,
+                                targetSets: sets,
+                                targetReps: reps,
+                                note: note
+                            });
+                        }
+                    } else if (trimmed.startsWith('-') || trimmed.startsWith('*')) {
+                        const bulletMatch = trimmed.match(/^[-*]\s*\*{0,2}(.*?)\*{0,2}\s*:\s*(.*)/);
+                        if (bulletMatch) {
+                            list.push({
+                                name: bulletMatch[1].trim(),
+                                targetSets: 3,
+                                targetReps: '8-12',
+                                note: bulletMatch[2].trim()
+                            });
+                        }
+                    }
+                }
+                return list;
+            };
+
+            if (matches.length === 0) {
+                return [{ dayTitle: 'FitLAB AI Antrenmanı', exercises: extractExercisesFromBlock(text) }];
+            }
+
+            for (let i = 0; i < matches.length; i++) {
+                const start = matches[i].index;
+                const end = (i + 1 < matches.length) ? matches[i + 1].index : text.length;
+                const block = text.substring(start, end);
+                const exercises = extractExercisesFromBlock(block);
+                days.push({
+                    dayTitle: matches[i].title,
+                    exercises: exercises
+                });
+            }
+            return days;
+        }
+
+        function convertParsedDaysToWeeklySchedule(parsedDays) {
+            const schedule = {
+                1: { id: 'rest', title: '🧘 Dinlenme & Aktif Toparlanma', type: 'rest', rest: true, desc: 'Hafif yürüyüş, esneme veya tam istirahat' },
+                2: { id: 'rest', title: '🧘 Dinlenme & Mobilite', type: 'rest', rest: true, desc: 'Eklem mobilizasyonu, masaj rulosu' },
+                3: { id: 'rest', title: '🧘 Dinlenme & Aktif Toparlanma', type: 'rest', rest: true, desc: 'Hafif yürüyüş, esneme veya tam istirahat' },
+                4: { id: 'rest', title: '🧘 Dinlenme & Mobilite', type: 'rest', rest: true, desc: 'Eklem mobilizasyonu, masaj rulosu' },
+                5: { id: 'rest', title: '🧘 Dinlenme & Aktif Toparlanma', type: 'rest', rest: true, desc: 'Hafif yürüyüş, esneme veya tam istirahat' },
+                6: { id: 'rest', title: '🧘 Serbest Kardiyo / Core', type: 'rest', rest: true, desc: '30 dk tempolu yürüyüş, bisiklet veya karın' },
+                0: { id: 'rest', title: '🧘 Tam Dinlenme & Zihinsel Hazırlık', type: 'rest', rest: true, desc: 'Yeni haftaya kasları ve sinir sistemini dinlendirme' }
+            };
+            if (!Array.isArray(parsedDays) || parsedDays.length === 0) return schedule;
+            const slotMap = { 1: [1], 2: [1, 4], 3: [1, 3, 5], 4: [1, 2, 4, 5], 5: [1, 2, 3, 4, 5] };
+            const targetSlots = slotMap[parsedDays.length] || [1, 2, 3, 4, 5];
+            parsedDays.forEach((pDay, idx) => {
+                let slot = targetSlots[idx] || (idx + 1);
+                const tLower = (pDay.dayTitle || '').toLowerCase();
+                if (tLower.includes('pazartesi') || tLower.includes('pzt')) slot = 1;
+                else if (tLower.includes('salı') || tLower.includes('sal')) slot = 2;
+                else if (tLower.includes('çarşamba') || tLower.includes('çar')) slot = 3;
+                else if (tLower.includes('perşembe') || tLower.includes('per')) slot = 4;
+                else if (tLower.includes('cuma') || tLower.includes('cum')) slot = 5;
+                else if (tLower.includes('cumartesi') || tLower.includes('cmt')) slot = 6;
+                else if (tLower.includes('pazar') || tLower.includes('paz')) slot = 0;
+
+                const exNames = (pDay.exercises || []).map(e => e.name).join(' • ');
+                schedule[slot] = {
+                    id: 'fitlab_ai_day_' + slot,
+                    title: '🔬 ' + (pDay.dayTitle || ('Gün ' + (idx + 1))),
+                    desc: exNames || 'FitLAB AI Hipertrofi Bloğu',
+                    type: 'custom_ai',
+                    rest: false,
+                    source: 'FitLAB AI',
+                    exercises: pDay.exercises || []
+                };
+            });
+            return schedule;
+        }
+
+        function getFitLabIncomingProgramHtml(uid) {
+            if (!uid) return '';
+            try {
+                const raw = localStorage.getItem(`celik_kodu_ai_program_${uid}`);
+                if (!raw) return '';
+                const prog = JSON.parse(raw);
+                if (!prog || !prog.active || prog.dismissed || prog.applied) return '';
+
+                let shortSummary = 'FitLAB masaüstü istasyonundan sizin için optimize edilmiş yeni bir antrenman bloğu gönderildi.';
+                if (prog.programText) {
+                    const lines = prog.programText.split('\n').filter(l => l.trim() && !l.startsWith('#') && !l.startsWith('|'));
+                    if (lines.length > 0) {
+                        shortSummary = lines[0].replace(/\*+/g, '').substring(0, 180) + '...';
+                    }
+                }
+
+                return `
+                    <div class="incoming-program-banner">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:10px;">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span style="font-size:24px; padding:6px 10px; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.35); border-radius:12px;">💻</span>
+                                <div>
+                                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                                        <span style="font-size:10.5px; font-weight:900; color:var(--gold); letter-spacing:0.5px; text-transform:uppercase;">FitLAB MASAÜSTÜ İSTASYONU</span>
+                                        <span style="font-size:9.5px; padding:2px 6px; border-radius:4px; background:rgba(245,158,11,0.2); color:#fef08a; border:1px solid rgba(245,158,11,0.4); font-weight:900;">YENİ PROGRAM GELDİ</span>
+                                    </div>
+                                    <h3 style="font-size:13.5px; font-weight:900; color:#fff; margin:2px 0 0;">${escapeHTML(prog.title || 'Gelecek Hafta İçin AI Reçetesi Hazır')}</h3>
+                                </div>
+                            </div>
+                            <button type="button" onclick="dismissFitLabProgram('${uid}')" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size:16px; padding:2px 6px;" title="Bildirimi Kapat">✕</button>
+                        </div>
+                        <p style="font-size:12px; color:#cbd5e1; line-height:1.5; margin:0 0 12px; background:rgba(0,0,0,0.35); padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.06);">
+                            <strong>Koç Analizi:</strong> ${escapeHTML(shortSummary)}
+                        </p>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                            <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:7px 14px; font-weight:900; flex:1;" onclick="viewIncomingFitLabProgram('${uid}')">
+                                🚀 Gelecek Hafta Programını Gör
+                            </button>
+                            <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 14px; font-weight:800; border-color:var(--emerald); color:var(--emerald);" onclick="promoteNextWeekToCurrent('${uid}')">
+                                ✅ Gelecek Haftaya Onayla
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } catch(e) {
+                return '';
+            }
+        }
+
+        function dismissFitLabProgram(uid) {
+            try {
+                const raw = localStorage.getItem(`celik_kodu_ai_program_${uid}`);
+                if (raw) {
+                    const prog = JSON.parse(raw);
+                    prog.dismissed = true;
+                    localStorage.setItem(`celik_kodu_ai_program_${uid}`, JSON.stringify(prog));
+                    if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
+                }
+            } catch(e) {}
+        }
+
+        function viewIncomingFitLabProgram(uid) {
+            switchPlannerWeek('next');
+            const sec = document.querySelector('.weekly-planner-section');
+            if (sec) sec.scrollIntoView({ behavior: 'smooth' });
         }
 
         // ==================== UNIVERSAL WORKOUT PLAN RESOLVER ====================
@@ -12105,19 +12455,68 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
         }
 
+        let aiProgramLiveUnsub = null;
+
         async function syncCustomProgramsFromCloud(uid) {
             if (!isFirebaseReady || !fbDb || !uid) return;
             try {
                 const docRef = fbDb.collection('custom_programs').doc(uid);
+                
+                // Gerçek zamanlı dinleyici: FitLAB masaüstünden 'Programı Web\'e Gönder' butonuna basıldığı an canlı yakalama
+                if (!aiProgramLiveUnsub) {
+                    aiProgramLiveUnsub = docRef.onSnapshot((docSnap) => {
+                        if (docSnap && docSnap.exists) {
+                            const data = docSnap.data();
+                            if (data && data.active) {
+                                processIncomingAiProgram(uid, data);
+                            }
+                        }
+                    }, (e) => {
+                        console.warn("AI Program onSnapshot hatası:", e);
+                    });
+                }
+
                 const docSnap = await docRef.get();
                 if (docSnap.exists) {
                     const data = docSnap.data();
                     if (data && data.active) {
-                        localStorage.setItem(`celik_kodu_ai_program_${uid}`, JSON.stringify(data));
+                        processIncomingAiProgram(uid, data);
                     }
                 }
             } catch(e) {
                 console.warn("AI programı buluttan çekilemedi:", e);
+            }
+        }
+
+        function processIncomingAiProgram(uid, data) {
+            try {
+                const currentRaw = localStorage.getItem(`celik_kodu_ai_program_${uid}`);
+                const current = currentRaw ? JSON.parse(currentRaw) : null;
+                const isNew = !current || (data.assignedAt && data.assignedAt !== current.assignedAt);
+                if (isNew) {
+                    data.dismissed = false;
+                    data.applied = false;
+                } else if (current) {
+                    data.dismissed = current.dismissed;
+                    data.applied = current.applied;
+                }
+
+                localStorage.setItem(`celik_kodu_ai_program_${uid}`, JSON.stringify(data));
+
+                let days = data.structuredDays;
+                if (!Array.isArray(days) || days.length === 0) {
+                    days = parseMarkdownProgramClient(data.programText);
+                }
+                if (Array.isArray(days) && days.length > 0) {
+                    const nextSchedule = convertParsedDaysToWeeklySchedule(days);
+                    saveNextWeeklySchedule(nextSchedule, uid);
+                }
+
+                if (typeof renderActiveWorkout === 'function') {
+                    renderActiveWorkout();
+                }
+            } catch(e) {
+                console.warn("processIncomingAiProgram hatası:", e);
             }
         }
 
@@ -16199,7 +16598,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=101')
+                navigator.serviceWorker.register('./sw.js?v=102')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et

@@ -580,6 +580,68 @@ async function pushDirectiveToAthleteWeb() {
     }
 }
 
+function parseMarkdownProgram(text) {
+    if (!text) return [];
+    const days = [];
+    const dayRegex = /(?:^|\n)(?:#{1,4}\s*|\*{0,2})(GÜN\s*\d+|PAZARTESİ|SALI|ÇARŞAMBA|PERŞEMBE|CUMA|CUMARTESİ|PAZAR)[^\n]*/gi;
+    
+    const matches = [];
+    let match;
+    while ((match = dayRegex.exec(text)) !== null) {
+        matches.push({ title: match[0].trim().replace(/^#+\s*/, '').replace(/\*+/g, ''), index: match.index });
+    }
+
+    const extractExercisesFromBlock = (block) => {
+        const list = [];
+        const lines = block.split('\n');
+        for (const line of lines) {
+            const trimmed = line.trim();
+            if (trimmed.startsWith('|') && trimmed.endsWith('|') && !trimmed.includes('---') && !trimmed.toLowerCase().includes('egzersiz')) {
+                const cells = trimmed.split('|').map(c => c.trim()).filter(Boolean);
+                if (cells.length >= 3) {
+                    const rawName = cells[0].replace(/\*+/g, '').trim();
+                    const sets = parseInt(cells[2]) || 3;
+                    const reps = cells[3] || '8-12';
+                    const note = cells[cells.length - 1] || '';
+                    list.push({
+                        name: rawName,
+                        targetSets: sets,
+                        targetReps: reps,
+                        note: note
+                    });
+                }
+            } else if (trimmed.startsWith('-') || trimmed.startsWith('*')) {
+                const bulletMatch = trimmed.match(/^[-*]\s*\*{0,2}(.*?)\*{0,2}\s*:\s*(.*)/);
+                if (bulletMatch) {
+                    list.push({
+                        name: bulletMatch[1].trim(),
+                        targetSets: 3,
+                        targetReps: '8-12',
+                        note: bulletMatch[2].trim()
+                    });
+                }
+            }
+        }
+        return list;
+    };
+
+    if (matches.length === 0) {
+        return [{ dayTitle: 'FitLAB AI Antrenmanı', exercises: extractExercisesFromBlock(text) }];
+    }
+
+    for (let i = 0; i < matches.length; i++) {
+        const start = matches[i].index;
+        const end = (i + 1 < matches.length) ? matches[i + 1].index : text.length;
+        const block = text.substring(start, end);
+        const exercises = extractExercisesFromBlock(block);
+        days.push({
+            dayTitle: matches[i].title,
+            exercises: exercises
+        });
+    }
+    return days;
+}
+
 async function pushProgramToAthleteWeb() {
     if (!state.lastAiReport || !state.selectedUserId) {
         alert('Lütfen önce bir analiz üretin.');
@@ -592,9 +654,12 @@ async function pushProgramToAthleteWeb() {
         programSection = match[1].trim();
     }
 
+    const structuredDays = parseMarkdownProgram(programSection);
+
     const payload = {
         title: `FitLAB Hipertrofi & Güç Programı (${state.selectedUser.name})`,
         programText: programSection,
+        structuredDays: structuredDays,
         author: 'FitLAB AI Engine',
         assignedTo: state.selectedUserId,
         active: true,
