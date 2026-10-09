@@ -668,7 +668,7 @@ function parseMarkdownProgram(text, catalog) {
                         cue: note ? (note + (matchedDb && matchedDb.cue ? ' • ' + matchedDb.cue : '')) : (matchedDb ? matchedDb.cue : ''),
                         muscle: matchedDb ? matchedDb.muscle : 'Genel Kas Gelişimi & Fonksiyonel Güç',
                         equipment: matchedDb ? matchedDb.equipment : 'dumbbell',
-                        diagram: matchedDb ? (matchedDb.formImage || matchedDb.diagram) : null,
+                        diagram: matchedDb ? (matchedDb.formImage || null) : null,
                         formImage: matchedDb ? matchedDb.formImage : null,
                         anatomiImage: matchedDb ? matchedDb.anatomiImage : null
                     });
@@ -689,7 +689,7 @@ function parseMarkdownProgram(text, catalog) {
                         cue: bulletMatch[2].trim(),
                         muscle: matchedDb ? matchedDb.muscle : 'Genel Kas Gelişimi & Fonksiyonel Güç',
                         equipment: matchedDb ? matchedDb.equipment : 'dumbbell',
-                        diagram: matchedDb ? (matchedDb.formImage || matchedDb.diagram) : null,
+                        diagram: matchedDb ? (matchedDb.formImage || null) : null,
                         formImage: matchedDb ? matchedDb.formImage : null,
                         anatomiImage: matchedDb ? matchedDb.anatomiImage : null
                     });
@@ -1038,10 +1038,10 @@ function setVisualTab(tabName) {
 function updateInspectorImage() {
     if (!state.selectedExercise) return;
     const ex = state.selectedExercise;
-    // Form sekmesinde öncelik: Gerçek İnsan Fotoğraflı Form Rehberi (formImage), yoksa Vektörel Şema (diagramImage)
+    // Form sekmesinde sadece Gerçek İnsan Fotoğraflı Form Rehberi (formImage), anatomi sekmesinde anatomi görseli
     const imgSrc = state.visualTab === 'form' 
-        ? (ex.formImage || ex.diagramImage) 
-        : (ex.anatomiImage || ex.formImage || ex.diagramImage);
+        ? (ex.formImage || null) 
+        : (ex.anatomiImage || ex.formImage || null);
 
     el.inspImageFallback.style.display = 'none';
     el.inspImage.style.display = 'block';

@@ -3551,7 +3551,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v106</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v107</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3587,7 +3587,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v106</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v107</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -6474,7 +6474,9 @@
                 'conditioning': guideLibrary.pushup
             };
 
-            const photoGuide = (exerciseGuideMap && exerciseGuideMap[ex.id]) || (ex.diagram ? { form: ex.diagram } : null) || null;
+            const photoGuide = (exerciseGuideMap && exerciseGuideMap[ex.id]) 
+                || (categoryFallback && categoryFallback[ex.category]) 
+                || null;
             const hasAnatomy = !!(photoGuide && photoGuide.anatomi);
 
             const extraInfoId = `extra_info_${collapseId}`;
@@ -6485,9 +6487,6 @@
                         <span class="pos-info-arrow" id="arrow_${extraInfoId}">▼ Göster</span>
                     </button>
                     <div class="pos-extra-info-body" id="body_${extraInfoId}" style="display:none; margin-top:8px;">
-                        <div style="font-size:10.5px; color:var(--text-secondary); text-align:center; margin:4px 0 8px 0; line-height:1.35;">
-                            💡 <em>Görseller yapay zeka çizimidir. Aşağıdaki Türkçe hedefler ve güvenlik kuralları esastır.</em>
-                        </div>
                         <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:8px; padding:8px 10px; margin-bottom:8px;">
                             <div style="font-size:10.5px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:5px;">🎯 Çalıştırılan Kas Grupları:</div>
                             <div style="display:flex; flex-wrap:wrap; gap:5px;">
@@ -6530,69 +6529,7 @@
                     ${extraInfoHtml}
                 `;
             } else {
-                const diagramFallbackMap = {
-                    'db_goblet_squat': 'seq_db_squat.svg',
-                    'db_front_squat': 'seq_db_clean_squat.svg',
-                    'kb_clean': 'seq_db_clean_squat.svg',
-                    'db_bench_press': 'seq_floor_press.svg',
-                    'db_floor_press': 'seq_floor_press.svg',
-                    'db_overhead_press': 'seq_db_press.svg',
-                    'db_saw_row': 'seq_db_row.svg',
-                    'db_rdl': 'seq_db_rdl.svg',
-                    'db_walking_lunge': 'seq_db_lunge.svg',
-                    'db_snatch': 'seq_db_snatch.svg',
-                    'db_swing': 'seq_db_swing.svg',
-                    'bw_pushup': 'seq_pushup.svg',
-                    'db_renegade_row': 'seq_renegade_row.svg',
-                    'db_farmers_walk': 'seq_farmers_walk.svg',
-                    'db_russian_twist': 'seq_russian_twist.svg',
-                    'kb_windmill': 'seq_windmill.svg',
-                    'kb_turkish_getup': 'seq_windmill.svg',
-                    'kb_thruster': 'seq_thruster.svg',
-                    'bw_burpee': 'seq_escalera.svg',
-                    'bw_plank': 'seq_plank_pull_through.svg'
-                };
-                const targetFname = (ex.diagram ? ex.diagram.split('/').pop() : '') || diagramFallbackMap[ex.id] || '';
-                const inlineSvg = (typeof DIAGRAMS_SVG_DB !== 'undefined' && DIAGRAMS_SVG_DB[targetFname]) ? DIAGRAMS_SVG_DB[targetFname] : '';
-                if (inlineSvg) {
-                    formVisualHtml = `
-                        <div class="pos-diagram-wrap" id="wrap_form_${collapseId}">
-                            <div class="pos-diagram-toolbar">
-                                <button type="button" class="btn-diagram-tool btn-scroll-toggle" onclick="event.stopPropagation(); toggleDiagramScroll('wrap_form_${collapseId}')" title="Genişlet">
-                                    <span class="tool-icon">↔️</span> <span class="tool-text">Kaydırarak Büyüt</span>
-                                </button>
-                            </div>
-                            <div class="pos-diagram-img-box">
-                                ${inlineSvg}
-                            </div>
-                            <div class="pos-diagram-scroll-indicator">
-                                ↔️ Şemayı incelemek için sağa/sola kaydırın
-                            </div>
-                        </div>
-                        ${extraInfoHtml}
-                    `;
-                } else if (ex.diagram) {
-                    formVisualHtml = `
-                        <div class="pos-diagram-wrap" id="wrap_form_${collapseId}">
-                            <div class="pos-diagram-toolbar">
-                                <button type="button" class="btn-diagram-tool btn-scroll-toggle" onclick="event.stopPropagation(); toggleDiagramScroll('wrap_form_${collapseId}')" title="Genişlet ve incele">
-                                    <span class="tool-icon">↔️</span> <span class="tool-text">Kaydırarak Büyüt</span>
-                                </button>
-                                <button type="button" class="btn-diagram-tool" onclick="event.stopPropagation(); openImageLightbox('${ex.diagram}', '${escapeHTML(ex.name)} - Form Şeması')" title="Tam ekran mod">
-                                    <span class="tool-icon">⛶</span> <span class="tool-text">Tam Ekran</span>
-                                </button>
-                            </div>
-                            <div class="pos-diagram-img-box" onclick="event.stopPropagation(); openImageLightbox('${ex.diagram}', '${escapeHTML(ex.name)} - Form Şeması')">
-                                <img src="${ex.diagram}" alt="${escapeHTML(ex.name)} Form Şeması" class="pos-diagram-img" loading="lazy">
-                                <div class="pos-diagram-zoom-hint">🔍 Dokun: Büyüt</div>
-                            </div>
-                            <div class="pos-diagram-scroll-indicator">
-                                ↔️ Adımları yakından incelemek için sağa/sola kaydırın
-                            </div>
-                        </div>
-                        ${extraInfoHtml}
-                    `;
-                }
+                formVisualHtml = extraInfoHtml;
             }
 
             let anatomiVisualHtml = '';
@@ -6925,7 +6862,7 @@
                 if (subEl) subEl.innerHTML = `<span style="color:var(--text-secondary);">Aynı kas grubuna farklı ekipmanla veya başka bir bölgeye geçiş yapın.</span> <span style="display:inline-block; font-size:10.5px; color:var(--gold); background:rgba(245,158,11,0.12); padding:2px 7px; border-radius:4px; border:1px solid rgba(245,158,11,0.25); margin-left:4px; font-weight:700;">🛡️ Listenizdeki hareketler hariç tutuldu</span>`;
                 if (banner) banner.style.display = 'flex';
 
-                const guide = (exerciseGuideMap && exerciseGuideMap[currentEx.id]) || (currentEx.diagram ? { form: currentEx.diagram } : null) || null;
+                const guide = (exerciseGuideMap && exerciseGuideMap[currentEx.id]) || (categoryFallback && categoryFallback[currentEx.category]) || null;
                 const thumbImg = (guide && guide.form) ? guide.form : '';
                 if (thumbEl) {
                     thumbEl.innerHTML = thumbImg ? `<img src="${thumbImg}" style="width:100%; height:100%; object-fit:contain;" alt="${escapeHTML(currentEx.name)}">` : '🏋️';
@@ -7197,11 +7134,9 @@
             }
 
             let cardsHtml = filtered.map(ex => {
-                const photoGuide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) ? exerciseGuideMap[ex.id] : null;
-            const targetFname = (ex.diagram ? ex.diagram.split('/').pop() : '') || '';
-            const inlineSvg = (typeof DIAGRAMS_SVG_DB !== 'undefined' && DIAGRAMS_SVG_DB[targetFname]) ? DIAGRAMS_SVG_DB[targetFname] : null;
-            const hasDiagram = !!(inlineSvg || ex.diagram);
-            const guide = photoGuide;
+                const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) 
+                    || (typeof categoryFallback !== 'undefined' && categoryFallback[ex.category]) 
+                    || null;
                 const thumbImg = (guide && guide.form) ? guide.form : '';
                 const eqMeta = EQUIP_LABELS[ex.equipment] || { label: ex.equipment || '', icon: '🏋️' };
                 const anatomy = getExerciseAnatomy(ex);
@@ -10105,7 +10040,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) 
                     || (typeof categoryFallback !== 'undefined' && categoryFallback[ex.category]) 
                     || (typeof guideLibrary !== 'undefined' ? guideLibrary.goblet_squat : null);
-                const thumbImg = guide?.form || ex.diagram || '';
+                const thumbImg = guide?.form || '';
                 
                 const eqInfo = (typeof EQUIP_LABELS !== 'undefined' && EQUIP_LABELS[ex.equipment]) 
                     ? `${EQUIP_LABELS[ex.equipment].icon} ${EQUIP_LABELS[ex.equipment].label}` 
@@ -11360,7 +11295,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         `;
                     } else {
                         exercisesHtml = exercises.map((ex, idx) => {
-                            const guide = (exerciseGuideMap && exerciseGuideMap[ex.id]) || (ex.diagram ? { form: ex.diagram } : null) || null || {};
+                            const guide = (exerciseGuideMap && exerciseGuideMap[ex.id]) || (categoryFallback && categoryFallback[ex.category]) || {};
                             const thumb = guide.form || '';
                             const sets = ex.targetSets || (details.scheme ? details.scheme.sets : 3);
                             const reps = ex.targetReps || (details.scheme ? details.scheme.reps : '8-12');
@@ -11984,7 +11919,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             if (listEl) {
                 listEl.innerHTML = exercises.map((ex, idx) => {
-                    const guide = (exerciseGuideMap && exerciseGuideMap[ex.id]) || (ex.diagram ? { form: ex.diagram } : null) || null || {};
+                    const guide = (exerciseGuideMap && exerciseGuideMap[ex.id]) || (categoryFallback && categoryFallback[ex.category]) || {};
                     const thumb = guide.form || '';
                     const sets = ex.targetSets || (workout.scheme ? workout.scheme.sets : 3);
                     const reps = ex.targetReps || (workout.scheme ? workout.scheme.reps : '8-12');
@@ -16802,7 +16737,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=106')
+                navigator.serviceWorker.register('./sw.js?v=107')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
@@ -17042,12 +16977,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 const ex = EXERCISES_DB.find(e => e.id === item.exId);
                 if (!ex) return;
 
-                const photoGuide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) ? exerciseGuideMap[ex.id] : null;
-            const targetFname = (ex.diagram ? ex.diagram.split('/').pop() : '') || '';
-            const inlineSvg = (typeof DIAGRAMS_SVG_DB !== 'undefined' && DIAGRAMS_SVG_DB[targetFname]) ? DIAGRAMS_SVG_DB[targetFname] : null;
-            const hasDiagram = !!(inlineSvg || ex.diagram);
-            const guide = photoGuide;
-                const thumbImg = guide.form || '';
+                const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) 
+                    || (typeof categoryFallback !== 'undefined' && categoryFallback[ex.category]) 
+                    || null;
+                const thumbImg = guide ? guide.form || '' : '';
 
                 const anatomy = getExerciseAnatomy(ex);
 
@@ -17175,12 +17108,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             let html = '';
             filtered.forEach(ex => {
-                const photoGuide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) ? exerciseGuideMap[ex.id] : null;
-            const targetFname = (ex.diagram ? ex.diagram.split('/').pop() : '') || '';
-            const inlineSvg = (typeof DIAGRAMS_SVG_DB !== 'undefined' && DIAGRAMS_SVG_DB[targetFname]) ? DIAGRAMS_SVG_DB[targetFname] : null;
-            const hasDiagram = !!(inlineSvg || ex.diagram);
-            const guide = photoGuide;
-                const thumbImg = guide.form || '';
+                const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) 
+                    || (typeof categoryFallback !== 'undefined' && categoryFallback[ex.category]) 
+                    || null;
+                const thumbImg = guide ? guide.form || '' : '';
                 const isAlreadyInRoutine = customRoutineState.exercises.some(item => item.exId === ex.id);
 
                 const anatomy = getExerciseAnatomy(ex);
@@ -17534,9 +17465,6 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (!photoGuide && typeof categoryFallback !== 'undefined' && ex.category && categoryFallback[ex.category]) {
                 photoGuide = categoryFallback[ex.category];
             }
-            const targetFname = (ex.diagram ? ex.diagram.split('/').pop() : '') || '';
-            const inlineSvg = (typeof DIAGRAMS_SVG_DB !== 'undefined' && DIAGRAMS_SVG_DB[targetFname]) ? DIAGRAMS_SVG_DB[targetFname] : null;
-            const hasDiagram = !!(inlineSvg || ex.diagram);
             const guide = photoGuide;
 
             const btnReport = document.getElementById('btnExDetailReport');
@@ -17594,52 +17522,20 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const formContainer = document.getElementById('exDetailTabContentForm');
             const photoSrc = (photoGuide && photoGuide.form) ? photoGuide.form : (ex.formImage || null);
 
-            if (photoSrc || hasDiagram) {
-                let visualsHtml = '';
-                
-                // 1. ÖNCELİKLİ VE BİRİNCİL: Gerçek İnsan Fotoğraflı Form Rehberi
-                if (photoSrc) {
-                    visualsHtml += `
-                        <div style="background:#000; border-radius:12px; overflow:hidden; border:1.5px solid rgba(245,158,11,0.4); margin-bottom:12px; box-shadow:0 6px 24px rgba(0,0,0,0.6);">
-                            <div style="background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.08); padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
-                                <span style="font-size:11.5px; font-weight:900; color:var(--gold); letter-spacing:0.5px;">📸 GERÇEK FORM REHBERİ</span>
-                                <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 9px; border-radius:4px; color:var(--cyan); border-color:var(--cyan); font-weight:700;" onclick="openImageLightbox('${photoSrc}', '${escapeHTML(ex.name)} - Form Rehberi')">⛶ Tam Ekran Büyüt</button>
-                            </div>
-                            <div style="text-align:center; padding:6px; cursor:pointer;" onclick="openImageLightbox('${photoSrc}', '${escapeHTML(ex.name)} - Form Rehberi')" title="Büyütmek için dokunun">
-                                <img src="${photoSrc}" style="max-width:100%; max-height:46vh; object-fit:contain; display:block; margin:0 auto; border-radius:6px;" alt="${escapeHTML(ex.name)} Form">
-                                <div style="font-size:10.5px; color:var(--text-secondary); margin-top:6px; font-weight:600;">🔍 Dokunarak tam ekran inceleyebilirsiniz</div>
-                            </div>
+            let visualsHtml = '';
+            if (photoSrc) {
+                visualsHtml = `
+                    <div style="background:#000; border-radius:12px; overflow:hidden; border:1.5px solid rgba(245,158,11,0.4); margin-bottom:12px; box-shadow:0 6px 24px rgba(0,0,0,0.6);">
+                        <div style="background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.08); padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:11.5px; font-weight:900; color:var(--gold); letter-spacing:0.5px;">📸 GERÇEK FORM REHBERİ</span>
+                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 9px; border-radius:4px; color:var(--cyan); border-color:var(--cyan); font-weight:700;" onclick="openImageLightbox('${photoSrc}', '${escapeHTML(ex.name)} - Form Rehberi')">⛶ Tam Ekran Büyüt</button>
                         </div>
-                    `;
-
-                    // Vektörel şema varsa ikincil, isteğe bağlı akordiyon olarak sun
-                    if (hasDiagram) {
-                        visualsHtml += `
-                            <details style="margin-bottom:12px; background:#090d16; border:1px solid rgba(56,189,248,0.25); border-radius:8px; padding:6px 10px;">
-                                <summary style="font-size:11px; font-weight:800; color:var(--cyan); cursor:pointer; outline:none; user-select:none;">
-                                    📐 Vektörel Şematik Akış Çizimini Göster ▼
-                                </summary>
-                                <div style="margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06); text-align:center;">
-                                    ${inlineSvg ? `<div style="width:100%; overflow-x:auto;">${inlineSvg}</div>` : `<img src="${ex.diagram}" style="max-width:100%; max-height:35vh; object-fit:contain; display:block; margin:0 auto;" alt="Şema">`}
-                                </div>
-                            </details>
-                        `;
-                    }
-                } else if (hasDiagram) {
-                    // Fotoğraf yoksa mecburen diyagram göster
-                    visualsHtml += `
-                        <div style="background:#090d16; border-radius:10px; border:1px solid rgba(56,189,248,0.3); overflow:hidden; margin-bottom:10px;">
-                            <div style="background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.08); padding:6px 12px; display:flex; justify-content:space-between; align-items:center;">
-                                <span style="font-size:11px; font-weight:800; color:var(--cyan); letter-spacing:0.5px;">📐 HAREKET AKIŞ ŞEMASI</span>
-                                <button type="button" class="btn btn-outline" style="font-size:10px; padding:2px 8px; border-radius:4px; color:var(--gold); border-color:rgba(245,158,11,0.5);" onclick="openImageLightbox('${ex.diagram}', '${escapeHTML(ex.name)} - Form Şeması')">⛶ Tam Ekran</button>
-                            </div>
-                            <div style="padding:6px; text-align:center; cursor:pointer;" onclick="openImageLightbox('${ex.diagram}', '${escapeHTML(ex.name)} - Form Şeması')" title="Büyütmek için dokunun">
-                                ${inlineSvg ? `<div style="width:100%; overflow-x:auto;">${inlineSvg}</div>` : `<img src="${ex.diagram}" style="max-width:100%; max-height:45vh; object-fit:contain; display:block; margin:0 auto;" alt="${escapeHTML(ex.name)} Form">`}
-                                <div style="font-size:10px; color:var(--cyan); margin-top:4px; font-weight:700;">🔍 Dokun: Tam Ekran Büyüt & İncele</div>
-                            </div>
+                        <div style="text-align:center; padding:6px; cursor:pointer;" onclick="openImageLightbox('${photoSrc}', '${escapeHTML(ex.name)} - Form Rehberi')" title="Büyütmek için dokunun">
+                            <img src="${photoSrc}" style="max-width:100%; max-height:46vh; object-fit:contain; display:block; margin:0 auto; border-radius:6px;" alt="${escapeHTML(ex.name)} Form">
+                            <div style="font-size:10.5px; color:var(--text-secondary); margin-top:6px; font-weight:600;">🔍 Dokunarak tam ekran inceleyebilirsiniz</div>
                         </div>
-                    `;
-                }
+                    </div>
+                `;
 
                 formContainer.innerHTML = `
                     ${visualsHtml}
