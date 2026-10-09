@@ -54,15 +54,16 @@ body {
     -webkit-app-region: drag; /* Mac window drag */
 }
 
-.header-left, .header-center, .header-right {
+.header-left, .header-right {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     -webkit-app-region: no-drag;
 }
 
 .header-left {
     margin-left: 65px; /* Mac traffic light compensation */
+    gap: 16px;
 }
 
 .logo-mark {
@@ -76,34 +77,43 @@ body {
     align-items: center;
     justify-content: center;
     font-weight: 900;
+    flex-shrink: 0;
 }
 
-.brand-title h1 {
-    font-size: 15px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    color: #fff;
+.brand-title {
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
     line-height: 1.1;
 }
 
+.brand-title h1 {
+    font-size: 14.5px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: #fff;
+    margin: 0;
+}
+
 .brand-title .subtitle {
-    font-size: 10.5px;
-    color: var(--text-muted);
-    font-weight: 500;
+    font-size: 10px;
+    color: var(--gold);
+    font-weight: 700;
+    letter-spacing: 0.5px;
 }
 
 .athlete-selector-wrap {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     background: var(--bg-elevated);
-    padding: 4px 12px;
+    padding: 4px 10px;
     border-radius: 8px;
     border: 1px solid var(--border-subtle);
 }
 
 .athlete-selector-wrap label {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-secondary);
 }
 
@@ -112,28 +122,31 @@ body {
     border: none;
     color: var(--gold);
     font-weight: 700;
-    font-size: 13px;
+    font-size: 12.5px;
     outline: none;
     cursor: pointer;
+    max-width: 170px;
 }
 
 .btn-refresh {
     background: var(--bg-elevated);
     border: 1px solid var(--border-subtle);
     color: var(--text-secondary);
-    padding: 6px 12px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
     border-radius: 8px;
-    font-size: 12px;
+    font-size: 13px;
     cursor: pointer;
     transition: all 0.2s;
     display: flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
 }
 
 .btn-refresh:hover {
     color: #fff;
-    border-color: var(--text-secondary);
+    border-color: var(--gold);
 }
 
 .status-pill {

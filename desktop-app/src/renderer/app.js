@@ -261,9 +261,12 @@ async function loadAthletes() {
         usersWithCounts.sort((a, b) => b.validLogCount - a.validLogCount);
         state.users = usersWithCounts;
 
-        el.athleteSelect.innerHTML = usersWithCounts.map(u => 
-            `<option value="${u.id}">${u.name || u.username} • ${u.validLogCount > 0 ? `${u.validLogCount} Antrenman Kaydı` : 'Kayıt Yok'} (${u.role === 'admin' ? 'Admin' : 'Sporcu'})</option>`
-        ).join('');
+        el.athleteSelect.innerHTML = usersWithCounts.map(u => {
+            const rawName = u.name || u.username || 'Sporcu';
+            const cleanName = rawName.replace(/\s*\(Admin\)/gi, '').trim();
+            const roleTag = u.role === 'admin' ? ' (Admin)' : '';
+            return `<option value="${u.id}">${cleanName}${roleTag}</option>`;
+        }).join('');
 
         // İlk kullanıcıyı seç (En çok antrenman kaydı olan sporcu)
         const defaultUser = usersWithCounts[0];

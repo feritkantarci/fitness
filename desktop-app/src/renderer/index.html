@@ -14,35 +14,33 @@
             <div class="logo-mark">🔬</div>
             <div class="brand-title">
                 <h1>FitLAB</h1>
-                <span class="subtitle">Akademik Spor Bilimi & AI İstasyonu • v1.0</span>
+                <span class="subtitle">v1.0</span>
             </div>
+
+            <!-- Sekmeler Solda (Doğrudan Logo Yanında) -->
+            <nav class="app-nav-tabs">
+                <button class="nav-tab-btn active" id="tabBtnDashboard" data-view="dashboard">
+                    <span class="icon">📊</span> Kokpit
+                </button>
+                <button class="nav-tab-btn" id="tabBtnAnalytics" data-view="analytics">
+                    <span class="icon">🧬</span> Biyomekanik Analiz
+                </button>
+                <button class="nav-tab-btn" id="tabBtnLab" data-view="lab">
+                    <span class="icon">🔬</span> Lab Atlası
+                </button>
+            </nav>
         </div>
 
-        <nav class="app-nav-tabs">
-            <button class="nav-tab-btn active" id="tabBtnDashboard" data-view="dashboard">
-                <span class="icon">📊</span> Kokpit
-            </button>
-            <button class="nav-tab-btn" id="tabBtnAnalytics" data-view="analytics">
-                <span class="icon">🧬</span> Biyomekanik Analiz & Çubuklar
-            </button>
-            <button class="nav-tab-btn" id="tabBtnLab" data-view="lab">
-                <span class="icon">🔬</span> Lab (Biyomekanik Atlas)
-            </button>
-        </nav>
-
-        <div class="header-center">
+        <div class="header-right">
             <div class="athlete-selector-wrap">
-                <label for="athleteSelect">Aktif Sporcu:</label>
+                <label for="athleteSelect">👤</label>
                 <select id="athleteSelect">
                     <option value="">Yükleniyor...</option>
                 </select>
             </div>
             <button class="btn-refresh" id="btnRefresh" title="Verileri Firebase'den Canlı Yenile">
-                <span class="icon">🔄</span> Yenile
+                <span class="icon">🔄</span>
             </button>
-        </div>
-
-        <div class="header-right">
             <div class="status-pill status-firebase" id="firebaseStatusPill" title="Firebase Firestore Canlı Köprü">
                 <span class="dot"></span> Bulut: Canlı
             </div>
