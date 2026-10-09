@@ -3551,7 +3551,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v105</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v106</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3587,7 +3587,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v105</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v106</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -7245,7 +7245,7 @@
                                     <img src="${thumbImg}" style="max-width:100%; max-height:42vh; object-fit:contain; display:block; margin:0 auto;" alt="${escapeHTML(ex.name)} Form">
                                 </div>
                                 <div style="font-size:10.5px; color:var(--text-secondary); text-align:center; margin-bottom:6px;">
-                                    💡 <em>Görseller yapay zeka çizimidir. Türkçe talimat ve kas dağılımı aşağıdadır.</em>
+                                    📸 <em>Gerçek İnsan Form Rehberi • Tam ekran ve anatomi için butona dokunun.</em>
                                 </div>
                             ` : `
                                 <div style="text-align:center; padding:16px; color:var(--text-secondary); font-size:11.5px;">Görsel form rehberi optimize ediliyor.</div>
@@ -16802,7 +16802,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=105')
+                navigator.serviceWorker.register('./sw.js?v=106')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
@@ -17524,7 +17524,16 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 subTitleEl.innerHTML = `<span style="color:var(--gold); font-weight:800;">🎯 Ana: ${escapeHTML(anatomy.primary)}</span>${anatomy.secondary ? ` • <span style="color:var(--cyan); font-weight:700;">⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''} • <span style="color:var(--text-secondary);">${ex.equipment ? ex.equipment.toUpperCase() : ''}</span>`;
             }
 
-            const photoGuide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) ? exerciseGuideMap[ex.id] : null;
+            let photoGuide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) ? exerciseGuideMap[ex.id] : null;
+            if (!photoGuide && typeof findBestExerciseMatch === 'function' && ex.name) {
+                const matched = findBestExerciseMatch(ex.name);
+                if (matched && typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[matched.id]) {
+                    photoGuide = exerciseGuideMap[matched.id];
+                }
+            }
+            if (!photoGuide && typeof categoryFallback !== 'undefined' && ex.category && categoryFallback[ex.category]) {
+                photoGuide = categoryFallback[ex.category];
+            }
             const targetFname = (ex.diagram ? ex.diagram.split('/').pop() : '') || '';
             const inlineSvg = (typeof DIAGRAMS_SVG_DB !== 'undefined' && DIAGRAMS_SVG_DB[targetFname]) ? DIAGRAMS_SVG_DB[targetFname] : null;
             const hasDiagram = !!(inlineSvg || ex.diagram);
@@ -17583,35 +17592,50 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             // Form Tab
             const formContainer = document.getElementById('exDetailTabContentForm');
-            if (hasDiagram || (photoGuide && photoGuide.form)) {
+            const photoSrc = (photoGuide && photoGuide.form) ? photoGuide.form : (ex.formImage || null);
+
+            if (photoSrc || hasDiagram) {
                 let visualsHtml = '';
                 
-                // 1. Dedicated Vector SVG Flow (Highest pedagogical clarity & exact movement phases)
-                if (hasDiagram) {
+                // 1. ÖNCELİKLİ VE BİRİNCİL: Gerçek İnsan Fotoğraflı Form Rehberi
+                if (photoSrc) {
+                    visualsHtml += `
+                        <div style="background:#000; border-radius:12px; overflow:hidden; border:1.5px solid rgba(245,158,11,0.4); margin-bottom:12px; box-shadow:0 6px 24px rgba(0,0,0,0.6);">
+                            <div style="background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.08); padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
+                                <span style="font-size:11.5px; font-weight:900; color:var(--gold); letter-spacing:0.5px;">📸 GERÇEK FORM REHBERİ</span>
+                                <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 9px; border-radius:4px; color:var(--cyan); border-color:var(--cyan); font-weight:700;" onclick="openImageLightbox('${photoSrc}', '${escapeHTML(ex.name)} - Form Rehberi')">⛶ Tam Ekran Büyüt</button>
+                            </div>
+                            <div style="text-align:center; padding:6px; cursor:pointer;" onclick="openImageLightbox('${photoSrc}', '${escapeHTML(ex.name)} - Form Rehberi')" title="Büyütmek için dokunun">
+                                <img src="${photoSrc}" style="max-width:100%; max-height:46vh; object-fit:contain; display:block; margin:0 auto; border-radius:6px;" alt="${escapeHTML(ex.name)} Form">
+                                <div style="font-size:10.5px; color:var(--text-secondary); margin-top:6px; font-weight:600;">🔍 Dokunarak tam ekran inceleyebilirsiniz</div>
+                            </div>
+                        </div>
+                    `;
+
+                    // Vektörel şema varsa ikincil, isteğe bağlı akordiyon olarak sun
+                    if (hasDiagram) {
+                        visualsHtml += `
+                            <details style="margin-bottom:12px; background:#090d16; border:1px solid rgba(56,189,248,0.25); border-radius:8px; padding:6px 10px;">
+                                <summary style="font-size:11px; font-weight:800; color:var(--cyan); cursor:pointer; outline:none; user-select:none;">
+                                    📐 Vektörel Şematik Akış Çizimini Göster ▼
+                                </summary>
+                                <div style="margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06); text-align:center;">
+                                    ${inlineSvg ? `<div style="width:100%; overflow-x:auto;">${inlineSvg}</div>` : `<img src="${ex.diagram}" style="max-width:100%; max-height:35vh; object-fit:contain; display:block; margin:0 auto;" alt="Şema">`}
+                                </div>
+                            </details>
+                        `;
+                    }
+                } else if (hasDiagram) {
+                    // Fotoğraf yoksa mecburen diyagram göster
                     visualsHtml += `
                         <div style="background:#090d16; border-radius:10px; border:1px solid rgba(56,189,248,0.3); overflow:hidden; margin-bottom:10px;">
                             <div style="background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.08); padding:6px 12px; display:flex; justify-content:space-between; align-items:center;">
-                                <span style="font-size:11px; font-weight:800; color:var(--cyan); letter-spacing:0.5px;">📐 VEKTÖREL FORM AKIŞ ŞEMASI</span>
+                                <span style="font-size:11px; font-weight:800; color:var(--cyan); letter-spacing:0.5px;">📐 HAREKET AKIŞ ŞEMASI</span>
                                 <button type="button" class="btn btn-outline" style="font-size:10px; padding:2px 8px; border-radius:4px; color:var(--gold); border-color:rgba(245,158,11,0.5);" onclick="openImageLightbox('${ex.diagram}', '${escapeHTML(ex.name)} - Form Şeması')">⛶ Tam Ekran</button>
                             </div>
                             <div style="padding:6px; text-align:center; cursor:pointer;" onclick="openImageLightbox('${ex.diagram}', '${escapeHTML(ex.name)} - Form Şeması')" title="Büyütmek için dokunun">
                                 ${inlineSvg ? `<div style="width:100%; overflow-x:auto;">${inlineSvg}</div>` : `<img src="${ex.diagram}" style="max-width:100%; max-height:45vh; object-fit:contain; display:block; margin:0 auto;" alt="${escapeHTML(ex.name)} Form">`}
                                 <div style="font-size:10px; color:var(--cyan); margin-top:4px; font-weight:700;">🔍 Dokun: Tam Ekran Büyüt & İncele</div>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                // 2. Photographic Guide (If directly available for this exercise)
-                if (photoGuide && photoGuide.form) {
-                    visualsHtml += `
-                        <div style="background:#000; border-radius:8px; overflow:hidden; border:1px solid var(--border); margin-bottom:10px;">
-                            <div style="background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.08); padding:5px 10px; display:flex; justify-content:space-between; align-items:center;">
-                                <span style="font-size:10.5px; font-weight:700; color:var(--text-secondary);">📸 FOTOĞRAFİK FORM REHBERİ</span>
-                                <button type="button" class="btn btn-outline" style="font-size:9.5px; padding:1px 6px; color:var(--text-secondary);" onclick="openImageLightbox('${photoGuide.form}', '${escapeHTML(ex.name)} - Fotoğraf')">⛶ İncele</button>
-                            </div>
-                            <div style="text-align:center; padding:4px; cursor:pointer;" onclick="openImageLightbox('${photoGuide.form}', '${escapeHTML(ex.name)} - Fotoğraf')">
-                                <img src="${photoGuide.form}" style="max-width:100%; max-height:40vh; object-fit:contain; display:block; margin:0 auto;" alt="${escapeHTML(ex.name)} Fotoğraf">
                             </div>
                         </div>
                     `;

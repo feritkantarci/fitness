@@ -668,7 +668,9 @@ function parseMarkdownProgram(text, catalog) {
                         cue: note ? (note + (matchedDb && matchedDb.cue ? ' • ' + matchedDb.cue : '')) : (matchedDb ? matchedDb.cue : ''),
                         muscle: matchedDb ? matchedDb.muscle : 'Genel Kas Gelişimi & Fonksiyonel Güç',
                         equipment: matchedDb ? matchedDb.equipment : 'dumbbell',
-                        diagram: matchedDb ? matchedDb.diagram : null
+                        diagram: matchedDb ? (matchedDb.formImage || matchedDb.diagram) : null,
+                        formImage: matchedDb ? matchedDb.formImage : null,
+                        anatomiImage: matchedDb ? matchedDb.anatomiImage : null
                     });
                 }
             } else if (trimmed.startsWith('-') || trimmed.startsWith('*')) {
@@ -687,7 +689,9 @@ function parseMarkdownProgram(text, catalog) {
                         cue: bulletMatch[2].trim(),
                         muscle: matchedDb ? matchedDb.muscle : 'Genel Kas Gelişimi & Fonksiyonel Güç',
                         equipment: matchedDb ? matchedDb.equipment : 'dumbbell',
-                        diagram: matchedDb ? matchedDb.diagram : null
+                        diagram: matchedDb ? (matchedDb.formImage || matchedDb.diagram) : null,
+                        formImage: matchedDb ? matchedDb.formImage : null,
+                        anatomiImage: matchedDb ? matchedDb.anatomiImage : null
                     });
                 }
             }
@@ -1034,10 +1038,10 @@ function setVisualTab(tabName) {
 function updateInspectorImage() {
     if (!state.selectedExercise) return;
     const ex = state.selectedExercise;
-    // Form sekmesinde öncelik: Vektörel Hareket Şeması (diagramImage) yoksa Form Kılavuzu (formImage)
+    // Form sekmesinde öncelik: Gerçek İnsan Fotoğraflı Form Rehberi (formImage), yoksa Vektörel Şema (diagramImage)
     const imgSrc = state.visualTab === 'form' 
-        ? (ex.diagramImage || ex.formImage) 
-        : (ex.anatomiImage || ex.diagramImage || ex.formImage);
+        ? (ex.formImage || ex.diagramImage) 
+        : (ex.anatomiImage || ex.formImage || ex.diagramImage);
 
     el.inspImageFallback.style.display = 'none';
     el.inspImage.style.display = 'block';
