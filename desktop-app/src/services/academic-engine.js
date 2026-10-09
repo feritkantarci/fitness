@@ -271,13 +271,137 @@ function resolveExerciseBiomechanics(name = '', rawMuscle = '', category = '') {
 }
 
 /**
- * Antrenman loglarından egzersizleri mekanik gerilim katsayılarına göre analiz eder.
+ * Sporcunun tartı ve vücut kompozisyonu (BIA - Unique Health / InBody / Tanita) verilerini
+ * egzersiz fizyolojisi ve biyomekanik modeller ışığında analiz eder.
  */
-function analyzeAthleteHistory(workoutLogs, userProfile = {}) {
+function analyzeBodyComposition(scaleLogs = [], userProfile = {}) {
+    if (!Array.isArray(scaleLogs) || scaleLogs.length === 0) {
+        return {
+            hasData: false,
+            message: 'Kayıtlı tartı ve vücut kompozisyonu analizi bulunmuyor.'
+        };
+    }
+
+    // Tarihe göre yeniden eskiye sırala
+    const sorted = [...scaleLogs]
+        .filter(s => s && (s.weight || s.bodyFat || s.muscleMass))
+        .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
+    if (sorted.length === 0) {
+        return { hasData: false, message: 'Geçerli tartı kaydı bulunamadı.' };
+    }
+
+    const latest = sorted[0];
+    const previous = sorted.length > 1 ? sorted[1] : null;
+
+    const weight = parseFloat(latest.weight) || 0;
+    const bodyFat = parseFloat(latest.bodyFat) || null;
+    const skeletalMuscle = parseFloat(latest.skeletalMuscle || latest.muscleMass) || null;
+    const bmr = parseInt(latest.bmr, 10) || null;
+    const visceralFat = parseInt(latest.visceralFat, 10) || null;
+    const waterPct = parseFloat(latest.waterPct) || null;
+
+    const fatMassKg = (weight > 0 && bodyFat !== null) ? Math.round(weight * (bodyFat / 100) * 10) / 10 : null;
+    const leanMassKg = (weight > 0 && fatMassKg !== null) ? Math.round((weight - fatMassKg) * 10) / 10 : null;
+
+    let delta = null;
+    if (previous) {
+        const prevWeight = parseFloat(previous.weight) || 0;
+        const prevBodyFat = parseFloat(previous.bodyFat) || null;
+        const prevMuscle = parseFloat(previous.skeletalMuscle || previous.muscleMass) || null;
+        delta = {
+            weightKg: prevWeight > 0 ? Math.round((weight - prevWeight) * 10) / 10 : 0,
+            bodyFatPct: (bodyFat !== null && prevBodyFat !== null) ? Math.round((bodyFat - prevBodyFat) * 10) / 10 : null,
+            muscleKg: (skeletalMuscle !== null && prevMuscle !== null) ? Math.round((skeletalMuscle - prevMuscle) * 10) / 10 : null,
+            previousDate: previous.date
+        };
+    }
+
+    // Fizyolojik Teşhis ve Faz Sınıflandırması
+    let phase = 'OPTIMAL_RECOMP';
+    let phaseTitle = 'Vücut Rekompozisyonu & Dengeli Hipertrofi';
+    let conditioningDemand = 'MODERATE';
+    const scientificGuidelines = [];
+
+    const isMale = (userProfile.gender || 'male') === 'male';
+    const highFatThreshold = isMale ? 18.0 : 25.0;
+    const lowFatThreshold = isMale ? 12.0 : 19.0;
+
+    if (bodyFat !== null) {
+        if (bodyFat >= highFatThreshold) {
+            phase = 'FAT_LOSS_DENSITY';
+            phaseTitle = 'Definasyon, Yağ Yakımı & Kuvvet Koruma';
+            conditioningDemand = 'HIGH';
+            scientificGuidelines.push('Yüksek yağ oranı ve viseral yük: Antrenmanlarda glikolitik yoğunluk artırılmalı, seans sonlarına patlayıcı kettlebell/kondisyon blokları eklenmelidir.');
+            scientificGuidelines.push('Mekanik Gerilimi Koru (Dr. Brad Schoenfeld): Kalori kısıtlamasında veya yağ yakımında kas kaybını önlemek için ana bileşik egzersizlerde çalışma ağırlıkları kesinlikle düşürülmemelidir.');
+        } else if (bodyFat <= lowFatThreshold) {
+            phase = 'LEAN_HYPERTROPHY';
+            phaseTitle = 'Temiz Kas Kazanımı & Hipertrofi Maksimizasyonu';
+            conditioningDemand = 'LOW_MODERATE';
+            scientificGuidelines.push('Düşük yağ oranı ve yüksek insülin duyarlılığı: Hacim MAV üst bandına (14-20 set) çekilmeli, aşırı çöp kardiyodan kaçınılmalıdır.');
+            scientificGuidelines.push('Esneme Aracılı Büyüme (Pedrosa & Maeo): Kasın gergin pozisyonda yüklendiği hareketlere (Incline Dumbbell Curl, RDL, Cable Lateral) öncelik verilmelidir.');
+        } else {
+            phase = 'OPTIMAL_RECOMP';
+            phaseTitle = 'Rekompozisyon & Kademeli Aşırı Yüklenme';
+            conditioningDemand = 'MODERATE';
+            scientificGuidelines.push('İdeal kompozisyon dengesi: Kademeli aşırı yüklenme (Progressive Overload) ile kas dokusu artırılırken form korunmalıdır.');
+        }
+    }
+
+    // Viseral Yağ Değerlendirmesi
+    if (visceralFat && visceralFat >= 9) {
+        scientificGuidelines.push(`⚠️ Viseral (iç organ) yağlanma seviyesi (${visceralFat}) yüksek. Dinlenme süreleri 60-90 saniye bandında tutularak kardiyo-metabolik harcama yükseltilmelidir.`);
+    }
+
+    // Vücut Ağırlığı Egzersizlerinin Relatif Yükü (Calisthenic Impact)
+    let calisthenicsNote = '';
+    if (weight >= 82) {
+        calisthenicsNote = `Ağır vücut kütlesi (${weight} kg): Barfiks, şınav ve dip hareketlerinde eklemlere ve omuz kuşağına binen relatif yük yüksektir. RPE/RIR kontrolü sıkı tutulmalı veya gerekirse göğüs destekli row/kablo hareketleriyle kompanse edilmelidir.`;
+    } else {
+        calisthenicsNote = `Hafif/orta vücut kütlesi (${weight} kg): Barfiks ve şınav gibi vücut ağırlığı hareketleri yüksek SFR ile hipertrofiye mükemmel yanıt verir.`;
+    }
+
+    return {
+        hasData: true,
+        latest,
+        previous,
+        delta,
+        metrics: {
+            weight,
+            bodyFat,
+            skeletalMuscle,
+            fatMassKg,
+            leanMassKg,
+            bmr,
+            visceralFat,
+            waterPct,
+            bodyScore: latest.uniqueHealth?.bodyScore || null,
+            bodyAge: latest.uniqueHealth?.bodyAge || null
+        },
+        diagnosis: {
+            phase,
+            phaseTitle,
+            conditioningDemand,
+            calisthenicsNote,
+            scientificGuidelines
+        },
+        segmental: latest.uniqueHealth?.segmental || null,
+        historyCount: sorted.length
+    };
+}
+
+/**
+ * Antrenman loglarından egzersizleri mekanik gerilim katsayılarına göre analiz eder.
+ * Tartı ve vücut kompozisyonu verileriyle entegre çalışır.
+ */
+function analyzeAthleteHistory(workoutLogs, userProfile = {}, scaleLogs = []) {
+    const bodyComposition = analyzeBodyComposition(scaleLogs, userProfile);
+
     if (!Array.isArray(workoutLogs) || workoutLogs.length === 0) {
         return {
             status: 'NO_DATA',
-            message: 'Analiz edilecek antrenman kaydı bulunamadı.'
+            message: 'Analiz edilecek antrenman kaydı bulunamadı.',
+            bodyComposition: bodyComposition
         };
     }
 
@@ -292,7 +416,8 @@ function analyzeAthleteHistory(workoutLogs, userProfile = {}) {
     if (validLogs.length === 0) {
         return {
             status: 'NO_DATA',
-            message: 'Tamamlanmış hard set içeren antrenman kaydı bulunamadı.'
+            message: 'Tamamlanmış hard set içeren antrenman kaydı bulunamadı.',
+            bodyComposition: bodyComposition
         };
     }
 
@@ -477,7 +602,8 @@ function analyzeAthleteHistory(workoutLogs, userProfile = {}) {
         optimalMuscles: optimalMuscles,
         overreached: overreachedMuscles,
         biomechanicalWarnings: biomechanicalWarnings,
-        tonnageTrend: weeklyTonnageTrend
+        tonnageTrend: weeklyTonnageTrend,
+        bodyComposition: bodyComposition
     };
 }
 
@@ -513,5 +639,6 @@ module.exports = {
     VOLUME_LANDMARKS,
     EXERCISE_SPEC,
     resolveExerciseBiomechanics,
+    analyzeBodyComposition,
     analyzeAthleteHistory
 };

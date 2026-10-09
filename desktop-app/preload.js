@@ -12,11 +12,12 @@ contextBridge.exposeInMainWorld('coachAPI', {
     getUsers: () => ipcRenderer.invoke('firebase:getUsers'),
     getWorkoutLogs: (uid) => ipcRenderer.invoke('firebase:getWorkoutLogs', uid),
     getScaleLogs: (uid) => ipcRenderer.invoke('firebase:getScaleLogs', uid),
+    saveScaleLogs: (uid, logs) => ipcRenderer.invoke('firebase:saveScaleLogs', { uid, logs }),
     sendDirectiveToWeb: (uid, directive) => ipcRenderer.invoke('firebase:sendDirective', { uid, directive }),
     sendProgramToWeb: (uid, program) => ipcRenderer.invoke('firebase:sendProgram', { uid, program }),
 
     // Akademik Spor Bilimi Analizi & Biyomekanik Atlas
-    analyzeHistory: (logs, profile) => ipcRenderer.invoke('academic:analyze', { logs, profile }),
+    analyzeHistory: (logs, profile, scaleLogs) => ipcRenderer.invoke('academic:analyze', { logs, profile, scaleLogs }),
     getExerciseCatalog: () => ipcRenderer.invoke('catalog:getExercises'),
 
     // AI Koçluk & Gemini Reçete

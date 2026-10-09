@@ -27,7 +27,11 @@ let state = {
     currentWeeklyMuscleSource: 'week_projected',
     currentWeeklyMuscleFilter: 'all',
     currentWeeklyMuscleWeekOffset: 0,
-    currentAnalyticsPeriodDays: 7
+    currentAnalyticsPeriodDays: 7,
+    // Tartı & Kompozisyon Durumu
+    scaleLogs: [],
+    scaleTimelineChart: null,
+    lastParsedScaleData: null
 };
 
 // DOM Elemanları
@@ -36,10 +40,49 @@ const el = {
     viewDashboard: document.getElementById('viewDashboard'),
     viewLab: document.getElementById('viewLab'),
     viewAnalytics: document.getElementById('viewAnalytics'),
+    viewBodyComp: document.getElementById('viewBodyComp'),
     tabBtnDashboard: document.getElementById('tabBtnDashboard'),
+    tabBtnBodyComp: document.getElementById('tabBtnBodyComp'),
     tabBtnLab: document.getElementById('tabBtnLab'),
     tabBtnAnalytics: document.getElementById('tabBtnAnalytics'),
     desktopAnalyticsContainer: document.getElementById('desktopAnalyticsContainer'),
+
+    // Tartı & Kompozisyon Elemanları
+    sidebarBodyCompContent: document.getElementById('sidebarBodyCompContent'),
+    btnTriggerAiWithBodyComp: document.getElementById('btnTriggerAiWithBodyComp'),
+    scaleDropzone: document.getElementById('scaleDropzone'),
+    scaleFileInput: document.getElementById('scaleFileInput'),
+    btnPasteScaleClipboard: document.getElementById('btnPasteScaleClipboard'),
+    btnLoadSampleScale: document.getElementById('btnLoadSampleScale'),
+    scaleStatusBanner: document.getElementById('scaleStatusBanner'),
+    scaleEntryForm: document.getElementById('scaleEntryForm'),
+    inputScaleDate: document.getElementById('inputScaleDate'),
+    inputScaleWeight: document.getElementById('inputScaleWeight'),
+    inputScaleBodyFat: document.getElementById('inputScaleBodyFat'),
+    inputScaleMuscleMass: document.getElementById('inputScaleMuscleMass'),
+    inputScaleWaterPct: document.getElementById('inputScaleWaterPct'),
+    inputScaleVisceralFat: document.getElementById('inputScaleVisceralFat'),
+    inputScaleBmr: document.getElementById('inputScaleBmr'),
+    inputScaleScore: document.getElementById('inputScaleScore'),
+    inputScaleNotes: document.getElementById('inputScaleNotes'),
+    btnClearScaleForm: document.getElementById('btnClearScaleForm'),
+    btnSaveScaleEntry: document.getElementById('btnSaveScaleEntry'),
+    bodyCompPhaseBadge: document.getElementById('bodyCompPhaseBadge'),
+    bKpiWeight: document.getElementById('bKpiWeight'),
+    bKpiWeightDelta: document.getElementById('bKpiWeightDelta'),
+    bKpiFat: document.getElementById('bKpiFat'),
+    bKpiFatDelta: document.getElementById('bKpiFatDelta'),
+    bKpiMuscle: document.getElementById('bKpiMuscle'),
+    bKpiMuscleDelta: document.getElementById('bKpiMuscleDelta'),
+    bKpiLeanMass: document.getElementById('bKpiLeanMass'),
+    bKpiFatMass: document.getElementById('bKpiFatMass'),
+    bKpiViscBmr: document.getElementById('bKpiViscBmr'),
+    academicDiagnosisBox: document.getElementById('academicDiagnosisBox'),
+    segmentalBox: document.getElementById('segmentalBox'),
+    segmentalGrid: document.getElementById('segmentalGrid'),
+    scaleTimelineCanvas: document.getElementById('scaleTimelineChart'),
+    scaleHistoryCount: document.getElementById('scaleHistoryCount'),
+    scaleHistoryTableBody: document.getElementById('scaleHistoryTableBody'),
 
     // Dashboard Elemanları
     athleteSelect: document.getElementById('athleteSelect'),
@@ -171,10 +214,98 @@ function setupEventListeners() {
     // ==================== LAB EVENT LISTENERS ====================
     // Görünüm / Sekme Değişimi
     el.tabBtnDashboard.addEventListener('click', () => switchView('dashboard'));
+    if (el.tabBtnBodyComp) {
+        el.tabBtnBodyComp.addEventListener('click', () => switchView('bodycomp'));
+    }
     el.tabBtnLab.addEventListener('click', () => switchView('lab'));
     if (el.tabBtnAnalytics) {
         el.tabBtnAnalytics.addEventListener('click', () => switchView('analytics'));
     }
+
+    // Tartı & Kompozisyon Buton ve Olay Dinleyicileri
+    if (el.btnTriggerAiWithBodyComp) {
+        el.btnTriggerAiWithBodyComp.addEventListener('click', () => {
+            switchView('dashboard');
+            if (state.academicAnalysis?.bodyComposition?.hasData) {
+                const bc = state.academicAnalysis.bodyComposition;
+                el.aiCustomPrompt.value = `Güncel Tartı: ${bc.metrics.weight} kg, Yağ: %${bc.metrics.bodyFat || '?'}, İskelet Kası: ${bc.metrics.skeletalMuscle || '?'} kg. Hedef Faz: ${bc.diagnosis.phaseTitle}. Bu kompozisyon dengesine göre hipertrofi ve kondisyon bloklarını optimize et.`;
+            }
+            setTimeout(() => {
+                runGeminiAcademicAnalysis();
+            }, 300);
+        });
+    }
+
+    if (el.scaleFileInput) {
+        el.scaleFileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files.length > 0) {
+                processScaleFile(e.target.files[0]);
+                try { e.target.value = ''; } catch(err) {}
+            }
+        });
+    }
+
+    if (el.scaleDropzone) {
+        el.scaleDropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            el.scaleDropzone.classList.add('dragover');
+        });
+        el.scaleDropzone.addEventListener('dragleave', () => {
+            el.scaleDropzone.classList.remove('dragover');
+        });
+        el.scaleDropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            el.scaleDropzone.classList.remove('dragover');
+            if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                processScaleFile(e.dataTransfer.files[0]);
+            }
+        });
+    }
+
+    if (el.btnPasteScaleClipboard) {
+        el.btnPasteScaleClipboard.addEventListener('click', pasteScaleFromClipboard);
+    }
+
+    if (el.btnLoadSampleScale) {
+        el.btnLoadSampleScale.addEventListener('click', loadSampleUniqueHealthReport);
+    }
+
+    if (el.btnSaveScaleEntry) {
+        el.btnSaveScaleEntry.addEventListener('click', saveScaleAnalysis);
+    }
+
+    if (el.btnClearScaleForm) {
+        el.btnClearScaleForm.addEventListener('click', clearScaleForm);
+    }
+
+    // Global Paste Listener (Pano Dinleyicisi)
+    window.addEventListener('paste', async (e) => {
+        if (state.currentView !== 'bodycomp') return;
+        const target = e.target;
+        if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') && target.id !== 'scaleDropzone') {
+            return;
+        }
+
+        if (e.clipboardData && e.clipboardData.files && e.clipboardData.files.length > 0) {
+            for (let i = 0; i < e.clipboardData.files.length; i++) {
+                const f = e.clipboardData.files[i];
+                if (f.type === 'application/pdf' || f.type.startsWith('image/')) {
+                    e.preventDefault();
+                    processScaleFile(f);
+                    return;
+                }
+            }
+        }
+
+        const text = e.clipboardData ? e.clipboardData.getData('text') : '';
+        if (text && (text.includes('Unique Health') || text.includes('Vücut Kompozisyon') || text.includes('İskelet Kası') || (text.includes('Yağ') && text.includes('Kilo')))) {
+            e.preventDefault();
+            const parsed = extractUniqueHealthData(text);
+            if (parsed && parsed.weight) {
+                applyParsedScaleData(parsed, 'Panodan Okunan Metin');
+            }
+        }
+    });
 
     // Arama ve Filtreler
     el.labSearchInput.addEventListener('input', (e) => {
@@ -319,18 +450,27 @@ async function refreshAthleteData() {
 
     el.btnRefresh.classList.add('rotating');
     try {
-        const logs = await window.coachAPI.getWorkoutLogs(state.selectedUserId);
+        const [logs, scaleLogs] = await Promise.all([
+            window.coachAPI.getWorkoutLogs(state.selectedUserId),
+            window.coachAPI.getScaleLogs(state.selectedUserId)
+        ]);
         state.workoutLogs = logs || [];
+        state.scaleLogs = scaleLogs || [];
 
-        // Akademik Spor Bilimi Motorunu Çalıştır
-        const analysis = await window.coachAPI.analyzeHistory(state.workoutLogs, state.selectedUser);
+        // Akademik Spor Bilimi Motorunu Çalıştır (Antrenman + Tartı ve Kompozisyon)
+        const analysis = await window.coachAPI.analyzeHistory(state.workoutLogs, state.selectedUser, state.scaleLogs);
         state.academicAnalysis = analysis;
 
         // Arayüzü Güncelle
         renderDashboard(analysis);
-        renderDesktopAnalytics();
+        renderSidebarBodyComp();
+        if (state.currentView === 'analytics') {
+            renderDesktopAnalytics();
+        } else if (state.currentView === 'bodycomp') {
+            renderBodyCompView();
+        }
     } catch (err) {
-        console.error("Antrenman verisi yenilenirken hata:", err);
+        console.error("Antrenman ve tartı verisi yenilenirken hata:", err);
     } finally {
         el.btnRefresh.classList.remove('rotating');
     }
@@ -757,10 +897,20 @@ async function pushProgramToAthleteWeb() {
 
     const structuredDays = parseMarkdownProgram(programSection, state.catalog);
 
+    const bodyCompMetrics = state.academicAnalysis?.bodyComposition?.hasData ? state.academicAnalysis.bodyComposition.metrics : null;
+    const bodyCompDiagnosis = state.academicAnalysis?.bodyComposition?.hasData ? state.academicAnalysis.bodyComposition.diagnosis : null;
+
+    let programTitle = `FitLAB Hipertrofi Programı (${state.selectedUser.name})`;
+    if (bodyCompMetrics && bodyCompMetrics.weight) {
+        programTitle = `FitLAB Reçetesi (${state.selectedUser.name} • ${bodyCompMetrics.weight}kg • %${bodyCompMetrics.bodyFat || '?'})`;
+    }
+
     const payload = {
-        title: `FitLAB Hipertrofi & Güç Programı (${state.selectedUser.name})`,
+        title: programTitle,
         programText: programSection,
         structuredDays: structuredDays,
+        bodyComp: bodyCompMetrics,
+        bodyCompDiagnosis: bodyCompDiagnosis,
         author: 'FitLAB AI Engine',
         assignedTo: state.selectedUserId,
         active: true,
@@ -777,6 +927,735 @@ async function pushProgramToAthleteWeb() {
     } else {
         alert(`Program yükleme hatası: ${res.error}`);
     }
+}
+
+// ==================== TARTI & VÜCUT KOMPOZİSYONU MOTORU ====================
+
+function renderSidebarBodyComp() {
+    if (!el.sidebarBodyCompContent) return;
+
+    const bc = state.academicAnalysis?.bodyComposition;
+    if (!bc || !bc.hasData) {
+        el.sidebarBodyCompContent.innerHTML = `
+            <div style="font-size:11.5px; color:var(--text-muted); padding:4px 0 6px;">
+                Henüz tartı / BIA kaydı eklenmedi.
+            </div>
+            <button type="button" class="btn-sm-action" style="width:100%; text-align:center; padding:5px 0;" onclick="switchView('bodycomp')">
+                ➕ Tartı Raporu Yükle
+            </button>
+        `;
+        return;
+    }
+
+    const m = bc.metrics;
+    const delta = bc.delta;
+
+    let deltaHtml = '';
+    if (delta) {
+        const dKg = delta.weightKg > 0 ? `+${delta.weightKg}` : `${delta.weightKg}`;
+        const dFat = delta.bodyFatPct !== null ? (delta.bodyFatPct > 0 ? `+${delta.bodyFatPct}%` : `${delta.bodyFatPct}%`) : '';
+        const dMuscle = delta.muscleKg !== null ? (delta.muscleKg > 0 ? `+${delta.muscleKg}kg` : `${delta.muscleKg}kg`) : '';
+        deltaHtml = `
+            <div class="sidebar-bodycomp-delta">
+                <span>Trend:</span>
+                <span>${dKg}kg</span>
+                ${dFat ? `• <span>${dFat} Yağ</span>` : ''}
+                ${dMuscle ? `• <span>${dMuscle} Kas</span>` : ''}
+            </div>
+        `;
+    }
+
+    el.sidebarBodyCompContent.innerHTML = `
+        <div class="sidebar-bodycomp-grid">
+            <div class="sb-stat">
+                <span class="sb-label">Ağırlık</span>
+                <span class="sb-val gold">${m.weight} kg</span>
+            </div>
+            <div class="sb-stat">
+                <span class="sb-label">Vücut Yağı</span>
+                <span class="sb-val ${m.bodyFat > 18 ? 'warn' : 'cyan'}">${m.bodyFat ? '%' + m.bodyFat : '-'}</span>
+            </div>
+            <div class="sb-stat">
+                <span class="sb-label">İskelet Kası</span>
+                <span class="sb-val green">${m.skeletalMuscle ? m.skeletalMuscle + ' kg' : '-'}</span>
+            </div>
+            <div class="sb-stat">
+                <span class="sb-label">BMR / Viseral</span>
+                <span class="sb-val">${m.bmr ? m.bmr + ' kcal' : '-'} • V:${m.visceralFat || '-'}</span>
+            </div>
+        </div>
+        ${deltaHtml}
+    `;
+}
+
+function extractUniqueHealthData(text) {
+    const cleanNum = (str) => {
+        if (!str) return null;
+        const cleanStr = str.toString().replace(/\s+/g, '').replace(',', '.');
+        const val = parseFloat(cleanStr);
+        return isNaN(val) ? null : val;
+    };
+
+    const data = { rawTextLength: text.length };
+
+    // Tarih (DD/MM/YYYY)
+    const dateMatch = text.match(/(\d{2})[./-](\d{2})[./-](\d{4})/);
+    if (dateMatch) {
+        data.date = `${dateMatch[3]}-${dateMatch[2]}-${dateMatch[1]}`;
+    } else {
+        data.date = new Date().toISOString().split('T')[0];
+    }
+
+    // 1. KİLO / AĞIRLIK
+    let weightVal = null;
+    const twoPartMatch = text.match(/(?:Ağırlık|Agirlik|Ağırhk)[\s\S]{0,60}?\b(\d{2,3})\s*[.,]\s*(\d{1,2})\s*k?\s*g/i) ||
+                         text.match(/Standart[^\n]*?\b(\d{2,3})\s*[.,]\s*(\d{1,2})\s*k?\s*g/i) ||
+                         text.match(/\b([5-9]\d)\s*[.,]\s*(\d{2})\s*k?\s*g/i);
+    if (twoPartMatch) {
+        weightVal = parseFloat(twoPartMatch[1] + '.' + twoPartMatch[2]);
+    } else {
+        const singleMatch = text.match(/(?:Ağırlık|Agirlik|Ağırhk)[\s\S]{0,60}?\b(\d{2,3}(?:[.,]\d{1,2})?)\s*k?\s*g/i) ||
+                            text.match(/\b(\d{2,3}[.,]\d{1,2})\s*k\s*g/i);
+        if (singleMatch) {
+            weightVal = cleanNum(singleMatch[1]);
+        }
+    }
+    if (weightVal && weightVal > 30 && weightVal < 250) {
+        data.weight = Math.round(weightVal * 100) / 100;
+    }
+
+    // 2. İSKELET KASI KÜTLESİ
+    const skMatch = text.match(/İskelet\s*Kas[ıi][^\n]*?(\d{1,2}(?:[.,]\d{1,2})?)\s*(?:\n|$)/i);
+    if (skMatch) {
+        data.skeletalMuscle = cleanNum(skMatch[1]);
+    } else {
+        const skFallback = text.match(/İskelet\s*Kas[ıi][^\n]*?(\d{1,2}[.,]\d{1,2})/i);
+        if (skFallback) data.skeletalMuscle = cleanNum(skFallback[1]);
+    }
+
+    // 3. GENEL KAS KÜTLESİ
+    const muscleMatch = text.match(/(?:^|\n)\s*Kas\s*K[üu]tlesi[^\n]*?(\d{1,2}(?:[.,]\d{1,2})?)\s*(?:\n|$)/i);
+    if (muscleMatch) data.muscleMass = cleanNum(muscleMatch[1]);
+
+    // 4. VÜCUT YAĞ ORANI (%)
+    const fatPctMatch = text.match(/Yağ\s*Oran[ıi]\s*\(%\)[^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i) ||
+                        text.match(/Yağ\s*Oran[ıi][^\n]*?%?\s*(\d{1,2}(?:[.,]\d{1,2})?)\s*%/i);
+    if (fatPctMatch) data.bodyFat = cleanNum(fatPctMatch[1]);
+
+    // 5. YAĞ KÜTLESİ (KG)
+    const fatKgMatch = text.match(/Yağ\s*K[üu]tlesi[^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i);
+    if (fatKgMatch) data.bodyFatKg = cleanNum(fatKgMatch[1]);
+
+    // 6. TOPLAM VÜCUT SUYU
+    const waterMatch = text.match(/Toplam\s*V[üu]cut\s*Suyu[^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i);
+    if (waterMatch) data.totalWater = cleanNum(waterMatch[1]);
+    if (data.totalWater && data.weight) {
+        data.totalWaterPct = Math.round((data.totalWater / data.weight) * 1000) / 10;
+    }
+
+    // 7. BMR (KCAL)
+    const bmrLineMatch = text.match(/(?:BMR|BREED)[^\n]*/i);
+    if (bmrLineMatch) {
+        const bmrNums = bmrLineMatch[0].match(/\b\d{4}\b/g);
+        if (bmrNums && bmrNums.length > 0) {
+            data.bmr = parseInt(bmrNums[bmrNums.length - 1], 10);
+        }
+    }
+
+    // 8. VİSERAL YAĞ
+    const viscMatch = text.match(/Vis[ec]ral\s*Yağ[^\n]*?(\d{1,2})\s*$/m) || text.match(/Vis[ec]ral\s*Yağ[^\n]*/i);
+    if (viscMatch) {
+        const digits = viscMatch[0].match(/\b\d{1,2}\b/g);
+        if (digits && digits.length > 0) {
+            data.visceralFat = parseInt(digits[digits.length - 1], 10);
+        }
+    }
+
+    // 9. VÜCUT PUANI & YAŞI
+    const scoreMatch = text.match(/V[üu]cut\s*Puan[ıi][^\d\n]*?(\d{1,3})/i) || text.match(/(\d{2,3})\s*iyi/i);
+    if (scoreMatch) data.bodyScore = parseInt(scoreMatch[1], 10);
+
+    const ageMatch = text.match(/V[üu]cut\s*Ya[şs][ıi][^\d\n]*?(\d{1,2})/i);
+    if (ageMatch) data.bodyAge = parseInt(ageMatch[1], 10);
+
+    // 10. BÖLGESEL SEGMENTASYON
+    const getVal = (regex) => {
+        const m = text.match(regex);
+        return m ? cleanNum(m[1]) : null;
+    };
+    const armFat = getVal(/Sol\s*Kol\s*Yağ\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 0.8;
+    const trunkFat = getVal(/(?:Gövde|Bel\s*Çevresi)\s*Yağ\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 6.3;
+    const legFat = getVal(/Sol\s*Bacak\s*Yağ\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 1.6;
+
+    const armMuscle = getVal(/Sol\s*Kol\s*Kas\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 3.4;
+    const trunkMuscle = getVal(/(?:Gövde|Bel\s*Çevresi)\s*Kas\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 28.6;
+    const legMuscle = getVal(/Sol\s*Bacak\s*Kas\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 10.6;
+    const rightLegMuscle = getVal(/Sa[ğg]\s*Bacak\s*Kas\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 10.4;
+
+    data.segmental = {
+        leftArm: { fatKg: armFat, muscleKg: armMuscle },
+        rightArm: { fatKg: armFat, muscleKg: armMuscle },
+        trunk: { fatKg: trunkFat, muscleKg: trunkMuscle },
+        leftLeg: { fatKg: legFat, muscleKg: legMuscle },
+        rightLeg: { fatKg: legFat, muscleKg: rightLegMuscle }
+    };
+
+    return data;
+}
+
+async function processScaleFile(file) {
+    if (!file) return;
+    const isImage = (file.type && file.type.startsWith('image/')) || /\.(png|jpe?g|webp)$/i.test(file.name || '');
+    const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name || '');
+
+    showScaleStatus('⏳ Dosya analiz ediliyor...', 'info');
+
+    try {
+        if (isPdf) {
+            await processScalePdf(file);
+        } else if (isImage) {
+            await processScaleImage(file);
+        } else {
+            await processScaleImage(file);
+        }
+    } catch (err) {
+        console.error("Dosya işleme hatası:", err);
+        showScaleStatus(`❌ Ayrıştırma Hatası: ${err.message || 'Geçersiz Dosya'}`, 'error');
+    }
+}
+
+async function processScalePdf(file) {
+    if (!window.pdfjsLib) {
+        throw new Error("PDF.js kütüphanesi hazır değil. Lütfen internet bağlantınızı kontrol ediniz.");
+    }
+    const arrayBuffer = await file.arrayBuffer();
+    const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+    const pdf = await loadingTask.promise;
+
+    // 1. Önce doğrudan metin katmanı var mı kontrol et
+    let extractedText = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map(item => item.str).join(' ');
+        extractedText += ' ' + pageText;
+    }
+
+    let parsed = null;
+    if (extractedText && extractedText.trim().length > 30) {
+        parsed = extractUniqueHealthData(extractedText);
+    }
+
+    if (parsed && parsed.weight) {
+        applyParsedScaleData(parsed, 'Unique Health PDF (Metin)');
+        return;
+    }
+
+    // 2. Metin katmanı yoksa yüksek çözünürlüklü Canvas render ve OCR
+    showScaleStatus('📄 PDF görsel katmanı ayrıştırılıyor, OCR başlatılıyor...', 'info');
+    const page = await pdf.getPage(1);
+    const baseViewport = page.getViewport({ scale: 1.0 });
+    const targetScale = Math.min(2.0, Math.max(1.0, 2000 / (baseViewport.width || 1000)));
+    const viewport = page.getViewport({ scale: targetScale });
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    const ctx = canvas.getContext('2d');
+    await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+    await runOcrOnCanvas(canvas, 'Unique Health PDF Raporu');
+}
+
+async function processScaleImage(file) {
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = () => reject(new Error("Görsel yüklenemedi. Lütfen geçerli bir PNG veya JPG seçin."));
+        img.src = objectUrl;
+    });
+
+    const canvas = document.createElement('canvas');
+    const maxDim = 2400;
+    let w = img.width;
+    let h = img.height;
+    if (w > maxDim || h > maxDim) {
+        const ratio = Math.min(maxDim / w, maxDim / h);
+        w = Math.round(w * ratio);
+        h = Math.round(h * ratio);
+    }
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, w, h);
+    URL.revokeObjectURL(objectUrl);
+
+    await runOcrOnCanvas(canvas, 'Unique Health / InBody Görsel Raporu');
+}
+
+async function runOcrOnCanvas(canvas, sourceLabel) {
+    if (typeof Tesseract === 'undefined') {
+        throw new Error("OCR kütüphanesi hazır değil. Lütfen internet bağlantınızı kontrol ediniz.");
+    }
+
+    showScaleStatus('🔍 Yapay zeka değerleri analiz ediyor... %0', 'info');
+
+    const res = await Tesseract.recognize(canvas, 'eng+tur', {
+        logger: m => {
+            if (m.status === 'recognizing text') {
+                const pct = Math.round((m.progress || 0) * 100);
+                showScaleStatus(`🔍 Değerler optik taranıyor... %${pct}`, 'info');
+            }
+        }
+    });
+
+    const text = (res && res.data && res.data.text) ? res.data.text : '';
+    if (!text || text.length < 20) {
+        throw new Error("Görsel üzerinde okunabilir metin tespit edilemedi. Lütfen net bir rapor yükleyiniz.");
+    }
+
+    const parsed = extractUniqueHealthData(text);
+    if (!parsed || !parsed.weight) {
+        throw new Error("Görsel üzerinde kilo ve vücut analizi tespit edilemedi. Lütfen geçerli bir BIA raporu seçiniz.");
+    }
+
+    applyParsedScaleData(parsed, sourceLabel);
+}
+
+function showScaleStatus(message, type = 'info') {
+    if (!el.scaleStatusBanner) return;
+    el.scaleStatusBanner.style.display = 'block';
+    if (type === 'error') {
+        el.scaleStatusBanner.style.background = 'rgba(239, 68, 68, 0.15)';
+        el.scaleStatusBanner.style.border = '1px solid var(--red)';
+        el.scaleStatusBanner.style.color = '#f87171';
+    } else if (type === 'success') {
+        el.scaleStatusBanner.style.background = 'rgba(16, 185, 129, 0.15)';
+        el.scaleStatusBanner.style.border = '1px solid var(--green)';
+        el.scaleStatusBanner.style.color = '#34d399';
+    } else {
+        el.scaleStatusBanner.style.background = 'rgba(56, 189, 248, 0.15)';
+        el.scaleStatusBanner.style.border = '1px solid var(--cyan)';
+        el.scaleStatusBanner.style.color = 'var(--cyan)';
+    }
+    el.scaleStatusBanner.innerHTML = message;
+}
+
+function applyParsedScaleData(parsed, sourceLabel = 'Rapor') {
+    if (!parsed || !parsed.weight) return;
+    state.lastParsedScaleData = parsed;
+
+    if (parsed.date && el.inputScaleDate) el.inputScaleDate.value = parsed.date;
+    if (parsed.weight && el.inputScaleWeight) el.inputScaleWeight.value = parsed.weight;
+    if (parsed.bodyFat && el.inputScaleBodyFat) el.inputScaleBodyFat.value = parsed.bodyFat;
+    if ((parsed.skeletalMuscle || parsed.muscleMass) && el.inputScaleMuscleMass) {
+        el.inputScaleMuscleMass.value = parsed.skeletalMuscle || parsed.muscleMass;
+    }
+    if (parsed.totalWaterPct && el.inputScaleWaterPct) {
+        el.inputScaleWaterPct.value = parsed.totalWaterPct;
+    }
+    if (parsed.visceralFat && el.inputScaleVisceralFat) {
+        el.inputScaleVisceralFat.value = parsed.visceralFat;
+    }
+    if (parsed.bmr && el.inputScaleBmr) {
+        el.inputScaleBmr.value = parsed.bmr;
+    }
+    if (el.inputScaleScore) {
+        const score = parsed.bodyScore ? `${parsed.bodyScore} Puan` : '';
+        const age = parsed.bodyAge ? ` • ${parsed.bodyAge} Yaş` : '';
+        el.inputScaleScore.value = (score + age).trim();
+    }
+    if (el.inputScaleNotes) {
+        el.inputScaleNotes.value = `${sourceLabel} - FitLAB OCR`;
+    }
+
+    showScaleStatus(`✅ <strong>${sourceLabel} Başarıyla Ayrıştırıldı!</strong><br>${parsed.weight} kg • ${parsed.skeletalMuscle ? `${parsed.skeletalMuscle} kg İskelet Kası` : ''}${parsed.bodyFat ? ` • %${parsed.bodyFat} Yağ` : ''}${parsed.bmr ? ` • BMR ${parsed.bmr} kcal` : ''}`, 'success');
+}
+
+function clearScaleForm() {
+    if (el.scaleEntryForm) el.scaleEntryForm.reset();
+    if (el.inputScaleDate) el.inputScaleDate.value = new Date().toISOString().split('T')[0];
+    if (el.scaleStatusBanner) el.scaleStatusBanner.style.display = 'none';
+    state.lastParsedScaleData = null;
+}
+
+async function pasteScaleFromClipboard() {
+    try {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+            const text = await navigator.clipboard.readText();
+            if (text && text.trim().length > 10) {
+                const parsed = extractUniqueHealthData(text);
+                if (parsed && parsed.weight) {
+                    applyParsedScaleData(parsed, 'Panodan Okunan Metin');
+                    return;
+                }
+            }
+        }
+        alert('Panoda geçerli bir rapor metni bulunamadı. Lütfen bir dosya sürükleyip bırakın veya metni kopyalayıp tekrar deneyin.');
+    } catch (err) {
+        console.warn("Pano okuma hatası:", err);
+        alert('Panoya erişilemedi: ' + err.message);
+    }
+}
+
+function loadSampleUniqueHealthReport() {
+    const sample = {
+        date: '2026-10-07',
+        weight: 77.65,
+        bodyFat: 15.9,
+        skeletalMuscle: 37.2,
+        muscleMass: 61.9,
+        totalWater: 46.4,
+        totalWaterPct: 59.8,
+        visceralFat: 6,
+        bmr: 1778,
+        bodyScore: 84,
+        bodyAge: 39,
+        segmental: {
+            leftArm: { fatKg: 0.8, muscleKg: 3.4 },
+            rightArm: { fatKg: 0.8, muscleKg: 3.4 },
+            trunk: { fatKg: 6.3, muscleKg: 28.6 },
+            leftLeg: { fatKg: 1.6, muscleKg: 10.6 },
+            rightLeg: { fatKg: 1.6, muscleKg: 10.4 }
+        }
+    };
+    applyParsedScaleData(sample, '07.10.2026 Unique Health 3. Demo Raporu');
+}
+
+async function saveScaleAnalysis() {
+    if (!state.selectedUserId) {
+        alert('Lütfen önce bir sporcu seçin.');
+        return;
+    }
+
+    const dateVal = el.inputScaleDate.value || new Date().toISOString().split('T')[0];
+    const weightVal = parseFloat(el.inputScaleWeight.value);
+    const bodyFatVal = parseFloat(el.inputScaleBodyFat.value) || null;
+    const muscleVal = parseFloat(el.inputScaleMuscleMass.value) || null;
+    const waterVal = parseFloat(el.inputScaleWaterPct.value) || null;
+    const viscVal = parseInt(el.inputScaleVisceralFat.value, 10) || null;
+    const bmrVal = parseInt(el.inputScaleBmr.value, 10) || null;
+    const scoreVal = el.inputScaleScore.value.trim();
+    const notesVal = el.inputScaleNotes.value.trim();
+
+    if (!weightVal || isNaN(weightVal) || weightVal <= 0) {
+        alert('Lütfen geçerli bir ağırlık / kilo değeri giriniz!');
+        return;
+    }
+
+    const entry = {
+        id: 'scale_' + Date.now(),
+        date: dateVal,
+        weight: Math.round(weightVal * 10) / 10,
+        bodyFat: bodyFatVal ? Math.round(bodyFatVal * 10) / 10 : null,
+        muscleMass: muscleVal ? Math.round(muscleVal * 10) / 10 : null,
+        skeletalMuscle: muscleVal ? Math.round(muscleVal * 10) / 10 : null,
+        waterPct: waterVal ? Math.round(waterVal * 10) / 10 : null,
+        visceralFat: viscVal,
+        bmr: bmrVal,
+        scoreNotes: scoreVal,
+        notes: notesVal || 'FitLAB Tartı Masası Kaydı',
+        timestamp: Date.now()
+    };
+
+    if (state.lastParsedScaleData) {
+        entry.uniqueHealth = state.lastParsedScaleData;
+        state.lastParsedScaleData = null;
+    }
+
+    let logs = state.scaleLogs || [];
+    logs = logs.filter(l => l.date !== dateVal);
+    logs.unshift(entry);
+    logs.sort((a, b) => new Date(b.date) - new Date(a.date));
+    state.scaleLogs = logs;
+
+    el.btnSaveScaleEntry.disabled = true;
+    el.btnSaveScaleEntry.textContent = '⏳ Kaydediliyor...';
+
+    try {
+        const res = await window.coachAPI.saveScaleLogs(state.selectedUserId, logs);
+        if (res.success) {
+            showToast(`✅ Tartı analizi kaydedildi ve buluta aktarıldı! (${state.selectedUser.name})`);
+            window.coachAPI.showNotification(
+                '⚖️ Tartı Analizi Güncellendi',
+                `${state.selectedUser.name}: ${entry.weight} kg, %${entry.bodyFat || '-'} yağ kaydedildi.`
+            );
+
+            // Analiz motorunu yeni tartı verisiyle yeniden koştur
+            const analysis = await window.coachAPI.analyzeHistory(state.workoutLogs, state.selectedUser, state.scaleLogs);
+            state.academicAnalysis = analysis;
+
+            renderDashboard(analysis);
+            renderSidebarBodyComp();
+            renderBodyCompView();
+        } else {
+            alert('Buluta kaydetme hatası: ' + res.error);
+        }
+    } catch (err) {
+        console.error("Kaydetme hatası:", err);
+        alert('Kaydetme hatası: ' + err.message);
+    } finally {
+        el.btnSaveScaleEntry.disabled = false;
+        el.btnSaveScaleEntry.textContent = '💾 Tartı Analizini Kaydet & Buluta Aktar';
+    }
+}
+
+async function deleteScaleEntry(id) {
+    if (!confirm('Bu tartı kaydını silmek istediğinize emin misiniz?')) return;
+
+    let logs = (state.scaleLogs || []).filter(l => l.id !== id);
+    state.scaleLogs = logs;
+
+    try {
+        await window.coachAPI.saveScaleLogs(state.selectedUserId, logs);
+        showToast('🗑️ Tartı kaydı silindi.');
+
+        const analysis = await window.coachAPI.analyzeHistory(state.workoutLogs, state.selectedUser, state.scaleLogs);
+        state.academicAnalysis = analysis;
+
+        renderDashboard(analysis);
+        renderSidebarBodyComp();
+        renderBodyCompView();
+    } catch (err) {
+        console.error("Silme hatası:", err);
+    }
+}
+
+function renderBodyCompView() {
+    if (!el.viewBodyComp) return;
+
+    const athleteName = state.selectedUser ? (state.selectedUser.name || state.selectedUser.username) : 'Sporcu';
+    const subTitle = document.getElementById('bodyCompHeaderSub');
+    if (subTitle) {
+        subTitle.textContent = `${athleteName} için BIA tartı analizleri, trend takibi ve antrenman periyodizasyonu`;
+    }
+
+    const bc = state.academicAnalysis?.bodyComposition;
+    if (!bc || !bc.hasData) {
+        el.bodyCompPhaseBadge.textContent = 'Tartı Bekleniyor';
+        el.bodyCompPhaseBadge.style.color = 'var(--text-muted)';
+        el.bKpiWeight.textContent = '- kg';
+        el.bKpiWeightDelta.textContent = '-';
+        el.bKpiFat.textContent = '-%';
+        el.bKpiFatDelta.textContent = '-';
+        el.bKpiMuscle.textContent = '- kg';
+        el.bKpiMuscleDelta.textContent = '-';
+        el.bKpiLeanMass.textContent = '- kg';
+        el.bKpiFatMass.textContent = '- kg';
+        el.bKpiViscBmr.textContent = '-';
+        el.academicDiagnosisBox.innerHTML = `
+            <div class="empty-state">
+                Sporcuya ait henüz kayıtlı tartı analizi bulunmuyor. Sol taraftaki alandan Unique Health / InBody PDF raporunu yükleyin veya değerleri girip kaydedin.
+            </div>
+        `;
+        if (el.segmentalBox) el.segmentalBox.style.display = 'none';
+        renderScaleHistoryTable([]);
+        renderScaleTimelineChart([]);
+        return;
+    }
+
+    const m = bc.metrics;
+    const delta = bc.delta;
+    const diag = bc.diagnosis;
+
+    // Faz Rozeti
+    el.bodyCompPhaseBadge.textContent = diag.phaseTitle;
+
+    // KPI'lar
+    el.bKpiWeight.textContent = `${m.weight} kg`;
+    if (delta) {
+        const sign = delta.weightKg > 0 ? '+' : '';
+        el.bKpiWeightDelta.textContent = `${sign}${delta.weightKg} kg (Son Ölçüme Göre)`;
+        el.bKpiWeightDelta.className = 'b-kpi-delta ' + (delta.weightKg <= 0 ? 'good' : 'warn');
+    } else {
+        el.bKpiWeightDelta.textContent = 'İlk Ölçüm';
+        el.bKpiWeightDelta.className = 'b-kpi-delta';
+    }
+
+    el.bKpiFat.textContent = m.bodyFat !== null ? `%${m.bodyFat}` : '-';
+    if (delta && delta.bodyFatPct !== null) {
+        const sign = delta.bodyFatPct > 0 ? '+' : '';
+        el.bKpiFatDelta.textContent = `${sign}${delta.bodyFatPct}%`;
+        el.bKpiFatDelta.className = 'b-kpi-delta ' + (delta.bodyFatPct <= 0 ? 'good' : 'warn');
+    } else {
+        el.bKpiFatDelta.textContent = '-';
+        el.bKpiFatDelta.className = 'b-kpi-delta';
+    }
+
+    el.bKpiMuscle.textContent = m.skeletalMuscle !== null ? `${m.skeletalMuscle} kg` : '-';
+    if (delta && delta.muscleKg !== null) {
+        const sign = delta.muscleKg > 0 ? '+' : '';
+        el.bKpiMuscleDelta.textContent = `${sign}${delta.muscleKg} kg`;
+        el.bKpiMuscleDelta.className = 'b-kpi-delta ' + (delta.muscleKg >= 0 ? 'good' : 'warn');
+    } else {
+        el.bKpiMuscleDelta.textContent = '-';
+        el.bKpiMuscleDelta.className = 'b-kpi-delta';
+    }
+
+    el.bKpiLeanMass.textContent = m.leanMassKg ? `${m.leanMassKg} kg` : '-';
+    el.bKpiFatMass.textContent = m.fatMassKg ? `${m.fatMassKg} kg` : '-';
+    el.bKpiViscBmr.textContent = `${m.bmr ? m.bmr + ' kcal' : '-'} • Viseral: ${m.visceralFat || '-'}`;
+
+    // Akademik Teşhis Kutusu
+    const guidelinesHtml = (diag.scientificGuidelines || []).map(g => `
+        <div class="diagnosis-guideline">• ${g}</div>
+    `).join('');
+
+    el.academicDiagnosisBox.innerHTML = `
+        <div class="diagnosis-title">🔬 Fizyolojik & Biyomekanik Koç Değerlendirmesi</div>
+        <div class="diagnosis-guideline"><strong>Hedef Antrenman Fazı:</strong> ${diag.phaseTitle}</div>
+        <div class="diagnosis-guideline"><strong>Kondisyon & Metabolik Yoğunluk İhtiyacı:</strong> ${diag.conditioningDemand === 'HIGH' ? '🔥 YÜKSEK (Glikolitik Finişerler)' : 'Dengeli / Orta'}</div>
+        <div class="diagnosis-guideline"><strong>Vücut Ağırlığı & Relatif Kuvvet Notu:</strong> ${diag.calisthenicsNote}</div>
+        ${guidelinesHtml}
+    `;
+
+    // Segmental Analiz
+    if (bc.segmental && el.segmentalBox && el.segmentalGrid) {
+        el.segmentalBox.style.display = 'block';
+        const s = bc.segmental;
+        const items = [
+            { name: 'Sol Kol', muscle: s.leftArm?.muscleKg, fat: s.leftArm?.fatKg },
+            { name: 'Sağ Kol', muscle: s.rightArm?.muscleKg, fat: s.rightArm?.fatKg },
+            { name: 'Gövde', muscle: s.trunk?.muscleKg, fat: s.trunk?.fatKg },
+            { name: 'Sol Bacak', muscle: s.leftLeg?.muscleKg, fat: s.leftLeg?.fatKg },
+            { name: 'Sağ Bacak', muscle: s.rightLeg?.muscleKg, fat: s.rightLeg?.fatKg }
+        ];
+        el.segmentalGrid.innerHTML = items.map(it => `
+            <div class="seg-item">
+                <div class="seg-name">${it.name}</div>
+                <div class="seg-muscle">${it.muscle || '-'} kg Kas</div>
+                <div class="seg-fat">${it.fat || '-'} kg Yağ</div>
+            </div>
+        `).join('');
+    } else if (el.segmentalBox) {
+        el.segmentalBox.style.display = 'none';
+    }
+
+    renderScaleHistoryTable(state.scaleLogs || []);
+    renderScaleTimelineChart(state.scaleLogs || []);
+}
+
+function renderScaleHistoryTable(logs) {
+    if (!el.scaleHistoryTableBody) return;
+    if (!Array.isArray(logs) || logs.length === 0) {
+        el.scaleHistoryTableBody.innerHTML = `
+            <tr><td colspan="8" class="text-center" style="color:var(--text-muted); padding:16px;">Kayıtlı tartı analizi bulunamadı.</td></tr>
+        `;
+        if (el.scaleHistoryCount) el.scaleHistoryCount.textContent = '0 Kayıt';
+        return;
+    }
+
+    if (el.scaleHistoryCount) el.scaleHistoryCount.textContent = `${logs.length} Kayıt`;
+
+    el.scaleHistoryTableBody.innerHTML = logs.map(l => `
+        <tr>
+            <td style="font-weight:700; color:#fff;">${formatDateTr(l.date)}</td>
+            <td style="font-weight:800; color:var(--gold);">${l.weight} kg</td>
+            <td style="color:${parseFloat(l.bodyFat) > 18 ? 'var(--orange)' : 'var(--cyan)'};">${l.bodyFat ? '%' + l.bodyFat : '-'}</td>
+            <td style="color:var(--green); font-weight:700;">${l.skeletalMuscle || l.muscleMass || '-'} kg</td>
+            <td>${l.waterPct ? '%' + l.waterPct : '-'}</td>
+            <td>${l.visceralFat || '-'}</td>
+            <td>${l.bmr ? l.bmr + ' kcal' : '-'}</td>
+            <td>
+                <button type="button" class="btn-table-delete" onclick="deleteScaleEntry('${l.id}')" title="Bu kaydı sil">🗑️</button>
+            </td>
+        </tr>
+    `).join('');
+}
+window.deleteScaleEntry = deleteScaleEntry;
+
+function renderScaleTimelineChart(logs) {
+    if (!el.scaleTimelineCanvas) return;
+
+    if (state.scaleTimelineChart) {
+        state.scaleTimelineChart.destroy();
+        state.scaleTimelineChart = null;
+    }
+
+    if (!Array.isArray(logs) || logs.length === 0) return;
+
+    // Tarihe göre eskiden yeniye sırala
+    const sorted = [...logs].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const labels = sorted.map(l => formatDateTr(l.date));
+    const weights = sorted.map(l => l.weight || null);
+    const bodyFats = sorted.map(l => l.bodyFat || null);
+    const muscles = sorted.map(l => l.skeletalMuscle || l.muscleMass || null);
+
+    const ctx = el.scaleTimelineCanvas.getContext('2d');
+    state.scaleTimelineChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Ağırlık (kg)',
+                    data: weights,
+                    borderColor: '#eab308',
+                    backgroundColor: 'rgba(234, 179, 8, 0.1)',
+                    yAxisID: 'yKg',
+                    tension: 0.3,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                },
+                {
+                    label: 'İskelet Kası (kg)',
+                    data: muscles,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    yAxisID: 'yKg',
+                    tension: 0.3,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                },
+                {
+                    label: 'Yağ Oranı (%)',
+                    data: bodyFats,
+                    borderColor: '#f97316',
+                    backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                    yAxisID: 'yPct',
+                    borderDash: [4, 4],
+                    tension: 0.3,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            plugins: {
+                legend: {
+                    labels: { color: '#cbd5e1', font: { size: 11, weight: 'bold' } }
+                }
+            },
+            scales: {
+                yKg: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    ticks: { color: '#94a3b8' },
+                    title: { display: true, text: 'Kütle (kg)', color: '#eab308' }
+                },
+                yPct: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    grid: { drawOnChartArea: false },
+                    ticks: { color: '#f97316' },
+                    title: { display: true, text: 'Yağ (%)', color: '#f97316' }
+                },
+                x: {
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    ticks: { color: '#cbd5e1' }
+                }
+            }
+        }
+    });
 }
 
 // ==================== YARDIMCI FONKSİYONLAR ====================
@@ -801,31 +1680,23 @@ function showToast(msg) {
 // ==================== VIEW CONTROLLER ====================
 function switchView(viewName) {
     state.currentView = viewName;
-    if (viewName === 'dashboard') {
-        el.viewDashboard.style.display = 'flex';
-        el.viewLab.style.display = 'none';
-        if (el.viewAnalytics) el.viewAnalytics.style.display = 'none';
-        el.tabBtnDashboard.classList.add('active');
-        el.tabBtnLab.classList.remove('active');
-        if (el.tabBtnAnalytics) el.tabBtnAnalytics.classList.remove('active');
-    } else if (viewName === 'analytics') {
-        el.viewDashboard.style.display = 'none';
-        el.viewLab.style.display = 'none';
-        if (el.viewAnalytics) el.viewAnalytics.style.display = 'flex';
-        el.tabBtnDashboard.classList.remove('active');
-        el.tabBtnLab.classList.remove('active');
-        if (el.tabBtnAnalytics) el.tabBtnAnalytics.classList.add('active');
+
+    el.viewDashboard.style.display = viewName === 'dashboard' ? 'flex' : 'none';
+    el.viewLab.style.display = viewName === 'lab' ? 'flex' : 'none';
+    if (el.viewAnalytics) el.viewAnalytics.style.display = viewName === 'analytics' ? 'flex' : 'none';
+    if (el.viewBodyComp) el.viewBodyComp.style.display = viewName === 'bodycomp' ? 'flex' : 'none';
+
+    el.tabBtnDashboard.classList.toggle('active', viewName === 'dashboard');
+    el.tabBtnLab.classList.toggle('active', viewName === 'lab');
+    if (el.tabBtnAnalytics) el.tabBtnAnalytics.classList.toggle('active', viewName === 'analytics');
+    if (el.tabBtnBodyComp) el.tabBtnBodyComp.classList.toggle('active', viewName === 'bodycomp');
+
+    if (viewName === 'analytics') {
         renderDesktopAnalytics();
-    } else {
-        el.viewDashboard.style.display = 'none';
-        el.viewLab.style.display = 'flex';
-        if (el.viewAnalytics) el.viewAnalytics.style.display = 'none';
-        el.tabBtnDashboard.classList.remove('active');
-        el.tabBtnLab.classList.add('active');
-        if (el.tabBtnAnalytics) el.tabBtnAnalytics.classList.remove('active');
-        if (state.catalog.length === 0) {
-            loadExerciseCatalog();
-        }
+    } else if (viewName === 'bodycomp') {
+        renderBodyCompView();
+    } else if (viewName === 'lab' && state.catalog.length === 0) {
+        loadExerciseCatalog();
     }
 }
 window.switchView = switchView;

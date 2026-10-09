@@ -91,6 +91,25 @@ async function fetchScaleLogs(uid) {
 }
 
 /**
+ * Tartı ve vücut kompozisyonu kayıtlarını Firestore'a kaydeder/günceller
+ */
+async function saveScaleLogs(uid, logs) {
+    if (!db) initFirebase();
+    try {
+        const ref = doc(db, 'scale_logs', uid);
+        await setDoc(ref, {
+            logs: logs,
+            updatedAt: serverTimestamp(),
+            lastUpdatedBy: 'FitLAB_Desktop'
+        }, { merge: true });
+        return { success: true, message: 'Tartı analizleri buluta kaydedildi.' };
+    } catch (err) {
+        console.error("Scale logs kaydedilemedi:", err);
+        return { success: false, error: err.message };
+    }
+}
+
+/**
  * Sporcunun antrenman kayıtlarını CANLI dinler (Gerçek Zamanlı)
  * Sporcu salonda telefonundan antrenmanı bitirdiği an bu fonksiyon tetiklenir!
  */
@@ -152,6 +171,7 @@ module.exports = {
     fetchUsers,
     fetchWorkoutLogs,
     fetchScaleLogs,
+    saveScaleLogs,
     listenToAthleteWorkouts,
     sendDirectiveToWeb,
     sendCustomProgramToWeb
