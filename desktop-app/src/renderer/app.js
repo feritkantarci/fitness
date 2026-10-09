@@ -843,8 +843,17 @@ function selectLabExercise(ex) {
             : 'Hareket tepe sıkıştırma veya kısalmış pozisyon odaklıdır.';
     }
 
-    // Biyomekanik Form Cues
-    el.inspCueText.textContent = ex.cue || 'Standart biyomekanik form ve eklem hizalanmasına dikkat edin.';
+    // Biyomekanik Form Cues & Pozisyon Adımları
+    if (Array.isArray(ex.positions) && ex.positions.length > 0) {
+        let posHtml = `<p style="margin-bottom:8px;">${ex.cue || ''}</p><div class="cue-phases" style="display:flex; flex-direction:column; gap:6px; margin-top:8px; border-top:1px solid rgba(255,255,255,0.08); padding-top:8px;">`;
+        ex.positions.forEach(p => {
+            posHtml += `<div style="font-size:0.82rem; line-height:1.4;"><strong style="color:var(--cyan, #38bdf8);">${p.phase}:</strong> <span style="color:#94a3b8;">${p.desc}</span></div>`;
+        });
+        posHtml += `</div>`;
+        el.inspCueText.innerHTML = posHtml;
+    } else {
+        el.inspCueText.textContent = ex.cue || 'Standart biyomekanik form ve eklem hizalanmasına dikkat edin.';
+    }
 
     // Görseli Güncelle
     updateInspectorImage();
@@ -863,7 +872,10 @@ function setVisualTab(tabName) {
 function updateInspectorImage() {
     if (!state.selectedExercise) return;
     const ex = state.selectedExercise;
-    const imgSrc = state.visualTab === 'form' ? ex.formImage : ex.anatomiImage;
+    // Form sekmesinde öncelik: Vektörel Hareket Şeması (diagramImage) yoksa Form Kılavuzu (formImage)
+    const imgSrc = state.visualTab === 'form' 
+        ? (ex.diagramImage || ex.formImage) 
+        : (ex.anatomiImage || ex.diagramImage || ex.formImage);
 
     el.inspImageFallback.style.display = 'none';
     el.inspImage.style.display = 'block';
