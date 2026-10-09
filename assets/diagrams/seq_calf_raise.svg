@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 230" width="100%" height="auto" style="background:#090d16; border-radius:12px; font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;">
+<defs>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#fbbf24"/>
+        <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <linearGradient id="cyanGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#38bdf8"/>
+        <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+    <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#f8fafc"/>
+        <stop offset="100%" stop-color="#94a3b8"/>
+    </linearGradient>
+    <marker id="arrowCyan" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrowGold" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="#f59e0b"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="#10b981"/>
+    </marker>
+</defs>
+
+    <!-- PANEL 1: KURULUM &amp; ESNEME -->
+    <g transform="translate(12, 10)">
+        <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+        <rect x="12" y="10" width="105" height="22" rx="4" fill="#38bdf8" fill-opacity="0.15" stroke="#38bdf8" stroke-width="1"/>
+        <text x="64" y="25" fill="#38bdf8" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">1. BAŞLANGIÇ</text>
+        <g transform="translate(120, 95)">
+            <!-- Platform &amp; Floor -->
+            <rect x="-65" y="46" width="70" height="8" rx="2" fill="#334155" stroke="#475569" stroke-width="1"/>
+            <line x1="-75" y1="54" x2="75" y2="54" stroke="#1e293b" stroke-width="2" stroke-dasharray="4,4"/>
+            <!-- Body standing -->
+            <line x1="-15" y1="46" x2="-15" y2="12" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
+            <line x1="-5" y1="46" x2="-5" y2="12" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
+            <!-- Dropped heel indicator -->
+            <line x1="-20" y1="50" x2="-12" y2="46" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+            <line x1="-10" y1="12" x2="-10" y2="-22" stroke="url(#bodyGrad)" stroke-width="12" stroke-linecap="round"/>
+            <circle cx="-10" cy="-35" r="9" fill="#cbd5e1"/>
+            <!-- Arms holding dumbbell -->
+            <line x1="-10" y1="-16" x2="-2" y2="4" stroke="#94a3b8" stroke-width="4.5" stroke-linecap="round"/>
+            <g transform="translate(-2,6) scale(0.85)">
+                <rect x="-6" y="-2" width="12" height="4" rx="1" fill="#fde68a"/>
+                <rect x="-10" y="-6" width="4" height="12" rx="1.5" fill="url(#goldGrad)"/>
+                <rect x="6" y="-6" width="4" height="12" rx="1.5" fill="url(#goldGrad)"/>
+            </g>
+        </g>
+        <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Topuklar Tabanda / Esneme</text>
+        <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Ayak kökleri platformda, aşil gergin</text>
+    </g>
+
+    <!-- ARROW 1 -->
+    <g transform="translate(253, 105)">
+        <circle cx="8" cy="0" r="9" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+        <path d="M6,-3 L10,0 L6,3" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <!-- PANEL 2: PARMAK UCUNDA PATLAMA -->
+    <g transform="translate(270, 10)">
+        <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+        <rect x="12" y="10" width="105" height="22" rx="4" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="1"/>
+        <text x="64" y="25" fill="#10b981" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">2. TEPE KİLİT</text>
+        <g transform="translate(120, 85)">
+            <rect x="-65" y="56" width="70" height="8" rx="2" fill="#334155" stroke="#475569" stroke-width="1"/>
+            <!-- Elevated calf body -->
+            <line x1="-15" y1="46" x2="-15" y2="2" stroke="#10b981" stroke-width="7" stroke-linecap="round"/>
+            <line x1="-5" y1="46" x2="-5" y2="2" stroke="#10b981" stroke-width="7" stroke-linecap="round"/>
+            <!-- High toe tiptoe angle -->
+            <line x1="-17" y1="56" x2="-14" y2="46" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/>
+            <line x1="-7" y1="56" x2="-4" y2="46" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/>
+            <line x1="-10" y1="2" x2="-10" y2="-32" stroke="url(#bodyGrad)" stroke-width="12" stroke-linecap="round"/>
+            <circle cx="-10" cy="-45" r="9" fill="#cbd5e1"/>
+            <!-- Up arrow indicator -->
+            <path d="M18,35 L18,5" stroke="#10b981" stroke-width="2.5" marker-end="url(#arrowGreen)" stroke-linecap="round"/>
+            <!-- Arms holding dumbbell -->
+            <line x1="-10" y1="-26" x2="-2" y2="-6" stroke="#94a3b8" stroke-width="4.5" stroke-linecap="round"/>
+            <g transform="translate(-2,-4) scale(0.85)">
+                <rect x="-6" y="-2" width="12" height="4" rx="1" fill="#fde68a"/>
+                <rect x="-10" y="-6" width="4" height="12" rx="1.5" fill="url(#goldGrad)"/>
+                <rect x="6" y="-6" width="4" height="12" rx="1.5" fill="url(#goldGrad)"/>
+            </g>
+        </g>
+        <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Parmak Ucunda Tepe Nokta</text>
+        <text x="120" y="195" fill="#10b981" font-size="10" font-weight="600" text-anchor="middle">Maksimum yüksel, 2 sn kalfı sık</text>
+    </g>
+
+    <!-- ARROW 2 -->
+    <g transform="translate(511, 105)">
+        <circle cx="8" cy="0" r="9" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+        <path d="M6,-3 L10,0 L6,3" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <!-- PANEL 3: KONTROLLÜ NEGATİF İNİŞ -->
+    <g transform="translate(528, 10)">
+        <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+        <rect x="12" y="10" width="105" height="22" rx="4" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="1"/>
+        <text x="64" y="25" fill="#f59e0b" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">3. YAVAŞ İNİŞ</text>
+        <g transform="translate(120, 95)">
+            <rect x="-65" y="46" width="70" height="8" rx="2" fill="#334155" stroke="#475569" stroke-width="1"/>
+            <line x1="-15" y1="46" x2="-15" y2="12" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
+            <line x1="-5" y1="46" x2="-5" y2="12" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
+            <line x1="-10" y1="12" x2="-10" y2="-22" stroke="url(#bodyGrad)" stroke-width="12" stroke-linecap="round"/>
+            <circle cx="-10" cy="-35" r="9" fill="#cbd5e1"/>
+            <!-- Down arrow indicator -->
+            <path d="M18,10 L18,38" stroke="#f59e0b" stroke-width="2.5" marker-end="url(#arrowGold)" stroke-linecap="round"/>
+            <line x1="-10" y1="-16" x2="-2" y2="4" stroke="#94a3b8" stroke-width="4.5" stroke-linecap="round"/>
+            <g transform="translate(-2,6) scale(0.85)">
+                <rect x="-6" y="-2" width="12" height="4" rx="1" fill="#fde68a"/>
+                <rect x="-10" y="-6" width="4" height="12" rx="1.5" fill="url(#goldGrad)"/>
+                <rect x="6" y="-6" width="4" height="12" rx="1.5" fill="url(#goldGrad)"/>
+            </g>
+        </g>
+        <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">3 Saniye Negatif İniş</text>
+        <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Zıplamadan kontrollü derin esneme</text>
+    </g>
+</svg>

@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 230" width="100%" height="auto" style="background:#090d16; border-radius:12px; font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;">
+<defs>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#fbbf24"/>
+        <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <linearGradient id="cyanGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#38bdf8"/>
+        <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+    <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#f8fafc"/>
+        <stop offset="100%" stop-color="#94a3b8"/>
+    </linearGradient>
+    <marker id="arrowCyan" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrowGold" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="#f59e0b"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="#10b981"/>
+    </marker>
+</defs>
+
+    <!-- PANEL 1: NÖTR TUTUŞ BAŞLANGIÇ -->
+    <g transform="translate(12, 10)">
+        <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+        <rect x="12" y="10" width="105" height="22" rx="4" fill="#38bdf8" fill-opacity="0.15" stroke="#38bdf8" stroke-width="1"/>
+        <text x="64" y="25" fill="#38bdf8" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">1. NÖTR DURUŞ</text>
+        <g transform="translate(120, 95)">
+            <line x1="-65" y1="48" x2="65" y2="48" stroke="#334155" stroke-width="2" stroke-dasharray="4,4"/>
+            <line x1="-8" y1="45" x2="-8" y2="10" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
+            <line x1="8" y1="45" x2="8" y2="10" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
+            <line x1="0" y1="10" x2="0" y2="-22" stroke="url(#bodyGrad)" stroke-width="12" stroke-linecap="round"/>
+            <circle cx="0" cy="-35" r="9" fill="#cbd5e1"/>
+            <!-- Arm vertical neutral -->
+            <line x1="-10" y1="-16" x2="-14" y2="5" stroke="#94a3b8" stroke-width="5" stroke-linecap="round"/>
+            <line x1="-14" y1="5" x2="-14" y2="26" stroke="#94a3b8" stroke-width="4.5" stroke-linecap="round"/>
+            <!-- Vertical Dumbbell (Hammer Grip) -->
+            <g transform="translate(-14,28) rotate(90) scale(0.9)">
+                <rect x="-8" y="-2.5" width="16" height="5" rx="1.5" fill="#fde68a"/>
+                <rect x="-12" y="-6.5" width="5" height="13" rx="1.5" fill="url(#goldGrad)"/>
+                <rect x="7" y="-6.5" width="5" height="13" rx="1.5" fill="url(#goldGrad)"/>
+            </g>
+        </g>
+        <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Avuçlar Birbirine Bakar</text>
+        <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Dirsekler gövdeye yapışık, dik duruş</text>
+    </g>
+
+    <!-- ARROW 1 -->
+    <g transform="translate(253, 105)">
+        <circle cx="8" cy="0" r="9" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+        <path d="M6,-3 L10,0 L6,3" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <!-- PANEL 2: TEPE BRACHIALIS SIKIŞTIRMA -->
+    <g transform="translate(270, 10)">
+        <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+        <rect x="12" y="10" width="105" height="22" rx="4" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="1"/>
+        <text x="64" y="25" fill="#10b981" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">2. ÇEKİÇ KİLİT</text>
+        <g transform="translate(120, 95)">
+            <line x1="-65" y1="48" x2="65" y2="48" stroke="#334155" stroke-width="2" stroke-dasharray="4,4"/>
+            <line x1="-8" y1="45" x2="-8" y2="10" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
+            <line x1="8" y1="45" x2="8" y2="10" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
+            <line x1="0" y1="10" x2="0" y2="-22" stroke="url(#bodyGrad)" stroke-width="12" stroke-linecap="round"/>
+            <circle cx="0" cy="-35" r="9" fill="#cbd5e1"/>
+            <!-- Arm flexed at 90-80 degrees -->
+            <line x1="-10" y1="-16" x2="-14" y2="2" stroke="#10b981" stroke-width="5" stroke-linecap="round"/>
+            <line x1="-14" y1="2" x2="-2" y2="-14" stroke="#10b981" stroke-width="5" stroke-linecap="round"/>
+            <!-- Muscle bulge highlight -->
+            <circle cx="-8" cy="-6" r="4.5" fill="#10b981" fill-opacity="0.6"/>
+            <!-- Vertical Dumbbell near shoulder -->
+            <g transform="translate(-2,-16) rotate(90) scale(0.9)">
+                <rect x="-8" y="-2.5" width="16" height="5" rx="1.5" fill="#fde68a"/>
+                <rect x="-12" y="-6.5" width="5" height="13" rx="1.5" fill="url(#goldGrad)"/>
+                <rect x="7" y="-6.5" width="5" height="13" rx="1.5" fill="url(#goldGrad)"/>
+            </g>
+            <!-- Up curl arc -->
+            <path d="M-14,24 A20,20 0 0,0 -4,-8" fill="none" stroke="#10b981" stroke-width="2" marker-end="url(#arrowGreen)"/>
+        </g>
+        <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Tepe Brachialis Kasıntısı</text>
+        <text x="120" y="195" fill="#10b981" font-size="10" font-weight="600" text-anchor="middle">Bileği bükmeden 1 sn zirvede sık</text>
+    </g>
+
+    <!-- ARROW 2 -->
+    <g transform="translate(511, 105)">
+        <circle cx="8" cy="0" r="9" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+        <path d="M6,-3 L10,0 L6,3" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <!-- PANEL 3: KONTROLLÜ İNİŞ -->
+    <g transform="translate(528, 10)">
+        <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+        <rect x="12" y="10" width="105" height="22" rx="4" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="1"/>
+        <text x="64" y="25" fill="#f59e0b" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">3. NEGATİF İNİŞ</text>
+        <g transform="translate(120, 95)">
+            <line x1="-65" y1="48" x2="65" y2="48" stroke="#334155" stroke-width="2" stroke-dasharray="4,4"/>
+            <line x1="-8" y1="45" x2="-8" y2="10" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
+            <line x1="8" y1="45" x2="8" y2="10" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
+            <line x1="0" y1="10" x2="0" y2="-22" stroke="url(#bodyGrad)" stroke-width="12" stroke-linecap="round"/>
+            <circle cx="0" cy="-35" r="9" fill="#cbd5e1"/>
+            <line x1="-10" y1="-16" x2="-14" y2="4" stroke="#94a3b8" stroke-width="5" stroke-linecap="round"/>
+            <line x1="-14" y1="4" x2="-8" y2="18" stroke="#94a3b8" stroke-width="4.5" stroke-linecap="round"/>
+            <!-- Down arrow indicator -->
+            <path d="M-2,-10 A22,22 0 0,1 -10,22" fill="none" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrowGold)"/>
+            <g transform="translate(-8,20) rotate(90) scale(0.9)">
+                <rect x="-8" y="-2.5" width="16" height="5" rx="1.5" fill="#fde68a"/>
+                <rect x="-12" y="-6.5" width="5" height="13" rx="1.5" fill="url(#goldGrad)"/>
+                <rect x="7" y="-6.5" width="5" height="13" rx="1.5" fill="url(#goldGrad)"/>
+            </g>
+        </g>
+        <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Sallanmadan Kontrollü İniş</text>
+        <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Belden ivme almadan tam esneme</text>
+    </g>
+</svg>
