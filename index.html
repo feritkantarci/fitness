@@ -3503,7 +3503,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v87</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v88</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3539,7 +3539,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v87</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v88</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -13724,6 +13724,230 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
         }
 
+        // ==================== AKADEMİK BİYOMEKANİK & KAS DAĞILIM MOTORU ====================
+        // Brad Schoenfeld & RP Çok Eklemli Kademeli Yük Modeli (Single Source of Truth)
+        const ACADEMIC_EXERCISE_SPEC = {
+            // 1. GÖĞÜS & YATAY İTİŞ
+            'barbell bench': { primary: 'Göğüs', pFactor: 1.0, sec: { 'Omuz': 0.35, 'Triceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'dambıl bench press': { primary: 'Göğüs', pFactor: 1.0, sec: { 'Omuz': 0.35, 'Triceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'bench press': { primary: 'Göğüs', pFactor: 1.0, sec: { 'Omuz': 0.35, 'Triceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'incline barbell bench': { primary: 'Göğüs', pFactor: 1.0, sec: { 'Omuz': 0.45, 'Triceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'incline dambıl press': { primary: 'Göğüs', pFactor: 1.0, sec: { 'Omuz': 0.45, 'Triceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'eğimli sehpa dambıl pres (incline db press)': { primary: 'Göğüs', pFactor: 1.0, sec: { 'Omuz': 0.45, 'Triceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'dambıl floor press': { primary: 'Göğüs', pFactor: 0.85, sec: { 'Triceps': 0.45, 'Omuz': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: false },
+            'kablo crossover': { primary: 'Göğüs', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+            'kablo göğüs sıkıştırma (cable flyes / crossover)': { primary: 'Göğüs', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+            'pec deck kelebek': { primary: 'Göğüs', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+            'dips': { primary: 'Göğüs', pFactor: 0.85, sec: { 'Triceps': 0.40, 'Omuz': 0.30 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'MODERATE', lengthened: true },
+            'şınav (push-up)': { primary: 'Göğüs', pFactor: 0.65, sec: { 'Omuz': 0.25, 'Triceps': 0.25, 'Karın/Core': 0.20 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: false },
+            'klasik şınav (floor push-up)': { primary: 'Göğüs', pFactor: 0.65, sec: { 'Omuz': 0.25, 'Triceps': 0.25, 'Karın/Core': 0.20 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: false },
+            'şınav': { primary: 'Göğüs', pFactor: 0.65, sec: { 'Omuz': 0.25, 'Triceps': 0.25, 'Karın/Core': 0.20 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: false },
+            'decline şınav': { primary: 'Göğüs', pFactor: 0.75, sec: { 'Omuz': 0.35, 'Triceps': 0.25, 'Karın/Core': 0.25 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: false },
+            'dambıl pullover': { primary: 'Göğüs', pFactor: 0.50, sec: { 'Sırt': 0.50, 'Triceps': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: true },
+
+            // 2. SIRT & ÇEKİŞ
+            'barbell row': { primary: 'Sırt', pFactor: 1.0, sec: { 'Biceps': 0.40, 'Omuz': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: true },
+            'pendlay row': { primary: 'Sırt', pFactor: 1.0, sec: { 'Biceps': 0.35, 'Omuz': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: false },
+            'dambıl saw row': { primary: 'Sırt', pFactor: 1.0, sec: { 'Biceps': 0.40, 'Karın/Core': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'göğüs destekli row': { primary: 'Sırt', pFactor: 1.0, sec: { 'Biceps': 0.40, 'Omuz': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'gorilla row': { primary: 'Sırt', pFactor: 1.0, sec: { 'Biceps': 0.40, 'Karın/Core': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: true },
+            'lat pulldown': { primary: 'Sırt', pFactor: 1.0, sec: { 'Biceps': 0.35, 'Omuz': 0.20 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'kablo row': { primary: 'Sırt', pFactor: 1.0, sec: { 'Biceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'barfiks (pull-up)': { primary: 'Sırt', pFactor: 0.85, sec: { 'Biceps': 0.40, 'Karın/Core': 0.25 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: true },
+            'yatay barfiks': { primary: 'Sırt', pFactor: 0.70, sec: { 'Biceps': 0.35, 'Karın/Core': 0.20 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: true },
+            'chin-up (ters barfiks)': { primary: 'Biceps', pFactor: 0.85, sec: { 'Sırt': 0.65 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: true },
+            'renegade row': { primary: 'Sırt', pFactor: 0.70, sec: { 'Karın/Core': 0.70, 'Biceps': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: false },
+            'renegade row + şınav': { primary: 'Sırt', pFactor: 0.60, sec: { 'Göğüs': 0.50, 'Karın/Core': 0.60, 'Triceps': 0.25 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'MODERATE', lengthened: false },
+
+            // 3. OMUZ
+            'barbell omuz presi': { primary: 'Omuz', pFactor: 1.0, sec: { 'Triceps': 0.35, 'Karın/Core': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'dambıl omuz presi': { primary: 'Omuz', pFactor: 1.0, sec: { 'Triceps': 0.35, 'Karın/Core': 0.20 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'kettlebell press': { primary: 'Omuz', pFactor: 1.0, sec: { 'Triceps': 0.35, 'Karın/Core': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'kettlebell strict overhead press': { primary: 'Omuz', pFactor: 1.0, sec: { 'Triceps': 0.35, 'Karın/Core': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'arnold press': { primary: 'Omuz', pFactor: 1.0, sec: { 'Triceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'barbell push press': { primary: 'Omuz', pFactor: 0.80, sec: { 'Triceps': 0.30, 'Ön Bacak': 0.25 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
+            'dambıl push press': { primary: 'Omuz', pFactor: 0.80, sec: { 'Triceps': 0.30, 'Ön Bacak': 0.25 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
+            'dambıl lateral raise': { primary: 'Omuz', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: false },
+            'kablo lateral raise': { primary: 'Omuz', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+            'face pull': { primary: 'Omuz', pFactor: 0.80, sec: { 'Sırt': 0.50 }, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+            'diz üstü plaka ön omuz kaldırış': { primary: 'Omuz', pFactor: 0.80, sec: { 'Karın/Core': 0.30 }, type: 'ISOLATION', sfr: 'HIGH', lengthened: false },
+            'kettlebell halo': { primary: 'Omuz', pFactor: 0.40, sec: { 'Karın/Core': 0.40 }, type: 'MOBILITY_STABILITY', sfr: 'HIGH', lengthened: false },
+            'dambıl snatch': { primary: 'Omuz', pFactor: 0.50, sec: { 'Arka Bacak': 0.30, 'Glute': 0.30, 'Karın/Core': 0.30 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
+            'kettlebell snatch': { primary: 'Omuz', pFactor: 0.50, sec: { 'Arka Bacak': 0.30, 'Glute': 0.30, 'Karın/Core': 0.30 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
+            'dambıl clean & press': { primary: 'Omuz', pFactor: 0.70, sec: { 'Glute': 0.35, 'Arka Bacak': 0.30, 'Triceps': 0.25 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
+            'step-up + omuz presi': { primary: 'Ön Bacak', pFactor: 0.70, sec: { 'Omuz': 0.60, 'Glute': 0.40 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: false },
+
+            // 4. ÖN BACAK (QUAD DOMINANT)
+            'barbell back squat': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.50, 'Karın/Core': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: true },
+            'barbell front squat': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.40, 'Karın/Core': 0.40 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'çift dambıl ön squat (front squat)': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.40, 'Karın/Core': 0.40 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'barbell zercher squat': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.40, 'Karın/Core': 0.50, 'Biceps': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: true },
+            'dambıl goblet squat': { primary: 'Ön Bacak', pFactor: 0.90, sec: { 'Glute': 0.40, 'Karın/Core': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'kettlebell goblet squat': { primary: 'Ön Bacak', pFactor: 0.90, sec: { 'Glute': 0.40, 'Karın/Core': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            '45° leg press': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'bulgar split squat': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.60 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'walking lunge': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.50, 'Karın/Core': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'reverse lunge': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.50 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'leg extension': { primary: 'Ön Bacak', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: false },
+            'air squat': { primary: 'Ön Bacak', pFactor: 0.30, sec: { 'Glute': 0.20 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: true },
+            'jump squat': { primary: 'Ön Bacak', pFactor: 0.50, sec: { 'Glute': 0.35 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
+            'lunge + gövde rotasyonu': { primary: 'Ön Bacak', pFactor: 0.80, sec: { 'Glute': 0.40, 'Karın/Core': 0.50 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+
+            // 5. ARKA BACAK (HAMSTRINGS)
+            'barbell rdl': { primary: 'Arka Bacak', pFactor: 1.0, sec: { 'Glute': 0.50, 'Sırt': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'dambıl rdl': { primary: 'Arka Bacak', pFactor: 1.0, sec: { 'Glute': 0.50, 'Sırt': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'tek bacak rdl': { primary: 'Arka Bacak', pFactor: 1.0, sec: { 'Glute': 0.60, 'Karın/Core': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'barbell deadlift': { primary: 'Arka Bacak', pFactor: 1.0, sec: { 'Glute': 0.65, 'Sırt': 0.50, 'Karın/Core': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'LOW', lengthened: true },
+            'leg curl': { primary: 'Arka Bacak', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+            'barbell hang power clean': { primary: 'Arka Bacak', pFactor: 0.50, sec: { 'Glute': 0.50, 'Omuz': 0.30, 'Sırt': 0.30 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
+            'kettlebell clean': { primary: 'Glute', pFactor: 0.50, sec: { 'Arka Bacak': 0.40, 'Karın/Core': 0.30 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
+
+            // 6. KALÇA (GLUTES)
+            'barbell hip thrust': { primary: 'Glute', pFactor: 1.0, sec: { 'Arka Bacak': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: false },
+            'glute bridge': { primary: 'Glute', pFactor: 1.0, sec: { 'Arka Bacak': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: false },
+            'dambıl swing': { primary: 'Glute', pFactor: 0.60, sec: { 'Arka Bacak': 0.40, 'Karın/Core': 0.25 }, type: 'BALLISTIC_POWER', sfr: 'HIGH', lengthened: true },
+            'kettlebell swing': { primary: 'Glute', pFactor: 0.60, sec: { 'Arka Bacak': 0.40, 'Karın/Core': 0.25 }, type: 'BALLISTIC_POWER', sfr: 'HIGH', lengthened: true },
+
+            // 7. BICEPS
+            'incline dambıl curl': { primary: 'Biceps', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+            'barbell curl': { primary: 'Biceps', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: false },
+            'hammer curl': { primary: 'Biceps', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: false },
+            'kablo biceps curl': { primary: 'Biceps', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+
+            // 8. TRICEPS
+            'dambıl başüstü triceps': { primary: 'Triceps', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+            'dambıl skullcrusher': { primary: 'Triceps', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+            'halat triceps pushdown': { primary: 'Triceps', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: false },
+            'dar tutuş bench': { primary: 'Triceps', pFactor: 0.85, sec: { 'Göğüs': 0.50, 'Omuz': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'elmas şınav': { primary: 'Triceps', pFactor: 0.70, sec: { 'Göğüs': 0.35, 'Karın/Core': 0.20 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: false },
+
+            // 9. KALF
+            'calf raise': { primary: 'Kalf', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+
+            // 10. KARIN & CORE
+            'russian twist': { primary: 'Karın/Core', pFactor: 0.70, sec: {}, type: 'CORE', sfr: 'HIGH', lengthened: false },
+            'kablo woodchopper': { primary: 'Karın/Core', pFactor: 0.80, sec: { 'Omuz': 0.20 }, type: 'CORE', sfr: 'HIGH', lengthened: false },
+            'yarım diz üstü plaka oduncu (woodchopper)': { primary: 'Karın/Core', pFactor: 0.80, sec: { 'Omuz': 0.20 }, type: 'CORE', sfr: 'HIGH', lengthened: false },
+            'plank': { primary: 'Karın/Core', pFactor: 0.50, sec: {}, type: 'CORE', sfr: 'HIGH', lengthened: false },
+            'hollow body': { primary: 'Karın/Core', pFactor: 0.80, sec: {}, type: 'CORE', sfr: 'HIGH', lengthened: false },
+            'barda dize çekme': { primary: 'Karın/Core', pFactor: 0.85, sec: { 'Sırt': 0.20 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: true },
+            "farmer's walk": { primary: 'Karın/Core', pFactor: 0.60, sec: { 'Sırt': 0.35 }, type: 'LOADED_CARRY', sfr: 'HIGH', lengthened: false },
+            'suitcase carry': { primary: 'Karın/Core', pFactor: 0.60, sec: {}, type: 'LOADED_CARRY', sfr: 'HIGH', lengthened: false },
+            'garson taşıması (waiter carry)': { primary: 'Karın/Core', pFactor: 0.60, sec: { 'Omuz': 0.40 }, type: 'LOADED_CARRY', sfr: 'HIGH', lengthened: false },
+            'çapraz taşıma (cross-body carry)': { primary: 'Karın/Core', pFactor: 0.60, sec: { 'Omuz': 0.30 }, type: 'LOADED_CARRY', sfr: 'HIGH', lengthened: false },
+            'ayı emeklemesi plaka çekişi': { primary: 'Karın/Core', pFactor: 0.70, sec: { 'Omuz': 0.35 }, type: 'CORE', sfr: 'MODERATE', lengthened: false },
+            'turkish get-up': { primary: 'Karın/Core', pFactor: 0.60, sec: { 'Omuz': 0.50, 'Glute': 0.35 }, type: 'MOBILITY_STABILITY', sfr: 'MODERATE', lengthened: false },
+
+            // 11. HİBRİT / KOMPLEKS
+            'barbell thruster': { primary: 'Ön Bacak', pFactor: 0.70, sec: { 'Omuz': 0.70, 'Glute': 0.35, 'Triceps': 0.25 }, type: 'BALLISTIC_POWER', sfr: 'LOW', lengthened: false },
+            'dambıl thruster': { primary: 'Ön Bacak', pFactor: 0.70, sec: { 'Omuz': 0.70, 'Glute': 0.35, 'Triceps': 0.25 }, type: 'BALLISTIC_POWER', sfr: 'LOW', lengthened: false },
+            'kettlebell thruster': { primary: 'Ön Bacak', pFactor: 0.70, sec: { 'Omuz': 0.70, 'Glute': 0.35, 'Triceps': 0.25 }, type: 'BALLISTIC_POWER', sfr: 'LOW', lengthened: false },
+            'landmine squat to press': { primary: 'Ön Bacak', pFactor: 0.70, sec: { 'Omuz': 0.65, 'Glute': 0.35, 'Triceps': 0.20 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: false },
+
+            // 12. METABOLİK KONDİSYON (HİPERTROFİYE 0.0x VERİR)
+            'burpee': { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false },
+            'mountain climber': { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false },
+            'dambıl manmaker': { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false },
+            'jumping jack': { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false },
+            'ip atlama': { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false }
+        };
+
+        function resolveExerciseBiomechanics(name = '', rawMuscle = '', category = '') {
+            const cleanName = String(name).trim().toLowerCase();
+            if (ACADEMIC_EXERCISE_SPEC[cleanName]) {
+                return ACADEMIC_EXERCISE_SPEC[cleanName];
+            }
+            for (const [key, val] of Object.entries(ACADEMIC_EXERCISE_SPEC)) {
+                if (cleanName.includes(key) || key.includes(cleanName)) {
+                    return val;
+                }
+            }
+            const text = `${cleanName} ${String(rawMuscle).toLowerCase()} ${String(category).toLowerCase()}`;
+            if (text.includes('burpee') || text.includes('climber') || text.includes('cardio') || text.includes('kondisyon') || text.includes('jumping') || text.includes('manmaker')) {
+                return { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false };
+            }
+            let primary = 'Göğüs';
+            let pFactor = 1.0;
+            let sec = {};
+            let type = 'HEAVY_COMPOUND';
+            let sfr = 'HIGH';
+            let lengthened = false;
+            if (text.includes('bench') || (text.includes('press') && !text.includes('omuz') && !text.includes('overhead') && !text.includes('leg'))) {
+                primary = 'Göğüs';
+                sec = { 'Omuz': 0.35, 'Triceps': 0.35 };
+                lengthened = true;
+            } else if (text.includes('şınav') || text.includes('push-up') || text.includes('pushup')) {
+                primary = 'Göğüs';
+                pFactor = 0.65;
+                sec = { 'Omuz': 0.25, 'Triceps': 0.25, 'Karın/Core': 0.20 };
+                type = 'BODYWEIGHT_STRENGTH';
+            } else if (text.includes('row') || text.includes('lat') || text.includes('barfiks') || text.includes('pull-up') || text.includes('çekiş')) {
+                primary = 'Sırt';
+                sec = { 'Biceps': 0.40 };
+                lengthened = true;
+            } else if (text.includes('omuz') || text.includes('overhead') || text.includes('arnold') || text.includes('deltoid')) {
+                primary = 'Omuz';
+                sec = { 'Triceps': 0.35 };
+                lengthened = true;
+            } else if (text.includes('squat') || text.includes('lunge') || text.includes('ön bacak') || text.includes('kuadriseps') || text.includes('quad')) {
+                primary = 'Ön Bacak';
+                sec = { 'Glute': 0.40 };
+                lengthened = true;
+            } else if (text.includes('rdl') || text.includes('deadlift') || text.includes('hamstring') || text.includes('leg curl') || text.includes('arka bacak')) {
+                primary = 'Arka Bacak';
+                sec = { 'Glute': 0.50 };
+                lengthened = true;
+            } else if (text.includes('swing') || text.includes('glute') || text.includes('kalça') || text.includes('hip thrust')) {
+                primary = 'Glute';
+                sec = { 'Arka Bacak': 0.40 };
+                pFactor = 0.60;
+                type = 'BALLISTIC_POWER';
+            } else if (text.includes('curl') || text.includes('biceps')) {
+                primary = 'Biceps';
+                type = 'ISOLATION';
+                lengthened = text.includes('incline');
+            } else if (text.includes('triceps') || text.includes('arka kol') || text.includes('pushdown')) {
+                primary = 'Triceps';
+                type = 'ISOLATION';
+                lengthened = text.includes('başüstü') || text.includes('overhead');
+            } else if (text.includes('kalf') || text.includes('calf') || text.includes('baldır')) {
+                primary = 'Kalf';
+                type = 'ISOLATION';
+                lengthened = true;
+            } else if (text.includes('core') || text.includes('karın') || text.includes('twist') || text.includes('carry')) {
+                primary = 'Karın/Core';
+                pFactor = 0.60;
+                type = 'CORE';
+            }
+            return { primary, pFactor, sec, type, sfr, lengthened };
+        }
+
+        const ACADEMIC_MUSCLE_TO_ID = {
+            'Göğüs': 'chest',
+            'Sırt': 'back',
+            'Omuz': 'shoulders',
+            'Ön Bacak': 'quads',
+            'Arka Bacak': 'hamstrings',
+            'Glute': 'glutes',
+            'Kalça': 'glutes',
+            'Biceps': 'biceps',
+            'Triceps': 'triceps',
+            'Karın/Core': 'core',
+            'Karın': 'core',
+            'Core': 'core',
+            'Kalf': 'calves',
+            'chest': 'chest',
+            'back': 'back',
+            'shoulders': 'shoulders',
+            'quads': 'quads',
+            'hamstrings': 'hamstrings',
+            'glutes': 'glutes',
+            'biceps': 'biceps',
+            'triceps': 'triceps',
+            'core': 'core',
+            'calves': 'calves'
+        };
+
         // ==================== WEEKLY MUSCLE BALANCE & SUFFICIENCY ENGINE ====================
         const WEEKLY_MUSCLE_CONFIG = [
             { id: 'chest', name: 'Göğüs', icon: '🛡️', optimalMin: 8, optimalMax: 18, desc: 'Pectoralis Major & Minor' },
@@ -13815,46 +14039,39 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 };
             });
 
-            // 1. Process Completed Workout Logs
+            // 1. Gerçekleşen Antrenman Loglarını Biyomekanik Katsayılarla İşle
             weekLogs.forEach(log => {
                 if (!log.exercises || !Array.isArray(log.exercises)) return;
                 log.exercises.forEach(ex => {
-                    const cSets = Number(ex.completedSetsCount) || (Array.isArray(ex.completedSets) ? ex.completedSets.length : 0) || Number(ex.targetSets) || Number(ex.sets) || 0;
+                    const cSets = Number(ex.completedSetsCount) || (Array.isArray(ex.sets) ? ex.sets.filter(s => s.completed || parseInt(s.reps, 10) > 0).length : 0) || Number(ex.targetSets) || Number(ex.sets) || 0;
                     if (cSets <= 0) return;
 
-                    const dbEx = EXERCISES_DB.find(x => x.id === ex.id) || EXERCISES_DB.find(x => x.name && x.name.toLowerCase() === (ex.name || '').toLowerCase());
-                    let pMuscles = (dbEx && dbEx.primaryMuscles && dbEx.primaryMuscles.length) ? [...dbEx.primaryMuscles] : (ex.primaryMuscles ? [...ex.primaryMuscles] : []);
-                    let sMuscles = (dbEx && dbEx.secondaryMuscles && dbEx.secondaryMuscles.length) ? [...dbEx.secondaryMuscles] : (ex.secondaryMuscles ? [...ex.secondaryMuscles] : []);
-
-                    if (pMuscles.length === 0) {
-                        const str = `${ex.name || ''} ${ex.muscle || ''} ${ex.category || ''}`.toLowerCase();
-                        if (str.includes('bench') || str.includes('göğüs') || str.includes('pushup') || str.includes('şınav')) pMuscles.push('chest');
-                        if (str.includes('sırt') || str.includes('row') || str.includes('pullup') || str.includes('barfiks') || str.includes('kanat')) pMuscles.push('back');
-                        if (str.includes('omuz') || str.includes('press') || str.includes('deltoid') || str.includes('halo')) pMuscles.push('shoulders');
-                        if (str.includes('squat') || str.includes('lunge') || str.includes('quad')) pMuscles.push('quads');
-                        if (str.includes('rdl') || str.includes('deadlift') || str.includes('hamstring')) pMuscles.push('hamstrings');
-                        if (str.includes('glute') || str.includes('kalça') || str.includes('bridge') || str.includes('hip')) pMuscles.push('glutes');
-                        if (str.includes('biceps') || str.includes('curl') || str.includes('pazı')) pMuscles.push('biceps');
-                        if (str.includes('triceps') || str.includes('dips') || str.includes('arka kol')) pMuscles.push('triceps');
-                        if (str.includes('karın') || str.includes('core') || str.includes('plank') || str.includes('hollow') || str.includes('twist')) pMuscles.push('core');
-                        if (str.includes('kalf') || str.includes('calf') || str.includes('farmers')) pMuscles.push('calves');
+                    const spec = resolveExerciseBiomechanics(ex.name, ex.muscle, ex.category);
+                    if (!spec || spec.type === 'CONDITIONING' || spec.pFactor === 0) {
+                        return; // Metabolik dayanıklılık hipertrofi set havuzuna eklenmez
                     }
 
-                    pMuscles.forEach(m => {
-                        if (map[m]) {
-                            map[m].doneDirectSets += cSets;
-                            map[m].doneExercises.add(ex.name || dbEx?.name || 'Egzersiz');
-                        }
-                    });
-                    sMuscles.forEach(m => {
-                        if (map[m]) {
-                            map[m].doneSecondarySets += cSets;
-                        }
-                    });
+                    // Birincil Hedef Kas Grubu
+                    const primId = ACADEMIC_MUSCLE_TO_ID[spec.primary] || spec.primary;
+                    if (primId && map[primId] && spec.pFactor > 0) {
+                        const directAdd = cSets * spec.pFactor;
+                        map[primId].doneDirectSets += directAdd;
+                        map[primId].doneExercises.add(ex.name);
+                    }
+
+                    // İkincil / Sinerjist Kas Grupları
+                    if (spec.sec && typeof spec.sec === 'object') {
+                        Object.entries(spec.sec).forEach(([secName, secFactor]) => {
+                            const secId = ACADEMIC_MUSCLE_TO_ID[secName] || secName;
+                            if (secId && map[secId] && secFactor > 0) {
+                                map[secId].doneSecondarySets += (cSets * secFactor);
+                            }
+                        });
+                    }
                 });
             });
 
-            // 2. Process Weekly Scheduled Workouts
+            // 2. Haftalık Planlanan Antrenmanları Biyomekanik Katsayılarla İşle
             const dayKeys = [1, 2, 3, 4, 5, 6, 0];
             let totalPlannedSessions = 0;
             dayKeys.forEach(dKey => {
@@ -13872,36 +14089,42 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
                 details.exercises.forEach(ex => {
                     const pSets = Number(ex.targetSets || ex.sets) || (details.scheme && Number(details.scheme.sets)) || 3;
-                    const dbEx = EXERCISES_DB.find(x => x.id === ex.id) || ex;
-                    const pMuscles = (dbEx && dbEx.primaryMuscles && dbEx.primaryMuscles.length) ? dbEx.primaryMuscles : (ex.primaryMuscles || []);
-                    const sMuscles = (dbEx && dbEx.secondaryMuscles && dbEx.secondaryMuscles.length) ? dbEx.secondaryMuscles : (ex.secondaryMuscles || []);
+                    const spec = resolveExerciseBiomechanics(ex.name, ex.muscle, ex.category);
+                    if (!spec || spec.type === 'CONDITIONING' || spec.pFactor === 0) {
+                        return;
+                    }
 
-                    pMuscles.forEach(m => {
-                        if (map[m]) {
-                            map[m].scheduledTotalSets += pSets;
-                            if (isRemaining || sourceMode === 'schedule_full') {
-                                map[m].planDirectSets += pSets;
-                                map[m].plannedExercises.set(`${ex.name}_${dKey}`, {
-                                    name: ex.name || dbEx?.name || 'Egzersiz',
-                                    dayIdx: dKey,
-                                    dayName: (typeof DAY_NAMES_TR !== 'undefined') ? DAY_NAMES_TR[dKey] : `Gün ${dKey}`,
-                                    sets: pSets
-                                });
-                            }
+                    const primId = ACADEMIC_MUSCLE_TO_ID[spec.primary] || spec.primary;
+                    if (primId && map[primId] && spec.pFactor > 0) {
+                        const directPlan = pSets * spec.pFactor;
+                        map[primId].scheduledTotalSets += directPlan;
+                        if (isRemaining || sourceMode === 'schedule_full') {
+                            map[primId].planDirectSets += directPlan;
+                            map[primId].plannedExercises.set(`${ex.name}_${dKey}`, {
+                                name: ex.name,
+                                dayIdx: dKey,
+                                dayName: (typeof DAY_NAMES_TR !== 'undefined') ? DAY_NAMES_TR[dKey] : `Gün ${dKey}`,
+                                sets: directPlan
+                            });
                         }
-                    });
-                    sMuscles.forEach(m => {
-                        if (map[m]) {
-                            map[m].scheduledSecondarySets += pSets;
-                            if (isRemaining || sourceMode === 'schedule_full') {
-                                map[m].planSecondarySets += pSets;
+                    }
+
+                    if (spec.sec && typeof spec.sec === 'object') {
+                        Object.entries(spec.sec).forEach(([secName, secFactor]) => {
+                            const secId = ACADEMIC_MUSCLE_TO_ID[secName] || secName;
+                            if (secId && map[secId] && secFactor > 0) {
+                                const secPlan = pSets * secFactor;
+                                map[secId].scheduledSecondarySets += secPlan;
+                                if (isRemaining || sourceMode === 'schedule_full') {
+                                    map[secId].planSecondarySets += secPlan;
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
                 });
             });
 
-            // 3. Finalize Metrics & Classifications
+            // 3. Metrikleri ve Kademeli Hipertrofi Değerlendirmesini Sonuçlandır
             const summary = {
                 totalMuscles: WEEKLY_MUSCLE_CONFIG.length,
                 workedCount: 0,
@@ -13917,10 +14140,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             const muscles = WEEKLY_MUSCLE_CONFIG.map(cfg => {
                 const data = map[cfg.id];
-                const effectiveDone = data.doneDirectSets + Math.round(data.doneSecondarySets * 0.5);
-                const effectivePlan = data.planDirectSets + Math.round(data.planSecondarySets * 0.5);
-                const effectiveProjected = effectiveDone + effectivePlan;
-                const effectiveScheduledTotal = data.scheduledTotalSets + Math.round(data.scheduledSecondarySets * 0.5);
+                const effectiveDone = Math.round((data.doneDirectSets + data.doneSecondarySets) * 10) / 10;
+                const effectivePlan = Math.round((data.planDirectSets + data.planSecondarySets) * 10) / 10;
+                const effectiveProjected = Math.round((effectiveDone + effectivePlan) * 10) / 10;
+                const effectiveScheduledTotal = Math.round((data.scheduledTotalSets + data.scheduledSecondarySets) * 10) / 10;
 
                 let evalVolume = effectiveProjected;
                 if (sourceMode === 'week_done') evalVolume = effectiveDone;
@@ -13938,15 +14161,15 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     status = 'unworked';
                     summary.unworkedCount++;
                     unworkedNames.push(cfg.name);
-                    if (data.scheduledTotalSets > 0 && sourceMode === 'week_done') {
-                        statusDesc = `Planda ${data.scheduledTotalSets} set var ancak henüz seans yapılmadı.`;
+                    if (effectiveScheduledTotal > 0 && sourceMode === 'week_done') {
+                        statusDesc = `Planda ${effectiveScheduledTotal.toFixed(1)} set var ancak henüz seans yapılmadı.`;
                     }
                 } else if (evalVolume < cfg.optimalMin) {
                     status = 'insufficient';
                     statusBadge = '⚠️ Yetersiz Hacim';
                     statusColor = '#f59e0b';
                     statusBg = 'rgba(245, 158, 11, 0.12)';
-                    statusDesc = `Minimum gelişim eşiğinin altında (${evalVolume}/${cfg.optimalMin} set).`;
+                    statusDesc = `Minimum gelişim eşiğinin altında (${evalVolume.toFixed(1)}/${cfg.optimalMin} set).`;
                     summary.insufficientCount++;
                     insufficientNames.push(cfg.name);
                 } else if (evalVolume <= cfg.optimalMax) {
@@ -13954,7 +14177,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     statusBadge = '✅ Yeterli & Optimal';
                     statusColor = '#10b981';
                     statusBg = 'rgba(16, 185, 129, 0.12)';
-                    statusDesc = `İdeal hipertrofi & adaptasyon aralığında (${evalVolume} set).`;
+                    statusDesc = `İdeal hipertrofi & adaptasyon aralığında (${evalVolume.toFixed(1)} set).`;
                     summary.optimalCount++;
                     optimalNames.push(cfg.name);
                 } else {
@@ -13962,7 +14185,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     statusBadge = '🔥 Yüksek Hacim';
                     statusColor = '#818cf8';
                     statusBg = 'rgba(129, 140, 248, 0.12)';
-                    statusDesc = `Yoğun aşırı yükleme (${evalVolume} set); toparlanmaya özen gösterin.`;
+                    statusDesc = `Yoğun aşırı yükleme (${evalVolume.toFixed(1)} set); toparlanmaya özen gösterin.`;
                     summary.highCount++;
                     optimalNames.push(cfg.name);
                 }
@@ -13974,11 +14197,11 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     desc: cfg.desc,
                     optimalMin: cfg.optimalMin,
                     optimalMax: cfg.optimalMax,
-                    doneDirectSets: data.doneDirectSets,
-                    doneSecondarySets: data.doneSecondarySets,
+                    doneDirectSets: Math.round(data.doneDirectSets * 10) / 10,
+                    doneSecondarySets: Math.round(data.doneSecondarySets * 10) / 10,
                     effectiveDone,
-                    planDirectSets: data.planDirectSets,
-                    planSecondarySets: data.planSecondarySets,
+                    planDirectSets: Math.round(data.planDirectSets * 10) / 10,
+                    planSecondarySets: Math.round(data.planSecondarySets * 10) / 10,
                     effectivePlan,
                     projectedSets: effectiveProjected,
                     scheduledTotalSets: effectiveScheduledTotal,
@@ -14468,12 +14691,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 <!-- PROGRESS BAR & BENCHMARK -->
                                 <div style="margin-top:10px;">
                                     <div style="position:relative; height:12px; background:rgba(255,255,255,0.06); border-radius:6px; overflow:hidden; display:flex;">
-                                        <div style="width:${donePct}%; background:${m.statusColor}; height:100%; transition:width 0.3s ease;" title="Yapılan: ${m.effectiveDone} set"></div>
-                                        <div style="width:${planPct}%; background:repeating-linear-gradient(45deg, #f59e0b, #f59e0b 6px, #d97706 6px, #d97706 12px); height:100%; opacity:0.85; transition:width 0.3s ease;" title="Planlanan: ${m.effectivePlan} set"></div>
+                                        <div style="width:${donePct}%; background:${m.statusColor}; height:100%; transition:width 0.3s ease;" title="Yapılan: ${m.effectiveDone.toFixed(1)} Efektif Set"></div>
+                                        <div style="width:${planPct}%; background:repeating-linear-gradient(45deg, #f59e0b, #f59e0b 6px, #d97706 6px, #d97706 12px); height:100%; opacity:0.85; transition:width 0.3s ease;" title="Planlanan: ${m.effectivePlan.toFixed(1)} Efektif Set"></div>
                                     </div>
                                     <div style="display:flex; justify-content:space-between; align-items:center; font-size:10px; color:var(--text-secondary); margin-top:4px; flex-wrap:wrap; gap:4px;">
-                                        <span>🟢 Yapılan: <strong style="color:#fff;">${m.doneDirectSets}</strong> direkt set ${m.doneSecondarySets > 0 ? `(+${m.doneSecondarySets} ikincil)` : ''}</span>
-                                        <span>🟡 Kalan Plan: <strong style="color:#fff;">${m.planDirectSets}</strong> set</span>
+                                        <span>🟢 Yapılan: <strong style="color:#fff;">${m.effectiveDone.toFixed(1)}</strong> set <span style="font-size:9.5px; opacity:0.8;">(${m.doneDirectSets.toFixed(1)} ana + ${m.doneSecondarySets.toFixed(1)} destek)</span></span>
+                                        <span>🟡 Kalan Plan: <strong style="color:#fff;">${m.effectivePlan.toFixed(1)}</strong> set</span>
                                         <span>🎯 Hedef: <strong style="color:var(--gold);">${m.optimalMin}-${m.optimalMax} set/hf</strong></span>
                                     </div>
                                 </div>
@@ -14482,7 +14705,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 <div style="margin-top:8px; font-size:11.5px; color:#cbd5e1; display:flex; flex-direction:column; gap:4px;">
                                     <div>
                                         <span style="color:${m.statusColor}; font-weight:700;">${m.statusDesc}</span>
-                                        <span style="color:var(--text-secondary);"> (Toplam Beklenen: <strong style="color:#fff;">${m.effectiveTotal} set</strong>)</span>
+                                        <span style="color:var(--text-secondary);"> (Toplam Efektif: <strong style="color:#fff;">${m.effectiveTotal.toFixed(1)} set</strong>)</span>
                                     </div>
 
                                     ${m.doneExercises.length > 0 ? `
@@ -14657,49 +14880,55 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 if (log.exercises && log.exercises.length > 0) {
                     log.exercises.forEach(ex => {
                         const exVol = ex.exerciseVolume || 0;
-                        const cSets = ex.completedSetsCount || 0;
-                        if (cSets === 0) return;
+                        const cSets = ex.completedSetsCount || (Array.isArray(ex.sets) ? ex.sets.filter(s => s.completed || parseInt(s.reps, 10) > 0).length : 0) || 0;
+                        if (cSets === 0 && exVol === 0) return;
 
-                        const nameLower = (ex.name || '').toLowerCase();
-                        const muscleLower = (ex.muscle || '').toLowerCase();
-                        const catLower = (ex.category || '').toLowerCase();
-                        const searchStr = `${nameLower} ${muscleLower} ${catLower}`;
+                        const spec = resolveExerciseBiomechanics(ex.name, ex.muscle, ex.category);
+                        const shares = [];
+                        if (spec.primary && spec.pFactor > 0) {
+                            shares.push({ muscle: spec.primary, factor: spec.pFactor });
+                        }
+                        if (spec.sec && typeof spec.sec === 'object') {
+                            Object.entries(spec.sec).forEach(([mName, factor]) => {
+                                if (factor > 0) shares.push({ muscle: mName, factor: factor });
+                            });
+                        }
 
-                        let matched = false;
-                        if (searchStr.includes('bacak') || searchStr.includes('squat') || searchStr.includes('lunge') || searchStr.includes('rdl') || searchStr.includes('deadlift') || searchStr.includes('quad') || searchStr.includes('kalça') || searchStr.includes('hamstring') || searchStr.includes('baldır')) {
-                            pillars.legs.volume += exVol;
-                            pillars.legs.sets += cSets;
-                            matched = true;
-                        }
-                        if (searchStr.includes('sırt') || searchStr.includes('kürek') || searchStr.includes('row') || searchStr.includes('barfiks') || searchStr.includes('kanat') || searchStr.includes('trapez') || searchStr.includes('pull')) {
-                            pillars.back.volume += exVol;
-                            pillars.back.sets += cSets;
-                            matched = true;
-                        }
-                        if (searchStr.includes('göğüs') || searchStr.includes('press') || searchStr.includes('şınav') || searchStr.includes('push') || searchStr.includes('omuz') || searchStr.includes('deltoid') || searchStr.includes('bench')) {
-                            pillars.chest.volume += exVol;
-                            pillars.chest.sets += cSets;
-                            matched = true;
-                        }
-                        if (searchStr.includes('biceps') || searchStr.includes('triceps') || searchStr.includes('kol') || searchStr.includes('curl') || searchStr.includes('dips')) {
-                            pillars.arms.volume += exVol;
-                            pillars.arms.sets += cSets;
-                            matched = true;
-                        }
-                        if (searchStr.includes('karın') || searchStr.includes('core') || searchStr.includes('plank') || searchStr.includes('twist') || searchStr.includes('hollow') || searchStr.includes('swing')) {
-                            pillars.core.volume += exVol;
-                            pillars.core.sets += cSets;
-                            matched = true;
-                        }
-                        if (!matched) {
+                        const sumFactor = shares.reduce((acc, s) => acc + s.factor, 0);
+
+                        if (sumFactor > 0) {
+                            shares.forEach(s => {
+                                const ratio = s.factor / sumFactor;
+                                const mId = ACADEMIC_MUSCLE_TO_ID[s.muscle] || s.muscle;
+                                let targetPillar = null;
+                                if (['quads', 'hamstrings', 'glutes', 'calves'].includes(mId)) targetPillar = pillars.legs;
+                                else if (mId === 'back') targetPillar = pillars.back;
+                                else if (['chest', 'shoulders'].includes(mId)) targetPillar = pillars.chest;
+                                else if (['biceps', 'triceps'].includes(mId)) targetPillar = pillars.arms;
+                                else if (mId === 'core') targetPillar = pillars.core;
+
+                                if (targetPillar) {
+                                    targetPillar.volume += (exVol * ratio);
+                                    targetPillar.sets += Math.round((cSets * ratio) * 10) / 10;
+                                }
+                            });
+                        } else if (spec.type === 'CONDITIONING') {
+                            const pKeys = Object.keys(pillars);
+                            pKeys.forEach(k => {
+                                pillars[k].volume += (exVol / pKeys.length);
+                                pillars[k].sets += Math.round((cSets / pKeys.length) * 10) / 10;
+                            });
+                        } else {
                             pillars.legs.volume += (exVol * 0.5);
                             pillars.back.volume += (exVol * 0.5);
+                            pillars.legs.sets += (cSets * 0.5);
+                            pillars.back.sets += (cSets * 0.5);
                         }
 
                         // Track PRs
                         if (ex.maxWeight && ex.maxWeight > 0) {
                             if (!prMap[ex.name] || ex.maxWeight > prMap[ex.name].weight) {
-                                prMap[ex.name] = { weight: ex.maxWeight, date: log.dateFormatted || log.date, muscle: ex.muscle };
+                                prMap[ex.name] = { weight: ex.maxWeight, date: log.dateFormatted || log.date, muscle: ex.muscle || spec.primary || '' };
                             }
                         }
                     });
@@ -14776,7 +15005,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                         <div class="analytics-bar-fill" style="width:${Math.min(100, Math.max(4, pct))}%; background:${p.color};"></div>
                                     </div>
                                     <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-secondary); margin-top:2px;">
-                                        <span>Tamamlanan Set: ${p.sets}</span>
+                                        <span>Tamamlanan Efektif Set: ${(Math.round(p.sets * 10) / 10).toFixed(1)}</span>
                                         <span>Ortalama Yük: ${p.sets > 0 ? Math.round(p.volume / p.sets) : 0} kg/set</span>
                                     </div>
                                 </div>
@@ -15349,7 +15578,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=87')
+                navigator.serviceWorker.register('./sw.js?v=88')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
@@ -15963,16 +16192,22 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 updateExDetailModalHideButton(ex.id);
             }
 
-            // Muscle breakdown helper
-            const pMuscleLabels = (ex.primaryMuscles || []).map(m => {
-                const conf = WEEKLY_MUSCLE_CONFIG.find(w => w.id === m);
-                return `<span style="background:rgba(245,158,11,0.2); color:var(--gold); border:1px solid rgba(245,158,11,0.4); padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800;">${conf ? conf.icon + ' ' + conf.name : m} (Primer)</span>`;
-            }).join(' ');
+            // Muscle breakdown helper with exact biomechanical factors
+            const spec = resolveExerciseBiomechanics(ex.name, ex.muscle, ex.category);
+            let pMuscleLabels = '';
+            let sMuscleLabels = '';
 
-            const sMuscleLabels = (ex.secondaryMuscles || []).map(m => {
-                const conf = WEEKLY_MUSCLE_CONFIG.find(w => w.id === m);
-                return `<span style="background:rgba(56,189,248,0.15); color:var(--cyan); border:1px solid rgba(56,189,248,0.35); padding:3px 8px; border-radius:12px; font-size:11px; font-weight:700;">${conf ? conf.icon + ' ' + conf.name : m} (Sekonder)</span>`;
-            }).join(' ');
+            if (spec.type === 'CONDITIONING' || spec.pFactor === 0) {
+                pMuscleLabels = `<span style="background:rgba(148,163,184,0.15); color:#94a3b8; border:1px solid rgba(148,163,184,0.3); padding:3px 8px; border-radius:12px; font-size:11px; font-weight:700;">⚡ Metabolik Kondisyon (0 Set Hipertrofi)</span>`;
+            } else {
+                pMuscleLabels = `<span style="background:rgba(245,158,11,0.2); color:var(--gold); border:1px solid rgba(245,158,11,0.4); padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800;">${spec.primary} (Ana Kas: +${spec.pFactor.toFixed(2)} Set)</span>`;
+            }
+
+            if (spec.sec && typeof spec.sec === 'object' && Object.keys(spec.sec).length > 0) {
+                sMuscleLabels = Object.entries(spec.sec).map(([sM, sF]) => {
+                    return `<span style="background:rgba(56,189,248,0.15); color:var(--cyan); border:1px solid rgba(56,189,248,0.35); padding:3px 8px; border-radius:12px; font-size:11px; font-weight:700;">${sM} (+${sF.toFixed(2)} Set / %${Math.round(sF * 100)})</span>`;
+                }).join(' ');
+            }
 
             // Steps HTML Generator (shared between Form and Steps tab)
             let stepsHtml = '';
@@ -16055,10 +16290,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         <img src="${guide.anatomi}" style="max-width:100%; max-height:48vh; object-fit:contain; display:block; margin:0 auto;" alt="${escapeHTML(ex.name)} Anatomi">
                     </div>
                     <div style="background:rgba(0,0,0,0.35); border:1px solid var(--border); border-radius:8px; padding:12px; margin-top:10px;">
-                        <div style="font-size:12px; font-weight:800; color:#fff; margin-bottom:6px;">🧬 Kas Biyomekaniği & Yük Dağılımı:</div>
-                        <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.5;">
-                            • <strong>Birincil Hedef (Primer - 1.0x):</strong> ${pMuscleLabels}<br>
-                            • <strong>Destekleyici (Sekonder - 0.5x):</strong> ${sMuscleLabels || 'Yok (Saf İzolasyon)'}<br>
+                        <div style="font-size:12px; font-weight:800; color:#fff; margin-bottom:6px;">🎯 1 Çalışma Setinin Kaslara Dağılımı:</div>
+                        <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.6;">
+                            • <strong>Ana Kas Grubu:</strong> ${pMuscleLabels}<br>
+                            • <strong>Destekleyici (Sinerjist):</strong> ${sMuscleLabels || '<span style="color:var(--text-secondary);">Yok (Saf İzolasyon)</span>'}<br>
                             • <strong>Mekanik Yapı:</strong> ${ex.mechanic === 'compound' ? '⚡ Çok Eklemli (Bileşik / Compound)' : '🎯 Tek Eklemli (İzolasyon)'}
                         </div>
                     </div>
