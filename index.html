@@ -3551,7 +3551,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v102</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v103</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3587,7 +3587,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v102</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v103</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -7346,7 +7346,7 @@
             // 2. DAY SCHEDULE MODAL SCOPE
             if (pickerContext.scope === 'day_schedule' && pickerContext.dayIdx !== null && pickerContext.dayIdx !== undefined) {
                 const dayIdx = pickerContext.dayIdx;
-                const schedule = getWeeklySchedule();
+                const schedule = activePlannerWeek === 'next' ? getNextWeeklySchedule() : getWeeklySchedule();
                 const plan = schedule[dayIdx];
 
                 if (plan && !plan.rest) {
@@ -7405,9 +7405,14 @@
                         type: 'custom_saved',
                         desc: `${newExercises.length} Hareket • ${updatedWorkout.duration} Dk`,
                         rest: false,
-                        customWorkout: updatedWorkout
+                        customWorkout: updatedWorkout,
+                        exercises: newExercises
                     };
-                    saveWeeklySchedule(schedule);
+                    if (activePlannerWeek === 'next') {
+                        saveNextWeeklySchedule(schedule);
+                    } else {
+                        saveWeeklySchedule(schedule);
+                    }
 
                     // 2. Also persist in custom programs library
                     const existingIdx = saved.findIndex(p => p.id === progId);
@@ -11132,7 +11137,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 dayBadge.innerText = isToday ? 'BUGÜNÜN PROGRAMI' : (isTomorrow ? 'YARINKİ PROGRAM' : 'HAFTALIK PLAN');
             }
 
-            const schedule = getWeeklySchedule();
+            const schedule = activePlannerWeek === 'next' ? getNextWeeklySchedule() : getWeeklySchedule();
             const currentPlan = schedule[dayIdx] || { id: 'rest', rest: true };
             const workoutDetails = getWorkoutDetailsForPlan(currentPlan);
 
@@ -11395,7 +11400,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         }
 
         function editProgramForDay(dayIdx) {
-            const schedule = getWeeklySchedule();
+            const schedule = activePlannerWeek === 'next' ? getNextWeeklySchedule() : getWeeklySchedule();
             const plan = schedule[dayIdx];
             if (!plan || plan.rest) return;
 
@@ -11516,16 +11521,21 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 isCustom: true
             };
 
-            const schedule = getWeeklySchedule();
+            const schedule = activePlannerWeek === 'next' ? getNextWeeklySchedule() : getWeeklySchedule();
             schedule[dayIdx] = {
                 id: progId,
                 title: title,
                 type: 'custom_saved',
                 desc: `${exercisesList.length} Hareket • ${updatedWorkout.duration} Dk`,
                 rest: false,
-                customWorkout: updatedWorkout
+                customWorkout: updatedWorkout,
+                exercises: exercisesList
             };
-            saveWeeklySchedule(schedule);
+            if (activePlannerWeek === 'next') {
+                saveNextWeeklySchedule(schedule);
+            } else {
+                saveWeeklySchedule(schedule);
+            }
 
             // Also update or add to custom programs in library
             const user = getActiveUser();
@@ -16598,7 +16608,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=102')
+                navigator.serviceWorker.register('./sw.js?v=103')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
