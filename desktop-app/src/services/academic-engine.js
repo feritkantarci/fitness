@@ -47,7 +47,6 @@ const EXERCISE_SPEC = {
     'incline dambıl press': { primary: 'Göğüs', pFactor: 1.0, sec: { 'Omuz': 0.45, 'Triceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
     'eğimli sehpa dambıl pres (incline db press)': { primary: 'Göğüs', pFactor: 1.0, sec: { 'Omuz': 0.45, 'Triceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
     'dambıl floor press': { primary: 'Göğüs', pFactor: 0.85, sec: { 'Triceps': 0.45, 'Omuz': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: false },
-    'makine göğüs presi': { primary: 'Göğüs', pFactor: 1.0, sec: { 'Triceps': 0.30, 'Omuz': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
     'kablo crossover': { primary: 'Göğüs', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
     'kablo göğüs sıkıştırma (cable flyes / crossover)': { primary: 'Göğüs', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
     'pec deck kelebek': { primary: 'Göğüs', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },

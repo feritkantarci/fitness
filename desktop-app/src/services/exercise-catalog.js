@@ -1,10 +1,13 @@
 /**
  * FitLAB BİYOMEKANİK EGZERSİZ ATLAŞI & KÜTÜPHANESİ
- * Web uygulaması (fitness.kantarci.io) EXERCISES_DB ve guideLibrary ile %100 birebir senkronize
- * Toplam 94 Orijinal Egzersiz
+ * Single Source of Truth (SSOT): index.html EXERCISES_DB & exerciseGuideMap ile senkronize.
+ * Toplam 93 Orijinal Egzersiz
  */
+const fs = require('fs');
+const path = require('path');
+const academicEngine = require('./academic-engine');
 
-const EXERCISE_CATALOG = [
+const STATIC_FALLBACK_CATALOG = [
   {
     "id": "db_bench_press",
     "name": "Dambıl Bench Press",
@@ -944,25 +947,6 @@ const EXERCISE_CATALOG = [
     "cue": "Halatı göz hizasından tut, dirsekleri yüksekte dışa açarak halatın ortasını alnına doğru çek ve arka omuzu sık."
   },
   {
-    "id": "mach_chest_press",
-    "name": "Makine Göğüs Presi",
-    "rawKey": "makine göğüs presi",
-    "primary": "Göğüs",
-    "pFactor": 1,
-    "sec": {
-      "Triceps": 0.3,
-      "Omuz": 0.25
-    },
-    "type": "HEAVY_COMPOUND",
-    "typeLabel": "Ağır Serbest Ağırlık Bileşik",
-    "sfr": "HIGH",
-    "sfrLabel": "Yüksek Verim (Eklem Dostu, Güçlü Hipertrofi)",
-    "lengthened": true,
-    "formImage": "assets/guides/guide_mach_chest_press_form.jpg",
-    "anatomiImage": "assets/guides/guide_mach_chest_press_anatomi.jpg",
-    "cue": "Koltuk yüksekliğini tutacaklar göğüs ortasına gelecek şekilde ayarla, sırtı mindere gömüp öne güçlüce it."
-  },
-  {
     "id": "mach_cable_crossover",
     "name": "Kablo Crossover",
     "rawKey": "kablo crossover",
@@ -1721,17 +1705,66 @@ const EXERCISE_CATALOG = [
 ];
 
 function getFullCatalog() {
-    return EXERCISE_CATALOG;
+    try {
+        const candidatePaths = [
+            path.join(__dirname, '../../../index.html'),
+            path.join(process.cwd(), 'index.html')
+        ];
+        let html = null;
+        for (const p of candidatePaths) {
+            if (fs.existsSync(p)) {
+                html = fs.readFileSync(p, 'utf8');
+                break;
+            }
+        }
+        if (html) {
+            const dbMatch = html.match(/const EXERCISES_DB = (\[[\s\S]*?\]);/m);
+            const egmMatch = html.match(/const exerciseGuideMap = ({[\s\S]*?^        };)/m);
+            const glMatch = html.match(/const guideLibrary = ({[\s\S]*?^        };)/m);
+            if (dbMatch && egmMatch && glMatch) {
+                let guideLibrary = {};
+                eval('guideLibrary = ' + glMatch[1].replace(/;$/, ''));
+                let exerciseGuideMap = {};
+                eval('exerciseGuideMap = ' + egmMatch[1].replace(/;$/, ''));
+                let EXERCISES_DB = [];
+                eval('EXERCISES_DB = ' + dbMatch[1]);
+
+                return EXERCISES_DB.map(ex => {
+                    const guide = exerciseGuideMap[ex.id] || {};
+                    const biomech = academicEngine.resolveExerciseBiomechanics(ex.name);
+                    return {
+                        id: ex.id,
+                        name: ex.name,
+                        rawKey: ex.name.toLowerCase(),
+                        primary: biomech.primary || (ex.category === 'conditioning' ? 'Kondisyon / Kardiyo' : 'Tüm Vücut'),
+                        pFactor: biomech.pFactor,
+                        sec: biomech.sec || {},
+                        type: biomech.type || 'HEAVY_COMPOUND',
+                        typeLabel: (biomech.type === 'CONDITIONING') ? 'Metabolik Kondisyon & Kardiyo' : 'Kuvvet Egzersizi',
+                        sfr: biomech.sfr || 'HIGH',
+                        sfrLabel: biomech.sfr || 'Standart',
+                        lengthened: !!biomech.lengthened,
+                        formImage: guide.form || '',
+                        anatomiImage: guide.anatomi || '',
+                        cue: ex.cue || ''
+                    };
+                });
+            }
+        }
+    } catch (e) {
+        // Fallback to static catalog
+    }
+    return STATIC_FALLBACK_CATALOG;
 }
 
 function findExercise(query) {
     if (!query) return null;
     const q = query.trim().toLowerCase();
-    return EXERCISE_CATALOG.find(e => e.id === q || e.name.toLowerCase() === q || e.rawKey === q) || null;
+    const cat = getFullCatalog();
+    return cat.find(e => e.id === q || e.name.toLowerCase() === q || e.rawKey === q) || null;
 }
 
 module.exports = {
-    EXERCISE_CATALOG,
     getFullCatalog,
     findExercise
 };
