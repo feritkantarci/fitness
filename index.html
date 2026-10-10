@@ -2065,199 +2065,233 @@
             line-height: 1.4;
         }
 
-        /* ==================== WEEKLY SCHEDULE & PLANNER ==================== */
+        /* ==================== WEEKLY SCHEDULE & PLANNER (STREAMLINED) ==================== */
         .weekly-planner-section {
-            background: #090e1a;
-            border: 1px solid rgba(245, 158, 11, 0.25);
+            background: rgba(18, 24, 38, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 14px;
-            padding: 14px;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            padding: 12px 14px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
         }
-        .weekly-planner-header {
+        .planner-top-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
+            margin-bottom: 10px;
             gap: 8px;
         }
+        .planner-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .planner-title {
+            font-size: 13px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.2px;
+        }
+        /* MINI COMPACT WEEK SWITCHER */
+        .mini-week-segmented {
+            display: inline-flex;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 2px;
+            gap: 2px;
+        }
+        .mini-week-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 9px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            white-space: nowrap;
+        }
+        .mini-week-btn.active {
+            background: var(--gold);
+            color: #090d16;
+            font-weight: 900;
+            box-shadow: 0 1px 6px rgba(245, 158, 11, 0.3);
+        }
+
+        /* 7-DAY CALENDAR STRIP: PERFECT MOBILE 7-COLUMN GRID (NO SCROLL REQUIRED) */
         .weekly-strip {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 6px;
-        }
-        @media (max-width: 600px) {
-            .weekly-strip {
-                display: flex;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                padding-bottom: 6px;
-                gap: 6px;
-                scroll-snap-type: x mandatory;
-            }
-            .weekly-day-pill {
-                min-width: 76px;
-                flex: 0 0 76px;
-                scroll-snap-align: start;
-            }
+            gap: 4px;
+            margin-bottom: 8px;
         }
         .weekly-day-pill {
-            background: rgba(15, 23, 42, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 10px;
-            padding: 8px 4px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 8px;
+            padding: 7px 2px 6px 2px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
             position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 3px;
+            gap: 2px;
+            min-width: 0;
+            user-select: none;
         }
         .weekly-day-pill:hover {
-            background: rgba(245, 158, 11, 0.12);
-            border-color: rgba(245, 158, 11, 0.4);
-            transform: translateY(-2px);
+            background: rgba(245, 158, 11, 0.08);
+            border-color: rgba(245, 158, 11, 0.3);
         }
         .weekly-day-pill.active-today {
-            background: rgba(245, 158, 11, 0.18);
+            background: rgba(245, 158, 11, 0.14);
             border: 1.5px solid var(--gold);
-            box-shadow: 0 0 14px rgba(245, 158, 11, 0.3);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
         }
-        .weekly-day-pill.active-tomorrow {
-            background: rgba(56, 189, 248, 0.14);
-            border: 1.5px solid #38bdf8;
-            box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
-        }
-        .weekly-day-tag {
-            font-size: 8.5px;
-            font-weight: 800;
-            padding: 1px 4px;
-            border-radius: 3px;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-        .weekly-day-tag.today {
+        .weekly-day-pill.active-today::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
             background: var(--gold);
-            color: #090d16;
-        }
-        .weekly-day-tag.tomorrow {
-            background: #38bdf8;
-            color: #090d16;
         }
         .weekly-day-name {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 800;
-            color: #fff;
+            color: #e2e8f0;
+            text-transform: uppercase;
+            letter-spacing: 0.2px;
+        }
+        .weekly-day-icon {
+            font-size: 14px;
+            line-height: 1.1;
+            margin: 1px 0;
         }
         .weekly-day-status {
-            font-size: 9.5px;
-            color: var(--text-secondary);
+            font-size: 9px;
+            font-weight: 700;
+            color: #94a3b8;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 100%;
+            line-height: 1.1;
+        }
+        .weekly-day-pill.active-today .weekly-day-status {
+            color: var(--gold);
         }
 
-        /* WEEK SELECTOR TABS (BU HAFTA / GELECEK HAFTA) */
-        .weekly-week-tabs {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+        /* PLANNER QUICK TEMPLATE FOOTER */
+        .planner-template-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
             gap: 6px;
-            background: rgba(0, 0, 0, 0.45);
-            padding: 4px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            margin-bottom: 12px;
+            padding-top: 6px;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
         }
-        .weekly-week-tab-btn {
+        .planner-template-lbl {
+            font-size: 10px;
+            color: #64748b;
+            font-weight: 600;
+        }
+        .planner-template-btn {
             background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 11.5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            font-size: 10px;
             font-weight: 700;
-            padding: 8px 12px;
-            border-radius: 9px;
+            padding: 2px 7px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
+        }
+        .planner-template-btn:hover {
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        /* ==================== TODAY WORKOUT / REST STATUS BARS ==================== */
+        .today-rest-bar {
+            background: rgba(18, 24, 38, 0.65);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .today-rest-info {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 6px;
+            gap: 8px;
         }
-        .weekly-week-tab-btn:hover {
-            color: #fff;
-            background: rgba(255, 255, 255, 0.04);
+        .today-rest-title {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #f1f5f9;
         }
-        .weekly-week-tab-btn.active {
-            background: linear-gradient(135deg, #d97706, #f59e0b);
-            color: #090d16;
-            font-weight: 900;
-            box-shadow: 0 0 12px rgba(245, 158, 11, 0.35);
-        }
-
-        /* INCOMING FITLAB AI PROGRAM BANNER */
-        .incoming-program-banner {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.14), rgba(15, 23, 42, 0.95), rgba(6, 182, 212, 0.08));
-            border: 1.5px solid rgba(245, 158, 11, 0.45);
-            border-radius: 16px;
-            padding: 14px 16px;
-            margin-bottom: 16px;
-            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        /* HERO SCHEDULED LAUNCH BANNER */
-        .hero-scheduled-banner {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
-            border: 1.5px solid var(--gold);
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 14px;
-            position: relative;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 18px rgba(245, 158, 11, 0.15);
-        }
-        .hero-scheduled-badge {
+        .today-rest-badge {
             font-size: 10px;
-            font-weight: 900;
-            letter-spacing: 0.6px;
-            text-transform: uppercase;
-            padding: 3px 8px;
-            border-radius: 4px;
-            display: inline-flex;
+            font-weight: 800;
+            color: #94a3b8;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 2px 7px;
+            border-radius: 5px;
+        }
+
+        .today-workout-hero {
+            background: rgba(18, 24, 38, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            border-radius: 14px;
+            padding: 12px 14px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+        .today-workout-header {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 4px;
             margin-bottom: 6px;
         }
-        .hero-scheduled-badge.today {
-            background: rgba(245, 158, 11, 0.2);
-            color: #fbbf24;
-            border: 1px solid rgba(245, 158, 11, 0.5);
-        }
-        .hero-scheduled-badge.tomorrow {
-            background: rgba(56, 189, 248, 0.2);
-            color: #7dd3fc;
-            border: 1px solid rgba(56, 189, 248, 0.5);
-        }
-        .hero-scheduled-title {
-            font-size: 17px;
+        .today-workout-badge {
+            font-size: 10px;
             font-weight: 900;
+            color: var(--gold);
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 5px;
+            padding: 2px 7px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .today-workout-title {
+            font-size: 14.5px;
+            font-weight: 800;
             color: #fff;
-            margin: 0 0 4px 0;
-            line-height: 1.2;
+            margin: 0 0 10px 0;
+            line-height: 1.25;
         }
-        .hero-scheduled-desc {
-            font-size: 12px;
-            color: #cbd5e1;
-            margin: 0 0 12px 0;
-            line-height: 1.4;
-        }
-        .hero-scheduled-actions {
+        .today-workout-actions {
             display: flex;
             gap: 8px;
-            flex-wrap: wrap;
+            align-items: center;
+        }
             align-items: center;
         }
 
@@ -3673,7 +3707,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v117</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v118</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3709,7 +3743,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v117</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v118</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -9448,43 +9482,30 @@ KURALLAR:
                         const todayDetails = getWorkoutDetailsForPlan(todayPlan);
                         const todayExCount = todayDetails && todayDetails.exercises ? todayDetails.exercises.length : null;
                         heroBannerHtml = `
-                            <div class="hero-scheduled-banner">
-                                <div class="hero-scheduled-badge today">
-                                    🔥 BUGÜNÜN PROGRAMI (${DAY_NAMES_TR[todayIdx].toUpperCase()})
+                            <div class="today-workout-hero">
+                                <div class="today-workout-header">
+                                    <div class="today-workout-badge">🔥 BUGÜN • ${DAY_NAMES_TR[todayIdx].toUpperCase()}</div>
+                                    <span style="font-size:11px; color:#cbd5e1; font-weight:700;">${todayExCount ? `${todayExCount} Hareket` : ''}</span>
                                 </div>
-                                <h2 class="hero-scheduled-title">${escapeHTML(todayPlan.title)}</h2>
-                                <p class="hero-scheduled-desc">${escapeHTML(todayPlan.desc || (todayExCount ? `${todayExCount} egzersiz hazır. Hiçbir seçim yapmadan doğrudan başlayabilirsin.` : 'Çelik Kodu seansın hazır. Hiçbir seçim yapmadan doğrudan başlayabilirsin.'))}</p>
-                                <div class="hero-scheduled-actions">
-                                    <button class="btn btn-gold" style="padding:12px 22px; font-size:14px; font-weight:900; box-shadow:0 0 20px rgba(245,158,11,0.5);" onclick="startScheduledWorkoutForDay(${todayIdx})">
-                                        ▶️ TEK DOKUNUŞLA BAŞLAT
+                                <h2 class="today-workout-title">${escapeHTML(todayPlan.title)}</h2>
+                                <div class="today-workout-actions">
+                                    <button class="btn btn-gold" style="padding:9px 18px; font-size:12.5px; font-weight:900;" onclick="startScheduledWorkoutForDay(${todayIdx})">
+                                        ▶️ SEANSI BAŞLAT
                                     </button>
-                                    <button class="btn btn-outline" style="padding:11px 16px; font-size:12px; color:var(--cyan); border-color:var(--cyan); font-weight:700;" onclick="openScheduleDayModal(${todayIdx})">
-                                        👁️ ${todayExCount ? `${todayExCount} Hareket • İçerik & Düzenle` : 'İçeriği Gör & Düzenle'}
+                                    <button class="btn btn-outline" style="padding:9px 14px; font-size:12px; font-weight:700; border-color:rgba(255,255,255,0.2); color:#cbd5e1;" onclick="openScheduleDayModal(${todayIdx})">
+                                        👁️ İncele & Düzenle
                                     </button>
                                 </div>
                             </div>
                         `;
                     } else {
-                        const tomorrowDetails = getWorkoutDetailsForPlan(tomorrowPlan);
-                        const tomorrowExCount = tomorrowDetails && tomorrowDetails.exercises ? tomorrowDetails.exercises.length : null;
                         heroBannerHtml = `
-                            <div class="hero-scheduled-banner">
-                                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; flex-wrap:wrap; margin-bottom:6px;">
-                                    <div class="hero-scheduled-badge tomorrow">
-                                        📅 YARINKİ ANTRENMANIN (${DAY_NAMES_TR[tomorrowIdx].toUpperCase()})
-                                    </div>
-                                    <span style="font-size:11px; color:#94a3b8; font-weight:700;">Bugün (${DAY_NAMES_TR[todayIdx]}): 🧘 Dinlenme</span>
+                            <div class="today-rest-bar">
+                                <div class="today-rest-info">
+                                    <span style="font-size:16px;">🧘</span>
+                                    <span class="today-rest-title">Bugün Dinlenme & Aktif Toparlanma</span>
                                 </div>
-                                <h2 class="hero-scheduled-title">${escapeHTML(tomorrowPlan.title)}</h2>
-                                <p class="hero-scheduled-desc">${escapeHTML(tomorrowPlan.desc || (tomorrowExCount ? `${tomorrowExCount} egzersiz hazır. Salona girdiğinde doğrudan başlayabilirsin.` : 'Yarın salona girdiğinde hiçbir seçim yapmadan doğrudan başlayabilirsin.'))}</p>
-                                <div class="hero-scheduled-actions">
-                                    <button class="btn btn-gold" style="padding:12px 20px; font-size:13.5px; font-weight:900; box-shadow:0 0 20px rgba(245,158,11,0.4);" onclick="startScheduledWorkoutForDay(${tomorrowIdx})">
-                                        ▶️ YARININ PROGRAMINI BAŞLAT
-                                    </button>
-                                    <button class="btn btn-outline" style="padding:11px 16px; font-size:12px; color:var(--cyan); border-color:var(--cyan); font-weight:700;" onclick="openScheduleDayModal(${tomorrowIdx})">
-                                        👁️ ${tomorrowExCount ? `${tomorrowExCount} Hareket • İçerik & Düzenle` : 'İçeriği Gör & Düzenle'}
-                                    </button>
-                                </div>
+                                <span class="today-rest-badge">Yenilenme</span>
                             </div>
                         `;
                     }
@@ -9498,73 +9519,52 @@ KURALLAR:
                         if (isToday) pillClass += ' active-today';
                         else if (isTomorrow) pillClass += ' active-tomorrow';
 
-                        let tagHtml = '';
-                        if (isToday) tagHtml = '<span class="weekly-day-tag today">BUGÜN</span>';
-                        else if (isTomorrow) tagHtml = '<span class="weekly-day-tag tomorrow">YARIN</span>';
-                        else if (isNextWeek && !plan.rest) tagHtml = '<span class="weekly-day-tag" style="background:var(--cyan); color:#090d16;">GELECEK</span>';
-
                         const icon = plan.rest ? '🧘' : (plan.source === 'FitLAB AI' ? '🔬' : '⚔️');
-                        const cleanTitle = (plan.title || '').replace(/⚔️|🧘|🔬|Çelik Kodu/g, '').trim();
-                        const shortTitle = plan.rest ? 'Dinlenme' : (cleanTitle.length > 13 ? cleanTitle.substring(0, 13) + '..' : cleanTitle);
                         const planDetails = getWorkoutDetailsForPlan(plan);
                         const exCount = (!plan.rest && planDetails && planDetails.exercises) ? planDetails.exercises.length : null;
+                        const statusText = plan.rest ? 'Dinlen' : (exCount ? `${exCount} Hrk` : 'Plan');
 
                         return `
-                            <div class="${pillClass}" onclick="openScheduleDayModal(${d})" title="${DAY_NAMES_TR[d]}: ${escapeHTML(plan.title)} (İçeriği görmek ve düzenlemek için tıkla)">
-                                ${tagHtml}
+                            <div class="${pillClass}" onclick="openScheduleDayModal(${d})" title="${DAY_NAMES_TR[d]}: ${escapeHTML(plan.title)}">
                                 <span class="weekly-day-name">${DAY_SHORT_TR[d]}</span>
-                                <span style="font-size:15px; margin:2px 0;">${icon}</span>
-                                <span class="weekly-day-status">${escapeHTML(shortTitle)}</span>
-                                ${exCount ? `<span style="font-size:9.5px; color:var(--gold); font-weight:800; margin-top:2px;">${exCount} Hrk</span>` : ''}
+                                <span class="weekly-day-icon">${icon}</span>
+                                <span class="weekly-day-status">${statusText}</span>
                             </div>
                         `;
                     }).join('');
 
                     container.innerHTML = `
-                        <div style="padding:10px 4px 10px;">
+                        <div style="padding:8px 4px 10px;">
                             <!-- FİTLAB MASAÜSTÜ YENİ PROGRAM BİLDİRİMİ -->
                             ${getFitLabIncomingProgramHtml(user.id)}
 
                             <!-- AKADEMİK KOÇ İSTASYONU DİREKTİFİ -->
                             ${getCoachStationDirectiveHtml(user.id)}
 
-                            <!-- 1. HERO SCHEDULED BANNER -->
+                            <!-- 1. GÜNLÜK DURUM / HERO SEANS KARTI -->
                             ${heroBannerHtml}
 
-                            <!-- 2. HAFTALIK ANTRENMAN TAKVİMİ -->
+                            <!-- 2. HAFTALIK ANTRENMAN TAKVİMİ (KOMPAKT & NİZAMİ) -->
                             <div class="weekly-planner-section">
-                                <div class="weekly-planner-header">
-                                    <div style="display:flex; align-items:center; gap:8px;">
-                                        <span style="font-size:20px;">📅</span>
-                                        <div>
-                                            <h3 style="font-size:14px; font-weight:900; color:#fff; margin:0;">${isNextWeek ? 'Gelecek Hafta Antrenman Planım' : 'Haftalık Antrenman Planım'}</h3>
-                                            <p style="font-size:11px; color:var(--text-secondary); margin:2px 0 0;">Güne dokunarak antrenmanın içeriğini görün veya değiştirin.</p>
-                                        </div>
+                                <div class="planner-top-bar">
+                                    <div class="planner-title-wrap">
+                                        <span style="font-size:15px;">📅</span>
+                                        <span class="planner-title">${isNextWeek ? 'Gelecek Hafta Planı' : 'Haftalık Antrenman Takvimi'}</span>
                                     </div>
-                                    <div style="display:flex; gap:6px;">
-                                        <button type="button" class="btn btn-outline" style="font-size:10.5px; padding:4px 8px;" onclick="resetWeeklyScheduleTemplate('standard_3day')" title="Standart 3 Günlük Çelik Şablonu">
-                                            ⚡ 3 Günlük Şablon
+                                    <div class="mini-week-segmented">
+                                        <button type="button" class="mini-week-btn ${!isNextWeek ? 'active' : ''}" onclick="switchPlannerWeek('current')">
+                                            Bu Hafta
                                         </button>
-                                        <button type="button" class="btn btn-outline" style="font-size:10.5px; padding:4px 8px;" onclick="resetWeeklyScheduleTemplate('split_4day')" title="4 Günlük Bölünmüş Şablon">
-                                            ⚡ 4 Günlük Şablon
+                                        <button type="button" class="mini-week-btn ${isNextWeek ? 'active' : ''}" onclick="switchPlannerWeek('next')">
+                                            Gelecek Hafta ${hasIncomingAi ? '<span style="color:var(--gold);">•</span>' : ''}
                                         </button>
                                     </div>
-                                </div>
-
-                                <!-- BU HAFTA / GELECEK HAFTA SEGMENTED SWITCHER -->
-                                <div class="weekly-week-tabs">
-                                    <button type="button" class="weekly-week-tab-btn ${!isNextWeek ? 'active' : ''}" onclick="switchPlannerWeek('current')">
-                                        📅 BU HAFTA (Aktif)
-                                    </button>
-                                    <button type="button" class="weekly-week-tab-btn ${isNextWeek ? 'active' : ''}" onclick="switchPlannerWeek('next')">
-                                        🚀 GELECEK HAFTA ${hasIncomingAi ? '<span style="width:7px; height:7px; border-radius:50%; background:var(--gold); display:inline-block;"></span>' : ''}
-                                    </button>
                                 </div>
 
                                 ${isNextWeek ? `
-                                    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(6,182,212,0.1); border:1px solid rgba(6,182,212,0.3); border-radius:10px; padding:10px 14px; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
-                                        <span style="font-size:12px; color:#e0f2fe; font-weight:700;">🚀 Gelecek Hafta Takvimi (${hasIncomingAi ? '🔬 FitLAB AI Biyomekanik Reçetesi' : 'Planlanan Döngü'})</span>
-                                        <button type="button" class="btn btn-gold" style="font-size:11px; padding:6px 14px; font-weight:900;" onclick="promoteNextWeekToCurrent('${user.id}')">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.25); border-radius:8px; padding:8px 12px; margin-bottom:10px; gap:8px;">
+                                        <span style="font-size:11.5px; color:#f8fafc; font-weight:700;">🚀 Gelecek Hafta Reçetesi Takvimde</span>
+                                        <button type="button" class="btn btn-gold" style="font-size:11px; padding:5px 12px; font-weight:900;" onclick="promoteNextWeekToCurrent('${user.id}')">
                                             ⚡ Aktif Haftam Yap
                                         </button>
                                     </div>
@@ -9573,21 +9573,11 @@ KURALLAR:
                                 <div class="weekly-strip">
                                     ${weeklyStripHtml}
                                 </div>
-                            </div>
 
-                            <!-- 3. OTOMATİK SİHİRBAZ & ATÖLYE KART -->
-                            <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:16px; text-align:center;">
-                                <h3 style="font-size:14.5px; font-weight:900; color:#fff; margin-bottom:4px;">Özel Antrenman Oluştur veya Tasarla</h3>
-                                <p style="font-size:12px; color:var(--text-secondary); line-height:1.4; max-width:380px; margin:0 auto 14px;">
-                                    Sihirbaz ile bölge/hedef seçerek yapay zeka destekli yeni program üretebilir veya Atölye'den kendi setlerinizi kurabilirsiniz.
-                                </p>
-                                <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
-                                    <button class="btn btn-gold" style="padding:9px 15px; font-size:12px; font-weight:800;" onclick="switchTab('generatorTab')">
-                                        ⚡ Otomatik Sihirbaz
-                                    </button>
-                                    <button class="btn btn-outline" style="padding:9px 15px; font-size:12px; font-weight:800;" onclick="openStudioAccordion()">
-                                        🎯 Kendin Tasarla (Atölye)
-                                    </button>
+                                <div class="planner-template-bar">
+                                    <span class="planner-template-lbl">Hızlı Şablon:</span>
+                                    <button type="button" class="planner-template-btn" onclick="resetWeeklyScheduleTemplate('standard_3day')" title="Standart 3 Günlük Çelik Şablonu">⚡ 3 Gün</button>
+                                    <button type="button" class="planner-template-btn" onclick="resetWeeklyScheduleTemplate('split_4day')" title="4 Günlük Bölünmüş Şablon">⚡ 4 Gün</button>
                                 </div>
                             </div>
 
@@ -17770,7 +17760,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=117')
+                navigator.serviceWorker.register('./sw.js?v=118')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
