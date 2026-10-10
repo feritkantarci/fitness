@@ -38,6 +38,9 @@
                 <button class="nav-tab-btn" id="tabBtnLab" data-view="lab">
                     <span class="icon">🔬</span> Lab Atlası
                 </button>
+                <button class="nav-tab-btn" id="tabBtnConsult" data-view="consult">
+                    <span class="icon">💬</span> AI İstişare Odası
+                </button>
             </nav>
         </div>
 
@@ -567,6 +570,103 @@
         </aside>
     </section>
 
+    <!-- AI Biyomekanik İstişare & Koçluk Odası (Interactive Consultation Chamber) -->
+    <section class="consult-layout" id="viewConsult" style="display: none;">
+        <!-- Sol Panel: Sporcu Bağlamı & Hızlı İstişare Senaryoları -->
+        <aside class="consult-sidebar">
+            <div class="panel-box">
+                <div class="panel-box-header">
+                    <h3>👤 Sporcu Durumu & Bağlam</h3>
+                </div>
+                <div class="consult-context-box" id="consultAthleteBrief">
+                    <div style="font-size:13px; font-weight:800; color:#fff;" id="consultAthleteName">Sporcu Seçilmedi</div>
+                    <div style="font-size:11.5px; color:var(--text-secondary); margin-top:3px;" id="consultAthleteMetrics">Tartı ve antrenman verisi bekleniyor...</div>
+                </div>
+            </div>
+
+            <div class="panel-box">
+                <div class="panel-box-header">
+                    <h3>💡 Hızlı İstişare Senaryoları</h3>
+                </div>
+                <p style="font-size:11px; color:var(--text-secondary); margin:0 0 10px 0;">
+                    Karşılaştığın bir zorluğu seçerek doğrudan istişareyi başlatabilirsin:
+                </p>
+                <div class="quick-consult-buttons">
+                    <button type="button" class="btn-quick-consult" onclick="triggerQuickConsult('pullup_regression')">
+                        🧗‍♂️ <strong>"Barfiks çekemiyorum"</strong>
+                        <span>Hareketi nasıl kazanırım veya yerine ne yapmalıyım?</span>
+                    </button>
+                    <button type="button" class="btn-quick-consult" onclick="triggerQuickConsult('squat_knee_pain')">
+                        🦵 <strong>"Squat dizimi zorluyor"</strong>
+                        <span>Diz dostu ikame veya regresyon nedir?</span>
+                    </button>
+                    <button type="button" class="btn-quick-consult" onclick="triggerQuickConsult('shoulder_impingement')">
+                        ⚔️ <strong>"Lateral raise boynumu kasıyor"</strong>
+                        <span>Deltoidi tecrit eden alternatifler nelerdir?</span>
+                    </button>
+                    <button type="button" class="btn-quick-consult" onclick="triggerQuickConsult('kettlebell_substitute')">
+                        🔔 <strong>"Salonda Kettlebell yok"</strong>
+                        <span>Kettlebell hareketlerini dambılla nasıl ikame ederiz?</span>
+                    </button>
+                    <button type="button" class="btn-quick-consult" onclick="triggerQuickConsult('compact_routine')">
+                        ⏱️ <strong>"Seans sürem çok uzuyor"</strong>
+                        <span>Hacmi koruyarak süreyi nasıl kısaltabiliriz?</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel-box">
+                <div class="panel-box-header">
+                    <h3>📚 Akademik İstişare Metodolojisi</h3>
+                </div>
+                <ul style="font-size:11.5px; color:var(--text-secondary); line-height:1.5; padding-left:16px; margin:0;">
+                    <li><strong>Progresyon / Regresyon:</strong> Hareketi basitleştirerek adım adım kazandırma.</li>
+                    <li><strong>Biyomekanik İkiz (Substitution):</strong> Kas liflerini aynı açıda vuran alternatif hareket.</li>
+                    <li><strong>Karşılıklı Karar:</strong> Sporcunun tercihine göre programı şekillendirme.</li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Sağ Taraf: İnteraktif Sohbet / İstişare Konsolu -->
+        <main class="consult-main">
+            <div class="consult-header-bar">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div class="consult-avatar">🧠</div>
+                    <div>
+                        <h2 style="font-size:15px; font-weight:800; color:#fff; margin:0;">AI Biyomekanik İstişare Odası</h2>
+                        <span style="font-size:11px; color:var(--text-secondary);">Antrenmandaki zorlukları, hareket ikamelerini ve progresyonları birlikte tartışalım.</span>
+                    </div>
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button type="button" class="btn-action" style="font-size:11px; padding:6px 12px; background:rgba(239,68,68,0.15); color:#fca5a5; border:1px solid rgba(239,68,68,0.3);" onclick="clearConsultationChat()">
+                        🗑️ Sohbeti Sıfırla
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mesaj Akışı -->
+            <div class="consult-messages-stream" id="consultMessagesStream">
+                <!-- Hoş geldin mesajı -->
+                <div class="chat-bubble chat-bubble-ai">
+                    <div class="chat-bubble-sender">🧠 FitLAB Biyomekanik Danışmanı</div>
+                    <div class="chat-bubble-text">
+                        Merhaba Şampiyon! Antrenmanında takıldığın, yapamadığın ya da değiştirmek istediğin bir hareket olduğunda buradayım.
+                        <br><br>
+                        Örneğin: <em>"Verilen programda Barfiks var ama ben hiç barfiks çekemiyorum; bunu nasıl çözelim?"</em> gibi sorular sorabilirsin.
+                        İster o hareketi sıfırdan kazandıracak <strong>progresyon protokolü</strong> çalışalım, ister aynı kası çalıştıracak <strong>daha basit bir ikame hareket</strong> koyalım.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Giriş Kutusu -->
+            <div class="consult-input-bar">
+                <textarea id="consultUserInput" placeholder="Koç ile istişare et (Örn: Barfiks çekemiyorum, bunun yerine ne koyabiliriz veya nasıl barfiks öğrenebilirim?)..." rows="2"></textarea>
+                <button type="button" class="btn-primary" id="btnSendConsultMsg" onclick="sendConsultationMessage()">
+                    <span>Gönder ➔</span>
+                </button>
+            </div>
+        </main>
+    </section>
 
     <!-- Ayarlar Modalı -->
     <div class="modal-backdrop" id="settingsModal" style="display:none;">

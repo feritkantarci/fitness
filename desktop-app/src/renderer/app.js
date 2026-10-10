@@ -45,6 +45,14 @@ const el = {
     tabBtnBodyComp: document.getElementById('tabBtnBodyComp'),
     tabBtnLab: document.getElementById('tabBtnLab'),
     tabBtnAnalytics: document.getElementById('tabBtnAnalytics'),
+    tabBtnConsult: document.getElementById('tabBtnConsult'),
+    viewConsult: document.getElementById('viewConsult'),
+    consultMessagesStream: document.getElementById('consultMessagesStream'),
+    consultUserInput: document.getElementById('consultUserInput'),
+    btnSendConsultMsg: document.getElementById('btnSendConsultMsg'),
+    consultAthleteBrief: document.getElementById('consultAthleteBrief'),
+    consultAthleteName: document.getElementById('consultAthleteName'),
+    consultAthleteMetrics: document.getElementById('consultAthleteMetrics'),
     desktopAnalyticsContainer: document.getElementById('desktopAnalyticsContainer'),
 
     // Tartı & Kompozisyon Elemanları
@@ -220,6 +228,18 @@ function setupEventListeners() {
     el.tabBtnLab.addEventListener('click', () => switchView('lab'));
     if (el.tabBtnAnalytics) {
         el.tabBtnAnalytics.addEventListener('click', () => switchView('analytics'));
+    }
+    if (el.tabBtnConsult) {
+        el.tabBtnConsult.addEventListener('click', () => switchView('consult'));
+    }
+
+    if (el.consultUserInput) {
+        el.consultUserInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendConsultationMessage();
+            }
+        });
     }
 
     // Tartı & Kompozisyon Buton ve Olay Dinleyicileri
@@ -1696,21 +1716,211 @@ function switchView(viewName) {
     el.viewLab.style.display = viewName === 'lab' ? 'flex' : 'none';
     if (el.viewAnalytics) el.viewAnalytics.style.display = viewName === 'analytics' ? 'flex' : 'none';
     if (el.viewBodyComp) el.viewBodyComp.style.display = viewName === 'bodycomp' ? 'flex' : 'none';
+    if (el.viewConsult) el.viewConsult.style.display = viewName === 'consult' ? 'flex' : 'none';
 
     el.tabBtnDashboard.classList.toggle('active', viewName === 'dashboard');
     el.tabBtnLab.classList.toggle('active', viewName === 'lab');
     if (el.tabBtnAnalytics) el.tabBtnAnalytics.classList.toggle('active', viewName === 'analytics');
     if (el.tabBtnBodyComp) el.tabBtnBodyComp.classList.toggle('active', viewName === 'bodycomp');
+    if (el.tabBtnConsult) el.tabBtnConsult.classList.toggle('active', viewName === 'consult');
 
     if (viewName === 'analytics') {
         renderDesktopAnalytics();
     } else if (viewName === 'bodycomp') {
         renderBodyCompView();
+    } else if (viewName === 'consult') {
+        renderConsultationContext();
     } else if (viewName === 'lab' && state.catalog.length === 0) {
         loadExerciseCatalog();
     }
 }
 window.switchView = switchView;
+
+// ==================== AI CONSULTATION CHAMBER (İSTİŞARE ODASI) ====================
+let consultationConversation = [];
+
+function renderConsultationContext() {
+    if (!el.consultAthleteBrief) return;
+    const user = state.selectedUser;
+    if (!user) {
+        if (el.consultAthleteName) el.consultAthleteName.textContent = 'Sporcu Seçilmedi';
+        if (el.consultAthleteMetrics) el.consultAthleteMetrics.textContent = 'Lütfen üst bardan bir sporcu seçin.';
+        return;
+    }
+
+    if (el.consultAthleteName) {
+        el.consultAthleteName.textContent = `${user.avatar || '🥋'} ${user.name} (${user.level || 'Orta Seviye'})`;
+    }
+
+    if (el.consultAthleteMetrics) {
+        const bc = state.academicAnalysis?.bodyComposition;
+        let str = `Tamamlanan Seans: ${state.workoutLogs.length} | `;
+        if (bc?.hasData) {
+            str += `Kilo: ${bc.metrics.weight} kg | Yağ: %${bc.metrics.bodyFat || '-'} | Kas: ${bc.metrics.skeletalMuscle || '-'} kg`;
+        } else {
+            str += `Kayıtlı tartı analizi yok (Standart profil)`;
+        }
+        el.consultAthleteMetrics.textContent = str;
+    }
+}
+
+function triggerQuickConsult(scenario) {
+    const prompts = {
+        pullup_regression: "Programımda Barfiks var ama ben hiç barfiks çekemiyorum. Bu hareketi nasıl kazanırım (progresyon) veya yerine aynı kasları vuracak daha basit hangi ikame hareketi yapmalıyım?",
+        squat_knee_pain: "Squat yaparken dizimde batma ve rahatsızlık hissediyorum. Dizimi koruyacak biyomekanik ikame hareketler veya regresyonlar nelerdir?",
+        shoulder_impingement: "Lateral raise yaparken omuz başımdan çok boyun ve trapezlerim kasılıyor. Yan deltoidi izole eden alternatifler ve form düzeltmeleri nedir?",
+        kettlebell_substitute: "Salonda Kettlebell bulunmuyor. Kettlebell Swing ve Clean hareketlerini dambıl ile nasıl ikame edebilirim?",
+        compact_routine: "Antrenman sürem 60 dakikayı aşıyor ve çok uzuyor. Efektif hacmi koruyarak seansımı süpersetlerle 40-45 dakikaya nasıl indirgeyebiliriz?"
+    };
+
+    const text = prompts[scenario];
+    if (text) {
+        if (el.consultUserInput) el.consultUserInput.value = text;
+        sendConsultationMessage(text);
+    }
+}
+window.triggerQuickConsult = triggerQuickConsult;
+
+async function sendConsultationMessage(presetText = null) {
+    const input = el.consultUserInput;
+    const text = presetText || (input ? input.value.trim() : '');
+    if (!text) return;
+
+    if (!state.selectedUser) {
+        showToast('⚠️ Lütfen önce üst bardan bir sporcu seçin.');
+        return;
+    }
+
+    // Kullanıcı balonunu ekle
+    appendChatBubble('user', text);
+    if (input && !presetText) input.value = '';
+
+    // Diyalog geçmişine ekle
+    consultationConversation.push({ role: 'user', text });
+
+    // Yükleniyor balonunu göster
+    const loadingBubbleId = appendChatLoadingBubble();
+
+    try {
+        const result = await window.coachAPI.consultWithAi({
+            profile: state.selectedUser,
+            academicData: state.academicAnalysis || {},
+            conversationHistory: consultationConversation.slice(-6),
+            message: text
+        });
+
+        removeChatLoadingBubble(loadingBubbleId);
+
+        const aiReply = result.reply;
+        consultationConversation.push({ role: 'model', text: aiReply });
+        appendChatBubble('ai', aiReply, true);
+
+    } catch (err) {
+        removeChatLoadingBubble(loadingBubbleId);
+        console.error("İstişare hatası:", err);
+        appendChatBubble('ai', `⚠️ İstişare sırasında bir hata oluştu: ${err.message || err}`);
+    }
+}
+window.sendConsultationMessage = sendConsultationMessage;
+
+function appendChatBubble(sender, text, showActions = false) {
+    const stream = el.consultMessagesStream;
+    if (!stream) return;
+
+    const bubble = document.createElement('div');
+    bubble.className = `chat-bubble ${sender === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'}`;
+
+    const senderTitle = sender === 'user' 
+        ? `👤 ${state.selectedUser?.name || 'Sporcu'}` 
+        : `🧠 FitLAB Biyomekanik Danışmanı`;
+
+    let actionsHtml = '';
+    if (showActions && sender === 'ai') {
+        actionsHtml = `
+            <div class="chat-bubble-actions">
+                <button type="button" class="btn-chat-action" onclick="pushDirectiveFromConsult(decodeURIComponent('${encodeURIComponent(text)}'))" title="Bu tavsiyeyi sporcunun telefonundaki web uygulamasına koç direktifi olarak fırlat">
+                    📱 Bu Tavsiyeyi Web'e Direktif Olarak Gönder
+                </button>
+            </div>
+        `;
+    }
+
+    bubble.innerHTML = `
+        <div class="chat-bubble-sender">${senderTitle}</div>
+        <div class="chat-bubble-text">${escapeHTML(text)}</div>
+        ${actionsHtml}
+    `;
+
+    stream.appendChild(bubble);
+    stream.scrollTop = stream.scrollHeight;
+}
+
+let loadingBubbleCounter = 0;
+function appendChatLoadingBubble() {
+    const stream = el.consultMessagesStream;
+    if (!stream) return null;
+
+    loadingBubbleCounter++;
+    const id = `loadingBubble_${loadingBubbleCounter}`;
+    const bubble = document.createElement('div');
+    bubble.id = id;
+    bubble.className = 'chat-bubble chat-bubble-ai';
+    bubble.innerHTML = `
+        <div class="chat-bubble-sender">🧠 FitLAB Biyomekanik Danışmanı</div>
+        <div style="display:flex; align-items:center; gap:8px; color:var(--text-secondary); font-size:12px;">
+            <span class="loading-spinner" style="display:inline-block; width:12px; height:12px; border:2px solid var(--gold); border-top-color:transparent; border-radius:50%; animation:spin 0.8s linear infinite;"></span>
+            <span>Biyomekanik seçenekler ve ikameler değerlendiriliyor...</span>
+        </div>
+    `;
+
+    stream.appendChild(bubble);
+    stream.scrollTop = stream.scrollHeight;
+    return id;
+}
+
+function removeChatLoadingBubble(id) {
+    if (!id) return;
+    const elBubble = document.getElementById(id);
+    if (elBubble) elBubble.remove();
+}
+
+function clearConsultationChat() {
+    consultationConversation = [];
+    const stream = el.consultMessagesStream;
+    if (stream) {
+        stream.innerHTML = `
+            <div class="chat-bubble chat-bubble-ai">
+                <div class="chat-bubble-sender">🧠 FitLAB Biyomekanik Danışmanı</div>
+                <div class="chat-bubble-text">
+                    Merhaba Şampiyon! Antrenmanında takıldığın, yapamadığın ya da değiştirmek istediğin bir hareket olduğunda buradayım.
+                    <br><br>
+                    Örneğin: <em>"Verilen programda Barfiks var ama ben hiç barfiks çekemiyorum; bunu nasıl çözelim?"</em> gibi sorular sorabilirsin.
+                    İster o hareketi sıfırdan kazandıracak <strong>progresyon protokolü</strong> çalışalım, ister aynı kası çalıştıracak <strong>daha basit bir ikame hareket</strong> koyalım.
+                </div>
+            </div>
+        `;
+    }
+}
+window.clearConsultationChat = clearConsultationChat;
+
+async function pushDirectiveFromConsult(consultReply) {
+    if (!state.selectedUserId) {
+        showToast('⚠️ Lütfen önce bir sporcu seçin.');
+        return;
+    }
+
+    const firstLines = consultReply.split('\n').filter(l => l.trim().length > 0).slice(0, 3).join(' ');
+    const shortDirective = firstLines.length > 250 ? firstLines.substring(0, 247) + '...' : firstLines;
+
+    try {
+        await window.coachAPI.sendDirectiveToWeb(state.selectedUserId, shortDirective);
+        showToast('🚀 İstişare kararı başarıyla sporcunun web uygulamasına gönderildi!');
+    } catch (err) {
+        console.error("Web direktifi gönderim hatası:", err);
+        showToast('⚠️ Direktif gönderilirken hata oluştu.');
+    }
+}
+window.pushDirectiveFromConsult = pushDirectiveFromConsult;
 
 async function loadExerciseCatalog() {
     try {

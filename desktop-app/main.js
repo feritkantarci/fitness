@@ -192,6 +192,10 @@ ipcMain.handle('ai:generatePrescription', async (event, { profile, academicData,
     return await aiCoachService.generateAcademicPrescription(profile, academicData, prompt);
 });
 
+ipcMain.handle('ai:consult', async (event, { profile, academicData, conversationHistory, message }) => {
+    return await aiCoachService.conductConsultationDialogue(profile, academicData, conversationHistory, message);
+});
+
 ipcMain.handle('ai:saveApiKey', async (event, key) => {
     return saveApiKeyToDisk(key);
 });

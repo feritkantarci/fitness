@@ -20,8 +20,9 @@ contextBridge.exposeInMainWorld('coachAPI', {
     analyzeHistory: (logs, profile, scaleLogs) => ipcRenderer.invoke('academic:analyze', { logs, profile, scaleLogs }),
     getExerciseCatalog: () => ipcRenderer.invoke('catalog:getExercises'),
 
-    // AI Koçluk & Gemini Reçete
+    // AI Koçluk & Gemini Reçete & İstişare
     generatePrescription: (payload) => ipcRenderer.invoke('ai:generatePrescription', payload),
+    consultWithAi: (payload) => ipcRenderer.invoke('ai:consult', payload),
     saveApiKey: (key) => ipcRenderer.invoke('ai:saveApiKey', key),
     getApiKey: () => ipcRenderer.invoke('ai:getApiKey'),
 

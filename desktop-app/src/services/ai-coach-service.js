@@ -186,8 +186,108 @@ Her gün için başlığı MUTLAKA şu standart formatta başlat ve altına egze
     };
 }
 
+/**
+ * Karşılıklı Biyomekanik ve Egzersiz İstişare Diyaloğu (Interactive Consultation)
+ * Kullanıcının yapamadığı hareketleri, sakatlık/ağrı durumlarını, ekipman eksikliklerini
+ * tartışarak progresyon veya ikame egzersiz seçenekleri sunar.
+ */
+async function conductConsultationDialogue(athleteProfile, academicData = {}, conversationHistory = [], userMessage = '') {
+    if (!activeApiKey) {
+        throw new Error('Gemini API anahtarı girilmedi. Lütfen ayarlar bölümünden API anahtarınızı kaydedin.');
+    }
+
+    const genAI = new GoogleGenerativeAI(activeApiKey);
+
+    const systemPrompt = `
+Sen "FitLAB" sisteminin Baş Spor Bilimcisi ve Biyomekanik İstişare Danışmanısın.
+Sporcu ile karşılıklı İSTİŞARE (diyalog) yürütüyorsun.
+Sporcu sana antrenmanındaki zorlukları anlatıyor: Örneğin "Programda barfiks var ama ben hiç çekemiyorum", "Squat yaparken dizimde batma oluyor", "Dambıl yerine ne yapabilirim?", "Bu hareketi yapmalı mıyım yoksa daha basitiyle mi başlamalıyım?".
+
+SENİN YAKLAŞIMIN & İSTİŞARE PRENSİPLERİN:
+1. DİKTE ETME, İSTİŞARE ET: Kullanıcıya doğrudan emir verme; seçenekleri biyomekanik avantajlarıyla açıkla.
+2. REGRESYON / PROGRESYON PERSPEKTİFİ:
+   - Eğer sporcu temel bir hareketi (örneğin Barfiks, Şınav, Dip) yapamıyorsa:
+     - Neden yapamadığını kısaca açıkla (relatif kuvvet, skapular depresyon/retraksiyon yetersizliği, vücut ağırlığı).
+     - Bu hareketi kazandıracak "Progresyon Protokolü" sun (Örn: Avustralya Row / Inverted Row -> Scapular Pull-up -> Direnç Bandı Destekli Barfiks -> Eksantrik/Negatif Barfiks).
+3. İKAME / BİYOMEKANİK İKİZ (SUBSTITUTION) PERSPEKTİFİ:
+   - Eğer sporcu o hareketi şu an yapmak istemiyorsa veya eklem hassasiyeti varsa:
+     - Hedef kası (örneğin Latissimus Dorsi) aynı anatomik açıda ve yüksek SFR (Stimulus-to-Fatigue Ratio) ile vuracak en basit ve etkili ikame hareketini öner (Örn: Göğüs Destekli Dambıl Row veya Lat Pulldown).
+4. SEÇİMİ SPORCUYA BIRAK & SOMUT KARAR KARTLARI SUN:
+   Her yanıtının sonunda sporcuya net seçenekler sun:
+   - 🧗‍♂️ Seçenek 1: Hareketi Kazanalım (4 Haftalık Progresyon Planı)
+   - 🛡️ Seçenek 2: Güvenli İkame ile Devam Edelim (Alternatif Egzersiz)
+   - ⚖️ Seçenek 3: Hibrit Denge (Haftada 1 gün adaptasyon, 1 gün izole çekiş)
+5. DİL & TON:
+   Türkçe, son derece empatik, çözüm odaklı, spor bilimine dayalı ve motive edici. Sporcunun mevcut kilo ve kas durumunu göz önünde bulundur.
+`;
+
+    const athleteBrief = {
+        isim: athleteProfile.name || 'Sporcu',
+        seviye: athleteProfile.level || 'Orta Seviye',
+        kilo: academicData.bodyComposition?.metrics?.weight ? `${academicData.bodyComposition.metrics.weight} kg` : 'Belirtilmedi',
+        yagOrani: academicData.bodyComposition?.metrics?.bodyFat ? `%${academicData.bodyComposition.metrics.bodyFat}` : 'Belirtilmedi',
+        mevcutAgirliklar: athleteProfile.weights || {}
+    };
+
+    let promptContent = `[SPORCU BAĞLAMI]: ${JSON.stringify(athleteBrief)}\n\n`;
+    if (conversationHistory && conversationHistory.length > 0) {
+        promptContent += `[ÖNCEKİ DİYALOG GEÇMİŞİ]:\n`;
+        conversationHistory.forEach(m => {
+            promptContent += `${m.role === 'user' ? 'Sporcu' : 'AI Danışman'}: ${m.text}\n`;
+        });
+        promptContent += `\n`;
+    }
+    promptContent += `[SPORCUNUN YENİ İSTİŞARE MESAJI]:\n"${userMessage}"\n\nLütfen yukarıdaki istişare ilkelerine göre sporcuya rehberlik et ve seçenekleri sun.`;
+
+    let responseText = '';
+    let lastError = null;
+
+    for (const modelName of CANDIDATE_MODELS) {
+        try {
+            const model = genAI.getGenerativeModel({ model: modelName });
+            const result = await model.generateContent([systemPrompt, promptContent]);
+            responseText = result.response.text();
+            if (responseText) break;
+        } catch (err) {
+            lastError = err;
+        }
+    }
+
+    if (!responseText) {
+        try {
+            const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + activeApiKey);
+            if (res.ok) {
+                const data = await res.json();
+                const availableModels = (data.models || [])
+                    .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
+                    .map(m => m.name.replace('models/', ''))
+                    .filter(name => name.includes('flash') || name.includes('pro'));
+
+                for (const dynModel of availableModels) {
+                    try {
+                        const model = genAI.getGenerativeModel({ model: dynModel });
+                        const result = await model.generateContent([systemPrompt, promptContent]);
+                        responseText = result.response.text();
+                        if (responseText) break;
+                    } catch (e) {}
+                }
+            }
+        } catch (e) {}
+    }
+
+    if (!responseText) {
+        throw lastError || new Error('AI ile bağlantı kurulamadı. Lütfen API anahtarınızı kontrol edin.');
+    }
+
+    return {
+        timestamp: new Date().toISOString(),
+        reply: responseText
+    };
+}
+
 module.exports = {
     setApiKey,
     getApiKey,
-    generateAcademicPrescription
+    generateAcademicPrescription,
+    conductConsultationDialogue
 };
