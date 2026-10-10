@@ -1851,18 +1851,31 @@ function appendChatBubbleDOM(sender, text, showActions = false, timestamp = null
 
     let actionsHtml = '';
     if (showActions && sender === 'ai') {
+        const hasWorkout = (text.includes('|') && /set|tekrar|blok|hareket|bench|curl|squat|row|press/i.test(text));
+
         if (directiveSent) {
             actionsHtml = `
                 <div class="chat-bubble-actions">
                     <button type="button" class="btn-chat-action" id="btnPush_${msgId}" disabled style="color:#10b981; border-color:#10b981; background:rgba(16, 185, 129, 0.15);">
-                        ✅ Web'e Gönderildi
+                        ✅ Web'e İletildi
+                    </button>
+                </div>
+            `;
+        } else if (hasWorkout) {
+            actionsHtml = `
+                <div class="chat-bubble-actions" style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <button type="button" class="btn-chat-action" id="btnAssignToday_${msgId}" onclick="pushWorkoutToTodayFromConsult('${msgId}', this)" style="background:rgba(245,158,11,0.2); border-color:#f59e0b; color:#f59e0b; font-weight:800;" title="Bu antrenmanı sporcunun bugünkü takvimine ata ve webde hemen başlatılabilir yap">
+                        🔥 Bugüne Ata (Web'de Başlat)
+                    </button>
+                    <button type="button" class="btn-chat-action" id="btnPush_${msgId}" onclick="pushDirectiveFromConsult('${msgId}', this)" title="Bu koç tavsiyesini sporcunun telefonuna direktif olarak gönder">
+                        📱 Web'e Gönder
                     </button>
                 </div>
             `;
         } else {
             actionsHtml = `
                 <div class="chat-bubble-actions">
-                    <button type="button" class="btn-chat-action" id="btnPush_${msgId}" onclick="pushDirectiveFromConsult('${msgId}', this)" title="Bu koç tavsiyesini sporcunun telefonundaki web uygulamasına direktif olarak gönder">
+                    <button type="button" class="btn-chat-action" id="btnPush_${msgId}" onclick="pushDirectiveFromConsult('${msgId}', this)" title="Bu koç tavsiyesini sporcunun telefonuna direktif olarak gönder">
                         📱 Web'e Gönder
                     </button>
                 </div>
@@ -2161,6 +2174,164 @@ async function pushDirectiveFromConsult(msgId, btnElement = null) {
     }
 }
 window.pushDirectiveFromConsult = pushDirectiveFromConsult;
+
+function extractProtocolTitleFromText(text) {
+    if (!text) return 'FitLAB Antrenman Protokolü';
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    for (const l of lines) {
+        if (l.startsWith('#')) {
+            return l.replace(/^#+\s*/, '').replace(/\*+/g, '').trim();
+        }
+        if (l.startsWith('**') && l.endsWith('**') && l.length > 6) {
+            return l.replace(/\*+/g, '').trim();
+        }
+    }
+    return 'FitLAB Antrenman Protokolü';
+}
+
+function parseConsultWorkoutExercises(fullText) {
+    if (!fullText) return null;
+    const lines = fullText.split('\n');
+    const exercises = [];
+    for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('|') && trimmed.endsWith('|') && !trimmed.includes('---')) {
+            const lower = trimmed.toLowerCase();
+            if (lower.includes('blok') && lower.includes('hareket')) continue;
+            if (lower.includes('egzersiz') && lower.includes('set')) continue;
+            const cells = trimmed.split('|').map(c => c.trim()).filter(Boolean);
+            if (cells.length >= 2) {
+                let rawName = cells[0].replace(/\*+/g, '').trim();
+                let setRepCell = cells[1] || '';
+                let note = cells.slice(2).join(' • ');
+
+                if (rawName.length <= 4 || /^[A-Z0-9\.\-\s]{1,5}$/i.test(rawName) || ['blok', 'bitiriş', 'finisher', 'isinma'].includes(rawName.toLowerCase())) {
+                    rawName = (cells[1] || '').replace(/\*+/g, '').trim();
+                    setRepCell = cells[2] || '';
+                    note = cells.slice(3).join(' • ');
+                }
+
+                if (!rawName || rawName.length < 3) continue;
+
+                let sets = 3;
+                let reps = '8-12';
+                const srMatch = setRepCell.match(/(\d+)\s*[xX*]\s*([0-9\-–]+)/);
+                if (srMatch) {
+                    sets = parseInt(srMatch[1], 10) || 3;
+                    reps = srMatch[2] || '8-12';
+                } else {
+                    const sMatch = setRepCell.match(/(\d+)\s*set/i);
+                    if (sMatch) sets = parseInt(sMatch[1], 10) || 3;
+                    const rMatch = setRepCell.match(/([0-9\-–]+)\s*(?:tekrar|rep)/i);
+                    if (rMatch) reps = rMatch[1];
+                }
+
+                let matchedEx = null;
+                if (Array.isArray(state.catalog)) {
+                    const normRaw = rawName.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    matchedEx = state.catalog.find(e => {
+                        const n = (e.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+                        return n === normRaw || n.includes(normRaw) || normRaw.includes(n);
+                    });
+                }
+
+                exercises.push({
+                    id: matchedEx ? matchedEx.id : ('gen_' + Math.random().toString(36).substring(2, 8)),
+                    name: matchedEx ? matchedEx.name : rawName,
+                    category: matchedEx ? matchedEx.category : 'dumbbell',
+                    equipment: matchedEx ? matchedEx.equipment : 'Dambıl & Sehpa',
+                    targetSets: sets,
+                    targetReps: reps,
+                    note: note || ''
+                });
+            }
+        }
+    }
+    return exercises.length > 0 ? exercises : null;
+}
+
+async function pushWorkoutToTodayFromConsult(msgId, btnElement = null) {
+    if (!state.selectedUserId) {
+        showToast('⚠️ Lütfen önce üst bardan bir sporcu seçin.');
+        return;
+    }
+
+    const fullText = consultMsgStore[msgId] || '';
+    if (!fullText) {
+        showToast('⚠️ Antrenman metni bulunamadı.');
+        return;
+    }
+
+    const exercises = parseConsultWorkoutExercises(fullText);
+    const title = extractProtocolTitleFromText(fullText);
+    const todayName = new Date().toLocaleDateString('tr-TR', { weekday: 'long' });
+
+    if (btnElement) {
+        btnElement.disabled = true;
+        btnElement.innerHTML = '⏳ Bugüne Atanıyor...';
+    }
+
+    const cleanLines = fullText.split('\n').map(l => l.trim()).filter(l => l.length > 0 && !l.startsWith('#'));
+    const firstLines = cleanLines.slice(0, 3).join(' ');
+    const shortDirective = firstLines.length > 250 ? firstLines.substring(0, 247) + '...' : (firstLines || fullText.substring(0, 250));
+
+    const workoutObj = {
+        id: 'fitlab_today_' + Date.now(),
+        title: title,
+        duration: Math.max(30, Math.round((exercises ? exercises.length : 6) * 6.5)),
+        exercises: exercises || [],
+        isDirective: true,
+        source: 'fitlab_consult'
+    };
+
+    const payload = {
+        title: `🔥 FitLAB Antrenmanı: ${title}`,
+        text: shortDirective,
+        fullReport: fullText,
+        targetAthlete: state.selectedUser?.name || 'Sporcu',
+        badge: 'Bugünün Antrenmanı',
+        active: true,
+        assignToToday: true,
+        parsedWorkout: workoutObj,
+        sentAt: new Date().toISOString()
+    };
+
+    try {
+        const res = await window.coachAPI.sendDirectiveToWeb(state.selectedUserId, payload);
+        if (res && res.success) {
+            if (btnElement) {
+                btnElement.innerHTML = '✅ Bugüne Atandı!';
+                btnElement.style.color = '#10b981';
+                btnElement.style.borderColor = '#10b981';
+                btnElement.style.background = 'rgba(16, 185, 129, 0.15)';
+            }
+
+            const targetMsg = consultationMessagesList.find(m => m.id === msgId);
+            if (targetMsg) {
+                targetMsg.directiveSent = true;
+                saveCurrentConsultationHistory();
+            }
+
+            showToast(`🔥 Antrenman sporcunun (${state.selectedUser?.name || 'Sporcu'}) bugünkü (${todayName}) programına atandı ve iletildi!`);
+            if (window.coachAPI && window.coachAPI.showNotification) {
+                window.coachAPI.showNotification(
+                    '🔥 Bugüne Atandı',
+                    `"${title}" sporcunun bugünkü (${todayName}) antrenmanına başarıyla yüklendi.`
+                );
+            }
+        } else {
+            throw new Error(res?.error || 'Bulut veritabanına yazılamadı.');
+        }
+    } catch (err) {
+        console.error("Bugüne atama hatası:", err);
+        if (btnElement) {
+            btnElement.disabled = false;
+            btnElement.innerHTML = '⚠️ Tekrar Dene';
+        }
+        alert(`Bugüne atama hatası: ${err.message || err}`);
+    }
+}
+window.pushWorkoutToTodayFromConsult = pushWorkoutToTodayFromConsult;
 
 async function loadExerciseCatalog() {
     try {
