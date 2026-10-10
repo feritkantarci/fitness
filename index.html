@@ -3551,7 +3551,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v109</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v110</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3587,7 +3587,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v109</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v110</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -4823,36 +4823,28 @@
     <!-- ==================== EXERCISE PICKER & ALTERNATIVE MODAL ==================== -->
     <div id="exercisePickerModal" class="modal-overlay" onclick="if(event.target === this) closeExercisePickerModal()">
         <div class="modal-box" style="max-width: 640px; max-height: 92vh; display: flex; flex-direction: column;">
-            <div class="modal-header" style="margin-bottom: 8px;">
-                <div>
-                    <span class="modal-title" id="pickerModalTitle">🔄 Alternatif Egzersiz Seçici</span>
-                    <div id="pickerModalSubtitle" style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">
-                        Mevcut hareketi aynı veya farklı kas grubu / ekipmanla değiştirin
-                    </div>
-                </div>
+            <div class="modal-header" style="margin-bottom: 6px;">
+                <span class="modal-title" id="pickerModalTitle">🔄 Alternatif Egzersiz Seçici</span>
                 <button class="modal-close" onclick="closeExercisePickerModal()">✕</button>
             </div>
 
             <!-- CURRENT EXERCISE CONTEXT BANNER -->
-            <div id="pickerCurrentExBanner" style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-                <div style="display:flex; align-items:center; gap:10px; min-width:0;">
-                    <div id="pickerCurrentExThumb" style="width:38px; height:38px; border-radius:6px; background:#000; overflow:hidden; flex-shrink:0; border:1px solid var(--border); display:flex; align-items:center; justify-content:center;">
+            <div id="pickerCurrentExBanner" style="background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+                <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+                    <div id="pickerCurrentExThumb" style="width:28px; height:28px; border-radius:5px; background:#000; overflow:hidden; flex-shrink:0; border:1px solid var(--border); display:flex; align-items:center; justify-content:center;">
                         🏋️
                     </div>
-                    <div style="min-width:0;">
-                        <div style="font-size:10px; color:var(--gold); font-weight:800; text-transform:uppercase;">Değiştirilecek Hareket</div>
-                        <div id="pickerCurrentExName" style="font-size:13px; font-weight:900; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                            -
-                        </div>
+                    <div id="pickerCurrentExName" style="font-size:13px; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                        -
                     </div>
                 </div>
-                <div id="pickerCurrentExBadges" style="display:flex; gap:4px; flex-shrink:0;">
+                <div id="pickerCurrentExBadges" style="display:flex; gap:4px; flex-shrink:0; align-items:center;">
                     <!-- badges injected dynamically -->
                 </div>
             </div>
 
             <!-- 4 SMART TABS -->
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 10px; background: rgba(0,0,0,0.35); padding: 4px; border-radius: 8px; border: 1px solid var(--border);">
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 8px; background: rgba(0,0,0,0.35); padding: 4px; border-radius: 8px; border: 1px solid var(--border);">
                 <button type="button" class="btn btn-outline" id="pickerTabBtnSame" style="padding: 7px 2px; font-size: 10.5px; font-weight: 800; border-radius: 6px; border-color: transparent;" onclick="switchPickerTab('same_muscle')">
                     🎯 Biyomekanik
                 </button>
@@ -4868,30 +4860,20 @@
             </div>
 
             <!-- TAB 1: AYNI BİYOMEKANİK PATERN & KAS GRUBU -->
-            <div id="pickerSubPanelSame" style="margin-bottom:8px;">
-                <!-- REASON / INTENT SELECTOR -->
-                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:6px 10px; margin-bottom:8px;">
-                    <div style="font-size:10px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:5px; display:flex; align-items:center; justify-content:space-between;">
-                        <span>🎯 Neden Alternatif Arıyorsunuz?</span>
-                        <span style="color:#c084fc; font-weight:700; cursor:pointer;" onclick="switchPickerTab('ai_coach')">✨ Gemini AI Koç'a Danış ➔</span>
-                    </div>
-                    <div style="display:flex; gap:4px; flex-wrap:wrap;" id="pickerReasonPills">
-                        <button type="button" class="btn-quick-equip" id="pill_reason_all" onclick="setPickerReasonFilter('all')">⚡ Birebir Patern</button>
-                        <button type="button" class="btn-quick-equip" id="pill_reason_no_equip" onclick="setPickerReasonFilter('no_equip')">🚫 Alet Yok / Dolu</button>
-                        <button type="button" class="btn-quick-equip" id="pill_reason_joint" onclick="setPickerReasonFilter('joint')">🩹 Bel / Eklem Dostu</button>
-                        <button type="button" class="btn-quick-equip" id="pill_reason_easier" onclick="setPickerReasonFilter('easier')">📉 Daha Kolay (Form)</button>
-                    </div>
+            <div id="pickerSubPanelSame" style="margin-bottom:6px;">
+                <div style="display:flex; gap:4px; flex-wrap:wrap; margin-bottom:6px;" id="pickerReasonPills">
+                    <button type="button" class="btn-quick-equip" id="pill_reason_all" onclick="setPickerReasonFilter('all')">⚡ Birebir Patern</button>
+                    <button type="button" class="btn-quick-equip" id="pill_reason_no_equip" onclick="setPickerReasonFilter('no_equip')">🚫 Alet Yok / Dolu</button>
+                    <button type="button" class="btn-quick-equip" id="pill_reason_joint" onclick="setPickerReasonFilter('joint')">🩹 Bel / Eklem Dostu</button>
+                    <button type="button" class="btn-quick-equip" id="pill_reason_easier" onclick="setPickerReasonFilter('easier')">📉 Daha Kolay (Form)</button>
                 </div>
 
-                <div style="font-size:11px; color:var(--text-secondary); margin-bottom:6px;">
-                    ⚡ <span id="pickerSameMuscleLabel" style="color:var(--cyan); font-weight:700;">Aynı biyomekanik paterni</span> hedefleyen ekipmanlar:
-                </div>
-                <div style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:6px;" id="pickerSameEquipPills">
+                <div style="display:flex; gap:4px; flex-wrap:wrap;" id="pickerSameEquipPills">
                     <button class="btn-quick-equip" id="pill_seq_all" onclick="setSameEquipFilter('all')">Tüm Ekipmanlar</button>
                     <button class="btn-quick-equip" id="pill_seq_dumbbell" onclick="setSameEquipFilter('dumbbell')">🏋️ Dambıl</button>
                     <button class="btn-quick-equip" id="pill_seq_kettlebell" onclick="setSameEquipFilter('kettlebell')">🔔 Kettlebell</button>
                     <button class="btn-quick-equip" id="pill_seq_barbell" onclick="setSameEquipFilter('barbell')">⚡ Barbell</button>
-                    <button class="btn-quick-equip" id="pill_seq_machine" onclick="setSameEquipFilter('machine')">⚙️ Makine / Kablo</button>
+                    <button class="btn-quick-equip" id="pill_seq_machine" onclick="setSameEquipFilter('machine')">⚙️ Makine</button>
                     <button class="btn-quick-equip" id="pill_seq_bodyweight" onclick="setSameEquipFilter('bodyweight')">🤸 Vücut Ağırlığı</button>
                 </div>
             </div>
@@ -4904,7 +4886,7 @@
                         <span style="font-size:22px;">🤖</span>
                         <div>
                             <div style="font-size:12.5px; font-weight:800; color:#e9d5ff;">Çelik Kodu Gemini AI Biyomekanik Koç</div>
-                            <div style="font-size:11px; color:var(--text-secondary);">Salondaki ekipman durumunuza, eklem ağrılarınıza ve biyomekanik hedefinize göre anında akıllı ikame üretin.</div>
+                            <div style="font-size:11px; color:var(--text-secondary);">Ekipman durumunuza, eklem ağrılarınıza ve hedefinize göre anında akıllı ikame üretin.</div>
                         </div>
                     </div>
                     <div style="margin-top:10px;">
@@ -4914,7 +4896,7 @@
                             <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:8px 14px; white-space:nowrap; font-weight:800;" onclick="saveGeminiApiKeyFromModal()">💾 Kaydet</button>
                         </div>
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-size:10.5px; flex-wrap:wrap; gap:4px;">
-                            <span style="color:var(--text-secondary);">🔒 Tamamen cihazınızda saklanır, sunucuya iletilmez.</span>
+                            <span style="color:var(--text-secondary);">🔒 Tamamen cihazınızda saklanır.</span>
                             <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="color:var(--cyan); text-decoration:underline; font-weight:700;">🔗 Ücretsiz API Key Al (Google AI Studio) ➔</a>
                         </div>
                     </div>
@@ -4923,32 +4905,32 @@
                 <!-- API KEY ACTIVE STATE -->
                 <div id="geminiAiActiveBox" style="display:none;">
                     <div style="background:rgba(192, 132, 252, 0.06); border:1px solid rgba(192, 132, 252, 0.25); border-radius:8px; padding:8px 10px; margin-bottom:8px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                             <span style="font-size:11px; font-weight:800; color:#e9d5ff; display:flex; align-items:center; gap:5px;">
-                                <span>🤖</span> <span>Biyomekanik Koça Durumunuzu Bildirin:</span>
+                                <span>🤖</span> <span>Biyomekanik Koça Durumunu Bildir:</span>
                             </span>
                             <span style="font-size:10px; color:var(--cyan); cursor:pointer; font-weight:700;" onclick="editGeminiApiKey()">⚙️ API Anahtarını Değiştir</span>
                         </div>
                         <!-- QUICK AI PROMPTS -->
-                        <div style="display:flex; flex-direction:column; gap:5px; margin-bottom:8px;">
-                            <button type="button" class="btn-quick-equip" style="text-align:left; padding:6px 9px; font-size:11px; border-radius:6px; display:flex; align-items:center; gap:6px; width:100%; border-color:rgba(192,132,252,0.3);" onclick="quickAskGemini('no_equip')">
-                                <span>🚫</span> <span><strong>Bu alet salonda yok / dolu:</strong> Elimdeki dambıllarla aynı kas zincirini koruyan alternatif ver.</span>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-bottom:8px;">
+                            <button type="button" class="btn-quick-equip" style="text-align:left; padding:5px 8px; font-size:11px; border-radius:6px; display:flex; align-items:center; gap:5px; border-color:rgba(192,132,252,0.3);" onclick="quickAskGemini('no_equip')">
+                                <span>🚫</span> <span>Alet Yok (Dambıl İkamesi)</span>
                             </button>
-                            <button type="button" class="btn-quick-equip" style="text-align:left; padding:6px 9px; font-size:11px; border-radius:6px; display:flex; align-items:center; gap:6px; width:100%; border-color:rgba(192,132,252,0.3);" onclick="quickAskGemini('joint_pain')">
-                                <span>🩹</span> <span><strong>Belimde / eklemimde batma var:</strong> Omurgaya eksenel yük bindirmeyen güvenli varyasyon öner.</span>
+                            <button type="button" class="btn-quick-equip" style="text-align:left; padding:5px 8px; font-size:11px; border-radius:6px; display:flex; align-items:center; gap:5px; border-color:rgba(192,132,252,0.3);" onclick="quickAskGemini('joint_pain')">
+                                <span>🩹</span> <span>Bel / Eklem Dostu (Sıfır Yük)</span>
                             </button>
-                            <button type="button" class="btn-quick-equip" style="text-align:left; padding:6px 9px; font-size:11px; border-radius:6px; display:flex; align-items:center; gap:6px; width:100%; border-color:rgba(192,132,252,0.3);" onclick="quickAskGemini('easier')">
-                                <span>📉</span> <span><strong>Form tutturamıyorum / zor geldi:</strong> Biyomekaniği öğreten daha basit (regresyon) bir hareket öner.</span>
+                            <button type="button" class="btn-quick-equip" style="text-align:left; padding:5px 8px; font-size:11px; border-radius:6px; display:flex; align-items:center; gap:5px; border-color:rgba(192,132,252,0.3);" onclick="quickAskGemini('easier')">
+                                <span>📉</span> <span>Daha Kolay (Regresyon)</span>
                             </button>
-                            <button type="button" class="btn-quick-equip" style="text-align:left; padding:6px 9px; font-size:11px; border-radius:6px; display:flex; align-items:center; gap:6px; width:100%; border-color:rgba(192,132,252,0.3);" onclick="quickAskGemini('conditioning')">
-                                <span>⚡</span> <span><strong>Aynı patlayıcı nabız ve metabolik yakım:</strong> Eşdeğer yüksek tempolu kondisyon ikamesi ver.</span>
+                            <button type="button" class="btn-quick-equip" style="text-align:left; padding:5px 8px; font-size:11px; border-radius:6px; display:flex; align-items:center; gap:5px; border-color:rgba(192,132,252,0.3);" onclick="quickAskGemini('conditioning')">
+                                <span>⚡</span> <span>Balistik & Kondisyon</span>
                             </button>
                         </div>
                         <!-- CUSTOM USER QUERY -->
                         <div style="display:flex; gap:6px; align-items:center;">
-                            <input type="text" id="geminiCustomQueryInput" class="form-input" style="font-size:11.5px; padding:7px 10px;" placeholder="✍️ Veya durumunuzu yazın (örn: sağ omzum çıtlıyor, sadece 15 kg dambıl var)..." onkeydown="if(event.key === 'Enter') submitGeminiCustomQuery()">
+                            <input type="text" id="geminiCustomQueryInput" class="form-input" style="font-size:11.5px; padding:7px 10px;" placeholder="✍️ Özel durumunu yaz (örn: bel ağrısı, 15 kg dambıl)..." onkeydown="if(event.key === 'Enter') submitGeminiCustomQuery()">
                             <button type="button" class="btn btn-gold" id="btnSubmitGeminiQuery" style="font-size:11.5px; padding:7px 12px; font-weight:800; white-space:nowrap; background:#9333ea; border-color:#a855f7; color:#fff;" onclick="submitGeminiCustomQuery()">
-                                🚀 Gemini'ye Sor
+                                🚀 Sor
                             </button>
                         </div>
                     </div>
@@ -4960,9 +4942,6 @@
 
             <!-- TAB 3: BAŞKA KAS GRUBU SEÇİMİ -->
             <div id="pickerSubPanelOther" style="display:none; margin-bottom:8px;">
-                <div style="font-size:11px; color:var(--text-secondary); margin-bottom:6px;">
-                    🧬 Çalıştırmak istediğiniz alternatif kas grubunu seçin:
-                </div>
                 <div style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:6px;" id="pickerMuscleGrid">
                     <!-- Dynamic Muscle Buttons -->
                 </div>
@@ -7272,12 +7251,11 @@ BİYOMEKANİK KURALLAR:
             const nameEl = document.getElementById('pickerCurrentExName');
             const thumbEl = document.getElementById('pickerCurrentExThumb');
             const badgesEl = document.getElementById('pickerCurrentExBadges');
-            const sameMuscleLabel = document.getElementById('pickerSameMuscleLabel');
             const muscleGrid = document.getElementById('pickerMuscleGrid');
 
             if (pickerContext.mode === 'replace' && currentEx) {
-                if (titleEl) titleEl.innerText = `🔄 "${currentEx.name}" İçin Alternatif Seç`;
-                if (subEl) subEl.innerHTML = `<span style="color:var(--text-secondary);">Aynı kas grubuna farklı ekipmanla veya başka bir bölgeye geçiş yapın.</span> <span style="display:inline-block; font-size:10.5px; color:var(--gold); background:rgba(245,158,11,0.12); padding:2px 7px; border-radius:4px; border:1px solid rgba(245,158,11,0.25); margin-left:4px; font-weight:700;">🛡️ Listenizdeki hareketler hariç tutuldu</span>`;
+                if (titleEl) titleEl.innerText = `🔄 Alternatif: ${currentEx.name}`;
+                if (subEl) subEl.innerHTML = '';
                 if (banner) banner.style.display = 'flex';
 
                 const guide = (exerciseGuideMap && exerciseGuideMap[currentEx.id]) || (categoryFallback && categoryFallback[currentEx.category]) || null;
@@ -7293,15 +7271,11 @@ BİYOMEKANİK KURALLAR:
                     badgesEl.innerHTML = `
                         <span class="ex-badge badge-equip">${eqMeta.icon} ${eqMeta.label}</span>
                         <span class="ex-badge badge-muscle" style="color:var(--gold); font-weight:800;">🎯 ${escapeHTML(anatomy.primary)}</span>
-                        ${anatomy.secondary ? `<span class="ex-badge" style="background:rgba(56,189,248,0.12); color:var(--cyan); border:1px solid rgba(56,189,248,0.3); font-size:10px; font-weight:700;">⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''}
                     `;
                 }
-                if (sameMuscleLabel) {
-                    sameMuscleLabel.innerText = `"${anatomy.primary}" bölgesini`;
-                }
             } else {
-                if (titleEl) titleEl.innerText = "➕ Antrenmana Yeni Hareket Ekle";
-                if (subEl) subEl.innerText = "Katalogdan veya kas grubuna göre arayarak hareket ekleyin";
+                if (titleEl) titleEl.innerText = "➕ Egzersiz Ekle";
+                if (subEl) subEl.innerHTML = '';
                 if (banner) banner.style.display = 'none';
             }
 
@@ -17279,7 +17253,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=109')
+                navigator.serviceWorker.register('./sw.js?v=110')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
