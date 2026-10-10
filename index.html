@@ -3551,7 +3551,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v111</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v112</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3587,7 +3587,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v111</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v112</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -6862,15 +6862,52 @@
         const GEMINI_API_STORAGE_KEY = 'celik_kodu_gemini_api_key';
 
         function getGeminiApiKey() {
-            return (localStorage.getItem(GEMINI_API_STORAGE_KEY) || '').trim();
+            let key = (localStorage.getItem(GEMINI_API_STORAGE_KEY) || '').trim();
+            if (!key && typeof getActiveUser === 'function') {
+                const user = getActiveUser();
+                if (user && user.geminiApiKey) {
+                    key = user.geminiApiKey.trim();
+                    localStorage.setItem(GEMINI_API_STORAGE_KEY, key);
+                }
+            }
+            return key;
         }
 
-        function setGeminiApiKey(key) {
-            if (!key) {
+        function setGeminiApiKey(key, syncCloud = true) {
+            const cleanKey = (key || '').trim();
+            if (!cleanKey) {
                 localStorage.removeItem(GEMINI_API_STORAGE_KEY);
             } else {
-                localStorage.setItem(GEMINI_API_STORAGE_KEY, key.trim());
+                localStorage.setItem(GEMINI_API_STORAGE_KEY, cleanKey);
             }
+
+            if (syncCloud) {
+                // 1. Kullanıcı profiline yaz ve eşitle
+                if (typeof getActiveUser === 'function') {
+                    const user = getActiveUser();
+                    if (user) {
+                        user.geminiApiKey = cleanKey;
+                        const users = typeof getAuthUsers === 'function' ? getAuthUsers() : [];
+                        const idx = users.findIndex(u => u.id === user.id);
+                        if (idx !== -1) {
+                            users[idx] = user;
+                            if (typeof saveAuthUsers === 'function') saveAuthUsers(users);
+                            if (typeof syncUsersToCloud === 'function') syncUsersToCloud(users);
+                        }
+                    }
+                }
+
+                // 2. Global Firestore ai_config dokümanına yaz (tüm cihazlar için tek kaynak)
+                if (typeof fbDb !== 'undefined' && fbDb && typeof isFirebaseReady !== 'undefined' && isFirebaseReady) {
+                    try {
+                        fbDb.collection('app_system').doc('ai_config').set({
+                            geminiApiKey: cleanKey,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        }, { merge: true }).catch(err => console.warn("AI config cloud write warning:", err));
+                    } catch(e) {}
+                }
+            }
+
             updateProfileGeminiStatusUI();
             const curEx = (pickerContext && pickerContext.targetExId) ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
             updateGeminiAiModalUI(curEx);
@@ -12873,10 +12910,58 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     await syncCustomProgramsFromCloud(uid);
                 }
 
+                // 3. AI Biyomekanik Koç Anahtarını Eşitle (Telefon - Masaüstü senkronu)
+                await syncAiConfigFromCloud();
+
                 updateCloudSyncBadge('synced', 'Bulut Aktif');
             } catch (e) {
                 console.warn("Bulut eşitleme gecikti (çevrimdışı olabilir):", e);
                 updateCloudSyncBadge('offline', 'Çevrimdışı');
+            }
+        }
+
+        async function syncAiConfigFromCloud() {
+            if (!isFirebaseReady || !fbDb) return;
+            try {
+                const localKey = (localStorage.getItem(GEMINI_API_STORAGE_KEY) || '').trim();
+                const docRef = fbDb.collection('app_system').doc('ai_config');
+                const docSnap = await docRef.get();
+
+                if (docSnap && docSnap.exists) {
+                    const data = docSnap.data();
+                    if (data && data.geminiApiKey) {
+                        const cloudKey = data.geminiApiKey.trim();
+                        if (cloudKey) {
+                            if (localKey !== cloudKey) {
+                                localStorage.setItem(GEMINI_API_STORAGE_KEY, cloudKey);
+                            }
+                            const user = typeof getActiveUser === 'function' ? getActiveUser() : null;
+                            if (user && user.geminiApiKey !== cloudKey) {
+                                user.geminiApiKey = cloudKey;
+                                const users = typeof getAuthUsers === 'function' ? getAuthUsers() : [];
+                                const idx = users.findIndex(u => u.id === user.id);
+                                if (idx !== -1) {
+                                    users[idx] = user;
+                                    if (typeof saveAuthUsers === 'function') saveAuthUsers(users);
+                                }
+                            }
+                            if (typeof updateProfileGeminiStatusUI === 'function') updateProfileGeminiStatusUI();
+                            const curEx = (typeof pickerContext !== 'undefined' && pickerContext && pickerContext.targetExId) ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
+                            if (typeof updateGeminiAiModalUI === 'function') updateGeminiAiModalUI(curEx);
+                            return;
+                        }
+                    }
+                }
+
+                // Bulutta henüz anahtar yoksa ama bu cihazda yerel anahtar varsa otomatik buluta yedekle
+                if (localKey) {
+                    await docRef.set({
+                        geminiApiKey: localKey,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                }
+            } catch (err) {
+                console.warn("AI config buluttan eşitlenemedi:", err);
             }
         }
 
@@ -13909,10 +13994,18 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 lunge: document.getElementById('w_lunge').value
             };
 
+            const geminiInput = document.getElementById('profileGeminiApiKeyInput');
+            if (geminiInput) {
+                const gKey = geminiInput.value.trim();
+                setGeminiApiKey(gKey, true);
+                user.geminiApiKey = gKey;
+            }
+
             const users = getAuthUsers();
             const idx = users.findIndex(u => u.id === user.id);
             if (idx !== -1) users[idx] = user;
             saveAuthUsers(users);
+            if (typeof syncUsersToCloud === 'function') syncUsersToCloud(users);
 
             const session = getSession();
             if (session && session.userId === user.id) {
@@ -17318,7 +17411,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=111')
+                navigator.serviceWorker.register('./sw.js?v=112')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
