@@ -5,7 +5,7 @@
  * donanım hızlandırma, sistem bildirimleri ve arka plan Firebase/AI köprüsü.
  */
 
-const { app, BrowserWindow, ipcMain, Notification } = require('electron');
+const { app, BrowserWindow, ipcMain, Notification, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -37,9 +37,7 @@ function saveApiKeyToDisk(key) {
     try {
         aiCoachService.setApiKey(key);
         fs.writeFileSync(CONFIG_PATH, JSON.stringify({ apiKey: key }, null, 2), 'utf-8');
-        if (key && firebaseService && firebaseService.syncAiConfigToCloud) {
-            firebaseService.syncAiConfigToCloud(key);
-        }
+        // GÜVENLİK: API anahtarı artık genel Firestore dokümanına yazılmaz (sızıntı önleme)
         return true;
     } catch (e) {
         console.error("Config yazılamadı:", e);
@@ -66,6 +64,30 @@ function createWindow() {
         }
     });
 
+    // Güvenlik: Harici web navigasyonlarını ve izinsiz yönlenmeleri engelle
+    mainWindow.webContents.on('will-navigate', (event, url) => {
+        try {
+            const parsedUrl = new URL(url);
+            if (parsedUrl.protocol !== 'file:') {
+                event.preventDefault();
+                console.warn(`[FitLAB Güvenlik] Yetkisiz pencere navigasyonu engellendi: ${url}`);
+            }
+        } catch(e) {
+            event.preventDefault();
+        }
+    });
+
+    // Güvenlik: Harici pencereleri varsayılan sistem tarayıcısında aç (yalnızca http/https)
+    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+        try {
+            const parsed = new URL(url);
+            if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
+                shell.openExternal(url);
+            }
+        } catch(e) {}
+        return { action: 'deny' };
+    });
+
     mainWindow.loadFile(path.join(__dirname, 'src', 'renderer', 'index.html'));
 
     mainWindow.on('closed', () => {
@@ -80,13 +102,10 @@ function createWindow() {
 // Uygulama Yaşam Döngüsü
 app.whenReady().then(() => {
     // Kayıtlı API anahtarını yükle
-    const savedKey = loadSavedApiKey();
+    loadSavedApiKey();
 
     // Firebase başlat
     firebaseService.initFirebase();
-    if (savedKey && firebaseService.syncAiConfigToCloud) {
-        firebaseService.syncAiConfigToCloud(savedKey);
-    }
 
     createWindow();
 

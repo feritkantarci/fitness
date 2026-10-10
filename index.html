@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <!-- Security: CSP & Permissions -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://*; connect-src 'self' https://* wss://* data: blob:; img-src 'self' data: blob: https://*; media-src 'self' data: blob: https://*;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; connect-src 'self' https://firestore.googleapis.com https://generativelanguage.googleapis.com https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://raw.githubusercontent.com https://cdn.jsdelivr.net data: blob:; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; media-src 'self' data: blob: https:;">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="theme-color" content="#090d16">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -3707,7 +3709,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v118</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v119</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3743,7 +3745,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v118</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v119</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -6990,7 +6992,7 @@
                 toast.style.borderColor = 'var(--gold)';
                 toast.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(245, 158, 11, 0.3)';
             }
-            toast.innerHTML = msg;
+            toast.textContent = msg;
             toast.style.opacity = '1';
             toast.style.transform = 'translateX(-50%) translateY(0)';
 
@@ -7104,15 +7106,7 @@
                     }
                 }
 
-                // 2. Global Firestore ai_config dokümanına yaz (tüm cihazlar için tek kaynak)
-                if (typeof fbDb !== 'undefined' && fbDb && typeof isFirebaseReady !== 'undefined' && isFirebaseReady) {
-                    try {
-                        fbDb.collection('app_system').doc('ai_config').set({
-                            geminiApiKey: cleanKey,
-                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                        }, { merge: true }).catch(err => console.warn("AI config cloud write warning:", err));
-                    } catch(e) {}
-                }
+                // Güvenlik: Gemini API anahtarı genel Firestore dokümanına yazılarak açığa çıkarılmaz.
             }
 
             updateProfileGeminiStatusUI();
@@ -8703,7 +8697,7 @@ KURALLAR:
 
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; font-size:10.5px; color:var(--text-secondary); flex-wrap:wrap; gap:6px;">
                                 <span>📅 ${escapeHTML(r.createdAtFormatted || (r.createdAt ? r.createdAt.substring(0, 16) : ''))}</span>
-                                <button type="button" class="btn btn-outline" style="border-color:#22c55e; color:#86efac; font-size:11px; padding:4px 10px; font-weight:800;" onclick="confirmAndDeleteBugReport('${docId}')">
+                                <button type="button" class="btn btn-outline" style="border-color:#22c55e; color:#86efac; font-size:11px; padding:4px 10px; font-weight:800;" onclick="confirmAndDeleteBugReport(decodeURIComponent('${encodeURIComponent(docId)}'))">
                                     ✅ Onayla & Havuzdan Sil
                                 </button>
                             </div>
@@ -11251,19 +11245,19 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 </div>
                             </div>
                             <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-                                <button class="btn btn-outline" style="font-size:11px; padding:4px 8px; color:var(--cyan); border-color:var(--cyan);" onclick="previewWorkoutModal('${p.id}')">
+                                <button class="btn btn-outline" style="font-size:11px; padding:4px 8px; color:var(--cyan); border-color:var(--cyan);" onclick="previewWorkoutModal(decodeURIComponent('${encodeURIComponent(p.id)}'))">
                                     👁️ İçerik
                                 </button>
-                                <button class="btn btn-outline" style="font-size:11px; padding:4px 8px; color:var(--gold); border-color:var(--gold);" onclick="editSavedProgram('${p.id}')">
+                                <button class="btn btn-outline" style="font-size:11px; padding:4px 8px; color:var(--gold); border-color:var(--gold);" onclick="editSavedProgram(decodeURIComponent('${encodeURIComponent(p.id)}'))">
                                     ✏️ Düzenle
                                 </button>
-                                <button class="btn btn-outline" style="font-size:11px; padding:4px 8px; color:var(--cyan); border-color:var(--cyan);" onclick="promptAssignToDay('${p.id}', '${escapeHTML(p.title).replace(/'/g, "\\'")}', 'custom_saved', '${(p.exercises || []).length} Egzersiz')">
+                                <button class="btn btn-outline" style="font-size:11px; padding:4px 8px; color:var(--cyan); border-color:var(--cyan);" onclick="promptAssignToDay(decodeURIComponent('${encodeURIComponent(p.id)}'), decodeURIComponent('${encodeURIComponent(p.title || '')}'), 'custom_saved', decodeURIComponent('${encodeURIComponent((p.exercises || []).length + ' Egzersiz')}'))">
                                     📅 Güne Planla
                                 </button>
-                                <button class="btn btn-gold" style="font-size:11px; padding:4px 10px; font-weight:800;" onclick="loadSavedProgram('${p.id}')">
+                                <button class="btn btn-gold" style="font-size:11px; padding:4px 10px; font-weight:800;" onclick="loadSavedProgram(decodeURIComponent('${encodeURIComponent(p.id)}'))">
                                     ▶ Başlat
                                 </button>
-                                <button class="btn-delete-log" onclick="deleteSavedProgram('${p.id}')" title="Sil">✕</button>
+                                <button class="btn-delete-log" onclick="deleteSavedProgram(decodeURIComponent('${encodeURIComponent(p.id)}'))" title="Sil">✕</button>
                             </div>
                         </div>
                     </div>
@@ -13264,13 +13258,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     }
                 }
 
-                // Bulutta henüz anahtar yoksa ama bu cihazda yerel anahtar varsa otomatik buluta yedekle
-                if (localKey) {
-                    await docRef.set({
-                        geminiApiKey: localKey,
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true });
-                }
+                // Güvenlik: Yerel anahtar genel buluta yedeklenmez.
             } catch (err) {
                 console.warn("AI config buluttan eşitlenemedi:", err);
             }
@@ -13311,8 +13299,15 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (!isFirebaseReady || !fbDb) return;
             try {
                 updateCloudSyncBadge('syncing', 'Kaydediliyor...');
+                // Güvenlik: Açık metin şifreleri ve API anahtarlarını buluta gönderme
+                const sanitizedUsers = (users || []).map(u => {
+                    const copy = { ...u };
+                    delete copy.password;
+                    delete copy.geminiApiKey;
+                    return copy;
+                });
                 await fbDb.collection('app_system').doc('users').set({
-                    users: users,
+                    users: sanitizedUsers,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 }, { merge: true });
                 updateCloudSyncBadge('synced', 'Bulut Aktif');
@@ -13737,6 +13732,23 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         }
 
         // ==================== AUTHENTICATION & MULTI-USER SYSTEM ====================
+        async function sha256Hex(message) {
+            try {
+                if (window.crypto && window.crypto.subtle) {
+                    const msgBuffer = new TextEncoder().encode(message);
+                    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+                    const hashArray = Array.from(new Uint8Array(hashBuffer));
+                    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                }
+            } catch(e) {}
+            let hash = 0;
+            for (let i = 0; i < message.length; i++) {
+                hash = ((hash << 5) - hash) + message.charCodeAt(i);
+                hash |= 0;
+            }
+            return String(Math.abs(hash));
+        }
+
         function initAuthDatabase() {
             let users = [];
             try {
@@ -13745,11 +13757,15 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             } catch(e) {}
 
             if (!Array.isArray(users) || users.length === 0) {
+                // Şifre: 123 (Salted SHA-256 Hash ile korunur)
+                const defaultHash = 'a924925a37aaa6c8e9f3d54b4f00a30b1d7445611efb0ee3641b3c959e13fea7';
+                const defaultSalt = 'celik_salt_default';
                 users = [
                     {
                         id: 'usr_admin',
                         username: 'admin',
-                        password: '123',
+                        passwordHash: defaultHash,
+                        salt: defaultSalt,
                         role: 'admin',
                         name: 'Ferit (Admin)',
                         avatar: '🥋',
@@ -13762,7 +13778,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     {
                         id: 'usr_ferit',
                         username: 'ferit',
-                        password: '123',
+                        passwordHash: defaultHash,
+                        salt: defaultSalt,
                         role: 'admin',
                         name: 'Ferit',
                         avatar: '🥋',
@@ -13775,7 +13792,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     {
                         id: 'usr_ismail',
                         username: 'ismail',
-                        password: '123',
+                        passwordHash: defaultHash,
+                        salt: defaultSalt,
                         role: 'athlete',
                         name: 'İsmail',
                         avatar: '🦁',
@@ -13868,7 +13886,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
         }
 
-        function handleAuthLogin(e) {
+        async function handleAuthLogin(e) {
             e.preventDefault();
             const usernameInput = document.getElementById('loginUsername');
             const passwordInput = document.getElementById('loginPassword');
@@ -13878,7 +13896,29 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const pass = (passwordInput.value || '').trim();
 
             const users = getAuthUsers();
-            const matched = users.find(u => u.username.toLowerCase() === uname && u.password === pass);
+            let matched = null;
+
+            for (const u of users) {
+                if ((u.username || '').toLowerCase() !== uname) continue;
+                // 1. Salted SHA-256 hash kontrolü
+                if (u.passwordHash) {
+                    const enteredHash = await sha256Hex((u.salt || '') + pass);
+                    if (enteredHash === u.passwordHash) {
+                        matched = u;
+                        break;
+                    }
+                }
+                // 2. Geriye dönük uyumluluk: Eski açık şifre eşleşirse hemen hash'e yükselt
+                if (u.password && u.password === pass) {
+                    matched = u;
+                    const salt = Math.random().toString(36).substring(2, 10);
+                    u.salt = salt;
+                    u.passwordHash = await sha256Hex(salt + pass);
+                    delete u.password;
+                    saveAuthUsers(users);
+                    break;
+                }
+            }
 
             if (matched) {
                 errorBox.style.display = 'none';
@@ -13959,7 +13999,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             });
         }
 
-        function handleCreateUser() {
+        async function handleCreateUser() {
             const uname = (document.getElementById('newUsername').value || '').trim().toLowerCase();
             const pass = (document.getElementById('newPassword').value || '').trim();
             const dname = (document.getElementById('newDisplayName').value || '').trim();
@@ -13978,10 +14018,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 return;
             }
 
+            const salt = Math.random().toString(36).substring(2, 10);
+            const passHash = await sha256Hex(salt + pass);
+
             const newUser = {
                 id: 'usr_' + Date.now(),
                 username: uname,
-                password: pass,
+                passwordHash: passHash,
+                salt: salt,
                 role: role,
                 name: dname,
                 avatar: selectedNewAvatar,
@@ -14589,6 +14633,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }).join('');
         }
 
+        function sanitizeCsvCell(val) {
+            let str = String(val === null || val === undefined ? '' : val);
+            if (/^[=+\-@\t\r]/.test(str)) {
+                str = "'" + str;
+            }
+            return `"${str.replace(/"/g, '""')}"`;
+        }
+
         function exportCSV() {
             const uid = getActiveUserId();
             const logs = getWorkoutLogs();
@@ -14601,25 +14653,25 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const rows = [headers.join(",")];
 
             logs.forEach(l => {
-                const date = `"${l.dateFormatted || l.date}"`;
-                const prog = `"${(l.program || '').replace(/"/g, '""')}"`;
-                const locType = `"${(l.locationType === 'salon' ? 'Spor Salonu' : (l.locationType === 'ev' ? 'Ev' : (l.locationType === 'acik_hava' ? 'Açık Hava' : 'Diğer')))}"`;
-                const locName = `"${(l.locationName || (l.locationType === 'ev' ? 'Ev' : 'Salon')).replace(/"/g, '""')}"`;
-                const dur = l.duration || '';
-                const rpe = `"${(l.rpe || '').replace(/"/g, '""')}"`;
-                const totalVol = l.totalVolumeKg || 0;
+                const date = sanitizeCsvCell(l.dateFormatted || l.date);
+                const prog = sanitizeCsvCell(l.program);
+                const locType = sanitizeCsvCell(l.locationType === 'salon' ? 'Spor Salonu' : (l.locationType === 'ev' ? 'Ev' : (l.locationType === 'acik_hava' ? 'Açık Hava' : 'Diğer')));
+                const locName = sanitizeCsvCell(l.locationName || (l.locationType === 'ev' ? 'Ev' : 'Salon'));
+                const dur = sanitizeCsvCell(l.duration || '');
+                const rpe = sanitizeCsvCell(l.rpe || '');
+                const totalVol = Number(l.totalVolumeKg) || 0;
 
                 if (l.exercises && l.exercises.length > 0) {
                     l.exercises.forEach(ex => {
-                        const exName = `"${ex.name.replace(/"/g, '""')}"`;
-                        const equip = `"${ex.equipment || ''}"`;
-                        const muscle = `"${(ex.muscle || '').replace(/"/g, '""')}"`;
+                        const exName = sanitizeCsvCell(ex.name);
+                        const equip = sanitizeCsvCell(ex.equipment || '');
+                        const muscle = sanitizeCsvCell(ex.muscle || '');
                         if (ex.sets && ex.sets.length > 0) {
                             ex.sets.forEach(st => {
-                                const setNo = st.setNo;
+                                const setNo = Number(st.setNo) || 1;
                                 const isDone = !!st.completed;
-                                const w = isDone ? (st.weight || 0) : 0;
-                                const r = isDone ? (st.reps || 0) : 0;
+                                const w = isDone ? (Number(st.weight) || 0) : 0;
+                                const r = isDone ? (Number(st.reps) || 0) : 0;
                                 const v = isDone ? (w * r) : 0;
                                 const status = isDone ? '"Tamamlandı"' : '"Atlandı"';
                                 rows.push([date, prog, locType, locName, dur, rpe, totalVol, exName, equip, muscle, setNo, w, r, v, status].join(","));
@@ -14629,7 +14681,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         }
                     });
                 } else {
-                    rows.push([date, prog, locType, locName, dur, rpe, totalVol, 'Genel', '', '', 1, 0, 0, 0, '"Tamamlandı"'].join(","));
+                    rows.push([date, prog, locType, locName, dur, rpe, totalVol, sanitizeCsvCell('Genel'), '""', '""', 1, 0, 0, 0, '"Tamamlandı"'].join(","));
                 }
             });
 
@@ -14663,17 +14715,44 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         function importData(e) {
             const file = e.target.files[0];
             if (!file) return;
+
+            // Güvenlik: Maksimum 2 MB dosya sınırı (bellek tükenmesi ve DoS önleme)
+            if (file.size > 2 * 1024 * 1024) {
+                alert("❌ Güvenlik Uyarısı: Yedek dosya boyutu 2 MB sınırından büyüktür!");
+                return;
+            }
+
             const reader = new FileReader();
             reader.onload = function(evt) {
                 try {
                     const data = JSON.parse(evt.target.result);
-                    if (data.history && Array.isArray(data.history)) {
-                        setWorkoutLogs(data.history);
+                    if (data && typeof data === 'object' && Array.isArray(data.history)) {
+                        // Şema doğrulama ve veri temizliği
+                        const sanitizedHistory = data.history
+                            .filter(item => item && typeof item === 'object')
+                            .slice(0, 500)
+                            .map(item => ({
+                                id: String(item.id || ('log_' + Date.now())).slice(0, 50),
+                                program: String(item.program || '').slice(0, 150),
+                                date: String(item.date || '').slice(0, 30),
+                                duration: String(item.duration || '').slice(0, 10),
+                                rpe: String(item.rpe || '').slice(0, 50),
+                                notes: String(item.notes || '').slice(0, 2000),
+                                locationName: String(item.locationName || '').slice(0, 50),
+                                locationType: String(item.locationType || '').slice(0, 30),
+                                exercises: Array.isArray(item.exercises) ? item.exercises.slice(0, 30) : [],
+                                totalVolumeKg: Number(item.totalVolumeKg) || 0,
+                                totalSetsCompleted: Number(item.totalSetsCompleted) || 0,
+                                timestamp: Number(item.timestamp) || Date.now()
+                            }));
+                        setWorkoutLogs(sanitizedHistory);
                         renderHistory();
-                        alert("✅ Antrenman geçmişi başarıyla yüklendi!");
+                        alert("✅ Antrenman geçmişi başarıyla ve güvenle yüklendi!");
+                    } else {
+                        alert("❌ Hata: Geçersiz yedek dosyası şeması!");
                     }
                 } catch(err) {
-                    alert("❌ Hata: Geçersiz yedek dosyası!");
+                    alert("❌ Hata: Geçersiz veya bozuk yedek dosyası!");
                 }
             };
             reader.readAsText(file);
@@ -17534,7 +17613,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                         ${u.notes ? `<div style="font-size:11px; color:var(--gold-light); margin-top:4px;">📝 ${escapeHTML(u.notes)}</div>` : ''}
                                     </div>
                                     <div>
-                                        <button class="btn-delete-log" onclick="deleteUnifiedBodyEntry('${u.date}', '${u.scaleId || ''}', '${u.measId || ''}')" title="Kaydı Sil">✕</button>
+                                        <button class="btn-delete-log" onclick="deleteUnifiedBodyEntry(decodeURIComponent('${encodeURIComponent(u.date)}'), decodeURIComponent('${encodeURIComponent(u.scaleId || '')}'), decodeURIComponent('${encodeURIComponent(u.measId || '')}'))" title="Kaydı Sil">✕</button>
                                     </div>
                                 </div>
                             </div>
@@ -17760,7 +17839,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=118')
+                navigator.serviceWorker.register('./sw.js?v=119')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et

@@ -37,7 +37,7 @@
     "mac": {
       "category": "public.app-category.sports",
       "identity": null,
-      "hardenedRuntime": false,
+      "hardenedRuntime": true,
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
       "target": [

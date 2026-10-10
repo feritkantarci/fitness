@@ -1238,7 +1238,7 @@ function showScaleStatus(message, type = 'info') {
         el.scaleStatusBanner.style.border = '1px solid var(--cyan)';
         el.scaleStatusBanner.style.color = 'var(--cyan)';
     }
-    el.scaleStatusBanner.innerHTML = message;
+    el.scaleStatusBanner.textContent = message;
 }
 
 function applyParsedScaleData(parsed, sourceLabel = 'Rapor') {
@@ -1659,9 +1659,20 @@ function renderScaleTimelineChart(logs) {
 }
 
 // ==================== YARDIMCI FONKSİYONLAR ====================
+function escapeHtmlForMarkdown(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 function formatMarkdown(text) {
     if (!text) return '';
-    return text
+    const safeText = escapeHtmlForMarkdown(text);
+    return safeText
         .replace(/### (.*?)\n/g, '<h3>$1</h3>')
         .replace(/## (.*?)\n/g, '<h2 style="color:var(--gold); font-size:15px; margin:12px 0 6px;">$1</h2>')
         .replace(/\*\*(.*?)\*\*/g, '<strong style="color:#fff;">$1</strong>')
