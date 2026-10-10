@@ -3551,7 +3551,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v114</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v115</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3587,7 +3587,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v114</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v115</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -7201,41 +7201,29 @@
             const candidates = EXERCISES_DB.filter(e => e.id !== currentEx.id && !isExerciseExcludedByUser(e.id));
             const candidateSummary = candidates.map(e => `ID:${e.id} | İsim:${e.name} | Ekipman:${e.equipment} | Patern:${e.category} | Kas:${e.muscle}`).join('\n');
 
-            const systemInstruction = `Sen "Çelik Kodu (El Código del Acero)" metodolojisinin uzman Biyomekanik, Ortopedik ve Fonksiyonel Fitness Baş Koçusun.
-Kullanıcımız antrenman seansı sırasında bir hareketi değiştirmek istiyor.
+            const systemInstruction = `Sen "Çelik Kodu (El Código del Acero)" metodolojisinin uzman Biyomekanik Koçusun.
+Kullanıcı antrenman seansı sırasında, uzun metin okumadan hemen karar vermek istiyor.
 DEĞİŞTİRİLECEK HAREKET:
 - Adı: "${currentEx.name}"
 - Ekipman: "${currentEx.equipment}"
 - Patern/Kategori: "${currentEx.category}"
 - Kas Grubu: "${currentEx.muscle}"
-- Primer Kaslar: ${(currentEx.primaryMuscles || []).join(', ')}
-- Sekonder Kaslar: ${(currentEx.secondaryMuscles || []).join(', ')}
 
-KULLANICININ DURUMU & NEDENİ:
+KULLANICININ DURUMU:
 "${userPromptText}"
 
 KÜTÜPHANEMİZDE BULUNAN TÜM HAREKETLER (YALNIZCA BU LİSTEDEN SEÇECEKSİN):
 ${candidateSummary}
 
-BİYOMEKANİK KURALLAR & CEVAP FORMATI:
-1. HAREKET PATERNİNE VE KİNEMATİK ZİNCİRE KESİNLİKLE SADIK KAL!
-   - Kettlebell Swing bir Hip Hinge (Kalça Menteşesi / Arka Zincir) hareketidir. Swing yerine ASLA Plank, Mekik veya Squat önerme! Swing alternatifi: Dambıl Swing, Dambıl RDL, Barbell RDL, Glute Bridge veya Single-Leg RDL'dir.
-   - Squat alternatifi diz dominant ön bacak hareketleridir.
-   - İtiş (Push) alternatifi itiş, Çekiş (Pull) alternatifi çekiş olmalıdır.
-2. Eğer kullanıcı ekipman yok dediyse (${currentEx.equipment}), o ekipmanı KESİNLİKLE önerme.
-3. Eğer bel/eklem ağrısı dediyse omurgaya eksenel yük bindirmeyen (örn: Chest supported row, Dumbbell floor press, Glute bridge) hareketleri seç.
-4. Önerdiğin 1 veya en fazla 2 hareketi yanıtında tam olarak şu etiketle belirt: [[EX_ID:hareketin_id_si]]
-5. KESİNLİKLE YARIDA BIRAKMA: Analizini baştan sona eksiksiz tamamla, cümleleri tam bitir.
-6. Yanıtını aşağıdaki 3 yapılandırılmış bölümde netçe sun:
-   ### 🔬 Biyomekanik Analiz & Teşhis
-   Kullanıcının durumunu (${userPromptText}) ve "${currentEx.name}" hareketinin yarattığı biyomekanik baskıyı açıkla.
-   ### 🎯 Önerilen Biyomekanik İkame(ler)
-   Önerilen 1-2 hareketin adı ve [[EX_ID:...]] etiketiyle birlikte kinematik gerekçesini, hangi eklemi koruduğunu veya kası izole ettiğini belirt.
-   ### 💡 Uygulama & Güvenlik İpucu
-   Bu alternatifi uygularken form kalitesini maksimize edecek altın kural, tempo veya set/tekrar tavsiyesini açıkla.`;
+KURALLAR:
+1. HAREKET PATERNİNE VE KİNEMATİK ZİNCİRE KESİNLİKLE SADIK KAL! (Hip Hinge -> Swing/RDL; Squat -> diz dominant; İtiş -> itiş; Çekiş -> çekiş).
+2. İstenmeyen/olmayan ekipmanı (${currentEx.equipment}) kesinlikle önerme. Bel/eklem hassasiyetinde omurgaya sıfır eksenel yük bindiren hareketleri seç.
+3. KESİNLİKLE UZUN METİN, MAKALE VEYA PARAGRAF YAZMA! Kullanıcı sadece direkt öneri istiyor.
+4. Önerdiğin 1 veya en fazla 2 hareketi MUTLAKA şu etiketle belirt: [[EX_ID:hareketin_id_si]]
+5. Metin olarak YALNIZCA 1-2 CÜMLELİK çok kısa ve vurucu bir biyomekanik gerekçe yaz. (Örn: "Dambıl RDL, omurgaya eksenel kompresyon bindirmeden kalça ve hamstring liflerini birebir ateşler.")`;
 
             try {
-                const aiResponse = await callGeminiAPI(`Kullanıcı sorusu/durumu: ${userPromptText}\n\nLütfen kütüphaneden en uygun 1-2 alternatifi seç, yukarıdaki 3 bölümde eksiksiz, doyurucu ve tamamlanmış bir biyomekanik analiz sun.`, systemInstruction, '', 3500);
+                const aiResponse = await callGeminiAPI(`"${currentEx.name}" yerine kütüphanemizden en uygun 1-2 alternatifi seç. Uzun metin yazma, sadece etiketleri ([[EX_ID:id]]) ve 1-2 cümlelik çok kısa gerekçeni belirt.`, systemInstruction, '', 1000);
                 renderGeminiAiResult(aiResponse, currentEx);
             } catch (err) {
                 if (resArea) {
@@ -7271,7 +7259,7 @@ BİYOMEKANİK KURALLAR & CEVAP FORMATI:
                         inList = false;
                         listType = null;
                     }
-                    html += '<div style="height:6px;"></div>';
+                    html += '<div style="height:4px;"></div>';
                     return;
                 }
 
@@ -7283,8 +7271,8 @@ BİYOMEKANİK KURALLAR & CEVAP FORMATI:
                         listType = null;
                     }
                     const headingText = trimmed.replace(/^#{1,4}\s+/, '');
-                    html += `<div style="font-size:12px; font-weight:800; color:#e9d5ff; margin-top:10px; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
-                        <span style="display:inline-block; width:4px; height:12px; background:#c084fc; border-radius:2px; flex-shrink:0;"></span>
+                    html += `<div style="font-size:11.5px; font-weight:800; color:#e9d5ff; margin-top:6px; margin-bottom:2px; display:flex; align-items:center; gap:5px;">
+                        <span style="display:inline-block; width:3px; height:10px; background:#c084fc; border-radius:2px; flex-shrink:0;"></span>
                         <span>${formatAiCoachInline(headingText)}</span>
                     </div>`;
                     return;
@@ -7294,12 +7282,12 @@ BİYOMEKANİK KURALLAR & CEVAP FORMATI:
                 if (/^[-*•]\s+/.test(trimmed)) {
                     if (!inList || listType !== 'ul') {
                         if (inList) html += listType === 'ul' ? '</ul>' : '</ol>';
-                        html += '<ul style="margin:4px 0; padding-left:18px; list-style-type:disc;">';
+                        html += '<ul style="margin:2px 0; padding-left:16px; list-style-type:disc;">';
                         inList = true;
                         listType = 'ul';
                     }
                     const itemText = trimmed.replace(/^[-*•]\s+/, '');
-                    html += `<li style="margin-bottom:4px; line-height:1.5;">${formatAiCoachInline(itemText)}</li>`;
+                    html += `<li style="margin-bottom:2px; line-height:1.4;">${formatAiCoachInline(itemText)}</li>`;
                     return;
                 }
 
@@ -7307,12 +7295,12 @@ BİYOMEKANİK KURALLAR & CEVAP FORMATI:
                 if (/^\d+[\.\)]\s+/.test(trimmed)) {
                     if (!inList || listType !== 'ol') {
                         if (inList) html += listType === 'ul' ? '</ul>' : '</ol>';
-                        html += '<ol style="margin:4px 0; padding-left:18px;">';
+                        html += '<ol style="margin:2px 0; padding-left:16px;">';
                         inList = true;
                         listType = 'ol';
                     }
                     const itemText = trimmed.replace(/^\d+[\.\)]\s+/, '');
-                    html += `<li style="margin-bottom:4px; line-height:1.5;">${formatAiCoachInline(itemText)}</li>`;
+                    html += `<li style="margin-bottom:2px; line-height:1.4;">${formatAiCoachInline(itemText)}</li>`;
                     return;
                 }
 
@@ -7322,7 +7310,7 @@ BİYOMEKANİK KURALLAR & CEVAP FORMATI:
                     inList = false;
                     listType = null;
                 }
-                html += `<p style="margin:4px 0; line-height:1.5;">${formatAiCoachInline(trimmed)}</p>`;
+                html += `<p style="margin:2px 0; line-height:1.4;">${formatAiCoachInline(trimmed)}</p>`;
             });
 
             if (inList) {
@@ -7370,43 +7358,52 @@ BİYOMEKANİK KURALLAR & CEVAP FORMATI:
                     const thumbImg = (guide && guide.form) ? guide.form : '';
 
                     cardsHtml += `
-                        <div style="background:rgba(192, 132, 252, 0.08); border:1px solid rgba(192, 132, 252, 0.4); border-radius:8px; padding:10px 12px; margin-top:8px;">
+                        <div style="background:rgba(192, 132, 252, 0.1); border:1px solid rgba(192, 132, 252, 0.45); border-radius:8px; padding:10px 12px; margin-bottom:8px; box-shadow:0 2px 8px rgba(0,0,0,0.25);">
                             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                                <div style="display:flex; align-items:center; gap:8px; min-width:0;">
-                                    <div style="width:36px; height:36px; border-radius:6px; background:#000; overflow:hidden; flex-shrink:0; border:1px solid var(--border); display:flex; align-items:center; justify-content:center;">
+                                <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+                                    <div style="width:38px; height:38px; border-radius:6px; background:#000; overflow:hidden; flex-shrink:0; border:1px solid rgba(192,132,252,0.3); display:flex; align-items:center; justify-content:center;">
                                         ${thumbImg ? `<img src="${thumbImg}" style="width:100%; height:100%; object-fit:contain;" alt="${escapeHTML(ex.name)}">` : '🏋️'}
                                     </div>
                                     <div style="min-width:0;">
-                                        <div style="font-size:9.5px; color:#c084fc; font-weight:800; text-transform:uppercase;">ÖNERİLEN BİYOMEKANİK ALTERNATİF</div>
-                                        <div style="font-size:12.5px; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(ex.name)}</div>
-                                        <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">
+                                        <div style="font-size:9.5px; color:#c084fc; font-weight:800; text-transform:uppercase; letter-spacing:0.5px;">ÖNERİLEN İKAME</div>
+                                        <div style="font-size:13px; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(ex.name)}</div>
+                                        <div style="font-size:10.5px; color:var(--text-secondary); margin-top:2px;">
                                             <span>${eqMeta.icon} ${eqMeta.label}</span> • <span>${escapeHTML(ex.muscle || '')}</span>
                                         </div>
                                     </div>
                                 </div>
-                                <button type="button" class="btn btn-gold" style="font-size:11px; padding:6px 12px; font-weight:800; background:#9333ea; border-color:#a855f7; color:#fff; white-space:nowrap; box-shadow:0 0 10px rgba(168,85,247,0.3);" onclick="selectExerciseFromPicker('${ex.id}')">
+                                <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:7px 14px; font-weight:800; background:#9333ea; border-color:#a855f7; color:#fff; white-space:nowrap; box-shadow:0 0 10px rgba(168,85,247,0.35); flex-shrink:0;" onclick="selectExerciseFromPicker('${ex.id}')">
                                     ✓ Bu Alternatifi Seç
                                 </button>
                             </div>
-                            ${ex.cue ? `<div style="font-size:10.5px; color:var(--text-secondary); margin-top:6px; background:rgba(0,0,0,0.25); padding:4px 8px; border-radius:4px;">💡 ${escapeHTML(ex.cue)}</div>` : ''}
+                            ${ex.cue ? `<div style="font-size:10.5px; color:#e9d5ff; margin-top:6px; background:rgba(0,0,0,0.35); padding:5px 8px; border-radius:4px; border:1px solid rgba(192,132,252,0.15);">💡 <strong>İpucu:</strong> ${escapeHTML(ex.cue)}</div>` : ''}
                         </div>
                     `;
                 }
             });
 
             resArea.innerHTML = `
-                <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(192, 132, 252, 0.3); border-radius:8px; padding:12px; margin-top:6px;">
-                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid rgba(192,132,252,0.2); padding-bottom:6px;">
+                <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(192, 132, 252, 0.35); border-radius:10px; padding:12px; margin-top:6px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; border-bottom:1px solid rgba(192,132,252,0.2); padding-bottom:6px;">
                         <div style="display:flex; align-items:center; gap:6px;">
-                            <span style="font-size:16px;">✨</span>
-                            <span style="font-size:12px; font-weight:800; color:#e9d5ff;">Gemini Biyomekanik Koç Analizi</span>
+                            <span style="font-size:16px;">🤖</span>
+                            <span style="font-size:12px; font-weight:800; color:#e9d5ff;">Gemini Biyomekanik İkameler</span>
                         </div>
-                        <span style="font-size:10px; color:#c084fc; background:rgba(192,132,252,0.15); padding:2px 6px; border-radius:4px; border:1px solid rgba(192,132,252,0.3); font-weight:700;">Eksiksiz Koç Değerlendirmesi</span>
+                        <span style="font-size:10px; color:#c084fc; background:rgba(192,132,252,0.15); padding:2px 6px; border-radius:4px; font-weight:700;">Hızlı Seçim</span>
                     </div>
-                    <div style="font-size:11.5px; color:#f3f4f6; line-height:1.55;">
-                        ${formattedHtml}
-                    </div>
-                    ${cardsHtml ? `<div style="margin-top:12px;">${cardsHtml}</div>` : ''}
+
+                    <!-- 1. ÖNCELİKLİ: HAREKET KARTLARI VE SEÇİM BUTONU -->
+                    ${cardsHtml ? `<div>${cardsHtml}</div>` : ''}
+
+                    <!-- 2. KISA & ÖZ KOÇ NOTU (VARSA) -->
+                    ${cleanedText ? `
+                        <div style="background:rgba(192, 132, 252, 0.06); border:1px solid rgba(192, 132, 252, 0.2); border-radius:6px; padding:8px 10px; margin-top:${cardsHtml ? '4px' : '0'}; font-size:11px; color:#cbd5e1; line-height:1.45;">
+                            <div style="font-size:10px; font-weight:800; color:#c084fc; margin-bottom:3px; display:flex; align-items:center; gap:4px;">
+                                <span>💡</span> <span>Biyomekanik Gerekçe:</span>
+                            </div>
+                            ${formattedHtml}
+                        </div>
+                    ` : ''}
                 </div>
             `;
         }
@@ -17562,7 +17559,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=114')
+                navigator.serviceWorker.register('./sw.js?v=115')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
