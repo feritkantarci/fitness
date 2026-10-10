@@ -6,6 +6,13 @@
     <title>FitLAB - Akademik Spor Bilimi ve AI İstasyonu</title>
     <link rel="stylesheet" href="style.css">
     <script src="chart.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script>
+        if (window.pdfjsLib) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+    </script>
 </head>
 <body>
     <!-- Pencere Üst Barı (Mac & Windows Titlebar) -->
@@ -21,6 +28,9 @@
             <nav class="app-nav-tabs">
                 <button class="nav-tab-btn active" id="tabBtnDashboard" data-view="dashboard">
                     <span class="icon">📊</span> Kokpit
+                </button>
+                <button class="nav-tab-btn" id="tabBtnBodyComp" data-view="bodycomp">
+                    <span class="icon">⚖️</span> Tartı & Kompozisyon
                 </button>
                 <button class="nav-tab-btn" id="tabBtnAnalytics" data-view="analytics">
                     <span class="icon">🧬</span> Biyomekanik Analiz
@@ -60,6 +70,17 @@
                 <div class="athlete-info">
                     <h2 id="athleteName">Sporcu Seçilmedi</h2>
                     <span class="badge-level" id="athleteLevel">-</span>
+                </div>
+            </div>
+
+            <!-- Güncel Vücut Kompozisyonu (Son Tartı Özeti) -->
+            <div class="panel-box" id="sidebarBodyCompBox">
+                <div class="panel-box-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3>⚖️ Vücut Kompozisyonu</h3>
+                    <button type="button" class="btn-sm-action" onclick="switchView('bodycomp')" title="Tartı Masasını Aç">Detay ➔</button>
+                </div>
+                <div class="sidebar-bodycomp-content" id="sidebarBodyCompContent">
+                    <div class="empty-state">Tartı verisi taranıyor...</div>
                 </div>
             </div>
 
@@ -207,6 +228,226 @@
             </div>
         </section>
     </main>
+
+    <!-- Tartı & Vücut Kompozisyonu Bölümü (FitLab BIA / InBody / Unique Health İstasyonu) -->
+    <section class="bodycomp-layout" id="viewBodyComp" style="display: none;">
+        <div class="bodycomp-container">
+            <!-- Üst Başlık & Hızlı Özet Çubuğu -->
+            <div class="bodycomp-top-header">
+                <div class="bodycomp-header-title">
+                    <div class="bodycomp-icon-badge">⚖️</div>
+                    <div>
+                        <h2>Vücut Kompozisyonu & Biyomekanik Tartı Analiz Masası</h2>
+                        <p class="bodycomp-header-sub" id="bodyCompHeaderSub">Unique Health, InBody, Tanita BIA analizleri & antrenman periyodizasyonu uyarlaması</p>
+                    </div>
+                </div>
+                <div class="bodycomp-header-actions">
+                    <button type="button" class="btn-primary" id="btnTriggerAiWithBodyComp" style="background:linear-gradient(135deg, #eab308, #ca8a04); color:#000; font-weight:800;">
+                        🧠 Bu Tartı ile AI Programı Çıkar
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="switchView('dashboard')">
+                        📊 Kokpite Dön
+                    </button>
+                </div>
+            </div>
+
+            <!-- Ana 2 Sütunlu Çalışma Masası -->
+            <div class="bodycomp-grid">
+                <!-- Sol Sütun: Yükleme Masası & Manuel Form -->
+                <div class="bodycomp-col-card">
+                    <div class="card-header-row">
+                        <h3>📥 Rapor Yükleme & Veri Girişi</h3>
+                        <span class="badge-source" id="scaleSourceBadge">Hazır</span>
+                    </div>
+
+                    <!-- Akıllı Sürükle-Bırak Yükleme Alanı -->
+                    <div class="scale-dropzone" id="scaleDropzone">
+                        <div class="dropzone-inner">
+                            <span class="drop-icon">📄</span>
+                            <h4>Unique Health / InBody / Tanita Raporu</h4>
+                            <p>PDF veya Rapor Fotoğrafını (PNG/JPG) buraya sürükleyin veya seçin</p>
+                            <div class="dropzone-btns">
+                                <label for="scaleFileInput" class="btn-file-select">
+                                    📁 Dosyadan Rapor Seç
+                                </label>
+                                <input type="file" id="scaleFileInput" accept=".pdf,image/*" style="display:none;" />
+                                <button type="button" class="btn-outline-sm" id="btnPasteScaleClipboard" title="Panodaki metin veya PDF/görseli yapıştır">
+                                    📋 Panodan Oku (Cmd+V)
+                                </button>
+                                <button type="button" class="btn-outline-sm btn-demo" id="btnLoadSampleScale" title="Örnek 07.10.2026 Unique Health 3. raporunu yükle">
+                                    ✨ Örnek Rapor
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- OCR & Ayrıştırma Durum Kutusu -->
+                    <div class="scale-status-banner" id="scaleStatusBanner" style="display:none;"></div>
+
+                    <!-- Değer İnceleme ve Kaydetme Formu -->
+                    <form id="scaleEntryForm" class="scale-form-grid" onsubmit="event.preventDefault();">
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="inputScaleDate">📅 Ölçüm Tarihi</label>
+                                <input type="date" id="inputScaleDate" required />
+                            </div>
+                            <div class="form-field">
+                                <label for="inputScaleWeight">⚖️ Ağırlık / Kilo (kg)</label>
+                                <input type="number" step="0.05" id="inputScaleWeight" placeholder="Örn: 77.6" required />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="inputScaleBodyFat">🔥 Vücut Yağ Oranı (%)</label>
+                                <input type="number" step="0.1" id="inputScaleBodyFat" placeholder="Örn: 15.9" />
+                            </div>
+                            <div class="form-field">
+                                <label for="inputScaleMuscleMass">💪 İskelet Kası Kütlesi (kg)</label>
+                                <input type="number" step="0.1" id="inputScaleMuscleMass" placeholder="Örn: 37.2" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="inputScaleWaterPct">💧 Toplam Vücut Suyu (%)</label>
+                                <input type="number" step="0.1" id="inputScaleWaterPct" placeholder="Örn: 59.8" />
+                            </div>
+                            <div class="form-field">
+                                <label for="inputScaleVisceralFat">⚠️ Viseral (İç) Yağ (1-15)</label>
+                                <input type="number" step="1" id="inputScaleVisceralFat" placeholder="Örn: 6" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="inputScaleBmr">⚡ Bazal Metabolizma (BMR kcal)</label>
+                                <input type="number" step="1" id="inputScaleBmr" placeholder="Örn: 1778" />
+                            </div>
+                            <div class="form-field">
+                                <label for="inputScaleScore">🏆 Vücut Puanı / Yaşı</label>
+                                <input type="text" id="inputScaleScore" placeholder="Örn: 84 Puan • 39 Yaş" />
+                            </div>
+                        </div>
+
+                        <div class="form-field full-width">
+                            <label for="inputScaleNotes">📝 Notlar / Analiz Modeli</label>
+                            <input type="text" id="inputScaleNotes" placeholder="Unique Health BIA Analizi / InBody 270" />
+                        </div>
+
+                        <div class="form-actions-row">
+                            <button type="button" class="btn-clear-form" id="btnClearScaleForm">
+                                🧹 Temizle
+                            </button>
+                            <button type="button" class="btn-save-scale" id="btnSaveScaleEntry">
+                                💾 Tartı Analizini Kaydet & Buluta Aktar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Sağ Sütun: Akademik Kompozisyon Analitiği & Biyomekanik Teşhis -->
+                <div class="bodycomp-col-card">
+                    <div class="card-header-row">
+                        <h3>🧬 Biyomekanik Kompozisyon Teşhisi</h3>
+                        <span class="badge-phase" id="bodyCompPhaseBadge">Analiz Bekleniyor</span>
+                    </div>
+
+                    <!-- Büyük KPI Göstergeleri -->
+                    <div class="bodycomp-kpi-grid">
+                        <div class="b-kpi-card">
+                            <span class="b-kpi-label">Güncel Kilo</span>
+                            <span class="b-kpi-val" id="bKpiWeight">- kg</span>
+                            <span class="b-kpi-delta" id="bKpiWeightDelta">-</span>
+                        </div>
+                        <div class="b-kpi-card">
+                            <span class="b-kpi-label">Yağ Oranı</span>
+                            <span class="b-kpi-val highlight-fat" id="bKpiFat">-%</span>
+                            <span class="b-kpi-delta" id="bKpiFatDelta">-</span>
+                        </div>
+                        <div class="b-kpi-card">
+                            <span class="b-kpi-label">İskelet Kası</span>
+                            <span class="b-kpi-val highlight-muscle" id="bKpiMuscle">- kg</span>
+                            <span class="b-kpi-delta" id="bKpiMuscleDelta">-</span>
+                        </div>
+                        <div class="b-kpi-card">
+                            <span class="b-kpi-label">Yağsız Kütle (FFM)</span>
+                            <span class="b-kpi-val" id="bKpiLeanMass">- kg</span>
+                            <span class="b-kpi-sub">Kas, İskelet & Organ</span>
+                        </div>
+                        <div class="b-kpi-card">
+                            <span class="b-kpi-label">Yağ Kütlesi</span>
+                            <span class="b-kpi-val" id="bKpiFatMass">- kg</span>
+                            <span class="b-kpi-sub">Toplam Adipoz Doku</span>
+                        </div>
+                        <div class="b-kpi-card">
+                            <span class="b-kpi-label">Viseral Yağ / BMR</span>
+                            <span class="b-kpi-val" id="bKpiViscBmr">-</span>
+                            <span class="b-kpi-sub">İç Yağ & Bazal Enerji</span>
+                        </div>
+                    </div>
+
+                    <!-- Fizyolojik Teşhis ve Spor Bilimi Çıkarımı -->
+                    <div class="academic-diagnosis-box" id="academicDiagnosisBox">
+                        <div class="empty-state">Sporcuya ait tartı kaydı yüklendiğinde akademik değerlendirme burada görünecek.</div>
+                    </div>
+
+                    <!-- Bölgesel Segmental Dağılım Kartı (Unique Health / InBody) -->
+                    <div class="segmental-box" id="segmentalBox" style="display:none;">
+                        <h4>📐 Bölgesel Kas & Yağ Segmentasyonu (BIA)</h4>
+                        <div class="segmental-grid" id="segmentalGrid">
+                            <!-- Dinamik doldurulacak -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alt Kısım: Zaman Çizelgesi Grafiği & Kayıt Geçmişi -->
+            <div class="bodycomp-bottom-grid">
+                <!-- Vücut Kompozisyonu Gelişim Grafiği (Chart.js) -->
+                <div class="bodycomp-chart-card">
+                    <div class="card-header-row">
+                        <div>
+                            <h3>📈 Vücut Kompozisyonu Zaman Çizelgesi</h3>
+                            <p class="chart-desc">Kilo (kg), Vücut Yağ Oranı (%) ve İskelet Kası (kg) Değişim Eğrisi</p>
+                        </div>
+                    </div>
+                    <div class="canvas-wrap" style="height: 240px; position:relative;">
+                        <canvas id="scaleTimelineChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Geçmiş Tartı Kayıtları Tablosu -->
+                <div class="bodycomp-history-card">
+                    <div class="card-header-row">
+                        <h3>📋 Tartı Analizleri Geçmişi</h3>
+                        <span class="count-badge" id="scaleHistoryCount">0 Kayıt</span>
+                    </div>
+                    <div class="table-scroll-wrap">
+                        <table class="scale-history-table">
+                            <thead>
+                                <tr>
+                                    <th>Tarih</th>
+                                    <th>Kilo</th>
+                                    <th>Yağ %</th>
+                                    <th>Kas kg</th>
+                                    <th>Su %</th>
+                                    <th>Viseral</th>
+                                    <th>BMR</th>
+                                    <th>İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scaleHistoryTableBody">
+                                <tr>
+                                    <td colspan="8" class="text-center" style="color:var(--text-muted); padding:16px;">Kayıt bulunamadı.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- Biyomekanik Analiz ve Gelişim Çubukları Bölümü (Web PWA ile Birebir Eşit) -->
     <section class="analytics-layout" id="viewAnalytics" style="display: none;">

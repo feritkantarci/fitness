@@ -141,6 +141,10 @@ ipcMain.handle('firebase:getScaleLogs', async (event, uid) => {
     return await firebaseService.fetchScaleLogs(uid);
 });
 
+ipcMain.handle('firebase:saveScaleLogs', async (event, { uid, logs }) => {
+    return await firebaseService.saveScaleLogs(uid, logs);
+});
+
 ipcMain.handle('firebase:sendDirective', async (event, { uid, directive }) => {
     return await firebaseService.sendDirectiveToWeb(uid, directive);
 });
@@ -150,8 +154,8 @@ ipcMain.handle('firebase:sendProgram', async (event, { uid, program }) => {
 });
 
 // Akademik Spor Bilimi Motoru & Egzersiz Atlası
-ipcMain.handle('academic:analyze', async (event, { logs, profile }) => {
-    return academicEngine.analyzeAthleteHistory(logs, profile);
+ipcMain.handle('academic:analyze', async (event, { logs, profile, scaleLogs }) => {
+    return academicEngine.analyzeAthleteHistory(logs, profile, scaleLogs);
 });
 
 ipcMain.handle('catalog:getExercises', async () => {

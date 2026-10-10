@@ -11448,6 +11448,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                     <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
                                         <span style="font-size:10.5px; font-weight:900; color:var(--gold); letter-spacing:0.5px; text-transform:uppercase;">FitLAB MASAÜSTÜ İSTASYONU</span>
                                         <span style="font-size:9.5px; padding:2px 6px; border-radius:4px; background:rgba(245,158,11,0.2); color:#fef08a; border:1px solid rgba(245,158,11,0.4); font-weight:900;">YENİ PROGRAM GELDİ</span>
+                                        ${prog.bodyComp?.weight ? `<span style="font-size:9.5px; padding:2px 6px; border-radius:4px; background:rgba(6,182,212,0.2); color:#67e8f9; border:1px solid rgba(6,182,212,0.4); font-weight:800;">⚖️ ${prog.bodyComp.weight} kg • %${prog.bodyComp.bodyFat || '?'} Yağ</span>` : ''}
+                                        ${prog.bodyCompDiagnosis?.phaseTitle ? `<span style="font-size:9.5px; padding:2px 6px; border-radius:4px; background:rgba(16,185,129,0.2); color:#6ee7b7; border:1px solid rgba(16,185,129,0.4); font-weight:800;">🎯 ${escapeHTML(prog.bodyCompDiagnosis.phaseTitle)}</span>` : ''}
                                     </div>
                                     <h3 style="font-size:13.5px; font-weight:900; color:#fff; margin:2px 0 0;">${escapeHTML(prog.title || 'Gelecek Hafta İçin AI Reçetesi Hazır')}</h3>
                                 </div>
@@ -13028,10 +13030,30 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         }
 
         // TARTI & ÖLÇÜM BULUT EŞİTLEME
+        let scaleLogsLiveUnsub = null;
+
         async function syncUserScaleLogsFromCloud(uid) {
             if (!isFirebaseReady || !fbDb || !uid) return;
             try {
                 const docRef = fbDb.collection('scale_logs').doc(uid);
+
+                // Canlı dinleyici: FitLAB masaüstünden tartı yüklendiği an telefonda anında yakala
+                if (!scaleLogsLiveUnsub) {
+                    scaleLogsLiveUnsub = docRef.onSnapshot((docSnap) => {
+                        if (docSnap && docSnap.exists) {
+                            const data = docSnap.data();
+                            if (data && Array.isArray(data.logs)) {
+                                localStorage.setItem(`celik_kodu_scale_${uid}`, JSON.stringify(data.logs));
+                                if (typeof renderAnalytics === 'function' && document.getElementById('analyticsModal')?.classList.contains('active')) {
+                                    renderAnalytics();
+                                }
+                            }
+                        }
+                    }, (e) => {
+                        console.warn("scale_logs onSnapshot hatası:", e);
+                    });
+                }
+
                 const doc = await docRef.get();
                 const localLogs = getScaleLogs();
 
