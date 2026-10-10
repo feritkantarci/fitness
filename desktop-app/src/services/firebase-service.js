@@ -166,6 +166,26 @@ async function sendCustomProgramToWeb(uid, programData) {
     }
 }
 
+/**
+ * AI API ANAHTARINI BULUTA EŞİTLE (Web & Mobil PWA ile ortaklaşma)
+ */
+async function syncAiConfigToCloud(apiKey) {
+    if (!apiKey) return;
+    if (!db) initFirebase();
+    try {
+        const ref = doc(db, 'app_system', 'ai_config');
+        await setDoc(ref, {
+            geminiApiKey: apiKey.trim(),
+            updatedAt: serverTimestamp(),
+            source: 'CelikKodu_Desktop_Station'
+        }, { merge: true });
+        return { success: true };
+    } catch (err) {
+        console.warn("AI config buluta eşitlenemedi:", err);
+        return { success: false, error: err.message };
+    }
+}
+
 module.exports = {
     initFirebase,
     fetchUsers,
@@ -174,5 +194,6 @@ module.exports = {
     saveScaleLogs,
     listenToAthleteWorkouts,
     sendDirectiveToWeb,
-    sendCustomProgramToWeb
+    sendCustomProgramToWeb,
+    syncAiConfigToCloud
 };

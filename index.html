@@ -3551,7 +3551,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v112</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v113</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3587,7 +3587,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v112</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v113</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -6860,6 +6860,7 @@
 
         // ==================== GEMINI AI BIOMECHANICAL COACH ENGINE ====================
         const GEMINI_API_STORAGE_KEY = 'celik_kodu_gemini_api_key';
+        let isFetchingCloudAiConfig = false;
 
         function getGeminiApiKey() {
             let key = (localStorage.getItem(GEMINI_API_STORAGE_KEY) || '').trim();
@@ -6870,7 +6871,43 @@
                     localStorage.setItem(GEMINI_API_STORAGE_KEY, key);
                 }
             }
+            if (!key && !isFetchingCloudAiConfig) {
+                // Arka planda Firestore buluttan anında çekmeyi tetikle
+                fastFetchCloudAiConfig();
+            }
             return key;
+        }
+
+        async function fastFetchCloudAiConfig() {
+            if (isFetchingCloudAiConfig) return '';
+            const existingKey = (localStorage.getItem(GEMINI_API_STORAGE_KEY) || '').trim();
+            if (existingKey) return existingKey;
+
+            isFetchingCloudAiConfig = true;
+            try {
+                const endpoint = 'https://firestore.googleapis.com/v1/projects/fitness-4f427/databases/(default)/documents/app_system/ai_config?key=' + (typeof FIREBASE_CONFIG !== 'undefined' ? FIREBASE_CONFIG.apiKey : '');
+                const res = await fetch(endpoint);
+                if (res.ok) {
+                    const doc = await res.json();
+                    const cloudKey = doc?.fields?.geminiApiKey?.stringValue?.trim();
+                    if (cloudKey) {
+                        localStorage.setItem(GEMINI_API_STORAGE_KEY, cloudKey);
+                        const user = typeof getActiveUser === 'function' ? getActiveUser() : null;
+                        if (user && user.geminiApiKey !== cloudKey) {
+                            user.geminiApiKey = cloudKey;
+                        }
+                        if (typeof updateProfileGeminiStatusUI === 'function') updateProfileGeminiStatusUI();
+                        const curEx = (typeof pickerContext !== 'undefined' && pickerContext && pickerContext.targetExId) ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
+                        if (typeof updateGeminiAiModalUI === 'function') updateGeminiAiModalUI(curEx);
+                        return cloudKey;
+                    }
+                }
+            } catch (e) {
+                console.warn("Hızlı AI anahtarı senkronu:", e);
+            } finally {
+                isFetchingCloudAiConfig = false;
+            }
+            return '';
         }
 
         function setGeminiApiKey(key, syncCloud = true) {
@@ -6924,7 +6961,7 @@
 
             if (badge) {
                 if (key) {
-                    badge.innerText = '🟢 API Aktif (Gemini Flash)';
+                    badge.innerText = '🟢 API Aktif (Gemini 3.8 Flash)';
                     badge.style.background = 'rgba(34, 197, 94, 0.15)';
                     badge.style.color = '#4ade80';
                     badge.style.border = '1px solid rgba(34, 197, 94, 0.35)';
@@ -6996,6 +7033,7 @@
             if (!key) {
                 if (missingBox) missingBox.style.display = 'block';
                 if (activeBox) activeBox.style.display = 'none';
+                fastFetchCloudAiConfig();
             } else {
                 if (missingBox) missingBox.style.display = 'none';
                 if (activeBox) activeBox.style.display = 'block';
@@ -7005,7 +7043,10 @@
         let cachedGeminiWorkingModel = null;
 
         async function callGeminiAPI(prompt, systemInstruction = '', overrideKey = '') {
-            const apiKey = overrideKey || getGeminiApiKey();
+            let apiKey = overrideKey || getGeminiApiKey();
+            if (!apiKey) {
+                apiKey = await fastFetchCloudAiConfig();
+            }
             if (!apiKey) throw new Error("Google Gemini API anahtarı eksik. Lütfen profilinizden veya modal üzerinden anahtar tanımlayın.");
 
             let candidateModels = [];
@@ -7023,10 +7064,11 @@
                             .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
                             .map(m => m.name.replace(/^models\//, ''));
                         
-                        // Flash modellerini ve en güncel sürümleri öne al
-                        const flashModels = supported.filter(m => m.includes('flash'));
-                        const otherModels = supported.filter(m => !m.includes('flash'));
-                        const ordered = [...flashModels, ...otherModels];
+                        // 3.8 ve Flash modellerini en öne al
+                        const flash38 = supported.filter(m => m.includes('3.8'));
+                        const otherFlash = supported.filter(m => m.includes('flash') && !m.includes('3.8'));
+                        const otherModels = supported.filter(m => !m.includes('flash') && !m.includes('3.8'));
+                        const ordered = [...flash38, ...otherFlash, ...otherModels];
 
                         ordered.forEach(m => {
                             if (!candidateModels.includes(m)) candidateModels.push(m);
@@ -7039,9 +7081,10 @@
 
             // Keşif başarısız olduysa veya modeller listelenemediyse denenmesi gereken güncel modeller
             const fallbackModels = [
+                'gemini-3.8-flash',
+                'gemini-2.5-flash',
                 'gemini-2.0-flash',
                 'gemini-2.0-flash-lite',
-                'gemini-2.5-flash',
                 'gemini-1.5-flash-latest',
                 'gemini-1.5-flash-8b',
                 'gemini-1.5-flash',
@@ -12897,10 +12940,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             updateCloudSyncBadge('syncing', 'Eşitleniyor...');
 
             try {
-                // 1. Kullanıcıları eşitle
+                // 1. AI Biyomekanik Koç Anahtarını Eşitle (Öncelikli hızlı senkron)
+                await syncAiConfigFromCloud();
+
+                // 2. Kullanıcıları eşitle
                 await syncUsersFromCloud();
 
-                // 2. Aktif kullanıcının verilerini eşitle
+                // 3. Aktif kullanıcının verilerini eşitle
                 const uid = getActiveUserId();
                 if (uid) {
                     await syncUserWorkoutLogsFromCloud(uid);
@@ -12909,9 +12955,6 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     await syncCoachDirectiveFromCloud(uid);
                     await syncCustomProgramsFromCloud(uid);
                 }
-
-                // 3. AI Biyomekanik Koç Anahtarını Eşitle (Telefon - Masaüstü senkronu)
-                await syncAiConfigFromCloud();
 
                 updateCloudSyncBadge('synced', 'Bulut Aktif');
             } catch (e) {
@@ -17411,7 +17454,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=112')
+                navigator.serviceWorker.register('./sw.js?v=113')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
@@ -17432,6 +17475,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         // INITIALIZE APPLICATION
         window.addEventListener('DOMContentLoaded', () => {
+            fastFetchCloudAiConfig();
             initAuthDatabase();
             initFirebaseEngine();
             syncAppViewState();

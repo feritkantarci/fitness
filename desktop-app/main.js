@@ -37,6 +37,9 @@ function saveApiKeyToDisk(key) {
     try {
         aiCoachService.setApiKey(key);
         fs.writeFileSync(CONFIG_PATH, JSON.stringify({ apiKey: key }, null, 2), 'utf-8');
+        if (key && firebaseService && firebaseService.syncAiConfigToCloud) {
+            firebaseService.syncAiConfigToCloud(key);
+        }
         return true;
     } catch (e) {
         console.error("Config yazılamadı:", e);
@@ -77,10 +80,13 @@ function createWindow() {
 // Uygulama Yaşam Döngüsü
 app.whenReady().then(() => {
     // Kayıtlı API anahtarını yükle
-    loadSavedApiKey();
+    const savedKey = loadSavedApiKey();
 
     // Firebase başlat
     firebaseService.initFirebase();
+    if (savedKey && firebaseService.syncAiConfigToCloud) {
+        firebaseService.syncAiConfigToCloud(savedKey);
+    }
 
     createWindow();
 
