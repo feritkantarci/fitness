@@ -1,4 +1,4 @@
-const CACHE_NAME = 'celik-kodu-cache-v119';
+const CACHE_NAME = 'celik-kodu-cache-v120';
 const ASSETS = [
   './',
   './assets/guides/guide_bb_thruster_form.png',
@@ -13,6 +13,7 @@ const ASSETS = [
   './assets/guides/guide_bear_crawl_pull_through_form.jpg',
   './assets/guides/guide_db_clean_and_press_form.jpg',
   './assets/guides/guide_db_manmaker_form.jpg',
+  './assets/guides/guide_db_manmaker_anatomi.jpg',
   './assets/guides/guide_waiters_carry_form.jpg',
   './assets/guides/guide_cross_body_carry_form.jpg',
   './assets/guides/guide_lunge_with_twist_form.jpg',
