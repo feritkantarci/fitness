@@ -7494,50 +7494,66 @@ KURALLAR:
                     const thumbImg = (guide && guide.form) ? guide.form : '';
 
                     cardsHtml += `
-                        <div style="background:rgba(192, 132, 252, 0.1); border:1px solid rgba(192, 132, 252, 0.45); border-radius:8px; padding:10px 12px; margin-bottom:8px; box-shadow:0 2px 8px rgba(0,0,0,0.25);">
-                            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                                <div style="display:flex; align-items:center; gap:10px; min-width:0;">
-                                    <div style="width:38px; height:38px; border-radius:6px; background:#000; overflow:hidden; flex-shrink:0; border:1px solid rgba(192,132,252,0.3); display:flex; align-items:center; justify-content:center;">
-                                        ${thumbImg ? `<img src="${thumbImg}" style="width:100%; height:100%; object-fit:contain;" alt="${escapeHTML(ex.name)}">` : '🏋️'}
+                        <div style="background:rgba(192, 132, 252, 0.08); border:1px solid rgba(192, 132, 252, 0.35); border-radius:8px; padding:10px 12px; margin-bottom:8px; box-shadow:0 2px 8px rgba(0,0,0,0.25);">
+                            <!-- ÜST SATIR: TAM BAŞLIK, ROZETLER VE '✓ SEÇ' BUTONU -->
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                                <div style="flex:1; min-width:0;">
+                                    <div style="font-size:9.5px; color:#c084fc; font-weight:800; text-transform:uppercase; letter-spacing:0.5px;">ÖNERİLEN İKAME</div>
+                                    <div style="font-size:14px; font-weight:800; color:#fff; line-height:1.25; margin:2px 0 3px 0; word-break:break-word;">
+                                        ${escapeHTML(ex.name)}
                                     </div>
-                                    <div style="min-width:0;">
-                                        <div style="font-size:9.5px; color:#c084fc; font-weight:800; text-transform:uppercase; letter-spacing:0.5px;">ÖNERİLEN İKAME</div>
-                                        <div style="font-size:13px; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(ex.name)}</div>
-                                        <div style="font-size:10.5px; color:var(--text-secondary); margin-top:2px;">
-                                            <span>${eqMeta.icon} ${eqMeta.label}</span> • <span>${escapeHTML(ex.muscle || '')}</span>
-                                        </div>
+                                    <div style="font-size:10px; color:var(--text-secondary); display:flex; flex-wrap:wrap; gap:4px; align-items:center;">
+                                        <span style="color:#e2e8f0; font-weight:700;">${eqMeta.icon} ${eqMeta.label}</span>
+                                        <span>•</span>
+                                        <span style="color:var(--gold); font-weight:700;">🎯 ${escapeHTML(ex.muscle || '')}</span>
                                     </div>
                                 </div>
-                                <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:7px 14px; font-weight:800; background:#9333ea; border-color:#a855f7; color:#fff; white-space:nowrap; box-shadow:0 0 10px rgba(168,85,247,0.35); flex-shrink:0;" onclick="selectExerciseFromPicker('${ex.id}')">
-                                    ✓ Bu Alternatifi Seç
-                                </button>
+                                <div style="flex-shrink:0;">
+                                    <button type="button" class="btn btn-gold" style="font-size:12px; padding:6px 14px; font-weight:800; background:#9333ea; border-color:#a855f7; color:#fff; white-space:nowrap; box-shadow:0 0 10px rgba(168,85,247,0.35); border-radius:6px;" onclick="selectExerciseFromPicker('${ex.id}')">
+                                        ✓ Seç
+                                    </button>
+                                </div>
                             </div>
-                            ${ex.cue ? `<div style="font-size:10.5px; color:#e9d5ff; margin-top:6px; background:rgba(0,0,0,0.35); padding:5px 8px; border-radius:4px; border:1px solid rgba(192,132,252,0.15);">💡 <strong>İpucu:</strong> ${escapeHTML(ex.cue)}</div>` : ''}
+
+                            <!-- FORM GÖRSELİ (GENİŞ, NET VE DETAYLI) -->
+                            ${thumbImg ? `
+                                <div style="width:100%; height:115px; border-radius:6px; background:#000; overflow:hidden; border:1px solid rgba(192,132,252,0.25); margin-top:8px; display:flex; align-items:center; justify-content:center; position:relative; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')" title="Form rehberini incele">
+                                    <img src="${thumbImg}" style="max-width:100%; max-height:100%; object-fit:contain;" alt="${escapeHTML(ex.name)}" loading="lazy">
+                                    <div style="position:absolute; bottom:4px; right:4px; background:rgba(0,0,0,0.75); backdrop-filter:blur(4px); border:1px solid rgba(255,255,255,0.15); border-radius:4px; padding:2px 6px; font-size:9.5px; color:#e9d5ff; font-weight:700; display:flex; align-items:center; gap:3px;">
+                                        <span>🔍 Büyüt / İncele</span>
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            <!-- FORM İPUCU -->
+                            ${ex.cue ? `<div style="font-size:10.5px; color:#e9d5ff; margin-top:6px; background:rgba(0,0,0,0.35); padding:5px 8px; border-radius:4px; border:1px solid rgba(192,132,252,0.15); line-height:1.35;">💡 <strong>İpucu:</strong> ${escapeHTML(ex.cue)}</div>` : ''}
                         </div>
                     `;
                 }
             });
 
             resArea.innerHTML = `
-                <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(192, 132, 252, 0.35); border-radius:10px; padding:12px; margin-top:6px;">
-                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; border-bottom:1px solid rgba(192,132,252,0.2); padding-bottom:6px;">
+                <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(192, 132, 252, 0.35); border-radius:10px; padding:10px 12px; margin-top:6px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid rgba(192,132,252,0.2); padding-bottom:5px;">
                         <div style="display:flex; align-items:center; gap:6px;">
-                            <span style="font-size:16px;">🤖</span>
+                            <span style="font-size:15px;">🤖</span>
                             <span style="font-size:12px; font-weight:800; color:#e9d5ff;">Gemini Biyomekanik İkameler</span>
                         </div>
-                        <span style="font-size:10px; color:#c084fc; background:rgba(192,132,252,0.15); padding:2px 6px; border-radius:4px; font-weight:700;">Hızlı Seçim</span>
+                        <span style="font-size:9.5px; color:#c084fc; background:rgba(192,132,252,0.15); padding:2px 6px; border-radius:4px; font-weight:700;">Hızlı Seçim</span>
                     </div>
 
-                    <!-- 1. ÖNCELİKLİ: HAREKET KARTLARI VE SEÇİM BUTONU -->
+                    <!-- 1. HAREKET KARTLARI (FORM GÖRSELİ + TAM İSİM + '✓ SEÇ' BUTONU) -->
                     ${cardsHtml ? `<div>${cardsHtml}</div>` : ''}
 
-                    <!-- 2. KISA & ÖZ KOÇ NOTU (VARSA) -->
+                    <!-- 2. İSTEĞE BAĞLI / KAPALI KOÇ GEREKÇESİ (ALAN KAZANMAK İÇİN VARSAYILAN GİZLİ) -->
                     ${cleanedText ? `
-                        <div style="background:rgba(192, 132, 252, 0.06); border:1px solid rgba(192, 132, 252, 0.2); border-radius:6px; padding:8px 10px; margin-top:${cardsHtml ? '4px' : '0'}; font-size:11px; color:#cbd5e1; line-height:1.45;">
-                            <div style="font-size:10px; font-weight:800; color:#c084fc; margin-bottom:3px; display:flex; align-items:center; gap:4px;">
-                                <span>💡</span> <span>Biyomekanik Gerekçe:</span>
+                        <div style="margin-top:6px;">
+                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:4px 8px; border:none; color:var(--text-secondary); width:100%; text-align:center; display:flex; align-items:center; justify-content:center; gap:4px; cursor:pointer;" onclick="const b = document.getElementById('aiCoachWhyBox'); if(b) b.style.display = b.style.display === 'none' ? 'block' : 'none';">
+                                <span>💡 Biyomekanik Gerekçeyi Gör / Gizle</span>
+                            </button>
+                            <div id="aiCoachWhyBox" style="display:none; background:rgba(192, 132, 252, 0.06); border:1px solid rgba(192, 132, 252, 0.2); border-radius:6px; padding:8px 10px; margin-top:4px; font-size:10.5px; color:#cbd5e1; line-height:1.4;">
+                                ${formattedHtml}
                             </div>
-                            ${formattedHtml}
                         </div>
                     ` : ''}
                 </div>
