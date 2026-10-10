@@ -53,6 +53,8 @@ const el = {
     consultAthleteBrief: document.getElementById('consultAthleteBrief'),
     consultAthleteName: document.getElementById('consultAthleteName'),
     consultAthleteMetrics: document.getElementById('consultAthleteMetrics'),
+    consultSaveStatusBadge: document.getElementById('consultSaveStatusBadge'),
+    consultSaveStatusText: document.getElementById('consultSaveStatusText'),
     desktopAnalyticsContainer: document.getElementById('desktopAnalyticsContainer'),
 
     // Tartı & Kompozisyon Elemanları
@@ -458,6 +460,10 @@ async function selectAthlete(userId) {
 
     // Referans Ağırlıklar Tablosu
     renderWeightsTable(state.selectedUser.weights || {});
+
+    // İstişare Odası Geçmişini Sporcuya Özel Yükle
+    loadConsultationHistoryForAthlete(userId);
+    renderConsultationContext();
 
     // Antrenman Geçmişini ve Akademik Analizi Yükle
     await refreshAthleteData();
@@ -1753,7 +1759,186 @@ function switchView(viewName) {
 window.switchView = switchView;
 
 // ==================== AI CONSULTATION CHAMBER (İSTİŞARE ODASI) ====================
-let consultationConversation = [];
+let consultationConversation = []; // Gemini diyalog bağlamı [{ role: 'user'|'model', text: string }]
+let consultationMessagesList = []; // Kayıtlı tam diyalog nesneleri [{ id, sender, role, text, timestamp, directiveSent }]
+let consultMsgStore = {};
+let currentConsultLoadedUserId = null;
+
+function updateConsultationBadge(count = 0, lastUpdated = null) {
+    if (!el.consultSaveStatusText) return;
+    if (count === 0) {
+        el.consultSaveStatusText.textContent = 'Yeni Oturum';
+        if (el.consultSaveStatusBadge) {
+            el.consultSaveStatusBadge.style.borderColor = 'var(--border-subtle)';
+            el.consultSaveStatusBadge.title = 'Henüz bu sporcu için kayıtlı istişare mesajı bulunmuyor.';
+        }
+    } else {
+        const timePart = lastUpdated 
+            ? new Date(lastUpdated).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+            : '';
+        el.consultSaveStatusText.textContent = `Kayıtlı (${count} mesaj${timePart ? ' • ' + timePart : ''})`;
+        if (el.consultSaveStatusBadge) {
+            el.consultSaveStatusBadge.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+            el.consultSaveStatusBadge.title = `Tüm görüşmeler yerel olarak kaydedildi. Son güncelleme: ${lastUpdated || 'Az önce'}`;
+        }
+    }
+}
+
+function saveCurrentConsultationHistory() {
+    if (!state.selectedUserId) return;
+    try {
+        const payload = {
+            athleteId: state.selectedUserId,
+            athleteName: state.selectedUser?.name || 'Sporcu',
+            lastUpdated: new Date().toISOString(),
+            messages: consultationMessagesList
+        };
+        localStorage.setItem(`fitlab_consult_history_${state.selectedUserId}`, JSON.stringify(payload));
+        updateConsultationBadge(consultationMessagesList.length, payload.lastUpdated);
+    } catch (e) {
+        console.warn("İstişare geçmişi kaydedilemedi:", e);
+    }
+}
+
+function renderWelcomeBubble() {
+    const stream = el.consultMessagesStream;
+    if (!stream) return;
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-bubble chat-bubble-ai';
+    bubble.innerHTML = `
+        <div class="chat-bubble-sender">
+            <span>🧠 FitLAB Biyomekanik Danışmanı</span>
+        </div>
+        <div class="chat-bubble-text">
+            Merhaba <strong>${escapeHTML(state.selectedUser?.name || 'Şampiyon')}</strong>! Antrenmanında takıldığın, yapamadığın ya da değiştirmek istediğin bir hareket olduğunda buradayım.
+            <br><br>
+            Örneğin: <em>"Verilen programda Barfiks var ama ben hiç barfiks çekemiyorum; bunu nasıl çözelim?"</em> gibi sorular sorabilirsin.
+            İster o hareketi sıfırdan kazandıracak <strong>progresyon protokolü</strong> çalışalım, ister aynı kası çalıştıracak <strong>daha basit bir ikame hareket</strong> koyalım.
+            <br><br>
+            <span style="font-size:11px; color:var(--text-secondary);">💡 Yaptığımız tüm görüşmeler bu sporcu için otomatik olarak hafızaya alınır ve dilediğin zaman kaldığın yerden devam edebilirsin.</span>
+        </div>
+    `;
+    stream.appendChild(bubble);
+}
+
+function formatChatTime(timestamp) {
+    if (!timestamp) return '';
+    try {
+        const d = new Date(timestamp);
+        return d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    } catch (e) {
+        return '';
+    }
+}
+
+function appendChatBubbleDOM(sender, text, showActions = false, timestamp = null, directiveSent = false, msgId = null) {
+    const stream = el.consultMessagesStream;
+    if (!stream) return null;
+
+    if (!msgId) {
+        msgId = `cmsg_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+    }
+    consultMsgStore[msgId] = text;
+
+    const bubble = document.createElement('div');
+    bubble.className = `chat-bubble ${sender === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'}`;
+
+    const senderTitle = sender === 'user' 
+        ? `👤 ${state.selectedUser?.name || 'Sporcu'}` 
+        : `🧠 FitLAB Biyomekanik Danışmanı`;
+
+    const timeStr = formatChatTime(timestamp);
+
+    let actionsHtml = '';
+    if (showActions && sender === 'ai') {
+        if (directiveSent) {
+            actionsHtml = `
+                <div class="chat-bubble-actions">
+                    <button type="button" class="btn-chat-action" id="btnPush_${msgId}" disabled style="color:#10b981; border-color:#10b981; background:rgba(16, 185, 129, 0.15);">
+                        ✅ Web'e Gönderildi
+                    </button>
+                </div>
+            `;
+        } else {
+            actionsHtml = `
+                <div class="chat-bubble-actions">
+                    <button type="button" class="btn-chat-action" id="btnPush_${msgId}" onclick="pushDirectiveFromConsult('${msgId}', this)" title="Bu koç tavsiyesini sporcunun telefonundaki web uygulamasına direktif olarak gönder">
+                        📱 Web'e Gönder
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    const formattedContent = sender === 'ai' ? formatMarkdown(text) : escapeHTML(text);
+
+    bubble.innerHTML = `
+        <div class="chat-bubble-sender">
+            <span>${senderTitle}</span>
+            ${timeStr ? `<span class="chat-bubble-time">${timeStr}</span>` : ''}
+        </div>
+        <div class="chat-bubble-text">${formattedContent}</div>
+        ${actionsHtml}
+    `;
+
+    stream.appendChild(bubble);
+    stream.scrollTop = stream.scrollHeight;
+    return msgId;
+}
+
+function loadConsultationHistoryForAthlete(athleteId) {
+    if (!athleteId) return;
+    currentConsultLoadedUserId = athleteId;
+    consultationConversation = [];
+    consultationMessagesList = [];
+    consultMsgStore = {};
+
+    const stream = el.consultMessagesStream;
+    if (!stream) return;
+    stream.innerHTML = '';
+
+    let data = null;
+    try {
+        const raw = localStorage.getItem(`fitlab_consult_history_${athleteId}`);
+        if (raw) data = JSON.parse(raw);
+    } catch (e) {
+        console.warn("İstişare geçmişi okunamadı:", e);
+    }
+
+    if (!data || !Array.isArray(data.messages) || data.messages.length === 0) {
+        renderWelcomeBubble();
+        updateConsultationBadge(0, null);
+        return;
+    }
+
+    // Geçmiş oturum var: Oturum ayracı ekle
+    const dateFormatted = data.lastUpdated 
+        ? new Date(data.lastUpdated).toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+        : '';
+    const divider = document.createElement('div');
+    divider.className = 'consult-history-divider';
+    divider.innerHTML = `<span>🕒 Kayıtlı İstişare Oturumu Yüklendi • ${data.messages.length} Mesaj • Son: ${dateFormatted}</span>`;
+    stream.appendChild(divider);
+
+    // Mesajları sırayla yükle
+    data.messages.forEach(msg => {
+        const role = msg.role || (msg.sender === 'user' ? 'user' : 'model');
+        consultationConversation.push({ role, text: msg.text });
+        consultationMessagesList.push(msg);
+        appendChatBubbleDOM(
+            msg.sender,
+            msg.text,
+            msg.sender === 'ai',
+            msg.timestamp,
+            msg.directiveSent,
+            msg.id
+        );
+    });
+
+    updateConsultationBadge(data.messages.length, data.lastUpdated);
+    stream.scrollTop = stream.scrollHeight;
+}
+window.loadConsultationHistoryForAthlete = loadConsultationHistoryForAthlete;
 
 function renderConsultationContext() {
     if (!el.consultAthleteBrief) return;
@@ -1761,6 +1946,7 @@ function renderConsultationContext() {
     if (!user) {
         if (el.consultAthleteName) el.consultAthleteName.textContent = 'Sporcu Seçilmedi';
         if (el.consultAthleteMetrics) el.consultAthleteMetrics.textContent = 'Lütfen üst bardan bir sporcu seçin.';
+        updateConsultationBadge(0, null);
         return;
     }
 
@@ -1777,6 +1963,11 @@ function renderConsultationContext() {
             str += `Kayıtlı tartı analizi yok (Standart profil)`;
         }
         el.consultAthleteMetrics.textContent = str;
+    }
+
+    // Eğer farklı bir sporcu seçiliyse veya henüz yüklenmediyse geçmişi yükle
+    if (currentConsultLoadedUserId !== user.id) {
+        loadConsultationHistoryForAthlete(user.id);
     }
 }
 
@@ -1797,85 +1988,21 @@ function triggerQuickConsult(scenario) {
 }
 window.triggerQuickConsult = triggerQuickConsult;
 
-async function sendConsultationMessage(presetText = null) {
-    const input = el.consultUserInput;
-    const text = presetText || (input ? input.value.trim() : '');
-    if (!text) return;
-
-    if (!state.selectedUser) {
-        showToast('⚠️ Lütfen önce üst bardan bir sporcu seçin.');
-        return;
-    }
-
-    // Kullanıcı balonunu ekle
-    appendChatBubble('user', text);
-    if (input && !presetText) input.value = '';
-
-    // Diyalog geçmişine ekle
-    consultationConversation.push({ role: 'user', text });
-
-    // Yükleniyor balonunu göster
-    const loadingBubbleId = appendChatLoadingBubble();
-
-    try {
-        const result = await window.coachAPI.consultWithAi({
-            profile: state.selectedUser,
-            academicData: state.academicAnalysis || {},
-            conversationHistory: consultationConversation.slice(-6),
-            message: text
-        });
-
-        removeChatLoadingBubble(loadingBubbleId);
-
-        const aiReply = result.reply;
-        consultationConversation.push({ role: 'model', text: aiReply });
-        appendChatBubble('ai', aiReply, true);
-
-    } catch (err) {
-        removeChatLoadingBubble(loadingBubbleId);
-        console.error("İstişare hatası:", err);
-        appendChatBubble('ai', `⚠️ İstişare sırasında bir hata oluştu: ${err.message || err}`);
-    }
-}
-window.sendConsultationMessage = sendConsultationMessage;
-
-let consultMsgStore = {};
-let consultMsgCounter = 0;
-
 function appendChatBubble(sender, text, showActions = false) {
-    const stream = el.consultMessagesStream;
-    if (!stream) return;
+    const nowIso = new Date().toISOString();
+    const msgId = `cmsg_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+    appendChatBubbleDOM(sender, text, showActions, nowIso, false, msgId);
 
-    consultMsgCounter++;
-    const msgId = `cmsg_${consultMsgCounter}`;
-    consultMsgStore[msgId] = text;
-
-    const bubble = document.createElement('div');
-    bubble.className = `chat-bubble ${sender === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'}`;
-
-    const senderTitle = sender === 'user' 
-        ? `👤 ${state.selectedUser?.name || 'Sporcu'}` 
-        : `🧠 FitLAB Biyomekanik Danışmanı`;
-
-    let actionsHtml = '';
-    if (showActions && sender === 'ai') {
-        actionsHtml = `
-            <div class="chat-bubble-actions">
-                <button type="button" class="btn-chat-action" id="btnPush_${msgId}" onclick="pushDirectiveFromConsult('${msgId}', this)" title="Bu koç tavsiyesini sporcunun telefonundaki web uygulamasına direktif olarak gönder">
-                    📱 Web'e Gönder
-                </button>
-            </div>
-        `;
-    }
-
-    bubble.innerHTML = `
-        <div class="chat-bubble-sender">${senderTitle}</div>
-        <div class="chat-bubble-text">${escapeHTML(text)}</div>
-        ${actionsHtml}
-    `;
-
-    stream.appendChild(bubble);
-    stream.scrollTop = stream.scrollHeight;
+    // Listeye ve depoya ekle
+    consultationMessagesList.push({
+        id: msgId,
+        sender,
+        role: sender === 'user' ? 'user' : 'model',
+        text,
+        timestamp: nowIso,
+        directiveSent: false
+    });
+    saveCurrentConsultationHistory();
 }
 
 let loadingBubbleCounter = 0;
@@ -1907,22 +2034,61 @@ function removeChatLoadingBubble(id) {
     if (elBubble) elBubble.remove();
 }
 
-function clearConsultationChat() {
-    consultationConversation = [];
-    const stream = el.consultMessagesStream;
-    if (stream) {
-        stream.innerHTML = `
-            <div class="chat-bubble chat-bubble-ai">
-                <div class="chat-bubble-sender">🧠 FitLAB Biyomekanik Danışmanı</div>
-                <div class="chat-bubble-text">
-                    Merhaba Şampiyon! Antrenmanında takıldığın, yapamadığın ya da değiştirmek istediğin bir hareket olduğunda buradayım.
-                    <br><br>
-                    Örneğin: <em>"Verilen programda Barfiks var ama ben hiç barfiks çekemiyorum; bunu nasıl çözelim?"</em> gibi sorular sorabilirsin.
-                    İster o hareketi sıfırdan kazandıracak <strong>progresyon protokolü</strong> çalışalım, ister aynı kası çalıştıracak <strong>daha basit bir ikame hareket</strong> koyalım.
-                </div>
-            </div>
-        `;
+async function sendConsultationMessage(presetText = null) {
+    const input = el.consultUserInput;
+    const text = presetText || (input ? input.value.trim() : '');
+    if (!text) return;
+
+    if (!state.selectedUser) {
+        showToast('⚠️ Lütfen önce üst bardan bir sporcu seçin.');
+        return;
     }
+
+    // Kullanıcı balonunu ekle (otomatik olarak kaydedilir)
+    appendChatBubble('user', text);
+    if (input && !presetText) input.value = '';
+
+    // Diyalog geçmişine ekle
+    consultationConversation.push({ role: 'user', text });
+
+    // Yükleniyor balonunu göster
+    const loadingBubbleId = appendChatLoadingBubble();
+
+    try {
+        const result = await window.coachAPI.consultWithAi({
+            profile: state.selectedUser,
+            academicData: state.academicAnalysis || {},
+            conversationHistory: consultationConversation.slice(-14),
+            message: text
+        });
+
+        removeChatLoadingBubble(loadingBubbleId);
+
+        const aiReply = result.reply;
+        consultationConversation.push({ role: 'model', text: aiReply });
+        appendChatBubble('ai', aiReply, true);
+
+    } catch (err) {
+        removeChatLoadingBubble(loadingBubbleId);
+        console.error("İstişare hatası:", err);
+        appendChatBubble('ai', `⚠️ İstişare sırasında bir hata oluştu: ${err.message || err}`);
+    }
+}
+window.sendConsultationMessage = sendConsultationMessage;
+
+function clearConsultationChat() {
+    if (!state.selectedUserId) {
+        showToast('⚠️ Lütfen önce bir sporcu seçin.');
+        return;
+    }
+
+    const athleteName = state.selectedUser?.name || 'Bu sporcu';
+    const ok = confirm(`${athleteName} için kayıtlı tüm istişare görüşmelerini sıfırlamak istiyor musunuz?\n\nBu işlem geri alınamaz.`);
+    if (!ok) return;
+
+    localStorage.removeItem(`fitlab_consult_history_${state.selectedUserId}`);
+    loadConsultationHistoryForAthlete(state.selectedUserId);
+    showToast('🧹 İstişare geçmişi başarıyla sıfırlandı.');
 }
 window.clearConsultationChat = clearConsultationChat;
 
@@ -1967,6 +2133,14 @@ async function pushDirectiveFromConsult(msgId, btnElement = null) {
                 btnElement.style.borderColor = '#10b981';
                 btnElement.style.background = 'rgba(16, 185, 129, 0.15)';
             }
+
+            // Kayıtlı mesaj listesinde bu mesajı 'directiveSent = true' olarak güncelle ve kaydet
+            const targetMsg = consultationMessagesList.find(m => m.id === msgId);
+            if (targetMsg) {
+                targetMsg.directiveSent = true;
+                saveCurrentConsultationHistory();
+            }
+
             showToast(`🚀 Tavsiye sporcunun (${state.selectedUser?.name || 'Sporcu'}) telefonuna başarıyla iletildi!`);
             if (window.coachAPI && window.coachAPI.showNotification) {
                 window.coachAPI.showNotification(
