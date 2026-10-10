@@ -1112,6 +1112,89 @@
             flex-shrink: 0;
         }
 
+        /* ==================== AI HYBRID BLUEPRINT & DOCTRINE ARCHITECT ==================== */
+        .ai-hybrid-hero-banner {
+            background: linear-gradient(135deg, rgba(30, 27, 75, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
+            border: 1px solid rgba(168, 85, 247, 0.45);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 6px 28px rgba(147, 51, 234, 0.18);
+            position: relative;
+            overflow: hidden;
+        }
+        .ai-hybrid-hero-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, #c084fc, var(--gold));
+        }
+        .doctrine-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 10px;
+            margin: 12px 0;
+        }
+        .doctrine-card {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            position: relative;
+        }
+        .doctrine-card:hover {
+            border-color: rgba(168, 85, 247, 0.5);
+            background: rgba(30, 27, 75, 0.5);
+            transform: translateY(-1px);
+        }
+        .doctrine-card.selected {
+            border-color: var(--gold);
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.14), rgba(168, 85, 247, 0.16));
+            box-shadow: 0 0 16px rgba(245, 158, 11, 0.2);
+        }
+        .doctrine-card.ai-recommended {
+            border-color: rgba(168, 85, 247, 0.75);
+        }
+        .doctrine-ai-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #9333ea, #f59e0b);
+            color: #fff;
+            font-size: 9px;
+            font-weight: 900;
+            padding: 2px 7px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+            align-self: flex-start;
+        }
+        .telemetry-pill {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 6px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .telemetry-pill-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+        .telemetry-pill-val {
+            font-size: 13.5px;
+            font-weight: 900;
+            color: #fff;
+        }
+
         /* COLLAPSIBLE NOTIFICATION / DIRECTIVE / NEXT-WEEK BANNER (UNIFIED DESIGN) */
         .collapsible-panel {
             background: rgba(18, 24, 38, 0.75);
@@ -3709,7 +3792,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v121</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v122</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3745,7 +3828,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v121</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v122</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -3790,6 +3873,33 @@
 
             <!-- ==================== TAB 1: WORKOUT GENERATOR ==================== -->
             <div id="generatorTab" class="tab-content active">
+
+                <!-- AI HYBRID BLUEPRINT & DOCTRINE ARCHITECT BANNER -->
+                <div class="ai-hybrid-hero-banner" id="aiHybridHeroBanner">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
+                        <div style="flex:1; min-width:260px;">
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                                <span class="auth-role-tag" style="background:linear-gradient(135deg, rgba(168,85,247,0.35), rgba(245,158,11,0.25)); color:#e9d5ff; border:1px solid rgba(168,85,247,0.5); font-size:10px; font-weight:800; padding:3px 8px; border-radius:6px; letter-spacing:0.5px;">🧠 AKILLI HİBRİT MİMARI</span>
+                                <span id="aiDoctrineCurrentBadge" style="font-size:10.5px; font-weight:800; color:var(--gold); background:rgba(245,158,11,0.12); padding:2px 8px; border-radius:12px; border:1px solid rgba(245,158,11,0.3);">⚡ Hibrit Doktrini</span>
+                            </div>
+                            <h3 style="font-size:16px; font-weight:900; color:#fff; margin:0 0 6px 0; letter-spacing:-0.3px;">Bodybuilding & Fonksiyonel Fitness Hibrit Doktrini</h3>
+                            <p id="aiDoctrineHeroQuickTeaser" style="font-size:12px; color:var(--text-secondary); margin:0; line-height:1.45;">
+                                Yapay zeka geçmiş antrenmanlarını, tartı trendini ve vücut ölçülerini analiz ederek sana özel <strong>Hipertrofi + Fonksiyonel Fitness</strong> dengesini program öncesinde baştan kurgular.
+                            </p>
+                            <div id="aiDoctrineHeroQuickStats" style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+                                <!-- Live Telemetry snippet populated by JS -->
+                            </div>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
+                            <button type="button" class="btn btn-gold" onclick="openAiHybridArchitectModal()" style="padding:10px 16px; font-size:12.5px; font-weight:900; display:flex; align-items:center; gap:6px; box-shadow:0 0 16px rgba(245,158,11,0.35); white-space:nowrap;">
+                                <span>🤖 AI Doktrin Teşhisini Aç</span>
+                                <span>➔</span>
+                            </button>
+                            <span style="font-size:10px; color:var(--text-muted); font-weight:600;">Schumann (2022) Concurrent Training Destekli</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="generator-card">
                     
                     <!-- STEP 1: MUSCLE SPLIT -->
@@ -4950,6 +5060,160 @@
         </div>
     </div>
 
+    <!-- ==================== AI HYBRID BLUEPRINT & DOCTRINE ARCHITECT MODAL ==================== -->
+    <div id="aiHybridArchitectModal" class="modal-overlay" onclick="if(event.target === this) closeAiHybridArchitectModal()">
+        <div class="modal-box" style="max-width: 740px; max-height: 92vh; overflow-y: auto; border: 1px solid rgba(168, 85, 247, 0.45); box-shadow: 0 10px 40px rgba(147, 51, 234, 0.25);">
+            <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px; margin-bottom:14px;">
+                <div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span class="auth-role-tag" style="background:linear-gradient(135deg, rgba(168,85,247,0.35), rgba(245,158,11,0.25)); color:#e9d5ff; border:1px solid rgba(168,85,247,0.5); font-size:10px; font-weight:800; padding:2px 7px; border-radius:6px;">🧠 AKADEMİK AI MİMARI</span>
+                        <span style="font-size:10.5px; color:var(--gold); font-weight:800;" id="aiModalVersionTag">Schumann (2022) Hibrit Model</span>
+                    </div>
+                    <span class="modal-title" style="font-size:18px; margin-top:4px; display:block;">Bodybuilding & Fonksiyonel Hibrit Doktrini</span>
+                    <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">
+                        Yapay zeka antrenman geçmişini, tartı/bel trendini ve hedeflerini analiz ederek program öncesi doktrini belirler.
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeAiHybridArchitectModal()">✕</button>
+            </div>
+
+            <!-- BÖLÜM 1: CANLI TELEMETRİ (GEÇMİŞ & VÜCUT VERİLERİ) -->
+            <div style="margin-bottom:16px;">
+                <div style="font-size:12px; font-weight:800; color:var(--gold); margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                    <span>📊</span> <span>Mevcut Durum Telemetrisi (Son Veriler)</span>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:8px;" id="aiTelemetryGrid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- BÖLÜM 2: AI TEŞHİS VE BİYOMEKANİK RAPORU -->
+            <div style="background:linear-gradient(135deg, rgba(30,27,75,0.6), rgba(15,23,42,0.8)); border:1px solid rgba(168,85,247,0.35); border-radius:12px; padding:14px; margin-bottom:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:8px; flex-wrap:wrap;">
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <span style="font-size:15px;">🧠</span>
+                        <strong style="font-size:13.5px; color:#fff;" id="aiDiagnosticHeadline">Biyomekanik Durum Teşhisi Çıkarılıyor...</strong>
+                    </div>
+                    <button type="button" class="btn btn-outline" id="btnTriggerGeminiLiveReport" onclick="requestGeminiDeepHybridReport()" style="font-size:11px; padding:4px 10px; border-color:#c084fc; color:#c084fc; font-weight:800; display:flex; align-items:center; gap:5px;">
+                        <span>✨ Canlı Gemini Analizi</span>
+                    </button>
+                </div>
+                <div id="aiDiagnosticContent" style="font-size:12.5px; color:var(--text-secondary); line-height:1.55;">
+                    <!-- Populated by JS -->
+                </div>
+                <div id="aiGeminiExtraReportContainer" style="display:none; margin-top:12px; padding-top:12px; border-top:1px dashed rgba(168,85,247,0.3); font-size:12.5px; color:#e2e8f0; line-height:1.55;">
+                    <!-- Gemini live output will be streamed/rendered here -->
+                </div>
+            </div>
+
+            <!-- BÖLÜM 3: HİBRİT DOKTRİN SEÇİMİ (EN BAŞTA KARAR VERİLECEK YAKLAŞIM) -->
+            <div style="margin-bottom:16px;">
+                <div style="font-size:12.5px; font-weight:800; color:#fff; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+                    <span>🎯</span> <span>Programın Temel Doktrinini Belirle (En Başta Yaklaşım)</span>
+                </div>
+                <p style="font-size:11.5px; color:var(--text-secondary); margin:0 0 10px 0;">
+                    Yapay zekanın durumuna göre önerdiği doktrini onaylayabilir veya farklı bir hibrit denge seçebilirsin:
+                </p>
+                <div class="doctrine-grid" id="doctrineSelectionGrid">
+                    <!-- 1. Pure Bodybuilding -->
+                    <div class="doctrine-card" id="docCard_bb_pure" onclick="selectAiDoctrine('bb_pure')">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong style="color:#fff; font-size:13px;">🛡️ Saf Bodybuilding</strong>
+                            <span style="font-size:11px; color:var(--gold); font-weight:800;">%90 Kas / %10 Kond.</span>
+                        </div>
+                        <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.35;">
+                            Maksimum mekanik gerilim, izole kas tecridi ve simetri. Estetik ve hacim odaklı geleneksel yaklaşım.
+                        </div>
+                    </div>
+
+                    <!-- 2. BB-Dominant Hybrid -->
+                    <div class="doctrine-card selected ai-recommended" id="docCard_bb_hybrid" onclick="selectAiDoctrine('bb_hybrid')">
+                        <div class="doctrine-ai-badge">⭐ AI TAVSİYESİ</div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
+                            <strong style="color:var(--gold); font-size:13px;">⚡ BB-Dominant Hibrit</strong>
+                            <span style="font-size:11px; color:var(--gold); font-weight:800;">%70 Kas / %30 Fonk.</span>
+                        </div>
+                        <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.35;">
+                            Ana gövde ağır hipertrofi; seans sonlarına veya aralara Kettlebell, Carry ve metabolik kondisyon. Kas yaparken eklemleri korur ve iş kapasitesini artırır.
+                        </div>
+                    </div>
+
+                    <!-- 3. Balanced Hybrid (50/50) -->
+                    <div class="doctrine-card" id="docCard_balanced_hybrid" onclick="selectAiDoctrine('balanced_hybrid')">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong style="color:#fff; font-size:13px;">⚖️ Dengeli Hibrit Atlet</strong>
+                            <span style="font-size:11px; color:#38bdf8; font-weight:800;">%50 / %50 Eşit</span>
+                        </div>
+                        <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.35;">
+                            Ağır compound güç blokları ile patlayıcı kettlebell, dinamik rotasyon ve core zırhının mükemmel sinerjisi.
+                        </div>
+                    </div>
+
+                    <!-- 4. Functional-Dominant Hybrid -->
+                    <div class="doctrine-card" id="docCard_func_hybrid" onclick="selectAiDoctrine('func_hybrid')">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong style="color:#fff; font-size:13px;">🔥 Fonksiyonel-Dominant</strong>
+                            <span style="font-size:11px; color:#f97316; font-weight:800;">%70 Fonk. / %30 Kas</span>
+                        </div>
+                        <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.35;">
+                            Ana omurga atletik güç ve yüksek dayanıklılık; zayıf kalan omuz, kol veya göğüs bölgelerine hedefe yönelik izole hipertrofi iğneleri.
+                        </div>
+                    </div>
+
+                    <!-- 5. Pure Functional -->
+                    <div class="doctrine-card" id="docCard_func_pure" onclick="selectAiDoctrine('func_pure')">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong style="color:#fff; font-size:13px;">🌪️ Saf Fonksiyonel & Kondisyon</strong>
+                            <span style="font-size:11px; color:#4ade80; font-weight:800;">%90 Fonksiyonel</span>
+                        </div>
+                        <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.35;">
+                            Çok düzlemli hareket kalıpları, kettlebell kompleksleri, yüksek VO2 Max ve kardiyovasküler dayanıklılık.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BÖLÜM 4: HIZLI PARAMETRE VE ÖZEL İSTEKLER -->
+            <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:12px 14px; margin-bottom:16px;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+                    <div>
+                        <label class="form-label" style="font-size:11px;">Hedef Bölge / Split</label>
+                        <select id="aiModalSplitSelect" class="form-input" style="font-size:12px; padding:8px 10px;">
+                            <option value="full_body" selected>⚡ Tüm Vücut (Full Body Hibrit)</option>
+                            <option value="upper_push">🛡️ Üst İtiş (Push Hibrit)</option>
+                            <option value="upper_pull">⚔️ Üst Çekiş (Pull Hibrit)</option>
+                            <option value="lower">🦵 Bacak & Alt Vücut Hibrit</option>
+                            <option value="upper">🦅 Tüm Üst Vücut</option>
+                            <option value="core">🧱 Karın & Core Zırhı</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label" style="font-size:11px;">Seans Süresi</label>
+                        <select id="aiModalDurationSelect" class="form-input" style="font-size:12px; padding:8px 10px;">
+                            <option value="30">⏱️ 30 Dk (Hızlı & Yoğun Seans)</option>
+                            <option value="45" selected>⏱️ 45-50 Dk (İdeal Çelik Denge)</option>
+                            <option value="60">⏱️ 60 Dk (Tam Hacimli & Detaylı)</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label" style="font-size:11px;">Özel İstek, Zayıf Bölge veya Sakatlık Durumu (Opsiyonel)</label>
+                    <input type="text" id="aiModalUserWishInput" class="form-input" placeholder="Örn: Dizimde hafif hassasiyet var, arka omuzlarımı da vurmak istiyorum..." style="font-size:12px;">
+                </div>
+            </div>
+
+            <!-- BÖLÜM 5: AKSİYON BUTONLARI -->
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button type="button" class="btn btn-gold" style="flex:1; min-width:200px; padding:12px 14px; font-weight:900; font-size:13px; display:flex; justify-content:center; align-items:center; gap:6px;" onclick="applyAiHybridProgram(false)">
+                    <span>⚡ Bu Doktrinle Programı Oluştur & İncele</span>
+                </button>
+                <button type="button" class="btn" style="padding:12px 18px; font-weight:900; font-size:13px; background:linear-gradient(135deg, #10b981, #059669); color:#fff; border:none; display:flex; align-items:center; gap:6px; box-shadow:0 0 16px rgba(16,185,129,0.3);" onclick="applyAiHybridProgram(true)">
+                    <span>🚀 Seansı Doğrudan Başlat</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- ==================== EXERCISE DETAIL & FORM AUDIT MODAL ==================== -->
     <div id="exerciseDetailModal" class="modal-overlay" onclick="if(event.target === this) closeExerciseDetailModal()">
         <div class="modal-box" style="max-width: 680px; max-height: 92vh; overflow-y: auto;">
@@ -5896,6 +6160,7 @@
                 }
             }
 
+            if (tabId === 'generatorTab') renderAiHybridHeroBanner();
             if (tabId === 'libraryTab') renderLibrary();
             if (tabId === 'historyTab') renderHistory();
             if (tabId === 'analyticsTab') renderAnalytics();
@@ -6103,12 +6368,424 @@
             });
         }
 
+        // ==================== AI HYBRID BLUEPRINT & DOCTRINE ARCHITECT ENGINE ====================
+        let currentSelectedDoctrine = 'bb_hybrid';
+        const AI_DOCTRINES = {
+            bb_pure: {
+                id: 'bb_pure',
+                name: '🛡️ Saf Bodybuilding',
+                shortTag: '%90 Kas / %10 Kond.',
+                badgeColor: '#f59e0b',
+                summary: 'Maksimum mekanik gerilim, izole kas tecridi ve simetri. Estetik ve hacim odaklı saf hipertrofi yaklaşımı.',
+                academicRatio: { bb: 0.90, func: 0.10 }
+            },
+            bb_hybrid: {
+                id: 'bb_hybrid',
+                name: '⚡ BB-Dominant Hibrit',
+                shortTag: '%70 Kas / %30 Fonk.',
+                badgeColor: '#c084fc',
+                summary: 'Ana gövde ağır hipertrofi; seans sonlarına veya aralara Kettlebell, Carry ve metabolik kondisyon. Kas yaparken eklemleri korur ve iş kapasitesini artırır.',
+                academicRatio: { bb: 0.70, func: 0.30 }
+            },
+            balanced_hybrid: {
+                id: 'balanced_hybrid',
+                name: '⚖️ Dengeli Hibrit Atlet',
+                shortTag: '%50 / %50 Eşit',
+                badgeColor: '#38bdf8',
+                summary: 'Ağır compound güç blokları ile patlayıcı kettlebell, dinamik rotasyon ve core zırhının 50/50 eşit sinerjisi.',
+                academicRatio: { bb: 0.50, func: 0.50 }
+            },
+            func_hybrid: {
+                id: 'func_hybrid',
+                name: '🔥 Fonksiyonel-Dominant',
+                shortTag: '%70 Fonk. / %30 Kas',
+                badgeColor: '#f97316',
+                summary: 'Ana omurga atletik güç ve yüksek dayanıklılık; zayıf kalan omuz, kol veya göğüs bölgelerine hedefe yönelik izole hipertrofi iğneleri.',
+                academicRatio: { bb: 0.30, func: 0.70 }
+            },
+            func_pure: {
+                id: 'func_pure',
+                name: '🌪️ Saf Fonksiyonel & Kondisyon',
+                shortTag: '%90 Fonksiyonel',
+                badgeColor: '#4ade80',
+                summary: 'Çok düzlemli hareket kalıpları, kettlebell kompleksleri, yüksek VO2 Max ve kardiyovasküler savaşçı dayanıklılığı.',
+                academicRatio: { bb: 0.10, func: 0.90 }
+            }
+        };
+
+        function isExerciseFunctionalCategory(ex) {
+            if (!ex) return false;
+            const eq = (ex.equipment || '').toLowerCase();
+            const cat = (ex.category || '').toLowerCase();
+            const name = (ex.name || '').toLowerCase();
+            const tags = Array.isArray(ex.tags) ? ex.tags.map(t => String(t).toLowerCase()) : [];
+
+            if (eq === 'kettlebell') return true;
+            if (cat === 'conditioning') return true;
+            if (tags.includes('conditioning') || tags.includes('power') || tags.includes('mobility')) return true;
+            if (name.includes('swing') || name.includes('snatch') || name.includes('clean') || 
+                name.includes('turkish') || name.includes('carry') || name.includes('crawl') || 
+                name.includes('manmaker') || name.includes('burpee') || name.includes('thruster') ||
+                name.includes('woodchopper') || name.includes('renegade') || name.includes('twist')) {
+                return true;
+            }
+            return false;
+        }
+
+        function getAiDoctrineTelemetry() {
+            const logs = typeof getWorkoutLogs === 'function' ? getWorkoutLogs() : [];
+            const scaleLogs = typeof getScaleLogs === 'function' ? getScaleLogs() : [];
+            const measLogs = typeof getMeasurementsLogs === 'function' ? getMeasurementsLogs() : [];
+
+            const totalLogsCount = logs.length;
+            const recentLogs = logs.slice(0, 15);
+            let totalExercisesCount = 0;
+            let functionalCount = 0;
+            let isolationCount = 0;
+            let compoundBbCount = 0;
+            let totalRpeSum = 0;
+            let rpeLogsCount = 0;
+
+            recentLogs.forEach(l => {
+                if (l.rpe) {
+                    const rVal = parseFloat(l.rpe);
+                    if (!isNaN(rVal)) {
+                        totalRpeSum += rVal;
+                        rpeLogsCount++;
+                    }
+                }
+                if (Array.isArray(l.exercises)) {
+                    l.exercises.forEach(ex => {
+                        totalExercisesCount++;
+                        if (isExerciseFunctionalCategory(ex)) {
+                            functionalCount++;
+                        } else if (ex.mechanic === 'isolation' || ex.category === 'core') {
+                            isolationCount++;
+                        } else {
+                            compoundBbCount++;
+                        }
+                    });
+                }
+            });
+
+            const bbCount = isolationCount + compoundBbCount;
+            const bbRatio = totalExercisesCount > 0 ? (bbCount / totalExercisesCount) : 0.82;
+            const funcRatio = totalExercisesCount > 0 ? (functionalCount / totalExercisesCount) : 0.18;
+            const avgRpe = rpeLogsCount > 0 ? (totalRpeSum / rpeLogsCount).toFixed(1) : '8.0';
+
+            // Kilo Telemetrisi
+            let currentWeight = null;
+            let weightTrend = 'Sabit';
+            let weightDelta = 0;
+            if (scaleLogs.length > 0) {
+                currentWeight = parseFloat(scaleLogs[0].weight) || null;
+                if (scaleLogs.length >= 2) {
+                    const prev = parseFloat(scaleLogs[1].weight);
+                    if (currentWeight && prev) {
+                        weightDelta = (currentWeight - prev).toFixed(1);
+                        if (weightDelta > 0.4) weightTrend = `+${weightDelta} kg (Artış)`;
+                        else if (weightDelta < -0.4) weightTrend = `${weightDelta} kg (Azalış)`;
+                        else weightTrend = 'Dengeli / Sabit';
+                    }
+                }
+            }
+
+            // Ölçü Telemetrisi
+            let currentWaist = null;
+            let currentChest = null;
+            let currentArms = null;
+            if (measLogs.length > 0) {
+                currentWaist = parseFloat(measLogs[0].waist) || null;
+                currentChest = parseFloat(measLogs[0].chest) || null;
+                currentArms = parseFloat(measLogs[0].arms) || null;
+            }
+
+            // Teşhis ve Öneri Mantığı
+            let recommendedDoctrine = 'bb_hybrid';
+            let headline = '';
+            let summary = '';
+            let academicBadge = 'Schumann (2022) Hibrit Model';
+
+            if (totalLogsCount === 0) {
+                recommendedDoctrine = 'bb_hybrid';
+                headline = 'Biyomekanik Teşhis: Yeni Hibrit Döngü Başlangıcı';
+                summary = 'Henüz kayıtlı antrenman geçmişin oluşmadığı için spor biliminin en yüksek adaptasyon sağlayan **BB-Dominant Hibrit (%70 Hipertrofi + %30 Fonksiyonel Kondisyon)** doktriniyle başlamanı öneriyorum. Bu yaklaşım kas kütlesi inşa ederken kettlebell ve core hareketleriyle eklemlerini korur ve iş kapasiteni artırır.';
+            } else if (bbRatio >= 0.65) {
+                recommendedDoctrine = 'bb_hybrid';
+                headline = 'Biyomekanik Teşhis: Uzun Süredir Bodybuilding Tarzında Çalışıyorsun';
+                summary = `Son antrenmanlarının **%${Math.round(bbRatio * 100)}** kadarı izole ve klasik hipertrofi odaklı. Kas dolgunluğun ve mekanik gerilim birikimin mükemmel seviyede; ancak eklemleri tek yönlü aşınmadan korumak, fasyal rotasyonları uyarmak ve seanslar arası toparlanma hızını (mitokondriyal yoğunluk) artırmak için **BB-Dominant Hibrit (%70 Hipertrofi + %30 Fonksiyonel)** doktrinine geçmeni öneriyorum. Schumann et al. (2022) araştırmalarına göre seans sonuna eklenecek Kettlebell Swing ve Carry kompleksleri kas hipertrofisini engellemez, toparlanma toleransını yükseltir.`;
+            } else if (funcRatio >= 0.55) {
+                recommendedDoctrine = 'func_hybrid';
+                headline = 'Biyomekanik Teşhis: Yoğun Fonksiyonel Fitness & Kondisyon Çalışıyorsun';
+                summary = `Son antrenmanlarının **%${Math.round(funcRatio * 100)}** kadarı dinamik ve metabolik kondisyon odaklı. Laktat eşiğin ve atletizmin zirvede; ancak maksimal kas kütlesini ve eklem çevresindeki kas zırhını pekiştirmek için aralara izole hipertrofi süpersetleri ekleyerek **Fonksiyonel-Dominant Hibrit (%70 Fonksiyonel + %30 Kas İğnesi)** doktrinine geçmeni öneriyorum.`;
+            } else {
+                recommendedDoctrine = 'balanced_hybrid';
+                headline = 'Biyomekanik Teşhis: Dengeli Atletik Temel';
+                summary = `Antrenman geçmişin dengeli bir çizgide seyrediyor (%${Math.round(bbRatio * 100)} Hipertrofi / %${Math.round(funcRatio * 100)} Fonksiyonel). Hem estetik ve hacimli bir fizik, hem de çevik ve patlayıcı bir güç için **%50 Hipertrofi / %50 Fonksiyonel Dengeli Hibrit Atlet** doktrinini korumanı öneriyorum.`;
+            }
+
+            if (currentWaist && currentWaist > 90) {
+                summary += ` <br><br>💡 <em>Bel çevren (${currentWaist} cm) metabolik uyarılmaya ihtiyaç olduğunu gösteriyor; seans sonu kettlebell/metabolik finisher yağ yakımını hızlandıracaktır.</em>`;
+            }
+
+            return {
+                totalLogsCount,
+                recentLogsCount: recentLogs.length,
+                totalExercisesCount,
+                bbCount,
+                funcCount: functionalCount,
+                bbRatio,
+                funcRatio,
+                avgRpe,
+                currentWeight,
+                weightTrend,
+                currentWaist,
+                currentChest,
+                currentArms,
+                recommendedDoctrine,
+                headline,
+                summary,
+                academicBadge
+            };
+        }
+
+        function renderAiHybridHeroBanner() {
+            const telemetry = getAiDoctrineTelemetry();
+            const badge = document.getElementById('aiDoctrineCurrentBadge');
+            const teaser = document.getElementById('aiDoctrineHeroQuickTeaser');
+            const stats = document.getElementById('aiDoctrineHeroQuickStats');
+
+            if (badge) {
+                const activeDoc = AI_DOCTRINES[currentSelectedDoctrine] || AI_DOCTRINES.bb_hybrid;
+                badge.innerHTML = `${activeDoc.name} (${activeDoc.shortTag})`;
+                badge.style.color = activeDoc.badgeColor;
+                badge.style.borderColor = activeDoc.badgeColor;
+            }
+
+            if (teaser) {
+                if (telemetry.totalLogsCount > 0) {
+                    teaser.innerHTML = `<strong>AI Teşhisi:</strong> Son ${telemetry.recentLogsCount} antrenmanın <strong>%${Math.round(telemetry.bbRatio * 100)}</strong> Hipertrofi, <strong>%${Math.round(telemetry.funcRatio * 100)}</strong> Fonksiyonel. Önerilen: <strong>${(AI_DOCTRINES[telemetry.recommendedDoctrine] || {}).name}</strong>.`;
+                } else {
+                    teaser.innerHTML = `Yapay zeka antrenman geçmişini, tartı trendini ve vücut ölçülerini analiz ederek sana özel <strong>Hipertrofi + Fonksiyonel Fitness</strong> dengesini program öncesinde baştan kurgular.`;
+                }
+            }
+
+            if (stats) {
+                let html = '';
+                if (telemetry.totalLogsCount > 0) {
+                    html += `
+                        <div class="telemetry-pill">
+                            <span class="telemetry-pill-label">Seanslar</span>
+                            <span class="telemetry-pill-val">${telemetry.totalLogsCount} Antrenman</span>
+                        </div>
+                        <div class="telemetry-pill">
+                            <span class="telemetry-pill-label">Kas / Fonksiyonel</span>
+                            <span class="telemetry-pill-val" style="color:var(--gold);">%${Math.round(telemetry.bbRatio * 100)} / %${Math.round(telemetry.funcRatio * 100)}</span>
+                        </div>
+                    `;
+                }
+                if (telemetry.currentWeight) {
+                    html += `
+                        <div class="telemetry-pill">
+                            <span class="telemetry-pill-label">Kilo Trendi</span>
+                            <span class="telemetry-pill-val" style="color:#38bdf8;">${telemetry.currentWeight} kg (${telemetry.weightTrend})</span>
+                        </div>
+                    `;
+                }
+                if (telemetry.currentWaist) {
+                    html += `
+                        <div class="telemetry-pill">
+                            <span class="telemetry-pill-label">Bel Çevresi</span>
+                            <span class="telemetry-pill-val" style="color:#c084fc;">${telemetry.currentWaist} cm</span>
+                        </div>
+                    `;
+                }
+                stats.innerHTML = html;
+            }
+        }
+
+        function openAiHybridArchitectModal() {
+            const telemetry = getAiDoctrineTelemetry();
+            const modal = document.getElementById('aiHybridArchitectModal');
+            if (!modal) return;
+
+            // 1. Telemetri Gridini Doldur
+            const teleGrid = document.getElementById('aiTelemetryGrid');
+            if (teleGrid) {
+                teleGrid.innerHTML = `
+                    <div class="telemetry-pill">
+                        <span class="telemetry-pill-label">Tamamlanan Seans</span>
+                        <span class="telemetry-pill-val">${telemetry.totalLogsCount} Antrenman</span>
+                    </div>
+                    <div class="telemetry-pill">
+                        <span class="telemetry-pill-label">Kas Hipertrofisi</span>
+                        <span class="telemetry-pill-val" style="color:#f59e0b;">%${Math.round(telemetry.bbRatio * 100)}</span>
+                    </div>
+                    <div class="telemetry-pill">
+                        <span class="telemetry-pill-label">Fonksiyonel Kondisyon</span>
+                        <span class="telemetry-pill-val" style="color:#4ade80;">%${Math.round(telemetry.funcRatio * 100)}</span>
+                    </div>
+                    <div class="telemetry-pill">
+                        <span class="telemetry-pill-label">Son Kilo Durumu</span>
+                        <span class="telemetry-pill-val" style="color:#38bdf8;">${telemetry.currentWeight ? telemetry.currentWeight + ' kg' : 'Girilmedi'}</span>
+                    </div>
+                    <div class="telemetry-pill">
+                        <span class="telemetry-pill-label">Bel Çevresi</span>
+                        <span class="telemetry-pill-val" style="color:#c084fc;">${telemetry.currentWaist ? telemetry.currentWaist + ' cm' : 'Girilmedi'}</span>
+                    </div>
+                    <div class="telemetry-pill">
+                        <span class="telemetry-pill-label">Ortalama RPE</span>
+                        <span class="telemetry-pill-val">⚡ ${telemetry.avgRpe} / 10</span>
+                    </div>
+                `;
+            }
+
+            // 2. Teşhis ve Rapor Kutusu
+            const headlineEl = document.getElementById('aiDiagnosticHeadline');
+            const contentEl = document.getElementById('aiDiagnosticContent');
+            if (headlineEl) headlineEl.innerText = telemetry.headline;
+            if (contentEl) contentEl.innerHTML = telemetry.summary;
+
+            // Önerilen doktrini otomatik seç
+            selectAiDoctrine(telemetry.recommendedDoctrine, false);
+
+            modal.classList.add('active');
+        }
+
+        function closeAiHybridArchitectModal() {
+            const modal = document.getElementById('aiHybridArchitectModal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        function selectAiDoctrine(docKey, updateHero = true) {
+            if (!AI_DOCTRINES[docKey]) docKey = 'bb_hybrid';
+            currentSelectedDoctrine = docKey;
+
+            document.querySelectorAll('#doctrineSelectionGrid .doctrine-card').forEach(card => {
+                const isTarget = card.id === `docCard_${docKey}`;
+                card.classList.toggle('selected', isTarget);
+            });
+
+            if (updateHero) {
+                renderAiHybridHeroBanner();
+            }
+        }
+
+        async function requestGeminiDeepHybridReport() {
+            const btn = document.getElementById('btnTriggerGeminiLiveReport');
+            const container = document.getElementById('aiGeminiExtraReportContainer');
+            if (!container) return;
+
+            const telemetry = getAiDoctrineTelemetry();
+            const activeDoc = AI_DOCTRINES[currentSelectedDoctrine] || AI_DOCTRINES.bb_hybrid;
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '⏳ Gemini Analiz Ediyor...';
+            }
+
+            container.style.display = 'block';
+            container.innerHTML = `
+                <div style="display:flex; align-items:center; gap:8px; color:var(--gold);">
+                    <span class="loading-spinner" style="display:inline-block; width:14px; height:14px; border:2px solid var(--gold); border-top-color:transparent; border-radius:50%; animation:spin 0.8s linear infinite;"></span>
+                    <span>Google Gemini AI Biyomekanik Motoru canlı olarak antrenman geçmişini ve literatür verilerini analiz ediyor...</span>
+                </div>
+            `;
+
+            const prompt = `Sen elit bir spor bilimci ve biyomekanik uzmanısın (Concurrent / Hybrid Training & Hypertrophy Specialist).
+Aşağıdaki sporcu telemetri verilerini incele:
+- Toplam Antrenman: ${telemetry.totalLogsCount} (Son 15 antrenmanda %${Math.round(telemetry.bbRatio * 100)} Bodybuilding, %${Math.round(telemetry.funcRatio * 100)} Fonksiyonel Fitness)
+- Son Kilo: ${telemetry.currentWeight ? telemetry.currentWeight + ' kg' : 'Belirtilmedi'} (${telemetry.weightTrend})
+- Bel Çevresi: ${telemetry.currentWaist ? telemetry.currentWaist + ' cm' : 'Belirtilmedi'}
+- Ortalama RPE: ${telemetry.avgRpe}
+- Seçilen Doktrin: ${activeDoc.name} (${activeDoc.shortTag})
+
+Lütfen sporcuya hitaben:
+1. Neden bu antrenman doktrininin (Schumann et al. 2022 Concurrent Training, Hickson interferans modeli ve Fasyal hatlar uyarınca) kendisi için en yüksek verimi sağlayacağını 2-3 vurucu paragrafta açıkla.
+2. Bodybuilding izole kas hipertrofisi ile Kettlebell / Fonksiyonel fitness hareketlerinin nasıl bir sinerji oluşturacağını anlat.
+3. Seans için 1 altın koç tavsiyesi ver.
+Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
+
+            const sysPrompt = 'Sen Çelik Kodu platformunun Baş Biyomekanik ve Hibrit Antrenör yapay zekasısın. Bilimsel referanslarla doğrudan sporcuya konuşursun.';
+
+            try {
+                if (typeof callGeminiAPI === 'function') {
+                    const reply = await callGeminiAPI(prompt, sysPrompt);
+                    container.innerHTML = `
+                        <div style="background:rgba(168,85,247,0.12); border:1px solid rgba(168,85,247,0.4); border-radius:10px; padding:12px; margin-top:4px;">
+                            <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
+                                <span style="font-size:14px;">✨</span>
+                                <strong style="color:#c084fc; font-size:13px;">Google Gemini AI Canlı Akademik Biyomekanik Raporu</strong>
+                            </div>
+                            <div style="font-size:12.5px; color:#f1f5f9; line-height:1.6; white-space:pre-line;">${reply}</div>
+                        </div>
+                    `;
+                } else {
+                    throw new Error("Gemini API fonksiyonu tanımlı değil.");
+                }
+            } catch (err) {
+                console.warn("Gemini rapor hatası, yerel bilimsel analiz gösteriliyor:", err);
+                container.innerHTML = `
+                    <div style="background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); border-radius:10px; padding:12px; margin-top:4px;">
+                        <strong style="color:var(--gold); font-size:12.5px;">📚 Schumann et al. (2022) Hibrit Literatür Notu:</strong>
+                        <p style="margin:6px 0 0 0; font-size:12px; color:#e2e8f0; line-height:1.5;">
+                            Seçilen <strong>${activeDoc.name}</strong> doktrini; izole hipertrofi ile yüksek eşikli motor üniteleri rekrüte ederken, fonksiyonel kettlebell ve core kompleksleriyle mitokondriyal toparlanma hızını maksimize eder. Eklemler tek düzlemli aşınmadan korunur ve iş kapasitesi artar.
+                        </p>
+                    </div>
+                `;
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '✨ Raporu Yenile';
+                }
+            }
+        }
+
+        function applyAiHybridProgram(startImmediately = false) {
+            const splitSelect = document.getElementById('aiModalSplitSelect');
+            const durSelect = document.getElementById('aiModalDurationSelect');
+            const wishInput = document.getElementById('aiModalUserWishInput');
+
+            const chosenSplit = splitSelect ? splitSelect.value : 'full_body';
+            const chosenDur = durSelect ? parseInt(durSelect.value, 10) : 45;
+            const userWish = wishInput ? wishInput.value.trim() : '';
+
+            // Split ve süre seçimlerini ana ekrana yansıt
+            selectSplit(chosenSplit);
+            const paramDurEl = document.getElementById('paramDuration');
+            if (paramDurEl) paramDurEl.value = String(chosenDur);
+
+            // Doktrini hero banner'a yansıt
+            renderAiHybridHeroBanner();
+
+            // Programı üret
+            handleGenerateWorkout(currentSelectedDoctrine, userWish);
+
+            closeAiHybridArchitectModal();
+
+            if (startImmediately && currentGeneratedWorkout) {
+                setTimeout(() => {
+                    startActiveWorkoutSession(currentGeneratedWorkout);
+                }, 150);
+            } else {
+                // Program Oluşturucu sekmesinde oluşturulan program kutusuna kaydır
+                switchTab('generatorTab');
+                const outEl = document.getElementById('generatedWorkoutOutput');
+                if (outEl) {
+                    outEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        }
+
         function pickRandom(arr) {
             if (!arr || arr.length === 0) return null;
             return arr[Math.floor(Math.random() * arr.length)];
         }
 
-        function handleGenerateWorkout() {
+        function handleGenerateWorkout(doctrineOverride = null, customWish = '') {
+            const activeDoctrineKey = doctrineOverride || currentSelectedDoctrine || 'bb_hybrid';
+            const activeDoc = AI_DOCTRINES[activeDoctrineKey] || AI_DOCTRINES.bb_hybrid;
+
             const style = document.getElementById('paramStyle').value;
             const goal = document.getElementById('paramGoal').value;
             const duration = parseInt(document.getElementById('paramDuration').value, 10);
@@ -6117,8 +6794,22 @@
             const chosenExercises = [];
             const usedIds = [];
 
-            function addEx(cat) {
+            function addEx(cat, filterMode = 'any') {
                 let pool = filterExercises(cat, usedIds);
+                if (filterMode === 'functional') {
+                    const funcPool = pool.filter(e => isExerciseFunctionalCategory(e));
+                    if (funcPool.length > 0) pool = funcPool;
+                } else if (filterMode === 'bb_isolation') {
+                    const isoPool = pool.filter(e => !isExerciseFunctionalCategory(e) && (e.mechanic === 'isolation' || e.category === 'core'));
+                    if (isoPool.length > 0) pool = isoPool;
+                } else if (filterMode === 'bb_compound') {
+                    const compPool = pool.filter(e => !isExerciseFunctionalCategory(e) && e.mechanic === 'compound');
+                    if (compPool.length > 0) pool = compPool;
+                } else if (filterMode === 'bb_only') {
+                    const bbPool = pool.filter(e => !isExerciseFunctionalCategory(e));
+                    if (bbPool.length > 0) pool = bbPool;
+                }
+
                 let chosen = pickRandom(pool);
                 if (!chosen) {
                     let relatedCat = cat;
@@ -6140,92 +6831,202 @@
                 }
             }
 
-            // Split-based generation logic
-            if (selectedSplit === 'full_body') {
-                // Block A: Quad + Row/Pull
-                addEx('legs_quad');
-                addEx('pull');
-                // Block B: Hinge + Push
-                addEx('legs_hinge');
-                addEx('push');
+            // ==================== DOKTRİN BAZLI EGZERSİZ DİZİLİM MİMARİSİ ====================
+            if (activeDoctrineKey === 'bb_pure') {
+                // 1. SAF BODYBUILDING (Yalnızca Hipertrofi Bileşikleri & İzole Kas Tecritleri)
+                if (selectedSplit === 'full_body') {
+                    addEx('legs_quad', 'bb_compound');
+                    addEx('pull', 'bb_compound');
+                    addEx('legs_hinge', 'bb_compound');
+                    addEx('push', 'bb_compound');
+                    if (duration >= 45) {
+                        addEx('push', 'bb_isolation');
+                        addEx('pull', 'bb_isolation');
+                    }
+                    if (duration >= 60) {
+                        addEx('core', 'any');
+                        addEx('legs_quad', 'bb_isolation');
+                    }
+                } else if (selectedSplit === 'upper_push') {
+                    addEx('push', 'bb_compound');
+                    addEx('push', 'bb_compound');
+                    addEx('push', 'bb_isolation');
+                    addEx('push', 'bb_isolation');
+                    if (duration >= 45) {
+                        addEx('push', 'bb_isolation');
+                        addEx('core', 'any');
+                    }
+                    if (duration >= 60) {
+                        addEx('push', 'bb_isolation');
+                        addEx('core', 'any');
+                    }
+                } else if (selectedSplit === 'upper_pull') {
+                    addEx('pull', 'bb_compound');
+                    addEx('pull', 'bb_compound');
+                    addEx('pull', 'bb_isolation');
+                    addEx('legs_hinge', 'bb_compound');
+                    if (duration >= 45) {
+                        addEx('pull', 'bb_isolation');
+                        addEx('core', 'any');
+                    }
+                    if (duration >= 60) {
+                        addEx('pull', 'bb_isolation');
+                        addEx('core', 'any');
+                    }
+                } else if (selectedSplit === 'lower') {
+                    addEx('legs_quad', 'bb_compound');
+                    addEx('legs_hinge', 'bb_compound');
+                    addEx('legs_quad', 'bb_isolation');
+                    addEx('legs_hinge', 'bb_isolation');
+                    if (duration >= 45) {
+                        addEx('legs_quad', 'bb_isolation');
+                        addEx('core', 'any');
+                    }
+                    if (duration >= 60) {
+                        addEx('legs_hinge', 'bb_isolation');
+                        addEx('core', 'any');
+                    }
+                } else {
+                    addEx('push', 'bb_compound');
+                    addEx('pull', 'bb_compound');
+                    addEx('push', 'bb_isolation');
+                    addEx('pull', 'bb_isolation');
+                    if (duration >= 45) { addEx('core', 'any'); addEx('core', 'any'); }
+                }
+
+            } else if (activeDoctrineKey === 'bb_hybrid') {
+                // 2. BB-DOMINANT HİBRİT (%70 Hipertrofi + %30 Fonksiyonel Kondisyon)
+                if (selectedSplit === 'full_body') {
+                    addEx('legs_quad', 'bb_compound');
+                    addEx('pull', 'bb_compound');
+                    addEx('legs_hinge', 'bb_compound');
+                    addEx('push', 'bb_compound');
+                    if (duration >= 45) {
+                        // Fonksiyonel Kettlebell / Kondisyon Bloğu
+                        addEx(['conditioning', 'legs_hinge', 'pull'], 'functional');
+                        addEx('core', 'functional');
+                    }
+                    if (duration >= 60) {
+                        addEx('push', 'bb_isolation');
+                        addEx(['conditioning', 'legs_quad'], 'functional');
+                    }
+                } else if (selectedSplit === 'upper_push') {
+                    addEx('push', 'bb_compound');
+                    addEx('push', 'bb_compound');
+                    addEx('push', 'bb_isolation');
+                    addEx(['conditioning', 'push'], 'functional'); // Thruster veya push press
+                    if (duration >= 45) {
+                        addEx('push', 'bb_isolation');
+                        addEx('core', 'functional');
+                    }
+                    if (duration >= 60) {
+                        addEx('push', 'bb_isolation');
+                        addEx(['conditioning', 'core'], 'functional');
+                    }
+                } else if (selectedSplit === 'upper_pull') {
+                    addEx('pull', 'bb_compound');
+                    addEx('pull', 'bb_compound');
+                    addEx('pull', 'bb_isolation');
+                    addEx(['legs_hinge', 'pull'], 'functional'); // Gorilla row veya swing
+                    if (duration >= 45) {
+                        addEx('pull', 'bb_isolation');
+                        addEx('core', 'functional');
+                    }
+                    if (duration >= 60) {
+                        addEx(['conditioning', 'pull'], 'functional');
+                        addEx('core', 'functional');
+                    }
+                } else if (selectedSplit === 'lower') {
+                    addEx('legs_quad', 'bb_compound');
+                    addEx('legs_hinge', 'bb_compound');
+                    addEx('legs_quad', 'bb_isolation');
+                    addEx(['conditioning', 'legs_hinge'], 'functional'); // Swing / Goblet
+                    if (duration >= 45) {
+                        addEx('legs_hinge', 'bb_isolation');
+                        addEx('core', 'functional');
+                    }
+                    if (duration >= 60) {
+                        addEx(['conditioning', 'legs_quad'], 'functional');
+                        addEx('core', 'functional');
+                    }
+                } else {
+                    addEx('push', 'bb_compound');
+                    addEx('pull', 'bb_compound');
+                    addEx('push', 'bb_isolation');
+                    addEx(['conditioning', 'pull'], 'functional');
+                    if (duration >= 45) { addEx('core', 'functional'); addEx('pull', 'bb_isolation'); }
+                }
+
+            } else if (activeDoctrineKey === 'balanced_hybrid') {
+                // 3. DENGELİ HİBRİT ATLET (50/50 Eşit: 1 Hipertrofi + 1 Fonksiyonel Süperset)
+                if (selectedSplit === 'full_body') {
+                    addEx('legs_quad', 'bb_compound');
+                    addEx(['pull', 'legs_hinge'], 'functional'); // Swing / Clean
+                    addEx('push', 'bb_compound');
+                    addEx(['conditioning', 'legs_quad'], 'functional'); // Thruster / Manmaker
+                    if (duration >= 45) {
+                        addEx('pull', 'bb_compound');
+                        addEx('core', 'functional'); // Carry / Rotation
+                    }
+                    if (duration >= 60) {
+                        addEx('push', 'bb_isolation');
+                        addEx(['conditioning', 'legs_hinge'], 'functional');
+                    }
+                } else if (selectedSplit === 'upper_push') {
+                    addEx('push', 'bb_compound');
+                    addEx(['push', 'conditioning'], 'functional');
+                    addEx('push', 'bb_isolation');
+                    addEx('core', 'functional');
+                    if (duration >= 45) {
+                        addEx('push', 'bb_compound');
+                        addEx('core', 'functional');
+                    }
+                } else if (selectedSplit === 'upper_pull') {
+                    addEx('pull', 'bb_compound');
+                    addEx(['legs_hinge', 'pull'], 'functional');
+                    addEx('pull', 'bb_isolation');
+                    addEx('core', 'functional');
+                    if (duration >= 45) {
+                        addEx('pull', 'bb_compound');
+                        addEx(['conditioning', 'pull'], 'functional');
+                    }
+                } else {
+                    addEx('legs_quad', 'bb_compound');
+                    addEx(['legs_hinge', 'conditioning'], 'functional');
+                    addEx('push', 'bb_compound');
+                    addEx('core', 'functional');
+                    if (duration >= 45) { addEx('pull', 'bb_compound'); addEx(['conditioning', 'legs_quad'], 'functional'); }
+                }
+
+            } else if (activeDoctrineKey === 'func_hybrid') {
+                // 4. FONKSİYONEL-DOMİNANT HİBRİT (%70 Fonksiyonel + %30 Zayıf Bölge Kas İğnesi)
+                addEx(['push', 'legs_quad'], 'functional'); // Thruster / Push Press
+                addEx(['pull', 'legs_hinge'], 'functional'); // Clean & Press / Swing
+                addEx('core', 'functional'); // Carries / Rotations
+                addEx(['legs_quad', 'conditioning'], 'functional'); // Manmaker / Burpee
                 if (duration >= 45) {
-                    // Block C: Lunge/Single leg + Core/Arms
-                    addEx(['legs_quad', 'legs_hinge']);
-                    addEx('core');
+                    // Kas İğnesi (Hypertrophy Boost)
+                    addEx(['push', 'pull'], 'bb_isolation');
+                    addEx('core', 'functional');
                 }
                 if (duration >= 60) {
-                    // Block D: Push + Pull accessories
-                    addEx('push');
-                    addEx('pull');
+                    addEx(['push', 'pull'], 'bb_isolation');
+                    addEx(['conditioning', 'legs_hinge'], 'functional');
                 }
-            } else if (selectedSplit === 'upper_push') {
-                addEx('push');
-                addEx('push');
-                addEx('push');
-                addEx('core');
+
+            } else {
+                // 5. SAF FONKSİYONEL FITNESS & KONDİSYON
+                addEx(['push', 'legs_quad'], 'functional');
+                addEx(['pull', 'legs_hinge'], 'functional');
+                addEx('core', 'functional');
+                addEx(['legs_quad', 'conditioning'], 'functional');
                 if (duration >= 45) {
-                    addEx('push');
-                    addEx('core');
+                    addEx('core', 'functional');
+                    addEx(['pull', 'push'], 'functional');
                 }
                 if (duration >= 60) {
-                    addEx('push');
-                    addEx('core');
-                }
-            } else if (selectedSplit === 'upper_pull') {
-                addEx('pull');
-                addEx('pull');
-                addEx(['legs_hinge', 'pull']);
-                addEx('core');
-                if (duration >= 45) {
-                    addEx('pull');
-                    addEx('core');
-                }
-                if (duration >= 60) {
-                    addEx('pull');
-                    addEx('core');
-                }
-            } else if (selectedSplit === 'lower') {
-                addEx('legs_quad');
-                addEx('legs_hinge');
-                addEx('legs_quad');
-                addEx('legs_hinge');
-                if (duration >= 45) {
-                    addEx(['legs_quad', 'legs_hinge']);
-                    addEx('core');
-                }
-                if (duration >= 60) {
-                    addEx(['legs_quad', 'legs_hinge']);
-                    addEx('core');
-                }
-            } else if (selectedSplit === 'upper') {
-                addEx('push');
-                addEx('pull');
-                addEx('push');
-                addEx('pull');
-                if (duration >= 45) {
-                    addEx('push');
-                    addEx('pull');
-                }
-                if (duration >= 60) {
-                    addEx('core');
-                    addEx('core');
-                }
-            } else if (selectedSplit === 'core') {
-                for (let i = 0; i < (duration >= 45 ? 6 : 4); i++) {
-                    addEx('core');
-                }
-            } else if (selectedSplit === 'functional') {
-                // Functional Compound & Conditioning circuit
-                addEx(['push', 'legs_quad']); // Thruster / Push Press / Goblet
-                addEx(['pull', 'legs_hinge']); // Clean & Press / Swing / Gorilla
-                addEx('core'); // Woodchopper / Bear crawl / Plank pull through
-                addEx(['legs_quad', 'conditioning']); // Lunge twist / Step up press / Manmaker
-                if (duration >= 45) {
-                    addEx('core'); // Carries / Rotations
-                    addEx(['pull', 'push']); // Renegade pushup / Dips / Rows
-                }
-                if (duration >= 60) {
-                    addEx(['conditioning', 'core']); // Finisher compound
+                    addEx(['conditioning', 'core'], 'functional');
+                    addEx(['legs_hinge', 'conditioning'], 'functional');
                 }
             }
 
@@ -6254,9 +7055,14 @@
 
             currentGeneratedWorkout = {
                 id: 'gen_' + Date.now(),
-                title: `${splitNames[selectedSplit]} • ${style === 'superset' ? 'Süperset' : (style === 'emom' ? 'EMOM' : 'Klasik')}`,
+                title: `${activeDoc.name} • ${splitNames[selectedSplit]}`,
                 split: selectedSplit,
                 splitName: splitNames[selectedSplit],
+                doctrine: activeDoctrineKey,
+                doctrineName: activeDoc.name,
+                doctrineShort: activeDoc.shortTag,
+                doctrineBadgeColor: activeDoc.badgeColor,
+                customWish: customWish || '',
                 style,
                 goal,
                 duration,
@@ -6304,12 +7110,25 @@
                 });
             }
 
+            const docBadge = w.doctrineName ? `
+                <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(168,85,247,0.18); border:1px solid ${w.doctrineBadgeColor || '#c084fc'}; padding:3px 10px; border-radius:12px; margin-bottom:6px;">
+                    <span style="font-size:11px; font-weight:900; color:${w.doctrineBadgeColor || '#c084fc'};">🎯 HİBRİT DOKTRİN: ${escapeHTML(w.doctrineName)} (${escapeHTML(w.doctrineShort || '')})</span>
+                </div>
+            ` : '';
+            const wishBadge = w.customWish ? `
+                <div style="font-size:11.5px; color:#e2e8f0; background:rgba(255,255,255,0.04); padding:4px 8px; border-radius:6px; margin-top:4px; display:inline-block;">
+                    🎯 <strong>Özel İstek/Not:</strong> "${escapeHTML(w.customWish)}"
+                </div>
+            ` : '';
+
             container.innerHTML = `
                 <div class="workout-header-card">
                     <div class="workout-title-row">
                         <div>
-                            <div class="badge-brand">HAZIRLANAN ANTRENMAN</div>
+                            ${docBadge}
+                            <div class="badge-brand">HAZIRLANAN HİBRİT ANTRENMAN</div>
                             <h2 class="workout-main-title">${escapeHTML(w.title)}</h2>
+                            ${wishBadge}
                         </div>
                         <div class="workout-meta-badges">
                             <span class="meta-pill">⏱️ ${w.duration} Dk</span>
@@ -17839,7 +18658,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=121')
+                navigator.serviceWorker.register('./sw.js?v=122')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
@@ -17866,6 +18685,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             syncAppViewState();
             applyWednesdayHammerCurlPatch();
             updateProfileGeminiStatusUI();
+            renderAiHybridHeroBanner();
             const hasRestored = restoreActiveWorkoutStateFromStorage();
             if (hasRestored) {
                 switchTab('activeWorkoutTab');
