@@ -1,6 +1,7 @@
-const CACHE_NAME = 'celik-kodu-cache-v120';
+const CACHE_NAME = 'celik-kodu-cache-v121';
 const ASSETS = [
   './',
+  './assets/diagrams/seq_manmaker.svg',
   './assets/guides/guide_bb_thruster_form.png',
   './assets/guides/guide_bb_hang_power_clean_form.png',
   './assets/guides/guide_bb_push_press_form.png',
