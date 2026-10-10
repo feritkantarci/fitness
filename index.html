@@ -3551,7 +3551,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v107</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v109</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3587,7 +3587,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v107</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v109</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -4222,6 +4222,31 @@
                         💾 DEĞİŞİKLİKLERİ VE KİLOLARIMI KAYDET
                     </button>
 
+                    <!-- GOOGLE GEMINI AI CONFIGURATION -->
+                    <div style="background:rgba(192, 132, 252, 0.08); border:1px solid rgba(192, 132, 252, 0.3); border-radius:10px; padding:14px; margin-top:20px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="font-size:22px;">🤖</span>
+                                <div>
+                                    <h4 style="font-size:13.5px; font-weight:800; color:#e9d5ff; margin:0;">Google Gemini AI Biyomekanik Motoru</h4>
+                                    <div style="font-size:11px; color:var(--text-secondary);">Antrenman ortasında akıllı alternatifler ve eklem koruyucu reçeteler</div>
+                                </div>
+                            </div>
+                            <span id="profileGeminiStatusBadge" style="font-size:10px; font-weight:800; padding:3px 8px; border-radius:12px; background:rgba(255,255,255,0.1); color:var(--text-secondary);">Kontrol Ediliyor...</span>
+                        </div>
+                        <div class="form-group" style="margin-bottom:8px;">
+                            <label class="form-label" style="font-size:11px;">Gemini API Anahtarı (Google AI Studio)</label>
+                            <div style="display:flex; gap:6px;">
+                                <input type="password" id="profileGeminiApiKeyInput" class="form-input" placeholder="AIzaSy... anahtarınızı girin" autocomplete="off">
+                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 12px; border-color:#c084fc; color:#c084fc; font-weight:800; white-space:nowrap;" onclick="testAndSaveGeminiKeyFromProfile()">⚡ Test Et & Kaydet</button>
+                            </div>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; flex-wrap:wrap; gap:6px;">
+                            <span style="color:var(--text-secondary);">🔒 Anahtar sadece yerel cihazınızda (localStorage) saklanır.</span>
+                            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="color:var(--cyan); text-decoration:underline; font-weight:700;">🔗 Ücretsiz API Key Al (Google AI Studio) ➔</a>
+                        </div>
+                    </div>
+
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
                         <button class="btn btn-outline" id="profileTabAdminBtn" style="font-size:11px; border-color:var(--gold); color:var(--gold); display:none;" onclick="openAdminModal()">
                             👑 Sporcu Yönetim Portalı (Admin)
@@ -4826,23 +4851,40 @@
                 </div>
             </div>
 
-            <!-- 3 SMART TABS -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 10px; background: rgba(0,0,0,0.3); padding: 4px; border-radius: 8px; border: 1px solid var(--border);">
-                <button type="button" class="btn btn-outline" id="pickerTabBtnSame" style="padding: 7px 4px; font-size: 11px; font-weight: 800; border-radius: 6px; border-color: transparent;" onclick="switchPickerTab('same_muscle')">
-                    🎯 Aynı Kas Grubu
+            <!-- 4 SMART TABS -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 10px; background: rgba(0,0,0,0.35); padding: 4px; border-radius: 8px; border: 1px solid var(--border);">
+                <button type="button" class="btn btn-outline" id="pickerTabBtnSame" style="padding: 7px 2px; font-size: 10.5px; font-weight: 800; border-radius: 6px; border-color: transparent;" onclick="switchPickerTab('same_muscle')">
+                    🎯 Biyomekanik
                 </button>
-                <button type="button" class="btn btn-outline" id="pickerTabBtnOther" style="padding: 7px 4px; font-size: 11px; font-weight: 800; border-radius: 6px; border-color: transparent;" onclick="switchPickerTab('other_muscle')">
-                    🧬 Başka Kas Grubu
+                <button type="button" class="btn btn-outline" id="pickerTabBtnAI" style="padding: 7px 2px; font-size: 10.5px; font-weight: 800; border-radius: 6px; border-color: transparent; color:#c084fc;" onclick="switchPickerTab('ai_coach')">
+                    🤖 Gemini AI
                 </button>
-                <button type="button" class="btn btn-outline" id="pickerTabBtnCatalog" style="padding: 7px 4px; font-size: 11px; font-weight: 800; border-radius: 6px; border-color: transparent;" onclick="switchPickerTab('catalog')">
-                    ➕ Diğer (Tüm Katalog)
+                <button type="button" class="btn btn-outline" id="pickerTabBtnOther" style="padding: 7px 2px; font-size: 10.5px; font-weight: 800; border-radius: 6px; border-color: transparent;" onclick="switchPickerTab('other_muscle')">
+                    🧬 Başka Kas
+                </button>
+                <button type="button" class="btn btn-outline" id="pickerTabBtnCatalog" style="padding: 7px 2px; font-size: 10.5px; font-weight: 800; border-radius: 6px; border-color: transparent;" onclick="switchPickerTab('catalog')">
+                    ➕ Katalog
                 </button>
             </div>
 
-            <!-- TAB 1: AYNI KAS GRUBU (Farklı Ekipman İkameleri) -->
+            <!-- TAB 1: AYNI BİYOMEKANİK PATERN & KAS GRUBU -->
             <div id="pickerSubPanelSame" style="margin-bottom:8px;">
+                <!-- REASON / INTENT SELECTOR -->
+                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:6px 10px; margin-bottom:8px;">
+                    <div style="font-size:10px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:5px; display:flex; align-items:center; justify-content:space-between;">
+                        <span>🎯 Neden Alternatif Arıyorsunuz?</span>
+                        <span style="color:#c084fc; font-weight:700; cursor:pointer;" onclick="switchPickerTab('ai_coach')">✨ Gemini AI Koç'a Danış ➔</span>
+                    </div>
+                    <div style="display:flex; gap:4px; flex-wrap:wrap;" id="pickerReasonPills">
+                        <button type="button" class="btn-quick-equip" id="pill_reason_all" onclick="setPickerReasonFilter('all')">⚡ Birebir Patern</button>
+                        <button type="button" class="btn-quick-equip" id="pill_reason_no_equip" onclick="setPickerReasonFilter('no_equip')">🚫 Alet Yok / Dolu</button>
+                        <button type="button" class="btn-quick-equip" id="pill_reason_joint" onclick="setPickerReasonFilter('joint')">🩹 Bel / Eklem Dostu</button>
+                        <button type="button" class="btn-quick-equip" id="pill_reason_easier" onclick="setPickerReasonFilter('easier')">📉 Daha Kolay (Form)</button>
+                    </div>
+                </div>
+
                 <div style="font-size:11px; color:var(--text-secondary); margin-bottom:6px;">
-                    ⚡ <span id="pickerSameMuscleLabel" style="color:var(--cyan); font-weight:700;">Aynı kas grubunu</span> hedefleyen alternatif ekipmanlar:
+                    ⚡ <span id="pickerSameMuscleLabel" style="color:var(--cyan); font-weight:700;">Aynı biyomekanik paterni</span> hedefleyen ekipmanlar:
                 </div>
                 <div style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:6px;" id="pickerSameEquipPills">
                     <button class="btn-quick-equip" id="pill_seq_all" onclick="setSameEquipFilter('all')">Tüm Ekipmanlar</button>
@@ -4854,7 +4896,69 @@
                 </div>
             </div>
 
-            <!-- TAB 2: BAŞKA KAS GRUBU SEÇİMİ -->
+            <!-- TAB 2: 🤖 GEMINI AI BİYOMEKANİK KOÇ -->
+            <div id="pickerSubPanelAI" style="display:none; margin-bottom:8px;">
+                <!-- API KEY MISSING STATE -->
+                <div id="geminiAiKeyMissingBox" style="display:none; background:rgba(192, 132, 252, 0.08); border:1px solid rgba(192, 132, 252, 0.35); border-radius:10px; padding:12px 14px; margin-bottom:8px;">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                        <span style="font-size:22px;">🤖</span>
+                        <div>
+                            <div style="font-size:12.5px; font-weight:800; color:#e9d5ff;">Çelik Kodu Gemini AI Biyomekanik Koç</div>
+                            <div style="font-size:11px; color:var(--text-secondary);">Salondaki ekipman durumunuza, eklem ağrılarınıza ve biyomekanik hedefinize göre anında akıllı ikame üretin.</div>
+                        </div>
+                    </div>
+                    <div style="margin-top:10px;">
+                        <label style="font-size:11px; font-weight:700; color:var(--text-secondary); display:block; margin-bottom:4px;">Google Gemini API Anahtarınız:</label>
+                        <div style="display:flex; gap:6px;">
+                            <input type="password" id="geminiApiKeyModalInput" class="form-input" style="font-size:12px; padding:8px;" placeholder="AIzaSy... anahtarınızı yapıştırın" autocomplete="off">
+                            <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:8px 14px; white-space:nowrap; font-weight:800;" onclick="saveGeminiApiKeyFromModal()">💾 Kaydet</button>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-size:10.5px; flex-wrap:wrap; gap:4px;">
+                            <span style="color:var(--text-secondary);">🔒 Tamamen cihazınızda saklanır, sunucuya iletilmez.</span>
+                            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="color:var(--cyan); text-decoration:underline; font-weight:700;">🔗 Ücretsiz API Key Al (Google AI Studio) ➔</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API KEY ACTIVE STATE -->
+                <div id="geminiAiActiveBox" style="display:none;">
+                    <div style="background:rgba(192, 132, 252, 0.06); border:1px solid rgba(192, 132, 252, 0.25); border-radius:8px; padding:8px 10px; margin-bottom:8px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <span style="font-size:11px; font-weight:800; color:#e9d5ff; display:flex; align-items:center; gap:5px;">
+                                <span>🤖</span> <span>Biyomekanik Koça Durumunuzu Bildirin:</span>
+                            </span>
+                            <span style="font-size:10px; color:var(--cyan); cursor:pointer; font-weight:700;" onclick="editGeminiApiKey()">⚙️ API Anahtarını Değiştir</span>
+                        </div>
+                        <!-- QUICK AI PROMPTS -->
+                        <div style="display:flex; flex-direction:column; gap:5px; margin-bottom:8px;">
+                            <button type="button" class="btn-quick-equip" style="text-align:left; padding:6px 9px; font-size:11px; border-radius:6px; display:flex; align-items:center; gap:6px; width:100%; border-color:rgba(192,132,252,0.3);" onclick="quickAskGemini('no_equip')">
+                                <span>🚫</span> <span><strong>Bu alet salonda yok / dolu:</strong> Elimdeki dambıllarla aynı kas zincirini koruyan alternatif ver.</span>
+                            </button>
+                            <button type="button" class="btn-quick-equip" style="text-align:left; padding:6px 9px; font-size:11px; border-radius:6px; display:flex; align-items:center; gap:6px; width:100%; border-color:rgba(192,132,252,0.3);" onclick="quickAskGemini('joint_pain')">
+                                <span>🩹</span> <span><strong>Belimde / eklemimde batma var:</strong> Omurgaya eksenel yük bindirmeyen güvenli varyasyon öner.</span>
+                            </button>
+                            <button type="button" class="btn-quick-equip" style="text-align:left; padding:6px 9px; font-size:11px; border-radius:6px; display:flex; align-items:center; gap:6px; width:100%; border-color:rgba(192,132,252,0.3);" onclick="quickAskGemini('easier')">
+                                <span>📉</span> <span><strong>Form tutturamıyorum / zor geldi:</strong> Biyomekaniği öğreten daha basit (regresyon) bir hareket öner.</span>
+                            </button>
+                            <button type="button" class="btn-quick-equip" style="text-align:left; padding:6px 9px; font-size:11px; border-radius:6px; display:flex; align-items:center; gap:6px; width:100%; border-color:rgba(192,132,252,0.3);" onclick="quickAskGemini('conditioning')">
+                                <span>⚡</span> <span><strong>Aynı patlayıcı nabız ve metabolik yakım:</strong> Eşdeğer yüksek tempolu kondisyon ikamesi ver.</span>
+                            </button>
+                        </div>
+                        <!-- CUSTOM USER QUERY -->
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <input type="text" id="geminiCustomQueryInput" class="form-input" style="font-size:11.5px; padding:7px 10px;" placeholder="✍️ Veya durumunuzu yazın (örn: sağ omzum çıtlıyor, sadece 15 kg dambıl var)..." onkeydown="if(event.key === 'Enter') submitGeminiCustomQuery()">
+                            <button type="button" class="btn btn-gold" id="btnSubmitGeminiQuery" style="font-size:11.5px; padding:7px 12px; font-weight:800; white-space:nowrap; background:#9333ea; border-color:#a855f7; color:#fff;" onclick="submitGeminiCustomQuery()">
+                                🚀 Gemini'ye Sor
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- AI RESPONSE OUTPUT AREA -->
+                    <div id="geminiAiResponseArea" style="display:none; margin-top:8px;"></div>
+                </div>
+            </div>
+
+            <!-- TAB 3: BAŞKA KAS GRUBU SEÇİMİ -->
             <div id="pickerSubPanelOther" style="display:none; margin-bottom:8px;">
                 <div style="font-size:11px; color:var(--text-secondary); margin-bottom:6px;">
                     🧬 Çalıştırmak istediğiniz alternatif kas grubunu seçin:
@@ -4864,7 +4968,7 @@
                 </div>
             </div>
 
-            <!-- TAB 3: DİĞER (GENİŞLETİLMİŞ KATALOG VE SERBEST ARAMA) -->
+            <!-- TAB 4: DİĞER (GENİŞLETİLMİŞ KATALOG VE SERBEST ARAMA) -->
             <div id="pickerSubPanelCatalog" style="display:none; margin-bottom:8px;">
                 <div style="margin-bottom:6px;">
                     <input type="text" id="pickerSearchInput" class="form-input" placeholder="🔍 Egzersiz adı, kas veya ipucu ara..." oninput="handlePickerSearchInput()">
@@ -5644,6 +5748,7 @@
             if (tabId === 'libraryTab') renderLibrary();
             if (tabId === 'historyTab') renderHistory();
             if (tabId === 'analyticsTab') renderAnalytics();
+            if (tabId === 'profileTab') updateProfileGeminiStatusUI();
 
             if (!requestedStudio) {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -6764,6 +6869,7 @@
                 scheduleExIndex: null,
                 currentTab: 'same_muscle',
                 sameEquipFilter: 'all',
+                reasonFilter: 'all',
                 otherSelectedMuscle: primaryM,
                 categoryFilter: 'all',
                 searchQuery: ''
@@ -6771,6 +6877,315 @@
 
             setupAlternativeModalUI(currentEx);
             document.getElementById('exercisePickerModal').classList.add('active');
+        }
+
+        // ==================== GEMINI AI BIOMECHANICAL COACH ENGINE ====================
+        const GEMINI_API_STORAGE_KEY = 'celik_kodu_gemini_api_key';
+
+        function getGeminiApiKey() {
+            return (localStorage.getItem(GEMINI_API_STORAGE_KEY) || '').trim();
+        }
+
+        function setGeminiApiKey(key) {
+            if (!key) {
+                localStorage.removeItem(GEMINI_API_STORAGE_KEY);
+            } else {
+                localStorage.setItem(GEMINI_API_STORAGE_KEY, key.trim());
+            }
+            updateProfileGeminiStatusUI();
+            const curEx = (pickerContext && pickerContext.targetExId) ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
+            updateGeminiAiModalUI(curEx);
+        }
+
+        function updateProfileGeminiStatusUI() {
+            const badge = document.getElementById('profileGeminiStatusBadge');
+            const input = document.getElementById('profileGeminiApiKeyInput');
+            const key = getGeminiApiKey();
+
+            if (input && document.activeElement !== input) {
+                input.value = key;
+            }
+
+            if (badge) {
+                if (key) {
+                    badge.innerText = '🟢 API Aktif (Gemini Flash)';
+                    badge.style.background = 'rgba(34, 197, 94, 0.15)';
+                    badge.style.color = '#4ade80';
+                    badge.style.border = '1px solid rgba(34, 197, 94, 0.35)';
+                } else {
+                    badge.innerText = '⚪ Yapılandırılmadı';
+                    badge.style.background = 'rgba(255, 255, 255, 0.08)';
+                    badge.style.color = 'var(--text-secondary)';
+                    badge.style.border = '1px solid var(--border)';
+                }
+            }
+        }
+
+        async function testAndSaveGeminiKeyFromProfile() {
+            const input = document.getElementById('profileGeminiApiKeyInput');
+            const key = input ? input.value.trim() : '';
+            if (!key) {
+                setGeminiApiKey('');
+                showToast("ℹ️ Gemini API anahtarı temizlendi.");
+                return;
+            }
+
+            showToast("⏳ Gemini API anahtarı test ediliyor...");
+            try {
+                const testResp = await callGeminiAPI("Biyomekanik test mesajı. Tek kelimeyle 'Hazır' de.", "Sen fitness koçusun.", key);
+                if (testResp) {
+                    setGeminiApiKey(key);
+                    showToast("✅ Gemini API başarıyla doğrulandı ve kaydedildi!");
+                }
+            } catch (err) {
+                alert("Gemini API Bağlantı Hatası:\n" + (err.message || err));
+            }
+        }
+
+        function saveGeminiApiKeyFromModal() {
+            const input = document.getElementById('geminiApiKeyModalInput');
+            const key = input ? input.value.trim() : '';
+            if (!key) {
+                alert("Lütfen geçerli bir Gemini API anahtarı girin.");
+                return;
+            }
+            setGeminiApiKey(key);
+            showToast("✅ Gemini API anahtarı kaydedildi!");
+            const curEx = (pickerContext && pickerContext.targetExId) ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
+            updateGeminiAiModalUI(curEx);
+        }
+
+        function editGeminiApiKey() {
+            const curKey = getGeminiApiKey();
+            const newKey = prompt("Google Gemini API Anahtarınızı güncelleyin (Silmek için boş bırakın):", curKey);
+            if (newKey !== null) {
+                setGeminiApiKey(newKey);
+                showToast(newKey.trim() ? "✅ API Anahtarı güncellendi!" : "ℹ️ API Anahtarı silindi.");
+            }
+        }
+
+        function updateGeminiAiModalUI(currentEx) {
+            const missingBox = document.getElementById('geminiAiKeyMissingBox');
+            const activeBox = document.getElementById('geminiAiActiveBox');
+            const resArea = document.getElementById('geminiAiResponseArea');
+            const key = getGeminiApiKey();
+
+            if (!key) {
+                if (missingBox) missingBox.style.display = 'block';
+                if (activeBox) activeBox.style.display = 'none';
+            } else {
+                if (missingBox) missingBox.style.display = 'none';
+                if (activeBox) activeBox.style.display = 'block';
+            }
+        }
+
+        async function callGeminiAPI(prompt, systemInstruction = '', overrideKey = '') {
+            const apiKey = overrideKey || getGeminiApiKey();
+            if (!apiKey) throw new Error("Google Gemini API anahtarı eksik. Lütfen profilinizden veya modal üzerinden anahtar tanımlayın.");
+
+            const models = ['gemini-2.5-flash', 'gemini-1.5-flash'];
+            let lastError = null;
+
+            for (const model of models) {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+                const body = {
+                    contents: [{
+                        role: 'user',
+                        parts: [{ text: prompt }]
+                    }],
+                    generationConfig: {
+                        temperature: 0.35,
+                        maxOutputTokens: 900
+                    }
+                };
+                if (systemInstruction) {
+                    body.systemInstruction = {
+                        parts: [{ text: systemInstruction }]
+                    };
+                }
+
+                try {
+                    const resp = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+
+                    if (!resp.ok) {
+                        const errData = await resp.json().catch(() => ({}));
+                        const errMsg = (errData && errData.error && errData.error.message) || resp.statusText;
+                        lastError = new Error(`Gemini API (${model}) [${resp.status}]: ${errMsg}`);
+                        continue;
+                    }
+
+                    const data = await resp.json();
+                    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (text) return text;
+                } catch (e) {
+                    lastError = e;
+                }
+            }
+
+            throw lastError || new Error("Gemini API yanıt üretemedi.");
+        }
+
+        function quickAskGemini(reasonType) {
+            runGeminiExerciseAlternative(reasonType, '');
+        }
+
+        function submitGeminiCustomQuery() {
+            const input = document.getElementById('geminiCustomQueryInput');
+            const text = input ? input.value.trim() : '';
+            if (!text) {
+                alert("Lütfen sormak istediğiniz durumu veya sorunuzu yazın.");
+                return;
+            }
+            runGeminiExerciseAlternative('custom', text);
+        }
+
+        async function runGeminiExerciseAlternative(reasonType, userCustomText) {
+            const resArea = document.getElementById('geminiAiResponseArea');
+            const currentEx = pickerContext.targetExId ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
+            if (!currentEx) {
+                alert("Değiştirilecek egzersiz bulunamadı.");
+                return;
+            }
+
+            if (resArea) {
+                resArea.style.display = 'block';
+                resArea.innerHTML = `
+                    <div style="text-align:center; padding:24px 14px; background:rgba(0,0,0,0.3); border-radius:8px; border:1px dashed #c084fc;">
+                        <div style="font-size:24px; animation:spin 1s linear infinite; display:inline-block; margin-bottom:8px;">🧠</div>
+                        <div style="font-size:12.5px; font-weight:800; color:#e9d5ff;">Gemini Biyomekanik Motoru Analiz Ediyor...</div>
+                        <div style="font-size:11px; color:var(--text-secondary); margin-top:4px;">"${escapeHTML(currentEx.name)}" için en güvenli ve bilimsel ikameler hesaplanıyor.</div>
+                    </div>
+                `;
+            }
+
+            const reasonDescriptions = {
+                no_equip: `Salonda mevcut ekipman (${currentEx.equipment}) bulunmuyor veya istasyon dolu. Elimdeki dambıl, makine veya vücut ağırlığı ile aynı kas liflerini ateşleyecek birebir biyomekanik alternatif istiyorum.`,
+                joint_pain: `Bu hareketi yaparken belimde veya eklemimde batma/hassasiyet hissediyorum. Omurgaya veya ekleme eksenel kompresyon (axial load) bindirmeyen, hedef kasları izole eden en güvenli alternatifi öner.`,
+                easier: `Hareketi formunu tam çıkaramıyorum veya çok ağır/zor geldi. Biyomekanik motor öğrenmeyi sağlayan daha kontrollü, basit (regresyon) bir varyasyon öner.`,
+                conditioning: `Bu hareketin kardiyovasküler, patlayıcı güç ve metabolik yakım etkisini koruyacak eşdeğer bir finisher/alternatif öner.`,
+                custom: userCustomText
+            };
+
+            const userPromptText = reasonDescriptions[reasonType] || userCustomText || 'Uygun alternatif öner.';
+
+            // Kütüphanemizden ilgili adayları Gemini'ye bağlam olarak veriyoruz (Master Pool SSOT)
+            const candidates = EXERCISES_DB.filter(e => e.id !== currentEx.id && !isExerciseExcludedByUser(e.id));
+            const candidateSummary = candidates.map(e => `ID:${e.id} | İsim:${e.name} | Ekipman:${e.equipment} | Patern:${e.category} | Kas:${e.muscle}`).join('\n');
+
+            const systemInstruction = `Sen "Çelik Kodu (El Código del Acero)" metodolojisinin uzman Biyomekanik, Ortopedik ve Fonksiyonel Fitness Baş Koçusun.
+Kullanıcımız antrenman seansı sırasında bir hareketi değiştirmek istiyor.
+DEĞİŞTİRİLECEK HAREKET:
+- Adı: "${currentEx.name}"
+- Ekipman: "${currentEx.equipment}"
+- Patern/Kategori: "${currentEx.category}"
+- Kas Grubu: "${currentEx.muscle}"
+- Primer Kaslar: ${(currentEx.primaryMuscles || []).join(', ')}
+- Sekonder Kaslar: ${(currentEx.secondaryMuscles || []).join(', ')}
+
+KULLANICININ DURUMU & NEDENİ:
+"${userPromptText}"
+
+KÜTÜPHANEMİZDE BULUNAN TÜM HAREKETLER (YALNIZCA BU LİSTEDEN SEÇECEKSİN):
+${candidateSummary}
+
+BİYOMEKANİK KURALLAR:
+1. HAREKET PATERNİNE VE KİNEMATİK ZİNCİRE KESİNLİKLE SADIK KAL!
+   - Kettlebell Swing bir Hip Hinge (Kalça Menteşesi / Arka Zincir) hareketidir. Swing yerine ASLA Plank, Mekik veya Squat önerme! Swing alternatifi: Dambıl Swing, Dambıl RDL, Barbell RDL, Glute Bridge veya Single-Leg RDL'dir.
+   - Squat alternatifi diz dominant ön bacak hareketleridir.
+   - İtiş (Push) alternatifi itiş, Çekiş (Pull) alternatifi çekiş olmalıdır.
+2. Eğer kullanıcı ekipman yok dediyse (${currentEx.equipment}), o ekipmanı KESİNLİKLE önerme.
+3. Eğer bel/eklem ağrısı dediyse omurgaya eksenel yük bindirmeyen (örn: Chest supported row, Dumbbell floor press, Glute bridge) hareketleri seç.
+4. Önerdiğin 1 veya en fazla 2 hareketi yanıtında tam olarak şu etiketle belirt: [[EX_ID:hareketin_id_si]]
+5. Türkçe, vurucu, bilimsel ama bir o kadar anlaşılır bir koç diliyle neden bu alternatifi seçtiğini ve hangi eklemi/kası nasıl koruduğunu açıkla.`;
+
+            try {
+                const aiResponse = await callGeminiAPI(`Kullanıcı sorusu: ${userPromptText}\n\nLütfen kütüphaneden en uygun 1-2 alternatifi seç ve biyomekanik gerekçesini açıkla.`, systemInstruction);
+                renderGeminiAiResult(aiResponse, currentEx);
+            } catch (err) {
+                if (resArea) {
+                    resArea.innerHTML = `
+                        <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:8px; padding:12px; font-size:11.5px; color:#fca5a5;">
+                            ⚠️ <strong>Gemini Bağlantı Hatası:</strong> ${escapeHTML(err.message || 'Bilinmeyen hata')}<br>
+                            <span style="font-size:10.5px; color:var(--text-secondary); margin-top:4px; display:inline-block;">API anahtarınızın geçerli olduğundan ve internet bağlantınızdan emin olun.</span>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function renderGeminiAiResult(aiText, targetEx) {
+            const resArea = document.getElementById('geminiAiResponseArea');
+            if (!resArea) return;
+
+            // Extract recommended exercise IDs using regex: [[EX_ID:ex_id]]
+            const idMatches = [];
+            const regex = /\[\[EX_ID:([a-zA-Z0-9_\-]+)\]\]/g;
+            let m;
+            while ((m = regex.exec(aiText)) !== null) {
+                if (m[1] && !idMatches.includes(m[1])) {
+                    idMatches.push(m[1]);
+                }
+            }
+
+            // Clean text from tags for neat reading
+            let cleanedText = aiText.replace(/\[\[EX_ID:[a-zA-Z0-9_\-]+\]\]/g, '').trim();
+            // Convert simple markdown bold and bullets
+            let formattedHtml = escapeHTML(cleanedText)
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/\n\n/g, '<br><br>')
+                .replace(/\n- /g, '<br>• ')
+                .replace(/\n/g, '<br>');
+
+            let cardsHtml = '';
+            idMatches.forEach(exId => {
+                const ex = EXERCISES_DB.find(e => e.id === exId);
+                if (ex) {
+                    const eqMeta = EQUIP_LABELS[ex.equipment] || { label: ex.equipment || '', icon: '🏋️' };
+                    const guide = (exerciseGuideMap && exerciseGuideMap[ex.id]) || (categoryFallback && categoryFallback[ex.category]) || null;
+                    const thumbImg = (guide && guide.form) ? guide.form : '';
+
+                    cardsHtml += `
+                        <div style="background:rgba(192, 132, 252, 0.08); border:1px solid rgba(192, 132, 252, 0.4); border-radius:8px; padding:10px 12px; margin-top:8px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                                <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+                                    <div style="width:36px; height:36px; border-radius:6px; background:#000; overflow:hidden; flex-shrink:0; border:1px solid var(--border); display:flex; align-items:center; justify-content:center;">
+                                        ${thumbImg ? `<img src="${thumbImg}" style="width:100%; height:100%; object-fit:contain;" alt="${escapeHTML(ex.name)}">` : '🏋️'}
+                                    </div>
+                                    <div style="min-width:0;">
+                                        <div style="font-size:9.5px; color:#c084fc; font-weight:800; text-transform:uppercase;">ÖNERİLEN BİYOMEKANİK ALTERNATİF</div>
+                                        <div style="font-size:12.5px; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(ex.name)}</div>
+                                        <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">
+                                            <span>${eqMeta.icon} ${eqMeta.label}</span> • <span>${escapeHTML(ex.muscle || '')}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-gold" style="font-size:11px; padding:6px 12px; font-weight:800; background:#9333ea; border-color:#a855f7; color:#fff; white-space:nowrap; box-shadow:0 0 10px rgba(168,85,247,0.3);" onclick="selectExerciseFromPicker('${ex.id}')">
+                                    ✓ Bu Alternatifi Seç
+                                </button>
+                            </div>
+                            ${ex.cue ? `<div style="font-size:10.5px; color:var(--text-secondary); margin-top:6px; background:rgba(0,0,0,0.25); padding:4px 8px; border-radius:4px;">💡 ${escapeHTML(ex.cue)}</div>` : ''}
+                        </div>
+                    `;
+                }
+            });
+
+            resArea.innerHTML = `
+                <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(192, 132, 252, 0.3); border-radius:8px; padding:12px; margin-top:6px;">
+                    <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
+                        <span style="font-size:16px;">✨</span>
+                        <span style="font-size:12px; font-weight:800; color:#e9d5ff;">Gemini Biyomekanik Koç Analizi:</span>
+                    </div>
+                    <div style="font-size:11.5px; color:#f3f4f6; line-height:1.45;">
+                        ${formattedHtml}
+                    </div>
+                    ${cardsHtml ? `<div style="margin-top:10px;">${cardsHtml}</div>` : ''}
+                </div>
+            `;
         }
 
         function openScheduleExerciseAlternativeModal(dayIdx, currentExId, exIdx) {
@@ -6788,6 +7203,7 @@
                 scheduleExIndex: exIdx,
                 currentTab: 'same_muscle',
                 sameEquipFilter: 'all',
+                reasonFilter: 'all',
                 otherSelectedMuscle: primaryM,
                 categoryFilter: 'all',
                 searchQuery: ''
@@ -6819,6 +7235,7 @@
                 scheduleExIndex: null,
                 currentTab: 'same_muscle',
                 sameEquipFilter: 'all',
+                reasonFilter: 'all',
                 otherSelectedMuscle: primaryM,
                 categoryFilter: 'all',
                 searchQuery: ''
@@ -6838,6 +7255,7 @@
                 scheduleExIndex: null,
                 currentTab: 'catalog',
                 sameEquipFilter: 'all',
+                reasonFilter: 'all',
                 otherSelectedMuscle: 'chest',
                 categoryFilter: 'all',
                 searchQuery: ''
@@ -6900,6 +7318,9 @@
             const searchInput = document.getElementById('pickerSearchInput');
             if (searchInput) searchInput.value = '';
 
+            updatePickerReasonPills();
+            updateGeminiAiModalUI(currentEx);
+
             switchPickerTab(pickerContext.currentTab);
         }
 
@@ -6912,28 +7333,69 @@
             pickerContext.currentTab = tab;
 
             const btnSame = document.getElementById('pickerTabBtnSame');
+            const btnAI = document.getElementById('pickerTabBtnAI');
             const btnOther = document.getElementById('pickerTabBtnOther');
             const btnCatalog = document.getElementById('pickerTabBtnCatalog');
 
             const panSame = document.getElementById('pickerSubPanelSame');
+            const panAI = document.getElementById('pickerSubPanelAI');
             const panOther = document.getElementById('pickerSubPanelOther');
             const panCatalog = document.getElementById('pickerSubPanelCatalog');
+            const container = document.getElementById('pickerExercisesContainer');
 
-            const activeStyle = "padding:7px 4px; font-size:11px; font-weight:800; border-radius:6px; border-color:var(--gold); color:var(--gold); background:rgba(245, 158, 11, 0.15); box-shadow:0 0 10px rgba(245,158,11,0.2);";
-            const inactiveStyle = "padding:7px 4px; font-size:11px; font-weight:800; border-radius:6px; border-color:transparent; color:var(--text-secondary); background:transparent;";
+            const activeStyle = "padding:7px 2px; font-size:10.5px; font-weight:800; border-radius:6px; border-color:var(--gold); color:var(--gold); background:rgba(245, 158, 11, 0.15); box-shadow:0 0 10px rgba(245,158,11,0.2);";
+            const activeAIStyle = "padding:7px 2px; font-size:10.5px; font-weight:800; border-radius:6px; border-color:#c084fc; color:#e9d5ff; background:rgba(192, 132, 252, 0.2); box-shadow:0 0 10px rgba(192,132,252,0.3);";
+            const inactiveStyle = "padding:7px 2px; font-size:10.5px; font-weight:800; border-radius:6px; border-color:transparent; color:var(--text-secondary); background:transparent;";
 
             if (btnSame) btnSame.style.cssText = tab === 'same_muscle' ? activeStyle : inactiveStyle;
+            if (btnAI) btnAI.style.cssText = tab === 'ai_coach' ? activeAIStyle : inactiveStyle;
             if (btnOther) btnOther.style.cssText = tab === 'other_muscle' ? activeStyle : inactiveStyle;
             if (btnCatalog) btnCatalog.style.cssText = tab === 'catalog' ? activeStyle : inactiveStyle;
 
             if (panSame) panSame.style.display = tab === 'same_muscle' ? 'block' : 'none';
+            if (panAI) panAI.style.display = tab === 'ai_coach' ? 'block' : 'none';
             if (panOther) panOther.style.display = tab === 'other_muscle' ? 'block' : 'none';
             if (panCatalog) panCatalog.style.display = tab === 'catalog' ? 'block' : 'none';
 
-            updateSameEquipPills();
-            updateOtherMusclePills();
-            updatePickerCategoryPills();
+            if (tab === 'ai_coach') {
+                const currentEx = pickerContext.targetExId ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
+                updateGeminiAiModalUI(currentEx);
+                if (container) container.style.display = 'none';
+            } else {
+                if (container) container.style.display = 'block';
+                updateSameEquipPills();
+                updatePickerReasonPills();
+                updateOtherMusclePills();
+                updatePickerCategoryPills();
+                renderPickerList();
+            }
+        }
+
+        function setPickerReasonFilter(reason) {
+            pickerContext.reasonFilter = reason;
+            updatePickerReasonPills();
             renderPickerList();
+        }
+
+        function updatePickerReasonPills() {
+            const reasons = ['all', 'no_equip', 'joint', 'easier'];
+            const cur = pickerContext.reasonFilter || 'all';
+            reasons.forEach(r => {
+                const el = document.getElementById('pill_reason_' + r);
+                if (el) {
+                    if (cur === r) {
+                        el.style.borderColor = 'var(--gold)';
+                        el.style.color = 'var(--gold)';
+                        el.style.background = 'rgba(245, 158, 11, 0.2)';
+                        el.style.fontWeight = '800';
+                    } else {
+                        el.style.borderColor = 'var(--border)';
+                        el.style.color = 'var(--text-secondary)';
+                        el.style.background = 'transparent';
+                        el.style.fontWeight = '500';
+                    }
+                }
+            });
         }
 
         function setSameEquipFilter(equip) {
@@ -7067,6 +7529,15 @@
                 const pMuscles = (currentEx && currentEx.primaryMuscles) ? currentEx.primaryMuscles : [];
                 const sMuscles = (currentEx && currentEx.secondaryMuscles) ? currentEx.secondaryMuscles : [];
                 const cat = currentEx ? currentEx.category : null;
+                const currentEq = currentEx ? currentEx.equipment : null;
+                const reason = pickerContext.reasonFilter || 'all';
+
+                // Kinematik patern kategorisi eşleme (Hinge -> Hinge, Squat -> Squat vs.)
+                const isHinge = cat === 'legs_hinge' || (pMuscles.includes('hamstrings') && !pMuscles.includes('quads'));
+                const isQuad = cat === 'legs_quad' || pMuscles.includes('quads');
+                const isPush = cat === 'push';
+                const isPull = cat === 'pull';
+                const isCore = cat === 'core';
 
                 filtered = EXERCISES_DB.filter(ex => {
                     // Exclude hidden exercises
@@ -7074,18 +7545,67 @@
                     // Exclude all exercises already in current routine
                     if (existingIds.includes(ex.id)) return false;
 
-                    // Match same muscle or same movement category
-                    const hasPrimaryHit = pMuscles.some(m => (ex.primaryMuscles || []).includes(m));
-                    const hasSecondaryHit = pMuscles.some(m => (ex.secondaryMuscles || []).includes(m));
-                    const hasCatHit = cat && ex.category === cat;
-
-                    if (!hasPrimaryHit && !hasSecondaryHit && !hasCatHit) return false;
+                    // BİYOMEKANİK KİNEMATİK KİLİT (Kettlebell Swing yerine ASLA Plank veya Goblet Squat çıkamaz!)
+                    if (isHinge) {
+                        // Sadece Hinge veya Hamstring/Glute çekiş hareketleri kabul edilir! Core (plank) veya Quad (squat) kesinlikle elenir!
+                        if (ex.category === 'core' || ex.category === 'legs_quad') return false;
+                        const hitHinge = ex.category === 'legs_hinge' || (ex.primaryMuscles || []).includes('hamstrings') || (ex.primaryMuscles || []).includes('glutes');
+                        if (!hitHinge) return false;
+                    } else if (isQuad) {
+                        // Squat/Lunge için Hinge veya Core elenir
+                        if (ex.category === 'core' || ex.category === 'legs_hinge') return false;
+                        const hitQuad = ex.category === 'legs_quad' || (ex.primaryMuscles || []).includes('quads');
+                        if (!hitQuad) return false;
+                    } else if (isPush) {
+                        if (ex.category !== 'push' && !(ex.primaryMuscles || []).some(m => ['chest', 'shoulders', 'triceps'].includes(m))) return false;
+                    } else if (isPull) {
+                        if (ex.category !== 'pull' && !(ex.primaryMuscles || []).some(m => ['back', 'lats', 'traps', 'biceps'].includes(m))) return false;
+                    } else if (isCore) {
+                        if (ex.category !== 'core' && !(ex.primaryMuscles || []).includes('core')) return false;
+                    } else {
+                        const hasPrimaryHit = pMuscles.some(m => (ex.primaryMuscles || []).includes(m));
+                        const hasCatHit = cat && ex.category === cat;
+                        if (!hasPrimaryHit && !hasCatHit) return false;
+                    }
 
                     // Equipment filter
                     if (pickerContext.sameEquipFilter !== 'all' && ex.equipment !== pickerContext.sameEquipFilter) {
                         return false;
                     }
+
+                    // Neden filtresi: Alet Yok / Dolu
+                    if (reason === 'no_equip' && currentEq && ex.equipment === currentEq) {
+                        return false;
+                    }
+
                     return true;
+                });
+
+                // Biyomekanik Uygunluk Sıralaması
+                filtered.sort((a, b) => {
+                    let scoreA = 0;
+                    let scoreB = 0;
+
+                    if (a.category === cat) scoreA += 60;
+                    if (b.category === cat) scoreB += 60;
+
+                    const aPriHits = (a.primaryMuscles || []).filter(m => pMuscles.includes(m)).length;
+                    const bPriHits = (b.primaryMuscles || []).filter(m => pMuscles.includes(m)).length;
+                    scoreA += aPriHits * 30;
+                    scoreB += bPriHits * 30;
+
+                    if (reason === 'joint') {
+                        const friendly = ['bridge', 'curl', 'cable', 'support', 'seated', 'floor', 'machine', 'thrust'];
+                        if (friendly.some(k => a.id.includes(k) || a.name.toLowerCase().includes(k))) scoreA += 50;
+                        if (friendly.some(k => b.id.includes(k) || b.name.toLowerCase().includes(k))) scoreB += 50;
+                    }
+
+                    if (reason === 'easier') {
+                        if (a.mechanic === 'isolation' || a.equipment === 'bodyweight') scoreA += 40;
+                        if (b.mechanic === 'isolation' || b.equipment === 'bodyweight') scoreB += 40;
+                    }
+
+                    return scoreB - scoreA;
                 });
             } else if (tab === 'other_muscle') {
                 const targetM = pickerContext.otherSelectedMuscle;
@@ -16737,7 +17257,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=107')
+                navigator.serviceWorker.register('./sw.js?v=109')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
@@ -16762,6 +17282,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             initFirebaseEngine();
             syncAppViewState();
             applyWednesdayHammerCurlPatch();
+            updateProfileGeminiStatusUI();
             const hasRestored = restoreActiveWorkoutStateFromStorage();
             if (hasRestored) {
                 switchTab('activeWorkoutTab');
