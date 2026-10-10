@@ -156,10 +156,26 @@ const el = {
 
 // ==================== INITIALIZATION ====================
 window.addEventListener('DOMContentLoaded', async () => {
-    setupEventListeners();
-    await loadApiKey();
-    await loadAthletes();
-    loadExerciseCatalog(); // Egzersiz atlasını arka planda hazırla
+    console.log('[App Init] DOMContentLoaded tetiklendi.');
+    try {
+        console.log('[App Init] setupEventListeners başlıyor...');
+        setupEventListeners();
+        console.log('[App Init] setupEventListeners tamamlandı.');
+
+        console.log('[App Init] loadApiKey başlıyor...');
+        await loadApiKey();
+        console.log('[App Init] loadApiKey tamamlandı.');
+
+        console.log('[App Init] loadAthletes başlıyor...');
+        await loadAthletes();
+        console.log('[App Init] loadAthletes tamamlandı.');
+
+        console.log('[App Init] loadExerciseCatalog başlıyor...');
+        loadExerciseCatalog();
+        console.log('[App Init] Başlatma akışı tamamlandı.');
+    } catch (err) {
+        console.error('[App Init] Kritik başlatma hatası:', err);
+    }
 
     // Canlı antrenman dinleyicisi
     if (window.coachAPI && window.coachAPI.onLiveWorkoutUpdated) {
@@ -1823,9 +1839,16 @@ async function sendConsultationMessage(presetText = null) {
 }
 window.sendConsultationMessage = sendConsultationMessage;
 
+let consultMsgStore = {};
+let consultMsgCounter = 0;
+
 function appendChatBubble(sender, text, showActions = false) {
     const stream = el.consultMessagesStream;
     if (!stream) return;
+
+    consultMsgCounter++;
+    const msgId = `cmsg_${consultMsgCounter}`;
+    consultMsgStore[msgId] = text;
 
     const bubble = document.createElement('div');
     bubble.className = `chat-bubble ${sender === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'}`;
@@ -1838,8 +1861,8 @@ function appendChatBubble(sender, text, showActions = false) {
     if (showActions && sender === 'ai') {
         actionsHtml = `
             <div class="chat-bubble-actions">
-                <button type="button" class="btn-chat-action" onclick="pushDirectiveFromConsult(decodeURIComponent('${encodeURIComponent(text)}'))" title="Bu tavsiyeyi sporcunun telefonundaki web uygulamasına koç direktifi olarak fırlat">
-                    📱 Bu Tavsiyeyi Web'e Direktif Olarak Gönder
+                <button type="button" class="btn-chat-action" id="btnPush_${msgId}" onclick="pushDirectiveFromConsult('${msgId}', this)" title="Bu koç tavsiyesini sporcunun telefonundaki web uygulamasına direktif olarak gönder">
+                    📱 Web'e Gönder
                 </button>
             </div>
         `;
@@ -1903,21 +1926,64 @@ function clearConsultationChat() {
 }
 window.clearConsultationChat = clearConsultationChat;
 
-async function pushDirectiveFromConsult(consultReply) {
+async function pushDirectiveFromConsult(msgId, btnElement = null) {
     if (!state.selectedUserId) {
-        showToast('⚠️ Lütfen önce bir sporcu seçin.');
+        showToast('⚠️ Lütfen önce üst bardan bir sporcu seçin.');
         return;
     }
 
-    const firstLines = consultReply.split('\n').filter(l => l.trim().length > 0).slice(0, 3).join(' ');
-    const shortDirective = firstLines.length > 250 ? firstLines.substring(0, 247) + '...' : firstLines;
+    const fullText = consultMsgStore[msgId] || '';
+    if (!fullText) {
+        showToast('⚠️ Gönderilecek tavsiye metni bulunamadı.');
+        return;
+    }
+
+    // Kısa bir koç direktifi özeti çıkar (ilk 2-3 cümle veya 250 karakter)
+    const cleanLines = fullText.split('\n').map(l => l.trim()).filter(l => l.length > 0 && !l.startsWith('#'));
+    const firstLines = cleanLines.slice(0, 3).join(' ');
+    const shortDirective = firstLines.length > 250 ? firstLines.substring(0, 247) + '...' : (firstLines || fullText.substring(0, 250));
+
+    if (btnElement) {
+        btnElement.disabled = true;
+        btnElement.innerHTML = '⏳ Gönderiliyor...';
+    }
+
+    const payload = {
+        title: '💬 FitLAB İstişare Tavsiyesi',
+        text: shortDirective,
+        fullReport: fullText,
+        targetAthlete: state.selectedUser?.name || 'Sporcu',
+        badge: 'Biyomekanik İstişare',
+        active: true,
+        sentAt: new Date().toISOString()
+    };
 
     try {
-        await window.coachAPI.sendDirectiveToWeb(state.selectedUserId, shortDirective);
-        showToast('🚀 İstişare kararı başarıyla sporcunun web uygulamasına gönderildi!');
+        const res = await window.coachAPI.sendDirectiveToWeb(state.selectedUserId, payload);
+        if (res && res.success) {
+            if (btnElement) {
+                btnElement.innerHTML = '✅ Web\'e Gönderildi';
+                btnElement.style.color = '#10b981';
+                btnElement.style.borderColor = '#10b981';
+                btnElement.style.background = 'rgba(16, 185, 129, 0.15)';
+            }
+            showToast(`🚀 Tavsiye sporcunun (${state.selectedUser?.name || 'Sporcu'}) telefonuna başarıyla iletildi!`);
+            if (window.coachAPI && window.coachAPI.showNotification) {
+                window.coachAPI.showNotification(
+                    '📱 Web Direktifi Gönderildi',
+                    `${state.selectedUser?.name || 'Sporcu'} telefonundaki web uygulamasını açtığında bu tavsiyeyi görecek.`
+                );
+            }
+        } else {
+            throw new Error(res?.error || 'Bulut veritabanına yazılamadı.');
+        }
     } catch (err) {
         console.error("Web direktifi gönderim hatası:", err);
-        showToast('⚠️ Direktif gönderilirken hata oluştu.');
+        if (btnElement) {
+            btnElement.disabled = false;
+            btnElement.innerHTML = '⚠️ Tekrar Dene';
+        }
+        alert(`Web uygulamasına gönderim hatası: ${err.message || err}`);
     }
 }
 window.pushDirectiveFromConsult = pushDirectiveFromConsult;

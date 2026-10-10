@@ -88,6 +88,14 @@ function createWindow() {
         return { action: 'deny' };
     });
 
+    mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
+        console.log(`[Renderer Console] [${level}] ${message} (line: ${line}, src: ${sourceId})`);
+    });
+
+    mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+        console.error(`[Renderer Load Fail] ${errorCode}: ${errorDescription}`);
+    });
+
     mainWindow.loadFile(path.join(__dirname, 'src', 'renderer', 'index.html'));
 
     mainWindow.on('closed', () => {
