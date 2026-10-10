@@ -3551,7 +3551,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v113</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v114</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3587,7 +3587,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v113</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v114</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -7042,7 +7042,7 @@
 
         let cachedGeminiWorkingModel = null;
 
-        async function callGeminiAPI(prompt, systemInstruction = '', overrideKey = '') {
+        async function callGeminiAPI(prompt, systemInstruction = '', overrideKey = '', maxTokens = 3500) {
             let apiKey = overrideKey || getGeminiApiKey();
             if (!apiKey) {
                 apiKey = await fastFetchCloudAiConfig();
@@ -7064,11 +7064,12 @@
                             .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
                             .map(m => m.name.replace(/^models\//, ''));
                         
-                        // 3.8 ve Flash modellerini en öne al
-                        const flash38 = supported.filter(m => m.includes('3.8'));
-                        const otherFlash = supported.filter(m => m.includes('flash') && !m.includes('3.8'));
-                        const otherModels = supported.filter(m => !m.includes('flash') && !m.includes('3.8'));
-                        const ordered = [...flash38, ...otherFlash, ...otherModels];
+                        // Flash modellerini en öne al (hız ve zengin token desteği için)
+                        const flash25 = supported.filter(m => m.includes('2.5-flash'));
+                        const flash20 = supported.filter(m => m.includes('2.0-flash'));
+                        const otherFlash = supported.filter(m => m.includes('flash') && !m.includes('2.5-flash') && !m.includes('2.0-flash'));
+                        const otherModels = supported.filter(m => !m.includes('flash'));
+                        const ordered = [...flash25, ...flash20, ...otherFlash, ...otherModels];
 
                         ordered.forEach(m => {
                             if (!candidateModels.includes(m)) candidateModels.push(m);
@@ -7081,7 +7082,6 @@
 
             // Keşif başarısız olduysa veya modeller listelenemediyse denenmesi gereken güncel modeller
             const fallbackModels = [
-                'gemini-3.8-flash',
                 'gemini-2.5-flash',
                 'gemini-2.0-flash',
                 'gemini-2.0-flash-lite',
@@ -7109,7 +7109,7 @@
                         }],
                         generationConfig: {
                             temperature: 0.35,
-                            maxOutputTokens: 900
+                            maxOutputTokens: maxTokens || 3500
                         }
                     };
                     if (systemInstruction) {
@@ -7139,7 +7139,8 @@
                         }
 
                         const data = await resp.json();
-                        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                        const candidate = data?.candidates?.[0];
+                        const text = candidate?.content?.parts?.[0]?.text;
                         if (text) {
                             cachedGeminiWorkingModel = model;
                             return text;
@@ -7216,7 +7217,7 @@ KULLANICININ DURUMU & NEDENİ:
 KÜTÜPHANEMİZDE BULUNAN TÜM HAREKETLER (YALNIZCA BU LİSTEDEN SEÇECEKSİN):
 ${candidateSummary}
 
-BİYOMEKANİK KURALLAR:
+BİYOMEKANİK KURALLAR & CEVAP FORMATI:
 1. HAREKET PATERNİNE VE KİNEMATİK ZİNCİRE KESİNLİKLE SADIK KAL!
    - Kettlebell Swing bir Hip Hinge (Kalça Menteşesi / Arka Zincir) hareketidir. Swing yerine ASLA Plank, Mekik veya Squat önerme! Swing alternatifi: Dambıl Swing, Dambıl RDL, Barbell RDL, Glute Bridge veya Single-Leg RDL'dir.
    - Squat alternatifi diz dominant ön bacak hareketleridir.
@@ -7224,10 +7225,17 @@ BİYOMEKANİK KURALLAR:
 2. Eğer kullanıcı ekipman yok dediyse (${currentEx.equipment}), o ekipmanı KESİNLİKLE önerme.
 3. Eğer bel/eklem ağrısı dediyse omurgaya eksenel yük bindirmeyen (örn: Chest supported row, Dumbbell floor press, Glute bridge) hareketleri seç.
 4. Önerdiğin 1 veya en fazla 2 hareketi yanıtında tam olarak şu etiketle belirt: [[EX_ID:hareketin_id_si]]
-5. Türkçe, vurucu, bilimsel ama bir o kadar anlaşılır bir koç diliyle neden bu alternatifi seçtiğini ve hangi eklemi/kası nasıl koruduğunu açıkla.`;
+5. KESİNLİKLE YARIDA BIRAKMA: Analizini baştan sona eksiksiz tamamla, cümleleri tam bitir.
+6. Yanıtını aşağıdaki 3 yapılandırılmış bölümde netçe sun:
+   ### 🔬 Biyomekanik Analiz & Teşhis
+   Kullanıcının durumunu (${userPromptText}) ve "${currentEx.name}" hareketinin yarattığı biyomekanik baskıyı açıkla.
+   ### 🎯 Önerilen Biyomekanik İkame(ler)
+   Önerilen 1-2 hareketin adı ve [[EX_ID:...]] etiketiyle birlikte kinematik gerekçesini, hangi eklemi koruduğunu veya kası izole ettiğini belirt.
+   ### 💡 Uygulama & Güvenlik İpucu
+   Bu alternatifi uygularken form kalitesini maksimize edecek altın kural, tempo veya set/tekrar tavsiyesini açıkla.`;
 
             try {
-                const aiResponse = await callGeminiAPI(`Kullanıcı sorusu: ${userPromptText}\n\nLütfen kütüphaneden en uygun 1-2 alternatifi seç ve biyomekanik gerekçesini açıkla.`, systemInstruction);
+                const aiResponse = await callGeminiAPI(`Kullanıcı sorusu/durumu: ${userPromptText}\n\nLütfen kütüphaneden en uygun 1-2 alternatifi seç, yukarıdaki 3 bölümde eksiksiz, doyurucu ve tamamlanmış bir biyomekanik analiz sun.`, systemInstruction, '', 3500);
                 renderGeminiAiResult(aiResponse, currentEx);
             } catch (err) {
                 if (resArea) {
@@ -7241,13 +7249,96 @@ BİYOMEKANİK KURALLAR:
             }
         }
 
+        function formatAiCoachInline(str) {
+            return escapeHTML(str)
+                .replace(/\*\*(.*?)\*\*/g, '<strong style="color:#fff; font-weight:700;">$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em style="color:#d8b4fe;">$1</em>')
+                .replace(/`([^`]+)`/g, '<code style="background:rgba(255,255,255,0.1); padding:1px 4px; border-radius:3px; font-size:11px; color:#fbcfe8;">$1</code>');
+        }
+
+        function formatAiCoachMarkdown(text) {
+            if (!text) return '';
+            const lines = text.split('\n');
+            let html = '';
+            let inList = false;
+            let listType = null;
+
+            lines.forEach(line => {
+                let trimmed = line.trim();
+                if (!trimmed) {
+                    if (inList) {
+                        html += listType === 'ul' ? '</ul>' : '</ol>';
+                        inList = false;
+                        listType = null;
+                    }
+                    html += '<div style="height:6px;"></div>';
+                    return;
+                }
+
+                // Başlıklar (###, ##, #)
+                if (/^#{1,4}\s+/.test(trimmed)) {
+                    if (inList) {
+                        html += listType === 'ul' ? '</ul>' : '</ol>';
+                        inList = false;
+                        listType = null;
+                    }
+                    const headingText = trimmed.replace(/^#{1,4}\s+/, '');
+                    html += `<div style="font-size:12px; font-weight:800; color:#e9d5ff; margin-top:10px; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+                        <span style="display:inline-block; width:4px; height:12px; background:#c084fc; border-radius:2px; flex-shrink:0;"></span>
+                        <span>${formatAiCoachInline(headingText)}</span>
+                    </div>`;
+                    return;
+                }
+
+                // Madde listeleri (- , * , • )
+                if (/^[-*•]\s+/.test(trimmed)) {
+                    if (!inList || listType !== 'ul') {
+                        if (inList) html += listType === 'ul' ? '</ul>' : '</ol>';
+                        html += '<ul style="margin:4px 0; padding-left:18px; list-style-type:disc;">';
+                        inList = true;
+                        listType = 'ul';
+                    }
+                    const itemText = trimmed.replace(/^[-*•]\s+/, '');
+                    html += `<li style="margin-bottom:4px; line-height:1.5;">${formatAiCoachInline(itemText)}</li>`;
+                    return;
+                }
+
+                // Numaralı listeler (1. , 2. )
+                if (/^\d+[\.\)]\s+/.test(trimmed)) {
+                    if (!inList || listType !== 'ol') {
+                        if (inList) html += listType === 'ul' ? '</ul>' : '</ol>';
+                        html += '<ol style="margin:4px 0; padding-left:18px;">';
+                        inList = true;
+                        listType = 'ol';
+                    }
+                    const itemText = trimmed.replace(/^\d+[\.\)]\s+/, '');
+                    html += `<li style="margin-bottom:4px; line-height:1.5;">${formatAiCoachInline(itemText)}</li>`;
+                    return;
+                }
+
+                // Düz paragraf satırı
+                if (inList) {
+                    html += listType === 'ul' ? '</ul>' : '</ol>';
+                    inList = false;
+                    listType = null;
+                }
+                html += `<p style="margin:4px 0; line-height:1.5;">${formatAiCoachInline(trimmed)}</p>`;
+            });
+
+            if (inList) {
+                html += listType === 'ul' ? '</ul>' : '</ol>';
+            }
+
+            return html;
+        }
+
         function renderGeminiAiResult(aiText, targetEx) {
             const resArea = document.getElementById('geminiAiResponseArea');
             if (!resArea) return;
 
             // Extract recommended exercise IDs using regex: [[EX_ID:ex_id]]
             const idMatches = [];
-            const regex = /\[\[EX_ID:([a-zA-Z0-9_\-]+)\]\]/g;
+            const regex = /\[\[(?:EX_ID|ex_id)\s*:\s*([a-zA-Z0-9_\-]+)\]\]/gi;
             let m;
             while ((m = regex.exec(aiText)) !== null) {
                 if (m[1] && !idMatches.includes(m[1])) {
@@ -7255,15 +7346,20 @@ BİYOMEKANİK KURALLAR:
                 }
             }
 
+            // Fallback: If no tag was matched, check if any DB exercise name is mentioned directly
+            if (idMatches.length === 0 && targetEx) {
+                EXERCISES_DB.forEach(e => {
+                    if (e.id !== targetEx.id && aiText.toLowerCase().includes(e.name.toLowerCase())) {
+                        if (!idMatches.includes(e.id) && idMatches.length < 2) {
+                            idMatches.push(e.id);
+                        }
+                    }
+                });
+            }
+
             // Clean text from tags for neat reading
-            let cleanedText = aiText.replace(/\[\[EX_ID:[a-zA-Z0-9_\-]+\]\]/g, '').trim();
-            // Convert simple markdown bold and bullets
-            let formattedHtml = escapeHTML(cleanedText)
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                .replace(/\n\n/g, '<br><br>')
-                .replace(/\n- /g, '<br>• ')
-                .replace(/\n/g, '<br>');
+            let cleanedText = aiText.replace(/\[\[(?:EX_ID|ex_id)\s*:\s*[a-zA-Z0-9_\-]+\]\]/gi, '').trim();
+            let formattedHtml = formatAiCoachMarkdown(cleanedText);
 
             let cardsHtml = '';
             idMatches.forEach(exId => {
@@ -7300,14 +7396,17 @@ BİYOMEKANİK KURALLAR:
 
             resArea.innerHTML = `
                 <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(192, 132, 252, 0.3); border-radius:8px; padding:12px; margin-top:6px;">
-                    <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
-                        <span style="font-size:16px;">✨</span>
-                        <span style="font-size:12px; font-weight:800; color:#e9d5ff;">Gemini Biyomekanik Koç Analizi:</span>
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid rgba(192,132,252,0.2); padding-bottom:6px;">
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <span style="font-size:16px;">✨</span>
+                            <span style="font-size:12px; font-weight:800; color:#e9d5ff;">Gemini Biyomekanik Koç Analizi</span>
+                        </div>
+                        <span style="font-size:10px; color:#c084fc; background:rgba(192,132,252,0.15); padding:2px 6px; border-radius:4px; border:1px solid rgba(192,132,252,0.3); font-weight:700;">Eksiksiz Koç Değerlendirmesi</span>
                     </div>
-                    <div style="font-size:11.5px; color:#f3f4f6; line-height:1.45;">
+                    <div style="font-size:11.5px; color:#f3f4f6; line-height:1.55;">
                         ${formattedHtml}
                     </div>
-                    ${cardsHtml ? `<div style="margin-top:10px;">${cardsHtml}</div>` : ''}
+                    ${cardsHtml ? `<div style="margin-top:12px;">${cardsHtml}</div>` : ''}
                 </div>
             `;
         }
@@ -7436,6 +7535,15 @@ BİYOMEKANİK KURALLAR:
             // Clear search input
             const searchInput = document.getElementById('pickerSearchInput');
             if (searchInput) searchInput.value = '';
+
+            // Reset AI response area and custom query for clean start
+            const resArea = document.getElementById('geminiAiResponseArea');
+            if (resArea) {
+                resArea.style.display = 'none';
+                resArea.innerHTML = '';
+            }
+            const queryInput = document.getElementById('geminiCustomQueryInput');
+            if (queryInput) queryInput.value = '';
 
             updatePickerReasonPills();
             updateGeminiAiModalUI(currentEx);
@@ -17454,7 +17562,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=113')
+                navigator.serviceWorker.register('./sw.js?v=114')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
