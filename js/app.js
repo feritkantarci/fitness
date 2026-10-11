@@ -695,12 +695,27 @@
             }
 
             if (teaser) {
+                const note = '<div style="margin-top:4px; font-size:10px; color:var(--text-muted); font-weight:600;">📚 Schumann (2022) Concurrent Training Destekli</div>';
                 if (telemetry.totalLogsCount > 0) {
-                    teaser.innerHTML = `<strong>AI Teşhisi:</strong> Son ${telemetry.recentLogsCount} antrenmanın <strong>%${Math.round(telemetry.bbRatio * 100)}</strong> Hipertrofi, <strong>%${Math.round(telemetry.funcRatio * 100)}</strong> Fonksiyonel. Önerilen: <strong>${(AI_DOCTRINES[telemetry.recommendedDoctrine] || {}).name}</strong>.`;
+                    teaser.innerHTML = `<strong>AI Teşhisi:</strong> Son ${telemetry.recentLogsCount} antrenmanın <strong>%${Math.round(telemetry.bbRatio * 100)}</strong> Hipertrofi, <strong>%${Math.round(telemetry.funcRatio * 100)}</strong> Fonksiyonel. Önerilen: <strong>${(AI_DOCTRINES[telemetry.recommendedDoctrine] || {}).name}</strong>.${note}`;
                 } else {
-                    teaser.innerHTML = `Yapay zeka antrenman geçmişini, tartı trendini ve vücut ölçülerini analiz ederek sana özel <strong>Hipertrofi + Fonksiyonel Fitness</strong> dengesini program öncesinde baştan kurgular.`;
+                    teaser.innerHTML = `Yapay zeka antrenman geçmişini, tartı trendini ve vücut ölçülerini analiz ederek sana özel <strong>Hipertrofi + Fonksiyonel Fitness</strong> dengesini program öncesinde baştan kurgular.${note}`;
                 }
             }
+        }
+
+        function toggleAiDoctrineTeaser() {
+            const el = document.getElementById('aiDoctrineHeroQuickTeaser');
+            const btn = document.getElementById('aiDoctrineInfoBtn');
+            if (!el) return;
+            const isHidden = window.getComputedStyle(el).display === 'none';
+            el.style.display = isHidden ? 'block' : 'none';
+            if (btn) {
+                btn.classList.toggle('active', isHidden);
+                btn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+            }
+        }
+        window.toggleAiDoctrineTeaser = toggleAiDoctrineTeaser;
 
             if (stats) {
                 let html = '';
@@ -15215,7 +15230,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=145')
+                navigator.serviceWorker.register('./sw.js?v=147')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et

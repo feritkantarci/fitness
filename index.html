@@ -13,6 +13,9 @@
     <meta name="apple-mobile-web-app-title" content="Çelik Kodu">
     
     <title>Çelik Kodu | Akıllı Antrenman Mimarı & Program Oluşturucu</title>
+    <meta name="description" content="Çelik Kodu - Akıllı Antrenman Mimarı & Program Oluşturucu">
+    <meta property="og:title" content="Çelik Kodu | Akıllı Antrenman Mimarı & Program Oluşturucu">
+    <meta property="og:description" content="Çelik Kodu - Akıllı Antrenman Mimarı & Program Oluşturucu">
     <link rel="manifest" href="./manifest.json">
     <link rel="icon" type="image/svg+xml" href="assets/diagrams/seq_db_press.svg">
 
@@ -27,7 +30,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v145</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v147</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -63,7 +66,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v145</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v147</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -113,27 +116,35 @@
             <div id="generatorTab" class="tab-content active">
 
                 <!-- AI HYBRID BLUEPRINT & DOCTRINE ARCHITECT BANNER -->
+                <!-- AI HYBRID BLUEPRINT & DOCTRINE ARCHITECT BANNER -->
                 <div class="ai-hybrid-hero-banner" id="aiHybridHeroBanner">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
-                        <div style="flex:1; min-width:260px;">
-                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-                                <span class="auth-role-tag" style="background:linear-gradient(135deg, rgba(168,85,247,0.35), rgba(245,158,11,0.25)); color:#e9d5ff; border:1px solid rgba(168,85,247,0.5); font-size:10px; font-weight:800; padding:3px 8px; border-radius:6px; letter-spacing:0.5px;">🧠 AKILLI HİBRİT MİMARI</span>
-                                <span id="aiDoctrineCurrentBadge" style="font-size:10.5px; font-weight:800; color:var(--gold); background:rgba(245,158,11,0.12); padding:2px 8px; border-radius:12px; border:1px solid rgba(245,158,11,0.3);">⚡ Hibrit Doktrini</span>
+                    <div class="ai-hero-compact-row">
+                        <div class="ai-hero-left">
+                            <div class="ai-hero-badges-row">
+                                <span class="ai-hero-tag">🧠 MİMAR</span>
+                                <span id="aiDoctrineCurrentBadge" class="ai-hero-doc-badge">⚡ Hibrit Doktrini</span>
+                                <h3 class="ai-hero-title">Bodybuilding & Fonksiyonel Doktrin</h3>
+                                <button type="button" id="aiDoctrineInfoBtn" class="ai-hero-info-btn" onclick="toggleAiDoctrineTeaser()" title="Açıklamayı Göster / Gizle" aria-expanded="false" aria-label="Bilgi">
+                                    ℹ️
+                                </button>
                             </div>
-                            <h3 style="font-size:16px; font-weight:900; color:#fff; margin:0 0 6px 0; letter-spacing:-0.3px;">Bodybuilding & Fonksiyonel Fitness Hibrit Doktrini</h3>
-                            <p id="aiDoctrineHeroQuickTeaser" style="font-size:12px; color:var(--text-secondary); margin:0; line-height:1.45;">
-                                Yapay zeka geçmiş antrenmanlarını, tartı trendini ve vücut ölçülerini analiz ederek sana özel <strong>Hipertrofi + Fonksiyonel Fitness</strong> dengesini program öncesinde baştan kurgular.
-                            </p>
-                            <div id="aiDoctrineHeroQuickStats" style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+                            <div id="aiDoctrineHeroQuickStats" class="ai-hero-stats-wrap">
                                 <!-- Live Telemetry snippet populated by JS -->
                             </div>
                         </div>
-                        <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
-                            <button type="button" class="btn btn-gold" onclick="openAiHybridArchitectModal()" style="padding:10px 16px; font-size:12.5px; font-weight:900; display:flex; align-items:center; gap:6px; box-shadow:0 0 16px rgba(245,158,11,0.35); white-space:nowrap;">
-                                <span>🤖 AI Doktrin Teşhisini Aç</span>
+                        <div class="ai-hero-right">
+                            <button type="button" class="btn btn-gold ai-hero-action-btn" onclick="openAiHybridArchitectModal()" title="AI Doktrin Teşhisini Aç">
+                                <span>🤖 Doktrin Teşhisi</span>
                                 <span>➔</span>
                             </button>
-                            <span style="font-size:10px; color:var(--text-muted); font-weight:600;">Schumann (2022) Concurrent Training Destekli</span>
+                        </div>
+                    </div>
+
+                    <!-- COLLAPSIBLE INFO DRAWER -->
+                    <div id="aiDoctrineHeroQuickTeaser" class="ai-hero-info-drawer" style="display:none;">
+                        Yapay zeka antrenman geçmişini, tartı trendini ve vücut ölçülerini analiz ederek sana özel <strong>Hipertrofi + Fonksiyonel Fitness</strong> dengesini program öncesinde baştan kurgular.
+                        <div style="margin-top:4px; font-size:10px; color:var(--text-muted); font-weight:600;">
+                            📚 Schumann (2022) Concurrent Training Destekli
                         </div>
                     </div>
                 </div>
@@ -466,16 +477,16 @@
 
             <!-- ==================== TAB: AKILLI ANTRENMAN TAKVİMİ ==================== -->
             <div id="calendarTab" class="tab-content">
-                <div class="generator-card" style="padding:16px;">
+                <div class="generator-card">
                     <!-- TOP TOOLBAR -->
                     <div class="calendar-screen-header">
-                        <div>
-                            <h2 style="font-size:18px; font-weight:900; color:#fff; display:flex; align-items:center; gap:8px;">
+                        <div class="cal-header-title-box">
+                            <h2>
                                 <span>📅</span>
                                 <span>AKILLI ANTRENMAN TAKVİMİ</span>
                             </h2>
-                            <p style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
-                                Haftalık ve aylık seans planlama, geçmiş tamamlanan antrenman kayıtları ve tek dokunuşla program yönetimi.
+                            <p>
+                                Haftalık ve aylık seans planlama, geçmiş tamamlanan antrenman kayıtları ve program yönetimi.
                             </p>
                         </div>
                         <div class="calendar-screen-nav-bar">
@@ -487,14 +498,14 @@
                                     🗓️ Aylık
                                 </button>
                             </div>
-                            <div style="display:flex; align-items:center; gap:5px;">
-                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 10px;" onclick="navigateCalendar(-1)" title="Önceki Dönem">
+                            <div style="display:flex; align-items:center; gap:4px;">
+                                <button type="button" class="btn btn-outline cal-nav-btn" onclick="navigateCalendar(-1)" title="Önceki Dönem">
                                     ◀
                                 </button>
-                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 12px; font-weight:800; color:var(--gold); border-color:rgba(245,158,11,0.4);" onclick="jumpCalendarToToday()">
+                                <button type="button" class="btn btn-outline cal-nav-btn" style="font-weight:800; color:var(--gold); border-color:rgba(245,158,11,0.4);" onclick="jumpCalendarToToday()">
                                     Bugün
                                 </button>
-                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 10px;" onclick="navigateCalendar(1)" title="Sonraki Dönem">
+                                <button type="button" class="btn btn-outline cal-nav-btn" onclick="navigateCalendar(1)" title="Sonraki Dönem">
                                     ▶
                                 </button>
                             </div>
@@ -502,18 +513,18 @@
                     </div>
 
                     <!-- PERIOD TITLE & DIRECT EXPORT BAR -->
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.08);">
-                        <div style="font-size:15px; font-weight:900; color:var(--gold);" id="calPeriodTitle">
+                    <div class="calendar-screen-period-bar">
+                        <div class="cal-period-title" id="calPeriodTitle">
                             <!-- E.g. 5 - 11 Ekim 2026 -->
                         </div>
-                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                            <button type="button" class="btn btn-gold" style="font-size:11px; padding:5px 12px; font-weight:800;" onclick="openGoogleCalendarWeb()" title="Google Takvim uygulamasını aç">
+                        <div class="cal-actions-wrap">
+                            <button type="button" class="btn btn-gold cal-action-btn" onclick="openGoogleCalendarWeb()" title="Google Takvim uygulamasını aç">
                                 📅 Google Takvim
                             </button>
-                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:5px 10px; color:#cbd5e1;" onclick="downloadFullScheduleICS()" title="Tüm haftayı cihaz takvimine aktar (.ics)">
+                            <button type="button" class="btn btn-outline cal-action-btn" style="color:#cbd5e1;" onclick="downloadFullScheduleICS()" title="Tüm haftayı cihaz takvimine aktar (.ics)">
                                 🍏 Cihaza Aktar (.ics)
                             </button>
-                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:5px 8px;" onclick="openCalendarSyncModal()" title="Takvim Ayarları">
+                            <button type="button" class="btn btn-outline cal-action-btn" style="padding:4px 6px;" onclick="openCalendarSyncModal()" title="Takvim Ayarları">
                                 ⚙️
                             </button>
                         </div>

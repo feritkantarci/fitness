@@ -1,0 +1,16 @@
+{
+  "name": "celik-kodu",
+  "version": "1.0.0",
+  "description": "Çelik Kodu | Akıllı Antrenman Mimarı & Program Oluşturucu",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "build": "echo 'Static build complete'",
+    "lint": "node -c server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

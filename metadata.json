@@ -1,0 +1,8 @@
+{
+  "name": "Çelik Kodu",
+  "description": "Çelik Kodu - Akıllı Antrenman Mimarı & Program Oluşturucu",
+  "version": "1.0.0",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
