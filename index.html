@@ -4092,7 +4092,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v135</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v136</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -4128,7 +4128,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v135</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v136</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -15466,7 +15466,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     renderActiveWorkout();
                 }
                 if (hasCalendarChange && typeof isGoogleCalendarConnected === 'function' && isGoogleCalendarConnected(uid)) {
-                    syncFitLabToGoogleCalendar().catch(e => console.warn("Google Calendar otomatik senkronizasyon:", e));
+                    performFullCalendarSync().catch(e => console.warn("Google Calendar otomatik senkronizasyon:", e));
                 }
             } catch(e) {
                 console.warn("processIncomingCoachDirective hatası:", e);
@@ -16155,11 +16155,15 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 }
 
                 if (!eventRes) {
-                    eventRes = await callGoogleCalendarApi(`/calendars/${encodeURIComponent(calId)}/events`, {
-                        method: 'POST',
-                        body: JSON.stringify(eventBody)
-                    });
-                    createdCount++;
+                    try {
+                        eventRes = await callGoogleCalendarApi(`/calendars/${encodeURIComponent(calId)}/events`, {
+                            method: 'POST',
+                            body: JSON.stringify(eventBody)
+                        });
+                        createdCount++;
+                    } catch(postErr) {
+                        console.error(`Gün ${d} (${week}) POST hatası:`, postErr);
+                    }
                 }
 
                 if (eventRes && eventRes.id) {
@@ -16251,15 +16255,33 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
             try {
                 if (typeof showToast === 'function') showToast("🔄 Takvim ile canlı çift yönlü eşitleniyor...");
-                const pullResult = await syncGoogleCalendarToFitLab();
-                await syncFitLabToGoogleCalendar();
+                
+                // 1. Önce hem bu haftayı hem gelecek haftayı Google'dan çek
+                let dayMoves = 0;
+                let timeCorrections = 0;
+                try {
+                    const pullCur = await syncGoogleCalendarToFitLab('current');
+                    dayMoves += (pullCur && pullCur.dayMoves) || 0;
+                    timeCorrections += (pullCur && pullCur.timeCorrections) || 0;
+                } catch(e) {}
+                try {
+                    const pullNext = await syncGoogleCalendarToFitLab('next');
+                    dayMoves += (pullNext && pullNext.dayMoves) || 0;
+                    timeCorrections += (pullNext && pullNext.timeCorrections) || 0;
+                } catch(e) {}
+
+                // 2. Hem bu haftayı hem de gelecek haftayı Google Takvim'e eksiksiz yaz
+                const syncCur = await syncFitLabToGoogleCalendar('current');
+                const syncNext = await syncFitLabToGoogleCalendar('next');
 
                 if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
                 renderCalendarConnectionCard();
 
-                let msg = `✅ Canlı Takvim Senkronize Edildi!`;
-                if (pullResult.dayMoves > 0) msg += ` • 📅 ${pullResult.dayMoves} seans takvimdeki yeni gününe taşındı.`;
-                if (pullResult.timeCorrections > 0) msg += ` • 🕒 ${pullResult.timeCorrections} seans saati güncellendi.`;
+                const totalSynced = (syncCur.createdCount || 0) + (syncCur.updatedCount || 0) + (syncNext.createdCount || 0) + (syncNext.updatedCount || 0);
+
+                let msg = `✅ Canlı Takvim Senkronize Edildi! (${totalSynced} seans aktif)`;
+                if (dayMoves > 0) msg += ` • 📅 ${dayMoves} seans yeni gününe taşındı.`;
+                if (timeCorrections > 0) msg += ` • 🕒 ${timeCorrections} seans saati güncellendi.`;
                 if (typeof showToast === 'function') showToast(msg);
                 else alert(msg);
             } catch(e) {
@@ -21398,7 +21420,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=135')
+                navigator.serviceWorker.register('./sw.js?v=136')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
