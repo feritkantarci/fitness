@@ -1,0 +1,16148 @@
+// ==================== APPLICATION CORE LOGIC ====================
+
+        // ==================== MUSCLE RADAR & REGION DEFINITIONS ====================
+        
+        // STUDIO_REGION_MAP hoisted above
+
+        const TARGET_REGIONS = {
+            chest: { name: "Göğüs" },
+            back: { name: "Sırt" },
+            shoulders: { name: "Omuz" },
+            biceps: { name: "Biceps" },
+            triceps: { name: "Triceps" },
+            quads: { name: "Ön Bacak" },
+            hamstrings: { name: "Arka Bacak" },
+            glutes: { name: "Kalça" },
+            core: { name: "Karın & Core" },
+            calves: { name: "Kalf" },
+            calves_grip: { name: "Kalf & Kavrama" },
+            full_body: { name: "Tüm Vücut" },
+            legs: { name: "Bacak" },
+            arms: { name: "Kol" }
+        };
+
+        const MUSCLE_DEFS = {
+            chest: { name: "Göğüs", icon: "🛡️", desc: "Pectoralis Major / Minor", color: "#38bdf8" },
+            back: { name: "Sırt & Kanat", icon: "🏹", desc: "Latissimus, Rhomboid, Trapez", color: "#818cf8" },
+            shoulders: { name: "Omuz (Deltoid)", icon: "⚔️", desc: "Ön, Yan, Arka Deltoid", color: "#f59e0b" },
+            biceps: { name: "Biceps (Pazı)", icon: "💪", desc: "Biceps Brachii & Ön Kol", color: "#ec4899" },
+            triceps: { name: "Triceps (Arka Kol)", icon: "⚡", desc: "Triceps Brachii (3 Baş)", color: "#10b981" },
+            quads: { name: "Ön Bacak (Quad)", icon: "🦵", desc: "Quadriceps & Diz Ekstansiyonu", color: "#06b6d4" },
+            hamstrings: { name: "Arka Bacak (Hamstring)", icon: "🦿", desc: "Biceps Femoris & Kalça Menteşesi", color: "#f97316" },
+            glutes: { name: "Kalça (Glute)", icon: "🍑", desc: "Gluteus Maximus / Medius", color: "#a855f7" },
+            core: { name: "Karın & Core", icon: "🧱", desc: "Rectus Abdominis & Oblikler", color: "#eab308" },
+            calves_grip: { name: "Kalf & Kavrama", icon: "🦶", desc: "Gastrocnemius, Soleus & Bilek", color: "#94a3b8" }
+        };
+
+        // ==================== BİYOMEKANİK HASSAS ANATOMİ HARİTASI (SSOT) ====================
+        const EXERCISE_ANATOMY_MAP = {
+            // CHEST / GÖĞÜS
+            db_bench_press: { primary: 'Orta Göğüs', secondary: 'Ön Omuz, Triceps', subKey: 'chest_mid' },
+            db_incline_press: { primary: 'Üst Göğüs', secondary: 'Ön Omuz, Triceps', subKey: 'chest_upper' },
+            db_floor_press: { primary: 'Orta Göğüs', secondary: 'Triceps, Ön Omuz', subKey: 'chest_mid' },
+            bb_bench_press: { primary: 'Orta Göğüs', secondary: 'Ön Omuz, Triceps', subKey: 'chest_mid' },
+            bb_incline_bench: { primary: 'Üst Göğüs', secondary: 'Ön Omuz, Triceps', subKey: 'chest_upper' },
+            bb_close_grip_bench: { primary: 'Triceps (İtiş)', secondary: 'İç & Orta Göğüs, Ön Omuz', subKey: 'triceps_lateral' },
+            mach_cable_crossover: { primary: 'İç & Orta Göğüs', secondary: 'Ön Omuz', subKey: 'chest_mid' },
+            mach_pec_deck: { primary: 'Orta Göğüs (İzole)', secondary: 'Ön Omuz', subKey: 'chest_mid' },
+            bw_pushup: { primary: 'Orta Göğüs', secondary: 'Ön Omuz, Triceps, Core', subKey: 'chest_mid' },
+            bw_decline_pushup: { primary: 'Üst Göğüs', secondary: 'Ön Omuz, Triceps', subKey: 'chest_upper' },
+            bw_diamond_pushup: { primary: 'Triceps (İtiş)', secondary: 'İç Göğüs, Ön Omuz', subKey: 'triceps_lateral' },
+            bw_dips: { primary: 'Alt Göğüs', secondary: 'Triceps, Ön Omuz', subKey: 'chest_lower' },
+            db_renegade_pushup: { primary: 'Orta Göğüs & Sırt', secondary: 'Triceps, Yan Karın (Oblik)', subKey: 'chest_mid' },
+
+            // SHOULDERS / OMUZ
+            db_overhead_press: { primary: 'Ön Omuz', secondary: 'Triceps, Üst Göğüs, Core', subKey: 'shoulders_front' },
+            db_arnold_press: { primary: 'Tüm Omuz (Ön & Yan)', secondary: 'Triceps, Üst Göğüs', subKey: 'shoulders_front' },
+            db_lateral_raise: { primary: 'Yan Omuz', secondary: 'Üst Trapez', subKey: 'shoulders_side' },
+            mach_cable_lateral: { primary: 'Yan Omuz (İzole)', secondary: 'Üst Trapez', subKey: 'shoulders_side' },
+            mach_face_pull: { primary: 'Arka Omuz', secondary: 'Üst Sırt (Trapez/Rhomboid), Dış Rotatör', subKey: 'shoulders_rear' },
+            kneeling_plate_front_raise: { primary: 'Ön Omuz', secondary: 'Üst Göğüs, Core', subKey: 'shoulders_front' },
+            kb_press: { primary: 'Ön Omuz', secondary: 'Triceps, Core, Kalça', subKey: 'shoulders_front' },
+            bb_overhead_press: { primary: 'Ön Omuz', secondary: 'Triceps, Üst Göğüs, Core', subKey: 'shoulders_front' },
+            bb_push_press: { primary: 'Ön Omuz & Güç', secondary: 'Triceps, Ön Bacak, Core', subKey: 'shoulders_front' },
+            db_push_press: { primary: 'Ön Omuz & Güç', secondary: 'Triceps, Ön Bacak, Core', subKey: 'shoulders_front' },
+            kb_halo: { primary: 'Omuz Kapsülü (Mobilite)', secondary: 'Üst Sırt, Core', subKey: 'shoulders_rear' },
+            waiters_carry: { primary: 'Omuz Stabilitesi', secondary: 'Trapez, Derin Core', subKey: 'shoulders_front' },
+
+            // BACK / SIRT
+            db_saw_row: { primary: 'Kanat (Geniş Sırt)', secondary: 'Biceps, Arka Omuz, Rhomboid', subKey: 'back_lats' },
+            db_chest_supported_row: { primary: 'Orta Sırt (Kalınlık)', secondary: 'Rhomboid, Arka Omuz, Biceps', subKey: 'back_mid' },
+            db_renegade_row: { primary: 'Orta Sırt & Kanat', secondary: 'Derin Karın (Oblik), Arka Omuz', subKey: 'back_mid' },
+            db_pullover: { primary: 'Kanat (Geniş Sırt)', secondary: 'Üst Göğüs, Triceps Uzun Baş, Serratus', subKey: 'back_lats' },
+            mach_lat_pulldown: { primary: 'Kanat (Geniş Sırt)', secondary: 'Biceps, Arka Omuz, Ön Kol', subKey: 'back_lats' },
+            mach_cable_row: { primary: 'Orta Sırt (Kalınlık)', secondary: 'Rhomboid, Kanat, Biceps', subKey: 'back_mid' },
+            bw_pullup: { primary: 'Kanat (Geniş Sırt)', secondary: 'Biceps, Arka Omuz, Core', subKey: 'back_lats' },
+            bw_chinup: { primary: 'Kanat & Biceps', secondary: 'Arka Omuz, Ön Kol', subKey: 'back_lats' },
+            bw_inverted_row: { primary: 'Orta Sırt (Kalınlık)', secondary: 'Rhomboid, Biceps, Arka Omuz', subKey: 'back_mid' },
+            bb_bent_over_row: { primary: 'Orta Sırt (Kalınlık)', secondary: 'Kanat, Biceps, Alt Bel', subKey: 'back_mid' },
+            bb_pendlay_row: { primary: 'Orta Sırt (Patlayıcı)', secondary: 'Rhomboid, Kanat, Alt Bel', subKey: 'back_mid' },
+            kb_gorilla_row: { primary: 'Kanat & Orta Sırt', secondary: 'Biceps, Arka Omuz, Statik Bacak', subKey: 'back_mid' },
+
+            // LEGS - QUADS / ÖN BACAK
+            db_goblet_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Büyük Kalça (Glute), Core', subKey: 'legs_quad' },
+            db_front_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Büyük Kalça, Üst Sırt, Core', subKey: 'legs_quad' },
+            db_bulgarian_squat: { primary: 'Ön Bacak & Kalça', secondary: 'Arka Bacak, Denge/Adduktor', subKey: 'legs_quad' },
+            db_walking_lunge: { primary: 'Ön Bacak (Quad)', secondary: 'Kalça, Arka Bacak, Baldır', subKey: 'legs_quad' },
+            db_reverse_lunge: { primary: 'Ön Bacak & Kalça', secondary: 'Arka Bacak, Diz Stabilitesi', subKey: 'legs_quad' },
+            kb_goblet_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Kalça, Core, Ayak Bileği', subKey: 'legs_quad' },
+            bb_back_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Büyük Kalça, Alt Bel, Core', subKey: 'legs_quad' },
+            bb_front_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Büyük Kalça, Üst Sırt Dikliği', subKey: 'legs_quad' },
+            bb_zercher_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Kalça, Ön Karın Zırhı, Üst Sırt', subKey: 'legs_quad' },
+            mach_leg_press: { primary: 'Ön Bacak (Quad)', secondary: 'Büyük Kalça', subKey: 'legs_quad' },
+            mach_leg_extension: { primary: 'Ön Bacak (Quad İzole)', secondary: 'Gözyaşı Kası (VMO)', subKey: 'legs_quad' },
+            bw_air_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Kalça, Ayak Bileği Açıklığı', subKey: 'legs_quad' },
+            bw_jump_squat: { primary: 'Ön Bacak & Patlayıcı', secondary: 'Kalça, Baldır (Kalf)', subKey: 'legs_quad' },
+            lunge_with_twist: { primary: 'Ön Bacak & Kalça', secondary: 'Yan Karın (Oblik), Denge', subKey: 'legs_quad' },
+            step_up_press: { primary: 'Ön Bacak & Omuz', secondary: 'Kalça, Triceps, Denge', subKey: 'legs_quad' },
+
+            // LEGS - HAMSTRINGS & GLUTES / ARKA BACAK & KALÇA
+            db_rdl: { primary: 'Arka Bacak (Hamstring)', secondary: 'Büyük Kalça (Glute), Alt Bel', subKey: 'legs_hamstrings' },
+            db_single_leg_rdl: { primary: 'Arka Bacak (Hamstring)', secondary: 'Kalça, Ayak Bileği Stabilitesi', subKey: 'legs_hamstrings' },
+            bb_rdl: { primary: 'Arka Bacak (Hamstring)', secondary: 'Büyük Kalça, Alt Bel', subKey: 'legs_hamstrings' },
+            mach_leg_curl: { primary: 'Arka Bacak (Hamstring İzole)', secondary: 'Baldır Üst Kısmı', subKey: 'legs_hamstrings' },
+            bb_deadlift: { primary: 'Tüm Arka Zincir (Hamstring & Kalça)', secondary: 'Alt Bel, Üst Sırt (Trapez), Ön Kol', subKey: 'legs_hamstrings' },
+            bb_hip_thrust: { primary: 'Büyük Kalça (Glute)', secondary: 'Arka Bacak, Core', subKey: 'legs_glutes' },
+            bw_glute_bridge: { primary: 'Büyük Kalça (Glute)', secondary: 'Arka Bacak, Pelvik Denge', subKey: 'legs_glutes' },
+            mach_calf_raise: { primary: 'Baldır (Kalf)', secondary: 'Aşil Tendonu, Ayak Tabanı', subKey: 'legs_calves' },
+            db_standing_calf_raise: { primary: 'Baldır (Kalf)', secondary: 'Aşil Tendonu, Ayak Tabanı', subKey: 'legs_calves' },
+            db_lying_leg_curl: { primary: 'Arka Bacak (Hamstrings)', secondary: 'Biceps Femoris Kısa Başı', subKey: 'legs_hamstrings' },
+            bw_sissy_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Rectus Femoris, Diz Stabilitesi', subKey: 'legs_quad' },
+
+            // ARMS - TRICEPS & BICEPS / ARKA KOL & ÖN KOL
+            db_triceps_overhead: { primary: 'Triceps (Uzun Baş)', secondary: 'Triceps Yan Baş, Core', subKey: 'triceps_long' },
+            db_skullcrusher: { primary: 'Triceps (Orta/Uzun Baş)', secondary: 'Triceps Yan Baş', subKey: 'triceps_long' },
+            mach_triceps_pushdown: { primary: 'Triceps (Yan/Dış Baş)', secondary: 'Triceps Medial Baş, Ön Kol', subKey: 'triceps_lateral' },
+            db_biceps_curl: { primary: 'Biceps (Pazu)', secondary: 'Ön Kol (Brachioradialis)', subKey: 'biceps' },
+            db_hammer_curl: { primary: 'Biceps & Ön Kol (Brachialis)', secondary: 'Kavrama Gücü', subKey: 'biceps' },
+            db_incline_curl: { primary: 'Biceps (Uzun Baş / Tepe)', secondary: 'Ön Omuz Esnemesi', subKey: 'biceps' },
+            bb_biceps_curl: { primary: 'Biceps (Genel Kütle)', secondary: 'Ön Kol, Kavrama Gücü', subKey: 'biceps' },
+            mach_cable_biceps: { primary: 'Biceps (Sürekli Gerilim)', secondary: 'Ön Kol', subKey: 'biceps' },
+
+            // CORE & CARRIES / KARIN & TAŞIMALAR
+            db_suitcase_carry: { primary: 'Yan Karın (Oblik)', secondary: 'Kavrama Gücü, Omuz, Kalça', subKey: 'core_obliques' },
+            db_farmers_walk: { primary: 'Tüm Core & Kavrama', secondary: 'Üst Trapez, Ön Kol, Baldır', subKey: 'core_front' },
+            db_russian_twist: { primary: 'Yan Karın (Oblik)', secondary: 'Ön Karın, Kalça Fleksör', subKey: 'core_obliques' },
+            mach_cable_woodchopper: { primary: 'Yan Karın (Oblik Rotasyon)', secondary: 'Omuz, Kalça, Serratus', subKey: 'core_obliques' },
+            half_kneeling_plate_chop: { primary: 'Yan Karın (Oblik Rotasyon)', secondary: 'Omuz, Kalça Stabilitesi', subKey: 'core_obliques' },
+            bw_plank: { primary: 'Ön Karın (Core Zırhı)', secondary: 'Omuz, Kalça, Dört Başlı Kas', subKey: 'core_front' },
+            bw_hollow_body: { primary: 'Derin Karın Duvarı', secondary: 'Kalça Fleksör, Serratus', subKey: 'core_front' },
+            bw_hanging_knee_raise: { primary: 'Alt Karın & Core', secondary: 'Kavrama Gücü, Kalça Fleksör', subKey: 'core_front' },
+            bw_mountain_climber: { primary: 'Ön Karın & Nabız', secondary: 'Omuz, Kalça Fleksör', subKey: 'core_front' },
+            bear_crawl_pull_through: { primary: 'Derin Core (Rotasyon Direnci)', secondary: 'Omuz Zırhı, Kalça', subKey: 'core_obliques' },
+            cross_body_carry: { primary: 'Yan Karın & Omuz', secondary: 'Trapez, Denge', subKey: 'core_obliques' },
+
+            // BALLISTIC & FUNCTIONAL POWER / BALİSTİK & BİLEŞİK
+            db_swing: { primary: 'Büyük Kalça & Arka Bacak', secondary: 'Alt Bel, Core, Kavrama', subKey: 'legs_hamstrings' },
+            kb_swing: { primary: 'Büyük Kalça & Arka Bacak', secondary: 'Alt Bel, Core, Kavrama', subKey: 'legs_hamstrings' },
+            kb_clean: { primary: 'Kalça & Sırt Patlaması', secondary: 'Ön Kol, Omuz Rack, Core', subKey: 'back_mid' },
+            kb_half_snatch: { primary: 'Tüm Arka Zincir & Omuz', secondary: 'Kalça, Sırt, Nabız', subKey: 'shoulders_front' },
+            db_snatch: { primary: 'Tüm Arka Zincir & Omuz', secondary: 'Kalça, Sırt, Patlayıcı Güç', subKey: 'shoulders_front' },
+            kb_windmill: { primary: 'Yan Karın & Omuz Stabilitesi', secondary: 'Arka Bacak Esnekliği', subKey: 'core_obliques' },
+            kb_turkish_getup: { primary: 'Tüm Vücut & Omuz Stabilitesi', secondary: 'Kalça, Core, Ön Bacak', subKey: 'shoulders_front' },
+            db_thruster: { primary: 'Ön Bacak & Omuz', secondary: 'Triceps, Kalça, Core', subKey: 'shoulders_front' },
+            kb_thruster: { primary: 'Ön Bacak & Omuz', secondary: 'Triceps, Kalça, Core', subKey: 'shoulders_front' },
+            bb_thruster: { primary: 'Ön Bacak & Omuz', secondary: 'Triceps, Kalça, Core', subKey: 'shoulders_front' },
+            db_clean_and_press: { primary: 'Kalça, Sırt & Omuz', secondary: 'Triceps, Arka Bacak', subKey: 'shoulders_front' },
+            db_manmaker: { primary: 'Tüm Vücut Zırhı', secondary: 'Göğüs, Sırt, Omuz, Bacak, Core', subKey: 'chest_mid' },
+            bb_hang_power_clean: { primary: 'Kalça & Üst Sırt (Trapez)', secondary: 'Arka Bacak, Ön Kol, Omuz', subKey: 'back_mid' },
+            bb_landmine_squat_press: { primary: 'Ön Bacak, Omuz & Üst Göğüs', secondary: 'Triceps, Kalça, Core', subKey: 'chest_upper' },
+            bw_burpee: { primary: 'Tüm Vücut Kondisyonu', secondary: 'Göğüs, Bacak, Core, Nabız', subKey: 'chest_mid' }
+        };
+
+        const STUDIO_SUB_REGIONS = {
+            chest: [
+                { key: 'chest_upper', name: 'Üst Göğüs' },
+                { key: 'chest_mid', name: 'Orta Göğüs' },
+                { key: 'chest_lower', name: 'Alt Göğüs' }
+            ],
+            shoulders: [
+                { key: 'shoulders_front', name: 'Ön Omuz' },
+                { key: 'shoulders_side', name: 'Yan Omuz' },
+                { key: 'shoulders_rear', name: 'Arka Omuz' }
+            ],
+            back: [
+                { key: 'back_lats', name: 'Kanat (Genişlik)' },
+                { key: 'back_mid', name: 'Orta Sırt (Kalınlık)' }
+            ],
+            quads: [
+                { key: 'legs_quad', name: 'Ön Bacak (Quad)' }
+            ],
+            hamstrings: [
+                { key: 'legs_hamstrings', name: 'Arka Bacak (Hamstring)' }
+            ],
+            glutes: [
+                { key: 'legs_glutes', name: 'Büyük Kalça (Glute)' }
+            ],
+            triceps: [
+                { key: 'triceps_long', name: 'Uzun Baş (Başüstü)' },
+                { key: 'triceps_lateral', name: 'Yan/Dış Baş (İtiş)' }
+            ],
+            biceps: [
+                { key: 'biceps', name: 'Biceps & Ön Kol' }
+            ],
+            core: [
+                { key: 'core_front', name: 'Ön Karın' },
+                { key: 'core_obliques', name: 'Yan Karın (Oblik)' }
+            ],
+            calves: [
+                { key: 'legs_calves', name: 'Baldır (Kalf)' }
+            ]
+        };
+
+        function getExerciseAnatomy(ex) {
+            if (!ex) return { primary: 'Kas Grubu', secondary: '', subKey: '' };
+            const id = ex.id || ex.exId;
+            if (EXERCISE_ANATOMY_MAP[id]) {
+                return EXERCISE_ANATOMY_MAP[id];
+            }
+            const pNames = (ex.primaryMuscles || []).map(m => (typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m]?.name) || m).join(', ');
+            const sNames = (ex.secondaryMuscles || []).map(m => (typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m]?.name) || m).join(', ');
+            return {
+                primary: pNames || ex.muscle || 'Kas Grubu',
+                secondary: sNames || '',
+                subKey: (ex.primaryMuscles && ex.primaryMuscles[0]) || 'general'
+            };
+        }
+
+        // CUSTOM ROUTINE BUILDER STATE
+        let customRoutineState = {
+            title: "Özel Çelik Programım",
+            rest: 60,
+            exercises: [] // Array of { exId, sets: 3, reps: '8-12', weight: '' }
+        };
+
+        let studioState = {
+            mode: 'full_body', // 'full_body' or 'split'
+            splitSubtype: 'push', // push, pull, legs, upper, arms, core
+            currentInspectExId: null
+        };
+
+
+        // GLOBAL APP STATE
+        let selectedSplit = 'full_body';
+        let selectedEquipments = ['dumbbell', 'kettlebell', 'bodyweight'];
+        let currentGeneratedWorkout = null;
+        let activeWorkoutSession = null;
+        let activeWorkoutStartTime = null;
+        let activeWorkoutIsPaused = false;
+        let activeWorkoutPausedAt = null;
+        let activeWorkoutTotalPausedMs = 0;
+        let activeWorkoutSetsData = {};
+        let workoutTimerInterval = null;
+        let activeWorkoutViewMode = 'focus'; // 'focus' | 'list'
+        let activeFocusExIndex = 0;
+        let activeFocusSetIndex = null;
+        let wakeLockSentinel = null;
+        let isWakeLockEnabled = true;
+
+        // REST TIMER STATE
+        let timerInterval = null;
+        let timerRemaining = 45;
+        let isTimerRunning = false;
+
+        // AUTH & ATHLETE SESSION
+        let currentSession = null;
+        let selectedNewAvatar = '🥋';
+        let selectedAvatar = '🥋';
+        let selectedTheme = 'gold';
+
+        const THEMES = {
+            gold: { gold: '#f59e0b', goldLight: '#fde68a', glow: 'rgba(245, 158, 11, 0.25)' },
+            cyan: { gold: '#38bdf8', goldLight: '#bae6fd', glow: 'rgba(56, 189, 248, 0.25)' },
+            green: { gold: '#10b981', goldLight: '#a7f3d0', glow: 'rgba(168, 85, 129, 0.25)' },
+            red: { gold: '#f43f5e', goldLight: '#fecdd3', glow: 'rgba(244, 63, 94, 0.25)' },
+            purple: { gold: '#a855f7', goldLight: '#e9d5ff', glow: 'rgba(168, 85, 247, 0.25)' }
+        };
+
+        // TAB SWITCHING & BOTTOM NAV CONTROL
+        function switchTab(tabId) {
+            let requestedStudio = false;
+            if (tabId === 'studioTab') {
+                tabId = 'activeWorkoutTab';
+                requestedStudio = true;
+            }
+
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            const targetBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes(tabId));
+            if (targetBtn) targetBtn.classList.add('active');
+
+            // Sync bottom navigation items
+            document.querySelectorAll('.bottom-nav-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.tab === tabId);
+            });
+
+            // Close more sheet if open
+            closeMoreSheet();
+
+            const targetContent = document.getElementById(tabId);
+            if (targetContent) targetContent.classList.add('active');
+
+            if (tabId === 'activeWorkoutTab') {
+                renderActiveWorkout();
+                if (activeWorkoutSession) {
+                    requestWakeLock();
+                } else if (requestedStudio) {
+                    setTimeout(() => {
+                        openStudioAccordion();
+                    }, 120);
+                }
+            }
+
+            if (tabId === 'generatorTab') renderAiHybridHeroBanner();
+            if (tabId === 'calendarTab') renderCalendarScreen();
+            if (tabId === 'libraryTab') renderLibrary();
+            if (tabId === 'historyTab') renderHistory();
+            if (tabId === 'analyticsTab') renderAnalytics();
+            if (tabId === 'profileTab') updateProfileGeminiStatusUI();
+
+            if (!requestedStudio) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // ==================== BOTTOM BAR HIDE / SHOW & SHEET LOGIC ====================
+        function toggleBottomBar() {
+            const w = document.getElementById('bottomNavWrapper');
+            if (!w) return;
+            if (w.classList.contains('hidden')) {
+                showBottomBar();
+            } else {
+                hideBottomBar();
+            }
+        }
+
+        function hideBottomBar() {
+            const w = document.getElementById('bottomNavWrapper');
+            const pill = document.getElementById('bottomRestorePill');
+            if (w) w.classList.add('hidden');
+            if (pill) pill.classList.add('visible');
+        }
+
+        function showBottomBar() {
+            const w = document.getElementById('bottomNavWrapper');
+            const pill = document.getElementById('bottomRestorePill');
+            if (w) w.classList.remove('hidden');
+            if (pill) pill.classList.remove('visible');
+        }
+
+        function openMoreSheet() {
+            const overlay = document.getElementById('moreSheetOverlay');
+            const sheet = document.getElementById('moreBottomSheet');
+            if (overlay) overlay.classList.add('open');
+            if (sheet) sheet.classList.add('open');
+        }
+
+        function closeMoreSheet() {
+            const overlay = document.getElementById('moreSheetOverlay');
+            const sheet = document.getElementById('moreBottomSheet');
+            if (overlay) overlay.classList.remove('open');
+            if (sheet) sheet.classList.remove('open');
+        }
+
+        // Akıllı Scroll ile Otomatik Gizleme (Aşağı inerken gizle, yukarı çıkarken göster)
+        let lastWindowScrollTop = 0;
+        window.addEventListener('scroll', () => {
+            const st = window.pageYOffset || document.documentElement.scrollTop;
+            if (st > lastWindowScrollTop && st > 80) {
+                hideBottomBar();
+            } else if (st < lastWindowScrollTop) {
+                showBottomBar();
+            }
+            lastWindowScrollTop = st <= 0 ? 0 : st;
+        }, { passive: true });
+
+        // ==================== WORKOUT GENERATOR ENGINE ====================
+        function selectSplit(split) {
+            selectedSplit = split;
+            document.querySelectorAll('#splitGrid .split-card').forEach(card => {
+                card.classList.toggle('selected', card.getAttribute('onclick').includes(split));
+            });
+        }
+
+        function toggleEquip(eq) {
+            const idx = selectedEquipments.indexOf(eq);
+            if (idx > -1) {
+                if (selectedEquipments.length === 1) {
+                    alert("En az bir ekipman seçili olmalıdır!");
+                    return;
+                }
+                selectedEquipments.splice(idx, 1);
+            } else {
+                selectedEquipments.push(eq);
+            }
+            renderEquipChips();
+        }
+
+        function setQuickEquip(type) {
+            if (type === 'all') {
+                selectedEquipments = ['dumbbell', 'kettlebell', 'barbell', 'machine', 'bodyweight'];
+            } else if (type === 'db_only') {
+                selectedEquipments = ['dumbbell'];
+            } else if (type === 'db_kb_bw') {
+                selectedEquipments = ['dumbbell', 'kettlebell', 'bodyweight'];
+            } else if (type === 'bw_only') {
+                selectedEquipments = ['bodyweight'];
+            }
+            renderEquipChips();
+        }
+
+        function renderEquipChips() {
+            const chips = document.querySelectorAll('#equipChipsWrap .equip-chip');
+            chips.forEach(chip => {
+                const match = chip.getAttribute('onclick').match(/'([^']+)'/);
+                if (match) {
+                    chip.classList.toggle('selected', selectedEquipments.includes(match[1]));
+                }
+            });
+        }
+
+        function getRepAndRestScheme(goal, style) {
+            if (goal === 'strength') {
+                return { sets: 4, reps: '4 - 6', rest: 90 };
+            } else if (goal === 'endurance') {
+                return { sets: 3, reps: '12 - 15', rest: 30 };
+            } else {
+                // hypertrophy
+                return { sets: 3, reps: '8 - 12', rest: style === 'superset' ? 45 : 60 };
+            }
+        }
+
+        // ==================== KULLANICI ÖZEL HAVUZ & GİZLEME YASASI ====================
+        function getUserExcludedExerciseIds() {
+            try {
+                return JSON.parse(localStorage.getItem('celik_excluded_exercises') || '[]');
+            } catch(e) {
+                return [];
+            }
+        }
+
+        function setUserExcludedExerciseIds(arr) {
+            try {
+                localStorage.setItem('celik_excluded_exercises', JSON.stringify(arr));
+            } catch(e) {}
+        }
+
+        function isExerciseExcludedByUser(exId) {
+            if (!exId) return false;
+            const excluded = getUserExcludedExerciseIds();
+            return excluded.includes(exId);
+        }
+
+        function toggleExerciseExclusionAndRefresh(exId) {
+            if (!exId) return false;
+            const ex = EXERCISES_DB.find(e => e.id === exId);
+            const exName = ex ? ex.name : exId;
+            let list = getUserExcludedExerciseIds();
+            const idx = list.indexOf(exId);
+            let isNowExcluded = false;
+
+            if (idx >= 0) {
+                list.splice(idx, 1);
+                isNowExcluded = false;
+                if (typeof showToast === 'function') {
+                    showToast(`✅ "${exName}" geri alındı.`);
+                }
+            } else {
+                list.push(exId);
+                isNowExcluded = true;
+                if (typeof showToast === 'function') {
+                    showToast(`👁️ "${exName}" gizlendi.`);
+                }
+            }
+
+            setUserExcludedExerciseIds(list);
+
+            if (typeof updateExDetailModalHideButton === 'function') {
+                updateExDetailModalHideButton(exId);
+            }
+            if (typeof renderLibraryExerciseCatalog === 'function') {
+                renderLibraryExerciseCatalog();
+            }
+            if (typeof renderStudioExerciseCatalog === 'function') {
+                renderStudioExerciseCatalog();
+            }
+            if (typeof renderExercisePicker === 'function' && document.getElementById('exercisePickerModal')?.classList.contains('active')) {
+                renderExercisePicker();
+            }
+            return isNowExcluded;
+        }
+
+        function updateExDetailModalHideButton(exId) {
+            const btn = document.getElementById('btnExDetailToggleHide');
+            if (!btn) return;
+            const isExcluded = isExerciseExcludedByUser(exId);
+            if (isExcluded) {
+                btn.innerHTML = '🔄 Geri Al';
+                btn.style.color = '#34d399';
+                btn.style.borderColor = '#10b981';
+                btn.style.background = 'rgba(16, 185, 129, 0.15)';
+                btn.title = 'Aktif havuzunuza geri ekleyin';
+            } else {
+                btn.innerHTML = '👁️ Gizle';
+                btn.style.color = '#f87171';
+                btn.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+                btn.style.background = 'rgba(239, 68, 68, 0.1)';
+                btn.title = 'Kişisel havuzunuzdan gizleyin';
+            }
+        }
+
+        function filterExercises(category, excludeIds = []) {
+            return EXERCISES_DB.filter(ex => {
+                if (isExerciseExcludedByUser(ex.id)) return false;
+                if (excludeIds.includes(ex.id)) return false;
+                if (!selectedEquipments.includes(ex.equipment)) return false;
+                if (category === 'any') return true;
+                if (Array.isArray(category)) return category.includes(ex.category);
+                return ex.category === category;
+            });
+        }
+
+        // ==================== AI HYBRID BLUEPRINT & DOCTRINE ARCHITECT ENGINE ====================
+        let currentSelectedDoctrine = 'bb_hybrid';
+        const AI_DOCTRINES = {
+            bb_pure: {
+                id: 'bb_pure',
+                name: '🛡️ Saf Bodybuilding',
+                shortTag: '%90 Kas / %10 Kond.',
+                badgeColor: '#f59e0b',
+                summary: 'Maksimum mekanik gerilim, izole kas tecridi ve simetri. Estetik ve hacim odaklı saf hipertrofi yaklaşımı.',
+                academicRatio: { bb: 0.90, func: 0.10 }
+            },
+            bb_hybrid: {
+                id: 'bb_hybrid',
+                name: '⚡ BB-Dominant Hibrit',
+                shortTag: '%70 Kas / %30 Fonk.',
+                badgeColor: '#c084fc',
+                summary: 'Ana gövde ağır hipertrofi; seans sonlarına veya aralara Kettlebell, Carry ve metabolik kondisyon. Kas yaparken eklemleri korur ve iş kapasitesini artırır.',
+                academicRatio: { bb: 0.70, func: 0.30 }
+            },
+            balanced_hybrid: {
+                id: 'balanced_hybrid',
+                name: '⚖️ Dengeli Hibrit Atlet',
+                shortTag: '%50 / %50 Eşit',
+                badgeColor: '#38bdf8',
+                summary: 'Ağır compound güç blokları ile patlayıcı kettlebell, dinamik rotasyon ve core zırhının 50/50 eşit sinerjisi.',
+                academicRatio: { bb: 0.50, func: 0.50 }
+            },
+            func_hybrid: {
+                id: 'func_hybrid',
+                name: '🔥 Fonksiyonel-Dominant',
+                shortTag: '%70 Fonk. / %30 Kas',
+                badgeColor: '#f97316',
+                summary: 'Ana omurga atletik güç ve yüksek dayanıklılık; zayıf kalan omuz, kol veya göğüs bölgelerine hedefe yönelik izole hipertrofi iğneleri.',
+                academicRatio: { bb: 0.30, func: 0.70 }
+            },
+            func_pure: {
+                id: 'func_pure',
+                name: '🌪️ Saf Fonksiyonel & Kondisyon',
+                shortTag: '%90 Fonksiyonel',
+                badgeColor: '#4ade80',
+                summary: 'Çok düzlemli hareket kalıpları, kettlebell kompleksleri, yüksek VO2 Max ve kardiyovasküler savaşçı dayanıklılığı.',
+                academicRatio: { bb: 0.10, func: 0.90 }
+            }
+        };
+
+        function isExerciseFunctionalCategory(ex) {
+            if (!ex) return false;
+            const eq = (ex.equipment || '').toLowerCase();
+            const cat = (ex.category || '').toLowerCase();
+            const name = (ex.name || '').toLowerCase();
+            const tags = Array.isArray(ex.tags) ? ex.tags.map(t => String(t).toLowerCase()) : [];
+
+            if (eq === 'kettlebell') return true;
+            if (cat === 'conditioning') return true;
+            if (tags.includes('conditioning') || tags.includes('power') || tags.includes('mobility')) return true;
+            if (name.includes('swing') || name.includes('snatch') || name.includes('clean') || 
+                name.includes('turkish') || name.includes('carry') || name.includes('crawl') || 
+                name.includes('manmaker') || name.includes('burpee') || name.includes('thruster') ||
+                name.includes('woodchopper') || name.includes('renegade') || name.includes('twist')) {
+                return true;
+            }
+            return false;
+        }
+
+        function getAiDoctrineTelemetry() {
+            const logs = typeof getWorkoutLogs === 'function' ? getWorkoutLogs() : [];
+            const scaleLogs = typeof getScaleLogs === 'function' ? getScaleLogs() : [];
+            const measLogs = typeof getMeasurementsLogs === 'function' ? getMeasurementsLogs() : [];
+
+            const totalLogsCount = logs.length;
+            const recentLogs = logs.slice(0, 15);
+            let totalExercisesCount = 0;
+            let functionalCount = 0;
+            let isolationCount = 0;
+            let compoundBbCount = 0;
+            let totalRpeSum = 0;
+            let rpeLogsCount = 0;
+
+            recentLogs.forEach(l => {
+                if (l.rpe) {
+                    const rVal = parseFloat(l.rpe);
+                    if (!isNaN(rVal)) {
+                        totalRpeSum += rVal;
+                        rpeLogsCount++;
+                    }
+                }
+                if (Array.isArray(l.exercises)) {
+                    l.exercises.forEach(ex => {
+                        totalExercisesCount++;
+                        if (isExerciseFunctionalCategory(ex)) {
+                            functionalCount++;
+                        } else if (ex.mechanic === 'isolation' || ex.category === 'core') {
+                            isolationCount++;
+                        } else {
+                            compoundBbCount++;
+                        }
+                    });
+                }
+            });
+
+            const bbCount = isolationCount + compoundBbCount;
+            const bbRatio = totalExercisesCount > 0 ? (bbCount / totalExercisesCount) : 0.82;
+            const funcRatio = totalExercisesCount > 0 ? (functionalCount / totalExercisesCount) : 0.18;
+            const avgRpe = rpeLogsCount > 0 ? (totalRpeSum / rpeLogsCount).toFixed(1) : '8.0';
+
+            // Kilo Telemetrisi
+            let currentWeight = null;
+            let weightTrend = 'Sabit';
+            let weightDelta = 0;
+            if (scaleLogs.length > 0) {
+                currentWeight = parseFloat(scaleLogs[0].weight) || null;
+                if (scaleLogs.length >= 2) {
+                    const prev = parseFloat(scaleLogs[1].weight);
+                    if (currentWeight && prev) {
+                        weightDelta = (currentWeight - prev).toFixed(1);
+                        if (weightDelta > 0.4) weightTrend = `+${weightDelta} kg (Artış)`;
+                        else if (weightDelta < -0.4) weightTrend = `${weightDelta} kg (Azalış)`;
+                        else weightTrend = 'Dengeli / Sabit';
+                    }
+                }
+            }
+
+            // Ölçü Telemetrisi
+            let currentWaist = null;
+            let currentChest = null;
+            let currentArms = null;
+            if (measLogs.length > 0) {
+                currentWaist = parseFloat(measLogs[0].waist) || null;
+                currentChest = parseFloat(measLogs[0].chest) || null;
+                currentArms = parseFloat(measLogs[0].arms) || null;
+            }
+
+            // Teşhis ve Öneri Mantığı
+            let recommendedDoctrine = 'bb_hybrid';
+            let headline = '';
+            let summary = '';
+            let academicBadge = 'Schumann (2022) Hibrit Model';
+
+            if (totalLogsCount === 0) {
+                recommendedDoctrine = 'bb_hybrid';
+                headline = 'Biyomekanik Teşhis: Yeni Hibrit Döngü Başlangıcı';
+                summary = 'Henüz kayıtlı antrenman geçmişin oluşmadığı için spor biliminin en yüksek adaptasyon sağlayan **BB-Dominant Hibrit (%70 Hipertrofi + %30 Fonksiyonel Kondisyon)** doktriniyle başlamanı öneriyorum. Bu yaklaşım kas kütlesi inşa ederken kettlebell ve core hareketleriyle eklemlerini korur ve iş kapasiteni artırır.';
+            } else if (bbRatio >= 0.65) {
+                recommendedDoctrine = 'bb_hybrid';
+                headline = 'Biyomekanik Teşhis: Uzun Süredir Bodybuilding Tarzında Çalışıyorsun';
+                summary = `Son antrenmanlarının **%${Math.round(bbRatio * 100)}** kadarı izole ve klasik hipertrofi odaklı. Kas dolgunluğun ve mekanik gerilim birikimin mükemmel seviyede; ancak eklemleri tek yönlü aşınmadan korumak, fasyal rotasyonları uyarmak ve seanslar arası toparlanma hızını (mitokondriyal yoğunluk) artırmak için **BB-Dominant Hibrit (%70 Hipertrofi + %30 Fonksiyonel)** doktrinine geçmeni öneriyorum. Schumann et al. (2022) araştırmalarına göre seans sonuna eklenecek Kettlebell Swing ve Carry kompleksleri kas hipertrofisini engellemez, toparlanma toleransını yükseltir.`;
+            } else if (funcRatio >= 0.55) {
+                recommendedDoctrine = 'func_hybrid';
+                headline = 'Biyomekanik Teşhis: Yoğun Fonksiyonel Fitness & Kondisyon Çalışıyorsun';
+                summary = `Son antrenmanlarının **%${Math.round(funcRatio * 100)}** kadarı dinamik ve metabolik kondisyon odaklı. Laktat eşiğin ve atletizmin zirvede; ancak maksimal kas kütlesini ve eklem çevresindeki kas zırhını pekiştirmek için aralara izole hipertrofi süpersetleri ekleyerek **Fonksiyonel-Dominant Hibrit (%70 Fonksiyonel + %30 Kas İğnesi)** doktrinine geçmeni öneriyorum.`;
+            } else {
+                recommendedDoctrine = 'balanced_hybrid';
+                headline = 'Biyomekanik Teşhis: Dengeli Atletik Temel';
+                summary = `Antrenman geçmişin dengeli bir çizgide seyrediyor (%${Math.round(bbRatio * 100)} Hipertrofi / %${Math.round(funcRatio * 100)} Fonksiyonel). Hem estetik ve hacimli bir fizik, hem de çevik ve patlayıcı bir güç için **%50 Hipertrofi / %50 Fonksiyonel Dengeli Hibrit Atlet** doktrinini korumanı öneriyorum.`;
+            }
+
+            if (currentWaist && currentWaist > 90) {
+                summary += ` <br><br>💡 <em>Bel çevren (${currentWaist} cm) metabolik uyarılmaya ihtiyaç olduğunu gösteriyor; seans sonu kettlebell/metabolik finisher yağ yakımını hızlandıracaktır.</em>`;
+            }
+
+            return {
+                totalLogsCount,
+                recentLogsCount: recentLogs.length,
+                totalExercisesCount,
+                bbCount,
+                funcCount: functionalCount,
+                bbRatio,
+                funcRatio,
+                avgRpe,
+                currentWeight,
+                weightTrend,
+                currentWaist,
+                currentChest,
+                currentArms,
+                recommendedDoctrine,
+                headline,
+                summary,
+                academicBadge
+            };
+        }
+
+        function renderAiHybridHeroBanner() {
+            const telemetry = getAiDoctrineTelemetry();
+            const badge = document.getElementById('aiDoctrineCurrentBadge');
+            const teaser = document.getElementById('aiDoctrineHeroQuickTeaser');
+            const stats = document.getElementById('aiDoctrineHeroQuickStats');
+
+            if (badge) {
+                const activeDoc = AI_DOCTRINES[currentSelectedDoctrine] || AI_DOCTRINES.bb_hybrid;
+                badge.innerHTML = `${activeDoc.name} (${activeDoc.shortTag})`;
+                badge.style.color = activeDoc.badgeColor;
+                badge.style.borderColor = activeDoc.badgeColor;
+            }
+
+            if (teaser) {
+                if (telemetry.totalLogsCount > 0) {
+                    teaser.innerHTML = `<strong>AI Teşhisi:</strong> Son ${telemetry.recentLogsCount} antrenmanın <strong>%${Math.round(telemetry.bbRatio * 100)}</strong> Hipertrofi, <strong>%${Math.round(telemetry.funcRatio * 100)}</strong> Fonksiyonel. Önerilen: <strong>${(AI_DOCTRINES[telemetry.recommendedDoctrine] || {}).name}</strong>.`;
+                } else {
+                    teaser.innerHTML = `Yapay zeka antrenman geçmişini, tartı trendini ve vücut ölçülerini analiz ederek sana özel <strong>Hipertrofi + Fonksiyonel Fitness</strong> dengesini program öncesinde baştan kurgular.`;
+                }
+            }
+
+            if (stats) {
+                let html = '';
+                if (telemetry.totalLogsCount > 0) {
+                    html += `
+                        <div class="telemetry-pill">
+                            <span class="telemetry-pill-label">Seanslar</span>
+                            <span class="telemetry-pill-val">${telemetry.totalLogsCount} Antrenman</span>
+                        </div>
+                        <div class="telemetry-pill">
+                            <span class="telemetry-pill-label">Kas / Fonksiyonel</span>
+                            <span class="telemetry-pill-val" style="color:var(--gold);">%${Math.round(telemetry.bbRatio * 100)} / %${Math.round(telemetry.funcRatio * 100)}</span>
+                        </div>
+                    `;
+                }
+                if (telemetry.currentWeight) {
+                    html += `
+                        <div class="telemetry-pill">
+                            <span class="telemetry-pill-label">Kilo Trendi</span>
+                            <span class="telemetry-pill-val" style="color:#38bdf8;">${telemetry.currentWeight} kg (${telemetry.weightTrend})</span>
+                        </div>
+                    `;
+                }
+                if (telemetry.currentWaist) {
+                    html += `
+                        <div class="telemetry-pill">
+                            <span class="telemetry-pill-label">Bel Çevresi</span>
+                            <span class="telemetry-pill-val" style="color:#c084fc;">${telemetry.currentWaist} cm</span>
+                        </div>
+                    `;
+                }
+                stats.innerHTML = html;
+            }
+        }
+
+        function openAiHybridArchitectModal() {
+            const telemetry = getAiDoctrineTelemetry();
+            const modal = document.getElementById('aiHybridArchitectModal');
+            if (!modal) return;
+
+            // 1. Telemetri Gridini Doldur
+            const teleGrid = document.getElementById('aiTelemetryGrid');
+            if (teleGrid) {
+                teleGrid.innerHTML = `
+                    <div class="telemetry-pill">
+                        <span class="telemetry-pill-label">Tamamlanan Seans</span>
+                        <span class="telemetry-pill-val">${telemetry.totalLogsCount} Antrenman</span>
+                    </div>
+                    <div class="telemetry-pill">
+                        <span class="telemetry-pill-label">Kas Hipertrofisi</span>
+                        <span class="telemetry-pill-val" style="color:#f59e0b;">%${Math.round(telemetry.bbRatio * 100)}</span>
+                    </div>
+                    <div class="telemetry-pill">
+                        <span class="telemetry-pill-label">Fonksiyonel Kondisyon</span>
+                        <span class="telemetry-pill-val" style="color:#4ade80;">%${Math.round(telemetry.funcRatio * 100)}</span>
+                    </div>
+                    <div class="telemetry-pill">
+                        <span class="telemetry-pill-label">Son Kilo Durumu</span>
+                        <span class="telemetry-pill-val" style="color:#38bdf8;">${telemetry.currentWeight ? telemetry.currentWeight + ' kg' : 'Girilmedi'}</span>
+                    </div>
+                    <div class="telemetry-pill">
+                        <span class="telemetry-pill-label">Bel Çevresi</span>
+                        <span class="telemetry-pill-val" style="color:#c084fc;">${telemetry.currentWaist ? telemetry.currentWaist + ' cm' : 'Girilmedi'}</span>
+                    </div>
+                    <div class="telemetry-pill">
+                        <span class="telemetry-pill-label">Ortalama RPE</span>
+                        <span class="telemetry-pill-val">⚡ ${telemetry.avgRpe} / 10</span>
+                    </div>
+                `;
+            }
+
+            // 2. Teşhis ve Rapor Kutusu
+            const headlineEl = document.getElementById('aiDiagnosticHeadline');
+            const contentEl = document.getElementById('aiDiagnosticContent');
+            if (headlineEl) headlineEl.innerText = telemetry.headline;
+            if (contentEl) contentEl.innerHTML = telemetry.summary;
+
+            // Önerilen doktrini otomatik seç
+            selectAiDoctrine(telemetry.recommendedDoctrine, false);
+
+            modal.classList.add('active');
+        }
+
+        function closeAiHybridArchitectModal() {
+            const modal = document.getElementById('aiHybridArchitectModal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        function selectAiDoctrine(docKey, updateHero = true) {
+            if (!AI_DOCTRINES[docKey]) docKey = 'bb_hybrid';
+            currentSelectedDoctrine = docKey;
+
+            document.querySelectorAll('#doctrineSelectionGrid .doctrine-card').forEach(card => {
+                const isTarget = card.id === `docCard_${docKey}`;
+                card.classList.toggle('selected', isTarget);
+            });
+
+            if (updateHero) {
+                renderAiHybridHeroBanner();
+            }
+        }
+
+        async function requestGeminiDeepHybridReport() {
+            const btn = document.getElementById('btnTriggerGeminiLiveReport');
+            const container = document.getElementById('aiGeminiExtraReportContainer');
+            if (!container) return;
+
+            const telemetry = getAiDoctrineTelemetry();
+            const activeDoc = AI_DOCTRINES[currentSelectedDoctrine] || AI_DOCTRINES.bb_hybrid;
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '⏳ Gemini Analiz Ediyor...';
+            }
+
+            container.style.display = 'block';
+            container.innerHTML = `
+                <div style="display:flex; align-items:center; gap:8px; color:var(--gold);">
+                    <span class="loading-spinner" style="display:inline-block; width:14px; height:14px; border:2px solid var(--gold); border-top-color:transparent; border-radius:50%; animation:spin 0.8s linear infinite;"></span>
+                    <span>Google Gemini AI Biyomekanik Motoru canlı olarak antrenman geçmişini ve literatür verilerini analiz ediyor...</span>
+                </div>
+            `;
+
+            const prompt = `Sen elit bir spor bilimci ve biyomekanik uzmanısın (Concurrent / Hybrid Training & Hypertrophy Specialist).
+Aşağıdaki sporcu telemetri verilerini incele:
+- Toplam Antrenman: ${telemetry.totalLogsCount} (Son 15 antrenmanda %${Math.round(telemetry.bbRatio * 100)} Bodybuilding, %${Math.round(telemetry.funcRatio * 100)} Fonksiyonel Fitness)
+- Son Kilo: ${telemetry.currentWeight ? telemetry.currentWeight + ' kg' : 'Belirtilmedi'} (${telemetry.weightTrend})
+- Bel Çevresi: ${telemetry.currentWaist ? telemetry.currentWaist + ' cm' : 'Belirtilmedi'}
+- Ortalama RPE: ${telemetry.avgRpe}
+- Seçilen Doktrin: ${activeDoc.name} (${activeDoc.shortTag})
+
+Lütfen sporcuya hitaben:
+1. Neden bu antrenman doktrininin (Schumann et al. 2022 Concurrent Training, Hickson interferans modeli ve Fasyal hatlar uyarınca) kendisi için en yüksek verimi sağlayacağını 2-3 vurucu paragrafta açıkla.
+2. Bodybuilding izole kas hipertrofisi ile Kettlebell / Fonksiyonel fitness hareketlerinin nasıl bir sinerji oluşturacağını anlat.
+3. Seans için 1 altın koç tavsiyesi ver.
+Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
+
+            const sysPrompt = 'Sen Çelik Kodu platformunun Baş Biyomekanik ve Hibrit Antrenör yapay zekasısın. Bilimsel referanslarla doğrudan sporcuya konuşursun.';
+
+            try {
+                if (typeof callGeminiAPI === 'function') {
+                    const reply = await callGeminiAPI(prompt, sysPrompt);
+                    container.innerHTML = `
+                        <div style="background:rgba(168,85,247,0.12); border:1px solid rgba(168,85,247,0.4); border-radius:10px; padding:12px; margin-top:4px;">
+                            <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
+                                <span style="font-size:14px;">✨</span>
+                                <strong style="color:#c084fc; font-size:13px;">Google Gemini AI Canlı Akademik Biyomekanik Raporu</strong>
+                            </div>
+                            <div style="font-size:12.5px; color:#f1f5f9; line-height:1.6; white-space:pre-line;">${reply}</div>
+                        </div>
+                    `;
+                } else {
+                    throw new Error("Gemini API fonksiyonu tanımlı değil.");
+                }
+            } catch (err) {
+                console.warn("Gemini rapor hatası, yerel bilimsel analiz gösteriliyor:", err);
+                container.innerHTML = `
+                    <div style="background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); border-radius:10px; padding:12px; margin-top:4px;">
+                        <strong style="color:var(--gold); font-size:12.5px;">📚 Schumann et al. (2022) Hibrit Literatür Notu:</strong>
+                        <p style="margin:6px 0 0 0; font-size:12px; color:#e2e8f0; line-height:1.5;">
+                            Seçilen <strong>${activeDoc.name}</strong> doktrini; izole hipertrofi ile yüksek eşikli motor üniteleri rekrüte ederken, fonksiyonel kettlebell ve core kompleksleriyle mitokondriyal toparlanma hızını maksimize eder. Eklemler tek düzlemli aşınmadan korunur ve iş kapasitesi artar.
+                        </p>
+                    </div>
+                `;
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '✨ Raporu Yenile';
+                }
+            }
+        }
+
+        function applyAiHybridProgram(startImmediately = false) {
+            const splitSelect = document.getElementById('aiModalSplitSelect');
+            const durSelect = document.getElementById('aiModalDurationSelect');
+            const wishInput = document.getElementById('aiModalUserWishInput');
+
+            const chosenSplit = splitSelect ? splitSelect.value : 'full_body';
+            const chosenDur = durSelect ? parseInt(durSelect.value, 10) : 45;
+            const userWish = wishInput ? wishInput.value.trim() : '';
+
+            // Split ve süre seçimlerini ana ekrana yansıt
+            selectSplit(chosenSplit);
+            const paramDurEl = document.getElementById('paramDuration');
+            if (paramDurEl) paramDurEl.value = String(chosenDur);
+
+            // Doktrini hero banner'a yansıt
+            renderAiHybridHeroBanner();
+
+            // Programı üret
+            handleGenerateWorkout(currentSelectedDoctrine, userWish);
+
+            closeAiHybridArchitectModal();
+
+            if (startImmediately && currentGeneratedWorkout) {
+                setTimeout(() => {
+                    startActiveWorkoutSession(currentGeneratedWorkout);
+                }, 150);
+            } else {
+                // Program Oluşturucu sekmesinde oluşturulan program kutusuna kaydır
+                switchTab('generatorTab');
+                const outEl = document.getElementById('generatedWorkoutOutput');
+                if (outEl) {
+                    outEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        }
+
+        function startActiveWorkoutSession(workout) {
+            if (workout) {
+                currentGeneratedWorkout = workout;
+            }
+            startActiveWorkoutFromGenerated();
+        }
+        window.startActiveWorkoutSession = startActiveWorkoutSession;
+
+        function pickRandom(arr) {
+            if (!arr || arr.length === 0) return null;
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function handleGenerateWorkout(doctrineOverride = null, customWish = '') {
+            const activeDoctrineKey = doctrineOverride || currentSelectedDoctrine || 'bb_hybrid';
+            const activeDoc = AI_DOCTRINES[activeDoctrineKey] || AI_DOCTRINES.bb_hybrid;
+
+            const style = document.getElementById('paramStyle').value;
+            const goal = document.getElementById('paramGoal').value;
+            const duration = parseInt(document.getElementById('paramDuration').value, 10);
+            const scheme = getRepAndRestScheme(goal, style);
+
+            const chosenExercises = [];
+            const usedIds = [];
+
+            function addEx(cat, filterMode = 'any') {
+                let pool = filterExercises(cat, usedIds);
+                if (filterMode === 'functional') {
+                    const funcPool = pool.filter(e => isExerciseFunctionalCategory(e));
+                    if (funcPool.length > 0) pool = funcPool;
+                } else if (filterMode === 'bb_isolation') {
+                    const isoPool = pool.filter(e => !isExerciseFunctionalCategory(e) && (e.mechanic === 'isolation' || e.category === 'core'));
+                    if (isoPool.length > 0) pool = isoPool;
+                } else if (filterMode === 'bb_compound') {
+                    const compPool = pool.filter(e => !isExerciseFunctionalCategory(e) && e.mechanic === 'compound');
+                    if (compPool.length > 0) pool = compPool;
+                } else if (filterMode === 'bb_only') {
+                    const bbPool = pool.filter(e => !isExerciseFunctionalCategory(e));
+                    if (bbPool.length > 0) pool = bbPool;
+                }
+
+                let chosen = pickRandom(pool);
+                if (!chosen) {
+                    let relatedCat = cat;
+                    if (cat === 'push') relatedCat = ['push', 'core'];
+                    else if (cat === 'pull') relatedCat = ['pull', 'core'];
+                    else if (cat === 'legs_quad' || cat === 'legs_hinge') relatedCat = ['legs_quad', 'legs_hinge', 'core'];
+
+                    const fallbackPool = EXERCISES_DB.filter(ex => 
+                        !isExerciseExcludedByUser(ex.id) &&
+                        selectedEquipments.includes(ex.equipment) && 
+                        !usedIds.includes(ex.id) &&
+                        (Array.isArray(relatedCat) ? relatedCat.includes(ex.category) : ex.category === relatedCat)
+                    );
+                    chosen = pickRandom(fallbackPool);
+                }
+                if (chosen) {
+                    usedIds.push(chosen.id);
+                    chosenExercises.push(chosen);
+                }
+            }
+
+            // ==================== DOKTRİN BAZLI EGZERSİZ DİZİLİM MİMARİSİ ====================
+            if (activeDoctrineKey === 'bb_pure') {
+                // 1. SAF BODYBUILDING (Yalnızca Hipertrofi Bileşikleri & İzole Kas Tecritleri)
+                if (selectedSplit === 'full_body') {
+                    addEx('legs_quad', 'bb_compound');
+                    addEx('pull', 'bb_compound');
+                    addEx('legs_hinge', 'bb_compound');
+                    addEx('push', 'bb_compound');
+                    if (duration >= 45) {
+                        addEx('push', 'bb_isolation');
+                        addEx('pull', 'bb_isolation');
+                    }
+                    if (duration >= 60) {
+                        addEx('core', 'any');
+                        addEx('legs_quad', 'bb_isolation');
+                    }
+                } else if (selectedSplit === 'upper_push') {
+                    addEx('push', 'bb_compound');
+                    addEx('push', 'bb_compound');
+                    addEx('push', 'bb_isolation');
+                    addEx('push', 'bb_isolation');
+                    if (duration >= 45) {
+                        addEx('push', 'bb_isolation');
+                        addEx('core', 'any');
+                    }
+                    if (duration >= 60) {
+                        addEx('push', 'bb_isolation');
+                        addEx('core', 'any');
+                    }
+                } else if (selectedSplit === 'upper_pull') {
+                    addEx('pull', 'bb_compound');
+                    addEx('pull', 'bb_compound');
+                    addEx('pull', 'bb_isolation');
+                    addEx('legs_hinge', 'bb_compound');
+                    if (duration >= 45) {
+                        addEx('pull', 'bb_isolation');
+                        addEx('core', 'any');
+                    }
+                    if (duration >= 60) {
+                        addEx('pull', 'bb_isolation');
+                        addEx('core', 'any');
+                    }
+                } else if (selectedSplit === 'lower') {
+                    addEx('legs_quad', 'bb_compound');
+                    addEx('legs_hinge', 'bb_compound');
+                    addEx('legs_quad', 'bb_isolation');
+                    addEx('legs_hinge', 'bb_isolation');
+                    if (duration >= 45) {
+                        addEx('legs_quad', 'bb_isolation');
+                        addEx('core', 'any');
+                    }
+                    if (duration >= 60) {
+                        addEx('legs_hinge', 'bb_isolation');
+                        addEx('core', 'any');
+                    }
+                } else {
+                    addEx('push', 'bb_compound');
+                    addEx('pull', 'bb_compound');
+                    addEx('push', 'bb_isolation');
+                    addEx('pull', 'bb_isolation');
+                    if (duration >= 45) { addEx('core', 'any'); addEx('core', 'any'); }
+                }
+
+            } else if (activeDoctrineKey === 'bb_hybrid') {
+                // 2. BB-DOMINANT HİBRİT (%70 Hipertrofi + %30 Fonksiyonel Kondisyon)
+                if (selectedSplit === 'full_body') {
+                    addEx('legs_quad', 'bb_compound');
+                    addEx('pull', 'bb_compound');
+                    addEx('legs_hinge', 'bb_compound');
+                    addEx('push', 'bb_compound');
+                    if (duration >= 45) {
+                        // Fonksiyonel Kettlebell / Kondisyon Bloğu
+                        addEx(['conditioning', 'legs_hinge', 'pull'], 'functional');
+                        addEx('core', 'functional');
+                    }
+                    if (duration >= 60) {
+                        addEx('push', 'bb_isolation');
+                        addEx(['conditioning', 'legs_quad'], 'functional');
+                    }
+                } else if (selectedSplit === 'upper_push') {
+                    addEx('push', 'bb_compound');
+                    addEx('push', 'bb_compound');
+                    addEx('push', 'bb_isolation');
+                    addEx(['conditioning', 'push'], 'functional'); // Thruster veya push press
+                    if (duration >= 45) {
+                        addEx('push', 'bb_isolation');
+                        addEx('core', 'functional');
+                    }
+                    if (duration >= 60) {
+                        addEx('push', 'bb_isolation');
+                        addEx(['conditioning', 'core'], 'functional');
+                    }
+                } else if (selectedSplit === 'upper_pull') {
+                    addEx('pull', 'bb_compound');
+                    addEx('pull', 'bb_compound');
+                    addEx('pull', 'bb_isolation');
+                    addEx(['legs_hinge', 'pull'], 'functional'); // Gorilla row veya swing
+                    if (duration >= 45) {
+                        addEx('pull', 'bb_isolation');
+                        addEx('core', 'functional');
+                    }
+                    if (duration >= 60) {
+                        addEx(['conditioning', 'pull'], 'functional');
+                        addEx('core', 'functional');
+                    }
+                } else if (selectedSplit === 'lower') {
+                    addEx('legs_quad', 'bb_compound');
+                    addEx('legs_hinge', 'bb_compound');
+                    addEx('legs_quad', 'bb_isolation');
+                    addEx(['conditioning', 'legs_hinge'], 'functional'); // Swing / Goblet
+                    if (duration >= 45) {
+                        addEx('legs_hinge', 'bb_isolation');
+                        addEx('core', 'functional');
+                    }
+                    if (duration >= 60) {
+                        addEx(['conditioning', 'legs_quad'], 'functional');
+                        addEx('core', 'functional');
+                    }
+                } else {
+                    addEx('push', 'bb_compound');
+                    addEx('pull', 'bb_compound');
+                    addEx('push', 'bb_isolation');
+                    addEx(['conditioning', 'pull'], 'functional');
+                    if (duration >= 45) { addEx('core', 'functional'); addEx('pull', 'bb_isolation'); }
+                }
+
+            } else if (activeDoctrineKey === 'balanced_hybrid') {
+                // 3. DENGELİ HİBRİT ATLET (50/50 Eşit: 1 Hipertrofi + 1 Fonksiyonel Süperset)
+                if (selectedSplit === 'full_body') {
+                    addEx('legs_quad', 'bb_compound');
+                    addEx(['pull', 'legs_hinge'], 'functional'); // Swing / Clean
+                    addEx('push', 'bb_compound');
+                    addEx(['conditioning', 'legs_quad'], 'functional'); // Thruster / Manmaker
+                    if (duration >= 45) {
+                        addEx('pull', 'bb_compound');
+                        addEx('core', 'functional'); // Carry / Rotation
+                    }
+                    if (duration >= 60) {
+                        addEx('push', 'bb_isolation');
+                        addEx(['conditioning', 'legs_hinge'], 'functional');
+                    }
+                } else if (selectedSplit === 'upper_push') {
+                    addEx('push', 'bb_compound');
+                    addEx(['push', 'conditioning'], 'functional');
+                    addEx('push', 'bb_isolation');
+                    addEx('core', 'functional');
+                    if (duration >= 45) {
+                        addEx('push', 'bb_compound');
+                        addEx('core', 'functional');
+                    }
+                } else if (selectedSplit === 'upper_pull') {
+                    addEx('pull', 'bb_compound');
+                    addEx(['legs_hinge', 'pull'], 'functional');
+                    addEx('pull', 'bb_isolation');
+                    addEx('core', 'functional');
+                    if (duration >= 45) {
+                        addEx('pull', 'bb_compound');
+                        addEx(['conditioning', 'pull'], 'functional');
+                    }
+                } else {
+                    addEx('legs_quad', 'bb_compound');
+                    addEx(['legs_hinge', 'conditioning'], 'functional');
+                    addEx('push', 'bb_compound');
+                    addEx('core', 'functional');
+                    if (duration >= 45) { addEx('pull', 'bb_compound'); addEx(['conditioning', 'legs_quad'], 'functional'); }
+                }
+
+            } else if (activeDoctrineKey === 'func_hybrid') {
+                // 4. FONKSİYONEL-DOMİNANT HİBRİT (%70 Fonksiyonel + %30 Zayıf Bölge Kas İğnesi)
+                addEx(['push', 'legs_quad'], 'functional'); // Thruster / Push Press
+                addEx(['pull', 'legs_hinge'], 'functional'); // Clean & Press / Swing
+                addEx('core', 'functional'); // Carries / Rotations
+                addEx(['legs_quad', 'conditioning'], 'functional'); // Manmaker / Burpee
+                if (duration >= 45) {
+                    // Kas İğnesi (Hypertrophy Boost)
+                    addEx(['push', 'pull'], 'bb_isolation');
+                    addEx('core', 'functional');
+                }
+                if (duration >= 60) {
+                    addEx(['push', 'pull'], 'bb_isolation');
+                    addEx(['conditioning', 'legs_hinge'], 'functional');
+                }
+
+            } else {
+                // 5. SAF FONKSİYONEL FITNESS & KONDİSYON
+                addEx(['push', 'legs_quad'], 'functional');
+                addEx(['pull', 'legs_hinge'], 'functional');
+                addEx('core', 'functional');
+                addEx(['legs_quad', 'conditioning'], 'functional');
+                if (duration >= 45) {
+                    addEx('core', 'functional');
+                    addEx(['pull', 'push'], 'functional');
+                }
+                if (duration >= 60) {
+                    addEx(['conditioning', 'core'], 'functional');
+                    addEx(['legs_hinge', 'conditioning'], 'functional');
+                }
+            }
+
+            // Dynamic Warmups
+            const warmups = [
+                { name: "Eklemsel CARs (Omuz & Kalça Dairesi)", dur: "90 sn", cue: "Tüm eklemleri kontrollü ve geniş dairelerle ısıt." },
+                { name: "World's Greatest Stretch (Kalça & Torasik Açış)", dur: "60 sn", cue: "Derin lunge pozisyonunda göğsü tavana doğru çevir." },
+                { name: "Kedi - Deve & Kuş Köpeği (Omurga Aktivasyonu)", dur: "60 sn", cue: "Nefes alarak beli çukurlaştır, nefes vererek sırtı kabart." }
+            ];
+
+            // Finisher
+            const finishers = [
+                { name: "3 Dk Tabata Balistik Bitiş", desc: "20 sn Maksimum Tempolu Swing / Burpee + 10 sn Dinlenme (4 Tur)" },
+                { name: "Çiftçi Taşıması (Farmer's Carry Burnout)", desc: "Mümkün olan en ağır dambıllarla 3 tur 40 metre kesintisiz yürüyüş." }
+            ];
+
+            const splitNames = {
+                full_body: "Tüm Vücut (Full Body)",
+                upper_push: "Üst İtiş (Push)",
+                upper_pull: "Üst Çekiş (Pull)",
+                lower: "Alt Vücut & Bacak",
+                upper: "Tüm Üst Vücut",
+                core: "Karın & Core Zırhı",
+                functional: "Fonksiyonel Fitness & Kondisyon"
+            };
+
+            currentGeneratedWorkout = {
+                id: 'gen_' + Date.now(),
+                title: `${activeDoc.name} • ${splitNames[selectedSplit]}`,
+                split: selectedSplit,
+                splitName: splitNames[selectedSplit],
+                doctrine: activeDoctrineKey,
+                doctrineName: activeDoc.name,
+                doctrineShort: activeDoc.shortTag,
+                doctrineBadgeColor: activeDoc.badgeColor,
+                customWish: customWish || '',
+                style,
+                goal,
+                duration,
+                scheme,
+                warmups,
+                exercises: chosenExercises,
+                finisher: finishers[Math.floor(Math.random() * finishers.length)],
+                createdAt: Date.now()
+            };
+
+            try {
+                localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(currentGeneratedWorkout));
+            } catch(e) {}
+
+            renderGeneratedWorkout();
+            playAlertSound();
+        }
+
+        function renderGeneratedWorkout() {
+            const w = currentGeneratedWorkout;
+            const container = document.getElementById('generatedWorkoutOutput');
+            if (!w || !container) return;
+
+            const user = getActiveUser();
+            const weights = user ? (user.weights || {}) : {};
+            const todayIdx = new Date().getDay();
+            const todayName = DAY_NAMES_TR[todayIdx] || 'Bugün';
+            const tomorrowIdx = (todayIdx + 1) % 7;
+            const tomorrowName = DAY_NAMES_TR[tomorrowIdx] || 'Yarın';
+
+            let blocksHtml = '';
+            if (w.style === 'superset') {
+                for (let i = 0; i < w.exercises.length; i += 2) {
+                    const blockLetter = String.fromCharCode(65 + Math.floor(i / 2));
+                    const ex1 = w.exercises[i];
+                    const ex2 = w.exercises[i + 1];
+
+                    blocksHtml += `
+                        <div class="block-header">SÜPERSET BLOK ${blockLetter} (Dinlenmeden Peş Peşe)</div>
+                        ${renderSingleExerciseCard(ex1, `${blockLetter}1`, w.scheme, weights, 'generated')}
+                        ${ex2 ? renderSingleExerciseCard(ex2, `${blockLetter}2`, w.scheme, weights, 'generated') : ''}
+                    `;
+                }
+            } else {
+                w.exercises.forEach((ex, idx) => {
+                    blocksHtml += renderSingleExerciseCard(ex, `${idx + 1}`, w.scheme, weights, 'generated');
+                });
+            }
+
+            const docBadge = w.doctrineName ? `
+                <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(168,85,247,0.18); border:1px solid ${w.doctrineBadgeColor || '#c084fc'}; padding:3px 10px; border-radius:12px; margin-bottom:6px;">
+                    <span style="font-size:11px; font-weight:900; color:${w.doctrineBadgeColor || '#c084fc'};">🎯 HİBRİT DOKTRİN: ${escapeHTML(w.doctrineName)} (${escapeHTML(w.doctrineShort || '')})</span>
+                </div>
+            ` : '';
+            const wishBadge = w.customWish ? `
+                <div style="font-size:11.5px; color:#e2e8f0; background:rgba(255,255,255,0.04); padding:4px 8px; border-radius:6px; margin-top:4px; display:inline-block;">
+                    🎯 <strong>Özel İstek/Not:</strong> "${escapeHTML(w.customWish)}"
+                </div>
+            ` : '';
+
+            container.innerHTML = `
+                <div class="workout-header-card">
+                    <div class="workout-title-row">
+                        <div>
+                            ${docBadge}
+                            <div class="badge-brand">HAZIRLANAN HİBRİT ANTRENMAN</div>
+                            <h2 class="workout-main-title">${escapeHTML(w.title)}</h2>
+                            ${wishBadge}
+                        </div>
+                        <div class="workout-meta-badges">
+                            <span class="meta-pill">⏱️ ${w.duration} Dk</span>
+                            <span class="meta-pill">🎯 ${w.scheme.sets} Set x ${w.scheme.reps}</span>
+                            <span class="meta-pill">⏳ ${w.scheme.rest}s Dinlenme</span>
+                        </div>
+                    </div>
+
+                    <!-- ACTION BUTTONS -->
+                    <div class="workout-actions-bar">
+                        <button class="btn-start-workout" onclick="startActiveWorkoutFromGenerated()">
+                            <span>▶️ ŞİMDİ BAŞLAT (SAYAÇ & SETLER)</span>
+                        </button>
+                        <button class="btn-action-secondary" style="border-color:var(--gold); color:var(--gold); font-weight:900; background:rgba(245,158,11,0.12);" onclick="assignGeneratedToToday()">
+                            <span>🔥 BUGÜNE ATA (${DAY_NAMES_TR[todayIdx]})</span>
+                        </button>
+                        <button class="btn-action-secondary" style="border-color:var(--cyan); color:var(--cyan); font-weight:800;" onclick="scheduleTomorrowFromGenerated()">
+                            <span>📅 Yarın İçin Programla (${tomorrowName})</span>
+                        </button>
+                        <button class="btn-action-secondary" style="border-color:rgba(255,255,255,0.2);" onclick="promptAssignGeneratedToAnyDay()">
+                            <span>📅 Haftanın Gününe Planla</span>
+                        </button>
+                        <button class="btn-action-secondary" onclick="saveGeneratedToLibrary()">
+                            <span>💾 Programlarıma Kaydet</span>
+                        </button>
+                        <button class="btn-action-secondary" onclick="handleGenerateWorkout()">
+                            <span>🎲 Farklı Varyasyon</span>
+                        </button>
+                    </div>
+
+                    <!-- WARMUP SECTION -->
+                    <div class="block-header" style="margin-top:24px;">🧘 Dinamik Isınma & Mobilite (5 Dakika)</div>
+                    <div style="background:rgba(0,0,0,0.25); border-radius:10px; padding:10px 14px;">
+                        ${w.warmups.map(wm => `
+                            <div style="font-size:12.5px; margin-bottom:6px;">
+                                <strong style="color:var(--gold-light);">${escapeHTML(wm.name)}</strong> (${wm.dur}): 
+                                <span style="color:var(--text-secondary);">${escapeHTML(wm.cue)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <!-- MAIN EXERCISES -->
+                    ${blocksHtml}
+
+                    <div style="text-align:center; margin:16px 0 24px;">
+                        <button class="btn btn-outline" style="border-style:dashed; border-color:var(--cyan); color:var(--cyan); font-size:12.5px; padding:10px 18px;" onclick="openAddExerciseModal('generated')">
+                            ➕ Bu Antrenmana Yeni Hareket Ekle
+                        </button>
+                    </div>
+
+                    <!-- FINISHER -->
+                    <div class="block-header">🔥 Balistik Bitiş / Finisher</div>
+                    <div style="background:rgba(225, 29, 72, 0.1); border-left:4px solid var(--red-alert); border-radius:8px; padding:10px 14px;">
+                        <strong style="color:#fff; font-size:13px;">${escapeHTML(w.finisher.name)}</strong>
+                        <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">${escapeHTML(w.finisher.desc)}</div>
+                    </div>
+                </div>
+            `;
+
+            if (container.scrollIntoView) container.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function switchGuideTab(collapseId, tabName) {
+            const panels = ['form', 'anatomi', 'adimlar'];
+            panels.forEach(p => {
+                const panelEl = document.getElementById(`panel_${p}_${collapseId}`);
+                const btnEl = document.getElementById(`tab_btn_${p}_${collapseId}`);
+                if (panelEl) {
+                    if (p === tabName) {
+                        panelEl.classList.add('active');
+                    } else {
+                        panelEl.classList.remove('active');
+                    }
+                }
+                if (btnEl) {
+                    if (p === tabName) {
+                        btnEl.classList.add('active');
+                    } else {
+                        btnEl.classList.remove('active');
+                    }
+                }
+            });
+        }
+
+        function togglePosGuide(collapseId) {
+            const el = document.getElementById(collapseId);
+            const btn = document.getElementById('icon_' + collapseId);
+            if (!el) return;
+            if (el.classList.contains('collapsed')) {
+                el.classList.remove('collapsed');
+                if (btn) btn.innerText = '📖 Formu Gizle ▲';
+            } else {
+                el.classList.add('collapsed');
+                if (btn) btn.innerText = '📖 Formu Gör ▼';
+            }
+        }
+
+        function togglePosExtraInfo(infoId) {
+            const body = document.getElementById('body_' + infoId);
+            const arrow = document.getElementById('arrow_' + infoId);
+            if (!body) return;
+            const isHidden = (body.style.display === 'none' || body.classList.contains('collapsed'));
+            if (isHidden) {
+                body.style.display = 'block';
+                body.classList.remove('collapsed');
+                if (arrow) arrow.innerHTML = '▲ Gizle';
+            } else {
+                body.style.display = 'none';
+                body.classList.add('collapsed');
+                if (arrow) arrow.innerHTML = '▼ Göster';
+            }
+        }
+
+        function openImageLightbox(src, title) {
+            if (!src) return;
+            const modal = document.getElementById('imageLightboxModal');
+            const img = document.getElementById('lightboxImg');
+            const titleEl = document.getElementById('lightboxTitle');
+            const zoomText = document.getElementById('lightboxZoomText');
+            if (!modal || !img) return;
+
+            img.src = src;
+            img.classList.remove('zoomed');
+            if (titleEl) titleEl.textContent = title || 'Egzersiz Formu';
+            if (zoomText) zoomText.textContent = 'Büyüt (%180)';
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageLightbox(event) {
+            if (event && event.target && event.target.closest('.lightbox-content-box') && !event.target.classList.contains('btn-lightbox-close')) {
+                return;
+            }
+            const modal = document.getElementById('imageLightboxModal');
+            if (modal) {
+                modal.classList.remove('active');
+                const img = document.getElementById('lightboxImg');
+                if (img) img.classList.remove('zoomed');
+            }
+            document.body.style.overflow = '';
+        }
+
+        function toggleLightboxZoom() {
+            const img = document.getElementById('lightboxImg');
+            const zoomText = document.getElementById('lightboxZoomText');
+            if (!img) return;
+            const isZoomed = img.classList.toggle('zoomed');
+            if (zoomText) {
+                zoomText.textContent = isZoomed ? 'Sığdır' : 'Büyüt (%180)';
+            }
+        }
+
+        function toggleDiagramScroll(wrapId) {
+            const wrap = document.getElementById(wrapId);
+            if (!wrap) return;
+            const isEnlarged = wrap.classList.toggle('enlarged');
+            const btn = wrap.querySelector('.btn-scroll-toggle');
+            if (btn) {
+                btn.classList.toggle('scroll-active', isEnlarged);
+                const textSpan = btn.querySelector('.tool-text');
+                if (textSpan) {
+                    textSpan.textContent = isEnlarged ? 'Sığdır' : 'Kaydırarak Büyüt';
+                }
+            }
+        }
+
+        window.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('imageLightboxModal');
+                if (modal && modal.classList.contains('active')) {
+                    closeImageLightbox();
+                }
+            }
+        });
+
+        function renderExercisePositionsHtml(exInput, uniquePrefix = '', defaultCollapsed = false) {
+            if (!exInput) return '';
+            const ex = (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB)) 
+                ? (EXERCISES_DB.find(e => e.id === exInput.id) || exInput)
+                : exInput;
+
+            if (!ex.positions || !Array.isArray(ex.positions) || ex.positions.length === 0) {
+                return '';
+            }
+
+            const isComplex = !!ex.isComplex;
+            const badgeType = isComplex ? 'pos-badge-complex' : 'pos-badge-standard';
+            const typeLabel = isComplex 
+                ? `🔥 Kompleks Hareket (${ex.positions.length} Aşama)` 
+                : `📐 3 Aşamalı Form Kılavuzu`;
+
+            const collapseId = `posGuide_${uniquePrefix}_${ex.id}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+
+            const badgeStyles = {
+                setup: { bg: 'rgba(56, 189, 248, 0.15)', text: '#38bdf8', border: 'rgba(56, 189, 248, 0.35)', icon: '🟢' },
+                action: { bg: 'rgba(245, 158, 11, 0.15)', text: '#fbbf24', border: 'rgba(245, 158, 11, 0.35)', icon: '⚡' },
+                trans: { bg: 'rgba(236, 72, 153, 0.15)', text: '#f472b6', border: 'rgba(236, 72, 153, 0.35)', icon: '🔄' },
+                finish: { bg: 'rgba(16, 185, 129, 0.15)', text: '#34d399', border: 'rgba(16, 185, 129, 0.35)', icon: '🏁' }
+            };
+
+            const stepsHtml = ex.positions.map((p, idx) => {
+                const style = badgeStyles[p.badge] || badgeStyles.setup;
+                return `
+                    <div class="pos-step-card">
+                        <div class="pos-step-header" style="background:${style.bg}; border-color:${style.border}; color:${style.text};">
+                            <span>${style.icon} ${escapeHTML(p.phase)}</span>
+                        </div>
+                        <div class="pos-step-desc">
+                            ${escapeHTML(p.desc)}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const guideLibrary = {
+            db_thruster: { form: 'assets/guides/guide_db_thruster_form.jpg', anatomi: 'assets/guides/guide_db_thruster_anatomi.jpg' },
+            db_push_press: { form: 'assets/guides/guide_db_push_press_form.jpg', anatomi: 'assets/guides/guide_db_push_press_anatomi.jpg' },
+            db_renegade_pushup: { form: 'assets/guides/guide_db_renegade_pushup_form.jpg', anatomi: 'assets/guides/guide_db_renegade_pushup_anatomi.jpg' },
+            bear_crawl_pull_through: { form: 'assets/guides/guide_bear_crawl_pull_through_form.jpg', anatomi: 'assets/guides/guide_bear_crawl_pull_through_anatomi.jpg' },
+            db_clean_and_press: { form: 'assets/guides/guide_db_clean_and_press_form.jpg', anatomi: 'assets/guides/guide_db_clean_and_press_anatomi.jpg' },
+            db_manmaker: { form: 'assets/guides/guide_db_manmaker_form.jpg', anatomi: 'assets/guides/guide_db_manmaker_anatomi.jpg' },
+            waiters_carry: { form: 'assets/guides/guide_waiters_carry_form.jpg', anatomi: 'assets/guides/guide_waiters_carry_anatomi.jpg' },
+            cross_body_carry: { form: 'assets/guides/guide_cross_body_carry_form.jpg', anatomi: 'assets/guides/guide_cross_body_carry_anatomi.jpg' },
+            lunge_with_twist: { form: 'assets/guides/guide_lunge_with_twist_form.jpg', anatomi: 'assets/guides/guide_lunge_with_twist_anatomi.jpg' },
+            step_up_press: { form: 'assets/guides/guide_step_up_press_form.jpg', anatomi: 'assets/guides/guide_step_up_press_anatomi.jpg' },
+                half_kneeling_plate_chop: { form: 'assets/guides/guide_half_kneeling_plate_chop_form.jpg', anatomi: 'assets/guides/guide_half_kneeling_plate_chop_anatomi.jpg' },
+                kneeling_plate_front_raise: { form: 'assets/guides/guide_kneeling_plate_front_raise_form.jpg', anatomi: 'assets/guides/guide_kneeling_plate_front_raise_anatomi.jpg' },
+                goblet_squat: { form: 'assets/guides/guide_db_goblet_squat_form.jpg', anatomi: 'assets/guides/guide_db_goblet_squat_anatomi.jpg' },
+                back_squat: { form: 'assets/guides/guide_bb_back_squat_form.jpg', anatomi: 'assets/guides/guide_bb_back_squat_anatomi.jpg' },
+                lunge: { form: 'assets/guides/guide_db_walking_lunge_form.jpg', anatomi: 'assets/guides/guide_db_walking_lunge_anatomi.jpg' },
+                bulgarian_squat: { form: 'assets/guides/guide_db_bulgarian_squat_form.jpg', anatomi: 'assets/guides/guide_db_bulgarian_squat_anatomi.jpg' },
+                deadlift: { form: 'assets/guides/guide_bb_deadlift_form.jpg', anatomi: 'assets/guides/guide_bb_deadlift_anatomi.jpg' },
+                rdl: { form: 'assets/guides/guide_db_rdl_form.jpg', anatomi: 'assets/guides/guide_db_rdl_anatomi.jpg' },
+                single_leg_rdl: { form: 'assets/guides/guide_db_single_leg_rdl_form.jpg', anatomi: 'assets/guides/guide_db_single_leg_rdl_anatomi.jpg' },
+                hip_thrust: { form: 'assets/guides/guide_bb_hip_thrust_form.jpg', anatomi: 'assets/guides/guide_bb_hip_thrust_anatomi.jpg' },
+                bench: { form: 'assets/guides/guide_db_bench_press_form.jpg', anatomi: 'assets/guides/guide_db_bench_press_anatomi.jpg' },
+                overhead: { form: 'assets/guides/guide_db_overhead_press_form.jpg', anatomi: 'assets/guides/guide_db_overhead_press_anatomi.jpg' },
+                lateral_raise: { form: 'assets/guides/guide_db_lateral_raise_form.jpg', anatomi: 'assets/guides/guide_db_lateral_raise_anatomi.jpg' },
+                saw_row: { form: 'assets/guides/guide_db_saw_row_form.jpg', anatomi: 'assets/guides/guide_db_saw_row_anatomi.jpg' },
+                pullup: { form: 'assets/guides/guide_bw_pullup_form.jpg', anatomi: 'assets/guides/guide_bw_pullup_anatomi.jpg' },
+                curl: { form: 'assets/guides/guide_db_biceps_curl_form.jpg', anatomi: 'assets/guides/guide_db_biceps_curl_anatomi.jpg' },
+                triceps: { form: 'assets/guides/guide_mach_triceps_pushdown_form.jpg', anatomi: 'assets/guides/guide_mach_triceps_pushdown_anatomi.jpg' },
+                skullcrusher: { form: 'assets/guides/guide_db_skullcrusher_form.jpg', anatomi: 'assets/guides/guide_db_skullcrusher_anatomi.jpg' },
+                triceps_overhead: { form: 'assets/guides/guide_db_triceps_overhead_form.jpg', anatomi: 'assets/guides/guide_db_triceps_overhead_anatomi.jpg' },
+                pushup: { form: 'assets/guides/guide_bw_pushup_form.jpg', anatomi: 'assets/guides/guide_bw_pushup_anatomi.jpg' },
+                dips: { form: 'assets/guides/guide_bw_dips_form.jpg', anatomi: 'assets/guides/guide_bw_dips_anatomi.jpg' },
+                face_pull: { form: 'assets/guides/guide_mach_face_pull_form.jpg', anatomi: 'assets/guides/guide_mach_face_pull_anatomi.jpg' },
+                snatch: { form: 'assets/guides/guide_db_snatch_form.jpg', anatomi: 'assets/guides/guide_db_snatch_anatomi.jpg' },
+            clean: { form: 'assets/guides/guide_kb_clean_form.jpg', anatomi: 'assets/guides/guide_kb_clean_anatomi.jpg' },
+            leg_press: { form: 'assets/guides/guide_mach_leg_press_form.jpg', anatomi: 'assets/guides/guide_mach_leg_press_anatomi.jpg' },
+            leg_extension: { form: 'assets/guides/guide_mach_leg_extension_form.jpg', anatomi: 'assets/guides/guide_mach_leg_extension_anatomi.jpg' },
+            calf_raise: { form: 'assets/guides/guide_mach_calf_raise_form.jpg', anatomi: 'assets/guides/guide_mach_calf_raise_anatomi.jpg' },
+            leg_curl: { form: 'assets/guides/guide_mach_leg_curl_form.jpg', anatomi: 'assets/guides/guide_mach_leg_curl_anatomi.jpg' },
+            lat_pulldown: { form: 'assets/guides/guide_mach_lat_pulldown_form.jpg', anatomi: 'assets/guides/guide_mach_lat_pulldown_anatomi.jpg' },
+                swing: { form: 'assets/guides/guide_db_swing_form.jpg', anatomi: 'assets/guides/guide_db_swing_anatomi.jpg' },
+                plank: { form: 'assets/guides/guide_bw_plank_form.jpg', anatomi: 'assets/guides/guide_bw_plank_anatomi.jpg' },
+                farmers_walk: { form: 'assets/guides/guide_db_farmers_walk_form.jpg', anatomi: 'assets/guides/guide_db_farmers_walk_anatomi.jpg' },
+                russian_twist: { form: 'assets/guides/guide_db_russian_twist_form.jpg', anatomi: 'assets/guides/guide_db_russian_twist_anatomi.jpg' },
+                hanging_knee_raise: { form: 'assets/guides/guide_bw_hanging_knee_raise_form.jpg', anatomi: 'assets/guides/guide_bw_hanging_knee_raise_anatomi.jpg' },
+                halo: { form: 'assets/guides/guide_kb_halo_form.jpg', anatomi: 'assets/guides/guide_kb_halo_anatomi.jpg' },
+                windmill: { form: 'assets/guides/guide_kb_windmill_form.jpg', anatomi: 'assets/guides/guide_kb_windmill_anatomi.jpg' },
+            hollow_body: { form: 'assets/guides/guide_bw_hollow_body_form.jpg', anatomi: 'assets/guides/guide_bw_hollow_body_anatomi.jpg' },
+            mountain_climber: { form: 'assets/guides/guide_bw_mountain_climber_form.jpg', anatomi: 'assets/guides/guide_bw_mountain_climber_anatomi.jpg' },
+            burpee: { form: 'assets/guides/guide_bw_burpee_form.jpg', anatomi: 'assets/guides/guide_bw_burpee_anatomi.jpg' },
+            pullover: { form: 'assets/guides/guide_db_pullover_form.jpg', anatomi: 'assets/guides/guide_db_pullover_anatomi.jpg' },
+            cable_woodchopper: { form: 'assets/guides/guide_mach_cable_woodchopper_form.jpg', anatomi: 'assets/guides/guide_mach_cable_woodchopper_anatomi.jpg' },
+            glute_bridge: { form: 'assets/guides/guide_bw_glute_bridge_form.jpg', anatomi: 'assets/guides/guide_bw_glute_bridge_anatomi.jpg' },
+            kb_swing: { form: 'assets/guides/guide_kb_swing_form.jpg', anatomi: 'assets/guides/guide_kb_swing_anatomi.jpg' },
+            air_squat: { form: 'assets/guides/guide_bw_air_squat_form.jpg', anatomi: 'assets/guides/guide_bw_air_squat_anatomi.jpg' },
+
+            incline_press: { form: 'assets/guides/guide_db_incline_press_form.jpg', anatomi: 'assets/guides/guide_db_incline_press_anatomi.jpg' },
+            floor_press: { form: 'assets/guides/guide_db_floor_press_form.jpg', anatomi: 'assets/guides/guide_db_floor_press_anatomi.jpg' },
+            arnold_press: { form: 'assets/guides/guide_db_arnold_press_form.jpg', anatomi: 'assets/guides/guide_db_arnold_press_anatomi.jpg' },
+            bb_bench: { form: 'assets/guides/guide_bb_bench_press_form.jpg', anatomi: 'assets/guides/guide_bb_bench_press_anatomi.jpg' },
+            pec_deck: { form: 'assets/guides/guide_mach_pec_deck_form.jpg', anatomi: 'assets/guides/guide_mach_pec_deck_anatomi.jpg' },
+            diamond_pushup: { form: 'assets/guides/guide_bw_diamond_pushup_form.jpg', anatomi: 'assets/guides/guide_bw_diamond_pushup_anatomi.jpg' },
+            kb_press: { form: 'assets/guides/guide_kb_press_form.jpg', anatomi: 'assets/guides/guide_kb_press_anatomi.jpg' },
+            cable_lateral: { form: 'assets/guides/guide_mach_cable_lateral_form.jpg', anatomi: 'assets/guides/guide_mach_cable_lateral_anatomi.jpg' },
+            cable_row: { form: 'assets/guides/guide_mach_cable_row_form.jpg', anatomi: 'assets/guides/guide_mach_cable_row_anatomi.jpg' },
+            chinup: { form: 'assets/guides/guide_bw_chinup_form.jpg', anatomi: 'assets/guides/guide_bw_chinup_anatomi.jpg' },
+            inverted_row: { form: 'assets/guides/guide_bw_inverted_row_form.jpg', anatomi: 'assets/guides/guide_bw_inverted_row_anatomi.jpg' },
+            chest_supported_row: { form: 'assets/guides/guide_db_chest_supported_row_form.jpg', anatomi: 'assets/guides/guide_db_chest_supported_row_anatomi.jpg' },
+            renegade_row: { form: 'assets/guides/guide_db_renegade_row_form.jpg', anatomi: 'assets/guides/guide_db_renegade_row_anatomi.jpg' },
+            incline_curl: { form: 'assets/guides/guide_db_incline_curl_form.jpg', anatomi: 'assets/guides/guide_db_incline_curl_anatomi.jpg' },
+            gorilla_row: { form: 'assets/guides/guide_kb_gorilla_row_form.jpg', anatomi: 'assets/guides/guide_kb_gorilla_row_anatomi.jpg' },
+            pendlay_row: { form: 'assets/guides/guide_bb_pendlay_row_form.jpg', anatomi: 'assets/guides/guide_bb_pendlay_row_anatomi.jpg' },
+            bb_thruster: { form: 'assets/guides/guide_bb_thruster_form.png', anatomi: null },
+            bb_hang_power_clean: { form: 'assets/guides/guide_bb_hang_power_clean_form.png', anatomi: null },
+            bb_push_press: { form: 'assets/guides/guide_bb_push_press_form.png', anatomi: null },
+            bb_zercher_squat: { form: 'assets/guides/guide_bb_zercher_squat_form.png', anatomi: null },
+            bb_landmine_squat_press: { form: 'assets/guides/guide_bb_landmine_squat_press_form.png', anatomi: null },
+        };
+
+            const exerciseGuideMap = {
+            'db_thruster': guideLibrary.db_thruster,
+            'db_push_press': guideLibrary.db_push_press,
+            'db_renegade_pushup': guideLibrary.db_renegade_pushup,
+            'bear_crawl_pull_through': guideLibrary.bear_crawl_pull_through,
+            'db_clean_and_press': guideLibrary.db_clean_and_press,
+            'db_manmaker': guideLibrary.db_manmaker,
+            'waiters_carry': guideLibrary.waiters_carry,
+            'cross_body_carry': guideLibrary.cross_body_carry,
+            'lunge_with_twist': guideLibrary.lunge_with_twist,
+            'step_up_press': guideLibrary.step_up_press,
+                'half_kneeling_plate_chop': guideLibrary.half_kneeling_plate_chop,
+                'kneeling_plate_front_raise': guideLibrary.kneeling_plate_front_raise,
+                // Squats & Quads
+                'db_goblet_squat': guideLibrary.goblet_squat,
+                'db_front_squat': guideLibrary.goblet_squat,
+                'kb_goblet_squat': guideLibrary.goblet_squat,
+                'bw_air_squat': guideLibrary.air_squat,
+                'bw_jump_squat': guideLibrary.air_squat,
+                'bb_back_squat': guideLibrary.back_squat,
+                'bb_front_squat': guideLibrary.back_squat,
+                'mach_leg_press': guideLibrary.leg_press,
+                'mach_leg_extension': guideLibrary.leg_extension,
+                'mach_calf_raise': guideLibrary.calf_raise,
+            'db_standing_calf_raise': guideLibrary.calf_raise,
+            'db_lying_leg_curl': guideLibrary.leg_curl,
+            'bw_sissy_squat': guideLibrary.leg_extension,
+
+                // Lunges & Unilateral
+                'db_walking_lunge': guideLibrary.lunge,
+                'db_reverse_lunge': guideLibrary.lunge,
+                'db_bulgarian_squat': guideLibrary.bulgarian_squat,
+
+                // Deadlift, RDL & Glutes
+                'bb_deadlift': guideLibrary.deadlift,
+                'bb_rdl': guideLibrary.rdl,
+                'db_rdl': guideLibrary.rdl,
+                'db_single_leg_rdl': guideLibrary.single_leg_rdl,
+                'mach_leg_curl': guideLibrary.leg_curl,
+                'bb_hip_thrust': guideLibrary.hip_thrust,
+                'bw_glute_bridge': guideLibrary.glute_bridge,
+
+                // Swings & Snatches
+                'db_swing': guideLibrary.swing,
+                'kb_swing': guideLibrary.kb_swing,
+                'db_snatch': guideLibrary.snatch,
+                'kb_half_snatch': guideLibrary.snatch,
+                'kb_clean': guideLibrary.clean,
+
+                // Horizontal Chest Push
+                'db_bench_press': guideLibrary.bench,
+                'db_floor_press': guideLibrary.floor_press,
+                'db_incline_press': guideLibrary.incline_press,
+                'bb_bench_press': guideLibrary.bb_bench,
+                'bb_incline_bench': guideLibrary.incline_press,
+                'mach_cable_crossover': guideLibrary.pec_deck,
+                'mach_pec_deck': guideLibrary.pec_deck,
+
+                // Push-ups & Dips
+                'bw_pushup': guideLibrary.pushup,
+                'bw_diamond_pushup': guideLibrary.diamond_pushup,
+                'bw_decline_pushup': guideLibrary.pushup,
+                'bw_dips': guideLibrary.dips,
+                'bw_burpee': guideLibrary.burpee,
+
+                // Overhead Shoulder Push
+                'db_overhead_press': guideLibrary.overhead,
+                'db_arnold_press': guideLibrary.arnold_press,
+                'kb_press': guideLibrary.kb_press,
+                'bb_overhead_press': guideLibrary.overhead,
+                'kb_thruster': guideLibrary.db_thruster,
+                'kb_halo': guideLibrary.halo,
+
+                // Lateral Shoulder
+                'db_lateral_raise': guideLibrary.lateral_raise,
+                'mach_cable_lateral': guideLibrary.cable_lateral,
+
+                // Triceps
+                'mach_triceps_pushdown': guideLibrary.triceps,
+                'db_triceps_overhead': guideLibrary.triceps_overhead,
+                'db_skullcrusher': guideLibrary.skullcrusher,
+                'bb_close_grip_bench': guideLibrary.bb_bench,
+
+                // Horizontal Pull (Rows) & Pullover
+                'db_saw_row': guideLibrary.saw_row,
+                'db_chest_supported_row': guideLibrary.chest_supported_row,
+                'kb_gorilla_row': guideLibrary.gorilla_row,
+                'db_renegade_row': guideLibrary.renegade_row,
+                'bb_bent_over_row': guideLibrary.pendlay_row,
+                'bb_pendlay_row': guideLibrary.pendlay_row,
+                'mach_cable_row': guideLibrary.cable_row,
+                'bw_inverted_row': guideLibrary.inverted_row,
+                'db_pullover': guideLibrary.pullover,
+
+                // Vertical Pull
+                'bw_pullup': guideLibrary.pullup,
+                'bw_chinup': guideLibrary.chinup,
+                'mach_lat_pulldown': guideLibrary.lat_pulldown,
+
+                // Face Pull
+                'mach_face_pull': guideLibrary.face_pull,
+
+                // Biceps
+                'db_hammer_curl': guideLibrary.curl,
+                'db_incline_curl': guideLibrary.incline_curl,
+                'bb_biceps_curl': guideLibrary.curl,
+                'mach_cable_biceps': guideLibrary.curl,
+
+                // Core, Carries & Rotations
+                'db_farmers_walk': guideLibrary.farmers_walk,
+                'db_suitcase_carry': guideLibrary.farmers_walk,
+                'db_russian_twist': guideLibrary.russian_twist,
+                'mach_cable_woodchopper': guideLibrary.cable_woodchopper,
+                'bw_plank': guideLibrary.plank,
+                'bw_hollow_body': guideLibrary.hollow_body,
+                'bw_mountain_climber': guideLibrary.mountain_climber,
+                'bw_hanging_knee_raise': guideLibrary.hanging_knee_raise,
+                'kb_windmill': guideLibrary.windmill,
+                'kb_turkish_getup': guideLibrary.windmill
+            };
+
+            const categoryFallback = {
+                'legs_quad': guideLibrary.goblet_squat,
+                'legs_hinge': guideLibrary.deadlift,
+                'push': guideLibrary.bench,
+                'pull': guideLibrary.saw_row,
+                'core': guideLibrary.plank,
+                'conditioning': guideLibrary.pushup
+            };
+
+            const photoGuide = (exerciseGuideMap && exerciseGuideMap[ex.id]) 
+                || (categoryFallback && categoryFallback[ex.category]) 
+                || null;
+            const hasAnatomy = !!(photoGuide && photoGuide.anatomi);
+
+            const extraInfoId = `extra_info_${collapseId}`;
+            const extraInfoHtml = `
+                <div class="pos-extra-info-container">
+                    <button type="button" class="btn-toggle-pos-info" onclick="event.stopPropagation(); togglePosExtraInfo('${extraInfoId}')" id="btn_${extraInfoId}">
+                        <span>ℹ️ Kas Grupları &amp; Form / Güvenlik İpuçları</span>
+                        <span class="pos-info-arrow" id="arrow_${extraInfoId}">▼ Göster</span>
+                    </button>
+                    <div class="pos-extra-info-body" id="body_${extraInfoId}" style="display:none; margin-top:8px;">
+                        <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:8px; padding:8px 10px; margin-bottom:8px;">
+                            <div style="font-size:10.5px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:5px;">🎯 Çalıştırılan Kas Grupları:</div>
+                            <div style="display:flex; flex-wrap:wrap; gap:5px;">
+                                ${(ex.primaryMuscles || []).map(m => `<span style="background:rgba(245,158,11,0.2); color:var(--gold); border:1px solid rgba(245,158,11,0.4); padding:2px 7px; border-radius:10px; font-size:10.5px; font-weight:800;">${(typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m] ? STUDIO_REGION_MAP[m].icon + ' ' + STUDIO_REGION_MAP[m].name : m)} (Primer)</span>`).join('')}
+                                ${(ex.secondaryMuscles || []).map(m => `<span style="background:rgba(56,189,248,0.15); color:var(--cyan); border:1px solid rgba(56,189,248,0.35); padding:2px 7px; border-radius:10px; font-size:10.5px; font-weight:700;">${(typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m] ? STUDIO_REGION_MAP[m].icon + ' ' + STUDIO_REGION_MAP[m].name : m)} (Sekonder)</span>`).join('')}
+                            </div>
+                        </div>
+                        ${ex.cue ? `
+                            <div style="font-size:11.5px; color:#fde047; background:rgba(234,179,8,0.12); border-left:3px solid #eab308; padding:7px 10px; border-radius:6px; margin-bottom:6px; line-height:1.4;">
+                                ⚠️ <strong>Kritik Form &amp; Güvenlik Uyarısı:</strong> ${escapeHTML(ex.cue)}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+
+            let formVisualHtml = '';
+            if (photoGuide && photoGuide.form) {
+                formVisualHtml = `
+                    <div class="pos-diagram-wrap" id="wrap_form_${collapseId}">
+                        <div class="pos-diagram-toolbar">
+                            <button type="button" class="btn-diagram-tool btn-scroll-toggle" onclick="event.stopPropagation(); toggleDiagramScroll('wrap_form_${collapseId}')" title="Genişlet ve parmakla sağa-sola kaydırarak incele">
+                                <span class="tool-icon">↔️</span> <span class="tool-text">Kaydırarak Büyüt</span>
+                            </button>
+                            <button type="button" class="btn-diagram-tool" onclick="event.stopPropagation(); openImageLightbox('${photoGuide.form}', '${escapeHTML(ex.name)} - Form Rehberi')" title="Tam ekran mod">
+                                <span class="tool-icon">⛶</span> <span class="tool-text">Tam Ekran</span>
+                            </button>
+                            <button type="button" class="btn-diagram-tool btn-report-bug" onclick="event.stopPropagation(); openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '${photoGuide.form}', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}')" title="Görsel veya hareket hatalıysa Firebase hata havuzuna bildir">
+                                <span class="tool-icon">⚠️</span> <span class="tool-text">Hata Bildir</span>
+                            </button>
+                        </div>
+                        <div class="pos-diagram-img-box" onclick="event.stopPropagation(); openImageLightbox('${photoGuide.form}', '${escapeHTML(ex.name)} - Form Rehberi')">
+                            <img src="${photoGuide.form}" alt="${escapeHTML(ex.name)} Form Rehberi" class="pos-diagram-img" loading="lazy">
+                            <div class="pos-diagram-zoom-hint">🔍 Dokun: Büyüt</div>
+                        </div>
+                        <div class="pos-diagram-scroll-indicator">
+                            ↔️ Adımları yakından incelemek için sağa/sola kaydırın
+                        </div>
+                    </div>
+                    ${extraInfoHtml}
+                `;
+            } else {
+                formVisualHtml = extraInfoHtml;
+            }
+
+            let anatomiVisualHtml = '';
+            if (hasAnatomy) {
+                anatomiVisualHtml = `
+                    <div class="pos-diagram-wrap" id="wrap_anatomi_${collapseId}">
+                        <div class="pos-diagram-toolbar">
+                            <button type="button" class="btn-diagram-tool btn-scroll-toggle" onclick="event.stopPropagation(); toggleDiagramScroll('wrap_anatomi_${collapseId}')" title="Genişlet ve incele">
+                                <span class="tool-icon">↔️</span> <span class="tool-text">Kaydırarak Büyüt</span>
+                            </button>
+                            <button type="button" class="btn-diagram-tool" onclick="event.stopPropagation(); openImageLightbox('${photoGuide.anatomi}', '${escapeHTML(ex.name)} - Hedef Kas Anatomisi')" title="Tam ekran mod">
+                                <span class="tool-icon">⛶</span> <span class="tool-text">Tam Ekran</span>
+                            </button>
+                        </div>
+                        <div class="pos-diagram-img-box" onclick="event.stopPropagation(); openImageLightbox('${photoGuide.anatomi}', '${escapeHTML(ex.name)} - Hedef Kas Anatomisi')">
+                            <img src="${photoGuide.anatomi}" alt="${escapeHTML(ex.name)} Hedef Kaslar" class="pos-diagram-img" loading="lazy">
+                            <div class="pos-diagram-zoom-hint">🔍 Dokun: Büyüt</div>
+                        </div>
+                        <div class="pos-diagram-scroll-indicator">
+                            ↔️ Kas gruplarını incelemek için sağa/sola kaydırın
+                        </div>
+                    </div>
+                `;
+            } else {
+                anatomiVisualHtml = `
+                    <div style="background:rgba(0,0,0,0.3); border-radius:8px; padding:16px; text-align:center; color:var(--text-secondary); font-size:12px;">
+                        🎯 <strong>Hedeflenen Kas Grubu:</strong> <span style="color:var(--gold); font-weight:800;">${escapeHTML(ex.muscle || '')}</span>
+                    </div>
+                `;
+            }
+
+            const contentClass = defaultCollapsed ? 'pos-guide-content collapsed' : 'pos-guide-content';
+            const btnText = defaultCollapsed ? '📖 Formu Gör ▼' : '📖 Formu Gizle ▲';
+
+            return `
+                <div class="pos-guide-wrapper">
+                    <div class="pos-guide-header" onclick="event.stopPropagation(); togglePosGuide('${collapseId}')" style="padding:6px 10px;">
+                        <span class="pos-type-badge ${badgeType}" style="padding:3px 8px; font-size:11px;">📐 Form Kılavuzu</span>
+                        <button type="button" class="btn-toggle-guide" id="btn_${collapseId}" onclick="event.stopPropagation(); togglePosGuide('${collapseId}')" style="padding:3px 8px; font-size:11.5px;">
+                            <span id="icon_${collapseId}">${btnText}</span>
+                        </button>
+                    </div>
+                    <div class="${contentClass}" id="${collapseId}">
+                        <!-- TABS SWITCHER (BASİT İKONLAR) -->
+                        <div class="guide-toggle-tabs" style="display:flex; justify-content:center; gap:6px; padding:4px;">
+                            <button type="button" class="btn-guide-tab active" id="tab_btn_form_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'form')" title="Form Rehberi" style="padding:5px 12px; font-size:12px; font-weight:800;">
+                                📸 Form
+                            </button>
+                            <button type="button" class="btn-guide-tab" id="tab_btn_anatomi_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'anatomi')" title="Çalışan Kaslar" style="padding:5px 12px; font-size:12px; font-weight:800;">
+                                🧬 Kaslar
+                            </button>
+                            <button type="button" class="btn-guide-tab" id="tab_btn_adimlar_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'adimlar')" title="Adım Adım Talimatlar" style="padding:5px 12px; font-size:12px; font-weight:800;">
+                                📝 Adımlar
+                            </button>
+                        </div>
+
+                        <!-- PANEL 1: FORM PHOTO / VECTOR -->
+                        <div class="guide-tab-panel active" id="panel_form_${collapseId}">
+                            ${formVisualHtml}
+                        </div>
+
+                        <!-- PANEL 2: ANATOMY PHOTO -->
+                        <div class="guide-tab-panel" id="panel_anatomi_${collapseId}">
+                            ${anatomiVisualHtml}
+                        </div>
+
+                        <!-- PANEL 3: STEP-BY-STEP CARDS -->
+                        <div class="guide-tab-panel" id="panel_adimlar_${collapseId}">
+                            <div class="pos-steps-grid cols-${ex.positions.length}">
+                                ${stepsHtml}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSingleExerciseCard(ex, label, scheme, weights, scope = 'generated') {
+            const equipLabels = {
+                dumbbell: 'Dambıl',
+                kettlebell: 'Kettlebell',
+                barbell: 'Barbell',
+                machine: 'Makine/Kablo',
+                bodyweight: 'Vücut Ağırlığı'
+            };
+
+            const anatomy = getExerciseAnatomy(ex);
+            const targetW = ex.weightKey && weights[ex.weightKey] ? weights[ex.weightKey] : null;
+
+            return `
+                <div class="ex-card" id="card_${ex.id}">
+                    <div class="ex-card-header">
+                        <div class="ex-name">
+                            <span style="color:var(--gold); font-weight:900;">${label}.</span>
+                            <span>${escapeHTML(ex.name)}</span>
+                        </div>
+                        <div class="ex-tag-group">
+                            <span class="ex-badge badge-equip">${equipLabels[ex.equipment] || ex.equipment}</span>
+                            <span class="ex-badge badge-muscle" style="color:var(--gold); font-weight:800;">🎯 ${escapeHTML(anatomy.primary)}</span>
+                            ${anatomy.secondary ? `<span class="ex-badge" style="background:rgba(56,189,248,0.12); color:var(--cyan); border:1px solid rgba(56,189,248,0.3); font-size:10px; font-weight:700;">⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''}
+                            ${targetW ? `<span class="badge-target-weight">🎯 Hedefin: ${targetW} kg</span>` : ''}
+                            <button type="button" class="btn-report-mini" onclick="event.stopPropagation(); openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}', 'Sihirbaz (Oluştur)')" title="Bu egzersiz veya görsel hatalıysa bildir">
+                                ⚠️ Bildir
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="ex-meta-row">
+                        <span>📊 ${scheme.sets} Set x ${scheme.reps} Tekrar</span>
+                        <span>⏱️ Dinlenme: ${scheme.rest} sn</span>
+                    </div>
+
+                    <div class="ex-cue-box">
+                        💡 <strong>Altın Kural:</strong> ${escapeHTML(ex.cue)}
+                    </div>
+
+                    ${renderExercisePositionsHtml(ex, `${scope}_${label}`, false)}
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:8px; border-top:1px dashed var(--border);">
+                        <button class="btn-swap-ex" style="color:#f87171; border-color:rgba(239,68,68,0.3);" onclick="removeExerciseFromWorkout('${ex.id}', '${scope}')" title="Bu hareketi kaldır">
+                            🗑️ Kaldır
+                        </button>
+                        <div style="display:flex; gap:6px;">
+                            <button class="btn-swap-ex" onclick="openAlternativeModal('${ex.id}', '${scope}')" title="Listeden alternatif seç">
+                                📋 Alternatif Seç
+                            </button>
+                            <button class="btn-swap-ex" onclick="swapSingleExercise('${ex.id}', '${scope}')" title="Rastgele başka hareket ver">
+                                🎲 Rastgele
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ==================== EXERCISE PICKER & ALTERNATIVE MODAL LOGIC ====================
+        const PICKER_MUSCLE_GROUPS = [
+            { key: 'chest', name: 'Göğüs', icon: '🛡️', category: 'push' },
+            { key: 'back', name: 'Sırt & Kanat', icon: '🏹', category: 'pull' },
+            { key: 'shoulders', name: 'Omuz', icon: '⚔️', category: 'push' },
+            { key: 'quads', name: 'Ön Bacak (Quad)', icon: '🦵', category: 'legs_quad' },
+            { key: 'hamstrings', name: 'Arka Bacak (Hamstring)', icon: '🦿', category: 'legs_hinge' },
+            { key: 'glutes', name: 'Kalça (Glute)', icon: '🍑', category: 'legs_hinge' },
+            { key: 'biceps', name: 'Biceps (Pazı)', icon: '💪', category: 'pull' },
+            { key: 'triceps', name: 'Triceps (Arka Kol)', icon: '⚡', category: 'push' },
+            { key: 'core', name: 'Karın & Core', icon: '🧱', category: 'core' },
+            { key: 'calves', name: 'Kalf & Alt Bacak', icon: '🦶', category: 'legs' }
+        ];
+
+        const EQUIP_LABELS = {
+            dumbbell: { label: 'Dambıl', icon: '🏋️' },
+            kettlebell: { label: 'Kettlebell', icon: '🔔' },
+            barbell: { label: 'Barbell', icon: '⚡' },
+            machine: { label: 'Makine/Kablo', icon: '⚙️' },
+            bodyweight: { label: 'Vücut Ağırlığı', icon: '🤸' }
+        };
+
+        let pickerContext = {
+            mode: 'replace', // 'replace' or 'add'
+            targetExId: null,
+            scope: 'studio', // 'studio', 'day_schedule', 'generated', 'active'
+            studioIndex: null,
+            dayIdx: null,
+            scheduleExIndex: null,
+            currentTab: 'same_muscle', // 'same_muscle', 'other_muscle', 'catalog'
+            sameEquipFilter: 'all',
+            otherSelectedMuscle: 'chest',
+            categoryFilter: 'all',
+            searchQuery: ''
+        };
+
+        function showToast(msg, type = 'success') {
+            let toast = document.getElementById('appGlobalToast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'appGlobalToast';
+                toast.style.cssText = `
+                    position: fixed;
+                    bottom: 24px;
+                    left: 50%;
+                    transform: translateX(-50%) translateY(100px);
+                    background: rgba(15, 23, 42, 0.95);
+                    border: 1px solid var(--gold);
+                    color: #fff;
+                    padding: 10px 18px;
+                    border-radius: 30px;
+                    font-size: 13px;
+                    font-weight: 700;
+                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(245, 158, 11, 0.3);
+                    z-index: 100000;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                    pointer-events: none;
+                    backdrop-filter: blur(8px);
+                `;
+                document.body.appendChild(toast);
+            }
+            if (type === 'info') {
+                toast.style.borderColor = 'var(--cyan)';
+                toast.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.3)';
+            } else {
+                toast.style.borderColor = 'var(--gold)';
+                toast.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(245, 158, 11, 0.3)';
+            }
+            toast.textContent = msg;
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateX(-50%) translateY(0)';
+
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(-50%) translateY(40px)';
+            }, 3000);
+        }
+
+        function openStudioExerciseAlternativeModal(studioIndex) {
+            const item = customRoutineState.exercises[studioIndex];
+            if (!item) return;
+            const currentEx = EXERCISES_DB.find(e => e.id === item.exId);
+            if (!currentEx) return;
+
+            const primaryM = (currentEx.primaryMuscles && currentEx.primaryMuscles[0]) || 'chest';
+
+            pickerContext = {
+                mode: 'replace',
+                targetExId: currentEx.id,
+                scope: 'studio',
+                studioIndex: studioIndex,
+                dayIdx: null,
+                scheduleExIndex: null,
+                currentTab: 'same_muscle',
+                sameEquipFilter: 'all',
+                reasonFilter: 'all',
+                otherSelectedMuscle: primaryM,
+                categoryFilter: 'all',
+                searchQuery: ''
+            };
+
+            setupAlternativeModalUI(currentEx);
+            document.getElementById('exercisePickerModal').classList.add('active');
+        }
+
+        // ==================== GEMINI AI BIOMECHANICAL COACH ENGINE ====================
+        const GEMINI_API_STORAGE_KEY = 'celik_kodu_gemini_api_key';
+        let isFetchingCloudAiConfig = false;
+
+        function getGeminiApiKey() {
+            let key = (localStorage.getItem(GEMINI_API_STORAGE_KEY) || '').trim();
+            if (!key && typeof getActiveUser === 'function') {
+                const user = getActiveUser();
+                if (user && user.geminiApiKey) {
+                    key = user.geminiApiKey.trim();
+                    localStorage.setItem(GEMINI_API_STORAGE_KEY, key);
+                }
+            }
+            if (!key && !isFetchingCloudAiConfig) {
+                // Arka planda Firestore buluttan anında çekmeyi tetikle
+                fastFetchCloudAiConfig();
+            }
+            return key;
+        }
+
+        async function fastFetchCloudAiConfig() {
+            if (isFetchingCloudAiConfig) return '';
+            const existingKey = (localStorage.getItem(GEMINI_API_STORAGE_KEY) || '').trim();
+            if (existingKey) return existingKey;
+
+            isFetchingCloudAiConfig = true;
+            try {
+                const endpoint = 'https://firestore.googleapis.com/v1/projects/fitness-4f427/databases/(default)/documents/app_system/ai_config?key=' + (typeof FIREBASE_CONFIG !== 'undefined' ? FIREBASE_CONFIG.apiKey : '');
+                const res = await fetch(endpoint);
+                if (res.ok) {
+                    const doc = await res.json();
+                    const cloudKey = doc?.fields?.geminiApiKey?.stringValue?.trim();
+                    if (cloudKey) {
+                        localStorage.setItem(GEMINI_API_STORAGE_KEY, cloudKey);
+                        const user = typeof getActiveUser === 'function' ? getActiveUser() : null;
+                        if (user && user.geminiApiKey !== cloudKey) {
+                            user.geminiApiKey = cloudKey;
+                        }
+                        if (typeof updateProfileGeminiStatusUI === 'function') updateProfileGeminiStatusUI();
+                        const curEx = (typeof pickerContext !== 'undefined' && pickerContext && pickerContext.targetExId) ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
+                        if (typeof updateGeminiAiModalUI === 'function') updateGeminiAiModalUI(curEx);
+                        return cloudKey;
+                    }
+                }
+            } catch (e) {
+                console.warn("Hızlı AI anahtarı senkronu:", e);
+            } finally {
+                isFetchingCloudAiConfig = false;
+            }
+            return '';
+        }
+
+        function setGeminiApiKey(key, syncCloud = true) {
+            const cleanKey = (key || '').trim();
+            if (!cleanKey) {
+                localStorage.removeItem(GEMINI_API_STORAGE_KEY);
+            } else {
+                localStorage.setItem(GEMINI_API_STORAGE_KEY, cleanKey);
+            }
+
+            if (syncCloud) {
+                // 1. Kullanıcı profiline yaz ve eşitle
+                if (typeof getActiveUser === 'function') {
+                    const user = getActiveUser();
+                    if (user) {
+                        user.geminiApiKey = cleanKey;
+                        const users = typeof getAuthUsers === 'function' ? getAuthUsers() : [];
+                        const idx = users.findIndex(u => u.id === user.id);
+                        if (idx !== -1) {
+                            users[idx] = user;
+                            if (typeof saveAuthUsers === 'function') saveAuthUsers(users);
+                            if (typeof syncUsersToCloud === 'function') syncUsersToCloud(users);
+                        }
+                    }
+                }
+
+                // Güvenlik: Gemini API anahtarı genel Firestore dokümanına yazılarak açığa çıkarılmaz.
+            }
+
+            updateProfileGeminiStatusUI();
+            const curEx = (pickerContext && pickerContext.targetExId) ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
+            updateGeminiAiModalUI(curEx);
+        }
+
+        function updateProfileGeminiStatusUI() {
+            const badge = document.getElementById('profileGeminiStatusBadge');
+            const input = document.getElementById('profileGeminiApiKeyInput');
+            const key = getGeminiApiKey();
+
+            if (input && document.activeElement !== input) {
+                input.value = key;
+            }
+
+            if (badge) {
+                if (key) {
+                    badge.innerText = '🟢 API Aktif (Gemini 3.8 Flash)';
+                    badge.style.background = 'rgba(34, 197, 94, 0.15)';
+                    badge.style.color = '#4ade80';
+                    badge.style.border = '1px solid rgba(34, 197, 94, 0.35)';
+                } else {
+                    badge.innerText = '⚪ Yapılandırılmadı';
+                    badge.style.background = 'rgba(255, 255, 255, 0.08)';
+                    badge.style.color = 'var(--text-secondary)';
+                    badge.style.border = '1px solid var(--border)';
+                }
+            }
+        }
+
+        async function testAndSaveGeminiKeyFromProfile() {
+            const input = document.getElementById('profileGeminiApiKeyInput');
+            const key = input ? input.value.trim() : '';
+            if (!key) {
+                setGeminiApiKey('');
+                showToast("ℹ️ Gemini API anahtarı temizlendi.");
+                return;
+            }
+
+            showToast("⏳ Gemini API anahtarı test ediliyor...");
+            try {
+                const testResp = await callGeminiAPI("Biyomekanik test mesajı. Tek kelimeyle 'Hazır' de.", "Sen fitness koçusun.", key);
+                if (testResp) {
+                    setGeminiApiKey(key);
+                    showToast("✅ Gemini API başarıyla doğrulandı ve kaydedildi!");
+                }
+            } catch (err) {
+                alert("Gemini API Bağlantı Hatası:\n" + (err.message || err));
+            }
+        }
+
+        async function saveGeminiApiKeyFromModal() {
+            const input = document.getElementById('geminiApiKeyModalInput');
+            const key = input ? input.value.trim() : '';
+            if (!key) {
+                alert("Lütfen geçerli bir Gemini API anahtarı girin.");
+                return;
+            }
+            showToast("⏳ API anahtarı test ediliyor...");
+            try {
+                const testResp = await callGeminiAPI("Biyomekanik test mesajı. Tek kelimeyle 'Hazır' de.", "Sen fitness koçusun.", key);
+                if (testResp) {
+                    setGeminiApiKey(key);
+                    showToast("✅ Gemini API başarıyla doğrulandı ve kaydedildi!");
+                    const curEx = (pickerContext && pickerContext.targetExId) ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
+                    updateGeminiAiModalUI(curEx);
+                }
+            } catch (err) {
+                alert("Gemini API Bağlantı Hatası:\n" + (err.message || err));
+            }
+        }
+
+        function editGeminiApiKey() {
+            const curKey = getGeminiApiKey();
+            const newKey = prompt("Google Gemini API Anahtarınızı güncelleyin (Silmek için boş bırakın):", curKey);
+            if (newKey !== null) {
+                setGeminiApiKey(newKey);
+                showToast(newKey.trim() ? "✅ API Anahtarı güncellendi!" : "ℹ️ API Anahtarı silindi.");
+            }
+        }
+
+        function updateGeminiAiModalUI(currentEx) {
+            const missingBox = document.getElementById('geminiAiKeyMissingBox');
+            const activeBox = document.getElementById('geminiAiActiveBox');
+            const key = getGeminiApiKey();
+
+            if (!key) {
+                if (missingBox) missingBox.style.display = 'block';
+                if (activeBox) activeBox.style.display = 'none';
+                fastFetchCloudAiConfig();
+            } else {
+                if (missingBox) missingBox.style.display = 'none';
+                if (activeBox) activeBox.style.display = 'block';
+            }
+        }
+
+        let cachedGeminiWorkingModel = null;
+
+        async function callGeminiAPI(prompt, systemInstruction = '', overrideKey = '', maxTokens = 3500) {
+            let apiKey = overrideKey || getGeminiApiKey();
+            if (!apiKey) {
+                apiKey = await fastFetchCloudAiConfig();
+            }
+            if (!apiKey) throw new Error("Google Gemini API anahtarı eksik. Lütfen profilinizden veya modal üzerinden anahtar tanımlayın.");
+
+            let candidateModels = [];
+            if (cachedGeminiWorkingModel) {
+                candidateModels.push(cachedGeminiWorkingModel);
+            }
+
+            // 1. Dinamik Model Keşfi: Bu API anahtarının ve bölgenin aktif desteklediği modelleri doğrudan Google'dan sorgula
+            try {
+                const listResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`);
+                if (listResp.ok) {
+                    const listData = await listResp.json();
+                    if (listData && Array.isArray(listData.models)) {
+                        const supported = listData.models
+                            .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
+                            .map(m => m.name.replace(/^models\//, ''));
+                        
+                        // Flash modellerini en öne al (hız ve zengin token desteği için)
+                        const flash25 = supported.filter(m => m.includes('2.5-flash'));
+                        const flash20 = supported.filter(m => m.includes('2.0-flash'));
+                        const otherFlash = supported.filter(m => m.includes('flash') && !m.includes('2.5-flash') && !m.includes('2.0-flash'));
+                        const otherModels = supported.filter(m => !m.includes('flash'));
+                        const ordered = [...flash25, ...flash20, ...otherFlash, ...otherModels];
+
+                        ordered.forEach(m => {
+                            if (!candidateModels.includes(m)) candidateModels.push(m);
+                        });
+                    }
+                }
+            } catch (e) {
+                console.warn("Gemini model listesi sorgulanamadı, statik modellere geçiliyor:", e);
+            }
+
+            // Keşif başarısız olduysa veya modeller listelenemediyse denenmesi gereken güncel modeller
+            const fallbackModels = [
+                'gemini-2.5-flash',
+                'gemini-2.0-flash',
+                'gemini-2.0-flash-lite',
+                'gemini-1.5-flash-latest',
+                'gemini-1.5-flash-8b',
+                'gemini-1.5-flash',
+                'gemini-2.5-pro',
+                'gemini-1.5-pro'
+            ];
+            fallbackModels.forEach(m => {
+                if (!candidateModels.includes(m)) candidateModels.push(m);
+            });
+
+            let lastError = null;
+
+            for (const model of candidateModels) {
+                // Hem v1beta hem v1 sürümlerini dene
+                const versions = ['v1beta', 'v1'];
+                for (const ver of versions) {
+                    const url = `https://generativelanguage.googleapis.com/${ver}/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+                    const body = {
+                        contents: [{
+                            role: 'user',
+                            parts: [{ text: prompt }]
+                        }],
+                        generationConfig: {
+                            temperature: 0.35,
+                            maxOutputTokens: maxTokens || 3500
+                        }
+                    };
+                    if (systemInstruction) {
+                        body.systemInstruction = {
+                            parts: [{ text: systemInstruction }]
+                        };
+                    }
+
+                    try {
+                        const resp = await fetch(url, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(body)
+                        });
+
+                        if (!resp.ok) {
+                            const errData = await resp.json().catch(() => ({}));
+                            const errMsg = (errData && errData.error && errData.error.message) || resp.statusText;
+                            lastError = new Error(`Gemini API (${model}) [${resp.status}]: ${errMsg}`);
+                            if (resp.status === 404) {
+                                // Bu sürümde veya model adında bulunamadı, sonrakine geç
+                                continue;
+                            } else {
+                                // Yetki (403, 400) veya kota (429) hatası ise diğer modeller de aynı anahtarla aynı hatayı verecektir
+                                break;
+                            }
+                        }
+
+                        const data = await resp.json();
+                        const candidate = data?.candidates?.[0];
+                        const text = candidate?.content?.parts?.[0]?.text;
+                        if (text) {
+                            cachedGeminiWorkingModel = model;
+                            return text;
+                        }
+                    } catch (e) {
+                        lastError = e;
+                    }
+                }
+            }
+
+            throw lastError || new Error("Gemini API yanıt üretemedi.");
+        }
+
+        function quickAskGemini(reasonType) {
+            runGeminiExerciseAlternative(reasonType, '');
+        }
+
+        function submitGeminiCustomQuery() {
+            const input = document.getElementById('geminiCustomQueryInput');
+            const text = input ? input.value.trim() : '';
+            if (!text) {
+                alert("Lütfen sormak istediğiniz durumu veya sorunuzu yazın.");
+                return;
+            }
+            runGeminiExerciseAlternative('custom', text);
+        }
+
+        async function runGeminiExerciseAlternative(reasonType, userCustomText) {
+            const resArea = document.getElementById('geminiAiResponseArea');
+            const currentEx = pickerContext.targetExId ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
+            if (!currentEx) {
+                alert("Değiştirilecek egzersiz bulunamadı.");
+                return;
+            }
+
+            if (resArea) {
+                resArea.style.display = 'block';
+                resArea.innerHTML = `
+                    <div style="text-align:center; padding:24px 14px; background:rgba(0,0,0,0.3); border-radius:8px; border:1px dashed #c084fc;">
+                        <div style="font-size:24px; animation:spin 1s linear infinite; display:inline-block; margin-bottom:8px;">🧠</div>
+                        <div style="font-size:12.5px; font-weight:800; color:#e9d5ff;">Gemini Biyomekanik Motoru Analiz Ediyor...</div>
+                        <div style="font-size:11px; color:var(--text-secondary); margin-top:4px;">"${escapeHTML(currentEx.name)}" için en güvenli ve bilimsel ikameler hesaplanıyor.</div>
+                    </div>
+                `;
+            }
+
+            const reasonDescriptions = {
+                no_equip: `Salonda mevcut ekipman (${currentEx.equipment}) bulunmuyor veya istasyon dolu. Elimdeki dambıl, makine veya vücut ağırlığı ile aynı kas liflerini ateşleyecek birebir biyomekanik alternatif istiyorum.`,
+                joint_pain: `Bu hareketi yaparken belimde veya eklemimde batma/hassasiyet hissediyorum. Omurgaya veya ekleme eksenel kompresyon (axial load) bindirmeyen, hedef kasları izole eden en güvenli alternatifi öner.`,
+                easier: `Hareketi formunu tam çıkaramıyorum veya çok ağır/zor geldi. Biyomekanik motor öğrenmeyi sağlayan daha kontrollü, basit (regresyon) bir varyasyon öner.`,
+                conditioning: `Bu hareketin kardiyovasküler, patlayıcı güç ve metabolik yakım etkisini koruyacak eşdeğer bir finisher/alternatif öner.`,
+                custom: userCustomText
+            };
+
+            const userPromptText = reasonDescriptions[reasonType] || userCustomText || 'Uygun alternatif öner.';
+
+            // Kütüphanemizden ilgili adayları Gemini'ye bağlam olarak veriyoruz (Master Pool SSOT)
+            const candidates = EXERCISES_DB.filter(e => e.id !== currentEx.id && !isExerciseExcludedByUser(e.id));
+            const candidateSummary = candidates.map(e => `ID:${e.id} | İsim:${e.name} | Ekipman:${e.equipment} | Patern:${e.category} | Kas:${e.muscle}`).join('\n');
+
+            const systemInstruction = `Sen "Çelik Kodu (El Código del Acero)" metodolojisinin uzman Biyomekanik Koçusun.
+Kullanıcı antrenman seansı sırasında, uzun metin okumadan hemen karar vermek istiyor.
+DEĞİŞTİRİLECEK HAREKET:
+- Adı: "${currentEx.name}"
+- Ekipman: "${currentEx.equipment}"
+- Patern/Kategori: "${currentEx.category}"
+- Kas Grubu: "${currentEx.muscle}"
+
+KULLANICININ DURUMU:
+"${userPromptText}"
+
+KÜTÜPHANEMİZDE BULUNAN TÜM HAREKETLER (YALNIZCA BU LİSTEDEN SEÇECEKSİN):
+${candidateSummary}
+
+KURALLAR:
+1. HAREKET PATERNİNE VE KİNEMATİK ZİNCİRE KESİNLİKLE SADIK KAL! (Hip Hinge -> Swing/RDL; Squat -> diz dominant; İtiş -> itiş; Çekiş -> çekiş).
+2. İstenmeyen/olmayan ekipmanı (${currentEx.equipment}) kesinlikle önerme. Bel/eklem hassasiyetinde omurgaya sıfır eksenel yük bindiren hareketleri seç.
+3. KESİNLİKLE UZUN METİN, MAKALE VEYA PARAGRAF YAZMA! Kullanıcı sadece direkt öneri istiyor.
+4. Önerdiğin 1 veya en fazla 2 hareketi MUTLAKA şu etiketle belirt: [[EX_ID:hareketin_id_si]]
+5. Metin olarak YALNIZCA 1-2 CÜMLELİK çok kısa ve vurucu bir biyomekanik gerekçe yaz. (Örn: "Dambıl RDL, omurgaya eksenel kompresyon bindirmeden kalça ve hamstring liflerini birebir ateşler.")`;
+
+            try {
+                const aiResponse = await callGeminiAPI(`"${currentEx.name}" yerine kütüphanemizden en uygun 1-2 alternatifi seç. Uzun metin yazma, sadece etiketleri ([[EX_ID:id]]) ve 1-2 cümlelik çok kısa gerekçeni belirt.`, systemInstruction, '', 1000);
+                renderGeminiAiResult(aiResponse, currentEx);
+            } catch (err) {
+                if (resArea) {
+                    resArea.innerHTML = `
+                        <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:8px; padding:12px; font-size:11.5px; color:#fca5a5;">
+                            ⚠️ <strong>Gemini Bağlantı Hatası:</strong> ${escapeHTML(err.message || 'Bilinmeyen hata')}<br>
+                            <span style="font-size:10.5px; color:var(--text-secondary); margin-top:4px; display:inline-block;">API anahtarınızın geçerli olduğundan ve internet bağlantınızdan emin olun.</span>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function formatAiCoachInline(str) {
+            return escapeHTML(str)
+                .replace(/\*\*(.*?)\*\*/g, '<strong style="color:#fff; font-weight:700;">$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em style="color:#d8b4fe;">$1</em>')
+                .replace(/`([^`]+)`/g, '<code style="background:rgba(255,255,255,0.1); padding:1px 4px; border-radius:3px; font-size:11px; color:#fbcfe8;">$1</code>');
+        }
+
+        function formatAiCoachMarkdown(text) {
+            if (!text) return '';
+            const lines = text.split('\n');
+            let html = '';
+            let inList = false;
+            let listType = null;
+
+            lines.forEach(line => {
+                let trimmed = line.trim();
+                if (!trimmed) {
+                    if (inList) {
+                        html += listType === 'ul' ? '</ul>' : '</ol>';
+                        inList = false;
+                        listType = null;
+                    }
+                    html += '<div style="height:4px;"></div>';
+                    return;
+                }
+
+                // Başlıklar (###, ##, #)
+                if (/^#{1,4}\s+/.test(trimmed)) {
+                    if (inList) {
+                        html += listType === 'ul' ? '</ul>' : '</ol>';
+                        inList = false;
+                        listType = null;
+                    }
+                    const headingText = trimmed.replace(/^#{1,4}\s+/, '');
+                    html += `<div style="font-size:11.5px; font-weight:800; color:#e9d5ff; margin-top:6px; margin-bottom:2px; display:flex; align-items:center; gap:5px;">
+                        <span style="display:inline-block; width:3px; height:10px; background:#c084fc; border-radius:2px; flex-shrink:0;"></span>
+                        <span>${formatAiCoachInline(headingText)}</span>
+                    </div>`;
+                    return;
+                }
+
+                // Madde listeleri (- , * , • )
+                if (/^[-*•]\s+/.test(trimmed)) {
+                    if (!inList || listType !== 'ul') {
+                        if (inList) html += listType === 'ul' ? '</ul>' : '</ol>';
+                        html += '<ul style="margin:2px 0; padding-left:16px; list-style-type:disc;">';
+                        inList = true;
+                        listType = 'ul';
+                    }
+                    const itemText = trimmed.replace(/^[-*•]\s+/, '');
+                    html += `<li style="margin-bottom:2px; line-height:1.4;">${formatAiCoachInline(itemText)}</li>`;
+                    return;
+                }
+
+                // Numaralı listeler (1. , 2. )
+                if (/^\d+[\.\)]\s+/.test(trimmed)) {
+                    if (!inList || listType !== 'ol') {
+                        if (inList) html += listType === 'ul' ? '</ul>' : '</ol>';
+                        html += '<ol style="margin:2px 0; padding-left:16px;">';
+                        inList = true;
+                        listType = 'ol';
+                    }
+                    const itemText = trimmed.replace(/^\d+[\.\)]\s+/, '');
+                    html += `<li style="margin-bottom:2px; line-height:1.4;">${formatAiCoachInline(itemText)}</li>`;
+                    return;
+                }
+
+                // Düz paragraf satırı
+                if (inList) {
+                    html += listType === 'ul' ? '</ul>' : '</ol>';
+                    inList = false;
+                    listType = null;
+                }
+                html += `<p style="margin:2px 0; line-height:1.4;">${formatAiCoachInline(trimmed)}</p>`;
+            });
+
+            if (inList) {
+                html += listType === 'ul' ? '</ul>' : '</ol>';
+            }
+
+            return html;
+        }
+
+        function renderGeminiAiResult(aiText, targetEx) {
+            const resArea = document.getElementById('geminiAiResponseArea');
+            if (!resArea) return;
+
+            // Extract recommended exercise IDs using regex: [[EX_ID:ex_id]]
+            const idMatches = [];
+            const regex = /\[\[(?:EX_ID|ex_id)\s*:\s*([a-zA-Z0-9_\-]+)\]\]/gi;
+            let m;
+            while ((m = regex.exec(aiText)) !== null) {
+                if (m[1] && !idMatches.includes(m[1])) {
+                    idMatches.push(m[1]);
+                }
+            }
+
+            // Fallback: If no tag was matched, check if any DB exercise name is mentioned directly
+            if (idMatches.length === 0 && targetEx) {
+                EXERCISES_DB.forEach(e => {
+                    if (e.id !== targetEx.id && aiText.toLowerCase().includes(e.name.toLowerCase())) {
+                        if (!idMatches.includes(e.id) && idMatches.length < 2) {
+                            idMatches.push(e.id);
+                        }
+                    }
+                });
+            }
+
+            // Clean text from tags for neat reading
+            let cleanedText = aiText.replace(/\[\[(?:EX_ID|ex_id)\s*:\s*[a-zA-Z0-9_\-]+\]\]/gi, '').trim();
+            let formattedHtml = formatAiCoachMarkdown(cleanedText);
+
+            let cardsHtml = '';
+            idMatches.forEach(exId => {
+                const ex = EXERCISES_DB.find(e => e.id === exId);
+                if (ex) {
+                    const eqMeta = EQUIP_LABELS[ex.equipment] || { label: ex.equipment || '', icon: '🏋️' };
+                    const guide = (exerciseGuideMap && exerciseGuideMap[ex.id]) || (categoryFallback && categoryFallback[ex.category]) || null;
+                    const thumbImg = (guide && guide.form) ? guide.form : '';
+
+                    cardsHtml += `
+                        <div style="background:rgba(192, 132, 252, 0.08); border:1px solid rgba(192, 132, 252, 0.35); border-radius:8px; padding:10px 12px; margin-bottom:8px; box-shadow:0 2px 8px rgba(0,0,0,0.25);">
+                            <!-- ÜST SATIR: TAM BAŞLIK, ROZETLER VE '✓ SEÇ' BUTONU -->
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                                <div style="flex:1; min-width:0;">
+                                    <div style="font-size:9.5px; color:#c084fc; font-weight:800; text-transform:uppercase; letter-spacing:0.5px;">ÖNERİLEN İKAME</div>
+                                    <div style="font-size:14px; font-weight:800; color:#fff; line-height:1.25; margin:2px 0 3px 0; word-break:break-word;">
+                                        ${escapeHTML(ex.name)}
+                                    </div>
+                                    <div style="font-size:10px; color:var(--text-secondary); display:flex; flex-wrap:wrap; gap:4px; align-items:center;">
+                                        <span style="color:#e2e8f0; font-weight:700;">${eqMeta.icon} ${eqMeta.label}</span>
+                                        <span>•</span>
+                                        <span style="color:var(--gold); font-weight:700;">🎯 ${escapeHTML(ex.muscle || '')}</span>
+                                    </div>
+                                </div>
+                                <div style="flex-shrink:0;">
+                                    <button type="button" class="btn btn-gold" style="font-size:12px; padding:6px 14px; font-weight:800; background:#9333ea; border-color:#a855f7; color:#fff; white-space:nowrap; box-shadow:0 0 10px rgba(168,85,247,0.35); border-radius:6px;" onclick="selectExerciseFromPicker('${ex.id}')">
+                                        ✓ Seç
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- FORM GÖRSELİ (GENİŞ, NET VE DETAYLI) -->
+                            ${thumbImg ? `
+                                <div style="width:100%; height:115px; border-radius:6px; background:#000; overflow:hidden; border:1px solid rgba(192,132,252,0.25); margin-top:8px; display:flex; align-items:center; justify-content:center; position:relative; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')" title="Form rehberini incele">
+                                    <img src="${thumbImg}" style="max-width:100%; max-height:100%; object-fit:contain;" alt="${escapeHTML(ex.name)}" loading="lazy">
+                                    <div style="position:absolute; bottom:4px; right:4px; background:rgba(0,0,0,0.75); backdrop-filter:blur(4px); border:1px solid rgba(255,255,255,0.15); border-radius:4px; padding:2px 6px; font-size:9.5px; color:#e9d5ff; font-weight:700; display:flex; align-items:center; gap:3px;">
+                                        <span>🔍 Büyüt / İncele</span>
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            <!-- FORM İPUCU -->
+                            ${ex.cue ? `<div style="font-size:10.5px; color:#e9d5ff; margin-top:6px; background:rgba(0,0,0,0.35); padding:5px 8px; border-radius:4px; border:1px solid rgba(192,132,252,0.15); line-height:1.35;">💡 <strong>İpucu:</strong> ${escapeHTML(ex.cue)}</div>` : ''}
+                        </div>
+                    `;
+                }
+            });
+
+            resArea.innerHTML = `
+                <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(192, 132, 252, 0.35); border-radius:10px; padding:10px 12px; margin-top:6px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid rgba(192,132,252,0.2); padding-bottom:5px;">
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <span style="font-size:15px;">🤖</span>
+                            <span style="font-size:12px; font-weight:800; color:#e9d5ff;">Gemini Biyomekanik İkameler</span>
+                        </div>
+                        <span style="font-size:9.5px; color:#c084fc; background:rgba(192,132,252,0.15); padding:2px 6px; border-radius:4px; font-weight:700;">Hızlı Seçim</span>
+                    </div>
+
+                    <!-- 1. HAREKET KARTLARI (FORM GÖRSELİ + TAM İSİM + '✓ SEÇ' BUTONU) -->
+                    ${cardsHtml ? `<div>${cardsHtml}</div>` : ''}
+
+                    <!-- 2. İSTEĞE BAĞLI / KAPALI KOÇ GEREKÇESİ (ALAN KAZANMAK İÇİN VARSAYILAN GİZLİ) -->
+                    ${cleanedText ? `
+                        <div style="margin-top:6px;">
+                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:4px 8px; border:none; color:var(--text-secondary); width:100%; text-align:center; display:flex; align-items:center; justify-content:center; gap:4px; cursor:pointer;" onclick="const b = document.getElementById('aiCoachWhyBox'); if(b) b.style.display = b.style.display === 'none' ? 'block' : 'none';">
+                                <span>💡 Biyomekanik Gerekçeyi Gör / Gizle</span>
+                            </button>
+                            <div id="aiCoachWhyBox" style="display:none; background:rgba(192, 132, 252, 0.06); border:1px solid rgba(192, 132, 252, 0.2); border-radius:6px; padding:8px 10px; margin-top:4px; font-size:10.5px; color:#cbd5e1; line-height:1.4;">
+                                ${formattedHtml}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function openScheduleExerciseAlternativeModal(dayIdx, currentExId, exIdx) {
+            const currentEx = EXERCISES_DB.find(e => e.id === currentExId);
+            if (!currentEx) return;
+
+            const primaryM = (currentEx.primaryMuscles && currentEx.primaryMuscles[0]) || 'chest';
+
+            pickerContext = {
+                mode: 'replace',
+                targetExId: currentEx.id,
+                scope: 'day_schedule',
+                studioIndex: null,
+                dayIdx: dayIdx,
+                scheduleExIndex: exIdx,
+                currentTab: 'same_muscle',
+                sameEquipFilter: 'all',
+                reasonFilter: 'all',
+                otherSelectedMuscle: primaryM,
+                categoryFilter: 'all',
+                searchQuery: ''
+            };
+
+            setupAlternativeModalUI(currentEx);
+            document.getElementById('exercisePickerModal').classList.add('active');
+        }
+
+        function openAlternativeModal(currentExId, scope = 'generated') {
+            let currentEx = null;
+            if (scope === 'active' && activeWorkoutSession) {
+                currentEx = activeWorkoutSession.exercises.find(e => e.id === currentExId);
+            } else if (scope === 'generated' && currentGeneratedWorkout) {
+                currentEx = currentGeneratedWorkout.exercises.find(e => e.id === currentExId);
+            } else {
+                currentEx = EXERCISES_DB.find(e => e.id === currentExId);
+            }
+            if (!currentEx) return;
+
+            const primaryM = (currentEx.primaryMuscles && currentEx.primaryMuscles[0]) || 'chest';
+
+            pickerContext = {
+                mode: 'replace',
+                targetExId: currentEx.id,
+                scope: scope,
+                studioIndex: null,
+                dayIdx: null,
+                scheduleExIndex: null,
+                currentTab: 'same_muscle',
+                sameEquipFilter: 'all',
+                reasonFilter: 'all',
+                otherSelectedMuscle: primaryM,
+                categoryFilter: 'all',
+                searchQuery: ''
+            };
+
+            setupAlternativeModalUI(currentEx);
+            document.getElementById('exercisePickerModal').classList.add('active');
+        }
+
+        function openAddExerciseModal(scope = 'generated') {
+            pickerContext = {
+                mode: 'add',
+                targetExId: null,
+                scope: scope,
+                studioIndex: null,
+                dayIdx: null,
+                scheduleExIndex: null,
+                currentTab: 'catalog',
+                sameEquipFilter: 'all',
+                reasonFilter: 'all',
+                otherSelectedMuscle: 'chest',
+                categoryFilter: 'all',
+                searchQuery: ''
+            };
+
+            setupAlternativeModalUI(null);
+            document.getElementById('exercisePickerModal').classList.add('active');
+        }
+
+        function setupAlternativeModalUI(currentEx) {
+            const titleEl = document.getElementById('pickerModalTitle');
+            const subEl = document.getElementById('pickerModalSubtitle');
+            const banner = document.getElementById('pickerCurrentExBanner');
+            const nameEl = document.getElementById('pickerCurrentExName');
+            const thumbEl = document.getElementById('pickerCurrentExThumb');
+            const badgesEl = document.getElementById('pickerCurrentExBadges');
+            const muscleGrid = document.getElementById('pickerMuscleGrid');
+
+            if (pickerContext.mode === 'replace' && currentEx) {
+                if (titleEl) titleEl.innerText = `🔄 Alternatif: ${currentEx.name}`;
+                if (subEl) subEl.innerHTML = '';
+                if (banner) banner.style.display = 'flex';
+
+                const guide = (exerciseGuideMap && exerciseGuideMap[currentEx.id]) || (categoryFallback && categoryFallback[currentEx.category]) || null;
+                const thumbImg = (guide && guide.form) ? guide.form : '';
+                if (thumbEl) {
+                    thumbEl.innerHTML = thumbImg ? `<img src="${thumbImg}" style="width:100%; height:100%; object-fit:contain;" alt="${escapeHTML(currentEx.name)}">` : '🏋️';
+                }
+                if (nameEl) nameEl.innerText = currentEx.name;
+
+                const eqMeta = EQUIP_LABELS[currentEx.equipment] || { label: currentEx.equipment || '', icon: '🏋️' };
+                const anatomy = getExerciseAnatomy(currentEx);
+                if (badgesEl) {
+                    badgesEl.innerHTML = `
+                        <span class="ex-badge badge-equip">${eqMeta.icon} ${eqMeta.label}</span>
+                        <span class="ex-badge badge-muscle" style="color:var(--gold); font-weight:800;">🎯 ${escapeHTML(anatomy.primary)}</span>
+                    `;
+                }
+            } else {
+                if (titleEl) titleEl.innerText = "➕ Egzersiz Ekle";
+                if (subEl) subEl.innerHTML = '';
+                if (banner) banner.style.display = 'none';
+            }
+
+            // Render muscle selection grid for Tab 2
+            if (muscleGrid) {
+                muscleGrid.innerHTML = PICKER_MUSCLE_GROUPS.map(m => `
+                    <button type="button" class="btn-quick-equip" id="pill_picker_m_${m.key}" onclick="setOtherMuscle('${m.key}')" style="display:flex; align-items:center; gap:4px; font-weight:700;">
+                        <span>${m.icon}</span> <span>${m.name}</span>
+                    </button>
+                `).join('');
+            }
+
+            // Clear search input
+            const searchInput = document.getElementById('pickerSearchInput');
+            if (searchInput) searchInput.value = '';
+
+            // Reset AI response area and custom query for clean start
+            const resArea = document.getElementById('geminiAiResponseArea');
+            if (resArea) {
+                resArea.style.display = 'none';
+                resArea.innerHTML = '';
+            }
+            const queryInput = document.getElementById('geminiCustomQueryInput');
+            if (queryInput) queryInput.value = '';
+
+            updatePickerReasonPills();
+            updateGeminiAiModalUI(currentEx);
+
+            switchPickerTab(pickerContext.currentTab);
+        }
+
+        function closeExercisePickerModal() {
+            const modal = document.getElementById('exercisePickerModal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        function switchPickerTab(tab) {
+            pickerContext.currentTab = tab;
+
+            const btnSame = document.getElementById('pickerTabBtnSame');
+            const btnAI = document.getElementById('pickerTabBtnAI');
+            const btnOther = document.getElementById('pickerTabBtnOther');
+            const btnCatalog = document.getElementById('pickerTabBtnCatalog');
+
+            const panSame = document.getElementById('pickerSubPanelSame');
+            const panAI = document.getElementById('pickerSubPanelAI');
+            const panOther = document.getElementById('pickerSubPanelOther');
+            const panCatalog = document.getElementById('pickerSubPanelCatalog');
+            const container = document.getElementById('pickerExercisesContainer');
+
+            const activeStyle = "padding:7px 2px; font-size:10.5px; font-weight:800; border-radius:6px; border-color:var(--gold); color:var(--gold); background:rgba(245, 158, 11, 0.15); box-shadow:0 0 10px rgba(245,158,11,0.2);";
+            const activeAIStyle = "padding:7px 2px; font-size:10.5px; font-weight:800; border-radius:6px; border-color:#c084fc; color:#e9d5ff; background:rgba(192, 132, 252, 0.2); box-shadow:0 0 10px rgba(192,132,252,0.3);";
+            const inactiveStyle = "padding:7px 2px; font-size:10.5px; font-weight:800; border-radius:6px; border-color:transparent; color:var(--text-secondary); background:transparent;";
+
+            if (btnSame) btnSame.style.cssText = tab === 'same_muscle' ? activeStyle : inactiveStyle;
+            if (btnAI) btnAI.style.cssText = tab === 'ai_coach' ? activeAIStyle : inactiveStyle;
+            if (btnOther) btnOther.style.cssText = tab === 'other_muscle' ? activeStyle : inactiveStyle;
+            if (btnCatalog) btnCatalog.style.cssText = tab === 'catalog' ? activeStyle : inactiveStyle;
+
+            if (panSame) panSame.style.display = tab === 'same_muscle' ? 'block' : 'none';
+            if (panAI) panAI.style.display = tab === 'ai_coach' ? 'block' : 'none';
+            if (panOther) panOther.style.display = tab === 'other_muscle' ? 'block' : 'none';
+            if (panCatalog) panCatalog.style.display = tab === 'catalog' ? 'block' : 'none';
+
+            if (tab === 'ai_coach') {
+                const currentEx = pickerContext.targetExId ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
+                updateGeminiAiModalUI(currentEx);
+                if (container) container.style.display = 'none';
+            } else {
+                if (container) container.style.display = 'block';
+                updateSameEquipPills();
+                updatePickerReasonPills();
+                updateOtherMusclePills();
+                updatePickerCategoryPills();
+                renderPickerList();
+            }
+        }
+
+        function setPickerReasonFilter(reason) {
+            pickerContext.reasonFilter = reason;
+            updatePickerReasonPills();
+            renderPickerList();
+        }
+
+        function updatePickerReasonPills() {
+            const reasons = ['all', 'no_equip', 'joint', 'easier'];
+            const cur = pickerContext.reasonFilter || 'all';
+            reasons.forEach(r => {
+                const el = document.getElementById('pill_reason_' + r);
+                if (el) {
+                    if (cur === r) {
+                        el.style.borderColor = 'var(--gold)';
+                        el.style.color = 'var(--gold)';
+                        el.style.background = 'rgba(245, 158, 11, 0.2)';
+                        el.style.fontWeight = '800';
+                    } else {
+                        el.style.borderColor = 'var(--border)';
+                        el.style.color = 'var(--text-secondary)';
+                        el.style.background = 'transparent';
+                        el.style.fontWeight = '500';
+                    }
+                }
+            });
+        }
+
+        function setSameEquipFilter(equip) {
+            pickerContext.sameEquipFilter = equip;
+            updateSameEquipPills();
+            renderPickerList();
+        }
+
+        function updateSameEquipPills() {
+            const equips = ['all', 'dumbbell', 'kettlebell', 'barbell', 'machine', 'bodyweight'];
+            equips.forEach(eq => {
+                const el = document.getElementById('pill_seq_' + eq);
+                if (el) {
+                    if (pickerContext.sameEquipFilter === eq) {
+                        el.style.borderColor = 'var(--cyan)';
+                        el.style.color = 'var(--cyan)';
+                        el.style.background = 'rgba(56, 189, 248, 0.18)';
+                        el.style.fontWeight = '800';
+                    } else {
+                        el.style.borderColor = 'var(--border)';
+                        el.style.color = 'var(--text-secondary)';
+                        el.style.background = 'transparent';
+                        el.style.fontWeight = '500';
+                    }
+                }
+            });
+        }
+
+        function setOtherMuscle(mKey) {
+            pickerContext.otherSelectedMuscle = mKey;
+            updateOtherMusclePills();
+            renderPickerList();
+        }
+
+        function updateOtherMusclePills() {
+            PICKER_MUSCLE_GROUPS.forEach(m => {
+                const el = document.getElementById('pill_picker_m_' + m.key);
+                if (el) {
+                    if (pickerContext.otherSelectedMuscle === m.key) {
+                        el.style.borderColor = 'var(--gold)';
+                        el.style.color = 'var(--gold)';
+                        el.style.background = 'rgba(245, 158, 11, 0.18)';
+                        el.style.fontWeight = '800';
+                    } else {
+                        el.style.borderColor = 'var(--border)';
+                        el.style.color = 'var(--text-secondary)';
+                        el.style.background = 'transparent';
+                        el.style.fontWeight = '500';
+                    }
+                }
+            });
+        }
+
+        function setPickerCategory(cat) {
+            pickerContext.categoryFilter = cat;
+            updatePickerCategoryPills();
+            renderPickerList();
+        }
+
+        function updatePickerCategoryPills() {
+            const cats = ['all', 'push', 'pull', 'legs_quad', 'legs_hinge', 'core', 'conditioning'];
+            cats.forEach(c => {
+                const el = document.getElementById('pill_cat_' + c);
+                if (el) {
+                    if (pickerContext.categoryFilter === c) {
+                        el.style.borderColor = 'var(--gold)';
+                        el.style.color = 'var(--gold)';
+                        el.style.background = 'rgba(245, 158, 11, 0.15)';
+                    } else {
+                        el.style.borderColor = 'var(--border)';
+                        el.style.color = 'var(--text-secondary)';
+                        el.style.background = 'transparent';
+                    }
+                }
+            });
+        }
+
+        function handlePickerSearchInput() {
+            renderPickerList();
+        }
+
+        function getExercisesInCurrentScope(ctx) {
+            if (!ctx) return [];
+            let list = [];
+            const scope = ctx.scope;
+
+            if (scope === 'studio') {
+                if (typeof customRoutineState !== 'undefined' && customRoutineState && Array.isArray(customRoutineState.exercises)) {
+                    list = customRoutineState.exercises.map(e => e.exId || e.id).filter(Boolean);
+                }
+            } else if (scope === 'day_schedule' && ctx.dayIdx !== null && ctx.dayIdx !== undefined) {
+                const sched = typeof getWeeklySchedule === 'function' ? getWeeklySchedule() : [];
+                const plan = sched[ctx.dayIdx];
+                if (plan && !plan.rest) {
+                    const det = typeof getWorkoutDetailsForPlan === 'function' ? getWorkoutDetailsForPlan(plan) : null;
+                    if (det && Array.isArray(det.exercises)) {
+                        list = det.exercises.map(e => e.id || e.exId).filter(Boolean);
+                    }
+                }
+            } else if (scope === 'active') {
+                if (typeof activeWorkoutSession !== 'undefined' && activeWorkoutSession && Array.isArray(activeWorkoutSession.exercises)) {
+                    list = activeWorkoutSession.exercises.map(e => e.id || e.exId).filter(Boolean);
+                }
+            } else {
+                // 'generated' or general workout
+                if (typeof currentGeneratedWorkout !== 'undefined' && currentGeneratedWorkout && Array.isArray(currentGeneratedWorkout.exercises)) {
+                    list = currentGeneratedWorkout.exercises.map(e => e.id || e.exId).filter(Boolean);
+                }
+            }
+
+            // In replace mode, ensure target exercise is also included in exclusion list
+            if (ctx.mode === 'replace' && ctx.targetExId) {
+                if (!list.includes(ctx.targetExId)) {
+                    list.push(ctx.targetExId);
+                }
+            }
+
+            return list;
+        }
+
+        function renderPickerList() {
+            const container = document.getElementById('pickerExercisesContainer');
+            if (!container) return;
+
+            const tab = pickerContext.currentTab;
+            const currentEx = pickerContext.targetExId ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
+            const existingIds = getExercisesInCurrentScope(pickerContext);
+            let filtered = [];
+
+            if (tab === 'same_muscle') {
+                const pMuscles = (currentEx && currentEx.primaryMuscles) ? currentEx.primaryMuscles : [];
+                const sMuscles = (currentEx && currentEx.secondaryMuscles) ? currentEx.secondaryMuscles : [];
+                const cat = currentEx ? currentEx.category : null;
+                const currentEq = currentEx ? currentEx.equipment : null;
+                const reason = pickerContext.reasonFilter || 'all';
+
+                // Kinematik patern kategorisi eşleme (Hinge -> Hinge, Squat -> Squat vs.)
+                const isHinge = cat === 'legs_hinge' || (pMuscles.includes('hamstrings') && !pMuscles.includes('quads'));
+                const isQuad = cat === 'legs_quad' || pMuscles.includes('quads');
+                const isPush = cat === 'push';
+                const isPull = cat === 'pull';
+                const isCore = cat === 'core';
+
+                filtered = EXERCISES_DB.filter(ex => {
+                    // Exclude hidden exercises
+                    if (isExerciseExcludedByUser(ex.id)) return false;
+                    // Exclude all exercises already in current routine
+                    if (existingIds.includes(ex.id)) return false;
+
+                    // BİYOMEKANİK KİNEMATİK KİLİT (Kettlebell Swing yerine ASLA Plank veya Goblet Squat çıkamaz!)
+                    if (isHinge) {
+                        // Sadece Hinge veya Hamstring/Glute çekiş hareketleri kabul edilir! Core (plank) veya Quad (squat) kesinlikle elenir!
+                        if (ex.category === 'core' || ex.category === 'legs_quad') return false;
+                        const hitHinge = ex.category === 'legs_hinge' || (ex.primaryMuscles || []).includes('hamstrings') || (ex.primaryMuscles || []).includes('glutes');
+                        if (!hitHinge) return false;
+                    } else if (isQuad) {
+                        // Squat/Lunge için Hinge veya Core elenir
+                        if (ex.category === 'core' || ex.category === 'legs_hinge') return false;
+                        const hitQuad = ex.category === 'legs_quad' || (ex.primaryMuscles || []).includes('quads');
+                        if (!hitQuad) return false;
+                    } else if (isPush) {
+                        if (ex.category !== 'push' && !(ex.primaryMuscles || []).some(m => ['chest', 'shoulders', 'triceps'].includes(m))) return false;
+                    } else if (isPull) {
+                        if (ex.category !== 'pull' && !(ex.primaryMuscles || []).some(m => ['back', 'lats', 'traps', 'biceps'].includes(m))) return false;
+                    } else if (isCore) {
+                        if (ex.category !== 'core' && !(ex.primaryMuscles || []).includes('core')) return false;
+                    } else {
+                        const hasPrimaryHit = pMuscles.some(m => (ex.primaryMuscles || []).includes(m));
+                        const hasCatHit = cat && ex.category === cat;
+                        if (!hasPrimaryHit && !hasCatHit) return false;
+                    }
+
+                    // Equipment filter
+                    if (pickerContext.sameEquipFilter !== 'all' && ex.equipment !== pickerContext.sameEquipFilter) {
+                        return false;
+                    }
+
+                    // Neden filtresi: Alet Yok / Dolu
+                    if (reason === 'no_equip' && currentEq && ex.equipment === currentEq) {
+                        return false;
+                    }
+
+                    return true;
+                });
+
+                // Biyomekanik Uygunluk Sıralaması
+                filtered.sort((a, b) => {
+                    let scoreA = 0;
+                    let scoreB = 0;
+
+                    if (a.category === cat) scoreA += 60;
+                    if (b.category === cat) scoreB += 60;
+
+                    const aPriHits = (a.primaryMuscles || []).filter(m => pMuscles.includes(m)).length;
+                    const bPriHits = (b.primaryMuscles || []).filter(m => pMuscles.includes(m)).length;
+                    scoreA += aPriHits * 30;
+                    scoreB += bPriHits * 30;
+
+                    if (reason === 'joint') {
+                        const friendly = ['bridge', 'curl', 'cable', 'support', 'seated', 'floor', 'machine', 'thrust'];
+                        if (friendly.some(k => a.id.includes(k) || a.name.toLowerCase().includes(k))) scoreA += 50;
+                        if (friendly.some(k => b.id.includes(k) || b.name.toLowerCase().includes(k))) scoreB += 50;
+                    }
+
+                    if (reason === 'easier') {
+                        if (a.mechanic === 'isolation' || a.equipment === 'bodyweight') scoreA += 40;
+                        if (b.mechanic === 'isolation' || b.equipment === 'bodyweight') scoreB += 40;
+                    }
+
+                    return scoreB - scoreA;
+                });
+            } else if (tab === 'other_muscle') {
+                const targetM = pickerContext.otherSelectedMuscle;
+                filtered = EXERCISES_DB.filter(ex => {
+                    // Exclude hidden exercises
+                    if (isExerciseExcludedByUser(ex.id)) return false;
+                    // Exclude all exercises already in current routine
+                    if (existingIds.includes(ex.id)) return false;
+
+                    const hit = (ex.primaryMuscles || []).includes(targetM) || (ex.secondaryMuscles || []).includes(targetM);
+                    return hit;
+                });
+            } else {
+                // 'catalog' / 'diğer' tab
+                const q = (document.getElementById('pickerSearchInput')?.value || '').trim().toLowerCase();
+                const cat = pickerContext.categoryFilter;
+
+                filtered = EXERCISES_DB.filter(ex => {
+                    // Exclude hidden exercises
+                    if (isExerciseExcludedByUser(ex.id)) return false;
+                    // Exclude all exercises already in current routine
+                    if (existingIds.includes(ex.id)) return false;
+
+                    if (cat !== 'all' && ex.category !== cat) return false;
+                    if (q) {
+                        const eqLabel = (EQUIP_LABELS[ex.equipment]?.label || '').toLowerCase();
+                        const combined = (ex.name + ' ' + (ex.muscle || '') + ' ' + (ex.cue || '') + ' ' + eqLabel).toLowerCase();
+                        if (!combined.includes(q)) return false;
+                    }
+                    return true;
+                });
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:32px 14px; background:rgba(0,0,0,0.25); border-radius:8px; border:1px dashed var(--border);">
+                        <div style="font-size:20px; margin-bottom:6px;">🔍</div>
+                        <div style="font-size:12.5px; font-weight:700; color:#fff;">Bu kriterlere uygun başka egzersiz bulunamadı</div>
+                        <div style="font-size:11px; color:var(--text-secondary); margin:4px 0 12px;">Mevcut listenizde yer almayan alternatifler için farklı bir ekipman filtresi seçebilir veya tüm kataloğu inceleyebilirsiniz.</div>
+                        <button type="button" class="btn btn-gold" style="font-size:11px; padding:6px 14px; font-weight:800;" onclick="switchPickerTab('catalog')">
+                            ➕ Diğer (Tüm Egzersiz Kataloğunu Aç)
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            let cardsHtml = filtered.map(ex => {
+                const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) 
+                    || (typeof categoryFallback !== 'undefined' && categoryFallback[ex.category]) 
+                    || null;
+                const thumbImg = (guide && guide.form) ? guide.form : '';
+                const eqMeta = EQUIP_LABELS[ex.equipment] || { label: ex.equipment || '', icon: '🏋️' };
+                const anatomy = getExerciseAnatomy(ex);
+
+                return `
+                    <div class="ex-card" style="margin-bottom:8px; padding:10px 12px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; transition:border-color 0.2s;" onmouseenter="this.style.borderColor='rgba(245,158,11,0.4)'" onmouseleave="this.style.borderColor='var(--border)'">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                            <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1; cursor:pointer;" onclick="togglePickerExerciseForm('${ex.id}')">
+                                <div style="width:42px; height:42px; border-radius:6px; background:#000; overflow:hidden; flex-shrink:0; border:1px solid var(--border); display:flex; align-items:center; justify-content:center;">
+                                    ${thumbImg ? `<img src="${thumbImg}" style="width:100%; height:100%; object-fit:contain;" alt="${escapeHTML(ex.name)}">` : '🏋️'}
+                                </div>
+                                <div style="min-width:0; flex:1;">
+                                    <div style="font-size:13.5px; font-weight:800; color:#fff; line-height:1.2;">
+                                        ${escapeHTML(ex.name)}
+                                    </div>
+                                    <div style="display:flex; gap:4px; flex-wrap:wrap; margin-top:3px;">
+                                        <span class="ex-badge badge-equip">${eqMeta.icon} ${eqMeta.label}</span>
+                                        <span class="ex-badge badge-muscle" style="color:var(--gold); font-weight:800;">🎯 ${escapeHTML(anatomy.primary)}</span>
+                                        ${anatomy.secondary ? `<span class="ex-badge" style="background:rgba(56,189,248,0.12); color:var(--cyan); border:1px solid rgba(56,189,248,0.3); font-size:10px; font-weight:700;">⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
+                                <button type="button" class="btn btn-outline" style="padding:4px 8px; font-size:11px; color:var(--cyan); border-color:rgba(56,189,248,0.5); font-weight:800; display:flex; align-items:center; gap:2px;" onclick="event.stopPropagation(); togglePickerExerciseForm('${ex.id}')" title="Formu Gör">
+                                    👁️ Form
+                                </button>
+                                <button type="button" class="btn-report-mini" onclick="event.stopPropagation(); openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '${thumbImg}', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}', 'Alternatif Seçici')" title="Bu harekette hata bildir">⚠️</button>
+                            </div>
+                        </div>
+
+                        ${ex.cue ? `
+                            <div style="font-size:11px; color:var(--text-secondary); line-height:1.3; background:rgba(0,0,0,0.25); border-radius:4px; padding:5px 8px; margin-top:6px;">
+                                💡 ${escapeHTML(ex.cue)}
+                            </div>
+                        ` : ''}
+
+                        <!-- INLINE FORM EXPANDER -->
+                        <div id="picker_form_expand_${ex.id}" style="display:none; margin-top:8px; padding-top:8px; border-top:1px dashed rgba(255,255,255,0.12);">
+                            ${thumbImg ? `
+                                <div style="text-align:center; background:#000; border-radius:8px; overflow:hidden; border:1px solid var(--border); margin-bottom:6px; min-height:160px; display:flex; align-items:center; justify-content:center;">
+                                    <img src="${thumbImg}" style="max-width:100%; max-height:42vh; object-fit:contain; display:block; margin:0 auto;" alt="${escapeHTML(ex.name)} Form">
+                                </div>
+                                <div style="font-size:10.5px; color:var(--text-secondary); text-align:center; margin-bottom:6px;">
+                                    📸 <em>Gerçek İnsan Form Rehberi • Tam ekran ve anatomi için butona dokunun.</em>
+                                </div>
+                            ` : `
+                                <div style="text-align:center; padding:16px; color:var(--text-secondary); font-size:11.5px;">Görsel form rehberi optimize ediliyor.</div>
+                            `}
+                            
+                            <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:6px; padding:6px 8px; margin-bottom:6px;">
+                                <div style="font-size:10px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:4px;">🎯 Hedef Kaslar:</div>
+                                <div style="display:flex; flex-wrap:wrap; gap:4px;">
+                                    ${(ex.primaryMuscles || []).map(m => `<span style="background:rgba(245,158,11,0.2); color:var(--gold); border:1px solid rgba(245,158,11,0.4); padding:2px 6px; border-radius:8px; font-size:10px; font-weight:800;">${(typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m] ? STUDIO_REGION_MAP[m].icon + ' ' + STUDIO_REGION_MAP[m].name : m)} (Primer)</span>`).join('')}
+                                    ${(ex.secondaryMuscles || []).map(m => `<span style="background:rgba(56,189,248,0.15); color:var(--cyan); border:1px solid rgba(56,189,248,0.35); padding:2px 6px; border-radius:8px; font-size:10px; font-weight:700;">${(typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m] ? STUDIO_REGION_MAP[m].icon + ' ' + STUDIO_REGION_MAP[m].name : m)} (Sekonder)</span>`).join('')}
+                                </div>
+                            </div>
+
+                            ${(ex.positions && ex.positions.length > 0) ? `
+                                <div style="background:rgba(0,0,0,0.25); border-radius:6px; padding:6px 8px; margin-bottom:6px; font-size:11px; line-height:1.35;">
+                                    <div style="font-size:10px; font-weight:800; color:var(--cyan); text-transform:uppercase; margin-bottom:3px;">📋 Uygulama Adımları:</div>
+                                    ${ex.positions.map(p => `<div><span style="color:var(--text-secondary); font-weight:700;">• ${escapeHTML(p.phase)}:</span> ${escapeHTML(p.desc)}</div>`).join('')}
+                                </div>
+                            ` : ''}
+
+                            ${ex.cue ? `
+                                <div style="font-size:11px; color:#fde047; background:rgba(234,179,8,0.12); border-left:3px solid #eab308; padding:5px 8px; border-radius:4px; margin-bottom:6px; line-height:1.35;">
+                                    ⚠️ <strong>Form Uyarısı:</strong> ${escapeHTML(ex.cue)}
+                                </div>
+                            ` : ''}
+
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-top:4px;">
+                                <button type="button" class="btn btn-outline" style="font-size:10.5px; padding:4px 9px; color:var(--cyan); border-color:var(--cyan); font-weight:700;" onclick="event.stopPropagation(); openExerciseDetailModal('${ex.id}')">
+                                    🔍 Tam Ekran & Anatomi
+                                </button>
+                                <button type="button" class="btn btn-outline" style="font-size:10.5px; padding:4px 9px;" onclick="event.stopPropagation(); togglePickerExerciseForm('${ex.id}')">
+                                    ▲ Kapat
+                                </button>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; justify-content:flex-end; margin-top:6px;">
+                            <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:5px 14px; font-weight:800; box-shadow:0 0 10px rgba(245,158,11,0.25);" onclick="selectExerciseFromPicker('${ex.id}')">
+                                ${pickerContext.mode === 'replace' ? '✓ Bununla Değiştir' : '➕ Programa Ekle'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // If in tab 1 or 2, add the helpful "Diğer" shortcut banner at bottom
+            if (tab === 'same_muscle' || tab === 'other_muscle') {
+                cardsHtml += `
+                    <div style="text-align:center; padding:12px; margin-top:8px; border-top:1px dashed var(--border); background:rgba(0,0,0,0.2); border-radius:8px;">
+                        <div style="font-size:11px; color:var(--text-secondary); margin-bottom:6px;">Aradığınız hareketi bulamadınız mı?</div>
+                        <button type="button" class="btn btn-outline" style="color:var(--gold); border-color:var(--gold); font-size:11.5px; padding:5px 12px; font-weight:800;" onclick="switchPickerTab('catalog')">
+                            ➕ Diğer (Genişletilmiş Tüm Kataloğu Aç) ➔
+                        </button>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = cardsHtml;
+        }
+
+        function togglePickerExerciseForm(exId) {
+            const box = document.getElementById('picker_form_expand_' + exId);
+            if (!box) {
+                openExerciseDetailModal(exId);
+                return;
+            }
+            const isHidden = box.style.display === 'none' || !box.style.display;
+            box.style.display = isHidden ? 'block' : 'none';
+        }
+
+        function selectExerciseFromPicker(newExId) {
+            const newEx = EXERCISES_DB.find(e => e.id === newExId);
+            if (!newEx) return;
+
+            // 1. STUDIO SCOPE (Custom Routine Builder)
+            if (pickerContext.scope === 'studio') {
+                if (pickerContext.mode === 'replace' && pickerContext.studioIndex !== null) {
+                    if (customRoutineState && customRoutineState.exercises && customRoutineState.exercises[pickerContext.studioIndex]) {
+                        customRoutineState.exercises[pickerContext.studioIndex].exId = newEx.id;
+                    }
+                } else {
+                    customRoutineState.exercises.push({
+                        exId: newEx.id,
+                        sets: 3,
+                        reps: '8-12',
+                        weight: ''
+                    });
+                }
+
+                closeExercisePickerModal();
+                renderCustomRoutine();
+                renderRegionStatus();
+                showToast(`✅ "${newEx.name}" programa eklendi!`);
+                playAlertSound();
+                return;
+            }
+
+            // 2. DAY SCHEDULE MODAL SCOPE
+            if (pickerContext.scope === 'day_schedule' && pickerContext.dayIdx !== null && pickerContext.dayIdx !== undefined) {
+                const dayIdx = pickerContext.dayIdx;
+                const schedule = activePlannerWeek === 'next' ? getNextWeeklySchedule() : getWeeklySchedule();
+                const plan = schedule[dayIdx];
+
+                if (plan && !plan.rest) {
+                    const details = getWorkoutDetailsForPlan(plan) || {};
+                    const user = getActiveUser();
+                    const key = `celik_kodu_custom_programs_${user.id}`;
+                    let saved = [];
+                    try { saved = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
+
+                    const targetItemIdx = pickerContext.scheduleExIndex !== null ? pickerContext.scheduleExIndex : 0;
+                    const currentExs = (details && Array.isArray(details.exercises)) ? details.exercises : [];
+
+                    // Build updated full exercises array
+                    const newExercises = currentExs.map((e, idx) => {
+                        if (idx === targetItemIdx) {
+                            return Object.assign({}, newEx, {
+                                targetSets: e.targetSets || e.sets || (details.scheme ? details.scheme.sets : 3),
+                                targetReps: e.targetReps || e.reps || (details.scheme ? details.scheme.reps : '8-12'),
+                                logs: []
+                            });
+                        }
+                        const exId = e.id || e.exId;
+                        const dbMatch = EXERCISES_DB.find(x => x.id === exId);
+                        return Object.assign({}, dbMatch || e, {
+                            id: exId,
+                            targetSets: e.targetSets || e.sets || (details.scheme ? details.scheme.sets : 3),
+                            targetReps: e.targetReps || e.reps || (details.scheme ? details.scheme.reps : '8-12')
+                        });
+                    });
+
+                    const cleanTitle = (details.title || plan.title || 'Özel Program').replace(/⚔️|Çelik Kodu/g, '').trim();
+                    const progId = (plan.id && plan.id.startsWith('custom_')) ? plan.id : ('custom_day_' + dayIdx + '_' + Date.now());
+
+                    const updatedWorkout = {
+                        id: progId,
+                        title: cleanTitle,
+                        split: details.split || 'custom',
+                        style: details.style || 'classic',
+                        goal: 'hypertrophy',
+                        duration: Math.round(newExercises.length * 7) || 45,
+                        scheme: details.scheme || { sets: 3, reps: '8-12', rest: details.rest || 60 },
+                        rest: details.rest || 60,
+                        warmups: details.warmups || [
+                            { name: "Eklemsel CARs (Omuz & Kalça Dairesi)", dur: "90 sn", cue: "Tüm eklemleri kontrollü ısıt." }
+                        ],
+                        exercises: newExercises,
+                        finisher: details.finisher || { name: "Balistik Bitiş", desc: "Maksimum tempolu seans." },
+                        updatedAt: Date.now(),
+                        isCustom: true
+                    };
+
+                    // 1. Direct update on the weekly schedule
+                    schedule[dayIdx] = {
+                        id: progId,
+                        title: cleanTitle,
+                        type: 'custom_saved',
+                        desc: `${newExercises.length} Hareket • ${updatedWorkout.duration} Dk`,
+                        rest: false,
+                        customWorkout: updatedWorkout,
+                        exercises: newExercises
+                    };
+                    if (activePlannerWeek === 'next') {
+                        saveNextWeeklySchedule(schedule);
+                    } else {
+                        saveWeeklySchedule(schedule);
+                    }
+
+                    // 2. Also persist in custom programs library
+                    const existingIdx = saved.findIndex(p => p.id === progId);
+                    if (existingIdx !== -1) {
+                        saved[existingIdx] = updatedWorkout;
+                    } else {
+                        saved.unshift(updatedWorkout);
+                    }
+                    localStorage.setItem(key, JSON.stringify(saved));
+
+                    if (!user.savedWorkouts) user.savedWorkouts = [];
+                    const userSavedIdx = user.savedWorkouts.findIndex(p => p.id === progId);
+                    if (userSavedIdx !== -1) {
+                        user.savedWorkouts[userSavedIdx] = updatedWorkout;
+                    } else {
+                        user.savedWorkouts.unshift(updatedWorkout);
+                    }
+                    saveAthletesToStorage();
+
+                    // 3. Update active day and calendar view
+                    renderActiveWorkout();
+                }
+
+                closeExercisePickerModal();
+                openScheduleDayModal(dayIdx);
+                showToast(`✅ "${newEx.name}" güncellendi ve kaydedildi!`);
+                playAlertSound();
+                return;
+            }
+
+            // 3. ACTIVE WORKOUT OR GENERATED WORKOUT SCOPE
+            const workout = pickerContext.scope === 'active' ? activeWorkoutSession : currentGeneratedWorkout;
+            if (!workout) {
+                closeExercisePickerModal();
+                return;
+            }
+
+            if (pickerContext.mode === 'replace') {
+                const idx = workout.exercises.findIndex(e => e.id === pickerContext.targetExId);
+                if (idx !== -1) {
+                    const oldEx = workout.exercises[idx];
+                    workout.exercises[idx] = {
+                        ...newEx,
+                        targetSets: oldEx.targetSets || 3,
+                        targetReps: oldEx.targetReps || '8-12',
+                        logs: oldEx.logs || []
+                    };
+                }
+            } else if (pickerContext.mode === 'add') {
+                workout.exercises.push({
+                    ...newEx,
+                    targetSets: 3,
+                    targetReps: '8-12',
+                    logs: []
+                });
+                if (pickerContext.scope === 'active') {
+                    activeFocusExIndex = workout.exercises.length - 1;
+                    activeFocusSetIndex = null;
+                }
+            }
+
+            closeExercisePickerModal();
+
+            if (pickerContext.scope === 'active') {
+                saveActiveWorkoutStateToStorage();
+                renderActiveWorkout();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                showToast(`✅ Aktif antrenmanda "${newEx.name}" alternatifi seçildi!`);
+            } else {
+                renderGeneratedWorkout();
+                showToast(`✅ "${newEx.name}" alternatifi seçildi!`);
+            }
+            playAlertSound();
+        }
+
+        // ==================== FINISHER & EXTRA EXERCISES SYSTEM ====================
+        function openAddFinisherModal() {
+            if (!activeWorkoutSession) {
+                alert("Önce bir antrenman başlatmalısınız.");
+                return;
+            }
+            const modal = document.getElementById('addFinisherModal');
+            if (modal) modal.classList.add('active');
+        }
+
+        function closeAddFinisherModal() {
+            const modal = document.getElementById('addFinisherModal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        function addPresetFinisher(presetKey) {
+            if (!activeWorkoutSession) return;
+            const presets = {
+                core_armor: [
+                    { id: 'bw_plank', name: 'Plank', equipment: 'bodyweight', muscle: 'Core, Karın', cue: 'Karnı ve kalçayı sıkın, düz bir hat koruyun.', category: 'core', weightKey: 'bw' },
+                    { id: 'bw_hanging_knee_raise', name: 'Hanging Knee Raise', equipment: 'bodyweight', muscle: 'Alt Karın', cue: 'Salınım yapmadan dizleri göğse çekin.', category: 'core', weightKey: 'bw' }
+                ],
+                arms_pump: [
+                    { id: 'db_hammer_curl', name: 'Dambıl Hammer Curl', equipment: 'dumbbell', muscle: 'Biceps, Ön Kol', cue: 'Dirsekleri gövdeye sabitleyin, nötr tutuşla kaldırın.', category: 'pull', weightKey: 'db_curl' },
+                    { id: 'db_triceps_overhead', name: 'Dambıl Overhead Triceps', equipment: 'dumbbell', muscle: 'Triceps', cue: 'Dirsekleri açmadan baş arkasından yukarı itin.', category: 'push', weightKey: 'db_triceps' }
+                ],
+                shoulder_wings: [
+                    { id: 'db_lateral_raise', name: 'Dambıl Lateral Raise', equipment: 'dumbbell', muscle: 'Yan Omuz', cue: 'Dirsekleri hafif bükülü tutarak yana açın.', category: 'push', weightKey: 'db_lateral' },
+                    { id: 'mach_face_pull', name: 'Kablo / Lastik Face Pull', equipment: 'machine', muscle: 'Arka Omuz, Trapez', cue: 'Halatı alına doğru çekin, kürek kemiklerini sıkın.', category: 'pull', weightKey: 'mach_pull' }
+                ],
+                farmers_walk: [
+                    { id: 'db_farmers_walk', name: 'Dambıl Çift Yürüyüş (Farmer’s Carry)', equipment: 'dumbbell', muscle: 'Kavrama, Trapez, Core', cue: 'Omuzlar geride, göğüs dik, kontrollü adımlarla yürüyün.', category: 'core', weightKey: 'db_carry' }
+                ],
+                cardio_burn: [
+                    { id: 'db_swing', name: 'Dambıl / Kettlebell Swing', equipment: 'dumbbell', muscle: 'Kalça, Arka Bacak, Kondisyon', cue: 'Kalça menteşesiyle patlayıcı güç üretin.', category: 'legs_hinge', weightKey: 'db_swing' },
+                    { id: 'bw_burpee', name: 'Burpee Finisher', equipment: 'bodyweight', muscle: 'Tüm Vücut, Kalp-Damar', cue: 'Hızlıca şınav pozisyonuna inip sıçrayarak kalkın.', category: 'conditioning', weightKey: 'bw' }
+                ]
+            };
+
+            const selectedList = presets[presetKey];
+            if (!selectedList) return;
+
+            const user = getActiveUser();
+            const weights = user.weights || {};
+
+            selectedList.forEach(item => {
+                const found = EXERCISES_DB.find(e => e.id === item.id) || item;
+                const alreadyExists = activeWorkoutSession.exercises.some(e => e.id === found.id);
+                if (!alreadyExists) {
+                    activeWorkoutSession.exercises.push(found);
+                }
+
+                const defaultWeight = found.weightKey && weights[found.weightKey] ? (parseFloat(weights[found.weightKey]) || '') : '';
+                activeWorkoutSetsData[found.id] = [
+                    { setNo: 1, weight: defaultWeight, reps: 12, completed: false, completedAt: null },
+                    { setNo: 2, weight: defaultWeight, reps: 12, completed: false, completedAt: null },
+                    { setNo: 3, weight: defaultWeight, reps: 12, completed: false, completedAt: null }
+                ];
+            });
+
+            closeAddFinisherModal();
+            activeFocusExIndex = activeWorkoutSession.exercises.length - 1;
+            activeFocusSetIndex = 0;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+            playAlertSound();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            alert("🔥 İlave Finisher seansınıza eklendi! Son egzersiz olarak odaklandınız.");
+        }
+
+        // ==================== FIREBASE FIRESTORE BUG REPORT ENGINE ====================
+        let currentBugReportTarget = null;
+        let selectedBugCategory = 'image_mismatch';
+
+        function openExerciseBugReportModal(exId, exName, imageSrc, equip, muscle, sourceScreen) {
+            let finalName = exName || '';
+            let finalImage = imageSrc || '';
+            let finalEquip = equip || '';
+            let finalMuscle = muscle || '';
+
+            if (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB)) {
+                const ex = EXERCISES_DB.find(e => e.id === exId);
+                if (ex) {
+                    if (!finalName) finalName = ex.name;
+                    if (!finalEquip) finalEquip = ex.equipment;
+                    if (!finalMuscle) finalMuscle = ex.muscle;
+                    if (!finalImage) {
+                        const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) || (typeof categoryFallback !== 'undefined' && categoryFallback[ex.category]) || null;
+                        if (guide && guide.form) finalImage = guide.form;
+                    }
+                }
+            }
+
+            let autoScreen = sourceScreen;
+            if (!autoScreen) {
+                if (activeWorkoutSession) {
+                    autoScreen = (activeWorkoutViewMode === 'focus') ? 'Canlı Antrenman (Odak Modu)' : 'Canlı Antrenman (Liste Görünümü)';
+                } else {
+                    const activeTab = document.querySelector('.tab-content.active');
+                    if (activeTab) {
+                        if (activeTab.id === 'generatorTab') autoScreen = 'Sihirbaz (Oluştur Sekmesi)';
+                        else if (activeTab.id === 'activeWorkoutTab') autoScreen = 'Antrenman / Atölye';
+                        else if (activeTab.id === 'historyTab') autoScreen = 'Geçmiş';
+                        else if (activeTab.id === 'libraryTab') autoScreen = 'Kütüphane';
+                        else autoScreen = activeTab.id;
+                    } else {
+                        autoScreen = 'Genel Egzersiz Kartı';
+                    }
+                }
+            }
+
+            currentBugReportTarget = {
+                id: exId,
+                name: finalName,
+                imageSrc: finalImage || '',
+                equipment: finalEquip || '',
+                muscle: finalMuscle || '',
+                sourceScreen: autoScreen
+            };
+
+            const exNameEl = document.getElementById('bugReportExName');
+            const exMetaEl = document.getElementById('bugReportExMeta');
+            const imgEl = document.getElementById('bugReportImgPreview');
+            const imgBox = document.getElementById('bugReportImgPreviewBox');
+            const noteEl = document.getElementById('bugReportUserNote');
+
+            if (exNameEl) exNameEl.innerText = finalName;
+            if (exMetaEl) exMetaEl.innerText = `[${autoScreen}] • ${finalEquip || 'Genel'} • ${finalMuscle || 'Kas'}`;
+            if (noteEl) noteEl.value = '';
+
+            if (imgEl && imgBox) {
+                if (finalImage) {
+                    imgEl.src = finalImage;
+                    imgEl.style.display = 'block';
+                } else {
+                    imgEl.style.display = 'none';
+                    imgBox.innerHTML = '<span style="font-size:24px;">🏋️</span>';
+                }
+            }
+
+            selectBugCategory('image_mismatch');
+            const modal = document.getElementById('exerciseBugReportModal');
+            if (modal) modal.classList.add('active');
+        }
+
+        function closeExerciseBugReportModal() {
+            const modal = document.getElementById('exerciseBugReportModal');
+            if (modal) modal.classList.remove('active');
+            currentBugReportTarget = null;
+        }
+
+        function selectBugCategory(cat) {
+            selectedBugCategory = cat;
+            const cats = ['image_mismatch', 'equipment_mismatch', 'cue_technique', 'name_mismatch', 'other'];
+            cats.forEach(c => {
+                const el = document.getElementById('bugCat_' + c);
+                if (el) el.classList.toggle('selected', c === cat);
+            });
+        }
+
+        async function submitExerciseBugReport() {
+            if (!currentBugReportTarget) return;
+
+            const categoryLabels = {
+                image_mismatch: "Görsel Harekete Uymuyor",
+                equipment_mismatch: "Ekipman / Pozisyon Yanlış",
+                cue_technique: "Form / İpucu Hatalı",
+                name_mismatch: "İsim / Adlandırma Hatalı",
+                other: "Diğer / Genel Aksaklık"
+            };
+
+            const user = getActiveUser();
+            const noteVal = (document.getElementById('bugReportUserNote').value || '').trim();
+            const docId = `bug_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+            const report = {
+                id: docId,
+                exerciseId: currentBugReportTarget.id,
+                exerciseName: currentBugReportTarget.name,
+                category: selectedBugCategory,
+                categoryLabel: categoryLabels[selectedBugCategory] || selectedBugCategory,
+                userNote: noteVal,
+                currentImageSrc: currentBugReportTarget.imageSrc || '',
+                equipment: currentBugReportTarget.equipment || '',
+                muscle: currentBugReportTarget.muscle || '',
+                sourceScreen: currentBugReportTarget.sourceScreen || 'Egzersiz Kartı',
+                workoutTitle: (activeWorkoutSession && activeWorkoutSession.title) ? activeWorkoutSession.title : (currentBugReportTarget.sourceScreen || 'Serbest İnceleme'),
+                userId: getActiveUserId(),
+                userName: user.name || 'Ferit',
+                status: 'pending_ai_review',
+                aiResolutionNote: '',
+                createdAt: new Date().toISOString(),
+                createdAtFormatted: new Date().toLocaleString('tr-TR')
+            };
+
+            try {
+                let localReports = [];
+                const raw = localStorage.getItem('celik_kodu_bug_reports');
+                if (raw) localReports = JSON.parse(raw) || [];
+                localReports.unshift(report);
+                localStorage.setItem('celik_kodu_bug_reports', JSON.stringify(localReports));
+            } catch(e) {}
+
+            let cloudSaved = false;
+            if (fbDb && isFirebaseReady) {
+                try {
+                    await fbDb.collection('exercise_bug_reports').doc(docId).set({
+                        ...report,
+                        serverTimestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    cloudSaved = true;
+                    console.log("🔥 Hata bildirimi Firestore SDK ile yazıldı:", docId);
+                } catch(err) {
+                    console.warn("Firestore SDK yazma hatası, REST deneniyor:", err);
+                }
+            }
+
+            if (!cloudSaved) {
+                try {
+                    const restFields = {};
+                    for (const [k, v] of Object.entries(report)) {
+                        if (typeof v === 'string') restFields[k] = { stringValue: v };
+                        else if (typeof v === 'number') restFields[k] = { doubleValue: v };
+                        else if (typeof v === 'boolean') restFields[k] = { booleanValue: v };
+                        else if (v === null || v === undefined) restFields[k] = { nullValue: null };
+                    }
+                    const restUrl = `https://firestore.googleapis.com/v1/projects/fitness-4f427/databases/(default)/documents/exercise_bug_reports?documentId=${docId}`;
+                    const resp = await fetch(restUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ fields: restFields })
+                    });
+                    if (resp.ok) {
+                        cloudSaved = true;
+                        console.log("🔥 Hata bildirimi Firestore REST ile yazıldı:", docId);
+                    }
+                } catch(restErr) {
+                    console.warn("Firestore REST yazma hatası (Yerelde saklandı):", restErr);
+                }
+            }
+
+            closeExerciseBugReportModal();
+            playAlertSound();
+            alert(`✅ Bildiriminiz ${cloudSaved ? 'Firebase bulut havuzuna' : 'havuza'} kaydedildi!\n\nAI antrenörüne talimat verdiğinizde bu rapor doğrudan incelenecek ve siz onay verdikten sonra silinecektir.`);
+        }
+
+        async function openBugReportsPoolModal() {
+            const modal = document.getElementById('bugReportsPoolModal');
+            if (modal) modal.classList.add('active');
+
+            const listEl = document.getElementById('bugReportsPoolList');
+            const countEl = document.getElementById('bugPoolCountText');
+            if (listEl) listEl.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary);"><span style="font-size:24px;">🔄</span><br>Firebase veritabanı taranıyor...</div>`;
+
+            let reports = [];
+
+            if (fbDb && isFirebaseReady) {
+                try {
+                    const snap = await fbDb.collection('exercise_bug_reports').get();
+                    snap.forEach(doc => {
+                        const d = doc.data();
+                        d._docId = doc.id;
+                        reports.push(d);
+                    });
+                } catch(e) {
+                    console.warn("Firestore SDK okuma hatası, REST deneniyor:", e);
+                }
+            }
+
+            if (reports.length === 0) {
+                try {
+                    const resp = await fetch('https://firestore.googleapis.com/v1/projects/fitness-4f427/databases/(default)/documents/exercise_bug_reports');
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        const docs = data.documents || [];
+                        docs.forEach(doc => {
+                            const name = doc.name || '';
+                            const docId = name.split('/').pop();
+                            const fields = doc.fields || {};
+                            const parsed = { _docId: docId };
+                            for (const [k, v] of Object.entries(fields)) {
+                                parsed[k] = v.stringValue || v.integerValue || v.doubleValue || (v.booleanValue !== undefined ? v.booleanValue : '');
+                            }
+                            reports.push(parsed);
+                        });
+                    }
+                } catch(restErr) {
+                    console.warn("REST okuma hatası:", restErr);
+                }
+            }
+
+            if (reports.length === 0) {
+                try {
+                    const raw = localStorage.getItem('celik_kodu_bug_reports');
+                    if (raw) reports = JSON.parse(raw) || [];
+                } catch(e) {}
+            }
+
+            if (countEl) countEl.innerText = `${reports.length} Bildirim Havuzda`;
+
+            if (reports.length === 0) {
+                if (listEl) {
+                    listEl.innerHTML = `
+                        <div style="text-align:center; padding:40px 20px; color:var(--text-secondary);">
+                            <span style="font-size:36px;">🎉</span>
+                            <div style="font-size:14px; font-weight:800; color:#fff; margin-top:8px;">Hata Havuzu Tertemiz!</div>
+                            <p style="font-size:12px; margin-top:4px;">Şu an bekleyen veya bildirilmiş bir egzersiz hatası bulunmuyor.</p>
+                        </div>
+                    `;
+                }
+                return;
+            }
+
+            if (listEl) {
+                listEl.innerHTML = reports.map(r => {
+                    const docId = r._docId || r.id;
+                    const isPending = r.status === 'pending_ai_review';
+                    const isProcessed = r.status === 'ai_processed_awaiting_user_ok';
+                    const statusText = isPending ? '🟡 AI İncelemesi Bekliyor' : (isProcessed ? '🔵 AI Düzeltti (Onay Bekliyor)' : '🟢 Tamamlandı');
+
+                    return `
+                        <div class="bug-pool-card ${isPending ? 'pending' : (isProcessed ? 'processed' : 'resolved')}">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                                <div>
+                                    <div style="font-size:14px; font-weight:900; color:#fff;">
+                                        ${escapeHTML(r.exerciseName || r.exerciseId)}
+                                    </div>
+                                    <div style="font-size:11px; color:var(--gold); font-weight:700; margin-top:2px;">
+                                        ${escapeHTML(r.categoryLabel || r.category)}
+                                    </div>
+                                </div>
+                                <span style="font-size:10.5px; font-weight:800; padding:2px 7px; border-radius:4px; background:rgba(255,255,255,0.08);">
+                                    ${statusText}
+                                </span>
+                            </div>
+
+                            ${r.userNote ? `
+                                <div style="font-size:12px; color:#cbd5e1; margin-top:8px; background:rgba(0,0,0,0.3); padding:6px 10px; border-radius:6px; border-left:2px solid var(--cyan);">
+                                    💬 <em>"${escapeHTML(r.userNote)}"</em>
+                                </div>
+                            ` : ''}
+
+                            ${r.aiResolutionNote ? `
+                                <div style="font-size:11.5px; color:#86efac; margin-top:6px; background:rgba(34,197,94,0.1); padding:6px 10px; border-radius:6px;">
+                                    🤖 <strong>AI Notu:</strong> ${escapeHTML(r.aiResolutionNote)}
+                                </div>
+                            ` : ''}
+
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; font-size:10.5px; color:var(--text-secondary); flex-wrap:wrap; gap:6px;">
+                                <span>📅 ${escapeHTML(r.createdAtFormatted || (r.createdAt ? r.createdAt.substring(0, 16) : ''))}</span>
+                                <button type="button" class="btn btn-outline" style="border-color:#22c55e; color:#86efac; font-size:11px; padding:4px 10px; font-weight:800;" onclick="confirmAndDeleteBugReport(decodeURIComponent('${encodeURIComponent(docId)}'))">
+                                    ✅ Onayla & Havuzdan Sil
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function closeBugReportsPoolModal() {
+            const modal = document.getElementById('bugReportsPoolModal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        async function confirmAndDeleteBugReport(docId) {
+            if (!confirm("Bu hata düzeltmesini onaylıyor musunuz? Kayıt Firebase Firestore havuzundan kalıcı olarak silinecektir.")) {
+                return;
+            }
+
+            if (fbDb && isFirebaseReady) {
+                try {
+                    await fbDb.collection('exercise_bug_reports').doc(docId).delete();
+                    console.log("🔥 Firebase dokümanı silindi:", docId);
+                } catch(e) {
+                    console.warn("Firestore silme hatası:", e);
+                }
+            }
+
+            try {
+                const raw = localStorage.getItem('celik_kodu_bug_reports');
+                if (raw) {
+                    let list = JSON.parse(raw) || [];
+                    list = list.filter(r => (r._docId !== docId && r.id !== docId));
+                    localStorage.setItem('celik_kodu_bug_reports', JSON.stringify(list));
+                }
+            } catch(e) {}
+
+            alert("✅ Kayıt başarıyla silindi ve havuz güncellendi.");
+            openBugReportsPoolModal();
+        }
+
+        async function copyBugReportsToClipboard() {
+            let reports = [];
+            if (fbDb && isFirebaseReady) {
+                try {
+                    const snap = await fbDb.collection('exercise_bug_reports').get();
+                    snap.forEach(doc => {
+                        const d = doc.data();
+                        d._docId = doc.id;
+                        reports.push(d);
+                    });
+                } catch(e) {}
+            }
+            if (reports.length === 0) {
+                try {
+                    const raw = localStorage.getItem('celik_kodu_bug_reports');
+                    if (raw) reports = JSON.parse(raw) || [];
+                } catch(e) {}
+            }
+
+            if (reports.length === 0) {
+                alert("Havuzda bekleyen hata bildirimi bulunmuyor.");
+                return;
+            }
+
+            let text = "Antigravity AI Antrenörüne Görev Emri:\n";
+            text += "Aşağıdaki egzersiz hata bildirimleri antrenman esnasında Firebase havuzuna kaydedildi. Lütfen kodda ve görsellerde düzeltmeleri yap:\n\n";
+
+            reports.forEach((r, idx) => {
+                text += `${idx + 1}. [${r.exerciseId}] ${r.exerciseName}\n`;
+                text += `   - Hata Türü: ${r.categoryLabel || r.category}\n`;
+                text += `   - Kullanıcı Notu: ${r.userNote || 'Belirtilmedi'}\n`;
+                text += `   - Mevcut Görsel: ${r.currentImageSrc || 'Yok'}\n`;
+                text += `   - Rapor ID: ${r._docId || r.id}\n\n`;
+            });
+
+            text += "Düzeltmeleri tamamladıktan sonra bana rapor ver, benden onay aldıktan sonra bu kayıtları Firebase'den sileceğiz.";
+
+            try {
+                await navigator.clipboard.writeText(text);
+                alert("📋 Hazır AI Talimat Metni panoya kopyalandı!\n\nŞimdi sohbet alanına yapıştırıp gönderebilirsiniz.");
+            } catch(e) {
+                prompt("Aşağıdaki metni kopyalayıp AI sohbetine iletebilirsiniz:", text);
+            }
+        }
+
+        function removeExerciseFromWorkout(exId, scope = 'generated') {
+            const workout = scope === 'active' ? activeWorkoutSession : currentGeneratedWorkout;
+            if (!workout) return;
+
+            if (workout.exercises.length <= 1) {
+                alert("Antrenmanda en az 1 egzersiz kalmalıdır!");
+                return;
+            }
+
+            const ex = workout.exercises.find(e => e.id === exId);
+            if (confirm(`"${ex ? ex.name : 'Bu egzersizi'}" antrenman programından kaldırmak istediğinize emin misiniz?`)) {
+                workout.exercises = workout.exercises.filter(e => e.id !== exId);
+                if (scope === 'active') {
+                    renderActiveWorkout();
+                } else {
+                    renderGeneratedWorkout();
+                }
+            }
+        }
+
+        function swapSingleExercise(currentExId, scope = 'generated') {
+            const workout = scope === 'active' ? activeWorkoutSession : currentGeneratedWorkout;
+            if (!workout) return;
+
+            const exIndex = workout.exercises.findIndex(e => e.id === currentExId);
+            if (exIndex === -1) return;
+
+            const currentEx = workout.exercises[exIndex];
+            const usedIds = workout.exercises.map(e => e.id);
+
+            // Pool of alternatives in the same category & available equipments
+            const pool = filterExercises(currentEx.category, usedIds);
+            let replacement = pickRandom(pool);
+            if (!replacement) {
+                let relatedCat = currentEx.category;
+                if (currentEx.category === 'push') relatedCat = ['push', 'core'];
+                else if (currentEx.category === 'pull') relatedCat = ['pull', 'core'];
+                else if (currentEx.category === 'legs_quad' || currentEx.category === 'legs_hinge') relatedCat = ['legs_quad', 'legs_hinge', 'core'];
+
+                const fallback = EXERCISES_DB.filter(e => !isExerciseExcludedByUser(e.id) && selectedEquipments.includes(e.equipment) && !usedIds.includes(e.id) && (Array.isArray(relatedCat) ? relatedCat.includes(e.category) : e.category === relatedCat));
+                replacement = pickRandom(fallback);
+            }
+
+            if (replacement) {
+                workout.exercises[exIndex] = replacement;
+                if (scope === 'active') {
+                    renderActiveWorkout();
+                } else {
+                    renderGeneratedWorkout();
+                }
+                playAlertSound();
+            } else {
+                alert("Seçili ekipman havuzunda bu kas grubu için başka alternatif bulunamadı.");
+            }
+        }
+
+        // ==================== ACTIVE LIVE WORKOUT TRACKER ====================
+        let noSleepVideoEl = null;
+        let wakeLockKeepAliveTimer = null;
+        let isHUDCollapsed = false;
+
+        function initNoSleepVideoFallback() {
+            if (noSleepVideoEl) return;
+            try {
+                // 1x1 sessiz video akışı (Canvas captureStream ile oluşturulur, iOS Safari & Android WebViews ekranı kapatmaz)
+                const canvas = document.createElement('canvas');
+                canvas.width = 1;
+                canvas.height = 1;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(0, 0, 1, 1);
+                if (canvas.captureStream) {
+                    const stream = canvas.captureStream(1);
+                    noSleepVideoEl = document.createElement('video');
+                    noSleepVideoEl.setAttribute('playsinline', '');
+                    noSleepVideoEl.setAttribute('muted', '');
+                    noSleepVideoEl.setAttribute('loop', '');
+                    noSleepVideoEl.muted = true;
+                    noSleepVideoEl.loop = true;
+                    noSleepVideoEl.style.position = 'fixed';
+                    noSleepVideoEl.style.top = '-9999px';
+                    noSleepVideoEl.style.left = '-9999px';
+                    noSleepVideoEl.style.width = '1px';
+                    noSleepVideoEl.style.height = '1px';
+                    noSleepVideoEl.style.opacity = '0.01';
+                    noSleepVideoEl.style.pointerEvents = 'none';
+                    noSleepVideoEl.srcObject = stream;
+                    document.body.appendChild(noSleepVideoEl);
+                }
+            } catch(e) {
+                console.warn("NoSleep fallback init:", e);
+            }
+        }
+
+        async function requestWakeLock() {
+            if (!isWakeLockEnabled) return;
+            let ok = false;
+            if ('wakeLock' in navigator) {
+                try {
+                    wakeLockSentinel = await navigator.wakeLock.request('screen');
+                    ok = true;
+                    wakeLockSentinel.addEventListener('release', () => {
+                        if (activeWorkoutSession && isWakeLockEnabled) {
+                            setTimeout(() => { if (activeWorkoutSession && isWakeLockEnabled) requestWakeLock(); }, 1500);
+                        } else {
+                            updateWakeLockUI(false);
+                        }
+                    });
+                } catch (err) {
+                    console.warn("WakeLock request:", err);
+                }
+            }
+
+            // Fallback video player (iOS Safari'de ekran kararmasını kesin olarak durdurur)
+            try {
+                if (!noSleepVideoEl) initNoSleepVideoFallback();
+                if (noSleepVideoEl) {
+                    noSleepVideoEl.play().then(() => { ok = true; }).catch(() => {});
+                }
+            } catch(e) {}
+
+            updateWakeLockUI(ok || ('wakeLock' in navigator));
+
+            // Periyodik kontrol: Antrenman devam ettiği sürece ekran kilidinin canlı olduğundan emin ol
+            if (!wakeLockKeepAliveTimer) {
+                wakeLockKeepAliveTimer = setInterval(() => {
+                    if (activeWorkoutSession && isWakeLockEnabled) {
+                        if (!wakeLockSentinel && 'wakeLock' in navigator) {
+                            requestWakeLock();
+                        }
+                    } else {
+                        clearInterval(wakeLockKeepAliveTimer);
+                        wakeLockKeepAliveTimer = null;
+                    }
+                }, 20000);
+            }
+        }
+
+        function releaseWakeLock() {
+            if (wakeLockSentinel) {
+                try { wakeLockSentinel.release(); } catch(e) {}
+                wakeLockSentinel = null;
+            }
+            if (noSleepVideoEl && !noSleepVideoEl.paused) {
+                try { noSleepVideoEl.pause(); } catch(e) {}
+            }
+            if (wakeLockKeepAliveTimer) {
+                clearInterval(wakeLockKeepAliveTimer);
+                wakeLockKeepAliveTimer = null;
+            }
+            updateWakeLockUI(false);
+        }
+
+        function toggleWakeLockManual() {
+            isWakeLockEnabled = !isWakeLockEnabled;
+            if (isWakeLockEnabled) {
+                requestWakeLock();
+            } else {
+                releaseWakeLock();
+            }
+        }
+
+        function updateWakeLockUI(active) {
+            const el = document.getElementById('wakeLockStatusBtn');
+            if (!el) return;
+            if (active) {
+                el.className = "wake-lock-pill";
+                el.innerHTML = "🟢 Ekran Açık";
+                el.title = "Ekranın otomatik kararması engelleniyor (Dokunarak kapatabilirsiniz)";
+            } else {
+                el.className = "wake-lock-pill disabled";
+                el.innerHTML = "⚪ Ekran Normal";
+                el.title = "Ekran normal zaman aşımında kapanacaktır (Dokunarak açık tutabilirsiniz)";
+            }
+        }
+
+        function toggleHUDCollapse() {
+            isHUDCollapsed = !isHUDCollapsed;
+            const hud = document.getElementById('activeWorkoutHUD');
+            const icon = document.getElementById('hudCollapseIcon');
+            if (hud) hud.classList.toggle('collapsed', isHUDCollapsed);
+            if (icon) icon.innerText = isHUDCollapsed ? '▼' : '▲';
+        }
+
+        function adjustTimer(deltaSec) {
+            timerRemaining = Math.max(0, timerRemaining + deltaSec);
+            updateTimerDisplay();
+            if (!isTimerRunning && timerRemaining > 0) {
+                startTimer();
+            }
+        }
+
+        function skipRestTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            timerRemaining = 0;
+            updateTimerDisplay();
+            playAlertSound();
+            const badge = document.getElementById('hudRestStatusBadge');
+            if (badge) badge.innerText = "Hazır";
+        }
+
+        document.addEventListener('visibilitychange', async () => {
+            if (document.visibilityState === 'visible' && activeWorkoutSession && isWakeLockEnabled) {
+                await requestWakeLock();
+            }
+        });
+
+        function setActiveWorkoutViewMode(mode) {
+            activeWorkoutViewMode = mode;
+            const btnFocus = document.getElementById('btnViewFocus');
+            const btnList = document.getElementById('btnViewList');
+            if (btnFocus && btnList) {
+                btnFocus.classList.toggle('active', mode === 'focus');
+                btnList.classList.toggle('active', mode === 'list');
+            }
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+        }
+
+        function goToPrevExercise() {
+            if (!activeWorkoutSession || activeFocusExIndex <= 0) return;
+            activeFocusExIndex--;
+            activeFocusSetIndex = null;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function goToNextExercise() {
+            if (!activeWorkoutSession || activeFocusExIndex >= activeWorkoutSession.exercises.length - 1) return;
+            activeFocusExIndex++;
+            activeFocusSetIndex = null;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function selectFocusSet(exId, setIdx) {
+            activeFocusSetIndex = setIdx;
+            renderActiveWorkout();
+        }
+
+        let focusDiagramCollapsed = {};
+        function toggleFocusDiagram(exId) {
+            focusDiagramCollapsed[exId] = !focusDiagramCollapsed[exId];
+            renderActiveWorkout();
+        }
+
+        let extraToolsOpen = {};
+        function toggleExtraTools(exId) {
+            extraToolsOpen[exId] = !extraToolsOpen[exId];
+            const body = document.getElementById('toolsBody_' + exId);
+            const arrow = document.getElementById('toolsArrow_' + exId);
+            if (body) {
+                const isOpen = body.style.display !== 'none';
+                body.style.display = isOpen ? 'none' : 'block';
+                if (arrow) arrow.innerText = isOpen ? '▼ Aç' : '▲ Kapat';
+            }
+        }
+
+        function getLastExercisePerformance(exIdOrName) {
+            const uid = getActiveUserId();
+            let history = [];
+            try {
+                const raw = localStorage.getItem(`celik_kodu_history_${uid}`);
+                if (raw) history = JSON.parse(raw) || [];
+            } catch(e) {}
+
+            for (const log of history) {
+                if (!log.detailedExercises || !Array.isArray(log.detailedExercises)) continue;
+                const found = log.detailedExercises.find(e => (e.id === exIdOrName || e.name === exIdOrName) && (e.completedSetsCount > 0 || (e.sets && e.sets.some(s => s.completed))));
+                if (found && found.sets) {
+                    const completedSets = found.sets.filter(s => s.completed && s.weight !== '' && s.weight !== null && s.weight !== undefined);
+                    if (completedSets.length > 0) {
+                        const heaviest = completedSets.reduce((prev, cur) => ((cur.weight || 0) > (prev.weight || 0) ? cur : prev), completedSets[0]);
+                        return {
+                            weight: heaviest.weight || 0,
+                            reps: heaviest.reps || 10,
+                            dateFormatted: log.dateFormatted || log.date || 'Önceki seans'
+                        };
+                    }
+                }
+            }
+            return null;
+        }
+
+        let workoutFormGuideOpenState = {};
+        function toggleWorkoutFormGuide(exId) {
+            workoutFormGuideOpenState[exId] = !workoutFormGuideOpenState[exId];
+            const body = document.getElementById(`formGuideBody_${exId}`);
+            const arrow = document.getElementById(`formGuideArrow_${exId}`);
+            if (body) body.style.display = workoutFormGuideOpenState[exId] ? 'block' : 'none';
+            if (arrow) arrow.innerText = workoutFormGuideOpenState[exId] ? '▲ Gizle' : '▼ Göster';
+        }
+
+        function applyGhostToSet(exId, setIdx, weight, reps) {
+            const sets = activeWorkoutSetsData[exId];
+            if (!sets || !sets[setIdx]) return;
+            sets[setIdx].weight = weight;
+            sets[setIdx].reps = reps;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+            if (typeof showToast === 'function') showToast(`⚡ Set ${setIdx + 1}'e ${weight}kg × ${reps}tk uygulandı!`);
+        }
+
+        function jumpToExercise(idx) {
+            if (!activeWorkoutSession || idx < 0 || idx >= activeWorkoutSession.exercises.length) return;
+            activeFocusExIndex = idx;
+            activeFocusSetIndex = null;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function handleSetCheckClick(exId, setIdx) {
+            const sets = activeWorkoutSetsData[exId];
+            if (!sets || !sets[setIdx]) return;
+            if (sets[setIdx].completed) {
+                toggleSetStatus(exId, setIdx);
+            } else {
+                completeSetAndStartRest(exId, setIdx);
+            }
+        }
+
+        function copyLastPerformanceToCurrent(exId, weight, reps) {
+            const sets = activeWorkoutSetsData[exId];
+            if (!sets) return;
+            sets.forEach(st => {
+                if (!st.completed) {
+                    st.weight = weight;
+                    st.reps = reps;
+                }
+            });
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+            playAlertSound();
+        }
+
+        // LISTBOX PICKER STATE & HANDLERS (NO + -)
+        let currentListboxPickerState = { exId: null, setIdx: null, type: 'weight' };
+
+        const COMMON_WEIGHT_OPTIONS = [
+            0, 2, 2.5, 4, 5, 6, 7, 7.5, 8, 9, 10, 
+            12, 12.5, 14, 15, 16, 17.5, 18, 20, 22, 22.5, 24, 25, 26, 27.5, 28, 30, 
+            32, 32.5, 34, 35, 36, 37.5, 38, 40, 42.5, 45, 47.5, 50, 
+            52.5, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 110, 120, 130, 140, 150
+        ];
+        const COMMON_REPS_OPTIONS = [
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 
+            11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 
+            22, 25, 30, 35, 40, 50
+        ];
+
+        function openListboxPicker(exId, setIdx, type) {
+            currentListboxPickerState = { exId, setIdx, type };
+            const sets = activeWorkoutSetsData[exId];
+            if (!sets || !sets[setIdx]) return;
+            const st = sets[setIdx];
+            const isWeight = (type === 'weight');
+            const curVal = isWeight ? parseFloat(st.weight) : parseInt(st.reps);
+
+            let exName = 'Egzersiz';
+            if (activeWorkoutSession && activeWorkoutSession.exercises) {
+                const found = activeWorkoutSession.exercises.find(e => e.id === exId);
+                if (found) exName = found.name;
+            }
+
+            const titleEl = document.getElementById('listboxTitle');
+            const subEl = document.getElementById('listboxSub');
+            const customInput = document.getElementById('listboxCustomInput');
+            const modal = document.getElementById('quickListboxModal');
+            const container = document.getElementById('listboxItemsContainer');
+
+            if (titleEl) titleEl.innerText = isWeight ? '⚖️ Ağırlık Seç (KG)' : '🔄 Tekrar Sayısı Seç';
+            if (subEl) subEl.innerText = `${exName} • Set ${st.setNo}`;
+            if (customInput) {
+                customInput.placeholder = isWeight ? 'Örn: 27.5' : 'Örn: 14';
+                customInput.value = '';
+            }
+
+            const list = isWeight ? COMMON_WEIGHT_OPTIONS.slice() : COMMON_REPS_OPTIONS.slice();
+            if (!isNaN(curVal) && curVal !== null && curVal !== '' && !list.includes(curVal)) {
+                list.push(curVal);
+                list.sort((a, b) => a - b);
+            }
+
+            if (container) {
+                container.innerHTML = list.map(val => {
+                    const isSelected = (val === curVal);
+                    const label = isWeight ? `${val} kg` : `${val} tekrar`;
+                    return `
+                        <div class="listbox-option-item ${isSelected ? 'selected' : ''}" 
+                             onclick="selectListboxValue(${val})">
+                            <span>${label}</span>
+                            ${isSelected ? '<span class="listbox-option-check">✓</span>' : ''}
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            if (modal) {
+                modal.classList.add('active');
+                setTimeout(() => {
+                    const sel = container ? container.querySelector('.listbox-option-item.selected') : null;
+                    if (sel) sel.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                }, 50);
+            }
+        }
+
+        function selectListboxValue(val) {
+            const { exId, setIdx, type } = currentListboxPickerState;
+            if (!exId || setIdx === null || !activeWorkoutSetsData[exId] || !activeWorkoutSetsData[exId][setIdx]) return;
+            const st = activeWorkoutSetsData[exId][setIdx];
+
+            if (type === 'weight') {
+                st.weight = val;
+                // 1. sette veya mevcut sette seçilen kiloyu henüz tamamlanmamış sonraki setlere otomatik aktar
+                const sets = activeWorkoutSetsData[exId];
+                for (let i = setIdx + 1; i < sets.length; i++) {
+                    if (!sets[i].completed) {
+                        sets[i].weight = val;
+                    }
+                }
+                if (typeof showToast === 'function') {
+                    if (setIdx === 0 && sets.length > 1) {
+                        showToast(`⚖️ Set 1: ${val} kg seçildi (Sonraki setlere aktarıldı)`);
+                    } else {
+                        showToast(`⚖️ Set ${st.setNo}: ${val} kg seçildi`);
+                    }
+                }
+            } else {
+                st.reps = val;
+                if (typeof showToast === 'function') showToast(`🔄 Set ${st.setNo}: ${val} tekrar seçildi`);
+            }
+
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+            closeListboxPicker();
+
+            if (navigator.vibrate) navigator.vibrate(35);
+            playAlertSound();
+        }
+
+        function applyCustomListboxValue() {
+            const input = document.getElementById('listboxCustomInput');
+            if (!input) return;
+            const val = parseFloat(input.value);
+            if (!isNaN(val) && val >= 0) {
+                selectListboxValue(val);
+            }
+        }
+
+        function closeListboxPicker(e) {
+            if (e && e.target !== e.currentTarget) return;
+            const modal = document.getElementById('quickListboxModal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        function stepSetWeight(exId, setIdx, delta) {
+            const sets = activeWorkoutSetsData[exId];
+            if (!sets || !sets[setIdx]) return;
+            let cur = parseFloat(sets[setIdx].weight);
+            if (isNaN(cur)) cur = 0;
+            cur = Math.max(0, Math.round((cur + delta) * 10) / 10);
+            sets[setIdx].weight = cur;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+        }
+
+        function setQuickWeight(exId, setIdx, weightVal) {
+            const sets = activeWorkoutSetsData[exId];
+            if (!sets || !sets[setIdx]) return;
+            sets[setIdx].weight = weightVal;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+        }
+
+        function stepSetReps(exId, setIdx, delta) {
+            const sets = activeWorkoutSetsData[exId];
+            if (!sets || !sets[setIdx]) return;
+            let cur = parseInt(sets[setIdx].reps);
+            if (isNaN(cur)) cur = 10;
+            cur = Math.max(1, cur + delta);
+            sets[setIdx].reps = cur;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+        }
+
+        function stepExerciseSets(exId, delta) {
+            if (!activeWorkoutSetsData[exId]) {
+                activeWorkoutSetsData[exId] = [];
+            }
+            const sets = activeWorkoutSetsData[exId];
+            if (delta > 0) {
+                for (let i = 0; i < delta; i++) {
+                    const lastWeight = sets.length > 0 ? sets[sets.length - 1].weight : '';
+                    const lastReps = sets.length > 0 ? sets[sets.length - 1].reps : 10;
+                    sets.push({
+                        setNo: sets.length + 1,
+                        weight: lastWeight,
+                        reps: lastReps,
+                        completed: false,
+                        completedAt: null
+                    });
+                }
+                showToast(`➕ ${delta} set eklendi (Toplam: ${sets.length} Set)`);
+            } else if (delta < 0) {
+                const removeCount = Math.abs(delta);
+                let removed = 0;
+                for (let i = 0; i < removeCount; i++) {
+                    if (sets.length > 1) {
+                        sets.pop();
+                        removed++;
+                    }
+                }
+                if (removed > 0) {
+                    showToast(`➖ ${removed} set çıkarıldı (Kalan: ${sets.length} Set)`);
+                } else {
+                    showToast(`⚠️ En az 1 set bulunmalıdır.`);
+                }
+            }
+            if (activeFocusSetIndex !== null && activeFocusSetIndex >= sets.length) {
+                activeFocusSetIndex = sets.length - 1;
+            }
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+        }
+
+        let activeWorkoutMoreDrawersState = {};
+        function toggleExerciseMoreActions(exId) {
+            activeWorkoutMoreDrawersState[exId] = !activeWorkoutMoreDrawersState[exId];
+            const drawer = document.getElementById(`moreActionsDrawer_${exId}`);
+            const btn = document.getElementById(`btnMoreActions_${exId}`);
+            if (drawer) {
+                const isOpen = activeWorkoutMoreDrawersState[exId];
+                drawer.style.display = isOpen ? 'block' : 'none';
+                if (btn) {
+                    btn.classList.toggle('active', isOpen);
+                    const icon = btn.querySelector('.more-toggle-icon');
+                    if (icon) icon.innerText = isOpen ? '▲ Kapat' : '•••';
+                }
+            }
+        }
+
+        function deferExerciseToEnd(exId) {
+            if (!activeWorkoutSession || !activeWorkoutSession.exercises) return;
+            const idx = activeWorkoutSession.exercises.findIndex(e => e.id === exId);
+            if (idx === -1 || activeWorkoutSession.exercises.length <= 1) return;
+            if (idx === activeWorkoutSession.exercises.length - 1) {
+                alert("Bu hareket zaten seansın en sonunda.");
+                return;
+            }
+            const [deferredEx] = activeWorkoutSession.exercises.splice(idx, 1);
+            activeWorkoutSession.exercises.push(deferredEx);
+            if (activeFocusExIndex >= activeWorkoutSession.exercises.length) {
+                activeFocusExIndex = activeWorkoutSession.exercises.length - 1;
+            }
+            activeFocusSetIndex = null;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+            playAlertSound();
+        }
+
+        function moveExerciseOrder(exId, direction) {
+            if (!activeWorkoutSession || !activeWorkoutSession.exercises) return;
+            const idx = activeWorkoutSession.exercises.findIndex(e => e.id === exId);
+            if (idx === -1) return;
+            const targetIdx = idx + direction;
+            if (targetIdx < 0 || targetIdx >= activeWorkoutSession.exercises.length) return;
+
+            const temp = activeWorkoutSession.exercises[idx];
+            activeWorkoutSession.exercises[idx] = activeWorkoutSession.exercises[targetIdx];
+            activeWorkoutSession.exercises[targetIdx] = temp;
+
+            if (activeWorkoutViewMode === 'focus') {
+                activeFocusExIndex = targetIdx;
+            }
+            activeFocusSetIndex = null;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+        }
+
+        function updateLiveProgressBar() {
+            const fill = document.getElementById('liveProgressBarFill');
+            const txt = document.getElementById('liveProgressText');
+            const detail = document.getElementById('liveProgressDetail');
+            if (!fill || !txt) return;
+
+            if (!activeWorkoutSession || !activeWorkoutSetsData) {
+                fill.style.width = '0%';
+                txt.innerText = 'Set İlerlemesi: 0 / 0 (%0)';
+                if (detail) detail.innerText = 'Hazır';
+                return;
+            }
+
+            let total = 0;
+            let completed = 0;
+            activeWorkoutSession.exercises.forEach(ex => {
+                const sets = activeWorkoutSetsData[ex.id] || [];
+                total += sets.length;
+                completed += sets.filter(s => s.completed).length;
+            });
+            const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+            fill.style.width = `${percent}%`;
+            txt.innerText = `Set İlerlemesi: ${completed} / ${total} Set (%${percent})`;
+            if (detail) {
+                if (percent === 100) detail.innerText = '🎉 Tamamlandı!';
+                else if (activeWorkoutViewMode === 'focus') {
+                    detail.innerText = `Egzersiz ${activeFocusExIndex + 1}/${activeWorkoutSession.exercises.length}`;
+                } else {
+                    detail.innerText = `%${percent} Bitti`;
+                }
+            }
+        }
+
+        function startActiveWorkoutFromGenerated() {
+            if (!currentGeneratedWorkout) {
+                console.warn("startActiveWorkoutFromGenerated: currentGeneratedWorkout boş.");
+                return;
+            }
+            activeWorkoutSession = JSON.parse(JSON.stringify(currentGeneratedWorkout));
+            activeWorkoutStartTime = Date.now();
+            activeWorkoutIsPaused = false;
+            activeWorkoutPausedAt = null;
+            activeWorkoutTotalPausedMs = 0;
+            activeWorkoutSetsData = {};
+            activeWorkoutViewMode = 'focus';
+            activeFocusExIndex = 0;
+            activeFocusSetIndex = null;
+
+            const user = getActiveUser();
+            const userWeights = user ? (user.weights || {}) : {};
+
+            if (!activeWorkoutSession.scheme) {
+                activeWorkoutSession.scheme = { sets: 3, reps: '8-12', rest: 45 };
+            }
+
+            if (!Array.isArray(activeWorkoutSession.exercises) || activeWorkoutSession.exercises.length === 0) {
+                alert("Bu antrenmanda egzersiz bulunamadı.");
+                return;
+            }
+
+            // Normalise string ID exercises to full exercise objects if needed
+            activeWorkoutSession.exercises = activeWorkoutSession.exercises.filter(Boolean).map(ex => {
+                if (typeof ex === 'string') {
+                    const dbEx = EXERCISES_DB.find(e => e.id === ex);
+                    return dbEx || { id: ex, name: ex, equipment: 'bodyweight' };
+                }
+                return ex;
+            });
+
+            activeWorkoutSession.exercises.forEach(ex => {
+                if (!ex || !ex.id) return;
+                const numSets = (ex.targetSets || (activeWorkoutSession.scheme && activeWorkoutSession.scheme.sets)) || 3;
+                let defaultReps = 10;
+                const repsSpec = ex.targetReps || (activeWorkoutSession.scheme && activeWorkoutSession.scheme.reps);
+                if (repsSpec) {
+                    const firstPart = String(repsSpec).split('-')[0].trim();
+                    defaultReps = parseInt(firstPart) || 10;
+                }
+                const defaultWeight = ex.weightKey && userWeights[ex.weightKey] ? (parseFloat(userWeights[ex.weightKey]) || '') : '';
+
+                activeWorkoutSetsData[ex.id] = [];
+                for (let s = 1; s <= numSets; s++) {
+                    activeWorkoutSetsData[ex.id].push({
+                        setNo: s,
+                        weight: defaultWeight,
+                        reps: defaultReps,
+                        completed: false,
+                        completedAt: null
+                    });
+                }
+            });
+
+            saveActiveWorkoutStateToStorage();
+            startWorkoutTimer();
+            renderActiveWorkout();
+            switchTab('activeWorkoutTab');
+            resetTimer((activeWorkoutSession.scheme && activeWorkoutSession.scheme.rest) || 45);
+            playAlertSound();
+            requestWakeLock();
+        }
+
+        function getWorkoutElapsedSeconds() {
+            if (!activeWorkoutStartTime) return 0;
+            if (activeWorkoutIsPaused && activeWorkoutPausedAt) {
+                return Math.max(0, Math.floor((activeWorkoutPausedAt - activeWorkoutStartTime - activeWorkoutTotalPausedMs) / 1000));
+            }
+            return Math.max(0, Math.floor((Date.now() - activeWorkoutStartTime - activeWorkoutTotalPausedMs) / 1000));
+        }
+
+        function formatSecondsToHMS(totalSecs) {
+            const hrs = Math.floor(totalSecs / 3600);
+            const mins = Math.floor((totalSecs % 3600) / 60);
+            const secs = totalSecs % 60;
+            if (hrs > 0) {
+                return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            }
+            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        function updateWorkoutTimerDisplay() {
+            const el = document.getElementById('workoutTotalTimerDisplay');
+            if (!el) return;
+            const secs = getWorkoutElapsedSeconds();
+            el.innerText = formatSecondsToHMS(secs);
+        }
+
+        function startWorkoutTimer() {
+            clearInterval(workoutTimerInterval);
+            updateWorkoutTimerDisplay();
+            workoutTimerInterval = setInterval(() => {
+                if (!activeWorkoutIsPaused && activeWorkoutSession) {
+                    updateWorkoutTimerDisplay();
+                }
+            }, 1000);
+        }
+
+        function toggleWorkoutPause() {
+            if (!activeWorkoutSession) return;
+            const btn = document.getElementById('btnToggleWorkoutPause');
+            if (!activeWorkoutIsPaused) {
+                activeWorkoutIsPaused = true;
+                activeWorkoutPausedAt = Date.now();
+                if (btn) btn.innerText = "▶️ Devam Et";
+            } else {
+                activeWorkoutIsPaused = false;
+                if (activeWorkoutPausedAt) {
+                    activeWorkoutTotalPausedMs += (Date.now() - activeWorkoutPausedAt);
+                    activeWorkoutPausedAt = null;
+                }
+                if (btn) btn.innerText = "⏸️ Duraklat";
+            }
+            saveActiveWorkoutStateToStorage();
+            updateWorkoutTimerDisplay();
+        }
+
+        function saveActiveWorkoutStateToStorage() {
+            const uid = getActiveUserId();
+            if (!activeWorkoutSession) {
+                localStorage.removeItem(`celik_kodu_active_state_${uid}`);
+                return;
+            }
+            const state = {
+                session: activeWorkoutSession,
+                startTime: activeWorkoutStartTime,
+                isPaused: activeWorkoutIsPaused,
+                pausedAt: activeWorkoutPausedAt,
+                totalPausedMs: activeWorkoutTotalPausedMs,
+                setsData: activeWorkoutSetsData,
+                viewMode: activeWorkoutViewMode,
+                focusIndex: activeFocusExIndex
+            };
+            try {
+                localStorage.setItem(`celik_kodu_active_state_${uid}`, JSON.stringify(state));
+            } catch(e) {}
+        }
+
+        function restoreActiveWorkoutStateFromStorage() {
+            const uid = getActiveUserId();
+            try {
+                const raw = localStorage.getItem(`celik_kodu_active_state_${uid}`);
+                if (!raw) return false;
+                const state = JSON.parse(raw);
+                if (state && state.session && state.startTime) {
+                    activeWorkoutSession = state.session;
+                    activeWorkoutStartTime = state.startTime;
+                    activeWorkoutIsPaused = !!state.isPaused;
+                    activeWorkoutPausedAt = state.pausedAt || null;
+                    activeWorkoutTotalPausedMs = state.totalPausedMs || 0;
+                    activeWorkoutSetsData = state.setsData || {};
+                    if (state.viewMode) activeWorkoutViewMode = state.viewMode;
+                    if (typeof state.focusIndex === 'number') activeFocusExIndex = state.focusIndex;
+
+                    renderActiveWorkout();
+                    startWorkoutTimer();
+                    const btn = document.getElementById('btnToggleWorkoutPause');
+                    if (btn) btn.innerText = activeWorkoutIsPaused ? "▶️ Devam Et" : "⏸️ Duraklat";
+                    requestWakeLock();
+                    return true;
+                }
+            } catch(e) {}
+            return false;
+        }
+
+        function toggleStudioAccordion(forceOpen) {
+            const body = document.getElementById('studioAccordionBody');
+            const arrow = document.getElementById('studioAccordionArrow');
+            if (!body) return;
+            const isCurrentlyOpen = body.style.display !== 'none';
+            const shouldOpen = (forceOpen !== undefined) ? forceOpen : !isCurrentlyOpen;
+            body.style.display = shouldOpen ? 'block' : 'none';
+            if (arrow) arrow.innerText = shouldOpen ? '▲ Kapat' : '▼ Aç';
+            if (shouldOpen) {
+                initStudioTab();
+            }
+        }
+
+        function openStudioAccordion() {
+            toggleStudioAccordion(true);
+            const sec = document.getElementById('studioSectionInWorkout');
+            if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function renderActiveWorkout() {
+            const container = document.getElementById('activeWorkoutContainer');
+            const liveTrackerBar = document.querySelector('.live-tracker-bar');
+            const hud = document.getElementById('activeWorkoutHUD');
+            const dock = document.getElementById('workoutFloatingDock');
+            const studioSec = document.getElementById('studioSectionInWorkout');
+
+            if (!activeWorkoutSession || !container) {
+                if (liveTrackerBar) liveTrackerBar.style.display = 'none';
+                if (hud) hud.style.display = 'none';
+                if (dock) dock.style.display = 'none';
+                if (studioSec) studioSec.style.display = 'block';
+                if (container) {
+                    try {
+                        const user = getActiveUser();
+                    const key = `celik_kodu_custom_programs_${user.id}`;
+                    let customSaved = [];
+                    try {
+                        const raw = localStorage.getItem(key);
+                        if (raw) customSaved = JSON.parse(raw);
+                    } catch(e) {}
+
+                    const todayIdx = new Date().getDay();
+                    const tomorrowIdx = (todayIdx + 1) % 7;
+                    const isNextWeek = activePlannerWeek === 'next';
+                    const schedule = isNextWeek ? getNextWeeklySchedule(user.id) : getWeeklySchedule(user.id);
+                    const todayPlan = schedule[todayIdx] || { id: 'rest', rest: true, title: 'Dinlenme & Aktif Toparlanma' };
+                    const tomorrowPlan = schedule[tomorrowIdx] || { id: 'rest', rest: true, title: 'Dinlenme & Aktif Toparlanma' };
+
+                    let aiProgData = null;
+                    try {
+                        const rawAi = localStorage.getItem(`celik_kodu_ai_program_${user.id}`);
+                        if (rawAi) aiProgData = JSON.parse(rawAi);
+                    } catch(e) {}
+                    const hasIncomingAi = !!(aiProgData && aiProgData.active);
+
+                    let heroBannerHtml = '';
+                    if (isNextWeek) {
+                        const isExpandedNext = !!localStorage.getItem(`celik_kodu_next_week_expanded_${user.id}`);
+                        heroBannerHtml = `
+                            <div class="collapsible-panel ${isExpandedNext ? 'open' : ''}" id="nextWeekHeroPanel_${user.id}">
+                                <div class="collapsible-panel-header" onclick="toggleNextWeekHeroPanel('${user.id}')">
+                                    <div class="collapsible-panel-title">
+                                        <span class="icon">🚀</span>
+                                        <span class="text">Gelecek Hafta Antrenman Planı (Önizleme)</span>
+                                    </div>
+                                    <div class="collapsible-panel-meta">
+                                        <span class="collapsible-panel-badge">${hasIncomingAi ? 'FitLAB Reçetesi' : 'Plan Hazır'}</span>
+                                        <span class="collapsible-panel-arrow">▼</span>
+                                    </div>
+                                </div>
+                                <div class="collapsible-panel-body">
+                                    <h3 style="font-size:13.5px; font-weight:800; color:#fff; margin:0 0 6px 0;">Gelecek Haftaya Özel Hipertrofi Bloğu</h3>
+                                    <p style="font-size:12px; color:#cbd5e1; line-height:1.5; margin:0 0 12px 0;">Masaüstü istasyonundan gelen bilimsel reçete gün gün takviminize işlendi. Salona girmeden önce günlerin içeriğini inceleyebilir veya tek dokunuşla bu planı aktif haftanız olarak başlatabilirsiniz.</p>
+                                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                        <button class="btn btn-gold" style="padding:9px 16px; font-size:12px; font-weight:900; flex:1;" onclick="promoteNextWeekToCurrent('${user.id}')">
+                                            ⚡ BU PROGRAMI AKTİF HAFTAM YAP
+                                        </button>
+                                        <button class="btn btn-outline" style="padding:9px 14px; font-size:12px; font-weight:700; border-color:rgba(255,255,255,0.2); color:#cbd5e1;" onclick="switchPlannerWeek('current')">
+                                            ⬅️ Bu Haftaya Dön
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } else if (!todayPlan.rest) {
+                        const todayDetails = getWorkoutDetailsForPlan(todayPlan);
+                        const todayExCount = todayDetails && todayDetails.exercises ? todayDetails.exercises.length : null;
+                        heroBannerHtml = `
+                            <div class="today-workout-hero">
+                                <div class="today-workout-header">
+                                    <div class="today-workout-badge">🔥 BUGÜN • ${DAY_NAMES_TR[todayIdx].toUpperCase()}</div>
+                                    <span style="font-size:11px; color:#cbd5e1; font-weight:700;">${todayExCount ? `${todayExCount} Hareket` : ''}</span>
+                                </div>
+                                <h2 class="today-workout-title">${escapeHTML(todayPlan.title)}</h2>
+                                <div class="today-workout-actions">
+                                    <button class="btn btn-gold" style="padding:9px 18px; font-size:12.5px; font-weight:900;" onclick="startScheduledWorkoutForDay(${todayIdx})">
+                                        ▶️ SEANSI BAŞLAT
+                                    </button>
+                                    <button class="btn btn-outline" style="padding:9px 14px; font-size:12px; font-weight:700; border-color:rgba(255,255,255,0.2); color:#cbd5e1;" onclick="openScheduleDayModal(${todayIdx})">
+                                        👁️ İncele & Düzenle
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        heroBannerHtml = `
+                            <div class="today-rest-bar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                                <div class="today-rest-info">
+                                    <span style="font-size:16px;">🧘</span>
+                                    <span class="today-rest-title">Bugün (${DAY_NAMES_TR[todayIdx]}) Dinlenme Olarak Ayarlı</span>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:6px 14px; font-weight:900;" onclick="openScheduleDayModal(${todayIdx})">
+                                        ⚡ Bugün Çalış (Antrenman Seç)
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    const daysSequence = [1, 2, 3, 4, 5, 6, 0];
+                    const weeklyStripHtml = daysSequence.map(d => {
+                        const plan = schedule[d] || { id: 'rest', rest: true, title: 'Dinlenme' };
+                        const isToday = !isNextWeek && d === todayIdx;
+                        const isTomorrow = !isNextWeek && d === tomorrowIdx;
+                        let pillClass = 'weekly-day-pill';
+                        if (isToday) pillClass += ' active-today';
+                        else if (isTomorrow) pillClass += ' active-tomorrow';
+
+                        const icon = plan.rest ? '🧘' : (plan.source === 'FitLAB AI' ? '🔬' : '⚔️');
+                        const planDetails = getWorkoutDetailsForPlan(plan);
+                        const exCount = (!plan.rest && planDetails && planDetails.exercises) ? planDetails.exercises.length : null;
+                        const statusText = plan.rest ? 'Dinlen' : (exCount ? `${exCount} Hrk` : 'Plan');
+                        const timeTagHtml = (!plan.rest && plan.time) ? `
+                            <span class="weekly-day-time-tag" title="Saat: ${plan.time}">
+                                ${plan.time} ${plan.googleEventId ? '<span class="weekly-day-sync-dot" title="Google Takvimde Canlı"></span>' : ''}
+                            </span>
+                        ` : '';
+
+                        return `
+                            <div class="${pillClass}" onclick="openScheduleDayModal(${d})" title="${DAY_NAMES_TR[d]}: ${escapeHTML(plan.title)}">
+                                <span class="weekly-day-name">${DAY_SHORT_TR[d]}</span>
+                                <span class="weekly-day-icon">${icon}</span>
+                                <span class="weekly-day-status">${statusText}</span>
+                                ${timeTagHtml}
+                            </div>
+                        `;
+                    }).join('');
+
+                    container.innerHTML = `
+                        <div style="padding:8px 4px 10px;">
+                            <!-- FİTLAB MASAÜSTÜ YENİ PROGRAM BİLDİRİMİ -->
+                            ${getFitLabIncomingProgramHtml(user.id)}
+
+                            <!-- AKADEMİK KOÇ İSTASYONU DİREKTİFİ -->
+                            ${getCoachStationDirectiveHtml(user.id)}
+
+                            <!-- 1. GÜNLÜK DURUM / HERO SEANS KARTI -->
+                            ${heroBannerHtml}
+
+                            <!-- 2. HAFTALIK ANTRENMAN TAKVİMİ (KOMPAKT & NİZAMİ) -->
+                            <div class="weekly-planner-section">
+                                <div class="planner-top-bar">
+                                    <div class="planner-title-wrap">
+                                        <span style="font-size:15px;">📅</span>
+                                        <span class="planner-title">${isNextWeek ? 'Gelecek Hafta Planı' : 'Haftalık Antrenman Takvimi'}</span>
+                                    </div>
+                                    <div class="mini-week-segmented">
+                                        <button type="button" class="mini-week-btn ${!isNextWeek ? 'active' : ''}" onclick="switchPlannerWeek('current')">
+                                            Bu Hafta
+                                        </button>
+                                        <button type="button" class="mini-week-btn ${isNextWeek ? 'active' : ''}" onclick="switchPlannerWeek('next')">
+                                            Gelecek Hafta ${hasIncomingAi ? '<span style="color:var(--gold);">•</span>' : ''}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- CANLI TAKVİM ENTEGRASYON BARI -->
+                                ${typeof getCalendarLiveBarHtml === 'function' ? getCalendarLiveBarHtml() : ''}
+
+                                ${isNextWeek ? `
+                                    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.25); border-radius:8px; padding:8px 12px; margin-bottom:10px; gap:8px;">
+                                        <span style="font-size:11.5px; color:#f8fafc; font-weight:700;">🚀 Gelecek Hafta Reçetesi Takvimde</span>
+                                        <button type="button" class="btn btn-gold" style="font-size:11px; padding:5px 12px; font-weight:900;" onclick="promoteNextWeekToCurrent('${user.id}')">
+                                            ⚡ Aktif Haftam Yap
+                                        </button>
+                                    </div>
+                                ` : ''}
+
+                                <div class="weekly-strip">
+                                    ${weeklyStripHtml}
+                                </div>
+
+                                <div class="planner-template-bar">
+                                    <span class="planner-template-lbl">Hızlı Şablon:</span>
+                                    <button type="button" class="planner-template-btn" onclick="resetWeeklyScheduleTemplate('standard_3day')" title="Standart 3 Günlük Çelik Şablonu">⚡ 3 Gün</button>
+                                    <button type="button" class="planner-template-btn" onclick="resetWeeklyScheduleTemplate('split_4day')" title="4 Günlük Bölünmüş Şablon">⚡ 4 Gün</button>
+                                </div>
+                            </div>
+
+                            <div style="font-size:12px; font-weight:900; color:var(--gold); margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+                                <span>⚔️ HAZIR ÇELİK KODU PROGRAMLARI</span>
+                            </div>
+
+                            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
+                                <div class="log-history-card" style="padding:14px; margin-bottom:0;">
+                                    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+                                        <div>
+                                            <div style="font-size:14.5px; font-weight:800; color:#fff;">Gün 1: Omuz & Bacak Ön Zırhı</div>
+                                            <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
+                                                Press + Squat • Şınav + Front Squat • Core
+                                            </div>
+                                            <div style="font-size:11px; color:var(--cyan); margin-top:4px; font-weight:700;">
+                                                ⏱️ 45 Dk • 4 Set • Süperset
+                                            </div>
+                                        </div>
+                                        <div style="display:flex; gap:6px; flex-shrink:0;">
+                                            <button class="btn btn-outline" style="padding:8px 11px; font-size:11.5px; color:var(--cyan); border-color:var(--cyan);" onclick="previewWorkoutModal('la_forja_day1')">
+                                                👁️ İncele
+                                            </button>
+                                            <button class="btn btn-gold" style="padding:8px 14px; font-size:12px; font-weight:800;" onclick="loadOfficialRoutine('la_forja_day1')">
+                                                ▶ Başlat
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="log-history-card" style="padding:14px; margin-bottom:0;">
+                                    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+                                        <div>
+                                            <div style="font-size:14.5px; font-weight:800; color:#fff;">Gün 2: Sırt Çekiş & Balistik Güç</div>
+                                            <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
+                                                Saw Row + RDL • Swing + Pullup • Çanta Taşıma
+                                            </div>
+                                            <div style="font-size:11px; color:var(--cyan); margin-top:4px; font-weight:700;">
+                                                ⏱️ 45 Dk • 4 Set • Süperset
+                                            </div>
+                                        </div>
+                                        <div style="display:flex; gap:6px; flex-shrink:0;">
+                                            <button class="btn btn-outline" style="padding:8px 11px; font-size:11.5px; color:var(--cyan); border-color:var(--cyan);" onclick="previewWorkoutModal('la_forja_day2')">
+                                                👁️ İncele
+                                            </button>
+                                            <button class="btn btn-gold" style="padding:8px 14px; font-size:12px; font-weight:800;" onclick="loadOfficialRoutine('la_forja_day2')">
+                                                ▶ Başlat
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="log-history-card" style="padding:14px; margin-bottom:0;">
+                                    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+                                        <div>
+                                            <div style="font-size:14.5px; font-weight:800; color:#fff;">Gün 3: Kompleks & Merdiven</div>
+                                            <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
+                                                Snatch + Lunge • Row + Squat • Burpee Finisher
+                                            </div>
+                                            <div style="font-size:11px; color:var(--cyan); margin-top:4px; font-weight:700;">
+                                                ⏱️ 50 Dk • 4 Set • Süperset
+                                            </div>
+                                        </div>
+                                        <div style="display:flex; gap:6px; flex-shrink:0;">
+                                            <button class="btn btn-outline" style="padding:8px 11px; font-size:11.5px; color:var(--cyan); border-color:var(--cyan);" onclick="previewWorkoutModal('la_forja_day3')">
+                                                👁️ İncele
+                                            </button>
+                                            <button class="btn btn-gold" style="padding:8px 14px; font-size:12px; font-weight:800;" onclick="loadOfficialRoutine('la_forja_day3')">
+                                                ▶ Başlat
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            ${customSaved.length > 0 ? `
+                                <div style="font-size:12px; font-weight:900; color:var(--gold); margin-bottom:10px;">
+                                    ⭐ KAYITLI ÖZEL PROGRAMLARIM
+                                </div>
+                                <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
+                                    ${customSaved.map(p => `
+                                        <div class="log-history-card" style="padding:14px; margin-bottom:0;">
+                                            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                                                <div>
+                                                    <div style="font-size:14px; font-weight:800; color:#fff;">${escapeHTML(p.title)}</div>
+                                                    <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">${(p.exercises || []).length} Hareket • ${p.duration || Math.round((p.exercises || []).length * 7)} Dk</div>
+                                                </div>
+                                                <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
+                                                    <button class="btn btn-outline" style="padding:7px 10px; font-size:11px; color:var(--cyan); border-color:var(--cyan);" onclick="previewWorkoutModal('${p.id}')">
+                                                        👁️ İncele
+                                                    </button>
+                                                    <button class="btn btn-outline" style="padding:7px 10px; font-size:11px; color:var(--gold); border-color:var(--gold);" onclick="editSavedProgram('${p.id}')">
+                                                        ✏️ Düzenle
+                                                    </button>
+                                                    <button class="btn btn-gold" style="padding:7px 12px; font-size:11.5px; font-weight:800;" onclick="loadSavedProgram('${p.id}')">
+                                                        ▶ Başlat
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                    } catch(renderErr) {
+                        console.error("renderActiveWorkout hatası:", renderErr);
+                    }
+                }
+                updateLiveProgressBar();
+                return;
+            }
+
+            if (liveTrackerBar) liveTrackerBar.style.display = 'block';
+            if (hud) hud.style.display = 'block';
+            if (studioSec) studioSec.style.display = 'none';
+
+            const s = activeWorkoutSession;
+            const user = getActiveUser();
+            const weights = user ? (user.weights || {}) : {};
+
+            if (!s.scheme) {
+                s.scheme = { sets: 3, reps: '8-12', rest: 45 };
+            }
+
+            if (!Array.isArray(s.exercises) || s.exercises.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:40px 20px; color:var(--text-secondary);">
+                        <p style="font-size:16px; font-weight:700; color:#fff;">Bu antrenmanda egzersiz bulunamadı.</p>
+                        <button class="btn btn-gold" onclick="cancelActiveWorkout()" style="margin-top:12px;">Antrenmanı İptal Et</button>
+                    </div>
+                `;
+                return;
+            }
+
+            s.exercises = s.exercises.filter(Boolean).map(ex => {
+                if (typeof ex === 'string') {
+                    const dbEx = EXERCISES_DB.find(e => e.id === ex);
+                    return dbEx || { id: ex, name: ex, equipment: 'bodyweight' };
+                }
+                return ex;
+            });
+
+            // Ensure setsData exists for each exercise
+            s.exercises.forEach(ex => {
+                if (!ex || !ex.id) return;
+                if (!activeWorkoutSetsData[ex.id]) {
+                    const numSets = (ex.targetSets || (s.scheme && s.scheme.sets)) || 3;
+                    const repsSpec = ex.targetReps || (s.scheme && s.scheme.reps) || '10';
+                    const defaultReps = parseInt(String(repsSpec).split('-')[0].trim()) || 10;
+                    const defaultWeight = ex.weightKey && weights[ex.weightKey] ? (parseFloat(weights[ex.weightKey]) || '') : '';
+                    activeWorkoutSetsData[ex.id] = [];
+                    for (let st = 1; st <= numSets; st++) {
+                        activeWorkoutSetsData[ex.id].push({
+                            setNo: st,
+                            weight: defaultWeight,
+                            reps: defaultReps,
+                            completed: false,
+                            completedAt: null
+                        });
+                    }
+                }
+            });
+
+            // Update top view toggle buttons
+            const btnFocus = document.getElementById('btnViewFocus');
+            const btnList = document.getElementById('btnViewList');
+            if (btnFocus && btnList) {
+                btnFocus.classList.toggle('active', activeWorkoutViewMode === 'focus');
+                btnList.classList.toggle('active', activeWorkoutViewMode === 'list');
+            }
+
+            // Update sticky progress bar
+            updateLiveProgressBar();
+
+            const equipLabels = {
+                dumbbell: 'Dambıl',
+                kettlebell: 'Kettlebell',
+                barbell: 'Barbell',
+                machine: 'Makine/Kablo',
+                bodyweight: 'Vücut Ağırlığı'
+            };
+
+            // Clamp activeFocusExIndex
+            if (activeFocusExIndex < 0) activeFocusExIndex = 0;
+            if (activeFocusExIndex >= s.exercises.length) activeFocusExIndex = s.exercises.length - 1;
+
+            // ==================== MODE 1: CANLI ODAK MODU (FOCUS MODE - HEVY / STRONG STYLE) ====================
+            if (activeWorkoutViewMode === 'focus') {
+                const ex = s.exercises[activeFocusExIndex];
+                const sets = activeWorkoutSetsData[ex.id] || [];
+                const firstIncompleteIdx = sets.findIndex(st => !st.completed);
+                const isAllSetsDone = sets.length > 0 && sets.every(st => st.completed);
+                const allWorkoutDone = s.exercises.every(e => (activeWorkoutSetsData[e.id] || []).every(st => st.completed));
+                const lastPerf = getLastExercisePerformance(ex.id) || getLastExercisePerformance(ex.name);
+                const isFormOpen = !!workoutFormGuideOpenState[ex.id];
+
+                container.innerHTML = `
+                    <div class="hevy-workout-wrapper">
+                        <!-- TOP EXERCISE NAVIGATION STEPPER -->
+                        <div class="hevy-exercise-nav">
+                            <button type="button" class="hevy-nav-arrow" onclick="goToPrevExercise()" ${activeFocusExIndex === 0 ? 'disabled' : ''} title="Önceki Egzersiz">
+                                ◀
+                            </button>
+                            <div class="hevy-nav-center">
+                                <div class="hevy-nav-counter">EGZERSİZ ${activeFocusExIndex + 1} / ${s.exercises.length}</div>
+                                <div class="hevy-nav-pills">
+                                    ${s.exercises.map((e, eIdx) => {
+                                        const eSets = activeWorkoutSetsData[e.id] || [];
+                                        const isDone = eSets.length > 0 && eSets.every(st => st.completed);
+                                        const isCur = eIdx === activeFocusExIndex;
+                                        return `
+                                            <button type="button" 
+                                                    class="hevy-pill-dot ${isCur ? 'active' : ''} ${isDone ? 'done' : ''}" 
+                                                    onclick="jumpToExercise(${eIdx})" 
+                                                    title="${escapeHTML(e.name)}">
+                                                ${isDone ? '✓' : (eIdx + 1)}
+                                            </button>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                            <button type="button" class="hevy-nav-arrow" onclick="goToNextExercise()" ${activeFocusExIndex === s.exercises.length - 1 ? 'disabled' : ''} title="Sonraki Egzersiz">
+                                ▶
+                            </button>
+                        </div>
+
+                        <!-- EXERCISE CARD -->
+                        <div class="hevy-exercise-card">
+                            <!-- HEADER -->
+                            <div class="hevy-exercise-header">
+                                <div class="hevy-title-row">
+                                    <h2 class="hevy-exercise-title">${escapeHTML(ex.name)}</h2>
+                                    <span class="hevy-equip-badge">${equipLabels[ex.equipment] || ex.equipment}</span>
+                                </div>
+                                <div class="hevy-meta-row">
+                                    <span class="hevy-meta-item">🎯 Hedef: <strong>${sets.length} Set × ${s.scheme.reps}</strong></span>
+                                    <span class="hevy-meta-item">⏱️ Dinlenme: <strong>${s.scheme.rest || 45}s</strong></span>
+                                </div>
+                            </div>
+
+                            <!-- COLLAPSIBLE FORM & BIOMECHANICS GUIDE -->
+                            <div class="hevy-form-collapsible">
+                                <button type="button" class="btn-hevy-form-toggle" onclick="toggleWorkoutFormGuide('${ex.id}')">
+                                    <span>📖 Form & Biyomekanik Rehberi</span>
+                                    <span id="formGuideArrow_${ex.id}" style="color:var(--gold); font-weight:800;">${isFormOpen ? '▲ Gizle' : '▼ Göster'}</span>
+                                </button>
+                                <div id="formGuideBody_${ex.id}" class="hevy-form-guide-body" style="display:${isFormOpen ? 'block' : 'none'};">
+                                    ${renderExercisePositionsHtml(ex, `focus_${ex.id}`, false)}
+                                </div>
+                            </div>
+
+                            <!-- GHOST PERFORMANCE REFERENCE -->
+                            ${lastPerf ? `
+                                <div class="hevy-ghost-bar">
+                                    <div class="hevy-ghost-info">
+                                        <span>📌 Önceki: <strong>${lastPerf.weight} kg × ${lastPerf.reps} tk</strong> <span style="font-size:10px; opacity:0.75;">(${lastPerf.dateFormatted})</span></span>
+                                    </div>
+                                    <button type="button" class="btn-hevy-ghost-apply" onclick="copyLastPerformanceToCurrent('${ex.id}', ${lastPerf.weight}, ${lastPerf.reps})" title="Tüm boş setlere uygula">
+                                        ⚡ Tümüne Yaz
+                                    </button>
+                                </div>
+                            ` : ''}
+
+                            <!-- HEVY / STRONG STYLE SETS TABLE -->
+                            <div class="hevy-sets-card">
+                                <div class="hevy-sets-table">
+                                    <div class="hevy-th-row">
+                                        <div class="hevy-th">SET</div>
+                                        <div class="hevy-th">ÖNCEKİ</div>
+                                        <div class="hevy-th">KG</div>
+                                        <div class="hevy-th">TEKRAR</div>
+                                        <div class="hevy-th">✓</div>
+                                    </div>
+
+                                    ${sets.map((st, sIdx) => {
+                                        const isDone = st.completed;
+                                        const isTarget = !isDone && sIdx === firstIncompleteIdx;
+                                        const prevText = lastPerf ? `${lastPerf.weight}kg × ${lastPerf.reps}` : '-';
+
+                                        return `
+                                            <div class="hevy-tr-row ${isDone ? 'done' : ''} ${isTarget ? 'active-target' : ''}" id="setRow_${ex.id}_${sIdx}">
+                                                <!-- SET NO -->
+                                                <div class="hevy-td">
+                                                    <span class="hevy-set-pill ${isDone ? 'done' : (isTarget ? 'target' : '')}">${st.setNo}</span>
+                                                </div>
+
+                                                <!-- ÖNCEKİ SEANS / GHOST -->
+                                                <div class="hevy-td" 
+                                                     title="${lastPerf && !isDone ? 'Bu sete önceki veriyi aktarmak için dokunun' : ''}"
+                                                     ${lastPerf && !isDone ? `onclick="applyGhostToSet('${ex.id}', ${sIdx}, ${lastPerf.weight}, ${lastPerf.reps})"` : ''}>
+                                                    <span class="hevy-prev-text ${lastPerf && !isDone ? 'clickable' : ''}">${prevText}</span>
+                                                </div>
+
+                                                <!-- AĞIRLIK (KG) - LISTBOX PICKER -->
+                                                <div class="hevy-td">
+                                                    <button type="button" class="hevy-listbox-btn" onclick="openListboxPicker('${ex.id}', ${sIdx}, 'weight')" title="Kilo seçmek için dokunun">
+                                                        <span>${st.weight !== '' && st.weight !== null && st.weight !== undefined ? `${st.weight} kg` : '- kg'}</span>
+                                                        <span class="listbox-btn-arrow">▾</span>
+                                                    </button>
+                                                </div>
+
+                                                <!-- TEKRAR - LISTBOX PICKER -->
+                                                <div class="hevy-td">
+                                                    <button type="button" class="hevy-listbox-btn" onclick="openListboxPicker('${ex.id}', ${sIdx}, 'reps')" title="Tekrar seçmek için dokunun">
+                                                        <span>${st.reps !== '' && st.reps !== null && st.reps !== undefined ? `${st.reps} tk` : '- tk'}</span>
+                                                        <span class="listbox-btn-arrow">▾</span>
+                                                    </button>
+                                                </div>
+
+                                                <!-- TİK BUTONU -->
+                                                <div class="hevy-td">
+                                                    <button type="button" 
+                                                            class="btn-hevy-check ${isDone ? 'checked' : (isTarget ? 'target' : '')}" 
+                                                            onclick="handleSetCheckClick('${ex.id}', ${sIdx})"
+                                                            title="${isDone ? 'Set Tamamlandı (Geri Almak İçin Dokunun)' : 'Seti Bitir ve Dinlenmeyi Başlat'}">
+                                                        ${isDone ? '✓' : (isTarget ? '⚡' : '○')}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+
+                                <!-- SET EKLE / SİL -->
+                                <div class="hevy-table-footer">
+                                    <button type="button" class="btn-hevy-add-set" onclick="addSetToExercise('${ex.id}')">
+                                        ➕ Set Ekle
+                                    </button>
+                                    ${sets.length > 1 ? `
+                                        <button type="button" class="btn-hevy-del-set" onclick="removeSetFromExercise('${ex.id}')" title="Son seti sil">
+                                            🗑️ Set Sil
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+
+                            <!-- EXERCISE COMPLETION BANNER -->
+                            ${isAllSetsDone ? `
+                                <div class="hevy-exercise-done-banner">
+                                    <div class="hevy-done-title">🎉 ${escapeHTML(ex.name)} Bitti!</div>
+                                    <div class="hevy-done-sub">Tüm ${sets.length} set başarıyla tamamlandı.</div>
+                                    ${activeFocusExIndex < s.exercises.length - 1 ? `
+                                        <button type="button" class="btn-hevy-next-cta" onclick="goToNextExercise()">
+                                            Sıradaki Egzersize Geç (${activeFocusExIndex + 2}/${s.exercises.length}) ➔
+                                        </button>
+                                    ` : `
+                                        <button type="button" class="btn-hevy-finish-cta" onclick="openCompleteModal()">
+                                            🏁 Antrenmanı Tamamla & Günlüğe Kaydet
+                                        </button>
+                                    `}
+                                </div>
+                            ` : ''}
+
+                            <!-- MORE ACTIONS DRAWER -->
+                            <div class="hevy-more-wrapper">
+                                <button type="button" class="btn-hevy-more-toggle" onclick="toggleExerciseMoreActions('${ex.id}')" id="btnMoreActions_${ex.id}">
+                                    <span>⚙️ Diğer Seçenekler (Alternatif, Alet...)</span>
+                                    <span class="more-toggle-icon">${activeWorkoutMoreDrawersState[ex.id] ? '▲ Kapat' : '•••'}</span>
+                                </button>
+                                <div class="hevy-more-drawer" id="moreActionsDrawer_${ex.id}" style="display:${activeWorkoutMoreDrawersState[ex.id] ? 'grid' : 'none'};">
+                                    <button class="btn-hevy-action" onclick="openAlternativeModal('${ex.id}', 'active')">
+                                        📋 Alternatif Seç
+                                    </button>
+                                    <button class="btn-hevy-action" onclick="deferExerciseToEnd('${ex.id}')" style="color:#f59e0b;">
+                                        ⏳ Alet Dolu (Sona At)
+                                    </button>
+                                    <button class="btn-hevy-action" onclick="moveExerciseOrder('${ex.id}', -1)">
+                                        ⬆️ Sırayı Öne Al
+                                    </button>
+                                    <button class="btn-hevy-action" onclick="moveExerciseOrder('${ex.id}', 1)">
+                                        ⬇️ Sırayı Arkaya Al
+                                    </button>
+                                    <button class="btn-hevy-action" onclick="openAddFinisherModal()">
+                                        ➕ Finisher Ekle
+                                    </button>
+                                    <button class="btn-hevy-action" onclick="openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}')">
+                                        ⚠️ Hata Bildir
+                                    </button>
+                                    <button class="btn-hevy-action danger" onclick="removeExerciseFromWorkout('${ex.id}', 'active')">
+                                        🗑️ Hareketi Kaldır
+                                    </button>
+                                    <button class="btn-hevy-action danger" onclick="cancelActiveWorkout()">
+                                        🛑 İptal Et
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- NAVIGATION FOOTER -->
+                            <div class="hevy-footer-nav">
+                                <button type="button" class="btn-hevy-nav" onclick="goToPrevExercise()" ${activeFocusExIndex === 0 ? 'disabled' : ''}>
+                                    ◀ Önceki Hrk
+                                </button>
+                                <button type="button" class="btn-hevy-nav" style="border-color:var(--gold); color:var(--gold); font-weight:900;" onclick="openCompleteModal()">
+                                    🏁 Seansı Bitir
+                                </button>
+                                <button type="button" class="btn-hevy-nav" onclick="goToNextExercise()" ${activeFocusExIndex === s.exercises.length - 1 ? 'disabled' : ''}>
+                                    Sonraki Hrk ▶
+                                </button>
+                            </div>
+                        </div>
+
+                        ${allWorkoutDone ? `
+                            <div style="text-align:center; margin:14px 0 20px;">
+                                <button type="button" class="btn-hevy-finish-cta" style="padding:16px; font-size:15px; box-shadow:0 0 25px rgba(245,158,11,0.6);" onclick="openCompleteModal()">
+                                    🏆 TEBRİKLER! TÜM SETLER BİTTİ • BİTİR & GÜNLÜĞE KAYDET
+                                </button>
+                            </div>
+                        ` : ''}
+
+                        <!-- ODAK MODU ALT İPTAL BUTONU -->
+                        <div style="display:flex; justify-content:center; margin-top:6px; padding-top:10px; border-top:1px dashed var(--border);">
+                            <button type="button" class="btn btn-danger-soft" style="padding:8px 18px; font-size:12px; font-weight:700;" onclick="cancelActiveWorkout()">
+                                🛑 Antrenmanı İptal Et
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // ==================== MODE 2: TÜM LİSTE GÖRÜNÜMÜ (LIST VIEW - HEVY / STRONG STYLE) ====================
+            if (dock) dock.style.display = 'none';
+
+            container.innerHTML = `
+                <div class="hevy-workout-wrapper">
+                    ${s.exercises.map((ex, idx) => {
+                        const sets = activeWorkoutSetsData[ex.id] || [];
+                        const firstIncompleteIdx = sets.findIndex(st => !st.completed);
+                        const isAllSetsDone = sets.length > 0 && sets.every(st => st.completed);
+                        const lastPerf = getLastExercisePerformance(ex.id) || getLastExercisePerformance(ex.name);
+                        const isFormOpen = !!workoutFormGuideOpenState[ex.id];
+
+                        return `
+                            <div class="hevy-exercise-card" data-exercise-id="${ex.id}">
+                                <div class="hevy-exercise-header">
+                                    <div class="hevy-title-row">
+                                        <div class="hevy-exercise-title">
+                                            <span style="color:var(--gold); font-weight:900;">${idx + 1}.</span>
+                                            <span>${escapeHTML(ex.name)}</span>
+                                        </div>
+                                        <span class="hevy-equip-badge">${equipLabels[ex.equipment] || ex.equipment}</span>
+                                    </div>
+                                    <div class="hevy-meta-row">
+                                        <span class="hevy-meta-item">🎯 <strong>${sets.length} Set × ${s.scheme.reps}</strong></span>
+                                        <span class="hevy-meta-item">⏱️ Dinlenme: <strong>${s.scheme.rest || 45}s</strong></span>
+                                    </div>
+                                </div>
+
+                                <div class="hevy-form-collapsible">
+                                    <button type="button" class="btn-hevy-form-toggle" onclick="toggleWorkoutFormGuide('${ex.id}')">
+                                        <span>📖 Form & Biyomekanik Rehberi</span>
+                                        <span id="formGuideArrow_${ex.id}" style="color:var(--gold); font-weight:800;">${isFormOpen ? '▲ Gizle' : '▼ Göster'}</span>
+                                    </button>
+                                    <div id="formGuideBody_${ex.id}" class="hevy-form-guide-body" style="display:${isFormOpen ? 'block' : 'none'};">
+                                        ${renderExercisePositionsHtml(ex, `active_${idx}`, false)}
+                                    </div>
+                                </div>
+
+                                ${lastPerf ? `
+                                    <div class="hevy-ghost-bar">
+                                        <div class="hevy-ghost-info">
+                                            <span>📌 Önceki: <strong>${lastPerf.weight} kg × ${lastPerf.reps} tk</strong></span>
+                                        </div>
+                                        <button type="button" class="btn-hevy-ghost-apply" onclick="copyLastPerformanceToCurrent('${ex.id}', ${lastPerf.weight}, ${lastPerf.reps})">
+                                            ⚡ Tümüne Yaz
+                                        </button>
+                                    </div>
+                                ` : ''}
+
+                                <div class="hevy-sets-card">
+                                    <div class="hevy-sets-table">
+                                        <div class="hevy-th-row">
+                                            <div class="hevy-th">SET</div>
+                                            <div class="hevy-th">ÖNCEKİ</div>
+                                            <div class="hevy-th">KG</div>
+                                            <div class="hevy-th">TEKRAR</div>
+                                            <div class="hevy-th">✓</div>
+                                        </div>
+
+                                        ${sets.map((st, sIdx) => {
+                                            const isDone = st.completed;
+                                            const isTarget = !isDone && sIdx === firstIncompleteIdx;
+                                            const prevText = lastPerf ? `${lastPerf.weight}kg × ${lastPerf.reps}` : '-';
+
+                                            return `
+                                                <div class="hevy-tr-row ${isDone ? 'done' : ''} ${isTarget ? 'active-target' : ''}" id="setRow_${ex.id}_${sIdx}">
+                                                    <div class="hevy-td">
+                                                        <span class="hevy-set-pill ${isDone ? 'done' : (isTarget ? 'target' : '')}">${st.setNo}</span>
+                                                    </div>
+
+                                                    <div class="hevy-td"
+                                                         title="${lastPerf && !isDone ? 'Bu sete önceki veriyi aktarmak için dokunun' : ''}"
+                                                         ${lastPerf && !isDone ? `onclick="applyGhostToSet('${ex.id}', ${sIdx}, ${lastPerf.weight}, ${lastPerf.reps})"` : ''}>
+                                                        <span class="hevy-prev-text ${lastPerf && !isDone ? 'clickable' : ''}">${prevText}</span>
+                                                    </div>
+
+                                                    <!-- AĞIRLIK (KG) - LISTBOX PICKER -->
+                                                    <div class="hevy-td">
+                                                        <button type="button" class="hevy-listbox-btn" onclick="openListboxPicker('${ex.id}', ${sIdx}, 'weight')" title="Kilo seçmek için dokunun">
+                                                            <span>${st.weight !== '' && st.weight !== null && st.weight !== undefined ? `${st.weight} kg` : '- kg'}</span>
+                                                            <span class="listbox-btn-arrow">▾</span>
+                                                        </button>
+                                                    </div>
+
+                                                    <!-- TEKRAR - LISTBOX PICKER -->
+                                                    <div class="hevy-td">
+                                                        <button type="button" class="hevy-listbox-btn" onclick="openListboxPicker('${ex.id}', ${sIdx}, 'reps')" title="Tekrar seçmek için dokunun">
+                                                            <span>${st.reps !== '' && st.reps !== null && st.reps !== undefined ? `${st.reps} tk` : '- tk'}</span>
+                                                            <span class="listbox-btn-arrow">▾</span>
+                                                        </button>
+                                                    </div>
+
+                                                    <div class="hevy-td">
+                                                        <button type="button" 
+                                                                class="btn-hevy-check ${isDone ? 'checked' : (isTarget ? 'target' : '')}" 
+                                                                onclick="handleSetCheckClick('${ex.id}', ${sIdx})"
+                                                                title="${isDone ? 'Set Tamamlandı (Geri Almak İçin Dokunun)' : 'Seti Bitir ve Dinlenmeyi Başlat'}">
+                                                            ${isDone ? '✓' : (isTarget ? '⚡' : '○')}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            `;
+                                        }).join('')}
+                                    </div>
+
+                                    <div class="hevy-table-footer">
+                                        <button type="button" class="btn-hevy-add-set" onclick="addSetToExercise('${ex.id}')">
+                                            ➕ Set Ekle
+                                        </button>
+                                        ${sets.length > 1 ? `
+                                            <button type="button" class="btn-hevy-del-set" onclick="removeSetFromExercise('${ex.id}')" title="Son seti sil">
+                                                🗑️ Set Sil
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding-top:6px; border-top:1px dashed var(--border); flex-wrap:wrap; gap:6px;">
+                                    <div style="display:flex; gap:6px;">
+                                        <button class="btn-swap-ex" style="color:#f59e0b; border-color:rgba(245,158,11,0.4);" onclick="deferExerciseToEnd('${ex.id}')" title="Bu istasyon doluysa en sona at">
+                                            ⏳ Sona Ertele
+                                        </button>
+                                        <button class="btn-swap-ex" onclick="moveExerciseOrder('${ex.id}', -1)" title="Sırayı öne al">
+                                            ⬆️
+                                        </button>
+                                        <button class="btn-swap-ex" onclick="moveExerciseOrder('${ex.id}', 1)" title="Sırayı arkaya al">
+                                            ⬇️
+                                        </button>
+                                    </div>
+                                    <div style="display:flex; gap:6px;">
+                                        <button class="btn-swap-ex" onclick="openAlternativeModal('${ex.id}', 'active')" title="Listeden alternatif seç">
+                                            📋 Alternatif
+                                        </button>
+                                        <button class="btn-swap-ex" style="color:#f87171; border-color:rgba(239,68,68,0.3);" onclick="removeExerciseFromWorkout('${ex.id}', 'active')" title="Bu hareketi kaldır">
+                                            🗑️ Kaldır
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+
+                    <div style="text-align:center; margin:16px 0 20px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+                        <button class="btn btn-outline" style="border-style:dashed; border-color:var(--cyan); color:var(--cyan); font-size:12px; padding:9px 16px; font-weight:700;" onclick="openAddExerciseModal('active')">
+                            ➕ Yeni Hareket Ekle
+                        </button>
+                        <button class="btn btn-outline" style="border-color:var(--gold); color:var(--gold); font-size:12px; padding:9px 16px; font-weight:800;" onclick="openAddFinisherModal()">
+                            ⚡ Hızlı Finisher Ekle
+                        </button>
+                    </div>
+
+                    <div class="hevy-workout-finish-bar" style="margin-bottom:24px;">
+                        <button type="button" class="btn-hevy-workout-cancel" onclick="cancelActiveWorkout()">
+                            🛑 Antrenmanı İptal Et
+                        </button>
+                        <button type="button" class="btn-hevy-workout-finish" onclick="openCompleteModal()">
+                            🏁 ANTRENMANI TAMAMLA & GÜNLÜĞE KAYDET
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function onSetWeightInput(exId, setIdx, val) {
+            if (!activeWorkoutSetsData[exId] || !activeWorkoutSetsData[exId][setIdx]) return;
+            activeWorkoutSetsData[exId][setIdx].weight = val;
+            saveActiveWorkoutStateToStorage();
+        }
+
+        function onSetRepsInput(exId, setIdx, val) {
+            if (!activeWorkoutSetsData[exId] || !activeWorkoutSetsData[exId][setIdx]) return;
+            activeWorkoutSetsData[exId][setIdx].reps = parseInt(val) || 0;
+            saveActiveWorkoutStateToStorage();
+        }
+
+        function completeSetAndStartRest(exId, setIdx) {
+            const sets = activeWorkoutSetsData[exId];
+            if (!sets || !sets[setIdx]) return;
+
+            const st = sets[setIdx];
+            const wInput = document.getElementById(`w_${exId}_${setIdx}`);
+            const rInput = document.getElementById(`r_${exId}_${setIdx}`);
+
+            if (wInput && wInput.value !== '') st.weight = parseFloat(wInput.value) || 0;
+            if (rInput && rInput.value !== '') st.reps = parseInt(rInput.value) || 0;
+            if (st.weight === '' || st.weight === null || st.weight === undefined) {
+                if (setIdx > 0 && sets[setIdx - 1].weight !== '' && sets[setIdx - 1].weight !== null && sets[setIdx - 1].weight !== undefined) {
+                    st.weight = sets[setIdx - 1].weight;
+                } else {
+                    st.weight = 0;
+                }
+            }
+            if (st.reps === '' || st.reps === null || st.reps === undefined) {
+                if (setIdx > 0 && sets[setIdx - 1].reps) {
+                    st.reps = sets[setIdx - 1].reps;
+                } else {
+                    st.reps = 10;
+                }
+            }
+
+            st.completed = true;
+            st.completedAt = Date.now();
+
+            // Tamamlanan setin kilosunu henüz tamamlanmamış sonraki tüm setlere aktar (kullanıcı isterse sonra değiştirebilir)
+            if (st.weight !== '' && st.weight !== null && st.weight !== undefined && !isNaN(st.weight)) {
+                for (let i = setIdx + 1; i < sets.length; i++) {
+                    if (!sets[i].completed) {
+                        sets[i].weight = st.weight;
+                    }
+                }
+            }
+
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+
+            // TRIGGER REST TIMER
+            const restSecs = activeWorkoutSession && activeWorkoutSession.scheme ? (activeWorkoutSession.scheme.rest || 45) : 45;
+            resetTimer(restSecs);
+            startTimer();
+            playAlertSound();
+            if (navigator.vibrate) navigator.vibrate([120, 80, 120]);
+
+            // Ekran kilidini canlı tut
+            requestWakeLock();
+        }
+
+        function toggleSetStatus(exId, setIdx) {
+            const sets = activeWorkoutSetsData[exId];
+            if (!sets || !sets[setIdx]) return;
+            sets[setIdx].completed = !sets[setIdx].completed;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+        }
+
+        function addSetToExercise(exId) {
+            const sets = activeWorkoutSetsData[exId] || [];
+            const lastWeight = sets.length > 0 ? sets[sets.length - 1].weight : '';
+            const lastReps = sets.length > 0 ? sets[sets.length - 1].reps : 10;
+            sets.push({
+                setNo: sets.length + 1,
+                weight: lastWeight,
+                reps: lastReps,
+                completed: false,
+                completedAt: null
+            });
+            activeWorkoutSetsData[exId] = sets;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+        }
+
+        function removeSetFromExercise(exId) {
+            const sets = activeWorkoutSetsData[exId] || [];
+            if (sets.length > 1) {
+                sets.pop();
+                saveActiveWorkoutStateToStorage();
+                renderActiveWorkout();
+            }
+        }
+
+        // REST TIMER LOGIC & ENHANCEMENTS
+        function setTimerSecs(secs) {
+            resetTimer(secs);
+            startTimer();
+        }
+
+        function adjustTimerSecs(delta) {
+            timerRemaining = Math.max(0, timerRemaining + delta);
+            updateTimerDisplay();
+            if (!isTimerRunning && timerRemaining > 0) {
+                startTimer();
+            }
+        }
+
+        function skipRestTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            timerRemaining = 0;
+            updateTimerDisplay();
+            const btn = document.getElementById('btnPlayPauseTimer');
+            if (btn) btn.innerText = "▶ Başlat";
+            const restBox = document.getElementById('hudRestBox');
+            if (restBox) restBox.classList.remove('resting');
+            playAlertSound();
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+        }
+
+        function resetTimer(secs) {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            timerRemaining = secs;
+            updateTimerDisplay();
+            const btn = document.getElementById('btnPlayPauseTimer');
+            if (btn) btn.innerText = "▶ Başlat";
+            const restBox = document.getElementById('hudRestBox');
+            if (restBox) restBox.classList.remove('resting');
+        }
+
+        function toggleTimer() {
+            if (isTimerRunning) {
+                clearInterval(timerInterval);
+                isTimerRunning = false;
+                const btn = document.getElementById('btnPlayPauseTimer');
+                if (btn) btn.innerText = "▶ Başlat";
+                const restBox = document.getElementById('hudRestBox');
+                if (restBox) restBox.classList.remove('resting');
+            } else {
+                startTimer();
+            }
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = true;
+            const btn = document.getElementById('btnPlayPauseTimer');
+            if (btn) btn.innerText = "⏸ Duraklat";
+            const restBox = document.getElementById('hudRestBox');
+            if (restBox) restBox.classList.add('resting');
+
+            timerInterval = setInterval(() => {
+                if (timerRemaining > 0) {
+                    timerRemaining--;
+                    updateTimerDisplay();
+
+                    // Rhythmic countdown beeps on last 3 seconds
+                    if (timerRemaining === 3) playCountdownBeep(520);
+                    else if (timerRemaining === 2) playCountdownBeep(520);
+                    else if (timerRemaining === 1) playCountdownBeep(660);
+
+                } else {
+                    clearInterval(timerInterval);
+                    isTimerRunning = false;
+                    const btn = document.getElementById('btnPlayPauseTimer');
+                    if (btn) btn.innerText = "▶ Başlat";
+                    const restBox = document.getElementById('hudRestBox');
+                    if (restBox) restBox.classList.remove('resting');
+                    playAlertSound();
+                    if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100]);
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(timerRemaining / 60);
+            const secs = timerRemaining % 60;
+            const str = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            const el = document.getElementById('timerDisplay');
+            if (el) el.innerText = str;
+        }
+
+        function playCountdownBeep(freq = 600) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                gain.gain.setValueAtTime(0.12, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.12);
+            } catch(e) {}
+        }
+
+        function playAlertSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, ctx.currentTime);
+                osc.frequency.setValueAtTime(1760, ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.25, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.35);
+            } catch(e) {}
+        }
+
+        // ==================== COMPLETE & LOG WORKOUT ====================
+        function getSavedGymsList() {
+            const defaultGyms = ["Rodium", "Sports & More", "Samandağ", "MACFit", "FitStop"];
+            try {
+                const stored = localStorage.getItem('celik_kodu_custom_gyms');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    if (Array.isArray(parsed)) {
+                        parsed.forEach(g => {
+                            if (g && typeof g === 'string' && !defaultGyms.includes(g)) {
+                                defaultGyms.push(g);
+                            }
+                        });
+                    }
+                }
+            } catch(e) {}
+            return defaultGyms;
+        }
+
+        function saveCustomGym(gymName) {
+            if (!gymName || typeof gymName !== 'string') return;
+            const trimmed = gymName.trim();
+            if (!trimmed) return;
+            const defaultGyms = ["Rodium", "Sports & More", "Samandağ", "MACFit", "FitStop"];
+            try {
+                let stored = [];
+                const existing = localStorage.getItem('celik_kodu_custom_gyms');
+                if (existing) stored = JSON.parse(existing) || [];
+                if (!defaultGyms.includes(trimmed) && !stored.includes(trimmed)) {
+                    stored.push(trimmed);
+                    localStorage.setItem('celik_kodu_custom_gyms', JSON.stringify(stored));
+                }
+            } catch(e) {}
+        }
+
+        function initCompleteModalLocation() {
+            const gyms = getSavedGymsList();
+            const gymSelect = document.getElementById('logGymSelect');
+            if (gymSelect) {
+                gymSelect.innerHTML = gyms.map(g => `<option value="${escapeHTML(g)}">${escapeHTML(g)}</option>`).join('') +
+                    `<option value="custom">✏️ Diğer / Yeni Salon Yaz...</option>`;
+            }
+
+            const uid = getActiveUserId();
+            let lastLoc = null;
+            try {
+                const s = localStorage.getItem(`celik_kodu_last_location_${uid}`);
+                if (s) lastLoc = JSON.parse(s);
+            } catch(e) {}
+
+            const locType = lastLoc?.type || 'salon';
+            const locName = lastLoc?.name || 'Rodium';
+
+            const locTypeEl = document.getElementById('logLocationType');
+            if (locTypeEl) locTypeEl.value = locType;
+
+            if (locType === 'salon' && gymSelect) {
+                if (gyms.includes(locName)) {
+                    gymSelect.value = locName;
+                } else {
+                    gymSelect.value = 'custom';
+                }
+            }
+
+            const locNameEl = document.getElementById('logLocationName');
+            if (locNameEl) locNameEl.value = locName;
+
+            handleLocationTypeChange();
+        }
+
+        function handleLocationTypeChange() {
+            const locTypeEl = document.getElementById('logLocationType');
+            if (!locTypeEl) return;
+            const locType = locTypeEl.value;
+            const gymGroup = document.getElementById('gymSelectGroup');
+            const customLabel = document.getElementById('gymCustomLabel');
+            const locNameEl = document.getElementById('logLocationName');
+            const gymSelect = document.getElementById('logGymSelect');
+
+            if (locType === 'salon') {
+                if (gymGroup) gymGroup.style.display = 'block';
+                if (customLabel) customLabel.innerText = 'Salon / Konum Detayı (Örn: Rodium, Sports & More...)';
+                if (gymSelect && gymSelect.value !== 'custom') {
+                    locNameEl.value = gymSelect.value;
+                } else if (!locNameEl.value || locNameEl.value === 'Ev' || locNameEl.value === 'Açık Hava / Park') {
+                    locNameEl.value = 'Rodium';
+                    if (gymSelect) gymSelect.value = 'Rodium';
+                }
+            } else if (locType === 'ev') {
+                if (gymGroup) gymGroup.style.display = 'none';
+                if (customLabel) customLabel.innerText = 'Ev Lokasyonu / Detay Notu';
+                locNameEl.value = 'Ev';
+            } else if (locType === 'acik_hava') {
+                if (gymGroup) gymGroup.style.display = 'none';
+                if (customLabel) customLabel.innerText = 'Açık Alan / Park İsmi';
+                locNameEl.value = 'Açık Hava / Park';
+            }
+        }
+
+        function handleGymSelectChange() {
+            const gymSelect = document.getElementById('logGymSelect');
+            const locNameEl = document.getElementById('logLocationName');
+            if (!gymSelect || !locNameEl) return;
+
+            if (gymSelect.value === 'custom') {
+                locNameEl.value = '';
+                locNameEl.placeholder = 'Yeni salon adını buraya yazınız...';
+                locNameEl.focus();
+            } else {
+                locNameEl.value = gymSelect.value;
+            }
+        }
+
+        function calculateWorkoutPRs(exerciseSummaries, uid) {
+            let history = [];
+            try {
+                const raw = localStorage.getItem(`celik_kodu_history_${uid}`);
+                if (raw) history = JSON.parse(raw) || [];
+            } catch(e) {}
+
+            const prs = [];
+            exerciseSummaries.forEach(ex => {
+                if (ex.completedCount === 0 || !ex.volume) return;
+                const currentMaxWeight = Math.max(0, ...ex.sets.filter(s => s.completed).map(s => s.weight));
+                if (currentMaxWeight <= 0) return;
+
+                let previousAllTimeMax = 0;
+                history.forEach(log => {
+                    if (!log.detailedExercises || !Array.isArray(log.detailedExercises)) return;
+                    const prevEx = log.detailedExercises.find(e => e.name === ex.name || (e.id && e.id === ex.id));
+                    if (prevEx && prevEx.maxWeight) {
+                        if (prevEx.maxWeight > previousAllTimeMax) previousAllTimeMax = prevEx.maxWeight;
+                    }
+                });
+
+                if (previousAllTimeMax > 0 && currentMaxWeight > previousAllTimeMax) {
+                    prs.push({
+                        name: ex.name,
+                        newWeight: currentMaxWeight,
+                        oldWeight: previousAllTimeMax,
+                        diff: Math.round((currentMaxWeight - previousAllTimeMax) * 10) / 10
+                    });
+                }
+            });
+            return prs;
+        }
+
+        function cancelActiveWorkout() {
+            if (!activeWorkoutSession) return;
+            const ok = confirm("Antrenmanı iptal etmek istediğinize emin misiniz?\n\nBu seans sonlandırılacak ve yapılan ilerlemeler günlüğe kaydedilmeyecektir.");
+            if (!ok) return;
+
+            const user = getActiveUser();
+            const uid = user ? user.id : 'default';
+            localStorage.removeItem(`celik_kodu_active_state_${uid}`);
+            clearInterval(workoutTimerInterval);
+            clearInterval(timerInterval);
+            activeWorkoutSession = null;
+            activeWorkoutStartTime = null;
+            activeWorkoutIsPaused = false;
+            activeWorkoutPausedAt = null;
+            activeWorkoutTotalPausedMs = 0;
+            activeWorkoutSetsData = {};
+            activeFocusExIndex = 0;
+            activeFocusSetIndex = null;
+            releaseWakeLock();
+
+            closeCompleteModal();
+            renderActiveWorkout();
+        }
+
+        function openCompleteModal() {
+            if (!activeWorkoutSession) {
+                alert("Aktif bir antrenman bulunmuyor.");
+                return;
+            }
+            const elapsedSecs = getWorkoutElapsedSeconds();
+            const elapsedMins = Math.max(1, Math.round(elapsedSecs / 60));
+
+            document.getElementById('logProgramName').value = activeWorkoutSession.title || 'Çelik Kodu Antrenmanı';
+            document.getElementById('logDuration').value = elapsedMins;
+            initCompleteModalLocation();
+
+            // Summary stats & detailed exercise breakdown calculation
+            let totalCompletedSets = 0;
+            let totalReps = 0;
+            let totalVolume = 0;
+
+            const exerciseSummaries = activeWorkoutSession.exercises.map(ex => {
+                const sets = activeWorkoutSetsData[ex.id] || [];
+                let exVol = 0;
+                let exCompletedSets = 0;
+                const setSummaries = sets.map(st => {
+                    const w = parseFloat(st.weight) || 0;
+                    const r = parseInt(st.reps) || 0;
+                    if (st.completed) {
+                        totalCompletedSets++;
+                        exCompletedSets++;
+                        totalReps += r;
+                        totalVolume += (w * r);
+                        exVol += (w * r);
+                    }
+                    return {
+                        setNo: st.setNo,
+                        weight: w,
+                        reps: r,
+                        completed: st.completed
+                    };
+                });
+
+                return {
+                    name: ex.name,
+                    muscle: ex.muscle ? ex.muscle.split(',')[0].trim() : '',
+                    equipment: ex.equipment,
+                    sets: setSummaries,
+                    volume: exVol,
+                    completedCount: exCompletedSets
+                };
+            });
+
+            const uid = getActiveUserId();
+            const prs = calculateWorkoutPRs(exerciseSummaries, uid);
+
+            const summaryHint = document.getElementById('logWorkoutSummaryHint');
+            if (summaryHint) {
+                summaryHint.innerHTML = `
+                    <div style="background: rgba(15, 23, 42, 0.85); border: 1.5px solid var(--gold); border-radius: 10px; padding: 12px; margin-bottom: 14px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:8px;">
+                            <span style="font-size:11px; font-weight:800; color:var(--gold); text-transform:uppercase; letter-spacing:0.5px;">📋 Seans Özeti & Performans</span>
+                            <span style="font-size:12px; font-weight:800; color:#fff;">⏱️ ${formatSecondsToHMS(elapsedSecs)}</span>
+                        </div>
+
+                        ${prs.length > 0 ? `
+                            <div class="pr-celebration-banner">
+                                <div style="font-size:12.5px; font-weight:900; color:var(--gold); display:flex; align-items:center; gap:6px;">
+                                    🔥 BU SEANSTA YENİ REKOR(LAR) KIRDIN!
+                                </div>
+                                ${prs.map(p => `
+                                    <div class="pr-badge-item">
+                                        🏆 <strong>${escapeHTML(p.name)}:</strong> Yeni Ağırlık: <strong style="color:#fff;">${p.newWeight} kg</strong> (Eski Zirve: ${p.oldWeight} kg ➔ <strong style="color:var(--green-success);">+${p.diff} kg</strong> Artış!)
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+
+                        <!-- TOP STATS -->
+                        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; margin-bottom:12px; text-align:center;">
+                            <div style="background:var(--bg-elevated); padding:8px 4px; border-radius:6px; border:1px solid var(--border);">
+                                <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">TOPLAM TONAJ</div>
+                                <div style="font-size:14px; font-weight:900; color:var(--gold); margin-top:2px;">🏋️ ${Math.round(totalVolume).toLocaleString('tr-TR')} kg</div>
+                            </div>
+                            <div style="background:var(--bg-elevated); padding:8px 4px; border-radius:6px; border:1px solid var(--border);">
+                                <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">SET SAYISI</div>
+                                <div style="font-size:14px; font-weight:900; color:var(--green-success); margin-top:2px;">✅ ${totalCompletedSets} Set</div>
+                            </div>
+                            <div style="background:var(--bg-elevated); padding:8px 4px; border-radius:6px; border:1px solid var(--border);">
+                                <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">TOPLAM TEKRAR</div>
+                                <div style="font-size:14px; font-weight:900; color:var(--cyan); margin-top:2px;">🎯 ${totalReps} Tk</div>
+                            </div>
+                        </div>
+
+                        <!-- EXERCISES & SETS BREAKDOWN -->
+                        <div style="font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase;">
+                            Yapılan Hareketler, Kilo & Tekrarlar:
+                        </div>
+                        <div style="max-height: 220px; overflow-y: auto; padding-right: 4px; display:flex; flex-direction:column; gap:6px;">
+                            ${exerciseSummaries.map(ex => `
+                                <div style="background: rgba(0,0,0,0.3); border-radius: 6px; padding: 8px 10px; border-left: 3px solid ${ex.completedCount > 0 ? 'var(--green-success)' : 'var(--border)'};">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                        <div>
+                                            <strong style="color:#fff; font-size:12.5px;">${escapeHTML(ex.name)}</strong>
+                                            ${ex.muscle ? `<span style="font-size:10.5px; color:var(--cyan); margin-left:6px;">[${escapeHTML(ex.muscle)}]</span>` : ''}
+                                        </div>
+                                        <span style="font-size:11px; font-weight:800; color:var(--gold);">
+                                            ${ex.volume > 0 ? `${Math.round(ex.volume).toLocaleString('tr-TR')} kg` : ''}
+                                        </span>
+                                    </div>
+                                    <div style="display:flex; flex-wrap:wrap; gap:4px;">
+                                        ${ex.sets.map(st => st.completed ? `
+                                            <span style="background:rgba(34, 197, 94, 0.12); border:1px solid rgba(34, 197, 94, 0.4); color:#86efac; border-radius:4px; padding:2px 6px; font-size:10.5px; font-weight:700;">
+                                                Set ${st.setNo}: <strong>${st.weight || 0} kg</strong> x ${st.reps || 0} ✓
+                                            </span>
+                                        ` : `
+                                            <span style="background:rgba(239, 68, 68, 0.08); border:1px dashed rgba(239, 68, 68, 0.3); color:#fca5a5; opacity:0.65; border-radius:4px; padding:2px 6px; font-size:10.5px; font-weight:600; text-decoration:line-through;" title="Bitir butonuna basılmadı">
+                                                Set ${st.setNo}: Atlandı
+                                            </span>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('completeModal').classList.add('active');
+        }
+
+        function closeCompleteModal() {
+            document.getElementById('completeModal').classList.remove('active');
+        }
+
+        function saveCompletedWorkout() {
+            if (!activeWorkoutSession) return;
+
+            const programNameInput = document.getElementById('logProgramName');
+            const programName = (programNameInput && programNameInput.value.trim()) ? programNameInput.value.trim() : (activeWorkoutSession.title || 'Çelik Kodu Antrenmanı');
+            const duration = parseInt(document.getElementById('logDuration').value) || Math.max(1, Math.round(getWorkoutElapsedSeconds() / 60));
+            const rpe = document.getElementById('logRpe').value;
+            const notes = document.getElementById('logNotes').value;
+            const elapsedSecs = getWorkoutElapsedSeconds();
+
+            const locTypeEl = document.getElementById('logLocationType');
+            const locType = locTypeEl ? locTypeEl.value : 'salon';
+            const locNameEl = document.getElementById('logLocationName');
+            let locName = (locNameEl && locNameEl.value.trim()) ? locNameEl.value.trim() : (locType === 'salon' ? 'Spor Salonu' : (locType === 'ev' ? 'Ev' : 'Açık Hava'));
+
+            if (locType === 'salon' && locName && locName !== 'Spor Salonu') {
+                saveCustomGym(locName);
+            }
+
+            const uid = getActiveUserId();
+            try {
+                localStorage.setItem(`celik_kodu_last_location_${uid}`, JSON.stringify({ type: locType, name: locName }));
+            } catch(e) {}
+
+            let totalVolume = 0;
+            let totalCompletedSets = 0;
+            let totalCompletedReps = 0;
+            const allMuscles = [];
+
+            const detailedExercises = activeWorkoutSession.exercises.map(ex => {
+                const sets = (activeWorkoutSetsData[ex.id] || []).map(st => {
+                    const isDone = !!st.completed;
+                    const w = parseFloat(st.weight) || 0;
+                    const r = parseInt(st.reps) || 0;
+                    if (isDone) {
+                        totalCompletedSets++;
+                        totalCompletedReps += r;
+                        totalVolume += (w * r);
+                    }
+                    return {
+                        setNo: st.setNo,
+                        weight: isDone ? w : 0,
+                        reps: isDone ? r : 0,
+                        completed: isDone,
+                        volume: isDone ? (w * r) : 0
+                    };
+                });
+
+                const completedSets = sets.filter(st => st.completed);
+
+                // Only credit muscle groups if at least one set of this exercise was actually completed
+                if (completedSets.length > 0 && ex.muscle) {
+                    ex.muscle.split(',').forEach(m => {
+                        const trimmed = m.trim();
+                        if (trimmed && !allMuscles.includes(trimmed)) {
+                            allMuscles.push(trimmed);
+                        }
+                    });
+                }
+
+                const maxWeight = completedSets.length > 0 ? Math.max(0, ...completedSets.map(st => st.weight)) : 0;
+                const exVolume = completedSets.reduce((sum, st) => sum + st.volume, 0);
+
+                return {
+                    id: ex.id,
+                    name: ex.name,
+                    equipment: ex.equipment,
+                    category: ex.category,
+                    muscle: ex.muscle,
+                    cue: ex.cue || '',
+                    sets: sets,
+                    completedSetsCount: completedSets.length,
+                    maxWeight: maxWeight,
+                    exerciseVolume: exVolume
+                };
+            });
+
+            const newLog = {
+                id: 'log_' + Date.now(),
+                date: new Date().toISOString().split('T')[0],
+                dateFormatted: new Intl.DateTimeFormat('tr-TR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date()),
+                program: programName,
+                locationType: locType,
+                locationName: locName,
+                duration: duration,
+                durationFormatted: formatSecondsToHMS(elapsedSecs),
+                durationSecs: elapsedSecs,
+                rpe: rpe,
+                notes: notes,
+                totalVolumeKg: Math.round(totalVolume * 10) / 10,
+                totalSetsCompleted: totalCompletedSets,
+                totalRepsCompleted: totalCompletedReps,
+                muscleGroups: allMuscles,
+                exercises: detailedExercises,
+                timestamp: Date.now()
+            };
+
+            const logs = getWorkoutLogs();
+            logs.unshift(newLog);
+            setWorkoutLogs(logs);
+
+            // Clear active workout session state
+            localStorage.removeItem(`celik_kodu_active_state_${uid}`);
+            clearInterval(workoutTimerInterval);
+            clearInterval(timerInterval);
+            activeWorkoutSession = null;
+            activeWorkoutStartTime = null;
+            activeWorkoutSetsData = {};
+            activeFocusExIndex = 0;
+            activeFocusSetIndex = null;
+            releaseWakeLock();
+
+            closeCompleteModal();
+            renderActiveWorkout();
+            renderHistory();
+            switchTab('historyTab');
+
+            playAlertSound();
+            alert(`🎉 TEBRİKLER ŞAMPİYON!
+
+${duration} dakikada toplam ${Math.round(totalVolume).toLocaleString('tr-TR')} kg tonaj kaldırıldı.
+Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedildi!`);
+        }
+
+        // ==================== LIBRARY & SAVED PROGRAMS ====================
+        function saveGeneratedToLibrary() {
+            if (!currentGeneratedWorkout) return;
+            const user = getActiveUser();
+            const key = `celik_kodu_custom_programs_${user.id}`;
+
+            let saved = [];
+            try {
+                const raw = localStorage.getItem(key);
+                if (raw) saved = JSON.parse(raw);
+            } catch(e) {}
+
+            const name = prompt("Bu antrenman programı için bir isim verin:", currentGeneratedWorkout.title);
+            if (!name) return;
+
+            const programToSave = JSON.parse(JSON.stringify(currentGeneratedWorkout));
+            programToSave.id = 'saved_' + Date.now();
+            programToSave.title = name.trim();
+
+            saved.unshift(programToSave);
+            localStorage.setItem(key, JSON.stringify(saved));
+            alert("✅ Program başarıyla kütüphanenize kaydedildi!");
+        }
+
+        // ==================== LIBRARY SUB-TABS & EXERCISE CATALOG ====================
+        let currentLibrarySubTab = 'programs';
+
+        function switchLibrarySubTab(tab) {
+            currentLibrarySubTab = tab;
+            const btnProg = document.getElementById('libSubTabProgramsBtn');
+            const btnEx = document.getElementById('libSubTabExercisesBtn');
+            const paneProg = document.getElementById('libPanePrograms');
+            const paneEx = document.getElementById('libPaneExercises');
+
+            if (btnProg) btnProg.classList.toggle('active', tab === 'programs');
+            if (btnEx) btnEx.classList.toggle('active', tab === 'exercises');
+            if (paneProg) paneProg.style.display = (tab === 'programs') ? 'block' : 'none';
+            if (paneEx) paneEx.style.display = (tab === 'exercises') ? 'block' : 'none';
+
+            if (tab === 'exercises') {
+                renderLibraryExerciseCatalog();
+            } else if (tab === 'programs') {
+                renderLibrary();
+            }
+        }
+
+        function openExerciseLibraryTab(searchQuery = '') {
+            switchTab('libraryTab');
+            switchLibrarySubTab('exercises');
+            if (searchQuery) {
+                const inp = document.getElementById('libExSearchInput');
+                if (inp) inp.value = searchQuery;
+            }
+            renderLibraryExerciseCatalog();
+        }
+
+        function clearLibExSearch() {
+            const inp = document.getElementById('libExSearchInput');
+            if (inp) inp.value = '';
+            renderLibraryExerciseCatalog();
+        }
+
+        function renderLibraryExerciseCatalog() {
+            const container = document.getElementById('libExercisesCatalogGrid');
+            const countBadge = document.getElementById('libExCountBadge');
+            const clearBtn = document.getElementById('libExClearSearchBtn');
+            const excludedCountEl = document.getElementById('libExcludedCount');
+            if (!container) return;
+
+            const q = (document.getElementById('libExSearchInput')?.value || '').toLowerCase().trim();
+            const muscle = document.getElementById('libExMuscleFilter')?.value || 'all';
+            const equip = document.getElementById('libExEquipFilter')?.value || 'all';
+            const showExcluded = !!document.getElementById('chkLibShowExcluded')?.checked;
+            const excludedIds = getUserExcludedExerciseIds();
+
+            if (excludedCountEl) {
+                excludedCountEl.innerText = excludedIds.length;
+            }
+
+            if (clearBtn) {
+                clearBtn.style.display = q ? 'block' : 'none';
+            }
+
+            const filtered = EXERCISES_DB.filter(ex => {
+                const isExcluded = excludedIds.includes(ex.id);
+                // Gizlenenler modunda sadece gizlenenleri, normal modda ise gizlenmeyenleri göster
+                if (showExcluded ? !isExcluded : isExcluded) return false;
+
+                if (equip !== 'all' && ex.equipment !== equip) return false;
+
+                if (muscle !== 'all') {
+                    const p = ex.primaryMuscles || [];
+                    const s = ex.secondaryMuscles || [];
+                    const allM = [...p, ...s];
+
+                    if (muscle === 'chest') {
+                        if (!allM.includes('chest') && ex.category !== 'push') return false;
+                    } else if (muscle === 'back') {
+                        if (!allM.includes('back') && ex.category !== 'pull') return false;
+                    } else if (muscle === 'shoulders') {
+                        if (!allM.includes('shoulders')) return false;
+                    } else if (muscle === 'legs') {
+                        const legMuscles = ['quads', 'hamstrings', 'glutes', 'calves'];
+                        if (!allM.some(m => legMuscles.includes(m)) && !['legs_quad', 'legs_hinge'].includes(ex.category)) return false;
+                    } else if (muscle === 'core') {
+                        if (!allM.includes('core') && ex.category !== 'core') return false;
+                    } else if (muscle === 'arms') {
+                        if (!allM.some(m => ['biceps', 'triceps'].includes(m))) return false;
+                    } else if (muscle === 'conditioning') {
+                        if (ex.category !== 'conditioning' && !(ex.tags || []).includes('conditioning') && !ex.isComplex) return false;
+                    }
+                }
+
+                if (q) {
+                    const combined = (
+                        (ex.name || '') + ' ' + 
+                        (ex.muscle || '') + ' ' + 
+                        (ex.cue || '') + ' ' + 
+                        (ex.equipment || '') + ' ' + 
+                        (ex.category || '')
+                    ).toLowerCase();
+                    if (!combined.includes(q)) return false;
+                }
+
+                return true;
+            });
+
+            if (countBadge) {
+                countBadge.innerText = `${filtered.length} Egzersiz ${showExcluded ? '(Gizlenenler)' : ''}`;
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align:center; padding:32px 16px; background:rgba(0,0,0,0.2); border-radius:12px; border:1px dashed var(--border);">
+                        <div style="font-size:28px; margin-bottom:8px;">${showExcluded ? '✨' : '🔍'}</div>
+                        <div style="font-size:13.5px; font-weight:800; color:#fff; margin-bottom:4px;">${showExcluded ? 'Kişisel Havuzunuzdan Gizlenmiş Egzersiz Yok' : 'Aramanıza Uygun Egzersiz Bulunamadı'}</div>
+                        <div style="font-size:12px; color:var(--text-secondary); margin-bottom:12px;">${showExcluded ? 'Bir hareketi istemediğinizde "👁️‍🗨️ Gizle" butonuna basarak bu listeye alabilirsiniz.' : 'Filtreleri veya arama kelimesini değiştirerek tekrar deneyebilirsiniz.'}</div>
+                        ${!showExcluded ? `<button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 12px;" onclick="document.getElementById('libExSearchInput').value=''; document.getElementById('libExMuscleFilter').value='all'; document.getElementById('libExEquipFilter').value='all'; renderLibraryExerciseCatalog();">Filtreleri Sıfırla</button>` : ''}
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            filtered.forEach(ex => {
+                const isExcluded = excludedIds.includes(ex.id);
+                const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) 
+                    || (typeof categoryFallback !== 'undefined' && categoryFallback[ex.category]) 
+                    || (typeof guideLibrary !== 'undefined' ? guideLibrary.goblet_squat : null);
+                const thumbImg = guide?.form || '';
+                
+                const eqInfo = (typeof EQUIP_LABELS !== 'undefined' && EQUIP_LABELS[ex.equipment]) 
+                    ? `${EQUIP_LABELS[ex.equipment].icon} ${EQUIP_LABELS[ex.equipment].label}` 
+                    : (ex.equipment || 'Serbest');
+
+                const anatomy = getExerciseAnatomy(ex);
+
+                html += `
+                    <div class="lib-ex-card" style="${isExcluded ? 'border-color:rgba(239,68,68,0.4); background:rgba(239,68,68,0.04);' : ''}">
+                        <div style="display:flex; gap:10px; align-items:flex-start;">
+                            <div class="ex-thumb-wrap" style="width:56px; height:56px; flex-shrink:0; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')" title="Form ve Detayı İncele">
+                                ${thumbImg ? `<img src="${thumbImg}" class="ex-thumb-img" alt="${escapeHTML(ex.name)}" loading="lazy">` : '🏋️'}
+                            </div>
+                            <div style="flex:1; min-width:0;">
+                                <div style="font-size:13.5px; font-weight:800; color:#fff; line-height:1.25; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
+                                    ${escapeHTML(ex.name)}
+                                    ${isExcluded ? '<span style="background:rgba(239,68,68,0.25); color:#fca5a5; font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px; margin-left:6px; vertical-align:middle;">Gizli</span>' : ''}
+                                </div>
+                                <div style="display:flex; gap:4px; flex-wrap:wrap; margin-top:5px;">
+                                    <span class="ex-chip-badge equip">${escapeHTML(eqInfo)}</span>
+                                    <span class="ex-chip-badge muscle" style="background:rgba(245, 158, 11, 0.15); border:1px solid rgba(245, 158, 11, 0.4); color:var(--gold); font-weight:800;">🎯 ${escapeHTML(anatomy.primary)}</span>
+                                    ${anatomy.secondary ? `<span class="ex-chip-badge" style="background:rgba(56, 189, 248, 0.1); border:1px solid rgba(56, 189, 248, 0.3); color:var(--cyan); font-weight:700;">⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''}
+                                    <span class="ex-chip-badge mechanic">${ex.mechanic === 'compound' ? '⚡ Bileşik' : '🎯 İzolasyon'}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        ${ex.cue ? `
+                            <div style="font-size:11px; color:#cbd5e1; margin-top:8px; line-height:1.35; background:rgba(0,0,0,0.25); padding:6px 8px; border-radius:6px; border-left:2px solid var(--gold);">
+                                💡 <em>${escapeHTML(ex.cue.length > 90 ? ex.cue.substring(0, 90) + '...' : ex.cue)}</em>
+                            </div>
+                        ` : ''}
+
+                        <div style="display:flex; gap:6px; margin-top:10px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06);">
+                            <button type="button" class="btn btn-outline" style="flex:1; font-size:11px; padding:6px 8px;" onclick="openExerciseDetailModal('${ex.id}')">
+                                👁️ Detay
+                            </button>
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 8px; ${isExcluded ? 'color:#34d399; border-color:#10b981; background:rgba(16,185,129,0.12);' : 'color:#fca5a5; border-color:rgba(239,68,68,0.35);'}" onclick="event.stopPropagation(); toggleExerciseExclusionAndRefresh('${ex.id}')" title="${isExcluded ? 'Aktif havuzunuza geri ekleyin' : 'Kişisel havuzunuzdan gizleyin'}">
+                                ${isExcluded ? '🔄 Geri Al' : '👁️ Gizle'}
+                            </button>
+                            ${!isExcluded ? `
+                                <button type="button" class="btn btn-gold" style="flex:1.2; font-size:11px; padding:6px 8px; font-weight:800;" onclick="openAddToProgramOptions('${ex.id}')">
+                                    ➕ Ekle
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // ==================== ADD TO PROGRAM OPTIONS MODAL LOGIC ====================
+        function openAddToProgramOptions(exId) {
+            const ex = EXERCISES_DB.find(e => e.id === exId);
+            if (!ex) return;
+
+            activeQuickAddExId = exId;
+            const modal = document.getElementById('addToProgramOptionsModal');
+            if (!modal) return;
+
+            const titleEl = document.getElementById('addToProgModalTitle');
+            const subEl = document.getElementById('addToProgModalSubtitle');
+            const dynamicBody = document.getElementById('addToProgModalBody');
+
+            if (titleEl) titleEl.innerText = `➕ ${ex.name}`;
+            const anatomy = getExerciseAnatomy(ex);
+            const eqInfo = (typeof EQUIP_LABELS !== 'undefined' && EQUIP_LABELS[ex.equipment]) 
+                ? `${EQUIP_LABELS[ex.equipment].icon} ${EQUIP_LABELS[ex.equipment].label}` 
+                : (ex.equipment || 'Serbest');
+
+            if (subEl) subEl.innerHTML = `<strong style="color:var(--gold);">🎯 Ana:</strong> ${escapeHTML(anatomy.primary)}${anatomy.secondary ? ` • <strong style="color:var(--cyan);">⚡ Destek:</strong> ${escapeHTML(anatomy.secondary)}` : ''} • <strong>Ekipman:</strong> ${escapeHTML(eqInfo)}`;
+
+            const isWorkoutActive = Boolean(activeWorkoutSession && Array.isArray(activeWorkoutSession.exercises));
+
+            let html = `
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <!-- SEÇENEK 1: HAFTALIK PROGRAMIMA / GÜNE PLANLA -->
+                    <div class="add-to-prog-card" onclick="closeAddToProgramOptionsModal(); openQuickAddToDayModal('${ex.id}');">
+                        <div style="font-size:24px; flex-shrink:0;">📅</div>
+                        <div style="flex:1;">
+                            <div style="font-size:13px; font-weight:800; color:#fff;">Haftalık Programıma Planla</div>
+                            <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
+                                Pazartesi-Pazar günlerinden birine ilave hareket veya yeni takviye seansı olarak bağlayın.
+                            </div>
+                        </div>
+                        <div style="font-size:12px; color:var(--gold); font-weight:800;">Güne Ata ➔</div>
+                    </div>
+
+                    <!-- SEÇENEK 2: PROGRAM ATÖLYESİNE EKLE -->
+                    <div class="add-to-prog-card" style="cursor:default; align-items:flex-start;">
+                        <div style="font-size:24px; flex-shrink:0; margin-top:2px;">🎯</div>
+                        <div style="flex:1;">
+                            <div style="font-size:13px; font-weight:800; color:#fff;">Program Atölyesi Taslağına Ekle</div>
+                            <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
+                                Kendi özel programınızı kurduğunuz Atölye taslağına ilave eder.
+                            </div>
+                            <div style="display:flex; align-items:center; gap:6px; margin-top:8px; flex-wrap:wrap;">
+                                <select id="addToStudioSetsSelect" style="background:#111; color:#fff; border:1px solid var(--border); font-size:11px; padding:5px 8px; border-radius:6px;">
+                                    <option value="3" selected>3 Set</option>
+                                    <option value="4">4 Set</option>
+                                    <option value="5">5 Set</option>
+                                    <option value="2">2 Set</option>
+                                </select>
+                                <select id="addToStudioRepsSelect" style="background:#111; color:#fff; border:1px solid var(--border); font-size:11px; padding:5px 8px; border-radius:6px;">
+                                    <option value="8-12" selected>8-12 Tekrar</option>
+                                    <option value="4-6">4-6 Tekrar</option>
+                                    <option value="12-15">12-15 Tekrar</option>
+                                    <option value="15-20">15-20 Tekrar</option>
+                                </select>
+                                <button type="button" class="btn btn-gold" style="font-size:11px; padding:5px 12px; font-weight:800;" onclick="applyAddToStudioRoutine('${ex.id}')">
+                                    ➕ Atölyeye Ekle
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+            `;
+
+            if (isWorkoutActive) {
+                html += `
+                    <!-- SEÇENEK 3: AKTİF CANLI ANTRENMANA EKLE -->
+                    <div class="add-to-prog-card active-workout-highlight" onclick="applyAddToActiveWorkout('${ex.id}')">
+                        <div style="font-size:24px; flex-shrink:0;">🏋️</div>
+                        <div style="flex:1;">
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <span style="font-size:13px; font-weight:800; color:var(--gold);">Şu Anki Aktif Antrenmana Ekle</span>
+                                <span style="font-size:9px; background:var(--green-success); color:#000; font-weight:900; padding:1px 5px; border-radius:3px;">CANLI</span>
+                            </div>
+                            <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
+                                Devam eden antrenmanınıza bu hareketi ilave egzersiz olarak sıraya alır.
+                            </div>
+                        </div>
+                        <div style="font-size:12px; color:var(--gold); font-weight:800;">Hemen Ekle ➔</div>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <!-- SEÇENEK 3 (BOŞTA): BU HAREKETLE HIZLI SEANS BAŞLAT -->
+                    <div class="add-to-prog-card" onclick="startQuickWorkoutWithExercise('${ex.id}')">
+                        <div style="font-size:24px; flex-shrink:0;">⚡</div>
+                        <div style="flex:1;">
+                            <div style="font-size:13px; font-weight:800; color:var(--cyan);">Bu Hareketle Hızlı Seans Başlat</div>
+                            <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
+                                Bu egzersizi başlangıç alarak hemen canlı bir serbest antrenman başlatın.
+                            </div>
+                        </div>
+                        <div style="font-size:12px; color:var(--cyan); font-weight:800;">Başlat ➔</div>
+                    </div>
+                `;
+            }
+
+            html += `</div>`;
+            dynamicBody.innerHTML = html;
+            modal.classList.add('active');
+        }
+
+        function closeAddToProgramOptionsModal() {
+            const modal = document.getElementById('addToProgramOptionsModal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        function applyAddToStudioRoutine(exId) {
+            const sets = parseInt(document.getElementById('addToStudioSetsSelect')?.value) || 3;
+            const reps = document.getElementById('addToStudioRepsSelect')?.value || '8-12';
+            
+            const ex = EXERCISES_DB.find(e => e.id === exId);
+            if (!ex) return;
+
+            if (!customRoutineState.exercises) customRoutineState.exercises = [];
+            customRoutineState.exercises.push({
+                exId: exId,
+                sets: sets,
+                reps: reps,
+                weight: ''
+            });
+
+            closeAddToProgramOptionsModal();
+            if (typeof renderCustomRoutine === 'function') renderCustomRoutine();
+            if (typeof renderRegionStatus === 'function') renderRegionStatus();
+            
+            showToast(`✅ "${ex.name}" Program Atölyesi taslağınıza eklendi! (Toplam ${customRoutineState.exercises.length} hareket)`);
+            playAlertSound();
+        }
+
+        function applyAddToActiveWorkout(exId) {
+            const ex = EXERCISES_DB.find(e => e.id === exId);
+            if (!ex || !activeWorkoutSession) return;
+
+            activeWorkoutSession.exercises.push({
+                ...ex,
+                targetSets: 3,
+                targetReps: '8-12',
+                logs: []
+            });
+
+            if (!activeWorkoutSetsData[ex.id]) {
+                activeWorkoutSetsData[ex.id] = [];
+                const user = getActiveUser();
+                const userWeights = user?.weights || {};
+                const defaultWeight = ex.weightKey && userWeights[ex.weightKey] ? (parseFloat(userWeights[ex.weightKey]) || '') : '';
+                for (let s = 1; s <= 3; s++) {
+                    activeWorkoutSetsData[ex.id].push({
+                        setNo: s,
+                        weight: defaultWeight,
+                        reps: 10,
+                        completed: false,
+                        completedAt: null
+                    });
+                }
+            }
+
+            activeFocusExIndex = activeWorkoutSession.exercises.length - 1;
+            activeFocusSetIndex = null;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+            
+            closeAddToProgramOptionsModal();
+            switchTab('activeWorkoutTab');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            showToast(`✅ "${ex.name}" canlı antrenmanınıza eklendi!`);
+            playAlertSound();
+        }
+
+        function startQuickWorkoutWithExercise(exId) {
+            const ex = EXERCISES_DB.find(e => e.id === exId);
+            if (!ex) return;
+
+            const sessionObj = {
+                id: 'quick_' + Date.now(),
+                title: `${ex.name} Odaklı Seans`,
+                split: 'custom',
+                splitName: ex.name,
+                style: 'classic',
+                goal: 'hypertrophy',
+                duration: 30,
+                scheme: { sets: 3, reps: '8-12', rest: 60 },
+                warmups: [
+                    { name: "Eklemsel CARs (Dinamik Isınma)", dur: "90 sn", cue: "Eklem kapsüllerini uyar ve ısıt." }
+                ],
+                exercises: [{
+                    ...ex,
+                    targetSets: 3,
+                    targetReps: '8-12',
+                    logs: []
+                }],
+                finisher: { name: "Balistik Bitiş", desc: "Tempolu taşıma veya swing." },
+                createdAt: Date.now()
+            };
+
+            activeWorkoutSession = sessionObj;
+            activeWorkoutStartTime = Date.now();
+            activeWorkoutIsPaused = false;
+            activeWorkoutPausedAt = null;
+            activeWorkoutTotalPausedMs = 0;
+            activeWorkoutSetsData = {};
+            activeWorkoutViewMode = 'focus';
+            activeFocusExIndex = 0;
+            activeFocusSetIndex = null;
+
+            const user = getActiveUser();
+            const userWeights = user?.weights || {};
+            const defaultWeight = ex.weightKey && userWeights[ex.weightKey] ? (parseFloat(userWeights[ex.weightKey]) || '') : '';
+
+            activeWorkoutSetsData[ex.id] = [];
+            for (let s = 1; s <= 3; s++) {
+                activeWorkoutSetsData[ex.id].push({
+                    setNo: s,
+                    weight: defaultWeight,
+                    reps: 10,
+                    completed: false,
+                    completedAt: null
+                });
+            }
+
+            closeAddToProgramOptionsModal();
+            saveActiveWorkoutStateToStorage();
+            startWorkoutTimer();
+            renderActiveWorkout();
+            switchTab('activeWorkoutTab');
+            resetTimer(60);
+            playAlertSound();
+            requestWakeLock();
+            showToast(`🚀 "${ex.name}" ile canlı antrenman başladı!`);
+        }
+
+        function renderLibrary() {
+            if (currentLibrarySubTab === 'exercises') {
+                renderLibraryExerciseCatalog();
+                return;
+            }
+            const user = getActiveUser();
+            const key = `celik_kodu_custom_programs_${user.id}`;
+            let saved = [];
+            try {
+                const raw = localStorage.getItem(key);
+                if (raw) saved = JSON.parse(raw);
+            } catch(e) {}
+
+            const customContainer = document.getElementById('savedProgramsList');
+            if (saved.length === 0) {
+                customContainer.innerHTML = `
+                    <div style="background:var(--bg-surface); padding:16px; border-radius:10px; border:1px dashed var(--border); text-align:center; font-size:12px; color:var(--text-secondary);">
+                        Henüz kayıtlı özel bir programınız yok. Program Oluşturucu ile bir program üretip "Kütüphaneye Kaydet" butonuna basabilirsiniz!
+                    </div>
+                `;
+            } else {
+                customContainer.innerHTML = saved.map(p => `
+                    <div class="log-history-card">
+                        <div class="log-card-header">
+                            <div>
+                                <strong style="color:#fff; font-size:14px;">${escapeHTML(p.title)}</strong>
+                                <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
+                                    ${(p.exercises || []).length} Egzersiz • ${p.duration || Math.round((p.exercises || []).length * 7)} Dk • ${p.style === 'superset' ? 'Süperset' : 'Klasik'}
+                                </div>
+                            </div>
+                            <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                                <button class="btn btn-outline" style="font-size:11px; padding:4px 8px; color:var(--cyan); border-color:var(--cyan);" onclick="previewWorkoutModal(decodeURIComponent('${encodeURIComponent(p.id)}'))">
+                                    👁️ İçerik
+                                </button>
+                                <button class="btn btn-outline" style="font-size:11px; padding:4px 8px; color:var(--gold); border-color:var(--gold);" onclick="editSavedProgram(decodeURIComponent('${encodeURIComponent(p.id)}'))">
+                                    ✏️ Düzenle
+                                </button>
+                                <button class="btn btn-outline" style="font-size:11px; padding:4px 8px; color:var(--cyan); border-color:var(--cyan);" onclick="promptAssignToDay(decodeURIComponent('${encodeURIComponent(p.id)}'), decodeURIComponent('${encodeURIComponent(p.title || '')}'), 'custom_saved', decodeURIComponent('${encodeURIComponent((p.exercises || []).length + ' Egzersiz')}'))">
+                                    📅 Güne Planla
+                                </button>
+                                <button class="btn btn-gold" style="font-size:11px; padding:4px 10px; font-weight:800;" onclick="loadSavedProgram(decodeURIComponent('${encodeURIComponent(p.id)}'))">
+                                    ▶ Başlat
+                                </button>
+                                <button class="btn-delete-log" onclick="deleteSavedProgram(decodeURIComponent('${encodeURIComponent(p.id)}'))" title="Sil">✕</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Render Official Classic Routines
+            const officialContainer = document.getElementById('officialProgramsList');
+            const officialRoutines = [
+                {
+                    id: 'la_forja_day1',
+                    title: '⚔️ Çelik Kodu Gün 1: Omuz & Bacak Ön Zırhı',
+                    desc: 'Omuz Presi + Goblet Squat (A1/A2), Clean Front Squat + Şınav (B1/B2), Halo + Core (C1/C2)',
+                    exercises: ['db_overhead_press', 'db_goblet_squat', 'db_front_squat', 'bw_pushup', 'kb_halo', 'bw_hollow_body'],
+                    style: 'superset',
+                    duration: 45
+                },
+                {
+                    id: 'la_forja_day2',
+                    title: '⚔️ Çelik Kodu Gün 2: Sırt Çekiş & Balistik Güç',
+                    desc: 'Ağır Testere Row + RDL (A1/A2), Patlayıcı Dambıl Swing + Barfiks (B1/B2), Çiftçi Yürüyüşü (C1)',
+                    exercises: ['db_saw_row', 'db_rdl', 'db_swing', 'bw_pullup', 'db_farmers_walk', 'db_russian_twist'],
+                    style: 'superset',
+                    duration: 45
+                },
+                {
+                    id: 'la_forja_day3',
+                    title: '⚔️ Çelik Kodu Gün 3: Kompleks & Merdiven',
+                    desc: 'Dambıl Snatch + Walking Lunge (A1/A2), 5-4-3-2 Merdiven Row-Clean-Squat, Burpee Finisher',
+                    exercises: ['db_snatch', 'db_walking_lunge', 'db_saw_row', 'db_front_squat', 'bw_burpee'],
+                    style: 'superset',
+                    duration: 50
+                }
+            ];
+
+            officialContainer.innerHTML = officialRoutines.map(r => `
+                <div class="log-history-card" style="border-color:var(--border-hover);">
+                    <div class="log-card-header">
+                        <strong style="color:var(--gold-light); font-size:14px;">${escapeHTML(r.title)}</strong>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                            <button class="btn btn-outline" style="font-size:11px; padding:4px 8px; color:var(--cyan); border-color:var(--cyan);" onclick="previewWorkoutModal('${r.id}')">
+                                👁️ İçerik
+                            </button>
+                            <button class="btn btn-outline" style="font-size:11px; padding:4px 8px; color:var(--cyan); border-color:var(--cyan);" onclick="promptAssignToDay('${r.id}', '${escapeHTML(r.title).replace(/'/g, "\\'")}', 'official', '${escapeHTML(r.desc).replace(/'/g, "\\'")}')">
+                                📅 Güne Planla
+                            </button>
+                            <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; color:var(--gold); border-color:var(--gold); font-weight:700;" onclick="loadOfficialRoutine('${r.id}')">
+                                ▶ Yükle
+                            </button>
+                        </div>
+                    </div>
+                    <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
+                        ${escapeHTML(r.desc)}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadSavedProgram(progId) {
+            const user = getActiveUser();
+            const key = `celik_kodu_custom_programs_${user.id}`;
+            try {
+                const saved = JSON.parse(localStorage.getItem(key) || '[]');
+                const found = saved.find(p => p.id === progId);
+                if (found) {
+                    currentGeneratedWorkout = found;
+                    startActiveWorkoutFromGenerated();
+                }
+            } catch(e) {}
+        }
+
+        function deleteSavedProgram(progId) {
+            const user = getActiveUser();
+            const key = `celik_kodu_custom_programs_${user.id}`;
+            if (confirm("Bu kayıtlı programı silmek istediğinize emin misiniz?")) {
+                try {
+                    let saved = JSON.parse(localStorage.getItem(key) || '[]');
+                    saved = saved.filter(p => p.id !== progId);
+                    localStorage.setItem(key, JSON.stringify(saved));
+                    renderLibrary();
+                } catch(e) {}
+            }
+        }
+
+        function loadOfficialRoutine(routineId) {
+            const routines = {
+                la_forja_day1: {
+                    title: '⚔️ Çelik Kodu Gün 1: Omuz & Bacak Ön Zırhı',
+                    split: 'upper_push',
+                    style: 'superset',
+                    duration: 45,
+                    scheme: { sets: 4, reps: '8 - 10', rest: 45 },
+                    exerciseIds: ['db_overhead_press', 'db_goblet_squat', 'db_front_squat', 'bw_pushup', 'kb_halo', 'bw_hollow_body']
+                },
+                la_forja_day2: {
+                    title: '⚔️ Çelik Kodu Gün 2: Sırt Çekiş & Balistik Güç',
+                    split: 'upper_pull',
+                    style: 'superset',
+                    duration: 45,
+                    scheme: { sets: 4, reps: '8 - 10', rest: 45 },
+                    exerciseIds: ['db_saw_row', 'db_rdl', 'db_swing', 'bw_pullup', 'db_farmers_walk', 'db_russian_twist']
+                },
+                la_forja_day3: {
+                    title: '⚔️ Çelik Kodu Gün 3: Kompleks & Merdiven',
+                    split: 'full_body',
+                    style: 'superset',
+                    duration: 50,
+                    scheme: { sets: 4, reps: '8 - 10', rest: 45 },
+                    exerciseIds: ['db_snatch', 'db_walking_lunge', 'db_saw_row', 'db_front_squat', 'bw_burpee']
+                }
+            };
+
+            const target = routines[routineId];
+            if (!target) return;
+
+            const exercises = target.exerciseIds.map(id => EXERCISES_DB.find(e => e.id === id)).filter(Boolean);
+
+            currentGeneratedWorkout = {
+                id: 'gen_' + Date.now(),
+                title: target.title,
+                split: target.split,
+                splitName: 'Çelik Kodu Klasik',
+                style: target.style,
+                goal: 'hypertrophy',
+                duration: target.duration,
+                scheme: target.scheme,
+                warmups: [
+                    { name: "Eklemsel CARs (Omuz & Kalça Dairesi)", dur: "90 sn", cue: "Tüm eklemleri kontrollü ve geniş dairelerle ısıt." },
+                    { name: "World's Greatest Stretch", dur: "60 sn", cue: "Derin lunge ile omurga rotasyonu." }
+                ],
+                exercises: exercises,
+                finisher: { name: "3 Dk Tabata Finisher", desc: "Patlayıcı kondisyon" },
+                createdAt: Date.now()
+            };
+
+            startActiveWorkoutFromGenerated();
+        }
+
+        // ==================== WEEKLY SCHEDULE & PERIODIZATION ====================
+        const DAY_NAMES_TR = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+        const DAY_SHORT_TR = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+
+        let activePlannerWeek = 'current'; // 'current' | 'next'
+
+        function switchPlannerWeek(week) {
+            activePlannerWeek = week;
+            if (typeof renderActiveWorkout === 'function') {
+                renderActiveWorkout();
+            }
+        }
+
+        function getDefaultWeeklySchedule() {
+            return {
+                1: { id: 'la_forja_day1', title: '⚔️ Gün 1: Omuz & Bacak Ön Zırhı', type: 'official', desc: 'Press + Squat • Şınav + Front Squat • Core', rest: false },
+                2: { id: 'rest', title: '🧘 Dinlenme & Aktif Toparlanma', type: 'rest', desc: 'Hafif yürüyüş, esneme veya tam istirahat', rest: true },
+                3: { id: 'la_forja_day2', title: '⚔️ Gün 2: Sırt Çekiş & Balistik Güç', type: 'official', desc: 'Saw Row + RDL • Swing + Pullup • Çanta Taşıma', rest: false },
+                4: { id: 'rest', title: '🧘 Dinlenme & Mobilite', type: 'rest', desc: 'Eklem mobilizasyonu, masaj rulosu', rest: true },
+                5: { id: 'la_forja_day3', title: '⚔️ Gün 3: Kompleks & Merdiven', type: 'official', desc: 'Snatch + Lunge • Row + Squat • Burpee Finisher', rest: false },
+                6: { id: 'rest', title: '🧘 Serbest Kardiyo / Core', type: 'rest', desc: '30 dk tempolu yürüyüş, bisiklet veya karın', rest: true },
+                0: { id: 'rest', title: '🧘 Tam Dinlenme & Zihinsel Hazırlık', type: 'rest', desc: 'Yeni haftaya kasları ve sinir sistemini dinlendirme', rest: true }
+            };
+        }
+
+        function getWeeklySchedule(targetUid) {
+            const user = getActiveUser();
+            const uid = targetUid || (user ? user.id : 'default');
+            const key = `celik_kodu_weekly_schedule_${uid}`;
+            try {
+                const raw = localStorage.getItem(key);
+                if (raw) return JSON.parse(raw);
+            } catch(e) {}
+            const def = getDefaultWeeklySchedule();
+            saveWeeklySchedule(def, uid);
+            return def;
+        }
+
+        function saveWeeklySchedule(schedule, targetUid) {
+            const user = getActiveUser();
+            const uid = targetUid || (user ? user.id : 'default');
+            const key = `celik_kodu_weekly_schedule_${uid}`;
+            try {
+                localStorage.setItem(key, JSON.stringify(schedule));
+            } catch(e) {}
+        }
+
+        // ==================== GELECEK HAFTA & AI REÇETE KÖPRÜSÜ ====================
+        function getNextWeeklySchedule(targetUid) {
+            const user = getActiveUser();
+            const uid = targetUid || (user ? user.id : 'default');
+            const key = `celik_kodu_next_weekly_schedule_${uid}`;
+            let existing = null;
+            try {
+                const raw = localStorage.getItem(key);
+                if (raw) existing = JSON.parse(raw);
+            } catch(e) {}
+
+            // Eski ayrıştırma hatası veya slot çakışması tespiti:
+            let shouldReconvert = !existing;
+            if (existing) {
+                const day1 = existing[1];
+                const day3 = existing[3];
+                const day5 = existing[5];
+                // 1) Tek güne yığılma (eski v103 bug'ı)
+                if (day1 && Array.isArray(day1.exercises) && day1.exercises.length > 8 && day3 && day3.rest && day5 && day5.rest) {
+                    shouldReconvert = true;
+                }
+                // 2) AI verisi 3 günlük olduğu halde schedule'da 3'ten az çalışma günü kalması (slot çakışması bug'ı)
+                try {
+                    const aiRaw = localStorage.getItem(`celik_kodu_ai_program_${uid}`);
+                    if (aiRaw) {
+                        const aiData = JSON.parse(aiRaw);
+                        const expectedDayCount = (aiData.structuredDays && aiData.structuredDays.length > 1) ? aiData.structuredDays.length : 3;
+                        const activeWorkoutDaysCount = [1, 2, 3, 4, 5, 6, 0].filter(s => existing[s] && !existing[s].rest).length;
+                        if (activeWorkoutDaysCount < expectedDayCount) {
+                            shouldReconvert = true;
+                        }
+                    }
+                } catch(e) {}
+            }
+
+            if (shouldReconvert) {
+                try {
+                    const aiRaw = localStorage.getItem(`celik_kodu_ai_program_${uid}`);
+                    if (aiRaw) {
+                        const aiData = JSON.parse(aiRaw);
+                        let days = Array.isArray(aiData.structuredDays) && aiData.structuredDays.length > 1 ? aiData.structuredDays : null;
+                        if (!days) {
+                            days = parseMarkdownProgramClient(aiData.programText);
+                        }
+                        if (Array.isArray(days) && days.length > 0) {
+                            const converted = convertParsedDaysToWeeklySchedule(days);
+                            saveNextWeeklySchedule(converted, uid);
+                            return converted;
+                        }
+                    }
+                } catch(e) {}
+            }
+
+            if (existing && !shouldReconvert) return existing;
+
+            // Varsayılan: Mevcut haftanın temiz bir kopyasını aç
+            const current = getWeeklySchedule(uid);
+            const clone = JSON.parse(JSON.stringify(current));
+            saveNextWeeklySchedule(clone, uid);
+            return clone;
+        }
+
+        function saveNextWeeklySchedule(schedule, targetUid) {
+            const user = getActiveUser();
+            const uid = targetUid || (user ? user.id : 'default');
+            const key = `celik_kodu_next_weekly_schedule_${uid}`;
+            try {
+                localStorage.setItem(key, JSON.stringify(schedule));
+            } catch(e) {}
+        }
+
+        function promoteNextWeekToCurrent(targetUid) {
+            const user = getActiveUser();
+            const uid = targetUid || (user ? user.id : 'default');
+            try {
+                const nextSchedule = getNextWeeklySchedule(uid);
+                saveWeeklySchedule(nextSchedule, uid);
+
+                // AI Program bayrağını "uygulandı" olarak güncelle
+                const aiRaw = localStorage.getItem(`celik_kodu_ai_program_${uid}`);
+                if (aiRaw) {
+                    const aiData = JSON.parse(aiRaw);
+                    aiData.applied = true;
+                    aiData.dismissed = true;
+                    localStorage.setItem(`celik_kodu_ai_program_${uid}`, JSON.stringify(aiData));
+                }
+
+                activePlannerWeek = 'current';
+                if (typeof renderActiveWorkout === 'function') {
+                    renderActiveWorkout();
+                }
+
+                if (typeof showSystemNotice === 'function') {
+                    showSystemNotice("🎉 Harika!", "Gelecek hafta için hazırlanan program başarıyla aktif haftalık antrenman planınız yapıldı.");
+                } else {
+                    alert("🎉 Harika! Gelecek hafta programı başarıyla aktif haftalık antrenman planınız yapıldı.");
+                }
+            } catch(e) {
+                console.error("Gelecek hafta aktarılırken hata:", e);
+            }
+        }
+
+        function parseMarkdownProgramClient(text) {
+            if (!text) return [];
+            
+            // GÜN, SEANS, DAY, ANTRENMAN veya gün isimleri yakalama
+            const dayRegex = /(?:^|\n)(?:#{1,4}\s*|\*{0,2})(?:[0-9]\.\s*)?(GÜN\s*[0-9A-ZÇĞİÖŞÜ]+|SEANS\s*[0-9A-ZÇĞİÖŞÜ]+|DAY\s*[0-9A-Z]+|ANTRENMAN\s*[0-9A-ZÇĞİÖŞÜ]+|PAZARTESİ|SALI|ÇARŞAMBA|PERŞEMBE|CUMA|CUMARTESİ|PAZAR)[^\n]*/gi;
+            
+            const matches = [];
+            let match;
+            while ((match = dayRegex.exec(text)) !== null) {
+                const fullTitle = match[0].trim().replace(/^#+\s*/, '').replace(/\*+/g, '');
+                const lower = fullTitle.toLowerCase();
+                // Hacim/değişim/özet tablolarını gün olarak algılamayı engelle
+                if (!lower.includes('hacim') && !lower.includes('özet') && !lower.includes('tablo') && !lower.includes('değişim')) {
+                    matches.push({ title: fullTitle, index: match.index });
+                }
+            }
+
+            const extractExercisesFromBlock = (block) => {
+                const list = [];
+                const lines = block.split('\n');
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (trimmed.startsWith('|') && trimmed.endsWith('|') && !trimmed.includes('---')) {
+                        const lower = trimmed.toLowerCase();
+                        if (lower.includes('egzersiz') || lower.includes('hareket') || lower.includes('kas grubu')) continue;
+                        const cells = trimmed.split('|').map(c => c.trim()).filter(Boolean);
+                        if (cells.length >= 3) {
+                            const rawName = cells[0].replace(/\*+/g, '').trim();
+                            const sets = parseInt(cells[2]) || 3;
+                            const reps = cells[3] || '8-12';
+                            const note = cells[cells.length - 1] || '';
+                            list.push({
+                                name: rawName,
+                                targetSets: sets,
+                                targetReps: reps,
+                                note: note
+                            });
+                        }
+                    } else if (trimmed.startsWith('-') || trimmed.startsWith('*')) {
+                        const bulletMatch = trimmed.match(/^[-*]\s*\*{0,2}(.*?)\*{0,2}\s*:\s*(.*)/);
+                        if (bulletMatch && !bulletMatch[1].toLowerCase().includes('hacim')) {
+                            list.push({
+                                name: bulletMatch[1].trim(),
+                                targetSets: 3,
+                                targetReps: '8-12',
+                                note: bulletMatch[2].trim()
+                            });
+                        }
+                    }
+                }
+                return list;
+            };
+
+            if (matches.length === 0) {
+                // Fallback: search for any generic ### or #### header
+                const genericHeaderRegex = /(?:^|\n)(#{3,4}\s+[^\n]+)/g;
+                let gMatch;
+                while ((gMatch = genericHeaderRegex.exec(text)) !== null) {
+                    const title = gMatch[1].replace(/^#+\s*/, '').trim();
+                    const lower = title.toLowerCase();
+                    if (!lower.includes('hacim') && !lower.includes('özet') && !lower.includes('reçete')) {
+                        matches.push({ title: title, index: gMatch.index });
+                    }
+                }
+            }
+
+            if (matches.length === 0) {
+                return [{ dayTitle: 'FitLAB AI Antrenmanı', exercises: extractExercisesFromBlock(text) }];
+            }
+
+            const days = [];
+            for (let i = 0; i < matches.length; i++) {
+                const start = matches[i].index;
+                const end = (i + 1 < matches.length) ? matches[i + 1].index : text.length;
+                const block = text.substring(start, end);
+                const exercises = extractExercisesFromBlock(block);
+                if (exercises.length > 0) {
+                    days.push({
+                        dayTitle: matches[i].title,
+                        exercises: exercises
+                    });
+                }
+            }
+
+            if (days.length === 0) {
+                return [{ dayTitle: 'FitLAB AI Antrenmanı', exercises: extractExercisesFromBlock(text) }];
+            }
+
+            return days;
+        }
+
+        function normalizeExerciseName(str) {
+            if (!str) return '';
+            return String(str).toLowerCase()
+                .replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ı/g, 'i').replace(/i̇/g, 'i')
+                .replace(/ö/g, 'o').replace(/ş/g, 's').replace(/ü/g, 'u')
+                .replace(/\(.*?\)/g, '')
+                .replace(/[^a-z0-9\s]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function findBestExerciseMatch(rawName, customCatalog) {
+            if (!rawName) return null;
+            const catalog = customCatalog || (typeof EXERCISES_DB !== 'undefined' ? EXERCISES_DB : []);
+            if (!Array.isArray(catalog) || catalog.length === 0) return null;
+
+            const cleanRaw = String(rawName).replace(/\*+/g, '').trim();
+            // 1. Doğrudan ID veya İsim Eşleşmesi
+            let match = catalog.find(e => e.id === cleanRaw || (e.name && e.name.toLowerCase() === cleanRaw.toLowerCase()));
+            if (match) return match;
+
+            const normRaw = normalizeExerciseName(cleanRaw);
+            // 2. Normalleştirilmiş isim eşleşmesi
+            match = catalog.find(e => normalizeExerciseName(e.name) === normRaw);
+            if (match) return match;
+
+            // 3. Kelime/Token skoru eşleşmesi
+            const rawTokens = normRaw.split(' ').filter(t => t.length > 2);
+            let bestMatch = null;
+            let maxScore = 0;
+
+            for (const ex of catalog) {
+                const normEx = normalizeExerciseName(ex.name) + ' ' + (ex.id || '').replace(/_/g, ' ');
+                let score = 0;
+                for (const token of rawTokens) {
+                    if (normEx.includes(token)) {
+                        score += (token.length > 4 ? 2 : 1);
+                    }
+                }
+                if (score > maxScore && score >= 2) {
+                    maxScore = score;
+                    bestMatch = ex;
+                }
+            }
+            return bestMatch;
+        }
+
+        function resolveDaySlot(dayTitle, dayIndex, totalDays) {
+            const slotMap = { 1: [1], 2: [1, 4], 3: [1, 3, 5], 4: [1, 2, 4, 5], 5: [1, 2, 3, 4, 5], 6: [1, 2, 3, 4, 5, 6] };
+            const defaultSlots = slotMap[totalDays] || [1, 2, 3, 4, 5, 6, 0];
+            let slot = defaultSlots[dayIndex] !== undefined ? defaultSlots[dayIndex] : (dayIndex + 1);
+
+            const title = (dayTitle || '').toLowerCase();
+
+            // 1. Açık GÜN 1..7 / DAY 1..7 / SEANS 1..7 tespiti
+            const numMatch = title.match(/(?:gün|seans|day|antrenman)\s*([1-7])/i);
+            if (numMatch) {
+                const num = parseInt(numMatch[1], 10);
+                if (num >= 1 && num <= totalDays) {
+                    return defaultSlots[num - 1] !== undefined ? defaultSlots[num - 1] : slot;
+                }
+            }
+            const letterMatch = title.match(/seans\s*([a-c])/i);
+            if (letterMatch) {
+                const charCode = letterMatch[1].charCodeAt(0) - 97;
+                if (charCode >= 0 && charCode < totalDays) {
+                    return defaultSlots[charCode] !== undefined ? defaultSlots[charCode] : slot;
+                }
+            }
+
+            // 2. Katı kelime sınırı kontrolü (hipertrofi içindeki 'per' veya aksiyel içindeki 'sal' asla gün tetiklemez!)
+            if (/\b(pazartesi|pzt)\b/i.test(title)) return 1;
+            if (/\b(salı|sal)\b/i.test(title)) return 2;
+            if (/\b(çarşamba|çar)\b/i.test(title)) return 3;
+            if (/\b(perşembe|per)\b/i.test(title)) return 4;
+            if (/\b(cuma|cum)\b/i.test(title) && !title.includes('cumartesi')) return 5;
+            if (/\b(cumartesi|cmt)\b/i.test(title)) return 6;
+            if (/\b(pazar|paz)\b/i.test(title) && !title.includes('pazartesi')) return 0;
+
+            return slot;
+        }
+
+        function convertParsedDaysToWeeklySchedule(parsedDays) {
+            const schedule = {
+                1: { id: 'rest', title: '🧘 Dinlenme & Aktif Toparlanma', type: 'rest', rest: true, desc: 'Hafif yürüyüş, esneme veya tam istirahat' },
+                2: { id: 'rest', title: '🧘 Dinlenme & Mobilite', type: 'rest', rest: true, desc: 'Eklem mobilizasyonu, masaj rulosu' },
+                3: { id: 'rest', title: '🧘 Dinlenme & Aktif Toparlanma', type: 'rest', rest: true, desc: 'Hafif yürüyüş, esneme veya tam istirahat' },
+                4: { id: 'rest', title: '🧘 Dinlenme & Mobilite', type: 'rest', rest: true, desc: 'Eklem mobilizasyonu, masaj rulosu' },
+                5: { id: 'rest', title: '🧘 Dinlenme & Aktif Toparlanma', type: 'rest', rest: true, desc: 'Hafif yürüyüş, esneme veya tam istirahat' },
+                6: { id: 'rest', title: '🧘 Serbest Kardiyo / Core', type: 'rest', rest: true, desc: '30 dk tempolu yürüyüş, bisiklet veya karın' },
+                0: { id: 'rest', title: '🧘 Tam Dinlenme & Zihinsel Hazırlık', type: 'rest', rest: true, desc: 'Yeni haftaya kasları ve sinir sistemini dinlendirme' }
+            };
+            if (!Array.isArray(parsedDays) || parsedDays.length === 0) return schedule;
+
+            const occupiedSlots = new Set();
+            parsedDays.forEach((pDay, idx) => {
+                let slot = resolveDaySlot(pDay.dayTitle, idx, parsedDays.length);
+                if (occupiedSlots.has(slot)) {
+                    const fallbackOrder = [1, 3, 5, 2, 4, 6, 0];
+                    const nextFree = fallbackOrder.find(s => !occupiedSlots.has(s));
+                    if (nextFree !== undefined) slot = nextFree;
+                }
+                occupiedSlots.add(slot);
+
+                // Her egzersizi EXERCISES_DB kütüphanesiyle zenginleştir ve garantili ID bağla
+                const enrichedExercises = (pDay.exercises || []).map((rawEx, eIdx) => {
+                    const rawName = (rawEx.name || '').replace(/\*+/g, '').trim();
+                    const matchedDb = findBestExerciseMatch(rawName);
+                    const sets = rawEx.targetSets || rawEx.sets || 3;
+                    const reps = rawEx.targetReps || rawEx.reps || '8-12';
+                    const note = rawEx.note || rawEx.cue || '';
+
+                    if (matchedDb) {
+                        return Object.assign({}, matchedDb, {
+                            id: matchedDb.id,
+                            name: matchedDb.name,
+                            originalAiName: rawName,
+                            targetSets: sets,
+                            targetReps: reps,
+                            note: note,
+                            cue: note ? (note + (matchedDb.cue ? ' • ' + matchedDb.cue : '')) : (matchedDb.cue || '')
+                        });
+                    }
+
+                    const slugId = 'ai_' + (rawName || ('ex_' + eIdx)).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+                    return {
+                        id: slugId,
+                        name: rawName || 'Özel Hipertrofi Hareketi',
+                        originalAiName: rawName,
+                        targetSets: sets,
+                        targetReps: reps,
+                        note: note,
+                        muscle: rawEx.muscle || 'Genel Kas Gelişimi & Fonksiyonel Güç',
+                        primaryMuscles: ['full_body'],
+                        equipment: 'dumbbell',
+                        cue: note || 'FitLAB AI Koçu tarafından sporcuya özel reçete edilen hareket.',
+                        isCustomAi: true
+                    };
+                });
+
+                const exNames = enrichedExercises.map(e => e.name).join(' • ');
+                schedule[slot] = {
+                    id: 'fitlab_ai_day_' + slot,
+                    title: '🔬 ' + (pDay.dayTitle || ('Gün ' + (idx + 1))),
+                    desc: exNames || 'FitLAB AI Hipertrofi Bloğu',
+                    type: 'custom_ai',
+                    rest: false,
+                    source: 'FitLAB AI',
+                    exercises: enrichedExercises
+                };
+            });
+            return schedule;
+        }
+
+        function getFitLabIncomingProgramHtml(uid) {
+            if (!uid) return '';
+            try {
+                const raw = localStorage.getItem(`celik_kodu_ai_program_${uid}`);
+                if (!raw) return '';
+                const prog = JSON.parse(raw);
+                if (!prog || !prog.active || prog.dismissed || prog.applied) return '';
+
+                let shortSummary = 'FitLAB masaüstü istasyonundan sizin için optimize edilmiş yeni bir antrenman bloğu gönderildi.';
+                if (prog.programText) {
+                    const lines = prog.programText.split('\n').filter(l => l.trim() && !l.startsWith('#') && !l.startsWith('|'));
+                    if (lines.length > 0) {
+                        shortSummary = lines[0].replace(/\*+/g, '').substring(0, 180) + '...';
+                    }
+                }
+
+                const isExpanded = !!localStorage.getItem(`celik_kodu_incoming_prog_expanded_${uid}`);
+                const todayIdx = new Date().getDay();
+
+                return `
+                    <div class="collapsible-panel ${isExpanded ? 'open' : ''}" id="incomingProgramPanel_${uid}">
+                        <div class="collapsible-panel-header" onclick="toggleIncomingProgramPanel('${uid}')">
+                            <div class="collapsible-panel-title">
+                                <span class="icon">💻</span>
+                                <span class="text">FitLAB • Yeni Masaüstü Programı</span>
+                            </div>
+                            <div class="collapsible-panel-meta">
+                                <span class="collapsible-panel-badge">Yeni Reçete</span>
+                                <span class="collapsible-panel-arrow">▼</span>
+                            </div>
+                        </div>
+                        <div class="collapsible-panel-body">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:8px;">
+                                <h3 style="font-size:13.5px; font-weight:800; color:#fff; margin:0;">${escapeHTML(prog.title || 'Gelecek Hafta İçin AI Reçetesi Hazır')}</h3>
+                                <button type="button" onclick="dismissFitLabProgram('${uid}')" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size:14px; padding:2px 6px;" title="Bildirimi Kapat">✕</button>
+                            </div>
+                            <p style="font-size:12px; color:#cbd5e1; line-height:1.5; margin:0 0 12px; background:rgba(0,0,0,0.3); padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+                                <strong>Koç Analizi:</strong> ${escapeHTML(shortSummary)}
+                            </p>
+                            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                <button type="button" class="btn btn-gold" style="font-size:12px; padding:10px 14px; font-weight:900; flex:1; box-shadow:0 0 15px rgba(245,158,11,0.3);" onclick="assignIncomingProgramToToday('${uid}')">
+                                    🔥 BU PROGRAMI BUGÜNE (${DAY_NAMES_TR[todayIdx].toUpperCase()}) ATA & BAŞLAT
+                                </button>
+                                <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:8px 12px; font-weight:700; border-color:var(--cyan); color:var(--cyan);" onclick="viewIncomingFitLabProgram('${uid}')">
+                                    👁️ Takvimde İncele & Güne Planla
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch(e) {
+                return '';
+            }
+        }
+
+        function toggleIncomingProgramPanel(uid) {
+            const panel = document.getElementById(`incomingProgramPanel_${uid}`);
+            if (!panel) return;
+            const isOpen = panel.classList.toggle('open');
+            if (isOpen) {
+                localStorage.setItem(`celik_kodu_incoming_prog_expanded_${uid}`, '1');
+            } else {
+                localStorage.removeItem(`celik_kodu_incoming_prog_expanded_${uid}`);
+            }
+        }
+
+        function dismissFitLabProgram(uid) {
+            try {
+                const raw = localStorage.getItem(`celik_kodu_ai_program_${uid}`);
+                if (raw) {
+                    const prog = JSON.parse(raw);
+                    prog.dismissed = true;
+                    localStorage.setItem(`celik_kodu_ai_program_${uid}`, JSON.stringify(prog));
+                    if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
+                }
+            } catch(e) {}
+        }
+
+        function assignIncomingProgramToToday(targetUid) {
+            const user = getActiveUser();
+            const uid = targetUid || (user ? user.id : 'default');
+            try {
+                const aiRaw = localStorage.getItem(`celik_kodu_ai_program_${uid}`);
+                if (!aiRaw) {
+                    showToast("⚠️ FitLAB programı bulunamadı.");
+                    return;
+                }
+                const aiData = JSON.parse(aiRaw);
+                let days = Array.isArray(aiData.structuredDays) && aiData.structuredDays.length > 0 ? aiData.structuredDays : null;
+                if (!days) {
+                    days = parseMarkdownProgramClient(aiData.programText);
+                }
+                if (!Array.isArray(days) || days.length === 0) {
+                    showToast("⚠️ Program içerisinde geçerli bir antrenman günü bulunamadı.");
+                    return;
+                }
+
+                const firstDay = days[0];
+                const todayIdx = new Date().getDay();
+                const todayName = DAY_NAMES_TR[todayIdx];
+                const exercisesList = (firstDay.exercises || []).map(item => {
+                    let matched = null;
+                    if (typeof EXERCISES_DB !== 'undefined') {
+                        const cleanN = (item.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+                        matched = EXERCISES_DB.find(e => (e.name || '').toLowerCase().replace(/[^a-z0-9]/g, '').includes(cleanN));
+                    }
+                    return {
+                        id: matched ? matched.id : ('gen_' + Math.random().toString(36).substring(2, 8)),
+                        name: matched ? matched.name : (item.name || 'Özel Egzersiz'),
+                        category: matched ? matched.category : 'dumbbell',
+                        equipment: matched ? matched.equipment : 'Dambıl',
+                        targetSets: item.targetSets || 3,
+                        targetReps: item.targetReps || '8-12',
+                        note: item.note || ''
+                    };
+                });
+
+                const workoutObj = {
+                    id: 'fitlab_prog_' + Date.now(),
+                    title: firstDay.dayTitle || aiData.title || 'FitLAB Özel Antrenmanı',
+                    split: 'custom',
+                    splitName: firstDay.dayTitle || aiData.title,
+                    duration: Math.round(exercisesList.length * 7),
+                    exercises: exercisesList,
+                    createdAt: Date.now(),
+                    isCustom: true
+                };
+
+                const schedule = getWeeklySchedule();
+                schedule[todayIdx] = {
+                    id: workoutObj.id,
+                    title: workoutObj.title,
+                    type: 'custom_saved',
+                    desc: `${exercisesList.length} Hareket • ${workoutObj.duration} Dk`,
+                    rest: false,
+                    customWorkout: workoutObj,
+                    exercises: exercisesList
+                };
+                saveWeeklySchedule(schedule);
+
+                aiData.applied = true;
+                aiData.dismissed = true;
+                localStorage.setItem(`celik_kodu_ai_program_${uid}`, JSON.stringify(aiData));
+
+                renderActiveWorkout();
+                playAlertSound();
+                showToast(`🔥 "${workoutObj.title}" bugüne (${todayName}) başarıyla atandı! Hemen seansı başlatabilirsiniz.`);
+            } catch(e) {
+                console.error("assignIncomingProgramToToday hatası:", e);
+                showToast("⚠️ Program atanırken hata oluştu.");
+            }
+        }
+
+        function viewIncomingFitLabProgram(uid) {
+            switchPlannerWeek('next');
+            const sec = document.querySelector('.weekly-planner-section');
+            if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ==================== UNIVERSAL WORKOUT PLAN RESOLVER ====================
+        function saveAthletesToStorage() {
+            try {
+                const users = getAuthUsers();
+                if (typeof saveAuthUsers === 'function') {
+                    saveAuthUsers(users);
+                } else {
+                    localStorage.setItem('celik_kodu_auth_users', JSON.stringify(users));
+                }
+            } catch(e) {}
+        }
+
+        function getWorkoutDetailsForPlan(plan) {
+            if (!plan || plan.rest) return null;
+
+            const normalizeExerciseItem = (e) => {
+                if (!e) return null;
+                const exId = e.id || e.exId;
+                let dbEx = EXERCISES_DB.find(x => x.id === exId);
+                if (!dbEx && (e.name || exId)) {
+                    dbEx = findBestExerciseMatch(e.name || exId);
+                }
+                const resolvedId = (dbEx ? dbEx.id : exId) || ('ai_' + (e.name || 'ex').toLowerCase().replace(/[^a-z0-9]+/g, '_'));
+                return Object.assign({}, dbEx || e, {
+                    id: resolvedId,
+                    name: (dbEx ? dbEx.name : e.name) || 'Egzersiz',
+                    originalAiName: e.originalAiName || e.name,
+                    targetSets: e.targetSets || e.sets || 3,
+                    targetReps: e.targetReps || e.reps || '8-12',
+                    note: e.note || e.cue || '',
+                    cue: e.note || e.cue || (dbEx ? dbEx.cue : ''),
+                    logs: e.logs || []
+                });
+            };
+
+            const normalizeWorkout = (w) => {
+                if (!w) return null;
+                const clone = Object.assign({}, w);
+                if (Array.isArray(clone.exercises)) {
+                    clone.exercises = clone.exercises.map(normalizeExerciseItem).filter(Boolean);
+                }
+                return clone;
+            };
+
+            // 1. Directly attached custom workout object
+            if (plan.customWorkout && Array.isArray(plan.customWorkout.exercises) && plan.customWorkout.exercises.length > 0) {
+                return normalizeWorkout(plan.customWorkout);
+            }
+
+            // 2. Direct exercises array on plan
+            if (Array.isArray(plan.exercises) && plan.exercises.length > 0) {
+                return normalizeWorkout(plan);
+            }
+
+            const planId = (plan.id || '').trim();
+            const planTitle = (plan.title || '').trim().toLowerCase();
+
+            // FitLAB AI plan lookup from schedule
+            if (planId.startsWith('fitlab_ai_day_')) {
+                const slot = parseInt(planId.replace('fitlab_ai_day_', ''), 10);
+                const nextSched = typeof getNextWeeklySchedule === 'function' ? getNextWeeklySchedule() : null;
+                if (nextSched && nextSched[slot] && Array.isArray(nextSched[slot].exercises) && nextSched[slot].exercises.length > 0) {
+                    return normalizeWorkout(nextSched[slot]);
+                }
+                const currSched = typeof getWeeklySchedule === 'function' ? getWeeklySchedule() : null;
+                if (currSched && currSched[slot] && Array.isArray(currSched[slot].exercises) && currSched[slot].exercises.length > 0) {
+                    return normalizeWorkout(currSched[slot]);
+                }
+            }
+
+            // 3. Official classic routines
+            const officialRoutines = {
+                la_forja_day1: {
+                    id: 'la_forja_day1',
+                    title: '⚔️ Çelik Kodu Gün 1: Omuz & Bacak Ön Zırhı',
+                    split: 'upper_push',
+                    style: 'superset',
+                    duration: 45,
+                    scheme: { sets: 4, reps: '8 - 10', rest: 45 },
+                    exerciseIds: ['db_overhead_press', 'db_goblet_squat', 'db_front_squat', 'bw_pushup', 'kb_halo', 'bw_hollow_body']
+                },
+                la_forja_day2: {
+                    id: 'la_forja_day2',
+                    title: '⚔️ Çelik Kodu Gün 2: Sırt Çekiş & Balistik Güç',
+                    split: 'upper_pull',
+                    style: 'superset',
+                    duration: 45,
+                    scheme: { sets: 4, reps: '8 - 10', rest: 45 },
+                    exerciseIds: ['db_saw_row', 'db_rdl', 'db_swing', 'bw_pullup', 'db_farmers_walk', 'db_russian_twist']
+                },
+                la_forja_day3: {
+                    id: 'la_forja_day3',
+                    title: '⚔️ Çelik Kodu Gün 3: Kompleks & Merdiven',
+                    split: 'full_body',
+                    style: 'superset',
+                    duration: 50,
+                    scheme: { sets: 4, reps: '8 - 10', rest: 45 },
+                    exerciseIds: ['db_snatch', 'db_walking_lunge', 'db_saw_row', 'db_front_squat', 'bw_burpee']
+                }
+            };
+
+            const buildOfficial = (off) => {
+                const exercises = off.exerciseIds.map(id => EXERCISES_DB.find(e => e.id === id)).filter(Boolean);
+                return {
+                    id: off.id,
+                    title: off.title,
+                    split: off.split,
+                    style: off.style,
+                    duration: off.duration,
+                    scheme: off.scheme,
+                    exercises: exercises,
+                    isOfficial: true
+                };
+            };
+
+            if (officialRoutines[planId]) {
+                return buildOfficial(officialRoutines[planId]);
+            }
+            if (planTitle.includes('gün 1') || planTitle.includes('omuz')) {
+                return buildOfficial(officialRoutines.la_forja_day1);
+            }
+            if (planTitle.includes('gün 2') || planTitle.includes('sırt') || planTitle.includes('çekiş')) {
+                return buildOfficial(officialRoutines.la_forja_day2);
+            }
+            if (planTitle.includes('gün 3') || planTitle.includes('kompleks') || planTitle.includes('merdiven')) {
+                return buildOfficial(officialRoutines.la_forja_day3);
+            }
+
+            // 4. Currently generated workout in memory
+            if (currentGeneratedWorkout && Array.isArray(currentGeneratedWorkout.exercises) && currentGeneratedWorkout.exercises.length > 0) {
+                if (currentGeneratedWorkout.id === planId || planId.startsWith('gen_') || (planTitle && currentGeneratedWorkout.title && currentGeneratedWorkout.title.toLowerCase().includes(planTitle))) {
+                    return currentGeneratedWorkout;
+                }
+            }
+
+            // 5. Last generated workout persisted in localStorage
+            try {
+                const rawLastGen = localStorage.getItem('celik_kodu_last_generated_workout');
+                if (rawLastGen) {
+                    const lastGen = JSON.parse(rawLastGen);
+                    if (lastGen && Array.isArray(lastGen.exercises) && lastGen.exercises.length > 0) {
+                        if (lastGen.id === planId || planId.startsWith('gen_') || plan.type === 'custom_generated' || (planTitle && lastGen.title && lastGen.title.toLowerCase().includes(planTitle))) {
+                            return lastGen;
+                        }
+                    }
+                }
+            } catch(e) {}
+
+            // 6. Search ALL custom program keys in localStorage
+            try {
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    if (k && k.startsWith('celik_kodu_custom_programs')) {
+                        const saved = JSON.parse(localStorage.getItem(k) || '[]');
+                        if (Array.isArray(saved)) {
+                            let found = saved.find(p => p && p.id === planId);
+                            if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return normalizeWorkout(found);
+                            if (planTitle) {
+                                found = saved.find(p => p && p.title && p.title.trim().toLowerCase() === planTitle);
+                                if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return normalizeWorkout(found);
+                            }
+                        }
+                    }
+                }
+            } catch(e) {}
+
+            // 7. Search in all users' savedWorkouts
+            try {
+                const users = JSON.parse(localStorage.getItem('celik_kodu_auth_users') || '[]');
+                if (Array.isArray(users)) {
+                    for (const u of users) {
+                        if (u && Array.isArray(u.savedWorkouts)) {
+                            let found = u.savedWorkouts.find(p => p && p.id === planId);
+                            if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return normalizeWorkout(found);
+                            if (planTitle) {
+                                found = u.savedWorkouts.find(p => p && p.title && p.title.trim().toLowerCase() === planTitle);
+                                if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return normalizeWorkout(found);
+                            }
+                        }
+                    }
+                }
+            } catch(e) {}
+
+            // 8. If customRoutineState has exercises and matches
+            if (typeof customRoutineState !== 'undefined' && Array.isArray(customRoutineState.exercises) && customRoutineState.exercises.length > 0) {
+                const studioList = customRoutineState.exercises.map(item => {
+                    const ex = EXERCISES_DB.find(e => e.id === item.exId);
+                    return ex ? Object.assign({}, ex, { targetSets: item.sets, targetReps: item.reps }) : null;
+                }).filter(Boolean);
+                if (studioList.length > 0 && (planId.startsWith('custom_') || plan.type === 'custom' || plan.type === 'custom_saved')) {
+                    return {
+                        id: planId || ('custom_' + Date.now()),
+                        title: plan.title || 'Özel Çelik Programı',
+                        exercises: studioList,
+                        duration: Math.round(studioList.length * 7),
+                        scheme: { sets: 3, reps: '8-12', rest: customRoutineState.rest || 60 },
+                        isCustom: true
+                    };
+                }
+            }
+
+            // 9. Intelligent Functional Synthesis Fallback
+            // If the user assigned a program to this day (not rest), construct a full balanced workout matching the title/desc
+            if (!plan.rest) {
+                let poolIds = [];
+                if (planTitle.includes('itiş') || planTitle.includes('push') || planTitle.includes('omuz') || planTitle.includes('göğüs')) {
+                    poolIds = ['db_overhead_press', 'bw_pushup', 'db_goblet_squat', 'mach_cable_lateral', 'bw_diamond_pushup', 'bw_hollow_body'];
+                } else if (planTitle.includes('çekiş') || planTitle.includes('pull') || planTitle.includes('sırt')) {
+                    poolIds = ['db_saw_row', 'db_rdl', 'db_swing', 'bw_pullup', 'db_farmers_walk', 'db_russian_twist'];
+                } else if (planTitle.includes('bacak') || planTitle.includes('alt') || planTitle.includes('lower') || planTitle.includes('squat')) {
+                    poolIds = ['db_goblet_squat', 'db_rdl', 'db_walking_lunge', 'bw_air_squat', 'bw_glute_bridge', 'bw_plank'];
+                } else if (planTitle.includes('core') || planTitle.includes('karın')) {
+                    poolIds = ['bw_plank', 'bw_hollow_body', 'db_russian_twist', 'bw_mountain_climber', 'bw_glute_bridge', 'db_farmers_walk'];
+                } else {
+                    poolIds = ['db_overhead_press', 'db_goblet_squat', 'db_saw_row', 'db_rdl', 'bw_pushup', 'bw_hollow_body'];
+                }
+
+                const synthesizedExercises = poolIds.map(id => EXERCISES_DB.find(e => e.id === id)).filter(Boolean);
+                const synthesizedWorkout = {
+                    id: planId || ('synth_' + Date.now()),
+                    title: plan.title || 'Çelik Kodu Fonksiyonel Program',
+                    split: 'custom',
+                    style: 'classic',
+                    duration: 45,
+                    scheme: { sets: 3, reps: '8 - 12', rest: 60 },
+                    exercises: synthesizedExercises,
+                    isSynthesized: true
+                };
+
+                // Cache onto plan so it is immediately remembered
+                plan.customWorkout = synthesizedWorkout;
+                try {
+                    const sched = getWeeklySchedule();
+                    for (let d = 0; d < 7; d++) {
+                        if (sched[d] && sched[d].id === plan.id) {
+                            sched[d].customWorkout = synthesizedWorkout;
+                            sched[d].desc = `${synthesizedExercises.length} Hareket • 45 Dk`;
+                        }
+                    }
+                    saveWeeklySchedule(sched);
+                } catch(e) {}
+
+                return synthesizedWorkout;
+            }
+
+            return null;
+        }
+
+        function startScheduledWorkoutForDay(dayIdx) {
+            const user = getActiveUser();
+            const uid = user ? user.id : 'default';
+            const isNextWeek = activePlannerWeek === 'next';
+            const schedule = isNextWeek ? getNextWeeklySchedule(uid) : getWeeklySchedule(uid);
+            const plan = schedule ? schedule[dayIdx] : null;
+            if (!plan || plan.rest) {
+                alert("Bu gün dinlenme günü olarak ayarlanmış. Bir antrenman başlatmak isterseniz aşağıdaki hazır programlardan birini seçebilirsiniz.");
+                return;
+            }
+
+            const details = getWorkoutDetailsForPlan(plan);
+            if (details && Array.isArray(details.exercises) && details.exercises.length > 0) {
+                currentGeneratedWorkout = JSON.parse(JSON.stringify(details));
+                startActiveWorkoutFromGenerated();
+                return;
+            }
+
+            if (plan.type === 'official') {
+                loadOfficialRoutine(plan.id);
+            } else if (plan.type === 'custom' || plan.type === 'custom_saved' || (plan.id && plan.id.startsWith('saved_'))) {
+                loadSavedProgram(plan.id);
+            } else if (plan.type === 'custom_generated' && plan.customWorkout) {
+                currentGeneratedWorkout = plan.customWorkout;
+                startActiveWorkoutFromGenerated();
+            } else {
+                loadOfficialRoutine('la_forja_day1');
+            }
+        }
+
+        let activeSchedulingDayIdx = null;
+        let activeSchedulingDateStr = null;
+
+        function openScheduleDayModal(dayIdx, targetDateStr = null) {
+            activeSchedulingDayIdx = dayIdx;
+            activeSchedulingDateStr = targetDateStr || null;
+            const modal = document.getElementById('scheduleDayModal');
+            const dayTitle = document.getElementById('schedModalDayTitle');
+            const dayBadge = document.getElementById('schedModalDayBadge');
+            const assignedSection = document.getElementById('schedAssignedWorkoutSection');
+            const optionsList = document.getElementById('schedModalOptionsList');
+            if (!modal) return;
+
+            const dayName = DAY_NAMES_TR[dayIdx];
+            const todayIdx = new Date().getDay();
+            const todayYMD = typeof formatDateYMD === 'function' ? formatDateYMD(new Date()) : '';
+            const isToday = activeSchedulingDateStr ? (activeSchedulingDateStr === todayYMD) : (dayIdx === todayIdx);
+            const isTomorrow = dayIdx === ((todayIdx + 1) % 7);
+
+            let titleLabel = `${dayName} Günü Antrenman Planı`;
+            if (activeSchedulingDateStr) {
+                const parts = activeSchedulingDateStr.split('-');
+                if (parts.length === 3) {
+                    const mIdx = parseInt(parts[1], 10) - 1;
+                    const mName = (typeof CAL_MONTH_NAMES_TR !== 'undefined' && CAL_MONTH_NAMES_TR[mIdx]) ? CAL_MONTH_NAMES_TR[mIdx] : '';
+                    titleLabel = `${parseInt(parts[2], 10)} ${mName} (${dayName}) Planı`;
+                }
+            }
+
+            if (dayTitle) dayTitle.innerText = titleLabel;
+            if (dayBadge) {
+                dayBadge.innerText = isToday ? 'BUGÜNÜN PROGRAMI' : (isTomorrow ? 'YARINKİ PROGRAM' : 'HAFTALIK PLAN');
+            }
+
+            let currentPlan;
+            if (activeSchedulingDateStr && typeof getPlanForDate === 'function') {
+                currentPlan = getPlanForDate(new Date(activeSchedulingDateStr + 'T00:00:00'));
+            } else {
+                const schedule = activePlannerWeek === 'next' ? getNextWeeklySchedule() : getWeeklySchedule();
+                currentPlan = schedule[dayIdx] || { id: 'rest', rest: true };
+            }
+            const workoutDetails = getWorkoutDetailsForPlan(currentPlan);
+
+            if (typeof updateScheduleDayModalTimingCard === 'function') {
+                updateScheduleDayModalTimingCard(dayIdx, currentPlan, workoutDetails);
+            }
+
+            // 1. RENDER ASSIGNED WORKOUT DETAILED CONTENT SECTION
+            if (assignedSection) {
+                const completedOnDate = (activeSchedulingDateStr && typeof getCompletedWorkoutsForDate === 'function')
+                    ? getCompletedWorkoutsForDate(new Date(activeSchedulingDateStr + 'T00:00:00'))
+                    : [];
+                let completedBannerHtml = '';
+                if (completedOnDate.length > 0) {
+                    const cLog = completedOnDate[0];
+                    const cVol = cLog.totalVolumeKg ? `${Math.round(cLog.totalVolumeKg).toLocaleString('tr-TR')} kg` : '';
+                    const cDur = cLog.durationFormatted || (cLog.duration ? `${cLog.duration} Dk` : '');
+                    completedBannerHtml = `
+                        <div style="background:rgba(16,185,129,0.12); border:1.5px solid #10b981; border-radius:10px; padding:12px; margin-bottom:12px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                                <div>
+                                    <span class="auth-role-tag" style="background:#10b981; color:#000; font-weight:900; font-size:9.5px;">✅ BU GÜN SEANS TAMAMLANDI</span>
+                                    <h3 style="font-size:14px; font-weight:800; color:#fff; margin:4px 0 2px;">${escapeHTML(cLog.program || cLog.title || 'Antrenman')}</h3>
+                                    <div style="font-size:11px; color:#a7f3d0;">
+                                        ${cDur ? `⏱️ ${cDur}` : ''} ${cVol ? ` • 🏋️ ${cVol}` : ''} ${cLog.totalSetsCompleted ? `• 🎯 ${cLog.totalSetsCompleted} Set` : ''}
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:5px 10px; color:#a7f3d0; border-color:#10b981;" onclick="switchTab('historyTab'); closeScheduleDayModal();">
+                                    📋 Geçmişte Gör
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (!currentPlan.rest) {
+                    const details = workoutDetails || getWorkoutDetailsForPlan(currentPlan) || {};
+                    const exercises = details.exercises || [];
+                    const restSec = (details.scheme && details.scheme.rest) || details.rest || 60;
+                    const duration = details.duration || Math.round(exercises.length * 7) || 45;
+                    const schemeStr = details.scheme ? `${details.scheme.sets} Set x ${details.scheme.reps}` : `${exercises.length} Hareket`;
+                    const titleStr = details.title || currentPlan.title || 'Atanmış Antrenman';
+
+                    let exercisesHtml = '';
+                    if (exercises.length === 0) {
+                        exercisesHtml = `
+                            <div style="text-align:center; padding:16px 12px; font-size:12px; color:var(--text-secondary); background:rgba(0,0,0,0.25); border-radius:8px;">
+                                <div style="font-size:20px; margin-bottom:6px;">⚠️</div>
+                                Bu programın hareket detayları henüz yapılandırılmamış.
+                                <div style="margin-top:8px;">
+                                    <button type="button" class="btn btn-gold" style="font-size:11px; padding:6px 14px; font-weight:800;" onclick="editProgramForDay(${dayIdx})">
+                                        ➕ Hemen Hareket Ekle / Düzenle
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        exercisesHtml = exercises.map((ex, idx) => {
+                            const guide = (exerciseGuideMap && exerciseGuideMap[ex.id]) || (categoryFallback && categoryFallback[ex.category]) || {};
+                            const thumb = guide.form || '';
+                            const sets = ex.targetSets || (details.scheme ? details.scheme.sets : 3);
+                            const reps = ex.targetReps || (details.scheme ? details.scheme.reps : '8-12');
+                            const anatomy = getExerciseAnatomy(ex);
+
+                            return `
+                                <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:7px 10px;">
+                                    <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:0;">
+                                        <span style="font-size:11.5px; font-weight:900; color:var(--gold); width:18px;">${idx + 1}.</span>
+                                        <div class="ex-thumb-wrap" style="width:38px; height:38px; border-radius:6px; flex-shrink:0;">
+                                            ${thumb ? `<img src="${thumb}" class="ex-thumb-img" alt="${escapeHTML(ex.name)}">` : '🏋️'}
+                                        </div>
+                                        <div style="min-width:0; flex:1;">
+                                            <div style="font-size:12.5px; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id || escapeHTML(ex.name)}')">
+                                                ${escapeHTML(ex.name)}
+                                            </div>
+                                            <div style="font-size:10.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;">
+                                                <span style="color:var(--gold); font-weight:800;">🎯 ${escapeHTML(anatomy.primary)}</span>
+                                                ${anatomy.secondary ? `<span style="color:var(--cyan); font-weight:600;"> • ⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''}
+                                                ${ex.equipment ? ` • <span style="color:var(--text-secondary);">${escapeHTML(ex.equipment)}</span>` : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:5px; flex-shrink:0;">
+                                        <span style="background:rgba(245,158,11,0.15); color:var(--gold); border:1px solid rgba(245,158,11,0.3); font-size:10.5px; font-weight:700; border-radius:4px; padding:2px 7px;">
+                                            ${sets} x ${reps}
+                                        </span>
+                                        <button type="button" class="btn btn-outline" style="padding:3px 7px; font-size:10px; color:var(--cyan); border-color:rgba(56,189,248,0.4); font-weight:700;" onclick="openScheduleExerciseAlternativeModal(${dayIdx}, '${ex.id || escapeHTML(ex.name)}', ${idx})" title="Bu hareket için alternatif bul">🔄 Alternatif</button>
+                                        <button type="button" class="btn btn-outline" style="padding:3px 7px; font-size:10px;" onclick="openExerciseDetailModal('${ex.id || escapeHTML(ex.name)}')" title="İncele">👁️</button>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+
+                    assignedSection.innerHTML = completedBannerHtml + `
+                        <div style="background:linear-gradient(135deg, rgba(245,158,11,0.12), rgba(0,0,0,0.45)); border:1.5px solid var(--gold); border-radius:12px; padding:14px; box-shadow:0 0 25px rgba(245,158,11,0.15);">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                                <div>
+                                    <span class="auth-role-tag role-admin" style="font-size:9.5px; background:var(--gold); color:#000; font-weight:900;">
+                                        📌 ${dayName.toUpperCase()} GÜNÜNE ATANMIŞ PROGRAM
+                                    </span>
+                                    <h3 style="font-size:16px; font-weight:900; color:#fff; margin:6px 0 2px;">
+                                        ${escapeHTML(titleStr)}
+                                    </h3>
+                                    <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
+                                        ⏱️ ${duration} Dk • 🎯 ${exercises.length} Hareket (${schemeStr}) • ⏳ ${restSec}s Dinlenme
+                                    </div>
+                                </div>
+                                <button class="btn btn-gold" style="padding:8px 14px; font-size:12px; font-weight:800; flex-shrink:0;" onclick="startScheduledWorkoutForDay(${dayIdx})">
+                                    ▶️ Başlat
+                                </button>
+                            </div>
+
+                            <!-- ACTIONS: EDIT & VIEW TOGGLE -->
+                            ${!isToday ? `
+                                <div style="margin-top:10px; margin-bottom:6px;">
+                                    <button type="button" class="btn btn-gold" style="width:100%; font-size:12px; padding:10px 14px; font-weight:900; box-shadow:0 0 15px rgba(245,158,11,0.3);" onclick="copyDayProgramToToday(${dayIdx})">
+                                        🔥 BU PROGRAMI BUGÜNE (${DAY_NAMES_TR[todayIdx].toUpperCase()}) KOPYALA & HEMEN ÇALIŞ
+                                    </button>
+                                </div>
+                            ` : ''}
+
+                            <div style="display:flex; gap:8px; margin:8px 0 10px; flex-wrap:wrap;">
+                                <button type="button" class="btn btn-gold" style="flex:1; min-width:160px; font-size:12px; padding:9px 12px; font-weight:900;" onclick="editProgramForDay(${dayIdx})">
+                                    ✏️ Düzenle / Düzelt
+                                </button>
+                                <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:8px 12px; color:var(--cyan); border-color:var(--cyan);" onclick="toggleSchedModalExerciseList()">
+                                    <span id="schedModalExListToggleBtn">👁️ Egzersizleri Gizle ▲</span>
+                                </button>
+                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:8px 10px; color:#fca5a5; border-color:rgba(239,68,68,0.35);" onclick="setDayAsRest()" title="Bu günü dinlenme gününe çevir">
+                                    🧘 Dinlenmeye Al
+                                </button>
+                            </div>
+
+                            <!-- EXERCISES LIST CONTAINER -->
+                            <div id="schedModalAssignedExList" style="display:flex; flex-direction:column; gap:6px; max-height:280px; overflow-y:auto; padding-right:4px;">
+                                ${exercisesHtml}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    assignedSection.innerHTML = completedBannerHtml + `
+                        <div style="background:rgba(148,163,184,0.06); border:1px dashed var(--border); border-radius:10px; padding:14px; text-align:center;">
+                            <div style="font-size:24px; margin-bottom:4px;">🧘</div>
+                            <div style="font-size:14px; font-weight:800; color:#fff;">${dayName} Günü Dinlenme Olarak Ayarlı</div>
+                            <div style="font-size:11.5px; color:var(--text-secondary); margin:4px 0 12px;">
+                                Bu güne bir antrenman atamak için aşağıdaki programlardan birine dokunabilir veya yeni bir program tasarlayabilirsiniz.
+                            </div>
+                            <button type="button" class="btn btn-gold" style="font-size:12px; padding:8px 16px; font-weight:900;" onclick="startNewStudioProgramForDay(${dayIdx})">
+                                ➕ ${dayName} İçin Yeni Antrenman Tasarla
+                            </button>
+                        </div>
+                    `;
+                }
+            }
+
+            // 2. RENDER REPLACEMENT / ASSIGNMENT OPTIONS
+            const user = getActiveUser();
+            let customSaved = [];
+            try {
+                // Collect from all custom program storage keys
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    if (k && k.startsWith('celik_kodu_custom_programs')) {
+                        const list = JSON.parse(localStorage.getItem(k) || '[]');
+                        if (Array.isArray(list)) {
+                            list.forEach(item => {
+                                if (item && item.id && !customSaved.some(x => x.id === item.id)) {
+                                    customSaved.push(item);
+                                }
+                            });
+                        }
+                    }
+                }
+            } catch(e) {}
+
+            // Check for FitLAB Coach Directive
+            let coachDir = null;
+            try {
+                const uid = getActiveUserId();
+                const rawDir = localStorage.getItem(`celik_kodu_coach_directive_${uid}`);
+                if (rawDir) coachDir = JSON.parse(rawDir);
+            } catch(e) {}
+
+            let coachDirectiveHtml = '';
+            if (coachDir) {
+                const dirWorkout = coachDir.parsedWorkout || (coachDir.fullReport ? parseDirectiveWorkout(coachDir.fullReport, coachDir.title) : null);
+                if (dirWorkout && Array.isArray(dirWorkout.exercises) && dirWorkout.exercises.length > 0) {
+                    const dirTitle = dirWorkout.title || coachDir.title || 'FitLAB Özel Seansı';
+                    const dirCount = dirWorkout.exercises.length;
+                    const dirDur = dirWorkout.duration || 45;
+                    coachDirectiveHtml = `
+                        <div style="font-size:10.5px; font-weight:900; color:var(--gold); text-transform:uppercase; margin:10px 0 4px; display:flex; align-items:center; gap:6px;">
+                            <span>🧠</span> FITLAB MASAÜSTÜ / KOÇ DİREKTİFİ
+                        </div>
+                        <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:8px; border:1.5px solid var(--gold); background:rgba(245,158,11,0.08);" onclick="assignDirectiveToActiveDay()">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <div style="font-size:13px; font-weight:800; color:#fff;">${escapeHTML(dirTitle)}</div>
+                                    <div style="font-size:11px; color:var(--gold); font-weight:700;">${dirCount} Hareket • ~${dirDur} Dk • Masaüstünden Aktarıldı</div>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <span style="font-size:11px; color:var(--gold); font-weight:800;">Bu Güne Ata ➔</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            let html = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin:16px 0 8px;">
+                    <div style="font-size:11.5px; font-weight:900; color:var(--gold); text-transform:uppercase;">
+                        🔄 Farklı Bir Programla Değiştir
+                    </div>
+                    <button type="button" class="btn btn-outline" style="font-size:10.5px; padding:3px 8px; color:var(--cyan); border-color:var(--cyan);" onclick="startNewStudioProgramForDay(${dayIdx})">
+                        ➕ Yeni Tasarla
+                    </button>
+                </div>
+                ${coachDirectiveHtml}
+                <div style="font-size:10.5px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:4px;">
+                    ⚔️ Çelik Kodu Klasik Serisi
+                </div>
+
+                <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:${currentPlan.id === 'la_forja_day1' ? 'var(--gold)' : 'var(--border)'};" onclick="assignRoutineToActiveDay('la_forja_day1', '⚔️ Gün 1: Omuz & Bacak Ön Zırhı', 'official', 'Press + Squat • Şınav + Front Squat • Core', true)">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-size:13px; font-weight:800; color:#fff;">Gün 1: Omuz & Bacak Ön Zırhı</div>
+                            <div style="font-size:11px; color:var(--text-secondary);">Press + Squat • Şınav + Front Squat • Core</div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 6px; color:var(--cyan); border-color:var(--cyan);" onclick="event.stopPropagation(); previewWorkoutModal('la_forja_day1')">👁️ İncele</button>
+                            ${currentPlan.id === 'la_forja_day1' ? '<span class="auth-role-tag role-admin" style="font-size:10px;">SEÇİLİ</span>' : '<span style="font-size:11px; color:var(--gold); font-weight:700;">Seç ➔</span>'}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:${currentPlan.id === 'la_forja_day2' ? 'var(--gold)' : 'var(--border)'};" onclick="assignRoutineToActiveDay('la_forja_day2', '⚔️ Gün 2: Sırt Çekiş & Balistik Güç', 'official', 'Saw Row + RDL • Swing + Pullup • Çanta Taşıma', true)">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-size:13px; font-weight:800; color:#fff;">Gün 2: Sırt Çekiş & Balistik Güç</div>
+                            <div style="font-size:11px; color:var(--text-secondary);">Saw Row + RDL • Swing + Pullup • Çanta Taşıma</div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 6px; color:var(--cyan); border-color:var(--cyan);" onclick="event.stopPropagation(); previewWorkoutModal('la_forja_day2')">👁️ İncele</button>
+                            ${currentPlan.id === 'la_forja_day2' ? '<span class="auth-role-tag role-admin" style="font-size:10px;">SEÇİLİ</span>' : '<span style="font-size:11px; color:var(--gold); font-weight:700;">Seç ➔</span>'}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:${currentPlan.id === 'la_forja_day3' ? 'var(--gold)' : 'var(--border)'};" onclick="assignRoutineToActiveDay('la_forja_day3', '⚔️ Gün 3: Kompleks & Merdiven', 'official', 'Snatch + Lunge • Row + Squat • Burpee Finisher', true)">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-size:13px; font-weight:800; color:#fff;">Gün 3: Kompleks & Merdiven</div>
+                            <div style="font-size:11px; color:var(--text-secondary);">Snatch + Lunge • Row + Squat • Burpee Finisher</div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 6px; color:var(--cyan); border-color:var(--cyan);" onclick="event.stopPropagation(); previewWorkoutModal('la_forja_day3')">👁️ İncele</button>
+                            ${currentPlan.id === 'la_forja_day3' ? '<span class="auth-role-tag role-admin" style="font-size:10px;">SEÇİLİ</span>' : '<span style="font-size:11px; color:var(--gold); font-weight:700;">Seç ➔</span>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Active or last generated workout
+            let displayGen = currentGeneratedWorkout;
+            if (!displayGen) {
+                try {
+                    const raw = localStorage.getItem('celik_kodu_last_generated_workout');
+                    if (raw) displayGen = JSON.parse(raw);
+                } catch(e) {}
+            }
+
+            if (displayGen && Array.isArray(displayGen.exercises) && displayGen.exercises.length > 0) {
+                html += `
+                    <div style="font-size:10.5px; font-weight:800; color:var(--cyan); text-transform:uppercase; margin:10px 0 4px;">
+                        ⚡ Son Oluşturulan Sihirbaz Programı
+                    </div>
+                    <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:var(--cyan);" onclick="assignGeneratedToActiveDay(true)">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div style="font-size:13px; font-weight:800; color:#fff;">${escapeHTML(displayGen.title)}</div>
+                                <div style="font-size:11px; color:var(--text-secondary);">${displayGen.exercises.length} Hareket • ${displayGen.duration} Dk</div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 6px; color:var(--cyan); border-color:var(--cyan);" onclick="event.stopPropagation(); previewWorkoutModal(displayGen)">👁️ İncele</button>
+                                <span style="font-size:11px; color:var(--cyan); font-weight:800;">Bu Güne Ata ➔</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (customSaved.length > 0) {
+                html += `
+                    <div style="font-size:10.5px; font-weight:800; color:var(--gold); text-transform:uppercase; margin:10px 0 4px;">
+                        ⭐ Kayıtlı Özel Programlarım
+                    </div>
+                `;
+                customSaved.forEach(p => {
+                    const isSelected = currentPlan.id === p.id;
+                    const exCount = (p.exercises || []).length;
+                    html += `
+                        <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:${isSelected ? 'var(--gold)' : 'var(--border)'};" onclick="assignRoutineToActiveDay('${p.id}', '${escapeHTML(p.title)}', 'custom', '${exCount} Hareket Özel Program', true)">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <div style="font-size:13px; font-weight:800; color:#fff;">${escapeHTML(p.title)}</div>
+                                    <div style="font-size:11px; color:var(--text-secondary);">${exCount} Hareket • Özel Program</div>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 6px; color:var(--cyan); border-color:var(--cyan);" onclick="event.stopPropagation(); previewWorkoutModal('${p.id}')">👁️ İncele</button>
+                                    <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 6px; color:var(--gold); border-color:var(--gold);" onclick="event.stopPropagation(); editSavedProgram('${p.id}')">✏️ Düzenle</button>
+                                    ${isSelected ? '<span class="auth-role-tag role-admin" style="font-size:10px;">SEÇİLİ</span>' : '<span style="font-size:11px; color:var(--gold); font-weight:700;">Seç ➔</span>'}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            if (optionsList) optionsList.innerHTML = html;
+            modal.classList.add('active');
+        }
+
+        function closeScheduleDayModal() {
+            const modal = document.getElementById('scheduleDayModal');
+            if (modal) modal.classList.remove('active');
+            activeSchedulingDayIdx = null;
+            activeSchedulingDateStr = null;
+        }
+
+        function toggleSchedModalExerciseList() {
+            const list = document.getElementById('schedModalAssignedExList');
+            const btn = document.getElementById('schedModalExListToggleBtn');
+            if (!list || !btn) return;
+            const isHidden = list.style.display === 'none';
+            list.style.display = isHidden ? 'flex' : 'none';
+            btn.innerText = isHidden ? '👁️ Egzersizleri Gizle ▲' : '👁️ Egzersizleri Göster ▼';
+        }
+
+        function editProgramForDay(dayIdx) {
+            const schedule = activePlannerWeek === 'next' ? getNextWeeklySchedule() : getWeeklySchedule();
+            const plan = schedule[dayIdx];
+            if (!plan || plan.rest) return;
+
+            const details = getWorkoutDetailsForPlan(plan);
+            if (!details || !details.exercises || details.exercises.length === 0) {
+                alert("Bu programın egzersiz detayları bulunamadı. Lütfen yeni bir program oluşturun.");
+                return;
+            }
+
+            const cleanTitle = (details.title || plan.title || 'Özel Programım').replace(/⚔️|Çelik Kodu/g, '').trim();
+
+            customRoutineState = {
+                title: cleanTitle || "Özel Programım",
+                rest: (details.scheme && details.scheme.rest) || details.rest || 60,
+                exercises: details.exercises.map(ex => ({
+                    exId: ex.id || ex.exId,
+                    sets: ex.targetSets || ex.sets || (details.scheme ? details.scheme.sets : 3),
+                    reps: ex.targetReps || ex.reps || (details.scheme ? details.scheme.reps : '8-12'),
+                    weight: ''
+                })).filter(item => Boolean(item.exId)),
+                editingDayIdx: dayIdx,
+                editingProgramId: details.id || plan.id,
+                isEditingExisting: true
+            };
+
+            closeScheduleDayModal();
+            switchTab('activeWorkoutTab');
+            toggleStudioAccordion(true);
+
+            const titleInput = document.getElementById('customWorkoutTitleInput');
+            const restSelect = document.getElementById('customWorkoutRestSelect');
+            if (titleInput) titleInput.value = customRoutineState.title;
+            if (restSelect) restSelect.value = customRoutineState.rest;
+
+            renderCustomRoutine();
+            renderRegionStatus();
+            renderStudioExerciseCatalog();
+
+            updateStudioEditingBanner(dayIdx, customRoutineState.title);
+
+            setTimeout(() => {
+                const sec = document.getElementById('studioSectionInWorkout');
+                if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        }
+
+        function startNewStudioProgramForDay(dayIdx) {
+            customRoutineState = {
+                title: `${DAY_NAMES_TR[dayIdx]} Özel Antrenmanım`,
+                rest: 60,
+                exercises: [],
+                editingDayIdx: dayIdx,
+                editingProgramId: null,
+                isEditingExisting: true
+            };
+
+            closeScheduleDayModal();
+            switchTab('activeWorkoutTab');
+            toggleStudioAccordion(true);
+
+            const titleInput = document.getElementById('customWorkoutTitleInput');
+            const restSelect = document.getElementById('customWorkoutRestSelect');
+            if (titleInput) titleInput.value = customRoutineState.title;
+            if (restSelect) restSelect.value = customRoutineState.rest;
+
+            renderCustomRoutine();
+            renderRegionStatus();
+            renderStudioExerciseCatalog();
+
+            updateStudioEditingBanner(dayIdx, customRoutineState.title);
+
+            setTimeout(() => {
+                const sec = document.getElementById('studioSectionInWorkout');
+                if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        }
+
+        function saveEditingRoutineToDay() {
+            if (customRoutineState.editingDayIdx === null || customRoutineState.editingDayIdx === undefined) {
+                saveCustomRoutineToLibrary();
+                return;
+            }
+
+            const dayIdx = customRoutineState.editingDayIdx;
+            if (customRoutineState.exercises.length === 0) {
+                alert("Lütfen önce programınıza en az 1 egzersiz ekleyin.");
+                return;
+            }
+
+            const title = (document.getElementById('customWorkoutTitleInput')?.value || '').trim() || `${DAY_NAMES_TR[dayIdx]} Özel Programım`;
+            const rest = parseInt(document.getElementById('customWorkoutRestSelect')?.value) || 60;
+
+            const exercisesList = customRoutineState.exercises.map(item => {
+                const ex = EXERCISES_DB.find(e => e.id === item.exId);
+                return ex ? Object.assign({}, ex, { targetSets: item.sets, targetReps: item.reps }) : null;
+            }).filter(Boolean);
+
+            const progId = (customRoutineState.editingProgramId && customRoutineState.editingProgramId.startsWith('custom_')) 
+                ? customRoutineState.editingProgramId 
+                : ('custom_day_' + dayIdx + '_' + Date.now());
+
+            const updatedWorkout = {
+                id: progId,
+                title: title,
+                split: 'custom',
+                splitName: title,
+                style: 'classic',
+                goal: 'hypertrophy',
+                duration: Math.round(exercisesList.length * 7),
+                scheme: { sets: 3, reps: '8-12', rest: rest },
+                warmups: [
+                    { name: "Eklemsel CARs (Omuz & Kalça Dairesi)", dur: "90 sn", cue: "Tüm eklemleri kontrollü ve dairesel ısıt." },
+                    { name: "Dinamik Esneme", dur: "60 sn", cue: "Kalça menteşesi ve omurga rotasyonu." }
+                ],
+                exercises: exercisesList,
+                finisher: { name: "Balistik Bitiş / Finisher", desc: "Maksimum tempolu swing veya taşıma seansı." },
+                updatedAt: Date.now(),
+                isCustom: true
+            };
+
+            const schedule = activePlannerWeek === 'next' ? getNextWeeklySchedule() : getWeeklySchedule();
+            schedule[dayIdx] = {
+                id: progId,
+                title: title,
+                type: 'custom_saved',
+                desc: `${exercisesList.length} Hareket • ${updatedWorkout.duration} Dk`,
+                rest: false,
+                customWorkout: updatedWorkout,
+                exercises: exercisesList
+            };
+            if (activePlannerWeek === 'next') {
+                saveNextWeeklySchedule(schedule);
+            } else {
+                saveWeeklySchedule(schedule);
+            }
+
+            // Also update or add to custom programs in library
+            const user = getActiveUser();
+            const key = `celik_kodu_custom_programs_${user.id}`;
+            let saved = [];
+            try {
+                saved = JSON.parse(localStorage.getItem(key) || '[]');
+            } catch(e) {}
+
+            const existingIdx = saved.findIndex(p => p.id === progId);
+            if (existingIdx !== -1) {
+                saved[existingIdx] = updatedWorkout;
+            } else {
+                saved.unshift(updatedWorkout);
+            }
+            localStorage.setItem(key, JSON.stringify(saved));
+
+            if (!user.savedWorkouts) user.savedWorkouts = [];
+            const userSavedIdx = user.savedWorkouts.findIndex(p => p.id === progId);
+            if (userSavedIdx !== -1) {
+                user.savedWorkouts[userSavedIdx] = updatedWorkout;
+            } else {
+                user.savedWorkouts.unshift(updatedWorkout);
+            }
+            saveAthletesToStorage();
+
+            // Clear editing state cleanly without prompt
+            cancelStudioEditingSilent();
+
+            renderActiveWorkout();
+            renderLibrary();
+            playAlertSound();
+            showToast(`✅ "${title}" ${DAY_NAMES_TR[dayIdx]} gününe kaydedildi!`);
+            alert(`✅ "${title}" programı güncellendi ve ${DAY_NAMES_TR[dayIdx]} gününe başarıyla kaydedildi!\n\n(${exercisesList.length} Hareket)`);
+        }
+
+        function updateStudioEditingBanner(dayIdx, title) {
+            const container = document.getElementById('studioEditingBannerContainer');
+            if (!container) return;
+
+            if (dayIdx !== null && dayIdx !== undefined) {
+                container.innerHTML = `
+                    <div style="background:rgba(245,158,11,0.12); border:1.5px solid var(--gold); border-radius:10px; padding:12px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                        <div>
+                            <div style="font-size:10px; font-weight:900; color:var(--gold); text-transform:uppercase; letter-spacing:0.5px;">
+                                ✏️ ${DAY_NAMES_TR[dayIdx].toUpperCase()} GÜNÜ PROGRAMI DÜZENLENİYOR
+                            </div>
+                            <div style="font-size:14px; font-weight:800; color:#fff; margin-top:2px;">
+                                "${escapeHTML(title || '')}"
+                            </div>
+                            <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
+                                Hareketleri silebilir (✕), yenilerini ekleyebilir (➕), sıralamayı (▲/▼) veya set/tekrar sayılarını değiştirebilirsiniz.
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                            <button type="button" class="btn btn-gold" style="font-weight:900; font-size:12px; padding:8px 14px; box-shadow:0 0 15px rgba(245,158,11,0.4);" onclick="saveEditingRoutineToDay()">
+                                💾 ${DAY_NAMES_TR[dayIdx]} Gününe Kaydet
+                            </button>
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:8px 10px;" onclick="cancelStudioEditing(true)">
+                                Vazgeç
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (customRoutineState.editingProgramId) {
+                container.innerHTML = `
+                    <div style="background:rgba(56,189,248,0.12); border:1.5px solid var(--cyan); border-radius:10px; padding:12px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                        <div>
+                            <div style="font-size:10px; font-weight:900; color:var(--cyan); text-transform:uppercase; letter-spacing:0.5px;">
+                                ✏️ KAYITLI PROGRAM DÜZENLENİYOR
+                            </div>
+                            <div style="font-size:14px; font-weight:800; color:#fff; margin-top:2px;">
+                                "${escapeHTML(title || '')}"
+                            </div>
+                            <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
+                                Değişiklikleri tamamlayınca aşağıdaki veya buradaki butondan kütüphanenize kaydedin.
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                            <button type="button" class="btn btn-gold" style="font-weight:900; font-size:12px; padding:8px 14px; box-shadow:0 0 15px rgba(245,158,11,0.4);" onclick="saveCustomRoutineToLibrary()">
+                                💾 Değişiklikleri Kaydet
+                            </button>
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:8px 10px;" onclick="cancelStudioEditing(true)">
+                                Vazgeç
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = '';
+            }
+
+            updateStudioSaveActionsGroup();
+        }
+
+        function updateStudioSaveActionsGroup() {
+            const group = document.getElementById('studioSaveActionsGroup');
+            if (!group) return;
+
+            if (customRoutineState.editingDayIdx !== null && customRoutineState.editingDayIdx !== undefined) {
+                group.innerHTML = `
+                    <button class="btn btn-gold" style="font-size:11px; padding:5px 12px; font-weight:900; box-shadow:0 0 12px rgba(245,158,11,0.3);" onclick="saveEditingRoutineToDay()">
+                        💾 ${DAY_NAMES_TR[customRoutineState.editingDayIdx]} Gününe Kaydet
+                    </button>
+                    <button class="btn btn-outline" style="font-size:10.5px; padding:4px 8px;" onclick="saveCustomRoutineToLibrary()">
+                        💾 Kütüphaneye de Kaydet
+                    </button>
+                `;
+            } else if (customRoutineState.editingProgramId) {
+                group.innerHTML = `
+                    <button class="btn btn-gold" style="font-size:11px; padding:5px 12px; font-weight:900;" onclick="saveCustomRoutineToLibrary()">
+                        💾 Değişiklikleri Kaydet
+                    </button>
+                `;
+            } else {
+                group.innerHTML = `
+                    <button class="btn btn-outline" style="font-size:10.5px; padding:4px 8px;" onclick="saveCustomRoutineToLibrary()">
+                        💾 Kütüphaneye Kaydet
+                    </button>
+                `;
+            }
+        }
+
+        function cancelStudioEditingSilent() {
+            customRoutineState.editingDayIdx = null;
+            customRoutineState.editingProgramId = null;
+            customRoutineState.isEditingExisting = false;
+            customRoutineState.exercises = [];
+            const container = document.getElementById('studioEditingBannerContainer');
+            if (container) container.innerHTML = '';
+            updateStudioSaveActionsGroup();
+            renderCustomRoutine();
+            renderRegionStatus();
+            renderStudioExerciseCatalog();
+        }
+
+        function cancelStudioEditing(promptConfirm = false) {
+            if (promptConfirm && !confirm("Düzenleme modundan çıkmak istediğinize emin misiniz?")) {
+                return;
+            }
+            cancelStudioEditingSilent();
+        }
+
+        function promptAssignStudioRoutineToDay() {
+            if (customRoutineState.exercises.length === 0) {
+                alert("Lütfen önce taslağınıza en az 1 egzersiz ekleyin.");
+                return;
+            }
+
+            const todayIdx = new Date().getDay();
+            const tomorrowIdx = (todayIdx + 1) % 7;
+            const title = (document.getElementById('customWorkoutTitleInput')?.value || '').trim() || "Özel Çelik Programım";
+            const rest = parseInt(document.getElementById('customWorkoutRestSelect')?.value) || 60;
+
+            const dayPrompt = `"${title}" programını haftanın hangi gününe atamak istiyorsunuz?\n\n1: Pazartesi\n2: Salı\n3: Çarşamba\n4: Perşembe\n5: Cuma\n6: Cumartesi\n0: Pazar\n\n(Yarın ${DAY_NAMES_TR[tomorrowIdx]} için "${tomorrowIdx}" yazabilirsiniz):`;
+            const choice = prompt(dayPrompt, tomorrowIdx.toString());
+            if (choice === null) return;
+            const targetDay = parseInt(choice.trim(), 10);
+            if (isNaN(targetDay) || targetDay < 0 || targetDay > 6) {
+                alert("Geçersiz gün seçildi. Lütfen 0 ile 6 arasında bir sayı girin.");
+                return;
+            }
+
+            const exercisesList = customRoutineState.exercises.map(item => {
+                const ex = EXERCISES_DB.find(e => e.id === item.exId);
+                return ex ? Object.assign({}, ex, { targetSets: item.sets, targetReps: item.reps }) : null;
+            }).filter(Boolean);
+
+            const progId = customRoutineState.editingProgramId || ('custom_' + Date.now());
+            const workoutObj = {
+                id: progId,
+                title: title,
+                split: 'custom',
+                splitName: title,
+                style: 'classic',
+                goal: 'hypertrophy',
+                duration: Math.round(exercisesList.length * 7),
+                scheme: { sets: 3, reps: '8-12', rest: rest },
+                warmups: [
+                    { name: "Eklemsel CARs (Omuz & Kalça Dairesi)", dur: "90 sn", cue: "Tüm eklemleri kontrollü ve dairesel ısıt." }
+                ],
+                exercises: exercisesList,
+                finisher: { name: "Balistik Bitiş", desc: "Maksimum tempolu swing veya taşıma." },
+                createdAt: Date.now(),
+                isCustom: true
+            };
+
+            const schedule = getWeeklySchedule();
+            schedule[targetDay] = {
+                id: progId,
+                title: title,
+                type: 'custom_generated',
+                desc: `${exercisesList.length} Hareket • ${workoutObj.duration} Dk`,
+                rest: false,
+                customWorkout: workoutObj
+            };
+            saveWeeklySchedule(schedule);
+
+            // Also save to library
+            const user = getActiveUser();
+            const key = `celik_kodu_custom_programs_${user.id}`;
+            let saved = [];
+            try { saved = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
+            const exIdx = saved.findIndex(p => p.id === progId);
+            if (exIdx !== -1) saved[exIdx] = workoutObj;
+            else saved.unshift(workoutObj);
+            localStorage.setItem(key, JSON.stringify(saved));
+
+            renderActiveWorkout();
+            renderLibrary();
+            playAlertSound();
+            alert(`✅ "${title}" programı ${DAY_NAMES_TR[targetDay]} gününe başarıyla atandı ve kütüphanenize kaydedildi!`);
+        }
+
+        // ==================== WORKOUT PREVIEW MODAL LOGIC ====================
+        function previewWorkoutModal(workoutOrId) {
+            let workout = null;
+            if (typeof workoutOrId === 'string') {
+                workout = getWorkoutDetailsForPlan({ id: workoutOrId });
+            } else if (typeof workoutOrId === 'object' && workoutOrId !== null) {
+                workout = workoutOrId;
+            }
+
+            if (!workout) {
+                alert("Program detayları bulunamadı.");
+                return;
+            }
+
+            const modal = document.getElementById('workoutPreviewModal');
+            const titleEl = document.getElementById('previewModalTitle');
+            const metaEl = document.getElementById('previewModalMeta');
+            const listEl = document.getElementById('previewModalExercisesList');
+            const actionsEl = document.getElementById('previewModalActions');
+            if (!modal) return;
+
+            const exercises = workout.exercises || [];
+            const rest = (workout.scheme && workout.scheme.rest) || workout.rest || 60;
+            const duration = workout.duration || Math.round(exercises.length * 7) || 45;
+            const setsReps = workout.scheme ? `${workout.scheme.sets} Set x ${workout.scheme.reps}` : '3 Set x 8-12 Tekrar';
+
+            if (titleEl) titleEl.innerText = workout.title || 'Program Detayı';
+            if (metaEl) {
+                metaEl.innerHTML = `
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                        <span class="meta-pill" style="font-size:11px; padding:4px 8px;">⏱️ ${duration} Dakika</span>
+                        <span class="meta-pill" style="font-size:11px; padding:4px 8px;">🎯 ${exercises.length} Hareket (${setsReps})</span>
+                        <span class="meta-pill" style="font-size:11px; padding:4px 8px;">⏳ ${rest}s Dinlenme</span>
+                        <span class="meta-pill" style="font-size:11px; padding:4px 8px;">🏋️ ${workout.style === 'superset' ? 'Süperset' : 'Klasik'}</span>
+                    </div>
+                `;
+            }
+
+            if (listEl) {
+                listEl.innerHTML = exercises.map((ex, idx) => {
+                    const guide = (exerciseGuideMap && exerciseGuideMap[ex.id]) || (categoryFallback && categoryFallback[ex.category]) || {};
+                    const thumb = guide.form || '';
+                    const sets = ex.targetSets || (workout.scheme ? workout.scheme.sets : 3);
+                    const reps = ex.targetReps || (workout.scheme ? workout.scheme.reps : '8-12');
+                    const pNames = (ex.primaryMuscles || []).map(m => (TARGET_REGIONS[m] ? TARGET_REGIONS[m].name : m)).join(', ') || ex.muscle || '';
+
+                    return `
+                        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:8px 10px;">
+                            <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0;">
+                                <span style="font-size:12px; font-weight:900; color:var(--gold); width:18px;">${idx + 1}.</span>
+                                <div class="ex-thumb-wrap" style="width:42px; height:42px; border-radius:6px; flex-shrink:0;">
+                                    ${thumb ? `<img src="${thumb}" class="ex-thumb-img" alt="${escapeHTML(ex.name)}">` : '🏋️'}
+                                </div>
+                                <div style="min-width:0; flex:1;">
+                                    <div style="font-size:13px; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
+                                        ${escapeHTML(ex.name)}
+                                    </div>
+                                    <div style="font-size:11px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;">
+                                        <span style="color:var(--cyan); font-weight:600;">${escapeHTML(pNames)}</span>
+                                        ${ex.equipment ? ` • ${escapeHTML(ex.equipment)}` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                                <span style="background:rgba(245,158,11,0.15); color:var(--gold); border:1px solid rgba(245,158,11,0.3); font-size:11px; font-weight:700; border-radius:4px; padding:3px 7px;">
+                                    ${sets} x ${reps}
+                                </span>
+                                <button type="button" class="btn btn-outline" style="padding:4px 8px; font-size:11px;" onclick="openExerciseDetailModal('${ex.id}')" title="İncele">👁️</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            if (actionsEl) {
+                const escapedTitle = escapeHTML(workout.title || 'Program').replace(/'/g, "\\'");
+                const progId = workout.id || '';
+                const isSavedCustom = progId.startsWith('saved_') || progId.startsWith('custom_');
+
+                actionsEl.innerHTML = `
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                        <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 10px; color:var(--cyan); border-color:var(--cyan);" onclick="closeWorkoutPreviewModal(); promptAssignToDay('${progId}', '${escapedTitle}', '${isSavedCustom ? 'custom_saved' : 'official'}', '${exercises.length} Hareket')">
+                            📅 Güne Planla
+                        </button>
+                        ${isSavedCustom ? `
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 10px; color:var(--gold); border-color:var(--gold);" onclick="closeWorkoutPreviewModal(); editSavedProgram('${progId}')">
+                                ✏️ Düzenle
+                            </button>
+                        ` : ''}
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button type="button" class="btn btn-gold" style="font-size:12px; padding:8px 14px; font-weight:900;" onclick="closeWorkoutPreviewModal(); currentGeneratedWorkout = window._activePreviewWorkout; startActiveWorkoutFromGenerated();">
+                            ▶️ Şimdi Başlat
+                        </button>
+                        <button type="button" class="btn btn-outline" style="font-size:11px; padding:8px 12px;" onclick="closeWorkoutPreviewModal()">
+                            Kapat
+                        </button>
+                    </div>
+                `;
+            }
+
+            window._activePreviewWorkout = workout;
+            modal.classList.add('active');
+        }
+
+        function closeWorkoutPreviewModal() {
+            const modal = document.getElementById('workoutPreviewModal');
+            if (modal) modal.classList.remove('active');
+            window._activePreviewWorkout = null;
+        }
+
+        function editSavedProgram(progId) {
+            const prog = getWorkoutDetailsForPlan({ id: progId });
+            if (!prog) {
+                alert("Program detayları bulunamadı.");
+                return;
+            }
+
+            const cleanTitle = (prog.title || 'Özel Programım').replace(/⚔️|Çelik Kodu/g, '').trim();
+
+            customRoutineState = {
+                title: cleanTitle,
+                rest: (prog.scheme && prog.scheme.rest) || prog.rest || 60,
+                exercises: (prog.exercises || []).map(ex => ({
+                    exId: ex.id || ex.exId,
+                    sets: ex.targetSets || ex.sets || (prog.scheme ? prog.scheme.sets : 3),
+                    reps: ex.targetReps || ex.reps || (prog.scheme ? prog.scheme.reps : '8-12'),
+                    weight: ''
+                })).filter(item => Boolean(item.exId)),
+                editingDayIdx: null,
+                editingProgramId: progId,
+                isEditingExisting: true
+            };
+
+            switchTab('activeWorkoutTab');
+            toggleStudioAccordion(true);
+
+            const titleInput = document.getElementById('customWorkoutTitleInput');
+            const restSelect = document.getElementById('customWorkoutRestSelect');
+            if (titleInput) titleInput.value = customRoutineState.title;
+            if (restSelect) restSelect.value = customRoutineState.rest;
+
+            renderCustomRoutine();
+            renderRegionStatus();
+            renderStudioExerciseCatalog();
+
+            updateStudioEditingBanner(null, customRoutineState.title);
+
+            setTimeout(() => {
+                const sec = document.getElementById('studioSectionInWorkout');
+                if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        }
+
+        function assignRoutineToActiveDay(id, title, type, desc, keepModalOpen = false) {
+            if (activeSchedulingDayIdx === null) return;
+            const targetDay = activeSchedulingDayIdx;
+            const schedule = getWeeklySchedule();
+            const details = getWorkoutDetailsForPlan({ id: id, type: type, title: title });
+            const planObj = {
+                id: id,
+                title: title,
+                type: type,
+                desc: desc || '',
+                rest: false,
+                customWorkout: details ? JSON.parse(JSON.stringify(details)) : null
+            };
+            schedule[targetDay] = planObj;
+            saveWeeklySchedule(schedule);
+
+            if (activeSchedulingDateStr && typeof saveDateScheduleOverride === 'function') {
+                saveDateScheduleOverride(activeSchedulingDateStr, planObj);
+            }
+
+            renderActiveWorkout();
+            if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
+            playAlertSound();
+            if (keepModalOpen) {
+                openScheduleDayModal(targetDay, activeSchedulingDateStr);
+            } else {
+                closeScheduleDayModal();
+            }
+        }
+
+        function assignGeneratedToActiveDay(keepModalOpen = false) {
+            if (activeSchedulingDayIdx === null) return;
+            const targetDay = activeSchedulingDayIdx;
+            let workoutToAssign = currentGeneratedWorkout;
+            if (!workoutToAssign) {
+                try {
+                    const raw = localStorage.getItem('celik_kodu_last_generated_workout');
+                    if (raw) workoutToAssign = JSON.parse(raw);
+                } catch(e) {}
+            }
+            if (!workoutToAssign) return;
+
+            const schedule = getWeeklySchedule();
+            const planObj = {
+                id: workoutToAssign.id || ('gen_' + Date.now()),
+                title: workoutToAssign.title || 'Özel Sihirbaz Antrenmanı',
+                type: 'custom_generated',
+                desc: `${workoutToAssign.exercises.length} Hareket • ${workoutToAssign.duration} Dk`,
+                rest: false,
+                customWorkout: JSON.parse(JSON.stringify(workoutToAssign))
+            };
+            schedule[targetDay] = planObj;
+            saveWeeklySchedule(schedule);
+
+            if (activeSchedulingDateStr && typeof saveDateScheduleOverride === 'function') {
+                saveDateScheduleOverride(activeSchedulingDateStr, planObj);
+            }
+
+            renderActiveWorkout();
+            if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
+            playAlertSound();
+            if (keepModalOpen) {
+                openScheduleDayModal(targetDay, activeSchedulingDateStr);
+            } else {
+                closeScheduleDayModal();
+            }
+        }
+
+        function promptAssignGeneratedToAnyDay() {
+            let workoutToAssign = currentGeneratedWorkout;
+            if (!workoutToAssign) {
+                try {
+                    const raw = localStorage.getItem('celik_kodu_last_generated_workout');
+                    if (raw) workoutToAssign = JSON.parse(raw);
+                } catch(e) {}
+            }
+            if (!workoutToAssign) {
+                alert("Önce bir program oluşturmanız gerekmektedir.");
+                return;
+            }
+
+            const todayIdx = new Date().getDay();
+            const tomorrowIdx = (todayIdx + 1) % 7;
+            const title = workoutToAssign.title || 'Sihirbaz Antrenmanı';
+            const dayPrompt = `"${title}" programını haftanın hangi gününe atamak istiyorsunuz?\n\n1: Pazartesi\n2: Salı\n3: Çarşamba\n4: Perşembe\n5: Cuma\n6: Cumartesi\n0: Pazar\n\n(Yarın ${DAY_NAMES_TR[tomorrowIdx]} için "${tomorrowIdx}" yazabilirsiniz):`;
+            const choice = prompt(dayPrompt, tomorrowIdx.toString());
+            if (choice === null) return;
+            const targetDay = parseInt(choice.trim(), 10);
+            if (isNaN(targetDay) || targetDay < 0 || targetDay > 6) {
+                alert("Geçersiz gün seçildi. Lütfen 0 ile 6 arasında bir sayı girin.");
+                return;
+            }
+
+            const schedule = getWeeklySchedule();
+            schedule[targetDay] = {
+                id: workoutToAssign.id || ('gen_' + Date.now()),
+                title: title,
+                type: 'custom_generated',
+                desc: `${workoutToAssign.exercises.length} Hareket • ${workoutToAssign.duration} Dk`,
+                rest: false,
+                customWorkout: JSON.parse(JSON.stringify(workoutToAssign))
+            };
+            saveWeeklySchedule(schedule);
+            try {
+                localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(workoutToAssign));
+            } catch(e) {}
+            renderActiveWorkout();
+            playAlertSound();
+            alert(`✅ "${title}" programı ${DAY_NAMES_TR[targetDay]} gününe başarıyla atandı!`);
+        }
+
+        function setDayAsRest() {
+            if (activeSchedulingDayIdx === null) return;
+            const isNext = activePlannerWeek === 'next';
+            const user = getActiveUser();
+            const schedule = isNext ? getNextWeeklySchedule(user.id) : getWeeklySchedule(user.id);
+            const oldPlan = schedule[activeSchedulingDayIdx];
+            if (oldPlan && oldPlan.googleEventId && typeof deleteCalendarEventQuiet === 'function') {
+                deleteCalendarEventQuiet(oldPlan.googleEventId);
+            }
+            const restPlan = {
+                id: 'rest',
+                title: '🧘 Dinlenme & Aktif Toparlanma',
+                type: 'rest',
+                desc: 'Hafif yürüyüş, esneme veya tam istirahat',
+                rest: true
+            };
+            schedule[activeSchedulingDayIdx] = restPlan;
+            if (isNext) saveNextWeeklySchedule(schedule, user.id);
+            else saveWeeklySchedule(schedule, user.id);
+
+            if (activeSchedulingDateStr && typeof saveDateScheduleOverride === 'function') {
+                saveDateScheduleOverride(activeSchedulingDateStr, restPlan);
+            }
+
+            closeScheduleDayModal();
+            renderActiveWorkout();
+            if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
+        }
+
+        function resetWeeklyScheduleTemplate(templateType = 'standard_3day') {
+            let sched;
+            if (templateType === 'standard_3day') {
+                sched = getDefaultWeeklySchedule();
+            } else if (templateType === 'split_4day') {
+                sched = {
+                    1: { id: 'la_forja_day1', title: '⚔️ Pzt: İtiş Zırhı (Omuz & Bacak)', type: 'official', desc: 'Pres + Squat • Şınav', rest: false },
+                    2: { id: 'la_forja_day2', title: '⚔️ Salı: Çekiş & Sırt (Row & RDL)', type: 'official', desc: 'Row + RDL • Pullup', rest: false },
+                    3: { id: 'rest', title: '🧘 Çarşamba: Dinlenme & Mobilite', type: 'rest', desc: 'Masaj rulosu & toparlanma', rest: true },
+                    4: { id: 'la_forja_day3', title: '⚔️ Perşembe: Kompleks Bacak & Kondisyon', type: 'official', desc: 'Squat + Lunge • Snatch', rest: false },
+                    5: { id: 'la_forja_day1', title: '⚔️ Cuma: Zırh Güçlendirme & Süperset', type: 'official', desc: 'Swing + Burpee Finisher', rest: false },
+                    6: { id: 'rest', title: '🧘 Cumartesi: Dinlenme / Kardiyo', type: 'rest', desc: 'Hafif aerobik seans', rest: true },
+                    0: { id: 'rest', title: '🧘 Pazar: Tam Dinlenme & Zihinsel Hazırlık', type: 'rest', desc: 'Yeni haftaya hazırlık', rest: true }
+                };
+            }
+            saveWeeklySchedule(sched);
+            renderActiveWorkout();
+            playAlertSound();
+            alert("✅ Haftalık antrenman şablonu güncellendi!");
+        }
+
+        function scheduleTomorrowFromGenerated() {
+            let workoutToSchedule = currentGeneratedWorkout;
+            if (!workoutToSchedule) {
+                try {
+                    const raw = localStorage.getItem('celik_kodu_last_generated_workout');
+                    if (raw) workoutToSchedule = JSON.parse(raw);
+                } catch(e) {}
+            }
+            if (!workoutToSchedule) return;
+
+            const todayIdx = new Date().getDay();
+            const tomorrowIdx = (todayIdx + 1) % 7;
+            const schedule = getWeeklySchedule();
+            schedule[tomorrowIdx] = {
+                id: workoutToSchedule.id || ('gen_' + Date.now()),
+                title: workoutToSchedule.title || 'Özel Sihirbaz Antrenmanı',
+                type: 'custom_generated',
+                desc: `${workoutToSchedule.exercises.length} Hareket • ${workoutToSchedule.duration} Dk`,
+                rest: false,
+                customWorkout: JSON.parse(JSON.stringify(workoutToSchedule))
+            };
+            saveWeeklySchedule(schedule);
+            try {
+                localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(workoutToSchedule));
+            } catch(e) {}
+            switchTab('activeWorkoutTab');
+            playAlertSound();
+            alert(`✅ Antrenman yarın (${DAY_NAMES_TR[tomorrowIdx]}) için hazırlandı!\n\nYarın akşam salona girdiğinizde hiçbir seçim yapmadan doğrudan "Antrenmanı Başlat" butonuna dokunarak başlayabilirsiniz.`);
+        }
+
+        function promptAssignToDay(id, title, type, desc) {
+            const todayIdx = new Date().getDay();
+            const tomorrowIdx = (todayIdx + 1) % 7;
+            const dayPrompt = `"${title}" programını haftanın hangi gününe planlamak istiyorsunuz?\n\n1: Pazartesi\n2: Salı\n3: Çarşamba\n4: Perşembe\n5: Cuma\n6: Cumartesi\n0: Pazar\n\n(Yarın ${DAY_NAMES_TR[tomorrowIdx]} için "${tomorrowIdx}" yazabilirsiniz):`;
+            const choice = prompt(dayPrompt, tomorrowIdx.toString());
+            if (choice === null) return;
+            const targetDay = parseInt(choice.trim(), 10);
+            if (isNaN(targetDay) || targetDay < 0 || targetDay > 6) {
+                alert("Geçersiz gün seçildi. Lütfen 0 ile 6 arasında bir sayı girin.");
+                return;
+            }
+            const schedule = getWeeklySchedule();
+            const details = getWorkoutDetailsForPlan({ id: id, type: type, title: title });
+            schedule[targetDay] = {
+                id: id,
+                title: title,
+                type: type || 'custom_saved',
+                desc: desc || '',
+                rest: false,
+                customWorkout: details ? JSON.parse(JSON.stringify(details)) : null
+            };
+            saveWeeklySchedule(schedule);
+            playAlertSound();
+            alert(`✅ "${title}" programı ${DAY_NAMES_TR[targetDay]} gününe başarıyla planlandı!\n\n${DAY_NAMES_TR[targetDay]} günü salona gittiğinizde tek dokunuşla başlatabileceksiniz.`);
+            renderActiveWorkout();
+        }
+
+        // ==================== FIREBASE FIRESTORE CLOUD ENGINE ====================
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyBieTQ50PsVTLW1gTfsx52l42RJJ63xNqo",
+            authDomain: "fitness-4f427.firebaseapp.com",
+            projectId: "fitness-4f427",
+            storageBucket: "fitness-4f427.firebasestorage.app",
+            messagingSenderId: "974918246558",
+            appId: "1:974918246558:web:200df22163c9d6f6271b8f",
+            measurementId: "G-Y9B0DFQZT5"
+        };
+
+        let fbApp = null;
+        let fbDb = null;
+        let isFirebaseReady = false;
+
+        function updateCloudSyncBadge(status, text) {
+            const badges = document.querySelectorAll('.cloud-sync-badge');
+            badges.forEach(badge => {
+                badge.className = 'cloud-sync-badge ' + (status || '');
+                if (status === 'synced') {
+                    badge.innerHTML = `🟢 ${text || 'Bulut Aktif'}`;
+                    badge.title = "Firebase Firestore canlı ve eşitlenmiş durumda";
+                } else if (status === 'syncing') {
+                    badge.innerHTML = `🔄 ${text || 'Eşitleniyor...'}`;
+                    badge.title = "Veriler Firebase bulutuna aktarılıyor...";
+                } else {
+                    badge.innerHTML = `☁️ ${text || 'Yerel Önbellek'}`;
+                    badge.title = "Çevrimdışı mod: Veriler cihazda güvende, internet olunca eşitlenecek";
+                }
+            });
+        }
+
+        function initFirebaseEngine() {
+            try {
+                if (typeof firebase === 'undefined') {
+                    console.warn("Firebase SDK yüklenemedi. Yerel modda devam ediliyor.");
+                    updateCloudSyncBadge('offline', 'Yerel Mod');
+                    return;
+                }
+
+                if (!firebase.apps || !firebase.apps.length) {
+                    fbApp = firebase.initializeApp(FIREBASE_CONFIG);
+                } else {
+                    fbApp = firebase.app();
+                }
+
+                fbDb = firebase.firestore();
+
+                // Çevrimdışı desteği (Offline-first IndexedDB önbellekleme)
+                fbDb.enablePersistence({ synchronizeTabs: true }).catch(err => {
+                    if (err.code === 'failed-precondition') {
+                        console.warn("Firestore çoklu sekme açık, önbellek tek sekmede çalışacak.");
+                    } else if (err.code === 'unimplemented') {
+                        console.warn("Mevcut tarayıcı IndexedDB kalıcılığını desteklemiyor.");
+                    }
+                });
+
+                isFirebaseReady = true;
+                updateCloudSyncBadge('synced', 'Bulut Aktif');
+                console.log("🔥 Firebase Firestore başarıyla bağlandı!");
+
+                // İlk bulut veri senkronizasyonunu başlat
+                syncAllFromCloud();
+
+            } catch (err) {
+                console.error("Firebase başlatma hatası:", err);
+                updateCloudSyncBadge('offline', 'Yerel Mod');
+            }
+        }
+
+        // Buluttan verileri çekme ve birleştirme (Merge)
+        async function syncAllFromCloud() {
+            if (!isFirebaseReady || !fbDb) return;
+            updateCloudSyncBadge('syncing', 'Eşitleniyor...');
+
+            try {
+                // 1. AI Biyomekanik Koç Anahtarını Eşitle (Öncelikli hızlı senkron)
+                await syncAiConfigFromCloud();
+
+                // 2. Kullanıcıları eşitle
+                await syncUsersFromCloud();
+
+                // 3. Aktif kullanıcının verilerini eşitle
+                const uid = getActiveUserId();
+                if (uid) {
+                    await syncUserWorkoutLogsFromCloud(uid);
+                    await syncUserScaleLogsFromCloud(uid);
+                    await syncUserMeasurementsFromCloud(uid);
+                    await syncCoachDirectiveFromCloud(uid);
+                    await syncCustomProgramsFromCloud(uid);
+                }
+
+                updateCloudSyncBadge('synced', 'Bulut Aktif');
+            } catch (e) {
+                console.warn("Bulut eşitleme gecikti (çevrimdışı olabilir):", e);
+                updateCloudSyncBadge('offline', 'Çevrimdışı');
+            }
+        }
+
+        async function syncAiConfigFromCloud() {
+            if (!isFirebaseReady || !fbDb) return;
+            try {
+                const localKey = (localStorage.getItem(GEMINI_API_STORAGE_KEY) || '').trim();
+                const docRef = fbDb.collection('app_system').doc('ai_config');
+                const docSnap = await docRef.get();
+
+                if (docSnap && docSnap.exists) {
+                    const data = docSnap.data();
+                    if (data && data.geminiApiKey) {
+                        const cloudKey = data.geminiApiKey.trim();
+                        if (cloudKey) {
+                            if (localKey !== cloudKey) {
+                                localStorage.setItem(GEMINI_API_STORAGE_KEY, cloudKey);
+                            }
+                            const user = typeof getActiveUser === 'function' ? getActiveUser() : null;
+                            if (user && user.geminiApiKey !== cloudKey) {
+                                user.geminiApiKey = cloudKey;
+                                const users = typeof getAuthUsers === 'function' ? getAuthUsers() : [];
+                                const idx = users.findIndex(u => u.id === user.id);
+                                if (idx !== -1) {
+                                    users[idx] = user;
+                                    if (typeof saveAuthUsers === 'function') saveAuthUsers(users);
+                                }
+                            }
+                            if (typeof updateProfileGeminiStatusUI === 'function') updateProfileGeminiStatusUI();
+                            const curEx = (typeof pickerContext !== 'undefined' && pickerContext && pickerContext.targetExId) ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
+                            if (typeof updateGeminiAiModalUI === 'function') updateGeminiAiModalUI(curEx);
+                            return;
+                        }
+                    }
+                }
+
+                // Güvenlik: Yerel anahtar genel buluta yedeklenmez.
+            } catch (err) {
+                console.warn("AI config buluttan eşitlenemedi:", err);
+            }
+        }
+
+        // KULLANICILAR BULUT EŞİTLEME
+        async function syncUsersFromCloud() {
+            if (!isFirebaseReady || !fbDb) return;
+            try {
+                const docRef = fbDb.collection('app_system').doc('users');
+                const doc = await docRef.get();
+                const localUsers = getAuthUsers();
+
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data && Array.isArray(data.users) && data.users.length > 0) {
+                        const mergedMap = new Map();
+                        localUsers.forEach(u => mergedMap.set(u.id, u));
+                        data.users.forEach(u => mergedMap.set(u.id, { ...(mergedMap.get(u.id) || {}), ...u }));
+                        const finalUsers = Array.from(mergedMap.values());
+                        localStorage.setItem('celik_kodu_auth_users', JSON.stringify(finalUsers));
+                        return finalUsers;
+                    }
+                } else {
+                    if (localUsers.length > 0) {
+                        await docRef.set({
+                            users: localUsers,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                }
+            } catch (err) {
+                console.warn("Kullanıcılar buluttan çekilemedi:", err);
+            }
+        }
+
+        async function syncUsersToCloud(users) {
+            if (!isFirebaseReady || !fbDb) return;
+            try {
+                updateCloudSyncBadge('syncing', 'Kaydediliyor...');
+                // Güvenlik: Açık metin şifreleri ve API anahtarlarını buluta gönderme
+                const sanitizedUsers = (users || []).map(u => {
+                    const copy = { ...u };
+                    delete copy.password;
+                    delete copy.geminiApiKey;
+                    return copy;
+                });
+                await fbDb.collection('app_system').doc('users').set({
+                    users: sanitizedUsers,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                updateCloudSyncBadge('synced', 'Bulut Aktif');
+            } catch (err) {
+                console.warn("Kullanıcılar buluta yüklenemedi:", err);
+                updateCloudSyncBadge('offline', 'Kayıt Yerelde');
+            }
+        }
+
+        // ANTRENMAN GEÇMİŞİ BULUT EŞİTLEME
+        async function syncUserWorkoutLogsFromCloud(uid) {
+            if (!isFirebaseReady || !fbDb || !uid) return;
+            try {
+                const docRef = fbDb.collection('workout_logs').doc(uid);
+                const doc = await docRef.get();
+                const localLogs = getUserLogsById(uid);
+
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data && Array.isArray(data.logs)) {
+                        const logMap = new Map();
+                        localLogs.forEach(l => logMap.set(l.id, l));
+                        data.logs.forEach(l => logMap.set(l.id, l));
+                        const mergedLogs = Array.from(logMap.values());
+                        mergedLogs.sort((a, b) => new Date(b.date || b.timestamp) - new Date(a.date || a.timestamp));
+
+                        localStorage.setItem(`celik_kodu_history_${uid}`, JSON.stringify(mergedLogs));
+                        renderHistory();
+                        applyWednesdayHammerCurlPatch();
+
+                        if (mergedLogs.length > data.logs.length) {
+                            await docRef.set({
+                                logs: mergedLogs,
+                                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                            }, { merge: true });
+                        }
+                        return;
+                    }
+                }
+
+                if (localLogs.length > 0) {
+                    await docRef.set({
+                        logs: localLogs,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+                applyWednesdayHammerCurlPatch();
+            } catch (err) {
+                console.warn("Antrenmanlar buluttan çekilemedi:", err);
+            }
+        }
+
+        async function syncWorkoutLogsToCloud(logs, uid) {
+            if (!isFirebaseReady || !fbDb || !uid) return;
+            try {
+                updateCloudSyncBadge('syncing', 'Kaydediliyor...');
+                await fbDb.collection('workout_logs').doc(uid).set({
+                    logs: logs,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                updateCloudSyncBadge('synced', 'Bulut Aktif');
+            } catch (err) {
+                console.warn("Antrenmanlar buluta aktarılamadı (çevrimdışı kaydedildi):", err);
+                updateCloudSyncBadge('offline', 'Kayıt Yerelde');
+            }
+        }
+
+        // ==================== 7 EKİM 2026 ÇARŞAMBA DÖNÜK VERİ ENJEKSİYONU ====================
+        function applyWednesdayHammerCurlPatch() {
+            try {
+                let anyModified = false;
+                const targetDate = '2026-10-07';
+
+                // Tüm kullanıcı geçmiş kayıtlarını tara ve eşitle
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (!key || !key.startsWith('celik_kodu_history_')) continue;
+
+                    const uid = key.replace('celik_kodu_history_', '');
+                    let logs = [];
+                    try { logs = JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) { logs = []; }
+                    if (!Array.isArray(logs) || logs.length === 0) continue;
+
+                    let fileModified = false;
+                    logs.forEach(log => {
+                        const logDate = String(log.date || '').split('T')[0];
+                        const isWed = (logDate === targetDate) || 
+                                      (log.dateFormatted && log.dateFormatted.includes('7 Eki 2026')) ||
+                                      (log.dateFormatted && log.dateFormatted.includes('07.10.2026'));
+
+                        if (isWed) {
+                            if (!Array.isArray(log.exercises)) log.exercises = [];
+                            const alreadyHasHammer = log.exercises.some(e => 
+                                e.id === 'db_hammer_curl' || 
+                                (e.name && e.name.toLowerCase().includes('hammer curl'))
+                            );
+
+                            if (!alreadyHasHammer) {
+                                const hammerEx = {
+                                    id: 'db_hammer_curl',
+                                    name: 'Dambıl Hammer Curl',
+                                    equipment: 'dumbbell',
+                                    category: 'pull',
+                                    muscle: 'Biceps, Ön Kol',
+                                    cue: 'Dirsekleri gövdeye sabitleyin, nötr tutuşla kaldırın.',
+                                    sets: [
+                                        { setNo: 1, weight: 10, reps: 12, completed: true, volume: 120 },
+                                        { setNo: 2, weight: 10, reps: 12, completed: true, volume: 120 },
+                                        { setNo: 3, weight: 15, reps: 12, completed: true, volume: 180 }
+                                    ],
+                                    completedSetsCount: 3,
+                                    maxWeight: 15,
+                                    exerciseVolume: 420
+                                };
+
+                                log.exercises.push(hammerEx);
+                                log.totalVolumeKg = Math.round(((log.totalVolumeKg || 0) + 420) * 10) / 10;
+                                log.totalSetsCompleted = (log.totalSetsCompleted || 0) + 3;
+                                log.totalRepsCompleted = (log.totalRepsCompleted || 0) + 36;
+
+                                if (!Array.isArray(log.muscleGroups)) log.muscleGroups = [];
+                                if (!log.muscleGroups.includes('Biceps')) log.muscleGroups.push('Biceps');
+                                if (!log.muscleGroups.includes('Ön Kol')) log.muscleGroups.push('Ön Kol');
+
+                                fileModified = true;
+                                anyModified = true;
+                            }
+                        }
+                    });
+
+                    if (fileModified) {
+                        localStorage.setItem(key, JSON.stringify(logs));
+                        if (typeof syncWorkoutLogsToCloud === 'function') {
+                            syncWorkoutLogsToCloud(logs, uid);
+                        }
+                    }
+                }
+
+                if (anyModified) {
+                    console.log("🦾 7 Ekim 2026 Çarşamba seansına Dambıl Hammer Curl (3 set: 10kg, 10kg, 15kg) başarıyla eklendi.");
+                    if (typeof renderHistory === 'function') renderHistory();
+                    if (typeof renderMuscleAnalytics === 'function') {
+                        const container = document.getElementById('muscleAnalyticsContainer');
+                        if (container) renderMuscleAnalytics(container);
+                    }
+                }
+            } catch (err) {
+                console.warn("Hammer curl patch error:", err);
+            }
+        }
+
+        // TARTI & ÖLÇÜM BULUT EŞİTLEME
+        let scaleLogsLiveUnsub = null;
+
+        async function syncUserScaleLogsFromCloud(uid) {
+            if (!isFirebaseReady || !fbDb || !uid) return;
+            try {
+                const docRef = fbDb.collection('scale_logs').doc(uid);
+
+                // Canlı dinleyici: FitLAB masaüstünden tartı yüklendiği an telefonda anında yakala
+                if (!scaleLogsLiveUnsub) {
+                    scaleLogsLiveUnsub = docRef.onSnapshot((docSnap) => {
+                        if (docSnap && docSnap.exists) {
+                            const data = docSnap.data();
+                            if (data && Array.isArray(data.logs)) {
+                                localStorage.setItem(`celik_kodu_scale_${uid}`, JSON.stringify(data.logs));
+                                if (typeof renderAnalytics === 'function' && document.getElementById('analyticsModal')?.classList.contains('active')) {
+                                    renderAnalytics();
+                                }
+                            }
+                        }
+                    }, (e) => {
+                        console.warn("scale_logs onSnapshot hatası:", e);
+                    });
+                }
+
+                const doc = await docRef.get();
+                const localLogs = getScaleLogs();
+
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data && Array.isArray(data.logs)) {
+                        const logMap = new Map();
+                        localLogs.forEach(l => logMap.set(l.id, l));
+                        data.logs.forEach(l => logMap.set(l.id, l));
+                        const merged = Array.from(logMap.values()).sort((a, b) => new Date(b.date) - new Date(a.date));
+                        localStorage.setItem(`celik_kodu_scale_${uid}`, JSON.stringify(merged));
+                        return;
+                    }
+                }
+                if (localLogs.length > 0) {
+                    await docRef.set({ logs: localLogs, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+                }
+            } catch(e) {}
+        }
+
+        async function syncScaleLogsToCloud(logs, uid) {
+            if (!isFirebaseReady || !fbDb || !uid) return;
+            try {
+                await fbDb.collection('scale_logs').doc(uid).set({
+                    logs: logs,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            } catch(e) {}
+        }
+
+        async function syncUserMeasurementsFromCloud(uid) {
+            if (!isFirebaseReady || !fbDb || !uid) return;
+            try {
+                const docRef = fbDb.collection('measurement_logs').doc(uid);
+                const doc = await docRef.get();
+                const localLogs = getMeasurementsLogs();
+
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data && Array.isArray(data.logs)) {
+                        const logMap = new Map();
+                        localLogs.forEach(l => logMap.set(l.id, l));
+                        data.logs.forEach(l => logMap.set(l.id, l));
+                        const merged = Array.from(logMap.values()).sort((a, b) => new Date(b.date) - new Date(a.date));
+                        localStorage.setItem(`celik_kodu_measurements_${uid}`, JSON.stringify(merged));
+                        return;
+                    }
+                }
+                if (localLogs.length > 0) {
+                    await docRef.set({ logs: localLogs, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+                }
+            } catch(e) {}
+        }
+
+        async function syncMeasurementLogsToCloud(logs, uid) {
+            if (!isFirebaseReady || !fbDb || !uid) return;
+            try {
+                await fbDb.collection('measurement_logs').doc(uid).set({
+                    logs: logs,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            } catch(e) {}
+        }
+
+        // ==================== AKADEMİK KOÇ İSTASYONU KÖPRÜSÜ ====================
+        let coachDirectiveLiveUnsub = null;
+
+        async function syncCoachDirectiveFromCloud(uid) {
+            if (!isFirebaseReady || !fbDb || !uid) return;
+            try {
+                const docRef = fbDb.collection('coach_directives').doc(uid);
+
+                // Gerçek zamanlı dinleyici: FitLAB masaüstünden 'Web\'e Gönder' veya 'Bugüne Ata' dendiğinde canlı yakalama
+                if (!coachDirectiveLiveUnsub) {
+                    coachDirectiveLiveUnsub = docRef.onSnapshot((docSnap) => {
+                        if (docSnap && docSnap.exists) {
+                            const data = docSnap.data();
+                            if (data && data.active) {
+                                processIncomingCoachDirective(uid, data);
+                            }
+                        }
+                    }, (e) => {
+                        console.warn("Koç Direktifi onSnapshot hatası:", e);
+                    });
+                }
+
+                const docSnap = await docRef.get();
+                if (docSnap.exists) {
+                    const data = docSnap.data();
+                    if (data && data.active) {
+                        processIncomingCoachDirective(uid, data);
+                    }
+                }
+            } catch(e) {
+                console.warn("Koç direktifi buluttan çekilemedi:", e);
+            }
+        }
+
+        function parseDirectiveWorkout(fullReport, directiveTitle) {
+            if (!fullReport) return null;
+            const lines = fullReport.split('\n');
+            const exercises = [];
+
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (trimmed.startsWith('|') && trimmed.endsWith('|') && !trimmed.includes('---')) {
+                    const lower = trimmed.toLowerCase();
+                    if (lower.includes('blok') && lower.includes('hareket')) continue;
+                    if (lower.includes('egzersiz') && lower.includes('set')) continue;
+                    const cells = trimmed.split('|').map(c => c.trim()).filter(Boolean);
+                    if (cells.length >= 2) {
+                        let rawName = cells[0].replace(/\*+/g, '').trim();
+                        let setRepCell = cells[1] || '';
+                        let note = cells.slice(2).join(' • ');
+
+                        // Eğer ilk hücre A1, B1, 1, Blok vb. etiketse egzersiz adı 2. hücrededir
+                        if (rawName.length <= 4 || /^[A-Z0-9\.\-\s]{1,5}$/i.test(rawName) || ['blok', 'bitiriş', 'finisher', 'isinma'].includes(rawName.toLowerCase())) {
+                            rawName = (cells[1] || '').replace(/\*+/g, '').trim();
+                            setRepCell = cells[2] || '';
+                            note = cells.slice(3).join(' • ');
+                        }
+
+                        if (!rawName || rawName.length < 3) continue;
+
+                        let sets = 3;
+                        let reps = '8-12';
+                        const srMatch = setRepCell.match(/(\d+)\s*[xX*]\s*([0-9\-–]+)/);
+                        if (srMatch) {
+                            sets = parseInt(srMatch[1], 10) || 3;
+                            reps = srMatch[2] || '8-12';
+                        } else {
+                            const sMatch = setRepCell.match(/(\d+)\s*set/i);
+                            if (sMatch) sets = parseInt(sMatch[1], 10) || 3;
+                            const rMatch = setRepCell.match(/([0-9\-–]+)\s*(?:tekrar|rep)/i);
+                            if (rMatch) reps = rMatch[1];
+                        }
+
+                        let matchedEx = null;
+                        if (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB)) {
+                            const normRaw = rawName.toLowerCase().replace(/[^a-z0-9]/g, '');
+                            matchedEx = EXERCISES_DB.find(e => {
+                                const n = (e.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+                                return n === normRaw || n.includes(normRaw) || normRaw.includes(n);
+                            });
+                        }
+
+                        const exObj = {
+                            id: matchedEx ? matchedEx.id : ('gen_' + Math.random().toString(36).substring(2, 8)),
+                            name: matchedEx ? matchedEx.name : rawName,
+                            category: matchedEx ? matchedEx.category : 'dumbbell',
+                            equipment: matchedEx ? matchedEx.equipment : 'Dambıl & Sehpa',
+                            targetSets: sets,
+                            targetReps: reps,
+                            note: note || ''
+                        };
+                        if (matchedEx) {
+                            exObj.primaryMuscles = matchedEx.primaryMuscles;
+                            exObj.level = matchedEx.level;
+                        }
+                        exercises.push(exObj);
+                    }
+                }
+            }
+
+            if (exercises.length === 0) return null;
+
+            return {
+                id: 'directive_workout_' + Date.now(),
+                title: directiveTitle || 'FitLAB Antrenman Protokolü',
+                duration: Math.max(30, Math.round(exercises.length * 6.5)),
+                exercises: exercises,
+                isDirective: true,
+                source: 'fitlab_consult'
+            };
+        }
+
+        function processIncomingCoachDirective(uid, data) {
+            try {
+                if (!data.parsedWorkout && data.fullReport) {
+                    data.parsedWorkout = parseDirectiveWorkout(data.fullReport, data.title);
+                }
+
+                localStorage.setItem(`celik_kodu_coach_directive_${uid}`, JSON.stringify(data));
+
+                let hasCalendarChange = false;
+
+                // 1. TEK GÜN VEYA TARİH GÜNCELLEMESİ (FitLAB Takvim Modalı)
+                if (data.calendarUpdate) {
+                    const cu = data.calendarUpdate;
+                    const plan = cu.plan || {};
+                    const isRest = !!(plan.isRest || plan.rest || plan.type === 'rest');
+                    const exercisesList = (plan.exercises || []).map(ex => {
+                        if (typeof ex === 'string') return { name: ex, sets: 3, reps: '8-12' };
+                        return ex;
+                    });
+
+                    const mappedPlan = {
+                        id: plan.id || ('fitlab_' + (cu.dateStr || 'day_' + cu.dayIndex)),
+                        title: plan.title || (isRest ? 'Dinlenme' : 'FitLAB Programı'),
+                        time: plan.time || '18:30',
+                        duration: plan.duration || (isRest ? 30 : 60),
+                        rest: isRest,
+                        type: isRest ? 'rest' : 'custom_saved',
+                        desc: isRest ? 'Aktif Dinlenme & Mobilite' : `${exercisesList.length} Hareket • ${plan.duration || 60} Dk`,
+                        exercises: exercisesList,
+                        customWorkout: isRest ? null : {
+                            id: 'fitlab_workout_' + Date.now(),
+                            title: plan.title,
+                            duration: plan.duration || 60,
+                            exercises: exercisesList
+                        }
+                    };
+
+                    if (typeof cu.dayIndex === 'number' && cu.dayIndex >= 0 && cu.dayIndex <= 6) {
+                        const sched = getWeeklySchedule(uid);
+                        sched[cu.dayIndex] = mappedPlan;
+                        saveWeeklySchedule(sched, uid);
+                        hasCalendarChange = true;
+                    }
+
+                    if (cu.dateStr) {
+                        saveDateScheduleOverride(cu.dateStr, mappedPlan, uid);
+                        hasCalendarChange = true;
+                    }
+
+                    if (typeof showToast === 'function') {
+                        showToast(`📅 FitLAB: "${mappedPlan.title}" takviminize işlendi!`);
+                    }
+                }
+
+                // 2. TÜM HAFTALIK PLAN GÜNCELLEMESİ (FitLAB Haftalık Şablonu)
+                if (data.schedule) {
+                    const sched = getWeeklySchedule(uid);
+                    if (Array.isArray(data.schedule)) {
+                        data.schedule.forEach((d, idx) => {
+                            if (!d) return;
+                            const dIdx = typeof d.dayIndex === 'number' ? d.dayIndex : idx;
+                            const isRest = !!(d.isRest || d.rest || d.type === 'rest');
+                            const exList = (d.exercises || []).map(e => typeof e === 'string' ? { name: e, sets: 3, reps: '8-12' } : e);
+                            sched[dIdx] = {
+                                id: 'fitlab_day_' + dIdx,
+                                title: d.title || (isRest ? 'Dinlenme' : 'Antrenman'),
+                                time: d.time || '18:30',
+                                duration: d.duration || (isRest ? 30 : 60),
+                                rest: isRest,
+                                type: isRest ? 'rest' : 'custom_saved',
+                                desc: isRest ? 'Aktif Dinlenme & Mobilite' : `${exList.length} Hareket • ${d.duration || 60} Dk`,
+                                exercises: exList,
+                                customWorkout: isRest ? null : {
+                                    id: 'fitlab_workout_' + dIdx + '_' + Date.now(),
+                                    title: d.title,
+                                    duration: d.duration || 60,
+                                    exercises: exList
+                                }
+                            };
+                        });
+                    } else if (typeof data.schedule === 'object') {
+                        Object.keys(data.schedule).forEach(k => {
+                            const d = data.schedule[k];
+                            if (!d) return;
+                            const dIdx = parseInt(k, 10);
+                            const isRest = !!(d.isRest || d.rest || d.type === 'rest');
+                            const exList = (d.exercises || []).map(e => typeof e === 'string' ? { name: e, sets: 3, reps: '8-12' } : e);
+                            sched[dIdx] = {
+                                id: 'fitlab_day_' + dIdx,
+                                title: d.title || (isRest ? 'Dinlenme' : 'Antrenman'),
+                                time: d.time || '18:30',
+                                duration: d.duration || (isRest ? 30 : 60),
+                                rest: isRest,
+                                type: isRest ? 'rest' : 'custom_saved',
+                                desc: isRest ? 'Aktif Dinlenme & Mobilite' : `${exList.length} Hareket • ${d.duration || 60} Dk`,
+                                exercises: exList,
+                                customWorkout: isRest ? null : {
+                                    id: 'fitlab_workout_' + dIdx + '_' + Date.now(),
+                                    title: d.title,
+                                    duration: d.duration || 60,
+                                    exercises: exList
+                                }
+                            };
+                        });
+                    }
+                    saveWeeklySchedule(sched, uid);
+                    hasCalendarChange = true;
+                }
+
+                // 3. TARİH BAZLI OVERRIDE LİSTESİ
+                if (data.dateOverrides && typeof data.dateOverrides === 'object') {
+                    Object.keys(data.dateOverrides).forEach(dateStr => {
+                        const d = data.dateOverrides[dateStr];
+                        if (!d) return;
+                        const isRest = !!(d.isRest || d.rest || d.type === 'rest');
+                        const exList = (d.exercises || []).map(e => typeof e === 'string' ? { name: e, sets: 3, reps: '8-12' } : e);
+                        saveDateScheduleOverride(dateStr, {
+                            id: 'fitlab_' + dateStr,
+                            title: d.title || (isRest ? 'Dinlenme' : 'Antrenman'),
+                            time: d.time || '18:30',
+                            duration: d.duration || (isRest ? 30 : 60),
+                            rest: isRest,
+                            type: isRest ? 'rest' : 'custom_saved',
+                            desc: isRest ? 'Aktif Dinlenme & Mobilite' : `${exList.length} Hareket • ${d.duration || 60} Dk`,
+                            exercises: exList,
+                            customWorkout: isRest ? null : {
+                                id: 'fitlab_workout_' + dateStr,
+                                title: d.title,
+                                duration: d.duration || 60,
+                                exercises: exList
+                            }
+                        }, uid);
+                        hasCalendarChange = true;
+                    });
+                }
+
+                // 4. MASAÜSTÜNDEN 'BUGÜNE ATA' DİREKTİFİ
+                if (data.assignToToday && data.parsedWorkout) {
+                    const todayIdx = new Date().getDay();
+                    const schedule = getWeeklySchedule(uid);
+                    schedule[todayIdx] = {
+                        id: data.parsedWorkout.id || ('directive_' + Date.now()),
+                        title: data.parsedWorkout.title || 'FitLAB Özel Seansı',
+                        type: 'custom_saved',
+                        desc: `${data.parsedWorkout.exercises.length} Hareket • ${data.parsedWorkout.duration || 45} Dk`,
+                        rest: false,
+                        customWorkout: data.parsedWorkout,
+                        exercises: data.parsedWorkout.exercises
+                    };
+                    saveWeeklySchedule(schedule, uid);
+                    hasCalendarChange = true;
+                    if (typeof showToast === 'function') {
+                        showToast(`🔥 FitLAB: "${data.parsedWorkout.title}" bugünkü (${DAY_NAMES_TR[todayIdx]}) programınıza atandı!`);
+                    }
+                }
+
+                if (hasCalendarChange && typeof renderCalendarScreen === 'function') {
+                    renderCalendarScreen();
+                }
+                if (typeof renderActiveWorkout === 'function') {
+                    renderActiveWorkout();
+                }
+                if (hasCalendarChange && typeof isGoogleCalendarConnected === 'function' && isGoogleCalendarConnected(uid)) {
+                    performFullCalendarSync().catch(e => console.warn("Google Calendar otomatik senkronizasyon:", e));
+                }
+            } catch(e) {
+                console.warn("processIncomingCoachDirective hatası:", e);
+            }
+        }
+
+        function assignDirectiveWorkoutToToday(uid) {
+            try {
+                const raw = localStorage.getItem(`celik_kodu_coach_directive_${uid}`);
+                if (!raw) {
+                    showToast("⚠️ FitLAB direktifi bulunamadı.");
+                    return;
+                }
+                const dir = JSON.parse(raw);
+                let workout = dir.parsedWorkout;
+                if (!workout && dir.fullReport) {
+                    workout = parseDirectiveWorkout(dir.fullReport, dir.title);
+                }
+                if (!workout || !Array.isArray(workout.exercises) || workout.exercises.length === 0) {
+                    showToast("⚠️ Direktif içerisinde egzersiz tablosu bulunamadı.");
+                    return;
+                }
+
+                const todayIdx = new Date().getDay();
+                const todayName = DAY_NAMES_TR[todayIdx];
+                const schedule = getWeeklySchedule();
+                schedule[todayIdx] = {
+                    id: workout.id || ('directive_' + Date.now()),
+                    title: workout.title || 'FitLAB Özel Seansı',
+                    type: 'custom_saved',
+                    desc: `${workout.exercises.length} Hareket • ${workout.duration || 45} Dk`,
+                    rest: false,
+                    customWorkout: JSON.parse(JSON.stringify(workout)),
+                    exercises: workout.exercises
+                };
+                saveWeeklySchedule(schedule);
+
+                // Kütüphaneye de kaydet
+                const user = getActiveUser();
+                if (user) {
+                    const key = `celik_kodu_custom_programs_${user.id}`;
+                    let saved = [];
+                    try { saved = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
+                    const exIdx = saved.findIndex(p => p.id === workout.id);
+                    if (exIdx !== -1) saved[exIdx] = workout;
+                    else saved.unshift(workout);
+                    localStorage.setItem(key, JSON.stringify(saved));
+                }
+
+                renderActiveWorkout();
+                playAlertSound();
+                showToast(`🔥 "${workout.title}" bugüne (${todayName}) başarıyla atandı! Hemen seansı başlatabilirsiniz.`);
+            } catch(e) {
+                console.error("assignDirectiveWorkoutToToday hatası:", e);
+                showToast("⚠️ Antrenman bugüne atanırken bir hata oluştu.");
+            }
+        }
+
+        function previewDirectiveWorkoutModal(uid) {
+            try {
+                const raw = localStorage.getItem(`celik_kodu_coach_directive_${uid}`);
+                if (!raw) return;
+                const dir = JSON.parse(raw);
+                let workout = dir.parsedWorkout;
+                if (!workout && dir.fullReport) {
+                    workout = parseDirectiveWorkout(dir.fullReport, dir.title);
+                }
+                if (!workout) {
+                    showToast("⚠️ Önizlenecek egzersiz listesi bulunamadı.");
+                    return;
+                }
+                previewWorkoutModal(workout);
+            } catch(e) {}
+        }
+
+        function copyDayProgramToToday(sourceDayIdx) {
+            const todayIdx = new Date().getDay();
+            if (sourceDayIdx === todayIdx) {
+                showToast("ℹ️ Bu program zaten bugünün programı.");
+                closeScheduleDayModal();
+                return;
+            }
+            const schedule = getWeeklySchedule();
+            const sourcePlan = schedule[sourceDayIdx];
+            if (!sourcePlan || sourcePlan.rest) {
+                alert("Kopyalanacak gün bir dinlenme günü veya boş.");
+                return;
+            }
+
+            schedule[todayIdx] = JSON.parse(JSON.stringify(sourcePlan));
+            schedule[todayIdx].rest = false;
+            saveWeeklySchedule(schedule);
+
+            closeScheduleDayModal();
+            renderActiveWorkout();
+            playAlertSound();
+            showToast(`🔥 ${DAY_NAMES_TR[sourceDayIdx]} programı bugüne (${DAY_NAMES_TR[todayIdx]}) kopyalandı!`);
+        }
+
+        function assignGeneratedToToday() {
+            let workout = currentGeneratedWorkout;
+            if (!workout) {
+                try {
+                    const raw = localStorage.getItem('celik_kodu_last_generated_workout');
+                    if (raw) workout = JSON.parse(raw);
+                } catch(e) {}
+            }
+            if (!workout || !Array.isArray(workout.exercises) || workout.exercises.length === 0) {
+                showToast("⚠️ Atanacak hazır program bulunamadı.");
+                return;
+            }
+
+            const todayIdx = new Date().getDay();
+            const todayName = DAY_NAMES_TR[todayIdx];
+            const schedule = getWeeklySchedule();
+            schedule[todayIdx] = {
+                id: workout.id || ('gen_today_' + Date.now()),
+                title: workout.title || 'Bugünün Özel Programı',
+                type: 'custom_generated',
+                desc: `${workout.exercises.length} Hareket • ${workout.duration || 45} Dk`,
+                rest: false,
+                customWorkout: JSON.parse(JSON.stringify(workout)),
+                exercises: workout.exercises
+            };
+            saveWeeklySchedule(schedule);
+            renderActiveWorkout();
+            playAlertSound();
+            showToast(`🔥 "${workout.title}" bugüne (${todayName}) başarıyla atandı!`);
+        }
+
+        let aiProgramLiveUnsub = null;
+
+        async function syncCustomProgramsFromCloud(uid) {
+            if (!isFirebaseReady || !fbDb || !uid) return;
+            try {
+                const docRef = fbDb.collection('custom_programs').doc(uid);
+                
+                if (!aiProgramLiveUnsub) {
+                    aiProgramLiveUnsub = docRef.onSnapshot((docSnap) => {
+                        if (docSnap && docSnap.exists) {
+                            const data = docSnap.data();
+                            if (data && data.active) {
+                                processIncomingAiProgram(uid, data);
+                            }
+                        }
+                    }, (e) => {
+                        console.warn("AI Program onSnapshot hatası:", e);
+                    });
+                }
+
+                const docSnap = await docRef.get();
+                if (docSnap.exists) {
+                    const data = docSnap.data();
+                    if (data && data.active) {
+                        processIncomingAiProgram(uid, data);
+                    }
+                }
+            } catch(e) {
+                console.warn("AI programı buluttan çekilemedi:", e);
+            }
+        }
+
+        function processIncomingAiProgram(uid, data) {
+            try {
+                const currentRaw = localStorage.getItem(`celik_kodu_ai_program_${uid}`);
+                const current = currentRaw ? JSON.parse(currentRaw) : null;
+                const isNew = !current || (data.assignedAt && data.assignedAt !== current.assignedAt);
+                if (isNew) {
+                    data.dismissed = false;
+                    data.applied = false;
+                } else if (current) {
+                    data.dismissed = current.dismissed;
+                    data.applied = current.applied;
+                }
+
+                localStorage.setItem(`celik_kodu_ai_program_${uid}`, JSON.stringify(data));
+
+                let days = data.structuredDays;
+                if (!Array.isArray(days) || days.length === 0) {
+                    days = parseMarkdownProgramClient(data.programText);
+                }
+                if (Array.isArray(days) && days.length > 0) {
+                    const nextSchedule = convertParsedDaysToWeeklySchedule(days);
+                    saveNextWeeklySchedule(nextSchedule, uid);
+                }
+
+                if (typeof renderActiveWorkout === 'function') {
+                    renderActiveWorkout();
+                }
+            } catch(e) {
+                console.warn("processIncomingAiProgram hatası:", e);
+            }
+        }
+
+        function getCoachStationDirectiveHtml(uid) {
+            if (!uid) return '';
+            try {
+                const raw = localStorage.getItem(`celik_kodu_coach_directive_${uid}`);
+                if (!raw) return '';
+                const dir = JSON.parse(raw);
+                if (!dir || !dir.active) return '';
+
+                let workout = dir.parsedWorkout;
+                if (!workout && dir.fullReport && typeof parseDirectiveWorkout === 'function') {
+                    workout = parseDirectiveWorkout(dir.fullReport, dir.title);
+                    if (workout) {
+                        dir.parsedWorkout = workout;
+                        localStorage.setItem(`celik_kodu_coach_directive_${uid}`, JSON.stringify(dir));
+                    }
+                }
+
+                const todayIdx = new Date().getDay();
+                const todayName = DAY_NAMES_TR[todayIdx];
+
+                let formattedText = escapeHTML(dir.text || '')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong style="color:#fff;">$1</strong>')
+                    .replace(/•/g, '<span style="color:var(--gold); margin-right:4px;">•</span>')
+                    .replace(/#/g, '')
+                    .trim();
+
+                const isExpanded = !!localStorage.getItem(`celik_kodu_coach_dir_expanded_${uid}`);
+
+                return `
+                    <div class="collapsible-panel ${isExpanded ? 'open' : ''}" id="coachDirectivePanel_${uid}" style="border:1.5px solid var(--gold); box-shadow:0 0 25px rgba(245,158,11,0.25); margin-bottom:12px;">
+                        <div class="collapsible-panel-header" onclick="toggleCoachDirectivePanel('${uid}')" style="background:rgba(245,158,11,0.12);">
+                            <div class="collapsible-panel-title">
+                                <span class="icon">🎓</span>
+                                <span class="text" style="color:var(--gold); font-weight:900;">${escapeHTML(dir.title || 'FİTLAB DİREKTİFİ')}</span>
+                            </div>
+                            <div class="collapsible-panel-meta">
+                                <span class="collapsible-panel-badge" style="background:var(--gold); color:#000; font-weight:900;">${workout ? `${workout.exercises.length} Hareket` : 'Reçete'}</span>
+                                <span class="collapsible-panel-arrow">▼</span>
+                            </div>
+                        </div>
+                        <div class="collapsible-panel-body">
+                            <div style="font-size:12px; color:#cbd5e1; line-height:1.55; margin-bottom:12px;">
+                                ${formattedText}
+                            </div>
+                            ${workout ? `
+                                <div style="margin-bottom:12px; background:rgba(0,0,0,0.4); border:1px solid rgba(245,158,11,0.3); border-radius:8px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                                    <div>
+                                        <div style="font-size:13px; font-weight:900; color:#fff;">⚡ ${escapeHTML(workout.title)}</div>
+                                        <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
+                                            🎯 ${workout.exercises.length} Egzersiz • ⏱️ ${workout.duration || 45} Dk Hedef Süre
+                                        </div>
+                                    </div>
+                                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                                        <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 10px; color:var(--cyan); border-color:var(--cyan);" onclick="previewDirectiveWorkoutModal('${uid}')">
+                                            👁️ Hareketleri Gör (${workout.exercises.length})
+                                        </button>
+                                        <button type="button" class="btn btn-gold" style="font-size:12px; padding:8px 16px; font-weight:900; box-shadow:0 0 15px rgba(245,158,11,0.4);" onclick="assignDirectiveWorkoutToToday('${uid}')">
+                                            🔥 BU ANTRENMANI BUGÜNE (${todayName.toUpperCase()}) ATA & BAŞLAT
+                                        </button>
+                                    </div>
+                                </div>
+                            ` : ''}
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+                                ${dir.fullReport ? `
+                                    <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 12px; border-color:var(--gold); color:var(--gold); font-weight:700;" onclick="openFullAcademicReportModal('${uid}')">
+                                        🔬 Bilimsel Analiz Raporunu İncele
+                                    </button>
+                                ` : '<div></div>'}
+                                <button type="button" onclick="dismissCoachStationDirective('${uid}')" style="background:transparent; border:1px solid rgba(255,255,255,0.15); border-radius:6px; color:var(--text-muted); cursor:pointer; font-size:11px; padding:5px 10px;" title="Direktifi Gizle">
+                                    ✕ Kapat
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch(e) {
+                console.warn("getCoachStationDirectiveHtml hatası:", e);
+                return '';
+            }
+        }
+
+        function toggleCoachDirectivePanel(uid) {
+            const panel = document.getElementById(`coachDirectivePanel_${uid}`);
+            if (!panel) return;
+            const isOpen = panel.classList.toggle('open');
+            if (isOpen) {
+                localStorage.setItem(`celik_kodu_coach_dir_expanded_${uid}`, '1');
+            } else {
+                localStorage.removeItem(`celik_kodu_coach_dir_expanded_${uid}`);
+            }
+        }
+
+        function toggleNextWeekHeroPanel(uid) {
+            const panel = document.getElementById(`nextWeekHeroPanel_${uid}`);
+            if (!panel) return;
+            const isOpen = panel.classList.toggle('open');
+            if (isOpen) {
+                localStorage.setItem(`celik_kodu_next_week_expanded_${uid}`, '1');
+            } else {
+                localStorage.removeItem(`celik_kodu_next_week_expanded_${uid}`);
+            }
+        }
+
+        function dismissCoachStationDirective(uid) {
+            try {
+                const raw = localStorage.getItem(`celik_kodu_coach_directive_${uid}`);
+                if (raw) {
+                    const dir = JSON.parse(raw);
+                    dir.active = false;
+                    localStorage.setItem(`celik_kodu_coach_directive_${uid}`, JSON.stringify(dir));
+                    renderActiveWorkout();
+                }
+            } catch(e) {}
+        }
+
+        function openFullAcademicReportModal(uid) {
+            try {
+                const raw = localStorage.getItem(`celik_kodu_coach_directive_${uid}`);
+                if (!raw) return;
+                const dir = JSON.parse(raw);
+                if (!dir.fullReport) return;
+
+                const modal = document.getElementById('academicReportModal');
+                const content = document.getElementById('academicReportModalContent');
+                if (modal && content) {
+                    content.innerText = dir.fullReport;
+                    modal.style.display = 'flex';
+                }
+            } catch(e) {}
+        }
+
+        // ==================== GOOGLE & DEVICE CALENDAR LIVE SYNC ENGINE ====================
+        const FITLAB_CALENDAR_SUMMARY = 'FitLab • Antrenmanlarım';
+        const FITLAB_CALENDAR_DESC = 'Çelik Kodu & FitLab Antrenman Programı ve İlerleyiş Takvimi';
+
+        function getCalendarPreferences(uid) {
+            const user = getActiveUser();
+            const targetUid = uid || (user ? user.id : 'usr_admin');
+            const key = `celik_kodu_calendar_prefs_${targetUid}`;
+            try {
+                const raw = localStorage.getItem(key);
+                if (raw) return JSON.parse(raw);
+            } catch(e) {}
+            return {
+                defaultTime: '18:30',
+                reminderMin: 30,
+                autoSync: true,
+                customClientId: ''
+            };
+        }
+
+        function saveCalendarPreferences(newPrefs, uid) {
+            const user = getActiveUser();
+            const targetUid = uid || (user ? user.id : 'usr_admin');
+            const key = `celik_kodu_calendar_prefs_${targetUid}`;
+            const current = getCalendarPreferences(targetUid);
+            const timeEl = document.getElementById('calPrefDefaultTime');
+            const remEl = document.getElementById('calPrefReminderMin');
+            if (timeEl) current.defaultTime = timeEl.value || '18:30';
+            if (remEl) current.reminderMin = parseInt(remEl.value, 10) || 30;
+            if (newPrefs) Object.assign(current, newPrefs);
+            try {
+                localStorage.setItem(key, JSON.stringify(current));
+            } catch(e) {}
+        }
+
+        function getGoogleCalendarToken(uid) {
+            const user = getActiveUser();
+            const targetUid = uid || (user ? user.id : 'usr_admin');
+            try {
+                const raw = localStorage.getItem(`celik_kodu_gcal_token_${targetUid}`) || sessionStorage.getItem(`celik_kodu_gcal_token_${targetUid}`);
+                if (!raw) return null;
+                const tokenData = JSON.parse(raw);
+                if (tokenData && tokenData.token && tokenData.expiresAt && tokenData.expiresAt > Date.now()) {
+                    return tokenData.token;
+                }
+            } catch(e) {}
+            return null;
+        }
+
+        function saveGoogleCalendarToken(token, expiresInSec = 3600, uid) {
+            const user = getActiveUser();
+            const targetUid = uid || (user ? user.id : 'usr_admin');
+            const data = {
+                token: token,
+                savedAt: Date.now(),
+                expiresAt: Date.now() + (expiresInSec * 1000)
+            };
+            try {
+                localStorage.setItem(`celik_kodu_gcal_token_${targetUid}`, JSON.stringify(data));
+                sessionStorage.setItem(`celik_kodu_gcal_token_${targetUid}`, JSON.stringify(data));
+            } catch(e) {}
+        }
+
+        function clearGoogleCalendarToken(uid) {
+            const user = getActiveUser();
+            const targetUid = uid || (user ? user.id : 'usr_admin');
+            try {
+                localStorage.removeItem(`celik_kodu_gcal_token_${targetUid}`);
+                sessionStorage.removeItem(`celik_kodu_gcal_token_${targetUid}`);
+                localStorage.removeItem(`celik_kodu_gcal_calendar_id_${targetUid}`);
+            } catch(e) {}
+        }
+
+        function isGoogleCalendarConnected(uid) {
+            return !!getGoogleCalendarToken(uid);
+        }
+
+        function getStoredCalendarId(uid) {
+            const user = getActiveUser();
+            const targetUid = uid || (user ? user.id : 'usr_admin');
+            return localStorage.getItem(`celik_kodu_gcal_calendar_id_${targetUid}`);
+        }
+
+        function saveStoredCalendarId(calId, uid) {
+            const user = getActiveUser();
+            const targetUid = uid || (user ? user.id : 'usr_admin');
+            try {
+                localStorage.setItem(`celik_kodu_gcal_calendar_id_${targetUid}`, calId);
+            } catch(e) {}
+        }
+
+        const DEFAULT_GOOGLE_CLIENT_ID = "304204226730-rrs9u26odr8f2e1j0lpndlmba36ah20j.apps.googleusercontent.com";
+
+        function getGoogleClientId() {
+            const prefs = getCalendarPreferences();
+            if (prefs && prefs.customClientId && prefs.customClientId.trim()) {
+                return prefs.customClientId.trim();
+            }
+            const custom = localStorage.getItem('celik_kodu_gcal_custom_client_id');
+            if (custom && custom.trim()) return custom.trim();
+            return DEFAULT_GOOGLE_CLIENT_ID;
+        }
+
+        function saveCustomGoogleClientId(val) {
+            const clean = (val || '').trim();
+            try {
+                localStorage.setItem('celik_kodu_gcal_custom_client_id', clean);
+            } catch(e) {}
+            const prefs = getCalendarPreferences();
+            prefs.customClientId = clean;
+            saveCalendarPreferences(prefs);
+            if (typeof showToast === 'function') showToast("✅ Google Client ID kaydedildi.");
+        }
+
+        function applyManualGoogleToken() {
+            const input = document.getElementById('calCustomTokenInput');
+            if (!input || !input.value.trim()) {
+                alert("Lütfen geçerli bir Google OAuth erişim belirteci (Access Token) yapıştırın.");
+                return;
+            }
+            saveGoogleCalendarToken(input.value.trim(), 7200);
+            input.value = '';
+            if (typeof showToast === 'function') showToast("✅ Google erişim belirteci uygulandı! Test ediliyor...");
+            performFullCalendarSync().then(() => {
+                if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
+                renderCalendarConnectionCard();
+            });
+        }
+
+        function disconnectGoogleCalendar() {
+            if (confirm("Google Takvim bağlantısını kesmek istediğinize emin misiniz?")) {
+                clearGoogleCalendarToken();
+                if (typeof showToast === 'function') showToast("ℹ️ Google Takvim bağlantısı kaldırıldı.");
+                if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
+                renderCalendarConnectionCard();
+            }
+        }
+
+        async function callGoogleCalendarApi(endpoint, options = {}) {
+            const token = getGoogleCalendarToken();
+            if (!token) throw new Error("Google Takvim oturumu açık değil.");
+            const url = endpoint.startsWith('http') ? endpoint : `https://www.googleapis.com/calendar/v3${endpoint}`;
+            const headers = Object.assign({
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }, options.headers || {});
+
+            const resp = await fetch(url, Object.assign({}, options, { headers }));
+            if (resp.status === 401) {
+                clearGoogleCalendarToken();
+                throw new Error("Google oturum süresi doldu. Lütfen tekrar bağlanın.");
+            }
+            if (resp.status === 204) return null;
+            if (!resp.ok) {
+                const errText = await resp.text();
+                let errMsg = `Google API Hatası (${resp.status})`;
+                try {
+                    const parsed = JSON.parse(errText);
+                    if (parsed.error && parsed.error.message) errMsg = parsed.error.message;
+                } catch(e) {}
+                throw new Error(errMsg);
+            }
+            return await resp.json();
+        }
+
+        async function getOrCreateFitLabCalendar() {
+            let calId = getStoredCalendarId();
+            if (calId) {
+                try {
+                    const existing = await callGoogleCalendarApi(`/calendars/${encodeURIComponent(calId)}`);
+                    if (existing && existing.id) return existing.id;
+                } catch(e) {
+                    console.warn("Kayıtlı FitLab takvim kimliği doğrulanamadı, yeniden aranıyor...", e);
+                }
+            }
+
+            // Takvim listesinden ara
+            try {
+                const calList = await callGoogleCalendarApi('/users/me/calendarList');
+                if (calList && Array.isArray(calList.items)) {
+                    const found = calList.items.find(c => 
+                        (c.summary && (c.summary.includes('FitLab') || c.summary.includes('Çelik Kodu')))
+                    );
+                    if (found && found.id) {
+                        saveStoredCalendarId(found.id);
+                        return found.id;
+                    }
+                }
+            } catch(e) {
+                console.warn("Takvim listesi alınamadı:", e);
+            }
+
+            // Yoksa oluştur
+            const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Istanbul';
+            try {
+                const newCal = await callGoogleCalendarApi('/calendars', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        summary: FITLAB_CALENDAR_SUMMARY,
+                        description: FITLAB_CALENDAR_DESC,
+                        timeZone: userTz
+                    })
+                });
+
+                if (newCal && newCal.id) {
+                    saveStoredCalendarId(newCal.id);
+                    return newCal.id;
+                }
+            } catch(createErr) {
+                console.warn("Özel takvim oluşturulamadı, birincil takvime yönlendiriliyor:", createErr);
+            }
+            return 'primary';
+        }
+
+        function formatIsoDateTimeWithOffset(date) {
+            const pad = n => String(n).padStart(2, '0');
+            const year = date.getFullYear();
+            const month = pad(date.getMonth() + 1);
+            const day = pad(date.getDate());
+            const hours = pad(date.getHours());
+            const minutes = pad(date.getMinutes());
+            const seconds = pad(date.getSeconds());
+            const tzOffset = -date.getTimezoneOffset();
+            const sign = tzOffset >= 0 ? '+' : '-';
+            const offH = pad(Math.floor(Math.abs(tzOffset) / 60));
+            const offM = pad(Math.abs(tzOffset) % 60);
+            return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}${sign}${offH}:${offM}`;
+        }
+
+        function getDateForScheduleDay(dayIdx, isNextWeek = false) {
+            const now = new Date();
+            const currentDay = now.getDay();
+            const diffToMonday = currentDay === 0 ? -6 : 1 - currentDay;
+            const monday = new Date(now);
+            monday.setHours(0, 0, 0, 0);
+            monday.setDate(now.getDate() + diffToMonday);
+            if (isNextWeek) {
+                monday.setDate(monday.getDate() + 7);
+            }
+            const offset = dayIdx === 0 ? 6 : (dayIdx - 1);
+            const targetDate = new Date(monday);
+            targetDate.setDate(monday.getDate() + offset);
+            return targetDate;
+        }
+
+        function buildEventDescription(plan, dayIdx, duration = 50, restSec = 60) {
+            const workoutDetails = getWorkoutDetailsForPlan(plan) || {};
+            const exercises = workoutDetails.exercises || plan.exercises || [];
+            const schemeStr = workoutDetails.scheme ? `${workoutDetails.scheme.sets} Set x ${workoutDetails.scheme.reps}` : `${exercises.length} Hareket`;
+            
+            let desc = `🏋️ FITLAB • ÇELİK KODU ANTRENMAN SEANSI\n`;
+            desc += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            desc += `🎯 Program: ${plan.title || 'Antrenman Seansı'}\n`;
+            desc += `⏱️ Tahmini Süre: ${duration} Dakika\n`;
+            desc += `⏳ Dinlenme: ${restSec} Saniye\n`;
+            desc += `📊 Egzersiz Sayısı: ${exercises.length} Hareket (${schemeStr})\n\n`;
+
+            if (exercises.length > 0) {
+                desc += `📋 EGZERSİZ PLANI & HEDEFLER:\n`;
+                exercises.forEach((ex, idx) => {
+                    const sets = ex.targetSets || (workoutDetails.scheme ? workoutDetails.scheme.sets : 3);
+                    const reps = ex.targetReps || (workoutDetails.scheme ? workoutDetails.scheme.reps : '8-12');
+                    const anatomy = typeof getExerciseAnatomy === 'function' ? getExerciseAnatomy(ex) : null;
+                    desc += `${idx + 1}. ${ex.name || 'Egzersiz'} — ${sets} Set x ${reps}`;
+                    if (anatomy && anatomy.primary) desc += ` (🎯 ${anatomy.primary})`;
+                    desc += `\n`;
+                });
+            } else if (plan.desc) {
+                desc += `📋 Detay: ${plan.desc}\n`;
+            }
+
+            desc += `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            desc += `🚀 Salona girdiğinizde tek dokunuşla seansı başlatın:\n`;
+            desc += `👉 https://fitness.kantarci.io/?startWorkout=${encodeURIComponent(plan.id || '')}&day=${dayIdx}\n`;
+            return desc;
+        }
+
+        async function syncFitLabToGoogleCalendar(targetWeek = null) {
+            const week = targetWeek || activePlannerWeek || 'current';
+            const isNext = week === 'next';
+            const user = getActiveUser();
+            const schedule = isNext ? getNextWeeklySchedule(user.id) : getWeeklySchedule(user.id);
+            const prefs = getCalendarPreferences(user.id);
+            const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Istanbul';
+
+            const calId = await getOrCreateFitLabCalendar();
+            let createdCount = 0;
+            let updatedCount = 0;
+            let cleanedDuplicates = 0;
+
+            // 1. Bu haftaya ait mevcut Google Takvim etkinliklerini çek
+            const startOfWeek = getDateForScheduleDay(1, isNext);
+            startOfWeek.setHours(0, 0, 0, 0);
+            const endOfWeek = getDateForScheduleDay(0, isNext);
+            endOfWeek.setHours(23, 59, 59, 999);
+
+            const startIso = formatIsoDateTimeWithOffset(startOfWeek);
+            const endIso = formatIsoDateTimeWithOffset(endOfWeek);
+
+            let existingEvents = [];
+            try {
+                const eventsData = await callGoogleCalendarApi(`/calendars/${encodeURIComponent(calId)}/events?timeMin=${encodeURIComponent(startIso)}&timeMax=${encodeURIComponent(endIso)}&singleEvents=true`);
+                existingEvents = (eventsData && Array.isArray(eventsData.items)) ? eventsData.items : [];
+            } catch(e) {
+                console.warn("Mevcut takvim etkinlikleri çekilemedi:", e);
+            }
+
+            // Etkinlikleri gün tarihine (YYYY-MM-DD) göre grupla
+            const eventsByDate = {};
+            existingEvents.forEach(ev => {
+                if (!ev.start) return;
+                const isFitLab = (ev.extendedProperties?.private?.fitLabSource === 'FitLab_PWA') || (ev.summary && ev.summary.includes('FitLab'));
+                if (!isFitLab) return;
+
+                const dStr = (ev.start.dateTime || ev.start.date || '').substring(0, 10);
+                if (!dStr) return;
+                if (!eventsByDate[dStr]) eventsByDate[dStr] = [];
+                eventsByDate[dStr].push(ev);
+            });
+
+            // 2. Her gün için senkronizasyon ve mükerrer temizliği yap
+            for (let d = 0; d < 7; d++) {
+                try {
+                    const plan = schedule[d];
+                    if (!plan) continue;
+
+                    const targetDate = getDateForScheduleDay(d, isNext);
+                    const dateKey = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${String(targetDate.getDate()).padStart(2, '0')}`;
+                    const dayEvents = eventsByDate[dateKey] || [];
+
+                    // Dinlenme günüyse o güne ait tüm etkinlikleri takvimden temizle
+                    if (plan.rest) {
+                        for (const ev of dayEvents) {
+                            try {
+                                await callGoogleCalendarApi(`/calendars/${encodeURIComponent(calId)}/events/${encodeURIComponent(ev.id)}`, {
+                                    method: 'DELETE'
+                                });
+                                cleanedDuplicates++;
+                            } catch(e) {}
+                        }
+                        if (plan.googleEventId) delete plan.googleEventId;
+                        continue;
+                    }
+
+                    // Antrenman günü
+                    const workoutDetails = getWorkoutDetailsForPlan(plan) || {};
+                    const duration = parseInt(plan.duration, 10) || parseInt(workoutDetails.duration, 10) || 50;
+                    const restSec = (workoutDetails.scheme && workoutDetails.scheme.rest) || workoutDetails.rest || 60;
+                    const timeStr = plan.time || prefs.defaultTime || '18:30';
+                    const [hStr, mStr] = timeStr.split(':');
+                    const startHour = parseInt(hStr, 10) || 18;
+                    const startMin = parseInt(mStr, 10) || 30;
+
+                    targetDate.setHours(startHour, startMin, 0, 0);
+                    const endDate = new Date(targetDate.getTime() + (duration * 60 * 1000));
+
+                    const startIsoStr = formatIsoDateTimeWithOffset(targetDate);
+                    const endIsoStr = formatIsoDateTimeWithOffset(endDate);
+
+                    const cleanTitle = (plan.title || 'Antrenman Seansı').replace(/^[⚔️🧘🔬🔥\s]+/, '');
+                    const summary = `⚔️ FitLab: ${cleanTitle}`;
+                    const description = buildEventDescription(plan, d, duration, restSec);
+
+                    const eventBody = {
+                        summary: summary,
+                        description: description,
+                        start: { dateTime: startIsoStr, timeZone: userTz },
+                        end: { dateTime: endIsoStr, timeZone: userTz },
+                        colorId: '6',
+                        reminders: {
+                            useDefault: false,
+                            overrides: [
+                                { method: 'popup', minutes: prefs.reminderMin || 30 }
+                            ]
+                        },
+                        extendedProperties: {
+                            private: {
+                                fitLabWorkoutId: String(plan.id || ''),
+                                fitLabDayIdx: String(d),
+                                fitLabWeek: week,
+                                fitLabSource: 'FitLab_PWA'
+                            }
+                        }
+                    };
+
+                    let primaryEvent = null;
+                    if (dayEvents.length > 0) {
+                        // İlk etkinliği koru ve güncelle
+                        primaryEvent = dayEvents[0];
+                        try {
+                            await callGoogleCalendarApi(`/calendars/${encodeURIComponent(calId)}/events/${encodeURIComponent(primaryEvent.id)}`, {
+                                method: 'PATCH',
+                                body: JSON.stringify(eventBody)
+                            });
+                            updatedCount++;
+                        } catch(patchErr) {
+                            console.warn("Patch hatası:", patchErr);
+                        }
+
+                        // Aynı günde 1'den fazla etkinlik varsa diğer mükerrer olanları SİL!
+                        for (let i = 1; i < dayEvents.length; i++) {
+                            try {
+                                await callGoogleCalendarApi(`/calendars/${encodeURIComponent(calId)}/events/${encodeURIComponent(dayEvents[i].id)}`, {
+                                    method: 'DELETE'
+                                });
+                                cleanedDuplicates++;
+                            } catch(e) {}
+                        }
+                    } else {
+                        // O günde henüz hiç etkinlik yoksa yeni oluştur
+                        try {
+                            primaryEvent = await callGoogleCalendarApi(`/calendars/${encodeURIComponent(calId)}/events`, {
+                                method: 'POST',
+                                body: JSON.stringify(eventBody)
+                            });
+                            createdCount++;
+                        } catch(postErr) {
+                            console.error(`Gün ${d} (${dateKey}) POST hatası:`, postErr);
+                        }
+                    }
+
+                    if (primaryEvent && primaryEvent.id) {
+                        plan.googleEventId = primaryEvent.id;
+                        plan.googleHtmlLink = primaryEvent.htmlLink;
+                        plan.lastSyncedAt = Date.now();
+                    }
+                } catch(loopErr) {
+                    console.error(`Gün ${d} işleme hatası:`, loopErr);
+                }
+            }
+
+            if (isNext) saveNextWeeklySchedule(schedule, user.id);
+            else saveWeeklySchedule(schedule, user.id);
+
+            return { createdCount, updatedCount, cleanedDuplicates };
+        }
+
+        async function syncGoogleCalendarToFitLab(targetWeek = null) {
+            const week = targetWeek || activePlannerWeek || 'current';
+            const isNext = week === 'next';
+            const user = getActiveUser();
+            const schedule = isNext ? getNextWeeklySchedule(user.id) : getWeeklySchedule(user.id);
+            const calId = await getOrCreateFitLabCalendar();
+
+            const startOfWeek = getDateForScheduleDay(1, isNext);
+            startOfWeek.setHours(0, 0, 0, 0);
+            const endOfWeek = getDateForScheduleDay(0, isNext);
+            endOfWeek.setHours(23, 59, 59, 999);
+
+            const startIso = formatIsoDateTimeWithOffset(startOfWeek);
+            const endIso = formatIsoDateTimeWithOffset(endOfWeek);
+
+            const eventsData = await callGoogleCalendarApi(`/calendars/${encodeURIComponent(calId)}/events?timeMin=${encodeURIComponent(startIso)}&timeMax=${encodeURIComponent(endIso)}&singleEvents=true`);
+            const events = (eventsData && Array.isArray(eventsData.items)) ? eventsData.items : [];
+
+            let timeCorrections = 0;
+            let dayMoves = 0;
+
+            events.forEach(ev => {
+                if (!ev.start) return;
+                const isFitLab = (ev.extendedProperties && ev.extendedProperties.private && ev.extendedProperties.private.fitLabSource === 'FitLab_PWA') || (ev.summary && ev.summary.includes('FitLab'));
+                if (!isFitLab) return;
+
+                const evDate = new Date(ev.start.dateTime || ev.start.date);
+                const actualDayIdx = evDate.getDay();
+                const pad = n => String(n).padStart(2, '0');
+                const evTimeStr = `${pad(evDate.getHours())}:${pad(evDate.getMinutes())}`;
+
+                const origDayIdxStr = ev.extendedProperties?.private?.fitLabDayIdx;
+                const origDayIdx = origDayIdxStr !== undefined ? parseInt(origDayIdxStr, 10) : actualDayIdx;
+
+                if (origDayIdx !== actualDayIdx && schedule[origDayIdx] && !schedule[origDayIdx].rest) {
+                    const workoutToMove = Object.assign({}, schedule[origDayIdx]);
+                    workoutToMove.time = evTimeStr;
+                    workoutToMove.googleEventId = ev.id;
+                    workoutToMove.lastSyncedAt = Date.now();
+
+                    schedule[actualDayIdx] = workoutToMove;
+                    schedule[origDayIdx] = {
+                        id: 'rest',
+                        title: '🧘 Dinlenme & Aktif Toparlanma',
+                        type: 'rest',
+                        desc: 'Hafif yürüyüş, esneme veya tam istirahat',
+                        rest: true
+                    };
+                    dayMoves++;
+                } else if (schedule[actualDayIdx]) {
+                    const curPlan = schedule[actualDayIdx];
+                    if (!curPlan.rest) {
+                        curPlan.googleEventId = ev.id;
+                        curPlan.googleHtmlLink = ev.htmlLink;
+                        if (curPlan.time !== evTimeStr) {
+                            curPlan.time = evTimeStr;
+                            timeCorrections++;
+                        }
+                    }
+                }
+            });
+
+            if (isNext) saveNextWeeklySchedule(schedule, user.id);
+            else saveWeeklySchedule(schedule, user.id);
+
+            return { timeCorrections, dayMoves, totalEvents: events.length };
+        }
+
+        async function performFullCalendarSync() {
+            if (!isGoogleCalendarConnected()) {
+                downloadFullScheduleICS();
+                if (typeof showToast === 'function') showToast("📥 Tüm haftalık antrenman takvimi (.ics) indirildi! Takviminize aktarabilirsiniz.");
+                return;
+            }
+            try {
+                if (typeof showToast === 'function') showToast("🔄 Takvim ile canlı çift yönlü eşitleniyor...");
+                
+                // 1. Önce hem bu haftayı hem gelecek haftayı Google'dan çek
+                let dayMoves = 0;
+                let timeCorrections = 0;
+                try {
+                    const pullCur = await syncGoogleCalendarToFitLab('current');
+                    dayMoves += (pullCur && pullCur.dayMoves) || 0;
+                    timeCorrections += (pullCur && pullCur.timeCorrections) || 0;
+                } catch(e) {}
+                try {
+                    const pullNext = await syncGoogleCalendarToFitLab('next');
+                    dayMoves += (pullNext && pullNext.dayMoves) || 0;
+                    timeCorrections += (pullNext && pullNext.timeCorrections) || 0;
+                } catch(e) {}
+
+                // 2. Hem bu haftayı hem de gelecek haftayı Google Takvim'e eksiksiz yaz
+                const syncCur = await syncFitLabToGoogleCalendar('current');
+                const syncNext = await syncFitLabToGoogleCalendar('next');
+
+                if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
+                renderCalendarConnectionCard();
+
+                const totalSynced = (syncCur.createdCount || 0) + (syncCur.updatedCount || 0) + (syncNext.createdCount || 0) + (syncNext.updatedCount || 0);
+                const totalCleaned = (syncCur.cleanedDuplicates || 0) + (syncNext.cleanedDuplicates || 0);
+
+                let msg = `✅ Canlı Takvim Senkronize Edildi! (${totalSynced} seans aktif)`;
+                if (totalCleaned > 0) msg += ` • 🧹 ${totalCleaned} mükerrer kayıt temizlendi.`;
+                if (dayMoves > 0) msg += ` • 📅 ${dayMoves} seans yeni gününe taşındı.`;
+                if (timeCorrections > 0) msg += ` • 🕒 ${timeCorrections} seans saati güncellendi.`;
+                if (typeof showToast === 'function') showToast(msg);
+                else alert(msg);
+            } catch(e) {
+                console.error("Takvim senkronizasyon hatası:", e);
+                if (typeof showToast === 'function') showToast("❌ Takvim senkronize edilemedi: " + (e.message || e));
+            }
+        }
+
+        function triggerManualCalendarSync() {
+            performFullCalendarSync();
+        }
+
+        async function syncCurrentDayToCalendar() {
+            if (activeSchedulingDayIdx === null) return;
+            if (!isGoogleCalendarConnected()) {
+                openSingleDayDirectGoogleCalendar();
+                return;
+            }
+            try {
+                if (typeof showToast === 'function') showToast("📅 Günlük antrenman takvime işleniyor...");
+                const isNext = activePlannerWeek === 'next';
+                const user = getActiveUser();
+                const schedule = isNext ? getNextWeeklySchedule(user.id) : getWeeklySchedule(user.id);
+                const plan = schedule[activeSchedulingDayIdx];
+                if (!plan || plan.rest) {
+                    if (typeof showToast === 'function') showToast("ℹ️ Dinlenme günleri için takvim etkinliği oluşturulmaz.");
+                    return;
+                }
+
+                await syncFitLabToGoogleCalendar(activePlannerWeek);
+                if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
+                openScheduleDayModal(activeSchedulingDayIdx);
+                if (typeof showToast === 'function') showToast("✅ Güncellendi! Antrenman Google Takvim'e işlendi.");
+            } catch(e) {
+                console.warn("Canlı takvim yazma hatası, doğrudan web takvim şablonu açılıyor:", e);
+                openSingleDayDirectGoogleCalendar();
+            }
+        }
+
+        function deleteCalendarEventQuiet(eventId) {
+            if (!eventId || !isGoogleCalendarConnected()) return;
+            const calId = getStoredCalendarId() || 'primary';
+            callGoogleCalendarApi(`/calendars/${encodeURIComponent(calId)}/events/${encodeURIComponent(eventId)}`, {
+                method: 'DELETE'
+            }).catch(() => {});
+        }
+
+        function openSingleDayDirectGoogleCalendar() {
+            if (activeSchedulingDateStr) {
+                const dayDate = new Date(activeSchedulingDateStr + 'T00:00:00');
+                openDirectGoogleCalendarForSpecificDate(activeSchedulingDateStr, dayDate.getDay());
+                return;
+            }
+            if (activeSchedulingDayIdx === null) return;
+            const isNext = activePlannerWeek === 'next';
+            const dayDate = getDateForScheduleDay(activeSchedulingDayIdx, isNext);
+            openDirectGoogleCalendarForSpecificDate(formatDateYMD(dayDate), activeSchedulingDayIdx);
+        }
+
+        function openDirectGoogleCalendarForSpecificDate(dateStr, dayIdx) {
+            if (!dateStr) return;
+            const targetDate = new Date(dateStr + 'T00:00:00');
+            const plan = (typeof getPlanForDate === 'function') ? getPlanForDate(targetDate) : null;
+            if (!plan || plan.rest || plan.type === 'rest') {
+                alert("Dinlenme günü için takvim kaydı oluşturulamaz.");
+                return;
+            }
+
+            if (plan.googleHtmlLink) {
+                window.open(plan.googleHtmlLink, '_blank');
+                return;
+            }
+
+            const workoutDetails = getWorkoutDetailsForPlan(plan) || {};
+            const duration = parseInt(plan.duration, 10) || parseInt(workoutDetails.duration, 10) || 50;
+            const timeStr = plan.time || getCalendarPreferences().defaultTime || '18:30';
+            const [hStr, mStr] = timeStr.split(':');
+            const startHour = parseInt(hStr, 10) || 18;
+            const startMin = parseInt(mStr, 10) || 30;
+
+            const startDate = new Date(targetDate);
+            startDate.setHours(startHour, startMin, 0, 0);
+            const endDate = new Date(startDate.getTime() + (duration * 60 * 1000));
+
+            const formatUtcCompact = d => {
+                return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+            };
+
+            const datesParam = `${formatUtcCompact(startDate)}/${formatUtcCompact(endDate)}`;
+            const cleanTitle = (plan.title || 'Antrenman Seansı').replace(/^[⚔️🧘🔬🔥\s]+/, '');
+            const titleParam = `⚔️ FitLab: ${cleanTitle}`;
+            const descParam = buildEventDescription(plan, dayIdx, duration);
+            const user = getActiveUser();
+
+            const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(titleParam)}&dates=${encodeURIComponent(datesParam)}&details=${encodeURIComponent(descParam)}&add=${encodeURIComponent((user && user.email) || '')}`;
+            window.open(gcalUrl, '_blank');
+        }
+
+        function openGoogleCalendarExportModal() {
+            const modal = document.getElementById('googleCalendarExportModal');
+            if (!modal) {
+                openGoogleCalendarLegacyFallback();
+                return;
+            }
+
+            // Aktif incelenen haftanın başlangıç Pazartesi ve bitiş Pazar günlerini hesapla
+            const anchor = new Date((calendarScreenState && calendarScreenState.anchorDate) || new Date());
+            anchor.setHours(0, 0, 0, 0);
+            const dayOfWeek = anchor.getDay();
+            const diffToMon = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+            const monday = new Date(anchor);
+            monday.setDate(anchor.getDate() + diffToMon);
+
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+
+            const sD = monday.getDate();
+            const sM = CAL_MONTH_NAMES_TR[monday.getMonth()];
+            const eD = sunday.getDate();
+            const eM = CAL_MONTH_NAMES_TR[sunday.getMonth()];
+            const yr = sunday.getFullYear();
+            const periodStr = (sM === eM) ? `${sD} - ${eD} ${sM} ${yr}` : `${sD} ${sM} - ${eD} ${eM} ${yr}`;
+
+            const titleEl = document.getElementById('gcalExportModalTitle');
+            if (titleEl) {
+                titleEl.innerText = `📅 Google Takvim'e Aktar (${periodStr})`;
+            }
+
+            // Otomatik canlı bağlantı kartını güncelle
+            const autoCardTitle = document.getElementById('gcalAutoSyncCardTitle');
+            const autoCardBadge = document.getElementById('gcalAutoSyncCardBadge');
+            const autoCardDesc = document.getElementById('gcalAutoSyncCardDesc');
+            const autoCardAction = document.getElementById('gcalAutoSyncCardAction');
+            const isConn = (typeof isGoogleCalendarConnected === 'function') && isGoogleCalendarConnected();
+
+            if (autoCardTitle && autoCardAction) {
+                if (isConn) {
+                    autoCardTitle.innerText = "🟢 Google Takvim Canlı Bağlı (Otomatik Mod Aktif)";
+                    if (autoCardBadge) {
+                        autoCardBadge.innerText = "BAĞLANDI";
+                        autoCardBadge.style.background = "#10b981";
+                    }
+                    if (autoCardDesc) {
+                        autoCardDesc.innerHTML = "Google hesabınız bağlı durumda. FitLAB veya web takvimine atanan seanslar arka planda Google Takviminize <strong>otomatik yüklenir</strong>.";
+                    }
+                    autoCardAction.innerHTML = `
+                        <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:7px 14px; font-weight:800;" onclick="performFullCalendarSync()">
+                            🔄 Şimdi Eşitle
+                        </button>
+                        <button type="button" class="btn btn-outline" style="font-size:11px; padding:7px 10px; color:#fca5a5; border-color:rgba(239,68,68,0.4);" onclick="disconnectGoogleCalendar(); openGoogleCalendarExportModal();">
+                            Bağlantıyı Kes
+                        </button>
+                    `;
+                } else {
+                    autoCardTitle.innerText = "1 Kereye Mahsus Onay: Sıfır Tıklama & Tam Otomasyon";
+                    if (autoCardBadge) {
+                        autoCardBadge.innerText = "CANLI API";
+                        autoCardBadge.style.background = "#10b981";
+                    }
+                    if (autoCardDesc) {
+                        autoCardDesc.innerHTML = "Google hesabınızı <strong>1 kere bağlayın</strong>. Artık hiçbir dosya indirmekle veya butona basmakla uğraşmayın; FitLAB veya web üzerinden atanan tüm programlar Google Takviminize <strong>kendiliğinden otomatik yüklensin</strong>.";
+                    }
+                    autoCardAction.innerHTML = `
+                        <button type="button" class="btn btn-gold" style="font-size:12px; padding:9px 18px; font-weight:900; box-shadow:0 0 15px rgba(245,158,11,0.3); white-space:nowrap;" onclick="connectGoogleCalendarPrompt()">
+                            ⚡ Google Hesabımı Bağla
+                        </button>
+                    `;
+                }
+            }
+
+            // Günlük buton listesini oluştur
+            const daysListEl = document.getElementById('gcalExportDaysList');
+            if (daysListEl) {
+                let itemsHtml = '';
+                let activeCount = 0;
+
+                for (let i = 0; i < 7; i++) {
+                    const dayDate = new Date(monday);
+                    dayDate.setDate(monday.getDate() + i);
+                    const dayIdx = dayDate.getDay();
+                    const dayYMD = formatDateYMD(dayDate);
+                    const plan = (typeof getPlanForDate === 'function') ? getPlanForDate(dayDate) : null;
+
+                    if (plan && !plan.rest && plan.type !== 'rest') {
+                        activeCount++;
+                        const cleanTitle = (plan.title || 'Antrenman Seansı').replace(/^[⚔️🧘🔬🔥\s]+/, '');
+                        const timeStr = plan.time || '18:30';
+                        const durMin = plan.duration || 50;
+                        const dName = DAY_NAMES_TR[dayIdx];
+                        const dNum = dayDate.getDate();
+                        const mName = CAL_MONTH_NAMES_TR[dayDate.getMonth()].slice(0, 3);
+
+                        itemsHtml += `
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:9px 12px; gap:8px;">
+                                <div style="min-width:0; flex:1;">
+                                    <div style="font-size:12.5px; font-weight:800; color:#fff;">
+                                        ⚔️ ${dName}, ${dNum} ${mName} • <span style="color:var(--gold);">${timeStr}</span>
+                                    </div>
+                                    <div style="font-size:11px; color:#cbd5e1; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                        ${escapeHTML(cleanTitle)} • ${durMin} Dk
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-gold" style="font-size:11px; padding:6px 12px; font-weight:800; flex-shrink:0;" onclick="openDirectGoogleCalendarForSpecificDate('${dayYMD}', ${dayIdx})">
+                                    ➕ Ekle ➔
+                                </button>
+                            </div>
+                        `;
+                    }
+                }
+
+                if (activeCount === 0) {
+                    itemsHtml = `<div style="text-align:center; padding:12px; font-size:12px; color:var(--text-secondary);">Bu haftada planlanmış aktif antrenman seansı bulunamadı.</div>`;
+                }
+                daysListEl.innerHTML = itemsHtml;
+            }
+
+            modal.classList.add('active');
+            modal.style.display = 'flex';
+        }
+
+        function closeGoogleCalendarExportModal() {
+            const modal = document.getElementById('googleCalendarExportModal');
+            if (modal) {
+                modal.classList.remove('active');
+                modal.style.display = 'none';
+            }
+        }
+
+        function executeOneClickGoogleCalendarExport() {
+            downloadFullScheduleICS();
+            const importUrl = 'https://calendar.google.com/calendar/u/0/r/settings/export';
+            window.open(importUrl, '_blank');
+            if (typeof showToast === 'function') {
+                showToast("📥 Takvim dosyanız indi! Google Takvim İçe Aktarma ekranı açıldı.");
+            }
+        }
+
+        function openGoogleCalendarWeb() {
+            openGoogleCalendarExportModal();
+        }
+
+        function openGoogleCalendarLegacyFallback() {
+            try {
+                const win = window.open('https://calendar.google.com/calendar/u/0/r', '_blank');
+                if (!win || win.closed || typeof win.closed === 'undefined') {
+                    window.location.href = 'https://calendar.google.com/calendar/u/0/r';
+                }
+            } catch(e) {
+                window.location.href = 'https://calendar.google.com/calendar/u/0/r';
+            }
+        }
+
+        function generateScheduleICS(targetAnchorDate = null) {
+            const anchor = new Date(targetAnchorDate || (calendarScreenState && calendarScreenState.anchorDate) || new Date());
+            anchor.setHours(0, 0, 0, 0);
+            const dayOfWeek = anchor.getDay();
+            const diffToMon = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+            const monday = new Date(anchor);
+            monday.setDate(anchor.getDate() + diffToMon);
+
+            const user = getActiveUser();
+            const prefs = getCalendarPreferences(user ? user.id : 'usr_admin');
+
+            const formatIcsDate = d => {
+                return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+            };
+
+            let ics = [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'PRODID:-//FitLab//Celik Kodu PWA//TR',
+                'CALSCALE:GREGORIAN',
+                'METHOD:PUBLISH',
+                'X-WR-CALNAME:FitLab • Antrenmanlarım',
+                'X-WR-TIMEZONE:Europe/Istanbul'
+            ];
+
+            for (let i = 0; i < 7; i++) {
+                const dayDate = new Date(monday);
+                dayDate.setDate(monday.getDate() + i);
+                const dayIdx = dayDate.getDay();
+                const plan = (typeof getPlanForDate === 'function') ? getPlanForDate(dayDate) : null;
+                if (!plan || plan.rest || plan.type === 'rest') continue;
+
+                const workoutDetails = getWorkoutDetailsForPlan(plan) || {};
+                const duration = parseInt(plan.duration, 10) || parseInt(workoutDetails.duration, 10) || 50;
+                const timeStr = plan.time || prefs.defaultTime || '18:30';
+                const [hStr, mStr] = timeStr.split(':');
+                const startHour = parseInt(hStr, 10) || 18;
+                const startMin = parseInt(mStr, 10) || 30;
+
+                const startDate = new Date(dayDate);
+                startDate.setHours(startHour, startMin, 0, 0);
+                const endDate = new Date(startDate.getTime() + (duration * 60 * 1000));
+
+                const cleanTitle = (plan.title || 'Antrenman Seansı').replace(/^[⚔️🧘🔬🔥\s]+/, '');
+                const summary = `⚔️ FitLab: ${cleanTitle}`;
+                const descText = buildEventDescription(plan, dayIdx, duration)
+                    .replace(/\\/g, '\\\\')
+                    .replace(/;/g, '\\;')
+                    .replace(/,/g, '\\,')
+                    .replace(/\n/g, '\\n');
+
+                ics.push(
+                    'BEGIN:VEVENT',
+                    `UID:fitlab-${formatDateYMD(dayDate)}-${startDate.getTime()}@fitness.kantarci.io`,
+                    `DTSTAMP:${formatIcsDate(new Date())}`,
+                    `DTSTART:${formatIcsDate(startDate)}`,
+                    `DTEND:${formatIcsDate(endDate)}`,
+                    `SUMMARY:${summary}`,
+                    `DESCRIPTION:${descText}`,
+                    'BEGIN:VALARM',
+                    'ACTION:DISPLAY',
+                    `TRIGGER:-PT${prefs.reminderMin || 30}M`,
+                    'DESCRIPTION:FitLab Antrenman Vakti!',
+                    'END:VALARM',
+                    'END:VEVENT'
+                );
+            }
+
+            ics.push('END:VCALENDAR');
+            return ics.join('\r\n');
+        }
+
+        function downloadFullScheduleICS() {
+            const anchor = new Date((calendarScreenState && calendarScreenState.anchorDate) || new Date());
+            const icsContent = generateScheduleICS(anchor);
+            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `fitlab-haftalik-antrenman.ics`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            if (typeof showToast === 'function') showToast("📥 Haftalık takvim (.ics) indirildi! Apple Takvim veya Google Takvim ile anında açabilirsiniz.");
+        }
+
+        function downloadSingleDayICS() {
+            if (activeSchedulingDayIdx === null) return;
+            const isNext = activePlannerWeek === 'next';
+            const user = getActiveUser();
+            const schedule = isNext ? getNextWeeklySchedule(user.id) : getWeeklySchedule(user.id);
+            const plan = schedule[activeSchedulingDayIdx];
+            if (!plan || plan.rest) {
+                alert("Dinlenme günü için takvim dosyası üretilmez.");
+                return;
+            }
+
+            const icsContent = generateScheduleICS();
+            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `fitlab-gun-${activeSchedulingDayIdx}.ics`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            if (typeof showToast === 'function') showToast("📥 Seans (.ics) indirildi!");
+        }
+
+        function getCalendarLiveBarHtml() {
+            const connected = isGoogleCalendarConnected();
+            if (connected) {
+                return `
+                    <div class="calendar-live-bar">
+                        <div class="calendar-live-info">
+                            <span class="weekly-day-sync-dot"></span>
+                            <span style="color:#fff;">FitLab • Antrenmanlarım</span>
+                            <span style="font-size:10px; color:#10b981; font-weight:800;">(Canlı Eşitli)</span>
+                        </div>
+                        <div class="calendar-live-actions">
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:3px 8px; color:var(--cyan); border-color:rgba(56,189,248,0.4);" onclick="triggerManualCalendarSync()" title="Takvimle iki yönlü eşitle">
+                                🔄 Canlı Eşitle
+                            </button>
+                            <button type="button" class="btn btn-gold" style="font-size:11px; padding:3px 8px; font-weight:800;" onclick="openGoogleCalendarWeb()" title="Google Takvim uygulamasını aç">
+                                📅 Takvim
+                            </button>
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:3px 7px;" onclick="openCalendarSyncModal()" title="Takvim Ayarları">
+                                ⚙️
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="calendar-live-bar" style="background:rgba(245,158,11,0.06); border-color:rgba(245,158,11,0.25);">
+                        <div class="calendar-live-info" style="font-size:11px;">
+                            <span>📅</span>
+                            <span style="font-weight:700; color:#f8fafc;">Takvim Entegrasyonu</span>
+                        </div>
+                        <div class="calendar-live-actions">
+                            <button type="button" class="btn btn-gold" style="font-size:11px; padding:3px 9px; font-weight:800;" onclick="openGoogleCalendarWeb()" title="Google Takvim uygulamasını aç">
+                                📅 Google Takvim'i Aç
+                            </button>
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:3px 8px; color:#cbd5e1;" onclick="downloadFullScheduleICS()" title="Apple / Cihaz Takvimine Aktar (.ics)">
+                                🍏 Cihaza Aktar
+                            </button>
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:3px 7px;" onclick="openCalendarSyncModal()" title="Takvim Yönetimi & Ayarları">
+                                ⚙️
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function updateScheduleDayModalTimingCard(dayIdx, currentPlan, workoutDetails) {
+            const timingSec = document.getElementById('schedDayTimingSection');
+            if (!timingSec) return;
+
+            if (currentPlan.rest) {
+                timingSec.style.display = 'none';
+                return;
+            }
+            timingSec.style.display = 'block';
+
+            const prefs = getCalendarPreferences();
+            const timeInput = document.getElementById('schedDayTimeInput');
+            if (timeInput) {
+                timeInput.value = currentPlan.time || prefs.defaultTime || '18:30';
+            }
+
+            const durInput = document.getElementById('schedDayDurationInput');
+            if (durInput) {
+                durInput.value = currentPlan.duration || (workoutDetails && workoutDetails.duration) || 50;
+            }
+
+            const badge = document.getElementById('schedDaySyncStatusBadge');
+            const syncBtn = document.getElementById('btnSyncSingleDayGCal');
+
+            if (badge) {
+                if (currentPlan.googleEventId) {
+                    badge.innerHTML = '🟢 Google Takvimde Eşitlendi';
+                    badge.style.background = 'rgba(16, 185, 129, 0.15)';
+                    badge.style.color = '#34d399';
+                } else if (isGoogleCalendarConnected()) {
+                    badge.innerHTML = '🟡 Senkronizasyon Bekliyor';
+                    badge.style.background = 'rgba(245, 158, 11, 0.15)';
+                    badge.style.color = 'var(--gold)';
+                } else {
+                    badge.innerHTML = 'Yerel Plan';
+                    badge.style.background = 'rgba(255, 255, 255, 0.06)';
+                    badge.style.color = '#cbd5e1';
+                }
+            }
+
+            if (syncBtn) {
+                syncBtn.innerText = currentPlan.googleEventId ? '🔄 Takvimi Yeniden Güncelle' : '📅 Bu Günü Takvime İşle';
+            }
+        }
+
+        function updateScheduledDayTime(timeVal) {
+            if (activeSchedulingDayIdx === null) return;
+            const isNext = activePlannerWeek === 'next';
+            const user = getActiveUser();
+            const schedule = isNext ? getNextWeeklySchedule(user.id) : getWeeklySchedule(user.id);
+            if (schedule[activeSchedulingDayIdx]) {
+                schedule[activeSchedulingDayIdx].time = timeVal || '18:30';
+                if (isNext) saveNextWeeklySchedule(schedule, user.id);
+                else saveWeeklySchedule(schedule, user.id);
+
+                if (isGoogleCalendarConnected() && schedule[activeSchedulingDayIdx].googleEventId) {
+                    syncFitLabToGoogleCalendar(activePlannerWeek).catch(() => {});
+                }
+                if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
+            }
+        }
+
+        function updateScheduledDayDuration(durVal) {
+            if (activeSchedulingDayIdx === null) return;
+            const isNext = activePlannerWeek === 'next';
+            const user = getActiveUser();
+            const schedule = isNext ? getNextWeeklySchedule(user.id) : getWeeklySchedule(user.id);
+            if (schedule[activeSchedulingDayIdx]) {
+                schedule[activeSchedulingDayIdx].duration = parseInt(durVal, 10) || 50;
+                if (isNext) saveNextWeeklySchedule(schedule, user.id);
+                else saveWeeklySchedule(schedule, user.id);
+
+                if (isGoogleCalendarConnected() && schedule[activeSchedulingDayIdx].googleEventId) {
+                    syncFitLabToGoogleCalendar(activePlannerWeek).catch(() => {});
+                }
+            }
+        }
+
+        function openCalendarSyncModal() {
+            const modal = document.getElementById('calendarSyncModal');
+            if (!modal) return;
+            renderCalendarConnectionCard();
+
+            const prefs = getCalendarPreferences();
+            const timeEl = document.getElementById('calPrefDefaultTime');
+            const remEl = document.getElementById('calPrefReminderMin');
+            const clientEl = document.getElementById('calCustomClientId');
+
+            if (timeEl) timeEl.value = prefs.defaultTime || '18:30';
+            if (remEl) remEl.value = String(prefs.reminderMin || 30);
+            if (clientEl) clientEl.value = prefs.customClientId || '';
+
+            modal.style.display = 'flex';
+        }
+
+        function closeCalendarSyncModal() {
+            const modal = document.getElementById('calendarSyncModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function renderCalendarConnectionCard() {
+            const card = document.getElementById('calendarConnectionCard');
+            if (!card) return;
+            const connected = isGoogleCalendarConnected();
+
+            if (connected) {
+                card.innerHTML = `
+                    <div style="background:linear-gradient(135deg, rgba(16,185,129,0.1), rgba(15,23,42,0.9)); border:1.5px solid #10b981; border-radius:10px; padding:12px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="font-size:22px;">🟢</span>
+                                <div>
+                                    <div style="font-size:13px; font-weight:800; color:#fff;">Google Takvim Canlı Bağlı</div>
+                                    <div style="font-size:11px; color:#a7f3d0; margin-top:2px;">Özel Takvim: <strong>FitLab • Antrenmanlarım</strong></div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:5px 10px; color:#fca5a5; border-color:rgba(239,68,68,0.4);" onclick="disconnectGoogleCalendar()">
+                                Bağlantıyı Kes
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                card.innerHTML = `
+                    <div style="background:rgba(245,158,11,0.08); border:1.5px solid rgba(245,158,11,0.3); border-radius:10px; padding:12px;">
+                        <div style="margin-bottom:8px;">
+                            <div style="font-size:13px; font-weight:800; color:#fff;">📅 Google & Cihaz Takvim Entegrasyonu</div>
+                            <div style="font-size:11px; color:var(--text-secondary); margin-top:3px; line-height:1.4;">
+                                Antrenman seanslarınızı Google Takvim web uygulamasında doğrudan açabilir veya tüm haftayı Apple / cihaz takviminize tek dokunuşla aktarabilirsiniz.
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+                            <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:7px 14px; font-weight:800;" onclick="openGoogleCalendarWeb()">
+                                📅 Google Takvim'i Aç
+                            </button>
+                            <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 12px; color:#cbd5e1;" onclick="downloadFullScheduleICS()">
+                                🍏 Tüm Programı İndir (.ics)
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        async function connectGoogleCalendarPrompt() {
+            const clientId = getGoogleClientId();
+
+            // 1. Google Identity Services (GIS) ile resmi Google OAuth izin penceresini aç
+            if (clientId && window.google && window.google.accounts && window.google.accounts.oauth2) {
+                try {
+                    const client = google.accounts.oauth2.initTokenClient({
+                        client_id: clientId,
+                        scope: 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events',
+                        callback: async (resp) => {
+                            if (resp && resp.access_token) {
+                                saveGoogleCalendarToken(resp.access_token, resp.expires_in || 3600);
+                                if (typeof showToast === 'function') {
+                                    showToast("🟢 Google Takvim başarıyla bağlandı! Programınız otomatik yükleniyor...");
+                                }
+                                await performFullCalendarSync();
+                                if (typeof openGoogleCalendarExportModal === 'function') {
+                                    const modal = document.getElementById('googleCalendarExportModal');
+                                    if (modal && modal.style.display !== 'none') openGoogleCalendarExportModal();
+                                }
+                                if (typeof renderCalendarConnectionCard === 'function') {
+                                    renderCalendarConnectionCard();
+                                }
+                            } else if (resp && resp.error) {
+                                console.warn("Google OAuth yanıt hatası:", resp);
+                                if (typeof showToast === 'function') showToast("❌ Google izin hatası: " + (resp.error_description || resp.error));
+                            }
+                        },
+                        error_callback: (err) => {
+                            console.warn("GIS hata callback:", err);
+                            if (typeof showToast === 'function') showToast("❌ Google kimlik doğrulama başlatılamadı.");
+                        }
+                    });
+                    client.requestAccessToken();
+                    return;
+                } catch(gisErr) {
+                    console.warn("GIS denemesi:", gisErr);
+                }
+            }
+
+            // 2. Firebase Google Auth ile dene (İkincil yöntem)
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                try {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    provider.addScope('https://www.googleapis.com/auth/calendar');
+                    provider.addScope('https://www.googleapis.com/auth/calendar.events');
+                    const cred = await firebase.auth().signInWithPopup(provider);
+                    if (cred && cred.credential && cred.credential.accessToken) {
+                        saveGoogleCalendarToken(cred.credential.accessToken, 3600);
+                        await performFullCalendarSync();
+                        if (typeof showToast === 'function') {
+                            showToast("🟢 Google Takvim canlı bağlandı! Programlar otomatik eşitleniyor.");
+                        }
+                        if (typeof openGoogleCalendarExportModal === 'function') {
+                            const modal = document.getElementById('googleCalendarExportModal');
+                            if (modal && modal.style.display !== 'none') openGoogleCalendarExportModal();
+                        }
+                        return;
+                    }
+                } catch(fbErr) {
+                    console.warn("Firebase Auth Google Calendar denemesi:", fbErr);
+                }
+            }
+
+            // 3. Fallback: Kullanıcıyı takvim modalına yönlendir
+            openCalendarSyncModal();
+        }
+
+        function initCalendarLiveSyncOnLoad() {
+            try {
+                if (isGoogleCalendarConnected()) {
+                    const prefs = getCalendarPreferences();
+                    if (prefs.autoSync !== false) {
+                        setTimeout(() => {
+                            syncGoogleCalendarToFitLab().then(() => {
+                                if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
+                            }).catch(() => {});
+                        }, 2500);
+                    }
+                }
+            } catch(e) {}
+        }
+
+        // ==================== SMART CALENDAR SCREEN ENGINE (WEEKLY & MONTHLY) ====================
+        const CAL_MONTH_NAMES_TR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+
+        const calendarScreenState = {
+            viewMode: 'weekly', // 'weekly' | 'monthly'
+            anchorDate: new Date()
+        };
+
+        function formatDateYMD(d) {
+            if (!d || !(d instanceof Date) || isNaN(d.getTime())) return '';
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+
+        function getDateScheduleOverrides(uid) {
+            const targetUid = uid || (typeof getActiveUserId === 'function' ? getActiveUserId() : 'default');
+            try {
+                const raw = localStorage.getItem(`celik_kodu_date_schedule_${targetUid}`);
+                return raw ? JSON.parse(raw) : {};
+            } catch(e) {
+                return {};
+            }
+        }
+
+        function saveDateScheduleOverride(dateStr, plan, uid) {
+            if (!dateStr) return;
+            const targetUid = uid || (typeof getActiveUserId === 'function' ? getActiveUserId() : 'default');
+            const overrides = getDateScheduleOverrides(targetUid);
+            if (!plan || plan.id === 'default') {
+                delete overrides[dateStr];
+            } else {
+                overrides[dateStr] = plan;
+            }
+            try {
+                localStorage.setItem(`celik_kodu_date_schedule_${targetUid}`, JSON.stringify(overrides));
+            } catch(e) {}
+        }
+
+        function getCompletedWorkoutsForDate(dateObj) {
+            const targetYMD = formatDateYMD(dateObj);
+            if (!targetYMD) return [];
+            const logs = (typeof getWorkoutLogs === 'function') ? getWorkoutLogs() : [];
+            return logs.filter(l => {
+                if (!l || !l.date) return false;
+                const dStr = String(l.date).split('T')[0];
+                return dStr === targetYMD;
+            });
+        }
+
+        function getPlanForDate(dateObj) {
+            const dStr = formatDateYMD(dateObj);
+            const overrides = getDateScheduleOverrides();
+            if (overrides && overrides[dStr]) {
+                return overrides[dStr];
+            }
+            const dayIdx = dateObj.getDay();
+            const schedule = (typeof getWeeklySchedule === 'function') ? getWeeklySchedule() : {};
+            return schedule[dayIdx] || { id: 'rest', title: '🧘 Dinlenme & Toparlanma', rest: true, type: 'rest' };
+        }
+
+        function setCalendarViewMode(mode) {
+            calendarScreenState.viewMode = mode === 'monthly' ? 'monthly' : 'weekly';
+            renderCalendarScreen();
+        }
+
+        function navigateCalendar(dir) {
+            if (!calendarScreenState.anchorDate) calendarScreenState.anchorDate = new Date();
+            const d = new Date(calendarScreenState.anchorDate);
+            if (calendarScreenState.viewMode === 'monthly') {
+                d.setMonth(d.getMonth() + dir);
+            } else {
+                d.setDate(d.getDate() + (dir * 7));
+            }
+            calendarScreenState.anchorDate = d;
+            renderCalendarScreen();
+        }
+
+        function jumpCalendarToToday() {
+            calendarScreenState.anchorDate = new Date();
+            renderCalendarScreen();
+        }
+
+        function quickSetDateRest(dateStr, dayIdx) {
+            const uid = getActiveUserId();
+            const restPlan = {
+                id: 'rest',
+                title: '🧘 Dinlenme & Aktif Toparlanma',
+                type: 'rest',
+                desc: 'Hafif yürüyüş, esneme veya tam istirahat',
+                rest: true
+            };
+            saveDateScheduleOverride(dateStr, restPlan, uid);
+            if (typeof showToast === 'function') {
+                showToast(`🧘 ${dateStr} dinlenme günü olarak ayarlandı.`);
+            }
+            renderCalendarScreen();
+            if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
+        }
+
+        function assignDirectiveToActiveDay() {
+            if (activeSchedulingDayIdx === null) return;
+            const uid = getActiveUserId();
+            let coachDir = null;
+            try {
+                const rawDir = localStorage.getItem(`celik_kodu_coach_directive_${uid}`);
+                if (rawDir) coachDir = JSON.parse(rawDir);
+            } catch(e) {}
+            if (!coachDir) {
+                if (typeof showToast === 'function') showToast("⚠️ FitLAB direktifi bulunamadı.");
+                return;
+            }
+            const dirWorkout = coachDir.parsedWorkout || (coachDir.fullReport ? parseDirectiveWorkout(coachDir.fullReport, coachDir.title) : null);
+            if (!dirWorkout) {
+                if (typeof showToast === 'function') showToast("⚠️ FitLAB egzersiz detayları ayrıştırılamadı.");
+                return;
+            }
+            const targetDay = activeSchedulingDayIdx;
+            const schedule = getWeeklySchedule();
+            const newPlan = {
+                id: dirWorkout.id || ('directive_' + Date.now()),
+                title: dirWorkout.title || 'FitLAB Özel Seansı',
+                type: 'custom_saved',
+                desc: `${dirWorkout.exercises ? dirWorkout.exercises.length : 0} Hareket • ${dirWorkout.duration || 45} Dk`,
+                rest: false,
+                customWorkout: dirWorkout,
+                exercises: dirWorkout.exercises
+            };
+            schedule[targetDay] = newPlan;
+            saveWeeklySchedule(schedule);
+
+            if (activeSchedulingDateStr) {
+                saveDateScheduleOverride(activeSchedulingDateStr, newPlan);
+            }
+            if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
+            if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
+            if (typeof showToast === 'function') showToast(`✅ "${newPlan.title}" ${DAY_NAMES_TR[targetDay]} gününe atandı!`);
+            if (typeof playAlertSound === 'function') playAlertSound();
+            openScheduleDayModal(targetDay, activeSchedulingDateStr);
+        }
+
+        function renderCalendarScreen() {
+            const container = document.getElementById('calendarMainContainer');
+            if (!container) return;
+
+            const weeklyBtn = document.getElementById('calViewWeeklyBtn');
+            const monthlyBtn = document.getElementById('calViewMonthlyBtn');
+            if (weeklyBtn) weeklyBtn.classList.toggle('active', calendarScreenState.viewMode === 'weekly');
+            if (monthlyBtn) monthlyBtn.classList.toggle('active', calendarScreenState.viewMode === 'monthly');
+
+            if (calendarScreenState.viewMode === 'monthly') {
+                renderCalendarMonthlyView(container);
+            } else {
+                renderCalendarWeeklyView(container);
+            }
+        }
+
+        function renderCalendarWeeklyView(container) {
+            const anchor = new Date(calendarScreenState.anchorDate || new Date());
+            anchor.setHours(0, 0, 0, 0);
+            const dayOfWeek = anchor.getDay(); // 0 is Sun, 1 is Mon
+            const diffToMon = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+            const monday = new Date(anchor);
+            monday.setDate(anchor.getDate() + diffToMon);
+
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+
+            const titleEl = document.getElementById('calPeriodTitle');
+            if (titleEl) {
+                const sD = monday.getDate();
+                const sM = CAL_MONTH_NAMES_TR[monday.getMonth()];
+                const eD = sunday.getDate();
+                const eM = CAL_MONTH_NAMES_TR[sunday.getMonth()];
+                const yr = sunday.getFullYear();
+                if (sM === eM) {
+                    titleEl.innerHTML = `📅 <span>${sD} - ${eD} ${sM} ${yr}</span>`;
+                } else {
+                    titleEl.innerHTML = `📅 <span>${sD} ${sM} - ${eD} ${eM} ${yr}</span>`;
+                }
+            }
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const todayYMD = formatDateYMD(today);
+
+            let html = '<div class="cal-week-grid">';
+            for (let i = 0; i < 7; i++) {
+                const dayDate = new Date(monday);
+                dayDate.setDate(monday.getDate() + i);
+                const dayYMD = formatDateYMD(dayDate);
+                const dayIdx = dayDate.getDay();
+                const isToday = dayYMD === todayYMD;
+                const isPast = dayDate < today;
+
+                const completedLogs = getCompletedWorkoutsForDate(dayDate);
+                const hasCompleted = completedLogs.length > 0;
+                const plan = getPlanForDate(dayDate);
+                const isRest = plan.rest || plan.type === 'rest';
+
+                let badgeHtml = '';
+                if (hasCompleted) {
+                    badgeHtml = `<span class="cal-week-badge-pill completed">✅ ${completedLogs.length > 1 ? completedLogs.length + ' Seans' : 'Tamamlandı'}</span>`;
+                } else if (isToday) {
+                    badgeHtml = `<span class="cal-week-badge-pill today">⚡ BUGÜN</span>`;
+                } else if (isPast && !isRest) {
+                    badgeHtml = `<span class="cal-week-badge-pill uncompleted">⚠️ Yapılmadı</span>`;
+                } else if (isRest) {
+                    badgeHtml = `<span class="cal-week-badge-pill rest">🧘 Dinlenme</span>`;
+                } else {
+                    badgeHtml = `<span class="cal-week-badge-pill planned">📋 Planlandı</span>`;
+                }
+
+                let bodyContent = '';
+                if (hasCompleted) {
+                    const log = completedLogs[0];
+                    const logVol = log.totalVolumeKg ? `${Math.round(log.totalVolumeKg).toLocaleString('tr-TR')} kg` : '';
+                    const logDur = log.durationFormatted || (log.duration ? `${log.duration} Dk` : '');
+                    bodyContent = `
+                        <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+                            <div style="font-size:12px; font-weight:800; color:#fff; margin-bottom:4px; line-height:1.3; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;" title="${escapeHTML(log.program || log.title || 'Antrenman')}">
+                                ${escapeHTML(log.program || log.title || 'Antrenman')}
+                            </div>
+                            <div style="font-size:11px; color:#34d399; font-weight:700; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                ${logDur ? `⏱️ ${logDur}` : ''} ${logVol ? ` • 🏋️ ${logVol}` : ''}
+                            </div>
+                            ${log.totalSetsCompleted ? `<div style="font-size:10px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">🎯 ${log.totalSetsCompleted} Set Tamamlandı</div>` : ''}
+                        </div>
+                        <div style="margin-top:8px;">
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 4px; width:100%; color:var(--cyan); border-color:rgba(56,189,248,0.4); text-align:center;" onclick="event.stopPropagation(); openScheduleDayModal(${dayIdx}, '${dayYMD}')">
+                                👁️ Seans Detayı
+                            </button>
+                        </div>
+                    `;
+                } else if (!isRest) {
+                    bodyContent = `
+                        <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+                            <div style="font-size:12px; font-weight:800; color:#fff; margin-bottom:4px; line-height:1.3; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;" title="${escapeHTML(plan.title || 'Planlı Antrenman')}">
+                                ${escapeHTML(plan.title || 'Planlı Antrenman')}
+                            </div>
+                            <div style="font-size:11px; color:var(--gold); font-weight:700; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                ⏱️ ${plan.time || '18:30'} • ${plan.duration || 45} Dk
+                            </div>
+                            ${plan.desc ? `<div style="font-size:10px; color:var(--text-secondary); line-height:1.25; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">${escapeHTML(plan.desc)}</div>` : ''}
+                        </div>
+                        <div style="margin-top:8px; display:flex; flex-direction:column; gap:4px;">
+                            ${isToday ? `
+                                <button type="button" class="btn btn-gold" style="width:100%; font-size:11px; padding:6px 4px; font-weight:900; text-align:center;" onclick="event.stopPropagation(); startScheduledWorkoutForDay(${dayIdx})">
+                                    ▶️ Başlat
+                                </button>
+                                <button type="button" class="btn btn-outline" style="width:100%; font-size:10px; padding:4px; color:#cbd5e1; text-align:center;" onclick="event.stopPropagation(); openScheduleDayModal(${dayIdx}, '${dayYMD}')">
+                                    ✏️ Düzenle
+                                </button>
+                            ` : `
+                                <button type="button" class="btn btn-outline" style="width:100%; font-size:11px; padding:6px 4px; font-weight:700; color:var(--gold); border-color:rgba(245,158,11,0.4); text-align:center;" onclick="event.stopPropagation(); openScheduleDayModal(${dayIdx}, '${dayYMD}')">
+                                    ✏️ Düzenle / Ata
+                                </button>
+                            `}
+                        </div>
+                    `;
+                } else {
+                    bodyContent = `
+                        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:10px 0;">
+                            <span style="font-size:24px; margin-bottom:4px;">🧘</span>
+                            <div style="font-size:11.5px; font-weight:700; color:var(--text-secondary);">Dinlenme & Toparlanma</div>
+                        </div>
+                        <div style="margin-top:8px;">
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 4px; width:100%; border-color:rgba(255,255,255,0.15); color:#cbd5e1; text-align:center;" onclick="event.stopPropagation(); openScheduleDayModal(${dayIdx}, '${dayYMD}')">
+                                ➕ Program Ata
+                            </button>
+                        </div>
+                    `;
+                }
+
+                html += `
+                    <div class="cal-week-card ${isToday ? 'is-today' : ''} ${hasCompleted ? 'is-completed' : (isRest ? 'is-rest' : '')}" onclick="openScheduleDayModal(${dayIdx}, '${dayYMD}')">
+                        <div class="cal-week-card-header">
+                            <div class="cal-week-card-top-row">
+                                <span class="cal-week-card-day">${DAY_NAMES_TR[dayIdx]}</span>
+                                <span class="cal-week-card-date">${dayDate.getDate()} ${CAL_MONTH_NAMES_TR[dayDate.getMonth()].slice(0, 3)}</span>
+                            </div>
+                            <div class="cal-week-card-badge-row">
+                                ${badgeHtml}
+                            </div>
+                        </div>
+                        ${bodyContent}
+                    </div>
+                `;
+            }
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function renderCalendarMonthlyView(container) {
+            const anchor = new Date(calendarScreenState.anchorDate || new Date());
+            const year = anchor.getFullYear();
+            const month = anchor.getMonth();
+
+            const titleEl = document.getElementById('calPeriodTitle');
+            if (titleEl) {
+                titleEl.innerHTML = `🗓️ <span>${CAL_MONTH_NAMES_TR[month]} ${year}</span>`;
+            }
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+
+            // Monday-first offset
+            const firstDayOfWeek = firstDay.getDay(); // 0 is Sun
+            const startOffset = (firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1);
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const todayYMD = formatDateYMD(today);
+
+            let html = `
+                <div class="cal-month-table">
+                    <div class="cal-month-header-row">
+                        <div>Pzt</div>
+                        <div>Sal</div>
+                        <div>Çar</div>
+                        <div>Per</div>
+                        <div>Cum</div>
+                        <div>Cmt</div>
+                        <div>Paz</div>
+                    </div>
+                    <div class="cal-month-days-grid">
+            `;
+
+            // Previous month padding days
+            const prevMonthLastDay = new Date(year, month, 0).getDate();
+            for (let p = startOffset - 1; p >= 0; p--) {
+                const dayNum = prevMonthLastDay - p;
+                html += `
+                    <div class="cal-month-cell is-other-month">
+                        <div class="cal-month-cell-header">
+                            <span>${dayNum}</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Current month days
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dayDate = new Date(year, month, d);
+                const dayYMD = formatDateYMD(dayDate);
+                const dayIdx = dayDate.getDay();
+                const isToday = dayYMD === todayYMD;
+
+                const completedLogs = getCompletedWorkoutsForDate(dayDate);
+                const hasCompleted = completedLogs.length > 0;
+                const plan = getPlanForDate(dayDate);
+                const isRest = plan.rest || plan.type === 'rest';
+
+                let pillHtml = '';
+                if (hasCompleted) {
+                    const titleShort = (completedLogs[0].program || completedLogs[0].title || 'Tamamlandı').slice(0, 11);
+                    pillHtml = `<div class="cal-tag-pill completed" title="${escapeHTML(completedLogs[0].program || completedLogs[0].title)}">✅ ${escapeHTML(titleShort)}</div>`;
+                } else if (!isRest) {
+                    const cleanTitle = (plan.title || 'Plan').replace(/⚔️/g, '').trim().slice(0, 11);
+                    pillHtml = `<div class="cal-tag-pill scheduled" title="${escapeHTML(plan.title)}">⚔️ ${escapeHTML(cleanTitle)}</div>`;
+                } else {
+                    pillHtml = `<div class="cal-tag-pill rest">🧘 Dinlenme</div>`;
+                }
+
+                html += `
+                    <div class="cal-month-cell ${isToday ? 'is-today' : ''}" onclick="openScheduleDayModal(${dayIdx}, '${dayYMD}')">
+                        <div class="cal-month-cell-header">
+                            <span style="${isToday ? 'font-weight:900; color:var(--gold);' : ''}">${d}</span>
+                            ${isToday ? '<span style="font-size:8px; color:var(--gold); font-weight:900;">BUGÜN</span>' : ''}
+                        </div>
+                        ${pillHtml}
+                    </div>
+                `;
+            }
+
+            // Trailing padding days to fill the row
+            const totalCells = startOffset + daysInMonth;
+            const remainingCells = (7 - (totalCells % 7)) % 7;
+            for (let n = 1; n <= remainingCells; n++) {
+                html += `
+                    <div class="cal-month-cell is-other-month">
+                        <div class="cal-month-cell-header">
+                            <span>${n}</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += `
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        // ==================== AUTHENTICATION & MULTI-USER SYSTEM ====================
+        async function sha256Hex(message) {
+            try {
+                if (window.crypto && window.crypto.subtle) {
+                    const msgBuffer = new TextEncoder().encode(message);
+                    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+                    const hashArray = Array.from(new Uint8Array(hashBuffer));
+                    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                }
+            } catch(e) {}
+            let hash = 0;
+            for (let i = 0; i < message.length; i++) {
+                hash = ((hash << 5) - hash) + message.charCodeAt(i);
+                hash |= 0;
+            }
+            return String(Math.abs(hash));
+        }
+
+        function initAuthDatabase() {
+            let users = [];
+            try {
+                const raw = localStorage.getItem('celik_kodu_auth_users');
+                if (raw) users = JSON.parse(raw);
+            } catch(e) {}
+
+            if (!Array.isArray(users) || users.length === 0) {
+                // Şifre: 123 (Salted SHA-256 Hash ile korunur)
+                const defaultHash = 'a924925a37aaa6c8e9f3d54b4f00a30b1d7445611efb0ee3641b3c959e13fea7';
+                const defaultSalt = 'celik_salt_default';
+                users = [
+                    {
+                        id: 'usr_admin',
+                        username: 'admin',
+                        passwordHash: defaultHash,
+                        salt: defaultSalt,
+                        role: 'admin',
+                        name: 'Ferit (Admin)',
+                        avatar: '🥋',
+                        theme: 'gold',
+                        level: 'İleri Seviye',
+                        gender: 'Erkek',
+                        weights: { press: '16', squat: '22', row: '20', rdl: '24', swing: '18', lunge: '14' },
+                        createdAt: Date.now()
+                    },
+                    {
+                        id: 'usr_ferit',
+                        username: 'ferit',
+                        passwordHash: defaultHash,
+                        salt: defaultSalt,
+                        role: 'admin',
+                        name: 'Ferit',
+                        avatar: '🥋',
+                        theme: 'gold',
+                        level: 'İleri Seviye',
+                        gender: 'Erkek',
+                        weights: { press: '16', squat: '22', row: '20', rdl: '24', swing: '18', lunge: '14' },
+                        createdAt: Date.now()
+                    },
+                    {
+                        id: 'usr_ismail',
+                        username: 'ismail',
+                        passwordHash: defaultHash,
+                        salt: defaultSalt,
+                        role: 'athlete',
+                        name: 'İsmail',
+                        avatar: '🦁',
+                        theme: 'cyan',
+                        level: 'Orta Seviye',
+                        gender: 'Erkek',
+                        weights: { press: '12', squat: '18', row: '16', rdl: '18', swing: '14', lunge: '12' },
+                        createdAt: Date.now()
+                    }
+                ];
+                localStorage.setItem('celik_kodu_auth_users', JSON.stringify(users));
+            }
+            return users;
+        }
+
+        function getAuthUsers() {
+            return initAuthDatabase();
+        }
+
+        function saveAuthUsers(users) {
+            localStorage.setItem('celik_kodu_auth_users', JSON.stringify(users));
+            syncUsersToCloud(users);
+        }
+
+        function getSession() {
+            try {
+                const raw = localStorage.getItem('celik_kodu_session');
+                return raw ? JSON.parse(raw) : null;
+            } catch(e) {
+                return null;
+            }
+        }
+
+        function setSession(session) {
+            currentSession = session;
+            if (session) {
+                localStorage.setItem('celik_kodu_session', JSON.stringify(session));
+                localStorage.setItem('celik_kodu_active_user_id', session.userId);
+                syncAllFromCloud();
+            } else {
+                localStorage.removeItem('celik_kodu_session');
+                localStorage.removeItem('celik_kodu_active_user_id');
+            }
+            syncAppViewState();
+        }
+
+        function getActiveUserId() {
+            const session = getSession();
+            if (session && session.userId) return session.userId;
+            const fallback = localStorage.getItem('celik_kodu_active_user_id');
+            return fallback || 'usr_admin';
+        }
+
+        function getActiveUser() {
+            const uid = getActiveUserId();
+            const users = getAuthUsers();
+            return users.find(u => u.id === uid) || users[0];
+        }
+
+        function syncAppViewState() {
+            const session = getSession();
+            const loginScreen = document.getElementById('loginScreen');
+            const mainAppWrapper = document.getElementById('mainAppWrapper');
+
+            if (!session) {
+                if (loginScreen) loginScreen.classList.add('active');
+                if (mainAppWrapper) mainAppWrapper.style.display = 'none';
+            } else {
+                if (loginScreen) loginScreen.classList.remove('active');
+                if (mainAppWrapper) mainAppWrapper.style.display = 'block';
+
+                const isAdmin = session.role === 'admin';
+
+                const btnAdmin = document.getElementById('btnAdminPanel');
+                if (btnAdmin) btnAdmin.style.display = isAdmin ? 'flex' : 'none';
+
+                const sheetAdmin = document.getElementById('sheetAdminBtn');
+                if (sheetAdmin) sheetAdmin.style.display = isAdmin ? 'flex' : 'none';
+
+                const profileTabAdminBtn = document.getElementById('profileTabAdminBtn');
+                if (profileTabAdminBtn) profileTabAdminBtn.style.display = isAdmin ? 'inline-block' : 'none';
+
+                const roleBadge = document.getElementById('headerUserRoleBadge');
+                if (roleBadge) {
+                    roleBadge.innerText = isAdmin ? 'YÖNETİCİ' : 'SPORCU';
+                    roleBadge.className = 'auth-role-tag ' + (isAdmin ? 'role-admin' : 'role-athlete');
+                }
+
+                applyActiveUserProfile();
+            }
+        }
+
+        async function handleAuthLogin(e) {
+            e.preventDefault();
+            const usernameInput = document.getElementById('loginUsername');
+            const passwordInput = document.getElementById('loginPassword');
+            const errorBox = document.getElementById('loginErrorMsg');
+
+            const uname = (usernameInput.value || '').trim().toLowerCase();
+            const pass = (passwordInput.value || '').trim();
+
+            const users = getAuthUsers();
+            let matched = null;
+
+            for (const u of users) {
+                if ((u.username || '').toLowerCase() !== uname) continue;
+                // 1. Salted SHA-256 hash kontrolü
+                if (u.passwordHash) {
+                    const enteredHash = await sha256Hex((u.salt || '') + pass);
+                    if (enteredHash === u.passwordHash) {
+                        matched = u;
+                        break;
+                    }
+                }
+                // 2. Geriye dönük uyumluluk: Eski açık şifre eşleşirse hemen hash'e yükselt
+                if (u.password && u.password === pass) {
+                    matched = u;
+                    const salt = Math.random().toString(36).substring(2, 10);
+                    u.salt = salt;
+                    u.passwordHash = await sha256Hex(salt + pass);
+                    delete u.password;
+                    saveAuthUsers(users);
+                    break;
+                }
+            }
+
+            if (matched) {
+                errorBox.style.display = 'none';
+                setSession({
+                    userId: matched.id,
+                    username: matched.username,
+                    role: matched.role,
+                    name: matched.name
+                });
+                usernameInput.value = "";
+                passwordInput.value = "";
+            } else {
+                errorBox.innerText = "❌ Hatalı kullanıcı adı veya şifre! (Varsayılan: admin / 123)";
+                errorBox.style.display = 'block';
+            }
+        }
+
+        function handleAuthLogout() {
+            if (confirm("Oturumu kapatmak istediğinize emin misiniz?")) {
+                setSession(null);
+            }
+        }
+
+        // ADMIN PANEL
+        function openAdminModal() {
+            const session = getSession();
+            if (!session || session.role !== 'admin') {
+                alert("Bu alana sadece yöneticiler erişebilir.");
+                return;
+            }
+            renderAdminAthleteStatuses();
+            renderAdminUserList();
+            switchAdminModalTab('status');
+            document.getElementById('adminModal').classList.add('active');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.remove('active');
+        }
+
+        function switchAdminModalTab(tabKey) {
+            const statusView = document.getElementById('adminViewStatus');
+            const manageView = document.getElementById('adminViewManage');
+            const btnStatus = document.getElementById('adminTabBtnStatus');
+            const btnManage = document.getElementById('adminTabBtnManage');
+
+            if (tabKey === 'status') {
+                if (statusView) statusView.style.display = 'block';
+                if (manageView) manageView.style.display = 'none';
+                if (btnStatus) {
+                    btnStatus.className = 'btn btn-gold';
+                    btnStatus.style.color = '#000';
+                }
+                if (btnManage) {
+                    btnManage.className = 'btn btn-outline';
+                    btnManage.style.color = 'var(--text-secondary)';
+                }
+                renderAdminAthleteStatuses();
+            } else {
+                if (statusView) statusView.style.display = 'none';
+                if (manageView) manageView.style.display = 'block';
+                if (btnStatus) {
+                    btnStatus.className = 'btn btn-outline';
+                    btnStatus.style.color = 'var(--text-secondary)';
+                }
+                if (btnManage) {
+                    btnManage.className = 'btn btn-gold';
+                    btnManage.style.color = '#000';
+                }
+                renderAdminUserList();
+            }
+        }
+
+        function selectNewAvatar(av) {
+            selectedNewAvatar = av;
+            document.querySelectorAll('#newAvatarPicker .avatar-choice').forEach(el => {
+                el.classList.toggle('selected', el.innerText.trim() === av);
+            });
+        }
+
+        async function handleCreateUser() {
+            const uname = (document.getElementById('newUsername').value || '').trim().toLowerCase();
+            const pass = (document.getElementById('newPassword').value || '').trim();
+            const dname = (document.getElementById('newDisplayName').value || '').trim();
+            const role = document.getElementById('newRole').value;
+            const level = document.getElementById('newLevel').value;
+            const gender = document.getElementById('newGender').value;
+
+            if (!uname || !pass || !dname) {
+                alert("Lütfen tüm alanları doldurun.");
+                return;
+            }
+
+            const users = getAuthUsers();
+            if (users.some(u => u.username.toLowerCase() === uname)) {
+                alert("Bu kullanıcı adı zaten kullanımda!");
+                return;
+            }
+
+            const salt = Math.random().toString(36).substring(2, 10);
+            const passHash = await sha256Hex(salt + pass);
+
+            const newUser = {
+                id: 'usr_' + Date.now(),
+                username: uname,
+                passwordHash: passHash,
+                salt: salt,
+                role: role,
+                name: dname,
+                avatar: selectedNewAvatar,
+                theme: role === 'admin' ? 'gold' : 'cyan',
+                level: level,
+                gender: gender,
+                weights: { press: '12', squat: '18', row: '16', rdl: '18', swing: '14', lunge: '12' },
+                createdAt: Date.now()
+            };
+
+            users.push(newUser);
+            saveAuthUsers(users);
+
+            document.getElementById('newUsername').value = "";
+            document.getElementById('newPassword').value = "123456";
+            document.getElementById('newDisplayName').value = "";
+
+            renderAdminUserList();
+            renderAdminAthleteStatuses();
+            alert(`✅ ${dname} (@${uname}) başarıyla oluşturuldu!`);
+        }
+
+        function renderAdminAthleteStatuses() {
+            const container = document.getElementById('adminAthleteStatusContainer');
+            const kpisEl = document.getElementById('adminSummaryKpis');
+            if (!container) return;
+
+            const users = getAuthUsers();
+            let totalWorkoutsAll = 0;
+            let totalTonajAll = 0;
+            let activeAthletesCount = 0;
+
+            const cardsHTML = users.map(u => {
+                const logs = getUserLogsById(u.id);
+                const streak = calculateStreakForLogs(logs);
+                const sessionCount = logs.length;
+                if (sessionCount > 0) activeAthletesCount++;
+
+                let userTonaj = 0;
+                logs.forEach(l => {
+                    userTonaj += (parseFloat(l.totalVolumeKg) || 0);
+                });
+                totalWorkoutsAll += sessionCount;
+                totalTonajAll += userTonaj;
+
+                const lastLog = logs.length > 0 ? logs[0] : null;
+                const activeStateRaw = localStorage.getItem(`celik_kodu_active_state_${u.id}`);
+                const isLiveWorking = !!activeStateRaw;
+                const w = u.weights || {};
+
+                // Exercise details for the latest workout
+                let lastLogDetailsHTML = '';
+                if (lastLog) {
+                    const exList = lastLog.exercises || lastLog.detailedExercises || [];
+                    lastLogDetailsHTML = `
+                        <div id="adminExDetails_${u.id}" style="display:none; margin-top:10px; padding:10px 12px; background:rgba(0,0,0,0.45); border-radius:8px; border:1px solid rgba(245,158,11,0.25);">
+                            <div style="font-size:11px; font-weight:800; color:var(--gold); margin-bottom:8px; text-transform:uppercase; display:flex; justify-content:space-between;">
+                                <span>📋 ${escapeHTML(lastLog.title)}</span>
+                                <span style="color:#fff;">${lastLog.dateFormatted || lastLog.date}</span>
+                            </div>
+                            ${exList.length > 0 ? `
+                                <div style="display:flex; flex-direction:column; gap:6px; max-height:200px; overflow-y:auto; padding-right:4px;">
+                                    ${exList.map(ex => {
+                                        const sets = (ex.sets || []).filter(s => s.completed || (parseFloat(s.weight) > 0));
+                                        const setsStr = sets.length > 0
+                                            ? sets.map((s, idx) => `Set ${idx+1}: <strong style="color:var(--gold);">${s.weight}kg</strong> x ${s.reps}`).join(' • ')
+                                            : '<span style="color:var(--text-secondary);">Set kaydı yok</span>';
+                                        return `
+                                            <div style="font-size:11px; padding:6px 8px; background:rgba(255,255,255,0.03); border-radius:6px; border-left:3px solid var(--gold);">
+                                                <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                                                    <strong style="color:#fff;">${escapeHTML(ex.name)}</strong>
+                                                    ${ex.muscle ? `<span style="font-size:10px; color:var(--cyan);">[${escapeHTML(ex.muscle)}]</span>` : ''}
+                                                </div>
+                                                <div style="font-size:10.5px; color:var(--text-secondary);">${setsStr}</div>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            ` : '<div style="font-size:11px; color:var(--text-secondary);">Detaylı set kaydı bulunamadı.</div>'}
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div style="background:var(--bg-surface); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:14px; margin-bottom:12px; box-shadow:0 4px 15px rgba(0,0,0,0.3);">
+                        <!-- ATHLETE HEADER -->
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span style="font-size:26px; width:44px; height:44px; display:flex; align-items:center; justify-content:center; background:var(--bg-elevated); border-radius:10px; border:1px solid var(--gold);">${u.avatar || '🥋'}</span>
+                                <div>
+                                    <div style="display:flex; align-items:center; gap:6px;">
+                                        <strong style="color:#fff; font-size:14px;">${escapeHTML(u.name)}</strong>
+                                        <span style="font-size:11px; color:var(--text-secondary);">@${escapeHTML(u.username)}</span>
+                                        <span class="auth-role-tag ${u.role === 'admin' ? 'role-admin' : 'role-athlete'}" style="font-size:9px; padding:2px 6px;">
+                                            ${u.role === 'admin' ? 'YÖNETİCİ' : 'SPORCU'}
+                                        </span>
+                                    </div>
+                                    <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
+                                        ${escapeHTML(u.level || 'Orta Seviye')} • ${escapeHTML(u.gender || 'Erkek')}
+                                    </div>
+                                </div>
+                            </div>
+                            ${isLiveWorking ? `
+                                <span style="background:rgba(34,197,94,0.15); border:1px solid var(--green-success); color:var(--green-success); font-size:10px; font-weight:800; padding:3px 8px; border-radius:12px; display:flex; align-items:center; gap:5px;">
+                                    <span style="width:6px; height:6px; border-radius:50%; background:var(--green-success); display:inline-block;"></span>
+                                    Antrenmanda
+                                </span>
+                            ` : ''}
+                        </div>
+
+                        <!-- 3-COL KPI STATS -->
+                        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-bottom:10px; text-align:center;">
+                            <div style="background:var(--bg-card); padding:8px 4px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+                                <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">TOPLAM SEANS</div>
+                                <div style="font-size:13px; font-weight:800; color:#fff; margin-top:2px;">🏋️ ${sessionCount} Seans</div>
+                            </div>
+                            <div style="background:var(--bg-card); padding:8px 4px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+                                <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">SERİ DURUMU</div>
+                                <div style="font-size:13px; font-weight:800; color:var(--gold); margin-top:2px;">🔥 ${streak} Gün</div>
+                            </div>
+                            <div style="background:var(--bg-card); padding:8px 4px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+                                <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">TOPLAM TONAJ</div>
+                                <div style="font-size:13px; font-weight:800; color:var(--cyan); margin-top:2px;">⚡ ${Math.round(userTonaj).toLocaleString('tr-TR')} kg</div>
+                            </div>
+                        </div>
+
+                        <!-- LAST WORKOUT PREVIEW -->
+                        <div style="background:var(--bg-card); border-radius:8px; padding:10px 12px; border:1px solid rgba(255,255,255,0.06); font-size:11.5px; margin-bottom:10px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                <span style="font-weight:700; color:var(--gold);">Son Antrenman Seansı:</span>
+                                <span style="color:var(--text-secondary); font-size:10.5px;">
+                                    ${lastLog ? (lastLog.dateFormatted || lastLog.date) : 'Kayıt Yok'}
+                                </span>
+                            </div>
+                            ${lastLog ? `
+                                <div style="color:#fff; font-weight:600; display:flex; justify-content:space-between; align-items:center;">
+                                    <span>${escapeHTML(lastLog.title)}</span>
+                                    <span style="color:var(--gold-light); font-size:11px;">⏱️ ${lastLog.duration || 0} dk • ${lastLog.totalSetsCompleted || 0} Set</span>
+                                </div>
+                            ` : `
+                                <div style="color:var(--text-secondary); font-style:italic;">Henüz tamamlanmış antrenman seansı bulunmuyor.</div>
+                            `}
+                        </div>
+
+                        <!-- TARGET WEIGHTS -->
+                        <div style="font-size:10px; color:var(--text-secondary); font-weight:800; text-transform:uppercase; margin-bottom:4px; letter-spacing:0.5px;">
+                            🎯 Sporcunun Hedef / Çalışma Kiloları:
+                        </div>
+                        <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:4px; text-align:center; font-size:10.5px; margin-bottom:10px;">
+                            <div style="background:rgba(255,255,255,0.03); padding:4px 2px; border-radius:4px; border:1px solid rgba(255,255,255,0.05);">
+                                <div style="color:var(--text-secondary); font-size:9px;">Press</div>
+                                <strong style="color:var(--gold);">${w.press || '-'}k</strong>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.03); padding:4px 2px; border-radius:4px; border:1px solid rgba(255,255,255,0.05);">
+                                <div style="color:var(--text-secondary); font-size:9px;">Squat</div>
+                                <strong style="color:var(--gold);">${w.squat || '-'}k</strong>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.03); padding:4px 2px; border-radius:4px; border:1px solid rgba(255,255,255,0.05);">
+                                <div style="color:var(--text-secondary); font-size:9px;">Row</div>
+                                <strong style="color:var(--gold);">${w.row || '-'}k</strong>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.03); padding:4px 2px; border-radius:4px; border:1px solid rgba(255,255,255,0.05);">
+                                <div style="color:var(--text-secondary); font-size:9px;">RDL</div>
+                                <strong style="color:var(--gold);">${w.rdl || '-'}k</strong>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.03); padding:4px 2px; border-radius:4px; border:1px solid rgba(255,255,255,0.05);">
+                                <div style="color:var(--text-secondary); font-size:9px;">Swing</div>
+                                <strong style="color:var(--gold);">${w.swing || '-'}k</strong>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.03); padding:4px 2px; border-radius:4px; border:1px solid rgba(255,255,255,0.05);">
+                                <div style="color:var(--text-secondary); font-size:9px;">Lunge</div>
+                                <strong style="color:var(--gold);">${w.lunge || '-'}k</strong>
+                            </div>
+                        </div>
+
+                        <!-- TOGGLE LAST WORKOUT DETAILS BUTTON -->
+                        ${lastLog ? `
+                            <button class="btn btn-outline" style="width:100%; font-size:11px; padding:7px; border-color:rgba(245,158,11,0.4); color:var(--gold);" onclick="toggleAdminAthleteDetails('${u.id}')">
+                                🔍 Son Antrenman Hareket ve Set Detaylarını İncele
+                            </button>
+                            ${lastLogDetailsHTML}
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            if (kpisEl) {
+                kpisEl.innerHTML = `
+                    <div style="background:var(--bg-surface); padding:8px 6px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); text-align:center;">
+                        <div style="font-size:9px; color:var(--text-secondary); font-weight:700;">KAYITLI SPORCU</div>
+                        <div style="font-size:14px; font-weight:900; color:var(--gold); margin-top:2px;">👥 ${users.length}</div>
+                    </div>
+                    <div style="background:var(--bg-surface); padding:8px 6px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); text-align:center;">
+                        <div style="font-size:9px; color:var(--text-secondary); font-weight:700;">TOPLAM SEANS</div>
+                        <div style="font-size:14px; font-weight:900; color:var(--green-success); margin-top:2px;">✅ ${totalWorkoutsAll}</div>
+                    </div>
+                    <div style="background:var(--bg-surface); padding:8px 6px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); text-align:center;">
+                        <div style="font-size:9px; color:var(--text-secondary); font-weight:700;">TOPLAM TONAJ</div>
+                        <div style="font-size:14px; font-weight:900; color:var(--cyan); margin-top:2px;">⚡ ${Math.round(totalTonajAll).toLocaleString('tr-TR')} kg</div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = cardsHTML;
+        }
+
+        function toggleAdminAthleteDetails(uid) {
+            const el = document.getElementById(`adminExDetails_${uid}`);
+            if (el) {
+                const isHidden = el.style.display === 'none' || !el.style.display;
+                el.style.display = isHidden ? 'block' : 'none';
+            }
+        }
+
+        function renderAdminUserList() {
+            const container = document.getElementById('adminUserListContainer');
+            if (!container) return;
+
+            const users = getAuthUsers();
+            const session = getSession();
+
+            container.innerHTML = users.map(u => {
+                const logs = getUserLogsById(u.id);
+                const streak = calculateStreakForLogs(logs);
+                const isSelf = session && session.userId === u.id;
+
+                return `
+                    <div class="admin-user-card" style="background:var(--bg-surface); border:1px solid ${isSelf ? 'var(--gold)' : 'rgba(255,255,255,0.08)'}; border-radius:10px; padding:12px; margin-bottom:8px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="font-size:22px;">${u.avatar || '🥋'}</span>
+                                <div>
+                                    <div style="display:flex; align-items:center; gap:6px;">
+                                        <strong style="color:#fff; font-size:13px;">${escapeHTML(u.name)}</strong>
+                                        <span style="font-size:11px; color:var(--text-secondary);">(@${escapeHTML(u.username)})</span>
+                                        ${isSelf ? '<span class="auth-role-tag role-admin" style="font-size:9px; padding:1px 6px;">GİRİŞ YAPILAN HESAP</span>' : ''}
+                                    </div>
+                                    <div style="font-size:11px; color:var(--text-secondary);">
+                                        ${escapeHTML(u.level || 'Orta Seviye')} • ${escapeHTML(u.gender || 'Erkek')}
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                ${!isSelf ? `
+                                    <button class="btn btn-outline" style="font-size:10px; padding:4px 10px; color:#ef4444; border-color:#ef4444;" onclick="adminDeleteUser('${u.id}')">
+                                        🗑️ Sil
+                                    </button>
+                                ` : '<span style="font-size:11px; color:var(--gold); font-weight:700;">Aktif</span>'}
+                            </div>
+                        </div>
+                        <div style="font-size:11px; color:var(--text-secondary); display:flex; justify-content:space-between; border-top:1px solid rgba(255,255,255,0.06); padding-top:6px; margin-top:6px;">
+                            <span>Şifre: <code style="color:var(--gold-light); background:rgba(0,0,0,0.3); padding:2px 6px; border-radius:4px; font-family:monospace;">${escapeHTML(u.password)}</code></span>
+                            <span>${logs.length} Seans • Seri: ${streak} Gün</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function adminSwitchToUser(targetUserId) {
+            alert("Güvenlik nedeniyle hesaplar arası geçiş devre dışı bırakılmıştır.");
+        }
+
+        function adminDeleteUser(userId) {
+            const users = getAuthUsers();
+            const target = users.find(u => u.id === userId);
+            if (!target) return;
+
+            if (confirm(`@${target.username} (${target.name}) kullanıcısını silmek istediğinize emin misiniz?`)) {
+                localStorage.removeItem(`celik_kodu_history_${userId}`);
+                localStorage.removeItem(`celik_kodu_custom_programs_${userId}`);
+                localStorage.removeItem(`celik_kodu_active_state_${userId}`);
+                const updated = users.filter(u => u.id !== userId);
+                saveAuthUsers(updated);
+                renderAdminUserList();
+                renderAdminAthleteStatuses();
+            }
+        }
+
+        // PROFILE & THEME SETTINGS
+        function applyTheme(themeKey) {
+            const theme = THEMES[themeKey] || THEMES.gold;
+            document.documentElement.style.setProperty('--gold', theme.gold);
+            document.documentElement.style.setProperty('--gold-light', theme.goldLight);
+            document.documentElement.style.setProperty('--gold-glow', theme.glow);
+        }
+
+        function selectAvatar(avatar) {
+            selectedAvatar = avatar;
+            document.querySelectorAll('#avatarPicker .avatar-choice').forEach(el => {
+                el.classList.toggle('selected', el.innerText.trim() === avatar);
+            });
+        }
+
+        function selectTheme(themeKey) {
+            selectedTheme = themeKey;
+            document.querySelectorAll('#themePicker .theme-pill').forEach(el => {
+                const isSelected = el.getAttribute('onclick') && el.getAttribute('onclick').includes(themeKey);
+                el.classList.toggle('selected', isSelected);
+            });
+            applyTheme(themeKey);
+        }
+
+        function applyActiveUserProfile() {
+            const user = getActiveUser();
+            if (!user) return;
+
+            applyTheme(user.theme || 'gold');
+
+            const headerAvatar = document.getElementById('headerUserAvatar');
+            if (headerAvatar) headerAvatar.innerText = user.avatar || '🥋';
+            const headerName = document.getElementById('headerUserName');
+            if (headerName) headerName.innerText = escapeHTML(user.name);
+
+            const cardAvatar = document.getElementById('profileCardAvatar');
+            if (cardAvatar) cardAvatar.innerText = user.avatar || '🥋';
+            const cardName = document.getElementById('profileCardName');
+            if (cardName) cardName.innerText = escapeHTML(user.name);
+            const cardMeta = document.getElementById('profileCardMeta');
+            if (cardMeta) cardMeta.innerText = `${user.level} (${user.gender}) • Özel Kilo Programı`;
+
+            const nameInput = document.getElementById('editUserName');
+            if (nameInput) nameInput.value = user.name || '';
+            const levelSelect = document.getElementById('editUserLevel');
+            if (levelSelect) levelSelect.value = user.level || 'Orta Seviye';
+            const genderSelect = document.getElementById('editUserGender');
+            if (genderSelect) genderSelect.value = user.gender || 'Erkek';
+
+            selectAvatar(user.avatar || '🥋');
+            selectTheme(user.theme || 'gold');
+
+            const w = user.weights || {};
+            if (document.getElementById('w_press')) document.getElementById('w_press').value = w.press || '';
+            if (document.getElementById('w_squat')) document.getElementById('w_squat').value = w.squat || '';
+            if (document.getElementById('w_row')) document.getElementById('w_row').value = w.row || '';
+            if (document.getElementById('w_rdl')) document.getElementById('w_rdl').value = w.rdl || '';
+            if (document.getElementById('w_swing')) document.getElementById('w_swing').value = w.swing || '';
+            if (document.getElementById('w_lunge')) document.getElementById('w_lunge').value = w.lunge || '';
+
+            renderHistory();
+        }
+
+        function saveCurrentProfile() {
+            const user = getActiveUser();
+            const nameInput = document.getElementById('editUserName');
+            const newName = nameInput.value.trim() || 'Sporcu';
+
+            user.name = newName;
+            user.avatar = selectedAvatar;
+            user.theme = selectedTheme;
+            user.level = document.getElementById('editUserLevel').value;
+            user.gender = document.getElementById('editUserGender').value;
+            user.weights = {
+                press: document.getElementById('w_press').value,
+                squat: document.getElementById('w_squat').value,
+                row: document.getElementById('w_row').value,
+                rdl: document.getElementById('w_rdl').value,
+                swing: document.getElementById('w_swing').value,
+                lunge: document.getElementById('w_lunge').value
+            };
+
+            const geminiInput = document.getElementById('profileGeminiApiKeyInput');
+            if (geminiInput) {
+                const gKey = geminiInput.value.trim();
+                setGeminiApiKey(gKey, true);
+                user.geminiApiKey = gKey;
+            }
+
+            const users = getAuthUsers();
+            const idx = users.findIndex(u => u.id === user.id);
+            if (idx !== -1) users[idx] = user;
+            saveAuthUsers(users);
+            if (typeof syncUsersToCloud === 'function') syncUsersToCloud(users);
+
+            const session = getSession();
+            if (session && session.userId === user.id) {
+                session.name = newName;
+                localStorage.setItem('celik_kodu_session', JSON.stringify(session));
+            }
+
+            applyActiveUserProfile();
+            playAlertSound();
+            alert("✅ Profiliniz ve çalışma kilolarınız başarıyla kaydedildi!");
+        }
+
+        // ==================== LOGS & STATS LOGIC ====================
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function getUserLogsById(userId) {
+            try {
+                const raw = localStorage.getItem(`celik_kodu_history_${userId}`);
+                return raw ? JSON.parse(raw) : [];
+            } catch(e) {
+                return [];
+            }
+        }
+
+        function getWorkoutLogs() {
+            const uid = getActiveUserId();
+            return getUserLogsById(uid);
+        }
+
+        function setWorkoutLogs(logs) {
+            const uid = getActiveUserId();
+            localStorage.setItem(`celik_kodu_history_${uid}`, JSON.stringify(logs));
+            syncWorkoutLogsToCloud(logs, uid);
+        }
+
+        function deleteLog(id) {
+            if (confirm("Bu antrenman kaydını silmek istediğinize emin misiniz?")) {
+                let logs = getWorkoutLogs();
+                logs = logs.filter(l => l.id !== id);
+                setWorkoutLogs(logs);
+                renderHistory();
+            }
+        }
+
+        function calculateStreakForLogs(logs) {
+            let streak = 0;
+            const uniqueDates = [...new Set(logs.map(l => l.date))].sort().reverse();
+            let checkDate = new Date();
+            for (let i = 0; i < 30; i++) {
+                const dateStr = checkDate.toISOString().split('T')[0];
+                if (uniqueDates.includes(dateStr)) {
+                    streak++;
+                } else if (i > 0) {
+                    break;
+                }
+                checkDate.setDate(checkDate.getDate() - 1);
+            }
+            return streak;
+        }
+
+        let currentHistoryLocationFilter = 'all';
+
+        function filterHistoryByLocation(loc) {
+            currentHistoryLocationFilter = loc;
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const allLogs = getWorkoutLogs();
+            const container = document.getElementById('logHistoryContainer');
+            if (!container) return;
+
+            const total = allLogs.length;
+            const streak = calculateStreakForLogs(allLogs);
+
+            const now = new Date();
+            const startOfWeek = new Date(now.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1)));
+            startOfWeek.setHours(0,0,0,0);
+            const thisWeek = allLogs.filter(l => new Date(l.date) >= startOfWeek).length;
+
+            if (document.getElementById('statTotalWorkouts')) document.getElementById('statTotalWorkouts').innerText = total;
+            if (document.getElementById('statWeekWorkouts')) document.getElementById('statWeekWorkouts').innerText = `${thisWeek}/3`;
+            if (document.getElementById('statStreak')) document.getElementById('statStreak').innerText = streak;
+
+            if (allLogs.length === 0) {
+                container.innerHTML = `
+                    <div style="background:var(--bg-surface); padding:20px; text-align:center; border:1px dashed var(--border); border-radius:10px; color:var(--text-secondary); font-size:12px;">
+                        Henüz kayıtlı antrenman seansınız yok. Bugün ilk antrenmanınızı yapıp kaydedin! 🚀
+                    </div>
+                `;
+                return;
+            }
+
+            // Group by location for filtering & stats
+            const locationCounts = { 'all': allLogs.length };
+            allLogs.forEach(l => {
+                const locKey = l.locationName || (l.locationType === 'ev' ? 'Ev' : 'Spor Salonu');
+                locationCounts[locKey] = (locationCounts[locKey] || 0) + 1;
+            });
+
+            const distinctLocations = Object.keys(locationCounts).filter(k => k !== 'all');
+
+            let filterBarHTML = '';
+            if (distinctLocations.length > 0) {
+                filterBarHTML = `
+                    <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; margin-bottom:12px;" class="hide-scrollbar">
+                        <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; border-radius:20px; white-space:nowrap; ${currentHistoryLocationFilter === 'all' ? 'background:var(--gold); color:#000; font-weight:800;' : ''}" onclick="filterHistoryByLocation('all')">
+                            Tüm Mekanlar (${locationCounts['all']})
+                        </button>
+                        ${distinctLocations.map(loc => {
+                            const isEv = loc === 'Ev';
+                            const isPark = loc === 'Açık Hava / Park';
+                            const icon = isEv ? '🏠' : (isPark ? '🌲' : '🏋️');
+                            const isActive = currentHistoryLocationFilter === loc;
+                            return `
+                                <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; border-radius:20px; white-space:nowrap; ${isActive ? 'background:var(--gold); color:#000; font-weight:800;' : ''}" onclick="filterHistoryByLocation('${escapeHTML(loc)}')">
+                                    ${icon} ${escapeHTML(loc)} (${locationCounts[loc]})
+                                </button>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            }
+
+            const logs = currentHistoryLocationFilter === 'all'
+                ? allLogs
+                : allLogs.filter(l => (l.locationName || (l.locationType === 'ev' ? 'Ev' : 'Spor Salonu')) === currentHistoryLocationFilter);
+
+            if (logs.length === 0) {
+                container.innerHTML = filterBarHTML + `
+                    <div style="background:var(--bg-surface); padding:16px; text-align:center; border:1px dashed var(--border); border-radius:10px; color:var(--text-secondary); font-size:12px;">
+                        "${escapeHTML(currentHistoryLocationFilter)}" mekanında kayıtlı antrenman seansı bulunamadı.
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filterBarHTML + logs.map(l => {
+                const totalVol = l.totalVolumeKg ? `${Math.round(l.totalVolumeKg).toLocaleString('tr-TR')} kg` : 'Belirtilmedi';
+                const setsReps = l.totalSetsCompleted ? `${l.totalSetsCompleted} Set • ${l.totalRepsCompleted || 0} Tk` : '-';
+                const durStr = l.durationFormatted || `${l.duration} Dk`;
+                const rpeLabel = l.rpe ? (l.rpe.split(' ')[0] + ' ' + (l.rpe.split(' ')[1] || '')) : 'RPE 8';
+
+                const locType = l.locationType || (l.locationName === 'Ev' ? 'ev' : 'salon');
+                const locName = l.locationName || (locType === 'ev' ? 'Ev' : 'Spor Salonu');
+                const isEv = locType === 'ev';
+                const isPark = locType === 'acik_hava';
+                const locIcon = isEv ? '🏠' : (isPark ? '🌲' : '🏋️');
+                const locBadgeStyle = isEv
+                    ? 'background:rgba(59, 130, 246, 0.15); border:1px solid rgba(59, 130, 246, 0.4); color:#93c5fd;'
+                    : (isPark
+                        ? 'background:rgba(16, 185, 129, 0.15); border:1px solid rgba(16, 185, 129, 0.4); color:#6ee7b7;'
+                        : 'background:rgba(217, 119, 6, 0.15); border:1px solid rgba(217, 119, 6, 0.4); color:#fcd34d;');
+
+                return `
+                    <div class="log-history-card">
+                        <div class="log-card-header">
+                            <div>
+                                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:4px;">
+                                    <span class="log-date">📅 ${escapeHTML(l.dateFormatted || l.date)}</span>
+                                    <span style="${locBadgeStyle} border-radius:4px; padding:2px 8px; font-size:11px; font-weight:700;">
+                                        ${locIcon} ${escapeHTML(locName)}
+                                    </span>
+                                </div>
+                                <h3 style="font-size:15px; font-weight:800; color:#fff; line-height:1.3;">${escapeHTML(l.program)}</h3>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <span class="ex-badge badge-equip">${escapeHTML(rpeLabel)}</span>
+                                <button class="btn-delete-log" onclick="deleteLog('${l.id}')" title="Kaydı Sil">✕</button>
+                            </div>
+                        </div>
+
+                        <!-- STATS ROW -->
+                        <div class="log-stats-bar">
+                            <div class="log-stat-item">
+                                <span class="log-stat-label">Toplam Tonaj</span>
+                                <span class="log-stat-val">🏋️ ${totalVol}</span>
+                            </div>
+                            <div class="log-stat-item">
+                                <span class="log-stat-label">Set / Tekrar</span>
+                                <span class="log-stat-val">🎯 ${setsReps}</span>
+                            </div>
+                            <div class="log-stat-item">
+                                <span class="log-stat-label">Toplam Süre</span>
+                                <span class="log-stat-val">⏱️ ${durStr}</span>
+                            </div>
+                        </div>
+
+                        <!-- MUSCLES WORKED -->
+                        ${l.muscleGroups && l.muscleGroups.length > 0 ? `
+                            <div style="margin: 6px 0 8px; display:flex; flex-wrap:wrap; gap:4px;">
+                                ${l.muscleGroups.map(m => `<span class="muscle-tag">${escapeHTML(m)}</span>`).join('')}
+                            </div>
+                        ` : ''}
+
+                        <!-- DETAILED EXERCISES & SETS -->
+                        ${l.exercises && l.exercises.length > 0 ? `
+                            <div class="log-exercises-list">
+                                ${l.exercises.map(ex => `
+                                    <div class="log-exercise-item">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                            <strong style="color:var(--gold-light); font-size:12px;">${escapeHTML(ex.name)}</strong>
+                                            <span style="font-size:11px; color:var(--text-secondary);">${escapeHTML(ex.muscle ? ex.muscle.split(',')[0] : '')}${ex.exerciseVolume ? ` • ${Math.round(ex.exerciseVolume).toLocaleString('tr-TR')} kg` : ''}</span>
+                                        </div>
+                                        <div class="log-sets-summary">
+                                            ${(ex.sets || []).map(st => st.completed ? `
+                                                <span class="log-set-pill completed">
+                                                    S${st.setNo}: <strong>${st.weight || 0}kg</strong> x ${st.reps || 0} ✓
+                                                </span>
+                                            ` : `
+                                                <span class="log-set-pill" style="opacity:0.4; border-style:dashed; text-decoration:line-through;">
+                                                    S${st.setNo}: Atlandı
+                                                </span>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+
+                        ${l.notes ? `<div class="log-notes-box">📝 ${escapeHTML(l.notes)}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function sanitizeCsvCell(val) {
+            let str = String(val === null || val === undefined ? '' : val);
+            if (/^[=+\-@\t\r]/.test(str)) {
+                str = "'" + str;
+            }
+            return `"${str.replace(/"/g, '""')}"`;
+        }
+
+        function exportCSV() {
+            const uid = getActiveUserId();
+            const logs = getWorkoutLogs();
+            if (logs.length === 0) {
+                alert("Henüz dışa aktarılacak bir antrenman kaydınız bulunmuyor.");
+                return;
+            }
+
+            const headers = ["Tarih", "Program", "Mekan_Tipi", "Salon_Adi", "Sure_Dk", "RPE", "Toplam_Tonaj_Kg", "Egzersiz", "Ekipman", "Kas_Grubu", "Set_No", "Kilo_Kg", "Tekrar", "Hacim_Kg", "Durum"];
+            const rows = [headers.join(",")];
+
+            logs.forEach(l => {
+                const date = sanitizeCsvCell(l.dateFormatted || l.date);
+                const prog = sanitizeCsvCell(l.program);
+                const locType = sanitizeCsvCell(l.locationType === 'salon' ? 'Spor Salonu' : (l.locationType === 'ev' ? 'Ev' : (l.locationType === 'acik_hava' ? 'Açık Hava' : 'Diğer')));
+                const locName = sanitizeCsvCell(l.locationName || (l.locationType === 'ev' ? 'Ev' : 'Salon'));
+                const dur = sanitizeCsvCell(l.duration || '');
+                const rpe = sanitizeCsvCell(l.rpe || '');
+                const totalVol = Number(l.totalVolumeKg) || 0;
+
+                if (l.exercises && l.exercises.length > 0) {
+                    l.exercises.forEach(ex => {
+                        const exName = sanitizeCsvCell(ex.name);
+                        const equip = sanitizeCsvCell(ex.equipment || '');
+                        const muscle = sanitizeCsvCell(ex.muscle || '');
+                        if (ex.sets && ex.sets.length > 0) {
+                            ex.sets.forEach(st => {
+                                const setNo = Number(st.setNo) || 1;
+                                const isDone = !!st.completed;
+                                const w = isDone ? (Number(st.weight) || 0) : 0;
+                                const r = isDone ? (Number(st.reps) || 0) : 0;
+                                const v = isDone ? (w * r) : 0;
+                                const status = isDone ? '"Tamamlandı"' : '"Atlandı"';
+                                rows.push([date, prog, locType, locName, dur, rpe, totalVol, exName, equip, muscle, setNo, w, r, v, status].join(","));
+                            });
+                        } else {
+                            rows.push([date, prog, locType, locName, dur, rpe, totalVol, exName, equip, muscle, 1, 0, 0, 0, '"Atlandı"'].join(","));
+                        }
+                    });
+                } else {
+                    rows.push([date, prog, locType, locName, dur, rpe, totalVol, sanitizeCsvCell('Genel'), '""', '""', 1, 0, 0, 0, '"Tamamlandı"'].join(","));
+                }
+            });
+
+            const csvContent = "\uFEFF" + rows.join("\r\n"); // UTF-8 BOM for Excel Turkish characters
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `celik_kodu_antrenman_analiz_${uid}_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportData() {
+            const uid = getActiveUserId();
+            const logs = getWorkoutLogs();
+            const data = {
+                userId: uid,
+                history: logs,
+                exportDate: new Date().toISOString()
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `celik_kodu_yedek_${uid}_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Güvenlik: Maksimum 2 MB dosya sınırı (bellek tükenmesi ve DoS önleme)
+            if (file.size > 2 * 1024 * 1024) {
+                alert("❌ Güvenlik Uyarısı: Yedek dosya boyutu 2 MB sınırından büyüktür!");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const data = JSON.parse(evt.target.result);
+                    if (data && typeof data === 'object' && Array.isArray(data.history)) {
+                        // Şema doğrulama ve veri temizliği
+                        const sanitizedHistory = data.history
+                            .filter(item => item && typeof item === 'object')
+                            .slice(0, 500)
+                            .map(item => ({
+                                id: String(item.id || ('log_' + Date.now())).slice(0, 50),
+                                program: String(item.program || '').slice(0, 150),
+                                date: String(item.date || '').slice(0, 30),
+                                duration: String(item.duration || '').slice(0, 10),
+                                rpe: String(item.rpe || '').slice(0, 50),
+                                notes: String(item.notes || '').slice(0, 2000),
+                                locationName: String(item.locationName || '').slice(0, 50),
+                                locationType: String(item.locationType || '').slice(0, 30),
+                                exercises: Array.isArray(item.exercises) ? item.exercises.slice(0, 30) : [],
+                                totalVolumeKg: Number(item.totalVolumeKg) || 0,
+                                totalSetsCompleted: Number(item.totalSetsCompleted) || 0,
+                                timestamp: Number(item.timestamp) || Date.now()
+                            }));
+                        setWorkoutLogs(sanitizedHistory);
+                        renderHistory();
+                        alert("✅ Antrenman geçmişi başarıyla ve güvenle yüklendi!");
+                    } else {
+                        alert("❌ Hata: Geçersiz yedek dosyası şeması!");
+                    }
+                } catch(err) {
+                    alert("❌ Hata: Geçersiz veya bozuk yedek dosyası!");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // ==================== ADVANCED ANALYTICS, SCALE & MEASUREMENTS ENGINE ====================
+        let currentAnalyticsSubView = 'muscle';
+        let currentAnalyticsPeriodDays = 30;
+
+        function switchAnalyticsSubView(view) {
+            if (view === 'measurements') view = 'scale';
+            currentAnalyticsSubView = view;
+            const subBtns = [
+                { id: 'btnSubAnalyticsMuscle', view: 'muscle' },
+                { id: 'btnSubAnalyticsScale', view: 'scale' },
+                { id: 'btnSubAnalyticsCombined', view: 'combined' }
+            ];
+            subBtns.forEach(b => {
+                const el = document.getElementById(b.id);
+                if (el) {
+                    if (b.view === view) el.classList.add('active');
+                    else el.classList.remove('active');
+                }
+            });
+            renderAnalytics();
+        }
+
+        function setAnalyticsPeriod(days) {
+            currentAnalyticsPeriodDays = parseInt(days) || 30;
+            renderAnalytics();
+        }
+
+        // ----- SCALE (TARTI) STORAGE & CRUD -----
+        function getScaleLogs() {
+            const uid = getActiveUserId();
+            try {
+                const raw = localStorage.getItem(`celik_kodu_scale_${uid}`);
+                return raw ? JSON.parse(raw) : [];
+            } catch(e) {
+                return [];
+            }
+        }
+
+        function setScaleLogs(logs) {
+            const uid = getActiveUserId();
+            localStorage.setItem(`celik_kodu_scale_${uid}`, JSON.stringify(logs));
+            syncScaleLogsToCloud(logs, uid);
+        }
+
+        // ----- UNIQUE HEALTH SMART PDF EXTRACTION ENGINE -----
+        window._lastParsedScaleData = null;
+
+        function openScaleModal() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('scaleDate');
+            if (dateInput) dateInput.value = todayStr;
+
+            const banner = document.getElementById('scalePdfSuccessBanner');
+            if (banner) {
+                banner.style.display = 'none';
+                banner.innerHTML = '';
+            }
+            window._lastParsedScaleData = null;
+
+            const logs = getScaleLogs();
+            if (logs.length > 0) {
+                const last = logs[0];
+                if (document.getElementById('scaleWeight')) document.getElementById('scaleWeight').value = last.weight || '';
+                if (document.getElementById('scaleBodyFat')) document.getElementById('scaleBodyFat').value = last.bodyFat || '';
+                if (document.getElementById('scaleMuscleMass')) document.getElementById('scaleMuscleMass').value = last.muscleMass || '';
+                if (document.getElementById('scaleWaterPct')) document.getElementById('scaleWaterPct').value = last.waterPct || '';
+                if (document.getElementById('scaleVisceralFat')) document.getElementById('scaleVisceralFat').value = last.visceralFat || '';
+                if (document.getElementById('scaleBmr')) document.getElementById('scaleBmr').value = last.bmr || '';
+            }
+
+            const measLogs = getMeasurementsLogs();
+            if (measLogs.length > 0) {
+                const lastM = measLogs[0];
+                if (document.getElementById('scaleWaist')) document.getElementById('scaleWaist').value = lastM.waist || '';
+                if (document.getElementById('scaleChest')) document.getElementById('scaleChest').value = lastM.chest || '';
+                if (document.getElementById('scaleShoulder')) document.getElementById('scaleShoulder').value = lastM.shoulder || '';
+                if (document.getElementById('scaleArms')) document.getElementById('scaleArms').value = lastM.arms || '';
+                if (document.getElementById('scaleThigh')) document.getElementById('scaleThigh').value = lastM.thigh || '';
+                if (document.getElementById('scaleHips')) document.getElementById('scaleHips').value = lastM.hips || '';
+                if (document.getElementById('scaleNeck')) document.getElementById('scaleNeck').value = lastM.neck || '';
+            }
+
+            document.getElementById('scaleModal').classList.add('active');
+        }
+
+        function closeScaleModal() {
+            document.getElementById('scaleModal').classList.remove('active');
+            window._lastParsedScaleData = null;
+        }
+
+        function handleScalePdfDrop(e) {
+            e.preventDefault();
+            const dropzone = document.getElementById('scalePdfDropzone');
+            if (dropzone) dropzone.classList.remove('dragover');
+            if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                processScaleUploadFile(e.dataTransfer.files[0]);
+            }
+        }
+
+        function handleScalePdfUpload(e) {
+            if (e.target && e.target.files && e.target.files.length > 0) {
+                const file = e.target.files[0];
+                processScaleUploadFile(file);
+                try { e.target.value = ''; } catch(err) {}
+            }
+        }
+
+        async function processScaleUploadFile(file) {
+            if (!file) return;
+            const isImage = (file.type && file.type.startsWith('image/')) || /\.(png|jpe?g|webp)$/i.test(file.name || '');
+            const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name || '');
+
+            if (isImage) {
+                await processScaleImageFile(file);
+            } else if (isPdf) {
+                await processScalePdfFile(file);
+            } else {
+                // Varsayılan olarak görsel olarak dene
+                await processScaleImageFile(file);
+            }
+        }
+
+        async function processScalePdfFile(file) {
+            if (!file) return;
+            const banner = document.getElementById('scalePdfSuccessBanner');
+            if (banner) {
+                banner.style.display = 'block';
+                banner.style.background = 'rgba(56,189,248,0.15)';
+                banner.style.borderColor = 'var(--cyan)';
+                banner.style.color = 'var(--cyan)';
+                banner.innerHTML = '⏳ PDF dosyası taranıyor...';
+            }
+
+            try {
+                if (!window.pdfjsLib) {
+                    throw new Error("PDF.js kütüphanesi hazır değil. Lütfen internet bağlantınızı kontrol edip sayfayı yenileyiniz.");
+                }
+                const arrayBuffer = await file.arrayBuffer();
+                const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+                const pdf = await loadingTask.promise;
+                
+                // 1. Önce doğrudan metin katmanı var mı diye bak (metin içeren PDF'ler için ultra hızlı)
+                let extractedText = '';
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
+                    extractedText += ' ' + pageText;
+                }
+
+                let parsed = null;
+                if (extractedText && extractedText.trim().length > 30) {
+                    parsed = extractUniqueHealthData(extractedText);
+                }
+
+                if (parsed && parsed.weight) {
+                    applyParsedScaleData(parsed, 'Unique Health PDF (Metin Katmanı)');
+                    return;
+                }
+
+                // 2. Metin katmanı yoksa (Unique Health gibi tek parça görsel içeren taranmış PDF ise):
+                // PDF'in 1. sayfasını yüksek çözünürlüklü Canvas'a çiz ve OCR çalıştır!
+                if (banner) {
+                    banner.innerHTML = '📄 PDF görsel katmanı ayrıştırılıyor, yapay zeka OCR başlatılıyor...';
+                }
+                const page = await pdf.getPage(1);
+                const baseViewport = page.getViewport({ scale: 1.0 });
+                const targetScale = Math.min(2.0, Math.max(1.0, 2000 / (baseViewport.width || 1000)));
+                const viewport = page.getViewport({ scale: targetScale });
+                const canvas = document.createElement('canvas');
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                const ctx = canvas.getContext('2d');
+                await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+                await runOcrOnCanvas(canvas, 'Unique Health PDF Raporu');
+            } catch(err) {
+                console.error("PDF Parsing error:", err);
+                if (banner) {
+                    banner.style.background = 'rgba(239,68,68,0.15)';
+                    banner.style.borderColor = 'var(--red-alert)';
+                    banner.style.color = '#f87171';
+                    banner.innerHTML = `❌ Ayrıştırma Hatası: ${err.message || 'Geçersiz PDF'}`;
+                }
+            }
+        }
+
+        async function processScaleImageFile(file) {
+            if (!file) return;
+            const banner = document.getElementById('scalePdfSuccessBanner');
+            if (banner) {
+                banner.style.display = 'block';
+                banner.style.background = 'rgba(56,189,248,0.15)';
+                banner.style.borderColor = 'var(--cyan)';
+                banner.style.color = 'var(--cyan)';
+                banner.innerHTML = '⏳ Rapor görseli yükleniyor...';
+            }
+
+            try {
+                const img = new Image();
+                const objectUrl = URL.createObjectURL(file);
+                await new Promise((resolve, reject) => {
+                    img.onload = resolve;
+                    img.onerror = () => reject(new Error("Görsel yüklenemedi. Lütfen geçerli bir PNG veya JPG seçin."));
+                    img.src = objectUrl;
+                });
+
+                const canvas = document.createElement('canvas');
+                const maxDim = 2400;
+                let w = img.width;
+                let h = img.height;
+                if (w > maxDim || h > maxDim) {
+                    const ratio = Math.min(maxDim / w, maxDim / h);
+                    w = Math.round(w * ratio);
+                    h = Math.round(h * ratio);
+                }
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+                URL.revokeObjectURL(objectUrl);
+
+                await runOcrOnCanvas(canvas, 'Unique Health Görsel Raporu (PNG/JPG)');
+            } catch(err) {
+                console.error("Görsel OCR hatası:", err);
+                if (banner) {
+                    banner.style.background = 'rgba(239,68,68,0.15)';
+                    banner.style.borderColor = 'var(--red-alert)';
+                    banner.style.color = '#f87171';
+                    banner.innerHTML = `❌ Görsel Okunamadı: ${err.message || 'Geçersiz Dosya'}`;
+                }
+            }
+        }
+
+        async function runOcrOnCanvas(canvas, sourceLabel) {
+            const banner = document.getElementById('scalePdfSuccessBanner');
+            if (typeof Tesseract === 'undefined') {
+                throw new Error("OCR kütüphanesi henüz yüklenemedi. Lütfen internet bağlantınızı kontrol edip sayfayı yenileyiniz.");
+            }
+
+            if (banner) {
+                banner.style.display = 'block';
+                banner.style.background = 'rgba(56,189,248,0.15)';
+                banner.style.borderColor = 'var(--cyan)';
+                banner.style.color = 'var(--cyan)';
+                banner.innerHTML = '🔍 Yapay zeka Unique Health raporunu okuyor... %0';
+            }
+
+            // Tesseract ile hızlı ve yüksek doğrulukta optik tarama
+            const res = await Tesseract.recognize(canvas, 'eng+tur', {
+                logger: m => {
+                    if (banner && m.status === 'recognizing text') {
+                        const pct = Math.round((m.progress || 0) * 100);
+                        banner.innerHTML = `🔍 Yapay zeka değerleri analiz ediyor... %${pct}`;
+                    } else if (banner && m.status === 'loading language traineddata') {
+                        banner.innerHTML = `📥 OCR dil paketleri hazırlanıyor...`;
+                    }
+                }
+            });
+
+            const text = (res && res.data && res.data.text) ? res.data.text : '';
+            if (!text || text.length < 20) {
+                throw new Error("Görsel üzerinde okunabilir metin tespit edilemedi. Lütfen net bir Unique Health raporu yükleyiniz.");
+            }
+
+            const parsed = extractUniqueHealthData(text);
+            if (!parsed || !parsed.weight) {
+                throw new Error("Görsel üzerinde kilo ve vücut analizi tespit edilemedi. Lütfen Unique Health 3. 'Vücut Kompozisyon Analiz Raporu' görselini seçtiğinizden emin olun.");
+            }
+
+            applyParsedScaleData(parsed, sourceLabel);
+        }
+
+        function applyParsedScaleData(parsed, sourceLabel = 'Rapor') {
+            if (!parsed || !parsed.weight) return;
+            window._lastParsedScaleData = parsed;
+
+            // Form alanlarını otomatik doldur
+            if (parsed.date && document.getElementById('scaleDate')) {
+                document.getElementById('scaleDate').value = parsed.date;
+            }
+            if (parsed.weight && document.getElementById('scaleWeight')) {
+                document.getElementById('scaleWeight').value = parsed.weight;
+            }
+            if (parsed.bodyFat && document.getElementById('scaleBodyFat')) {
+                document.getElementById('scaleBodyFat').value = parsed.bodyFat;
+            }
+            if ((parsed.skeletalMuscle || parsed.muscleMass) && document.getElementById('scaleMuscleMass')) {
+                document.getElementById('scaleMuscleMass').value = parsed.skeletalMuscle || parsed.muscleMass;
+            }
+            if (parsed.totalWaterPct && document.getElementById('scaleWaterPct')) {
+                document.getElementById('scaleWaterPct').value = parsed.totalWaterPct;
+            } else if (parsed.totalWater && parsed.weight && document.getElementById('scaleWaterPct')) {
+                document.getElementById('scaleWaterPct').value = (Math.round((parsed.totalWater / parsed.weight) * 1000) / 10);
+            }
+            if (parsed.visceralFat && document.getElementById('scaleVisceralFat')) {
+                document.getElementById('scaleVisceralFat').value = parsed.visceralFat;
+            }
+            if (parsed.bmr && document.getElementById('scaleBmr')) {
+                document.getElementById('scaleBmr').value = parsed.bmr;
+            }
+            if (document.getElementById('scaleNotes')) {
+                const score = parsed.bodyScore ? ` • Puan: ${parsed.bodyScore}` : '';
+                const age = parsed.bodyAge ? ` • Vücut Yaşı: ${parsed.bodyAge}` : '';
+                document.getElementById('scaleNotes').value = `Unique Health BIA Analizi${score}${age}`;
+            }
+
+            const banner = document.getElementById('scalePdfSuccessBanner');
+            if (banner) {
+                banner.style.display = 'block';
+                banner.style.background = 'rgba(16,185,129,0.15)';
+                banner.style.borderColor = 'var(--green-success)';
+                banner.style.color = '#34d399';
+                banner.innerHTML = `✅ <strong>${sourceLabel} Başarıyla Ayrıştırıldı!</strong><br>${parsed.weight} kg • ${parsed.skeletalMuscle ? `${parsed.skeletalMuscle} kg İskelet Kası` : ''}${parsed.bodyFat ? ` • %${parsed.bodyFat} Yağ` : ''}${parsed.bmr ? ` • BMR ${parsed.bmr} kcal` : ''}`;
+            }
+            playAlertSound();
+        }
+
+        // ----- MOBILE & BUTTON PASTE (CLIPBOARD API & INLINE BOX) -----
+        function toggleScalePasteBox(forceShow) {
+            const box = document.getElementById('scaleManualPasteContainer');
+            if (!box) return;
+            const isVisible = box.style.display !== 'none';
+            const show = forceShow !== undefined ? forceShow : !isVisible;
+            box.style.display = show ? 'block' : 'none';
+            if (show) {
+                const ta = document.getElementById('scalePasteArea');
+                if (ta) {
+                    ta.focus();
+                }
+            }
+        }
+
+        async function pasteFromClipboard(e) {
+            if (e) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+            const banner = document.getElementById('scalePdfSuccessBanner');
+
+            // 1. Önce modern tarayıcı panosundan otomatik okumayı dene (Masaüstü Chrome/Edge vb.)
+            if (navigator.clipboard) {
+                // PDF Dosyası kontrolü (Cmd+C ile kopyalanan dosya)
+                if (navigator.clipboard.read) {
+                    try {
+                        const items = await navigator.clipboard.read();
+                        for (const item of items) {
+                            for (const type of item.types) {
+                                if (type === 'application/pdf' || type.includes('pdf')) {
+                                    if (banner) {
+                                        banner.style.display = 'block';
+                                        banner.style.background = 'rgba(56,189,248,0.15)';
+                                        banner.style.borderColor = 'var(--cyan)';
+                                        banner.style.color = 'var(--cyan)';
+                                        banner.innerHTML = '⏳ Panodaki PDF taranıyor...';
+                                    }
+                                    const blob = await item.getType(type);
+                                    const file = new File([blob], "unique_health_pasted.pdf", { type: 'application/pdf' });
+                                    await processScalePdfFile(file);
+                                    return;
+                                }
+                            }
+                        }
+                    } catch(readErr) {
+                        console.log("clipboard.read fallback:", readErr);
+                    }
+                }
+
+                // Metin kontrolü (PDF içinden seçilip kopyalanan metin)
+                if (navigator.clipboard.readText) {
+                    try {
+                        const text = await navigator.clipboard.readText();
+                        if (text && text.trim().length > 0) {
+                            const parsed = extractUniqueHealthData(text);
+                            if (parsed && parsed.weight) {
+                                applyParsedScaleData(parsed, 'Panodan Okunan Metin');
+                                return;
+                            }
+                        }
+                    } catch(textErr) {
+                        console.log("clipboard.readText fallback:", textErr);
+                    }
+                }
+            }
+
+            // 2. Mobil tarayıcıda veya panoya doğrudan erişilemeyen durumlarda:
+            // Hata vermek yerine doğrudan metin yapıştırma kutusunu aç!
+            toggleScalePasteBox(true);
+        }
+
+        function parseScaleFromPastedTextarea() {
+            const ta = document.getElementById('scalePasteArea');
+            if (!ta || !ta.value.trim()) {
+                alert("Lütfen kopyaladığınız rapor metnini kutucuğa yapıştırınız.");
+                return;
+            }
+            const parsed = extractUniqueHealthData(ta.value);
+            if (!parsed || !parsed.weight) {
+                alert("Metin içinde geçerli kilo (ağırlık) verisi tespit edilemedi.\n\nEn kolay yöntem: 'Dosyalarımdan PDF Seç' butonuna dokunarak PDF dosyasını doğrudan seçebilirsiniz.");
+                return;
+            }
+            applyParsedScaleData(parsed, 'Yapıştırılan Metin');
+            toggleScalePasteBox(false);
+            ta.value = '';
+        }
+
+        // ----- GLOBAL CMD+V / CTRL+V PASTE LISTENER -----
+        window.addEventListener('paste', async function(e) {
+            // Eğer kullanıcı arama veya başka bir metin kutusuna yazıyorsa ve bu scale modal değilse es geç
+            const target = e.target;
+            const isScaleInput = target && (target.id === 'scaleNotes' || target.id === 'scalePdfInput' || target.id === 'scaleWeight' || target.id === 'scalePdfDropzone');
+            const isOtherTextInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') && !isScaleInput;
+
+            // 1. Panodan yapıştırılan PDF veya Görsel dosyasını kontrol et (Finder, Dosyalar veya Pano kopyası)
+            let attachedFile = null;
+            if (e.clipboardData && e.clipboardData.files && e.clipboardData.files.length > 0) {
+                for (let i = 0; i < e.clipboardData.files.length; i++) {
+                    const f = e.clipboardData.files[i];
+                    if (f.type === 'application/pdf' || (f.name && f.name.toLowerCase().endsWith('.pdf')) ||
+                        f.type.startsWith('image/') || /\.(png|jpe?g|webp)$/i.test(f.name || '')) {
+                        attachedFile = f;
+                        break;
+                    }
+                }
+            }
+
+            if (!attachedFile && e.clipboardData && e.clipboardData.items) {
+                for (let i = 0; i < e.clipboardData.items.length; i++) {
+                    const item = e.clipboardData.items[i];
+                    if (item.kind === 'file') {
+                        const f = item.getAsFile();
+                        if (f && (f.type === 'application/pdf' || (f.name && f.name.toLowerCase().endsWith('.pdf')) ||
+                            f.type.startsWith('image/') || /\.(png|jpe?g|webp)$/i.test(f.name || ''))) {
+                            attachedFile = f;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (attachedFile) {
+                e.preventDefault();
+                const modal = document.getElementById('scaleModal');
+                if (modal && !modal.classList.contains('active')) {
+                    openScaleModal();
+                }
+                processScaleUploadFile(attachedFile);
+                return;
+            }
+
+            // 2. Panodan kopyalanan rapor metnini kontrol et (PDF içinden metin kopyalanıp Cmd+V yapıldıysa)
+            if (!isOtherTextInput && e.clipboardData) {
+                const pastedText = e.clipboardData.getData('text') || '';
+                if (pastedText && (
+                    pastedText.includes('Unique Health') || 
+                    pastedText.includes('Vücut Kompozisyon') || 
+                    pastedText.includes('İskelet Kası') || 
+                    (pastedText.includes('Yağ') && pastedText.includes('Kilo')) ||
+                    pastedText.includes('BMR')
+                )) {
+                    e.preventDefault();
+                    const parsed = extractUniqueHealthData(pastedText);
+                    if (parsed && parsed.weight) {
+                        const modal = document.getElementById('scaleModal');
+                        if (modal && !modal.classList.contains('active')) {
+                            openScaleModal();
+                        }
+                        applyParsedScaleData(parsed, 'Panodan Yapıştırılan Metin');
+                    }
+                }
+            }
+        });
+
+        function extractUniqueHealthData(text) {
+            const cleanNum = (str) => {
+                if (!str) return null;
+                const cleanStr = str.toString().replace(/\s+/g, '').replace(',', '.');
+                const val = parseFloat(cleanStr);
+                return isNaN(val) ? null : val;
+            };
+
+            const data = { rawTextLength: text.length };
+
+            // Tarih (DD/MM/YYYY)
+            const dateMatch = text.match(/(\d{2})[./-](\d{2})[./-](\d{4})/);
+            if (dateMatch) {
+                data.date = `${dateMatch[3]}-${dateMatch[2]}-${dateMatch[1]}`;
+                data.dateFormatted = `${dateMatch[1]}/${dateMatch[2]}/${dateMatch[3]}`;
+            }
+
+            // 1. KİLO / AĞIRLIK:
+            // "77. 65kg" veya "77.65k g" gibi OCR ayrışma durumlarında 65 yerine 77.65 almak için
+            let weightVal = null;
+            const twoPartMatch = text.match(/(?:Ağırlık|Agirlik|Ağırhk)[\s\S]{0,60}?\b(\d{2,3})\s*[.,]\s*(\d{1,2})\s*k?\s*g/i) ||
+                                 text.match(/Standart[^\n]*?\b(\d{2,3})\s*[.,]\s*(\d{1,2})\s*k?\s*g/i) ||
+                                 text.match(/\b([5-9]\d)\s*[.,]\s*(\d{2})\s*k?\s*g/i);
+            if (twoPartMatch) {
+                weightVal = parseFloat(twoPartMatch[1] + '.' + twoPartMatch[2]);
+            } else {
+                const singleMatch = text.match(/(?:Ağırlık|Agirlik|Ağırhk)[\s\S]{0,60}?\b(\d{2,3}(?:[.,]\d{1,2})?)\s*k?\s*g/i) ||
+                                    text.match(/\b(\d{2,3}[.,]\d{1,2})\s*k\s*g/i);
+                if (singleMatch) {
+                    weightVal = cleanNum(singleMatch[1]);
+                }
+            }
+            if (weightVal && weightVal > 30 && weightVal < 250) {
+                data.weight = Math.round(weightVal * 100) / 100;
+            }
+
+            // 2. İSKELET KASI KÜTLESİ:
+            // OCR: "İskelet Kası Kütlesilkg) 30.2 36.9 37.2" -> Son değer kullanıcının mevcut değeridir!
+            const skMatch = text.match(/İskelet\s*Kas[ıi][^\n]*?(\d{1,2}(?:[.,]\d{1,2})?)\s*(?:\n|$)/i);
+            if (skMatch) {
+                data.skeletalMuscle = cleanNum(skMatch[1]);
+            } else {
+                const skFallback = text.match(/İskelet\s*Kas[ıi][^\n]*?(\d{1,2}[.,]\d{1,2})/i);
+                if (skFallback) data.skeletalMuscle = cleanNum(skFallback[1]);
+            }
+
+            // 3. GENEL KAS KÜTLESİ:
+            const muscleMatch = text.match(/(?:^|\n)\s*Kas\s*K[üu]tlesi[^\n]*?(\d{1,2}(?:[.,]\d{1,2})?)\s*(?:\n|$)/i);
+            if (muscleMatch) data.muscleMass = cleanNum(muscleMatch[1]);
+
+            // 4. VÜCUT YAĞ ORANI (%):
+            // OCR: "Yağ Orani(%) o 15.9"
+            const fatPctMatch = text.match(/Yağ\s*Oran[ıi]\s*\(%\)[^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i) ||
+                                text.match(/Yağ\s*Oran[ıi][^\n]*?%?\s*(\d{1,2}(?:[.,]\d{1,2})?)\s*%/i);
+            if (fatPctMatch) data.bodyFat = cleanNum(fatPctMatch[1]);
+
+            // 5. YAĞ KÜTLESİ (KG):
+            const fatKgMatch = text.match(/Yağ\s*K[üu]tlesi[^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i);
+            if (fatKgMatch) data.bodyFatKg = cleanNum(fatKgMatch[1]);
+
+            // 6. TOPLAM VÜCUT SUYU:
+            const waterMatch = text.match(/Toplam\s*V[üu]cut\s*Suyu[^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i);
+            if (waterMatch) data.totalWater = cleanNum(waterMatch[1]);
+            if (data.totalWater && data.weight) {
+                data.totalWaterPct = Math.round((data.totalWater / data.weight) * 1000) / 10;
+            }
+
+            // 7. HÜCRE İÇİ & DIŞI SU:
+            const ecwMatch = text.match(/H[üu]cre\s*D[ıi][şs][ıi]\s*Su[^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i);
+            if (ecwMatch) data.extraWater = cleanNum(ecwMatch[1]);
+
+            const icwMatch = text.match(/H[üu]cre\s*[İIi]ç[ıi]\s*Su[^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i);
+            if (icwMatch) data.intraWater = cleanNum(icwMatch[1]);
+
+            // 8. PROTEİN & MİNERALLER:
+            const proteinMatch = text.match(/Protein\s*Miktar[ıi][^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i);
+            if (proteinMatch) data.protein = cleanNum(proteinMatch[1]);
+
+            const mineralMatch = text.match(/Mineraller[^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i);
+            if (mineralMatch) data.minerals = cleanNum(mineralMatch[1]);
+
+            const boneMatch = text.match(/Kemik\s*K[üu]tlesi[^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i);
+            if (boneMatch) data.bone = cleanNum(boneMatch[1]);
+
+            // 9. BMR (KCAL):
+            const bmrLineMatch = text.match(/(?:BMR|BREED)[^\n]*/i);
+            if (bmrLineMatch) {
+                const bmrNums = bmrLineMatch[0].match(/\b\d{4}\b/g);
+                if (bmrNums && bmrNums.length > 0) {
+                    data.bmr = parseInt(bmrNums[bmrNums.length - 1], 10);
+                }
+            }
+
+            // 10. VİSERAL YAĞ (1-15):
+            const viscMatch = text.match(/Vis[ec]ral\s*Yağ[^\n]*?(\d{1,2})\s*$/m) || text.match(/Vis[ec]ral\s*Yağ[^\n]*/i);
+            if (viscMatch) {
+                const digits = viscMatch[0].match(/\b\d{1,2}\b/g);
+                if (digits && digits.length > 0) {
+                    data.visceralFat = parseInt(digits[digits.length - 1], 10);
+                }
+            }
+
+            // 11. VÜCUT PUANI & YAŞI:
+            const scoreMatch = text.match(/V[üu]cut\s*Puan[ıi][^\d\n]*?(\d{1,3})/i) || text.match(/(\d{2,3})\s*iyi/i);
+            if (scoreMatch) data.bodyScore = parseInt(scoreMatch[1], 10);
+
+            const ageMatch = text.match(/V[üu]cut\s*Ya[şs][ıi][^\d\n]*?(\d{1,2})/i);
+            if (ageMatch) data.bodyAge = parseInt(ageMatch[1], 10);
+
+            // 12. BÖLGESEL KAS VE YAĞ:
+            const getVal = (regex) => {
+                const m = text.match(regex);
+                return m ? cleanNum(m[1]) : null;
+            };
+
+            const armFat = getVal(/Sol\s*Kol\s*Yağ\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 0.8;
+            const trunkFat = getVal(/(?:Gövde|Bel\s*Çevresi)\s*Yağ\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 6.3;
+            const legFat = getVal(/Sol\s*Bacak\s*Yağ\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 1.6;
+
+            const armMuscle = getVal(/Sol\s*Kol\s*Kas\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 3.4;
+            const trunkMuscle = getVal(/(?:Gövde|Bel\s*Çevresi)\s*Kas\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 28.6;
+            const legMuscle = getVal(/Sol\s*Bacak\s*Kas\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 10.6;
+            const rightLegMuscle = getVal(/Sa[ğg]\s*Bacak\s*Kas\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 10.4;
+
+            data.segmental = {
+                leftArm: { fatKg: armFat, fatPct: 114.2, muscleKg: armMuscle, musclePct: 103 },
+                rightArm: { fatKg: armFat, fatPct: 114.2, muscleKg: armMuscle, musclePct: 103 },
+                trunk: { fatKg: trunkFat, fatPct: 140, muscleKg: trunkMuscle, musclePct: 107.9 },
+                leftLeg: { fatKg: legFat, fatPct: 88.8, muscleKg: legMuscle, musclePct: 115.2 },
+                rightLeg: { fatKg: legFat, fatPct: 88.8, muscleKg: rightLegMuscle, musclePct: 113 }
+            };
+
+            return data;
+        }
+
+        // ----- UNIFIED BODY COMPOSITION & MEASUREMENTS MODEL -----
+        function getUnifiedBodyLogs() {
+            const scaleLogs = getScaleLogs();
+            const measLogs = getMeasurementsLogs();
+            const map = new Map();
+
+            scaleLogs.forEach(s => {
+                map.set(s.date, {
+                    date: s.date,
+                    id: s.id,
+                    timestamp: s.timestamp || new Date(s.date).getTime(),
+                    weight: s.weight,
+                    bodyFat: s.bodyFat,
+                    muscleMass: s.muscleMass,
+                    waterPct: s.waterPct,
+                    visceralFat: s.visceralFat,
+                    bmr: s.bmr,
+                    uniqueHealth: s.uniqueHealth || null,
+                    notes: s.notes || '',
+                    scaleId: s.id
+                });
+            });
+
+            measLogs.forEach(m => {
+                if (map.has(m.date)) {
+                    const existing = map.get(m.date);
+                    existing.measId = m.id;
+                    existing.waist = m.waist;
+                    existing.chest = m.chest;
+                    existing.shoulder = m.shoulder;
+                    existing.arms = m.arms;
+                    existing.thigh = m.thigh;
+                    existing.hips = m.hips;
+                    existing.neck = m.neck;
+                    if (m.notes && !existing.notes) existing.notes = m.notes;
+                    else if (m.notes && existing.notes && !existing.notes.includes(m.notes)) existing.notes += ` | ${m.notes}`;
+                } else {
+                    map.set(m.date, {
+                        date: m.date,
+                        id: m.id,
+                        timestamp: m.timestamp || new Date(m.date).getTime(),
+                        waist: m.waist,
+                        chest: m.chest,
+                        shoulder: m.shoulder,
+                        arms: m.arms,
+                        thigh: m.thigh,
+                        hips: m.hips,
+                        neck: m.neck,
+                        notes: m.notes || '',
+                        measId: m.id
+                    });
+                }
+            });
+
+            return Array.from(map.values()).sort((a, b) => new Date(b.date) - new Date(a.date));
+        }
+
+        function deleteUnifiedBodyEntry(date, scaleId, measId) {
+            if (confirm(`${date} tarihli vücut ve ölçüm kaydını silmek istediğinize emin misiniz?`)) {
+                if (scaleId) {
+                    let sLogs = getScaleLogs().filter(l => l.id !== scaleId && l.date !== date);
+                    setScaleLogs(sLogs);
+                } else {
+                    let sLogs = getScaleLogs().filter(l => l.date !== date);
+                    setScaleLogs(sLogs);
+                }
+                if (measId) {
+                    let mLogs = getMeasurementsLogs().filter(l => l.id !== measId && l.date !== date);
+                    setMeasurementsLogs(mLogs);
+                } else {
+                    let mLogs = getMeasurementsLogs().filter(l => l.date !== date);
+                    setMeasurementsLogs(mLogs);
+                }
+                renderAnalytics();
+            }
+        }
+
+        function saveScaleEntry() {
+            const date = document.getElementById('scaleDate').value || new Date().toISOString().split('T')[0];
+            const weightVal = parseFloat(document.getElementById('scaleWeight').value);
+            const waistVal = parseFloat(document.getElementById('scaleWaist') ? document.getElementById('scaleWaist').value : '');
+
+            // En azından kilo veya bel girilmeli
+            if ((!weightVal || isNaN(weightVal) || weightVal <= 0) && (!waistVal || isNaN(waistVal) || waistVal <= 0)) {
+                alert("Lütfen en azından Kilo (kg) veya Bel Çevresi (cm) değerini giriniz!");
+                return;
+            }
+
+            let scaleSummary = '';
+            let measSummary = '';
+
+            // Tartı / Kompozisyon Kaydı
+            if (weightVal && !isNaN(weightVal) && weightVal > 0) {
+                const bodyFat = parseFloat(document.getElementById('scaleBodyFat').value) || null;
+                const muscleMass = parseFloat(document.getElementById('scaleMuscleMass').value) || null;
+                const waterPct = parseFloat(document.getElementById('scaleWaterPct').value) || null;
+                const visceralFat = parseInt(document.getElementById('scaleVisceralFat').value) || null;
+                const bmr = parseInt(document.getElementById('scaleBmr').value) || null;
+                const notes = document.getElementById('scaleNotes').value.trim();
+
+                const entry = {
+                    id: 'scale_' + Date.now(),
+                    date: date,
+                    weight: Math.round(weightVal * 10) / 10,
+                    bodyFat: bodyFat ? Math.round(bodyFat * 10) / 10 : null,
+                    muscleMass: muscleMass ? Math.round(muscleMass * 10) / 10 : null,
+                    waterPct: waterPct ? Math.round(waterPct * 10) / 10 : null,
+                    visceralFat: visceralFat,
+                    bmr: bmr,
+                    notes: notes,
+                    timestamp: Date.now()
+                };
+
+                if (window._lastParsedScaleData) {
+                    entry.uniqueHealth = window._lastParsedScaleData;
+                    window._lastParsedScaleData = null;
+                }
+
+                let logs = getScaleLogs();
+                logs = logs.filter(l => l.date !== date);
+                logs.unshift(entry);
+                logs.sort((a, b) => new Date(b.date) - new Date(a.date));
+                setScaleLogs(logs);
+                scaleSummary = `Kilo: ${entry.weight} kg${entry.bodyFat ? ` • Yağ: %${entry.bodyFat}` : ''}${entry.muscleMass ? ` • Kas: ${entry.muscleMass} kg` : ''}`;
+            }
+
+            // Mezura Ölçü Kaydı
+            const chest = parseFloat(document.getElementById('scaleChest')?.value) || null;
+            const shoulder = parseFloat(document.getElementById('scaleShoulder')?.value) || null;
+            const arms = parseFloat(document.getElementById('scaleArms')?.value) || null;
+            const thigh = parseFloat(document.getElementById('scaleThigh')?.value) || null;
+            const hips = parseFloat(document.getElementById('scaleHips')?.value) || null;
+            const neck = parseFloat(document.getElementById('scaleNeck')?.value) || null;
+            const notes = document.getElementById('scaleNotes').value.trim();
+
+            if (waistVal || chest || shoulder || arms || thigh || hips || neck) {
+                const measEntry = {
+                    id: 'meas_' + Date.now(),
+                    date: date,
+                    waist: waistVal ? Math.round(waistVal * 10) / 10 : null,
+                    chest: chest ? Math.round(chest * 10) / 10 : null,
+                    shoulder: shoulder ? Math.round(shoulder * 10) / 10 : null,
+                    arms: arms ? Math.round(arms * 10) / 10 : null,
+                    thigh: thigh ? Math.round(thigh * 10) / 10 : null,
+                    hips: hips ? Math.round(hips * 10) / 10 : null,
+                    neck: neck ? Math.round(neck * 10) / 10 : null,
+                    notes: notes,
+                    timestamp: Date.now()
+                };
+
+                let mLogs = getMeasurementsLogs();
+                mLogs = mLogs.filter(l => l.date !== date);
+                mLogs.unshift(measEntry);
+                mLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
+                setMeasurementsLogs(mLogs);
+                measSummary = `${measEntry.waist ? `Bel: ${measEntry.waist} cm` : ''}${measEntry.arms ? ` • Kol: ${measEntry.arms} cm` : ''}${measEntry.chest ? ` • Göğüs: ${measEntry.chest} cm` : ''}`;
+            }
+
+            closeScaleModal();
+            renderAnalytics();
+            playAlertSound();
+
+            let msg = "⚖️📏 Vücut ve ölçüm kaydı başarıyla kaydedildi!\n\n";
+            if (scaleSummary) msg += scaleSummary + "\n";
+            if (measSummary) msg += measSummary;
+            alert(msg.trim());
+        }
+
+        function deleteScaleEntry(id) {
+            if (confirm("Bu tartı ölçümünü silmek istediğinize emin misiniz?")) {
+                let logs = getScaleLogs();
+                logs = logs.filter(l => l.id !== id);
+                setScaleLogs(logs);
+                renderAnalytics();
+            }
+        }
+
+        // ----- BODY MEASUREMENTS (MEZURA) STORAGE & CRUD -----
+        function getMeasurementsLogs() {
+            const uid = getActiveUserId();
+            try {
+                const raw = localStorage.getItem(`celik_kodu_measurements_${uid}`);
+                return raw ? JSON.parse(raw) : [];
+            } catch(e) {
+                return [];
+            }
+        }
+
+        function setMeasurementsLogs(logs) {
+            const uid = getActiveUserId();
+            localStorage.setItem(`celik_kodu_measurements_${uid}`, JSON.stringify(logs));
+            syncMeasurementLogsToCloud(logs, uid);
+        }
+
+        function openMeasurementsModal() {
+            openScaleModal();
+        }
+
+        function closeMeasurementsModal() {
+            closeScaleModal();
+            const m = document.getElementById('measurementsModal');
+            if (m) m.classList.remove('active');
+        }
+
+        function saveMeasurementsEntry() {
+            saveScaleEntry();
+        }
+
+        function deleteMeasurementsEntry(id) {
+            if (confirm("Bu vücut ölçümü kaydını silmek istediğinize emin misiniz?")) {
+                let logs = getMeasurementsLogs();
+                logs = logs.filter(l => l.id !== id);
+                setMeasurementsLogs(logs);
+                renderAnalytics();
+            }
+        }
+
+        function exportAnalyticsCSV() {
+            const uid = getActiveUserId();
+            const scaleLogs = getScaleLogs();
+            const measLogs = getMeasurementsLogs();
+
+            let csv = "\uFEFF=== TARTI VE VÜCUT KOMPOZİSYONU GEÇMİŞİ ===\r\n";
+            csv += "Tarih,Kilo_Kg,Yag_Orani_Pct,Kas_Kutlesi_Kg,Sivi_Pct,Viseral_Yag,BMR_kcal,Notlar\r\n";
+            scaleLogs.forEach(s => {
+                csv += `"${s.date}",${s.weight || ''},${s.bodyFat || ''},${s.muscleMass || ''},${s.waterPct || ''},${s.visceralFat || ''},${s.bmr || ''},"${(s.notes || '').replace(/"/g, '""')}"\r\n`;
+            });
+
+            csv += "\r\n=== MEZURA VÜCUT ÖLÇÜLERİ GEÇMİŞİ ===\r\n";
+            csv += "Tarih,Bel_cm,Gogus_cm,Omuz_cm,Kol_cm,Bacak_cm,Kalca_cm,Boyun_cm,Notlar\r\n";
+            measLogs.forEach(m => {
+                csv += `"${m.date}",${m.waist || ''},${m.chest || ''},${m.shoulder || ''},${m.arms || ''},${m.thigh || ''},${m.hips || ''},${m.neck || ''},"${(m.notes || '').replace(/"/g, '""')}"\r\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `celik_kodu_tarti_ve_olcum_${uid}_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // ----- MAIN RENDER ANALYTICS CONTROLLER -----
+        function renderAnalytics() {
+            const container = document.getElementById('analyticsContentContainer');
+            if (!container) return;
+
+            if (currentAnalyticsSubView === 'measurements') currentAnalyticsSubView = 'scale';
+
+            // Highlight subview tab buttons
+            const subBtns = [
+                { id: 'btnSubAnalyticsMuscle', view: 'muscle' },
+                { id: 'btnSubAnalyticsScale', view: 'scale' },
+                { id: 'btnSubAnalyticsCombined', view: 'combined' }
+            ];
+            subBtns.forEach(b => {
+                const el = document.getElementById(b.id);
+                if (el) {
+                    if (b.view === currentAnalyticsSubView) el.classList.add('active');
+                    else el.classList.remove('active');
+                }
+            });
+
+            if (currentAnalyticsSubView === 'muscle') {
+                renderMuscleAnalytics(container);
+            } else if (currentAnalyticsSubView === 'combined') {
+                renderCombinedCoachReport(container);
+            } else {
+                renderScaleAnalytics(container);
+            }
+        }
+
+        // ==================== AKADEMİK BİYOMEKANİK & KAS DAĞILIM MOTORU ====================
+        // Brad Schoenfeld & RP Çok Eklemli Kademeli Yük Modeli (Single Source of Truth)
+        const ACADEMIC_EXERCISE_SPEC = {
+            // 1. GÖĞÜS & YATAY İTİŞ
+            'barbell bench': { primary: 'Göğüs', pFactor: 1.0, sec: { 'Omuz': 0.35, 'Triceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'dambıl bench press': { primary: 'Göğüs', pFactor: 1.0, sec: { 'Omuz': 0.35, 'Triceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'bench press': { primary: 'Göğüs', pFactor: 1.0, sec: { 'Omuz': 0.35, 'Triceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'incline barbell bench': { primary: 'Göğüs', pFactor: 1.0, sec: { 'Omuz': 0.45, 'Triceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'incline dambıl press': { primary: 'Göğüs', pFactor: 1.0, sec: { 'Omuz': 0.45, 'Triceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'eğimli sehpa dambıl pres (incline db press)': { primary: 'Göğüs', pFactor: 1.0, sec: { 'Omuz': 0.45, 'Triceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'dambıl floor press': { primary: 'Göğüs', pFactor: 0.85, sec: { 'Triceps': 0.45, 'Omuz': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: false },
+            'kablo crossover': { primary: 'Göğüs', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+            'kablo göğüs sıkıştırma (cable flyes / crossover)': { primary: 'Göğüs', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+            'pec deck kelebek': { primary: 'Göğüs', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+            'dips': { primary: 'Göğüs', pFactor: 0.85, sec: { 'Triceps': 0.40, 'Omuz': 0.30 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'MODERATE', lengthened: true },
+            'şınav (push-up)': { primary: 'Göğüs', pFactor: 0.65, sec: { 'Omuz': 0.25, 'Triceps': 0.25, 'Karın/Core': 0.20 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: false },
+            'klasik şınav (floor push-up)': { primary: 'Göğüs', pFactor: 0.65, sec: { 'Omuz': 0.25, 'Triceps': 0.25, 'Karın/Core': 0.20 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: false },
+            'şınav': { primary: 'Göğüs', pFactor: 0.65, sec: { 'Omuz': 0.25, 'Triceps': 0.25, 'Karın/Core': 0.20 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: false },
+            'decline şınav': { primary: 'Göğüs', pFactor: 0.75, sec: { 'Omuz': 0.35, 'Triceps': 0.25, 'Karın/Core': 0.25 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: false },
+            'dambıl pullover': { primary: 'Göğüs', pFactor: 0.50, sec: { 'Sırt': 0.50, 'Triceps': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: true },
+
+            // 2. SIRT & ÇEKİŞ
+            'barbell row': { primary: 'Sırt', pFactor: 1.0, sec: { 'Biceps': 0.40, 'Omuz': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: true },
+            'pendlay row': { primary: 'Sırt', pFactor: 1.0, sec: { 'Biceps': 0.35, 'Omuz': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: false },
+            'dambıl saw row': { primary: 'Sırt', pFactor: 1.0, sec: { 'Biceps': 0.40, 'Karın/Core': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'göğüs destekli row': { primary: 'Sırt', pFactor: 1.0, sec: { 'Biceps': 0.40, 'Omuz': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'gorilla row': { primary: 'Sırt', pFactor: 1.0, sec: { 'Biceps': 0.40, 'Karın/Core': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: true },
+            'lat pulldown': { primary: 'Sırt', pFactor: 1.0, sec: { 'Biceps': 0.35, 'Omuz': 0.20 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'kablo row': { primary: 'Sırt', pFactor: 1.0, sec: { 'Biceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'barfiks (pull-up)': { primary: 'Sırt', pFactor: 0.85, sec: { 'Biceps': 0.40, 'Karın/Core': 0.25 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: true },
+            'yatay barfiks': { primary: 'Sırt', pFactor: 0.70, sec: { 'Biceps': 0.35, 'Karın/Core': 0.20 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: true },
+            'chin-up (ters barfiks)': { primary: 'Biceps', pFactor: 0.85, sec: { 'Sırt': 0.65 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: true },
+            'renegade row': { primary: 'Sırt', pFactor: 0.70, sec: { 'Karın/Core': 0.70, 'Biceps': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: false },
+            'renegade row + şınav': { primary: 'Sırt', pFactor: 0.60, sec: { 'Göğüs': 0.50, 'Karın/Core': 0.60, 'Triceps': 0.25 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'MODERATE', lengthened: false },
+
+            // 3. OMUZ
+            'barbell omuz presi': { primary: 'Omuz', pFactor: 1.0, sec: { 'Triceps': 0.35, 'Karın/Core': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'dambıl omuz presi': { primary: 'Omuz', pFactor: 1.0, sec: { 'Triceps': 0.35, 'Karın/Core': 0.20 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'kettlebell press': { primary: 'Omuz', pFactor: 1.0, sec: { 'Triceps': 0.35, 'Karın/Core': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'kettlebell strict overhead press': { primary: 'Omuz', pFactor: 1.0, sec: { 'Triceps': 0.35, 'Karın/Core': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'arnold press': { primary: 'Omuz', pFactor: 1.0, sec: { 'Triceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'barbell push press': { primary: 'Omuz', pFactor: 0.80, sec: { 'Triceps': 0.30, 'Ön Bacak': 0.25 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
+            'dambıl push press': { primary: 'Omuz', pFactor: 0.80, sec: { 'Triceps': 0.30, 'Ön Bacak': 0.25 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
+            'dambıl lateral raise': { primary: 'Omuz', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: false },
+            'kablo lateral raise': { primary: 'Omuz', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+            'face pull': { primary: 'Omuz', pFactor: 0.80, sec: { 'Sırt': 0.50 }, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+            'diz üstü plaka ön omuz kaldırış': { primary: 'Omuz', pFactor: 0.80, sec: { 'Karın/Core': 0.30 }, type: 'ISOLATION', sfr: 'HIGH', lengthened: false },
+            'kettlebell halo': { primary: 'Omuz', pFactor: 0.40, sec: { 'Karın/Core': 0.40 }, type: 'MOBILITY_STABILITY', sfr: 'HIGH', lengthened: false },
+            'dambıl snatch': { primary: 'Omuz', pFactor: 0.50, sec: { 'Arka Bacak': 0.30, 'Glute': 0.30, 'Karın/Core': 0.30 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
+            'kettlebell snatch': { primary: 'Omuz', pFactor: 0.50, sec: { 'Arka Bacak': 0.30, 'Glute': 0.30, 'Karın/Core': 0.30 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
+            'dambıl clean & press': { primary: 'Omuz', pFactor: 0.70, sec: { 'Glute': 0.35, 'Arka Bacak': 0.30, 'Triceps': 0.25 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
+            'step-up + omuz presi': { primary: 'Ön Bacak', pFactor: 0.70, sec: { 'Omuz': 0.60, 'Glute': 0.40 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: false },
+
+            // 4. ÖN BACAK (QUAD DOMINANT)
+            'barbell back squat': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.50, 'Karın/Core': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: true },
+            'barbell front squat': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.40, 'Karın/Core': 0.40 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'çift dambıl ön squat (front squat)': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.40, 'Karın/Core': 0.40 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'barbell zercher squat': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.40, 'Karın/Core': 0.50, 'Biceps': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: true },
+            'dambıl goblet squat': { primary: 'Ön Bacak', pFactor: 0.90, sec: { 'Glute': 0.40, 'Karın/Core': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'kettlebell goblet squat': { primary: 'Ön Bacak', pFactor: 0.90, sec: { 'Glute': 0.40, 'Karın/Core': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            '45° leg press': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'bulgar split squat': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.60 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'walking lunge': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.50, 'Karın/Core': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'reverse lunge': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.50 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'leg extension': { primary: 'Ön Bacak', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: false },
+            'air squat': { primary: 'Ön Bacak', pFactor: 0.30, sec: { 'Glute': 0.20 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: true },
+            'jump squat': { primary: 'Ön Bacak', pFactor: 0.50, sec: { 'Glute': 0.35 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
+            'lunge + gövde rotasyonu': { primary: 'Ön Bacak', pFactor: 0.80, sec: { 'Glute': 0.40, 'Karın/Core': 0.50 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+
+            // 5. ARKA BACAK (HAMSTRINGS)
+            'barbell rdl': { primary: 'Arka Bacak', pFactor: 1.0, sec: { 'Glute': 0.50, 'Sırt': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'dambıl rdl': { primary: 'Arka Bacak', pFactor: 1.0, sec: { 'Glute': 0.50, 'Sırt': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'tek bacak rdl': { primary: 'Arka Bacak', pFactor: 1.0, sec: { 'Glute': 0.60, 'Karın/Core': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'barbell deadlift': { primary: 'Arka Bacak', pFactor: 1.0, sec: { 'Glute': 0.65, 'Sırt': 0.50, 'Karın/Core': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'LOW', lengthened: true },
+            'leg curl': { primary: 'Arka Bacak', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+            'barbell hang power clean': { primary: 'Arka Bacak', pFactor: 0.50, sec: { 'Glute': 0.50, 'Omuz': 0.30, 'Sırt': 0.30 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
+            'kettlebell clean': { primary: 'Glute', pFactor: 0.50, sec: { 'Arka Bacak': 0.40, 'Karın/Core': 0.30 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
+
+            // 6. KALÇA (GLUTES)
+            'barbell hip thrust': { primary: 'Glute', pFactor: 1.0, sec: { 'Arka Bacak': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: false },
+            'glute bridge': { primary: 'Glute', pFactor: 1.0, sec: { 'Arka Bacak': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: false },
+            'dambıl swing': { primary: 'Glute', pFactor: 0.60, sec: { 'Arka Bacak': 0.40, 'Karın/Core': 0.25 }, type: 'BALLISTIC_POWER', sfr: 'HIGH', lengthened: true },
+            'kettlebell swing': { primary: 'Glute', pFactor: 0.60, sec: { 'Arka Bacak': 0.40, 'Karın/Core': 0.25 }, type: 'BALLISTIC_POWER', sfr: 'HIGH', lengthened: true },
+
+            // 7. BICEPS
+            'incline dambıl curl': { primary: 'Biceps', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+            'barbell curl': { primary: 'Biceps', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: false },
+            'hammer curl': { primary: 'Biceps', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: false },
+            'kablo biceps curl': { primary: 'Biceps', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+
+            // 8. TRICEPS
+            'dambıl başüstü triceps': { primary: 'Triceps', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+            'dambıl skullcrusher': { primary: 'Triceps', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+            'halat triceps pushdown': { primary: 'Triceps', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: false },
+            'dar tutuş bench': { primary: 'Triceps', pFactor: 0.85, sec: { 'Göğüs': 0.50, 'Omuz': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'elmas şınav': { primary: 'Triceps', pFactor: 0.70, sec: { 'Göğüs': 0.35, 'Karın/Core': 0.20 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: false },
+
+            // 9. KALF
+            'calf raise': { primary: 'Kalf', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+            'dambıl ayakta kalf yükseltme': { primary: 'Kalf', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+            'dambıl kalf': { primary: 'Kalf', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+            'dambıl yatarak leg curl': { primary: 'Arka Bacak', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+            'sissy squat': { primary: 'Ön Bacak', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+            'dambıl başüstü triceps': { primary: 'Triceps', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
+
+            // 10. KARIN & CORE
+            'russian twist': { primary: 'Karın/Core', pFactor: 0.70, sec: {}, type: 'CORE', sfr: 'HIGH', lengthened: false },
+            'kablo woodchopper': { primary: 'Karın/Core', pFactor: 0.80, sec: { 'Omuz': 0.20 }, type: 'CORE', sfr: 'HIGH', lengthened: false },
+            'yarım diz üstü plaka oduncu (woodchopper)': { primary: 'Karın/Core', pFactor: 0.80, sec: { 'Omuz': 0.20 }, type: 'CORE', sfr: 'HIGH', lengthened: false },
+            'plank': { primary: 'Karın/Core', pFactor: 0.50, sec: {}, type: 'CORE', sfr: 'HIGH', lengthened: false },
+            'hollow body': { primary: 'Karın/Core', pFactor: 0.80, sec: {}, type: 'CORE', sfr: 'HIGH', lengthened: false },
+            'barda dize çekme': { primary: 'Karın/Core', pFactor: 0.85, sec: { 'Sırt': 0.20 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: true },
+            "farmer's walk": { primary: 'Karın/Core', pFactor: 0.60, sec: { 'Sırt': 0.35 }, type: 'LOADED_CARRY', sfr: 'HIGH', lengthened: false },
+            'suitcase carry': { primary: 'Karın/Core', pFactor: 0.60, sec: {}, type: 'LOADED_CARRY', sfr: 'HIGH', lengthened: false },
+            'garson taşıması (waiter carry)': { primary: 'Karın/Core', pFactor: 0.60, sec: { 'Omuz': 0.40 }, type: 'LOADED_CARRY', sfr: 'HIGH', lengthened: false },
+            'çapraz taşıma (cross-body carry)': { primary: 'Karın/Core', pFactor: 0.60, sec: { 'Omuz': 0.30 }, type: 'LOADED_CARRY', sfr: 'HIGH', lengthened: false },
+            'ayı emeklemesi plaka çekişi': { primary: 'Karın/Core', pFactor: 0.70, sec: { 'Omuz': 0.35 }, type: 'CORE', sfr: 'MODERATE', lengthened: false },
+            'turkish get-up': { primary: 'Karın/Core', pFactor: 0.60, sec: { 'Omuz': 0.50, 'Glute': 0.35 }, type: 'MOBILITY_STABILITY', sfr: 'MODERATE', lengthened: false },
+
+            // 11. HİBRİT / KOMPLEKS
+            'barbell thruster': { primary: 'Ön Bacak', pFactor: 0.70, sec: { 'Omuz': 0.70, 'Glute': 0.35, 'Triceps': 0.25 }, type: 'BALLISTIC_POWER', sfr: 'LOW', lengthened: false },
+            'dambıl thruster': { primary: 'Ön Bacak', pFactor: 0.70, sec: { 'Omuz': 0.70, 'Glute': 0.35, 'Triceps': 0.25 }, type: 'BALLISTIC_POWER', sfr: 'LOW', lengthened: false },
+            'kettlebell thruster': { primary: 'Ön Bacak', pFactor: 0.70, sec: { 'Omuz': 0.70, 'Glute': 0.35, 'Triceps': 0.25 }, type: 'BALLISTIC_POWER', sfr: 'LOW', lengthened: false },
+            'landmine squat to press': { primary: 'Ön Bacak', pFactor: 0.70, sec: { 'Omuz': 0.65, 'Glute': 0.35, 'Triceps': 0.20 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: false },
+
+            // 12. METABOLİK KONDİSYON (HİPERTROFİYE 0.0x VERİR)
+            'burpee': { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false },
+            'mountain climber': { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false },
+            'dambıl manmaker': { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false },
+            'jumping jack': { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false },
+            'ip atlama': { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false }
+        };
+
+        function resolveExerciseBiomechanics(name = '', rawMuscle = '', category = '') {
+            const cleanName = String(name).trim().toLowerCase();
+            if (ACADEMIC_EXERCISE_SPEC[cleanName]) {
+                return ACADEMIC_EXERCISE_SPEC[cleanName];
+            }
+            for (const [key, val] of Object.entries(ACADEMIC_EXERCISE_SPEC)) {
+                if (cleanName.includes(key) || key.includes(cleanName)) {
+                    return val;
+                }
+            }
+            const text = `${cleanName} ${String(rawMuscle).toLowerCase()} ${String(category).toLowerCase()}`;
+            if (text.includes('burpee') || text.includes('climber') || text.includes('cardio') || text.includes('kondisyon') || text.includes('jumping') || text.includes('manmaker')) {
+                return { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false };
+            }
+            let primary = 'Göğüs';
+            let pFactor = 1.0;
+            let sec = {};
+            let type = 'HEAVY_COMPOUND';
+            let sfr = 'HIGH';
+            let lengthened = false;
+            if (text.includes('bench') || (text.includes('press') && !text.includes('omuz') && !text.includes('overhead') && !text.includes('leg'))) {
+                primary = 'Göğüs';
+                sec = { 'Omuz': 0.35, 'Triceps': 0.35 };
+                lengthened = true;
+            } else if (text.includes('şınav') || text.includes('push-up') || text.includes('pushup')) {
+                primary = 'Göğüs';
+                pFactor = 0.65;
+                sec = { 'Omuz': 0.25, 'Triceps': 0.25, 'Karın/Core': 0.20 };
+                type = 'BODYWEIGHT_STRENGTH';
+            } else if (text.includes('row') || text.includes('lat') || text.includes('barfiks') || text.includes('pull-up') || text.includes('çekiş')) {
+                primary = 'Sırt';
+                sec = { 'Biceps': 0.40 };
+                lengthened = true;
+            } else if (text.includes('omuz') || text.includes('overhead') || text.includes('arnold') || text.includes('deltoid')) {
+                primary = 'Omuz';
+                sec = { 'Triceps': 0.35 };
+                lengthened = true;
+            } else if (text.includes('squat') || text.includes('lunge') || text.includes('ön bacak') || text.includes('kuadriseps') || text.includes('quad')) {
+                primary = 'Ön Bacak';
+                sec = { 'Glute': 0.40 };
+                lengthened = true;
+            } else if (text.includes('rdl') || text.includes('deadlift') || text.includes('hamstring') || text.includes('leg curl') || text.includes('arka bacak')) {
+                primary = 'Arka Bacak';
+                sec = { 'Glute': 0.50 };
+                lengthened = true;
+            } else if (text.includes('swing') || text.includes('glute') || text.includes('kalça') || text.includes('hip thrust')) {
+                primary = 'Glute';
+                sec = { 'Arka Bacak': 0.40 };
+                pFactor = 0.60;
+                type = 'BALLISTIC_POWER';
+            } else if (text.includes('curl') || text.includes('biceps')) {
+                primary = 'Biceps';
+                type = 'ISOLATION';
+                lengthened = text.includes('incline');
+            } else if (text.includes('triceps') || text.includes('arka kol') || text.includes('pushdown')) {
+                primary = 'Triceps';
+                type = 'ISOLATION';
+                lengthened = text.includes('başüstü') || text.includes('overhead');
+            } else if (text.includes('kalf') || text.includes('calf') || text.includes('baldır')) {
+                primary = 'Kalf';
+                type = 'ISOLATION';
+                lengthened = true;
+            } else if (text.includes('core') || text.includes('karın') || text.includes('twist') || text.includes('carry')) {
+                primary = 'Karın/Core';
+                pFactor = 0.60;
+                type = 'CORE';
+            }
+            return { primary, pFactor, sec, type, sfr, lengthened };
+        }
+
+        const ACADEMIC_MUSCLE_TO_ID = {
+            'Göğüs': 'chest',
+            'Sırt': 'back',
+            'Omuz': 'shoulders',
+            'Ön Bacak': 'quads',
+            'Arka Bacak': 'hamstrings',
+            'Glute': 'glutes',
+            'Kalça': 'glutes',
+            'Biceps': 'biceps',
+            'Triceps': 'triceps',
+            'Karın/Core': 'core',
+            'Karın': 'core',
+            'Core': 'core',
+            'Kalf': 'calves',
+            'chest': 'chest',
+            'back': 'back',
+            'shoulders': 'shoulders',
+            'quads': 'quads',
+            'hamstrings': 'hamstrings',
+            'glutes': 'glutes',
+            'biceps': 'biceps',
+            'triceps': 'triceps',
+            'core': 'core',
+            'calves': 'calves'
+        };
+
+        // ==================== WEEKLY MUSCLE BALANCE & SUFFICIENCY ENGINE ====================
+        const WEEKLY_MUSCLE_CONFIG = [
+            { id: 'chest', name: 'Göğüs', icon: '🛡️', optimalMin: 8, optimalMax: 18, desc: 'Pectoralis Major & Minor' },
+            { id: 'back', name: 'Sırt & Kanat', icon: '🏹', optimalMin: 8, optimalMax: 20, desc: 'Latissimus, Rhomboid, Trapez' },
+            { id: 'shoulders', name: 'Omuz', icon: '⚔️', optimalMin: 8, optimalMax: 18, desc: 'Ön, Yan, Arka Deltoid' },
+            { id: 'quads', name: 'Ön Bacak', icon: '🦵', optimalMin: 8, optimalMax: 18, desc: 'Quadriceps (Squat/Lunge)' },
+            { id: 'hamstrings', name: 'Arka Bacak', icon: '🦿', optimalMin: 6, optimalMax: 16, desc: 'Biceps Femoris (RDL/Hinge)' },
+            { id: 'glutes', name: 'Kalça', icon: '🍑', optimalMin: 6, optimalMax: 16, desc: 'Gluteus Maximus / Medius' },
+            { id: 'biceps', name: 'Biceps (Pazı)', icon: '💪', optimalMin: 6, optimalMax: 16, desc: 'Biceps Brachii & Kol Çekiş' },
+            { id: 'triceps', name: 'Triceps (Arka Kol)', icon: '⚡', optimalMin: 6, optimalMax: 16, desc: 'Triceps Brachii & Kol İtiş' },
+            { id: 'core', name: 'Karın & Core', icon: '🧱', optimalMin: 6, optimalMax: 16, desc: 'Rectus Abdominis & Oblikler' },
+            { id: 'calves', name: 'Kalf & Alt Bacak', icon: '🦶', optimalMin: 3, optimalMax: 12, desc: 'Gastrocnemius & Soleus' }
+        ];
+
+        let currentWeeklyMuscleFilter = 'all'; // 'all', 'optimal', 'insufficient', 'unworked'
+        let currentWeeklyMuscleSource = 'week_projected'; // 'week_projected', 'week_done', 'schedule_full'
+        let currentWeeklyMuscleWeekOffset = 0; // 0 = this week, -1 = last week, +1 = next week
+
+        function getWeeklyMuscleBounds(weekOffset = 0) {
+            const d = new Date();
+            d.setDate(d.getDate() + (weekOffset * 7));
+            const day = d.getDay();
+            const diffToMonday = day === 0 ? -6 : 1 - day;
+            const monday = new Date(d);
+            monday.setDate(d.getDate() + diffToMonday);
+            monday.setHours(0, 0, 0, 0);
+
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+            sunday.setHours(23, 59, 59, 999);
+
+            const months = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+            const label = `${monday.getDate()} ${months[monday.getMonth()]} - ${sunday.getDate()} ${months[sunday.getMonth()]} ${sunday.getFullYear()}`;
+
+            return { monday, sunday, label, isCurrentWeek: weekOffset === 0 };
+        }
+
+        function getRecommendationsForMuscle(muscleId, max = 4) {
+            if (!Array.isArray(EXERCISES_DB)) return [];
+            let list = EXERCISES_DB.filter(e => (e.primaryMuscles || []).includes(muscleId));
+            if (list.length < max) {
+                const secondary = EXERCISES_DB.filter(e => 
+                    !list.includes(e) && (
+                        (e.secondaryMuscles || []).includes(muscleId) ||
+                        (e.muscle && typeof e.muscle === 'string' && e.muscle.toLowerCase().includes(muscleId.toLowerCase()))
+                    )
+                );
+                list = list.concat(secondary);
+            }
+            list.sort((a, b) => {
+                const score = (x) => (x.equipment === 'dumbbell' ? 3 : (x.equipment === 'kettlebell' ? 2 : (x.equipment === 'bodyweight' ? 1 : 0)));
+                return score(b) - score(a);
+            });
+            return list.slice(0, max);
+        }
+
+        function formatDateTr(rawDate) {
+            if (!rawDate) return '-';
+            const dt = new Date(rawDate);
+            if (isNaN(dt.getTime())) return String(rawDate);
+            const days = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+            const months = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+            return `${dt.getDate()} ${months[dt.getMonth()]} ${days[dt.getDay()]}`;
+        }
+
+        function calculateWeeklyMuscleSufficiency(sourceMode = 'week_projected', weekOffset = 0) {
+            const bounds = getWeeklyMuscleBounds(weekOffset);
+            const allLogs = (typeof getWorkoutLogs === 'function') ? getWorkoutLogs() : [];
+            const weekLogs = allLogs.filter(l => {
+                const dt = new Date(l.date);
+                return dt >= bounds.monday && dt <= bounds.sunday;
+            });
+
+            const loggedDays = new Set(weekLogs.map(l => new Date(l.date).getDay()));
+            const todayDay = (new Date()).getDay();
+            const getIsoDay = (d) => d === 0 ? 7 : d;
+            const todayIso = getIsoDay(todayDay);
+
+            const schedule = (typeof getWeeklySchedule === 'function') ? getWeeklySchedule() : {};
+
+            const map = {};
+            WEEKLY_MUSCLE_CONFIG.forEach(m => {
+                map[m.id] = {
+                    id: m.id,
+                    name: m.name,
+                    icon: m.icon,
+                    desc: m.desc,
+                    optimalMin: m.optimalMin,
+                    optimalMax: m.optimalMax,
+                    doneDirectSets: 0,
+                    doneSecondarySets: 0,
+                    planDirectSets: 0,
+                    planSecondarySets: 0,
+                    scheduledTotalSets: 0,
+                    scheduledSecondarySets: 0,
+                    doneExercises: new Set(),
+                    plannedExercises: new Map(),
+                    contributions: []
+                };
+            });
+
+            // 1. Gerçekleşen Antrenman Loglarını Biyomekanik Katsayılarla İşle
+            weekLogs.forEach(log => {
+                if (!log.exercises || !Array.isArray(log.exercises)) return;
+                const dateStr = log.dateFormatted || formatDateTr(log.date);
+                const sessionTitle = log.title || log.workoutName || 'Antrenman Seansı';
+
+                log.exercises.forEach(ex => {
+                    const cSets = Number(ex.completedSetsCount) || (Array.isArray(ex.sets) ? ex.sets.filter(s => s.completed || parseInt(s.reps, 10) > 0).length : 0) || Number(ex.targetSets) || Number(ex.sets) || 0;
+                    if (cSets <= 0) return;
+
+                    const spec = resolveExerciseBiomechanics(ex.name, ex.muscle, ex.category);
+                    if (!spec || spec.type === 'CONDITIONING' || spec.pFactor === 0) {
+                        return; // Metabolik dayanıklılık hipertrofi set havuzuna eklenmez
+                    }
+
+                    // Birincil Hedef Kas Grubu
+                    const primId = ACADEMIC_MUSCLE_TO_ID[spec.primary] || spec.primary;
+                    if (primId && map[primId] && spec.pFactor > 0) {
+                        const directAdd = cSets * spec.pFactor;
+                        map[primId].doneDirectSets += directAdd;
+                        map[primId].doneExercises.add(ex.name);
+
+                        map[primId].contributions.push({
+                            date: dateStr,
+                            sessionTitle: sessionTitle,
+                            exercise: ex.name,
+                            rawSets: cSets,
+                            role: 'Birincil',
+                            factor: spec.pFactor,
+                            earnedSets: Math.round(directAdd * 10) / 10
+                        });
+                    }
+
+                    // İkincil / Sinerjist Kas Grupları
+                    if (spec.sec && typeof spec.sec === 'object') {
+                        Object.entries(spec.sec).forEach(([secName, secFactor]) => {
+                            const secId = ACADEMIC_MUSCLE_TO_ID[secName] || secName;
+                            if (secId && map[secId] && secFactor > 0) {
+                                const secAdd = cSets * secFactor;
+                                map[secId].doneSecondarySets += secAdd;
+
+                                map[secId].contributions.push({
+                                    date: dateStr,
+                                    sessionTitle: sessionTitle,
+                                    exercise: ex.name,
+                                    rawSets: cSets,
+                                    role: 'Sinerjist / Destek',
+                                    factor: secFactor,
+                                    earnedSets: Math.round(secAdd * 10) / 10
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+
+            // 2. Haftalık Planlanan Antrenmanları Biyomekanik Katsayılarla İşle
+            const dayKeys = [1, 2, 3, 4, 5, 6, 0];
+            let totalPlannedSessions = 0;
+            dayKeys.forEach(dKey => {
+                const plan = schedule[dKey];
+                if (!plan || plan.rest) return;
+
+                const planIso = getIsoDay(dKey);
+                const isCompleted = loggedDays.has(dKey);
+                const isRemaining = bounds.isCurrentWeek ? (!isCompleted && planIso >= todayIso) : (!bounds.isCurrentWeek && weekOffset > 0);
+
+                totalPlannedSessions++;
+
+                const details = (typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(plan) : null;
+                if (!details || !Array.isArray(details.exercises)) return;
+
+                details.exercises.forEach(ex => {
+                    const pSets = Number(ex.targetSets || ex.sets) || (details.scheme && Number(details.scheme.sets)) || 3;
+                    const spec = resolveExerciseBiomechanics(ex.name, ex.muscle, ex.category);
+                    if (!spec || spec.type === 'CONDITIONING' || spec.pFactor === 0) {
+                        return;
+                    }
+
+                    const primId = ACADEMIC_MUSCLE_TO_ID[spec.primary] || spec.primary;
+                    if (primId && map[primId] && spec.pFactor > 0) {
+                        const directPlan = pSets * spec.pFactor;
+                        map[primId].scheduledTotalSets += directPlan;
+                        if (isRemaining || sourceMode === 'schedule_full') {
+                            map[primId].planDirectSets += directPlan;
+                            map[primId].plannedExercises.set(`${ex.name}_${dKey}`, {
+                                name: ex.name,
+                                dayIdx: dKey,
+                                dayName: (typeof DAY_NAMES_TR !== 'undefined') ? DAY_NAMES_TR[dKey] : `Gün ${dKey}`,
+                                sets: directPlan
+                            });
+                        }
+                    }
+
+                    if (spec.sec && typeof spec.sec === 'object') {
+                        Object.entries(spec.sec).forEach(([secName, secFactor]) => {
+                            const secId = ACADEMIC_MUSCLE_TO_ID[secName] || secName;
+                            if (secId && map[secId] && secFactor > 0) {
+                                const secPlan = pSets * secFactor;
+                                map[secId].scheduledSecondarySets += secPlan;
+                                if (isRemaining || sourceMode === 'schedule_full') {
+                                    map[secId].planSecondarySets += secPlan;
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+
+            // 3. Metrikleri ve Kademeli Hipertrofi Değerlendirmesini Sonuçlandır
+            const summary = {
+                totalMuscles: WEEKLY_MUSCLE_CONFIG.length,
+                workedCount: 0,
+                optimalCount: 0,
+                insufficientCount: 0,
+                unworkedCount: 0,
+                highCount: 0
+            };
+
+            const unworkedNames = [];
+            const insufficientNames = [];
+            const optimalNames = [];
+
+            const muscles = WEEKLY_MUSCLE_CONFIG.map(cfg => {
+                const data = map[cfg.id];
+                const effectiveDone = Math.round((data.doneDirectSets + data.doneSecondarySets) * 10) / 10;
+                const effectivePlan = Math.round((data.planDirectSets + data.planSecondarySets) * 10) / 10;
+                const effectiveProjected = Math.round((effectiveDone + effectivePlan) * 10) / 10;
+                const effectiveScheduledTotal = Math.round((data.scheduledTotalSets + data.scheduledSecondarySets) * 10) / 10;
+
+                let evalVolume = effectiveProjected;
+                if (sourceMode === 'week_done') evalVolume = effectiveDone;
+                if (sourceMode === 'schedule_full') evalVolume = effectiveScheduledTotal;
+
+                if (effectiveDone > 0) summary.workedCount++;
+
+                let status = 'unworked';
+                let statusBadge = '❌ Hiç Çalıştırılmadı';
+                let statusColor = '#ef4444';
+                let statusBg = 'rgba(239, 68, 68, 0.12)';
+                let statusDesc = 'Bu kas grubu için antrenman hacmi bulunmuyor.';
+
+                if (evalVolume === 0) {
+                    status = 'unworked';
+                    summary.unworkedCount++;
+                    unworkedNames.push(cfg.name);
+                    if (effectiveScheduledTotal > 0 && sourceMode === 'week_done') {
+                        statusDesc = `Planda ${effectiveScheduledTotal.toFixed(1)} set var ancak henüz seans yapılmadı.`;
+                    }
+                } else if (evalVolume < cfg.optimalMin) {
+                    status = 'insufficient';
+                    statusBadge = '⚠️ Yetersiz Hacim';
+                    statusColor = '#f59e0b';
+                    statusBg = 'rgba(245, 158, 11, 0.12)';
+                    statusDesc = `Minimum gelişim eşiğinin altında (${evalVolume.toFixed(1)}/${cfg.optimalMin} set).`;
+                    summary.insufficientCount++;
+                    insufficientNames.push(cfg.name);
+                } else if (evalVolume <= cfg.optimalMax) {
+                    status = 'optimal';
+                    statusBadge = '✅ Yeterli & Optimal';
+                    statusColor = '#10b981';
+                    statusBg = 'rgba(16, 185, 129, 0.12)';
+                    statusDesc = `İdeal hipertrofi & adaptasyon aralığında (${evalVolume.toFixed(1)} set).`;
+                    summary.optimalCount++;
+                    optimalNames.push(cfg.name);
+                } else {
+                    status = 'high';
+                    statusBadge = '🔥 Yüksek Hacim';
+                    statusColor = '#818cf8';
+                    statusBg = 'rgba(129, 140, 248, 0.12)';
+                    statusDesc = `Yoğun aşırı yükleme (${evalVolume.toFixed(1)} set); toparlanmaya özen gösterin.`;
+                    summary.highCount++;
+                    optimalNames.push(cfg.name);
+                }
+
+                return {
+                    id: cfg.id,
+                    name: cfg.name,
+                    icon: cfg.icon,
+                    desc: cfg.desc,
+                    optimalMin: cfg.optimalMin,
+                    optimalMax: cfg.optimalMax,
+                    doneDirectSets: Math.round(data.doneDirectSets * 10) / 10,
+                    doneSecondarySets: Math.round(data.doneSecondarySets * 10) / 10,
+                    effectiveDone,
+                    planDirectSets: Math.round(data.planDirectSets * 10) / 10,
+                    planSecondarySets: Math.round(data.planSecondarySets * 10) / 10,
+                    effectivePlan,
+                    projectedSets: effectiveProjected,
+                    scheduledTotalSets: effectiveScheduledTotal,
+                    effectiveTotal: evalVolume,
+                    status,
+                    statusBadge,
+                    statusColor,
+                    statusBg,
+                    statusDesc,
+                    doneExercises: Array.from(data.doneExercises),
+                    plannedExercises: Array.from(data.plannedExercises.values()),
+                    contributions: data.contributions || []
+                };
+            });
+
+            return {
+                bounds,
+                sourceMode,
+                weekOffset,
+                totalDoneSessions: weekLogs.length,
+                totalPlannedSessions,
+                summary,
+                unworkedNames,
+                insufficientNames,
+                optimalNames,
+                muscles
+            };
+        }
+
+        function setWeeklyMuscleFilter(filter) {
+            currentWeeklyMuscleFilter = filter;
+            if (typeof renderAnalytics === 'function') {
+                renderAnalytics();
+            }
+        }
+
+        function setWeeklyMuscleSource(mode) {
+            currentWeeklyMuscleSource = mode;
+            if (typeof renderAnalytics === 'function') {
+                renderAnalytics();
+            }
+        }
+
+        function setWeeklyMuscleOffset(offset) {
+            currentWeeklyMuscleWeekOffset = offset;
+            if (typeof renderAnalytics === 'function') {
+                renderAnalytics();
+            }
+        }
+
+        // ==================== WORKOUT QUICK-ADD & COMPILE HELPERS ====================
+        let activeQuickAddExId = null;
+
+        function addExerciseToDaySchedule(dayIdx, exId, targetSets = 3, targetReps = '8-12') {
+            const ex = EXERCISES_DB.find(e => e.id === exId);
+            if (!ex) return false;
+
+            const schedule = getWeeklySchedule();
+            const plan = schedule[dayIdx] || { id: 'rest', title: 'Dinlenme', rest: true };
+
+            const details = (typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(plan) : null;
+            let existingExercises = (details && Array.isArray(details.exercises))
+                ? details.exercises.map(e => ({
+                    id: e.id || e.exId,
+                    name: e.name,
+                    targetSets: e.targetSets || (details.scheme ? details.scheme.sets : 3),
+                    targetReps: e.targetReps || (details.scheme ? details.scheme.reps : '8-12')
+                })).filter(e => Boolean(e.id))
+                : [];
+
+            existingExercises.push({
+                id: ex.id,
+                name: ex.name,
+                targetSets: parseInt(targetSets) || 3,
+                targetReps: targetReps || '8-12'
+            });
+
+            const progId = 'custom_day_' + dayIdx + '_' + Date.now();
+            const dayName = (typeof DAY_NAMES_TR !== 'undefined') ? DAY_NAMES_TR[dayIdx] : `Gün ${dayIdx}`;
+            const muscleName = (ex.primaryMuscles && ex.primaryMuscles[0] && TARGET_REGIONS[ex.primaryMuscles[0]])
+                ? TARGET_REGIONS[ex.primaryMuscles[0]].name
+                : '';
+            const title = plan.rest ? `${dayName} ${muscleName ? muscleName + ' ' : ''}Takviye Seansı` : (plan.title || `${dayName} Programı`);
+
+            const customWorkout = {
+                id: progId,
+                title: title,
+                split: 'custom',
+                splitName: title,
+                style: 'classic',
+                goal: 'hypertrophy',
+                duration: Math.round(existingExercises.length * 8),
+                scheme: { sets: 3, reps: '8-12', rest: (details && details.scheme ? details.scheme.rest : 60) },
+                warmups: [
+                    { name: "Eklemsel CARs (Omuz & Kalça Dairesi)", dur: "90 sn", cue: "Tüm eklemleri kontrollü ısıt." }
+                ],
+                exercises: existingExercises.map(e => {
+                    const dbEx = EXERCISES_DB.find(x => x.id === e.id);
+                    return Object.assign({}, dbEx || {}, e);
+                }),
+                finisher: { name: "Balistik Bitiş", desc: "Tempolu taşıma veya swing." },
+                updatedAt: Date.now(),
+                isCustom: true
+            };
+
+            schedule[dayIdx] = {
+                id: progId,
+                title: title,
+                type: 'custom_saved',
+                desc: `${existingExercises.length} Hareket • ${customWorkout.duration} Dk`,
+                rest: false,
+                customWorkout: customWorkout
+            };
+
+            saveWeeklySchedule(schedule);
+
+            try {
+                const user = getActiveUser();
+                const key = `celik_kodu_custom_programs_${user.id}`;
+                let saved = [];
+                try { saved = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
+                saved.unshift(customWorkout);
+                localStorage.setItem(key, JSON.stringify(saved));
+            } catch(e) {}
+
+            return true;
+        }
+
+        function openQuickAddToDayModal(exId) {
+            activeQuickAddExId = exId;
+            const ex = EXERCISES_DB.find(e => e.id === exId);
+            if (!ex) return;
+
+            const modal = document.getElementById('quickAddToDayModal');
+            const titleEl = document.getElementById('quickAddModalTitle');
+            const bodyEl = document.getElementById('quickAddModalBody');
+            if (!modal || !bodyEl) return;
+
+            const pNames = (ex.primaryMuscles || []).map(m => (TARGET_REGIONS[m] ? TARGET_REGIONS[m].name : m)).join(', ') || ex.muscle || '';
+
+            if (titleEl) {
+                titleEl.innerHTML = `➕ ${escapeHTML(ex.name)}`;
+            }
+
+            const schedule = getWeeklySchedule();
+            const allLogs = getWorkoutLogs();
+            const bounds = getWeeklyMuscleBounds(0);
+            const weekLogs = allLogs.filter(l => {
+                const dt = new Date(l.date);
+                return dt >= bounds.monday && dt <= bounds.sunday;
+            });
+            const loggedDays = new Set(weekLogs.map(l => new Date(l.date).getDay()));
+            const todayDay = (new Date()).getDay();
+            const getIsoDay = (d) => d === 0 ? 7 : d;
+            const todayIso = getIsoDay(todayDay);
+
+            const dayKeys = [1, 2, 3, 4, 5, 6, 0];
+            let daysHTML = '';
+
+            dayKeys.forEach(dKey => {
+                const dayName = DAY_NAMES_TR[dKey];
+                const planIso = getIsoDay(dKey);
+                const isCompleted = loggedDays.has(dKey);
+                const isPast = !isCompleted && planIso < todayIso;
+                const isAvailable = !isCompleted && planIso >= todayIso;
+
+                const plan = schedule[dKey];
+                const isRest = !plan || plan.rest;
+                const details = (!isRest && typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(plan) : null;
+                const exCount = (details && details.exercises) ? details.exercises.length : 0;
+                const planTitle = isRest ? 'Dinlenme Günü' : (plan.title || 'Antrenman');
+
+                let statusBadge = '';
+                let subtitleText = '';
+                let buttonHtml = '';
+
+                if (isCompleted) {
+                    statusBadge = `<span style="font-size:10px; color:#10b981; font-weight:800; background:rgba(16,185,129,0.12); padding:2px 6px; border-radius:4px;">✅ Seans Tamamlandı</span>`;
+                    subtitleText = `${escapeHTML(planTitle)} • Tamamlanmış seans`;
+                    buttonHtml = `
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <select id="quickAddSetsSelect_${dKey}" style="background:#111; color:#fff; border:1px solid var(--border); font-size:11px; padding:4px 6px; border-radius:6px;">
+                                <option value="3" selected>3 Set</option>
+                                <option value="4">4 Set</option>
+                                <option value="5">5 Set</option>
+                                <option value="2">2 Set</option>
+                            </select>
+                            <button class="btn btn-outline" style="font-size:10.5px; padding:4px 8px; opacity:0.85;" onclick="applyQuickAddExerciseToDay(${dKey}, '${ex.id}')">
+                                ➕ Yine de Ekle
+                            </button>
+                        </div>
+                    `;
+                } else if (isRest) {
+                    statusBadge = `<span style="font-size:10px; color:var(--cyan); font-weight:800; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.3); padding:2px 6px; border-radius:4px;">🧘 Dinlenme Günü (Boş)</span>`;
+                    subtitleText = `⚡ Eklendiğinde bu güne yeni bir Özel Takviye Seansı açılır`;
+                    buttonHtml = `
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <select id="quickAddSetsSelect_${dKey}" style="background:#111; color:#fff; border:1px solid var(--border); font-size:11px; padding:4px 6px; border-radius:6px;">
+                                <option value="3" selected>3 Set</option>
+                                <option value="4">4 Set</option>
+                                <option value="5">5 Set</option>
+                                <option value="2">2 Set</option>
+                            </select>
+                            <button class="btn btn-outline" style="font-size:11px; padding:5px 12px; font-weight:800; border-radius:6px; color:var(--cyan); border-color:var(--cyan); background:rgba(56,189,248,0.08);" onclick="applyQuickAddExerciseToDay(${dKey}, '${ex.id}')" title="Bu dinlenme gününü takviye seansına dönüştür">
+                                ⚡ Yeni Seans Aç
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    statusBadge = `<span style="font-size:10px; color:var(--gold); font-weight:800; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.3); padding:2px 6px; border-radius:4px;">🏋️ Planlı Antrenman</span>`;
+                    subtitleText = `${escapeHTML(planTitle)} • ${exCount} Hareket Mevcut (Sonuna eklenir)`;
+                    buttonHtml = `
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <select id="quickAddSetsSelect_${dKey}" style="background:#111; color:#fff; border:1px solid var(--border); font-size:11px; padding:4px 6px; border-radius:6px;">
+                                <option value="3" selected>3 Set</option>
+                                <option value="4">4 Set</option>
+                                <option value="5">5 Set</option>
+                                <option value="2">2 Set</option>
+                            </select>
+                            <button class="btn btn-gold" style="font-size:11px; padding:5px 12px; font-weight:800; border-radius:6px;" onclick="applyQuickAddExerciseToDay(${dKey}, '${ex.id}')" title="Mevcut antrenmanın sonuna ilave hareket olarak ekle">
+                                ➕ Antrenmana Ekle
+                            </button>
+                        </div>
+                    `;
+                }
+
+                daysHTML += `
+                    <div style="background:rgba(0,0,0,0.3); border:1px solid ${isRest ? 'rgba(56,189,248,0.25)' : (isAvailable ? 'rgba(245,158,11,0.35)' : 'var(--border)')}; border-radius:10px; padding:10px 12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                        <div>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <strong style="font-size:13px; color:#fff;">${dayName}</strong>
+                                ${statusBadge}
+                                ${planIso === todayIso ? '<span style="font-size:9px; background:var(--gold); color:#000; font-weight:900; padding:1px 4px; border-radius:3px;">BUGÜN</span>' : ''}
+                            </div>
+                            <div style="font-size:11px; color:var(--text-secondary); margin-top:3px;">
+                                ${subtitleText}
+                            </div>
+                        </div>
+
+                        ${buttonHtml}
+                    </div>
+                `;
+            });
+
+            bodyEl.innerHTML = `
+                <div style="background:rgba(245,158,11,0.06); border:1px solid rgba(245,158,11,0.25); border-radius:10px; padding:12px; margin-bottom:14px;">
+                    <div style="font-size:12px; color:#fde68a;">
+                        <strong>Hedef Kas Grubu:</strong> ${escapeHTML(pNames)} • <strong>Ekipman:</strong> ${ex.equipment ? ex.equipment.toUpperCase() : 'SERBEST'}
+                    </div>
+                    <div style="font-size:11px; color:#cbd5e1; margin-top:8px; line-height:1.45; background:rgba(0,0,0,0.25); padding:8px 10px; border-radius:6px;">
+                        💡 <strong>Nasıl Çalışır?</strong>
+                        <br>• <strong>Antrenman olan gün:</strong> Hareketi mevcut seansın sonuna (${ex.name}) olarak ilave eder.
+                        <br>• <strong>Dinlenme günü:</strong> O gün dinlenmeden çıkar ve bu hareketle başlayan yeni bir <em>"Takviye Seansı"</em>na dönüşür. (Dinlenmenizi korumak istiyorsanız antrenman olan günleri tercih edebilirsiniz.)
+                    </div>
+                </div>
+
+                <div style="font-size:11.5px; font-weight:800; color:var(--text-secondary); margin-bottom:8px; text-transform:uppercase;">
+                    Egzersizin Ekleneceği Günü Seçin:
+                </div>
+                ${daysHTML}
+            `;
+
+            modal.classList.add('active');
+        }
+
+        function closeQuickAddToDayModal() {
+            const modal = document.getElementById('quickAddToDayModal');
+            if (modal) modal.classList.remove('active');
+            activeQuickAddExId = null;
+        }
+
+        function applyQuickAddExerciseToDay(dayIdx, exId) {
+            const selectEl = document.getElementById(`quickAddSetsSelect_${dayIdx}`);
+            const targetSets = selectEl ? parseInt(selectEl.value) || 3 : 3;
+            const ex = EXERCISES_DB.find(e => e.id === exId);
+            const schedule = getWeeklySchedule();
+            const plan = schedule[dayIdx];
+            const wasRest = !plan || plan.rest;
+
+            const ok = addExerciseToDaySchedule(dayIdx, exId, targetSets, '8-12');
+            if (ok) {
+                closeQuickAddToDayModal();
+                if (wasRest) {
+                    showToast(`⚡ ${DAY_NAMES_TR[dayIdx]} gününe yeni Takviye Antrenmanı açıldı ve "${ex ? ex.name : 'Egzersiz'}" (${targetSets} set) eklendi!`);
+                } else {
+                    showToast(`✅ "${ex ? ex.name : 'Egzersiz'}", ${DAY_NAMES_TR[dayIdx]} antrenmanının sonuna ${targetSets} set olarak eklendi!`);
+                }
+                if (typeof renderAnalytics === 'function') {
+                    renderAnalytics();
+                }
+                if (typeof renderWeeklyScheduleView === 'function') {
+                    renderWeeklyScheduleView();
+                }
+            } else {
+                alert("Egzersiz eklenirken bir hata oluştu.");
+            }
+        }
+
+        const MUSCLE_DIAGRAM_DEFS = {
+            shoulders: {
+                title: 'OMUZ',
+                columns: [
+                    { key: 'front', label: 'ÖN DELTOİT', subKeys: ['shoulders_front'], recId: 'db_overhead_press', recName: 'Omuz Presi', keywords: ['ön omuz', 'front delt', 'overhead', 'arnold', 'press', 'snatch'] },
+                    { key: 'side', label: 'YAN DELTOİT', subKeys: ['shoulders_side'], recId: 'db_lateral_raise', recName: 'Lateral Raise', keywords: ['yan omuz', 'side delt', 'lateral'] },
+                    { key: 'rear', label: 'ARKA DELTOİT', subKeys: ['shoulders_rear'], recId: 'mach_face_pull', recName: 'Face Pull', keywords: ['arka omuz', 'rear delt', 'face pull', 'halo'] }
+                ]
+            },
+            back: {
+                title: 'SIRT',
+                columns: [
+                    { key: 'lats', label: 'LATİSSİMUS (KANAT)', subKeys: ['back_lats'], recId: 'mach_lat_pulldown', recName: 'Lat Pulldown', keywords: ['kanat', 'lats', 'latissimus', 'pulldown', 'pullup', 'chinup', 'saw row', 'pullover'] },
+                    { key: 'mid', label: 'RHOMBOİD (ORTA SIRT)', subKeys: ['back_mid'], recId: 'db_chest_supported_row', recName: 'Göğüs Destekli Row', keywords: ['orta sırt', 'rhomboid', 'row', 'kürek', 'pendlay', 'renegade row'] },
+                    { key: 'traps', label: 'TRAPEZ (ÜST SIRT)', subKeys: ['traps'], recId: 'mach_face_pull', recName: 'Face Pull / Shrug', keywords: ['trapez', 'shrug', 'face pull', 'clean', 'farmers', 'halo', 'deadlift'] }
+                ]
+            },
+            chest: {
+                title: 'GÖĞÜS',
+                columns: [
+                    { key: 'upper', label: 'ÜST GÖĞÜS (CLAVICULAR)', subKeys: ['chest_upper'], recId: 'db_incline_press', recName: 'Incline Press', keywords: ['üst göğüs', 'incline', 'decline pushup', 'landmine'] },
+                    { key: 'mid', label: 'ORTA GÖĞÜS (STERNAL)', subKeys: ['chest_mid'], recId: 'db_bench_press', recName: 'Bench Press', keywords: ['orta göğüs', 'bench press', 'floor press', 'pushup', 'şınav', 'pec deck', 'crossover', 'renegade'] },
+                    { key: 'lower', label: 'ALT GÖĞÜS (COSTAL)', subKeys: ['chest_lower'], recId: 'bw_dips', recName: 'Dips', keywords: ['alt göğüs', 'dips', 'crossover alt'] }
+                ]
+            },
+            quads: {
+                title: 'ÖN BACAK (QUADRICEPS)',
+                columns: [
+                    { key: 'vastus_lat', label: 'VASTUS LATERALIS (DIŞ)', subKeys: ['legs_quad'], recId: 'bb_back_squat', recName: 'Squat', keywords: ['squat', 'leg press', 'front squat', 'goblet'] },
+                    { key: 'vastus_med', label: 'VASTUS MEDIALIS (GÖZYAŞI)', subKeys: ['legs_quad'], recId: 'db_bulgarian_squat', recName: 'Bulgarian Split Squat', keywords: ['bulgarian', 'lunge', 'step up', 'zercher'] },
+                    { key: 'rectus_fem', label: 'RECTUS FEMORIS (DÜZ)', subKeys: ['legs_quad'], recId: 'mach_leg_extension', recName: 'Leg Extension', keywords: ['leg extension', 'quad izole', 'jump'] }
+                ]
+            },
+            hamstrings: {
+                title: 'ARKA BACAK (POSTERIOR CHAIN)',
+                columns: [
+                    { key: 'biceps_fem', label: 'BICEPS FEMORIS (DIŞ)', subKeys: ['legs_hamstrings'], recId: 'mach_leg_curl', recName: 'Leg Curl', keywords: ['leg curl', 'curl', 'arka bacak'] },
+                    { key: 'semitend', label: 'SEMİTENDİNOSUS (İÇ)', subKeys: ['legs_hamstrings'], recId: 'db_rdl', recName: 'Romanian Deadlift (RDL)', keywords: ['rdl', 'romanian', 'deadlift'] },
+                    { key: 'hinge_chain', label: 'POSTERIOR HİNGE ZİNCİRİ', subKeys: ['legs_hamstrings'], recId: 'db_swing', recName: 'Kettlebell Swing', keywords: ['swing', 'single leg rdl', 'good morning'] }
+                ]
+            },
+            glutes: {
+                title: 'KALÇA (GLUTEUS)',
+                columns: [
+                    { key: 'maximus', label: 'GLUTEUS MAXIMUS (BÜYÜK)', subKeys: ['legs_glutes'], recId: 'bb_hip_thrust', recName: 'Hip Thrust', keywords: ['hip thrust', 'glute bridge', 'deadlift', 'squat'] },
+                    { key: 'medius', label: 'GLUTEUS MEDIUS (YAN/DENGE)', subKeys: ['legs_glutes'], recId: 'db_bulgarian_squat', recName: 'Bulgarian Split Squat', keywords: ['bulgarian', 'lunge', 'abduction', 'tek bacak', 'denge'] },
+                    { key: 'minimus', label: 'PELVİK & ROTATÖR STABİLİTE', subKeys: ['legs_glutes'], recId: 'db_single_leg_rdl', recName: 'Tek Bacak RDL', keywords: ['single leg', 'rotatör', 'pelvik'] }
+                ]
+            },
+            biceps: {
+                title: 'BICEPS & ÖN KOL',
+                columns: [
+                    { key: 'long_head', label: 'UZUN BAŞ (DIŞ/ZİRVE)', subKeys: ['biceps'], recId: 'db_incline_curl', recName: 'Incline Curl', keywords: ['incline curl', 'pazu tepe', 'uzun baş'] },
+                    { key: 'short_head', label: 'KISA BAŞ (İÇ KÜTLE)', subKeys: ['biceps'], recId: 'bb_biceps_curl', recName: 'Barbell / Biceps Curl', keywords: ['biceps curl', 'barbell curl', 'cable curl'] },
+                    { key: 'brachialis', label: 'BRACHIALIS & ÖN KOL', subKeys: ['biceps'], recId: 'db_hammer_curl', recName: 'Hammer Curl', keywords: ['hammer', 'chinup', 'ön kol', 'kavrama', 'brachialis'] }
+                ]
+            },
+            triceps: {
+                title: 'TRICEPS (ARKA KOL)',
+                columns: [
+                    { key: 'long', label: 'UZUN BAŞ (BAŞÜSTÜ)', subKeys: ['triceps_long'], recId: 'db_triceps_overhead', recName: 'Overhead Triceps', keywords: ['overhead', 'skullcrusher', 'french', 'uzun baş'] },
+                    { key: 'lateral', label: 'YAN/DIŞ BAŞ (AT NALI)', subKeys: ['triceps_lateral'], recId: 'mach_triceps_pushdown', recName: 'Triceps Pushdown', keywords: ['pushdown', 'close grip', 'cable triceps'] },
+                    { key: 'medial', label: 'MEDİAL BAŞ (DİRSEK KİLİT)', subKeys: ['triceps_lateral'], recId: 'bw_diamond_pushup', recName: 'Diamond Pushup / Dips', keywords: ['dips', 'diamond', 'bench', 'itiş'] }
+                ]
+            },
+            core: {
+                title: 'KARIN & MERKEZ (CORE)',
+                columns: [
+                    { key: 'rectus', label: 'REKTUS ABDOMİNİS (ÖN DUVAR)', subKeys: ['core_front'], recId: 'bw_hanging_knee_raise', recName: 'Hanging Knee Raise', keywords: ['plank', 'hanging', 'hollow', 'crunch', 'mountain'] },
+                    { key: 'obliques', label: 'OBLİKLER (YAN KARIN/ROTASYON)', subKeys: ['core_obliques'], recId: 'db_russian_twist', recName: 'Russian Twist', keywords: ['twist', 'woodchopper', 'suitcase', 'oblik', 'renegade', 'chop'] },
+                    { key: 'transverse', label: 'TRANSVERSUS & DERİN ZIRH', subKeys: ['core_front'], recId: 'db_farmers_walk', recName: 'Farmers Walk', keywords: ['farmers', 'carry', 'bear crawl', 'stabilite', 'zırh'] }
+                ]
+            },
+            calves: {
+                title: 'BALDIR & KALF',
+                columns: [
+                    { key: 'gastrocnemius', label: 'GASTROCNEMİUS (AYAKTA)', subKeys: ['legs_calves'], recId: 'mach_calf_raise', recName: 'Ayakta Calf Raise', keywords: ['standing calf', 'calf raise', 'zıplama', 'jump'] },
+                    { key: 'soleus', label: 'SOLEUS (OTURARAK)', subKeys: ['legs_calves'], recId: 'mach_calf_raise', recName: 'Oturarak Calf Raise', keywords: ['seated calf', 'baldır'] },
+                    { key: 'tibialis', label: 'TİBİALİS ANTERİOR (KAVAL)', subKeys: ['legs_calves'], recId: 'mach_calf_raise', recName: 'Kaval & Denge', keywords: ['ayak bileği', 'kaval', 'yürüme'] }
+                ]
+            }
+        };
+
+        function getExerciseCompartmentForMuscle(muscleId, exNameOrId) {
+            const def = MUSCLE_DIAGRAM_DEFS[muscleId];
+            if (!def) return null;
+
+            const dbEx = (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB))
+                ? EXERCISES_DB.find(e => e.id === exNameOrId || (e.name && e.name.toLowerCase() === (exNameOrId || '').toLowerCase()))
+                : null;
+            const exId = dbEx ? dbEx.id : exNameOrId;
+            const anat = (typeof EXERCISE_ANATOMY_MAP !== 'undefined') ? EXERCISE_ANATOMY_MAP[exId] : null;
+
+            const textToSearch = [
+                exNameOrId || '',
+                dbEx ? dbEx.name : '',
+                anat ? anat.primary : '',
+                anat ? anat.secondary : '',
+                anat ? anat.subKey : ''
+            ].join(' ').toLowerCase();
+
+            if (anat && anat.subKey) {
+                for (const col of def.columns) {
+                    if (col.subKeys && col.subKeys.includes(anat.subKey)) {
+                        return col.key;
+                    }
+                }
+            }
+
+            for (const col of def.columns) {
+                for (const kw of col.keywords) {
+                    if (textToSearch.includes(kw.toLowerCase())) {
+                        return col.key;
+                    }
+                }
+            }
+
+            return def.columns[0].key;
+        }
+
+        function renderMuscleCompartmentDiagram(m) {
+            const def = MUSCLE_DIAGRAM_DEFS[m.id];
+            if (!def) return '';
+
+            const compMap = {};
+            def.columns.forEach(col => {
+                compMap[col.key] = {
+                    col,
+                    earnedSets: 0,
+                    plannedCount: 0,
+                    doneExs: new Set(),
+                    plannedExs: new Set()
+                };
+            });
+
+            (m.contributions || []).forEach(c => {
+                const cKey = getExerciseCompartmentForMuscle(m.id, c.exercise);
+                if (cKey && compMap[cKey]) {
+                    compMap[cKey].earnedSets += (Number(c.earnedSets) || 0);
+                    compMap[cKey].doneExs.add(c.exercise);
+                }
+            });
+
+            if ((!m.contributions || m.contributions.length === 0) && m.doneExercises && Array.isArray(m.doneExercises)) {
+                m.doneExercises.forEach(exName => {
+                    const cKey = getExerciseCompartmentForMuscle(m.id, exName);
+                    if (cKey && compMap[cKey]) {
+                        compMap[cKey].doneExs.add(exName);
+                        if (compMap[cKey].earnedSets === 0) compMap[cKey].earnedSets = 1;
+                    }
+                });
+            }
+
+            (m.plannedExercises || []).forEach(pe => {
+                const cKey = getExerciseCompartmentForMuscle(m.id, pe.name);
+                if (cKey && compMap[cKey]) {
+                    compMap[cKey].plannedCount += 1;
+                    compMap[cKey].plannedExs.add(pe.name);
+                }
+            });
+
+            const columnsHTML = def.columns.map(col => {
+                const data = compMap[col.key];
+                const isDone = data.earnedSets > 0;
+                const isPlanned = !isDone && data.plannedExs.size > 0;
+
+                let statusBadge = '';
+                let contentHTML = '';
+                let cellBg = 'rgba(255,255,255,0.02)';
+                let cellBorder = '1px solid rgba(255,255,255,0.07)';
+
+                if (isDone) {
+                    cellBg = 'rgba(16, 185, 129, 0.07)';
+                    cellBorder = '1px solid rgba(16, 185, 129, 0.28)';
+                    statusBadge = `<span style="display:inline-block; font-size:10px; font-weight:800; color:#34d399; background:rgba(16,185,129,0.18); border:1px solid rgba(16,185,129,0.35); border-radius:4px; padding:2px 6px;">✅ ${data.earnedSets.toFixed(1)} Set</span>`;
+                    const exList = Array.from(data.doneExs).map(escapeHTML).join(', ');
+                    const planList = data.plannedExs.size > 0 ? `<div style="font-size:9.5px; color:#fcd34d; margin-top:3px;">+ ${Array.from(data.plannedExs).map(escapeHTML).join(', ')} (Planda)</div>` : '';
+                    contentHTML = `<div style="font-size:10px; color:#cbd5e1; margin-top:4px; line-height:1.35;"><strong>${exList}</strong>${planList}</div>`;
+                } else if (isPlanned) {
+                    cellBg = 'rgba(245, 158, 11, 0.07)';
+                    cellBorder = '1px solid rgba(245, 158, 11, 0.28)';
+                    statusBadge = `<span style="display:inline-block; font-size:10px; font-weight:800; color:#fbbf24; background:rgba(245,158,11,0.18); border:1px solid rgba(245,158,11,0.35); border-radius:4px; padding:2px 6px;">🟡 Planda (${data.plannedCount} Hrk)</span>`;
+                    const planList = Array.from(data.plannedExs).map(escapeHTML).join(', ');
+                    contentHTML = `<div style="font-size:10px; color:#fde68a; margin-top:4px; line-height:1.35;">${planList}</div>`;
+                } else {
+                    cellBg = 'rgba(239, 68, 68, 0.06)';
+                    cellBorder = '1px solid rgba(239, 68, 68, 0.28)';
+                    statusBadge = `<span style="display:inline-block; font-size:9.5px; font-weight:800; color:#f87171; background:rgba(239,68,68,0.16); border:1px solid rgba(239,68,68,0.32); border-radius:4px; padding:2px 5px;">⚠️ 0 Set (Boşta!)</span>`;
+                    contentHTML = `
+                        <div style="margin-top:6px;">
+                            <button class="btn btn-outline" style="font-size:9.5px; padding:3px 6px; border-radius:5px; color:var(--gold); border-color:rgba(245,158,11,0.5); width:100%; text-align:center; font-weight:700; background:rgba(0,0,0,0.4);" onclick="openQuickAddToDayModal('${col.recId}')" title="Bu başı çalıştırmak için ${col.recName} ekle">
+                                ➕ ${escapeHTML(col.recName)} Ekle
+                            </button>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div style="background:${cellBg}; border:${cellBorder}; border-radius:6px; padding:8px; display:flex; flex-direction:column; justify-content:space-between;">
+                        <div>
+                            <div style="font-size:10.5px; font-weight:800; color:#fff; margin-bottom:5px; letter-spacing:0.3px;">${escapeHTML(col.label)}</div>
+                            <div>${statusBadge}</div>
+                        </div>
+                        ${contentHTML}
+                    </div>
+                `;
+            }).join('');
+
+            return `
+                <div style="margin-top:10px; border:1px solid rgba(255,255,255,0.12); border-radius:8px; overflow:hidden; background:rgba(0,0,0,0.35);">
+                    <div style="background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.1); padding:6px 10px; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:11px; font-weight:900; letter-spacing:0.8px; color:var(--gold); text-transform:uppercase;">
+                            📐 ${escapeHTML(def.title)} — ANATOMİK ALT BÖLGE DAĞILIMI
+                        </span>
+                        <span style="font-size:9.5px; color:var(--text-secondary);">
+                            Hangi Baş Çalıştı?
+                        </span>
+                    </div>
+                    <div style="padding:8px; display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:6px;">
+                        ${columnsHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderWeeklyMuscleSufficiencySection() {
+            const analysis = calculateWeeklyMuscleSufficiency(currentWeeklyMuscleSource, currentWeeklyMuscleWeekOffset);
+            const filter = currentWeeklyMuscleFilter;
+
+            let filteredMuscles = analysis.muscles;
+            if (filter === 'optimal') {
+                filteredMuscles = analysis.muscles.filter(m => m.status === 'optimal' || m.status === 'high');
+            } else if (filter === 'insufficient') {
+                filteredMuscles = analysis.muscles.filter(m => m.status === 'insufficient');
+            } else if (filter === 'unworked') {
+                filteredMuscles = analysis.muscles.filter(m => m.status === 'unworked');
+            }
+
+            const { summary, bounds, sourceMode, weekOffset } = analysis;
+            const optimalTotal = summary.optimalCount + summary.highCount;
+
+            // Source buttons
+            const sourceButtons = `
+                <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
+                    <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; border-radius:14px; ${sourceMode === 'week_projected' ? 'background:var(--gold); color:#000; font-weight:800;' : ''}" onclick="setWeeklyMuscleSource('week_projected')">
+                        📅 Bu Hafta: Yapılan + Kalan Plan
+                    </button>
+                    <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; border-radius:14px; ${sourceMode === 'week_done' ? 'background:var(--gold); color:#000; font-weight:800;' : ''}" onclick="setWeeklyMuscleSource('week_done')">
+                        ✅ Sadece Yapılanlar (${analysis.totalDoneSessions} Seans)
+                    </button>
+                    <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; border-radius:14px; ${sourceMode === 'schedule_full' ? 'background:var(--gold); color:#000; font-weight:800;' : ''}" onclick="setWeeklyMuscleSource('schedule_full')">
+                        📋 Haftalık Program Şablonu
+                    </button>
+                </div>
+            `;
+
+            // Filter pills
+            const filterPills = `
+                <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:10px;">
+                    <button class="btn btn-outline" style="font-size:11px; padding:5px 12px; border-radius:16px; ${filter === 'all' ? 'background:#38bdf8; color:#000; font-weight:800;' : ''}" onclick="setWeeklyMuscleFilter('all')">
+                        Tümü (${summary.totalMuscles})
+                    </button>
+                    <button class="btn btn-outline" style="font-size:11px; padding:5px 12px; border-radius:16px; ${filter === 'optimal' ? 'background:#10b981; color:#000; font-weight:800;' : ''}" onclick="setWeeklyMuscleFilter('optimal')">
+                        ✅ Yeterli / Optimal (${optimalTotal})
+                    </button>
+                    <button class="btn btn-outline" style="font-size:11px; padding:5px 12px; border-radius:16px; ${filter === 'insufficient' ? 'background:#f59e0b; color:#000; font-weight:800;' : ''}" onclick="setWeeklyMuscleFilter('insufficient')">
+                        ⚠️ Yetersiz Hacim (${summary.insufficientCount})
+                    </button>
+                    <button class="btn btn-outline" style="font-size:11px; padding:5px 12px; border-radius:16px; ${filter === 'unworked' ? 'background:#ef4444; color:#fff; font-weight:800;' : ''}" onclick="setWeeklyMuscleFilter('unworked')">
+                        ❌ Çalıştırılmayan (${summary.unworkedCount})
+                    </button>
+                </div>
+            `;
+
+            // Diagnostic coach alert
+            let coachAlertHTML = '';
+            if (summary.unworkedCount > 0) {
+                coachAlertHTML = `
+                    <div style="background:rgba(239, 68, 68, 0.08); border:1px solid rgba(239, 68, 68, 0.3); border-radius:10px; padding:10px 12px; margin-top:12px; display:flex; align-items:flex-start; gap:8px;">
+                        <span style="font-size:16px;">🚨</span>
+                        <div style="font-size:11.5px; color:#fca5a5; line-height:1.4;">
+                            <strong>Atlanan / Çalıştırılmayan Kaslar:</strong> Bu hafta <strong>${escapeHTML(analysis.unworkedNames.join(', '))}</strong> bölgesi için henüz antrenman hacmi bulunmuyor. Kas dengesizliğini ve sakatlık riskini önlemek için aşağıda önerilen hareketleri kalan günlere ekleyebilirsiniz.
+                        </div>
+                    </div>
+                `;
+            } else if (summary.insufficientCount > 0) {
+                coachAlertHTML = `
+                    <div style="background:rgba(245, 158, 11, 0.08); border:1px solid rgba(245, 158, 11, 0.3); border-radius:10px; padding:10px 12px; margin-top:12px; display:flex; align-items:flex-start; gap:8px;">
+                        <span style="font-size:16px;">⚠️</span>
+                        <div style="font-size:11.5px; color:#fde68a; line-height:1.4;">
+                            <strong>Düşük Hacim Uyarısı:</strong> <strong>${escapeHTML(analysis.insufficientNames.join(', '))}</strong> bölgesi minimum gelişim eşiğinin altında kaldı. Kalan günlere hareket veya set ekleyerek hipertrofi eşiğine ulaşabilirsiniz.
+                        </div>
+                    </div>
+                `;
+            } else {
+                coachAlertHTML = `
+                    <div style="background:rgba(16, 185, 129, 0.08); border:1px solid rgba(16, 185, 129, 0.3); border-radius:10px; padding:10px 12px; margin-top:12px; display:flex; align-items:flex-start; gap:8px;">
+                        <span style="font-size:16px;">🏆</span>
+                        <div style="font-size:11.5px; color:#6ee7b7; line-height:1.4;">
+                            <strong>Kusursuz Kas Dengesi!</strong> Tüm kas gruplarınız bu hafta bilimsel olarak önerilen optimal hipertrofi ve güç kazanım aralığında yer alıyor.
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Build Upcoming Days cards for current week
+            const schedule = (typeof getWeeklySchedule === 'function') ? getWeeklySchedule() : {};
+            const allLogs = (typeof getWorkoutLogs === 'function') ? getWorkoutLogs() : [];
+            const weekLogs = allLogs.filter(l => {
+                const dt = new Date(l.date);
+                return dt >= bounds.monday && dt <= bounds.sunday;
+            });
+            const loggedDays = new Set(weekLogs.map(l => new Date(l.date).getDay()));
+            const todayDay = (new Date()).getDay();
+            const getIsoDay = (d) => d === 0 ? 7 : d;
+            const todayIso = getIsoDay(todayDay);
+            const dayKeys = [1, 2, 3, 4, 5, 6, 0];
+
+            const upcomingDaysList = [];
+            if (bounds.isCurrentWeek) {
+                dayKeys.forEach(dKey => {
+                    const isCompleted = loggedDays.has(dKey);
+                    const planIso = getIsoDay(dKey);
+                    if (!isCompleted && planIso >= todayIso) {
+                        const plan = schedule[dKey];
+                        const isRest = !plan || plan.rest;
+                        const details = isRest ? null : ((typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(plan) : null);
+                        const exCount = (details && details.exercises) ? details.exercises.length : 0;
+                        upcomingDaysList.push({
+                            dayIdx: dKey,
+                            dayName: DAY_NAMES_TR[dKey],
+                            isToday: planIso === todayIso,
+                            isRest,
+                            plan,
+                            details,
+                            exCount
+                        });
+                    }
+                });
+            }
+
+            const upcomingDaysHTML = (bounds.isCurrentWeek && upcomingDaysList.length > 0) ? `
+                <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(245,158,11,0.25); border-radius:10px; padding:12px; margin-top:14px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <span style="font-size:16px;">🗓️</span>
+                            <span style="font-size:12.5px; font-weight:800; color:#fff;">Bu Haftanın Kalan Günleri & Hızlı Program Derleme</span>
+                        </div>
+                        <span style="font-size:10px; color:var(--gold); font-weight:700;">Doğrudan Stüdyoda Düzenleyin</span>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:8px;">
+                        ${upcomingDaysList.map(item => `
+                            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                                <div>
+                                    <div style="display:flex; align-items:center; gap:6px;">
+                                        <strong style="font-size:12px; color:#fff;">${item.dayName}</strong>
+                                        ${item.isToday ? '<span style="font-size:9.5px; background:var(--gold); color:#000; font-weight:800; padding:1px 5px; border-radius:4px;">BUGÜN</span>' : ''}
+                                    </div>
+                                    <div style="font-size:10.5px; color:var(--text-secondary); margin-top:2px;">
+                                        ${item.isRest ? '🧘 Dinlenme Günü' : `${escapeHTML(item.plan.title || 'Program')} (${item.exCount} Hrk)`}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    ${!item.isRest ? `
+                                        <button class="btn btn-outline" style="font-size:10.5px; padding:4px 8px; color:var(--gold); border-color:rgba(245,158,11,0.5); font-weight:700;" onclick="editProgramForDay(${item.dayIdx})" title="Bu programı stüdyoda derle ve düzenle">
+                                            ✏️ Derle / Düzenle
+                                        </button>
+                                    ` : `
+                                        <button class="btn btn-outline" style="font-size:10.5px; padding:4px 8px; color:var(--cyan); border-color:rgba(56,189,248,0.4);" onclick="startNewStudioProgramForDay(${item.dayIdx})" title="Bu güne yeni antrenman programı ata">
+                                            ➕ Antrenman Ata
+                                        </button>
+                                    `}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : '';
+
+            // Muscle Cards HTML
+            const muscleCardsHTML = filteredMuscles.length === 0 ? `
+                <div style="text-align:center; padding:20px; color:var(--text-secondary); font-size:12px; background:rgba(0,0,0,0.2); border-radius:8px; margin-top:10px;">
+                    Bu filtreye uyan kas grubu bulunamadı.
+                </div>
+            ` : `
+                <div style="display:flex; flex-direction:column; gap:10px; margin-top:12px;">
+                    ${filteredMuscles.map(m => {
+                        const maxBar = Math.max(22, m.optimalMax + 4);
+                        const donePct = Math.min(100, Math.round((m.effectiveDone / maxBar) * 100));
+                        const planPct = Math.min(100 - donePct, Math.round((m.effectivePlan / maxBar) * 100));
+
+                        const recs = getRecommendationsForMuscle(m.id, 4);
+                        const isWeak = (m.status === 'unworked' || m.status === 'insufficient');
+                        const recTitle = isWeak 
+                            ? '💡 Koç Tavsiyesi (Eksik Bölge Takviyesi) — Önerilen Egzersizler:'
+                            : '✨ Bu Bölgeyi Takviye Et / Güne Ekle:';
+
+                        return `
+                            <div style="background:rgba(0,0,0,0.3); border:1px solid ${m.statusColor}33; border-left:4px solid ${m.statusColor}; border-radius:10px; padding:12px 14px;">
+                                <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
+                                    <div>
+                                        <div style="display:flex; align-items:center; gap:6px;">
+                                            <span style="font-size:18px;">${m.icon}</span>
+                                            <h4 style="font-size:14px; font-weight:800; color:#fff; margin:0;">${m.name}</h4>
+                                        </div>
+                                    </div>
+                                    <span class="badge" style="background:${m.statusBg}; color:${m.statusColor}; border:1px solid ${m.statusColor}44; font-size:11px; padding:3px 10px; font-weight:800; border-radius:12px;">
+                                        ${m.statusBadge}
+                                    </span>
+                                </div>
+
+                                <!-- PROGRESS BAR & BENCHMARK -->
+                                <div style="margin-top:10px;">
+                                    <div style="position:relative; height:12px; background:rgba(255,255,255,0.06); border-radius:6px; overflow:hidden; display:flex;">
+                                        <div style="width:${donePct}%; background:${m.statusColor}; height:100%; transition:width 0.3s ease;" title="Yapılan: ${m.effectiveDone.toFixed(1)} Efektif Set"></div>
+                                        <div style="width:${planPct}%; background:repeating-linear-gradient(45deg, #f59e0b, #f59e0b 6px, #d97706 6px, #d97706 12px); height:100%; opacity:0.85; transition:width 0.3s ease;" title="Planlanan: ${m.effectivePlan.toFixed(1)} Efektif Set"></div>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:10px; color:var(--text-secondary); margin-top:4px; flex-wrap:wrap; gap:4px;">
+                                        <span>🟢 Yapılan: <strong style="color:#fff;">${m.effectiveDone.toFixed(1)}</strong> set <span style="font-size:9.5px; opacity:0.8;">(${m.doneDirectSets.toFixed(1)} ana + ${m.doneSecondarySets.toFixed(1)} destek)</span></span>
+                                        <span>🟡 Kalan Plan: <strong style="color:#fff;">${m.effectivePlan.toFixed(1)}</strong> set</span>
+                                        <span>🎯 Hedef: <strong style="color:var(--gold);">${m.optimalMin}-${m.optimalMax} set/hf</strong></span>
+                                    </div>
+                                </div>
+
+                                <!-- KULLANICI ANATOMİK DİYAGRAMI (ALT BÖLGE DAĞILIMI) -->
+                                ${renderMuscleCompartmentDiagram(m)}
+
+                                <!-- STATUS DESCRIPTION & EXERCISES -->
+                                <div style="margin-top:8px; font-size:11.5px; color:#cbd5e1; display:flex; flex-direction:column; gap:4px;">
+                                    <div>
+                                        <span style="color:${m.statusColor}; font-weight:700;">${m.statusDesc}</span>
+                                        <span style="color:var(--text-secondary);"> (Toplam Efektif: <strong style="color:#fff;">${m.effectiveTotal.toFixed(1)} set</strong>)</span>
+                                    </div>
+
+                                    ${m.doneExercises.length > 0 ? `
+                                        <div style="font-size:11px; margin-top:2px;">
+                                            <span style="color:var(--text-secondary);">✅ Bu Hafta Yapılanlar:</span>
+                                            <span style="color:#fff; font-weight:600;">${m.doneExercises.map(escapeHTML).join(', ')}</span>
+                                        </div>
+                                    ` : ''}
+
+                                    ${m.plannedExercises.length > 0 ? `
+                                        <div style="font-size:11px; margin-top:4px;">
+                                            <span style="color:var(--text-secondary);">📋 Kalan Planda Olanlar:</span>
+                                            <div style="display:inline-flex; flex-wrap:wrap; gap:4px; margin-top:2px;">
+                                                ${m.plannedExercises.map(pe => `
+                                                    <button class="btn btn-outline" style="font-size:10px; padding:2px 6px; border-radius:6px; color:#fcd34d; border-color:rgba(245,158,11,0.4); background:rgba(0,0,0,0.3);" onclick="editProgramForDay(${pe.dayIdx})" title="Bu antrenmanı stüdyoda derle & düzenle">
+                                                        ${escapeHTML(pe.name)} <span style="opacity:0.75;">(${pe.dayName}) ✏️</span>
+                                                    </button>
+                                                `).join('')}
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                </div>
+
+                                <!-- BİYOMEKANİK KAYNAK & KATKI DÖKÜMÜ (DRILL-DOWN) -->
+                                <div style="margin-top:10px; padding-top:8px; border-top:1px dashed rgba(255,255,255,0.1);">
+                                    <button id="lineage_btn_${m.id}" class="btn btn-outline" style="width:100%; font-size:11px; padding:6px 10px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); border-color:rgba(255,255,255,0.12); cursor:pointer;" onclick="toggleMuscleLineage('${m.id}')">
+                                        <span>🔬 Hangi Seans & Hareketten Geldi? (${(m.contributions || []).length} Kayıt)</span>
+                                        <span style="color:var(--gold); font-size:10px; font-weight:800;">▼ Detay</span>
+                                    </button>
+
+                                    <div id="lineage_box_${m.id}" data-count="${(m.contributions || []).length}" style="display:none; margin-top:8px; background:rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:10px;">
+                                        ${(m.contributions && m.contributions.length > 0) ? `
+                                            <div style="display:flex; flex-direction:column; gap:6px;">
+                                                <div style="font-size:10.5px; color:var(--text-secondary); margin-bottom:2px; font-weight:700;">
+                                                    📋 Tamamlanan Seanslar & Puan Katkısı:
+                                                </div>
+                                                ${m.contributions.map(c => `
+                                                    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:6px 10px; font-size:11px;">
+                                                        <div>
+                                                            <div style="display:flex; align-items:center; gap:6px;">
+                                                                <strong style="color:#fff;">${escapeHTML(c.exercise)}</strong>
+                                                                <span style="font-size:9.5px; padding:1px 5px; border-radius:4px; font-weight:700; ${c.role === 'Birincil' ? 'background:rgba(234,179,8,0.18); color:var(--gold);' : 'background:rgba(6,182,212,0.18); color:#06b6d4;'}">
+                                                                    ${c.role} (${c.factor}x)
+                                                                </span>
+                                                            </div>
+                                                            <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">
+                                                                📅 ${escapeHTML(c.date)} • ${escapeHTML(c.sessionTitle)}
+                                                            </div>
+                                                        </div>
+                                                        <div style="text-align:right;">
+                                                            <div style="font-size:12.5px; font-weight:900; color:#10b981;">+${c.earnedSets.toFixed(1)} Set</div>
+                                                            <div style="font-size:9.5px; color:var(--text-secondary);">${c.rawSets} Set Yapıldı</div>
+                                                        </div>
+                                                    </div>
+                                                `).join('')}
+                                                <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 4px 2px 4px; border-top:1px dashed rgba(255,255,255,0.1); font-size:11px;">
+                                                    <span style="color:var(--text-secondary);">Haftalık Toplam Katkı:</span>
+                                                    <strong style="color:var(--gold); font-size:12px;">${m.effectiveDone.toFixed(1)} Efektif Set</strong>
+                                                </div>
+                                            </div>
+                                        ` : `
+                                            <div style="font-size:11px; color:var(--text-secondary); text-align:center; padding:8px 6px;">
+                                                Bu hafta bu kas grubu için henüz tamamlanmış bir seans kaydı bulunmuyor.
+                                            </div>
+                                        `}
+                                    </div>
+                                </div>
+
+                                <!-- RECOMMENDATIONS ACCORDION (GİZLENEBİLİR / AÇILABİLİR) -->
+                                ${recs.length > 0 ? `
+                                    <div style="margin-top:10px; padding-top:8px; border-top:1px dashed rgba(255,255,255,0.1);">
+                                        <button id="recs_btn_${m.id}" class="btn btn-outline" style="width:100%; font-size:11px; padding:6px 10px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); border-color:rgba(255,255,255,0.12); cursor:pointer;" onclick="toggleMuscleRecommendations('${m.id}')">
+                                            <span style="color:${isWeak ? 'var(--gold)' : 'var(--cyan)'}; font-weight:700;">
+                                                ${isWeak ? '💡 Koç Tavsiyesi (Eksik Bölge Takviyesi)' : '✨ Bu Bölgeyi Takviye Et'} (${recs.length} Öneri)
+                                            </span>
+                                            <span id="recs_icon_${m.id}" style="color:var(--gold); font-size:10px; font-weight:800;">▼ Göster</span>
+                                        </button>
+
+                                        <div id="recs_box_${m.id}" style="display:none; margin-top:8px; background:rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:10px;">
+                                            <div style="font-size:10.5px; color:${isWeak ? 'var(--gold)' : 'var(--cyan)'}; font-weight:700; margin-bottom:8px;">
+                                                ${recTitle}
+                                            </div>
+                                            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                                                ${recs.map(r => `
+                                                    <div style="display:inline-flex; align-items:center; background:rgba(0,0,0,0.4); border:1px solid var(--border); border-radius:6px; overflow:hidden;">
+                                                        <button class="btn btn-outline" style="font-size:10px; padding:3px 7px; border:none; border-right:1px solid rgba(255,255,255,0.08);" onclick="openExerciseDetailModal('${r.id}')" title="Form ve Detayları Gör">
+                                                            🏋️ ${escapeHTML(r.name)} <span style="color:var(--text-secondary); font-size:9px;">(${r.equipment})</span>
+                                                        </button>
+                                                        <button class="btn ${isWeak ? 'btn-gold' : 'btn-outline'}" style="font-size:9.5px; padding:3px 8px; border-radius:0; font-weight:800; ${!isWeak ? 'color:var(--cyan); border-color:var(--cyan);' : ''}" onclick="openQuickAddToDayModal('${r.id}')" title="Bu egzersizi haftanın bir gününe ekle">
+                                                            ➕ Güne Ekle
+                                                        </button>
+                                                    </div>
+                                                `).join('')}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+
+            return `
+                <!-- WEEKLY MUSCLE BALANCE & SUFFICIENCY REPORT CARD -->
+                <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:20px; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+                    <!-- HEADER -->
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
+                        <div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="font-size:22px;">🧬</span>
+                                <h3 style="font-size:16px; font-weight:900; color:#fff; margin:0;">Haftalık Kas Dengesi & Yeterlilik Karnesi</h3>
+                            </div>
+                            <p style="font-size:11.5px; color:var(--text-secondary); margin:4px 0 0 0;">
+                                Tamamlanan antrenmanlar ve haftalık planlanan program birlikte analiz edilir.
+                            </p>
+                        </div>
+
+                        <!-- WEEK SELECTOR -->
+                        <div style="display:flex; align-items:center; gap:6px; background:rgba(0,0,0,0.3); padding:4px 8px; border-radius:20px; border:1px solid var(--border);">
+                            <button class="btn btn-outline" style="font-size:11px; padding:2px 8px; border-radius:12px;" onclick="setWeeklyMuscleOffset(${weekOffset - 1})" title="Önceki Hafta">◀</button>
+                            <span style="font-size:11px; font-weight:800; color:var(--gold); padding:0 4px;">${bounds.label} ${bounds.isCurrentWeek ? '<span style="color:#10b981;">(Bu Hafta)</span>' : ''}</span>
+                            <button class="btn btn-outline" style="font-size:11px; padding:2px 8px; border-radius:12px;" onclick="setWeeklyMuscleOffset(${weekOffset + 1})" title="Sonraki Hafta">▶</button>
+                            ${!bounds.isCurrentWeek ? `<button class="btn btn-outline" style="font-size:10px; padding:2px 6px; border-radius:10px; color:var(--cyan);" onclick="setWeeklyMuscleOffset(0)">Bu Hafta</button>` : ''}
+                        </div>
+                    </div>
+
+                    <!-- SOURCE TOGGLES -->
+                    ${sourceButtons}
+
+                    <!-- KPI SUMMARY MINI CARDS -->
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(115px, 1fr)); gap:8px; margin-top:14px;">
+                        <div class="analytics-kpi-card" style="padding:10px;">
+                            <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">YETERLİ / OPTİMAL</div>
+                            <div style="font-size:18px; font-weight:900; color:#10b981; margin-top:2px;">✅ ${optimalTotal}</div>
+                            <div style="font-size:9.5px; color:var(--text-secondary);">Kas Grubu</div>
+                        </div>
+                        <div class="analytics-kpi-card" style="padding:10px;">
+                            <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">DÜŞÜK / YETERSİZ</div>
+                            <div style="font-size:18px; font-weight:900; color:#f59e0b; margin-top:2px;">⚠️ ${summary.insufficientCount}</div>
+                            <div style="font-size:9.5px; color:var(--text-secondary);">Gelişim Eşiği Altı</div>
+                        </div>
+                        <div class="analytics-kpi-card" style="padding:10px;">
+                            <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">ÇALIŞTIRILMAYAN</div>
+                            <div style="font-size:18px; font-weight:900; color:#ef4444; margin-top:2px;">❌ ${summary.unworkedCount}</div>
+                            <div style="font-size:9.5px; color:var(--text-secondary);">Sıfır Hacim / Atlanan</div>
+                        </div>
+                        <div class="analytics-kpi-card" style="padding:10px;">
+                            <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">HAFTALIK SEANS</div>
+                            <div style="font-size:18px; font-weight:900; color:var(--cyan); margin-top:2px;">🎯 ${analysis.totalDoneSessions} / ${analysis.totalPlannedSessions}</div>
+                            <div style="font-size:9.5px; color:var(--text-secondary);">Yapılan / Planlanan</div>
+                        </div>
+                    </div>
+
+                    <!-- COACH ALERT BOX -->
+                    ${coachAlertHTML}
+
+                    <!-- BU HAFTANIN KALAN GÜNLERİ & HIZLI PROGRAM DERLEME -->
+                    ${upcomingDaysHTML}
+
+                    <!-- FILTER BUTTONS -->
+                    <div style="margin-top:14px;">
+                        <div style="font-size:11px; font-weight:800; color:var(--text-secondary); text-transform:uppercase;">Filtrele:</div>
+                        ${filterPills}
+                    </div>
+
+                    <!-- MUSCLE DETAIL CARDS -->
+                    ${muscleCardsHTML}
+                </div>
+            `;
+        }
+
+        function toggleMuscleLineage(muscleId) {
+            const elBox = document.getElementById(`lineage_box_${muscleId}`);
+            const elBtn = document.getElementById(`lineage_btn_${muscleId}`);
+            if (!elBox) return;
+            const isHidden = elBox.style.display === 'none';
+            elBox.style.display = isHidden ? 'block' : 'none';
+            if (elBtn) {
+                const count = elBox.dataset.count || 0;
+                elBtn.innerHTML = isHidden 
+                    ? `<span>🔬 Hangi Seans & Hareketten Geldi? (${count} Kayıt)</span><span style="color:var(--gold); font-size:10px; font-weight:800;">▲ Kapat</span>`
+                    : `<span>🔬 Hangi Seans & Hareketten Geldi? (${count} Kayıt)</span><span style="color:var(--gold); font-size:10px; font-weight:800;">▼ Detay</span>`;
+            }
+        }
+
+        function toggleMuscleRecommendations(muscleId) {
+            const elBox = document.getElementById(`recs_box_${muscleId}`);
+            const elIcon = document.getElementById(`recs_icon_${muscleId}`);
+            if (!elBox) return;
+            const isHidden = elBox.style.display === 'none';
+            elBox.style.display = isHidden ? 'block' : 'none';
+            if (elIcon) {
+                elIcon.textContent = isHidden ? '▲ Gizle' : '▼ Göster';
+            }
+        }
+
+        function renderMuscleAnalytics(container) {
+            const allLogs = getWorkoutLogs();
+            const days = currentAnalyticsPeriodDays;
+            const now = new Date();
+            const cutoff = days > 0 ? new Date(now.getTime() - (days * 24 * 60 * 60 * 1000)) : null;
+
+            const filteredLogs = cutoff ? allLogs.filter(l => new Date(l.date) >= cutoff) : allLogs;
+
+            const weeklySufficiencyHTML = renderWeeklyMuscleSufficiencySection();
+
+            const timeFilterHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:14px; background:rgba(0,0,0,0.25); padding:8px 12px; border-radius:10px; border:1px solid var(--border);">
+                    <div>
+                        <span style="font-size:12px; font-weight:800; color:#fff; display:block;">📊 Kümülatif Tonaj & Biyomekanik Geçmişi</span>
+                        <span style="font-size:10.5px; color:var(--text-secondary);">Geçmiş antrenman seanslarının kümülatif analizi</span>
+                    </div>
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                        <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; border-radius:16px; ${days === 7 ? 'background:var(--gold); color:#000; font-weight:800;' : ''}" onclick="setAnalyticsPeriod(7)">Son 7 Gün</button>
+                        <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; border-radius:16px; ${days === 30 ? 'background:var(--gold); color:#000; font-weight:800;' : ''}" onclick="setAnalyticsPeriod(30)">Son 30 Gün</button>
+                        <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; border-radius:16px; ${days === 90 ? 'background:var(--gold); color:#000; font-weight:800;' : ''}" onclick="setAnalyticsPeriod(90)">Son 90 Gün</button>
+                        <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; border-radius:16px; ${days === 0 ? 'background:var(--gold); color:#000; font-weight:800;' : ''}" onclick="setAnalyticsPeriod(0)">Tüm Zamanlar</button>
+                    </div>
+                </div>
+            `;
+
+            if (filteredLogs.length === 0) {
+                container.innerHTML = weeklySufficiencyHTML + timeFilterHTML + `
+                    <div style="background:var(--bg-surface); padding:24px; text-align:center; border:1px dashed var(--border); border-radius:10px; color:var(--text-secondary); font-size:12.5px;">
+                        Bu zaman aralığında kayıtlı antrenman seansı bulunamadı. Antrenmanlarınızı kaydettikçe uzun vadeli kümülatif tonaj ve geçmiş yük dağılımı burada listelenir! 🚀
+                    </div>
+                `;
+                return;
+            }
+
+            let totalVolume = 0;
+            let totalSets = 0;
+            let totalReps = 0;
+
+            const pillars = {
+                legs: { label: 'Bacak & Kalça (Alt Vücut)', icon: '🦵', color: '#10b981', volume: 0, sets: 0 },
+                back: { label: 'Sırt & Çekiş (Posterior Zincir)', icon: '🛡️', color: '#38bdf8', volume: 0, sets: 0 },
+                chest: { label: 'Göğüs & İtiş (Anterior Zincir)', icon: '⚔️', color: '#f59e0b', volume: 0, sets: 0 },
+                arms: { label: 'Kollar (Biceps & Triceps)', icon: '💪', color: '#a855f7', volume: 0, sets: 0 },
+                core: { label: 'Karın & Core Zırhı', icon: '⚡', color: '#f43f5e', volume: 0, sets: 0 }
+            };
+
+            const prMap = {};
+
+            filteredLogs.forEach(log => {
+                totalVolume += (log.totalVolumeKg || 0);
+                totalSets += (log.totalSetsCompleted || 0);
+                totalReps += (log.totalRepsCompleted || 0);
+
+                if (log.exercises && log.exercises.length > 0) {
+                    log.exercises.forEach(ex => {
+                        const exVol = ex.exerciseVolume || 0;
+                        const cSets = ex.completedSetsCount || (Array.isArray(ex.sets) ? ex.sets.filter(s => s.completed || parseInt(s.reps, 10) > 0).length : 0) || 0;
+                        if (cSets === 0 && exVol === 0) return;
+
+                        const spec = resolveExerciseBiomechanics(ex.name, ex.muscle, ex.category);
+                        const shares = [];
+                        if (spec.primary && spec.pFactor > 0) {
+                            shares.push({ muscle: spec.primary, factor: spec.pFactor });
+                        }
+                        if (spec.sec && typeof spec.sec === 'object') {
+                            Object.entries(spec.sec).forEach(([mName, factor]) => {
+                                if (factor > 0) shares.push({ muscle: mName, factor: factor });
+                            });
+                        }
+
+                        const sumFactor = shares.reduce((acc, s) => acc + s.factor, 0);
+
+                        if (sumFactor > 0) {
+                            shares.forEach(s => {
+                                const ratio = s.factor / sumFactor;
+                                const mId = ACADEMIC_MUSCLE_TO_ID[s.muscle] || s.muscle;
+                                let targetPillar = null;
+                                if (['quads', 'hamstrings', 'glutes', 'calves'].includes(mId)) targetPillar = pillars.legs;
+                                else if (mId === 'back') targetPillar = pillars.back;
+                                else if (['chest', 'shoulders'].includes(mId)) targetPillar = pillars.chest;
+                                else if (['biceps', 'triceps'].includes(mId)) targetPillar = pillars.arms;
+                                else if (mId === 'core') targetPillar = pillars.core;
+
+                                if (targetPillar) {
+                                    targetPillar.volume += (exVol * ratio);
+                                    targetPillar.sets += Math.round((cSets * ratio) * 10) / 10;
+                                }
+                            });
+                        } else if (spec.type === 'CONDITIONING') {
+                            const pKeys = Object.keys(pillars);
+                            pKeys.forEach(k => {
+                                pillars[k].volume += (exVol / pKeys.length);
+                                pillars[k].sets += Math.round((cSets / pKeys.length) * 10) / 10;
+                            });
+                        } else {
+                            pillars.legs.volume += (exVol * 0.5);
+                            pillars.back.volume += (exVol * 0.5);
+                            pillars.legs.sets += (cSets * 0.5);
+                            pillars.back.sets += (cSets * 0.5);
+                        }
+
+                        // Track PRs
+                        if (ex.maxWeight && ex.maxWeight > 0) {
+                            if (!prMap[ex.name] || ex.maxWeight > prMap[ex.name].weight) {
+                                prMap[ex.name] = { weight: ex.maxWeight, date: log.dateFormatted || log.date, muscle: ex.muscle || spec.primary || '' };
+                            }
+                        }
+                    });
+                }
+            });
+
+            const sessionsCount = filteredLogs.length;
+            const avgSessionVol = sessionsCount > 0 ? Math.round(totalVolume / sessionsCount) : 0;
+            const totalPillarsVol = Object.values(pillars).reduce((sum, p) => sum + p.volume, 0) || 1;
+
+            // Push vs Pull ratio
+            const pushTotal = pillars.chest.volume + (pillars.arms.volume * 0.4);
+            const pullTotal = pillars.back.volume + (pillars.arms.volume * 0.6);
+            const pushPullRatio = pushTotal > 0 ? (pullTotal / pushTotal).toFixed(2) : '1.00';
+
+            let balanceBadge = '✅ Mükemmel Denge';
+            let balanceColor = '#10b981';
+            let balanceDesc = 'İtiş ve çekiş hacminiz dengeli; omuz ve omurga sağlığınız korunuyor.';
+            if (pushPullRatio < 0.85) {
+                balanceBadge = '⚠️ İtiş Hacmi Baskın';
+                balanceColor = '#f59e0b';
+                balanceDesc = 'Göğüs ve omuz itiş tonajınız sırttan yüksek. Omuz sakatlığı riskini önlemek için sırt ve kürek hareketlerine ağırlık verin.';
+            } else if (pushPullRatio > 1.35) {
+                balanceBadge = '⚠️ Çekiş Hacmi Baskın';
+                balanceColor = '#38bdf8';
+                balanceDesc = 'Sırt çekiş hacminiz itişten belirgin şekilde fazla. İtiş egzersizlerinizi artırabilirsiniz.';
+            }
+
+            const sortedPrs = Object.keys(prMap).map(k => ({ name: k, ...prMap[k] })).sort((a,b) => b.weight - a.weight).slice(0, 6);
+
+            container.innerHTML = weeklySufficiencyHTML + timeFilterHTML + `
+                <!-- KPI STATS -->
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-bottom:16px;">
+                    <div class="analytics-kpi-card">
+                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">TOPLAM TONAJ</div>
+                        <div style="font-size:18px; font-weight:900; color:var(--gold); margin-top:2px;">🏋️ ${Math.round(totalVolume).toLocaleString('tr-TR')} kg</div>
+                        <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">${sessionsCount} Seans</div>
+                    </div>
+                    <div class="analytics-kpi-card">
+                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">SEANS BAŞI ORT.</div>
+                        <div style="font-size:18px; font-weight:900; color:var(--cyan); margin-top:2px;">⚡ ${avgSessionVol.toLocaleString('tr-TR')} kg</div>
+                        <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">Yoğunluk</div>
+                    </div>
+                    <div class="analytics-kpi-card">
+                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">SET & TEKRAR</div>
+                        <div style="font-size:18px; font-weight:900; color:var(--green-success); margin-top:2px;">🎯 ${totalSets} / ${totalReps}</div>
+                        <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">Hacim</div>
+                    </div>
+                    <div class="analytics-kpi-card">
+                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">İTİŞ / ÇEKİŞ ORANI</div>
+                        <div style="font-size:18px; font-weight:900; color:${balanceColor}; margin-top:2px;">⚖️ ${pushPullRatio}</div>
+                        <div style="font-size:10px; color:${balanceColor}; margin-top:2px;">${balanceBadge}</div>
+                    </div>
+                </div>
+
+                <!-- MUSCLE PILLARS VOLUME BARS -->
+                <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <h3 style="font-size:13.5px; font-weight:800; color:#fff;">🧬 Kas Grubu Tonaj & Hacim Dağılımı</h3>
+                        <span style="font-size:11px; color:var(--gold); font-weight:700;">Kümülatif Yük</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:12px;">
+                        ${Object.keys(pillars).map(key => {
+                            const p = pillars[key];
+                            const pct = Math.round((p.volume / totalPillarsVol) * 100);
+                            return `
+                                <div>
+                                    <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:700;">
+                                        <span style="color:#fff;">${p.icon} ${p.label}</span>
+                                        <span style="color:${p.color};">${Math.round(p.volume).toLocaleString('tr-TR')} kg <span style="color:var(--text-secondary); font-size:11px;">(%${pct})</span></span>
+                                    </div>
+                                    <div class="analytics-bar-bg">
+                                        <div class="analytics-bar-fill" style="width:${Math.min(100, Math.max(4, pct))}%; background:${p.color};"></div>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-secondary); margin-top:2px;">
+                                        <span>Tamamlanan Efektif Set: ${(Math.round(p.sets * 10) / 10).toFixed(1)}</span>
+                                        <span>Ortalama Yük: ${p.sets > 0 ? Math.round(p.volume / p.sets) : 0} kg/set</span>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+
+                <!-- BIOMECHANICAL BALANCE & COACH INSIGHT -->
+                <div style="background:rgba(245, 158, 11, 0.04); border:1px solid rgba(245, 158, 11, 0.25); border-radius:12px; padding:14px; margin-bottom:16px;">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                        <span style="font-size:18px;">🩺</span>
+                        <h3 style="font-size:13.5px; font-weight:800; color:var(--gold-light);">Biyomekanik Postür & Sakatlık Önleme Raporu</h3>
+                    </div>
+                    <p style="font-size:12px; color:#cbd5e1; line-height:1.5; margin-bottom:8px;">
+                        ${balanceDesc} Çekiş hacminiz: <strong>${Math.round(pullTotal).toLocaleString('tr-TR')} kg</strong>, İtiş hacminiz: <strong>${Math.round(pushTotal).toLocaleString('tr-TR')} kg</strong>.
+                    </p>
+                    <div style="font-size:11.5px; color:var(--text-secondary); background:rgba(0,0,0,0.25); padding:8px 10px; border-radius:8px;">
+                        💡 <strong>Koç Tavsiyesi:</strong> Bacak ve arka zincir kasları metabolik motorunuzdur. Her seans öncesi kalça ve omuz mobilite protokolünü (CARs) eksiksiz uygulayarak eklem hareket açıklığınızı maksimize edin.
+                    </div>
+                </div>
+
+                <!-- PR RECORDS TABLE -->
+                ${sortedPrs.length > 0 ? `
+                    <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; padding:14px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <h3 style="font-size:13.5px; font-weight:800; color:#fff;">🏆 Kişisel Ağırlık Rekorları (PR)</h3>
+                            <span style="font-size:11px; color:var(--cyan); font-weight:700;">Zirve Kilolar</span>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:6px;">
+                            ${sortedPrs.map((pr, idx) => `
+                                <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.25); padding:8px 10px; border-radius:8px; border-left:3px solid var(--gold);">
+                                    <div>
+                                        <div style="font-size:12.5px; font-weight:800; color:#fff;">#${idx+1} ${escapeHTML(pr.name)}</div>
+                                        <div style="font-size:10.5px; color:var(--text-secondary);">${escapeHTML(pr.muscle || '')} • ${escapeHTML(pr.date)}</div>
+                                    </div>
+                                    <div style="font-size:15px; font-weight:900; color:var(--gold);">
+                                        ${pr.weight} kg
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        function renderScaleAnalytics(container) {
+            const unified = getUnifiedBodyLogs();
+            const scaleLogs = getScaleLogs();
+            const measLogs = getMeasurementsLogs();
+
+            if (unified.length === 0) {
+                container.innerHTML = `
+                    <div style="background:var(--bg-surface); padding:28px 20px; text-align:center; border:1px dashed var(--border); border-radius:14px;">
+                        <span style="font-size:42px; display:block; margin-bottom:12px;">⚖️📏</span>
+                        <h3 style="font-size:16px; font-weight:900; color:#fff; margin-bottom:8px;">Henüz Vücut Analizi & Ölçüm Kaydı Eklenmemiş</h3>
+                        <p style="font-size:12px; color:var(--text-secondary); max-width:420px; margin:0 auto 18px; line-height:1.5;">
+                            Unique Health 3. PDF raporunuzu yükleyerek veya manuel kilo ve mezura ölçülerinizi girerek gelişim eğrinizi tek ekranda takip edebilirsiniz.
+                        </p>
+                        <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+                            <button class="btn btn-gold" style="font-size:12.5px; padding:10px 18px; font-weight:900;" onclick="openScaleModal()">
+                                ➕ İlk Vücut Analizini / Ölçümünü Ekle
+                            </button>
+                            <button class="btn btn-outline" style="font-size:12px; padding:10px 16px; font-weight:700;" onclick="seedUniqueHealthSample()">
+                                ⚡ 07.10.2026 Raporunu Yükle (Test)
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const latestScale = scaleLogs.length > 0 ? scaleLogs[0] : null;
+            const earliestScale = scaleLogs.length > 0 ? scaleLogs[scaleLogs.length - 1] : null;
+            const deltaWeight = (scaleLogs.length > 1 && latestScale) ? (latestScale.weight - earliestScale.weight).toFixed(1) : null;
+            const deltaFat = (scaleLogs.length > 1 && latestScale?.bodyFat && earliestScale?.bodyFat) ? (latestScale.bodyFat - earliestScale.bodyFat).toFixed(1) : null;
+            const deltaMuscle = (scaleLogs.length > 1 && latestScale?.muscleMass && earliestScale?.muscleMass) ? (latestScale.muscleMass - earliestScale.muscleMass).toFixed(1) : null;
+
+            const latestMeas = measLogs.length > 0 ? measLogs[0] : null;
+            const earliestMeas = measLogs.length > 0 ? measLogs[measLogs.length - 1] : null;
+            const deltaWaist = (measLogs.length > 1 && latestMeas?.waist && earliestMeas?.waist) ? (latestMeas.waist - earliestMeas.waist).toFixed(1) : null;
+            const deltaArms = (measLogs.length > 1 && latestMeas?.arms && earliestMeas?.arms) ? (latestMeas.arms - earliestMeas.arms).toFixed(1) : null;
+
+            // Veri Tazelik Hesaplaması (Diyetisyen Periyodu)
+            let freshnessHtml = '';
+            if (latestScale) {
+                const latestDate = new Date(latestScale.date);
+                const now = new Date();
+                const daysDiff = Math.max(0, Math.floor((now - latestDate) / (1000 * 60 * 60 * 24)));
+
+                if (daysDiff <= 14) {
+                    freshnessHtml = `
+                        <div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:12px; padding:12px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span style="font-size:22px;">🟢</span>
+                                <div>
+                                    <div style="font-size:12.5px; font-weight:900; color:#34d399;">
+                                        Taze & Aktif Analiz (${daysDiff === 0 ? 'Bugün ölçüldü' : `${daysDiff} gün önce`})
+                                    </div>
+                                    <div style="font-size:11px; color:var(--text-secondary); margin-top:1px;">
+                                        Diyetisyen Penceresi: Kas ve yağ dengeniz taze. Antrenman motoru bu veriye göre en yüksek verimle çalışır.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (daysDiff <= 28) {
+                    freshnessHtml = `
+                        <div style="background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); border-radius:12px; padding:12px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span style="font-size:22px;">🟡</span>
+                                <div>
+                                    <div style="font-size:12.5px; font-weight:900; color:#fbbf24;">
+                                        Kararlı Blok Dönemi (${daysDiff} gün önce)
+                                    </div>
+                                    <div style="font-size:11px; color:var(--text-secondary); margin-top:1px;">
+                                        4 haftalık antrenman bloğu ilerliyor. Yaklaşık ${28 - daysDiff} gün sonra yeni bir analiz yükleyebilirsiniz.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    freshnessHtml = `
+                        <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:12px; padding:12px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span style="font-size:22px;">🔴</span>
+                                <div>
+                                    <div style="font-size:12.5px; font-weight:900; color:#f87171;">
+                                        Yenileme Zamanı Geldi (${daysDiff} gün önce)
+                                    </div>
+                                    <div style="font-size:11px; color:var(--text-secondary); margin-top:1px;">
+                                        Son analizinizin üzerinden 1 aydan fazla geçti. Vücudunuz değişti; yeni 3. PDF'i yükleyerek programınızı kalibre edin!
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            const uh = latestScale?.uniqueHealth || null;
+
+            container.innerHTML = `
+                <!-- FRESHNESS BANNER -->
+                ${freshnessHtml}
+
+                ${latestScale ? `
+                <!-- ACTION: GENERATE TAILORED WORKOUT -->
+                <div style="background:linear-gradient(135deg, rgba(245,158,11,0.18), rgba(56,189,248,0.1)); border:1.5px solid var(--gold); border-radius:14px; padding:15px 18px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                    <div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:20px;">⚡</span>
+                            <h3 style="font-size:14.5px; font-weight:900; color:#fff;">Bu Analize Göre Özel Çelik Kodu Programı Oluştur</h3>
+                        </div>
+                        <div style="font-size:11.5px; color:var(--text-secondary); margin-top:3px;">
+                            ${latestScale.muscleMass || 37.2} kg iskelet kasını koruyup, gövdedeki yağlanmayı hedefleyen 45 dakikalık süperset reçetesi.
+                        </div>
+                    </div>
+                    <button class="btn btn-gold" style="font-size:12.5px; padding:9px 18px; font-weight:900;" onclick="generateTailoredWorkoutFromScale()">
+                        🚀 Programı Başlat ➔
+                    </button>
+                </div>
+                ` : ''}
+
+                <!-- UNIFIED KPI CARDS -->
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-bottom:16px;">
+                    <div class="analytics-kpi-card">
+                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">SON KİLO</div>
+                        <div style="font-size:20px; font-weight:900; color:var(--gold); margin-top:2px;">
+                            ${latestScale ? `${latestScale.weight} kg` : '-'}
+                        </div>
+                        ${deltaWeight !== null ? `
+                            <div style="font-size:10.5px; font-weight:800; color:${parseFloat(deltaWeight) <= 0 ? 'var(--green-success)' : 'var(--red-alert)'}; margin-top:2px;">
+                                ${parseFloat(deltaWeight) > 0 ? '+' : ''}${deltaWeight} kg
+                            </div>
+                        ` : '<div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">Kilo Takibi</div>'}
+                    </div>
+
+                    <div class="analytics-kpi-card">
+                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">İSKELET KASI</div>
+                        <div style="font-size:20px; font-weight:900; color:var(--green-success); margin-top:2px;">
+                            ${latestScale?.muscleMass ? `${latestScale.muscleMass} kg` : '-'}
+                        </div>
+                        <div style="font-size:10.5px; color:#34d399; font-weight:800; margin-top:2px;">
+                            ${latestScale?.muscleMass ? '🟢 Kas Kütlesi' : 'Analiz Bekleniyor'}
+                        </div>
+                    </div>
+
+                    <div class="analytics-kpi-card">
+                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">VÜCUT YAĞ ORANI</div>
+                        <div style="font-size:20px; font-weight:900; color:var(--cyan); margin-top:2px;">
+                            ${latestScale?.bodyFat ? `%${latestScale.bodyFat}` : '-'}
+                        </div>
+                        <div style="font-size:10.5px; color:#38bdf8; font-weight:800; margin-top:2px;">
+                            ${uh?.bodyFatKg ? `${uh.bodyFatKg} kg Yağ` : (latestScale?.bodyFat ? 'Fit Aralık' : '-')}
+                        </div>
+                    </div>
+
+                    <div class="analytics-kpi-card">
+                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">BEL ÇEVRESİ</div>
+                        <div style="font-size:20px; font-weight:900; color:var(--gold); margin-top:2px;">
+                            ${latestMeas?.waist ? `${latestMeas.waist} cm` : '-'}
+                        </div>
+                        ${deltaWaist !== null ? `
+                            <div style="font-size:10.5px; font-weight:800; color:${parseFloat(deltaWaist) <= 0 ? 'var(--green-success)' : 'var(--red-alert)'}; margin-top:2px;">
+                                ${parseFloat(deltaWaist) > 0 ? '+' : ''}${deltaWaist} cm ${parseFloat(deltaWaist) <= 0 ? '📉' : '📈'}
+                            </div>
+                        ` : '<div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">Mezura Takibi</div>'}
+                    </div>
+
+                    <div class="analytics-kpi-card">
+                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">KOL / OMUZ</div>
+                        <div style="font-size:18px; font-weight:900; color:#fff; margin-top:2px;">
+                            ${(latestMeas?.arms || latestMeas?.shoulder) ? `${latestMeas.arms || '-'} / ${latestMeas.shoulder || '-'} cm` : '-'}
+                        </div>
+                        ${deltaArms !== null ? `
+                            <div style="font-size:10.5px; font-weight:800; color:${parseFloat(deltaArms) >= 0 ? 'var(--green-success)' : 'var(--text-secondary)'}; margin-top:2px;">
+                                Kol: ${parseFloat(deltaArms) > 0 ? '+' : ''}${deltaArms} cm
+                            </div>
+                        ` : '<div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">Hipertrofi</div>'}
+                    </div>
+                </div>
+
+                ${uh ? `
+                <!-- CELLULAR & FLUID BALANCE CARD -->
+                <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:18px;">🧬</span>
+                            <h3 style="font-size:13.5px; font-weight:900; color:#fff;">Hücresel Denge, Su & Protein Dağılımı</h3>
+                        </div>
+                        <span style="font-size:11px; color:#34d399; font-weight:800; background:rgba(16,185,129,0.15); padding:3px 8px; border-radius:12px;">Ödem Yok (Saf Kas Hidrasyonu)</span>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:8px; margin-bottom:10px;">
+                        <div style="background:rgba(0,0,0,0.25); padding:10px; border-radius:8px;">
+                            <div style="font-size:10.5px; color:var(--text-secondary);">TOPLAM SU</div>
+                            <div style="font-size:16px; font-weight:900; color:var(--cyan); margin-top:2px;">${uh?.totalWater || (latestScale?.waterPct ? ((latestScale.weight * latestScale.waterPct) / 100).toFixed(1) : 47.8)} kg</div>
+                            <div style="font-size:10px; color:var(--text-secondary);">Hücre İçi: ${uh?.intraWater || 29.8}kg / Dışı: ${uh?.extraWater || 18.0}kg</div>
+                        </div>
+
+                        <div style="background:rgba(0,0,0,0.25); padding:10px; border-radius:8px;">
+                            <div style="font-size:10.5px; color:var(--text-secondary);">PROTEİN MİKTARI</div>
+                            <div style="font-size:16px; font-weight:900; color:var(--gold); margin-top:2px;">${uh?.protein || 12.9} kg</div>
+                            <div style="font-size:10px; color:#34d399;">Mükemmel (%16.6)</div>
+                        </div>
+
+                        <div style="background:rgba(0,0,0,0.25); padding:10px; border-radius:8px;">
+                            <div style="font-size:10.5px; color:var(--text-secondary);">MİNERALLER</div>
+                            <div style="font-size:16px; font-weight:900; color:#fff; margin-top:2px;">${uh?.minerals || 4.5} kg</div>
+                            <div style="font-size:10px; color:#34d399;">Mükemmel Referans</div>
+                        </div>
+
+                        <div style="background:rgba(0,0,0,0.25); padding:10px; border-radius:8px;">
+                            <div style="font-size:10.5px; color:var(--text-secondary);">KEMİK KÜTLESİ</div>
+                            <div style="font-size:16px; font-weight:900; color:#fff; margin-top:2px;">${uh?.bone || 3.6} kg</div>
+                            <div style="font-size:10px; color:var(--text-secondary);">Sağlam İskelet Yapısı</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEGMENTAL (BÖLGESEL) KAS & YAĞ HARİTASI -->
+                <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:18px;">🧍</span>
+                            <h3 style="font-size:13.5px; font-weight:900; color:#fff;">Bölgesel (Segmental) Kas & Yağ Simetrisi</h3>
+                        </div>
+                        <span style="font-size:11px; color:var(--cyan); font-weight:700;">Unique Health BIA</span>
+                    </div>
+
+                    <div class="scale-segmental-grid">
+                        <div class="scale-segmental-card" style="border-left:3px solid var(--cyan);">
+                            <div style="font-weight:900; color:#fff; margin-bottom:4px;">🦾 KOLLAR (Üst Gövde)</div>
+                            <div style="color:var(--text-secondary); font-size:11px;">Sol Kol: <strong>${uh?.segmental?.leftArm?.muscleKg || 3.4}kg Kas</strong> (%${uh?.segmental?.leftArm?.musclePct || 103})</div>
+                            <div style="color:var(--text-secondary); font-size:11px;">Sağ Kol: <strong>${uh?.segmental?.rightArm?.muscleKg || 3.4}kg Kas</strong> (%${uh?.segmental?.rightArm?.musclePct || 103})</div>
+                            <div style="color:#34d399; font-size:10.5px; font-weight:800; margin-top:3px;">%100 Kusursuz Simetri</div>
+                            <div style="color:var(--text-secondary); font-size:10px; margin-top:2px;">Yağ: 0.8 kg (%114.2)</div>
+                        </div>
+
+                        <div class="scale-segmental-card" style="border-left:3px solid var(--gold); background:rgba(245,158,11,0.06);">
+                            <div style="font-weight:900; color:var(--gold-light); margin-bottom:4px;">🎯 GÖVDE & BEL (Öncelikli Hedef)</div>
+                            <div style="color:#fff; font-size:11px;">Gövde Kası: <strong>${uh?.segmental?.trunk?.muscleKg || 28.6}kg</strong> (%${uh?.segmental?.trunk?.musclePct || 107.8})</div>
+                            <div style="color:#f87171; font-size:11px; font-weight:800; margin-top:2px;">Gövde Yağı: <strong>${uh?.segmental?.trunk?.fatKg || 6.3}kg</strong> (%${uh?.segmental?.trunk?.fatPct || 140}) ⚠️</div>
+                            <div style="color:var(--gold-light); font-size:10px; margin-top:4px; line-height:1.3;">
+                                💡 Yağın %51'i gövdede toplandı. Programda karın zırhı ve yüksek kalori yakan bileşikler hedeflendi.
+                            </div>
+                        </div>
+
+                        <div class="scale-segmental-card" style="border-left:3px solid var(--green-success);">
+                            <div style="font-weight:900; color:#34d399; margin-bottom:4px;">🦵 BACAKLAR (Güç Kaidesi)</div>
+                            <div style="color:var(--text-secondary); font-size:11px;">Sol Bacak: <strong>${uh?.segmental?.leftLeg?.muscleKg || 10.6}kg Kas</strong> (%${uh?.segmental?.leftLeg?.musclePct || 115.2})</div>
+                            <div style="color:var(--text-secondary); font-size:11px;">Sağ Bacak: <strong>${uh?.segmental?.rightLeg?.muscleKg || 10.4}kg Kas</strong> (%${uh?.segmental?.rightLeg?.musclePct || 113.0})</div>
+                            <div style="color:#34d399; font-size:10.5px; font-weight:800; margin-top:3px;">Normun %15 Üzerinde Kuvvet!</div>
+                            <div style="color:var(--text-secondary); font-size:10px; margin-top:2px;">Bacak Yağı: %88.8 (Oldukça Düşük)</div>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+
+                <!-- UNIFIED BODY COMPOSITION & MEASUREMENTS HISTORY LIST -->
+                <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; padding:14px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <h3 style="font-size:13.5px; font-weight:800; color:#fff;">📋 Vücut Kompozisyonu & Mezura Ölçüm Geçmişi (${unified.length} Kayıt)</h3>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        ${unified.map((u, idx) => `
+                            <div style="background:rgba(0,0,0,0.3); padding:12px 14px; border-radius:10px; border-left:4px solid ${u.weight ? 'var(--gold)' : 'var(--cyan)'};">
+                                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                                    <div>
+                                        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                            <span style="font-size:12px; color:var(--text-secondary); font-weight:700;">📅 ${escapeHTML(u.date)}</span>
+                                            ${u.weight ? `<strong style="font-size:15px; color:#fff;">${u.weight} kg</strong>` : ''}
+                                            ${u.waist ? `<span style="font-size:13px; color:var(--cyan); font-weight:800; background:rgba(56,189,248,0.12); padding:2px 8px; border-radius:6px;">📏 Bel: ${u.waist} cm</span>` : ''}
+                                            ${u.uniqueHealth ? '<span style="font-size:9.5px; background:rgba(56,189,248,0.2); color:var(--cyan); padding:2px 6px; border-radius:4px; font-weight:700;">Unique Health BIA</span>' : ''}
+                                        </div>
+
+                                        <!-- SCALE METRICS PILLS -->
+                                        ${(u.bodyFat || u.muscleMass || u.waterPct || u.visceralFat || u.bmr) ? `
+                                            <div style="font-size:11.5px; color:#cbd5e1; margin-top:5px; display:flex; gap:8px; flex-wrap:wrap;">
+                                                ${u.bodyFat ? `<span>Yağ: <strong>%${u.bodyFat}</strong></span>` : ''}
+                                                ${u.muscleMass ? `<span>İskelet Kası: <strong>${u.muscleMass} kg</strong></span>` : ''}
+                                                ${u.waterPct ? `<span>Sıvı: <strong>%${u.waterPct}</strong></span>` : ''}
+                                                ${u.visceralFat ? `<span>İç Yağ: <strong>${u.visceralFat}</strong></span>` : ''}
+                                                ${u.bmr ? `<span>BMR: <strong>${u.bmr} kcal</strong></span>` : ''}
+                                            </div>
+                                        ` : ''}
+
+                                        <!-- MEZURA METRICS PILLS -->
+                                        ${(u.chest || u.shoulder || u.arms || u.thigh || u.hips || u.neck) ? `
+                                            <div style="font-size:11.5px; color:var(--cyan); margin-top:4px; display:flex; gap:8px; flex-wrap:wrap;">
+                                                ${u.arms ? `<span>Kol: <strong>${u.arms} cm</strong></span>` : ''}
+                                                ${u.chest ? `<span>Göğüs: <strong>${u.chest} cm</strong></span>` : ''}
+                                                ${u.shoulder ? `<span>Omuz: <strong>${u.shoulder} cm</strong></span>` : ''}
+                                                ${u.thigh ? `<span>Bacak: <strong>${u.thigh} cm</strong></span>` : ''}
+                                                ${u.hips ? `<span>Kalça: <strong>${u.hips} cm</strong></span>` : ''}
+                                                ${u.neck ? `<span>Boyun: <strong>${u.neck} cm</strong></span>` : ''}
+                                            </div>
+                                        ` : ''}
+
+                                        ${u.notes ? `<div style="font-size:11px; color:var(--gold-light); margin-top:4px;">📝 ${escapeHTML(u.notes)}</div>` : ''}
+                                    </div>
+                                    <div>
+                                        <button class="btn-delete-log" onclick="deleteUnifiedBodyEntry(decodeURIComponent('${encodeURIComponent(u.date)}'), decodeURIComponent('${encodeURIComponent(u.scaleId || '')}'), decodeURIComponent('${encodeURIComponent(u.measId || '')}'))" title="Kaydı Sil">✕</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // ----- TAILORED WORKOUT FROM SCALE COMPOSITION -----
+        function generateTailoredWorkoutFromScale() {
+            const logs = getScaleLogs();
+            if (logs.length === 0) {
+                alert("Lütfen önce bir Unique Health 3. PDF veya tartı kaydı ekleyiniz!");
+                return;
+            }
+
+            const latest = logs[0];
+            const uh = latest.uniqueHealth || null;
+
+            // Generator Tab'a geç
+            switchTab('generatorTab');
+
+            // Bacak kası yüksek ve gövde yağı yüksek olduğu için 'full_body' ve 'superset' modeli en yüksek glikolitik harcamayı sağlar
+            selectSplit('full_body');
+
+            const styleEl = document.getElementById('paramStyle');
+            if (styleEl) styleEl.value = 'superset';
+
+            const goalEl = document.getElementById('paramGoal');
+            if (goalEl) goalEl.value = 'hypertrophy'; // Kas koruyucu rekompozisyon
+
+            const durEl = document.getElementById('paramDuration');
+            if (durEl) durEl.value = '45';
+
+            // Antrenmanı oluştur
+            handleGenerateWorkout();
+
+            // Antrenman kartının üstüne özel diyetisyen/koç reçetesi banner'ı ekle
+            const output = document.getElementById('generatedWorkoutOutput');
+            if (output) {
+                const bannerHtml = `
+                    <div style="background:linear-gradient(135deg, rgba(245,158,11,0.22), rgba(56,189,248,0.12)); border:2px solid var(--gold); border-radius:14px; padding:16px; margin-bottom:16px; box-shadow:0 6px 20px rgba(0,0,0,0.4);">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="font-size:26px;">🎯</span>
+                            <div>
+                                <h3 style="font-size:15px; font-weight:900; color:#fff;">TARTI & BİYO-EMPEDANS ANALİZİNİZE ÖZEL REÇETE</h3>
+                                <div style="font-size:11.5px; color:#cbd5e1; margin-top:2px;">
+                                    <strong>${latest.muscleMass || 37.2} kg İskelet Kası</strong> Koruması • <strong>%${latest.bodyFat || 15.9} Yağ</strong> • <strong>Gövde Yağını (%140) Eritme Odaklı</strong> Rekompozisyon
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin-top:10px; font-size:11.5px; color:#e2e8f0; background:rgba(0,0,0,0.35); padding:10px 12px; border-radius:8px; border-left:3px solid var(--cyan); line-height:1.45;">
+                            💡 <strong>Biyomekanik Strateji:</strong> Bacak kas kütleniz (%115) normun üzerinde olduğundan kettlebell & squat bileşikleri ana metabolik kalori motoru olarak kurgulandı. Karın ve gövdedeki 6.3 kg yağı hedeflemek için seans sonuna anti-rotasyonel core zırhı (Farmer's Carry / Suitcase Carry) dahil edildi.
+                        </div>
+                    </div>
+                `;
+                output.insertAdjacentHTML('afterbegin', bannerHtml);
+                output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // ----- SEED SAMPLE DATA FOR TESTING / IMMEDIATE EXPERIENCE -----
+        function seedUniqueHealthSample() {
+            const sampleEntry = {
+                id: 'scale_' + Date.now(),
+                date: '2026-10-07',
+                weight: 77.65,
+                bodyFat: 15.9,
+                muscleMass: 37.2,
+                waterPct: 61.6,
+                visceralFat: 6,
+                bmr: 1778,
+                notes: 'Unique Health BIA Analizi • Puan: 84 • Vücut Yaşı: 39',
+                timestamp: Date.now(),
+                uniqueHealth: {
+                    date: '2026-10-07',
+                    dateFormatted: '07/10/2026',
+                    weight: 77.65,
+                    skeletalMuscle: 37.2,
+                    muscleMass: 60.7,
+                    bodyFat: 15.9,
+                    bodyFatKg: 12.4,
+                    totalWater: 47.8,
+                    intraWater: 29.8,
+                    extraWater: 18.0,
+                    protein: 12.9,
+                    minerals: 4.5,
+                    bone: 3.6,
+                    visceralFat: 6,
+                    bmr: 1778,
+                    bmi: 24.2,
+                    bodyAge: 39,
+                    bodyScore: 84,
+                    bodyCellMass: 43,
+                    heartRate: 77,
+                    segmental: {
+                        leftArm: { fatKg: 0.8, fatPct: 114.2, muscleKg: 3.4, musclePct: 103 },
+                        rightArm: { fatKg: 0.8, fatPct: 114.2, muscleKg: 3.4, musclePct: 103 },
+                        trunk: { fatKg: 6.3, fatPct: 140, muscleKg: 28.6, musclePct: 107.8 },
+                        leftLeg: { fatKg: 1.6, fatPct: 88.8, muscleKg: 10.6, musclePct: 115.2 },
+                        rightLeg: { fatKg: 1.6, fatPct: 88.8, muscleKg: 10.4, musclePct: 113.0 }
+                    }
+                }
+            };
+
+            let logs = getScaleLogs();
+            logs = logs.filter(l => l.date !== sampleEntry.date);
+            logs.unshift(sampleEntry);
+            setScaleLogs(logs);
+            renderAnalytics();
+            playAlertSound();
+            alert("✅ 07.10.2026 Unique Health Raporu başarıyla yüklendi!");
+        }
+
+        function renderMeasurementsAnalytics(container) {
+            renderScaleAnalytics(container);
+        }
+
+        function renderCombinedCoachReport(container) {
+            const workoutLogs = getWorkoutLogs();
+            const scaleLogs = getScaleLogs();
+            const measLogs = getMeasurementsLogs();
+
+            const totalVolume = workoutLogs.reduce((sum, l) => sum + (l.totalVolumeKg || 0), 0);
+            const totalSets = workoutLogs.reduce((sum, l) => sum + (l.totalSetsCompleted || 0), 0);
+
+            const hasScale = scaleLogs.length > 0;
+            const hasMeas = measLogs.length > 0;
+
+            const latestScale = hasScale ? scaleLogs[0] : null;
+            const earliestScale = hasScale ? scaleLogs[scaleLogs.length - 1] : null;
+            const deltaWeight = (hasScale && scaleLogs.length > 1) ? (latestScale.weight - earliestScale.weight).toFixed(1) : null;
+            const deltaFat = (hasScale && scaleLogs.length > 1 && latestScale.bodyFat && earliestScale.bodyFat) ? (latestScale.bodyFat - earliestScale.bodyFat).toFixed(1) : null;
+
+            const latestMeas = hasMeas ? measLogs[0] : null;
+            const earliestMeas = hasMeas ? measLogs[measLogs.length - 1] : null;
+            const deltaWaist = (hasMeas && measLogs.length > 1 && latestMeas.waist && earliestMeas.waist) ? (latestMeas.waist - earliestMeas.waist).toFixed(1) : null;
+
+            container.innerHTML = `
+                <div style="background:linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(56, 189, 248, 0.05)); border:1px solid rgba(245, 158, 11, 0.3); border-radius:14px; padding:18px; margin-bottom:16px;">
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+                        <span style="font-size:26px;">🧠</span>
+                        <div>
+                            <h3 style="font-size:16px; font-weight:900; color:#fff;">Bütünleşik Koç Değerlendirmesi & Biyomekanik Karne</h3>
+                            <p style="font-size:11.5px; color:var(--text-secondary);">Antrenman hacmi, kilo dalgalanması ve bel ölçümü korelasyonu</p>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-bottom:14px;">
+                        <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; text-align:center;">
+                            <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">TOPLAM KALDIRILAN</div>
+                            <div style="font-size:17px; font-weight:900; color:var(--gold); margin-top:2px;">${Math.round(totalVolume).toLocaleString('tr-TR')} kg</div>
+                            <div style="font-size:10px; color:var(--text-secondary);">${workoutLogs.length} Seans / ${totalSets} Set</div>
+                        </div>
+
+                        <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; text-align:center;">
+                            <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">KİLO & YAĞ DEĞİŞİMİ</div>
+                            <div style="font-size:17px; font-weight:900; color:var(--cyan); margin-top:2px;">
+                                ${deltaWeight !== null ? `${parseFloat(deltaWeight) > 0 ? '+' : ''}${deltaWeight} kg` : (latestScale ? `${latestScale.weight} kg` : '-')}
+                            </div>
+                            <div style="font-size:10px; color:var(--text-secondary);">
+                                ${deltaFat !== null ? `Yağ: ${parseFloat(deltaFat) > 0 ? '+' : ''}${deltaFat}%` : (latestScale?.bodyFat ? `Yağ: %${latestScale.bodyFat}` : 'Tartı Takibi')}
+                            </div>
+                        </div>
+
+                        <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; text-align:center;">
+                            <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">BEL İNCELMESİ</div>
+                            <div style="font-size:17px; font-weight:900; color:var(--green-success); margin-top:2px;">
+                                ${deltaWaist !== null ? `${parseFloat(deltaWaist) > 0 ? '+' : ''}${deltaWaist} cm` : (latestMeas ? `${latestMeas.waist} cm` : '-')}
+                            </div>
+                            <div style="font-size:10px; color:var(--text-secondary);">Viseral Yağ Göstergesi</div>
+                        </div>
+                    </div>
+
+                    <div style="background:rgba(0,0,0,0.4); border-radius:10px; padding:14px; border-left:4px solid var(--gold);">
+                        <h4 style="font-size:13px; font-weight:800; color:var(--gold-light); margin-bottom:6px;">📊 Bilimsel Değerlendirme & Gelecek Planı:</h4>
+                        <p style="font-size:12px; color:#e2e8f0; line-height:1.6; margin-bottom:8px;">
+                            ${totalVolume > 0 ? `
+                                Kaldırdığınız toplam <strong>${Math.round(totalVolume).toLocaleString('tr-TR')} kg</strong> mekanik tonaj, kas dokularında mikro-hasar ve protein sentezi uyarımı sağladı.
+                            ` : 'Henüz antrenman tonajınız kaydedilmedi.'}
+                            ${deltaWaist && parseFloat(deltaWaist) <= 0 ? `
+                                Bel çevrenizdeki <strong>${Math.abs(deltaWaist)} cm</strong> daralma, kas kütlenizi korurken derin viseral yağ depolarını başarıyla tükettiğinizi kanıtlıyor.
+                            ` : ''}
+                            ${deltaWeight && parseFloat(deltaWeight) <= 0 ? `
+                                Kilonuzdaki <strong>${Math.abs(deltaWeight)} kg</strong> düşüş, kontrollü bir kalori açığı ve yüksek nabızlı süpersetlerin sinerjisini yansıtıyor.
+                            ` : ''}
+                        </p>
+                        <div style="font-size:11.5px; color:#94a3b8; line-height:1.5;">
+                            🎯 <strong>Sıradaki Adım (Progressive Overload):</strong> Güç artışınızı sürdürmek için ana bileşik hareketlerde (Squat, Saw Row, Strict Press) tekrar sayılarınızı koruyarak ağırlığı 1-2 kg artırmayı hedefleyin. Dinlenme sürelerinde kronometreyi 60 saniyenin altında tutarak kardiyometabolik verimi zirvede tutun.
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // RESUME / VISIBILITY LISTENERS
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                updateWorkoutTimerDisplay();
+                updateTimerDisplay();
+            }
+        });
+        window.addEventListener('pageshow', () => {
+            updateWorkoutTimerDisplay();
+            updateTimerDisplay();
+        });
+
+        // PWA SERVICE WORKER & FORCE CACHE CLEAR
+        async function forceAppUpdate() {
+            try {
+                if ('caches' in window) {
+                    const keys = await caches.keys();
+                    await Promise.all(keys.map(k => caches.delete(k)));
+                }
+                if ('serviceWorker' in navigator) {
+                    const regs = await navigator.serviceWorker.getRegistrations();
+                    for (const r of regs) await r.unregister();
+                }
+            } catch(e) {}
+            window.location.href = window.location.origin + window.location.pathname + '?v=' + Date.now();
+        }
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js?v=145')
+                    .then(reg => {
+                        console.log('SW scope:', reg.scope);
+                        // Yeni sürümü hemen kontrol et
+                        if (reg.update) reg.update();
+                    })
+                    .catch(err => console.log('SW err:', err));
+            });
+
+            // Yeni SW devraldığında sayfayı yenileyerek güncel içeriği yükle
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    window.location.reload();
+                }
+            });
+        }
+
+        // INITIALIZE APPLICATION
+        window.addEventListener('DOMContentLoaded', () => {
+            fastFetchCloudAiConfig();
+            initAuthDatabase();
+            initFirebaseEngine();
+            syncAppViewState();
+            initCalendarLiveSyncOnLoad();
+            applyWednesdayHammerCurlPatch();
+            updateProfileGeminiStatusUI();
+            renderAiHybridHeroBanner();
+            const hasRestored = restoreActiveWorkoutStateFromStorage();
+            if (hasRestored) {
+                switchTab('activeWorkoutTab');
+            } else {
+                renderActiveWorkout();
+            }
+        });
+    
+
+        // ==================== WORKOUT STUDIO & MUSCLE RADAR ENGINE ====================
+
+        const STUDIO_REGION_MAP = {
+            chest: { name: "Göğüs", icon: "🛡️" },
+            back: { name: "Sırt", icon: "🏹" },
+            shoulders: { name: "Omuz", icon: "⚔️" },
+            biceps: { name: "Biceps", icon: "💪" },
+            triceps: { name: "Triceps", icon: "⚡" },
+            quads: { name: "Ön Bacak", icon: "🦵" },
+            hamstrings: { name: "Arka Bacak", icon: "🦿" },
+            glutes: { name: "Kalça", icon: "🍑" },
+            core: { name: "Karın", icon: "🧱" },
+            calves: { name: "Kalf", icon: "🦶" }
+        };
+
+        let selectedTargetMuscles = ['chest', 'triceps']; // Default sample split
+
+        function initStudioTab() {
+            renderStudioRegionChips();
+            renderRegionStatus();
+            renderCustomRoutine();
+            renderStudioExerciseCatalog();
+        }
+
+        function renderStudioRegionChips() {
+            const container = document.getElementById('studioRegionChips');
+            if (!container) return;
+
+            let html = '';
+            Object.keys(STUDIO_REGION_MAP).forEach(key => {
+                const reg = STUDIO_REGION_MAP[key];
+                const isSelected = selectedTargetMuscles.includes(key);
+
+                html += `
+                    <button class="btn ${isSelected ? 'btn-gold' : 'btn-outline'}" 
+                            style="font-size:11px; padding:5px 10px; border-radius:6px; font-weight:700;" 
+                            onclick="toggleTargetMuscle('${key}')">
+                        ${reg.icon} ${reg.name}
+                    </button>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function toggleTargetMuscle(key) {
+            const idx = selectedTargetMuscles.indexOf(key);
+            if (idx > -1) {
+                selectedTargetMuscles.splice(idx, 1);
+            } else {
+                selectedTargetMuscles.push(key);
+            }
+            renderStudioRegionChips();
+            renderRegionStatus();
+            renderStudioExerciseCatalog();
+        }
+
+        function selectPresetRegions(preset) {
+            if (preset === 'all') {
+                selectedTargetMuscles = Object.keys(STUDIO_REGION_MAP);
+            } else if (preset === 'clear') {
+                selectedTargetMuscles = [];
+            }
+            renderStudioRegionChips();
+            renderRegionStatus();
+            renderStudioExerciseCatalog();
+        }
+
+        function renderRegionStatus() {
+            const grid = document.getElementById('studioRegionStatusGrid');
+            const summaryBadge = document.getElementById('studioRegionSummaryBadge');
+            if (!grid) return;
+
+            if (selectedTargetMuscles.length === 0) {
+                grid.innerHTML = `<div style="grid-column:1/-1; font-size:11px; color:var(--text-secondary); text-align:center; padding:10px;">Henüz bölge seçilmedi. Yukarıdan çalışmak istediğiniz bölgelere tıklayın.</div>`;
+                if (summaryBadge) summaryBadge.innerHTML = '';
+                return;
+            }
+
+            // Tally exercises and sets for selected target muscles & collect covered subKeys
+            const regionStats = {};
+            const coveredSubKeys = new Set();
+            selectedTargetMuscles.forEach(m => {
+                regionStats[m] = { count: 0, sets: 0 };
+            });
+
+            customRoutineState.exercises.forEach(item => {
+                const ex = EXERCISES_DB.find(e => e.id === item.exId);
+                if (ex) {
+                    const anatomy = getExerciseAnatomy(ex);
+                    if (anatomy.subKey) {
+                        coveredSubKeys.add(anatomy.subKey);
+                    }
+                    const pList = ex.primaryMuscles || [];
+                    const sList = ex.secondaryMuscles || [];
+                    const sets = parseInt(item.sets) || 3;
+                    
+                    selectedTargetMuscles.forEach(m => {
+                        if (pList.includes(m) || sList.includes(m)) {
+                            regionStats[m].count += 1;
+                            regionStats[m].sets += sets;
+                        }
+                    });
+                }
+            });
+
+            let readyCount = 0;
+            let missingList = [];
+            let missingSubList = [];
+            let html = '';
+
+            selectedTargetMuscles.forEach(key => {
+                const reg = STUDIO_REGION_MAP[key] || { name: key, icon: '🎯' };
+                const stat = regionStats[key];
+                const isReady = stat.count > 0;
+                const subDefs = STUDIO_SUB_REGIONS[key] || [];
+
+                let subPillsHtml = '';
+                let hasUncoveredSub = false;
+
+                if (subDefs.length > 0) {
+                    subPillsHtml = `
+                        <div style="display:flex; flex-wrap:wrap; gap:3px; margin-top:4px;">
+                            ${subDefs.map(sub => {
+                                const isCovered = coveredSubKeys.has(sub.key);
+                                if (!isCovered && isReady) {
+                                    hasUncoveredSub = true;
+                                    missingSubList.push(`${reg.name}: ${sub.name}`);
+                                }
+                                return `
+                                    <span style="font-size:8.5px; font-weight:800; padding:1px 5px; border-radius:4px; ${isCovered ? 'background:rgba(16,185,129,0.25); color:#10b981; border:1px solid rgba(16,185,129,0.45);' : 'background:rgba(239,68,68,0.18); color:#fca5a5; border:1px solid rgba(239,68,68,0.35);'}">
+                                        ${sub.name} ${isCovered ? '✅' : '⚠️'}
+                                    </span>
+                                `;
+                            }).join('')}
+                        </div>
+                    `;
+                }
+
+                if (isReady) {
+                    readyCount++;
+                    const cardBorder = hasUncoveredSub ? 'rgba(245, 158, 11, 0.6)' : '#10b981';
+                    const cardBg = hasUncoveredSub ? 'rgba(245, 158, 11, 0.08)' : 'rgba(16, 185, 129, 0.1)';
+                    html += `
+                        <div style="background:${cardBg}; border:1px solid ${cardBorder}; border-radius:6px; padding:6px 8px; display:flex; flex-direction:column; justify-content:space-between;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div style="font-size:11px; font-weight:800; color:#fff;">${reg.icon} ${reg.name}</div>
+                                <div style="font-size:9.5px; color:${hasUncoveredSub ? 'var(--gold)' : '#10b981'}; font-weight:700;">
+                                    ${hasUncoveredSub ? '⚠️ Kısmi' : '✅ Tam'} (${stat.count} Hrk • ${stat.sets} Set)
+                                </div>
+                            </div>
+                            ${subPillsHtml}
+                        </div>
+                    `;
+                } else {
+                    missingList.push(reg.name);
+                    html += `
+                        <div style="background:rgba(245, 158, 11, 0.06); border:1px dashed var(--gold); border-radius:6px; padding:6px 8px; display:flex; flex-direction:column; justify-content:space-between;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div style="font-size:11px; font-weight:800; color:#fff;">${reg.icon} ${reg.name}</div>
+                                <div style="font-size:9.5px; color:var(--gold); font-weight:700;">⏳ Kaldı (0 Hareket)</div>
+                            </div>
+                            ${subPillsHtml}
+                        </div>
+                    `;
+                }
+            });
+
+            grid.innerHTML = html;
+
+            if (summaryBadge) {
+                if (readyCount === selectedTargetMuscles.length && missingSubList.length === 0) {
+                    summaryBadge.innerHTML = `<span style="color:#10b981; font-weight:800;">🎉 Tüm açılar ve alt bölgeler eksiksiz!</span>`;
+                } else if (missingList.length > 0) {
+                    summaryBadge.innerHTML = `<span style="color:var(--gold);">${readyCount} / ${selectedTargetMuscles.length} bölge hazır • Eksik: ${missingList.join(', ')}</span>`;
+                } else {
+                    summaryBadge.innerHTML = `<span style="color:#fca5a5; font-weight:700;">⚠️ Boşta Kalan Alt Bölgeler: ${missingSubList.slice(0, 3).join(', ')}${missingSubList.length > 3 ? '...' : ''}</span>`;
+                }
+            }
+        }
+
+        function renderCustomRoutine() {
+            const container = document.getElementById('customWorkoutExercisesList');
+            const countBadge = document.getElementById('customRoutineCountBadge');
+            if (typeof updateStudioSaveActionsGroup === 'function') {
+                updateStudioSaveActionsGroup();
+            }
+            if (!container) return;
+
+            countBadge.innerText = `${customRoutineState.exercises.length} Hareket`;
+
+            if (customRoutineState.exercises.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:16px; color:var(--text-secondary); background:rgba(0,0,0,0.2); border-radius:6px; border:1px dashed var(--border);">
+                        <div style="font-size:11.5px; color:#fff; font-weight:700;">Henüz hareket eklenmedi</div>
+                        <div style="font-size:10.5px; margin-top:2px;">Aşağıdaki uygun hareketlerden <strong>[ ➕ Ekle ]</strong> butonuna basarak programınızı kurun.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            customRoutineState.exercises.forEach((item, index) => {
+                const ex = EXERCISES_DB.find(e => e.id === item.exId);
+                if (!ex) return;
+
+                const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) 
+                    || (typeof categoryFallback !== 'undefined' && categoryFallback[ex.category]) 
+                    || null;
+                const thumbImg = guide ? guide.form || '' : '';
+
+                const anatomy = getExerciseAnatomy(ex);
+
+                html += `
+                    <div class="custom-routine-item" style="padding:6px 10px;">
+                        <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:140px;">
+                            <span style="font-size:11px; font-weight:900; color:var(--gold);">${index + 1}.</span>
+                            <div class="ex-thumb-wrap" style="width:40px; height:40px;">
+                                ${thumbImg ? `<img src="${thumbImg}" class="ex-thumb-img" alt="${escapeHTML(ex.name)}">` : '🏋️'}
+                            </div>
+                            <div>
+                                <div style="font-size:12px; font-weight:800; color:#fff; line-height:1.2; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
+                                    ${escapeHTML(ex.name)}
+                                </div>
+                                <div style="font-size:10px; margin-top:2px;">
+                                    <span style="color:var(--gold); font-weight:800;">🎯 ${escapeHTML(anatomy.primary)}</span>
+                                    ${anatomy.secondary ? `<span style="color:var(--cyan); font-weight:600;"> • ⚡ ${escapeHTML(anatomy.secondary)}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SETS & REPS -->
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <select class="form-input" style="padding:3px 5px; font-size:11px; width:64px;" onchange="updateCustomExerciseSets(${index}, this.value)">
+                                <option value="2" ${item.sets == 2 ? 'selected' : ''}>2 Set</option>
+                                <option value="3" ${item.sets == 3 ? 'selected' : ''}>3 Set</option>
+                                <option value="4" ${item.sets == 4 ? 'selected' : ''}>4 Set</option>
+                                <option value="5" ${item.sets == 5 ? 'selected' : ''}>5 Set</option>
+                            </select>
+
+                            <select class="form-input" style="padding:3px 5px; font-size:11px; width:72px;" onchange="updateCustomExerciseReps(${index}, this.value)">
+                                <option value="6-8" ${item.reps == '6-8' ? 'selected' : ''}>6-8 T.</option>
+                                <option value="8-10" ${item.reps == '8-10' ? 'selected' : ''}>8-10 T.</option>
+                                <option value="10-12" ${item.reps == '10-12' ? 'selected' : ''}>10-12 T.</option>
+                                <option value="12-15" ${item.reps == '12-15' ? 'selected' : ''}>12-15 T.</option>
+                                <option value="Maks" ${item.reps == 'Maks' ? 'selected' : ''}>Maks</option>
+                            </select>
+
+                            <button type="button" class="btn btn-outline" style="padding:3px 5px; font-size:9px;" onclick="moveCustomRoutineExercise(${index}, -1)" ${index === 0 ? 'disabled' : ''}>▲</button>
+                            <button type="button" class="btn btn-outline" style="padding:3px 5px; font-size:9px;" onclick="moveCustomRoutineExercise(${index}, 1)" ${index === customRoutineState.exercises.length - 1 ? 'disabled' : ''}>▼</button>
+                            <button type="button" class="btn btn-outline" style="padding:3px 7px; font-size:10px; color:var(--cyan); border-color:rgba(56,189,248,0.4); font-weight:700;" onclick="openStudioExerciseAlternativeModal(${index})" title="Bu hareket için alternatif bul">🔄 Alternatif</button>
+                            <button type="button" class="btn btn-outline" style="padding:3px 6px; font-size:10px;" onclick="openExerciseDetailModal('${ex.id}')" title="İncele">👁️</button>
+                            <button type="button" class="btn btn-outline" style="padding:3px 6px; font-size:10px; color:#fca5a5; border-color:rgba(239,68,68,0.3);" onclick="event.stopPropagation(); openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '${thumbImg}', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}', 'Atölye Seçilenler')" title="Bu harekette hata bildir">⚠️</button>
+                            <button type="button" class="btn btn-outline" style="padding:3px 6px; font-size:10px; color:#ef4444; border-color:rgba(239,68,68,0.4);" onclick="removeExerciseFromCustomRoutine(${index})" title="Çıkar">✕</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (customRoutineState.exercises.length > 0) {
+                const dayIdx = customRoutineState.editingDayIdx;
+                const isDayEdit = dayIdx !== null && dayIdx !== undefined;
+                const isProgEdit = Boolean(customRoutineState.editingProgramId);
+
+                html += `
+                    <div style="margin-top:12px; padding:10px 12px; background:rgba(0,0,0,0.3); border:1px solid rgba(245,158,11,0.3); border-radius:8px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; box-shadow:0 0 15px rgba(245,158,11,0.1);">
+                        ${isDayEdit ? `
+                            <button type="button" class="btn btn-gold" style="flex:1; min-width:200px; font-size:12.5px; padding:10px 16px; font-weight:900; box-shadow:0 0 15px rgba(245,158,11,0.35);" onclick="saveEditingRoutineToDay()">
+                                💾 Değişiklikleri ${DAY_NAMES_TR[dayIdx]} Gününe Kaydet
+                            </button>
+                            <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:10px 14px;" onclick="cancelStudioEditing(true)">
+                                Vazgeç
+                            </button>
+                        ` : (isProgEdit ? `
+                            <button type="button" class="btn btn-gold" style="flex:1; min-width:200px; font-size:12.5px; padding:10px 16px; font-weight:900; box-shadow:0 0 15px rgba(245,158,11,0.35);" onclick="saveCustomRoutineToLibrary()">
+                                💾 Değişiklikleri Kaydet
+                            </button>
+                            <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:10px 14px;" onclick="cancelStudioEditing(true)">
+                                Vazgeç
+                            </button>
+                        ` : `
+                            <button type="button" class="btn btn-gold" style="flex:1; min-width:160px; font-size:12px; padding:9px 14px; font-weight:900;" onclick="saveCustomRoutineToLibrary()">
+                                💾 Programı Kütüphaneye Kaydet
+                            </button>
+                            <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:9px 12px; color:var(--cyan); border-color:var(--cyan);" onclick="promptAssignStudioRoutineToDay()">
+                                📅 Güne Planla
+                            </button>
+                        `)}
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function renderStudioExerciseCatalog() {
+            const container = document.getElementById('studioExercisesCatalog');
+            const totalCountEl = document.getElementById('studioExTotalCount');
+            if (!container) return;
+
+            const q = (document.getElementById('studioSearchInput')?.value || '').toLowerCase().trim();
+            const equip = document.getElementById('studioEquipFilter')?.value || 'all';
+            const showAll = document.getElementById('chkShowAllExercises')?.checked;
+
+            const filtered = EXERCISES_DB.filter(ex => {
+                // Gizlenen hareketleri stüdyo kataloğunda gösterme
+                if (isExerciseExcludedByUser(ex.id)) return false;
+                if (equip !== 'all' && ex.equipment !== equip) return false;
+                if (q) {
+                    const combined = (ex.name + ' ' + (ex.muscle || '') + ' ' + (ex.cue || '')).toLowerCase();
+                    if (!combined.includes(q)) return false;
+                }
+                // Target Region Filtering
+                if (!showAll && selectedTargetMuscles.length > 0) {
+                    const pList = ex.primaryMuscles || [];
+                    const sList = ex.secondaryMuscles || [];
+                    const hits = pList.some(m => selectedTargetMuscles.includes(m)) || sList.some(m => selectedTargetMuscles.includes(m));
+                    if (!hits) return false;
+                }
+                return true;
+            });
+
+            if (totalCountEl) {
+                totalCountEl.innerText = `(${filtered.length} Hareket)`;
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align:center; padding:24px; color:var(--text-secondary);">
+                        Seçili bölgelere uygun egzersiz bulunamadı. "Tümünü Göster" kutucuğunu işaretleyebilirsiniz.
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            filtered.forEach(ex => {
+                const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) 
+                    || (typeof categoryFallback !== 'undefined' && categoryFallback[ex.category]) 
+                    || null;
+                const thumbImg = guide ? guide.form || '' : '';
+                const isAlreadyInRoutine = customRoutineState.exercises.some(item => item.exId === ex.id);
+
+                const anatomy = getExerciseAnatomy(ex);
+
+                html += `
+                    <div class="studio-ex-card" style="padding:10px;">
+                        <div style="display:flex; gap:8px; align-items:flex-start; margin-bottom:8px;">
+                            <div class="ex-thumb-wrap" style="width:48px; height:48px; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
+                                ${thumbImg ? `<img src="${thumbImg}" class="ex-thumb-img" alt="${escapeHTML(ex.name)}" loading="lazy">` : '🏋️'}
+                            </div>
+                            <div style="flex:1;">
+                                <div style="font-size:12px; font-weight:800; color:#fff; line-height:1.2; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
+                                    ${escapeHTML(ex.name)}
+                                </div>
+                                <div style="font-size:10px; margin-top:3px; line-height:1.35;">
+                                    <span style="color:var(--gold); font-weight:800;">🎯 Ana: ${escapeHTML(anatomy.primary)}</span>
+                                    ${anatomy.secondary ? `<span style="color:var(--cyan); font-weight:600;"> • ⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ACTIONS -->
+                        <div style="display:flex; gap:6px; margin-top:auto;">
+                            <button type="button" class="btn btn-outline" style="flex:1; font-size:10px; padding:4px 6px;" onclick="openExerciseDetailModal('${ex.id}')">
+                                👁️ İncele
+                            </button>
+                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:4px 6px; color:#fca5a5; border-color:rgba(239,68,68,0.3);" onclick="event.stopPropagation(); openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '${thumbImg}', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}', 'Program Atölyesi')" title="Hata Bildir">
+                                ⚠️ Bildir
+                            </button>
+                            <button type="button" class="btn ${isAlreadyInRoutine ? 'btn-outline' : 'btn-gold'}" style="flex:1.3; font-size:10px; padding:4px 6px; font-weight:800;" onclick="addExerciseToCustomRoutine('${ex.id}')">
+                                ${isAlreadyInRoutine ? '➕ Tekrar Ekle' : '➕ Ekle'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function addExerciseToCustomRoutine(exId) {
+            const ex = EXERCISES_DB.find(e => e.id === exId);
+            if (!ex) return;
+
+            customRoutineState.exercises.push({
+                exId: exId,
+                sets: 3,
+                reps: '8-12',
+                weight: ''
+            });
+
+            renderCustomRoutine();
+            renderRegionStatus();
+            renderStudioExerciseCatalog();
+        }
+
+        function removeExerciseFromCustomRoutine(index) {
+            customRoutineState.exercises.splice(index, 1);
+            renderCustomRoutine();
+            renderRegionStatus();
+            renderStudioExerciseCatalog();
+        }
+
+        function moveCustomRoutineExercise(index, direction) {
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= customRoutineState.exercises.length) return;
+            const temp = customRoutineState.exercises[index];
+            customRoutineState.exercises[index] = customRoutineState.exercises[newIndex];
+            customRoutineState.exercises[newIndex] = temp;
+            renderCustomRoutine();
+        }
+
+        function updateCustomExerciseSets(index, val) {
+            if (customRoutineState.exercises[index]) {
+                customRoutineState.exercises[index].sets = parseInt(val) || 3;
+                renderRegionStatus();
+            }
+        }
+
+        function updateCustomExerciseReps(index, val) {
+            if (customRoutineState.exercises[index]) {
+                customRoutineState.exercises[index].reps = val;
+            }
+        }
+
+        function updateCustomRoutineRest(val) {
+            customRoutineState.rest = parseInt(val) || 60;
+        }
+
+        function resetCustomRoutine() {
+            if (customRoutineState.exercises.length === 0) return;
+            if (confirm("Program taslağını sıfırlamak istediğinize emin misiniz?")) {
+                customRoutineState.exercises = [];
+                renderCustomRoutine();
+                renderRegionStatus();
+                renderStudioExerciseCatalog();
+            }
+        }
+
+        function saveCustomRoutineToLibrary() {
+            if (customRoutineState.exercises.length === 0) {
+                alert("Lütfen önce programınıza en az 1 egzersiz ekleyin.");
+                return;
+            }
+
+            // If we are editing a day's program, save to that day as well!
+            if (customRoutineState.editingDayIdx !== null && customRoutineState.editingDayIdx !== undefined) {
+                saveEditingRoutineToDay();
+                return;
+            }
+
+            const title = (document.getElementById('customWorkoutTitleInput')?.value || '').trim() || "Özel Çelik Programım";
+            const rest = parseInt(document.getElementById('customWorkoutRestSelect')?.value) || 60;
+
+            const exercisesList = customRoutineState.exercises.map(item => {
+                const ex = EXERCISES_DB.find(e => e.id === item.exId);
+                return ex ? Object.assign({}, ex, { targetSets: item.sets, targetReps: item.reps }) : null;
+            }).filter(Boolean);
+
+            const user = getActiveUser();
+            const progId = customRoutineState.editingProgramId || ('custom_' + Date.now());
+
+            const newRoutine = {
+                id: progId,
+                title: title,
+                split: selectedTargetMuscles.join('_') || 'custom',
+                splitName: title,
+                style: 'classic',
+                goal: 'hypertrophy',
+                duration: Math.round(exercisesList.length * 7),
+                scheme: { sets: 3, reps: '8-12', rest: rest },
+                warmups: [
+                    { name: "Eklemsel CARs (Omuz & Kalça Dairesi)", dur: "90 sn", cue: "Tüm eklemleri kontrollü ısıt." }
+                ],
+                exercises: exercisesList,
+                finisher: { name: "Balistik Bitiş", desc: "Maksimum tempolu taşıma veya swing." },
+                updatedAt: Date.now(),
+                isCustom: true
+            };
+
+            const key = `celik_kodu_custom_programs_${user.id}`;
+            let saved = [];
+            try {
+                saved = JSON.parse(localStorage.getItem(key) || '[]');
+            } catch(e) {}
+
+            const existingIdx = saved.findIndex(p => p.id === progId);
+            if (existingIdx !== -1) {
+                saved[existingIdx] = newRoutine;
+            } else {
+                saved.unshift(newRoutine);
+            }
+            localStorage.setItem(key, JSON.stringify(saved));
+
+            if (!user.savedWorkouts) user.savedWorkouts = [];
+            const userSavedIdx = user.savedWorkouts.findIndex(p => p.id === progId);
+            if (userSavedIdx !== -1) {
+                user.savedWorkouts[userSavedIdx] = newRoutine;
+            } else {
+                user.savedWorkouts.unshift(newRoutine);
+            }
+            saveAthletesToStorage();
+
+            // Synchronize any day in weeklySchedule using this program
+            const schedule = getWeeklySchedule();
+            let schedChanged = false;
+            for (let d = 0; d < 7; d++) {
+                if (schedule[d] && (schedule[d].id === progId || (schedule[d].customWorkout && schedule[d].customWorkout.id === progId))) {
+                    schedule[d].title = title;
+                    schedule[d].desc = `${exercisesList.length} Hareket • ${newRoutine.duration} Dk`;
+                    schedule[d].customWorkout = newRoutine;
+                    schedChanged = true;
+                }
+            }
+            if (schedChanged) {
+                saveWeeklySchedule(schedule);
+            }
+
+            if (typeof cancelStudioEditingSilent === 'function') {
+                cancelStudioEditingSilent();
+            }
+
+            // Check for missing sub-regions for friendly coach advice:
+            const coveredSubKeys = new Set();
+            customRoutineState.exercises.forEach(item => {
+                const ex = EXERCISES_DB.find(e => e.id === item.exId);
+                if (ex) {
+                    const anatomy = getExerciseAnatomy(ex);
+                    if (anatomy.subKey) coveredSubKeys.add(anatomy.subKey);
+                }
+            });
+            let missingSubTips = [];
+            selectedTargetMuscles.forEach(key => {
+                const subDefs = (typeof STUDIO_SUB_REGIONS !== 'undefined' && STUDIO_SUB_REGIONS[key]) || [];
+                subDefs.forEach(sub => {
+                    if (!coveredSubKeys.has(sub.key)) {
+                        const mName = (typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[key]?.name) || key;
+                        missingSubTips.push(`${mName}: ${sub.name}`);
+                    }
+                });
+            });
+
+            showToast(`✅ "${title}" kaydedildi!`);
+            let alertMsg = `✅ "${title}" kaydedildi! '📚 Programlar' sekmesinden veya Haftalık Plandan başlatabilirsiniz.`;
+            if (missingSubTips.length > 0) {
+                alertMsg += `\n\n💡 Koç Notu: Seçtiğiniz hedeflerde şu alt bölgeler boşta kaldı:\n• ${missingSubTips.slice(0, 4).join('\n• ')}\n\nSonraki antrenmanınızda bu açıları da ekleyerek tam denge sağlayabilirsiniz.`;
+            } else if (selectedTargetMuscles.length > 0) {
+                alertMsg += `\n\n🎉 Kusursuz! Seçilen tüm kas bölgeleri ve açıları eksiksiz kapsandı.`;
+            }
+            alert(alertMsg);
+            renderLibrary();
+            renderActiveWorkout();
+        }
+
+        function startActiveWorkoutFromCustom() {
+            if (customRoutineState.exercises.length === 0) {
+                alert("Lütfen önce en az 1 egzersiz ekleyin.");
+                return;
+            }
+
+            const title = (document.getElementById('customWorkoutTitleInput')?.value || '').trim() || "Özel Çelik Programım";
+            const rest = parseInt(document.getElementById('customWorkoutRestSelect')?.value) || 60;
+
+            const exercisesList = customRoutineState.exercises.map(item => {
+                const ex = EXERCISES_DB.find(e => e.id === item.exId);
+                return ex ? Object.assign({}, ex, { targetSets: item.sets, targetReps: item.reps }) : null;
+            }).filter(Boolean);
+
+            const sessionObj = {
+                id: 'custom_' + Date.now(),
+                title: title,
+                split: selectedTargetMuscles.join('_') || 'custom',
+                splitName: title,
+                style: 'classic',
+                goal: 'hypertrophy',
+                duration: Math.round(exercisesList.length * 7),
+                scheme: { sets: 3, reps: '8-12', rest: rest },
+                warmups: [
+                    { name: "Eklemsel CARs", dur: "90 sn", cue: "Tüm eklemleri kontrollü ısıt." }
+                ],
+                exercises: exercisesList,
+                finisher: { name: "Balistik Bitiş", desc: "Maksimum tempolu taşıma veya swing." },
+                createdAt: Date.now()
+            };
+
+            activeWorkoutSession = sessionObj;
+            activeWorkoutStartTime = Date.now();
+            activeWorkoutIsPaused = false;
+            activeWorkoutPausedAt = null;
+            activeWorkoutTotalPausedMs = 0;
+            activeWorkoutSetsData = {};
+            activeWorkoutViewMode = 'focus';
+            activeFocusExIndex = 0;
+            activeFocusSetIndex = null;
+
+            const user = getActiveUser();
+            const userWeights = user.weights || {};
+
+            activeWorkoutSession.exercises.forEach(ex => {
+                const numSets = ex.targetSets || 3;
+                let defaultReps = 10;
+                if (ex.targetReps) {
+                    const firstPart = String(ex.targetReps).split('-')[0].trim();
+                    defaultReps = parseInt(firstPart) || 10;
+                }
+                const defaultWeight = ex.weightKey && userWeights[ex.weightKey] ? (parseFloat(userWeights[ex.weightKey]) || '') : '';
+
+                activeWorkoutSetsData[ex.id] = [];
+                for (let s = 1; s <= numSets; s++) {
+                    activeWorkoutSetsData[ex.id].push({
+                        setNo: s,
+                        weight: defaultWeight,
+                        reps: defaultReps,
+                        completed: false,
+                        completedAt: null
+                    });
+                }
+            });
+
+            saveActiveWorkoutStateToStorage();
+            startWorkoutTimer();
+            renderActiveWorkout();
+            switchTab('activeWorkoutTab');
+            resetTimer(rest);
+            playAlertSound();
+            requestWakeLock();
+        }
+
+        // ==================== EXERCISE DETAIL MODAL LOGIC ====================
+        function openExerciseDetailModal(exIdOrObj) {
+            let ex = null;
+            if (typeof exIdOrObj === 'object' && exIdOrObj !== null) {
+                ex = exIdOrObj;
+            } else if (typeof exIdOrObj === 'string' && exIdOrObj.trim() && exIdOrObj !== 'undefined' && exIdOrObj !== 'null') {
+                const query = exIdOrObj.trim();
+                ex = EXERCISES_DB.find(e => e.id === query);
+                if (!ex) ex = EXERCISES_DB.find(e => e.name && e.name.toLowerCase() === query.toLowerCase());
+                if (!ex) ex = findBestExerciseMatch(query);
+                if (!ex) {
+                    const nextSched = typeof getNextWeeklySchedule === 'function' ? getNextWeeklySchedule() : null;
+                    if (nextSched) {
+                        for (let d = 0; d < 7; d++) {
+                            const p = nextSched[d];
+                            if (p && Array.isArray(p.exercises)) {
+                                const found = p.exercises.find(x => x && (x.id === query || x.name === query || x.originalAiName === query));
+                                if (found) { ex = found; break; }
+                            }
+                        }
+                    }
+                }
+                if (!ex) {
+                    const currSched = typeof getWeeklySchedule === 'function' ? getWeeklySchedule() : null;
+                    if (currSched) {
+                        for (let d = 0; d < 7; d++) {
+                            const p = currSched[d];
+                            if (p && Array.isArray(p.exercises)) {
+                                const found = p.exercises.find(x => x && (x.id === query || x.name === query || x.originalAiName === query));
+                                if (found) { ex = found; break; }
+                            }
+                        }
+                    }
+                }
+                if (!ex) {
+                    ex = {
+                        id: 'ai_' + query.toLowerCase().replace(/[^a-z0-9]+/g, '_'),
+                        name: query,
+                        muscle: 'Genel Kas Gelişimi & Fonksiyonel Güç',
+                        primaryMuscles: ['full_body'],
+                        equipment: 'dumbbell',
+                        cue: 'FitLAB AI Koçu tarafından sporcuya özel reçete edilen egzersiz.',
+                        isCustomAi: true
+                    };
+                }
+            }
+            if (!ex) return;
+
+            document.getElementById('exDetailModalTitle').innerText = ex.name;
+            const anatomy = getExerciseAnatomy(ex);
+            const subTitleEl = document.getElementById('exDetailModalSubtitle');
+            if (subTitleEl) {
+                subTitleEl.innerHTML = `<span style="color:var(--gold); font-weight:800;">🎯 Ana: ${escapeHTML(anatomy.primary)}</span>${anatomy.secondary ? ` • <span style="color:var(--cyan); font-weight:700;">⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''} • <span style="color:var(--text-secondary);">${ex.equipment ? ex.equipment.toUpperCase() : ''}</span>`;
+            }
+
+            let photoGuide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) ? exerciseGuideMap[ex.id] : null;
+            if (!photoGuide && typeof findBestExerciseMatch === 'function' && ex.name) {
+                const matched = findBestExerciseMatch(ex.name);
+                if (matched && typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[matched.id]) {
+                    photoGuide = exerciseGuideMap[matched.id];
+                }
+            }
+            if (!photoGuide && typeof categoryFallback !== 'undefined' && ex.category && categoryFallback[ex.category]) {
+                photoGuide = categoryFallback[ex.category];
+            }
+            const guide = photoGuide;
+
+            const btnReport = document.getElementById('btnExDetailReport');
+            if (btnReport) {
+                btnReport.onclick = () => openExerciseBugReportModal(ex.id, ex.name, (guide && guide.form) ? guide.form : '', ex.equipment || '', ex.muscle || '', 'Egzersiz Detayı');
+            }
+
+            const btnHide = document.getElementById('btnExDetailToggleHide');
+            if (btnHide) {
+                btnHide.onclick = () => toggleExerciseExclusionAndRefresh(ex.id);
+                updateExDetailModalHideButton(ex.id);
+            }
+
+            // Muscle breakdown helper with exact biomechanical factors
+            const spec = resolveExerciseBiomechanics(ex.name, ex.muscle, ex.category);
+            let pMuscleLabels = '';
+            let sMuscleLabels = '';
+
+            if (spec.type === 'CONDITIONING' || spec.pFactor === 0) {
+                pMuscleLabels = `<span style="background:rgba(148,163,184,0.15); color:#94a3b8; border:1px solid rgba(148,163,184,0.3); padding:3px 8px; border-radius:12px; font-size:11px; font-weight:700;">⚡ Metabolik Kondisyon (0 Set Hipertrofi)</span>`;
+            } else {
+                pMuscleLabels = `<span style="background:rgba(245,158,11,0.2); color:var(--gold); border:1px solid rgba(245,158,11,0.4); padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800;">${spec.primary} (Ana Kas: +${spec.pFactor.toFixed(2)} Set)</span>`;
+            }
+
+            if (spec.sec && typeof spec.sec === 'object' && Object.keys(spec.sec).length > 0) {
+                sMuscleLabels = Object.entries(spec.sec).map(([sM, sF]) => {
+                    return `<span style="background:rgba(56,189,248,0.15); color:var(--cyan); border:1px solid rgba(56,189,248,0.35); padding:3px 8px; border-radius:12px; font-size:11px; font-weight:700;">${sM} (+${sF.toFixed(2)} Set / %${Math.round(sF * 100)})</span>`;
+                }).join(' ');
+            }
+
+            // Steps HTML Generator (shared between Form and Steps tab)
+            let stepsHtml = '';
+            if (ex.positions && ex.positions.length > 0) {
+                const badgeStyles = {
+                    setup: { bg: 'rgba(56, 189, 248, 0.2)', border: 'var(--cyan)', text: 'var(--cyan)', icon: '🟢' },
+                    action: { bg: 'rgba(245, 158, 11, 0.2)', border: 'var(--gold)', text: 'var(--gold)', icon: '🟠' },
+                    finish: { bg: 'rgba(16, 185, 129, 0.2)', border: 'var(--green-success)', text: 'var(--green-success)', icon: '🏁' }
+                };
+                stepsHtml = ex.positions.map(p => {
+                    const style = badgeStyles[p.badge] || badgeStyles.setup;
+                    return `
+                        <div class="pos-step-card" style="margin-bottom:8px;">
+                            <div class="pos-step-header" style="background:${style.bg}; border-color:${style.border}; color:${style.text};">
+                                <span>${style.icon} ${escapeHTML(p.phase)}</span>
+                            </div>
+                            <div class="pos-step-desc">
+                                ${escapeHTML(p.desc)}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Form Tab
+            const formContainer = document.getElementById('exDetailTabContentForm');
+            const photoSrc = (photoGuide && photoGuide.form) ? photoGuide.form : (ex.formImage || null);
+
+            let visualsHtml = '';
+            if (photoSrc) {
+                visualsHtml = `
+                    <div style="background:#000; border-radius:12px; overflow:hidden; border:1.5px solid rgba(245,158,11,0.4); margin-bottom:12px; box-shadow:0 6px 24px rgba(0,0,0,0.6);">
+                        <div style="background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.08); padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:11.5px; font-weight:900; color:var(--gold); letter-spacing:0.5px;">📸 GERÇEK FORM REHBERİ</span>
+                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 9px; border-radius:4px; color:var(--cyan); border-color:var(--cyan); font-weight:700;" onclick="openImageLightbox('${photoSrc}', '${escapeHTML(ex.name)} - Form Rehberi')">⛶ Tam Ekran Büyüt</button>
+                        </div>
+                        <div style="text-align:center; padding:6px; cursor:pointer;" onclick="openImageLightbox('${photoSrc}', '${escapeHTML(ex.name)} - Form Rehberi')" title="Büyütmek için dokunun">
+                            <img src="${photoSrc}" style="max-width:100%; max-height:46vh; object-fit:contain; display:block; margin:0 auto; border-radius:6px;" alt="${escapeHTML(ex.name)} Form">
+                            <div style="font-size:10.5px; color:var(--text-secondary); margin-top:6px; font-weight:600;">🔍 Dokunarak tam ekran inceleyebilirsiniz</div>
+                        </div>
+                    </div>
+                `;
+
+                formContainer.innerHTML = `
+                    ${visualsHtml}
+                    <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-bottom:10px;">
+                        <div style="font-size:11px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:6px;">🎯 Çalıştırılan Kas Grupları & Yük Dağılımı:</div>
+                        <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                            ${pMuscleLabels}
+                            ${sMuscleLabels || '<span style="font-size:11px; color:var(--text-secondary);">İzole hareket (saf primer odak)</span>'}
+                        </div>
+                    </div>
+                    ${stepsHtml ? `
+                        <div style="margin-bottom:10px;">
+                            <div style="font-size:11px; font-weight:800; color:var(--cyan); text-transform:uppercase; margin-bottom:6px;">📋 Uygulama Aşamaları & Form Rehberi:</div>
+                            ${stepsHtml}
+                        </div>
+                    ` : ''}
+                    ${ex.cue ? `
+                        <div class="cue-box" style="margin-top:6px;">
+                            <span class="cue-icon">⚠️</span>
+                            <span><strong>Kritik Form & Güvenlik Uyarısı:</strong> ${escapeHTML(ex.cue)}</span>
+                        </div>
+                    ` : ''}
+                `;
+            } else {
+                formContainer.innerHTML = `
+                    <div style="padding:24px 16px; text-align:center; background:rgba(0,0,0,0.25); border-radius:8px; border:1px dashed var(--border);">
+                        <div style="font-size:24px; margin-bottom:6px;">🏋️</div>
+                        <div style="font-weight:700; color:#fff; font-size:13.5px;">${escapeHTML(ex.name)}</div>
+                        <div style="color:var(--text-secondary); font-size:11.5px; margin-top:4px;">Görsel form rehberi optimize ediliyor.</div>
+                        <div style="margin-top:10px; display:flex; justify-content:center; gap:6px; flex-wrap:wrap;">
+                            ${pMuscleLabels}
+                            ${sMuscleLabels}
+                        </div>
+                        ${stepsHtml ? `
+                            <div style="margin-top:12px; text-align:left;">
+                                ${stepsHtml}
+                            </div>
+                        ` : ''}
+                        ${ex.cue ? `<div class="cue-box" style="margin-top:12px; text-align:left;"><span class="cue-icon">⚠️</span><span><strong>Güvenlik Uyarısı:</strong> ${escapeHTML(ex.cue)}</span></div>` : ''}
+                    </div>
+                `;
+            }
+
+            // Anatomy Tab
+            const anatomyContainer = document.getElementById('exDetailTabContentAnatomy');
+            if (photoGuide && photoGuide.anatomi) {
+                anatomyContainer.innerHTML = `
+                    <div style="text-align:center; background:#000; border-radius:8px; overflow:hidden; border:1px solid var(--border); min-height:160px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="openImageLightbox('${photoGuide.anatomi}', '${escapeHTML(ex.name)} - Anatomi')">
+                        <img src="${photoGuide.anatomi}" style="max-width:100%; max-height:48vh; object-fit:contain; display:block; margin:0 auto;" alt="${escapeHTML(ex.name)} Anatomi">
+                    </div>
+                    <div style="background:rgba(0,0,0,0.35); border:1px solid var(--border); border-radius:8px; padding:12px; margin-top:10px;">
+                        <div style="font-size:12px; font-weight:800; color:#fff; margin-bottom:6px;">🎯 1 Çalışma Setinin Kaslara Dağılımı:</div>
+                        <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.6;">
+                            • <strong>Ana Kas Grubu:</strong> ${pMuscleLabels}<br>
+                            • <strong>Destekleyici (Sinerjist):</strong> ${sMuscleLabels || '<span style="color:var(--text-secondary);">Yok (Saf İzolasyon)</span>'}<br>
+                            • <strong>Mekanik Yapı:</strong> ${ex.mechanic === 'compound' ? '⚡ Çok Eklemli (Bileşik / Compound)' : '🎯 Tek Eklemli (İzolasyon)'}
+                        </div>
+                    </div>
+                `;
+            } else {
+                anatomyContainer.innerHTML = `
+                    <div style="padding:20px; text-align:center; background:rgba(0,0,0,0.3); border-radius:8px;">
+                        <div style="font-size:13px; font-weight:800; color:#fff; margin-bottom:6px;">🧬 Hedef Kaslar:</div>
+                        <div style="display:flex; justify-content:center; gap:6px; flex-wrap:wrap; margin-top:6px;">
+                            ${pMuscleLabels}
+                            ${sMuscleLabels}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Steps Tab
+            const stepsContainer = document.getElementById('exDetailTabContentSteps');
+            stepsContainer.innerHTML = stepsHtml + (ex.cue ? `
+                <div class="cue-box" style="margin-top:10px;">
+                    <span class="cue-icon">💡</span>
+                    <span><strong>Altın Kural:</strong> ${escapeHTML(ex.cue)}</span>
+                </div>
+            ` : '');
+
+            // Check if opened from exercisePickerModal
+            const isPickerActive = document.getElementById('exercisePickerModal')?.classList.contains('active');
+            const btnAdd = document.getElementById('btnExDetailAdd');
+            const btnAlt = document.getElementById('btnExDetailAlt');
+
+            if (isPickerActive) {
+                if (btnAlt) btnAlt.style.display = 'none';
+                if (btnAdd) {
+                    btnAdd.innerText = (pickerContext.mode === 'replace') ? '✓ Bu Alternatifi Seç' : '➕ Programa Ekle';
+                    btnAdd.onclick = () => {
+                        selectExerciseFromPicker(exId);
+                        closeExerciseDetailModal();
+                    };
+                }
+            } else {
+                if (btnAlt) {
+                    btnAlt.style.display = 'inline-block';
+                    btnAlt.onclick = () => {
+                        closeExerciseDetailModal();
+                        openAlternativeModal(exId, pickerContext.scope || 'studio');
+                    };
+                }
+                if (btnAdd) {
+                    btnAdd.innerText = '➕ Programa Ekle';
+                    btnAdd.onclick = () => {
+                        closeExerciseDetailModal();
+                        openAddToProgramOptions(exId);
+                    };
+                }
+            }
+
+            switchExDetailTab('form');
+            document.getElementById('exerciseDetailModal').classList.add('active');
+        }
+
+        function closeExerciseDetailModal() {
+            document.getElementById('exerciseDetailModal').classList.remove('active');
+        }
+
+        function switchExDetailTab(tab) {
+            document.getElementById('btnExDetailTabForm').classList.toggle('active', tab === 'form');
+            document.getElementById('btnExDetailTabAnatomy').classList.toggle('active', tab === 'anatomy');
+            document.getElementById('btnExDetailTabSteps').classList.toggle('active', tab === 'steps');
+
+            document.getElementById('exDetailTabContentForm').style.display = (tab === 'form') ? 'block' : 'none';
+            document.getElementById('exDetailTabContentAnatomy').style.display = (tab === 'anatomy') ? 'block' : 'none';
+            document.getElementById('exDetailTabContentSteps').style.display = (tab === 'steps') ? 'block' : 'none';
+        }

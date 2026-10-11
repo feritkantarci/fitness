@@ -13,3 +13,6 @@ source_archive/
 *.dmg
 *.exe
 **/__pycache__/
+temp_ai_studio/
+*.bak*
+*.zip
