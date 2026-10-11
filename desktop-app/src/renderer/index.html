@@ -752,6 +752,28 @@
         </div>
     </div>
 
+    <!-- Günlük Program & Seans Yönetim Modalı -->
+    <div class="modal-backdrop" id="desktopDayScheduleModal" style="display:none;">
+        <div class="modal-box" style="max-width: 640px; max-height: 85vh; display: flex; flex-direction: column;">
+            <div class="modal-header">
+                <div>
+                    <h3 id="desktopDayModalTitle" style="margin: 0; font-size: 16px; font-weight: 800;">📅 Günlük Seans & Program Planı</h3>
+                    <div id="desktopDayModalSubtitle" style="font-size: 11.5px; color: var(--gold); margin-top: 2px;"></div>
+                </div>
+                <button class="btn-close" onclick="closeDesktopDayScheduleModal()">✕</button>
+            </div>
+            <div class="modal-body" style="overflow-y: auto; flex: 1; padding: 18px;" id="desktopDayModalBody">
+                <!-- Dynamically populated -->
+            </div>
+            <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+                <button class="btn-secondary" style="color: #fca5a5; border-color: rgba(239, 68, 68, 0.4);" onclick="setDesktopActiveDayRest()">
+                    🛌 Bu Günü Dinlenmeye Al
+                </button>
+                <button class="btn-secondary" onclick="closeDesktopDayScheduleModal()">Kapat</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Bildirim Toast -->
     <div class="toast-notification" id="toastNotification"></div>
 

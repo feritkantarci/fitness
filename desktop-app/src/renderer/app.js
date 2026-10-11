@@ -31,7 +31,12 @@ let state = {
     // Tartı & Kompozisyon Durumu
     scaleLogs: [],
     scaleTimelineChart: null,
-    lastParsedScaleData: null
+    lastParsedScaleData: null,
+    // Takvim & Planlayıcı Durumu
+    calendarViewMode: 'weekly', // 'weekly' | 'monthly'
+    calendarAnchorDate: new Date(),
+    activeSchedulingDayIdx: null,
+    activeSchedulingDateStr: null
 };
 
 // DOM Elemanları
@@ -3787,14 +3792,19 @@ function openGoogleCalendarFromDesktop() {
 }
 window.openGoogleCalendarFromDesktop = openGoogleCalendarFromDesktop;
 
-// Hafta günlerini Pazartesi'den Pazar'a hesapla
-function getDesktopCurrentWeekDays() {
-    const now = new Date();
-    const currentDay = now.getDay(); // 0: Pazar, 1: Pzt, ...
+const DESKTOP_MONTH_NAMES_TR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+
+// Hafta günlerini Pazartesi'den Pazar'a hesapla (İsteğe bağlı referans tarihli)
+function getDesktopCurrentWeekDays(anchor = null) {
+    const target = anchor ? new Date(anchor) : (state.calendarAnchorDate ? new Date(state.calendarAnchorDate) : new Date());
+    const currentDay = target.getDay(); // 0: Pazar, 1: Pzt, ...
     const distToMonday = (currentDay + 6) % 7;
-    const monday = new Date(now);
-    monday.setDate(now.getDate() - distToMonday);
+    const monday = new Date(target);
+    monday.setDate(target.getDate() - distToMonday);
     monday.setHours(0, 0, 0, 0);
+
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
 
     const dayNames = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
     const days = [];
@@ -3813,10 +3823,63 @@ function getDesktopCurrentWeekDays() {
             dateStr: dateStr,
             formattedDate: d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }),
             isToday: d.toDateString() === now.toDateString(),
-            isPast: d < new Date(now.getFullYear(), now.getMonth(), now.getDate())
+            isPast: d < now
         });
     }
     return days;
+}
+
+function getDesktopDateScheduleOverrides(uid) {
+    const targetUid = uid || state.selectedUserId || 'default';
+    try {
+        const raw = localStorage.getItem(`fitlab_desktop_date_schedule_${targetUid}`);
+        return raw ? JSON.parse(raw) : {};
+    } catch(e) {
+        return {};
+    }
+}
+
+function saveDesktopDateScheduleOverride(dateStr, plan, uid) {
+    if (!dateStr) return;
+    const targetUid = uid || state.selectedUserId || 'default';
+    const overrides = getDesktopDateScheduleOverrides(targetUid);
+    if (!plan || plan.id === 'default') {
+        delete overrides[dateStr];
+    } else {
+        overrides[dateStr] = plan;
+    }
+    try {
+        localStorage.setItem(`fitlab_desktop_date_schedule_${targetUid}`, JSON.stringify(overrides));
+    } catch(e) {}
+}
+
+function getDesktopPlanForDay(dayIndex, dateStr) {
+    if (dateStr) {
+        const overrides = getDesktopDateScheduleOverrides();
+        if (overrides && overrides[dateStr]) {
+            return overrides[dateStr];
+        }
+    }
+    const schedule = getDesktopAthleteSchedule();
+    return schedule[dayIndex] || { title: 'Antrenman', time: '18:30', duration: 60, isRest: false, exercises: [] };
+}
+
+function getDesktopCompletedLogForDate(dateStr) {
+    const workoutLogs = state.workoutLogs || [];
+    return workoutLogs.find(l => {
+        if (!l || !l.date) return false;
+        let logDateStr = '';
+        if (typeof l.date === 'string') {
+            logDateStr = l.date.split('T')[0];
+        } else if (l.date && l.date.seconds) {
+            logDateStr = new Date(l.date.seconds * 1000).toISOString().split('T')[0];
+        }
+        return logDateStr === dateStr && (
+            (l.totalSetsCompleted && l.totalSetsCompleted > 0) || 
+            (l.exercises && l.exercises.length > 0) ||
+            (l.detailedExercises && l.detailedExercises.length > 0)
+        );
+    });
 }
 
 // Seçili sporcu için haftalık plan şablonunu al (veya varsayılan yükle)
@@ -4126,136 +4189,299 @@ async function sendScheduleDirectiveToWeb() {
 }
 window.sendScheduleDirectiveToWeb = sendScheduleDirectiveToWeb;
 
+// ==================== FITLAB MASAÜSTÜ AKILLI TAKVİM & PLANLAYICI MOTORU ====================
+function setDesktopCalendarViewMode(mode) {
+    state.calendarViewMode = mode === 'monthly' ? 'monthly' : 'weekly';
+    renderDesktopCalendar();
+}
+window.setDesktopCalendarViewMode = setDesktopCalendarViewMode;
+
+function navigateDesktopCalendar(dir) {
+    if (!state.calendarAnchorDate) state.calendarAnchorDate = new Date();
+    const d = new Date(state.calendarAnchorDate);
+    if (state.calendarViewMode === 'monthly') {
+        d.setMonth(d.getMonth() + dir);
+    } else {
+        d.setDate(d.getDate() + (dir * 7));
+    }
+    state.calendarAnchorDate = d;
+    renderDesktopCalendar();
+}
+window.navigateDesktopCalendar = navigateDesktopCalendar;
+
+function jumpDesktopCalendarToToday() {
+    state.calendarAnchorDate = new Date();
+    renderDesktopCalendar();
+}
+window.jumpDesktopCalendarToToday = jumpDesktopCalendarToToday;
+
+function openDesktopDayScheduleModal(dayIdx, dateStr = null) {
+    state.activeSchedulingDayIdx = dayIdx;
+    state.activeSchedulingDateStr = dateStr;
+    const modal = document.getElementById('desktopDayScheduleModal');
+    const titleEl = document.getElementById('desktopDayModalTitle');
+    const subTitleEl = document.getElementById('desktopDayModalSubtitle');
+    const bodyEl = document.getElementById('desktopDayModalBody');
+    if (!modal || !bodyEl) return;
+
+    const dayNames = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+    const dayName = dayNames[dayIdx] || 'Günlük Seans';
+    
+    let dateFormatted = '';
+    if (dateStr) {
+        const parts = dateStr.split('-');
+        if (parts.length === 3) {
+            const mIdx = parseInt(parts[1], 10) - 1;
+            dateFormatted = `${parseInt(parts[2], 10)} ${DESKTOP_MONTH_NAMES_TR[mIdx]} ${parts[0]}`;
+        }
+    }
+
+    if (titleEl) titleEl.innerText = `📅 ${dayName} Günü Program Yönetimi`;
+    if (subTitleEl) subTitleEl.innerText = dateFormatted ? `${dateFormatted} • Sporcu: ${state.selectedUser ? (state.selectedUser.name || state.selectedUser.username) : 'Seçili Sporcu'}` : '';
+
+    const currentPlan = getDesktopPlanForDay(dayIdx, dateStr);
+    const completedLog = dateStr ? getDesktopCompletedLogForDate(dateStr) : null;
+
+    let completedBanner = '';
+    if (completedLog) {
+        const exCount = (completedLog.exercises || []).length;
+        const setCount = completedLog.totalSetsCompleted || (completedLog.exercises || []).reduce((acc, e) => acc + (e.sets || []).length, 0);
+        const vol = completedLog.totalVolumeKg ? `${Math.round(completedLog.totalVolumeKg)} kg` : '-';
+        const exNames = (completedLog.exercises || []).map(e => e.name || e.title).filter(Boolean).slice(0, 4).join(', ');
+
+        completedBanner = `
+            <div style="background: rgba(16,185,129,0.1); border: 1.5px solid #10b981; border-radius: 10px; padding: 14px; margin-bottom: 16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <span style="background: #10b981; color: #000; font-size: 10px; font-weight: 900; padding: 2px 7px; border-radius: 4px;">✅ BU GÜN SEANS TAMAMLANDI</span>
+                        <div style="font-size: 14px; font-weight: 800; color: #fff; margin-top: 6px;">${escapeHTML(completedLog.program || completedLog.title || 'Kayıtlı Antrenman')}</div>
+                        <div style="font-size: 11.5px; color: #a7f3d0; margin-top: 3px;">
+                            <strong>Toplam Hacim:</strong> ${vol} • <strong>Set:</strong> ${setCount} Set • <strong>Hareketler:</strong> ${escapeHTML(exNames || 'Belirtilmedi')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // AI Reçetesi Seçenekleri
+    let aiOptionsHtml = '';
+    if (state.lastAiReport && state.lastAiReport.rawReport) {
+        try {
+            const parsedDays = parseMarkdownProgram(state.lastAiReport.rawReport, state.catalog);
+            if (Array.isArray(parsedDays) && parsedDays.length > 0) {
+                aiOptionsHtml = `
+                    <div style="margin-top: 16px;">
+                        <div style="font-size: 11.5px; font-weight: 900; color: var(--gold); text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                            <span>🧠</span> AI İSTİŞARE ODASI REÇETESİNDEN SEÇ
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            ${parsedDays.map((pDay, pIdx) => {
+                                const exNames = (pDay.exercises || []).map(e => e.name).slice(0, 3).join(', ');
+                                const exArrJson = JSON.stringify((pDay.exercises || []).map(e => e.name)).replace(/"/g, '&quot;');
+                                return `
+                                    <div class="calendar-day-card" style="padding: 10px 14px; cursor: pointer; border: 1px solid rgba(245,158,11,0.3); background: rgba(245,158,11,0.04); display: flex; justify-content: space-between; align-items: center;" onclick="assignDesktopRoutineToActiveDay('${escapeHTML(pDay.dayTitle)}', ${exArrJson}, 60, '${currentPlan.time || '18:30'}')">
+                                        <div>
+                                            <div style="font-size: 13px; font-weight: 800; color: #fff;">${escapeHTML(pDay.dayTitle)}</div>
+                                            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">${(pDay.exercises || []).length} Hareket (${escapeHTML(exNames)}...)</div>
+                                        </div>
+                                        <button type="button" class="btn-sm-action" style="font-size: 11px; padding: 4px 10px; font-weight: 800; color: var(--gold); border-color: var(--gold);">
+                                            Bu Güne Ata ➔
+                                        </button>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+        } catch(e) {}
+    }
+
+    bodyEl.innerHTML = `
+        ${completedBanner}
+
+        <!-- MEVCUT PLAN BILGISI -->
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Mevcut Atanmış Plan:</span>
+                <span style="font-size: 12px; font-weight: 800; color: ${currentPlan.isRest ? '#94a3b8' : 'var(--gold)'};">
+                    ${currentPlan.isRest ? '🛌 Dinlenme Günü' : '⚔️ ' + escapeHTML(currentPlan.title)}
+                </span>
+            </div>
+
+            ${!currentPlan.isRest ? `
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px; margin-bottom: 10px;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <label style="font-size: 12px; color: var(--text-muted);">Saat:</label>
+                        <input type="time" value="${currentPlan.time || '18:30'}" onchange="changeDesktopActiveDayTime(this.value)" style="background: transparent; border: 1px solid var(--border-color); color: #fff; padding: 3px 8px; border-radius: 4px; font-family: var(--font-mono); font-size: 12px;">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <label style="font-size: 12px; color: var(--text-muted);">Süre:</label>
+                        <select onchange="changeDesktopActiveDayDuration(this.value)" style="background: #111; border: 1px solid var(--border-color); color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 12px;">
+                            <option value="45" ${currentPlan.duration === 45 ? 'selected' : ''}>45 dk</option>
+                            <option value="60" ${(!currentPlan.duration || currentPlan.duration === 60) ? 'selected' : ''}>60 dk</option>
+                            <option value="75" ${currentPlan.duration === 75 ? 'selected' : ''}>75 dk</option>
+                            <option value="90" ${currentPlan.duration === 90 ? 'selected' : ''}>90 dk</option>
+                        </select>
+                    </div>
+                </div>
+                ${(currentPlan.exercises && currentPlan.exercises.length > 0) ? `
+                    <div style="font-size: 11.5px; color: #cbd5e1; line-height: 1.5; padding: 4px 0;">
+                        <strong>Hareketler:</strong> ${currentPlan.exercises.map(e => escapeHTML(e)).join(' • ')}
+                    </div>
+                ` : ''}
+            ` : `
+                <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Bu gün dinlenme ve toparlanma olarak belirlenmiştir.</p>
+            `}
+        </div>
+
+        ${aiOptionsHtml}
+
+        <!-- AKADEMİK VE KLASİK SERİ -->
+        <div style="margin-top: 16px;">
+            <div style="font-size: 11.5px; font-weight: 900; color: #fff; text-transform: uppercase; margin-bottom: 8px;">
+                ⚔️ ÇELİK KODU & FİTLAB AKADEMİK PROGRAMLARI
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div class="calendar-day-card" style="padding: 10px 14px; cursor: pointer; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;" onclick="assignDesktopRoutineToActiveDay('⚔️ Gün 1: Omuz & Bacak Ön Zırhı', ['Dambıl Press', 'Goblet Squat', 'Push-up (Şınav)', 'Front Squat', 'Plank'], 60, '${currentPlan.time || '18:30'}')">
+                    <div>
+                        <div style="font-size: 13px; font-weight: 800; color: #fff;">Gün 1: Omuz & Bacak Ön Zırhı</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Press + Squat • Şınav + Front Squat • Core</div>
+                    </div>
+                    <button type="button" class="btn-sm-action" style="font-size: 11px; padding: 4px 10px;">Ata ➔</button>
+                </div>
+
+                <div class="calendar-day-card" style="padding: 10px 14px; cursor: pointer; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;" onclick="assignDesktopRoutineToActiveDay('⚔️ Gün 2: Sırt Çekiş & Balistik Güç', ['Saw Dumbbell Row', 'Romanian Deadlift (RDL)', 'Kettlebell Swing', 'Pull-up', 'Farmer\\'s Walk'], 60, '${currentPlan.time || '18:30'}')">
+                    <div>
+                        <div style="font-size: 13px; font-weight: 800; color: #fff;">Gün 2: Sırt Çekiş & Balistik Güç</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Saw Row + RDL • Swing + Pullup • Taşıma</div>
+                    </div>
+                    <button type="button" class="btn-sm-action" style="font-size: 11px; padding: 4px 10px;">Ata ➔</button>
+                </div>
+
+                <div class="calendar-day-card" style="padding: 10px 14px; cursor: pointer; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;" onclick="assignDesktopRoutineToActiveDay('⚔️ Gün 3: Kompleks & Merdiven', ['Snatch + Lunge', 'Row + Squat', 'Burpee Finisher', 'Hanging Leg Raise'], 60, '${currentPlan.time || '18:30'}')">
+                    <div>
+                        <div style="font-size: 13px; font-weight: 800; color: #fff;">Gün 3: Kompleks & Merdiven</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Snatch + Lunge • Row + Squat • Burpee Finisher</div>
+                    </div>
+                    <button type="button" class="btn-sm-action" style="font-size: 11px; padding: 4px 10px;">Ata ➔</button>
+                </div>
+
+                <div class="calendar-day-card" style="padding: 10px 14px; cursor: pointer; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;" onclick="assignDesktopRoutineToActiveDay('🔬 Hipertrofi & Zayıf Bölge İzolasyonu', ['Arnold Press', 'Hammer Curl', 'Lateral Raise', 'Triceps Skull Crusher', 'Face Pull'], 50, '${currentPlan.time || '18:30'}')">
+                    <div>
+                        <div style="font-size: 13px; font-weight: 800; color: #fff;">Hipertrofi & Zayıf Bölge İzolasyonu</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Arnold Press • Hammer Curl • Lateral Raise • Triceps</div>
+                    </div>
+                    <button type="button" class="btn-sm-action" style="font-size: 11px; padding: 4px 10px;">Ata ➔</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    modal.style.display = 'flex';
+}
+window.openDesktopDayScheduleModal = openDesktopDayScheduleModal;
+
+function closeDesktopDayScheduleModal() {
+    const modal = document.getElementById('desktopDayScheduleModal');
+    if (modal) modal.style.display = 'none';
+    state.activeSchedulingDayIdx = null;
+    state.activeSchedulingDateStr = null;
+}
+window.closeDesktopDayScheduleModal = closeDesktopDayScheduleModal;
+
+function assignDesktopRoutineToActiveDay(title, exercises, duration = 60, time = '18:30') {
+    if (state.activeSchedulingDayIdx === null) return;
+    const dayIdx = state.activeSchedulingDayIdx;
+    const schedule = getDesktopAthleteSchedule();
+    const newPlan = {
+        dayIndex: dayIdx,
+        title: title,
+        time: time,
+        duration: duration,
+        isRest: false,
+        exercises: exercises || []
+    };
+    schedule[dayIdx] = newPlan;
+    saveDesktopAthleteSchedule(schedule);
+
+    if (state.activeSchedulingDateStr) {
+        saveDesktopDateScheduleOverride(state.activeSchedulingDateStr, newPlan);
+    }
+
+    showToast(`✅ "${title}" başarıyla atandı!`);
+    closeDesktopDayScheduleModal();
+    renderDesktopCalendar();
+}
+window.assignDesktopRoutineToActiveDay = assignDesktopRoutineToActiveDay;
+
+function setDesktopActiveDayRest() {
+    if (state.activeSchedulingDayIdx === null) return;
+    const dayIdx = state.activeSchedulingDayIdx;
+    const schedule = getDesktopAthleteSchedule();
+    const restPlan = {
+        dayIndex: dayIdx,
+        title: 'Aktif Dinlenme & Mobilite',
+        time: '18:30',
+        duration: 30,
+        isRest: true,
+        exercises: []
+    };
+    schedule[dayIdx] = restPlan;
+    saveDesktopAthleteSchedule(schedule);
+
+    if (state.activeSchedulingDateStr) {
+        saveDesktopDateScheduleOverride(state.activeSchedulingDateStr, restPlan);
+    }
+
+    showToast(`🛌 Dinlenme günü olarak ayarlandı.`);
+    closeDesktopDayScheduleModal();
+    renderDesktopCalendar();
+}
+window.setDesktopActiveDayRest = setDesktopActiveDayRest;
+
+function changeDesktopActiveDayTime(newTime) {
+    if (state.activeSchedulingDayIdx === null) return;
+    changeDesktopCalendarTime(state.activeSchedulingDayIdx, newTime);
+}
+window.changeDesktopActiveDayTime = changeDesktopActiveDayTime;
+
+function changeDesktopActiveDayDuration(newDur) {
+    if (state.activeSchedulingDayIdx === null) return;
+    changeDesktopCalendarDuration(state.activeSchedulingDayIdx, newDur);
+}
+window.changeDesktopActiveDayDuration = changeDesktopActiveDayDuration;
+
 // Masaüstü Takvim & Planlayıcı Arayüzünü Çiz
 function renderDesktopCalendar() {
     if (!el.desktopCalendarContainer) return;
 
     const athlete = state.selectedUser;
     const athleteName = athlete ? (athlete.name || athlete.username) : 'Sporcu Seçilmedi';
-    const weekDays = getDesktopCurrentWeekDays();
     const schedule = getDesktopAthleteSchedule();
-    const workoutLogs = state.workoutLogs || [];
-
     const activeSessionsCount = schedule.filter(s => !s.isRest).length;
 
-    let cardsHtml = weekDays.map((day, idx) => {
-        const plan = schedule[idx] || { title: 'Antrenman', time: '18:30', duration: 60, isRest: false, exercises: [] };
+    const isMonthly = state.calendarViewMode === 'monthly';
+    const anchor = new Date(state.calendarAnchorDate || new Date());
 
-        // Bu gün için tamamlanmış antrenman kaydı var mı?
-        const completedLog = workoutLogs.find(l => {
-            if (!l.date) return false;
-            let logDateStr = '';
-            if (typeof l.date === 'string') {
-                logDateStr = l.date.split('T')[0];
-            } else if (l.date && l.date.seconds) {
-                logDateStr = new Date(l.date.seconds * 1000).toISOString().split('T')[0];
-            }
-            return logDateStr === day.dateStr && (
-                l.totalSetsCompleted > 0 || 
-                (l.exercises || []).some(e => (e.sets || []).some(s => s.completed || parseInt(s.reps, 10) > 0))
-            );
-        });
+    let periodTitle = '';
+    if (isMonthly) {
+        periodTitle = `🗓️ ${DESKTOP_MONTH_NAMES_TR[anchor.getMonth()]} ${anchor.getFullYear()}`;
+    } else {
+        const weekDays = getDesktopCurrentWeekDays(anchor);
+        const sD = weekDays[0].formattedDate;
+        const eD = weekDays[6].formattedDate;
+        const yr = weekDays[6].dateObj.getFullYear();
+        periodTitle = `📅 ${sD} - ${eD} ${yr}`;
+    }
 
-        const isTodayBadge = day.isToday ? '<span style="background:var(--gold); color:#000; font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px; margin-left:6px;">BUGÜN</span>' : '';
-
-        if (completedLog) {
-            const exCount = (completedLog.exercises || []).length;
-            const setCount = completedLog.totalSetsCompleted || (completedLog.exercises || []).reduce((acc, e) => acc + (e.sets || []).length, 0);
-            const vol = completedLog.totalVolumeKg ? `${Math.round(completedLog.totalVolumeKg)} kg` : '-';
-            const exNames = (completedLog.exercises || []).map(e => e.name || e.title).filter(Boolean).slice(0, 3).join(', ');
-
-            return `
-                <div class="calendar-day-card completed" style="background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.3); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
-                    <div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <span style="font-size: 14px; font-weight: 800; color: #fff;">${day.dayName} ${isTodayBadge}</span>
-                            <span style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">${day.formattedDate}</span>
-                        </div>
-                        <div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(16,185,129,0.2); color: #10b981; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-bottom: 10px;">
-                            ✅ Tamamlandı (${setCount} Set)
-                        </div>
-                        <div style="font-size: 12px; color: #e2e8f0; line-height: 1.4; margin-bottom: 8px;">
-                            <strong>Hacim:</strong> ${vol} • <strong>Hareketler:</strong> ${exNames || 'Kayıtlı Seans'}
-                        </div>
-                    </div>
-                    <div style="display: flex; gap: 6px; margin-top: 12px;">
-                        <button type="button" class="btn-sm-action" style="flex: 1; font-size: 11px; text-align: center; padding: 6px 0;" onclick="exportSingleDayToAppleCalendar(${idx})">
-                            🍏 Takvimde Gör
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-
-        if (plan.isRest) {
-            return `
-                <div class="calendar-day-card rest" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
-                    <div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <span style="font-size: 14px; font-weight: 800; color: var(--text-muted);">${day.dayName} ${isTodayBadge}</span>
-                            <span style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">${day.formattedDate}</span>
-                        </div>
-                        <div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(148,163,184,0.1); color: #94a3b8; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-bottom: 10px;">
-                            🛌 Dinlenme & Toparlanma
-                        </div>
-                        <p style="font-size: 12px; color: var(--text-muted); margin: 0; line-height: 1.4;">
-                            Merkezi sinir sistemi ve kas toparlanması için aktif dinlenme.
-                        </p>
-                    </div>
-                    <div style="margin-top: 12px;">
-                        <button type="button" class="btn-sm-action" style="width: 100%; font-size: 11px; text-align: center; padding: 6px 0; border-color: rgba(245,158,11,0.4);" onclick="toggleDesktopCalendarRest(${idx})">
-                            ➕ Antrenman Günü Yap
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-
-        // Aktif Planlanan Gün
-        const exListStr = (plan.exercises || []).map((e, i) => `<div style="font-size: 11.5px; color: #cbd5e1; padding: 2px 0;">• ${e}</div>`).join('');
-
-        return `
-            <div class="calendar-day-card active-plan" style="background: rgba(245,158,11,0.04); border: 1px solid rgba(245,158,11,0.25); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
-                <div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <span style="font-size: 14px; font-weight: 800; color: #fff;">${day.dayName} ${isTodayBadge}</span>
-                        <span style="font-size: 11px; color: var(--gold); font-family: var(--font-mono);">${day.formattedDate}</span>
-                    </div>
-                    <div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(245,158,11,0.15); color: var(--gold); padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-bottom: 10px;">
-                        ⚔️ ${plan.title}
-                    </div>
-
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; background: rgba(0,0,0,0.25); padding: 6px 8px; border-radius: 6px;">
-                        <label style="font-size: 11px; color: var(--text-muted);">Saat:</label>
-                        <input type="time" value="${plan.time || '18:30'}" onchange="changeDesktopCalendarTime(${idx}, this.value)" style="background: transparent; border: 1px solid var(--border-color); color: #fff; padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono); font-size: 12px;">
-                        <label style="font-size: 11px; color: var(--text-muted); margin-left: 6px;">Süre:</label>
-                        <select onchange="changeDesktopCalendarDuration(${idx}, this.value)" style="background: #111; border: 1px solid var(--border-color); color: #fff; padding: 2px 4px; border-radius: 4px; font-size: 11px;">
-                            <option value="45" ${plan.duration === 45 ? 'selected' : ''}>45 dk</option>
-                            <option value="60" ${(!plan.duration || plan.duration === 60) ? 'selected' : ''}>60 dk</option>
-                            <option value="75" ${plan.duration === 75 ? 'selected' : ''}>75 dk</option>
-                            <option value="90" ${plan.duration === 90 ? 'selected' : ''}>90 dk</option>
-                        </select>
-                    </div>
-
-                    <div style="margin-bottom: 12px;">
-                        ${exListStr || '<span style="font-size: 11px; color: var(--text-muted);">Özel Egzersiz Listesi</span>'}
-                    </div>
-                </div>
-
-                <div style="display: flex; gap: 6px; margin-top: 10px;">
-                    <button type="button" class="btn-sm-action" style="flex: 1; font-size: 11px; text-align: center; padding: 6px 0; background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.4); color: #10b981;" onclick="exportSingleDayToAppleCalendar(${idx})" title="Bu seansı macOS Apple Takvime işle">
-                        🍏 Takvime Ekle
-                    </button>
-                    <button type="button" class="btn-sm-action" style="font-size: 11px; padding: 6px 8px; color: #94a3b8;" onclick="toggleDesktopCalendarRest(${idx})" title="Dinlenme gününe çevir">
-                        🛌
-                    </button>
-                </div>
-            </div>
-        `;
-    }).join('');
+    const mainContentHtml = isMonthly 
+        ? renderDesktopCalendarMonthlyGrid(anchor) 
+        : renderDesktopCalendarWeeklyCards(anchor);
 
     el.desktopCalendarContainer.innerHTML = `
-        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 20px 24px; margin-bottom: 24px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);">
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 20px 24px; margin-bottom: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
                 <div>
                     <h2 style="margin: 0 0 6px 0; font-size: 20px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px;">
@@ -4266,26 +4492,48 @@ function renderDesktopCalendar() {
                     </p>
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                    <button type="button" class="btn-action" onclick="exportFullWeekToAppleCalendar()" style="background: linear-gradient(135deg, rgba(16,185,129,0.25), rgba(5,150,105,0.35)); border: 1px solid #10b981; color: #fff; font-size: 12.5px; padding: 8px 14px; border-radius: 8px; font-weight: 700;">
-                        🍏 Tüm Haftayı macOS Takvimi'ne İşle
+                    <!-- Görünüm Seçici (Haftalık / Aylık) -->
+                    <div class="cal-view-pills">
+                        <button type="button" class="cal-pill-btn ${!isMonthly ? 'active' : ''}" onclick="setDesktopCalendarViewMode('weekly')">
+                            📅 Haftalık
+                        </button>
+                        <button type="button" class="cal-pill-btn ${isMonthly ? 'active' : ''}" onclick="setDesktopCalendarViewMode('monthly')">
+                            🗓️ Aylık
+                        </button>
+                    </div>
+
+                    <!-- Gezinme Butonları (Önceki / Bugün / Sonraki) -->
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                        <button type="button" class="cal-nav-btn" onclick="navigateDesktopCalendar(-1)" title="Önceki Dönem">◀</button>
+                        <button type="button" class="cal-nav-btn cal-nav-today-btn" onclick="jumpDesktopCalendarToToday()" title="Bugüne Dön">Bugün</button>
+                        <button type="button" class="cal-nav-btn" onclick="navigateDesktopCalendar(1)" title="Sonraki Dönem">▶</button>
+                    </div>
+
+                    <div style="height: 24px; width: 1px; background: var(--border-color); margin: 0 4px;"></div>
+
+                    <button type="button" class="btn-action" onclick="exportFullWeekToAppleCalendar()" style="background: linear-gradient(135deg, rgba(16,185,129,0.25), rgba(5,150,105,0.35)); border: 1px solid #10b981; color: #fff; font-size: 12px; padding: 7px 12px; border-radius: 8px; font-weight: 700;">
+                        🍏 macOS Takvimi'ne İşle
                     </button>
-                    <button type="button" class="btn-action" onclick="openGoogleCalendarFromDesktop()" style="background: rgba(56,189,248,0.15); border: 1px solid #38bdf8; color: #38bdf8; font-size: 12.5px; padding: 8px 14px; border-radius: 8px; font-weight: 700;">
-                        🌐 Google Takvim'de Aç
+                    <button type="button" class="btn-action" onclick="openGoogleCalendarFromDesktop()" style="background: rgba(56,189,248,0.15); border: 1px solid #38bdf8; color: #38bdf8; font-size: 12px; padding: 7px 12px; border-radius: 8px; font-weight: 700;">
+                        🌐 Google Takvim
                     </button>
-                    <button type="button" class="btn-action" onclick="sendScheduleDirectiveToWeb()" style="background: rgba(245,158,11,0.15); border: 1px solid var(--gold); color: var(--gold); font-size: 12.5px; padding: 8px 14px; border-radius: 8px; font-weight: 700;" title="Mobil web uygulamasına direktif olarak gönder">
-                        📲 Web PWA'ya Planı Gönder
+                    <button type="button" class="btn-action" onclick="sendScheduleDirectiveToWeb()" style="background: rgba(245,158,11,0.15); border: 1px solid var(--gold); color: var(--gold); font-size: 12px; padding: 7px 12px; border-radius: 8px; font-weight: 700;" title="Mobil web uygulamasına direktif olarak gönder">
+                        📲 Web PWA'ya Gönder
                     </button>
-                    <button type="button" class="btn-refresh" onclick="refreshAthleteData().then(() => renderDesktopCalendar())" title="Yenile" style="width: 36px; height: 36px;">
+                    <button type="button" class="btn-refresh" onclick="refreshAthleteData().then(() => renderDesktopCalendar())" title="Yenile" style="width: 34px; height: 34px;">
                         🔄
                     </button>
                 </div>
             </div>
+
+            <!-- Dönem Başlığı -->
+            <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 15px; font-weight: 900; color: var(--gold);">
+                ${periodTitle}
+            </div>
         </div>
 
-        <!-- 7 Günlük Takvim Izgarası -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 24px;">
-            ${cardsHtml}
-        </div>
+        <!-- ANA TAKVİM İÇERİĞİ (HAFTALIK VEYA AYLIK) -->
+        ${mainContentHtml}
 
         <!-- Takvim Entegrasyonu ve Senkronizasyon Bilgi Paneli -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 16px;">
@@ -4308,7 +4556,7 @@ function renderDesktopCalendar() {
                     <span>🌐 Google Takvim & Mobil Canlı Senkronizasyon</span>
                 </h4>
                 <p style="font-size: 12.5px; color: var(--text-muted); line-height: 1.6; margin: 0 0 10px 0;">
-                    Web PWA (fitness.kantarci.io) üzerinde Google Takvim API v3 bağlantısı mevcuttur. Google Takvim üzerinde taşınan veya saati güncellenen antrenmanlar iki yönlü olarak FitLAB sistemine yansır.
+                    Web PWA (fitness.kantarci.io) üzerinde Google Takvim entegrasyonu mevcuttur. FitLAB üzerinden "Web PWA'ya Gönder" dendiğinde seanslar anında sporcunun takvimine işlenir.
                 </p>
                 <div style="display: flex; gap: 8px;">
                     <button type="button" class="btn-sm-action" onclick="openGoogleCalendarFromDesktop()" style="font-size: 11.5px; padding: 6px 12px; color: #38bdf8; border-color: rgba(56,189,248,0.4);">
@@ -4320,6 +4568,218 @@ function renderDesktopCalendar() {
     `;
 }
 window.renderDesktopCalendar = renderDesktopCalendar;
+
+function renderDesktopCalendarWeeklyCards(anchor) {
+    const weekDays = getDesktopCurrentWeekDays(anchor);
+
+    const cardsHtml = weekDays.map((day, idx) => {
+        const plan = getDesktopPlanForDay(idx, day.dateStr);
+        const completedLog = getDesktopCompletedLogForDate(day.dateStr);
+
+        const isTodayBadge = day.isToday ? '<span style="background:var(--gold); color:#000; font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px; margin-left:6px;">BUGÜN</span>' : '';
+
+        if (completedLog) {
+            const exCount = (completedLog.exercises || []).length;
+            const setCount = completedLog.totalSetsCompleted || (completedLog.exercises || []).reduce((acc, e) => acc + (e.sets || []).length, 0);
+            const vol = completedLog.totalVolumeKg ? `${Math.round(completedLog.totalVolumeKg)} kg` : '-';
+            const exNames = (completedLog.exercises || []).map(e => e.name || e.title).filter(Boolean).slice(0, 3).join(', ');
+
+            return `
+                <div class="calendar-day-card completed" style="background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.3); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;" onclick="openDesktopDayScheduleModal(${idx}, '${day.dateStr}')">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 14px; font-weight: 800; color: #fff;">${day.dayName} ${isTodayBadge}</span>
+                            <span style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">${day.formattedDate}</span>
+                        </div>
+                        <div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(16,185,129,0.2); color: #10b981; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-bottom: 10px;">
+                            ✅ Tamamlandı (${setCount} Set)
+                        </div>
+                        <div style="font-size: 12px; color: #e2e8f0; line-height: 1.4; margin-bottom: 8px;">
+                            <strong>Hacim:</strong> ${vol} • <strong>Hareketler:</strong> ${escapeHTML(exNames || 'Kayıtlı Seans')}
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 6px; margin-top: 12px;">
+                        <button type="button" class="btn-sm-action" style="flex: 1; font-size: 11px; text-align: center; padding: 6px 0; color: var(--cyan); border-color: rgba(56,189,248,0.4);" onclick="event.stopPropagation(); openDesktopDayScheduleModal(${idx}, '${day.dateStr}')">
+                            👁️ Program Yönetimi
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (plan.isRest) {
+            return `
+                <div class="calendar-day-card rest" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;" onclick="openDesktopDayScheduleModal(${idx}, '${day.dateStr}')">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 14px; font-weight: 800; color: var(--text-muted);">${day.dayName} ${isTodayBadge}</span>
+                            <span style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">${day.formattedDate}</span>
+                        </div>
+                        <div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(148,163,184,0.1); color: #94a3b8; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-bottom: 10px;">
+                            🛌 Dinlenme & Toparlanma
+                        </div>
+                        <p style="font-size: 12px; color: var(--text-muted); margin: 0; line-height: 1.4;">
+                            Merkezi sinir sistemi ve kas toparlanması için aktif dinlenme.
+                        </p>
+                    </div>
+                    <div style="margin-top: 12px;">
+                        <button type="button" class="btn-sm-action" style="width: 100%; font-size: 11px; text-align: center; padding: 6px 0; border-color: rgba(245,158,11,0.4);" onclick="event.stopPropagation(); openDesktopDayScheduleModal(${idx}, '${day.dateStr}')">
+                            ➕ Antrenman Ata
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Aktif Planlanan Gün
+        const exListStr = (plan.exercises || []).map((e, i) => `<div style="font-size: 11.5px; color: #cbd5e1; padding: 2px 0;">• ${escapeHTML(e)}</div>`).join('');
+
+        return `
+            <div class="calendar-day-card active-plan" style="background: rgba(245,158,11,0.04); border: 1px solid rgba(245,158,11,0.25); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;" onclick="openDesktopDayScheduleModal(${idx}, '${day.dateStr}')">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 14px; font-weight: 800; color: #fff;">${day.dayName} ${isTodayBadge}</span>
+                        <span style="font-size: 11px; color: var(--gold); font-family: var(--font-mono);">${day.formattedDate}</span>
+                    </div>
+                    <div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(245,158,11,0.15); color: var(--gold); padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-bottom: 10px;">
+                        ⚔️ ${escapeHTML(plan.title)}
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; background: rgba(0,0,0,0.25); padding: 6px 8px; border-radius: 6px;" onclick="event.stopPropagation()">
+                        <label style="font-size: 11px; color: var(--text-muted);">Saat:</label>
+                        <input type="time" value="${plan.time || '18:30'}" onchange="changeDesktopCalendarTime(${idx}, this.value)" style="background: transparent; border: 1px solid var(--border-color); color: #fff; padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono); font-size: 12px;">
+                        <label style="font-size: 11px; color: var(--text-muted); margin-left: 6px;">Süre:</label>
+                        <select onchange="changeDesktopCalendarDuration(${idx}, this.value)" style="background: #111; border: 1px solid var(--border-color); color: #fff; padding: 2px 4px; border-radius: 4px; font-size: 11px;">
+                            <option value="45" ${plan.duration === 45 ? 'selected' : ''}>45 dk</option>
+                            <option value="60" ${(!plan.duration || plan.duration === 60) ? 'selected' : ''}>60 dk</option>
+                            <option value="75" ${plan.duration === 75 ? 'selected' : ''}>75 dk</option>
+                            <option value="90" ${plan.duration === 90 ? 'selected' : ''}>90 dk</option>
+                        </select>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        ${exListStr || '<span style="font-size: 11px; color: var(--text-muted);">Özel Egzersiz Listesi</span>'}
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 6px; margin-top: 10px;" onclick="event.stopPropagation()">
+                    <button type="button" class="btn-sm-action" style="flex: 1; font-size: 11px; text-align: center; padding: 6px 0; color: var(--gold); border-color: rgba(245,158,11,0.4);" onclick="openDesktopDayScheduleModal(${idx}, '${day.dateStr}')">
+                        ✏️ Değiştir / Ata
+                    </button>
+                    <button type="button" class="btn-sm-action" style="font-size: 11px; padding: 6px 8px; color: #94a3b8;" onclick="toggleDesktopCalendarRest(${idx})" title="Dinlenme gününe çevir">
+                        🛌
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    return `
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 24px;">
+            ${cardsHtml}
+        </div>
+    `;
+}
+
+function renderDesktopCalendarMonthlyGrid(anchor) {
+    const year = anchor.getFullYear();
+    const month = anchor.getMonth();
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+
+    // Monday-first offset
+    const firstDayOfWeek = firstDay.getDay(); // 0 is Sun
+    const startOffset = (firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1);
+
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    let html = `
+        <div class="cal-month-table">
+            <div class="cal-month-header-row">
+                <div>Pzt</div>
+                <div>Sal</div>
+                <div>Çar</div>
+                <div>Per</div>
+                <div>Cum</div>
+                <div>Cmt</div>
+                <div>Paz</div>
+            </div>
+            <div class="cal-month-days-grid">
+    `;
+
+    // Previous month padding days
+    const prevMonthLastDay = new Date(year, month, 0).getDate();
+    for (let p = startOffset - 1; p >= 0; p--) {
+        const dayNum = prevMonthLastDay - p;
+        html += `
+            <div class="cal-month-cell is-other-month">
+                <div class="cal-month-cell-header">
+                    <span>${dayNum}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    // Current month days
+    for (let d = 1; d <= daysInMonth; d++) {
+        const dayDate = new Date(year, month, d);
+        dayDate.setHours(0, 0, 0, 0);
+        const yyyy = dayDate.getFullYear();
+        const mm = String(dayDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(dayDate.getDate()).padStart(2, '0');
+        const dateStr = `${yyyy}-${mm}-${dd}`;
+
+        const dayIdx = (dayDate.getDay() + 6) % 7; // 0: Pzt, ..., 6: Paz
+        const isToday = dayDate.toDateString() === now.toDateString();
+
+        const completedLog = getDesktopCompletedLogForDate(dateStr);
+        const plan = getDesktopPlanForDay(dayIdx, dateStr);
+
+        let pillHtml = '';
+        if (completedLog) {
+            const vol = completedLog.totalVolumeKg ? `${Math.round(completedLog.totalVolumeKg)} kg` : 'Seans';
+            pillHtml = `<div class="cal-tag-pill completed" title="${escapeHTML(completedLog.program || 'Tamamlandı')}">✅ ${vol}</div>`;
+        } else if (!plan.isRest) {
+            const cleanTitle = (plan.title || 'Plan').replace(/⚔️/g, '').trim().slice(0, 12);
+            pillHtml = `<div class="cal-tag-pill scheduled" title="${escapeHTML(plan.title)}">⚔️ ${escapeHTML(cleanTitle)}</div>`;
+        } else {
+            pillHtml = `<div class="cal-tag-pill rest">🛌 Dinlenme</div>`;
+        }
+
+        html += `
+            <div class="cal-month-cell ${isToday ? 'is-today' : ''}" onclick="openDesktopDayScheduleModal(${dayIdx}, '${dateStr}')">
+                <div class="cal-month-cell-header">
+                    <span style="${isToday ? 'font-weight:900; color:var(--gold);' : ''}">${d}</span>
+                    ${isToday ? '<span style="font-size:9px; color:var(--gold); font-weight:900;">BUGÜN</span>' : ''}
+                </div>
+                ${pillHtml}
+            </div>
+        `;
+    }
+
+    // Trailing padding days
+    const totalCells = startOffset + daysInMonth;
+    const remainingCells = (7 - (totalCells % 7)) % 7;
+    for (let n = 1; n <= remainingCells; n++) {
+        html += `
+            <div class="cal-month-cell is-other-month">
+                <div class="cal-month-cell-header">
+                    <span>${n}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    html += `
+            </div>
+        </div>
+    `;
+
+    return html;
+}
 
 
 

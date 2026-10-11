@@ -2416,6 +2416,147 @@ body {
     user-select: none;
 }
 
+/* ==================== FITLAB DESKTOP CALENDAR STYLES ==================== */
+.cal-view-pills {
+    display: inline-flex;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 2px;
+    gap: 2px;
+}
+.cal-pill-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.cal-pill-btn.active {
+    background: var(--gold);
+    color: #000;
+    font-weight: 800;
+    box-shadow: 0 1px 6px rgba(245, 158, 11, 0.35);
+}
+.cal-nav-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.cal-nav-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--gold);
+}
+.cal-nav-today-btn {
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    color: var(--gold);
+    font-weight: 800;
+}
+/* MONTHLY GRID */
+.cal-month-table {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 24px;
+}
+.cal-month-header-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    padding-bottom: 4px;
+}
+.cal-month-days-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+}
+.cal-month-cell {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    min-height: 105px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+}
+.cal-month-cell:hover {
+    border-color: var(--gold);
+    background: rgba(30, 41, 59, 0.7);
+    transform: translateY(-1px);
+}
+.cal-month-cell.is-other-month {
+    opacity: 0.35;
+}
+.cal-month-cell.is-today {
+    border: 1.5px solid var(--gold);
+    background: rgba(245, 158, 11, 0.06);
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
+}
+.cal-month-cell-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 800;
+    color: #cbd5e1;
+    margin-bottom: 6px;
+}
+.cal-month-cell.is-today .cal-month-cell-header {
+    color: var(--gold);
+}
+.cal-tag-pill {
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 3px 6px;
+    border-radius: 4px;
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+    display: block;
+}
+.cal-tag-pill.completed {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+}
+.cal-tag-pill.scheduled,
+.cal-tag-pill.planned {
+    background: rgba(245, 158, 11, 0.18);
+    color: #fde68a;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+}
+.cal-tag-pill.rest {
+    background: rgba(255, 255, 255, 0.04);
+    color: #94a3b8;
+}
+.cal-tag-pill.uncompleted {
+    background: rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
 
 
 
