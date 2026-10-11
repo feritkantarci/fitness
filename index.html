@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <!-- Security: CSP & Permissions -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; connect-src 'self' https://firestore.googleapis.com https://generativelanguage.googleapis.com https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://raw.githubusercontent.com https://cdn.jsdelivr.net data: blob:; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; media-src 'self' data: blob: https:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://apis.google.com https://accounts.google.com; connect-src 'self' https://firestore.googleapis.com https://generativelanguage.googleapis.com https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://raw.githubusercontent.com https://cdn.jsdelivr.net https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com data: blob:; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; media-src 'self' data: blob: https:; frame-src 'self' https://fitness-4f427.firebaseapp.com https://accounts.google.com;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="theme-color" content="#090d16">
@@ -2273,6 +2273,54 @@
         .weekly-day-pill.active-today .weekly-day-status {
             color: var(--gold);
         }
+        .weekly-day-time-tag {
+            font-size: 8.5px;
+            font-weight: 800;
+            color: var(--cyan);
+            background: rgba(56, 189, 248, 0.12);
+            border-radius: 4px;
+            padding: 1px 3px;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            margin-top: 1px;
+            line-height: 1.1;
+        }
+        .weekly-day-sync-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #10b981;
+            display: inline-block;
+            box-shadow: 0 0 4px #10b981;
+        }
+        .calendar-live-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.95));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 6px 10px;
+            margin-bottom: 8px;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .calendar-live-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11.5px;
+            color: #cbd5e1;
+            font-weight: 700;
+            min-width: 0;
+        }
+        .calendar-live-actions {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-shrink: 0;
+        }
 
         /* PLANNER QUICK TEMPLATE FOOTER */
         .planner-template-bar {
@@ -3792,7 +3840,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v124</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v125</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3828,7 +3876,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v124</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v125</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -4720,6 +4768,39 @@
                 <!-- Populated dynamically: Shows assigned exercises, sets, reps, and direct edit button -->
             </div>
 
+            <!-- SEANS SAATİ & CANLI TAKVİM ENTEGRASYON KARTI -->
+            <div id="schedDayTimingSection" style="background:rgba(15,23,42,0.85); border:1px solid rgba(255,255,255,0.12); border-radius:10px; padding:12px; margin-bottom:14px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <span style="font-size:12px; font-weight:800; color:#fff; display:flex; align-items:center; gap:6px;">
+                        <span>🕒</span> Seans Saati & Takvim Durumu
+                    </span>
+                    <span id="schedDaySyncStatusBadge" style="font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; background:rgba(255,255,255,0.06); color:#cbd5e1;">
+                        Yerel Plan
+                    </span>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+                    <div>
+                        <label style="font-size:11px; color:#94a3b8; display:block; margin-bottom:4px;">Başlama Saati</label>
+                        <input type="time" id="schedDayTimeInput" class="input-base" style="width:100%; padding:6px 10px; font-size:13px; font-weight:800;" value="18:30" onchange="updateScheduledDayTime(this.value)">
+                    </div>
+                    <div>
+                        <label style="font-size:11px; color:#94a3b8; display:block; margin-bottom:4px;">Tahmini Süre (Dk)</label>
+                        <input type="number" id="schedDayDurationInput" class="input-base" style="width:100%; padding:6px 10px; font-size:13px; font-weight:800;" min="15" max="180" step="5" value="50" onchange="updateScheduledDayDuration(this.value)">
+                    </div>
+                </div>
+                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <button type="button" id="btnSyncSingleDayGCal" class="btn btn-gold" style="font-size:11.5px; padding:7px 12px; font-weight:800; flex:1;" onclick="syncCurrentDayToCalendar()">
+                        📅 Bu Günü Takvime İşle / Güncelle
+                    </button>
+                    <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 10px; color:var(--cyan); border-color:rgba(56,189,248,0.4);" onclick="openSingleDayDirectGoogleCalendar()" title="Google Takvimde Aç veya Ekle">
+                        🔗 Takvimde Aç
+                    </button>
+                    <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 10px; color:#cbd5e1;" onclick="downloadSingleDayICS()" title="Apple Takvim / iCal Olarak İndir">
+                        📥 .ics
+                    </button>
+                </div>
+            </div>
+
             <!-- OPTIONS LIST FOR REPLACING / SELECTING -->
             <div id="schedModalOptionsList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">
                 <!-- Populated dynamically -->
@@ -4734,6 +4815,103 @@
                         Kapat
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== GOOGLE & DEVICE CALENDAR SYNC MODAL ==================== -->
+    <div id="calendarSyncModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 580px; max-height: 92vh; overflow-y: auto;">
+            <div class="modal-header">
+                <div>
+                    <span class="auth-role-tag role-admin" style="font-size:10px; background:var(--gold); color:#000;">CANLI SENKRONİZASYON</span>
+                    <h3 class="modal-title" style="font-size:16px; margin-top:4px;">Google & Cihaz Takvim Merkezi</h3>
+                </div>
+                <button class="modal-close" onclick="closeCalendarSyncModal()">✕</button>
+            </div>
+            
+            <p style="font-size:12px; color:var(--text-secondary); margin:0 0 14px 0; line-height:1.5;">
+                FitLab programınızı Google Takviminizle canlı ve iki yönlü senkronize edin. Kişisel etkinliklerinize karışmadan <strong>"FitLab • Antrenmanlarım"</strong> adında özel bir takvim oluşturulur. Takviminizde yaptığınız saat veya gün düzeltmeleri doğrudan FitLab'e yansır.
+            </p>
+
+            <!-- BAĞLANTI DURUM KARTI -->
+            <div id="calendarConnectionCard" style="margin-bottom:14px;">
+                <!-- Rendered dynamically -->
+            </div>
+
+            <!-- HIZLI AKSİYONLAR -->
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
+                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px;">
+                    <div style="font-size:12.5px; font-weight:800; color:#fff; margin-bottom:4px;">🔄 İki Yönlü Canlı Eşitleme</div>
+                    <div style="font-size:11px; color:var(--text-secondary); margin-bottom:10px; line-height:1.5;">
+                        • Google Takvim'deki "FitLab • Antrenmanlarım" takviminde taşıdığınız saat veya günleri FitLab'e çeker.<br>
+                        • FitLab'deki yeni veya güncellenmiş antrenmanları Google Takvim'e yazar.
+                    </div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <button type="button" class="btn btn-gold" style="font-size:12px; padding:8px 14px; font-weight:900;" onclick="performFullCalendarSync()">
+                            ⚡ Şimdi Canlı Eşitle
+                        </button>
+                        <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 12px; color:var(--cyan); border-color:rgba(56,189,248,0.4);" onclick="openGoogleCalendarWeb()">
+                            📅 Google Takvimde Aç
+                        </button>
+                    </div>
+                </div>
+
+                <!-- APPLE TAKVİM / iCAL / WEBCAL SEKMESİ -->
+                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px;">
+                    <div style="font-size:12.5px; font-weight:800; color:#fff; margin-bottom:4px;">🍏 Apple Takvim / Mac & iPhone Desteği</div>
+                    <div style="font-size:11px; color:var(--text-secondary); margin-bottom:10px; line-height:1.5;">
+                        • <strong>Yöntem 1 (Önerilen):</strong> macOS ve iOS Sistem Ayarları > İnternet Hesapları'ndan Google hesabınızı açın; "FitLab • Antrenmanlarım" anında Apple Takvim uygulamanıza yansır.<br>
+                        • <strong>Yöntem 2:</strong> Tüm haftalık programınızı anında Apple Takvim'e aktarmak için .ics dosyasını tek dokunuşla indirin.
+                    </div>
+                    <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 12px; color:#cbd5e1;" onclick="downloadFullScheduleICS()">
+                        📥 Tüm Haftalık Takvimi (.ics) İndir
+                    </button>
+                </div>
+
+                <!-- TERCİHLER VE GELİŞMİŞ AYARLAR -->
+                <div style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:12px;">
+                    <div style="font-size:12px; font-weight:800; color:var(--gold); margin-bottom:8px;">⚙️ Takvim Tercihleri</div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+                        <div>
+                            <label style="font-size:10.5px; color:#94a3b8; display:block; margin-bottom:3px;">Varsayılan Seans Saati</label>
+                            <input type="time" id="calPrefDefaultTime" class="input-base" style="width:100%; padding:5px 8px; font-size:12px;" value="18:30" onchange="saveCalendarPreferences()">
+                        </div>
+                        <div>
+                            <label style="font-size:10.5px; color:#94a3b8; display:block; margin-bottom:3px;">Bildirim Hatırlatıcısı</label>
+                            <select id="calPrefReminderMin" class="select-base" style="width:100%; padding:5px 8px; font-size:12px;" onchange="saveCalendarPreferences()">
+                                <option value="15">15 Dakika Önce</option>
+                                <option value="30" selected>30 Dakika Önce</option>
+                                <option value="60">1 Saat Önce</option>
+                                <option value="120">2 Saat Önce</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- GELİŞMİŞ GOOGLE OAUTH CLIENT ID (OPSİYONEL) -->
+                    <details style="margin-top:8px; font-size:11px; color:#94a3b8;">
+                        <summary style="cursor:pointer; color:var(--cyan); font-weight:700;">🔧 Özel OAuth İstemci / Manuel Token Girişi</summary>
+                        <div style="margin-top:8px; display:flex; flex-direction:column; gap:6px;">
+                            <div>
+                                <label style="font-size:10px; color:#94a3b8;">Google OAuth Client ID (Opsiyonel):</label>
+                                <input type="text" id="calCustomClientId" class="input-base" style="width:100%; padding:5px 8px; font-size:11px;" placeholder="ör. 974918246558-xxx.apps.googleusercontent.com" onchange="saveCustomGoogleClientId(this.value)">
+                            </div>
+                            <div>
+                                <label style="font-size:10px; color:#94a3b8;">OAuth Access Token (Manuel Yapıştırma):</label>
+                                <div style="display:flex; gap:6px;">
+                                    <input type="password" id="calCustomTokenInput" class="input-base" style="flex:1; padding:5px 8px; font-size:11px;" placeholder="ya29.a0...">
+                                    <button type="button" class="btn btn-outline" style="font-size:10px; padding:4px 8px;" onclick="applyManualGoogleToken()">Uygula</button>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:8px; border-top:1px solid var(--border); padding-top:12px;">
+                <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 16px;" onclick="closeCalendarSyncModal()">
+                    Kapat
+                </button>
             </div>
         </div>
     </div>
@@ -5656,6 +5834,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <!-- ==================== GOOGLE IDENTITY SERVICES (GIS) ==================== -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <!-- ==================== PDF.JS & TESSERACT.JS (FOR UNIQUE HEALTH BIA REPORTS & IMAGES) ==================== -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -10344,12 +10524,18 @@ KURALLAR:
                         const planDetails = getWorkoutDetailsForPlan(plan);
                         const exCount = (!plan.rest && planDetails && planDetails.exercises) ? planDetails.exercises.length : null;
                         const statusText = plan.rest ? 'Dinlen' : (exCount ? `${exCount} Hrk` : 'Plan');
+                        const timeTagHtml = (!plan.rest && plan.time) ? `
+                            <span class="weekly-day-time-tag" title="Saat: ${plan.time}">
+                                ${plan.time} ${plan.googleEventId ? '<span class="weekly-day-sync-dot" title="Google Takvimde Canlı"></span>' : ''}
+                            </span>
+                        ` : '';
 
                         return `
                             <div class="${pillClass}" onclick="openScheduleDayModal(${d})" title="${DAY_NAMES_TR[d]}: ${escapeHTML(plan.title)}">
                                 <span class="weekly-day-name">${DAY_SHORT_TR[d]}</span>
                                 <span class="weekly-day-icon">${icon}</span>
                                 <span class="weekly-day-status">${statusText}</span>
+                                ${timeTagHtml}
                             </div>
                         `;
                     }).join('');
@@ -10381,6 +10567,9 @@ KURALLAR:
                                         </button>
                                     </div>
                                 </div>
+
+                                <!-- CANLI TAKVİM ENTEGRASYON BARI -->
+                                ${typeof getCalendarLiveBarHtml === 'function' ? getCalendarLiveBarHtml() : ''}
 
                                 ${isNextWeek ? `
                                     <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.25); border-radius:8px; padding:8px 12px; margin-bottom:10px; gap:8px;">
@@ -13078,6 +13267,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const currentPlan = schedule[dayIdx] || { id: 'rest', rest: true };
             const workoutDetails = getWorkoutDetailsForPlan(currentPlan);
 
+            if (typeof updateScheduleDayModalTimingCard === 'function') {
+                updateScheduleDayModalTimingCard(dayIdx, currentPlan, workoutDetails);
+            }
+
             // 1. RENDER ASSIGNED WORKOUT DETAILED CONTENT SECTION
             if (assignedSection) {
                 if (!currentPlan.rest) {
@@ -13954,7 +14147,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         function setDayAsRest() {
             if (activeSchedulingDayIdx === null) return;
-            const schedule = getWeeklySchedule();
+            const isNext = activePlannerWeek === 'next';
+            const user = getActiveUser();
+            const schedule = isNext ? getNextWeeklySchedule(user.id) : getWeeklySchedule(user.id);
+            const oldPlan = schedule[activeSchedulingDayIdx];
+            if (oldPlan && oldPlan.googleEventId && typeof deleteCalendarEventQuiet === 'function') {
+                deleteCalendarEventQuiet(oldPlan.googleEventId);
+            }
             schedule[activeSchedulingDayIdx] = {
                 id: 'rest',
                 title: '🧘 Dinlenme & Aktif Toparlanma',
@@ -13962,7 +14161,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 desc: 'Hafif yürüyüş, esneme veya tam istirahat',
                 rest: true
             };
-            saveWeeklySchedule(schedule);
+            if (isNext) saveNextWeeklySchedule(schedule, user.id);
+            else saveWeeklySchedule(schedule, user.id);
             closeScheduleDayModal();
             renderActiveWorkout();
         }
@@ -14927,6 +15127,903 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 if (modal && content) {
                     content.innerText = dir.fullReport;
                     modal.style.display = 'flex';
+                }
+            } catch(e) {}
+        }
+
+        // ==================== GOOGLE & DEVICE CALENDAR LIVE SYNC ENGINE ====================
+        const FITLAB_CALENDAR_SUMMARY = 'FitLab • Antrenmanlarım';
+        const FITLAB_CALENDAR_DESC = 'Çelik Kodu & FitLab Antrenman Programı ve İlerleyiş Takvimi';
+
+        function getCalendarPreferences(uid) {
+            const user = getActiveUser();
+            const targetUid = uid || (user ? user.id : 'usr_admin');
+            const key = `celik_kodu_calendar_prefs_${targetUid}`;
+            try {
+                const raw = localStorage.getItem(key);
+                if (raw) return JSON.parse(raw);
+            } catch(e) {}
+            return {
+                defaultTime: '18:30',
+                reminderMin: 30,
+                autoSync: true,
+                customClientId: ''
+            };
+        }
+
+        function saveCalendarPreferences(newPrefs, uid) {
+            const user = getActiveUser();
+            const targetUid = uid || (user ? user.id : 'usr_admin');
+            const key = `celik_kodu_calendar_prefs_${targetUid}`;
+            const current = getCalendarPreferences(targetUid);
+            const timeEl = document.getElementById('calPrefDefaultTime');
+            const remEl = document.getElementById('calPrefReminderMin');
+            if (timeEl) current.defaultTime = timeEl.value || '18:30';
+            if (remEl) current.reminderMin = parseInt(remEl.value, 10) || 30;
+            if (newPrefs) Object.assign(current, newPrefs);
+            try {
+                localStorage.setItem(key, JSON.stringify(current));
+            } catch(e) {}
+        }
+
+        function getGoogleCalendarToken(uid) {
+            const user = getActiveUser();
+            const targetUid = uid || (user ? user.id : 'usr_admin');
+            try {
+                const raw = localStorage.getItem(`celik_kodu_gcal_token_${targetUid}`) || sessionStorage.getItem(`celik_kodu_gcal_token_${targetUid}`);
+                if (!raw) return null;
+                const tokenData = JSON.parse(raw);
+                if (tokenData && tokenData.token && tokenData.expiresAt && tokenData.expiresAt > Date.now()) {
+                    return tokenData.token;
+                }
+            } catch(e) {}
+            return null;
+        }
+
+        function saveGoogleCalendarToken(token, expiresInSec = 3600, uid) {
+            const user = getActiveUser();
+            const targetUid = uid || (user ? user.id : 'usr_admin');
+            const data = {
+                token: token,
+                savedAt: Date.now(),
+                expiresAt: Date.now() + (expiresInSec * 1000)
+            };
+            try {
+                localStorage.setItem(`celik_kodu_gcal_token_${targetUid}`, JSON.stringify(data));
+                sessionStorage.setItem(`celik_kodu_gcal_token_${targetUid}`, JSON.stringify(data));
+            } catch(e) {}
+        }
+
+        function clearGoogleCalendarToken(uid) {
+            const user = getActiveUser();
+            const targetUid = uid || (user ? user.id : 'usr_admin');
+            try {
+                localStorage.removeItem(`celik_kodu_gcal_token_${targetUid}`);
+                sessionStorage.removeItem(`celik_kodu_gcal_token_${targetUid}`);
+                localStorage.removeItem(`celik_kodu_gcal_calendar_id_${targetUid}`);
+            } catch(e) {}
+        }
+
+        function isGoogleCalendarConnected(uid) {
+            return !!getGoogleCalendarToken(uid);
+        }
+
+        function getStoredCalendarId(uid) {
+            const user = getActiveUser();
+            const targetUid = uid || (user ? user.id : 'usr_admin');
+            return localStorage.getItem(`celik_kodu_gcal_calendar_id_${targetUid}`);
+        }
+
+        function saveStoredCalendarId(calId, uid) {
+            const user = getActiveUser();
+            const targetUid = uid || (user ? user.id : 'usr_admin');
+            try {
+                localStorage.setItem(`celik_kodu_gcal_calendar_id_${targetUid}`, calId);
+            } catch(e) {}
+        }
+
+        function getGoogleClientId() {
+            const prefs = getCalendarPreferences();
+            if (prefs && prefs.customClientId && prefs.customClientId.trim()) {
+                return prefs.customClientId.trim();
+            }
+            const custom = localStorage.getItem('celik_kodu_gcal_custom_client_id');
+            if (custom && custom.trim()) return custom.trim();
+            return "974918246558-fuhhffo19f5o70qu7g6k8gupqg83058a.apps.googleusercontent.com";
+        }
+
+        function saveCustomGoogleClientId(val) {
+            const clean = (val || '').trim();
+            try {
+                localStorage.setItem('celik_kodu_gcal_custom_client_id', clean);
+            } catch(e) {}
+            const prefs = getCalendarPreferences();
+            prefs.customClientId = clean;
+            saveCalendarPreferences(prefs);
+            if (typeof showToast === 'function') showToast("✅ Google Client ID kaydedildi.");
+        }
+
+        function applyManualGoogleToken() {
+            const input = document.getElementById('calCustomTokenInput');
+            if (!input || !input.value.trim()) {
+                alert("Lütfen geçerli bir Google OAuth erişim belirteci (Access Token) yapıştırın.");
+                return;
+            }
+            saveGoogleCalendarToken(input.value.trim(), 7200);
+            input.value = '';
+            if (typeof showToast === 'function') showToast("✅ Google erişim belirteci uygulandı! Test ediliyor...");
+            performFullCalendarSync().then(() => {
+                if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
+                renderCalendarConnectionCard();
+            });
+        }
+
+        function disconnectGoogleCalendar() {
+            if (confirm("Google Takvim bağlantısını kesmek istediğinize emin misiniz?")) {
+                clearGoogleCalendarToken();
+                if (typeof showToast === 'function') showToast("ℹ️ Google Takvim bağlantısı kaldırıldı.");
+                if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
+                renderCalendarConnectionCard();
+            }
+        }
+
+        async function callGoogleCalendarApi(endpoint, options = {}) {
+            const token = getGoogleCalendarToken();
+            if (!token) throw new Error("Google Takvim oturumu açık değil.");
+            const url = endpoint.startsWith('http') ? endpoint : `https://www.googleapis.com/calendar/v3${endpoint}`;
+            const headers = Object.assign({
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }, options.headers || {});
+
+            const resp = await fetch(url, Object.assign({}, options, { headers }));
+            if (resp.status === 401) {
+                clearGoogleCalendarToken();
+                throw new Error("Google oturum süresi doldu. Lütfen tekrar bağlanın.");
+            }
+            if (resp.status === 204) return null;
+            if (!resp.ok) {
+                const errText = await resp.text();
+                let errMsg = `Google API Hatası (${resp.status})`;
+                try {
+                    const parsed = JSON.parse(errText);
+                    if (parsed.error && parsed.error.message) errMsg = parsed.error.message;
+                } catch(e) {}
+                throw new Error(errMsg);
+            }
+            return await resp.json();
+        }
+
+        async function getOrCreateFitLabCalendar() {
+            let calId = getStoredCalendarId();
+            if (calId) {
+                try {
+                    const existing = await callGoogleCalendarApi(`/calendars/${encodeURIComponent(calId)}`);
+                    if (existing && existing.id) return existing.id;
+                } catch(e) {
+                    console.warn("Kayıtlı FitLab takvim kimliği doğrulanamadı, yeniden aranıyor...", e);
+                }
+            }
+
+            // Takvim listesinden ara
+            try {
+                const calList = await callGoogleCalendarApi('/users/me/calendarList');
+                if (calList && Array.isArray(calList.items)) {
+                    const found = calList.items.find(c => 
+                        (c.summary && (c.summary.includes('FitLab') || c.summary.includes('Çelik Kodu')))
+                    );
+                    if (found && found.id) {
+                        saveStoredCalendarId(found.id);
+                        return found.id;
+                    }
+                }
+            } catch(e) {
+                console.warn("Takvim listesi alınamadı:", e);
+            }
+
+            // Yoksa oluştur
+            const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Istanbul';
+            try {
+                const newCal = await callGoogleCalendarApi('/calendars', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        summary: FITLAB_CALENDAR_SUMMARY,
+                        description: FITLAB_CALENDAR_DESC,
+                        timeZone: userTz
+                    })
+                });
+
+                if (newCal && newCal.id) {
+                    saveStoredCalendarId(newCal.id);
+                    return newCal.id;
+                }
+            } catch(createErr) {
+                console.warn("Özel takvim oluşturulamadı, birincil takvime yönlendiriliyor:", createErr);
+            }
+            return 'primary';
+        }
+
+        function formatIsoDateTimeWithOffset(date) {
+            const pad = n => String(n).padStart(2, '0');
+            const year = date.getFullYear();
+            const month = pad(date.getMonth() + 1);
+            const day = pad(date.getDate());
+            const hours = pad(date.getHours());
+            const minutes = pad(date.getMinutes());
+            const seconds = pad(date.getSeconds());
+            const tzOffset = -date.getTimezoneOffset();
+            const sign = tzOffset >= 0 ? '+' : '-';
+            const offH = pad(Math.floor(Math.abs(tzOffset) / 60));
+            const offM = pad(Math.abs(tzOffset) % 60);
+            return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}${sign}${offH}:${offM}`;
+        }
+
+        function getDateForScheduleDay(dayIdx, isNextWeek = false) {
+            const now = new Date();
+            const currentDay = now.getDay();
+            const diffToMonday = currentDay === 0 ? -6 : 1 - currentDay;
+            const monday = new Date(now);
+            monday.setHours(0, 0, 0, 0);
+            monday.setDate(now.getDate() + diffToMonday);
+            if (isNextWeek) {
+                monday.setDate(monday.getDate() + 7);
+            }
+            const offset = dayIdx === 0 ? 6 : (dayIdx - 1);
+            const targetDate = new Date(monday);
+            targetDate.setDate(monday.getDate() + offset);
+            return targetDate;
+        }
+
+        function buildEventDescription(plan, dayIdx, duration = 50, restSec = 60) {
+            const workoutDetails = getWorkoutDetailsForPlan(plan) || {};
+            const exercises = workoutDetails.exercises || plan.exercises || [];
+            const schemeStr = workoutDetails.scheme ? `${workoutDetails.scheme.sets} Set x ${workoutDetails.scheme.reps}` : `${exercises.length} Hareket`;
+            
+            let desc = `🏋️ FITLAB • ÇELİK KODU ANTRENMAN SEANSI\n`;
+            desc += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            desc += `🎯 Program: ${plan.title || 'Antrenman Seansı'}\n`;
+            desc += `⏱️ Tahmini Süre: ${duration} Dakika\n`;
+            desc += `⏳ Dinlenme: ${restSec} Saniye\n`;
+            desc += `📊 Egzersiz Sayısı: ${exercises.length} Hareket (${schemeStr})\n\n`;
+
+            if (exercises.length > 0) {
+                desc += `📋 EGZERSİZ PLANI & HEDEFLER:\n`;
+                exercises.forEach((ex, idx) => {
+                    const sets = ex.targetSets || (workoutDetails.scheme ? workoutDetails.scheme.sets : 3);
+                    const reps = ex.targetReps || (workoutDetails.scheme ? workoutDetails.scheme.reps : '8-12');
+                    const anatomy = typeof getExerciseAnatomy === 'function' ? getExerciseAnatomy(ex) : null;
+                    desc += `${idx + 1}. ${ex.name || 'Egzersiz'} — ${sets} Set x ${reps}`;
+                    if (anatomy && anatomy.primary) desc += ` (🎯 ${anatomy.primary})`;
+                    desc += `\n`;
+                });
+            } else if (plan.desc) {
+                desc += `📋 Detay: ${plan.desc}\n`;
+            }
+
+            desc += `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            desc += `🚀 Salona girdiğinizde tek dokunuşla seansı başlatın:\n`;
+            desc += `👉 https://fitness.kantarci.io/?startWorkout=${encodeURIComponent(plan.id || '')}&day=${dayIdx}\n`;
+            return desc;
+        }
+
+        async function syncFitLabToGoogleCalendar(targetWeek = null) {
+            const week = targetWeek || activePlannerWeek || 'current';
+            const isNext = week === 'next';
+            const user = getActiveUser();
+            const schedule = isNext ? getNextWeeklySchedule(user.id) : getWeeklySchedule(user.id);
+            const prefs = getCalendarPreferences(user.id);
+            const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Istanbul';
+
+            const calId = await getOrCreateFitLabCalendar();
+            let createdCount = 0;
+            let updatedCount = 0;
+
+            for (let d = 0; d < 7; d++) {
+                const plan = schedule[d];
+                if (!plan) continue;
+
+                // Dinlenme günüyse ve takvimde etkinliği varsa kaldır
+                if (plan.rest) {
+                    if (plan.googleEventId) {
+                        try {
+                            await callGoogleCalendarApi(`/calendars/${encodeURIComponent(calId)}/events/${encodeURIComponent(plan.googleEventId)}`, {
+                                method: 'DELETE'
+                            });
+                        } catch(e) {}
+                        delete plan.googleEventId;
+                    }
+                    continue;
+                }
+
+                // Antrenman günü
+                const workoutDetails = getWorkoutDetailsForPlan(plan) || {};
+                const duration = parseInt(plan.duration, 10) || parseInt(workoutDetails.duration, 10) || 50;
+                const restSec = (workoutDetails.scheme && workoutDetails.scheme.rest) || workoutDetails.rest || 60;
+                const timeStr = plan.time || prefs.defaultTime || '18:30';
+                const [hStr, mStr] = timeStr.split(':');
+                const startHour = parseInt(hStr, 10) || 18;
+                const startMin = parseInt(mStr, 10) || 30;
+
+                const startDate = getDateForScheduleDay(d, isNext);
+                startDate.setHours(startHour, startMin, 0, 0);
+
+                const endDate = new Date(startDate.getTime() + (duration * 60 * 1000));
+
+                const startIso = formatIsoDateTimeWithOffset(startDate);
+                const endIso = formatIsoDateTimeWithOffset(endDate);
+
+                const cleanTitle = (plan.title || 'Antrenman Seansı').replace(/^[⚔️🧘🔬🔥\s]+/, '');
+                const summary = `⚔️ FitLab: ${cleanTitle}`;
+                const description = buildEventDescription(plan, d, duration, restSec);
+
+                const eventBody = {
+                    summary: summary,
+                    description: description,
+                    start: { dateTime: startIso, timeZone: userTz },
+                    end: { dateTime: endIso, timeZone: userTz },
+                    colorId: '6',
+                    reminders: {
+                        useDefault: false,
+                        overrides: [
+                            { method: 'popup', minutes: prefs.reminderMin || 30 }
+                        ]
+                    },
+                    extendedProperties: {
+                        private: {
+                            fitLabWorkoutId: plan.id || '',
+                            fitLabDayIdx: String(d),
+                            fitLabWeek: week,
+                            fitLabSource: 'FitLab_PWA'
+                        }
+                    }
+                };
+
+                let eventRes = null;
+                if (plan.googleEventId) {
+                    try {
+                        eventRes = await callGoogleCalendarApi(`/calendars/${encodeURIComponent(calId)}/events/${encodeURIComponent(plan.googleEventId)}`, {
+                            method: 'PATCH',
+                            body: JSON.stringify(eventBody)
+                        });
+                        updatedCount++;
+                    } catch(err) {
+                        eventRes = null;
+                    }
+                }
+
+                if (!eventRes) {
+                    eventRes = await callGoogleCalendarApi(`/calendars/${encodeURIComponent(calId)}/events`, {
+                        method: 'POST',
+                        body: JSON.stringify(eventBody)
+                    });
+                    createdCount++;
+                }
+
+                if (eventRes && eventRes.id) {
+                    plan.googleEventId = eventRes.id;
+                    plan.googleHtmlLink = eventRes.htmlLink;
+                    plan.lastSyncedAt = Date.now();
+                }
+            }
+
+            if (isNext) saveNextWeeklySchedule(schedule, user.id);
+            else saveWeeklySchedule(schedule, user.id);
+
+            return { createdCount, updatedCount };
+        }
+
+        async function syncGoogleCalendarToFitLab(targetWeek = null) {
+            const week = targetWeek || activePlannerWeek || 'current';
+            const isNext = week === 'next';
+            const user = getActiveUser();
+            const schedule = isNext ? getNextWeeklySchedule(user.id) : getWeeklySchedule(user.id);
+            const calId = await getOrCreateFitLabCalendar();
+
+            const startOfWeek = getDateForScheduleDay(1, isNext);
+            startOfWeek.setHours(0, 0, 0, 0);
+            const endOfWeek = getDateForScheduleDay(0, isNext);
+            endOfWeek.setHours(23, 59, 59, 999);
+
+            const startIso = formatIsoDateTimeWithOffset(startOfWeek);
+            const endIso = formatIsoDateTimeWithOffset(endOfWeek);
+
+            const eventsData = await callGoogleCalendarApi(`/calendars/${encodeURIComponent(calId)}/events?timeMin=${encodeURIComponent(startIso)}&timeMax=${encodeURIComponent(endIso)}&singleEvents=true`);
+            const events = (eventsData && Array.isArray(eventsData.items)) ? eventsData.items : [];
+
+            let timeCorrections = 0;
+            let dayMoves = 0;
+
+            events.forEach(ev => {
+                if (!ev.start) return;
+                const isFitLab = (ev.extendedProperties && ev.extendedProperties.private && ev.extendedProperties.private.fitLabSource === 'FitLab_PWA') || (ev.summary && ev.summary.includes('FitLab'));
+                if (!isFitLab) return;
+
+                const evDate = new Date(ev.start.dateTime || ev.start.date);
+                const actualDayIdx = evDate.getDay();
+                const pad = n => String(n).padStart(2, '0');
+                const evTimeStr = `${pad(evDate.getHours())}:${pad(evDate.getMinutes())}`;
+
+                const origDayIdxStr = ev.extendedProperties?.private?.fitLabDayIdx;
+                const origDayIdx = origDayIdxStr !== undefined ? parseInt(origDayIdxStr, 10) : actualDayIdx;
+
+                if (origDayIdx !== actualDayIdx && schedule[origDayIdx] && !schedule[origDayIdx].rest) {
+                    const workoutToMove = Object.assign({}, schedule[origDayIdx]);
+                    workoutToMove.time = evTimeStr;
+                    workoutToMove.googleEventId = ev.id;
+                    workoutToMove.lastSyncedAt = Date.now();
+
+                    schedule[actualDayIdx] = workoutToMove;
+                    schedule[origDayIdx] = {
+                        id: 'rest',
+                        title: '🧘 Dinlenme & Aktif Toparlanma',
+                        type: 'rest',
+                        desc: 'Hafif yürüyüş, esneme veya tam istirahat',
+                        rest: true
+                    };
+                    dayMoves++;
+                } else if (schedule[actualDayIdx]) {
+                    const curPlan = schedule[actualDayIdx];
+                    if (!curPlan.rest) {
+                        curPlan.googleEventId = ev.id;
+                        curPlan.googleHtmlLink = ev.htmlLink;
+                        if (curPlan.time !== evTimeStr) {
+                            curPlan.time = evTimeStr;
+                            timeCorrections++;
+                        }
+                    }
+                }
+            });
+
+            if (isNext) saveNextWeeklySchedule(schedule, user.id);
+            else saveWeeklySchedule(schedule, user.id);
+
+            return { timeCorrections, dayMoves, totalEvents: events.length };
+        }
+
+        async function performFullCalendarSync() {
+            if (!isGoogleCalendarConnected()) {
+                connectGoogleCalendarPrompt();
+                return;
+            }
+            try {
+                if (typeof showToast === 'function') showToast("🔄 Takvim ile canlı çift yönlü eşitleniyor...");
+                const pullResult = await syncGoogleCalendarToFitLab();
+                await syncFitLabToGoogleCalendar();
+
+                if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
+                renderCalendarConnectionCard();
+
+                let msg = `✅ Canlı Takvim Senkronize Edildi!`;
+                if (pullResult.dayMoves > 0) msg += ` • 📅 ${pullResult.dayMoves} seans takvimdeki yeni gününe taşındı.`;
+                if (pullResult.timeCorrections > 0) msg += ` • 🕒 ${pullResult.timeCorrections} seans saati güncellendi.`;
+                if (typeof showToast === 'function') showToast(msg);
+                else alert(msg);
+            } catch(e) {
+                console.error("Takvim senkronizasyon hatası:", e);
+                if (typeof showToast === 'function') showToast("❌ Takvim senkronize edilemedi: " + (e.message || e));
+            }
+        }
+
+        function triggerManualCalendarSync() {
+            performFullCalendarSync();
+        }
+
+        async function syncCurrentDayToCalendar() {
+            if (activeSchedulingDayIdx === null) return;
+            if (!isGoogleCalendarConnected()) {
+                connectGoogleCalendarPrompt();
+                return;
+            }
+            try {
+                if (typeof showToast === 'function') showToast("📅 Günlük antrenman takvime işleniyor...");
+                const isNext = activePlannerWeek === 'next';
+                const user = getActiveUser();
+                const schedule = isNext ? getNextWeeklySchedule(user.id) : getWeeklySchedule(user.id);
+                const plan = schedule[activeSchedulingDayIdx];
+                if (!plan || plan.rest) {
+                    if (typeof showToast === 'function') showToast("ℹ️ Dinlenme günleri için takvim etkinliği oluşturulmaz.");
+                    return;
+                }
+
+                await syncFitLabToGoogleCalendar(activePlannerWeek);
+                if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
+                openScheduleDayModal(activeSchedulingDayIdx);
+                if (typeof showToast === 'function') showToast("✅ Güncellendi! Antrenman Google Takvim'e işlendi.");
+            } catch(e) {
+                if (typeof showToast === 'function') showToast("❌ Hata: " + (e.message || e));
+            }
+        }
+
+        function deleteCalendarEventQuiet(eventId) {
+            if (!eventId || !isGoogleCalendarConnected()) return;
+            const calId = getStoredCalendarId() || 'primary';
+            callGoogleCalendarApi(`/calendars/${encodeURIComponent(calId)}/events/${encodeURIComponent(eventId)}`, {
+                method: 'DELETE'
+            }).catch(() => {});
+        }
+
+        function openSingleDayDirectGoogleCalendar() {
+            if (activeSchedulingDayIdx === null) return;
+            const isNext = activePlannerWeek === 'next';
+            const user = getActiveUser();
+            const schedule = isNext ? getNextWeeklySchedule(user.id) : getWeeklySchedule(user.id);
+            const plan = schedule[activeSchedulingDayIdx];
+            if (!plan || plan.rest) {
+                alert("Dinlenme günü için doğrudan takvim bağlantısı oluşturulamaz.");
+                return;
+            }
+
+            if (plan.googleHtmlLink) {
+                window.open(plan.googleHtmlLink, '_blank');
+                return;
+            }
+
+            const workoutDetails = getWorkoutDetailsForPlan(plan) || {};
+            const duration = parseInt(plan.duration, 10) || parseInt(workoutDetails.duration, 10) || 50;
+            const timeStr = plan.time || getCalendarPreferences().defaultTime || '18:30';
+            const [hStr, mStr] = timeStr.split(':');
+            const startHour = parseInt(hStr, 10) || 18;
+            const startMin = parseInt(mStr, 10) || 30;
+
+            const startDate = getDateForScheduleDay(activeSchedulingDayIdx, isNext);
+            startDate.setHours(startHour, startMin, 0, 0);
+            const endDate = new Date(startDate.getTime() + (duration * 60 * 1000));
+
+            const formatUtcCompact = d => {
+                return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+            };
+
+            const datesParam = `${formatUtcCompact(startDate)}/${formatUtcCompact(endDate)}`;
+            const cleanTitle = (plan.title || 'Antrenman Seansı').replace(/^[⚔️🧘🔬🔥\s]+/, '');
+            const titleParam = `⚔️ FitLab: ${cleanTitle}`;
+            const descParam = buildEventDescription(plan, activeSchedulingDayIdx, duration);
+
+            const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(titleParam)}&dates=${encodeURIComponent(datesParam)}&details=${encodeURIComponent(descParam)}&add=${encodeURIComponent(user.email || '')}`;
+            window.open(gcalUrl, '_blank');
+        }
+
+        function openGoogleCalendarWeb() {
+            window.open('https://calendar.google.com/calendar/u/0/r', '_blank');
+        }
+
+        function generateScheduleICS(targetWeek = null) {
+            const week = targetWeek || activePlannerWeek || 'current';
+            const isNext = week === 'next';
+            const user = getActiveUser();
+            const schedule = isNext ? getNextWeeklySchedule(user.id) : getWeeklySchedule(user.id);
+            const prefs = getCalendarPreferences(user.id);
+
+            const formatIcsDate = d => {
+                return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+            };
+
+            let ics = [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'PRODID:-//FitLab//Celik Kodu PWA//TR',
+                'CALSCALE:GREGORIAN',
+                'METHOD:PUBLISH',
+                'X-WR-CALNAME:FitLab • Antrenmanlarım',
+                'X-WR-TIMEZONE:Europe/Istanbul'
+            ];
+
+            for (let d = 0; d < 7; d++) {
+                const plan = schedule[d];
+                if (!plan || plan.rest) continue;
+
+                const workoutDetails = getWorkoutDetailsForPlan(plan) || {};
+                const duration = parseInt(plan.duration, 10) || parseInt(workoutDetails.duration, 10) || 50;
+                const timeStr = plan.time || prefs.defaultTime || '18:30';
+                const [hStr, mStr] = timeStr.split(':');
+                const startHour = parseInt(hStr, 10) || 18;
+                const startMin = parseInt(mStr, 10) || 30;
+
+                const startDate = getDateForScheduleDay(d, isNext);
+                startDate.setHours(startHour, startMin, 0, 0);
+                const endDate = new Date(startDate.getTime() + (duration * 60 * 1000));
+
+                const cleanTitle = (plan.title || 'Antrenman Seansı').replace(/^[⚔️🧘🔬🔥\s]+/, '');
+                const summary = `FitLab: ${cleanTitle}`;
+                const descText = buildEventDescription(plan, d, duration)
+                    .replace(/\\/g, '\\\\')
+                    .replace(/;/g, '\\;')
+                    .replace(/,/g, '\\,')
+                    .replace(/\n/g, '\\n');
+
+                ics.push(
+                    'BEGIN:VEVENT',
+                    `UID:fitlab-${d}-${startDate.getTime()}@fitness.kantarci.io`,
+                    `DTSTAMP:${formatIcsDate(new Date())}`,
+                    `DTSTART:${formatIcsDate(startDate)}`,
+                    `DTEND:${formatIcsDate(endDate)}`,
+                    `SUMMARY:${summary}`,
+                    `DESCRIPTION:${descText}`,
+                    'BEGIN:VALARM',
+                    'ACTION:DISPLAY',
+                    `TRIGGER:-PT${prefs.reminderMin || 30}M`,
+                    'DESCRIPTION:FitLab Antrenman Vakti!',
+                    'END:VALARM',
+                    'END:VEVENT'
+                );
+            }
+
+            ics.push('END:VCALENDAR');
+            return ics.join('\r\n');
+        }
+
+        function downloadFullScheduleICS() {
+            const icsContent = generateScheduleICS();
+            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `fitlab-haftalik-antrenman-${activePlannerWeek || 'current'}.ics`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            if (typeof showToast === 'function') showToast("📥 Haftalık takvim (.ics) indirildi! Apple Takvim veya Google Takvim ile anında açabilirsiniz.");
+        }
+
+        function downloadSingleDayICS() {
+            if (activeSchedulingDayIdx === null) return;
+            const isNext = activePlannerWeek === 'next';
+            const user = getActiveUser();
+            const schedule = isNext ? getNextWeeklySchedule(user.id) : getWeeklySchedule(user.id);
+            const plan = schedule[activeSchedulingDayIdx];
+            if (!plan || plan.rest) {
+                alert("Dinlenme günü için takvim dosyası üretilmez.");
+                return;
+            }
+
+            const icsContent = generateScheduleICS();
+            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `fitlab-gun-${activeSchedulingDayIdx}.ics`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            if (typeof showToast === 'function') showToast("📥 Seans (.ics) indirildi!");
+        }
+
+        function getCalendarLiveBarHtml() {
+            const connected = isGoogleCalendarConnected();
+            if (connected) {
+                return `
+                    <div class="calendar-live-bar">
+                        <div class="calendar-live-info">
+                            <span class="weekly-day-sync-dot"></span>
+                            <span style="color:#fff;">FitLab • Antrenmanlarım</span>
+                            <span style="font-size:10px; color:#10b981; font-weight:800;">(Canlı Eşitli)</span>
+                        </div>
+                        <div class="calendar-live-actions">
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:3px 8px; color:var(--cyan); border-color:rgba(56,189,248,0.4);" onclick="triggerManualCalendarSync()" title="Takvimle iki yönlü eşitle">
+                                🔄 Canlı Eşitle
+                            </button>
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:3px 8px; color:#cbd5e1;" onclick="openGoogleCalendarWeb()" title="Google Takvimde Aç">
+                                📅 Takvim
+                            </button>
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:3px 7px;" onclick="openCalendarSyncModal()" title="Takvim Ayarları">
+                                ⚙️
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="calendar-live-bar" style="background:rgba(245,158,11,0.06); border-color:rgba(245,158,11,0.25);">
+                        <div class="calendar-live-info" style="font-size:11px;">
+                            <span>📅</span>
+                            <span>Takviminizle Canlı Eşitleyin</span>
+                        </div>
+                        <div class="calendar-live-actions">
+                            <button type="button" class="btn btn-gold" style="font-size:11px; padding:3px 10px; font-weight:800;" onclick="connectGoogleCalendarPrompt()">
+                                ⚡ Google Takvim'e Bağlan
+                            </button>
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:3px 7px;" onclick="openCalendarSyncModal()" title="Takvim Yönetimi & Dışa Aktar">
+                                ⚙️ / 📥
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function updateScheduleDayModalTimingCard(dayIdx, currentPlan, workoutDetails) {
+            const timingSec = document.getElementById('schedDayTimingSection');
+            if (!timingSec) return;
+
+            if (currentPlan.rest) {
+                timingSec.style.display = 'none';
+                return;
+            }
+            timingSec.style.display = 'block';
+
+            const prefs = getCalendarPreferences();
+            const timeInput = document.getElementById('schedDayTimeInput');
+            if (timeInput) {
+                timeInput.value = currentPlan.time || prefs.defaultTime || '18:30';
+            }
+
+            const durInput = document.getElementById('schedDayDurationInput');
+            if (durInput) {
+                durInput.value = currentPlan.duration || (workoutDetails && workoutDetails.duration) || 50;
+            }
+
+            const badge = document.getElementById('schedDaySyncStatusBadge');
+            const syncBtn = document.getElementById('btnSyncSingleDayGCal');
+
+            if (badge) {
+                if (currentPlan.googleEventId) {
+                    badge.innerHTML = '🟢 Google Takvimde Eşitlendi';
+                    badge.style.background = 'rgba(16, 185, 129, 0.15)';
+                    badge.style.color = '#34d399';
+                } else if (isGoogleCalendarConnected()) {
+                    badge.innerHTML = '🟡 Senkronizasyon Bekliyor';
+                    badge.style.background = 'rgba(245, 158, 11, 0.15)';
+                    badge.style.color = 'var(--gold)';
+                } else {
+                    badge.innerHTML = 'Yerel Plan';
+                    badge.style.background = 'rgba(255, 255, 255, 0.06)';
+                    badge.style.color = '#cbd5e1';
+                }
+            }
+
+            if (syncBtn) {
+                syncBtn.innerText = currentPlan.googleEventId ? '🔄 Takvimi Yeniden Güncelle' : '📅 Bu Günü Takvime İşle';
+            }
+        }
+
+        function updateScheduledDayTime(timeVal) {
+            if (activeSchedulingDayIdx === null) return;
+            const isNext = activePlannerWeek === 'next';
+            const user = getActiveUser();
+            const schedule = isNext ? getNextWeeklySchedule(user.id) : getWeeklySchedule(user.id);
+            if (schedule[activeSchedulingDayIdx]) {
+                schedule[activeSchedulingDayIdx].time = timeVal || '18:30';
+                if (isNext) saveNextWeeklySchedule(schedule, user.id);
+                else saveWeeklySchedule(schedule, user.id);
+
+                if (isGoogleCalendarConnected() && schedule[activeSchedulingDayIdx].googleEventId) {
+                    syncFitLabToGoogleCalendar(activePlannerWeek).catch(() => {});
+                }
+                if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
+            }
+        }
+
+        function updateScheduledDayDuration(durVal) {
+            if (activeSchedulingDayIdx === null) return;
+            const isNext = activePlannerWeek === 'next';
+            const user = getActiveUser();
+            const schedule = isNext ? getNextWeeklySchedule(user.id) : getWeeklySchedule(user.id);
+            if (schedule[activeSchedulingDayIdx]) {
+                schedule[activeSchedulingDayIdx].duration = parseInt(durVal, 10) || 50;
+                if (isNext) saveNextWeeklySchedule(schedule, user.id);
+                else saveWeeklySchedule(schedule, user.id);
+
+                if (isGoogleCalendarConnected() && schedule[activeSchedulingDayIdx].googleEventId) {
+                    syncFitLabToGoogleCalendar(activePlannerWeek).catch(() => {});
+                }
+            }
+        }
+
+        function openCalendarSyncModal() {
+            const modal = document.getElementById('calendarSyncModal');
+            if (!modal) return;
+            renderCalendarConnectionCard();
+
+            const prefs = getCalendarPreferences();
+            const timeEl = document.getElementById('calPrefDefaultTime');
+            const remEl = document.getElementById('calPrefReminderMin');
+            const clientEl = document.getElementById('calCustomClientId');
+
+            if (timeEl) timeEl.value = prefs.defaultTime || '18:30';
+            if (remEl) remEl.value = String(prefs.reminderMin || 30);
+            if (clientEl) clientEl.value = prefs.customClientId || '';
+
+            modal.style.display = 'flex';
+        }
+
+        function closeCalendarSyncModal() {
+            const modal = document.getElementById('calendarSyncModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function renderCalendarConnectionCard() {
+            const card = document.getElementById('calendarConnectionCard');
+            if (!card) return;
+            const connected = isGoogleCalendarConnected();
+
+            if (connected) {
+                card.innerHTML = `
+                    <div style="background:linear-gradient(135deg, rgba(16,185,129,0.1), rgba(15,23,42,0.9)); border:1.5px solid #10b981; border-radius:10px; padding:12px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="font-size:22px;">🟢</span>
+                                <div>
+                                    <div style="font-size:13px; font-weight:800; color:#fff;">Google Takvim Canlı Bağlı</div>
+                                    <div style="font-size:11px; color:#a7f3d0; margin-top:2px;">Özel Takvim: <strong>FitLab • Antrenmanlarım</strong></div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:5px 10px; color:#fca5a5; border-color:rgba(239,68,68,0.4);" onclick="disconnectGoogleCalendar()">
+                                Bağlantıyı Kes
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                card.innerHTML = `
+                    <div style="background:rgba(245,158,11,0.08); border:1.5px solid rgba(245,158,11,0.3); border-radius:10px; padding:12px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+                            <div>
+                                <div style="font-size:13px; font-weight:800; color:#fff;">Henüz Takvim Bağlantısı Yok</div>
+                                <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">Google hesabınızı bağlayarak anında canlı çift yönlü senkronizasyona geçebilirsiniz.</div>
+                            </div>
+                            <button type="button" class="btn btn-gold" style="font-size:12px; padding:8px 14px; font-weight:900;" onclick="connectGoogleCalendarPrompt()">
+                                ⚡ Şimdi Bağlan
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        async function connectGoogleCalendarPrompt() {
+            // 1. Firebase Google Auth ile dene
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                try {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    provider.addScope('https://www.googleapis.com/auth/calendar');
+                    provider.addScope('https://www.googleapis.com/auth/calendar.events');
+                    const cred = await firebase.auth().signInWithPopup(provider);
+                    if (cred && cred.credential && cred.credential.accessToken) {
+                        saveGoogleCalendarToken(cred.credential.accessToken, 3600);
+                        await performFullCalendarSync();
+                        return;
+                    }
+                } catch(fbErr) {
+                    console.warn("Firebase Auth Google Calendar denemesi:", fbErr);
+                }
+            }
+
+            // 2. Google Identity Services (GIS) ile dene
+            if (window.google && window.google.accounts && window.google.accounts.oauth2) {
+                try {
+                    const clientId = getGoogleClientId();
+                    const client = google.accounts.oauth2.initTokenClient({
+                        client_id: clientId,
+                        scope: 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events',
+                        callback: async (resp) => {
+                            if (resp && resp.access_token) {
+                                saveGoogleCalendarToken(resp.access_token, resp.expires_in || 3600);
+                                await performFullCalendarSync();
+                            } else if (resp && resp.error) {
+                                if (typeof showToast === 'function') showToast("❌ Google izin hatası: " + resp.error);
+                            }
+                        }
+                    });
+                    client.requestAccessToken();
+                    return;
+                } catch(gisErr) {
+                    console.warn("GIS denemesi:", gisErr);
+                }
+            }
+
+            // 3. Fallback: Kullanıcıyı takvim modalına yönlendir
+            openCalendarSyncModal();
+            if (typeof showToast === 'function') showToast("ℹ️ Google Takvim yetkilendirmesi için lütfen Takvim Merkezi'ndeki adımları inceleyin.");
+        }
+
+        function initCalendarLiveSyncOnLoad() {
+            try {
+                if (isGoogleCalendarConnected()) {
+                    const prefs = getCalendarPreferences();
+                    if (prefs.autoSync !== false) {
+                        setTimeout(() => {
+                            syncGoogleCalendarToFitLab().then(() => {
+                                if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
+                            }).catch(() => {});
+                        }, 2500);
+                    }
                 }
             } catch(e) {}
         }
@@ -19039,7 +20136,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=124')
+                navigator.serviceWorker.register('./sw.js?v=125')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
@@ -19064,6 +20161,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             initAuthDatabase();
             initFirebaseEngine();
             syncAppViewState();
+            initCalendarLiveSyncOnLoad();
             applyWednesdayHammerCurlPatch();
             updateProfileGeminiStatusUI();
             renderAiHybridHeroBanner();
