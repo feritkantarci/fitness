@@ -4092,7 +4092,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v133</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v134</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -4128,7 +4128,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v133</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v134</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -5250,8 +5250,29 @@
             </div>
             
             <p style="font-size:12px; color:var(--text-secondary); margin:0 0 14px 0; line-height:1.5;">
-                Google Takvim güvenlik protokolleri gereği, programınızı takviminize aktarmak için aşağıdaki 2 pratik yöntemden birini seçebilirsiniz:
+                Aşağıdaki <strong>1 kereye mahsus Google bağlantısını</strong> kurarak tüm antrenmanların arka planda otomatik yüklenmesini sağlayabilir veya dosya yöntemlerini kullanabilirsiniz:
             </p>
+
+            <!-- SIFIR TIKLAMA / TAM OTOMATİK CANLI GOOGLE SENKRONİZASYONU -->
+            <div id="gcalAutoSyncCard" style="background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(15,23,42,0.9)); border: 1.5px solid #10b981; border-radius: 12px; padding: 14px; margin-bottom: 16px; box-shadow: 0 0 20px rgba(16,185,129,0.15);">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
+                    <div style="flex:1; min-width:240px;">
+                        <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+                            <span style="font-size:16px;">⚡</span>
+                            <span style="font-size:13.5px; font-weight:900; color:#fff;" id="gcalAutoSyncCardTitle">1 Kereye Mahsus Onay: Sıfır Tıklama & Tam Otomasyon</span>
+                            <span class="auth-role-tag" id="gcalAutoSyncCardBadge" style="background:#10b981; color:#000; font-weight:900; font-size:9px;">CANLI API</span>
+                        </div>
+                        <p style="font-size:11.5px; color:#a7f3d0; margin:0; line-height:1.5;" id="gcalAutoSyncCardDesc">
+                            Google hesabınızı <strong>1 kere bağlayın</strong>. Artık hiçbir dosya indirmekle veya butona basmakla uğraşmayın; FitLAB veya web üzerinden atanan tüm programlar Google Takviminize <strong>kendiliğinden otomatik yüklensin</strong>.
+                        </p>
+                    </div>
+                    <div id="gcalAutoSyncCardAction" style="display:flex; align-items:center; gap:8px;">
+                        <button type="button" class="btn btn-gold" style="font-size:12px; padding:9px 18px; font-weight:900; box-shadow:0 0 15px rgba(245,158,11,0.3); white-space:nowrap;" onclick="connectGoogleCalendarPrompt()">
+                            ⚡ Google Hesabımı Bağla
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             <!-- YÖNTEM 1: TÜM HAFTAYI TEK SEFERDE AKTAR -->
             <div style="background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(15,23,42,0.8)); border: 1.5px solid var(--gold); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
@@ -16365,6 +16386,48 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 titleEl.innerText = `📅 Google Takvim'e Aktar (${periodStr})`;
             }
 
+            // Otomatik canlı bağlantı kartını güncelle
+            const autoCardTitle = document.getElementById('gcalAutoSyncCardTitle');
+            const autoCardBadge = document.getElementById('gcalAutoSyncCardBadge');
+            const autoCardDesc = document.getElementById('gcalAutoSyncCardDesc');
+            const autoCardAction = document.getElementById('gcalAutoSyncCardAction');
+            const isConn = (typeof isGoogleCalendarConnected === 'function') && isGoogleCalendarConnected();
+
+            if (autoCardTitle && autoCardAction) {
+                if (isConn) {
+                    autoCardTitle.innerText = "🟢 Google Takvim Canlı Bağlı (Otomatik Mod Aktif)";
+                    if (autoCardBadge) {
+                        autoCardBadge.innerText = "BAĞLANDI";
+                        autoCardBadge.style.background = "#10b981";
+                    }
+                    if (autoCardDesc) {
+                        autoCardDesc.innerHTML = "Google hesabınız bağlı durumda. FitLAB veya web takvimine atanan seanslar arka planda Google Takviminize <strong>otomatik yüklenir</strong>.";
+                    }
+                    autoCardAction.innerHTML = `
+                        <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:7px 14px; font-weight:800;" onclick="performFullCalendarSync()">
+                            🔄 Şimdi Eşitle
+                        </button>
+                        <button type="button" class="btn btn-outline" style="font-size:11px; padding:7px 10px; color:#fca5a5; border-color:rgba(239,68,68,0.4);" onclick="disconnectGoogleCalendar(); openGoogleCalendarExportModal();">
+                            Bağlantıyı Kes
+                        </button>
+                    `;
+                } else {
+                    autoCardTitle.innerText = "1 Kereye Mahsus Onay: Sıfır Tıklama & Tam Otomasyon";
+                    if (autoCardBadge) {
+                        autoCardBadge.innerText = "CANLI API";
+                        autoCardBadge.style.background = "#10b981";
+                    }
+                    if (autoCardDesc) {
+                        autoCardDesc.innerHTML = "Google hesabınızı <strong>1 kere bağlayın</strong>. Artık hiçbir dosya indirmekle veya butona basmakla uğraşmayın; FitLAB veya web üzerinden atanan tüm programlar Google Takviminize <strong>kendiliğinden otomatik yüklensin</strong>.";
+                    }
+                    autoCardAction.innerHTML = `
+                        <button type="button" class="btn btn-gold" style="font-size:12px; padding:9px 18px; font-weight:900; box-shadow:0 0 15px rgba(245,158,11,0.3); white-space:nowrap;" onclick="connectGoogleCalendarPrompt()">
+                            ⚡ Google Hesabımı Bağla
+                        </button>
+                    `;
+                }
+            }
+
             // Günlük buton listesini oluştur
             const daysListEl = document.getElementById('gcalExportDaysList');
             if (daysListEl) {
@@ -21327,7 +21390,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=133')
+                navigator.serviceWorker.register('./sw.js?v=134')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
