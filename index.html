@@ -4092,7 +4092,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v132</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v133</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -4128,7 +4128,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v132</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v133</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -15444,6 +15444,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 if (typeof renderActiveWorkout === 'function') {
                     renderActiveWorkout();
                 }
+                if (hasCalendarChange && typeof isGoogleCalendarConnected === 'function' && isGoogleCalendarConnected(uid)) {
+                    syncFitLabToGoogleCalendar().catch(e => console.warn("Google Calendar otomatik senkronizasyon:", e));
+                }
             } catch(e) {
                 console.warn("processIncomingCoachDirective hatası:", e);
             }
@@ -16742,13 +16745,33 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         }
 
         async function connectGoogleCalendarPrompt() {
+            // 1. Firebase Google Auth ile doğrudan tek tıkla oturum açma dene
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                try {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    provider.addScope('https://www.googleapis.com/auth/calendar');
+                    provider.addScope('https://www.googleapis.com/auth/calendar.events');
+                    const cred = await firebase.auth().signInWithPopup(provider);
+                    if (cred && cred.credential && cred.credential.accessToken) {
+                        saveGoogleCalendarToken(cred.credential.accessToken, 3600);
+                        await performFullCalendarSync();
+                        if (typeof showToast === 'function') {
+                            showToast("🟢 Google Takvim canlı bağlandı! Programlar otomatik eşitleniyor.");
+                        }
+                        return;
+                    }
+                } catch(fbErr) {
+                    console.warn("Firebase Auth Google Calendar denemesi:", fbErr);
+                }
+            }
+
             const clientId = getGoogleClientId();
 
-            // 1. İstemci kimliği girilmemişse doğrudan takvim modalına yönlendir ve bilgilendir
+            // 2. İstemci kimliği girilmemişse doğrudan takvim modalına yönlendir ve bilgilendir
             if (!clientId) {
                 openCalendarSyncModal();
                 if (typeof showToast === 'function') {
-                    showToast("ℹ️ Canlı API senkronizasyonu için geçerli bir Google OAuth Client ID gereklidir.");
+                    showToast("ℹ️ Canlı API senkronizasyonu için Google hesabınızla oturum açın veya Client ID tanımlayın.");
                 }
                 return;
             }
@@ -21304,7 +21327,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=132')
+                navigator.serviceWorker.register('./sw.js?v=133')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
