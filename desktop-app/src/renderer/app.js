@@ -3937,23 +3937,32 @@ function getDesktopAthleteSchedule() {
     try {
         const saved = localStorage.getItem(storageKey);
         if (saved) {
-            const parsed = JSON.parse(saved);
-            if (Array.isArray(parsed)) {
-                const normalized = {};
-                parsed.forEach((item, idx) => {
-                    if (!item) return;
-                    const dIdx = typeof item.dayIndex === 'number' ? item.dayIndex : idx;
-                    normalized[dIdx] = item;
-                });
-                return normalized;
-            }
-            if (typeof parsed === 'object') {
-                return parsed;
+            // Eski 4 günlük ayrık vücut geliştirme şablonunu temizle (Üst Gövde, Zayıf Bölge vb.)
+            const rawStr = typeof saved === 'string' ? saved : JSON.stringify(saved);
+            const isLegacy = rawStr.includes('Üst Gövde') || rawStr.includes('Zayıf Bölge') || rawStr.includes('Posterior Zincir & Çekiş');
+            if (!isLegacy) {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed)) {
+                    const normalized = {};
+                    parsed.forEach((item, idx) => {
+                        if (!item) return;
+                        const dIdx = typeof item.dayIndex === 'number' ? item.dayIndex : idx;
+                        normalized[dIdx] = item;
+                    });
+                    return normalized;
+                }
+                if (typeof parsed === 'object') {
+                    return parsed;
+                }
+            } else {
+                console.log(`[FitLAB] ${uid} için eski ayrık şablon tespit edildi, resmi Çelik Kodu programı yüklendi.`);
             }
         }
     } catch(e) {}
 
-    return getDefaultDesktopAthleteSchedule();
+    const def = getDefaultDesktopAthleteSchedule();
+    saveDesktopAthleteSchedule(def);
+    return def;
 }
 
 function saveDesktopAthleteSchedule(schedule) {
@@ -4719,21 +4728,21 @@ function renderDesktopCalendarWeeklyCards(anchor) {
             const exNames = (completedLog.exercises || []).map(e => e.name || e.title).filter(Boolean).slice(0, 3).join(', ');
 
             return `
-                <div class="calendar-day-card completed" style="background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.3); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;" onclick="openDesktopDayScheduleModal(${idx}, '${day.dateStr}')">
+                <div class="calendar-day-card completed" onclick="openDesktopDayScheduleModal(${idx}, '${day.dateStr}')">
                     <div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <span style="font-size: 14px; font-weight: 800; color: #fff;">${day.dayName} ${isTodayBadge}</span>
-                            <span style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">${day.formattedDate}</span>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span style="font-size: 13px; font-weight: 800; color: #fff;">${day.dayName} ${isTodayBadge}</span>
+                            <span style="font-size: 10.5px; color: var(--text-muted); font-family: var(--font-mono);">${day.formattedDate}</span>
                         </div>
-                        <div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(16,185,129,0.2); color: #10b981; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-bottom: 10px;">
+                        <div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(16,185,129,0.2); color: #10b981; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 700; margin-bottom: 8px;">
                             ✅ Tamamlandı (${setCount} Set)
                         </div>
-                        <div style="font-size: 12px; color: #e2e8f0; line-height: 1.4; margin-bottom: 8px;">
+                        <div style="font-size: 11.5px; color: #e2e8f0; line-height: 1.35; margin-bottom: 6px;">
                             <strong>Hacim:</strong> ${vol} • <strong>Hareketler:</strong> ${escapeHTML(exNames || 'Kayıtlı Seans')}
                         </div>
                     </div>
-                    <div style="display: flex; gap: 6px; margin-top: 12px;">
-                        <button type="button" class="btn-sm-action" style="flex: 1; font-size: 11px; text-align: center; padding: 6px 0; color: var(--cyan); border-color: rgba(56,189,248,0.4);" onclick="event.stopPropagation(); openDesktopDayScheduleModal(${idx}, '${day.dateStr}')">
+                    <div style="display: flex; gap: 4px; margin-top: 10px;">
+                        <button type="button" class="btn-sm-action" style="flex: 1; font-size: 10.5px; text-align: center; padding: 5px 0; color: var(--cyan); border-color: rgba(56,189,248,0.4);" onclick="event.stopPropagation(); openDesktopDayScheduleModal(${idx}, '${day.dateStr}')">
                             👁️ Program Yönetimi
                         </button>
                     </div>
@@ -4743,21 +4752,21 @@ function renderDesktopCalendarWeeklyCards(anchor) {
 
         if (plan.isRest) {
             return `
-                <div class="calendar-day-card rest" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;" onclick="openDesktopDayScheduleModal(${idx}, '${day.dateStr}')">
+                <div class="calendar-day-card rest" onclick="openDesktopDayScheduleModal(${idx}, '${day.dateStr}')">
                     <div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <span style="font-size: 14px; font-weight: 800; color: var(--text-muted);">${day.dayName} ${isTodayBadge}</span>
-                            <span style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">${day.formattedDate}</span>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span style="font-size: 13px; font-weight: 800; color: var(--text-muted);">${day.dayName} ${isTodayBadge}</span>
+                            <span style="font-size: 10.5px; color: var(--text-muted); font-family: var(--font-mono);">${day.formattedDate}</span>
                         </div>
-                        <div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(148,163,184,0.1); color: #94a3b8; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-bottom: 10px;">
-                            🛌 Dinlenme & Toparlanma
+                        <div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(148,163,184,0.1); color: #94a3b8; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 700; margin-bottom: 8px;">
+                            🧘 Dinlenme & Toparlanma
                         </div>
-                        <p style="font-size: 12px; color: var(--text-muted); margin: 0; line-height: 1.4;">
+                        <p style="font-size: 11px; color: var(--text-muted); margin: 0; line-height: 1.35;">
                             Merkezi sinir sistemi ve kas toparlanması için aktif dinlenme.
                         </p>
                     </div>
-                    <div style="margin-top: 12px;">
-                        <button type="button" class="btn-sm-action" style="width: 100%; font-size: 11px; text-align: center; padding: 6px 0; border-color: rgba(245,158,11,0.4);" onclick="event.stopPropagation(); openDesktopDayScheduleModal(${idx}, '${day.dateStr}')">
+                    <div style="margin-top: 10px;">
+                        <button type="button" class="btn-sm-action" style="width: 100%; font-size: 10.5px; text-align: center; padding: 5px 0; border-color: rgba(245,158,11,0.4);" onclick="event.stopPropagation(); openDesktopDayScheduleModal(${idx}, '${day.dateStr}')">
                             ➕ Antrenman Ata
                         </button>
                     </div>
@@ -4766,42 +4775,45 @@ function renderDesktopCalendarWeeklyCards(anchor) {
         }
 
         // Aktif Planlanan Gün
-        const exListStr = (plan.exercises || []).map((e, i) => `<div style="font-size: 11.5px; color: #cbd5e1; padding: 2px 0;">• ${escapeHTML(e)}</div>`).join('');
+        const exListStr = (plan.exercises || []).map((e, i) => `<div style="font-size: 11px; color: #cbd5e1; padding: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">• ${escapeHTML(e)}</div>`).join('');
 
         return `
-            <div class="calendar-day-card active-plan" style="background: rgba(245,158,11,0.04); border: 1px solid rgba(245,158,11,0.25); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;" onclick="openDesktopDayScheduleModal(${idx}, '${day.dateStr}')">
+            <div class="calendar-day-card active-plan" onclick="openDesktopDayScheduleModal(${idx}, '${day.dateStr}')">
                 <div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <span style="font-size: 14px; font-weight: 800; color: #fff;">${day.dayName} ${isTodayBadge}</span>
-                        <span style="font-size: 11px; color: var(--gold); font-family: var(--font-mono);">${day.formattedDate}</span>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 13px; font-weight: 800; color: #fff;">${day.dayName} ${isTodayBadge}</span>
+                        <span style="font-size: 10.5px; color: var(--gold); font-family: var(--font-mono);">${day.formattedDate}</span>
                     </div>
-                    <div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(245,158,11,0.15); color: var(--gold); padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-bottom: 10px;">
+                    <div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(245,158,11,0.15); color: var(--gold); padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 700; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">
                         ⚔️ ${escapeHTML(plan.title)}
                     </div>
 
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; background: rgba(0,0,0,0.25); padding: 6px 8px; border-radius: 6px;" onclick="event.stopPropagation()">
-                        <label style="font-size: 11px; color: var(--text-muted);">Saat:</label>
-                        <input type="time" value="${plan.time || '18:30'}" onchange="changeDesktopCalendarTime(${idx}, this.value)" style="background: transparent; border: 1px solid var(--border-color); color: #fff; padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono); font-size: 12px;">
-                        <label style="font-size: 11px; color: var(--text-muted); margin-left: 6px;">Süre:</label>
-                        <select onchange="changeDesktopCalendarDuration(${idx}, this.value)" style="background: #111; border: 1px solid var(--border-color); color: #fff; padding: 2px 4px; border-radius: 4px; font-size: 11px;">
-                            <option value="45" ${plan.duration === 45 ? 'selected' : ''}>45 dk</option>
-                            <option value="60" ${(!plan.duration || plan.duration === 60) ? 'selected' : ''}>60 dk</option>
-                            <option value="75" ${plan.duration === 75 ? 'selected' : ''}>75 dk</option>
-                            <option value="90" ${plan.duration === 90 ? 'selected' : ''}>90 dk</option>
-                        </select>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 4px; margin-bottom: 8px; background: rgba(0,0,0,0.3); padding: 4px 6px; border-radius: 6px;" onclick="event.stopPropagation()">
+                        <div style="display: flex; align-items: center; gap: 3px;">
+                            <label style="font-size: 10px; color: var(--text-muted);">Saat:</label>
+                            <input type="time" value="${plan.time || '18:30'}" onchange="changeDesktopCalendarTime(${idx}, this.value)" style="background: transparent; border: 1px solid var(--border-color); color: #fff; padding: 1px 3px; border-radius: 4px; font-family: var(--font-mono); font-size: 10.5px; width: 62px;">
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 3px;">
+                            <select onchange="changeDesktopCalendarDuration(${idx}, this.value)" style="background: #111; border: 1px solid var(--border-color); color: #fff; padding: 1px 2px; border-radius: 4px; font-size: 10.5px;">
+                                <option value="45" ${plan.duration === 45 ? 'selected' : ''}>45 dk</option>
+                                <option value="60" ${(!plan.duration || plan.duration === 60) ? 'selected' : ''}>60 dk</option>
+                                <option value="75" ${plan.duration === 75 ? 'selected' : ''}>75 dk</option>
+                                <option value="90" ${plan.duration === 90 ? 'selected' : ''}>90 dk</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div style="margin-bottom: 12px;">
-                        ${exListStr || '<span style="font-size: 11px; color: var(--text-muted);">Özel Egzersiz Listesi</span>'}
+                    <div style="margin-bottom: 8px; max-height: 85px; overflow-y: auto;">
+                        ${exListStr || '<span style="font-size: 10.5px; color: var(--text-muted);">Özel Egzersiz Listesi</span>'}
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 6px; margin-top: 10px;" onclick="event.stopPropagation()">
-                    <button type="button" class="btn-sm-action" style="flex: 1; font-size: 11px; text-align: center; padding: 6px 0; color: var(--gold); border-color: rgba(245,158,11,0.4);" onclick="openDesktopDayScheduleModal(${idx}, '${day.dateStr}')">
-                        ✏️ Değiştir / Ata
+                <div style="display: flex; gap: 4px; margin-top: 8px;" onclick="event.stopPropagation()">
+                    <button type="button" class="btn-sm-action" style="flex: 1; font-size: 10.5px; text-align: center; padding: 5px 0; color: var(--gold); border-color: rgba(245,158,11,0.4);" onclick="openDesktopDayScheduleModal(${idx}, '${day.dateStr}')">
+                        ✏️ Ata
                     </button>
-                    <button type="button" class="btn-sm-action" style="font-size: 11px; padding: 6px 8px; color: #94a3b8;" onclick="toggleDesktopCalendarRest(${idx})" title="Dinlenme gününe çevir">
-                        🛌
+                    <button type="button" class="btn-sm-action" style="font-size: 10.5px; padding: 5px 8px; color: #94a3b8;" onclick="toggleDesktopCalendarRest(${idx})" title="Dinlenme gününe çevir">
+                        🧘
                     </button>
                 </div>
             </div>
@@ -4809,7 +4821,7 @@ function renderDesktopCalendarWeeklyCards(anchor) {
     }).join('');
 
     return `
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 24px;">
+        <div class="cal-week-grid">
             ${cardsHtml}
         </div>
     `;

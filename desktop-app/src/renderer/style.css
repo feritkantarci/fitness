@@ -2557,6 +2557,56 @@ body {
     border: 1px solid rgba(239, 68, 68, 0.35);
 }
 
+/* WEEKLY 7-COLUMN RESPONSIVE GRID (DESKTOP) */
+.cal-week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+    margin-bottom: 24px;
+    box-sizing: border-box;
+}
+@media (max-width: 1100px) {
+    .cal-week-grid {
+        grid-template-columns: repeat(7, minmax(130px, 1fr));
+        overflow-x: auto;
+        padding-bottom: 10px;
+    }
+}
+
+.calendar-day-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 12px 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 220px;
+    box-sizing: border-box;
+}
+.calendar-day-card:hover {
+    border-color: var(--gold);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+}
+.calendar-day-card.completed {
+    background: rgba(16, 185, 129, 0.05);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+}
+.calendar-day-card.active-plan {
+    background: rgba(245, 158, 11, 0.04);
+    border: 1px solid rgba(245, 158, 11, 0.28);
+}
+.calendar-day-card.rest {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    opacity: 0.85;
+}
+
+
 
 
 
