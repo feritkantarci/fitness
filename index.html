@@ -22,7 +22,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=159">
+    <link rel="stylesheet" href="css/style.css?v=160">
 </head>
 <body>
 
@@ -30,7 +30,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v159</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v160</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -66,7 +66,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v159</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v160</span>
                 </div>
                 <div class="modern-bar-actions" style="position: relative;">
                     <div class="modern-user-badge" onclick="if(window.innerWidth <= 768){ openMoreSheet(); } else { switchTab('profileTab'); }" title="Profil & Menü">
@@ -1684,13 +1684,19 @@
                 <button class="modal-close" onclick="closeAiHybridArchitectModal()">✕</button>
             </div>
 
-            <!-- BÖLÜM 1: CANLI TELEMETRİ (GEÇMİŞ & VÜCUT VERİLERİ) -->
-            <div style="margin-bottom:16px;">
-                <div style="font-size:12px; font-weight:800; color:var(--gold); margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-                    <span>📊</span> <span>Mevcut Durum Telemetrisi (Son Veriler)</span>
+            <!-- BÖLÜM 1: CANLI TELEMETRİ (VARSAYILAN GİZLENEBİLİR AKORDİYON) -->
+            <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:10px 14px; margin-bottom:14px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleAiTelemetryAccordion()">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:13px;">📊</span>
+                        <strong style="font-size:12px; color:#fff;">Durum Telemetrisi</strong>
+                    </div>
+                    <span id="aiTelemetryToggleLabel" style="font-size:11px; color:var(--cyan); font-weight:700;">▼ Göster</span>
                 </div>
-                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:8px;" id="aiTelemetryGrid">
-                    <!-- Populated by JS -->
+                <div id="aiTelemetryAccordionBody" style="display:none; margin-top:8px; padding-top:8px; border-top:1px dashed rgba(255,255,255,0.08);">
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(110px, 1fr)); gap:6px;" id="aiTelemetryGrid">
+                        <!-- Populated by JS -->
+                    </div>
                 </div>
             </div>
 
@@ -2298,6 +2304,19 @@
         function toggleAiDiagnosticAccordion() {
             const body = document.getElementById('aiDiagnosticAccordionBody');
             const label = document.getElementById('aiDiagnosticToggleLabel');
+            if (body && label) {
+                if (body.style.display === 'none') {
+                    body.style.display = 'block';
+                    label.innerText = '▲ Gizle';
+                } else {
+                    body.style.display = 'none';
+                    label.innerText = '▼ Göster';
+                }
+            }
+        }
+        function toggleAiTelemetryAccordion() {
+            const body = document.getElementById('aiTelemetryAccordionBody');
+            const label = document.getElementById('aiTelemetryToggleLabel');
             if (body && label) {
                 if (body.style.display === 'none') {
                     body.style.display = 'block';
