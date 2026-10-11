@@ -702,20 +702,6 @@
                     teaser.innerHTML = `Yapay zeka antrenman geçmişini, tartı trendini ve vücut ölçülerini analiz ederek sana özel <strong>Hipertrofi + Fonksiyonel Fitness</strong> dengesini program öncesinde baştan kurgular.${note}`;
                 }
             }
-        }
-
-        function toggleAiDoctrineTeaser() {
-            const el = document.getElementById('aiDoctrineHeroQuickTeaser');
-            const btn = document.getElementById('aiDoctrineInfoBtn');
-            if (!el) return;
-            const isHidden = window.getComputedStyle(el).display === 'none';
-            el.style.display = isHidden ? 'block' : 'none';
-            if (btn) {
-                btn.classList.toggle('active', isHidden);
-                btn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
-            }
-        }
-        window.toggleAiDoctrineTeaser = toggleAiDoctrineTeaser;
 
             if (stats) {
                 let html = '';
@@ -750,6 +736,19 @@
                 stats.innerHTML = html;
             }
         }
+
+        function toggleAiDoctrineTeaser() {
+            const el = document.getElementById('aiDoctrineHeroQuickTeaser');
+            const btn = document.getElementById('aiDoctrineInfoBtn');
+            if (!el) return;
+            const isHidden = window.getComputedStyle(el).display === 'none';
+            el.style.display = isHidden ? 'block' : 'none';
+            if (btn) {
+                btn.classList.toggle('active', isHidden);
+                btn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+            }
+        }
+        window.toggleAiDoctrineTeaser = toggleAiDoctrineTeaser;
 
         function openAiHybridArchitectModal() {
             const telemetry = getAiDoctrineTelemetry();
@@ -3960,10 +3959,16 @@ KURALLAR:
             isTimerRunning = false;
             timerRemaining = 0;
             updateTimerDisplay();
+            const btn = document.getElementById('btnPlayPauseTimer');
+            if (btn) btn.innerText = "▶ Başlat";
+            const restBox = document.getElementById('hudRestBox');
+            if (restBox) restBox.classList.remove('resting');
             playAlertSound();
             const badge = document.getElementById('hudRestStatusBadge');
             if (badge) badge.innerText = "Hazır";
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
         }
+        window.skipRestTimer = skipRestTimer;
 
         document.addEventListener('visibilitychange', async () => {
             if (document.visibilityState === 'visible' && activeWorkoutSession && isWakeLockEnabled) {
@@ -5438,19 +5443,6 @@ KURALLAR:
             if (!isTimerRunning && timerRemaining > 0) {
                 startTimer();
             }
-        }
-
-        function skipRestTimer() {
-            clearInterval(timerInterval);
-            isTimerRunning = false;
-            timerRemaining = 0;
-            updateTimerDisplay();
-            const btn = document.getElementById('btnPlayPauseTimer');
-            if (btn) btn.innerText = "▶ Başlat";
-            const restBox = document.getElementById('hudRestBox');
-            if (restBox) restBox.classList.remove('resting');
-            playAlertSound();
-            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
         }
 
         function resetTimer(secs) {
