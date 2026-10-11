@@ -22,7 +22,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=156">
+    <link rel="stylesheet" href="css/style.css?v=157">
 </head>
 <body>
 
@@ -30,7 +30,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v156</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v157</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -66,7 +66,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v156</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v157</span>
                 </div>
                 <div class="modern-bar-actions" style="position: relative;">
                     <div class="modern-user-badge" onclick="if(window.innerWidth <= 768){ openMoreSheet(); } else { switchTab('profileTab'); }" title="Profil & Menü">
@@ -1723,58 +1723,43 @@
                 </p>
                 <div class="doctrine-grid" id="doctrineSelectionGrid">
                     <!-- 1. Pure Bodybuilding -->
-                    <div class="doctrine-card" id="docCard_bb_pure" onclick="selectAiDoctrine('bb_pure')">
+                    <div class="doctrine-card" id="docCard_bb_pure" onclick="selectAiDoctrine('bb_pure')" style="padding:10px 14px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <strong style="color:#fff; font-size:13px;">🛡️ Saf Bodybuilding</strong>
-                            <span style="font-size:11px; color:var(--gold); font-weight:800;">%90 Kas / %10 Kond.</span>
-                        </div>
-                        <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.35;">
-                            Maksimum mekanik gerilim, izole kas tecridi ve simetri. Estetik ve hacim odaklı geleneksel yaklaşım.
+                            <strong style="color:#fff; font-size:12.5px;">🛡️ Saf Bodybuilding</strong>
+                            <span style="font-size:11px; color:var(--gold); font-weight:800;">%90 Kas</span>
                         </div>
                     </div>
 
                     <!-- 2. BB-Dominant Hybrid -->
-                    <div class="doctrine-card selected ai-recommended" id="docCard_bb_hybrid" onclick="selectAiDoctrine('bb_hybrid')">
-                        <div class="doctrine-ai-badge">⭐ AI TAVSİYESİ</div>
+                    <div class="doctrine-card selected ai-recommended" id="docCard_bb_hybrid" onclick="selectAiDoctrine('bb_hybrid')" style="padding:10px 14px;">
+                        <div class="doctrine-ai-badge" style="font-size:8.5px; padding:1px 5px;">⭐ AI</div>
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
-                            <strong style="color:var(--gold); font-size:13px;">⚡ BB-Dominant Hibrit</strong>
-                            <span style="font-size:11px; color:var(--gold); font-weight:800;">%70 Kas / %30 Fonk.</span>
-                        </div>
-                        <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.35;">
-                            Ana gövde ağır hipertrofi; seans sonlarına veya aralara Kettlebell, Carry ve metabolik kondisyon. Kas yaparken eklemleri korur ve iş kapasitesini artırır.
+                            <strong style="color:var(--gold); font-size:12.5px;">⚡ BB Hibrit</strong>
+                            <span style="font-size:11px; color:var(--gold); font-weight:800;">%70 Kas</span>
                         </div>
                     </div>
 
                     <!-- 3. Balanced Hybrid (50/50) -->
-                    <div class="doctrine-card" id="docCard_balanced_hybrid" onclick="selectAiDoctrine('balanced_hybrid')">
+                    <div class="doctrine-card" id="docCard_balanced_hybrid" onclick="selectAiDoctrine('balanced_hybrid')" style="padding:10px 14px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <strong style="color:#fff; font-size:13px;">⚖️ Dengeli Hibrit Atlet</strong>
-                            <span style="font-size:11px; color:#38bdf8; font-weight:800;">%50 / %50 Eşit</span>
-                        </div>
-                        <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.35;">
-                            Ağır compound güç blokları ile patlayıcı kettlebell, dinamik rotasyon ve core zırhının mükemmel sinerjisi.
+                            <strong style="color:#fff; font-size:12.5px;">⚖️ Dengeli Atlet</strong>
+                            <span style="font-size:11px; color:#38bdf8; font-weight:800;">%50 / %50</span>
                         </div>
                     </div>
 
                     <!-- 4. Functional-Dominant Hybrid -->
-                    <div class="doctrine-card" id="docCard_func_hybrid" onclick="selectAiDoctrine('func_hybrid')">
+                    <div class="doctrine-card" id="docCard_func_hybrid" onclick="selectAiDoctrine('func_hybrid')" style="padding:10px 14px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <strong style="color:#fff; font-size:13px;">🔥 Fonksiyonel-Dominant</strong>
-                            <span style="font-size:11px; color:#f97316; font-weight:800;">%70 Fonk. / %30 Kas</span>
-                        </div>
-                        <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.35;">
-                            Ana omurga atletik güç ve yüksek dayanıklılık; zayıf kalan omuz, kol veya göğüs bölgelerine hedefe yönelik izole hipertrofi iğneleri.
+                            <strong style="color:#fff; font-size:12.5px;">🔥 Fonk-Dominant</strong>
+                            <span style="font-size:11px; color:#f97316; font-weight:800;">%70 Fonk</span>
                         </div>
                     </div>
 
                     <!-- 5. Pure Functional -->
-                    <div class="doctrine-card" id="docCard_func_pure" onclick="selectAiDoctrine('func_pure')">
+                    <div class="doctrine-card" id="docCard_func_pure" onclick="selectAiDoctrine('func_pure')" style="padding:10px 14px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <strong style="color:#fff; font-size:13px;">🌪️ Saf Fonksiyonel & Kondisyon</strong>
-                            <span style="font-size:11px; color:#4ade80; font-weight:800;">%90 Fonksiyonel</span>
-                        </div>
-                        <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.35;">
-                            Çok düzlemli hareket kalıpları, kettlebell kompleksleri, yüksek VO2 Max ve kardiyovasküler dayanıklılık.
+                            <strong style="color:#fff; font-size:12.5px;">🌪️ Saf Kondisyon</strong>
+                            <span style="font-size:11px; color:#4ade80; font-weight:800;">%90 Fonk</span>
                         </div>
                     </div>
                 </div>
