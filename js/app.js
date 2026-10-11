@@ -6489,23 +6489,24 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             ];
 
             officialContainer.innerHTML = officialRoutines.map(r => `
-                <div class="log-history-card" style="border-color:var(--border-hover);">
-                    <div class="log-card-header">
-                        <strong style="color:var(--gold-light); font-size:14px;">${escapeHTML(r.title)}</strong>
-                        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-                            <button class="btn btn-outline" style="font-size:11px; padding:4px 8px; color:var(--cyan); border-color:var(--cyan);" onclick="previewWorkoutModal('${r.id}')">
-                                👁️ İçerik
-                            </button>
-                            <button class="btn btn-outline" style="font-size:11px; padding:4px 8px; color:var(--cyan); border-color:var(--cyan);" onclick="promptAssignToDay('${r.id}', '${escapeHTML(r.title).replace(/'/g, "\\'")}', 'official', '${escapeHTML(r.desc).replace(/'/g, "\\'")}')">
-                                📅 Güne Planla
-                            </button>
-                            <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; color:var(--gold); border-color:var(--gold); font-weight:700;" onclick="loadOfficialRoutine('${r.id}')">
-                                ▶ Yükle
-                            </button>
-                        </div>
+                <div class="log-history-card" style="border-color:rgba(234,179,8,0.25); background:linear-gradient(135deg, rgba(30,27,75,0.3), rgba(15,23,42,0.6)); border-radius:12px; padding:12px 14px; margin-bottom:10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:8px;">
+                        <strong style="color:var(--gold-light); font-size:13px; font-weight:800;">${escapeHTML(r.title)}</strong>
+                        <span style="font-size:10.5px; padding:2px 8px; background:rgba(56,189,248,0.15); color:var(--cyan); border:1px solid rgba(56,189,248,0.3); border-radius:6px; font-weight:700;">⏱️ ${r.duration} Dk</span>
                     </div>
-                    <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
+                    <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.4; margin-bottom:10px;">
                         ${escapeHTML(r.desc)}
+                    </div>
+                    <div style="display:flex; justify-content:flex-end; gap:6px; flex-wrap:wrap; align-items:center; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+                        <button class="btn btn-outline" style="font-size:11px; padding:5px 10px; color:var(--cyan); border-color:rgba(56,189,248,0.4);" onclick="previewWorkoutModal('${r.id}')">
+                            👁️ İncele
+                        </button>
+                        <button class="btn btn-outline" style="font-size:11px; padding:5px 10px; color:var(--cyan); border-color:rgba(56,189,248,0.4);" onclick="promptAssignToDay('${r.id}', '${escapeHTML(r.title).replace(/'/g, "\\'")}', 'official', '${escapeHTML(r.desc).replace(/'/g, "\\'")}')">
+                            📅 Planla
+                        </button>
+                        <button class="btn btn-gold" style="font-size:11px; padding:5px 12px; font-weight:800;" onclick="loadOfficialRoutine('${r.id}')">
+                            ▶ Yükle
+                        </button>
                     </div>
                 </div>
             `).join('');
@@ -15251,7 +15252,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=165')
+                navigator.serviceWorker.register('./sw.js?v=166')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
