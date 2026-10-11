@@ -22,7 +22,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=161">
+    <link rel="stylesheet" href="css/style.css?v=162">
+    <style>
+        /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH */
+        .tab-nav { display: flex !important; gap: 6px; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.1); padding: 6px; border-radius: 16px; margin-bottom: 20px; overflow-x: auto; }
+        .tab-btn { flex: 1; min-width: 100px; background: transparent; border: none; color: #94a3b8; font-size: 12px; font-weight: 700; padding: 10px 8px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; }
+        .tab-btn.active { background: rgba(245, 158, 11, 0.15); color: #eab308; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .modern-app-bar { display: flex; justify-content: space-between; align-items: center; background: #0f172a; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 12px 18px; position: sticky; top: 0; z-index: 100; }
+    </style>
 </head>
 <body>
 
@@ -30,7 +37,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v161</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v162</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -66,7 +73,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v161</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v162</span>
                 </div>
                 <div class="modern-bar-actions" style="position: relative;">
                     <div class="modern-user-badge" onclick="if(window.innerWidth <= 768){ openMoreSheet(); } else { switchTab('profileTab'); }" title="Profil & Menü">
@@ -2280,8 +2287,8 @@
     </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
-    <script src="js/exercises-db.js?v=155"></script>
-    <script src="js/app.js?v=155"></script>
+    <script src="js/exercises-db.js?v=162"></script>
+    <script src="js/app.js?v=162"></script>
     <script>
         function toggleHeaderPopupMenu(e) {
             if (e) e.stopPropagation();
