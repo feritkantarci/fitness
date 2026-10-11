@@ -41,12 +41,15 @@ const el = {
     viewLab: document.getElementById('viewLab'),
     viewAnalytics: document.getElementById('viewAnalytics'),
     viewBodyComp: document.getElementById('viewBodyComp'),
+    viewCalendar: document.getElementById('viewCalendar'),
     tabBtnDashboard: document.getElementById('tabBtnDashboard'),
+    tabBtnCalendar: document.getElementById('tabBtnCalendar'),
     tabBtnBodyComp: document.getElementById('tabBtnBodyComp'),
     tabBtnLab: document.getElementById('tabBtnLab'),
     tabBtnAnalytics: document.getElementById('tabBtnAnalytics'),
     tabBtnConsult: document.getElementById('tabBtnConsult'),
     viewConsult: document.getElementById('viewConsult'),
+    desktopCalendarContainer: document.getElementById('desktopCalendarContainer'),
     consultMessagesStream: document.getElementById('consultMessagesStream'),
     consultUserInput: document.getElementById('consultUserInput'),
     btnSendConsultMsg: document.getElementById('btnSendConsultMsg'),
@@ -240,6 +243,9 @@ function setupEventListeners() {
     // ==================== LAB EVENT LISTENERS ====================
     // Görünüm / Sekme Değişimi
     el.tabBtnDashboard.addEventListener('click', () => switchView('dashboard'));
+    if (el.tabBtnCalendar) {
+        el.tabBtnCalendar.addEventListener('click', () => switchView('calendar'));
+    }
     if (el.tabBtnBodyComp) {
         el.tabBtnBodyComp.addEventListener('click', () => switchView('bodycomp'));
     }
@@ -1739,12 +1745,14 @@ function switchView(viewName) {
     if (el.viewAnalytics) el.viewAnalytics.style.display = viewName === 'analytics' ? 'flex' : 'none';
     if (el.viewBodyComp) el.viewBodyComp.style.display = viewName === 'bodycomp' ? 'flex' : 'none';
     if (el.viewConsult) el.viewConsult.style.display = viewName === 'consult' ? 'flex' : 'none';
+    if (el.viewCalendar) el.viewCalendar.style.display = viewName === 'calendar' ? 'flex' : 'none';
 
     el.tabBtnDashboard.classList.toggle('active', viewName === 'dashboard');
     el.tabBtnLab.classList.toggle('active', viewName === 'lab');
     if (el.tabBtnAnalytics) el.tabBtnAnalytics.classList.toggle('active', viewName === 'analytics');
     if (el.tabBtnBodyComp) el.tabBtnBodyComp.classList.toggle('active', viewName === 'bodycomp');
     if (el.tabBtnConsult) el.tabBtnConsult.classList.toggle('active', viewName === 'consult');
+    if (el.tabBtnCalendar) el.tabBtnCalendar.classList.toggle('active', viewName === 'calendar');
 
     if (viewName === 'analytics') {
         renderDesktopAnalytics();
@@ -1752,6 +1760,8 @@ function switchView(viewName) {
         renderBodyCompView();
     } else if (viewName === 'consult') {
         renderConsultationContext();
+    } else if (viewName === 'calendar') {
+        renderDesktopCalendar();
     } else if (viewName === 'lab' && state.catalog.length === 0) {
         loadExerciseCatalog();
     }
@@ -3766,74 +3776,6 @@ function closeDesktopCalendarModal() {
 }
 window.closeDesktopCalendarModal = closeDesktopCalendarModal;
 
-function generateAthleteIcsString(athleteName, scheduleOrPrescription) {
-    const formatIcsDate = d => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    const now = new Date();
-    
-    let ics = [
-        'BEGIN:VCALENDAR',
-        'VERSION:2.0',
-        'PRODID:-//FitLAB Desktop//Sports Science Engine//TR',
-        'CALSCALE:GREGORIAN',
-        'METHOD:PUBLISH',
-        'X-WR-CALNAME:FitLab • ' + (athleteName || 'Antrenmanlarım'),
-        'X-WR-TIMEZONE:Europe/Istanbul'
-    ];
-
-    const daysOffset = [1, 3, 5];
-    const sessions = [
-        { name: 'FitLAB Gün 1: Üst Gövde & İtiş Kuvveti', desc: 'Bench Press, Overhead Press, Goblet Squat, Lateral Raise' },
-        { name: 'FitLAB Gün 2: Arka Zincir & Çekiş Gücü', desc: 'Deadlift, Saw Row, RDL, Hammer Curl' },
-        { name: 'FitLAB Gün 3: Kompleks & Balistik Güç', desc: 'Kettlebell Clean, Thruster, Front Squat, Core' }
-    ];
-
-    daysOffset.forEach((dayOffset, idx) => {
-        const sess = sessions[idx];
-        const startDate = new Date(now);
-        startDate.setDate(now.getDate() + (dayOffset - now.getDay() + 7) % 7);
-        startDate.setHours(18, 30, 0, 0);
-        const endDate = new Date(startDate.getTime() + (55 * 60 * 1000));
-
-        ics.push(
-            'BEGIN:VEVENT',
-            `UID:fitlab-desktop-${idx}-${startDate.getTime()}@fitlab.kantarci.io`,
-            `DTSTAMP:${formatIcsDate(new Date())}`,
-            `DTSTART:${formatIcsDate(startDate)}`,
-            `DTEND:${formatIcsDate(endDate)}`,
-            `SUMMARY:⚔️ ${sess.name}`,
-            `DESCRIPTION:${sess.desc}\\n\\nAkademik FitLAB İstasyonu tarafından planlandı.`,
-            'BEGIN:VALARM',
-            'ACTION:DISPLAY',
-            'TRIGGER:-PT30M',
-            'DESCRIPTION:FitLAB Antrenman Vakti!',
-            'END:VALARM',
-            'END:VEVENT'
-        );
-    });
-
-    ics.push('END:VCALENDAR');
-    return ics.join('\r\n');
-}
-
-async function exportSelectedAthleteToAppleCalendar() {
-    try {
-        const athlete = state.selectedUser ? state.selectedUser.name : 'Sporcu';
-        const icsContent = generateAthleteIcsString(athlete);
-        if (window.coachAPI && window.coachAPI.exportAndOpenCalendar) {
-            const res = await window.coachAPI.exportAndOpenCalendar(icsContent);
-            if (res && res.success) {
-                showToast("🍏 Apple Takvim açılıyor! Seanslar takviminize işlendi.");
-                closeDesktopCalendarModal();
-            } else {
-                alert("Takvim dosyası açılamadı: " + (res ? res.error : 'Bilinmeyen hata'));
-            }
-        }
-    } catch(err) {
-        alert("Hata: " + err.message);
-    }
-}
-window.exportSelectedAthleteToAppleCalendar = exportSelectedAthleteToAppleCalendar;
-
 function openGoogleCalendarFromDesktop() {
     const url = 'https://calendar.google.com/calendar/u/0/r';
     if (window.coachAPI && window.coachAPI.openCalendarUrl) {
@@ -3844,6 +3786,541 @@ function openGoogleCalendarFromDesktop() {
     closeDesktopCalendarModal();
 }
 window.openGoogleCalendarFromDesktop = openGoogleCalendarFromDesktop;
+
+// Hafta günlerini Pazartesi'den Pazar'a hesapla
+function getDesktopCurrentWeekDays() {
+    const now = new Date();
+    const currentDay = now.getDay(); // 0: Pazar, 1: Pzt, ...
+    const distToMonday = (currentDay + 6) % 7;
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - distToMonday);
+    monday.setHours(0, 0, 0, 0);
+
+    const dayNames = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const dateStr = `${yyyy}-${mm}-${dd}`;
+        
+        days.push({
+            dateObj: d,
+            dayIndex: i,
+            dayName: dayNames[i],
+            dateStr: dateStr,
+            formattedDate: d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }),
+            isToday: d.toDateString() === now.toDateString(),
+            isPast: d < new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        });
+    }
+    return days;
+}
+
+// Seçili sporcu için haftalık plan şablonunu al (veya varsayılan yükle)
+function getDesktopAthleteSchedule() {
+    const uid = state.selectedUserId || 'default';
+    const storageKey = `fitlab_desktop_schedule_${uid}`;
+    try {
+        const saved = localStorage.getItem(storageKey);
+        if (saved) return JSON.parse(saved);
+    } catch(e) {}
+
+    // Varsayılan 7 günlük FitLAB Akademik Rutin Şablonu
+    return [
+        { dayIndex: 0, title: 'Üst Gövde & İtiş Kuvveti', time: '18:30', duration: 60, isRest: false, exercises: ['Bench Press', 'Dambıl Overhead Press', 'Incline Dumbbell Fly', 'Lateral Raise'] },
+        { dayIndex: 1, title: 'Aktif Dinlenme & Mobilite', time: '18:30', duration: 30, isRest: true, exercises: [] },
+        { dayIndex: 2, title: 'Posterior Zincir & Çekiş Gücü', time: '18:30', duration: 60, isRest: false, exercises: ['Romanian Deadlift (RDL)', 'Saw Dumbbell Row', 'Face Pull', 'Incline Biceps Curl'] },
+        { dayIndex: 3, title: 'Toparlanma & Hafif Kardiyo', time: '18:30', duration: 30, isRest: true, exercises: [] },
+        { dayIndex: 4, title: 'Kompleks & Balistik / Core', time: '18:30', duration: 60, isRest: false, exercises: ['Goblet Squat', 'Kettlebell Swing', 'Bulgarian Split Squat', 'Hanging Leg Raise'] },
+        { dayIndex: 5, title: 'Zayıf Bölge & Hipertrofi', time: '11:00', duration: 45, isRest: false, exercises: ['Arnold Press', 'Hammer Curl', 'Triceps Skull Crusher', 'Farmer\'s Walk'] },
+        { dayIndex: 6, title: 'Tam Dinlenme & Yenilenme', time: '12:00', duration: 30, isRest: true, exercises: [] }
+    ];
+}
+
+function saveDesktopAthleteSchedule(schedule) {
+    const uid = state.selectedUserId || 'default';
+    const storageKey = `fitlab_desktop_schedule_${uid}`;
+    try {
+        localStorage.setItem(storageKey, JSON.stringify(schedule));
+    } catch(e) {}
+}
+
+function changeDesktopCalendarTime(dayIndex, newTime) {
+    const schedule = getDesktopAthleteSchedule();
+    if (schedule[dayIndex]) {
+        schedule[dayIndex].time = newTime;
+        saveDesktopAthleteSchedule(schedule);
+        showToast(`⏰ Saat güncellendi: ${schedule[dayIndex].time}`);
+    }
+}
+window.changeDesktopCalendarTime = changeDesktopCalendarTime;
+
+function changeDesktopCalendarDuration(dayIndex, newDuration) {
+    const schedule = getDesktopAthleteSchedule();
+    if (schedule[dayIndex]) {
+        schedule[dayIndex].duration = parseInt(newDuration, 10) || 60;
+        saveDesktopAthleteSchedule(schedule);
+        showToast(`⏱️ Süre ayarlandı: ${schedule[dayIndex].duration} dk`);
+    }
+}
+window.changeDesktopCalendarDuration = changeDesktopCalendarDuration;
+
+function toggleDesktopCalendarRest(dayIndex) {
+    const schedule = getDesktopAthleteSchedule();
+    if (schedule[dayIndex]) {
+        schedule[dayIndex].isRest = !schedule[dayIndex].isRest;
+        if (!schedule[dayIndex].isRest && (!schedule[dayIndex].exercises || schedule[dayIndex].exercises.length === 0)) {
+            schedule[dayIndex].title = 'Fonksiyonel Kuvvet Seansı';
+            schedule[dayIndex].exercises = ['Kettlebell Clean', 'Goblet Squat', 'Dumbbell Press'];
+        }
+        saveDesktopAthleteSchedule(schedule);
+        renderDesktopCalendar();
+        showToast(schedule[dayIndex].isRest ? '🛌 Gün Dinlenmeye Alındı' : '⚔️ Gün Antrenman Seansı Olarak Atandı');
+    }
+}
+window.toggleDesktopCalendarRest = toggleDesktopCalendarRest;
+
+// RFC 5545 uyumlu iCal string üretici
+function formatIcsDateTime(d) {
+    return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+}
+
+function buildIcsEvent(summary, description, startDate, durationMinutes, uidPrefix) {
+    const endDate = new Date(startDate.getTime() + (durationMinutes * 60 * 1000));
+    const now = new Date();
+    const eventUid = `fitlab-${uidPrefix || 'event'}-${startDate.getTime()}@fitlab.kantarci.io`;
+    
+    const cleanDesc = (description || '').replace(/\r?\n/g, '\\n').replace(/,/g, '\\,').replace(/;/g, '\\;');
+    const cleanSummary = (summary || 'FitLAB Antrenmanı').replace(/,/g, '\\,').replace(/;/g, '\\;');
+
+    return [
+        'BEGIN:VEVENT',
+        `UID:${eventUid}`,
+        `DTSTAMP:${formatIcsDateTime(now)}`,
+        `DTSTART:${formatIcsDateTime(startDate)}`,
+        `DTEND:${formatIcsDateTime(endDate)}`,
+        `SUMMARY:${cleanSummary}`,
+        `DESCRIPTION:${cleanDesc}`,
+        'STATUS:CONFIRMED',
+        'BEGIN:VALARM',
+        'ACTION:DISPLAY',
+        'TRIGGER:-PT30M',
+        'DESCRIPTION:⚔️ FitLAB Antrenman Vakti! (30 dk kaldı)',
+        'END:VALARM',
+        'END:VEVENT'
+    ].join('\r\n');
+}
+
+// Tek günü Apple Takvim'e aktar
+async function exportSingleDayToAppleCalendar(dayIndex) {
+    const athleteName = state.selectedUser ? (state.selectedUser.name || state.selectedUser.username) : 'Sporcu';
+    const weekDays = getDesktopCurrentWeekDays();
+    const schedule = getDesktopAthleteSchedule();
+
+    const dayMeta = weekDays[dayIndex];
+    const plan = schedule[dayIndex];
+
+    if (!dayMeta || !plan) return;
+    if (plan.isRest) {
+        alert("Bu gün dinlenme günü olarak işaretlenmiş. Takvime eklemek için önce antrenman gününe çevirin.");
+        return;
+    }
+
+    const [hh, mm] = (plan.time || '18:30').split(':').map(Number);
+    const startDate = new Date(dayMeta.dateObj);
+    startDate.setHours(hh || 18, mm || 30, 0, 0);
+
+    const desc = `⚔️ ${plan.title}\\n\\nHareketler:\\n${(plan.exercises || []).map((e, i) => `${i + 1}. ${e}`).join('\\n')}\\n\\nAkademik FitLAB İstasyonu tarafından planlandı.`;
+    const eventIcs = buildIcsEvent(`⚔️ FitLab: ${plan.title}`, desc, startDate, plan.duration || 60, `single-${dayIndex}`);
+
+    const fullIcs = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//FitLAB Desktop//Sports Science Engine//TR',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        `X-WR-CALNAME:FitLab • ${athleteName}`,
+        'X-WR-TIMEZONE:Europe/Istanbul',
+        eventIcs,
+        'END:VCALENDAR'
+    ].join('\r\n');
+
+    try {
+        if (window.coachAPI && window.coachAPI.exportAndOpenCalendar) {
+            const res = await window.coachAPI.exportAndOpenCalendar(fullIcs);
+            if (res && res.success) {
+                showToast(`🍏 ${dayMeta.dayName} seansı macOS Apple Takvimi'ne aktarıldı!`);
+            } else {
+                alert("Takvim açılamadı: " + (res?.error || 'Bilinmeyen hata'));
+            }
+        }
+    } catch(err) {
+        alert("Hata: " + err.message);
+    }
+}
+window.exportSingleDayToAppleCalendar = exportSingleDayToAppleCalendar;
+
+// Tüm haftalık planı Apple Takvim'e aktar
+async function exportFullWeekToAppleCalendar() {
+    const athleteName = state.selectedUser ? (state.selectedUser.name || state.selectedUser.username) : 'Sporcu';
+    const weekDays = getDesktopCurrentWeekDays();
+    const schedule = getDesktopAthleteSchedule();
+
+    const activeDays = schedule.filter(s => !s.isRest);
+    if (activeDays.length === 0) {
+        alert("Haftada planlanmış aktif antrenman seansı bulunamadı.");
+        return;
+    }
+
+    const events = [];
+    activeDays.forEach(plan => {
+        const dayMeta = weekDays[plan.dayIndex];
+        if (!dayMeta) return;
+
+        const [hh, mm] = (plan.time || '18:30').split(':').map(Number);
+        const startDate = new Date(dayMeta.dateObj);
+        startDate.setHours(hh || 18, mm || 30, 0, 0);
+
+        const desc = `⚔️ ${plan.title}\\n\\nHareketler:\\n${(plan.exercises || []).map((e, i) => `${i + 1}. ${e}`).join('\\n')}\\n\\nAkademik FitLAB İstasyonu tarafından planlandı.`;
+        events.push(buildIcsEvent(`⚔️ FitLab: ${plan.title}`, desc, startDate, plan.duration || 60, `week-${plan.dayIndex}`));
+    });
+
+    const fullIcs = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//FitLAB Desktop//Sports Science Engine//TR',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        `X-WR-CALNAME:FitLab • ${athleteName}`,
+        'X-WR-TIMEZONE:Europe/Istanbul',
+        ...events,
+        'END:VCALENDAR'
+    ].join('\r\n');
+
+    try {
+        if (window.coachAPI && window.coachAPI.exportAndOpenCalendar) {
+            const res = await window.coachAPI.exportAndOpenCalendar(fullIcs);
+            if (res && res.success) {
+                showToast(`🍏 ${activeDays.length} seans Apple Takviminize işlendi! macOS Takvimi açılıyor...`);
+            } else {
+                alert("Takvim açılamadı: " + (res?.error || 'Bilinmeyen hata'));
+            }
+        }
+    } catch(err) {
+        alert("Hata: " + err.message);
+    }
+}
+window.exportFullWeekToAppleCalendar = exportFullWeekToAppleCalendar;
+window.exportSelectedAthleteToAppleCalendar = exportFullWeekToAppleCalendar;
+
+// AI Reçetesini Takvim Seanslarına Dönüştür & Apple Takvim'e Aktar
+async function sendAiPrescriptionToCalendar() {
+    if (!state.lastAiReport || !state.lastAiReport.rawReport) {
+        alert("Henüz oluşturulmuş bir AI Antrenman Reçetesi bulunmuyor.\n\nLütfen önce Kokpit ekranında Gemini AI motoruna 'Akademik Reçete Oluştur' komutunu verin.");
+        return;
+    }
+
+    const athleteName = state.selectedUser ? (state.selectedUser.name || state.selectedUser.username) : 'Sporcu';
+    const parsedDays = parseMarkdownProgram(state.lastAiReport.rawReport, state.catalog);
+
+    if (!parsedDays || parsedDays.length === 0) {
+        alert("AI reçetesinden antrenman günleri ayrıştırılamadı.");
+        return;
+    }
+
+    const weekDays = getDesktopCurrentWeekDays();
+    const targetDays = [0, 2, 4, 5]; // Pazartesi, Çarşamba, Cuma, Cumartesi
+    const events = [];
+    const schedule = getDesktopAthleteSchedule();
+
+    parsedDays.forEach((pDay, idx) => {
+        const targetDayIdx = targetDays[idx % targetDays.length];
+        const dayMeta = weekDays[targetDayIdx];
+        const startDate = new Date(dayMeta.dateObj);
+        startDate.setHours(18, 30, 0, 0);
+
+        const exList = (pDay.exercises || []).map((ex, i) => `${i + 1}. ${ex.name} (${ex.targetSets} set x ${ex.targetReps} tekrar)${ex.cue ? ' - ' + ex.cue : ''}`);
+        const desc = `🎓 FITLAB AI REÇETESİ: ${pDay.dayTitle}\\n\\n🎯 Seans Egzersizleri:\\n${exList.join('\\n')}\\n\\nÖnemli: Dinlenme sürelerine ve kademeli aşırı yüklenmeye dikkat edin.`;
+
+        events.push(buildIcsEvent(`⚔️ FitLab AI: ${pDay.dayTitle}`, desc, startDate, 60, `ai-presc-${idx}`));
+
+        // Masaüstü haftalık çizelgesini de AI reçetesiyle güncelle
+        if (schedule[targetDayIdx]) {
+            schedule[targetDayIdx].title = pDay.dayTitle;
+            schedule[targetDayIdx].isRest = false;
+            schedule[targetDayIdx].exercises = (pDay.exercises || []).map(e => e.name);
+        }
+    });
+
+    saveDesktopAthleteSchedule(schedule);
+
+    const fullIcs = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//FitLAB Desktop//Sports Science Engine//TR',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        `X-WR-CALNAME:FitLab AI • ${athleteName}`,
+        'X-WR-TIMEZONE:Europe/Istanbul',
+        ...events,
+        'END:VCALENDAR'
+    ].join('\r\n');
+
+    try {
+        if (window.coachAPI && window.coachAPI.exportAndOpenCalendar) {
+            const res = await window.coachAPI.exportAndOpenCalendar(fullIcs);
+            if (res && res.success) {
+                showToast(`🍏 AI Reçetesindeki ${parsedDays.length} seans takviminize işlendi ve Apple Takvim açıldı!`);
+                window.coachAPI.showNotification(
+                    '📅 Takvim Senkronize Edildi',
+                    `${athleteName} için ${parsedDays.length} AI antrenman seansı takvime başarıyla işlendi.`
+                );
+            } else {
+                alert("Takvim dosyası açılamadı: " + (res?.error || 'Bilinmeyen hata'));
+            }
+        }
+    } catch(err) {
+        alert("Hata: " + err.message);
+    }
+}
+window.sendAiPrescriptionToCalendar = sendAiPrescriptionToCalendar;
+
+// Haftalık Planı Web Uygulamasına Gönder (Telefonla Eşitle)
+async function sendScheduleDirectiveToWeb() {
+    if (!state.selectedUserId) {
+        alert("Lütfen önce bir sporcu seçin.");
+        return;
+    }
+
+    const schedule = getDesktopAthleteSchedule();
+    const athleteName = state.selectedUser ? state.selectedUser.name : 'Sporcu';
+
+    const activeDays = schedule.filter(s => !s.isRest);
+    const summaryLines = activeDays.map(d => {
+        const dayNames = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+        return `• ${dayNames[d.dayIndex]} (${d.time}): ${d.title} [${(d.exercises || []).slice(0, 3).join(', ')}...]`;
+    }).join('\n');
+
+    const directive = {
+        title: '📅 Haftalık Antrenman & Takvim Planı',
+        text: `${athleteName} için haftalık ${activeDays.length} seanslık akademik takvim onaylandı.\n\n${summaryLines}`,
+        schedule: schedule,
+        badge: 'Takvim Planı',
+        active: true,
+        sentAt: new Date().toISOString()
+    };
+
+    try {
+        const res = await window.coachAPI.sendDirectiveToWeb(state.selectedUserId, directive);
+        if (res && res.success) {
+            showToast(`🚀 Haftalık plan web uygulamasına gönderildi! ${athleteName} telefonunda görecek.`);
+        } else {
+            alert("Gönderim hatası: " + (res?.error || 'Bilinmeyen hata'));
+        }
+    } catch(err) {
+        alert("Hata: " + err.message);
+    }
+}
+window.sendScheduleDirectiveToWeb = sendScheduleDirectiveToWeb;
+
+// Masaüstü Takvim & Planlayıcı Arayüzünü Çiz
+function renderDesktopCalendar() {
+    if (!el.desktopCalendarContainer) return;
+
+    const athlete = state.selectedUser;
+    const athleteName = athlete ? (athlete.name || athlete.username) : 'Sporcu Seçilmedi';
+    const weekDays = getDesktopCurrentWeekDays();
+    const schedule = getDesktopAthleteSchedule();
+    const workoutLogs = state.workoutLogs || [];
+
+    const activeSessionsCount = schedule.filter(s => !s.isRest).length;
+
+    let cardsHtml = weekDays.map((day, idx) => {
+        const plan = schedule[idx] || { title: 'Antrenman', time: '18:30', duration: 60, isRest: false, exercises: [] };
+
+        // Bu gün için tamamlanmış antrenman kaydı var mı?
+        const completedLog = workoutLogs.find(l => {
+            if (!l.date) return false;
+            let logDateStr = '';
+            if (typeof l.date === 'string') {
+                logDateStr = l.date.split('T')[0];
+            } else if (l.date && l.date.seconds) {
+                logDateStr = new Date(l.date.seconds * 1000).toISOString().split('T')[0];
+            }
+            return logDateStr === day.dateStr && (
+                l.totalSetsCompleted > 0 || 
+                (l.exercises || []).some(e => (e.sets || []).some(s => s.completed || parseInt(s.reps, 10) > 0))
+            );
+        });
+
+        const isTodayBadge = day.isToday ? '<span style="background:var(--gold); color:#000; font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px; margin-left:6px;">BUGÜN</span>' : '';
+
+        if (completedLog) {
+            const exCount = (completedLog.exercises || []).length;
+            const setCount = completedLog.totalSetsCompleted || (completedLog.exercises || []).reduce((acc, e) => acc + (e.sets || []).length, 0);
+            const vol = completedLog.totalVolumeKg ? `${Math.round(completedLog.totalVolumeKg)} kg` : '-';
+            const exNames = (completedLog.exercises || []).map(e => e.name || e.title).filter(Boolean).slice(0, 3).join(', ');
+
+            return `
+                <div class="calendar-day-card completed" style="background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.3); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 14px; font-weight: 800; color: #fff;">${day.dayName} ${isTodayBadge}</span>
+                            <span style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">${day.formattedDate}</span>
+                        </div>
+                        <div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(16,185,129,0.2); color: #10b981; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-bottom: 10px;">
+                            ✅ Tamamlandı (${setCount} Set)
+                        </div>
+                        <div style="font-size: 12px; color: #e2e8f0; line-height: 1.4; margin-bottom: 8px;">
+                            <strong>Hacim:</strong> ${vol} • <strong>Hareketler:</strong> ${exNames || 'Kayıtlı Seans'}
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 6px; margin-top: 12px;">
+                        <button type="button" class="btn-sm-action" style="flex: 1; font-size: 11px; text-align: center; padding: 6px 0;" onclick="exportSingleDayToAppleCalendar(${idx})">
+                            🍏 Takvimde Gör
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (plan.isRest) {
+            return `
+                <div class="calendar-day-card rest" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 14px; font-weight: 800; color: var(--text-muted);">${day.dayName} ${isTodayBadge}</span>
+                            <span style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">${day.formattedDate}</span>
+                        </div>
+                        <div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(148,163,184,0.1); color: #94a3b8; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-bottom: 10px;">
+                            🛌 Dinlenme & Toparlanma
+                        </div>
+                        <p style="font-size: 12px; color: var(--text-muted); margin: 0; line-height: 1.4;">
+                            Merkezi sinir sistemi ve kas toparlanması için aktif dinlenme.
+                        </p>
+                    </div>
+                    <div style="margin-top: 12px;">
+                        <button type="button" class="btn-sm-action" style="width: 100%; font-size: 11px; text-align: center; padding: 6px 0; border-color: rgba(245,158,11,0.4);" onclick="toggleDesktopCalendarRest(${idx})">
+                            ➕ Antrenman Günü Yap
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Aktif Planlanan Gün
+        const exListStr = (plan.exercises || []).map((e, i) => `<div style="font-size: 11.5px; color: #cbd5e1; padding: 2px 0;">• ${e}</div>`).join('');
+
+        return `
+            <div class="calendar-day-card active-plan" style="background: rgba(245,158,11,0.04); border: 1px solid rgba(245,158,11,0.25); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 14px; font-weight: 800; color: #fff;">${day.dayName} ${isTodayBadge}</span>
+                        <span style="font-size: 11px; color: var(--gold); font-family: var(--font-mono);">${day.formattedDate}</span>
+                    </div>
+                    <div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(245,158,11,0.15); color: var(--gold); padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-bottom: 10px;">
+                        ⚔️ ${plan.title}
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; background: rgba(0,0,0,0.25); padding: 6px 8px; border-radius: 6px;">
+                        <label style="font-size: 11px; color: var(--text-muted);">Saat:</label>
+                        <input type="time" value="${plan.time || '18:30'}" onchange="changeDesktopCalendarTime(${idx}, this.value)" style="background: transparent; border: 1px solid var(--border-color); color: #fff; padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono); font-size: 12px;">
+                        <label style="font-size: 11px; color: var(--text-muted); margin-left: 6px;">Süre:</label>
+                        <select onchange="changeDesktopCalendarDuration(${idx}, this.value)" style="background: #111; border: 1px solid var(--border-color); color: #fff; padding: 2px 4px; border-radius: 4px; font-size: 11px;">
+                            <option value="45" ${plan.duration === 45 ? 'selected' : ''}>45 dk</option>
+                            <option value="60" ${(!plan.duration || plan.duration === 60) ? 'selected' : ''}>60 dk</option>
+                            <option value="75" ${plan.duration === 75 ? 'selected' : ''}>75 dk</option>
+                            <option value="90" ${plan.duration === 90 ? 'selected' : ''}>90 dk</option>
+                        </select>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        ${exListStr || '<span style="font-size: 11px; color: var(--text-muted);">Özel Egzersiz Listesi</span>'}
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 6px; margin-top: 10px;">
+                    <button type="button" class="btn-sm-action" style="flex: 1; font-size: 11px; text-align: center; padding: 6px 0; background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.4); color: #10b981;" onclick="exportSingleDayToAppleCalendar(${idx})" title="Bu seansı macOS Apple Takvime işle">
+                        🍏 Takvime Ekle
+                    </button>
+                    <button type="button" class="btn-sm-action" style="font-size: 11px; padding: 6px 8px; color: #94a3b8;" onclick="toggleDesktopCalendarRest(${idx})" title="Dinlenme gününe çevir">
+                        🛌
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    el.desktopCalendarContainer.innerHTML = `
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 20px 24px; margin-bottom: 24px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <h2 style="margin: 0 0 6px 0; font-size: 20px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px;">
+                        <span>📅 FitLAB Canlı Antrenman Takvimi & Planlayıcı</span>
+                    </h2>
+                    <p style="margin: 0; font-size: 13px; color: var(--text-muted);">
+                        Sporcu: <strong style="color:var(--gold);">${athleteName}</strong> • Bu Hafta: <strong style="color:#fff;">${activeSessionsCount} Seans Planlandı</strong> • Canlı Çift Yönlü Takvim Entegrasyonu
+                    </p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <button type="button" class="btn-action" onclick="exportFullWeekToAppleCalendar()" style="background: linear-gradient(135deg, rgba(16,185,129,0.25), rgba(5,150,105,0.35)); border: 1px solid #10b981; color: #fff; font-size: 12.5px; padding: 8px 14px; border-radius: 8px; font-weight: 700;">
+                        🍏 Tüm Haftayı macOS Takvimi'ne İşle
+                    </button>
+                    <button type="button" class="btn-action" onclick="openGoogleCalendarFromDesktop()" style="background: rgba(56,189,248,0.15); border: 1px solid #38bdf8; color: #38bdf8; font-size: 12.5px; padding: 8px 14px; border-radius: 8px; font-weight: 700;">
+                        🌐 Google Takvim'de Aç
+                    </button>
+                    <button type="button" class="btn-action" onclick="sendScheduleDirectiveToWeb()" style="background: rgba(245,158,11,0.15); border: 1px solid var(--gold); color: var(--gold); font-size: 12.5px; padding: 8px 14px; border-radius: 8px; font-weight: 700;" title="Mobil web uygulamasına direktif olarak gönder">
+                        📲 Web PWA'ya Planı Gönder
+                    </button>
+                    <button type="button" class="btn-refresh" onclick="refreshAthleteData().then(() => renderDesktopCalendar())" title="Yenile" style="width: 36px; height: 36px;">
+                        🔄
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7 Günlük Takvim Izgarası -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 24px;">
+            ${cardsHtml}
+        </div>
+
+        <!-- Takvim Entegrasyonu ve Senkronizasyon Bilgi Paneli -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 16px;">
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 12px; padding: 18px;">
+                <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #fff; display: flex; align-items: center; gap: 6px;">
+                    <span>🍏 macOS Apple Takvim Köprüsü</span>
+                </h4>
+                <p style="font-size: 12.5px; color: var(--text-muted); line-height: 1.6; margin: 0 0 10px 0;">
+                    Yukarıdaki "macOS Takvimi'ne İşle" butonuna tıkladığınızda, oluşturulan akademik seanslar doğrudan Mac'inizin yerel takvimine (iCal / Calendar.app) 30 dakikalık hatırlatıcı alarmlarla işlenir. Giriş veya şifre gerektirmez.
+                </p>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn-sm-action" onclick="openDesktopCalendarModal()" style="font-size: 11.5px; padding: 6px 12px;">
+                        ⚙️ Takvim Ayarları & Hızlı Dışa Aktar
+                    </button>
+                </div>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 12px; padding: 18px;">
+                <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #fff; display: flex; align-items: center; gap: 6px;">
+                    <span>🌐 Google Takvim & Mobil Canlı Senkronizasyon</span>
+                </h4>
+                <p style="font-size: 12.5px; color: var(--text-muted); line-height: 1.6; margin: 0 0 10px 0;">
+                    Web PWA (fitness.kantarci.io) üzerinde Google Takvim API v3 bağlantısı mevcuttur. Google Takvim üzerinde taşınan veya saati güncellenen antrenmanlar iki yönlü olarak FitLAB sistemine yansır.
+                </p>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn-sm-action" onclick="openGoogleCalendarFromDesktop()" style="font-size: 11.5px; padding: 6px 12px; color: #38bdf8; border-color: rgba(56,189,248,0.4);">
+                        🌐 calendar.google.com
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+window.renderDesktopCalendar = renderDesktopCalendar;
+
 
 
 

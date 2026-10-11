@@ -29,6 +29,9 @@
                 <button class="nav-tab-btn active" id="tabBtnDashboard" data-view="dashboard">
                     <span class="icon">📊</span> Kokpit
                 </button>
+                <button class="nav-tab-btn" id="tabBtnCalendar" data-view="calendar">
+                    <span class="icon">📅</span> Takvim & Planlayıcı
+                </button>
                 <button class="nav-tab-btn" id="tabBtnBodyComp" data-view="bodycomp">
                     <span class="icon">⚖️</span> Tartı & Kompozisyon
                 </button>
@@ -223,6 +226,9 @@
                             </button>
                             <button class="btn-action btn-send-program" id="btnPushProgramToWeb" title="Web uygulamasına yeni bilimsel antrenman programı şablonu ata">
                                 📋 Web'e Yeni Programı Yükle
+                            </button>
+                            <button class="btn-action" id="btnPushToCalendar" onclick="sendAiPrescriptionToCalendar()" style="background: linear-gradient(135deg, rgba(245,158,11,0.25), rgba(217,119,6,0.35)); border: 1px solid var(--gold); color: #fff; font-weight: 800;" title="Reçeteyi doğrudan Apple / Google Takvim'e işle">
+                                📅 Takvimime İşle & Senkronize Et
                             </button>
                         </div>
                     </div>
@@ -459,6 +465,13 @@
     <section class="analytics-layout" id="viewAnalytics" style="display: none;">
         <div id="desktopAnalyticsContainer" class="desktop-analytics-scroll">
             <!-- Dinamik Olarak Web Analiz Çubukları ve Karnesi Doldurulacak -->
+        </div>
+    </section>
+
+    <!-- Antrenman Takvimi & Planlayıcı Bölümü (Google & Apple Takvim Canlı Masası) -->
+    <section class="calendar-layout" id="viewCalendar" style="display: none; width: 100%; height: calc(100vh - 60px); overflow-y: auto;">
+        <div id="desktopCalendarContainer" style="width: 100%; max-width: 1300px; margin: 0 auto; padding: 24px;">
+            <!-- Dinamik Olarak renderDesktopCalendar() ile doldurulacak -->
         </div>
     </section>
  
