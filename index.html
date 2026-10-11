@@ -3840,7 +3840,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v125</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v126</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3876,7 +3876,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v125</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v126</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -4848,11 +4848,11 @@
                         • FitLab'deki yeni veya güncellenmiş antrenmanları Google Takvim'e yazar.
                     </div>
                     <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                        <button type="button" class="btn btn-gold" style="font-size:12px; padding:8px 14px; font-weight:900;" onclick="performFullCalendarSync()">
-                            ⚡ Şimdi Canlı Eşitle
+                        <button type="button" class="btn btn-gold" style="font-size:12px; padding:8px 14px; font-weight:900;" onclick="openGoogleCalendarWeb()">
+                            📅 Google Takvim'i Aç
                         </button>
-                        <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 12px; color:var(--cyan); border-color:rgba(56,189,248,0.4);" onclick="openGoogleCalendarWeb()">
-                            📅 Google Takvimde Aç
+                        <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 12px; color:var(--cyan); border-color:rgba(56,189,248,0.4);" onclick="performFullCalendarSync()">
+                            🔄 Takvimi Eşitle / İndir
                         </button>
                     </div>
                 </div>
@@ -4893,10 +4893,15 @@
                         <summary style="cursor:pointer; color:var(--cyan); font-weight:700;">🔧 Özel OAuth İstemci / Manuel Token Girişi</summary>
                         <div style="margin-top:8px; display:flex; flex-direction:column; gap:6px;">
                             <div>
-                                <label style="font-size:10px; color:#94a3b8;">Google OAuth Client ID (Opsiyonel):</label>
-                                <input type="text" id="calCustomClientId" class="input-base" style="width:100%; padding:5px 8px; font-size:11px;" placeholder="ör. 974918246558-xxx.apps.googleusercontent.com" onchange="saveCustomGoogleClientId(this.value)">
+                                <label style="font-size:10px; color:#94a3b8;">Google OAuth Client ID (Opsiyonel Canlı API):</label>
+                                <input type="text" id="calCustomClientId" class="input-base" style="width:100%; padding:5px 8px; font-size:11px;" placeholder="ör. xxx.apps.googleusercontent.com" onchange="saveCustomGoogleClientId(this.value)">
                             </div>
-                            <div>
+                            <div style="display:flex; gap:6px; margin-top:2px;">
+                                <button type="button" class="btn btn-outline" style="font-size:10.5px; padding:4px 10px; color:var(--gold); border-color:rgba(245,158,11,0.4);" onclick="connectGoogleCalendarPrompt()">
+                                    ⚡ Client ID ile Canlı Bağlan
+                                </button>
+                            </div>
+                            <div style="margin-top:4px;">
                                 <label style="font-size:10px; color:#94a3b8;">OAuth Access Token (Manuel Yapıştırma):</label>
                                 <div style="display:flex; gap:6px;">
                                     <input type="password" id="calCustomTokenInput" class="input-base" style="flex:1; padding:5px 8px; font-size:11px;" placeholder="ya29.a0...">
@@ -15229,7 +15234,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
             const custom = localStorage.getItem('celik_kodu_gcal_custom_client_id');
             if (custom && custom.trim()) return custom.trim();
-            return "974918246558-fuhhffo19f5o70qu7g6k8gupqg83058a.apps.googleusercontent.com";
+            return "";
         }
 
         function saveCustomGoogleClientId(val) {
@@ -15582,7 +15587,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         async function performFullCalendarSync() {
             if (!isGoogleCalendarConnected()) {
-                connectGoogleCalendarPrompt();
+                downloadFullScheduleICS();
+                if (typeof showToast === 'function') showToast("📥 Tüm haftalık antrenman takvimi (.ics) indirildi! Takviminize aktarabilirsiniz.");
                 return;
             }
             try {
@@ -15611,7 +15617,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         async function syncCurrentDayToCalendar() {
             if (activeSchedulingDayIdx === null) return;
             if (!isGoogleCalendarConnected()) {
-                connectGoogleCalendarPrompt();
+                openSingleDayDirectGoogleCalendar();
                 return;
             }
             try {
@@ -15630,7 +15636,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 openScheduleDayModal(activeSchedulingDayIdx);
                 if (typeof showToast === 'function') showToast("✅ Güncellendi! Antrenman Google Takvim'e işlendi.");
             } catch(e) {
-                if (typeof showToast === 'function') showToast("❌ Hata: " + (e.message || e));
+                console.warn("Canlı takvim yazma hatası, doğrudan web takvim şablonu açılıyor:", e);
+                openSingleDayDirectGoogleCalendar();
             }
         }
 
@@ -15683,7 +15690,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         }
 
         function openGoogleCalendarWeb() {
-            window.open('https://calendar.google.com/calendar/u/0/r', '_blank');
+            try {
+                const win = window.open('https://calendar.google.com/calendar/u/0/r', '_blank');
+                if (!win || win.closed || typeof win.closed === 'undefined') {
+                    window.location.href = 'https://calendar.google.com/calendar/u/0/r';
+                }
+            } catch(e) {
+                window.location.href = 'https://calendar.google.com/calendar/u/0/r';
+            }
         }
 
         function generateScheduleICS(targetWeek = null) {
@@ -15799,7 +15813,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             <button type="button" class="btn btn-outline" style="font-size:11px; padding:3px 8px; color:var(--cyan); border-color:rgba(56,189,248,0.4);" onclick="triggerManualCalendarSync()" title="Takvimle iki yönlü eşitle">
                                 🔄 Canlı Eşitle
                             </button>
-                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:3px 8px; color:#cbd5e1;" onclick="openGoogleCalendarWeb()" title="Google Takvimde Aç">
+                            <button type="button" class="btn btn-gold" style="font-size:11px; padding:3px 8px; font-weight:800;" onclick="openGoogleCalendarWeb()" title="Google Takvim uygulamasını aç">
                                 📅 Takvim
                             </button>
                             <button type="button" class="btn btn-outline" style="font-size:11px; padding:3px 7px;" onclick="openCalendarSyncModal()" title="Takvim Ayarları">
@@ -15813,14 +15827,17 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     <div class="calendar-live-bar" style="background:rgba(245,158,11,0.06); border-color:rgba(245,158,11,0.25);">
                         <div class="calendar-live-info" style="font-size:11px;">
                             <span>📅</span>
-                            <span>Takviminizle Canlı Eşitleyin</span>
+                            <span style="font-weight:700; color:#f8fafc;">Takvim Entegrasyonu</span>
                         </div>
                         <div class="calendar-live-actions">
-                            <button type="button" class="btn btn-gold" style="font-size:11px; padding:3px 10px; font-weight:800;" onclick="connectGoogleCalendarPrompt()">
-                                ⚡ Google Takvim'e Bağlan
+                            <button type="button" class="btn btn-gold" style="font-size:11px; padding:3px 9px; font-weight:800;" onclick="openGoogleCalendarWeb()" title="Google Takvim uygulamasını aç">
+                                📅 Google Takvim'i Aç
                             </button>
-                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:3px 7px;" onclick="openCalendarSyncModal()" title="Takvim Yönetimi & Dışa Aktar">
-                                ⚙️ / 📥
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:3px 8px; color:#cbd5e1;" onclick="downloadFullScheduleICS()" title="Apple / Cihaz Takvimine Aktar (.ics)">
+                                🍏 Cihaza Aktar
+                            </button>
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:3px 7px;" onclick="openCalendarSyncModal()" title="Takvim Yönetimi & Ayarları">
+                                ⚙️
                             </button>
                         </div>
                     </div>
@@ -15953,13 +15970,18 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             } else {
                 card.innerHTML = `
                     <div style="background:rgba(245,158,11,0.08); border:1.5px solid rgba(245,158,11,0.3); border-radius:10px; padding:12px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
-                            <div>
-                                <div style="font-size:13px; font-weight:800; color:#fff;">Henüz Takvim Bağlantısı Yok</div>
-                                <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">Google hesabınızı bağlayarak anında canlı çift yönlü senkronizasyona geçebilirsiniz.</div>
+                        <div style="margin-bottom:8px;">
+                            <div style="font-size:13px; font-weight:800; color:#fff;">📅 Google & Cihaz Takvim Entegrasyonu</div>
+                            <div style="font-size:11px; color:var(--text-secondary); margin-top:3px; line-height:1.4;">
+                                Antrenman seanslarınızı Google Takvim web uygulamasında doğrudan açabilir veya tüm haftayı Apple / cihaz takviminize tek dokunuşla aktarabilirsiniz.
                             </div>
-                            <button type="button" class="btn btn-gold" style="font-size:12px; padding:8px 14px; font-weight:900;" onclick="connectGoogleCalendarPrompt()">
-                                ⚡ Şimdi Bağlan
+                        </div>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+                            <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:7px 14px; font-weight:800;" onclick="openGoogleCalendarWeb()">
+                                📅 Google Takvim'i Aç
+                            </button>
+                            <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 12px; color:#cbd5e1;" onclick="downloadFullScheduleICS()">
+                                🍏 Tüm Programı İndir (.ics)
                             </button>
                         </div>
                     </div>
@@ -15968,27 +15990,20 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         }
 
         async function connectGoogleCalendarPrompt() {
-            // 1. Firebase Google Auth ile dene
-            if (typeof firebase !== 'undefined' && firebase.auth) {
-                try {
-                    const provider = new firebase.auth.GoogleAuthProvider();
-                    provider.addScope('https://www.googleapis.com/auth/calendar');
-                    provider.addScope('https://www.googleapis.com/auth/calendar.events');
-                    const cred = await firebase.auth().signInWithPopup(provider);
-                    if (cred && cred.credential && cred.credential.accessToken) {
-                        saveGoogleCalendarToken(cred.credential.accessToken, 3600);
-                        await performFullCalendarSync();
-                        return;
-                    }
-                } catch(fbErr) {
-                    console.warn("Firebase Auth Google Calendar denemesi:", fbErr);
+            const clientId = getGoogleClientId();
+
+            // 1. İstemci kimliği girilmemişse doğrudan takvim modalına yönlendir ve bilgilendir
+            if (!clientId) {
+                openCalendarSyncModal();
+                if (typeof showToast === 'function') {
+                    showToast("ℹ️ Canlı API senkronizasyonu için geçerli bir Google OAuth Client ID gereklidir.");
                 }
+                return;
             }
 
             // 2. Google Identity Services (GIS) ile dene
             if (window.google && window.google.accounts && window.google.accounts.oauth2) {
                 try {
-                    const clientId = getGoogleClientId();
                     const client = google.accounts.oauth2.initTokenClient({
                         client_id: clientId,
                         scope: 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events',
@@ -15999,6 +16014,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             } else if (resp && resp.error) {
                                 if (typeof showToast === 'function') showToast("❌ Google izin hatası: " + resp.error);
                             }
+                        },
+                        error_callback: (err) => {
+                            console.warn("GIS hata callback:", err);
+                            if (typeof showToast === 'function') showToast("❌ Google kimlik doğrulama başlatılamadı.");
                         }
                     });
                     client.requestAccessToken();
@@ -16010,7 +16029,6 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             // 3. Fallback: Kullanıcıyı takvim modalına yönlendir
             openCalendarSyncModal();
-            if (typeof showToast === 'function') showToast("ℹ️ Google Takvim yetkilendirmesi için lütfen Takvim Merkezi'ndeki adımları inceleyin.");
         }
 
         function initCalendarLiveSyncOnLoad() {
@@ -20136,7 +20154,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=125')
+                navigator.serviceWorker.register('./sw.js?v=126')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
