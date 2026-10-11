@@ -1,4 +1,4 @@
-const CACHE_NAME = 'celik-kodu-cache-v140';
+const CACHE_NAME = 'celik-kodu-cache-v141';
 const ASSETS = [
   './',
   './assets/diagrams/seq_manmaker.svg',
@@ -204,7 +204,8 @@ self.addEventListener('fetch', (event) => {
       event.request.url.includes('securetoken') ||
       event.request.url.includes('jsdelivr') ||
       event.request.url.includes('tesseract') ||
-      event.request.url.includes('tessdata')) {
+      event.request.url.includes('tessdata') ||
+      event.request.url.includes('test-live-workout.html')) {
     return;
   }
 

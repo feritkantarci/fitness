@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Çelik Kodu • Canlı Antrenman Test Laboratuvarı</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Çelik Kodu • Canlı Antrenman Test Laboratuvarı (v141)</title>
     <style>
         :root {
             --bg-base: #060911;
@@ -770,7 +773,10 @@
             <div class="test-title">⚔️ ÇELİK KODU • LİSTBOX SEÇİCİ LAB</div>
             <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">Kilo & Tekrar Listbox Seçim Arayüzü</div>
         </div>
-        <div class="test-badge">v140 MOTORU</div>
+        <div style="display:flex; gap:6px; align-items:center;">
+            <div class="test-badge">v141 MOTORU</div>
+            <button type="button" class="test-badge" onclick="forceRefreshTest()" style="cursor:pointer; background:rgba(245,158,11,0.2); color:var(--gold); border-color:var(--gold);" title="Önbelleği Temizle ve En Güncel Sürümü Yükle">🔄 Önbelleği Yenile</button>
+        </div>
     </div>
 
     <!-- 1. WORKOUT STICKY HUD -->
@@ -851,6 +857,16 @@
 <div id="toast"></div>
 
 <script>
+    async function forceRefreshTest() {
+        if ('caches' in window) {
+            try {
+                const keys = await caches.keys();
+                await Promise.all(keys.map(k => caches.delete(k)));
+            } catch(e) {}
+        }
+        window.location.href = window.location.origin + window.location.pathname + '?t=' + Date.now();
+    }
+
     // SIMULATED WORKOUT DATA
     const mockExercises = [
         {
