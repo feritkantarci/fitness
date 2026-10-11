@@ -2352,6 +2352,197 @@
             border-color: rgba(255, 255, 255, 0.25);
         }
 
+        /* ==================== DEDICATED CALENDAR SCREEN STYLES ==================== */
+        .calendar-screen-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .calendar-screen-nav-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .cal-view-pills {
+            display: inline-flex;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            padding: 2px;
+            gap: 2px;
+        }
+        .cal-pill-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 11.5px;
+            font-weight: 800;
+            padding: 5px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .cal-pill-btn.active {
+            background: var(--gold);
+            color: #000;
+            box-shadow: 0 1px 6px rgba(245, 158, 11, 0.35);
+        }
+        /* WEEKLY DETAILED GRID */
+        .cal-week-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+        @media (max-width: 1024px) {
+            .cal-week-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 640px) {
+            .cal-week-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .cal-week-card {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 160px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .cal-week-card:hover {
+            border-color: rgba(245, 158, 11, 0.45);
+            background: rgba(30, 41, 59, 0.9);
+            transform: translateY(-2px);
+        }
+        .cal-week-card.is-today {
+            border: 1.5px solid var(--gold);
+            background: linear-gradient(180deg, rgba(245, 158, 11, 0.12), rgba(15, 23, 42, 0.95));
+            box-shadow: 0 0 18px rgba(245, 158, 11, 0.22);
+        }
+        .cal-week-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding-bottom: 6px;
+        }
+        .cal-week-card-day {
+            font-size: 13px;
+            font-weight: 900;
+            color: #fff;
+        }
+        .cal-week-card-date {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 700;
+        }
+        .cal-week-card.is-today .cal-week-card-day {
+            color: var(--gold);
+        }
+        /* MONTHLY FULL GRID */
+        .cal-month-table {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .cal-month-header-row {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 900;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            padding-bottom: 4px;
+        }
+        .cal-month-days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        .cal-month-cell {
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            min-height: 85px;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            position: relative;
+        }
+        .cal-month-cell:hover {
+            border-color: rgba(245, 158, 11, 0.45);
+            background: rgba(30, 41, 59, 0.9);
+        }
+        .cal-month-cell.is-other-month {
+            opacity: 0.3;
+        }
+        .cal-month-cell.is-today {
+            border: 1.5px solid var(--gold);
+            background: rgba(245, 158, 11, 0.08);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
+        }
+        .cal-month-cell-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            font-weight: 800;
+            color: #cbd5e1;
+            margin-bottom: 4px;
+        }
+        .cal-month-cell.is-today .cal-month-cell-header {
+            color: var(--gold);
+        }
+        .cal-tag-pill {
+            font-size: 9.5px;
+            font-weight: 800;
+            padding: 2px 4px;
+            border-radius: 4px;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.2;
+            display: block;
+        }
+        .cal-tag-pill.completed {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.35);
+        }
+        .cal-tag-pill.scheduled,
+        .cal-tag-pill.planned {
+            background: rgba(56, 189, 248, 0.18);
+            color: #7dd3fc;
+            border: 1px solid rgba(56, 189, 248, 0.35);
+        }
+        .cal-tag-pill.uncompleted {
+            background: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.35);
+        }
+        .cal-tag-pill.rest {
+            background: rgba(255, 255, 255, 0.03);
+            color: #64748b;
+        }
+
         /* ==================== TODAY WORKOUT / REST STATUS BARS ==================== */
         .today-rest-bar {
             background: rgba(18, 24, 38, 0.65);
@@ -3840,7 +4031,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v126</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v127</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -3876,7 +4067,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v126</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v127</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -3904,6 +4095,9 @@
                 </button>
                 <button class="tab-btn" onclick="switchTab('activeWorkoutTab')" id="tabBtnActiveWorkout">
                     <span>🏋️ Antrenman</span>
+                </button>
+                <button class="tab-btn" onclick="switchTab('calendarTab')" id="tabBtnCalendar">
+                    <span>📅 Takvim</span>
                 </button>
                 <button class="tab-btn" onclick="switchTab('libraryTab')">
                     <span>📚 Program & Hareketler</span>
@@ -4270,6 +4464,68 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== TAB: AKILLI ANTRENMAN TAKVİMİ ==================== -->
+            <div id="calendarTab" class="tab-content">
+                <div class="generator-card" style="padding:16px;">
+                    <!-- TOP TOOLBAR -->
+                    <div class="calendar-screen-header">
+                        <div>
+                            <h2 style="font-size:18px; font-weight:900; color:#fff; display:flex; align-items:center; gap:8px;">
+                                <span>📅</span>
+                                <span>AKILLI ANTRENMAN TAKVİMİ</span>
+                            </h2>
+                            <p style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
+                                Haftalık ve aylık seans planlama, geçmiş tamamlanan antrenman kayıtları ve tek dokunuşla program yönetimi.
+                            </p>
+                        </div>
+                        <div class="calendar-screen-nav-bar">
+                            <div class="cal-view-pills">
+                                <button type="button" class="cal-pill-btn active" id="calViewWeeklyBtn" onclick="setCalendarViewMode('weekly')">
+                                    📅 Haftalık
+                                </button>
+                                <button type="button" class="cal-pill-btn" id="calViewMonthlyBtn" onclick="setCalendarViewMode('monthly')">
+                                    🗓️ Aylık
+                                </button>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:5px;">
+                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 10px;" onclick="navigateCalendar(-1)" title="Önceki Dönem">
+                                    ◀
+                                </button>
+                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 12px; font-weight:800; color:var(--gold); border-color:rgba(245,158,11,0.4);" onclick="jumpCalendarToToday()">
+                                    Bugün
+                                </button>
+                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 10px;" onclick="navigateCalendar(1)" title="Sonraki Dönem">
+                                    ▶
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PERIOD TITLE & DIRECT EXPORT BAR -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.08);">
+                        <div style="font-size:15px; font-weight:900; color:var(--gold);" id="calPeriodTitle">
+                            <!-- E.g. 5 - 11 Ekim 2026 -->
+                        </div>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                            <button type="button" class="btn btn-gold" style="font-size:11px; padding:5px 12px; font-weight:800;" onclick="openGoogleCalendarWeb()" title="Google Takvim uygulamasını aç">
+                                📅 Google Takvim
+                            </button>
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:5px 10px; color:#cbd5e1;" onclick="downloadFullScheduleICS()" title="Tüm haftayı cihaz takvimine aktar (.ics)">
+                                🍏 Cihaza Aktar (.ics)
+                            </button>
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:5px 8px;" onclick="openCalendarSyncModal()" title="Takvim Ayarları">
+                                ⚙️
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- MAIN CALENDAR CONTAINER (WEEKLY OR MONTHLY VIEW) -->
+                    <div id="calendarMainContainer">
+                        <!-- Populated dynamically by renderCalendarScreen() -->
                     </div>
                 </div>
             </div>
@@ -5771,6 +6027,10 @@
                 <span class="nav-icon">🏋️</span>
                 <span>Antrenman</span>
             </div>
+            <div class="bottom-nav-item" data-tab="calendarTab" onclick="switchTab('calendarTab')">
+                <span class="nav-icon">📅</span>
+                <span>Takvim</span>
+            </div>
             <div class="bottom-nav-item" data-tab="historyTab" onclick="switchTab('historyTab')">
                 <span class="nav-icon">📋</span>
                 <span>Geçmiş</span>
@@ -5796,6 +6056,10 @@
             <button onclick="closeMoreSheet()" style="background:none; border:none; color:var(--text-secondary); font-size:18px; cursor:pointer;">✕</button>
         </div>
         <div class="more-sheet-grid">
+            <div class="more-sheet-btn" onclick="closeMoreSheet(); switchTab('calendarTab');" style="border-color:rgba(245, 158, 11, 0.4); color:var(--gold);">
+                <span>📅</span>
+                <span>Akıllı Takvim</span>
+            </div>
             <div class="more-sheet-btn" onclick="closeMoreSheet(); switchTab('studioTab');">
                 <span>🎯</span>
                 <span>Program Atölyesi</span>
@@ -6346,6 +6610,7 @@
             }
 
             if (tabId === 'generatorTab') renderAiHybridHeroBanner();
+            if (tabId === 'calendarTab') renderCalendarScreen();
             if (tabId === 'libraryTab') renderLibrary();
             if (tabId === 'historyTab') renderHistory();
             if (tabId === 'analyticsTab') renderAnalytics();
@@ -13248,9 +13513,11 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         }
 
         let activeSchedulingDayIdx = null;
+        let activeSchedulingDateStr = null;
 
-        function openScheduleDayModal(dayIdx) {
+        function openScheduleDayModal(dayIdx, targetDateStr = null) {
             activeSchedulingDayIdx = dayIdx;
+            activeSchedulingDateStr = targetDateStr || null;
             const modal = document.getElementById('scheduleDayModal');
             const dayTitle = document.getElementById('schedModalDayTitle');
             const dayBadge = document.getElementById('schedModalDayBadge');
@@ -13260,16 +13527,32 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             const dayName = DAY_NAMES_TR[dayIdx];
             const todayIdx = new Date().getDay();
-            const isToday = dayIdx === todayIdx;
+            const todayYMD = typeof formatDateYMD === 'function' ? formatDateYMD(new Date()) : '';
+            const isToday = activeSchedulingDateStr ? (activeSchedulingDateStr === todayYMD) : (dayIdx === todayIdx);
             const isTomorrow = dayIdx === ((todayIdx + 1) % 7);
 
-            if (dayTitle) dayTitle.innerText = `${dayName} Günü Antrenman Planı`;
+            let titleLabel = `${dayName} Günü Antrenman Planı`;
+            if (activeSchedulingDateStr) {
+                const parts = activeSchedulingDateStr.split('-');
+                if (parts.length === 3) {
+                    const mIdx = parseInt(parts[1], 10) - 1;
+                    const mName = (typeof CAL_MONTH_NAMES_TR !== 'undefined' && CAL_MONTH_NAMES_TR[mIdx]) ? CAL_MONTH_NAMES_TR[mIdx] : '';
+                    titleLabel = `${parseInt(parts[2], 10)} ${mName} (${dayName}) Planı`;
+                }
+            }
+
+            if (dayTitle) dayTitle.innerText = titleLabel;
             if (dayBadge) {
                 dayBadge.innerText = isToday ? 'BUGÜNÜN PROGRAMI' : (isTomorrow ? 'YARINKİ PROGRAM' : 'HAFTALIK PLAN');
             }
 
-            const schedule = activePlannerWeek === 'next' ? getNextWeeklySchedule() : getWeeklySchedule();
-            const currentPlan = schedule[dayIdx] || { id: 'rest', rest: true };
+            let currentPlan;
+            if (activeSchedulingDateStr && typeof getPlanForDate === 'function') {
+                currentPlan = getPlanForDate(new Date(activeSchedulingDateStr + 'T00:00:00'));
+            } else {
+                const schedule = activePlannerWeek === 'next' ? getNextWeeklySchedule() : getWeeklySchedule();
+                currentPlan = schedule[dayIdx] || { id: 'rest', rest: true };
+            }
             const workoutDetails = getWorkoutDetailsForPlan(currentPlan);
 
             if (typeof updateScheduleDayModalTimingCard === 'function') {
@@ -13278,6 +13561,32 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             // 1. RENDER ASSIGNED WORKOUT DETAILED CONTENT SECTION
             if (assignedSection) {
+                const completedOnDate = (activeSchedulingDateStr && typeof getCompletedWorkoutsForDate === 'function')
+                    ? getCompletedWorkoutsForDate(new Date(activeSchedulingDateStr + 'T00:00:00'))
+                    : [];
+                let completedBannerHtml = '';
+                if (completedOnDate.length > 0) {
+                    const cLog = completedOnDate[0];
+                    const cVol = cLog.totalVolumeKg ? `${Math.round(cLog.totalVolumeKg).toLocaleString('tr-TR')} kg` : '';
+                    const cDur = cLog.durationFormatted || (cLog.duration ? `${cLog.duration} Dk` : '');
+                    completedBannerHtml = `
+                        <div style="background:rgba(16,185,129,0.12); border:1.5px solid #10b981; border-radius:10px; padding:12px; margin-bottom:12px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                                <div>
+                                    <span class="auth-role-tag" style="background:#10b981; color:#000; font-weight:900; font-size:9.5px;">✅ BU GÜN SEANS TAMAMLANDI</span>
+                                    <h3 style="font-size:14px; font-weight:800; color:#fff; margin:4px 0 2px;">${escapeHTML(cLog.program || cLog.title || 'Antrenman')}</h3>
+                                    <div style="font-size:11px; color:#a7f3d0;">
+                                        ${cDur ? `⏱️ ${cDur}` : ''} ${cVol ? ` • 🏋️ ${cVol}` : ''} ${cLog.totalSetsCompleted ? `• 🎯 ${cLog.totalSetsCompleted} Set` : ''}
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:5px 10px; color:#a7f3d0; border-color:#10b981;" onclick="switchTab('historyTab'); closeScheduleDayModal();">
+                                    📋 Geçmişte Gör
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+
                 if (!currentPlan.rest) {
                     const details = workoutDetails || getWorkoutDetailsForPlan(currentPlan) || {};
                     const exercises = details.exercises || [];
@@ -13337,7 +13646,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         }).join('');
                     }
 
-                    assignedSection.innerHTML = `
+                    assignedSection.innerHTML = completedBannerHtml + `
                         <div style="background:linear-gradient(135deg, rgba(245,158,11,0.12), rgba(0,0,0,0.45)); border:1.5px solid var(--gold); border-radius:12px; padding:14px; box-shadow:0 0 25px rgba(245,158,11,0.15);">
                             <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
                                 <div>
@@ -13384,7 +13693,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         </div>
                     `;
                 } else {
-                    assignedSection.innerHTML = `
+                    assignedSection.innerHTML = completedBannerHtml + `
                         <div style="background:rgba(148,163,184,0.06); border:1px dashed var(--border); border-radius:10px; padding:14px; text-align:center;">
                             <div style="font-size:24px; margin-bottom:4px;">🧘</div>
                             <div style="font-size:14px; font-weight:800; color:#fff;">${dayName} Günü Dinlenme Olarak Ayarlı</div>
@@ -13419,6 +13728,40 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 }
             } catch(e) {}
 
+            // Check for FitLAB Coach Directive
+            let coachDir = null;
+            try {
+                const uid = getActiveUserId();
+                const rawDir = localStorage.getItem(`celik_kodu_coach_directive_${uid}`);
+                if (rawDir) coachDir = JSON.parse(rawDir);
+            } catch(e) {}
+
+            let coachDirectiveHtml = '';
+            if (coachDir) {
+                const dirWorkout = coachDir.parsedWorkout || (coachDir.fullReport ? parseDirectiveWorkout(coachDir.fullReport, coachDir.title) : null);
+                if (dirWorkout && Array.isArray(dirWorkout.exercises) && dirWorkout.exercises.length > 0) {
+                    const dirTitle = dirWorkout.title || coachDir.title || 'FitLAB Özel Seansı';
+                    const dirCount = dirWorkout.exercises.length;
+                    const dirDur = dirWorkout.duration || 45;
+                    coachDirectiveHtml = `
+                        <div style="font-size:10.5px; font-weight:900; color:var(--gold); text-transform:uppercase; margin:10px 0 4px; display:flex; align-items:center; gap:6px;">
+                            <span>🧠</span> FITLAB MASAÜSTÜ / KOÇ DİREKTİFİ
+                        </div>
+                        <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:8px; border:1.5px solid var(--gold); background:rgba(245,158,11,0.08);" onclick="assignDirectiveToActiveDay()">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <div style="font-size:13px; font-weight:800; color:#fff;">${escapeHTML(dirTitle)}</div>
+                                    <div style="font-size:11px; color:var(--gold); font-weight:700;">${dirCount} Hareket • ~${dirDur} Dk • Masaüstünden Aktarıldı</div>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <span style="font-size:11px; color:var(--gold); font-weight:800;">Bu Güne Ata ➔</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
             let html = `
                 <div style="display:flex; justify-content:space-between; align-items:center; margin:16px 0 8px;">
                     <div style="font-size:11.5px; font-weight:900; color:var(--gold); text-transform:uppercase;">
@@ -13428,7 +13771,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         ➕ Yeni Tasarla
                     </button>
                 </div>
-
+                ${coachDirectiveHtml}
                 <div style="font-size:10.5px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:4px;">
                     ⚔️ Çelik Kodu Klasik Serisi
                 </div>
@@ -13537,6 +13880,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const modal = document.getElementById('scheduleDayModal');
             if (modal) modal.classList.remove('active');
             activeSchedulingDayIdx = null;
+            activeSchedulingDateStr = null;
         }
 
         function toggleSchedModalExerciseList() {
@@ -14058,7 +14402,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const targetDay = activeSchedulingDayIdx;
             const schedule = getWeeklySchedule();
             const details = getWorkoutDetailsForPlan({ id: id, type: type, title: title });
-            schedule[targetDay] = {
+            const planObj = {
                 id: id,
                 title: title,
                 type: type,
@@ -14066,11 +14410,18 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 rest: false,
                 customWorkout: details ? JSON.parse(JSON.stringify(details)) : null
             };
+            schedule[targetDay] = planObj;
             saveWeeklySchedule(schedule);
+
+            if (activeSchedulingDateStr && typeof saveDateScheduleOverride === 'function') {
+                saveDateScheduleOverride(activeSchedulingDateStr, planObj);
+            }
+
             renderActiveWorkout();
+            if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
             playAlertSound();
             if (keepModalOpen) {
-                openScheduleDayModal(targetDay);
+                openScheduleDayModal(targetDay, activeSchedulingDateStr);
             } else {
                 closeScheduleDayModal();
             }
@@ -14089,7 +14440,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (!workoutToAssign) return;
 
             const schedule = getWeeklySchedule();
-            schedule[targetDay] = {
+            const planObj = {
                 id: workoutToAssign.id || ('gen_' + Date.now()),
                 title: workoutToAssign.title || 'Özel Sihirbaz Antrenmanı',
                 type: 'custom_generated',
@@ -14097,11 +14448,18 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 rest: false,
                 customWorkout: JSON.parse(JSON.stringify(workoutToAssign))
             };
+            schedule[targetDay] = planObj;
             saveWeeklySchedule(schedule);
+
+            if (activeSchedulingDateStr && typeof saveDateScheduleOverride === 'function') {
+                saveDateScheduleOverride(activeSchedulingDateStr, planObj);
+            }
+
             renderActiveWorkout();
+            if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
             playAlertSound();
             if (keepModalOpen) {
-                openScheduleDayModal(targetDay);
+                openScheduleDayModal(targetDay, activeSchedulingDateStr);
             } else {
                 closeScheduleDayModal();
             }
@@ -14159,17 +14517,24 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (oldPlan && oldPlan.googleEventId && typeof deleteCalendarEventQuiet === 'function') {
                 deleteCalendarEventQuiet(oldPlan.googleEventId);
             }
-            schedule[activeSchedulingDayIdx] = {
+            const restPlan = {
                 id: 'rest',
                 title: '🧘 Dinlenme & Aktif Toparlanma',
                 type: 'rest',
                 desc: 'Hafif yürüyüş, esneme veya tam istirahat',
                 rest: true
             };
+            schedule[activeSchedulingDayIdx] = restPlan;
             if (isNext) saveNextWeeklySchedule(schedule, user.id);
             else saveWeeklySchedule(schedule, user.id);
+
+            if (activeSchedulingDateStr && typeof saveDateScheduleOverride === 'function') {
+                saveDateScheduleOverride(activeSchedulingDateStr, restPlan);
+            }
+
             closeScheduleDayModal();
             renderActiveWorkout();
+            if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
         }
 
         function resetWeeklyScheduleTemplate(templateType = 'standard_3day') {
@@ -16044,6 +16409,401 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     }
                 }
             } catch(e) {}
+        }
+
+        // ==================== SMART CALENDAR SCREEN ENGINE (WEEKLY & MONTHLY) ====================
+        const CAL_MONTH_NAMES_TR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+
+        const calendarScreenState = {
+            viewMode: 'weekly', // 'weekly' | 'monthly'
+            anchorDate: new Date()
+        };
+
+        function formatDateYMD(d) {
+            if (!d || !(d instanceof Date) || isNaN(d.getTime())) return '';
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+
+        function getDateScheduleOverrides(uid) {
+            const targetUid = uid || (typeof getActiveUserId === 'function' ? getActiveUserId() : 'default');
+            try {
+                const raw = localStorage.getItem(`celik_kodu_date_schedule_${targetUid}`);
+                return raw ? JSON.parse(raw) : {};
+            } catch(e) {
+                return {};
+            }
+        }
+
+        function saveDateScheduleOverride(dateStr, plan, uid) {
+            if (!dateStr) return;
+            const targetUid = uid || (typeof getActiveUserId === 'function' ? getActiveUserId() : 'default');
+            const overrides = getDateScheduleOverrides(targetUid);
+            if (!plan || plan.id === 'default') {
+                delete overrides[dateStr];
+            } else {
+                overrides[dateStr] = plan;
+            }
+            try {
+                localStorage.setItem(`celik_kodu_date_schedule_${targetUid}`, JSON.stringify(overrides));
+            } catch(e) {}
+        }
+
+        function getCompletedWorkoutsForDate(dateObj) {
+            const targetYMD = formatDateYMD(dateObj);
+            if (!targetYMD) return [];
+            const logs = (typeof getWorkoutLogs === 'function') ? getWorkoutLogs() : [];
+            return logs.filter(l => {
+                if (!l || !l.date) return false;
+                const dStr = String(l.date).split('T')[0];
+                return dStr === targetYMD;
+            });
+        }
+
+        function getPlanForDate(dateObj) {
+            const dStr = formatDateYMD(dateObj);
+            const overrides = getDateScheduleOverrides();
+            if (overrides && overrides[dStr]) {
+                return overrides[dStr];
+            }
+            const dayIdx = dateObj.getDay();
+            const schedule = (typeof getWeeklySchedule === 'function') ? getWeeklySchedule() : {};
+            return schedule[dayIdx] || { id: 'rest', title: '🧘 Dinlenme & Toparlanma', rest: true, type: 'rest' };
+        }
+
+        function setCalendarViewMode(mode) {
+            calendarScreenState.viewMode = mode === 'monthly' ? 'monthly' : 'weekly';
+            renderCalendarScreen();
+        }
+
+        function navigateCalendar(dir) {
+            if (!calendarScreenState.anchorDate) calendarScreenState.anchorDate = new Date();
+            const d = new Date(calendarScreenState.anchorDate);
+            if (calendarScreenState.viewMode === 'monthly') {
+                d.setMonth(d.getMonth() + dir);
+            } else {
+                d.setDate(d.getDate() + (dir * 7));
+            }
+            calendarScreenState.anchorDate = d;
+            renderCalendarScreen();
+        }
+
+        function jumpCalendarToToday() {
+            calendarScreenState.anchorDate = new Date();
+            renderCalendarScreen();
+        }
+
+        function quickSetDateRest(dateStr, dayIdx) {
+            const uid = getActiveUserId();
+            const restPlan = {
+                id: 'rest',
+                title: '🧘 Dinlenme & Aktif Toparlanma',
+                type: 'rest',
+                desc: 'Hafif yürüyüş, esneme veya tam istirahat',
+                rest: true
+            };
+            saveDateScheduleOverride(dateStr, restPlan, uid);
+            if (typeof showToast === 'function') {
+                showToast(`🧘 ${dateStr} dinlenme günü olarak ayarlandı.`);
+            }
+            renderCalendarScreen();
+            if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
+        }
+
+        function assignDirectiveToActiveDay() {
+            if (activeSchedulingDayIdx === null) return;
+            const uid = getActiveUserId();
+            let coachDir = null;
+            try {
+                const rawDir = localStorage.getItem(`celik_kodu_coach_directive_${uid}`);
+                if (rawDir) coachDir = JSON.parse(rawDir);
+            } catch(e) {}
+            if (!coachDir) {
+                if (typeof showToast === 'function') showToast("⚠️ FitLAB direktifi bulunamadı.");
+                return;
+            }
+            const dirWorkout = coachDir.parsedWorkout || (coachDir.fullReport ? parseDirectiveWorkout(coachDir.fullReport, coachDir.title) : null);
+            if (!dirWorkout) {
+                if (typeof showToast === 'function') showToast("⚠️ FitLAB egzersiz detayları ayrıştırılamadı.");
+                return;
+            }
+            const targetDay = activeSchedulingDayIdx;
+            const schedule = getWeeklySchedule();
+            const newPlan = {
+                id: dirWorkout.id || ('directive_' + Date.now()),
+                title: dirWorkout.title || 'FitLAB Özel Seansı',
+                type: 'custom_saved',
+                desc: `${dirWorkout.exercises ? dirWorkout.exercises.length : 0} Hareket • ${dirWorkout.duration || 45} Dk`,
+                rest: false,
+                customWorkout: dirWorkout,
+                exercises: dirWorkout.exercises
+            };
+            schedule[targetDay] = newPlan;
+            saveWeeklySchedule(schedule);
+
+            if (activeSchedulingDateStr) {
+                saveDateScheduleOverride(activeSchedulingDateStr, newPlan);
+            }
+            if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
+            if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
+            if (typeof showToast === 'function') showToast(`✅ "${newPlan.title}" ${DAY_NAMES_TR[targetDay]} gününe atandı!`);
+            if (typeof playAlertSound === 'function') playAlertSound();
+            openScheduleDayModal(targetDay, activeSchedulingDateStr);
+        }
+
+        function renderCalendarScreen() {
+            const container = document.getElementById('calendarMainContainer');
+            if (!container) return;
+
+            const weeklyBtn = document.getElementById('calViewWeeklyBtn');
+            const monthlyBtn = document.getElementById('calViewMonthlyBtn');
+            if (weeklyBtn) weeklyBtn.classList.toggle('active', calendarScreenState.viewMode === 'weekly');
+            if (monthlyBtn) monthlyBtn.classList.toggle('active', calendarScreenState.viewMode === 'monthly');
+
+            if (calendarScreenState.viewMode === 'monthly') {
+                renderCalendarMonthlyView(container);
+            } else {
+                renderCalendarWeeklyView(container);
+            }
+        }
+
+        function renderCalendarWeeklyView(container) {
+            const anchor = new Date(calendarScreenState.anchorDate || new Date());
+            anchor.setHours(0, 0, 0, 0);
+            const dayOfWeek = anchor.getDay(); // 0 is Sun, 1 is Mon
+            const diffToMon = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+            const monday = new Date(anchor);
+            monday.setDate(anchor.getDate() + diffToMon);
+
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+
+            const titleEl = document.getElementById('calPeriodTitle');
+            if (titleEl) {
+                const sD = monday.getDate();
+                const sM = CAL_MONTH_NAMES_TR[monday.getMonth()];
+                const eD = sunday.getDate();
+                const eM = CAL_MONTH_NAMES_TR[sunday.getMonth()];
+                const yr = sunday.getFullYear();
+                if (sM === eM) {
+                    titleEl.innerHTML = `📅 <span>${sD} - ${eD} ${sM} ${yr}</span>`;
+                } else {
+                    titleEl.innerHTML = `📅 <span>${sD} ${sM} - ${eD} ${eM} ${yr}</span>`;
+                }
+            }
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const todayYMD = formatDateYMD(today);
+
+            let html = '<div class="cal-week-grid">';
+            for (let i = 0; i < 7; i++) {
+                const dayDate = new Date(monday);
+                dayDate.setDate(monday.getDate() + i);
+                const dayYMD = formatDateYMD(dayDate);
+                const dayIdx = dayDate.getDay();
+                const isToday = dayYMD === todayYMD;
+                const isPast = dayDate < today;
+
+                const completedLogs = getCompletedWorkoutsForDate(dayDate);
+                const hasCompleted = completedLogs.length > 0;
+                const plan = getPlanForDate(dayDate);
+                const isRest = plan.rest || plan.type === 'rest';
+
+                let badgeHtml = '';
+                if (hasCompleted) {
+                    badgeHtml = `<span class="cal-tag-pill completed">✅ ${completedLogs.length > 1 ? completedLogs.length + ' Seans' : 'Tamamlandı'}</span>`;
+                } else if (isToday) {
+                    badgeHtml = `<span class="auth-role-tag role-admin" style="font-size:9.5px; background:var(--gold); color:#000;">BUGÜN</span>`;
+                } else if (isPast && !isRest) {
+                    badgeHtml = `<span class="cal-tag-pill uncompleted">⚠️ Yapılmadı</span>`;
+                } else if (isRest) {
+                    badgeHtml = `<span class="cal-tag-pill rest">🧘 Dinlenme</span>`;
+                } else {
+                    badgeHtml = `<span class="cal-tag-pill planned">📋 Planlandı</span>`;
+                }
+
+                let bodyContent = '';
+                if (hasCompleted) {
+                    const log = completedLogs[0];
+                    const logVol = log.totalVolumeKg ? `${Math.round(log.totalVolumeKg).toLocaleString('tr-TR')} kg` : '';
+                    const logDur = log.durationFormatted || (log.duration ? `${log.duration} Dk` : '');
+                    bodyContent = `
+                        <div style="flex:1;">
+                            <div style="font-size:13px; font-weight:800; color:#fff; margin-bottom:4px; line-height:1.3;">
+                                ${escapeHTML(log.program || log.title || 'Antrenman')}
+                            </div>
+                            <div style="font-size:11px; color:#34d399; font-weight:700; margin-bottom:4px;">
+                                ${logDur ? `⏱️ ${logDur}` : ''} ${logVol ? ` • 🏋️ ${logVol}` : ''}
+                            </div>
+                            ${log.totalSetsCompleted ? `<div style="font-size:10px; color:var(--text-secondary);">🎯 ${log.totalSetsCompleted} Set Tamamlandı</div>` : ''}
+                        </div>
+                        <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 10px; width:100%; margin-top:8px; color:var(--cyan); border-color:var(--cyan);" onclick="event.stopPropagation(); openScheduleDayModal(${dayIdx}, '${dayYMD}')">
+                            👁️ Seans & Programı Yönet
+                        </button>
+                    `;
+                } else if (!isRest) {
+                    bodyContent = `
+                        <div style="flex:1;">
+                            <div style="font-size:13px; font-weight:800; color:#fff; margin-bottom:4px; line-height:1.3;">
+                                ${escapeHTML(plan.title || 'Planlı Antrenman')}
+                            </div>
+                            <div style="font-size:11px; color:var(--gold); font-weight:700; margin-bottom:4px;">
+                                ⏱️ ${plan.time || '18:30'} • ${plan.duration || 45} Dk
+                            </div>
+                            ${plan.desc ? `<div style="font-size:10px; color:var(--text-secondary); line-height:1.3; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">${escapeHTML(plan.desc)}</div>` : ''}
+                        </div>
+                        <div style="display:flex; gap:6px; margin-top:8px;">
+                            ${isToday ? `
+                                <button type="button" class="btn btn-gold" style="flex:1; font-size:11px; padding:6px 8px; font-weight:900;" onclick="event.stopPropagation(); startScheduledWorkoutForDay(${dayIdx})">
+                                    ▶️ Başlat
+                                </button>
+                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 8px;" onclick="event.stopPropagation(); openScheduleDayModal(${dayIdx}, '${dayYMD}')">
+                                    ✏️ Düzenle
+                                </button>
+                            ` : `
+                                <button type="button" class="btn btn-outline" style="flex:1; font-size:11px; padding:6px 8px; font-weight:700; color:var(--gold); border-color:rgba(245,158,11,0.4);" onclick="event.stopPropagation(); openScheduleDayModal(${dayIdx}, '${dayYMD}')">
+                                    ✏️ Değiştir / Ata
+                                </button>
+                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 8px; color:#fca5a5; border-color:rgba(239,68,68,0.3);" onclick="event.stopPropagation(); quickSetDateRest('${dayYMD}', ${dayIdx})" title="Bu günü dinlenmeye al">
+                                    🧘
+                                </button>
+                            `}
+                        </div>
+                    `;
+                } else {
+                    bodyContent = `
+                        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:12px 0;">
+                            <span style="font-size:22px; margin-bottom:4px;">🧘</span>
+                            <div style="font-size:12px; font-weight:700; color:var(--text-secondary);">Dinlenme & Toparlanma</div>
+                        </div>
+                        <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 10px; width:100%; border-color:rgba(255,255,255,0.15); color:#cbd5e1;" onclick="event.stopPropagation(); openScheduleDayModal(${dayIdx}, '${dayYMD}')">
+                            ➕ Program Ata
+                        </button>
+                    `;
+                }
+
+                html += `
+                    <div class="cal-week-card ${isToday ? 'is-today' : ''} ${hasCompleted ? 'is-completed' : (isRest ? 'is-rest' : '')}" onclick="openScheduleDayModal(${dayIdx}, '${dayYMD}')">
+                        <div class="cal-week-card-header">
+                            <div>
+                                <span class="cal-week-card-day">${DAY_NAMES_TR[dayIdx]}</span>
+                                <span class="cal-week-card-date" style="margin-left:4px;">${dayDate.getDate()} ${CAL_MONTH_NAMES_TR[dayDate.getMonth()].slice(0, 3)}</span>
+                            </div>
+                            ${badgeHtml}
+                        </div>
+                        ${bodyContent}
+                    </div>
+                `;
+            }
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function renderCalendarMonthlyView(container) {
+            const anchor = new Date(calendarScreenState.anchorDate || new Date());
+            const year = anchor.getFullYear();
+            const month = anchor.getMonth();
+
+            const titleEl = document.getElementById('calPeriodTitle');
+            if (titleEl) {
+                titleEl.innerHTML = `🗓️ <span>${CAL_MONTH_NAMES_TR[month]} ${year}</span>`;
+            }
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+
+            // Monday-first offset
+            const firstDayOfWeek = firstDay.getDay(); // 0 is Sun
+            const startOffset = (firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1);
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const todayYMD = formatDateYMD(today);
+
+            let html = `
+                <div class="cal-month-table">
+                    <div class="cal-month-header-row">
+                        <div>Pzt</div>
+                        <div>Sal</div>
+                        <div>Çar</div>
+                        <div>Per</div>
+                        <div>Cum</div>
+                        <div>Cmt</div>
+                        <div>Paz</div>
+                    </div>
+                    <div class="cal-month-days-grid">
+            `;
+
+            // Previous month padding days
+            const prevMonthLastDay = new Date(year, month, 0).getDate();
+            for (let p = startOffset - 1; p >= 0; p--) {
+                const dayNum = prevMonthLastDay - p;
+                html += `
+                    <div class="cal-month-cell is-other-month">
+                        <div class="cal-month-cell-header">
+                            <span>${dayNum}</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Current month days
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dayDate = new Date(year, month, d);
+                const dayYMD = formatDateYMD(dayDate);
+                const dayIdx = dayDate.getDay();
+                const isToday = dayYMD === todayYMD;
+
+                const completedLogs = getCompletedWorkoutsForDate(dayDate);
+                const hasCompleted = completedLogs.length > 0;
+                const plan = getPlanForDate(dayDate);
+                const isRest = plan.rest || plan.type === 'rest';
+
+                let pillHtml = '';
+                if (hasCompleted) {
+                    const titleShort = (completedLogs[0].program || completedLogs[0].title || 'Tamamlandı').slice(0, 11);
+                    pillHtml = `<div class="cal-tag-pill completed" title="${escapeHTML(completedLogs[0].program || completedLogs[0].title)}">✅ ${escapeHTML(titleShort)}</div>`;
+                } else if (!isRest) {
+                    const cleanTitle = (plan.title || 'Plan').replace(/⚔️/g, '').trim().slice(0, 11);
+                    pillHtml = `<div class="cal-tag-pill scheduled" title="${escapeHTML(plan.title)}">⚔️ ${escapeHTML(cleanTitle)}</div>`;
+                } else {
+                    pillHtml = `<div class="cal-tag-pill rest">🧘 Dinlenme</div>`;
+                }
+
+                html += `
+                    <div class="cal-month-cell ${isToday ? 'is-today' : ''}" onclick="openScheduleDayModal(${dayIdx}, '${dayYMD}')">
+                        <div class="cal-month-cell-header">
+                            <span style="${isToday ? 'font-weight:900; color:var(--gold);' : ''}">${d}</span>
+                            ${isToday ? '<span style="font-size:8px; color:var(--gold); font-weight:900;">BUGÜN</span>' : ''}
+                        </div>
+                        ${pillHtml}
+                    </div>
+                `;
+            }
+
+            // Trailing padding days to fill the row
+            const totalCells = startOffset + daysInMonth;
+            const remainingCells = (7 - (totalCells % 7)) % 7;
+            for (let n = 1; n <= remainingCells; n++) {
+                html += `
+                    <div class="cal-month-cell is-other-month">
+                        <div class="cal-month-cell-header">
+                            <span>${n}</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += `
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = html;
         }
 
         // ==================== AUTHENTICATION & MULTI-USER SYSTEM ====================
@@ -20154,7 +20914,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=126')
+                navigator.serviceWorker.register('./sw.js?v=127')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
