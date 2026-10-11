@@ -476,8 +476,30 @@ async function selectAthlete(userId) {
     loadConsultationHistoryForAthlete(userId);
     renderConsultationContext();
 
+    // Bulut Direktif & Takvim Planını Sporcuya Özel Çek
+    if (window.coachAPI && window.coachAPI.getDirective) {
+        try {
+            const dir = await window.coachAPI.getDirective(userId);
+            if (dir) {
+                if (dir.schedule) {
+                    saveDesktopAthleteSchedule(dir.schedule);
+                }
+                if (dir.dateOverrides) {
+                    try {
+                        localStorage.setItem(`fitlab_desktop_date_schedule_${userId}`, JSON.stringify(dir.dateOverrides));
+                    } catch(e) {}
+                }
+            }
+        } catch(err) {
+            console.warn("[selectAthlete] Bulut direktif alınamadı:", err);
+        }
+    }
+
     // Antrenman Geçmişini ve Akademik Analizi Yükle
     await refreshAthleteData();
+    if (state.currentView === 'calendar' && typeof renderDesktopCalendar === 'function') {
+        renderDesktopCalendar();
+    }
 }
 
 function renderWeightsTable(weights) {
@@ -503,12 +525,24 @@ async function refreshAthleteData() {
 
     el.btnRefresh.classList.add('rotating');
     try {
-        const [logs, scaleLogs] = await Promise.all([
+        const [logs, scaleLogs, cloudDirective] = await Promise.all([
             window.coachAPI.getWorkoutLogs(state.selectedUserId),
-            window.coachAPI.getScaleLogs(state.selectedUserId)
+            window.coachAPI.getScaleLogs(state.selectedUserId),
+            (window.coachAPI?.getDirective ? window.coachAPI.getDirective(state.selectedUserId) : Promise.resolve(null))
         ]);
         state.workoutLogs = logs || [];
         state.scaleLogs = scaleLogs || [];
+
+        if (cloudDirective) {
+            if (cloudDirective.schedule) {
+                saveDesktopAthleteSchedule(cloudDirective.schedule);
+            }
+            if (cloudDirective.dateOverrides) {
+                try {
+                    localStorage.setItem(`fitlab_desktop_date_schedule_${state.selectedUserId}`, JSON.stringify(cloudDirective.dateOverrides));
+                } catch(e) {}
+            }
+        }
 
         // Akademik Spor Bilimi Motorunu Çalıştır (Antrenman + Tartı ve Kompozisyon)
         const analysis = await window.coachAPI.analyzeHistory(state.workoutLogs, state.selectedUser, state.scaleLogs);
@@ -3792,6 +3826,7 @@ function openGoogleCalendarFromDesktop() {
 }
 window.openGoogleCalendarFromDesktop = openGoogleCalendarFromDesktop;
 
+const DESKTOP_DAY_NAMES_TR = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
 const DESKTOP_MONTH_NAMES_TR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
 
 // Hafta günlerini Pazartesi'den Pazar'a hesapla (İsteğe bağlı referans tarihli)
@@ -3806,7 +3841,6 @@ function getDesktopCurrentWeekDays(anchor = null) {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
 
-    const dayNames = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
     const days = [];
     for (let i = 0; i < 7; i++) {
         const d = new Date(monday);
@@ -3815,11 +3849,13 @@ function getDesktopCurrentWeekDays(anchor = null) {
         const mm = String(d.getMonth() + 1).padStart(2, '0');
         const dd = String(d.getDate()).padStart(2, '0');
         const dateStr = `${yyyy}-${mm}-${dd}`;
+        const dayOfWeek = d.getDay(); // 1: Pazartesi ... 6: Cumartesi, 0: Pazar
         
         days.push({
             dateObj: d,
-            dayIndex: i,
-            dayName: dayNames[i],
+            dayIndex: dayOfWeek, // Standart JS gün indeksi (0=Pazar, 1=Pazartesi, ...)
+            weekOrder: i,
+            dayName: DESKTOP_DAY_NAMES_TR[dayOfWeek],
             dateStr: dateStr,
             formattedDate: d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }),
             isToday: d.toDateString() === now.toDateString(),
@@ -3861,7 +3897,7 @@ function getDesktopPlanForDay(dayIndex, dateStr) {
         }
     }
     const schedule = getDesktopAthleteSchedule();
-    return schedule[dayIndex] || { title: 'Antrenman', time: '18:30', duration: 60, isRest: false, exercises: [] };
+    return schedule[dayIndex] || { dayIndex: dayIndex, title: 'Dinlenme & Toparlanma', time: '18:30', duration: 30, isRest: true, exercises: [] };
 }
 
 function getDesktopCompletedLogForDate(dateStr) {
@@ -3882,25 +3918,42 @@ function getDesktopCompletedLogForDate(dateStr) {
     });
 }
 
+function getDefaultDesktopAthleteSchedule() {
+    return {
+        1: { dayIndex: 1, title: '⚔️ Gün 1: Omuz & Bacak Ön Zırhı', time: '18:30', duration: 60, isRest: false, exercises: ['Dambıl Press', 'Goblet Squat', 'Push-up (Şınav)', 'Front Squat', 'Plank'] },
+        2: { dayIndex: 2, title: '🧘 Dinlenme & Aktif Toparlanma', time: '18:30', duration: 30, isRest: true, exercises: [] },
+        3: { dayIndex: 3, title: '⚔️ Gün 2: Sırt Çekiş & Balistik Güç', time: '18:30', duration: 60, isRest: false, exercises: ['Saw Dumbbell Row', 'Romanian Deadlift (RDL)', 'Kettlebell Swing', 'Pull-up', 'Farmer\'s Walk'] },
+        4: { dayIndex: 4, title: '🧘 Dinlenme & Mobilite', time: '18:30', duration: 30, isRest: true, exercises: [] },
+        5: { dayIndex: 5, title: '⚔️ Gün 3: Kompleks & Merdiven', time: '18:30', duration: 60, isRest: false, exercises: ['Snatch + Lunge', 'Row + Squat', 'Burpee Finisher', 'Hanging Leg Raise'] },
+        6: { dayIndex: 6, title: '🧘 Serbest Kardiyo / Core', time: '11:00', duration: 30, isRest: true, exercises: [] },
+        0: { dayIndex: 0, title: '🧘 Tam Dinlenme & Zihinsel Hazırlık', time: '12:00', duration: 30, isRest: true, exercises: [] }
+    };
+}
+
 // Seçili sporcu için haftalık plan şablonunu al (veya varsayılan yükle)
 function getDesktopAthleteSchedule() {
     const uid = state.selectedUserId || 'default';
     const storageKey = `fitlab_desktop_schedule_${uid}`;
     try {
         const saved = localStorage.getItem(storageKey);
-        if (saved) return JSON.parse(saved);
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed)) {
+                const normalized = {};
+                parsed.forEach((item, idx) => {
+                    if (!item) return;
+                    const dIdx = typeof item.dayIndex === 'number' ? item.dayIndex : idx;
+                    normalized[dIdx] = item;
+                });
+                return normalized;
+            }
+            if (typeof parsed === 'object') {
+                return parsed;
+            }
+        }
     } catch(e) {}
 
-    // Varsayılan 7 günlük FitLAB Akademik Rutin Şablonu
-    return [
-        { dayIndex: 0, title: 'Üst Gövde & İtiş Kuvveti', time: '18:30', duration: 60, isRest: false, exercises: ['Bench Press', 'Dambıl Overhead Press', 'Incline Dumbbell Fly', 'Lateral Raise'] },
-        { dayIndex: 1, title: 'Aktif Dinlenme & Mobilite', time: '18:30', duration: 30, isRest: true, exercises: [] },
-        { dayIndex: 2, title: 'Posterior Zincir & Çekiş Gücü', time: '18:30', duration: 60, isRest: false, exercises: ['Romanian Deadlift (RDL)', 'Saw Dumbbell Row', 'Face Pull', 'Incline Biceps Curl'] },
-        { dayIndex: 3, title: 'Toparlanma & Hafif Kardiyo', time: '18:30', duration: 30, isRest: true, exercises: [] },
-        { dayIndex: 4, title: 'Kompleks & Balistik / Core', time: '18:30', duration: 60, isRest: false, exercises: ['Goblet Squat', 'Kettlebell Swing', 'Bulgarian Split Squat', 'Hanging Leg Raise'] },
-        { dayIndex: 5, title: 'Zayıf Bölge & Hipertrofi', time: '11:00', duration: 45, isRest: false, exercises: ['Arnold Press', 'Hammer Curl', 'Triceps Skull Crusher', 'Farmer\'s Walk'] },
-        { dayIndex: 6, title: 'Tam Dinlenme & Yenilenme', time: '12:00', duration: 30, isRest: true, exercises: [] }
-    ];
+    return getDefaultDesktopAthleteSchedule();
 }
 
 function saveDesktopAthleteSchedule(schedule) {
@@ -4004,7 +4057,7 @@ async function exportSingleDayToAppleCalendar(dayIndex) {
     const weekDays = getDesktopCurrentWeekDays();
     const schedule = getDesktopAthleteSchedule();
 
-    const dayMeta = weekDays[dayIndex];
+    const dayMeta = weekDays.find(w => w.dayIndex === dayIndex) || weekDays[0];
     const plan = schedule[dayIndex];
 
     if (!dayMeta || !plan) return;
@@ -4053,7 +4106,7 @@ async function exportFullWeekToAppleCalendar() {
     const weekDays = getDesktopCurrentWeekDays();
     const schedule = getDesktopAthleteSchedule();
 
-    const activeDays = schedule.filter(s => !s.isRest);
+    const activeDays = Object.values(schedule).filter(s => s && !s.isRest);
     if (activeDays.length === 0) {
         alert("Haftada planlanmış aktif antrenman seansı bulunamadı.");
         return;
@@ -4061,7 +4114,7 @@ async function exportFullWeekToAppleCalendar() {
 
     const events = [];
     activeDays.forEach(plan => {
-        const dayMeta = weekDays[plan.dayIndex];
+        const dayMeta = weekDays.find(w => w.dayIndex === plan.dayIndex);
         if (!dayMeta) return;
 
         const [hh, mm] = (plan.time || '18:30').split(':').map(Number);
@@ -4116,13 +4169,13 @@ async function sendAiPrescriptionToCalendar() {
     }
 
     const weekDays = getDesktopCurrentWeekDays();
-    const targetDays = [0, 2, 4, 5]; // Pazartesi, Çarşamba, Cuma, Cumartesi
+    const targetDays = [1, 3, 5]; // Pazartesi, Çarşamba, Cuma (Official 3-Day split)
     const events = [];
     const schedule = getDesktopAthleteSchedule();
 
     parsedDays.forEach((pDay, idx) => {
         const targetDayIdx = targetDays[idx % targetDays.length];
-        const dayMeta = weekDays[targetDayIdx];
+        const dayMeta = weekDays.find(w => w.dayIndex === targetDayIdx) || weekDays[0];
         const startDate = new Date(dayMeta.dateObj);
         startDate.setHours(18, 30, 0, 0);
 
@@ -4182,10 +4235,9 @@ async function sendScheduleDirectiveToWeb() {
     const schedule = getDesktopAthleteSchedule();
     const athleteName = state.selectedUser ? state.selectedUser.name : 'Sporcu';
 
-    const activeDays = schedule.filter(s => !s.isRest);
+    const activeDays = Object.values(schedule).filter(s => s && !s.isRest);
     const summaryLines = activeDays.map(d => {
-        const dayNames = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
-        return `• ${dayNames[d.dayIndex]} (${d.time}): ${d.title} [${(d.exercises || []).slice(0, 3).join(', ')}...]`;
+        return `• ${DESKTOP_DAY_NAMES_TR[d.dayIndex] || 'Gün'} (${d.time || '18:30'}): ${d.title} [${(d.exercises || []).slice(0, 3).join(', ')}...]`;
     }).join('\n');
 
     const directive = {
@@ -4246,8 +4298,7 @@ function openDesktopDayScheduleModal(dayIdx, dateStr = null) {
     const bodyEl = document.getElementById('desktopDayModalBody');
     if (!modal || !bodyEl) return;
 
-    const dayNames = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
-    const dayName = dayNames[dayIdx] || 'Günlük Seans';
+    const dayName = DESKTOP_DAY_NAMES_TR[dayIdx] || 'Günlük Seans';
     
     let dateFormatted = '';
     if (dateStr) {
@@ -4542,7 +4593,7 @@ function renderDesktopCalendar() {
     const athlete = state.selectedUser;
     const athleteName = athlete ? (athlete.name || athlete.username) : 'Sporcu Seçilmedi';
     const schedule = getDesktopAthleteSchedule();
-    const activeSessionsCount = schedule.filter(s => !s.isRest).length;
+    const activeSessionsCount = Object.values(schedule).filter(s => s && !s.isRest).length;
 
     const isMonthly = state.calendarViewMode === 'monthly';
     const anchor = new Date(state.calendarAnchorDate || new Date());
@@ -4654,7 +4705,8 @@ window.renderDesktopCalendar = renderDesktopCalendar;
 function renderDesktopCalendarWeeklyCards(anchor) {
     const weekDays = getDesktopCurrentWeekDays(anchor);
 
-    const cardsHtml = weekDays.map((day, idx) => {
+    const cardsHtml = weekDays.map((day) => {
+        const idx = day.dayIndex;
         const plan = getDesktopPlanForDay(idx, day.dateStr);
         const completedLog = getDesktopCompletedLogForDate(day.dateStr);
 
@@ -4814,7 +4866,7 @@ function renderDesktopCalendarMonthlyGrid(anchor) {
         const dd = String(dayDate.getDate()).padStart(2, '0');
         const dateStr = `${yyyy}-${mm}-${dd}`;
 
-        const dayIdx = (dayDate.getDay() + 6) % 7; // 0: Pzt, ..., 6: Paz
+        const dayIdx = dayDate.getDay(); // 0: Pazar, 1: Pzt, ..., 6: Cmt (Standart JS)
         const isToday = dayDate.toDateString() === now.toDateString();
 
         const completedLog = getDesktopCompletedLogForDate(dateStr);

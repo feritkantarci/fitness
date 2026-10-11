@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld('coachAPI', {
     saveScaleLogs: (uid, logs) => ipcRenderer.invoke('firebase:saveScaleLogs', { uid, logs }),
     sendDirectiveToWeb: (uid, directive) => ipcRenderer.invoke('firebase:sendDirective', { uid, directive }),
     sendProgramToWeb: (uid, program) => ipcRenderer.invoke('firebase:sendProgram', { uid, program }),
+    getDirective: (uid) => ipcRenderer.invoke('firebase:getDirective', uid),
 
     // Akademik Spor Bilimi Analizi & Biyomekanik Atlas
     analyzeHistory: (logs, profile, scaleLogs) => ipcRenderer.invoke('academic:analyze', { logs, profile, scaleLogs }),

@@ -186,6 +186,10 @@ ipcMain.handle('firebase:sendProgram', async (event, { uid, program }) => {
     return await firebaseService.sendCustomProgramToWeb(uid, program);
 });
 
+ipcMain.handle('firebase:getDirective', async (event, uid) => {
+    return await firebaseService.fetchCoachDirective(uid);
+});
+
 // Takvim Entegrasyonu (Apple Takvim / iCal / Google Takvim)
 ipcMain.handle('calendar:exportAndOpenICS', async (event, icsContent) => {
     try {

@@ -167,6 +167,23 @@ async function sendCustomProgramToWeb(uid, programData) {
 }
 
 /**
+ * Sporcunun en son koç direktifini ve takvim planını çeker
+ */
+async function fetchCoachDirective(uid) {
+    if (!db) initFirebase();
+    try {
+        const docSnap = await getDoc(doc(db, 'coach_directives', uid));
+        if (docSnap.exists()) {
+            return docSnap.data();
+        }
+        return null;
+    } catch (err) {
+        console.error(`Koç direktifi çekilemedi (${uid}):`, err);
+        return null;
+    }
+}
+
+/**
  * AI API ANAHTARINI BULUTA EŞİTLEME (GÜVENLİK İÇİN DEVRE DIŞI BIRAKILDI)
  */
 async function syncAiConfigToCloud(apiKey) {
@@ -183,5 +200,6 @@ module.exports = {
     listenToAthleteWorkouts,
     sendDirectiveToWeb,
     sendCustomProgramToWeb,
+    fetchCoachDirective,
     syncAiConfigToCloud
 };

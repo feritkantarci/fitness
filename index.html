@@ -4092,7 +4092,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v129</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v130</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -4128,7 +4128,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v129</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v130</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -15265,29 +15265,56 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 }
 
                 // 2. TÜM HAFTALIK PLAN GÜNCELLEMESİ (FitLAB Haftalık Şablonu)
-                if (Array.isArray(data.schedule) && data.schedule.length === 7) {
+                if (data.schedule) {
                     const sched = getWeeklySchedule(uid);
-                    data.schedule.forEach((d, idx) => {
-                        if (!d) return;
-                        const isRest = !!(d.isRest || d.rest || d.type === 'rest');
-                        const exList = (d.exercises || []).map(e => typeof e === 'string' ? { name: e, sets: 3, reps: '8-12' } : e);
-                        sched[idx] = {
-                            id: 'fitlab_day_' + idx,
-                            title: d.title || (isRest ? 'Dinlenme' : 'Antrenman'),
-                            time: d.time || '18:30',
-                            duration: d.duration || (isRest ? 30 : 60),
-                            rest: isRest,
-                            type: isRest ? 'rest' : 'custom_saved',
-                            desc: isRest ? 'Aktif Dinlenme & Mobilite' : `${exList.length} Hareket • ${d.duration || 60} Dk`,
-                            exercises: exList,
-                            customWorkout: isRest ? null : {
-                                id: 'fitlab_workout_' + idx + '_' + Date.now(),
-                                title: d.title,
-                                duration: d.duration || 60,
-                                exercises: exList
-                            }
-                        };
-                    });
+                    if (Array.isArray(data.schedule)) {
+                        data.schedule.forEach((d, idx) => {
+                            if (!d) return;
+                            const dIdx = typeof d.dayIndex === 'number' ? d.dayIndex : idx;
+                            const isRest = !!(d.isRest || d.rest || d.type === 'rest');
+                            const exList = (d.exercises || []).map(e => typeof e === 'string' ? { name: e, sets: 3, reps: '8-12' } : e);
+                            sched[dIdx] = {
+                                id: 'fitlab_day_' + dIdx,
+                                title: d.title || (isRest ? 'Dinlenme' : 'Antrenman'),
+                                time: d.time || '18:30',
+                                duration: d.duration || (isRest ? 30 : 60),
+                                rest: isRest,
+                                type: isRest ? 'rest' : 'custom_saved',
+                                desc: isRest ? 'Aktif Dinlenme & Mobilite' : `${exList.length} Hareket • ${d.duration || 60} Dk`,
+                                exercises: exList,
+                                customWorkout: isRest ? null : {
+                                    id: 'fitlab_workout_' + dIdx + '_' + Date.now(),
+                                    title: d.title,
+                                    duration: d.duration || 60,
+                                    exercises: exList
+                                }
+                            };
+                        });
+                    } else if (typeof data.schedule === 'object') {
+                        Object.keys(data.schedule).forEach(k => {
+                            const d = data.schedule[k];
+                            if (!d) return;
+                            const dIdx = parseInt(k, 10);
+                            const isRest = !!(d.isRest || d.rest || d.type === 'rest');
+                            const exList = (d.exercises || []).map(e => typeof e === 'string' ? { name: e, sets: 3, reps: '8-12' } : e);
+                            sched[dIdx] = {
+                                id: 'fitlab_day_' + dIdx,
+                                title: d.title || (isRest ? 'Dinlenme' : 'Antrenman'),
+                                time: d.time || '18:30',
+                                duration: d.duration || (isRest ? 30 : 60),
+                                rest: isRest,
+                                type: isRest ? 'rest' : 'custom_saved',
+                                desc: isRest ? 'Aktif Dinlenme & Mobilite' : `${exList.length} Hareket • ${d.duration || 60} Dk`,
+                                exercises: exList,
+                                customWorkout: isRest ? null : {
+                                    id: 'fitlab_workout_' + dIdx + '_' + Date.now(),
+                                    title: d.title,
+                                    duration: d.duration || 60,
+                                    exercises: exList
+                                }
+                            };
+                        });
+                    }
                     saveWeeklySchedule(sched, uid);
                     hasCalendarChange = true;
                 }
@@ -21085,7 +21112,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=129')
+                navigator.serviceWorker.register('./sw.js?v=130')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
