@@ -4092,7 +4092,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v136</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v137</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -4128,7 +4128,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v136</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v137</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -16080,103 +16080,153 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const calId = await getOrCreateFitLabCalendar();
             let createdCount = 0;
             let updatedCount = 0;
+            let cleanedDuplicates = 0;
 
+            // 1. Bu haftaya ait mevcut Google Takvim etkinliklerini çek
+            const startOfWeek = getDateForScheduleDay(1, isNext);
+            startOfWeek.setHours(0, 0, 0, 0);
+            const endOfWeek = getDateForScheduleDay(0, isNext);
+            endOfWeek.setHours(23, 59, 59, 999);
+
+            const startIso = formatIsoDateTimeWithOffset(startOfWeek);
+            const endIso = formatIsoDateTimeWithOffset(endOfWeek);
+
+            let existingEvents = [];
+            try {
+                const eventsData = await callGoogleCalendarApi(`/calendars/${encodeURIComponent(calId)}/events?timeMin=${encodeURIComponent(startIso)}&timeMax=${encodeURIComponent(endIso)}&singleEvents=true`);
+                existingEvents = (eventsData && Array.isArray(eventsData.items)) ? eventsData.items : [];
+            } catch(e) {
+                console.warn("Mevcut takvim etkinlikleri çekilemedi:", e);
+            }
+
+            // Etkinlikleri gün tarihine (YYYY-MM-DD) göre grupla
+            const eventsByDate = {};
+            existingEvents.forEach(ev => {
+                if (!ev.start) return;
+                const isFitLab = (ev.extendedProperties?.private?.fitLabSource === 'FitLab_PWA') || (ev.summary && ev.summary.includes('FitLab'));
+                if (!isFitLab) return;
+
+                const dStr = (ev.start.dateTime || ev.start.date || '').substring(0, 10);
+                if (!dStr) return;
+                if (!eventsByDate[dStr]) eventsByDate[dStr] = [];
+                eventsByDate[dStr].push(ev);
+            });
+
+            // 2. Her gün için senkronizasyon ve mükerrer temizliği yap
             for (let d = 0; d < 7; d++) {
-                const plan = schedule[d];
-                if (!plan) continue;
+                try {
+                    const plan = schedule[d];
+                    if (!plan) continue;
 
-                // Dinlenme günüyse ve takvimde etkinliği varsa kaldır
-                if (plan.rest) {
-                    if (plan.googleEventId) {
-                        try {
-                            await callGoogleCalendarApi(`/calendars/${encodeURIComponent(calId)}/events/${encodeURIComponent(plan.googleEventId)}`, {
-                                method: 'DELETE'
-                            });
-                        } catch(e) {}
-                        delete plan.googleEventId;
+                    const targetDate = getDateForScheduleDay(d, isNext);
+                    const dateKey = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${String(targetDate.getDate()).padStart(2, '0')}`;
+                    const dayEvents = eventsByDate[dateKey] || [];
+
+                    // Dinlenme günüyse o güne ait tüm etkinlikleri takvimden temizle
+                    if (plan.rest) {
+                        for (const ev of dayEvents) {
+                            try {
+                                await callGoogleCalendarApi(`/calendars/${encodeURIComponent(calId)}/events/${encodeURIComponent(ev.id)}`, {
+                                    method: 'DELETE'
+                                });
+                                cleanedDuplicates++;
+                            } catch(e) {}
+                        }
+                        if (plan.googleEventId) delete plan.googleEventId;
+                        continue;
                     }
-                    continue;
-                }
 
-                // Antrenman günü
-                const workoutDetails = getWorkoutDetailsForPlan(plan) || {};
-                const duration = parseInt(plan.duration, 10) || parseInt(workoutDetails.duration, 10) || 50;
-                const restSec = (workoutDetails.scheme && workoutDetails.scheme.rest) || workoutDetails.rest || 60;
-                const timeStr = plan.time || prefs.defaultTime || '18:30';
-                const [hStr, mStr] = timeStr.split(':');
-                const startHour = parseInt(hStr, 10) || 18;
-                const startMin = parseInt(mStr, 10) || 30;
+                    // Antrenman günü
+                    const workoutDetails = getWorkoutDetailsForPlan(plan) || {};
+                    const duration = parseInt(plan.duration, 10) || parseInt(workoutDetails.duration, 10) || 50;
+                    const restSec = (workoutDetails.scheme && workoutDetails.scheme.rest) || workoutDetails.rest || 60;
+                    const timeStr = plan.time || prefs.defaultTime || '18:30';
+                    const [hStr, mStr] = timeStr.split(':');
+                    const startHour = parseInt(hStr, 10) || 18;
+                    const startMin = parseInt(mStr, 10) || 30;
 
-                const startDate = getDateForScheduleDay(d, isNext);
-                startDate.setHours(startHour, startMin, 0, 0);
+                    targetDate.setHours(startHour, startMin, 0, 0);
+                    const endDate = new Date(targetDate.getTime() + (duration * 60 * 1000));
 
-                const endDate = new Date(startDate.getTime() + (duration * 60 * 1000));
+                    const startIsoStr = formatIsoDateTimeWithOffset(targetDate);
+                    const endIsoStr = formatIsoDateTimeWithOffset(endDate);
 
-                const startIso = formatIsoDateTimeWithOffset(startDate);
-                const endIso = formatIsoDateTimeWithOffset(endDate);
+                    const cleanTitle = (plan.title || 'Antrenman Seansı').replace(/^[⚔️🧘🔬🔥\s]+/, '');
+                    const summary = `⚔️ FitLab: ${cleanTitle}`;
+                    const description = buildEventDescription(plan, d, duration, restSec);
 
-                const cleanTitle = (plan.title || 'Antrenman Seansı').replace(/^[⚔️🧘🔬🔥\s]+/, '');
-                const summary = `⚔️ FitLab: ${cleanTitle}`;
-                const description = buildEventDescription(plan, d, duration, restSec);
+                    const eventBody = {
+                        summary: summary,
+                        description: description,
+                        start: { dateTime: startIsoStr, timeZone: userTz },
+                        end: { dateTime: endIsoStr, timeZone: userTz },
+                        colorId: '6',
+                        reminders: {
+                            useDefault: false,
+                            overrides: [
+                                { method: 'popup', minutes: prefs.reminderMin || 30 }
+                            ]
+                        },
+                        extendedProperties: {
+                            private: {
+                                fitLabWorkoutId: String(plan.id || ''),
+                                fitLabDayIdx: String(d),
+                                fitLabWeek: week,
+                                fitLabSource: 'FitLab_PWA'
+                            }
+                        }
+                    };
 
-                const eventBody = {
-                    summary: summary,
-                    description: description,
-                    start: { dateTime: startIso, timeZone: userTz },
-                    end: { dateTime: endIso, timeZone: userTz },
-                    colorId: '6',
-                    reminders: {
-                        useDefault: false,
-                        overrides: [
-                            { method: 'popup', minutes: prefs.reminderMin || 30 }
-                        ]
-                    },
-                    extendedProperties: {
-                        private: {
-                            fitLabWorkoutId: plan.id || '',
-                            fitLabDayIdx: String(d),
-                            fitLabWeek: week,
-                            fitLabSource: 'FitLab_PWA'
+                    let primaryEvent = null;
+                    if (dayEvents.length > 0) {
+                        // İlk etkinliği koru ve güncelle
+                        primaryEvent = dayEvents[0];
+                        try {
+                            await callGoogleCalendarApi(`/calendars/${encodeURIComponent(calId)}/events/${encodeURIComponent(primaryEvent.id)}`, {
+                                method: 'PATCH',
+                                body: JSON.stringify(eventBody)
+                            });
+                            updatedCount++;
+                        } catch(patchErr) {
+                            console.warn("Patch hatası:", patchErr);
+                        }
+
+                        // Aynı günde 1'den fazla etkinlik varsa diğer mükerrer olanları SİL!
+                        for (let i = 1; i < dayEvents.length; i++) {
+                            try {
+                                await callGoogleCalendarApi(`/calendars/${encodeURIComponent(calId)}/events/${encodeURIComponent(dayEvents[i].id)}`, {
+                                    method: 'DELETE'
+                                });
+                                cleanedDuplicates++;
+                            } catch(e) {}
+                        }
+                    } else {
+                        // O günde henüz hiç etkinlik yoksa yeni oluştur
+                        try {
+                            primaryEvent = await callGoogleCalendarApi(`/calendars/${encodeURIComponent(calId)}/events`, {
+                                method: 'POST',
+                                body: JSON.stringify(eventBody)
+                            });
+                            createdCount++;
+                        } catch(postErr) {
+                            console.error(`Gün ${d} (${dateKey}) POST hatası:`, postErr);
                         }
                     }
-                };
 
-                let eventRes = null;
-                if (plan.googleEventId) {
-                    try {
-                        eventRes = await callGoogleCalendarApi(`/calendars/${encodeURIComponent(calId)}/events/${encodeURIComponent(plan.googleEventId)}`, {
-                            method: 'PATCH',
-                            body: JSON.stringify(eventBody)
-                        });
-                        updatedCount++;
-                    } catch(err) {
-                        eventRes = null;
+                    if (primaryEvent && primaryEvent.id) {
+                        plan.googleEventId = primaryEvent.id;
+                        plan.googleHtmlLink = primaryEvent.htmlLink;
+                        plan.lastSyncedAt = Date.now();
                     }
-                }
-
-                if (!eventRes) {
-                    try {
-                        eventRes = await callGoogleCalendarApi(`/calendars/${encodeURIComponent(calId)}/events`, {
-                            method: 'POST',
-                            body: JSON.stringify(eventBody)
-                        });
-                        createdCount++;
-                    } catch(postErr) {
-                        console.error(`Gün ${d} (${week}) POST hatası:`, postErr);
-                    }
-                }
-
-                if (eventRes && eventRes.id) {
-                    plan.googleEventId = eventRes.id;
-                    plan.googleHtmlLink = eventRes.htmlLink;
-                    plan.lastSyncedAt = Date.now();
+                } catch(loopErr) {
+                    console.error(`Gün ${d} işleme hatası:`, loopErr);
                 }
             }
 
             if (isNext) saveNextWeeklySchedule(schedule, user.id);
             else saveWeeklySchedule(schedule, user.id);
 
-            return { createdCount, updatedCount };
+            return { createdCount, updatedCount, cleanedDuplicates };
         }
 
         async function syncGoogleCalendarToFitLab(targetWeek = null) {
@@ -16278,8 +16328,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 renderCalendarConnectionCard();
 
                 const totalSynced = (syncCur.createdCount || 0) + (syncCur.updatedCount || 0) + (syncNext.createdCount || 0) + (syncNext.updatedCount || 0);
+                const totalCleaned = (syncCur.cleanedDuplicates || 0) + (syncNext.cleanedDuplicates || 0);
 
                 let msg = `✅ Canlı Takvim Senkronize Edildi! (${totalSynced} seans aktif)`;
+                if (totalCleaned > 0) msg += ` • 🧹 ${totalCleaned} mükerrer kayıt temizlendi.`;
                 if (dayMoves > 0) msg += ` • 📅 ${dayMoves} seans yeni gününe taşındı.`;
                 if (timeCorrections > 0) msg += ` • 🕒 ${timeCorrections} seans saati güncellendi.`;
                 if (typeof showToast === 'function') showToast(msg);
@@ -21420,7 +21472,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=136')
+                navigator.serviceWorker.register('./sw.js?v=137')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
