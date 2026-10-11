@@ -5720,6 +5720,20 @@ KURALLAR:
 
         function openCompleteModal() {
             if (!activeWorkoutSession) {
+                try {
+                    const uid = getActiveUserId();
+                    const raw = localStorage.getItem(`celik_kodu_active_state_${uid}`);
+                    if (raw) {
+                        const state = JSON.parse(raw);
+                        if (state && state.session) {
+                            activeWorkoutSession = state.session;
+                            if (state.setsData) activeWorkoutSetsData = state.setsData;
+                            if (state.startTime) activeWorkoutStartTime = state.startTime;
+                        }
+                    }
+                } catch(e) {}
+            }
+            if (!activeWorkoutSession) {
                 alert("Aktif bir antrenman bulunmuyor.");
                 return;
             }
@@ -15252,7 +15266,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=167')
+                navigator.serviceWorker.register('./sw.js?v=168')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
