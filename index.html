@@ -22,7 +22,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=162">
+    <link rel="stylesheet" href="css/style.css?v=163">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH */
         .tab-nav { display: flex !important; gap: 6px; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.1); padding: 6px; border-radius: 16px; margin-bottom: 20px; overflow-x: auto; }
@@ -37,7 +37,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v162</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v163</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -73,7 +73,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v162</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v163</span>
                 </div>
                 <div class="modern-bar-actions" style="position: relative;">
                     <div class="modern-user-badge" onclick="if(window.innerWidth <= 768){ openMoreSheet(); } else { switchTab('profileTab'); }" title="Profil & Menü">
@@ -1785,24 +1785,24 @@
 
             <!-- BÖLÜM 4: HIZLI PARAMETRE VE ÖZEL İSTEKLER -->
             <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:12px 14px; margin-bottom:16px;">
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
-                    <div>
-                        <label class="form-label" style="font-size:11px;">Hedef Bölge / Split</label>
-                        <select id="aiModalSplitSelect" class="form-input" style="font-size:12px; padding:8px 10px;">
-                            <option value="full_body" selected>⚡ Tüm Vücut (Full Body Hibrit)</option>
-                            <option value="upper_push">🛡️ Üst İtiş (Push Hibrit)</option>
-                            <option value="upper_pull">⚔️ Üst Çekiş (Pull Hibrit)</option>
-                            <option value="lower">🦵 Bacak & Alt Vücut Hibrit</option>
-                            <option value="upper">🦅 Tüm Üst Vücut</option>
-                            <option value="core">🧱 Karın & Core Zırhı</option>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; align-items:stretch;">
+                    <div style="min-width:0;">
+                        <label class="form-label" style="font-size:11px; margin-bottom:4px; display:block;">Bölge / Split</label>
+                        <select id="aiModalSplitSelect" class="form-input" style="font-size:12px; padding:8px 10px; width:100%; box-sizing:border-box;">
+                            <option value="full_body" selected>⚡ Tüm Vücut</option>
+                            <option value="upper_push">🛡️ İtiş</option>
+                            <option value="upper_pull">⚔️ Çekiş</option>
+                            <option value="lower">🦵 Alt Vücut</option>
+                            <option value="upper">🦅 Üst Vücut</option>
+                            <option value="core">🧱 Core</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="form-label" style="font-size:11px;">Seans Süresi</label>
-                        <select id="aiModalDurationSelect" class="form-input" style="font-size:12px; padding:8px 10px;">
-                            <option value="30">⏱️ 30 Dk (Hızlı & Yoğun Seans)</option>
-                            <option value="45" selected>⏱️ 45-50 Dk (İdeal Çelik Denge)</option>
-                            <option value="60">⏱️ 60 Dk (Tam Hacimli & Detaylı)</option>
+                    <div style="min-width:0;">
+                        <label class="form-label" style="font-size:11px; margin-bottom:4px; display:block;">Süre</label>
+                        <select id="aiModalDurationSelect" class="form-input" style="font-size:12px; padding:8px 10px; width:100%; box-sizing:border-box;">
+                            <option value="30">⏱️ 30 Dk</option>
+                            <option value="45" selected>⏱️ 45 Dk</option>
+                            <option value="60">⏱️ 60 Dk</option>
                         </select>
                     </div>
                 </div>
