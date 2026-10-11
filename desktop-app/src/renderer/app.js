@@ -3917,6 +3917,13 @@ function changeDesktopCalendarTime(dayIndex, newTime) {
         schedule[dayIndex].time = newTime;
         saveDesktopAthleteSchedule(schedule);
         showToast(`⏰ Saat güncellendi: ${schedule[dayIndex].time}`);
+        if (typeof syncDesktopCalendarToCloud === 'function') {
+            syncDesktopCalendarToCloud(state.selectedUserId, {
+                dayIndex: dayIndex,
+                plan: schedule[dayIndex],
+                title: 'Saat Güncellendi'
+            });
+        }
     }
 }
 window.changeDesktopCalendarTime = changeDesktopCalendarTime;
@@ -3927,6 +3934,13 @@ function changeDesktopCalendarDuration(dayIndex, newDuration) {
         schedule[dayIndex].duration = parseInt(newDuration, 10) || 60;
         saveDesktopAthleteSchedule(schedule);
         showToast(`⏱️ Süre ayarlandı: ${schedule[dayIndex].duration} dk`);
+        if (typeof syncDesktopCalendarToCloud === 'function') {
+            syncDesktopCalendarToCloud(state.selectedUserId, {
+                dayIndex: dayIndex,
+                plan: schedule[dayIndex],
+                title: 'Süre Güncellendi'
+            });
+        }
     }
 }
 window.changeDesktopCalendarDuration = changeDesktopCalendarDuration;
@@ -3942,6 +3956,13 @@ function toggleDesktopCalendarRest(dayIndex) {
         saveDesktopAthleteSchedule(schedule);
         renderDesktopCalendar();
         showToast(schedule[dayIndex].isRest ? '🛌 Gün Dinlenmeye Alındı' : '⚔️ Gün Antrenman Seansı Olarak Atandı');
+        if (typeof syncDesktopCalendarToCloud === 'function') {
+            syncDesktopCalendarToCloud(state.selectedUserId, {
+                dayIndex: dayIndex,
+                plan: schedule[dayIndex],
+                title: schedule[dayIndex].isRest ? 'Dinlenme' : 'Antrenman Seansı'
+            });
+        }
     }
 }
 window.toggleDesktopCalendarRest = toggleDesktopCalendarRest;
@@ -4171,6 +4192,7 @@ async function sendScheduleDirectiveToWeb() {
         title: '📅 Haftalık Antrenman & Takvim Planı',
         text: `${athleteName} için haftalık ${activeDays.length} seanslık akademik takvim onaylandı.\n\n${summaryLines}`,
         schedule: schedule,
+        dateOverrides: getDesktopDateScheduleOverrides(state.selectedUserId),
         badge: 'Takvim Planı',
         active: true,
         sentAt: new Date().toISOString()
@@ -4391,6 +4413,50 @@ function closeDesktopDayScheduleModal() {
 }
 window.closeDesktopDayScheduleModal = closeDesktopDayScheduleModal;
 
+// FitLAB Takvim Değişikliklerini Canlı Olarak Buluta ve Web PWA'ya Eşitle
+async function syncDesktopCalendarToCloud(uid, changeInfo = {}) {
+    const targetUid = uid || state.selectedUserId;
+    if (!targetUid) {
+        console.warn("syncDesktopCalendarToCloud: targetUid bulunamadı.");
+        return;
+    }
+    if (!window.coachAPI?.sendDirectiveToWeb) {
+        console.warn("syncDesktopCalendarToCloud: coachAPI.sendDirectiveToWeb mevcut değil.");
+        return;
+    }
+
+    const schedule = getDesktopAthleteSchedule();
+    const dateOverrides = getDesktopDateScheduleOverrides(targetUid);
+    const athleteName = state.selectedUser ? state.selectedUser.name : 'Sporcu';
+
+    const payload = {
+        title: changeInfo.title ? `📅 Takvim: ${changeInfo.title}` : '📅 FitLAB Güncel Takvim Planı',
+        text: `${athleteName} için FitLAB takvim planı güncellendi.`,
+        targetAthlete: athleteName,
+        badge: 'Takvim Planı',
+        active: true,
+        sentAt: new Date().toISOString(),
+        calendarUpdate: changeInfo,
+        schedule: schedule,
+        dateOverrides: dateOverrides
+    };
+
+    try {
+        const res = await window.coachAPI.sendDirectiveToWeb(targetUid, payload);
+        if (res && res.success) {
+            console.log("FitLAB takvim değişikliği web'e başarıyla senkronize edildi.");
+            if (typeof showToast === 'function') {
+                showToast(`☁️ Program buluta ve web uygulamasına eşitlendi!`);
+            }
+        } else {
+            console.warn("FitLAB takvim bulut eşitleme uyarısı:", res?.error);
+        }
+    } catch(err) {
+        console.error("FitLAB takvim eşitleme hatası:", err);
+    }
+}
+window.syncDesktopCalendarToCloud = syncDesktopCalendarToCloud;
+
 function assignDesktopRoutineToActiveDay(title, exercises, duration = 60, time = '18:30') {
     if (state.activeSchedulingDayIdx === null) return;
     const dayIdx = state.activeSchedulingDayIdx;
@@ -4413,6 +4479,14 @@ function assignDesktopRoutineToActiveDay(title, exercises, duration = 60, time =
     showToast(`✅ "${title}" başarıyla atandı!`);
     closeDesktopDayScheduleModal();
     renderDesktopCalendar();
+
+    // CANLI BULUT KÖPRÜSÜ: Web PWA'ya otomatik eşitle
+    syncDesktopCalendarToCloud(state.selectedUserId, {
+        dayIndex: dayIdx,
+        dateStr: state.activeSchedulingDateStr,
+        plan: newPlan,
+        title: title
+    });
 }
 window.assignDesktopRoutineToActiveDay = assignDesktopRoutineToActiveDay;
 
@@ -4438,6 +4512,14 @@ function setDesktopActiveDayRest() {
     showToast(`🛌 Dinlenme günü olarak ayarlandı.`);
     closeDesktopDayScheduleModal();
     renderDesktopCalendar();
+
+    // CANLI BULUT KÖPRÜSÜ: Web PWA'ya otomatik eşitle
+    syncDesktopCalendarToCloud(state.selectedUserId, {
+        dayIndex: dayIdx,
+        dateStr: state.activeSchedulingDateStr,
+        plan: restPlan,
+        title: 'Aktif Dinlenme'
+    });
 }
 window.setDesktopActiveDayRest = setDesktopActiveDayRest;
 

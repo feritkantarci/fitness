@@ -4092,7 +4092,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v128</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v129</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -4128,7 +4128,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v128</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v129</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -15218,10 +15218,111 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
                 localStorage.setItem(`celik_kodu_coach_directive_${uid}`, JSON.stringify(data));
 
-                // Masaüstü 'Bugüne Ata' ile gönderilmişse hemen bugünkü plana geçir
+                let hasCalendarChange = false;
+
+                // 1. TEK GÜN VEYA TARİH GÜNCELLEMESİ (FitLAB Takvim Modalı)
+                if (data.calendarUpdate) {
+                    const cu = data.calendarUpdate;
+                    const plan = cu.plan || {};
+                    const isRest = !!(plan.isRest || plan.rest || plan.type === 'rest');
+                    const exercisesList = (plan.exercises || []).map(ex => {
+                        if (typeof ex === 'string') return { name: ex, sets: 3, reps: '8-12' };
+                        return ex;
+                    });
+
+                    const mappedPlan = {
+                        id: plan.id || ('fitlab_' + (cu.dateStr || 'day_' + cu.dayIndex)),
+                        title: plan.title || (isRest ? 'Dinlenme' : 'FitLAB Programı'),
+                        time: plan.time || '18:30',
+                        duration: plan.duration || (isRest ? 30 : 60),
+                        rest: isRest,
+                        type: isRest ? 'rest' : 'custom_saved',
+                        desc: isRest ? 'Aktif Dinlenme & Mobilite' : `${exercisesList.length} Hareket • ${plan.duration || 60} Dk`,
+                        exercises: exercisesList,
+                        customWorkout: isRest ? null : {
+                            id: 'fitlab_workout_' + Date.now(),
+                            title: plan.title,
+                            duration: plan.duration || 60,
+                            exercises: exercisesList
+                        }
+                    };
+
+                    if (typeof cu.dayIndex === 'number' && cu.dayIndex >= 0 && cu.dayIndex <= 6) {
+                        const sched = getWeeklySchedule(uid);
+                        sched[cu.dayIndex] = mappedPlan;
+                        saveWeeklySchedule(sched, uid);
+                        hasCalendarChange = true;
+                    }
+
+                    if (cu.dateStr) {
+                        saveDateScheduleOverride(cu.dateStr, mappedPlan, uid);
+                        hasCalendarChange = true;
+                    }
+
+                    if (typeof showToast === 'function') {
+                        showToast(`📅 FitLAB: "${mappedPlan.title}" takviminize işlendi!`);
+                    }
+                }
+
+                // 2. TÜM HAFTALIK PLAN GÜNCELLEMESİ (FitLAB Haftalık Şablonu)
+                if (Array.isArray(data.schedule) && data.schedule.length === 7) {
+                    const sched = getWeeklySchedule(uid);
+                    data.schedule.forEach((d, idx) => {
+                        if (!d) return;
+                        const isRest = !!(d.isRest || d.rest || d.type === 'rest');
+                        const exList = (d.exercises || []).map(e => typeof e === 'string' ? { name: e, sets: 3, reps: '8-12' } : e);
+                        sched[idx] = {
+                            id: 'fitlab_day_' + idx,
+                            title: d.title || (isRest ? 'Dinlenme' : 'Antrenman'),
+                            time: d.time || '18:30',
+                            duration: d.duration || (isRest ? 30 : 60),
+                            rest: isRest,
+                            type: isRest ? 'rest' : 'custom_saved',
+                            desc: isRest ? 'Aktif Dinlenme & Mobilite' : `${exList.length} Hareket • ${d.duration || 60} Dk`,
+                            exercises: exList,
+                            customWorkout: isRest ? null : {
+                                id: 'fitlab_workout_' + idx + '_' + Date.now(),
+                                title: d.title,
+                                duration: d.duration || 60,
+                                exercises: exList
+                            }
+                        };
+                    });
+                    saveWeeklySchedule(sched, uid);
+                    hasCalendarChange = true;
+                }
+
+                // 3. TARİH BAZLI OVERRIDE LİSTESİ
+                if (data.dateOverrides && typeof data.dateOverrides === 'object') {
+                    Object.keys(data.dateOverrides).forEach(dateStr => {
+                        const d = data.dateOverrides[dateStr];
+                        if (!d) return;
+                        const isRest = !!(d.isRest || d.rest || d.type === 'rest');
+                        const exList = (d.exercises || []).map(e => typeof e === 'string' ? { name: e, sets: 3, reps: '8-12' } : e);
+                        saveDateScheduleOverride(dateStr, {
+                            id: 'fitlab_' + dateStr,
+                            title: d.title || (isRest ? 'Dinlenme' : 'Antrenman'),
+                            time: d.time || '18:30',
+                            duration: d.duration || (isRest ? 30 : 60),
+                            rest: isRest,
+                            type: isRest ? 'rest' : 'custom_saved',
+                            desc: isRest ? 'Aktif Dinlenme & Mobilite' : `${exList.length} Hareket • ${d.duration || 60} Dk`,
+                            exercises: exList,
+                            customWorkout: isRest ? null : {
+                                id: 'fitlab_workout_' + dateStr,
+                                title: d.title,
+                                duration: d.duration || 60,
+                                exercises: exList
+                            }
+                        }, uid);
+                        hasCalendarChange = true;
+                    });
+                }
+
+                // 4. MASAÜSTÜNDEN 'BUGÜNE ATA' DİREKTİFİ
                 if (data.assignToToday && data.parsedWorkout) {
                     const todayIdx = new Date().getDay();
-                    const schedule = getWeeklySchedule();
+                    const schedule = getWeeklySchedule(uid);
                     schedule[todayIdx] = {
                         id: data.parsedWorkout.id || ('directive_' + Date.now()),
                         title: data.parsedWorkout.title || 'FitLAB Özel Seansı',
@@ -15231,10 +15332,16 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         customWorkout: data.parsedWorkout,
                         exercises: data.parsedWorkout.exercises
                     };
-                    saveWeeklySchedule(schedule);
-                    showToast(`🔥 FitLAB: "${data.parsedWorkout.title}" bugünkü (${DAY_NAMES_TR[todayIdx]}) programınıza atandı!`);
+                    saveWeeklySchedule(schedule, uid);
+                    hasCalendarChange = true;
+                    if (typeof showToast === 'function') {
+                        showToast(`🔥 FitLAB: "${data.parsedWorkout.title}" bugünkü (${DAY_NAMES_TR[todayIdx]}) programınıza atandı!`);
+                    }
                 }
 
+                if (hasCalendarChange && typeof renderCalendarScreen === 'function') {
+                    renderCalendarScreen();
+                }
                 if (typeof renderActiveWorkout === 'function') {
                     renderActiveWorkout();
                 }
@@ -20978,7 +21085,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=128')
+                navigator.serviceWorker.register('./sw.js?v=129')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
