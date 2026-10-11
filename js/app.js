@@ -6464,7 +6464,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const officialRoutines = [
                 {
                     id: 'la_forja_day1',
-                    title: '⚔️ Çelik Kodu Gün 1: Omuz & Bacak Ön Zırhı',
+                    title: '⚔️ Gün 1: Omuz & Bacak',
                     desc: 'Omuz Presi + Goblet Squat (A1/A2), Clean Front Squat + Şınav (B1/B2), Halo + Core (C1/C2)',
                     exercises: ['db_overhead_press', 'db_goblet_squat', 'db_front_squat', 'bw_pushup', 'kb_halo', 'bw_hollow_body'],
                     style: 'superset',
@@ -6472,7 +6472,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 },
                 {
                     id: 'la_forja_day2',
-                    title: '⚔️ Çelik Kodu Gün 2: Sırt Çekiş & Balistik Güç',
+                    title: '⚔️ Gün 2: Sırt Çekiş',
                     desc: 'Ağır Testere Row + RDL (A1/A2), Patlayıcı Dambıl Swing + Barfiks (B1/B2), Çiftçi Yürüyüşü (C1)',
                     exercises: ['db_saw_row', 'db_rdl', 'db_swing', 'bw_pullup', 'db_farmers_walk', 'db_russian_twist'],
                     style: 'superset',
@@ -6480,7 +6480,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 },
                 {
                     id: 'la_forja_day3',
-                    title: '⚔️ Çelik Kodu Gün 3: Kompleks & Merdiven',
+                    title: '⚔️ Gün 3: Kompleks & Merdiven',
                     desc: 'Dambıl Snatch + Walking Lunge (A1/A2), 5-4-3-2 Merdiven Row-Clean-Squat, Burpee Finisher',
                     exercises: ['db_snatch', 'db_walking_lunge', 'db_saw_row', 'db_front_squat', 'bw_burpee'],
                     style: 'superset',
@@ -6490,9 +6490,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             officialContainer.innerHTML = officialRoutines.map(r => `
                 <div class="log-history-card" style="border-color:rgba(234,179,8,0.25); background:linear-gradient(135deg, rgba(30,27,75,0.3), rgba(15,23,42,0.6)); border-radius:12px; padding:12px 14px; margin-bottom:10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:8px;">
-                        <strong style="color:var(--gold-light); font-size:13px; font-weight:800;">${escapeHTML(r.title)}</strong>
-                        <span style="font-size:10.5px; padding:2px 8px; background:rgba(56,189,248,0.15); color:var(--cyan); border:1px solid rgba(56,189,248,0.3); border-radius:6px; font-weight:700;">⏱️ ${r.duration} Dk</span>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:8px;">
+                        <strong style="color:var(--gold-light); font-size:12.5px; font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; min-width:0;">${escapeHTML(r.title)}</strong>
+                        <span style="font-size:10px; padding:2px 7px; background:rgba(56,189,248,0.15); color:var(--cyan); border:1px solid rgba(56,189,248,0.3); border-radius:6px; font-weight:700; white-space:nowrap; flex-shrink:0;">⏱️ ${r.duration} Dk</span>
                     </div>
                     <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.4; margin-bottom:10px;">
                         ${escapeHTML(r.desc)}
@@ -15252,7 +15252,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=166')
+                navigator.serviceWorker.register('./sw.js?v=167')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
