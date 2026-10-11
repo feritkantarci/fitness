@@ -4092,7 +4092,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v131</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v132</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -4128,7 +4128,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v131</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v132</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -5232,6 +5232,78 @@
 
             <div style="display:flex; justify-content:flex-end; gap:8px; border-top:1px solid var(--border); padding-top:12px;">
                 <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 16px;" onclick="closeCalendarSyncModal()">
+                    Kapat
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== GOOGLE TAKVİM AKILLI AKTARIM MODALI ==================== -->
+    <div id="googleCalendarExportModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <div>
+                    <span class="auth-role-tag role-admin" style="font-size:10px; background:var(--gold); color:#000;">GOOGLE TAKVİM AKTARIMI</span>
+                    <h3 class="modal-title" style="font-size:16px; margin-top:4px;" id="gcalExportModalTitle">📅 Google Takvim'e Aktar</h3>
+                </div>
+                <button class="modal-close" onclick="closeGoogleCalendarExportModal()">✕</button>
+            </div>
+            
+            <p style="font-size:12px; color:var(--text-secondary); margin:0 0 14px 0; line-height:1.5;">
+                Google Takvim güvenlik protokolleri gereği, programınızı takviminize aktarmak için aşağıdaki 2 pratik yöntemden birini seçebilirsiniz:
+            </p>
+
+            <!-- YÖNTEM 1: TÜM HAFTAYI TEK SEFERDE AKTAR -->
+            <div style="background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(15,23,42,0.8)); border: 1.5px solid var(--gold); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <div style="font-size:13.5px; font-weight:800; color:#fff; display:flex; align-items:center; gap:6px;">
+                        <span>⚡ Yöntem 1: Tüm Haftayı Tek Seferde Aktar</span>
+                        <span style="font-size:9.5px; background:var(--gold); color:#000; font-weight:900; padding:2px 6px; border-radius:4px;">ÖNERİLEN</span>
+                    </div>
+                </div>
+                <div style="font-size:11.5px; color:#cbd5e1; line-height:1.5; margin-bottom:12px;">
+                    Haftadaki tüm antrenman seanslarını tek bir takvim dosyası (.ics) halinde indirir ve Google Takvim'in içe aktarma sayfasını açar.
+                </div>
+                
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+                    <button type="button" class="btn btn-gold" style="font-size:12px; padding:9px 16px; font-weight:900; box-shadow:0 0 15px rgba(245,158,11,0.3);" onclick="executeOneClickGoogleCalendarExport()">
+                        🚀 Tek Tıkla İndir & Google Takvim'e Yükle
+                    </button>
+                    <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 12px; color:#cbd5e1;" onclick="downloadFullScheduleICS()">
+                        📥 Yalnızca Dosyayı İndir (.ics)
+                    </button>
+                </div>
+
+                <!-- 2 ADIMLI REHBER -->
+                <div style="background:rgba(0,0,0,0.35); border-radius:8px; padding:10px 12px; font-size:11px; color:#94a3b8; line-height:1.6;">
+                    <div style="color:var(--gold); font-weight:800; margin-bottom:4px;">📋 Nasıl Yapılır? (10 Saniyelik İşlem)</div>
+                    <div>1. <strong>"Tek Tıkla İndir & Google Takvim'e Yükle"</strong> butonuna basın (takvim dosyanız iner ve Google Takvim İçe Aktar ekranı açılır).</div>
+                    <div>2. Açılan Google Takvim ekranında <strong>"Bilgisayarınızdan bir dosya seçin"</strong>e tıklayıp indirilen <code>fitlab-takvim-....ics</code> dosyasını seçin ve <strong>"İçe Aktar"</strong>a basın. Tüm hafta takviminize işlenir!</div>
+                </div>
+            </div>
+
+            <!-- YÖNTEM 2: GÜNLERİ TEK TEK GOOGLE TAKVİM'E EKLE -->
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
+                <div style="font-size:13px; font-weight:800; color:#fff; margin-bottom:4px;">
+                    📅 Yöntem 2: Dosyasız — Günleri Tek Tıkla Google Takvim'e Ekle
+                </div>
+                <div style="font-size:11.5px; color:var(--text-secondary); margin-bottom:10px; line-height:1.4;">
+                    Herhangi bir dosya indirmeden, istediğiniz günün yanındaki <strong>"Google Takvim'e Ekle"</strong> butonuna basarak seansı doğrudan Google Takvim formu içinde açıp tek tıkla kaydedebilirsiniz:
+                </div>
+                <div id="gcalExportDaysList" style="display:flex; flex-direction:column; gap:8px;">
+                    <!-- JS ile dinamik doldurulur -->
+                </div>
+            </div>
+
+            <!-- APPLE TAKVİM / MOBİL CİHAZ BİLGİSİ -->
+            <div style="background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.25); border-radius: 10px; padding: 10px 14px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                <div style="font-size:11px; color:#a7f3d0; line-height:1.4;">
+                    🍏 <strong>Mac veya iPhone mu kullanıyorsunuz?</strong> İndirilen <code>.ics</code> dosyasına çift dokunduğunuzda tüm hafta anında Apple Takvim uygulamanıza eklenir.
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:8px; border-top:1px solid var(--border); padding-top:12px; margin-top:14px;">
+                <button type="button" class="btn btn-outline" style="font-size:12px; padding:7px 16px;" onclick="closeGoogleCalendarExportModal()">
                     Kapat
                 </button>
             </div>
@@ -16210,13 +16282,23 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         }
 
         function openSingleDayDirectGoogleCalendar() {
+            if (activeSchedulingDateStr) {
+                const dayDate = new Date(activeSchedulingDateStr + 'T00:00:00');
+                openDirectGoogleCalendarForSpecificDate(activeSchedulingDateStr, dayDate.getDay());
+                return;
+            }
             if (activeSchedulingDayIdx === null) return;
             const isNext = activePlannerWeek === 'next';
-            const user = getActiveUser();
-            const schedule = isNext ? getNextWeeklySchedule(user.id) : getWeeklySchedule(user.id);
-            const plan = schedule[activeSchedulingDayIdx];
-            if (!plan || plan.rest) {
-                alert("Dinlenme günü için doğrudan takvim bağlantısı oluşturulamaz.");
+            const dayDate = getDateForScheduleDay(activeSchedulingDayIdx, isNext);
+            openDirectGoogleCalendarForSpecificDate(formatDateYMD(dayDate), activeSchedulingDayIdx);
+        }
+
+        function openDirectGoogleCalendarForSpecificDate(dateStr, dayIdx) {
+            if (!dateStr) return;
+            const targetDate = new Date(dateStr + 'T00:00:00');
+            const plan = (typeof getPlanForDate === 'function') ? getPlanForDate(targetDate) : null;
+            if (!plan || plan.rest || plan.type === 'rest') {
+                alert("Dinlenme günü için takvim kaydı oluşturulamaz.");
                 return;
             }
 
@@ -16232,7 +16314,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const startHour = parseInt(hStr, 10) || 18;
             const startMin = parseInt(mStr, 10) || 30;
 
-            const startDate = getDateForScheduleDay(activeSchedulingDayIdx, isNext);
+            const startDate = new Date(targetDate);
             startDate.setHours(startHour, startMin, 0, 0);
             const endDate = new Date(startDate.getTime() + (duration * 60 * 1000));
 
@@ -16243,13 +16325,115 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const datesParam = `${formatUtcCompact(startDate)}/${formatUtcCompact(endDate)}`;
             const cleanTitle = (plan.title || 'Antrenman Seansı').replace(/^[⚔️🧘🔬🔥\s]+/, '');
             const titleParam = `⚔️ FitLab: ${cleanTitle}`;
-            const descParam = buildEventDescription(plan, activeSchedulingDayIdx, duration);
+            const descParam = buildEventDescription(plan, dayIdx, duration);
+            const user = getActiveUser();
 
-            const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(titleParam)}&dates=${encodeURIComponent(datesParam)}&details=${encodeURIComponent(descParam)}&add=${encodeURIComponent(user.email || '')}`;
+            const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(titleParam)}&dates=${encodeURIComponent(datesParam)}&details=${encodeURIComponent(descParam)}&add=${encodeURIComponent((user && user.email) || '')}`;
             window.open(gcalUrl, '_blank');
         }
 
+        function openGoogleCalendarExportModal() {
+            const modal = document.getElementById('googleCalendarExportModal');
+            if (!modal) {
+                openGoogleCalendarLegacyFallback();
+                return;
+            }
+
+            // Aktif incelenen haftanın başlangıç Pazartesi ve bitiş Pazar günlerini hesapla
+            const anchor = new Date((calendarScreenState && calendarScreenState.anchorDate) || new Date());
+            anchor.setHours(0, 0, 0, 0);
+            const dayOfWeek = anchor.getDay();
+            const diffToMon = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+            const monday = new Date(anchor);
+            monday.setDate(anchor.getDate() + diffToMon);
+
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+
+            const sD = monday.getDate();
+            const sM = CAL_MONTH_NAMES_TR[monday.getMonth()];
+            const eD = sunday.getDate();
+            const eM = CAL_MONTH_NAMES_TR[sunday.getMonth()];
+            const yr = sunday.getFullYear();
+            const periodStr = (sM === eM) ? `${sD} - ${eD} ${sM} ${yr}` : `${sD} ${sM} - ${eD} ${eM} ${yr}`;
+
+            const titleEl = document.getElementById('gcalExportModalTitle');
+            if (titleEl) {
+                titleEl.innerText = `📅 Google Takvim'e Aktar (${periodStr})`;
+            }
+
+            // Günlük buton listesini oluştur
+            const daysListEl = document.getElementById('gcalExportDaysList');
+            if (daysListEl) {
+                let itemsHtml = '';
+                let activeCount = 0;
+
+                for (let i = 0; i < 7; i++) {
+                    const dayDate = new Date(monday);
+                    dayDate.setDate(monday.getDate() + i);
+                    const dayIdx = dayDate.getDay();
+                    const dayYMD = formatDateYMD(dayDate);
+                    const plan = (typeof getPlanForDate === 'function') ? getPlanForDate(dayDate) : null;
+
+                    if (plan && !plan.rest && plan.type !== 'rest') {
+                        activeCount++;
+                        const cleanTitle = (plan.title || 'Antrenman Seansı').replace(/^[⚔️🧘🔬🔥\s]+/, '');
+                        const timeStr = plan.time || '18:30';
+                        const durMin = plan.duration || 50;
+                        const dName = DAY_NAMES_TR[dayIdx];
+                        const dNum = dayDate.getDate();
+                        const mName = CAL_MONTH_NAMES_TR[dayDate.getMonth()].slice(0, 3);
+
+                        itemsHtml += `
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:9px 12px; gap:8px;">
+                                <div style="min-width:0; flex:1;">
+                                    <div style="font-size:12.5px; font-weight:800; color:#fff;">
+                                        ⚔️ ${dName}, ${dNum} ${mName} • <span style="color:var(--gold);">${timeStr}</span>
+                                    </div>
+                                    <div style="font-size:11px; color:#cbd5e1; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                        ${escapeHTML(cleanTitle)} • ${durMin} Dk
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-gold" style="font-size:11px; padding:6px 12px; font-weight:800; flex-shrink:0;" onclick="openDirectGoogleCalendarForSpecificDate('${dayYMD}', ${dayIdx})">
+                                    ➕ Ekle ➔
+                                </button>
+                            </div>
+                        `;
+                    }
+                }
+
+                if (activeCount === 0) {
+                    itemsHtml = `<div style="text-align:center; padding:12px; font-size:12px; color:var(--text-secondary);">Bu haftada planlanmış aktif antrenman seansı bulunamadı.</div>`;
+                }
+                daysListEl.innerHTML = itemsHtml;
+            }
+
+            modal.classList.add('active');
+            modal.style.display = 'flex';
+        }
+
+        function closeGoogleCalendarExportModal() {
+            const modal = document.getElementById('googleCalendarExportModal');
+            if (modal) {
+                modal.classList.remove('active');
+                modal.style.display = 'none';
+            }
+        }
+
+        function executeOneClickGoogleCalendarExport() {
+            downloadFullScheduleICS();
+            const importUrl = 'https://calendar.google.com/calendar/u/0/r/settings/export';
+            window.open(importUrl, '_blank');
+            if (typeof showToast === 'function') {
+                showToast("📥 Takvim dosyanız indi! Google Takvim İçe Aktarma ekranı açıldı.");
+            }
+        }
+
         function openGoogleCalendarWeb() {
+            openGoogleCalendarExportModal();
+        }
+
+        function openGoogleCalendarLegacyFallback() {
             try {
                 const win = window.open('https://calendar.google.com/calendar/u/0/r', '_blank');
                 if (!win || win.closed || typeof win.closed === 'undefined') {
@@ -16260,12 +16444,16 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
         }
 
-        function generateScheduleICS(targetWeek = null) {
-            const week = targetWeek || activePlannerWeek || 'current';
-            const isNext = week === 'next';
+        function generateScheduleICS(targetAnchorDate = null) {
+            const anchor = new Date(targetAnchorDate || (calendarScreenState && calendarScreenState.anchorDate) || new Date());
+            anchor.setHours(0, 0, 0, 0);
+            const dayOfWeek = anchor.getDay();
+            const diffToMon = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+            const monday = new Date(anchor);
+            monday.setDate(anchor.getDate() + diffToMon);
+
             const user = getActiveUser();
-            const schedule = isNext ? getNextWeeklySchedule(user.id) : getWeeklySchedule(user.id);
-            const prefs = getCalendarPreferences(user.id);
+            const prefs = getCalendarPreferences(user ? user.id : 'usr_admin');
 
             const formatIcsDate = d => {
                 return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
@@ -16281,9 +16469,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 'X-WR-TIMEZONE:Europe/Istanbul'
             ];
 
-            for (let d = 0; d < 7; d++) {
-                const plan = schedule[d];
-                if (!plan || plan.rest) continue;
+            for (let i = 0; i < 7; i++) {
+                const dayDate = new Date(monday);
+                dayDate.setDate(monday.getDate() + i);
+                const dayIdx = dayDate.getDay();
+                const plan = (typeof getPlanForDate === 'function') ? getPlanForDate(dayDate) : null;
+                if (!plan || plan.rest || plan.type === 'rest') continue;
 
                 const workoutDetails = getWorkoutDetailsForPlan(plan) || {};
                 const duration = parseInt(plan.duration, 10) || parseInt(workoutDetails.duration, 10) || 50;
@@ -16292,13 +16483,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 const startHour = parseInt(hStr, 10) || 18;
                 const startMin = parseInt(mStr, 10) || 30;
 
-                const startDate = getDateForScheduleDay(d, isNext);
+                const startDate = new Date(dayDate);
                 startDate.setHours(startHour, startMin, 0, 0);
                 const endDate = new Date(startDate.getTime() + (duration * 60 * 1000));
 
                 const cleanTitle = (plan.title || 'Antrenman Seansı').replace(/^[⚔️🧘🔬🔥\s]+/, '');
-                const summary = `FitLab: ${cleanTitle}`;
-                const descText = buildEventDescription(plan, d, duration)
+                const summary = `⚔️ FitLab: ${cleanTitle}`;
+                const descText = buildEventDescription(plan, dayIdx, duration)
                     .replace(/\\/g, '\\\\')
                     .replace(/;/g, '\\;')
                     .replace(/,/g, '\\,')
@@ -16306,7 +16497,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
                 ics.push(
                     'BEGIN:VEVENT',
-                    `UID:fitlab-${d}-${startDate.getTime()}@fitness.kantarci.io`,
+                    `UID:fitlab-${formatDateYMD(dayDate)}-${startDate.getTime()}@fitness.kantarci.io`,
                     `DTSTAMP:${formatIcsDate(new Date())}`,
                     `DTSTART:${formatIcsDate(startDate)}`,
                     `DTEND:${formatIcsDate(endDate)}`,
@@ -16326,11 +16517,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         }
 
         function downloadFullScheduleICS() {
-            const icsContent = generateScheduleICS();
+            const anchor = new Date((calendarScreenState && calendarScreenState.anchorDate) || new Date());
+            const icsContent = generateScheduleICS(anchor);
             const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `fitlab-haftalik-antrenman-${activePlannerWeek || 'current'}.ics`;
+            link.download = `fitlab-haftalik-antrenman.ics`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -21112,7 +21304,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=131')
+                navigator.serviceWorker.register('./sw.js?v=132')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et

@@ -3815,12 +3815,31 @@ function closeDesktopCalendarModal() {
 }
 window.closeDesktopCalendarModal = closeDesktopCalendarModal;
 
-function openGoogleCalendarFromDesktop() {
-    const url = 'https://calendar.google.com/calendar/u/0/r';
-    if (window.coachAPI && window.coachAPI.openCalendarUrl) {
-        window.coachAPI.openCalendarUrl(url);
-    } else {
-        window.open(url, '_blank');
+async function openGoogleCalendarFromDesktop() {
+    const athleteName = state.selectedUser ? (state.selectedUser.name || state.selectedUser.username) : 'Sporcu';
+    const schedule = getDesktopAthleteSchedule();
+    const activeDays = Object.values(schedule).filter(s => s && !s.isRest);
+
+    if (activeDays.length === 0) {
+        alert("Haftada planlanmış aktif antrenman seansı bulunamadı.");
+        return;
+    }
+
+    const choice = confirm(
+        `📅 GOOGLE TAKVİM AKTARIMI (${athleteName})\n\n` +
+        `Haftalık ${activeDays.length} seansı Google Takvim'e aktarmak için takvim dosyası (.ics) oluşturulacak ve Google Takvim İçe Aktarma sayfası açılacaktır.\n\n` +
+        `• Açılan Google Takvim ekranında oluşturulan dosyayı seçip "İçe Aktar"a bastığınızda tüm haftalık program takviminize işlenir.\n\n` +
+        `Devam etmek istiyor musunuz?`
+    );
+
+    if (choice) {
+        await exportFullWeekToAppleCalendar();
+        const url = 'https://calendar.google.com/calendar/u/0/r/settings/export';
+        if (window.coachAPI && window.coachAPI.openCalendarUrl) {
+            window.coachAPI.openCalendarUrl(url);
+        } else {
+            window.open(url, '_blank');
+        }
     }
     closeDesktopCalendarModal();
 }
