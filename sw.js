@@ -1,4 +1,4 @@
-const CACHE_NAME = 'celik-kodu-cache-v139';
+const CACHE_NAME = 'celik-kodu-cache-v140';
 const ASSETS = [
   './',
   './assets/diagrams/seq_manmaker.svg',

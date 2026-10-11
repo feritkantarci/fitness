@@ -3698,60 +3698,193 @@
         .hevy-prev-text.clickable:hover {
             color: var(--gold);
         }
-        .hevy-cell-stepper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 3px;
+        /* LISTBOX PICKER CELL BUTTON (NO + -) */
+        .hevy-listbox-btn {
             width: 100%;
-        }
-        .btn-hevy-step {
-            width: 26px;
-            height: 32px;
-            background: var(--bg-elevated);
+            height: 36px;
+            background: rgba(15, 23, 42, 0.9);
             border: 1px solid var(--border);
-            border-radius: 6px;
-            color: #e2e8f0;
-            font-size: 13px;
-            font-weight: 900;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 13.5px;
+            font-weight: 800;
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 4px;
             cursor: pointer;
             transition: all 0.15s;
             user-select: none;
-            flex-shrink: 0;
-            padding: 0;
+            padding: 0 4px;
         }
-        .btn-hevy-step:hover {
+        .hevy-listbox-btn:hover {
             border-color: var(--gold);
             color: var(--gold);
+            background: rgba(245, 158, 11, 0.08);
         }
-        .btn-hevy-step:active {
-            transform: scale(0.92);
+        .hevy-listbox-btn:active {
+            transform: scale(0.95);
         }
-        .hevy-input-kg, .hevy-input-reps {
-            width: 44px;
-            height: 32px;
-            background: #090d16;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            color: #fff;
-            font-size: 14.5px;
-            font-weight: 800;
-            text-align: center;
-            outline: none;
-            box-sizing: border-box;
-            padding: 2px;
-            transition: border-color 0.15s;
+        .hevy-tr-row.active-target .hevy-listbox-btn {
+            border-color: rgba(245, 158, 11, 0.5);
         }
-        .hevy-input-kg:focus, .hevy-input-reps:focus {
-            border-color: var(--gold);
-            background: #030712;
-        }
-        .hevy-tr-row.done .hevy-input-kg, .hevy-tr-row.done .hevy-input-reps {
+        .hevy-tr-row.done .hevy-listbox-btn {
             color: #86efac;
             border-color: rgba(34, 197, 94, 0.35);
+            background: rgba(34, 197, 94, 0.06);
+        }
+        .listbox-btn-arrow {
+            font-size: 10px;
+            color: var(--gold);
+            opacity: 0.8;
+        }
+
+        /* QUICK LISTBOX PICKER MODAL (BOTTOM SHEET) */
+        .quick-listbox-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 10000;
+            align-items: flex-end;
+            justify-content: center;
+            animation: fadeInListboxOverlay 0.2s ease-out;
+        }
+        .quick-listbox-overlay.active {
+            display: flex;
+        }
+        @keyframes fadeInListboxOverlay {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .quick-listbox-sheet {
+            width: 100%;
+            max-width: 500px;
+            max-height: 75vh;
+            background: #0c1220;
+            border: 1px solid var(--border-highlight);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.85), 0 0 25px rgba(245, 158, 11, 0.15);
+            animation: slideUpListboxSheet 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
+        @keyframes slideUpListboxSheet {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .quick-listbox-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px 14px 20px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .quick-listbox-title {
+            font-size: 16px;
+            font-weight: 900;
+            color: #fff;
+        }
+        .quick-listbox-sub {
+            font-size: 11.5px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+        .btn-listbox-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-listbox-close:hover {
+            background: rgba(255, 255, 255, 0.18);
+        }
+        .quick-listbox-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+        .listbox-option-item {
+            padding: 13px 18px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 15px;
+            font-weight: 800;
+            color: #e2e8f0;
+            cursor: pointer;
+            transition: all 0.12s;
+        }
+        .listbox-option-item:active {
+            transform: scale(0.98);
+        }
+        .listbox-option-item.selected {
+            background: rgba(245, 158, 11, 0.15);
+            border-color: var(--gold);
+            color: var(--gold);
+            box-shadow: 0 0 14px rgba(245, 158, 11, 0.25);
+        }
+        .listbox-option-check {
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--gold);
+        }
+        .quick-listbox-custom-row {
+            padding: 12px 16px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        .listbox-custom-input {
+            flex: 1;
+            background: #090d16;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: #fff;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-weight: 800;
+            outline: none;
+        }
+        .listbox-custom-input:focus {
+            border-color: var(--gold);
+        }
+        .btn-listbox-apply {
+            background: var(--gold);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            padding: 0 18px;
+            font-size: 13px;
+            font-weight: 900;
+            cursor: pointer;
+        }
+        .btn-listbox-apply:active {
+            transform: scale(0.96);
         }
         .btn-hevy-check {
             width: 38px;
@@ -4704,7 +4837,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v139</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v140</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -4740,7 +4873,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v139</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v140</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -5964,6 +6097,24 @@
 
             <div id="previewModalActions" style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top:1px solid var(--border); padding-top:12px; flex-wrap:wrap;">
                 <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== QUICK LISTBOX PICKER MODAL (BOTTOM SHEET) ==================== -->
+    <div id="quickListboxModal" class="quick-listbox-overlay" onclick="closeListboxPicker(event)">
+        <div class="quick-listbox-sheet" onclick="event.stopPropagation()">
+            <div class="quick-listbox-header">
+                <div>
+                    <div class="quick-listbox-title" id="listboxTitle">⚖️ Ağırlık Seç (KG)</div>
+                    <div class="quick-listbox-sub" id="listboxSub">Set Detayı</div>
+                </div>
+                <button type="button" class="btn-listbox-close" onclick="closeListboxPicker()">✕</button>
+            </div>
+            <div class="quick-listbox-scroll" id="listboxItemsContainer"></div>
+            <div class="quick-listbox-custom-row">
+                <input type="number" step="0.5" id="listboxCustomInput" class="listbox-custom-input" placeholder="Özel Değer Yaz...">
+                <button type="button" class="btn-listbox-apply" onclick="applyCustomListboxValue()">Uygula</button>
             </div>
         </div>
     </div>
@@ -11161,6 +11312,113 @@ KURALLAR:
             playAlertSound();
         }
 
+        // LISTBOX PICKER STATE & HANDLERS (NO + -)
+        let currentListboxPickerState = { exId: null, setIdx: null, type: 'weight' };
+
+        const COMMON_WEIGHT_OPTIONS = [
+            0, 2, 2.5, 4, 5, 6, 7, 7.5, 8, 9, 10, 
+            12, 12.5, 14, 15, 16, 17.5, 18, 20, 22, 22.5, 24, 25, 26, 27.5, 28, 30, 
+            32, 32.5, 34, 35, 36, 37.5, 38, 40, 42.5, 45, 47.5, 50, 
+            52.5, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 110, 120, 130, 140, 150
+        ];
+        const COMMON_REPS_OPTIONS = [
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 
+            11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 
+            22, 25, 30, 35, 40, 50
+        ];
+
+        function openListboxPicker(exId, setIdx, type) {
+            currentListboxPickerState = { exId, setIdx, type };
+            const sets = activeWorkoutSetsData[exId];
+            if (!sets || !sets[setIdx]) return;
+            const st = sets[setIdx];
+            const isWeight = (type === 'weight');
+            const curVal = isWeight ? parseFloat(st.weight) : parseInt(st.reps);
+
+            let exName = 'Egzersiz';
+            if (activeWorkoutSession && activeWorkoutSession.exercises) {
+                const found = activeWorkoutSession.exercises.find(e => e.id === exId);
+                if (found) exName = found.name;
+            }
+
+            const titleEl = document.getElementById('listboxTitle');
+            const subEl = document.getElementById('listboxSub');
+            const customInput = document.getElementById('listboxCustomInput');
+            const modal = document.getElementById('quickListboxModal');
+            const container = document.getElementById('listboxItemsContainer');
+
+            if (titleEl) titleEl.innerText = isWeight ? '⚖️ Ağırlık Seç (KG)' : '🔄 Tekrar Sayısı Seç';
+            if (subEl) subEl.innerText = `${exName} • Set ${st.setNo}`;
+            if (customInput) {
+                customInput.placeholder = isWeight ? 'Örn: 27.5' : 'Örn: 14';
+                customInput.value = '';
+            }
+
+            const list = isWeight ? COMMON_WEIGHT_OPTIONS.slice() : COMMON_REPS_OPTIONS.slice();
+            if (!isNaN(curVal) && curVal !== null && curVal !== '' && !list.includes(curVal)) {
+                list.push(curVal);
+                list.sort((a, b) => a - b);
+            }
+
+            if (container) {
+                container.innerHTML = list.map(val => {
+                    const isSelected = (val === curVal);
+                    const label = isWeight ? `${val} kg` : `${val} tekrar`;
+                    return `
+                        <div class="listbox-option-item ${isSelected ? 'selected' : ''}" 
+                             onclick="selectListboxValue(${val})">
+                            <span>${label}</span>
+                            ${isSelected ? '<span class="listbox-option-check">✓</span>' : ''}
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            if (modal) {
+                modal.classList.add('active');
+                setTimeout(() => {
+                    const sel = container ? container.querySelector('.listbox-option-item.selected') : null;
+                    if (sel) sel.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                }, 50);
+            }
+        }
+
+        function selectListboxValue(val) {
+            const { exId, setIdx, type } = currentListboxPickerState;
+            if (!exId || setIdx === null || !activeWorkoutSetsData[exId] || !activeWorkoutSetsData[exId][setIdx]) return;
+            const st = activeWorkoutSetsData[exId][setIdx];
+
+            if (type === 'weight') {
+                st.weight = val;
+                if (typeof showToast === 'function') showToast(`⚖️ Set ${st.setNo}: ${val} kg seçildi`);
+            } else {
+                st.reps = val;
+                if (typeof showToast === 'function') showToast(`🔄 Set ${st.setNo}: ${val} tekrar seçildi`);
+            }
+
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+            closeListboxPicker();
+
+            if (navigator.vibrate) navigator.vibrate(35);
+            playAlertSound();
+        }
+
+        function applyCustomListboxValue() {
+            const input = document.getElementById('listboxCustomInput');
+            if (!input) return;
+            const val = parseFloat(input.value);
+            if (!isNaN(val) && val >= 0) {
+                selectListboxValue(val);
+            }
+        }
+
+        function closeListboxPicker(e) {
+            if (e && e.target !== e.currentTarget) return;
+            const modal = document.getElementById('quickListboxModal');
+            if (modal) modal.classList.remove('active');
+        }
+
         function stepSetWeight(exId, setIdx, delta) {
             const sets = activeWorkoutSetsData[exId];
             if (!sets || !sets[setIdx]) return;
@@ -11932,30 +12190,20 @@ KURALLAR:
                                                     <span class="hevy-prev-text ${lastPerf && !isDone ? 'clickable' : ''}">${prevText}</span>
                                                 </div>
 
-                                                <!-- AĞIRLIK (KG) -->
+                                                <!-- AĞIRLIK (KG) - LISTBOX PICKER -->
                                                 <div class="hevy-td">
-                                                    <div class="hevy-cell-stepper">
-                                                        <button type="button" class="btn-hevy-step" onclick="stepSetWeight('${ex.id}', ${sIdx}, -2.5)" title="-2.5 kg">-</button>
-                                                        <input type="number" step="0.5" inputmode="decimal" class="hevy-input-kg" 
-                                                               id="w_${ex.id}_${sIdx}" 
-                                                               value="${st.weight !== '' && st.weight !== null ? st.weight : ''}" 
-                                                               placeholder="0" 
-                                                               oninput="onSetWeightInput('${ex.id}', ${sIdx}, this.value)">
-                                                        <button type="button" class="btn-hevy-step pos" onclick="stepSetWeight('${ex.id}', ${sIdx}, 2.5)" title="+2.5 kg">+</button>
-                                                    </div>
+                                                    <button type="button" class="hevy-listbox-btn" onclick="openListboxPicker('${ex.id}', ${sIdx}, 'weight')" title="Kilo seçmek için dokunun">
+                                                        <span>${st.weight !== '' && st.weight !== null && st.weight !== undefined ? `${st.weight} kg` : '- kg'}</span>
+                                                        <span class="listbox-btn-arrow">▾</span>
+                                                    </button>
                                                 </div>
 
-                                                <!-- TEKRAR -->
+                                                <!-- TEKRAR - LISTBOX PICKER -->
                                                 <div class="hevy-td">
-                                                    <div class="hevy-cell-stepper">
-                                                        <button type="button" class="btn-hevy-step" onclick="stepSetReps('${ex.id}', ${sIdx}, -1)" title="-1 tekrar">-</button>
-                                                        <input type="number" step="1" inputmode="numeric" class="hevy-input-reps" 
-                                                               id="r_${ex.id}_${sIdx}" 
-                                                               value="${st.reps !== '' && st.reps !== null ? st.reps : ''}" 
-                                                               placeholder="0" 
-                                                               oninput="onSetRepsInput('${ex.id}', ${sIdx}, this.value)">
-                                                        <button type="button" class="btn-hevy-step pos" onclick="stepSetReps('${ex.id}', ${sIdx}, 1)" title="+1 tekrar">+</button>
-                                                    </div>
+                                                    <button type="button" class="hevy-listbox-btn" onclick="openListboxPicker('${ex.id}', ${sIdx}, 'reps')" title="Tekrar seçmek için dokunun">
+                                                        <span>${st.reps !== '' && st.reps !== null && st.reps !== undefined ? `${st.reps} tk` : '- tk'}</span>
+                                                        <span class="listbox-btn-arrow">▾</span>
+                                                    </button>
                                                 </div>
 
                                                 <!-- TİK BUTONU -->
@@ -12145,28 +12393,20 @@ KURALLAR:
                                                         <span class="hevy-prev-text ${lastPerf && !isDone ? 'clickable' : ''}">${prevText}</span>
                                                     </div>
 
+                                                    <!-- AĞIRLIK (KG) - LISTBOX PICKER -->
                                                     <div class="hevy-td">
-                                                        <div class="hevy-cell-stepper">
-                                                            <button type="button" class="btn-hevy-step" onclick="stepSetWeight('${ex.id}', ${sIdx}, -2.5)" title="-2.5 kg">-</button>
-                                                            <input type="number" step="0.5" inputmode="decimal" class="hevy-input-kg" 
-                                                                   id="w_${ex.id}_${sIdx}" 
-                                                                   value="${st.weight !== '' && st.weight !== null ? st.weight : ''}" 
-                                                                   placeholder="0" 
-                                                                   oninput="onSetWeightInput('${ex.id}', ${sIdx}, this.value)">
-                                                            <button type="button" class="btn-hevy-step pos" onclick="stepSetWeight('${ex.id}', ${sIdx}, 2.5)" title="+2.5 kg">+</button>
-                                                        </div>
+                                                        <button type="button" class="hevy-listbox-btn" onclick="openListboxPicker('${ex.id}', ${sIdx}, 'weight')" title="Kilo seçmek için dokunun">
+                                                            <span>${st.weight !== '' && st.weight !== null && st.weight !== undefined ? `${st.weight} kg` : '- kg'}</span>
+                                                            <span class="listbox-btn-arrow">▾</span>
+                                                        </button>
                                                     </div>
 
+                                                    <!-- TEKRAR - LISTBOX PICKER -->
                                                     <div class="hevy-td">
-                                                        <div class="hevy-cell-stepper">
-                                                            <button type="button" class="btn-hevy-step" onclick="stepSetReps('${ex.id}', ${sIdx}, -1)" title="-1 tekrar">-</button>
-                                                            <input type="number" step="1" inputmode="numeric" class="hevy-input-reps" 
-                                                                   id="r_${ex.id}_${sIdx}" 
-                                                                   value="${st.reps !== '' && st.reps !== null ? st.reps : ''}" 
-                                                                   placeholder="0" 
-                                                                   oninput="onSetRepsInput('${ex.id}', ${sIdx}, this.value)">
-                                                            <button type="button" class="btn-hevy-step pos" onclick="stepSetReps('${ex.id}', ${sIdx}, 1)" title="+1 tekrar">+</button>
-                                                        </div>
+                                                        <button type="button" class="hevy-listbox-btn" onclick="openListboxPicker('${ex.id}', ${sIdx}, 'reps')" title="Tekrar seçmek için dokunun">
+                                                            <span>${st.reps !== '' && st.reps !== null && st.reps !== undefined ? `${st.reps} tk` : '- tk'}</span>
+                                                            <span class="listbox-btn-arrow">▾</span>
+                                                        </button>
                                                     </div>
 
                                                     <div class="hevy-td">
@@ -12262,6 +12502,20 @@ KURALLAR:
 
             if (wInput && wInput.value !== '') st.weight = parseFloat(wInput.value) || 0;
             if (rInput && rInput.value !== '') st.reps = parseInt(rInput.value) || 0;
+            if (st.weight === '' || st.weight === null || st.weight === undefined) {
+                if (setIdx > 0 && sets[setIdx - 1].weight !== '' && sets[setIdx - 1].weight !== null && sets[setIdx - 1].weight !== undefined) {
+                    st.weight = sets[setIdx - 1].weight;
+                } else {
+                    st.weight = 0;
+                }
+            }
+            if (st.reps === '' || st.reps === null || st.reps === undefined) {
+                if (setIdx > 0 && sets[setIdx - 1].reps) {
+                    st.reps = sets[setIdx - 1].reps;
+                } else {
+                    st.reps = 10;
+                }
+            }
 
             st.completed = true;
             st.completedAt = Date.now();
@@ -22120,7 +22374,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=139')
+                navigator.serviceWorker.register('./sw.js?v=140')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
