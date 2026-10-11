@@ -1,0 +1,2333 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Security: CSP & Permissions -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://apis.google.com https://accounts.google.com; connect-src 'self' https://firestore.googleapis.com https://generativelanguage.googleapis.com https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://raw.githubusercontent.com https://cdn.jsdelivr.net https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com data: blob:; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; media-src 'self' data: blob: https:; frame-src 'self' https://fitness-4f427.firebaseapp.com https://accounts.google.com;">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta name="theme-color" content="#090d16">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Çelik Kodu">
+    
+    <title>Çelik Kodu | Akıllı Antrenman Mimarı & Program Oluşturucu</title>
+    <meta name="description" content="Çelik Kodu - Akıllı Antrenman Mimarı & Program Oluşturucu">
+    <meta property="og:title" content="Çelik Kodu | Akıllı Antrenman Mimarı & Program Oluşturucu">
+    <meta property="og:description" content="Çelik Kodu - Akıllı Antrenman Mimarı & Program Oluşturucu">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/svg+xml" href="assets/diagrams/seq_db_press.svg">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=156">
+</head>
+<body>
+
+    <!-- ==================== LOGIN SCREEN ==================== -->
+    <div id="loginScreen">
+        <div class="login-card">
+            <div class="login-logo">⚔️</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v156</div>
+            <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
+            <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
+
+            <div id="loginErrorMsg" class="login-error"></div>
+
+            <form id="loginForm" onsubmit="handleAuthLogin(event)">
+                <div class="login-field">
+                    <label class="login-label">Kullanıcı Adı</label>
+                    <input type="text" id="loginUsername" class="login-input" placeholder="Örn: ferit veya admin" required autocomplete="username" autocapitalize="none">
+                </div>
+
+                <div class="login-field">
+                    <label class="login-label">Şifre</label>
+                    <input type="password" id="loginPassword" class="login-input" placeholder="••••••" required autocomplete="current-password">
+                </div>
+
+                <button type="submit" class="login-btn" id="loginSubmitBtn">GİRİŞ YAP ➔</button>
+            </form>
+
+            <div class="login-hint">
+                🔑 <strong>Varsayılan Yönetici:</strong> admin | <strong>Şifre:</strong> 123<br>
+                <em>(Yönetici panelinden yeni kullanıcılar ve sporcular açabilirsiniz).</em>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MAIN APPLICATION WRAPPER ==================== -->
+    <div id="mainAppWrapper" style="display:none;">
+        <div class="app-container">
+
+            <!-- MODERN UNIFIED APP BAR -->
+            <div class="modern-app-bar">
+                <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
+                    <span class="modern-brand-logo">⚔️</span>
+                    <span class="modern-brand-title">ÇELİK KODU</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v156</span>
+                </div>
+                <div class="modern-bar-actions" style="position: relative;">
+                    <div class="modern-user-badge" onclick="if(window.innerWidth <= 768){ openMoreSheet(); } else { switchTab('profileTab'); }" title="Profil & Menü">
+                        <span class="modern-user-avatar" id="headerUserAvatar">🥋</span>
+                        <span class="modern-user-name" id="headerUserName">Sporcu</span>
+                        <span class="auth-role-tag role-admin" id="headerUserRoleBadge">YÖNETİCİ</span>
+                    </div>
+                    <button type="button" class="btn-header-popup-toggle" onclick="toggleHeaderPopupMenu(event)" title="Seçenekler ve Menü" style="background: var(--bg-elevated); border: 1px solid var(--border); color: var(--gold); padding: 6px 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 12.5px;">
+                        <span>⚙️</span>
+                        <span class="desktop-only-action">İşlemler</span>
+                        <span style="font-size:10px;">▼</span>
+                    </button>
+
+                    <!-- HEADER POPUP MENU (PROFESYONEL GİZLENEBİLİR POPUP) -->
+                    <div id="headerPopupMenu" class="header-popup-menu" style="display:none; position:absolute; top:calc(100% + 10px); right:0; background:rgba(15, 23, 42, 0.96); border:1px solid rgba(255, 255, 255, 0.12); backdrop-filter:blur(16px); border-radius:12px; min-width:240px; box-shadow:0 20px 40px rgba(0,0,0,0.7); z-index:9999; padding:8px;">
+                        <div style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:6px; display:flex; align-items:center; justify-content:space-between;">
+                            <span style="font-size:10.5px; font-weight:800; letter-spacing:0.8px; color:#94a3b8; text-transform:uppercase;">Sistem Durumu</span>
+                            <span class="cloud-sync-badge" id="headerCloudSyncBadge" style="font-size:10px; padding:3px 8px; background:rgba(34, 197, 94, 0.15); color:#4ade80; border:1px solid rgba(34, 197, 94, 0.3); border-radius:6px;" title="Firebase Bulut Veritabanı">Bulut Aktif</span>
+                        </div>
+                        <button type="button" class="header-popup-item" onclick="closeHeaderPopupMenu(); openBugReportsPoolModal();" style="width:100%; text-align:left; background:transparent; border:none; color:#e2e8f0; padding:10px 12px; border-radius:8px; cursor:pointer; font-size:12.5px; font-weight:600; display:flex; align-items:center; gap:10px; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#94a3b8;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                            <span>Hata Bildirim Havuzu</span>
+                        </button>
+                        <button type="button" class="header-popup-item" id="btnAdminPanelPopup" onclick="closeHeaderPopupMenu(); openAdminModal();" style="width:100%; text-align:left; background:transparent; border:none; color:#e2e8f0; padding:10px 12px; border-radius:8px; cursor:pointer; font-size:12.5px; font-weight:600; display:flex; align-items:center; gap:10px; display:none; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#94a3b8;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                            <span>Sporcu Yönetimi (Admin)</span>
+                        </button>
+                        <button type="button" class="header-popup-item" onclick="closeHeaderPopupMenu(); forceAppUpdate();" style="width:100%; text-align:left; background:transparent; border:none; color:#e2e8f0; padding:10px 12px; border-radius:8px; cursor:pointer; font-size:12.5px; font-weight:600; display:flex; align-items:center; gap:10px; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#94a3b8;"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                            <span>Sürümü / Önbelleği Yenile</span>
+                        </button>
+                        <div style="border-top:1px solid rgba(255,255,255,0.08); margin:4px 0;"></div>
+                        <button type="button" class="header-popup-item logout" onclick="closeHeaderPopupMenu(); handleAuthLogout();" style="width:100%; text-align:left; background:transparent; border:none; color:#f87171; padding:10px 12px; border-radius:8px; cursor:pointer; font-size:12.5px; font-weight:600; display:flex; align-items:center; gap:10px; transition:background 0.2s;" onmouseover="this.style.background='rgba(248,113,113,0.1)'" onmouseout="this.style.background='transparent'">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#f87171;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                            <span>Oturumu Kapat</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NAVIGATION TABS -->
+            <div class="tab-nav">
+                <button class="tab-btn active" onclick="switchTab('generatorTab')">
+                    <span>⚡ Otomatik</span>
+                </button>
+                <button class="tab-btn" onclick="switchTab('activeWorkoutTab')" id="tabBtnActiveWorkout">
+                    <span>🏋️ Antrenman</span>
+                </button>
+                <button class="tab-btn" onclick="switchTab('calendarTab')" id="tabBtnCalendar">
+                    <span>📅 Takvim</span>
+                </button>
+                <button class="tab-btn" onclick="switchTab('libraryTab')">
+                    <span>📚 Program & Hareketler</span>
+                </button>
+                <button class="tab-btn" onclick="switchTab('historyTab')">
+                    <span>📋 Geçmiş</span>
+                </button>
+                <button class="tab-btn" onclick="switchTab('analyticsTab')">
+                    <span>📈 Analiz & Tartı</span>
+                </button>
+                <button class="tab-btn" onclick="switchTab('profileTab')">
+                    <span>👤 Profil</span>
+                </button>
+            </div>
+
+            <!-- ==================== TAB 1: WORKOUT GENERATOR ==================== -->
+            <div id="generatorTab" class="tab-content active">
+
+                <!-- AI HYBRID BLUEPRINT & DOCTRINE ARCHITECT BANNER -->
+                <div class="ai-hybrid-hero-banner" id="aiHybridHeroBanner">
+                    <div class="ai-hero-top-bar">
+                        <div class="ai-hero-title-group">
+                            <span class="ai-hero-tag">🧠 MİMAR</span>
+                            <span id="aiDoctrineCurrentBadge" class="ai-hero-doc-badge">⚡ Hibrit Doktrini</span>
+                            <h3 class="ai-hero-title">Bodybuilding & Fonksiyonel</h3>
+                            <button type="button" id="aiDoctrineInfoBtn" class="ai-hero-info-btn" onclick="toggleAiDoctrineTeaser()" title="Açıklamayı Göster / Gizle" aria-expanded="false" aria-label="Bilgi">ℹ️</button>
+                        </div>
+                        <button type="button" class="btn btn-gold ai-hero-action-btn" onclick="openAiHybridArchitectModal()" title="AI Doktrin Teşhisini Aç">
+                            <span>🤖 Teşhis ➔</span>
+                        </button>
+                    </div>
+
+                    <div id="aiDoctrineHeroQuickStats" class="ai-hero-stats-wrap">
+                        <!-- Live Telemetry snippet populated by JS -->
+                    </div>
+
+                    <!-- COLLAPSIBLE INFO DRAWER -->
+                    <div id="aiDoctrineHeroQuickTeaser" class="ai-hero-info-drawer" style="display:none;">
+                        Yapay zeka antrenman geçmişini, tartı trendini ve vücut ölçülerini analiz ederek sana özel <strong>Hipertrofi + Fonksiyonel Fitness</strong> dengesini program öncesinde baştan kurgular.
+                        <div style="margin-top:4px; font-size:10px; color:var(--text-muted); font-weight:600;">
+                            📚 Schumann (2022) Concurrent Training Destekli
+                        </div>
+                    </div>
+                </div>
+
+                <div class="generator-card">
+                    
+                    <!-- STEP 1: MUSCLE SPLIT -->
+                    <div class="gen-mobile-picker-bar" id="mobileSplitPickerBar" onclick="toggleGenSection('splitSection')">
+                        <div class="picker-label-wrap">
+                            <span class="gen-step-badge">1</span>
+                            <span class="picker-step-title">Hedef Bölge:</span>
+                            <span class="picker-selected-val" id="selectedSplitLabel">⚡ Tüm Vücut (Full Body)</span>
+                        </div>
+                        <span class="picker-arrow" id="splitPickerArrow">▼</span>
+                    </div>
+                    <div class="gen-step-title desktop-only-title">
+                        <span class="gen-step-badge">1</span>
+                        <span>Hangi Bölgeyi Çalıştıracağız?</span>
+                    </div>
+                    <div class="gen-collapsible-section" id="splitSection">
+                        <div class="split-grid" id="splitGrid">
+                            <div class="split-card selected" onclick="selectSplit('full_body')">
+                                <div class="split-card-content">
+                                    <span class="split-icon">⚡</span>
+                                    <span class="split-name">Tüm Vücut (Full Body)</span>
+                                </div>
+                                <span class="split-radio">✓</span>
+                            </div>
+                            <div class="split-card" onclick="selectSplit('upper_push')">
+                                <div class="split-card-content">
+                                    <span class="split-icon">🛡️</span>
+                                    <span class="split-name">Üst İtiş (Push)</span>
+                                </div>
+                                <span class="split-radio">✓</span>
+                            </div>
+                            <div class="split-card" onclick="selectSplit('upper_pull')">
+                                <div class="split-card-content">
+                                    <span class="split-icon">⚔️</span>
+                                    <span class="split-name">Üst Çekiş (Pull)</span>
+                                </div>
+                                <span class="split-radio">✓</span>
+                            </div>
+                            <div class="split-card" onclick="selectSplit('lower')">
+                                <div class="split-card-content">
+                                    <span class="split-icon">🦵</span>
+                                    <span class="split-name">Alt Vücut & Bacak</span>
+                                </div>
+                                <span class="split-radio">✓</span>
+                            </div>
+                            <div class="split-card" onclick="selectSplit('upper')">
+                                <div class="split-card-content">
+                                    <span class="split-icon">🦅</span>
+                                    <span class="split-name">Tüm Üst Vücut</span>
+                                </div>
+                                <span class="split-radio">✓</span>
+                            </div>
+                            <div class="split-card" onclick="selectSplit('core')">
+                                <div class="split-card-content">
+                                    <span class="split-icon">🧱</span>
+                                    <span class="split-name">Karın & Core Zırhı</span>
+                                </div>
+                                <span class="split-radio">✓</span>
+                            </div>
+                            <div class="split-card" onclick="selectSplit('functional')">
+                                <div class="split-card-content">
+                                    <span class="split-icon">⚡</span>
+                                    <span class="split-name">Fonksiyonel Fitness & Kondisyon</span>
+                                </div>
+                                <span class="split-radio">✓</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: AVAILABLE EQUIPMENT -->
+                    <div class="gen-mobile-picker-bar" id="mobileEquipPickerBar" onclick="toggleGenSection('equipSection')">
+                        <div class="picker-label-wrap">
+                            <span class="gen-step-badge">2</span>
+                            <span class="picker-step-title">Ekipmanlar:</span>
+                            <span class="picker-selected-val" id="selectedEquipLabel">🏋️ Dambıl, KB, Vücut (3 Seçili)</span>
+                        </div>
+                        <span class="picker-arrow" id="equipPickerArrow">▼</span>
+                    </div>
+                    <div class="gen-step-title desktop-only-title">
+                        <span class="gen-step-badge">2</span>
+                        <span>Elimizde Hangi Aletler Var? (Çoklu Seçim)</span>
+                    </div>
+                    <div class="gen-collapsible-section" id="equipSection">
+                        <div class="equip-chips-wrap" id="equipChipsWrap">
+                            <div class="equip-chip selected" onclick="toggleEquip('dumbbell')">
+                                <span>🏋️ Dambıllar (Dumbbell)</span>
+                            </div>
+                            <div class="equip-chip selected" onclick="toggleEquip('kettlebell')">
+                                <span>🔔 Kettlebell (Girya)</span>
+                            </div>
+                            <div class="equip-chip" onclick="toggleEquip('barbell')">
+                                <span>🛑 Bar & Plakalar (Barbell)</span>
+                            </div>
+                            <div class="equip-chip" onclick="toggleEquip('machine')">
+                                <span>⚙️ Makineler & Kablolar</span>
+                            </div>
+                            <div class="equip-chip selected" onclick="toggleEquip('bodyweight')">
+                                <span>🤸 Vücut Ağırlığı & Barfiks</span>
+                            </div>
+                        </div>
+                        <div class="equip-quick-actions">
+                            <button class="btn-quick-equip" onclick="setQuickEquip('all')">🏢 Tüm Spor Salonu Ekipmanları</button>
+                            <button class="btn-quick-equip" onclick="setQuickEquip('db_only')">🏋️ Sadece Dambıl</button>
+                            <button class="btn-quick-equip" onclick="setQuickEquip('db_kb_bw')">⚡ Dambıl + Kettlebell + Vücut</button>
+                            <button class="btn-quick-equip" onclick="setQuickEquip('bw_only')">🏠 Sadece Vücut Ağırlığı (Ev)</button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3: WORKOUT PARAMETERS -->
+                    <div class="gen-mobile-picker-bar" id="mobileParamPickerBar" onclick="toggleGenSection('paramSection')">
+                        <div class="picker-label-wrap">
+                            <span class="gen-step-badge">3</span>
+                            <span class="picker-step-title">Yapı & Süre:</span>
+                            <span class="picker-selected-val" id="selectedParamLabel">⚡ Çelik Süperset • 🛡️ Kas • ⏱️ 45 Dk</span>
+                        </div>
+                        <span class="picker-arrow" id="paramPickerArrow">▼</span>
+                    </div>
+                    <div class="gen-step-title desktop-only-title">
+                        <span class="gen-step-badge">3</span>
+                        <span>Antrenman Yapısı, Hedef ve Süre</span>
+                    </div>
+                    <div class="gen-collapsible-section" id="paramSection">
+                        <div class="param-grid">
+                            <div class="param-group">
+                                <label>Antrenman Modeli</label>
+                                <select id="paramStyle" class="param-select" onchange="updateSelectedParamLabel()">
+                                    <option value="superset" selected>⚡ Çelik Süperset (A1/A2)</option>
+                                    <option value="straight">🧱 Klasik Düz Setler</option>
+                                    <option value="emom">⏱️ EMOM / Kondisyon</option>
+                                </select>
+                            </div>
+                            <div class="param-group">
+                                <label>Hedef</label>
+                                <select id="paramGoal" class="param-select" onchange="updateSelectedParamLabel()">
+                                    <option value="hypertrophy" selected>🛡️ Kas & Hacim (8-12 Tekrar)</option>
+                                    <option value="strength">💥 Kuvvet & Güç (4-6 Tekrar)</option>
+                                    <option value="endurance">🔥 Yağ Yakımı & Kondisyon (12-15+)</option>
+                                </select>
+                            </div>
+                            <div class="param-group">
+                                <label>Süre Hedefi</label>
+                                <select id="paramDuration" class="param-select" onchange="updateSelectedParamLabel()">
+                                    <option value="30">⏱️ 30 Dk (Hızlı Seans)</option>
+                                    <option value="45" selected>⏱️ 45-50 Dk (İdeal Çelik)</option>
+                                    <option value="60">⏱️ 60 Dk (Dolu Hacim)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- GENERATE CTA -->
+                    <button class="btn-generate-cta" onclick="handleGenerateWorkout()">
+                        <span>⚡ Programı Oluştur ➔</span>
+                    </button>
+                </div>
+
+                <!-- GENERATED WORKOUT CONTAINER -->
+                <div id="generatedWorkoutOutput">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- ==================== TAB 2: ACTIVE WORKOUT ==================== -->
+            <div id="activeWorkoutTab" class="tab-content">
+
+                <!-- 1. WORKOUT STICKY HUD (SADELEŞTİRİLMİŞ & KOMPAKT) -->
+                <div id="activeWorkoutHUD" class="workout-sticky-hud" style="display:none; padding:6px 10px; margin-bottom:8px;">
+                    <div class="hud-main-bar" style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:nowrap;">
+                        <!-- Sol: Toplam Süre -->
+                        <div class="hud-timer-col" style="display:flex; flex-direction:row; align-items:center; gap:5px; min-width:auto;">
+                            <span style="font-size:12px;">⏱️</span>
+                            <div class="hud-time-val" id="workoutTotalTimerDisplay" style="font-size:16px;">00:00</div>
+                            <button type="button" class="btn-hud-tiny" id="btnToggleWorkoutPause" onclick="toggleWorkoutPause()" title="Duraklat / Sürdür" style="padding:3px 6px; font-size:11px;">⏸️</button>
+                        </div>
+
+                        <!-- Orta: Dinlenme Sayacı (Rest Timer) -->
+                        <div class="hud-rest-col" id="hudRestBox" style="display:flex; flex-direction:row; align-items:center; gap:5px; padding:3px 8px; min-width:auto;">
+                            <span style="font-size:12px; color:var(--gold);">⏳</span>
+                            <div class="hud-rest-val" id="timerDisplay" style="font-size:17px;">00:45</div>
+                            <span id="hudRestStatusBadge" style="display:none;">Hazır</span>
+                            <div class="hud-rest-btns" style="display:flex; gap:3px; margin:0;">
+                                <button type="button" class="btn-hud-tiny" id="btnPlayPauseTimer" onclick="toggleTimer()" title="Başlat / Duraklat" style="padding:3px 7px; font-weight:800;">▶</button>
+                                <button type="button" class="btn-hud-tiny" onclick="adjustTimer(15)" title="15 saniye ekle" style="padding:3px 5px; font-size:9.5px;">+15s</button>
+                                <button type="button" class="btn-hud-tiny" style="color:var(--cyan); border-color:rgba(56,189,248,0.4); padding:3px 6px;" onclick="skipRestTimer()" title="Dinlenmeyi bitir">⏩</button>
+                            </div>
+                        </div>
+
+                        <!-- Sağ: Görünüm & Ekran Kilidi -->
+                        <div class="hud-meta-col" style="display:flex; align-items:center; gap:4px;">
+                            <div style="display:flex; gap:2px; background:rgba(0,0,0,0.35); border-radius:6px; padding:2px;">
+                                <button type="button" class="btn-view-toggle active" id="btnViewFocus" onclick="setActiveWorkoutViewMode('focus')" title="Tek hareket odak modu" style="padding:4px 7px; font-size:12px;">🎯</button>
+                                <button type="button" class="btn-view-toggle" id="btnViewList" onclick="setActiveWorkoutViewMode('list')" title="Tüm hareketler listesi" style="padding:4px 7px; font-size:12px;">📋</button>
+                            </div>
+                            <button type="button" id="wakeLockStatusBtn" class="wake-lock-pill" onclick="toggleWakeLockManual()" title="Ekranı açık tut" style="padding:3px 6px; font-size:11px; margin:0;">
+                                🟢
+                            </button>
+                            <span id="btnCollapseHUD" style="display:none;"><span id="hudCollapseIcon"></span></span>
+                        </div>
+                    </div>
+
+                    <!-- İnce İlerleme Çubuğu Satırı -->
+                    <div class="hud-progress-row" style="margin-top:4px;">
+                        <div class="hud-progress-track" style="height:3px;">
+                            <div class="hud-progress-fill" id="liveProgressBarFill" style="width:0%;"></div>
+                        </div>
+                        <div class="hud-progress-info" style="font-size:9.5px; margin-top:2px; display:flex; justify-content:space-between;">
+                            <span id="liveProgressText">Set İlerlemesi: 0 / 0 (%0)</span>
+                            <span id="liveProgressDetail" style="font-weight:700; color:var(--gold);">Hazır</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="activeWorkoutContainer">
+                    <!-- Populated dynamically when a workout is started -->
+                </div>
+
+                <!-- FLOATING DOCK FOR QUICK WORKOUT NAVIGATION -->
+                <div id="workoutFloatingDock" class="workout-floating-dock" style="display:none;">
+                    <button type="button" class="btn-dock-nav" id="btnDockPrev" onclick="goToPrevExercise()">
+                        ⬅️ Önceki
+                    </button>
+                    <div class="dock-ex-title">
+                        <div class="dock-ex-counter" id="dockExCounter">EGZERSİZ 1/6</div>
+                        <div class="dock-ex-name" id="dockExName">Egzersiz Adı</div>
+                    </div>
+                    <button type="button" class="btn-dock-nav next" id="btnDockNext" onclick="goToNextExercise()">
+                        Sonraki ➡️
+                    </button>
+                    <button type="button" class="btn-dock-add" onclick="openAddFinisherModal()" title="İlave hareket veya finisher ekle">
+                        ➕ Ekle
+                    </button>
+                </div>
+
+                <!-- EMBEDDED PROGRAM ATÖLYESİ (KENDİ PROGRAMINI TASARLA) -->
+                <div id="studioSectionInWorkout" style="display:none; margin-top:16px;">
+                    <div class="generator-card" style="border-color: rgba(245, 158, 11, 0.35); padding:16px;">
+                        
+                        <!-- ACCORDION HEADER -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleStudioAccordion()">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span style="font-size:24px;">🎯</span>
+                                <div>
+                                    <h3 style="font-size:15px; font-weight:900; color:var(--gold); margin:0;">Program Atölyesi (Kendi Hareketlerini Seç)</h3>
+                                    <p style="font-size:11.5px; color:var(--text-secondary); margin:2px 0 0;">Bölge seçin, hareket ekleyin ve kendi antrenmanınızı başlatın.</p>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline" id="btnToggleStudioAccordion" style="font-size:11px; padding:5px 12px; font-weight:800; border-color:var(--gold); color:var(--gold); flex-shrink:0;">
+                                <span id="studioAccordionArrow">▼ Aç</span>
+                            </button>
+                        </div>
+
+                        <!-- ACCORDION BODY -->
+                        <div id="studioAccordionBody" style="display:none; margin-top:16px; border-top:1px solid var(--border); padding-top:16px;">
+                            <!-- DYNAMIC EDITING DAY BANNER (Shown when editing a scheduled program) -->
+                            <div id="studioEditingBannerContainer"></div>
+
+                            <!-- TOP BAR: Title & Actions -->
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; border-bottom:1px solid var(--border); padding-bottom:12px;">
+                                <div>
+                                    <span style="font-size:14px; font-weight:800; color:#fff;" id="studioHeaderTitle">Özel Antrenman Taslağı</span>
+                                    <p style="font-size:11px; color:var(--text-secondary); margin-top:2px;" id="studioHeaderSub">Bölge seçin, hareketleri ekleyin, dengeyi görün.</p>
+                                </div>
+                                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                                    <button class="btn btn-outline" style="font-size:11px; padding:6px 10px; color:var(--cyan); border-color:var(--cyan);" onclick="promptAssignStudioRoutineToDay()">📅 Güne Planla</button>
+                                    <button class="btn btn-outline" style="font-size:11px; padding:6px 10px;" onclick="resetCustomRoutine()">🗑️ Sıfırla</button>
+                                    <button class="btn btn-gold" style="font-size:11px; padding:6px 14px; font-weight:800;" onclick="startActiveWorkoutFromCustom()">🏋️ Başlat</button>
+                                </div>
+                            </div>
+
+                            <!-- SECTION 1: HEDEF BÖLGELER (Region Selectors) -->
+                            <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:12px; margin-bottom:14px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                    <span style="font-size:12.5px; font-weight:800; color:#fff;">Hedef Bölgeler</span>
+                                    <div style="display:flex; gap:6px;">
+                                        <button class="btn btn-outline" style="font-size:10px; padding:3px 8px;" onclick="selectPresetRegions('all')">Tüm Vücut</button>
+                                        <button class="btn btn-outline" style="font-size:10px; padding:3px 8px;" onclick="selectPresetRegions('clear')">Temizle</button>
+                                    </div>
+                                </div>
+
+                                <!-- Multi-select Region Chips -->
+                                <div id="studioRegionChips" style="display:flex; flex-wrap:wrap; gap:6px;">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+
+                            <!-- SECTION 2: BÖLGE DURUMU (Visual Progress: Seçildi / Kaldı) -->
+                            <div id="studioRegionStatusBox" style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:12px; margin-bottom:14px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                    <span style="font-size:12.5px; font-weight:800; color:#fff;">Bölge Durumu</span>
+                                    <span id="studioRegionSummaryBadge" style="font-size:11px; font-weight:700;"></span>
+                                </div>
+                                <div id="studioRegionStatusGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:6px;">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+
+                            <!-- SECTION 3: PROGRAM TASLAĞI -->
+                            <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:12px; margin-bottom:14px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                    <div style="display:flex; align-items:center; gap:6px;">
+                                        <span style="font-size:12.5px; font-weight:800; color:var(--gold);">Program Taslağı</span>
+                                        <span id="customRoutineCountBadge" class="auth-role-tag role-admin" style="font-size:10px;">0 Hareket</span>
+                                    </div>
+                                    <div id="studioSaveActionsGroup" style="display:flex; gap:6px; flex-wrap:wrap;">
+                                        <button class="btn btn-outline" style="font-size:10.5px; padding:4px 8px;" onclick="saveCustomRoutineToLibrary()">💾 Kütüphaneye Kaydet</button>
+                                    </div>
+                                </div>
+
+                                <div style="display:grid; grid-template-columns: 1fr auto; gap:8px; margin-bottom:10px;">
+                                    <input type="text" id="customWorkoutTitleInput" class="form-input" style="font-weight:700; padding:8px 10px; font-size:12.5px;" placeholder="Program Adı (Örn: İtiş Zırhı)" value="Özel Çelik Programım">
+                                    <select id="customWorkoutRestSelect" class="form-input" style="width:115px; padding:8px; font-size:12px;" onchange="updateCustomRoutineRest(this.value)">
+                                        <option value="45">Dinlenme: 45s</option>
+                                        <option value="60" selected>Dinlenme: 60s</option>
+                                        <option value="90">Dinlenme: 90s</option>
+                                        <option value="120">Dinlenme: 120s</option>
+                                    </select>
+                                </div>
+
+                                <div id="customWorkoutExercisesList" style="display:flex; flex-direction:column; gap:6px;">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+
+                            <!-- SECTION 4: UYGUN HAREKETLER -->
+                            <div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                    <div style="font-size:12.5px; font-weight:800; color:#fff;">
+                                        Uygun Hareketler <span id="studioExTotalCount" style="color:var(--text-secondary); font-size:11px; font-weight:normal;"></span>
+                                    </div>
+                                    <label style="font-size:11px; color:var(--cyan); cursor:pointer; display:flex; align-items:center; gap:4px;">
+                                        <input type="checkbox" id="chkShowAllExercises" onchange="renderStudioExerciseCatalog()"> Tümünü Göster
+                                    </label>
+                                </div>
+
+                                <!-- Compact Search & Equipment Filter -->
+                                <div style="display:flex; gap:6px; margin-bottom:10px;">
+                                    <input type="text" id="studioSearchInput" class="form-input" style="flex:1; padding:8px 10px; font-size:12px;" placeholder="🔍 Hareket ara..." oninput="renderStudioExerciseCatalog()">
+                                    <select id="studioEquipFilter" class="form-input" style="width:auto; padding:8px; font-size:12px;" onchange="renderStudioExerciseCatalog()">
+                                        <option value="all">Tüm Ekipmanlar</option>
+                                        <option value="dumbbell">Dambıl</option>
+                                        <option value="kettlebell">Kettlebell</option>
+                                        <option value="bodyweight">Vücut Ağırlığı</option>
+                                        <option value="barbell">Halter</option>
+                                        <option value="machine">Makine</option>
+                                    </select>
+                                </div>
+
+                                <div id="studioExercisesCatalog" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:8px; max-height:600px; overflow-y:auto; padding-right:4px;">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== TAB: AKILLI ANTRENMAN TAKVİMİ ==================== -->
+            <div id="calendarTab" class="tab-content">
+                <div class="generator-card">
+                    <!-- TOP TOOLBAR -->
+                    <div class="calendar-screen-header">
+                        <div class="cal-header-title-box">
+                            <h2>
+                                <span>📅</span>
+                                <span>AKILLI ANTRENMAN TAKVİMİ</span>
+                            </h2>
+                            <p>
+                                Haftalık ve aylık seans planlama, geçmiş tamamlanan antrenman kayıtları ve program yönetimi.
+                            </p>
+                        </div>
+                        <div class="calendar-screen-nav-bar">
+                            <div class="cal-view-pills">
+                                <button type="button" class="cal-pill-btn active" id="calViewWeeklyBtn" onclick="setCalendarViewMode('weekly')">
+                                    📅 Haftalık
+                                </button>
+                                <button type="button" class="cal-pill-btn" id="calViewMonthlyBtn" onclick="setCalendarViewMode('monthly')">
+                                    🗓️ Aylık
+                                </button>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:4px;">
+                                <button type="button" class="btn btn-outline cal-nav-btn" onclick="navigateCalendar(-1)" title="Önceki Dönem">
+                                    ◀
+                                </button>
+                                <button type="button" class="btn btn-outline cal-nav-btn" style="font-weight:800; color:var(--gold); border-color:rgba(245,158,11,0.4);" onclick="jumpCalendarToToday()">
+                                    Bugün
+                                </button>
+                                <button type="button" class="btn btn-outline cal-nav-btn" onclick="navigateCalendar(1)" title="Sonraki Dönem">
+                                    ▶
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PERIOD TITLE & DIRECT EXPORT BAR -->
+                    <div class="calendar-screen-period-bar">
+                        <div class="cal-period-title" id="calPeriodTitle">
+                            <!-- E.g. 5 - 11 Ekim 2026 -->
+                        </div>
+                        <div class="cal-actions-wrap">
+                            <button type="button" class="btn btn-gold cal-action-btn" onclick="openGoogleCalendarWeb()" title="Google Takvim uygulamasını aç">
+                                📅 Google Takvim
+                            </button>
+                            <button type="button" class="btn btn-outline cal-action-btn" style="color:#cbd5e1;" onclick="downloadFullScheduleICS()" title="Tüm haftayı cihaz takvimine aktar (.ics)">
+                                🍏 Cihaza Aktar (.ics)
+                            </button>
+                            <button type="button" class="btn btn-outline cal-action-btn" style="padding:4px 6px;" onclick="openCalendarSyncModal()" title="Takvim Ayarları">
+                                ⚙️
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- MAIN CALENDAR CONTAINER (WEEKLY OR MONTHLY VIEW) -->
+                    <div id="calendarMainContainer">
+                        <!-- Populated dynamically by renderCalendarScreen() -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== TAB 3: PROGRAM LIBRARY & EXERCISE ARCHIVE ==================== -->
+            <div id="libraryTab" class="tab-content">
+                <div class="generator-card">
+                    <!-- SUB-TAB SWITCHER -->
+                    <div class="library-subnav">
+                        <button type="button" id="libSubTabProgramsBtn" class="lib-subtab-btn active" onclick="switchLibrarySubTab('programs')">
+                            📋 Hazır Programlar
+                        </button>
+                        <button type="button" id="libSubTabExercisesBtn" class="lib-subtab-btn" onclick="switchLibrarySubTab('exercises')">
+                            📖 Egzersiz Kütüphanesi
+                        </button>
+                    </div>
+
+                    <!-- PANE 1: HAZIR VE KAYITLI PROGRAMLAR -->
+                    <div id="libPanePrograms">
+                        <h2 style="font-size:18px; font-weight:900; color:#fff; margin-bottom:12px;">📚 Kayıtlı ve Hazır Programlar</h2>
+                        
+                        <h3 style="font-size:13px; font-weight:800; color:var(--gold); margin-bottom:10px;">⭐ Kişisel Kayıtlı Programlarım</h3>
+                        <div id="savedProgramsList">
+                            <!-- Populated dynamically -->
+                        </div>
+
+                        <h3 style="font-size:13px; font-weight:800; color:var(--gold); margin:24px 0 10px;">⚔️ Resmi Çelik Kodu (La Forja) Klasik Serisi</h3>
+                        <div id="officialProgramsList">
+                            <!-- Classic La Forja templates -->
+                        </div>
+                    </div>
+
+                    <!-- PANE 2: EGZERSİZ KÜTÜPHANESİ VE HAREKET REHBERİ -->
+                    <div id="libPaneExercises" style="display:none;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+                            <div>
+                                <h2 style="font-size:18px; font-weight:900; color:#fff; margin:0;">📖 Egzersiz Kütüphanesi & Rehber</h2>
+                                <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
+                                    Tüm hareketleri inceleyin, form ipuçlarına bakın veya doğrudan programınıza ekleyin.
+                                </div>
+                            </div>
+                            <span id="libExCountBadge" class="auth-role-tag role-admin" style="font-size:11px; padding:4px 10px; background:rgba(245,158,11,0.15); color:var(--gold); border:1px solid rgba(245,158,11,0.3);">
+                                89 Egzersiz
+                            </span>
+                        </div>
+
+                        <!-- SEARCH & FILTERS -->
+                        <div style="background:rgba(0,0,0,0.25); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:16px;">
+                            <!-- Search bar -->
+                            <div style="position:relative; margin-bottom:10px;">
+                                <input type="text" id="libExSearchInput" class="form-input" 
+                                       style="width:100%; padding:10px 36px 10px 36px; font-size:12.5px; border-radius:8px; background:rgba(0,0,0,0.5);" 
+                                       placeholder="🔍 Hareket, kas grubu veya ipucu ara (Örn: Bench, Kettlebell, Squat, Omuz)..." 
+                                       oninput="renderLibraryExerciseCatalog()">
+                                <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:14px; opacity:0.6;">🔍</span>
+                                <button id="libExClearSearchBtn" type="button" onclick="clearLibExSearch()" style="display:none; position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-secondary); font-size:16px; cursor:pointer;">✕</button>
+                            </div>
+
+                            <!-- Filter Selectors -->
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                                <div>
+                                    <label style="font-size:10.5px; font-weight:800; color:var(--text-secondary); display:block; margin-bottom:4px;">🎯 KAS GRUBU</label>
+                                    <select id="libExMuscleFilter" class="form-input" style="padding:8px 10px; font-size:12px;" onchange="renderLibraryExerciseCatalog()">
+                                        <option value="all">Tüm Kas Grupları</option>
+                                        <option value="chest">Göğüs</option>
+                                        <option value="back">Sırt & Kanat</option>
+                                        <option value="shoulders">Omuz & Trapez</option>
+                                        <option value="legs">Bacak & Kalça</option>
+                                        <option value="core">Core & Karın</option>
+                                        <option value="arms">Kollar (Biceps / Triceps)</option>
+                                        <option value="conditioning">Fonksiyonel & Kondisyon</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="font-size:10.5px; font-weight:800; color:var(--text-secondary); display:block; margin-bottom:4px;">⚙️ EKİPMAN</label>
+                                    <select id="libExEquipFilter" class="form-input" style="padding:8px 10px; font-size:12px;" onchange="renderLibraryExerciseCatalog()">
+                                        <option value="all">Tüm Ekipmanlar</option>
+                                        <option value="dumbbell">🏋️ Dambıl (Dumbbell)</option>
+                                        <option value="kettlebell">🔔 Kettlebell (Girya)</option>
+                                        <option value="barbell">⚡ Halter (Barbell)</option>
+                                        <option value="machine">⚙️ Makine & Kablo</option>
+                                        <option value="bodyweight">🤸 Vücut Ağırlığı</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding:0 2px;">
+                                <div style="font-size:11px; font-weight:700; color:var(--text-secondary);" id="libExCountBadge">93 Egzersiz</div>
+                                <label style="font-size:11px; font-weight:700; color:#fca5a5; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+                                    <input type="checkbox" id="chkLibShowExcluded" onchange="renderLibraryExerciseCatalog()" style="cursor:pointer; accent-color:#ef4444;">
+                                    <span>👁️ Gizlenenleri Göster (<span id="libExcludedCount">0</span>)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- EXERCISES GRID -->
+                        <div id="libExercisesCatalogGrid" class="lib-ex-grid">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== TAB 4: WORKOUT HISTORY & LOGS ==================== -->
+            <div id="historyTab" class="tab-content">
+                <div class="generator-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                        <h2 style="font-size:16px; font-weight:800; color:#fff;">Antrenman Geçmişi</h2>
+                        <div style="display:flex; gap:6px;">
+                            <button class="btn btn-outline" style="font-size:11.5px; padding:6px 12px; display:flex; align-items:center; gap:6px;" onclick="exportCSV()" title="CSV Olarak Dışa Aktar">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--cyan);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line></svg>
+                                <span>CSV</span>
+                            </button>
+                            <button class="btn btn-outline" style="font-size:11.5px; padding:6px 12px; display:flex; align-items:center; gap:6px;" onclick="exportData()" title="Yedeği İndir">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gold);"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                <span>Yedek</span>
+                            </button>
+                            <label class="btn btn-outline" style="font-size:11.5px; padding:6px 12px; cursor:pointer; display:flex; align-items:center; gap:6px;" title="Veri Yükle">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--green-success);"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                <span>Yükle</span>
+                                <input type="file" onchange="importData(event)" accept=".json" style="display:none;">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- STATS ROW -->
+                    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-bottom:16px;">
+                        <div style="background:var(--bg-surface); padding:12px; border-radius:10px; text-align:center; border:1px solid var(--border);">
+                            <div style="font-size:11px; color:var(--text-secondary);">Toplam Seans</div>
+                            <div style="font-size:22px; font-weight:900; color:var(--gold);" id="statTotalWorkouts">0</div>
+                        </div>
+                        <div style="background:var(--bg-surface); padding:12px; border-radius:10px; text-align:center; border:1px solid var(--border);">
+                            <div style="font-size:11px; color:var(--text-secondary);">Bu Hafta</div>
+                            <div style="font-size:22px; font-weight:900; color:var(--cyan);" id="statWeekWorkouts">0/3</div>
+                        </div>
+                        <div style="background:var(--bg-surface); padding:12px; border-radius:10px; text-align:center; border:1px solid var(--border);">
+                            <div style="font-size:11px; color:var(--text-secondary);">Seri (Gün)</div>
+                            <div style="font-size:22px; font-weight:900; color:var(--green-success);" id="statStreak">0</div>
+                        </div>
+                    </div>
+
+                    <div id="logHistoryContainer">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== TAB 5: ADVANCED ANALYTICS, SCALE & MEASUREMENTS ==================== -->
+            <div id="analyticsTab" class="tab-content">
+                <div class="generator-card">
+                    <!-- HEADER & ACTION BUTTONS -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+                        <div>
+                            <h2 style="font-size:18px; font-weight:900; color:#fff;">📈 Gelişim, Kas Yükü & Vücut Analizi</h2>
+                            <p style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Biyomekanik kas tonajı, akıllı tartı kompozisyonu ve mezura ölçüleri takibi</p>
+                        </div>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                            <button class="btn btn-gold" style="font-size:11.5px; padding:7px 14px; font-weight:900;" onclick="openScaleModal()">
+                                ➕ Vücut Analizi & Ölçüm Ekle
+                            </button>
+                            <button class="btn btn-outline" style="font-size:11px; padding:6px 12px; font-weight:700;" onclick="exportAnalyticsCSV()" title="Tartı & Ölçüm Verilerini İndir">
+                                📊 CSV İndir
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- SUB VIEW TOGGLES -->
+                    <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:6px; margin-bottom:16px;" class="hide-scrollbar">
+                        <button class="btn btn-outline analytics-subtab-btn active" id="btnSubAnalyticsMuscle" style="font-size:11.5px; padding:6px 12px; border-radius:20px; white-space:nowrap;" onclick="switchAnalyticsSubView('muscle')">
+                            💪 Kas Yükü & Biyomekanik
+                        </button>
+                        <button class="btn btn-outline analytics-subtab-btn" id="btnSubAnalyticsScale" style="font-size:11.5px; padding:6px 12px; border-radius:20px; white-space:nowrap;" onclick="switchAnalyticsSubView('scale')">
+                            ⚖️📏 Vücut Analizi & Ölçüler
+                        </button>
+                        <button class="btn btn-outline analytics-subtab-btn" id="btnSubAnalyticsCombined" style="font-size:11.5px; padding:6px 12px; border-radius:20px; white-space:nowrap;" onclick="switchAnalyticsSubView('combined')">
+                            🧠 Akıllı Koç Raporu
+                        </button>
+                    </div>
+
+                    <!-- DYNAMIC ANALYTICS CONTAINER -->
+                    <div id="analyticsContentContainer">
+                        <!-- Populated dynamically by renderAnalytics() -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== TAB 6: ATHLETE PROFILE & SETTINGS ==================== -->
+            <div id="profileTab" class="tab-content">
+                <div class="generator-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <span style="font-size:36px; background:var(--bg-surface); width:54px; height:54px; display:flex; align-items:center; justify-content:center; border-radius:12px; border:2px solid var(--gold);" id="profileCardAvatar">🥋</span>
+                            <div>
+                                <h2 style="font-size:18px; font-weight:800; color:#fff;" id="profileCardName">Ferit</h2>
+                                <p style="font-size:12px; color:var(--text-secondary);" id="profileCardMeta">Kişisel Sporcu Profili & Hedef Kilolar</p>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline" style="font-size:11.5px; padding:6px 12px; color:#f87171; border-color:rgba(239,68,68,0.4);" onclick="handleAuthLogout()">
+                            🚪 Çıkış
+                        </button>
+                    </div>
+
+                    <!-- CUSTOMIZATION FORM -->
+                    <div class="form-group">
+                        <label class="form-label">Sporcu Adı</label>
+                        <input type="text" id="editUserName" class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Avatar Seç</label>
+                        <div class="avatar-picker-grid" id="avatarPicker">
+                            <div class="avatar-choice" onclick="selectAvatar('🥋')">🥋</div>
+                            <div class="avatar-choice" onclick="selectAvatar('🦁')">🦁</div>
+                            <div class="avatar-choice" onclick="selectAvatar('⚡')">⚡</div>
+                            <div class="avatar-choice" onclick="selectAvatar('🛡️')">🛡️</div>
+                            <div class="avatar-choice" onclick="selectAvatar('🦅')">🦅</div>
+                            <div class="avatar-choice" onclick="selectAvatar('🐺')">🐺</div>
+                            <div class="avatar-choice" onclick="selectAvatar('👑')">👑</div>
+                            <div class="avatar-choice" onclick="selectAvatar('🔥')">🔥</div>
+                            <div class="avatar-choice" onclick="selectAvatar('🏋️‍♂️')">🏋️‍♂️</div>
+                            <div class="avatar-choice" onclick="selectAvatar('🏋️‍♀️')">🏋️‍♀️</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Tema Rengi</label>
+                        <div class="theme-picker-grid" id="themePicker">
+                            <div class="theme-pill" style="background:#f59e0b;" onclick="selectTheme('gold')">Altın Çelik</div>
+                            <div class="theme-pill" style="background:#0284c7;" onclick="selectTheme('cyan')">Siber Mavi</div>
+                            <div class="theme-pill" style="background:#059669;" onclick="selectTheme('green')">Zümrüt Zırh</div>
+                            <div class="theme-pill" style="background:#e11d48;" onclick="selectTheme('red')">Lav Kırmızı</div>
+                            <div class="theme-pill" style="background:#7c3aed;" onclick="selectTheme('purple')">Gladyatör Mor</div>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;" class="form-group">
+                        <div>
+                            <label class="form-label">Seviye</label>
+                            <select id="editUserLevel" class="form-select">
+                                <option value="Başlangıç">Başlangıç (0-6 Ay)</option>
+                                <option value="Orta Seviye">Orta Seviye (6-18 Ay)</option>
+                                <option value="İleri Seviye">İleri Seviye (18+ Ay)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">Cinsiyet</label>
+                            <select id="editUserGender" class="form-select">
+                                <option value="Erkek">Erkek</option>
+                                <option value="Kadın">Kadın</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- CUSTOM WEIGHT BENCHMARKS -->
+                    <h3 style="font-size:14px; font-weight:800; color:var(--gold); margin:20px 0 8px;">⚖️ Kişisel Çalışma Ağırlıklarım (KG)</h3>
+                    <p style="font-size:11.5px; color:var(--text-secondary); margin-bottom:12px;">
+                        Buraya girdiğiniz kilolar, program oluşturulduğunda ilgili hareket kartlarının üzerine <strong>"🎯 Hedefin: X kg"</strong> olarak otomatik yansır.
+                    </p>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <div class="form-group">
+                            <label class="form-label">Omuz Presi (Çift Dambıl/Bar)</label>
+                            <input type="number" id="w_press" class="form-input" placeholder="Örn: 16">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Goblet / Back Squat</label>
+                            <input type="number" id="w_squat" class="form-input" placeholder="Örn: 22">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Testere / Sırt Çekiş (Row)</label>
+                            <input type="number" id="w_row" class="form-input" placeholder="Örn: 20">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Romanian Deadlift (RDL)</label>
+                            <input type="number" id="w_rdl" class="form-input" placeholder="Örn: 24">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Dambıl / Kettlebell Swing</label>
+                            <input type="number" id="w_swing" class="form-input" placeholder="Örn: 18">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Lunge / Split Squat</label>
+                            <input type="number" id="w_lunge" class="form-input" placeholder="Örn: 14">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-gold" style="width:100%; padding:14px; font-weight:800; margin-top:12px;" onclick="saveCurrentProfile()">
+                        💾 DEĞİŞİKLİKLERİ VE KİLOLARIMI KAYDET
+                    </button>
+
+                    <!-- GOOGLE GEMINI AI CONFIGURATION -->
+                    <div style="background:rgba(192, 132, 252, 0.08); border:1px solid rgba(192, 132, 252, 0.3); border-radius:10px; padding:14px; margin-top:20px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="font-size:22px;">🤖</span>
+                                <div>
+                                    <h4 style="font-size:13.5px; font-weight:800; color:#e9d5ff; margin:0;">Google Gemini AI Biyomekanik Motoru</h4>
+                                    <div style="font-size:11px; color:var(--text-secondary);">Antrenman ortasında akıllı alternatifler ve eklem koruyucu reçeteler</div>
+                                </div>
+                            </div>
+                            <span id="profileGeminiStatusBadge" style="font-size:10px; font-weight:800; padding:3px 8px; border-radius:12px; background:rgba(255,255,255,0.1); color:var(--text-secondary);">Kontrol Ediliyor...</span>
+                        </div>
+                        <div class="form-group" style="margin-bottom:8px;">
+                            <label class="form-label" style="font-size:11px;">Gemini API Anahtarı (Google AI Studio)</label>
+                            <div style="display:flex; gap:6px;">
+                                <input type="password" id="profileGeminiApiKeyInput" class="form-input" placeholder="AIzaSy... anahtarınızı girin" autocomplete="off">
+                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 12px; border-color:#c084fc; color:#c084fc; font-weight:800; white-space:nowrap;" onclick="testAndSaveGeminiKeyFromProfile()">⚡ Test Et & Kaydet</button>
+                            </div>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; flex-wrap:wrap; gap:6px;">
+                            <span style="color:var(--text-secondary);">🔒 Anahtar sadece yerel cihazınızda (localStorage) saklanır.</span>
+                            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="color:var(--cyan); text-decoration:underline; font-weight:700;">🔗 Ücretsiz API Key Al (Google AI Studio) ➔</a>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+                        <button class="btn btn-outline" id="profileTabAdminBtn" style="font-size:11px; border-color:var(--gold); color:var(--gold); display:none;" onclick="openAdminModal()">
+                            👑 Sporcu Yönetim Portalı (Admin)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- END APP CONTAINER -->
+    </div><!-- END MAIN APP WRAPPER -->
+
+    <!-- ==================== ADMIN MANAGEMENT MODAL ==================== -->
+    <div id="adminModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 600px; width: 95%;">
+            <div class="modal-header">
+                <span class="modal-title">👑 Sporcu Yönetim Portalı (Admin)</span>
+                <button class="modal-close" onclick="closeAdminModal()">✕</button>
+            </div>
+
+            <!-- ADMIN NAVIGATION TABS -->
+            <div style="display:flex; gap:8px; margin-bottom:16px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
+                <button id="adminTabBtnStatus" class="btn btn-gold" style="flex:1; font-size:12px; padding:9px 12px; font-weight:800;" onclick="switchAdminModalTab('status')">
+                    📊 Sporcu Çalışma Durumları
+                </button>
+                <button id="adminTabBtnManage" class="btn btn-outline" style="flex:1; font-size:12px; padding:9px 12px; font-weight:800; color:var(--text-secondary);" onclick="switchAdminModalTab('manage')">
+                    ⚙️ Sporcu Hesap Yönetimi
+                </button>
+            </div>
+
+            <!-- TAB 1: SPORCU ÇALIŞMA DURUMLARI (ÖZET PANELİ) -->
+            <div id="adminViewStatus">
+                <!-- TOP KPI BAR -->
+                <div id="adminSummaryKpis" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-bottom:14px;"></div>
+
+                <!-- ATHLETES LIVE CARDS -->
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <h3 style="font-size:13px; font-weight:800; color:#fff; margin:0;">📋 Sporcuların Antrenman & Kilo Durumları</h3>
+                    <span style="font-size:10.5px; color:var(--text-secondary);">Hesap değiştirmeden canlı teftiş</span>
+                </div>
+                <div id="adminAthleteStatusContainer"></div>
+            </div>
+
+            <!-- TAB 2: SPORCU HESAP YÖNETİMİ -->
+            <div id="adminViewManage" style="display:none;">
+                <!-- ADD NEW USER SECTION -->
+                <div style="background:var(--bg-surface); border:1px solid var(--gold); border-radius:10px; padding:14px; margin-bottom:16px;">
+                    <h3 style="font-size:13px; font-weight:800; color:var(--gold); margin-bottom:10px;">➕ Yeni Sporcu Oluştur</h3>
+                    
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;" class="form-group">
+                        <div>
+                            <label class="form-label">Kullanıcı Adı</label>
+                            <input type="text" id="newUsername" class="form-input" placeholder="Örn: ahmet" autocapitalize="none">
+                        </div>
+                        <div>
+                            <label class="form-label">Şifre</label>
+                            <input type="text" id="newPassword" class="form-input" value="123456">
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1.2fr 0.8fr; gap:8px;" class="form-group">
+                        <div>
+                            <label class="form-label">Ad Soyad</label>
+                            <input type="text" id="newDisplayName" class="form-input" placeholder="Örn: Ahmet Yılmaz">
+                        </div>
+                        <div>
+                            <label class="form-label">Rol</label>
+                            <select id="newRole" class="form-select">
+                                <option value="athlete">Sporcu</option>
+                                <option value="admin">Yönetici (Admin)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;" class="form-group">
+                        <div>
+                            <label class="form-label">Seviye</label>
+                            <select id="newLevel" class="form-select">
+                                <option value="Başlangıç">Başlangıç</option>
+                                <option value="Orta Seviye" selected>Orta Seviye</option>
+                                <option value="İleri Seviye">İleri Seviye</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">Cinsiyet</label>
+                            <select id="newGender" class="form-select">
+                                <option value="Erkek">Erkek</option>
+                                <option value="Kadın">Kadın</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Avatar</label>
+                        <div class="avatar-picker-grid" id="newAvatarPicker">
+                            <div class="avatar-choice selected" onclick="selectNewAvatar('🥋')">🥋</div>
+                            <div class="avatar-choice" onclick="selectNewAvatar('🦁')">🦁</div>
+                            <div class="avatar-choice" onclick="selectNewAvatar('⚡')">⚡</div>
+                            <div class="avatar-choice" onclick="selectNewAvatar('🛡️')">🛡️</div>
+                            <div class="avatar-choice" onclick="selectNewAvatar('🦅')">🦅</div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-gold" style="width:100%; padding:10px; font-weight:800;" onclick="handleCreateUser()">
+                        ➕ KULLANICIYI KAYDET
+                    </button>
+                </div>
+
+                <!-- ATHLETES LIST -->
+                <h3 style="font-size:13px; font-weight:800; color:#fff; margin-bottom:10px;">📋 Kayıtlı Sporcu Hesapları</h3>
+                <div id="adminUserListContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== HD EXERCISE IMAGE LIGHTBOX MODAL ==================== -->
+    <div id="imageLightboxModal" class="image-lightbox-modal" onclick="closeImageLightbox(event)">
+        <div class="lightbox-content-box" onclick="event.stopPropagation()">
+            <div class="lightbox-header">
+                <div class="lightbox-title-area">
+                    <span class="lightbox-badge">HD REHBER</span>
+                    <h4 id="lightboxTitle" class="lightbox-title">Egzersiz Formu</h4>
+                </div>
+                <div class="lightbox-actions">
+                    <button type="button" class="btn-lightbox-action" id="btnLightboxZoom" onclick="toggleLightboxZoom()" title="Görseli %180 büyüt veya sığdır">
+                        🔍 <span id="lightboxZoomText">Büyüt (%180)</span>
+                    </button>
+                    <button type="button" class="btn-lightbox-close" onclick="closeImageLightbox()" title="Kapat (ESC)">✕</button>
+                </div>
+            </div>
+            <div class="lightbox-body" id="lightboxBody">
+                <img id="lightboxImg" src="" alt="Detaylı Egzersiz Görseli" class="lightbox-img" onclick="toggleLightboxZoom()">
+            </div>
+            <div class="lightbox-footer">
+                <span>💡 İpucu: Görsele dokunarak büyütebilir veya telefonunuzu yatay çevirerek tam genişlikte inceleyebilirsiniz.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== ADD TO PROGRAM OPTIONS MODAL ==================== -->
+    <div id="addToProgramOptionsModal" class="modal-overlay" onclick="if(event.target === this) closeAddToProgramOptionsModal()">
+        <div class="modal-box" style="max-width: 520px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <div>
+                    <span class="auth-role-tag role-admin" style="font-size:10px; background:rgba(245,158,11,0.2); color:var(--gold);">⚡ PROGRAMA EKLE</span>
+                    <h3 class="modal-title" id="addToProgModalTitle" style="font-size:16px; margin-top:4px;">Egzersizi Ekle</h3>
+                    <div id="addToProgModalSubtitle" style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;"></div>
+                </div>
+                <button class="modal-close" onclick="closeAddToProgramOptionsModal()">✕</button>
+            </div>
+            <div id="addToProgModalBody" style="margin-top: 14px;">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== QUICK ADD TO DAY MODAL (FROM ANALYTICS) ==================== -->
+    <div id="quickAddToDayModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 480px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <div>
+                    <span class="auth-role-tag role-admin" style="font-size:10px; background:rgba(245,158,11,0.2); color:var(--gold);">⚡ HIZLI KAS DENGESİ</span>
+                    <h3 class="modal-title" id="quickAddModalTitle" style="font-size:16px; margin-top:4px;">Egzersizi Güne Ekle</h3>
+                </div>
+                <button class="modal-close" onclick="closeQuickAddToDayModal()">✕</button>
+            </div>
+            <div id="quickAddModalBody" style="margin-top: 14px;">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== WEEKLY SCHEDULE DAY MODAL ==================== -->
+    <div id="scheduleDayModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 560px; max-height: 92vh; overflow-y: auto;">
+            <div class="modal-header">
+                <div>
+                    <span class="auth-role-tag role-admin" id="schedModalDayBadge" style="font-size:10px;">HAFTALIK PLAN</span>
+                    <h3 class="modal-title" id="schedModalDayTitle" style="font-size:16px; margin-top:4px;">Günü Programla</h3>
+                </div>
+                <button class="modal-close" onclick="closeScheduleDayModal()">✕</button>
+            </div>
+
+            <p id="schedModalDaySubDesc" style="font-size:12px; color:var(--text-secondary); margin:0 0 14px 0; line-height:1.4;">
+                Bu güne atanan antrenmanın içeriğini inceleyin, düzenleyin veya farklı bir program atayın.
+            </p>
+
+            <!-- ASSIGNED WORKOUT DETAILED CONTENT SECTION -->
+            <div id="schedAssignedWorkoutSection" style="margin-bottom:14px;">
+                <!-- Populated dynamically: Shows assigned exercises, sets, reps, and direct edit button -->
+            </div>
+
+            <!-- SEANS SAATİ & CANLI TAKVİM ENTEGRASYON KARTI -->
+            <div id="schedDayTimingSection" style="background:rgba(15,23,42,0.85); border:1px solid rgba(255,255,255,0.12); border-radius:10px; padding:12px; margin-bottom:14px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <span style="font-size:12px; font-weight:800; color:#fff; display:flex; align-items:center; gap:6px;">
+                        <span>🕒</span> Seans Saati & Takvim Durumu
+                    </span>
+                    <span id="schedDaySyncStatusBadge" style="font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; background:rgba(255,255,255,0.06); color:#cbd5e1;">
+                        Yerel Plan
+                    </span>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+                    <div>
+                        <label style="font-size:11px; color:#94a3b8; display:block; margin-bottom:4px;">Başlama Saati</label>
+                        <input type="time" id="schedDayTimeInput" class="input-base" style="width:100%; padding:6px 10px; font-size:13px; font-weight:800;" value="18:30" onchange="updateScheduledDayTime(this.value)">
+                    </div>
+                    <div>
+                        <label style="font-size:11px; color:#94a3b8; display:block; margin-bottom:4px;">Tahmini Süre (Dk)</label>
+                        <input type="number" id="schedDayDurationInput" class="input-base" style="width:100%; padding:6px 10px; font-size:13px; font-weight:800;" min="15" max="180" step="5" value="50" onchange="updateScheduledDayDuration(this.value)">
+                    </div>
+                </div>
+                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <button type="button" id="btnSyncSingleDayGCal" class="btn btn-gold" style="font-size:11.5px; padding:7px 12px; font-weight:800; flex:1;" onclick="syncCurrentDayToCalendar()">
+                        📅 Bu Günü Takvime İşle / Güncelle
+                    </button>
+                    <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 10px; color:var(--cyan); border-color:rgba(56,189,248,0.4);" onclick="openSingleDayDirectGoogleCalendar()" title="Google Takvimde Aç veya Ekle">
+                        🔗 Takvimde Aç
+                    </button>
+                    <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 10px; color:#cbd5e1;" onclick="downloadSingleDayICS()" title="Apple Takvim / iCal Olarak İndir">
+                        📥 .ics
+                    </button>
+                </div>
+            </div>
+
+            <!-- OPTIONS LIST FOR REPLACING / SELECTING -->
+            <div id="schedModalOptionsList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">
+                <!-- Populated dynamically -->
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top:1px solid var(--border); padding-top:12px; flex-wrap:wrap;">
+                <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 12px; color:#fca5a5; border-color:rgba(239,68,68,0.3);" onclick="setDayAsRest()">
+                    🧘 Dinlenme Günü Yap
+                </button>
+                <div style="display:flex; gap:6px;">
+                    <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 14px;" onclick="closeScheduleDayModal()">
+                        Kapat
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== GOOGLE & DEVICE CALENDAR SYNC MODAL ==================== -->
+    <div id="calendarSyncModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 580px; max-height: 92vh; overflow-y: auto;">
+            <div class="modal-header">
+                <div>
+                    <span class="auth-role-tag role-admin" style="font-size:10px; background:var(--gold); color:#000;">CANLI SENKRONİZASYON</span>
+                    <h3 class="modal-title" style="font-size:16px; margin-top:4px;">Google & Cihaz Takvim Merkezi</h3>
+                </div>
+                <button class="modal-close" onclick="closeCalendarSyncModal()">✕</button>
+            </div>
+            
+            <p style="font-size:12px; color:var(--text-secondary); margin:0 0 14px 0; line-height:1.5;">
+                FitLab programınızı Google Takviminizle canlı ve iki yönlü senkronize edin. Kişisel etkinliklerinize karışmadan <strong>"FitLab • Antrenmanlarım"</strong> adında özel bir takvim oluşturulur. Takviminizde yaptığınız saat veya gün düzeltmeleri doğrudan FitLab'e yansır.
+            </p>
+
+            <!-- BAĞLANTI DURUM KARTI -->
+            <div id="calendarConnectionCard" style="margin-bottom:14px;">
+                <!-- Rendered dynamically -->
+            </div>
+
+            <!-- HIZLI AKSİYONLAR -->
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
+                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px;">
+                    <div style="font-size:12.5px; font-weight:800; color:#fff; margin-bottom:4px;">🔄 İki Yönlü Canlı Eşitleme</div>
+                    <div style="font-size:11px; color:var(--text-secondary); margin-bottom:10px; line-height:1.5;">
+                        • Google Takvim'deki "FitLab • Antrenmanlarım" takviminde taşıdığınız saat veya günleri FitLab'e çeker.<br>
+                        • FitLab'deki yeni veya güncellenmiş antrenmanları Google Takvim'e yazar.
+                    </div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <button type="button" class="btn btn-gold" style="font-size:12px; padding:8px 14px; font-weight:900;" onclick="openGoogleCalendarWeb()">
+                            📅 Google Takvim'i Aç
+                        </button>
+                        <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 12px; color:var(--cyan); border-color:rgba(56,189,248,0.4);" onclick="performFullCalendarSync()">
+                            🔄 Takvimi Eşitle / İndir
+                        </button>
+                    </div>
+                </div>
+
+                <!-- APPLE TAKVİM / iCAL / WEBCAL SEKMESİ -->
+                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px;">
+                    <div style="font-size:12.5px; font-weight:800; color:#fff; margin-bottom:4px;">🍏 Apple Takvim / Mac & iPhone Desteği</div>
+                    <div style="font-size:11px; color:var(--text-secondary); margin-bottom:10px; line-height:1.5;">
+                        • <strong>Yöntem 1 (Önerilen):</strong> macOS ve iOS Sistem Ayarları > İnternet Hesapları'ndan Google hesabınızı açın; "FitLab • Antrenmanlarım" anında Apple Takvim uygulamanıza yansır.<br>
+                        • <strong>Yöntem 2:</strong> Tüm haftalık programınızı anında Apple Takvim'e aktarmak için .ics dosyasını tek dokunuşla indirin.
+                    </div>
+                    <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 12px; color:#cbd5e1;" onclick="downloadFullScheduleICS()">
+                        📥 Tüm Haftalık Takvimi (.ics) İndir
+                    </button>
+                </div>
+
+                <!-- TERCİHLER VE GELİŞMİŞ AYARLAR -->
+                <div style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:12px;">
+                    <div style="font-size:12px; font-weight:800; color:var(--gold); margin-bottom:8px;">⚙️ Takvim Tercihleri</div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+                        <div>
+                            <label style="font-size:10.5px; color:#94a3b8; display:block; margin-bottom:3px;">Varsayılan Seans Saati</label>
+                            <input type="time" id="calPrefDefaultTime" class="input-base" style="width:100%; padding:5px 8px; font-size:12px;" value="18:30" onchange="saveCalendarPreferences()">
+                        </div>
+                        <div>
+                            <label style="font-size:10.5px; color:#94a3b8; display:block; margin-bottom:3px;">Bildirim Hatırlatıcısı</label>
+                            <select id="calPrefReminderMin" class="select-base" style="width:100%; padding:5px 8px; font-size:12px;" onchange="saveCalendarPreferences()">
+                                <option value="15">15 Dakika Önce</option>
+                                <option value="30" selected>30 Dakika Önce</option>
+                                <option value="60">1 Saat Önce</option>
+                                <option value="120">2 Saat Önce</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- GELİŞMİŞ GOOGLE OAUTH CLIENT ID (OPSİYONEL) -->
+                    <details style="margin-top:8px; font-size:11px; color:#94a3b8;">
+                        <summary style="cursor:pointer; color:var(--cyan); font-weight:700;">🔧 Özel OAuth İstemci / Manuel Token Girişi</summary>
+                        <div style="margin-top:8px; display:flex; flex-direction:column; gap:6px;">
+                            <div>
+                                <label style="font-size:10px; color:#94a3b8;">Google OAuth Client ID (Opsiyonel Canlı API):</label>
+                                <input type="text" id="calCustomClientId" class="input-base" style="width:100%; padding:5px 8px; font-size:11px;" placeholder="ör. xxx.apps.googleusercontent.com" onchange="saveCustomGoogleClientId(this.value)">
+                            </div>
+                            <div style="display:flex; gap:6px; margin-top:2px;">
+                                <button type="button" class="btn btn-outline" style="font-size:10.5px; padding:4px 10px; color:var(--gold); border-color:rgba(245,158,11,0.4);" onclick="connectGoogleCalendarPrompt()">
+                                    ⚡ Client ID ile Canlı Bağlan
+                                </button>
+                            </div>
+                            <div style="margin-top:4px;">
+                                <label style="font-size:10px; color:#94a3b8;">OAuth Access Token (Manuel Yapıştırma):</label>
+                                <div style="display:flex; gap:6px;">
+                                    <input type="password" id="calCustomTokenInput" class="input-base" style="flex:1; padding:5px 8px; font-size:11px;" placeholder="ya29.a0...">
+                                    <button type="button" class="btn btn-outline" style="font-size:10px; padding:4px 8px;" onclick="applyManualGoogleToken()">Uygula</button>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:8px; border-top:1px solid var(--border); padding-top:12px;">
+                <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 16px;" onclick="closeCalendarSyncModal()">
+                    Kapat
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== GOOGLE TAKVİM AKILLI AKTARIM MODALI ==================== -->
+    <div id="googleCalendarExportModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <div>
+                    <span class="auth-role-tag role-admin" style="font-size:10px; background:var(--gold); color:#000;">GOOGLE TAKVİM AKTARIMI</span>
+                    <h3 class="modal-title" style="font-size:16px; margin-top:4px;" id="gcalExportModalTitle">📅 Google Takvim'e Aktar</h3>
+                </div>
+                <button class="modal-close" onclick="closeGoogleCalendarExportModal()">✕</button>
+            </div>
+            
+            <p style="font-size:12px; color:var(--text-secondary); margin:0 0 14px 0; line-height:1.5;">
+                Aşağıdaki <strong>1 kereye mahsus Google bağlantısını</strong> kurarak tüm antrenmanların arka planda otomatik yüklenmesini sağlayabilir veya dosya yöntemlerini kullanabilirsiniz:
+            </p>
+
+            <!-- SIFIR TIKLAMA / TAM OTOMATİK CANLI GOOGLE SENKRONİZASYONU -->
+            <div id="gcalAutoSyncCard" style="background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(15,23,42,0.9)); border: 1.5px solid #10b981; border-radius: 12px; padding: 14px; margin-bottom: 16px; box-shadow: 0 0 20px rgba(16,185,129,0.15);">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
+                    <div style="flex:1; min-width:240px;">
+                        <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+                            <span style="font-size:16px;">⚡</span>
+                            <span style="font-size:13.5px; font-weight:900; color:#fff;" id="gcalAutoSyncCardTitle">1 Kereye Mahsus Onay: Sıfır Tıklama & Tam Otomasyon</span>
+                            <span class="auth-role-tag" id="gcalAutoSyncCardBadge" style="background:#10b981; color:#000; font-weight:900; font-size:9px;">CANLI API</span>
+                        </div>
+                        <p style="font-size:11.5px; color:#a7f3d0; margin:0; line-height:1.5;" id="gcalAutoSyncCardDesc">
+                            Google hesabınızı <strong>1 kere bağlayın</strong>. Artık hiçbir dosya indirmekle veya butona basmakla uğraşmayın; FitLAB veya web üzerinden atanan tüm programlar Google Takviminize <strong>kendiliğinden otomatik yüklensin</strong>.
+                        </p>
+                    </div>
+                    <div id="gcalAutoSyncCardAction" style="display:flex; align-items:center; gap:8px;">
+                        <button type="button" class="btn btn-gold" style="font-size:12px; padding:9px 18px; font-weight:900; box-shadow:0 0 15px rgba(245,158,11,0.3); white-space:nowrap;" onclick="connectGoogleCalendarPrompt()">
+                            ⚡ Google Hesabımı Bağla
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- YÖNTEM 1: TÜM HAFTAYI TEK SEFERDE AKTAR -->
+            <div style="background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(15,23,42,0.8)); border: 1.5px solid var(--gold); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <div style="font-size:13.5px; font-weight:800; color:#fff; display:flex; align-items:center; gap:6px;">
+                        <span>⚡ Yöntem 1: Tüm Haftayı Tek Seferde Aktar</span>
+                        <span style="font-size:9.5px; background:var(--gold); color:#000; font-weight:900; padding:2px 6px; border-radius:4px;">ÖNERİLEN</span>
+                    </div>
+                </div>
+                <div style="font-size:11.5px; color:#cbd5e1; line-height:1.5; margin-bottom:12px;">
+                    Haftadaki tüm antrenman seanslarını tek bir takvim dosyası (.ics) halinde indirir ve Google Takvim'in içe aktarma sayfasını açar.
+                </div>
+                
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+                    <button type="button" class="btn btn-gold" style="font-size:12px; padding:9px 16px; font-weight:900; box-shadow:0 0 15px rgba(245,158,11,0.3);" onclick="executeOneClickGoogleCalendarExport()">
+                        🚀 Tek Tıkla İndir & Google Takvim'e Yükle
+                    </button>
+                    <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 12px; color:#cbd5e1;" onclick="downloadFullScheduleICS()">
+                        📥 Yalnızca Dosyayı İndir (.ics)
+                    </button>
+                </div>
+
+                <!-- 2 ADIMLI REHBER -->
+                <div style="background:rgba(0,0,0,0.35); border-radius:8px; padding:10px 12px; font-size:11px; color:#94a3b8; line-height:1.6;">
+                    <div style="color:var(--gold); font-weight:800; margin-bottom:4px;">📋 Nasıl Yapılır? (10 Saniyelik İşlem)</div>
+                    <div>1. <strong>"Tek Tıkla İndir & Google Takvim'e Yükle"</strong> butonuna basın (takvim dosyanız iner ve Google Takvim İçe Aktar ekranı açılır).</div>
+                    <div>2. Açılan Google Takvim ekranında <strong>"Bilgisayarınızdan bir dosya seçin"</strong>e tıklayıp indirilen <code>fitlab-takvim-....ics</code> dosyasını seçin ve <strong>"İçe Aktar"</strong>a basın. Tüm hafta takviminize işlenir!</div>
+                </div>
+            </div>
+
+            <!-- YÖNTEM 2: GÜNLERİ TEK TEK GOOGLE TAKVİM'E EKLE -->
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
+                <div style="font-size:13px; font-weight:800; color:#fff; margin-bottom:4px;">
+                    📅 Yöntem 2: Dosyasız — Günleri Tek Tıkla Google Takvim'e Ekle
+                </div>
+                <div style="font-size:11.5px; color:var(--text-secondary); margin-bottom:10px; line-height:1.4;">
+                    Herhangi bir dosya indirmeden, istediğiniz günün yanındaki <strong>"Google Takvim'e Ekle"</strong> butonuna basarak seansı doğrudan Google Takvim formu içinde açıp tek tıkla kaydedebilirsiniz:
+                </div>
+                <div id="gcalExportDaysList" style="display:flex; flex-direction:column; gap:8px;">
+                    <!-- JS ile dinamik doldurulur -->
+                </div>
+            </div>
+
+            <!-- APPLE TAKVİM / MOBİL CİHAZ BİLGİSİ -->
+            <div style="background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.25); border-radius: 10px; padding: 10px 14px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                <div style="font-size:11px; color:#a7f3d0; line-height:1.4;">
+                    🍏 <strong>Mac veya iPhone mu kullanıyorsunuz?</strong> İndirilen <code>.ics</code> dosyasına çift dokunduğunuzda tüm hafta anında Apple Takvim uygulamanıza eklenir.
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:8px; border-top:1px solid var(--border); padding-top:12px; margin-top:14px;">
+                <button type="button" class="btn btn-outline" style="font-size:12px; padding:7px 16px;" onclick="closeGoogleCalendarExportModal()">
+                    Kapat
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== WORKOUT PREVIEW MODAL (PROGRAM İÇERİĞİ) ==================== -->
+    <div id="workoutPreviewModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 560px; max-height: 92vh; overflow-y: auto;">
+            <div class="modal-header">
+                <div>
+                    <span class="auth-role-tag role-admin" id="previewModalBadge" style="font-size:10px;">PROGRAM DETAYI</span>
+                    <h3 class="modal-title" id="previewModalTitle" style="font-size:16px; margin-top:4px;">Program Detayları</h3>
+                </div>
+                <button class="modal-close" onclick="closeWorkoutPreviewModal()">✕</button>
+            </div>
+
+            <div id="previewModalMeta" style="margin-bottom:12px;">
+                <!-- Meta pills: duration, exercises, rest, style -->
+            </div>
+
+            <div id="previewModalExercisesList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px; max-height:360px; overflow-y:auto; padding-right:4px;">
+                <!-- Populated dynamically with exercise cards -->
+            </div>
+
+            <div id="previewModalActions" style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top:1px solid var(--border); padding-top:12px; flex-wrap:wrap;">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== QUICK LISTBOX PICKER MODAL (BOTTOM SHEET) ==================== -->
+    <div id="quickListboxModal" class="quick-listbox-overlay" onclick="closeListboxPicker(event)">
+        <div class="quick-listbox-sheet" onclick="event.stopPropagation()">
+            <div class="quick-listbox-header">
+                <div>
+                    <div class="quick-listbox-title" id="listboxTitle">⚖️ Ağırlık Seç (KG)</div>
+                    <div class="quick-listbox-sub" id="listboxSub">Set Detayı</div>
+                </div>
+                <button type="button" class="btn-listbox-close" onclick="closeListboxPicker()">✕</button>
+            </div>
+            <div class="quick-listbox-scroll" id="listboxItemsContainer"></div>
+            <div class="quick-listbox-custom-row">
+                <input type="number" step="0.5" id="listboxCustomInput" class="listbox-custom-input" placeholder="Özel Değer Yaz...">
+                <button type="button" class="btn-listbox-apply" onclick="applyCustomListboxValue()">Uygula</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== LOG WORKOUT COMPLETE MODAL ==================== -->
+    <div id="completeModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 560px; max-height: 92vh; overflow-y: auto;">
+            <div class="modal-header">
+                <span class="modal-title">🏁 Antrenmanı Tamamla & Kaydet</span>
+                <button class="modal-close" onclick="closeCompleteModal()">✕</button>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>🏷️ Antrenman İsmi / Program Başlığı</span>
+                    <span style="font-size:11px; color:var(--text-secondary); font-weight:normal;">(Hatırlamak için özelleştirin)</span>
+                </label>
+                <input type="text" id="logProgramName" class="form-input" placeholder="Örn: Pazartesi Ağır Çelik, Rodium Bacak Günü...">
+            </div>
+
+            <!-- MEKAN & SALON LOKASYONU -->
+            <div class="form-group" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                <label class="form-label" style="margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                    <span>📍 Antrenman Nerede Yapıldı?</span>
+                    <span style="font-size:11px; color:var(--text-secondary); font-weight:normal;">(Mekan & Salon Analizi)</span>
+                </label>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div>
+                        <label style="font-size:11px; color:var(--text-secondary); font-weight:700; margin-bottom:4px; display:block;">Mekan Tipi</label>
+                        <select id="logLocationType" class="form-select" onchange="handleLocationTypeChange()">
+                            <option value="salon" selected>🏋️ Spor Salonu</option>
+                            <option value="ev">🏠 Ev</option>
+                            <option value="acik_hava">🌲 Açık Hava / Park</option>
+                        </select>
+                    </div>
+                    <div id="gymSelectGroup">
+                        <label style="font-size:11px; color:var(--text-secondary); font-weight:700; margin-bottom:4px; display:block;">Salon Seçimi</label>
+                        <select id="logGymSelect" class="form-select" onchange="handleGymSelectChange()">
+                            <option value="Rodium">Rodium</option>
+                            <option value="Sports & More">Sports & More</option>
+                            <option value="Samandağ">Samandağ</option>
+                            <option value="MACFit">MACFit</option>
+                            <option value="FitStop">FitStop</option>
+                            <option value="custom">✏️ Diğer / Yeni Salon Yaz...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="gymCustomGroup" style="margin-top: 10px;">
+                    <label id="gymCustomLabel" style="font-size:11px; color:var(--text-secondary); font-weight:700; margin-bottom:4px; display:block;">Salon / Konum Detayı</label>
+                    <input type="text" id="logLocationName" class="form-input" value="Rodium" placeholder="Salon veya konum adını giriniz...">
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;" class="form-group">
+                <div>
+                    <label class="form-label">Süre (Dakika)</label>
+                    <input type="number" id="logDuration" class="form-input" value="45">
+                </div>
+                <div>
+                    <label class="form-label">Zorluk Derecesi (RPE)</label>
+                    <select id="logRpe" class="form-select">
+                        <option value="RPE 7 (Rahattı, 3 tekrar daha çıkardı)">RPE 7 (Hafif)</option>
+                        <option value="RPE 8 (İdeal, cepte 2 tekrar kaldı)" selected>RPE 8 (İdeal Çelik)</option>
+                        <option value="RPE 9 (Zordu, son tekrarda zorlandım)">RPE 9 (Yüksek Yoğunluk)</option>
+                        <option value="RPE 10 (Tam Tükeniş, sınırdaydım)">RPE 10 (Maksimal)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Günün Notları & Çalışılan Kilolar</label>
+                <textarea id="logNotes" class="form-input" rows="3" placeholder="Örn: Squat 20 kg rahat çıktı, omuz presinde son sette zorlandım..."></textarea>
+            </div>
+
+            <div id="logWorkoutSummaryHint"></div>
+
+            <div style="display:flex; gap:10px; margin-top:8px;">
+                <button type="button" class="btn btn-danger-soft" style="flex:1; padding:13px; font-weight:700; font-size:12.5px;" onclick="cancelActiveWorkout()">
+                    🛑 İptal Et
+                </button>
+                <button type="button" class="btn btn-gold" style="flex:2; padding:13px; font-weight:900; font-size:13px;" onclick="saveCompletedWorkout()">
+                    ✅ GÜNLÜĞE KAYDET
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SCALE & BODY COMPOSITION MODAL ==================== -->
+    <div id="scaleModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 520px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <span class="modal-title">⚖️📏 Vücut Analizi & Mezura Ölçümü Ekle</span>
+                <button class="modal-close" onclick="closeScaleModal()">✕</button>
+            </div>
+
+            <!-- UNIQUE HEALTH SMART PDF & IMAGE DROPZONE -->
+            <div class="scale-pdf-dropzone" id="scalePdfDropzone" 
+                 ondragover="event.preventDefault(); this.classList.add('dragover');" 
+                 ondragleave="this.classList.remove('dragover');" 
+                 ondrop="handleScalePdfDrop(event)">
+                <div style="font-size:32px; margin-bottom:4px;">📊</div>
+                <div style="font-weight:900; font-size:14.5px; color:#fff;">Unique Health Raporu (PDF veya PNG) Yükleyin</div>
+                <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px; margin-bottom:12px;">
+                    PDF dosyasını veya galerideki PNG/JPG görselini seçin, sürükleyin veya yapıştırın
+                </div>
+                
+                <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+                    <div style="position: relative; display: inline-flex;">
+                        <button type="button" class="btn btn-gold" style="display:inline-flex; align-items:center; gap:6px; font-size:12.5px; padding:10px 18px; border-radius:22px; font-weight:800; pointer-events:none;">
+                            📁 PDF veya Görsel (PNG/JPG) Seç
+                        </button>
+                        <input type="file" id="scalePdfInput" accept="application/pdf,.pdf,image/png,image/jpeg,image/webp,image/*" 
+                               style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer; font-size:0; z-index:10;" 
+                               onchange="handleScalePdfUpload(event)">
+                    </div>
+                    
+                    <button type="button" class="btn btn-outline" style="display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:10px 16px; border-radius:22px; font-weight:800; border-color:var(--cyan); color:var(--cyan); background:rgba(56,189,248,0.12); cursor:pointer;" onclick="pasteFromClipboard(event)">
+                        📋 Panodan / Metinle Yapıştır
+                    </button>
+                </div>
+
+                <div id="scaleManualPasteContainer" style="display:none; margin-top:12px; text-align:left; background:rgba(15,23,42,0.9); border:1px solid var(--border); border-radius:10px; padding:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <span style="font-size:11.5px; font-weight:800; color:var(--cyan);">📋 Rapor Metnini Yapıştırın</span>
+                        <button type="button" onclick="toggleScalePasteBox(false)" style="background:none; border:none; color:var(--text-secondary); font-size:14px; cursor:pointer;">✕</button>
+                    </div>
+                    <textarea id="scalePasteArea" class="form-input" style="width:100%; height:85px; font-size:11px; padding:8px; border-radius:8px; resize:vertical; font-family:monospace;" placeholder="Unique Health raporundan kopyaladığınız metni buraya yapıştırın (veya parmağınızı basılı tutup 'Yapıştır' seçin)..."></textarea>
+                    <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
+                        <button type="button" class="btn btn-outline" style="font-size:11px; padding:5px 12px;" onclick="toggleScalePasteBox(false)">İptal</button>
+                        <button type="button" class="btn btn-gold" style="font-size:11px; padding:5px 14px; font-weight:800;" onclick="parseScaleFromPastedTextarea()">⚡ Verileri Çek ve Doldur</button>
+                    </div>
+                </div>
+
+                <div id="scalePdfSuccessBanner" style="display:none; margin-top:12px; padding:8px 12px; background:rgba(16,185,129,0.15); border:1px solid var(--green-success); border-radius:8px; font-size:11.5px; color:#34d399; font-weight:700;"></div>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:8px; margin: 10px 0 14px;">
+                <div style="flex:1; height:1px; background:var(--border);"></div>
+                <span style="font-size:10px; color:var(--text-secondary); font-weight:700; text-transform:uppercase;">⚖️ Tartı & Biyo-Empedans Verileri</span>
+                <div style="flex:1; height:1px; background:var(--border);"></div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;" class="form-group">
+                <div>
+                    <label class="form-label">Tarih</label>
+                    <input type="date" id="scaleDate" class="form-input">
+                </div>
+                <div>
+                    <label class="form-label">Kilo (kg) <span style="color:var(--gold);">*</span></label>
+                    <input type="number" id="scaleWeight" class="form-input" step="0.1" placeholder="Örn: 82.4">
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;" class="form-group">
+                <div>
+                    <label class="form-label">Vücut Yağ Oranı (%)</label>
+                    <input type="number" id="scaleBodyFat" class="form-input" step="0.1" placeholder="Örn: 18.5">
+                </div>
+                <div>
+                    <label class="form-label">İskelet Kas Kütlesi (kg)</label>
+                    <input type="number" id="scaleMuscleMass" class="form-input" step="0.1" placeholder="Örn: 38.2">
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;" class="form-group">
+                <div>
+                    <label class="form-label">Vücut Sıvı Oranı (%)</label>
+                    <input type="number" id="scaleWaterPct" class="form-input" step="0.1" placeholder="Örn: 58.0">
+                </div>
+                <div>
+                    <label class="form-label">İç Organ Yağlanması (1-15)</label>
+                    <input type="number" id="scaleVisceralFat" class="form-input" step="1" placeholder="Örn: 6">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Bazal Metabolizma Hızı (BMR - kcal)</label>
+                <input type="number" id="scaleBmr" class="form-input" placeholder="Örn: 1850">
+            </div>
+
+            <!-- MEZURA VÜCUT ÖLÇÜLERİ (OPSİYONEL) -->
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-size:12px; font-weight:800; color:var(--cyan); display:flex; align-items:center; gap:6px;">
+                        <span>📏 Mezura Vücut Ölçüleri (cm)</span>
+                    </span>
+                    <span style="font-size:10px; color:var(--text-secondary);">(İsteğe Bağlı / Opsiyonel)</span>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;" class="form-group">
+                    <div>
+                        <label class="form-label">Bel Çevresi (cm)</label>
+                        <input type="number" id="scaleWaist" class="form-input" step="0.5" placeholder="Göbek hizası (Örn: 84)">
+                    </div>
+                    <div>
+                        <label class="form-label">Göğüs Çevresi (cm)</label>
+                        <input type="number" id="scaleChest" class="form-input" step="0.5" placeholder="Meme hizası (Örn: 104)">
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;" class="form-group">
+                    <div>
+                        <label class="form-label">Omuz Çevresi (cm)</label>
+                        <input type="number" id="scaleShoulder" class="form-input" step="0.5" placeholder="Deltoid tepe (Örn: 122)">
+                    </div>
+                    <div>
+                        <label class="form-label">Kol / Pazı (cm)</label>
+                        <input type="number" id="scaleArms" class="form-input" step="0.5" placeholder="Biceps tepe (Örn: 38)">
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px;" class="form-group">
+                    <div>
+                        <label class="form-label">Bacak (cm)</label>
+                        <input type="number" id="scaleThigh" class="form-input" step="0.5" placeholder="Uyluk (Örn: 58)">
+                    </div>
+                    <div>
+                        <label class="form-label">Kalça (cm)</label>
+                        <input type="number" id="scaleHips" class="form-input" step="0.5" placeholder="Glute (Örn: 100)">
+                    </div>
+                    <div>
+                        <label class="form-label">Boyun (cm)</label>
+                        <input type="number" id="scaleNeck" class="form-input" step="0.5" placeholder="Örn: 39">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Notlar & Koşullar</label>
+                <input type="text" id="scaleNotes" class="form-input" placeholder="Örn: Sabah aç karna, tuvalet sonrası...">
+            </div>
+
+            <button class="btn btn-gold" style="width:100%; padding:13px; font-weight:900;" onclick="saveScaleEntry()">
+                💾 TÜM VÜCUT KAYDINI KAYDET
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== BODY MEASUREMENTS MODAL ==================== -->
+    <div id="measurementsModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 520px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <span class="modal-title">📏 Mezura Vücut Ölçüleri Ekle</span>
+                <button class="modal-close" onclick="closeMeasurementsModal()">✕</button>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Ölçüm Tarihi</label>
+                <input type="date" id="measureDate" class="form-input">
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;" class="form-group">
+                <div>
+                    <label class="form-label">Bel Çevresi (cm) <span style="color:var(--gold);">*</span></label>
+                    <input type="number" id="measureWaist" class="form-input" step="0.5" placeholder="Göbek hizası (Örn: 86.5)">
+                </div>
+                <div>
+                    <label class="form-label">Göğüs Çevresi (cm)</label>
+                    <input type="number" id="measureChest" class="form-input" step="0.5" placeholder="Meme hizası (Örn: 104)">
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;" class="form-group">
+                <div>
+                    <label class="form-label">Omuz Çevresi (cm)</label>
+                    <input type="number" id="measureShoulder" class="form-input" step="0.5" placeholder="Omuz tepe hattı">
+                </div>
+                <div>
+                    <label class="form-label">Kol / Pazu (cm)</label>
+                    <input type="number" id="measureArms" class="form-input" step="0.5" placeholder="Sıkılı pazu tepe">
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;" class="form-group">
+                <div>
+                    <label class="form-label">Bacak / Uyluk (cm)</label>
+                    <input type="number" id="measureThigh" class="form-input" step="0.5" placeholder="Üst bacak orta">
+                </div>
+                <div>
+                    <label class="form-label">Kalça (cm)</label>
+                    <input type="number" id="measureHips" class="form-input" step="0.5" placeholder="En geniş kalça">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Boyun Çevresi (cm)</label>
+                <input type="number" id="measureNeck" class="form-input" step="0.5" placeholder="Adem elması altı">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Ölçüm Notu</label>
+                <input type="text" id="measureNotes" class="form-input" placeholder="Örn: Sabah aç karna, soğuk ölçüm...">
+            </div>
+
+            <button class="btn btn-gold" style="width:100%; padding:13px; font-weight:900;" onclick="saveMeasurementsEntry()">
+                💾 VÜCUT ÖLÇÜLERİNİ KAYDET
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== AI HYBRID BLUEPRINT & DOCTRINE ARCHITECT MODAL ==================== -->
+    <div id="aiHybridArchitectModal" class="modal-overlay" onclick="if(event.target === this) closeAiHybridArchitectModal()">
+        <div class="modal-box" style="max-width: 740px; max-height: 92vh; overflow-y: auto; border: 1px solid rgba(168, 85, 247, 0.45); box-shadow: 0 10px 40px rgba(147, 51, 234, 0.25);">
+            <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px; margin-bottom:14px;">
+                <div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span class="auth-role-tag" style="background:linear-gradient(135deg, rgba(168,85,247,0.35), rgba(245,158,11,0.25)); color:#e9d5ff; border:1px solid rgba(168,85,247,0.5); font-size:10px; font-weight:800; padding:2px 7px; border-radius:6px;">🧠 AKADEMİK AI MİMARI</span>
+                        <span style="font-size:10.5px; color:var(--gold); font-weight:800;" id="aiModalVersionTag">Schumann (2022) Hibrit Model</span>
+                    </div>
+                    <span class="modal-title" style="font-size:18px; margin-top:4px; display:block;">Bodybuilding & Fonksiyonel Hibrit Doktrini</span>
+                    <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">
+                        Yapay zeka antrenman geçmişini, tartı/bel trendini ve hedeflerini analiz ederek program öncesi doktrini belirler.
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeAiHybridArchitectModal()">✕</button>
+            </div>
+
+            <!-- BÖLÜM 1: CANLI TELEMETRİ (GEÇMİŞ & VÜCUT VERİLERİ) -->
+            <div style="margin-bottom:16px;">
+                <div style="font-size:12px; font-weight:800; color:var(--gold); margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                    <span>📊</span> <span>Mevcut Durum Telemetrisi (Son Veriler)</span>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:8px;" id="aiTelemetryGrid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- BÖLÜM 2: AI TEŞHİS VE BİYOMEKANİK RAPORU -->
+            <div style="background:linear-gradient(135deg, rgba(30,27,75,0.6), rgba(15,23,42,0.8)); border:1px solid rgba(168,85,247,0.35); border-radius:12px; padding:14px; margin-bottom:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:8px; flex-wrap:wrap;">
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <span style="font-size:15px;">🧠</span>
+                        <strong style="font-size:13.5px; color:#fff;" id="aiDiagnosticHeadline">Biyomekanik Durum Teşhisi Çıkarılıyor...</strong>
+                    </div>
+                    <button type="button" class="btn btn-outline" id="btnTriggerGeminiLiveReport" onclick="requestGeminiDeepHybridReport()" style="font-size:11px; padding:4px 10px; border-color:#c084fc; color:#c084fc; font-weight:800; display:flex; align-items:center; gap:5px;">
+                        <span>✨ Canlı Gemini Analizi</span>
+                    </button>
+                </div>
+                <div id="aiDiagnosticContent" style="font-size:12.5px; color:var(--text-secondary); line-height:1.55;">
+                    <!-- Populated by JS -->
+                </div>
+                <div id="aiGeminiExtraReportContainer" style="display:none; margin-top:12px; padding-top:12px; border-top:1px dashed rgba(168,85,247,0.3); font-size:12.5px; color:#e2e8f0; line-height:1.55;">
+                    <!-- Gemini live output will be streamed/rendered here -->
+                </div>
+            </div>
+
+            <!-- BÖLÜM 3: HİBRİT DOKTRİN SEÇİMİ (EN BAŞTA KARAR VERİLECEK YAKLAŞIM) -->
+            <div style="margin-bottom:16px;">
+                <div style="font-size:12.5px; font-weight:800; color:#fff; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+                    <span>🎯</span> <span>Programın Temel Doktrinini Belirle (En Başta Yaklaşım)</span>
+                </div>
+                <p style="font-size:11.5px; color:var(--text-secondary); margin:0 0 10px 0;">
+                    Yapay zekanın durumuna göre önerdiği doktrini onaylayabilir veya farklı bir hibrit denge seçebilirsin:
+                </p>
+                <div class="doctrine-grid" id="doctrineSelectionGrid">
+                    <!-- 1. Pure Bodybuilding -->
+                    <div class="doctrine-card" id="docCard_bb_pure" onclick="selectAiDoctrine('bb_pure')">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong style="color:#fff; font-size:13px;">🛡️ Saf Bodybuilding</strong>
+                            <span style="font-size:11px; color:var(--gold); font-weight:800;">%90 Kas / %10 Kond.</span>
+                        </div>
+                        <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.35;">
+                            Maksimum mekanik gerilim, izole kas tecridi ve simetri. Estetik ve hacim odaklı geleneksel yaklaşım.
+                        </div>
+                    </div>
+
+                    <!-- 2. BB-Dominant Hybrid -->
+                    <div class="doctrine-card selected ai-recommended" id="docCard_bb_hybrid" onclick="selectAiDoctrine('bb_hybrid')">
+                        <div class="doctrine-ai-badge">⭐ AI TAVSİYESİ</div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
+                            <strong style="color:var(--gold); font-size:13px;">⚡ BB-Dominant Hibrit</strong>
+                            <span style="font-size:11px; color:var(--gold); font-weight:800;">%70 Kas / %30 Fonk.</span>
+                        </div>
+                        <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.35;">
+                            Ana gövde ağır hipertrofi; seans sonlarına veya aralara Kettlebell, Carry ve metabolik kondisyon. Kas yaparken eklemleri korur ve iş kapasitesini artırır.
+                        </div>
+                    </div>
+
+                    <!-- 3. Balanced Hybrid (50/50) -->
+                    <div class="doctrine-card" id="docCard_balanced_hybrid" onclick="selectAiDoctrine('balanced_hybrid')">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong style="color:#fff; font-size:13px;">⚖️ Dengeli Hibrit Atlet</strong>
+                            <span style="font-size:11px; color:#38bdf8; font-weight:800;">%50 / %50 Eşit</span>
+                        </div>
+                        <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.35;">
+                            Ağır compound güç blokları ile patlayıcı kettlebell, dinamik rotasyon ve core zırhının mükemmel sinerjisi.
+                        </div>
+                    </div>
+
+                    <!-- 4. Functional-Dominant Hybrid -->
+                    <div class="doctrine-card" id="docCard_func_hybrid" onclick="selectAiDoctrine('func_hybrid')">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong style="color:#fff; font-size:13px;">🔥 Fonksiyonel-Dominant</strong>
+                            <span style="font-size:11px; color:#f97316; font-weight:800;">%70 Fonk. / %30 Kas</span>
+                        </div>
+                        <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.35;">
+                            Ana omurga atletik güç ve yüksek dayanıklılık; zayıf kalan omuz, kol veya göğüs bölgelerine hedefe yönelik izole hipertrofi iğneleri.
+                        </div>
+                    </div>
+
+                    <!-- 5. Pure Functional -->
+                    <div class="doctrine-card" id="docCard_func_pure" onclick="selectAiDoctrine('func_pure')">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong style="color:#fff; font-size:13px;">🌪️ Saf Fonksiyonel & Kondisyon</strong>
+                            <span style="font-size:11px; color:#4ade80; font-weight:800;">%90 Fonksiyonel</span>
+                        </div>
+                        <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.35;">
+                            Çok düzlemli hareket kalıpları, kettlebell kompleksleri, yüksek VO2 Max ve kardiyovasküler dayanıklılık.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BÖLÜM 4: HIZLI PARAMETRE VE ÖZEL İSTEKLER -->
+            <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:12px 14px; margin-bottom:16px;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+                    <div>
+                        <label class="form-label" style="font-size:11px;">Hedef Bölge / Split</label>
+                        <select id="aiModalSplitSelect" class="form-input" style="font-size:12px; padding:8px 10px;">
+                            <option value="full_body" selected>⚡ Tüm Vücut (Full Body Hibrit)</option>
+                            <option value="upper_push">🛡️ Üst İtiş (Push Hibrit)</option>
+                            <option value="upper_pull">⚔️ Üst Çekiş (Pull Hibrit)</option>
+                            <option value="lower">🦵 Bacak & Alt Vücut Hibrit</option>
+                            <option value="upper">🦅 Tüm Üst Vücut</option>
+                            <option value="core">🧱 Karın & Core Zırhı</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label" style="font-size:11px;">Seans Süresi</label>
+                        <select id="aiModalDurationSelect" class="form-input" style="font-size:12px; padding:8px 10px;">
+                            <option value="30">⏱️ 30 Dk (Hızlı & Yoğun Seans)</option>
+                            <option value="45" selected>⏱️ 45-50 Dk (İdeal Çelik Denge)</option>
+                            <option value="60">⏱️ 60 Dk (Tam Hacimli & Detaylı)</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label" style="font-size:11px;">Özel İstek, Zayıf Bölge veya Sakatlık Durumu (Opsiyonel)</label>
+                    <input type="text" id="aiModalUserWishInput" class="form-input" placeholder="Örn: Dizimde hafif hassasiyet var, arka omuzlarımı da vurmak istiyorum..." style="font-size:12px;">
+                </div>
+            </div>
+
+            <!-- BÖLÜM 5: AKSİYON BUTONLARI -->
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button type="button" class="btn btn-gold" style="flex:1; min-width:200px; padding:12px 14px; font-weight:900; font-size:13px; display:flex; justify-content:center; align-items:center; gap:6px;" onclick="applyAiHybridProgram(false)">
+                    <span>⚡ Bu Doktrinle Programı Oluştur & İncele</span>
+                </button>
+                <button type="button" class="btn" style="padding:12px 18px; font-weight:900; font-size:13px; background:linear-gradient(135deg, #10b981, #059669); color:#fff; border:none; display:flex; align-items:center; gap:6px; box-shadow:0 0 16px rgba(16,185,129,0.3);" onclick="applyAiHybridProgram(true)">
+                    <span>🚀 Seansı Doğrudan Başlat</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== EXERCISE DETAIL & FORM AUDIT MODAL ==================== -->
+    <div id="exerciseDetailModal" class="modal-overlay" onclick="if(event.target === this) closeExerciseDetailModal()">
+        <div class="modal-box" style="max-width: 680px; max-height: 92vh; overflow-y: auto;">
+            <div class="modal-header">
+                <div>
+                    <span class="modal-title" id="exDetailModalTitle">Hareket Detayı</span>
+                    <div id="exDetailModalSubtitle" style="font-size:12px; color:var(--text-secondary); margin-top:2px;"></div>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <button type="button" class="btn-report-mini" id="btnExDetailReport" style="padding:6px 10px; font-size:11px;" title="Bu egzersizde hata bildir">
+                        ⚠️ Hata Bildir
+                    </button>
+                    <button class="modal-close" onclick="closeExerciseDetailModal()">✕</button>
+                </div>
+            </div>
+
+            <!-- TABS: 📸 Form Rehberi | 🧬 Kas Anatomisi | 📝 Adım Adım -->
+            <div style="display:flex; gap:6px; margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:8px;">
+                <button class="pos-tab-btn active" id="btnExDetailTabForm" onclick="switchExDetailTab('form')">📸 Form Rehberi</button>
+                <button class="pos-tab-btn" id="btnExDetailTabAnatomy" onclick="switchExDetailTab('anatomy')">🧬 Çalışan Kaslar</button>
+                <button class="pos-tab-btn" id="btnExDetailTabSteps" onclick="switchExDetailTab('steps')">📝 Adım Adım</button>
+            </div>
+
+            <div id="exDetailTabContentForm" class="ex-detail-tab-pane">
+                <!-- Form guide image -->
+            </div>
+            <div id="exDetailTabContentAnatomy" class="ex-detail-tab-pane" style="display:none;">
+                <!-- Anatomy image -->
+            </div>
+            <div id="exDetailTabContentSteps" class="ex-detail-tab-pane" style="display:none;">
+                <!-- Steps & Cue -->
+            </div>
+
+            <div style="margin-top:16px; display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px;">
+                <button class="btn btn-outline" style="flex:1; min-width:80px;" onclick="closeExerciseDetailModal()">Kapat</button>
+                <button class="btn btn-outline" id="btnExDetailToggleHide" style="flex:1; min-width:90px; font-weight:700; transition:all 0.2s;" title="Kişisel havuzunuzdan gizleyin">👁️ Gizle</button>
+                <button class="btn btn-outline" id="btnExDetailAlt" style="flex:1.2; min-width:110px; color:var(--cyan); border-color:var(--cyan); font-weight:800;">🔄 Alternatifler</button>
+                <button class="btn btn-gold" id="btnExDetailAdd" style="flex:1.5; min-width:130px; font-weight:800;">➕ Bu Hareketi Ekle</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== EXERCISE PICKER & ALTERNATIVE MODAL ==================== -->
+    <div id="exercisePickerModal" class="modal-overlay" onclick="if(event.target === this) closeExercisePickerModal()">
+        <div class="modal-box" style="max-width: 640px; max-height: 92vh; display: flex; flex-direction: column;">
+            <div class="modal-header" style="margin-bottom: 6px;">
+                <span class="modal-title" id="pickerModalTitle">🔄 Alternatif Egzersiz Seçici</span>
+                <button class="modal-close" onclick="closeExercisePickerModal()">✕</button>
+            </div>
+
+            <!-- CURRENT EXERCISE CONTEXT BANNER -->
+            <div id="pickerCurrentExBanner" style="background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+                <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+                    <div id="pickerCurrentExThumb" style="width:28px; height:28px; border-radius:5px; background:#000; overflow:hidden; flex-shrink:0; border:1px solid var(--border); display:flex; align-items:center; justify-content:center;">
+                        🏋️
+                    </div>
+                    <div id="pickerCurrentExName" style="font-size:13px; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                        -
+                    </div>
+                </div>
+                <div id="pickerCurrentExBadges" style="display:flex; gap:4px; flex-shrink:0; align-items:center;">
+                    <!-- badges injected dynamically -->
+                </div>
+            </div>
+
+            <!-- 4 SMART TABS -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 8px; background: rgba(0,0,0,0.35); padding: 4px; border-radius: 8px; border: 1px solid var(--border);">
+                <button type="button" class="btn btn-outline" id="pickerTabBtnSame" style="padding: 7px 2px; font-size: 10.5px; font-weight: 800; border-radius: 6px; border-color: transparent;" onclick="switchPickerTab('same_muscle')">
+                    🎯 Biyomekanik
+                </button>
+                <button type="button" class="btn btn-outline" id="pickerTabBtnAI" style="padding: 7px 2px; font-size: 10.5px; font-weight: 800; border-radius: 6px; border-color: transparent; color:#c084fc;" onclick="switchPickerTab('ai_coach')">
+                    🤖 Gemini AI
+                </button>
+                <button type="button" class="btn btn-outline" id="pickerTabBtnOther" style="padding: 7px 2px; font-size: 10.5px; font-weight: 800; border-radius: 6px; border-color: transparent;" onclick="switchPickerTab('other_muscle')">
+                    🧬 Başka Kas
+                </button>
+                <button type="button" class="btn btn-outline" id="pickerTabBtnCatalog" style="padding: 7px 2px; font-size: 10.5px; font-weight: 800; border-radius: 6px; border-color: transparent;" onclick="switchPickerTab('catalog')">
+                    ➕ Katalog
+                </button>
+            </div>
+
+            <!-- TAB 1: AYNI BİYOMEKANİK PATERN & KAS GRUBU -->
+            <div id="pickerSubPanelSame" style="margin-bottom:6px;">
+                <div style="display:flex; gap:4px; flex-wrap:wrap; margin-bottom:6px;" id="pickerReasonPills">
+                    <button type="button" class="btn-quick-equip" id="pill_reason_all" onclick="setPickerReasonFilter('all')">⚡ Birebir Patern</button>
+                    <button type="button" class="btn-quick-equip" id="pill_reason_no_equip" onclick="setPickerReasonFilter('no_equip')">🚫 Alet Yok / Dolu</button>
+                    <button type="button" class="btn-quick-equip" id="pill_reason_joint" onclick="setPickerReasonFilter('joint')">🩹 Bel / Eklem Dostu</button>
+                    <button type="button" class="btn-quick-equip" id="pill_reason_easier" onclick="setPickerReasonFilter('easier')">📉 Daha Kolay (Form)</button>
+                </div>
+
+                <div style="display:flex; gap:4px; flex-wrap:wrap;" id="pickerSameEquipPills">
+                    <button class="btn-quick-equip" id="pill_seq_all" onclick="setSameEquipFilter('all')">Tüm Ekipmanlar</button>
+                    <button class="btn-quick-equip" id="pill_seq_dumbbell" onclick="setSameEquipFilter('dumbbell')">🏋️ Dambıl</button>
+                    <button class="btn-quick-equip" id="pill_seq_kettlebell" onclick="setSameEquipFilter('kettlebell')">🔔 Kettlebell</button>
+                    <button class="btn-quick-equip" id="pill_seq_barbell" onclick="setSameEquipFilter('barbell')">⚡ Barbell</button>
+                    <button class="btn-quick-equip" id="pill_seq_machine" onclick="setSameEquipFilter('machine')">⚙️ Makine</button>
+                    <button class="btn-quick-equip" id="pill_seq_bodyweight" onclick="setSameEquipFilter('bodyweight')">🤸 Vücut Ağırlığı</button>
+                </div>
+            </div>
+
+            <!-- TAB 2: 🤖 GEMINI AI BİYOMEKANİK KOÇ -->
+            <div id="pickerSubPanelAI" style="display:none; margin-bottom:8px;">
+                <!-- API KEY MISSING STATE -->
+                <div id="geminiAiKeyMissingBox" style="display:none; background:rgba(192, 132, 252, 0.08); border:1px solid rgba(192, 132, 252, 0.35); border-radius:10px; padding:12px 14px; margin-bottom:8px;">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                        <span style="font-size:22px;">🤖</span>
+                        <div>
+                            <div style="font-size:12.5px; font-weight:800; color:#e9d5ff;">Çelik Kodu Gemini AI Biyomekanik Koç</div>
+                            <div style="font-size:11px; color:var(--text-secondary);">Ekipman durumunuza, eklem ağrılarınıza ve hedefinize göre anında akıllı ikame üretin.</div>
+                        </div>
+                    </div>
+                    <div style="margin-top:10px;">
+                        <label style="font-size:11px; font-weight:700; color:var(--text-secondary); display:block; margin-bottom:4px;">Google Gemini API Anahtarınız:</label>
+                        <div style="display:flex; gap:6px;">
+                            <input type="password" id="geminiApiKeyModalInput" class="form-input" style="font-size:12px; padding:8px;" placeholder="AIzaSy... anahtarınızı yapıştırın" autocomplete="off">
+                            <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:8px 14px; white-space:nowrap; font-weight:800;" onclick="saveGeminiApiKeyFromModal()">💾 Kaydet</button>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-size:10.5px; flex-wrap:wrap; gap:4px;">
+                            <span style="color:var(--text-secondary);">🔒 Tamamen cihazınızda saklanır.</span>
+                            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="color:var(--cyan); text-decoration:underline; font-weight:700;">🔗 Ücretsiz API Key Al (Google AI Studio) ➔</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API KEY ACTIVE STATE -->
+                <div id="geminiAiActiveBox" style="display:none;">
+                    <div style="background:rgba(192, 132, 252, 0.06); border:1px solid rgba(192, 132, 252, 0.25); border-radius:8px; padding:8px 10px; margin-bottom:8px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                            <span style="font-size:11px; font-weight:800; color:#e9d5ff; display:flex; align-items:center; gap:5px;">
+                                <span>🤖</span> <span>Biyomekanik Koça Durumunu Bildir:</span>
+                            </span>
+                            <span style="font-size:10px; color:var(--cyan); cursor:pointer; font-weight:700;" onclick="editGeminiApiKey()">⚙️ API Anahtarını Değiştir</span>
+                        </div>
+                        <!-- QUICK AI PROMPTS -->
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-bottom:8px;">
+                            <button type="button" class="btn-quick-equip" style="text-align:left; padding:5px 8px; font-size:11px; border-radius:6px; display:flex; align-items:center; gap:5px; border-color:rgba(192,132,252,0.3);" onclick="quickAskGemini('no_equip')">
+                                <span>🚫</span> <span>Alet Yok (Dambıl İkamesi)</span>
+                            </button>
+                            <button type="button" class="btn-quick-equip" style="text-align:left; padding:5px 8px; font-size:11px; border-radius:6px; display:flex; align-items:center; gap:5px; border-color:rgba(192,132,252,0.3);" onclick="quickAskGemini('joint_pain')">
+                                <span>🩹</span> <span>Bel / Eklem Dostu (Sıfır Yük)</span>
+                            </button>
+                            <button type="button" class="btn-quick-equip" style="text-align:left; padding:5px 8px; font-size:11px; border-radius:6px; display:flex; align-items:center; gap:5px; border-color:rgba(192,132,252,0.3);" onclick="quickAskGemini('easier')">
+                                <span>📉</span> <span>Daha Kolay (Regresyon)</span>
+                            </button>
+                            <button type="button" class="btn-quick-equip" style="text-align:left; padding:5px 8px; font-size:11px; border-radius:6px; display:flex; align-items:center; gap:5px; border-color:rgba(192,132,252,0.3);" onclick="quickAskGemini('conditioning')">
+                                <span>⚡</span> <span>Balistik & Kondisyon</span>
+                            </button>
+                        </div>
+                        <!-- CUSTOM USER QUERY -->
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <input type="text" id="geminiCustomQueryInput" class="form-input" style="font-size:11.5px; padding:7px 10px;" placeholder="✍️ Özel durumunu yaz (örn: bel ağrısı, 15 kg dambıl)..." onkeydown="if(event.key === 'Enter') submitGeminiCustomQuery()">
+                            <button type="button" class="btn btn-gold" id="btnSubmitGeminiQuery" style="font-size:11.5px; padding:7px 12px; font-weight:800; white-space:nowrap; background:#9333ea; border-color:#a855f7; color:#fff;" onclick="submitGeminiCustomQuery()">
+                                🚀 Sor
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- AI RESPONSE OUTPUT AREA -->
+                    <div id="geminiAiResponseArea" style="display:none; margin-top:8px;"></div>
+                </div>
+            </div>
+
+            <!-- TAB 3: BAŞKA KAS GRUBU SEÇİMİ -->
+            <div id="pickerSubPanelOther" style="display:none; margin-bottom:8px;">
+                <div style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:6px;" id="pickerMuscleGrid">
+                    <!-- Dynamic Muscle Buttons -->
+                </div>
+            </div>
+
+            <!-- TAB 4: DİĞER (GENİŞLETİLMİŞ KATALOG VE SERBEST ARAMA) -->
+            <div id="pickerSubPanelCatalog" style="display:none; margin-bottom:8px;">
+                <div style="margin-bottom:6px;">
+                    <input type="text" id="pickerSearchInput" class="form-input" placeholder="🔍 Egzersiz adı, kas veya ipucu ara..." oninput="handlePickerSearchInput()">
+                </div>
+                <div style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:4px;" id="pickerCategoryPills">
+                    <button class="btn-quick-equip" id="pill_cat_all" onclick="setPickerCategory('all')">Tüm Kategoriler</button>
+                    <button class="btn-quick-equip" id="pill_cat_push" onclick="setPickerCategory('push')">İtiş / Göğüs / Omuz</button>
+                    <button class="btn-quick-equip" id="pill_cat_pull" onclick="setPickerCategory('pull')">Çekiş / Sırt / Biceps</button>
+                    <button class="btn-quick-equip" id="pill_cat_legs_quad" onclick="setPickerCategory('legs_quad')">Ön Bacak / Quad</button>
+                    <button class="btn-quick-equip" id="pill_cat_legs_hinge" onclick="setPickerCategory('legs_hinge')">Arka Bacak / Kalça</button>
+                    <button class="btn-quick-equip" id="pill_cat_core" onclick="setPickerCategory('core')">Karın & Core</button>
+                    <button class="btn-quick-equip" id="pill_cat_conditioning" onclick="setPickerCategory('conditioning')">⚡ Fonksiyonel & Kondisyon</button>
+                </div>
+            </div>
+
+            <!-- EXERCISE LIST CONTAINER -->
+            <div style="flex:1; max-height: 48vh; overflow-y: auto; padding-right: 4px;" id="pickerExercisesContainer">
+                <!-- Dynamically rendered list of exercises -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== EXERCISE BUG REPORT MODAL (HATA BİLDİRİMİ) ==================== -->
+    <div id="exerciseBugReportModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 520px;">
+            <div class="modal-header">
+                <span class="modal-title" style="color:#fca5a5;">⚠️ Egzersiz Hata Bildirimi</span>
+                <button class="modal-close" onclick="closeExerciseBugReportModal()">✕</button>
+            </div>
+
+            <!-- Egzersiz Künyesi & Görsel Özeti -->
+            <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:10px; padding:10px 12px; margin-bottom:12px; display:flex; align-items:center; gap:12px;">
+                <div id="bugReportImgPreviewBox" style="width:65px; height:65px; border-radius:8px; overflow:hidden; background:#000; flex-shrink:0; border:1px solid var(--border); display:flex; align-items:center; justify-content:center;">
+                    <img id="bugReportImgPreview" src="" alt="Önizleme" style="max-width:100%; max-height:100%; object-fit:contain;">
+                </div>
+                <div>
+                    <div style="font-size:14.5px; font-weight:900; color:#fff;" id="bugReportExName">Egzersiz Adı</div>
+                    <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;" id="bugReportExMeta">Ekipman • Kas</div>
+                    <div style="font-size:10.5px; color:var(--gold); margin-top:2px;">Bulut: Firebase Firestore Havuzuna Aktarılacak</div>
+                </div>
+            </div>
+
+            <!-- Hata Kategorisi Seçimi -->
+            <div style="margin-bottom:12px;">
+                <label class="form-label" style="margin-bottom:6px;">Hata Türünü Seçin:</label>
+                <div class="bug-cat-grid">
+                    <div class="bug-cat-chip selected" id="bugCat_image_mismatch" onclick="selectBugCategory('image_mismatch')">
+                        <span>🖼️</span> <span>Görsel Uyuşmuyor</span>
+                    </div>
+                    <div class="bug-cat-chip" id="bugCat_equipment_mismatch" onclick="selectBugCategory('equipment_mismatch')">
+                        <span>🏋️</span> <span>Ekipman / Pozisyon</span>
+                    </div>
+                    <div class="bug-cat-chip" id="bugCat_cue_technique" onclick="selectBugCategory('cue_technique')">
+                        <span>📝</span> <span>Form / İpucu Hatalı</span>
+                    </div>
+                    <div class="bug-cat-chip" id="bugCat_name_mismatch" onclick="selectBugCategory('name_mismatch')">
+                        <span>🏷️</span> <span>İsim / Adlandırma</span>
+                    </div>
+                    <div class="bug-cat-chip" id="bugCat_other" onclick="selectBugCategory('other')" style="grid-column: span 2;">
+                        <span>❓</span> <span>Diğer / Genel Aksaklık</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kullanıcı Notu -->
+            <div style="margin-bottom:14px;">
+                <label class="form-label" style="margin-bottom:4px;">Gözünüze çarpan detay (İsteğe bağlı):</label>
+                <textarea id="bugReportUserNote" class="form-input" style="height:70px; resize:none; font-size:12px; padding:8px 10px;" placeholder="Örn: Görselde omuz press yerine bench press gösteriliyor, ayakta dambıl omuz press görseli gelmeli."></textarea>
+            </div>
+
+            <!-- Aksiyon Butonları -->
+            <div style="display:flex; justify-content:flex-end; gap:8px;">
+                <button type="button" class="btn btn-outline" style="padding:9px 14px; font-size:12px;" onclick="closeExerciseBugReportModal()">Vazgeç</button>
+                <button type="button" class="btn btn-gold" id="btnSubmitBugReport" style="padding:9px 18px; font-size:12.5px; font-weight:800; background:#ef4444; border-color:#ef4444; color:#fff;" onclick="submitExerciseBugReport()">
+                    🚀 Firebase Havuzuna Gönder
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== BUG REPORTS POOL MODAL (HATA HAVUZU & AI ONAY) ==================== -->
+    <div id="bugReportsPoolModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 650px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:20px;">📋</span>
+                    <div>
+                        <h3 class="modal-title" style="font-size:15px; margin:0;">Egzersiz Hata Bildirim Havuzu</h3>
+                        <p style="font-size:11px; color:var(--text-secondary); margin:2px 0 0;">Firebase Firestore Canlı Veritabanı</p>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeBugReportsPoolModal()">✕</button>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.3); padding:10px 12px; border-radius:10px;">
+                <div>
+                    <span style="font-size:12.5px; font-weight:800; color:var(--gold);" id="bugPoolCountText">0 Bildirim Bekliyor</span>
+                    <p style="font-size:11px; color:var(--text-secondary); margin:2px 0 0;">AI düzeltme yaptıktan sonra benden okey aldığında silinir.</p>
+                </div>
+                <button type="button" class="btn btn-gold" style="font-size:11px; padding:7px 12px; font-weight:800;" onclick="copyBugReportsToClipboard()">
+                    🤖 AI İçin Görev Emri Kopyala
+                </button>
+            </div>
+
+            <!-- Liste Konteyneri -->
+            <div id="bugReportsPoolList" style="min-height:120px;">
+                <!-- Dynamically populated from Firestore -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== ADD FINISHER & EXTRA EXERCISES MODAL ==================== -->
+    <div id="addFinisherModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 580px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <div>
+                    <h3 class="modal-title" style="font-size:16px; margin:0;">➕ İlave Hareket & Finisher Ekle</h3>
+                    <p style="font-size:11px; color:var(--text-secondary); margin:2px 0 0;">Antrenman erken bittiğinde veya pump hissetmek istediğinizde seansa ekleyin.</p>
+                </div>
+                <button class="modal-close" onclick="closeAddFinisherModal()">✕</button>
+            </div>
+
+            <!-- 1. HIZLI FINISHER PAKETLERİ (TEK DOKUNUŞLA 3 SET) -->
+            <div style="font-size:12px; font-weight:900; color:var(--gold); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">
+                ⚡ Hızlı Finisher Paketleri (Tek Dokunuş):
+            </div>
+
+            <div class="finisher-preset-card">
+                <div>
+                    <div style="font-size:13.5px; font-weight:800; color:#fff;">🛡️ Core & Karın Çelik Zırhı</div>
+                    <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Plank + Hollow Body / Knee Raise</div>
+                    <span class="finisher-badge">3 Set • 30-45s / 12 Tk</span>
+                </div>
+                <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:8px 14px; font-weight:800;" onclick="addPresetFinisher('core_armor')">
+                    ➕ Ekle
+                </button>
+            </div>
+
+            <div class="finisher-preset-card">
+                <div>
+                    <div style="font-size:13.5px; font-weight:800; color:#fff;">🦾 Kol Pump Süperset</div>
+                    <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Dambıl Biceps Curl + Triceps Overhead</div>
+                    <span class="finisher-badge">3 Set • 10-12 Tekrar</span>
+                </div>
+                <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:8px 14px; font-weight:800;" onclick="addPresetFinisher('arms_pump')">
+                    ➕ Ekle
+                </button>
+            </div>
+
+            <div class="finisher-preset-card">
+                <div>
+                    <div style="font-size:13.5px; font-weight:800; color:#fff;">🦅 3D Omuz & Trapez Genişletme</div>
+                    <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Lateral Raise + Face Pull / Halo</div>
+                    <span class="finisher-badge">3 Set • 12-15 Tekrar</span>
+                </div>
+                <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:8px 14px; font-weight:800;" onclick="addPresetFinisher('shoulder_wings')">
+                    ➕ Ekle
+                </button>
+            </div>
+
+            <div class="finisher-preset-card">
+                <div>
+                    <div style="font-size:13.5px; font-weight:800; color:#fff;">🧳 Kavrama & Trapez: Çift Ağırlık Taşıma</div>
+                    <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Dambıl / Kettlebell Farmer's Walk</div>
+                    <span class="finisher-badge">3 Set • 45 Metre / Adım</span>
+                </div>
+                <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:8px 14px; font-weight:800;" onclick="addPresetFinisher('farmers_walk')">
+                    ➕ Ekle
+                </button>
+            </div>
+
+            <div class="finisher-preset-card">
+                <div>
+                    <div style="font-size:13.5px; font-weight:800; color:#fff;">🔥 Kalori & Patlayıcı Güç Finisher</div>
+                    <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Kettlebell / Dambıl Swing + Burpee</div>
+                    <span class="finisher-badge">3 Set • 15 Swing + 8 Burpee</span>
+                </div>
+                <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:8px 14px; font-weight:800;" onclick="addPresetFinisher('cardio_burn')">
+                    ➕ Ekle
+                </button>
+            </div>
+
+            <!-- 2. SERBEST EGZERSİZ SEÇİMİ -->
+            <div style="margin-top:16px; padding-top:14px; border-top:1px dashed var(--border); text-align:center;">
+                <div style="font-size:12px; color:var(--text-secondary); margin-bottom:8px;">Veya kütüphaneden tek tek hareket seçmek için:</div>
+                <button type="button" class="btn btn-outline" style="border-color:var(--cyan); color:var(--cyan); font-weight:800; padding:10px 18px; font-size:12.5px;" onclick="closeAddFinisherModal(); openAddExerciseModal('active');">
+                    🔍 Tüm Egzersiz Kütüphanesinden Seç
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== HIDEABLE BOTTOM NAVIGATION BAR ==================== -->
+    <div class="bottom-nav-wrapper" id="bottomNavWrapper">
+        <div class="bottom-pull-handle" onclick="toggleBottomBar()" title="Menüyü Gizle/Göster"></div>
+        <div class="bottom-nav-bar">
+            <div class="bottom-nav-item active" data-tab="generatorTab" onclick="switchTab('generatorTab')">
+                <span class="nav-icon">⚡</span>
+                <span>Oluştur</span>
+            </div>
+            <div class="bottom-nav-item" data-tab="activeWorkoutTab" onclick="switchTab('activeWorkoutTab')">
+                <span class="nav-icon">🏋️</span>
+                <span>Antrenman</span>
+            </div>
+            <div class="bottom-nav-item" data-tab="calendarTab" onclick="switchTab('calendarTab')">
+                <span class="nav-icon">📅</span>
+                <span>Takvim</span>
+            </div>
+            <div class="bottom-nav-item" data-tab="historyTab" onclick="switchTab('historyTab')">
+                <span class="nav-icon">📋</span>
+                <span>Geçmiş</span>
+            </div>
+            <div class="bottom-nav-item" onclick="openMoreSheet()">
+                <span class="nav-icon">☰</span>
+                <span>Menü</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLOATING RESTORE PILL (GİZLİYKEN ÇIKAN DÜĞME) -->
+    <div class="floating-restore-pill" id="bottomRestorePill" onclick="showBottomBar()">
+        <span>▲ Menüyü Aç</span>
+    </div>
+
+    <!-- ==================== MORE SHEET (ALT ÇEKMECE) ==================== -->
+    <div class="more-sheet-overlay" id="moreSheetOverlay" onclick="closeMoreSheet()"></div>
+    <div class="more-sheet" id="moreBottomSheet">
+        <div class="more-sheet-handle"></div>
+        <div class="more-sheet-header">
+            <div class="more-sheet-title">⚡ Menü & Ayarlar</div>
+            <button onclick="closeMoreSheet()" style="background:none; border:none; color:var(--text-secondary); font-size:18px; cursor:pointer;">✕</button>
+        </div>
+        <div class="more-sheet-grid">
+            <div class="more-sheet-btn" onclick="closeMoreSheet(); switchTab('calendarTab');">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#94a3b8;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <span>Akıllı Takvim</span>
+            </div>
+            <div class="more-sheet-btn" onclick="closeMoreSheet(); switchTab('studioTab');">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#94a3b8;"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+                <span>Program Atölyesi</span>
+            </div>
+            <div class="more-sheet-btn" onclick="closeMoreSheet(); switchTab('libraryTab'); switchLibrarySubTab('programs');">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#94a3b8;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                <span>Hazır Programlar</span>
+            </div>
+            <div class="more-sheet-btn" onclick="closeMoreSheet(); openExerciseLibraryTab();">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#94a3b8;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                <span>Egzersiz Kütüphanesi</span>
+            </div>
+            <div class="more-sheet-btn" onclick="closeMoreSheet(); switchTab('analyticsTab');">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#94a3b8;"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                <span>Tartı & Analiz</span>
+            </div>
+            <div class="more-sheet-btn" onclick="closeMoreSheet(); switchTab('profileTab');">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#94a3b8;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <span>Profil & Kilolarım</span>
+            </div>
+            <div class="more-sheet-btn" onclick="closeMoreSheet(); openBugReportsPoolModal();">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#94a3b8;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                <span>Hata Havuzu</span>
+            </div>
+            <div class="more-sheet-btn" onclick="closeMoreSheet(); forceAppUpdate();">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#94a3b8;"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                <span>Sürümü Yenile (Cache)</span>
+            </div>
+            <div class="more-sheet-btn" id="sheetAdminBtn" onclick="closeMoreSheet(); openAdminModal();" style="display:none;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#94a3b8;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                <span>Sporcu Yönetimi</span>
+            </div>
+            <div class="more-sheet-btn logout" onclick="closeMoreSheet(); handleAuthLogout();">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#f87171;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                <span>Oturumu Kapat</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== FIREBASE CLOUD DATABASE SDK (COMPAT) ==================== -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <!-- ==================== GOOGLE IDENTITY SERVICES (GIS) ==================== -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <!-- ==================== PDF.JS & TESSERACT.JS (FOR UNIQUE HEALTH BIA REPORTS & IMAGES) ==================== -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script>
+        if (window.pdfjsLib) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+    </script>
+
+    <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
+    <script src="js/exercises-db.js?v=155"></script>
+    <script src="js/app.js?v=155"></script>
+    <script>
+        function toggleHeaderPopupMenu(e) {
+            if (e) e.stopPropagation();
+            const menu = document.getElementById('headerPopupMenu');
+            if (menu) {
+                menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+            }
+        }
+        function closeHeaderPopupMenu() {
+            const menu = document.getElementById('headerPopupMenu');
+            if (menu) menu.style.display = 'none';
+        }
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('headerPopupMenu');
+            const btn = document.querySelector('.btn-header-popup-toggle');
+            if (menu && menu.style.display === 'block' && !menu.contains(e.target) && btn && !btn.contains(e.target)) {
+                menu.style.display = 'none';
+            }
+        });
+    </script>
+
+    <!-- AKADEMİK SPOR BİLİMİ RAPOR MODALI -->
+    <div class="modal-overlay" id="academicReportModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(8px);">
+        <div style="background:var(--bg-card, #161c2b); border:1px solid var(--gold, #eab308); border-radius:16px; width:92%; max-width:640px; max-height:85vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 15px 40px rgba(0,0,0,0.7);">
+            <div style="padding:16px 20px; border-bottom:1px solid var(--border, rgba(255,255,255,0.1)); display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="font-size:22px;">🔬</span>
+                    <div>
+                        <h3 style="font-size:15px; font-weight:900; color:var(--gold, #eab308); margin:0;">FitLAB Spor Bilimi ve Analiz Raporu</h3>
+                        <span style="font-size:11px; color:var(--text-secondary, #94a3b8);">FitLAB İstasyonu Tarafından Üretildi</span>
+                    </div>
+                </div>
+                <button type="button" onclick="document.getElementById('academicReportModal').style.display='none'" style="background:transparent; border:none; color:var(--text-secondary); font-size:20px; cursor:pointer; padding:4px 8px;">✕</button>
+            </div>
+            <div style="padding:18px 20px; overflow-y:auto; font-size:13px; line-height:1.65; color:#f1f5f9; white-space:pre-wrap; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;" id="academicReportModalContent">
+            </div>
+            <div style="padding:14px 20px; border-top:1px solid var(--border, rgba(255,255,255,0.1)); display:flex; justify-content:flex-end;">
+                <button type="button" class="btn btn-gold" onclick="document.getElementById('academicReportModal').style.display='none'" style="padding:8px 18px; font-size:12.5px; font-weight:800;">
+                    ✓ Anladım & Kapat
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 230" width="100%" height="auto" style="background:#090d16; border-radius:12px; font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;">
+    <defs>
+        <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#fbbf24"/>
+            <stop offset="100%" stop-color="#d97706"/>
+        </linearGradient>
+        <linearGradient id="cyanGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#38bdf8"/>
+            <stop offset="100%" stop-color="#0284c7"/>
+        </linearGradient>
+        <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#f8fafc"/>
+            <stop offset="100%" stop-color="#94a3b8"/>
+        </linearGradient>
+        <marker id="arrowCyan" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#38bdf8"/>
+        </marker>
+        <marker id="arrowGold" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#f59e0b"/>
+        </marker>
+    </defs>
+
+    <!-- STEP 1: YARIM DİZ ÜSTÜ & ALT ÇAPRAZ -->
+    <g transform="translate(12, 10)">
+        <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+        <rect x="12" y="10" width="135" height="22" rx="4" fill="#38bdf8" fill-opacity="0.15" stroke="#38bdf8" stroke-width="1"/>
+        <text x="79" y="25" fill="#38bdf8" font-size="10" font-weight="800" text-anchor="middle" letter-spacing="0.5">1. YARIM DİZ ÜSTÜ KURULUM</text>
+        
+        <g transform="translate(120, 105)">
+            <line x1="-70" y1="35" x2="70" y2="35" stroke="#334155" stroke-width="2" stroke-linecap="round"/>
+            <rect x="-45" y="32" width="80" height="6" rx="3" fill="#1e293b"/>
+            <!-- Arka Diz Yerde -->
+            <polyline points="-35,35 -20,35 -20,10" stroke="#64748b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <!-- Ön Bacak 90 Derece İleri Basar -->
+            <polyline points="-20,10 15,10 15,35" stroke="#64748b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <!-- Gövde Dik -->
+            <line x1="-20" y1="10" x2="-20" y2="-30" stroke="url(#bodyGrad)" stroke-width="12" stroke-linecap="round"/>
+            <!-- Kafa -->
+            <circle cx="-20" cy="-42" r="9" fill="#cbd5e1"/>
+            <!-- Kollar aşağı sağ kalçada -->
+            <line x1="-16" y1="-25" x2="-35" y2="0" stroke="#94a3b8" stroke-width="5" stroke-linecap="round"/>
+            <!-- Plaka sağ kalça yanında -->
+            <g transform="translate(-40, 2)">
+                <circle cx="0" cy="0" r="13" fill="#1e293b" stroke="url(#cyanGrad)" stroke-width="2.5"/>
+                <circle cx="0" cy="0" r="3" fill="#090d16"/>
+            </g>
+        </g>
+        <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Bir Diz Yerde, Bir Ayak İleride</text>
+        <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Plaka arka dizin kalça yanında</text>
+    </g>
+
+    <!-- STEP 2: DİYAGONAL GEÇİŞ FAZI -->
+    <g transform="translate(270, 10)">
+        <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+        <rect x="12" y="10" width="135" height="22" rx="4" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="1"/>
+        <text x="79" y="25" fill="#f59e0b" font-size="10" font-weight="800" text-anchor="middle" letter-spacing="0.5">2. DİYAGONAL GÖĞÜS DÖNÜŞÜ</text>
+        
+        <g transform="translate(120, 105)">
+            <line x1="-70" y1="35" x2="70" y2="35" stroke="#334155" stroke-width="2" stroke-linecap="round"/>
+            <rect x="-45" y="32" width="80" height="6" rx="3" fill="#1e293b"/>
+            <!-- Bacaklar Sabit (Kalça dönmez) -->
+            <polyline points="-35,35 -20,35 -20,10" stroke="#64748b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <polyline points="-20,10 15,10 15,35" stroke="#64748b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <!-- Gövde Çapraz Rotasyonda -->
+            <line x1="-20" y1="10" x2="-18" y2="-30" stroke="url(#bodyGrad)" stroke-width="12" stroke-linecap="round"/>
+            <circle cx="-18" cy="-42" r="9" fill="#cbd5e1"/>
+            <!-- Çapraz Hareket Yayı Oku -->
+            <path d="M -35,5 Q -5,-15 15,-20" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#arrowGold)"/>
+            <!-- Aktif Yan Karın Parlaması -->
+            <line x1="-16" y1="-8" x2="-16" y2="6" stroke="#38bdf8" stroke-width="4" stroke-linecap="round"/>
+            <!-- Kollar Göğüs Önünde Yükseliyor -->
+            <line x1="-16" y1="-25" x2="8" y2="-15" stroke="#94a3b8" stroke-width="5" stroke-linecap="round"/>
+            <g transform="translate(14, -15)">
+                <circle cx="0" cy="0" r="13" fill="#1e293b" stroke="url(#goldGrad)" stroke-width="2.5"/>
+                <circle cx="0" cy="0" r="3" fill="#090d16"/>
+            </g>
+        </g>
+        <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Kalça Sabit, Karından Çapraz Güç</text>
+        <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Alt karın ve obliklerle gövdeyi çevir</text>
+    </g>
+
+    <!-- STEP 3: ZİRVE ÇAPRAZ BAŞ ÜSTÜ KİLİT -->
+    <g transform="translate(528, 10)">
+        <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+        <rect x="12" y="10" width="135" height="22" rx="4" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="1"/>
+        <text x="79" y="25" fill="#10b981" font-size="10" font-weight="800" text-anchor="middle" letter-spacing="0.5">3. ZİRVE ÇAPRAZ KİLİT</text>
+        
+        <g transform="translate(120, 105)">
+            <line x1="-70" y1="35" x2="70" y2="35" stroke="#334155" stroke-width="2" stroke-linecap="round"/>
+            <rect x="-45" y="32" width="80" height="6" rx="3" fill="#1e293b"/>
+            <!-- Bacaklar -->
+            <polyline points="-35,35 -20,35 -20,10" stroke="#64748b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <polyline points="-20,10 15,10 15,35" stroke="#64748b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <!-- Gövde Dik & Kilitli -->
+            <line x1="-20" y1="10" x2="-20" y2="-30" stroke="url(#bodyGrad)" stroke-width="12" stroke-linecap="round"/>
+            <circle cx="-20" cy="-42" r="9" fill="#cbd5e1"/>
+            <!-- Yan Karın Zirve Kasılma -->
+            <line x1="-16" y1="-8" x2="-16" y2="6" stroke="#10b981" stroke-width="4.5" stroke-linecap="round"/>
+            <!-- Kollar Zıt Omuz Üstünde Çapraz Açık -->
+            <line x1="-16" y1="-25" x2="25" y2="-45" stroke="#f8fafc" stroke-width="5" stroke-linecap="round"/>
+            <!-- Plaka Zirvede -->
+            <g transform="translate(32, -48)">
+                <circle cx="0" cy="0" r="13" fill="#1e293b" stroke="url(#goldGrad)" stroke-width="3"/>
+                <circle cx="0" cy="0" r="3" fill="#090d16"/>
+            </g>
+        </g>
+        <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Zıt Omuz Üstünde 1 Sn Kilit</text>
+        <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Kontrollü 3 sn inişle kalçaya dön</text>
+    </g>
+</svg>

@@ -1,0 +1,54 @@
+{
+  "name": "fitlab",
+  "version": "1.0.0",
+  "description": "FitLAB - Akademik Spor Bilimi ve AI İstasyonu (Masaüstü)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "rm -rf dist /tmp/fitlab-dist && electron-builder --dir && mkdir -p /tmp/fitlab-dist && cp -R dist/mac-arm64/FitLAB.app /tmp/fitlab-dist/ && dot_clean /tmp/fitlab-dist/FitLAB.app && xattr -cr /tmp/fitlab-dist/FitLAB.app && codesign --force --deep --sign - --entitlements build/entitlements.mac.plist /tmp/fitlab-dist/FitLAB.app && rm -rf dist/mac-arm64/FitLAB.app && cp -a /tmp/fitlab-dist/FitLAB.app dist/mac-arm64/FitLAB.app",
+    "dist": "electron-builder",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win"
+  },
+  "keywords": [
+    "fitlab",
+    "sports-science",
+    "electron",
+    "ai-coach",
+    "hypertrophy"
+  ],
+  "author": "FitLAB",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "chart.js": "^4.4.7",
+    "firebase": "^10.14.1"
+  },
+  "build": {
+    "appId": "io.kantarci.fitlab",
+    "productName": "FitLAB",
+    "directories": {
+      "output": "dist"
+    },
+    "mac": {
+      "category": "public.app-category.sports",
+      "identity": null,
+      "hardenedRuntime": true,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "target": [
+        "dir",
+        "dmg"
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    }
+  }
+}

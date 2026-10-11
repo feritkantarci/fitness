@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 230" width="100%" height="auto" style="background:#090d16; border-radius:12px; font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;">
+<defs>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#fbbf24"/>
+        <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <linearGradient id="cyanGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#38bdf8"/>
+        <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+    <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#f8fafc"/>
+        <stop offset="100%" stop-color="#94a3b8"/>
+    </linearGradient>
+    <marker id="arrowCyan" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrowGold" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="#f59e0b"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="#10b981"/>
+    </marker>
+</defs>
+
+    <!-- PANEL 1: DİZ 90 DERECE BÜKÜK -->
+    <g transform="translate(12, 10)">
+        <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+        <rect x="12" y="10" width="105" height="22" rx="4" fill="#38bdf8" fill-opacity="0.15" stroke="#38bdf8" stroke-width="1"/>
+        <text x="64" y="25" fill="#38bdf8" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">1. BAŞLANGIÇ</text>
+        <g transform="translate(120, 95)">
+            <!-- Seat -->
+            <rect x="-35" y="12" width="40" height="6" rx="2" fill="#334155"/>
+            <rect x="-38" y="-25" width="6" height="40" rx="2" fill="#334155"/>
+            <!-- Seated body -->
+            <line x1="-30" y1="10" x2="-26" y2="-22" stroke="url(#bodyGrad)" stroke-width="11" stroke-linecap="round"/>
+            <circle cx="-25" cy="-34" r="8" fill="#cbd5e1"/>
+            <!-- Thigh horizontal -->
+            <line x1="-30" y1="10" x2="5" y2="10" stroke="#64748b" stroke-width="7" stroke-linecap="round"/>
+            <!-- Shin hanging down 90 deg -->
+            <line x1="5" y1="10" x2="5" y2="45" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
+            <!-- Machine pad at ankle -->
+            <circle cx="9" cy="42" r="5" fill="#38bdf8" stroke="#0284c7" stroke-width="1.5"/>
+        </g>
+        <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Ped Ayak Bileğinde</text>
+        <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Sırt mindere tam yaslı, diz 90°</text>
+    </g>
+
+    <!-- ARROW 1 -->
+    <g transform="translate(253, 105)">
+        <circle cx="8" cy="0" r="9" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+        <path d="M6,-3 L10,0 L6,3" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <!-- PANEL 2: TAM AÇILIŞ &amp; QUAD KİLİDİ -->
+    <g transform="translate(270, 10)">
+        <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+        <rect x="12" y="10" width="105" height="22" rx="4" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="1"/>
+        <text x="64" y="25" fill="#10b981" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">2. DİZİ KİLİTLE</text>
+        <g transform="translate(120, 95)">
+            <rect x="-35" y="12" width="40" height="6" rx="2" fill="#334155"/>
+            <rect x="-38" y="-25" width="6" height="40" rx="2" fill="#334155"/>
+            <line x1="-30" y1="10" x2="-26" y2="-22" stroke="url(#bodyGrad)" stroke-width="11" stroke-linecap="round"/>
+            <circle cx="-25" cy="-34" r="8" fill="#cbd5e1"/>
+            <line x1="-30" y1="10" x2="5" y2="10" stroke="#10b981" stroke-width="7" stroke-linecap="round"/>
+            <!-- Shin extended horizontal -->
+            <line x1="5" y1="10" x2="48" y2="10" stroke="#10b981" stroke-width="6" stroke-linecap="round"/>
+            <!-- Quad tear drop highlight -->
+            <circle cx="-5" cy="6" r="5" fill="#10b981" fill-opacity="0.7"/>
+            <!-- Machine pad at extended position -->
+            <circle cx="44" cy="6" r="5" fill="#10b981" stroke="#047857" stroke-width="1.5"/>
+            <!-- Kick arc arrow -->
+            <path d="M12,42 A30,30 0 0,0 44,18" fill="none" stroke="#10b981" stroke-width="2" marker-end="url(#arrowGreen)"/>
+        </g>
+        <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Tepe Quad &amp; VMO Kasıntısı</text>
+        <text x="120" y="195" fill="#10b981" font-size="10" font-weight="600" text-anchor="middle">Dizleri tam aç, gözyaşı kasını sık</text>
+    </g>
+
+    <!-- ARROW 2 -->
+    <g transform="translate(511, 105)">
+        <circle cx="8" cy="0" r="9" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+        <path d="M6,-3 L10,0 L6,3" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <!-- PANEL 3: YAVAŞ BIRAKILIŞ -->
+    <g transform="translate(528, 10)">
+        <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+        <rect x="12" y="10" width="105" height="22" rx="4" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="1"/>
+        <text x="64" y="25" fill="#f59e0b" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">3. NEGATİF İNİŞ</text>
+        <g transform="translate(120, 95)">
+            <rect x="-35" y="12" width="40" height="6" rx="2" fill="#334155"/>
+            <rect x="-38" y="-25" width="6" height="40" rx="2" fill="#334155"/>
+            <line x1="-30" y1="10" x2="-26" y2="-22" stroke="url(#bodyGrad)" stroke-width="11" stroke-linecap="round"/>
+            <circle cx="-25" cy="-34" r="8" fill="#cbd5e1"/>
+            <line x1="-30" y1="10" x2="5" y2="10" stroke="#64748b" stroke-width="7" stroke-linecap="round"/>
+            <line x1="5" y1="10" x2="32" y2="32" stroke="#94a3b8" stroke-width="6" stroke-linecap="round"/>
+            <circle cx="30" cy="34" r="5" fill="#f59e0b" stroke="#b45309" stroke-width="1.5"/>
+            <path d="M40,16 A28,28 0 0,1 18,40" fill="none" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrowGold)"/>
+        </g>
+        <text x="120" y="176" fill="#f8fafc" font-size="11.5" font-weight="700" text-anchor="middle">Ağırlığı Çarptırmadan İndir</text>
+        <text x="120" y="195" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Kas liflerini gerilim altında uzat</text>
+    </g>
+</svg>

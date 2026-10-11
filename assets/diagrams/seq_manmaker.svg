@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1344 230" width="100%" height="auto" style="background:#090d16; border-radius:12px; font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;">
+    <defs>
+        <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#fbbf24"/>
+            <stop offset="100%" stop-color="#d97706"/>
+        </linearGradient>
+        <linearGradient id="cyanGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#38bdf8"/>
+            <stop offset="100%" stop-color="#0284c7"/>
+        </linearGradient>
+        <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#f8fafc"/>
+            <stop offset="100%" stop-color="#94a3b8"/>
+        </linearGradient>
+        <linearGradient id="greenGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#34d399"/>
+            <stop offset="100%" stop-color="#059669"/>
+        </linearGradient>
+        <marker id="arrowGold" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#f59e0b"/>
+        </marker>
+        <marker id="arrowCyan" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#38bdf8"/>
+        </marker>
+    </defs>
+
+    <!-- 1. ŞINAV -->
+    <g transform="translate(12, 10)">
+        <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+        <rect x="12" y="10" width="105" height="22" rx="4" fill="#fbbf24" fill-opacity="0.15" stroke="#fbbf24" stroke-width="1"/>
+        <text x="64" y="25" fill="#fbbf24" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">1. TAM ŞINAV</text>
+        <g transform="translate(120, 95)">
+            <line x1="-75" y1="35" x2="75" y2="35" stroke="#334155" stroke-width="2" stroke-dasharray="4,4" stroke-linecap="round"/>
+            <line x1="-50" y1="33" x2="20" y2="24" stroke="url(#bodyGrad)" stroke-width="10" stroke-linecap="round"/>
+            <circle cx="28" cy="20" r="8" fill="#cbd5e1"/>
+            <polyline points="18,22 10,12 16,30" stroke="#f59e0b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <g transform="translate(16,32) rotate(90) scale(0.9)">
+                <rect x="-8" y="-2.5" width="16" height="5" rx="1.5" fill="#fde68a"/>
+                <rect x="-13" y="-7" width="5.5" height="14" rx="2" fill="url(#goldGrad)" stroke="#b45309" stroke-width="0.5"/>
+                <rect x="7.5" y="-7" width="5.5" height="14" rx="2" fill="url(#goldGrad)" stroke="#b45309" stroke-width="0.5"/>
+            </g>
+        </g>
+        <text x="120" y="174" fill="#f8fafc" font-size="12" font-weight="700" text-anchor="middle">Göğüs İnişi &amp; İtiş</text>
+        <text x="120" y="193" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">45° dirsek, bel çökmeden it</text>
+    </g>
+
+    <!-- Transition Arrow 1 -> 2 -->
+    <g transform="translate(252, 105)">
+        <circle cx="15" cy="0" r="10" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+        <path d="M12,-4 L18,0 L12,4" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <!-- 2. SAĞ ROW -->
+    <g transform="translate(282, 10)">
+        <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+        <rect x="12" y="10" width="115" height="22" rx="4" fill="#38bdf8" fill-opacity="0.15" stroke="#38bdf8" stroke-width="1"/>
+        <text x="69" y="25" fill="#38bdf8" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">2. SAĞ ROW</text>
+        <g transform="translate(120, 95)">
+            <line x1="-75" y1="35" x2="75" y2="35" stroke="#334155" stroke-width="2" stroke-dasharray="4,4" stroke-linecap="round"/>
+            <line x1="-50" y1="33" x2="20" y2="12" stroke="url(#bodyGrad)" stroke-width="10" stroke-linecap="round"/>
+            <circle cx="28" cy="8" r="8" fill="#cbd5e1"/>
+            <line x1="20" y1="14" x2="20" y2="30" stroke="#64748b" stroke-width="4" stroke-linecap="round"/>
+            <polyline points="10,14 -2,6 4,14" stroke="#38bdf8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <g transform="translate(4,14) rotate(90) scale(0.9)">
+                <rect x="-8" y="-2.5" width="16" height="5" rx="1.5" fill="#38bdf8"/>
+                <rect x="-13" y="-7" width="5.5" height="14" rx="2" fill="url(#cyanGrad)" stroke="#0284c7" stroke-width="0.5"/>
+                <rect x="7.5" y="-7" width="5.5" height="14" rx="2" fill="url(#cyanGrad)" stroke="#0284c7" stroke-width="0.5"/>
+            </g>
+        </g>
+        <text x="120" y="174" fill="#f8fafc" font-size="12" font-weight="700" text-anchor="middle">Renegade Row (Sağ)</text>
+        <text x="120" y="193" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Sol kol yerde, sağ dambılı çek</text>
+    </g>
+
+    <!-- Transition Arrow 2 -> 3 -->
+    <g transform="translate(522, 105)">
+        <circle cx="15" cy="0" r="10" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+        <path d="M12,-4 L18,0 L12,4" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <!-- 3. SOL ROW -->
+    <g transform="translate(552, 10)">
+        <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+        <rect x="12" y="10" width="115" height="22" rx="4" fill="#38bdf8" fill-opacity="0.15" stroke="#38bdf8" stroke-width="1"/>
+        <text x="69" y="25" fill="#38bdf8" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">3. SOL ROW</text>
+        <!-- Mirrored coordinates for left arm row -->
+        <g transform="translate(120, 95) scale(-1, 1)">
+            <line x1="-75" y1="35" x2="75" y2="35" stroke="#334155" stroke-width="2" stroke-dasharray="4,4" stroke-linecap="round"/>
+            <line x1="-50" y1="33" x2="20" y2="12" stroke="url(#bodyGrad)" stroke-width="10" stroke-linecap="round"/>
+            <circle cx="28" cy="8" r="8" fill="#cbd5e1"/>
+            <line x1="20" y1="14" x2="20" y2="30" stroke="#64748b" stroke-width="4" stroke-linecap="round"/>
+            <polyline points="10,14 -2,6 4,14" stroke="#38bdf8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <g transform="translate(4,14) rotate(90) scale(0.9)">
+                <rect x="-8" y="-2.5" width="16" height="5" rx="1.5" fill="#38bdf8"/>
+                <rect x="-13" y="-7" width="5.5" height="14" rx="2" fill="url(#cyanGrad)" stroke="#0284c7" stroke-width="0.5"/>
+                <rect x="7.5" y="-7" width="5.5" height="14" rx="2" fill="url(#cyanGrad)" stroke="#0284c7" stroke-width="0.5"/>
+            </g>
+        </g>
+        <text x="120" y="174" fill="#f8fafc" font-size="12" font-weight="700" text-anchor="middle">Renegade Row (Sol)</text>
+        <text x="120" y="193" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Sağ kol yerde, sol dambılı çek</text>
+    </g>
+
+    <!-- Transition Arrow 3 -> 4 -->
+    <g transform="translate(792, 105)">
+        <circle cx="15" cy="0" r="10" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+        <path d="M12,-4 L18,0 L12,4" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <!-- 4. SQUAT CLEAN -->
+    <g transform="translate(822, 10)">
+        <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+        <rect x="12" y="10" width="125" height="22" rx="4" fill="#fbbf24" fill-opacity="0.15" stroke="#fbbf24" stroke-width="1"/>
+        <text x="74" y="25" fill="#fbbf24" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">4. SQUAT CLEAN</text>
+        <g transform="translate(120, 95)">
+            <line x1="-50" y1="45" x2="50" y2="45" stroke="#334155" stroke-width="2" stroke-dasharray="4,4" stroke-linecap="round"/>
+            <polyline points="0,43 14,20 -4,12" stroke="#64748b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <line x1="-4" y1="12" x2="4" y2="-15" stroke="url(#bodyGrad)" stroke-width="11" stroke-linecap="round"/>
+            <circle cx="8" cy="-24" r="8" fill="#cbd5e1"/>
+            <polyline points="4,-10 14,-6 8,4" stroke="#f59e0b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <g transform="translate(8,4) scale(0.9)">
+                <rect x="-2.5" y="-8" width="5" height="16" rx="1.5" fill="#fde68a"/>
+                <rect x="-7" y="-13" width="14" height="5.5" rx="2" fill="url(#goldGrad)" stroke="#b45309" stroke-width="0.5"/>
+                <rect x="-7" y="7.5" width="14" height="5.5" rx="2" fill="url(#goldGrad)" stroke="#b45309" stroke-width="0.5"/>
+            </g>
+        </g>
+        <text x="120" y="174" fill="#f8fafc" font-size="12" font-weight="700" text-anchor="middle">Ön Squat &amp; Rack</text>
+        <text x="120" y="193" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Yere sağlam bas, omuzda karşıla</text>
+    </g>
+
+    <!-- Transition Arrow 4 -> 5 -->
+    <g transform="translate(1062, 105)">
+        <circle cx="15" cy="0" r="10" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+        <path d="M12,-4 L18,0 L12,4" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <!-- 5. BAŞ ÜSTÜ THRUSTER -->
+    <g transform="translate(1092, 10)">
+        <rect width="240" height="210" rx="10" fill="#131c2e" stroke="#25334d" stroke-width="1.5"/>
+        <rect x="12" y="10" width="125" height="22" rx="4" fill="#34d399" fill-opacity="0.15" stroke="#34d399" stroke-width="1"/>
+        <text x="74" y="25" fill="#34d399" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">5. BAŞ ÜSTÜ KİLİT</text>
+        <g transform="translate(120, 95)">
+            <line x1="-50" y1="45" x2="50" y2="45" stroke="#334155" stroke-width="2" stroke-dasharray="4,4" stroke-linecap="round"/>
+            <line x1="0" y1="43" x2="0" y2="0" stroke="#64748b" stroke-width="7" stroke-linecap="round"/>
+            <line x1="0" y1="0" x2="0" y2="-32" stroke="url(#bodyGrad)" stroke-width="11" stroke-linecap="round"/>
+            <circle cx="0" cy="-42" r="8" fill="#cbd5e1"/>
+            <line x1="0" y1="-28" x2="0" y2="-58" stroke="#34d399" stroke-width="5" stroke-linecap="round"/>
+            <g transform="translate(0,-60) scale(0.9)">
+                <rect x="-8" y="-2.5" width="16" height="5" rx="1.5" fill="#a7f3d0"/>
+                <rect x="-13" y="-7" width="5.5" height="14" rx="2" fill="url(#greenGrad)" stroke="#047857" stroke-width="0.5"/>
+                <rect x="7.5" y="-7" width="5.5" height="14" rx="2" fill="url(#greenGrad)" stroke="#047857" stroke-width="0.5"/>
+            </g>
+        </g>
+        <text x="120" y="174" fill="#f8fafc" font-size="12" font-weight="700" text-anchor="middle">Patlayıcı Thruster Pres</text>
+        <text x="120" y="193" fill="#94a3b8" font-size="10" font-weight="500" text-anchor="middle">Bacak itişiyle baş üstü kilit</text>
+    </g>
+</svg>

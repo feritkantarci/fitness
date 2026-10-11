@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Çelik Kodu • Canlı Antrenman Test Laboratuvarı (v141)</title>
+    <style>
+        :root {
+            --bg-base: #060911;
+            --bg-card: #0c1220;
+            --bg-elevated: #151e32;
+            --border: rgba(255, 255, 255, 0.1);
+            --border-highlight: rgba(245, 158, 11, 0.4);
+            --gold: #f59e0b;
+            --gold-glow: rgba(245, 158, 11, 0.35);
+            --cyan: #38bdf8;
+            --green: #22c55e;
+            --green-glow: rgba(34, 197, 94, 0.4);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 12px 10px 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* BANNER */
+        .test-header {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(56, 189, 248, 0.08));
+            border: 1px solid var(--border-highlight);
+            border-radius: 12px;
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .test-title {
+            font-size: 13px;
+            font-weight: 900;
+            color: var(--gold);
+            letter-spacing: 0.5px;
+        }
+        .test-badge {
+            background: rgba(34, 197, 94, 0.2);
+            color: #86efac;
+            border: 1px solid var(--green);
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 6px;
+        }
+
+        /* 1. STICKY HUD */
+        .workout-sticky-hud {
+            position: sticky;
+            top: 6px;
+            z-index: 100;
+            background: rgba(12, 18, 32, 0.94);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 7px 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+        .hud-main-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+        }
+        .hud-timer-col {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .hud-time-val {
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--cyan);
+        }
+        .btn-hud-tiny {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 3px 6px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .hud-rest-col {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            border-radius: 8px;
+            padding: 3px 8px;
+            transition: all 0.25s;
+        }
+        .hud-rest-col.resting {
+            background: rgba(245, 158, 11, 0.2) !important;
+            border-color: var(--gold) !important;
+            box-shadow: 0 0 14px rgba(245, 158, 11, 0.45) !important;
+            animation: hudRestPulse 1.8s infinite ease-in-out;
+        }
+        @keyframes hudRestPulse {
+            0%, 100% { border-color: rgba(245, 158, 11, 0.6); box-shadow: 0 0 10px rgba(245, 158, 11, 0.3); }
+            50% { border-color: rgba(245, 158, 11, 1); box-shadow: 0 0 20px rgba(245, 158, 11, 0.65); }
+        }
+        .hud-rest-val {
+            font-family: monospace;
+            font-size: 16.5px;
+            font-weight: 900;
+            color: var(--gold);
+        }
+        .hud-progress-row {
+            margin-top: 4px;
+        }
+        .hud-progress-track {
+            height: 3px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .hud-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold), var(--green));
+            transition: width 0.3s ease;
+        }
+
+        /* 2. EXERCISE NAVIGATION STEPPER */
+        .hevy-exercise-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 8px 10px;
+        }
+        .hevy-nav-arrow {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.15s;
+        }
+        .hevy-nav-arrow:hover:not(:disabled) {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+        .hevy-nav-arrow:disabled {
+            opacity: 0.25;
+            cursor: not-allowed;
+        }
+        .hevy-nav-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            flex: 1;
+        }
+        .hevy-nav-counter {
+            font-size: 10.5px;
+            font-weight: 900;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .hevy-nav-pills {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            max-width: 100%;
+            padding: 1px 2px;
+        }
+        .hevy-pill-dot {
+            min-width: 28px;
+            height: 25px;
+            padding: 0 6px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .hevy-pill-dot.active {
+            background: rgba(245, 158, 11, 0.22);
+            border-color: var(--gold);
+            color: var(--gold);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.35);
+        }
+        .hevy-pill-dot.done {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: var(--green);
+            color: #86efac;
+            font-weight: 900;
+        }
+
+        /* 3. EXERCISE CARD */
+        .hevy-exercise-card {
+            background: var(--bg-card);
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            padding: 14px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+        .hevy-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .hevy-exercise-title {
+            font-size: 18px;
+            font-weight: 900;
+            color: #fff;
+            line-height: 1.25;
+        }
+        .hevy-equip-badge {
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            color: var(--cyan);
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 7px;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+        .hevy-meta-row {
+            display: flex;
+            gap: 10px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+        .hevy-meta-item strong {
+            color: var(--gold);
+        }
+
+        /* COLLAPSIBLE FORM GUIDE */
+        .hevy-form-collapsible {
+            margin: 8px 0 12px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px dashed rgba(255, 255, 255, 0.12);
+            overflow: hidden;
+        }
+        .btn-hevy-form-toggle {
+            width: 100%;
+            padding: 8px 10px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 11.5px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .btn-hevy-form-toggle:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .hevy-form-body {
+            padding: 8px 10px 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 12px;
+            color: #cbd5e1;
+            line-height: 1.45;
+        }
+        .form-cue-box {
+            background: rgba(245, 158, 11, 0.08);
+            border-left: 3px solid var(--gold);
+            padding: 6px 10px;
+            border-radius: 4px;
+            margin-top: 6px;
+            font-size: 11.5px;
+        }
+
+        /* GHOST PREVIOUS RECORD */
+        .hevy-ghost-bar {
+            background: rgba(56, 189, 248, 0.08);
+            border: 1px dashed rgba(56, 189, 248, 0.35);
+            border-radius: 8px;
+            padding: 6px 10px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 11.5px;
+            color: #bae6fd;
+        }
+        .btn-hevy-ghost-apply {
+            background: var(--cyan);
+            color: #090d16;
+            border: none;
+            border-radius: 5px;
+            font-size: 10px;
+            font-weight: 900;
+            padding: 4px 8px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        /* 4. HEVY SETS TABLE */
+        .hevy-sets-card {
+            background: rgba(11, 17, 32, 0.85);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+        .hevy-th-row {
+            display: grid;
+            grid-template-columns: 36px 60px 1fr 1fr 48px;
+            gap: 6px;
+            padding: 7px 8px;
+            background: rgba(0, 0, 0, 0.4);
+            border-bottom: 1px solid var(--border);
+            font-size: 10px;
+            font-weight: 900;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+            text-align: center;
+            align-items: center;
+        }
+        .hevy-tr-row {
+            display: grid;
+            grid-template-columns: 36px 60px 1fr 1fr 48px;
+            gap: 6px;
+            padding: 7px 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            align-items: center;
+            transition: background 0.15s;
+        }
+        .hevy-tr-row:last-child {
+            border-bottom: none;
+        }
+        .hevy-tr-row.active-target {
+            background: rgba(245, 158, 11, 0.08);
+            border-left: 3px solid var(--gold);
+        }
+        .hevy-tr-row.done {
+            background: rgba(34, 197, 94, 0.06);
+        }
+        .hevy-td {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hevy-set-pill {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border);
+            color: #cbd5e1;
+            font-size: 12px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hevy-set-pill.target {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: rgba(245, 158, 11, 0.18);
+        }
+        .hevy-set-pill.done {
+            background: #16a34a;
+            border-color: var(--green);
+            color: #fff;
+        }
+        .hevy-prev-text {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 700;
+            text-align: center;
+            line-height: 1.2;
+            cursor: pointer;
+            text-decoration: underline dotted;
+            color: #7dd3fc;
+        }
+        .hevy-prev-text:hover {
+            color: var(--gold);
+        }
+
+        /* LISTBOX PICKER CELL BUTTON (NO + -) */
+        .hevy-listbox-btn {
+            width: 100%;
+            height: 36px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 13.5px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.15s;
+            user-select: none;
+            padding: 0 4px;
+        }
+        .hevy-listbox-btn:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: rgba(245, 158, 11, 0.08);
+        }
+        .hevy-listbox-btn:active {
+            transform: scale(0.95);
+        }
+        .hevy-tr-row.active-target .hevy-listbox-btn {
+            border-color: rgba(245, 158, 11, 0.5);
+        }
+        .hevy-tr-row.done .hevy-listbox-btn {
+            color: #86efac;
+            border-color: rgba(34, 197, 94, 0.35);
+            background: rgba(34, 197, 94, 0.06);
+        }
+        .listbox-btn-arrow {
+            font-size: 10px;
+            color: var(--gold);
+            opacity: 0.8;
+        }
+
+        /* CHECK BUTTON (HEVY CHECK) */
+        .btn-hevy-check {
+            width: 38px;
+            height: 34px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            user-select: none;
+        }
+        .btn-hevy-check.target {
+            border: 2px solid var(--gold);
+            background: rgba(245, 158, 11, 0.18);
+            color: var(--gold);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+            animation: targetPulse 1.8s infinite ease-in-out;
+        }
+        @keyframes targetPulse {
+            0%, 100% { border-color: rgba(245, 158, 11, 0.6); box-shadow: 0 0 8px rgba(245, 158, 11, 0.25); }
+            50% { border-color: rgba(245, 158, 11, 1); box-shadow: 0 0 16px rgba(245, 158, 11, 0.55); }
+        }
+        .btn-hevy-check.checked {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            border: 1.5px solid var(--green);
+            color: #fff;
+            font-weight: 900;
+            box-shadow: 0 2px 10px rgba(34, 197, 94, 0.4);
+        }
+        .btn-hevy-check:active {
+            transform: scale(0.92);
+        }
+
+        .hevy-table-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.25);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .btn-table-action {
+            background: transparent;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 5px 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-table-action.add {
+            border: 1px dashed var(--gold);
+            color: var(--gold);
+        }
+        .btn-table-action.del {
+            border: 1px dashed rgba(239, 68, 68, 0.4);
+            color: #f87171;
+        }
+
+        /* 5. CELEBRATION & NEXT BANNER */
+        .hevy-exercise-done-banner {
+            background: rgba(34, 197, 94, 0.12);
+            border: 1.5px solid var(--green);
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+            margin: 12px 0;
+            animation: fadeIn 0.25s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .btn-next-cta {
+            width: 100%;
+            margin-top: 10px;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--gold), #b45309);
+            border: none;
+            border-radius: 10px;
+            color: #090d16;
+            font-size: 13.5px;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+        }
+        .btn-next-cta:active {
+            transform: scale(0.98);
+        }
+
+        /* FOOTER ACTIONS */
+        .hevy-footer-nav {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: 14px;
+        }
+        .btn-footer-nav {
+            flex: 1;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 800;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .btn-footer-nav:hover:not(:disabled) {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+        .btn-footer-nav:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* ==================== QUICK LISTBOX PICKER MODAL (BOTTOM SHEET) ==================== */
+        .quick-listbox-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 10000;
+            align-items: flex-end;
+            justify-content: center;
+            animation: fadeInOverlay 0.2s ease-out;
+        }
+        .quick-listbox-overlay.active {
+            display: flex;
+        }
+        @keyframes fadeInOverlay {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .quick-listbox-sheet {
+            width: 100%;
+            max-width: 500px;
+            max-height: 75vh;
+            background: #0c1220;
+            border: 1px solid var(--border-highlight);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.85), 0 0 25px rgba(245, 158, 11, 0.15);
+            animation: slideUpSheet 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
+        @keyframes slideUpSheet {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .quick-listbox-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px 10px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.6);
+        }
+        .quick-listbox-title {
+            font-size: 15px;
+            font-weight: 900;
+            color: var(--gold);
+        }
+        .quick-listbox-sub {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+        .btn-listbox-close {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 800;
+        }
+        .quick-listbox-scroll {
+            overflow-y: auto;
+            padding: 10px 14px;
+            max-height: 50vh;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .listbox-option-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 800;
+            color: #e2e8f0;
+            cursor: pointer;
+            transition: all 0.15s;
+            user-select: none;
+        }
+        .listbox-option-item:hover, .listbox-option-item:active {
+            background: rgba(245, 158, 11, 0.15);
+            border-color: var(--gold);
+            color: #fff;
+            transform: scale(0.99);
+        }
+        .listbox-option-item.selected {
+            background: rgba(245, 158, 11, 0.22);
+            border: 1.5px solid var(--gold);
+            color: var(--gold);
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.25);
+        }
+        .listbox-option-check {
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--gold);
+        }
+        .quick-listbox-custom-row {
+            display: flex;
+            gap: 8px;
+            padding: 10px 14px 16px;
+            border-top: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.8);
+        }
+        .listbox-custom-input {
+            flex: 1;
+            background: #090d16;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 800;
+            padding: 8px 12px;
+            outline: none;
+        }
+        .listbox-custom-input:focus {
+            border-color: var(--gold);
+        }
+        .btn-listbox-apply {
+            background: var(--gold);
+            color: #090d16;
+            border: none;
+            border-radius: 8px;
+            font-size: 12.5px;
+            font-weight: 900;
+            padding: 0 16px;
+            cursor: pointer;
+        }
+
+        /* TOAST */
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid var(--gold);
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.8);
+            transition: transform 0.25s ease-out;
+            z-index: 20000;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        #toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- TEST HEADER -->
+    <div class="test-header">
+        <div>
+            <div class="test-title">⚔️ ÇELİK KODU • LİSTBOX SEÇİCİ LAB</div>
+            <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">Kilo & Tekrar Listbox Seçim Arayüzü</div>
+        </div>
+        <div style="display:flex; gap:6px; align-items:center;">
+            <div class="test-badge">v141 MOTORU</div>
+            <button type="button" class="test-badge" onclick="forceRefreshTest()" style="cursor:pointer; background:rgba(245,158,11,0.2); color:var(--gold); border-color:var(--gold);" title="Önbelleği Temizle ve En Güncel Sürümü Yükle">🔄 Önbelleği Yenile</button>
+        </div>
+    </div>
+
+    <!-- 1. WORKOUT STICKY HUD -->
+    <div class="workout-sticky-hud" id="activeWorkoutHUD">
+        <div class="hud-main-bar">
+            <div class="hud-timer-col">
+                <span style="font-size:12px;">⏱️</span>
+                <div class="hud-time-val" id="totalTimerDisplay">00:00</div>
+                <button type="button" class="btn-hud-tiny" onclick="toggleTotalTimer()" id="btnPauseResume">⏸️</button>
+            </div>
+
+            <div class="hud-rest-col" id="hudRestBox">
+                <span style="font-size:12px; color:var(--gold);">⏳</span>
+                <div class="hud-rest-val" id="restTimerDisplay">00:45</div>
+                <div style="display:flex; gap:3px;">
+                    <button type="button" class="btn-hud-tiny" id="btnRestPlay" onclick="toggleRestTimer()">▶</button>
+                    <button type="button" class="btn-hud-tiny" onclick="adjustRestTimer(15)">+15s</button>
+                    <button type="button" class="btn-hud-tiny" style="color:var(--cyan);" onclick="skipRestTimer()">⏩</button>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:4px; align-items:center;">
+                <button type="button" class="btn-hud-tiny" onclick="toggleSound()" id="soundToggleBtn" title="Ses Aç/Kapat">🔊</button>
+                <button type="button" class="btn-hud-tiny" style="background:rgba(34,197,94,0.15); color:#86efac; border-color:var(--green);" title="Ekran Açık">🟢</button>
+            </div>
+        </div>
+
+        <div class="hud-progress-row">
+            <div class="hud-progress-track">
+                <div class="hud-progress-fill" id="progressBarFill" style="width:0%;"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:9.5px; color:var(--text-secondary); margin-top:2px;">
+                <span id="progressText">Set İlerlemesi: 0 / 10 (%0)</span>
+                <span style="color:var(--gold); font-weight:800;" id="progressDetail">Egzersiz 1/3</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. HEVY NAVIGATION STEPPER (CAROUSEL) -->
+    <div class="hevy-exercise-nav">
+        <button type="button" class="hevy-nav-arrow" id="btnPrevEx" onclick="navigateExercise(-1)">◀</button>
+        <div class="hevy-nav-center">
+            <div class="hevy-nav-counter" id="navCounterText">EGZERSİZ 1 / 3</div>
+            <div class="hevy-nav-pills" id="navPillsContainer"></div>
+        </div>
+        <button type="button" class="hevy-nav-arrow" id="btnNextEx" onclick="navigateExercise(1)">▶</button>
+    </div>
+
+    <!-- 3. ACTIVE EXERCISE CARD -->
+    <div class="hevy-exercise-card" id="exerciseCardContainer"></div>
+
+    <!-- FOOTER NAV -->
+    <div class="hevy-footer-nav">
+        <button type="button" class="btn-footer-nav" id="btnFooterPrev" onclick="navigateExercise(-1)">◀ Önceki Hrk</button>
+        <button type="button" class="btn-footer-nav" style="border-color:var(--gold); color:var(--gold);" onclick="showToast('🏁 Antrenman özeti simüle edildi!')">🏁 Seansı Bitir</button>
+        <button type="button" class="btn-footer-nav" id="btnFooterNext" onclick="navigateExercise(1)">Sonraki Hrk ▶</button>
+    </div>
+</div>
+
+<!-- QUICK LISTBOX PICKER MODAL (BOTTOM SHEET) -->
+<div id="quickListboxModal" class="quick-listbox-overlay" onclick="closeListboxPicker(event)">
+    <div class="quick-listbox-sheet" onclick="event.stopPropagation()">
+        <div class="quick-listbox-header">
+            <div>
+                <div class="quick-listbox-title" id="listboxTitle">⚖️ Ağırlık Seç (KG)</div>
+                <div class="quick-listbox-sub" id="listboxSub">Dambıl Bench Press • Set 1</div>
+            </div>
+            <button type="button" class="btn-listbox-close" onclick="closeListboxPicker()">✕</button>
+        </div>
+        <div class="quick-listbox-scroll" id="listboxItemsContainer"></div>
+        <div class="quick-listbox-custom-row">
+            <input type="number" step="0.5" id="listboxCustomInput" class="listbox-custom-input" placeholder="Özel Değer Yaz...">
+            <button type="button" class="btn-listbox-apply" onclick="applyCustomListboxValue()">Uygula</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+    async function forceRefreshTest() {
+        if ('caches' in window) {
+            try {
+                const keys = await caches.keys();
+                await Promise.all(keys.map(k => caches.delete(k)));
+            } catch(e) {}
+        }
+        window.location.href = window.location.origin + window.location.pathname + '?t=' + Date.now();
+    }
+
+    // SIMULATED WORKOUT DATA
+    const mockExercises = [
+        {
+            id: 'ex_bench_press',
+            name: 'Dambıl Bench Press',
+            equipment: 'Dambıl',
+            target: '3 Set × 8-12 Tk',
+            rest: 45,
+            lastPerf: { weight: 24, reps: 10, date: '08.10' },
+            formGuide: 'Sırtınızı sehpaya düzgünce yaslayın. Kürek kemiklerini geride kilitleyin. Dambılları göğüs hizasına kontrollü indirin, dirsekleri 45 derece açıda tutun.',
+            sets: [
+                { setNo: 1, weight: 24, reps: 10, completed: false },
+                { setNo: 2, weight: 24, reps: 10, completed: false },
+                { setNo: 3, weight: 24, reps: 10, completed: false }
+            ]
+        },
+        {
+            id: 'ex_saw_row',
+            name: 'Kettlebell Saw Row (Tek Kol)',
+            equipment: 'Kettlebell',
+            target: '3 Set × 10 Tk',
+            rest: 45,
+            lastPerf: { weight: 20, reps: 10, date: '08.10' },
+            formGuide: 'Gövdeyi yere 45 derece eğin, karın sıkı. Ağırlığı kalça yönünde geriye çekin, tepe noktada latissimus kasını 1 saniye sıkın.',
+            sets: [
+                { setNo: 1, weight: 20, reps: 10, completed: false },
+                { setNo: 2, weight: 20, reps: 10, completed: false },
+                { setNo: 3, weight: 20, reps: 10, completed: false }
+            ]
+        },
+        {
+            id: 'ex_goblet_squat',
+            name: 'Goblet Squat (Derin Çöküş)',
+            equipment: 'Kettlebell',
+            target: '4 Set × 12 Tk',
+            rest: 60,
+            lastPerf: { weight: 24, reps: 12, date: '08.10' },
+            formGuide: 'Kettlebell\'i göğüs hizasında tutun, dirsekler göğse yapışık. Dizler ayak parmakları yönünde açılarak paralel seviyenin altına inin.',
+            sets: [
+                { setNo: 1, weight: 24, reps: 12, completed: false },
+                { setNo: 2, weight: 24, reps: 12, completed: false },
+                { setNo: 3, weight: 24, reps: 12, completed: false },
+                { setNo: 4, weight: 24, reps: 12, completed: false }
+            ]
+        }
+    ];
+
+    let currentExIdx = 0;
+    let isFormGuideOpen = {};
+    let soundEnabled = true;
+
+    // TOTAL TIMER
+    let totalSecs = 0;
+    let totalTimerInterval = null;
+    let totalTimerRunning = true;
+
+    function startTotalTimer() {
+        totalTimerInterval = setInterval(() => {
+            if (totalTimerRunning) {
+                totalSecs++;
+                const m = String(Math.floor(totalSecs / 60)).padStart(2, '0');
+                const s = String(totalSecs % 60).padStart(2, '0');
+                document.getElementById('totalTimerDisplay').innerText = `${m}:${s}`;
+            }
+        }, 1000);
+    }
+
+    function toggleTotalTimer() {
+        totalTimerRunning = !totalTimerRunning;
+        document.getElementById('btnPauseResume').innerText = totalTimerRunning ? '⏸️' : '▶️';
+    }
+
+    // REST TIMER
+    let restSecs = 45;
+    let restTimerInterval = null;
+    let isRestRunning = false;
+
+    function startRestTimer(secs) {
+        clearInterval(restTimerInterval);
+        restSecs = secs;
+        isRestRunning = true;
+        updateRestDisplay();
+        document.getElementById('hudRestBox').classList.add('resting');
+        document.getElementById('btnRestPlay').innerText = '⏸';
+
+        restTimerInterval = setInterval(() => {
+            if (restSecs > 0) {
+                restSecs--;
+                updateRestDisplay();
+                if (restSecs <= 3 && restSecs > 0) playBeep(520);
+            } else {
+                clearInterval(restTimerInterval);
+                isRestRunning = false;
+                document.getElementById('hudRestBox').classList.remove('resting');
+                document.getElementById('btnRestPlay').innerText = '▶';
+                playAlertSound();
+                if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                showToast("⏰ Dinlenme süresi bitti! Sıradaki sete başla!");
+            }
+        }, 1000);
+    }
+
+    function updateRestDisplay() {
+        const m = String(Math.floor(restSecs / 60)).padStart(2, '0');
+        const s = String(restSecs % 60).padStart(2, '0');
+        document.getElementById('restTimerDisplay').innerText = `${m}:${s}`;
+    }
+
+    function toggleRestTimer() {
+        if (isRestRunning) {
+            clearInterval(restTimerInterval);
+            isRestRunning = false;
+            document.getElementById('hudRestBox').classList.remove('resting');
+            document.getElementById('btnRestPlay').innerText = '▶';
+        } else {
+            startRestTimer(restSecs || 45);
+        }
+    }
+
+    function adjustRestTimer(delta) {
+        restSecs = Math.max(0, restSecs + delta);
+        updateRestDisplay();
+        if (!isRestRunning) startRestTimer(restSecs);
+    }
+
+    function skipRestTimer() {
+        clearInterval(restTimerInterval);
+        isRestRunning = false;
+        restSecs = 0;
+        updateRestDisplay();
+        document.getElementById('hudRestBox').classList.remove('resting');
+        document.getElementById('btnRestPlay').innerText = '▶';
+        playBeep(750);
+    }
+
+    // AUDIO SYNTH
+    function playBeep(freq = 600) {
+        if (!soundEnabled) return;
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, ctx.currentTime);
+            gain.gain.setValueAtTime(0.12, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.12);
+        } catch(e) {}
+    }
+
+    function playAlertSound() {
+        if (!soundEnabled) return;
+        playBeep(880);
+        setTimeout(() => playBeep(1100), 120);
+    }
+
+    function toggleSound() {
+        soundEnabled = !soundEnabled;
+        document.getElementById('soundToggleBtn').innerText = soundEnabled ? '🔊' : '🔇';
+        showToast(soundEnabled ? '🔊 Sesler Aktif' : '🔇 Sesler Kapatıldı');
+    }
+
+    // TOAST
+    function showToast(msg) {
+        const el = document.getElementById('toast');
+        el.innerText = msg;
+        el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), 2400);
+    }
+
+    // NAVIGATION
+    function navigateExercise(delta) {
+        const next = currentExIdx + delta;
+        if (next >= 0 && next < mockExercises.length) {
+            currentExIdx = next;
+            render();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    function jumpToEx(idx) {
+        currentExIdx = idx;
+        render();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ==================== LISTBOX PICKER ENGINE ====================
+    let currentPickerState = { setIdx: null, type: null }; // 'weight' | 'reps'
+    const COMMON_WEIGHT_OPTIONS = [
+        0, 2, 2.5, 4, 5, 6, 7, 7.5, 8, 9, 10, 
+        12, 12.5, 14, 15, 16, 17.5, 18, 20, 22, 22.5, 24, 25, 26, 27.5, 28, 30, 
+        32, 32.5, 34, 35, 36, 37.5, 38, 40, 42.5, 45, 47.5, 50, 52.5, 55, 60, 
+        65, 70, 75, 80, 85, 90, 95, 100, 110, 120, 130, 140, 150
+    ];
+    const COMMON_REPS_OPTIONS = [
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 
+        11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 
+        22, 25, 30, 35, 40, 50
+    ];
+
+    function openListboxPicker(setIdx, type) {
+        currentPickerState = { setIdx, type };
+        const ex = mockExercises[currentExIdx];
+        const st = ex.sets[setIdx];
+        const isWeight = (type === 'weight');
+        const curVal = isWeight ? parseFloat(st.weight) : parseInt(st.reps);
+
+        document.getElementById('listboxTitle').innerText = isWeight ? '⚖️ Ağırlık Seç (KG)' : '🔄 Tekrar Sayısı Seç';
+        document.getElementById('listboxSub').innerText = `${ex.name} • Set ${st.setNo}`;
+        document.getElementById('listboxCustomInput').placeholder = isWeight ? 'Örn: 27.5' : 'Örn: 14';
+        document.getElementById('listboxCustomInput').value = '';
+
+        const list = isWeight ? COMMON_WEIGHT_OPTIONS.slice() : COMMON_REPS_OPTIONS.slice();
+        if (!isNaN(curVal) && curVal !== null && !list.includes(curVal)) {
+            list.push(curVal);
+            list.sort((a,b) => a - b);
+        }
+
+        const itemsHtml = list.map(val => {
+            const isSelected = (val === curVal);
+            const label = isWeight ? `${val} kg` : `${val} tekrar`;
+            return `
+                <div class="listbox-option-item ${isSelected ? 'selected' : ''}" 
+                     onclick="selectListboxValue(${val})">
+                    <span>${label}</span>
+                    ${isSelected ? '<span class="listbox-option-check">✓</span>' : ''}
+                </div>
+            `;
+        }).join('');
+
+        document.getElementById('listboxItemsContainer').innerHTML = itemsHtml;
+        document.getElementById('quickListboxModal').classList.add('active');
+
+        // Scroll selected into view
+        setTimeout(() => {
+            const sel = document.querySelector('.listbox-option-item.selected');
+            if (sel) sel.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }, 50);
+    }
+
+    function selectListboxValue(val) {
+        if (currentPickerState.setIdx === null) return;
+        const ex = mockExercises[currentExIdx];
+        const st = ex.sets[currentPickerState.setIdx];
+        if (currentPickerState.type === 'weight') {
+            st.weight = val;
+            for (let i = currentPickerState.setIdx + 1; i < ex.sets.length; i++) {
+                if (!ex.sets[i].completed) {
+                    ex.sets[i].weight = val;
+                }
+            }
+            if (currentPickerState.setIdx === 0 && ex.sets.length > 1) {
+                showToast(`⚖️ Set 1: ${val} kg seçildi (Sonraki setlere aktarıldı)`);
+            } else {
+                showToast(`⚖️ Set ${st.setNo}: ${val} kg seçildi`);
+            }
+        } else {
+            st.reps = val;
+            showToast(`🔄 Set ${st.setNo}: ${val} tekrar seçildi`);
+        }
+        closeListboxPicker();
+        render();
+        if (navigator.vibrate) navigator.vibrate(35);
+        playBeep(650);
+    }
+
+    function applyCustomListboxValue() {
+        const input = document.getElementById('listboxCustomInput');
+        const val = parseFloat(input.value);
+        if (!isNaN(val) && val >= 0) {
+            selectListboxValue(val);
+        }
+    }
+
+    function closeListboxPicker(e) {
+        if (e && e.target !== e.currentTarget) return;
+        document.getElementById('quickListboxModal').classList.remove('active');
+    }
+
+    // SET ACTIONS
+    function toggleSet(setIdx) {
+        const ex = mockExercises[currentExIdx];
+        const st = ex.sets[setIdx];
+        st.completed = !st.completed;
+
+        if (st.completed) {
+            for (let i = setIdx + 1; i < ex.sets.length; i++) {
+                if (!ex.sets[i].completed) {
+                    ex.sets[i].weight = st.weight;
+                }
+            }
+            playBeep(700);
+            if (navigator.vibrate) navigator.vibrate([100, 40, 100]);
+            startRestTimer(ex.rest || 45);
+            showToast(`✅ Set ${st.setNo} Tamamlandı! Sonraki setler ${st.weight} kg yapıldı`);
+        } else {
+            showToast(`↩️ Set ${st.setNo} geri alındı`);
+        }
+        render();
+    }
+
+    function addSet() {
+        const ex = mockExercises[currentExIdx];
+        const lastSt = ex.sets[ex.sets.length - 1];
+        ex.sets.push({
+            setNo: ex.sets.length + 1,
+            weight: lastSt ? lastSt.weight : 20,
+            reps: lastSt ? lastSt.reps : 10,
+            completed: false
+        });
+        render();
+        showToast("➕ Yeni set eklendi");
+    }
+
+    function removeSet() {
+        const ex = mockExercises[currentExIdx];
+        if (ex.sets.length > 1) {
+            ex.sets.pop();
+            render();
+            showToast("🗑️ Son set silindi");
+        }
+    }
+
+    function applyGhostToAll() {
+        const ex = mockExercises[currentExIdx];
+        if (!ex.lastPerf) return;
+        ex.sets.forEach(st => {
+            if (!st.completed) {
+                st.weight = ex.lastPerf.weight;
+                st.reps = ex.lastPerf.reps;
+            }
+        });
+        render();
+        showToast(`⚡ Önceki seans (${ex.lastPerf.weight}kg x ${ex.lastPerf.reps}tk) tüm sete yazıldı!`);
+    }
+
+    function applyGhostToSingle(setIdx) {
+        const ex = mockExercises[currentExIdx];
+        if (!ex.lastPerf) return;
+        ex.sets[setIdx].weight = ex.lastPerf.weight;
+        ex.sets[setIdx].reps = ex.lastPerf.reps;
+        render();
+        showToast(`⚡ Set ${setIdx + 1}'e önceki seans kilosu aktarıldı!`);
+    }
+
+    function toggleFormGuide() {
+        const ex = mockExercises[currentExIdx];
+        isFormGuideOpen[ex.id] = !isFormGuideOpen[ex.id];
+        render();
+    }
+
+    // MAIN RENDER FUNCTION
+    function render() {
+        const ex = mockExercises[currentExIdx];
+        const sets = ex.sets;
+        const firstIncompleteIdx = sets.findIndex(s => !s.completed);
+        const isAllDone = sets.every(s => s.completed);
+
+        // Update Nav Stepper
+        document.getElementById('navCounterText').innerText = `EGZERSİZ ${currentExIdx + 1} / ${mockExercises.length}`;
+        document.getElementById('btnPrevEx').disabled = (currentExIdx === 0);
+        document.getElementById('btnNextEx').disabled = (currentExIdx === mockExercises.length - 1);
+        document.getElementById('btnFooterPrev').disabled = (currentExIdx === 0);
+        document.getElementById('btnFooterNext').disabled = (currentExIdx === mockExercises.length - 1);
+
+        // Update Nav Pills
+        const pillsHtml = mockExercises.map((e, idx) => {
+            const done = e.sets.every(s => s.completed);
+            const active = idx === currentExIdx;
+            const cls = `hevy-pill-dot ${active ? 'active' : ''} ${done ? 'done' : ''}`;
+            return `<button type="button" class="${cls}" onclick="jumpToEx(${idx})">${done ? '✓' : (idx + 1)}</button>`;
+        }).join('');
+        document.getElementById('navPillsContainer').innerHTML = pillsHtml;
+
+        // Calculate Overall Progress
+        let totalSets = 0;
+        let completedSets = 0;
+        mockExercises.forEach(e => {
+            totalSets += e.sets.length;
+            completedSets += e.sets.filter(s => s.completed).length;
+        });
+        const pct = Math.round((completedSets / totalSets) * 100);
+        document.getElementById('progressBarFill').style.width = `${pct}%`;
+        document.getElementById('progressText').innerText = `Set İlerlemesi: ${completedSets} / ${totalSets} Set (%${pct})`;
+        document.getElementById('progressDetail').innerText = `Egzersiz ${currentExIdx + 1}/${mockExercises.length}`;
+
+        // Render Card
+        const isOpen = !!isFormGuideOpen[ex.id];
+        const cardHtml = `
+            <!-- HEADER -->
+            <div class="hevy-title-row">
+                <h2 class="hevy-exercise-title">${ex.name}</h2>
+                <span class="hevy-equip-badge">${ex.equipment}</span>
+            </div>
+            <div class="hevy-meta-row">
+                <span class="hevy-meta-item">🎯 Hedef: <strong>${sets.length} Set × ${ex.target.split('×')[1] || '10 Tk'}</strong></span>
+                <span class="hevy-meta-item">⏱️ Dinlenme: <strong>${ex.rest}s</strong></span>
+            </div>
+
+            <!-- COLLAPSIBLE FORM GUIDE -->
+            <div class="hevy-form-collapsible">
+                <button type="button" class="btn-hevy-form-toggle" onclick="toggleFormGuide()">
+                    <span>📖 Form & Biyomekanik Rehberi</span>
+                    <span style="color:var(--gold); font-weight:800;">${isOpen ? '▲ Gizle' : '▼ Göster'}</span>
+                </button>
+                ${isOpen ? `
+                    <div class="hevy-form-body">
+                        ${ex.formGuide}
+                        <div class="form-cue-box">
+                            💡 <strong>Koç İpucu:</strong> Dirsek kilitlerini hafif yumuşak tutun, negatif fazı 2 saniyede indirin.
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+
+            <!-- GHOST PERFORMANCE REFERENCE -->
+            ${ex.lastPerf ? `
+                <div class="hevy-ghost-bar">
+                    <div>
+                        <span>📌 Önceki: <strong>${ex.lastPerf.weight} kg × ${ex.lastPerf.reps} tk</strong> <small style="opacity:0.75;">(${ex.lastPerf.date})</small></span>
+                    </div>
+                    <button type="button" class="btn-hevy-ghost-apply" onclick="applyGhostToAll()">
+                        ⚡ Tümüne Yaz
+                    </button>
+                </div>
+            ` : ''}
+
+            <!-- HEVY / STRONG STYLE SETS TABLE WITH LISTBOX PICKERS (NO + -) -->
+            <div class="hevy-sets-card">
+                <div class="hevy-th-row">
+                    <div>SET</div>
+                    <div>ÖNCEKİ</div>
+                    <div>KG</div>
+                    <div>TEKRAR</div>
+                    <div>✓</div>
+                </div>
+
+                ${sets.map((st, sIdx) => {
+                    const isDone = st.completed;
+                    const isTarget = !isDone && sIdx === firstIncompleteIdx;
+                    const prevText = ex.lastPerf ? `${ex.lastPerf.weight}kg × ${ex.lastPerf.reps}` : '-';
+
+                    return `
+                        <div class="hevy-tr-row ${isDone ? 'done' : ''} ${isTarget ? 'active-target' : ''}">
+                            <!-- SET NO -->
+                            <div class="hevy-td">
+                                <span class="hevy-set-pill ${isDone ? 'done' : (isTarget ? 'target' : '')}">${st.setNo}</span>
+                            </div>
+
+                            <!-- GHOST PREVIOUS -->
+                            <div class="hevy-td" onclick="applyGhostToSingle(${sIdx})" title="Bu sete aktar">
+                                <span class="hevy-prev-text">${prevText}</span>
+                            </div>
+
+                            <!-- KG LISTBOX BUTTON -->
+                            <div class="hevy-td">
+                                <button type="button" class="hevy-listbox-btn" onclick="openListboxPicker(${sIdx}, 'weight')" title="Kilo seçmek için dokunun">
+                                    <span>${st.weight !== '' && st.weight !== null ? `${st.weight} kg` : '- kg'}</span>
+                                    <span class="listbox-btn-arrow">▾</span>
+                                </button>
+                            </div>
+
+                            <!-- TEKRAR LISTBOX BUTTON -->
+                            <div class="hevy-td">
+                                <button type="button" class="hevy-listbox-btn" onclick="openListboxPicker(${sIdx}, 'reps')" title="Tekrar seçmek için dokunun">
+                                    <span>${st.reps !== '' && st.reps !== null ? `${st.reps} tk` : '- tk'}</span>
+                                    <span class="listbox-btn-arrow">▾</span>
+                                </button>
+                            </div>
+
+                            <!-- TİK BUTONU -->
+                            <div class="hevy-td">
+                                <button type="button" 
+                                        class="btn-hevy-check ${isDone ? 'checked' : (isTarget ? 'target' : '')}" 
+                                        onclick="toggleSet(${sIdx})"
+                                        title="${isDone ? 'Set Tamamlandı (Geri Al)' : 'Seti Bitir'}">
+                                    ${isDone ? '✓' : (isTarget ? '⚡' : '○')}
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+
+                <div class="hevy-table-footer">
+                    <button type="button" class="btn-table-action add" onclick="addSet()">➕ Set Ekle</button>
+                    ${sets.length > 1 ? `
+                        <button type="button" class="btn-table-action del" onclick="removeSet()">🗑️ Set Sil</button>
+                    ` : ''}
+                </div>
+            </div>
+
+            <!-- EXERCISE COMPLETION BANNER -->
+            ${isAllDone ? `
+                <div class="hevy-exercise-done-banner">
+                    <div style="font-size:15px; font-weight:900; color:#86efac;">🎉 ${ex.name} Bitti!</div>
+                    <div style="font-size:11.5px; color:#cbd5e1; margin-top:2px;">Tüm ${sets.length} set başarıyla tamamlandı.</div>
+                    ${currentExIdx < mockExercises.length - 1 ? `
+                        <button type="button" class="btn-next-cta" onclick="navigateExercise(1)">
+                            Sıradaki Harekete Geç (${currentExIdx + 2}/${mockExercises.length}) ➔
+                        </button>
+                    ` : `
+                        <button type="button" class="btn-next-cta" style="background:linear-gradient(135deg, #10b981, #047857); color:#fff;" onclick="showToast('🏆 Antrenman bitti! Tebrikler!')">
+                            🏁 Antrenmanı Tamamla & Kaydet
+                        </button>
+                    `}
+                </div>
+            ` : ''}
+        `;
+
+        document.getElementById('exerciseCardContainer').innerHTML = cardHtml;
+    }
+
+    // INIT
+    startTotalTimer();
+    render();
+</script>
+
+</body>
+</html>

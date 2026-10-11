@@ -1,0 +1,8 @@
+{
+  "name": "Remix fitness",
+  "description": "Imported from GitHub: feritkantarci/fitness",
+  "version": "1.0.0",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

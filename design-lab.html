@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Çelik Kodu | Arayüz Tasarım & Sadeleştirme Laboratuvarı</title>
+    <style>
+        :root {
+            --bg-base: #090d16;
+            --bg-surface: #0f172a;
+            --bg-elevated: #1e293b;
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+            --border-hover: rgba(245, 158, 11, 0.4);
+            --gold: #f59e0b;
+            --gold-light: #fde68a;
+            --gold-glow: rgba(245, 158, 11, 0.25);
+            --cyan: #38bdf8;
+            --cyan-glow: rgba(56, 189, 248, 0.25);
+            --red-alert: #e11d48;
+            --green-success: #10b981;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #050811;
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.5;
+            padding: 16px 12px 60px;
+        }
+
+        /* CONTROL TOOLBAR */
+        .lab-toolbar {
+            max-width: 440px;
+            margin: 0 auto 16px;
+            background: rgba(30, 41, 59, 0.85);
+            border: 1px solid var(--gold);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+        .lab-toolbar h2 {
+            font-size: 15px;
+            color: var(--gold-light);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .lab-tip {
+            font-size: 11.5px;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+
+        /* PHONE FRAME MOCKUP */
+        .phone-frame {
+            max-width: 420px;
+            height: 760px;
+            margin: 0 auto;
+            background: var(--bg-base);
+            background-image: 
+                radial-gradient(circle at 50% 0%, #1e293b 0%, transparent 60%),
+                radial-gradient(circle at 100% 100%, #172554 0%, transparent 50%);
+            border: 2px solid rgba(255,255,255,0.15);
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.9);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* STATUS BAR */
+        .phone-status-bar {
+            height: 38px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(8px);
+            z-index: 30;
+            flex-shrink: 0;
+        }
+
+        /* TOP COMPACT BAR */
+        .workout-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 16px;
+            background: rgba(15, 23, 42, 0.9);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            flex-shrink: 0;
+        }
+        .workout-timer-chip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--gold);
+            background: rgba(245, 158, 11, 0.1);
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        .workout-finish-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .workout-finish-btn:hover {
+            border-color: var(--red-alert);
+            color: #fca5a5;
+        }
+
+        /* WORKOUT STAGE (SCROLLABLE CONTENT) */
+        .workout-stage {
+            padding: 12px 16px 24px;
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            scroll-behavior: smooth;
+        }
+        .workout-stage::-webkit-scrollbar {
+            width: 4px;
+        }
+        .workout-stage::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+        }
+
+        /* 1. BAŞLIK VE STEPPER */
+        .exercise-stepper-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+        .ex-count-tag {
+            font-size: 10.5px;
+            font-weight: 800;
+            color: var(--cyan);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .ex-nav-btns {
+            display: flex;
+            gap: 6px;
+        }
+        .btn-stepper-nav {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            color: #fff;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .exercise-hero-title {
+            font-size: 21px;
+            font-weight: 900;
+            color: #fff;
+            line-height: 1.15;
+            margin-bottom: 2px;
+        }
+        .exercise-meta-sub {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        /* 2. ZARİF FORM GÖRSELİ (HER ZAMAN GÖRÜNÜR, KOMPAKT) */
+        .exercise-visual-card {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            backdrop-filter: blur(8px);
+        }
+        .visual-illustration {
+            width: 90px;
+            height: 80px;
+            background: #090d16;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            flex-shrink: 0;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        .visual-cue-info {
+            flex: 1;
+        }
+        .visual-cue-title {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--cyan);
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+        .visual-cue-text {
+            font-size: 11px;
+            color: #cbd5e1;
+            line-height: 1.35;
+        }
+
+        /* 3. SET İLERLEME ÇUBUĞU */
+        .sets-progress-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .set-pill-step {
+            flex: 1;
+            padding: 6px 4px;
+            border-radius: 8px;
+            background: var(--bg-surface);
+            border: 1.5px solid var(--border);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .set-pill-step.done {
+            border-color: var(--green-success);
+            background: rgba(16, 185, 129, 0.15);
+            color: #6ee7b7;
+        }
+        .set-pill-step.current {
+            border-color: var(--gold);
+            background: rgba(245, 158, 11, 0.15);
+            box-shadow: 0 0 12px var(--gold-glow);
+        }
+        .set-pill-num {
+            font-size: 9.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+        .set-pill-val {
+            font-size: 11.5px;
+            font-weight: 800;
+            color: #fff;
+            margin-top: 1px;
+        }
+
+        /* 4. AKTİF SET ODAK KARTI */
+        .active-set-focus-box {
+            background: rgba(19, 28, 46, 0.95);
+            border: 1.5px solid var(--gold);
+            border-radius: 18px;
+            padding: 14px 14px 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6), 0 0 20px var(--gold-glow);
+            margin-bottom: 12px;
+        }
+
+        .focus-box-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .current-badge-pulse {
+            background: var(--gold);
+            color: #090d16;
+            font-size: 10.5px;
+            font-weight: 900;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+        .target-reps-text {
+            font-size: 11.5px;
+            color: var(--gold-light);
+            font-weight: 700;
+        }
+
+        /* KİLO & TEKRAR GİRİŞİ */
+        .input-duo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .input-duo-cell {
+            background: #090d16;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 8px;
+            text-align: center;
+        }
+        .input-duo-label {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+        .input-stepper-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-step-mini {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-step-mini:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+        .input-huge-val {
+            width: 58px;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            font-weight: 900;
+            text-align: center;
+            outline: none;
+        }
+
+        /* ========================================================
+           5. GİZLENEBİLİR / AÇILABİLİR EKSTRA BUTONLAR (ÇOK İŞE YARAYAN PANEL)
+           ======================================================== */
+        .tools-collapsible {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px dashed rgba(245, 158, 11, 0.4);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            transition: all 0.25s;
+        }
+        .tools-header-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            cursor: pointer;
+            user-select: none;
+            background: rgba(245, 158, 11, 0.05);
+        }
+        .tools-header-toggle:hover {
+            background: rgba(245, 158, 11, 0.12);
+        }
+        .tools-title {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tools-badge-count {
+            font-size: 9px;
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--gold-light);
+            padding: 1px 5px;
+            border-radius: 4px;
+        }
+        .tools-body {
+            display: none;
+            padding: 10px;
+            border-top: 1px dashed rgba(255,255,255,0.08);
+            background: #090d16;
+        }
+        .tools-body.open {
+            display: block;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        /* HIZLI KİLO SEÇİM ÇİPLERİ */
+        .chips-scroll-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .quick-weight-chip {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            color: #cbd5e1;
+            padding: 5px 9px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .quick-weight-chip:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+        .quick-weight-chip.selected {
+            background: var(--gold);
+            color: #090d16;
+            border-color: var(--gold);
+            font-weight: 900;
+        }
+
+        /* HASSAS STEPPER BUTONLARI */
+        .fine-steppers-row {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+        .btn-fine-step {
+            flex: 1;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: #cbd5e1;
+            padding: 6px 2px;
+            border-radius: 6px;
+            font-size: 10.5px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-fine-step:hover {
+            border-color: var(--cyan);
+            color: var(--cyan);
+        }
+
+        /* 6. ANA TAMAMLAMA BUTONU */
+        .btn-complete-big {
+            width: 100%;
+            background: linear-gradient(135deg, var(--gold) 0%, #d97706 100%);
+            border: none;
+            color: #090d16;
+            font-size: 15px;
+            font-weight: 900;
+            padding: 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 6px 20px var(--gold-glow);
+            transition: all 0.2s;
+        }
+        .btn-complete-big:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(245, 158, 11, 0.5);
+        }
+
+        /* DİNLENME SAYACI PANELİ */
+        .rest-timer-modal {
+            background: rgba(15, 23, 42, 0.98);
+            border: 1px solid var(--cyan);
+            border-radius: 16px;
+            padding: 14px 16px;
+            text-align: center;
+            margin-top: 10px;
+            box-shadow: 0 0 25px var(--cyan-glow);
+            display: none;
+        }
+        .rest-timer-modal.active {
+            display: block;
+            animation: fadeIn 0.25s ease-out;
+        }
+        .rest-clock {
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--cyan);
+            letter-spacing: 1px;
+            margin: 4px 0 8px;
+        }
+        .rest-controls {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+        .btn-rest-sub {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .btn-rest-sub.skip {
+            background: var(--cyan);
+            color: #090d16;
+            border-color: var(--cyan);
+            font-weight: 900;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOOLBAR -->
+    <div class="lab-toolbar">
+        <h2>🏋️ Canlı Antrenman: Başlık + Görsel + Gizlenebilir Butonlar</h2>
+        <p class="lab-tip">
+            Başlık ve görsel ekranda sabit duruyor. Altındaki hızlı kilo ve hassas stepper butonları <strong>tek dokunuşla açılıp kapanabilir</strong> hale getirildi.
+        </p>
+    </div>
+
+    <!-- PHONE MOCKUP -->
+    <div class="phone-frame">
+        
+        <!-- STATUS BAR -->
+        <div class="phone-status-bar">
+            <span>22:23</span>
+            <span style="display:flex; gap:4px; align-items:center;">5G 🔋 80%</span>
+        </div>
+
+        <!-- TOP BAR -->
+        <div class="workout-top-bar">
+            <div class="workout-timer-chip">
+                <span>⏱️</span>
+                <span>14:28</span>
+            </div>
+            <button class="workout-finish-btn" onclick="alert('Antrenman tamamlanacak')">
+                🏁 Bitir & Kaydet
+            </button>
+        </div>
+
+        <!-- STAGE -->
+        <div class="workout-stage">
+            
+            <!-- 1. STEPPER & BAŞLIK (MUTLAKA OLAN) -->
+            <div class="exercise-stepper-header">
+                <span class="ex-count-tag">EGZERSİZ 2 / 5</span>
+                <div class="ex-nav-btns">
+                    <button class="btn-stepper-nav">◀</button>
+                    <button class="btn-stepper-nav">▶</button>
+                </div>
+            </div>
+            <h1 class="exercise-hero-title">Goblet Squat</h1>
+            <div class="exercise-meta-sub">
+                <span>🔔 Kettlebell / Dambıl</span>
+                <span>•</span>
+                <span style="color:var(--gold); font-weight:700;">3 Set × 10 Tk</span>
+            </div>
+
+            <!-- 2. GÖRSEL & FORM KARTI (MUTLAKA OLAN) -->
+            <div class="exercise-visual-card">
+                <div class="visual-illustration">
+                    🏋️‍♂️
+                </div>
+                <div class="visual-cue-info">
+                    <div class="visual-cue-title">Biyomekanik İpucu</div>
+                    <div class="visual-cue-text">
+                        Ağırlığı göğüs hizasında sıkı tutun. Dirsekler dizlerin içine insin, topuklar yerden kalkmasın.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. SET İLERLEME ADIMLARI -->
+            <div class="sets-progress-row">
+                <div class="set-pill-step done">
+                    <div class="set-pill-num">Set 1</div>
+                    <div class="set-pill-val">✓ 20kg</div>
+                </div>
+                <div class="set-pill-step current">
+                    <div class="set-pill-num">Set 2</div>
+                    <div class="set-pill-val">⚡ ŞİMDİ</div>
+                </div>
+                <div class="set-pill-step">
+                    <div class="set-pill-num">Set 3</div>
+                    <div class="set-pill-val">10 Tk</div>
+                </div>
+            </div>
+
+            <!-- 4. AKTİF SET ODAK KARTI -->
+            <div class="active-set-focus-box">
+                <div class="focus-box-top">
+                    <span class="current-badge-pulse">SET 2 / 3</span>
+                    <span class="target-reps-text">🎯 Hedef: 10 Tekrar</span>
+                </div>
+
+                <!-- KİLO & TEKRAR GİRİŞİ -->
+                <div class="input-duo-grid">
+                    <div class="input-duo-cell">
+                        <div class="input-duo-label">Ağırlık (KG)</div>
+                        <div class="input-stepper-row">
+                            <button class="btn-step-mini" onclick="stepWeight(-2.5)">-</button>
+                            <input type="number" id="boxWeight" class="input-huge-val" value="20">
+                            <button class="btn-step-mini" onclick="stepWeight(2.5)">+</button>
+                        </div>
+                    </div>
+
+                    <div class="input-duo-cell">
+                        <div class="input-duo-label">Tekrar</div>
+                        <div class="input-stepper-row">
+                            <button class="btn-step-mini" onclick="stepReps(-1)">-</button>
+                            <input type="number" id="boxReps" class="input-huge-val" value="10">
+                            <button class="btn-step-mini" onclick="stepReps(1)">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. GİZLENEBİLİR EKSTRA BUTONLAR (ÇOK İŞE YARAYAN HIZLI SEÇİCİ) -->
+                <div class="tools-collapsible">
+                    <div class="tools-header-toggle" onclick="toggleExtraTools()">
+                        <div class="tools-title">
+                            <span>⚡ Hızlı Kilo & Hassas Ayar Butonları</span>
+                            <span class="tools-badge-count">9 Kilo + 8 Buton</span>
+                        </div>
+                        <span id="toolsToggleArrow" style="font-size:12px; color:var(--gold);">▼ Aç</span>
+                    </div>
+                    
+                    <div class="tools-body" id="toolsBody">
+                        <!-- HIZLI AĞIRLIK ÇİPLERİ -->
+                        <div style="font-size:10px; font-weight:800; color:var(--text-secondary); margin-bottom:4px; text-transform:uppercase;">
+                            TEK TIKLA KİLO SEÇ:
+                        </div>
+                        <div class="chips-scroll-wrap">
+                            <button class="quick-weight-chip" onclick="setChipWeight(7.5)">7.5 kg</button>
+                            <button class="quick-weight-chip" onclick="setChipWeight(10)">10 kg</button>
+                            <button class="quick-weight-chip" onclick="setChipWeight(12.5)">12.5 kg</button>
+                            <button class="quick-weight-chip" onclick="setChipWeight(15)">15 kg</button>
+                            <button class="quick-weight-chip" onclick="setChipWeight(17.5)">17.5 kg</button>
+                            <button class="quick-weight-chip selected" onclick="setChipWeight(20)">20 kg</button>
+                            <button class="quick-weight-chip" onclick="setChipWeight(22.5)">22.5 kg</button>
+                            <button class="quick-weight-chip" onclick="setChipWeight(25)">25 kg</button>
+                            <button class="quick-weight-chip" onclick="setChipWeight(30)">30 kg</button>
+                        </div>
+
+                        <!-- HASSAS KİLO STEPPERLARI -->
+                        <div style="font-size:10px; font-weight:800; color:var(--text-secondary); margin-bottom:4px; text-transform:uppercase;">
+                            HASSAS KİLO AYARI:
+                        </div>
+                        <div class="fine-steppers-row">
+                            <button class="btn-fine-step" onclick="stepWeight(-2.5)">-2.5 kg</button>
+                            <button class="btn-fine-step" onclick="stepWeight(-1)">-1 kg</button>
+                            <button class="btn-fine-step" onclick="stepWeight(1)">+1 kg</button>
+                            <button class="btn-fine-step" onclick="stepWeight(2.5)">+2.5 kg</button>
+                        </div>
+
+                        <!-- HASSAS TEKRAR STEPPERLARI -->
+                        <div style="font-size:10px; font-weight:800; color:var(--text-secondary); margin-bottom:4px; text-transform:uppercase;">
+                            HASSAS TEKRAR AYARI:
+                        </div>
+                        <div class="fine-steppers-row">
+                            <button class="btn-fine-step" onclick="stepReps(-2)">-2 Tk</button>
+                            <button class="btn-fine-step" onclick="stepReps(-1)">-1 Tk</button>
+                            <button class="btn-fine-step" onclick="stepReps(1)">+1 Tk</button>
+                            <button class="btn-fine-step" onclick="stepReps(2)">+2 Tk</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. ANA EYLEM BUTONU -->
+                <button class="btn-complete-big" onclick="completeCurrentSet()">
+                    <span>✓</span>
+                    <span>SETİ BİTİR VE DİNLEN</span>
+                </button>
+            </div>
+
+            <!-- DİNLENME SAYACI PANELİ -->
+            <div class="rest-timer-modal" id="restTimerBox">
+                <div style="font-size:11px; font-weight:800; color:var(--text-secondary); text-transform:uppercase;">
+                    ⏳ DİNLENME SÜRESİ
+                </div>
+                <div class="rest-clock" id="restClock">00:45</div>
+                <div class="rest-controls">
+                    <button class="btn-rest-sub" onclick="adjustRest(-15)">-15s</button>
+                    <button class="btn-rest-sub" onclick="adjustRest(15)">+15s</button>
+                    <button class="btn-rest-sub skip" onclick="skipRest()">⏭️ Hemen Başla</button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        function toggleExtraTools() {
+            const body = document.getElementById('toolsBody');
+            const arrow = document.getElementById('toolsToggleArrow');
+            if (body.classList.contains('open')) {
+                body.classList.remove('open');
+                arrow.innerText = '▼ Aç';
+            } else {
+                body.classList.add('open');
+                arrow.innerText = '▲ Kapat';
+            }
+        }
+
+        function stepWeight(val) {
+            const el = document.getElementById('boxWeight');
+            let cur = parseFloat(el.value) || 0;
+            el.value = Math.max(0, cur + val);
+            highlightSelectedChip(el.value);
+        }
+
+        function setChipWeight(val) {
+            document.getElementById('boxWeight').value = val;
+            highlightSelectedChip(val);
+        }
+
+        function highlightSelectedChip(val) {
+            document.querySelectorAll('.quick-weight-chip').forEach(c => {
+                c.classList.toggle('selected', parseFloat(c.innerText) === parseFloat(val));
+            });
+        }
+
+        function stepReps(val) {
+            const el = document.getElementById('boxReps');
+            let cur = parseInt(el.value) || 0;
+            el.value = Math.max(1, cur + val);
+        }
+
+        let restTimerInterval = null;
+        let restSecs = 45;
+
+        function completeCurrentSet() {
+            const restBox = document.getElementById('restTimerBox');
+            restBox.classList.add('active');
+            restSecs = 45;
+            updateRestDisplay();
+            
+            clearInterval(restTimerInterval);
+            restTimerInterval = setInterval(() => {
+                restSecs--;
+                if (restSecs <= 0) {
+                    clearInterval(restTimerInterval);
+                    skipRest();
+                } else {
+                    updateRestDisplay();
+                }
+            }, 1000);
+        }
+
+        function updateRestDisplay() {
+            const m = Math.floor(restSecs / 60);
+            const s = restSecs % 60;
+            document.getElementById('restClock').innerText = 
+                `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        }
+
+        function adjustRest(delta) {
+            restSecs = Math.max(5, restSecs + delta);
+            updateRestDisplay();
+        }
+
+        function skipRest() {
+            clearInterval(restTimerInterval);
+            document.getElementById('restTimerBox').classList.remove('active');
+            alert('Dinlenme tamamlandı! 3. Sete geçildi.');
+        }
+    </script>
+</body>
+</html>

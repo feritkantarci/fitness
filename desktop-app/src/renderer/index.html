@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitLAB - Akademik Spor Bilimi ve AI İstasyonu</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="chart.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script>
+        if (window.pdfjsLib) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+    </script>
+</head>
+<body>
+    <!-- Pencere Üst Barı (Mac & Windows Titlebar) -->
+    <header class="app-header">
+        <div class="header-left">
+            <div class="logo-mark">🔬</div>
+            <div class="brand-title">
+                <h1>FitLAB</h1>
+                <span class="subtitle">v1.0</span>
+            </div>
+
+            <!-- Sekmeler Solda (Doğrudan Logo Yanında) -->
+            <nav class="app-nav-tabs">
+                <button class="nav-tab-btn active" id="tabBtnDashboard" data-view="dashboard">
+                    <span class="icon">📊</span> Kokpit
+                </button>
+                <button class="nav-tab-btn" id="tabBtnCalendar" data-view="calendar">
+                    <span class="icon">📅</span> Takvim & Planlayıcı
+                </button>
+                <button class="nav-tab-btn" id="tabBtnBodyComp" data-view="bodycomp">
+                    <span class="icon">⚖️</span> Tartı & Kompozisyon
+                </button>
+                <button class="nav-tab-btn" id="tabBtnAnalytics" data-view="analytics">
+                    <span class="icon">🧬</span> Biyomekanik Analiz
+                </button>
+                <button class="nav-tab-btn" id="tabBtnLab" data-view="lab">
+                    <span class="icon">🔬</span> Lab Atlası
+                </button>
+                <button class="nav-tab-btn" id="tabBtnConsult" data-view="consult">
+                    <span class="icon">💬</span> AI İstişare Odası
+                </button>
+            </nav>
+        </div>
+
+        <div class="header-right">
+            <div class="athlete-selector-wrap">
+                <label for="athleteSelect">👤</label>
+                <select id="athleteSelect">
+                    <option value="">Yükleniyor...</option>
+                </select>
+            </div>
+            <button class="btn-refresh" id="btnRefresh" title="Verileri Firebase'den Canlı Yenile">
+                <span class="icon">🔄</span>
+            </button>
+            <div class="status-pill status-firebase" id="firebaseStatusPill" title="Firebase Firestore Canlı Köprü">
+                <span class="dot"></span> Bulut: Canlı
+            </div>
+            <div class="status-pill status-ai" id="aiStatusPill" title="Google Gemini AI Spor Bilimci Motoru">
+                <span class="dot"></span> AI: Hazır
+            </div>
+            <button class="btn-refresh" id="btnOpenCalendarModal" title="FitLAB Takvim Merkezi (Apple / Google Takvim)" onclick="openDesktopCalendarModal()">
+                <span class="icon">📅</span>
+            </button>
+            <button class="btn-settings" id="btnOpenSettings" title="Ayarlar ve API Anahtarı">⚙️</button>
+        </div>
+    </header>
+
+    <!-- Ana Çalışma Alanı: Dashboard & Kokpit -->
+    <main class="main-layout" id="viewDashboard">
+        <!-- Sol Taraf: Sporcu Bilgisi ve Akademik Özet -->
+        <aside class="sidebar">
+            <div class="athlete-card">
+                <div class="athlete-avatar" id="athleteAvatar">🥋</div>
+                <div class="athlete-info">
+                    <h2 id="athleteName">Sporcu Seçilmedi</h2>
+                    <span class="badge-level" id="athleteLevel">-</span>
+                </div>
+            </div>
+
+            <!-- Güncel Vücut Kompozisyonu (Son Tartı Özeti) -->
+            <div class="panel-box" id="sidebarBodyCompBox">
+                <div class="panel-box-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3>⚖️ Vücut Kompozisyonu</h3>
+                    <button type="button" class="btn-sm-action" onclick="switchView('bodycomp')" title="Tartı Masasını Aç">Detay ➔</button>
+                </div>
+                <div class="sidebar-bodycomp-content" id="sidebarBodyCompContent">
+                    <div class="empty-state">Tartı verisi taranıyor...</div>
+                </div>
+            </div>
+
+            <!-- Temel Ağırlıklar Tablosu -->
+            <div class="panel-box">
+                <div class="panel-box-header">
+                    <h3>🏋️ Referans Ağırlıklar</h3>
+                </div>
+                <div class="weights-grid" id="weightsGrid">
+                    <!-- Dinamik yüklenecek -->
+                </div>
+            </div>
+
+            <!-- Biyomekanik Uyarılar -->
+            <div class="panel-box">
+                <div class="panel-box-header">
+                    <h3>⚖️ Yapısal & Biyomekanik Denge</h3>
+                </div>
+                <div class="biomech-alerts" id="biomechAlerts">
+                    <div class="empty-state">Antrenman verisi taranıyor...</div>
+                </div>
+            </div>
+
+            <!-- Hacim Açıkları / Atlanan Kaslar -->
+            <div class="panel-box">
+                <div class="panel-box-header">
+                    <h3>🚨 Hacim Açıkları (MEV Altı)</h3>
+                </div>
+                <div class="deficit-list" id="deficitList">
+                    <!-- Dinamik -->
+                </div>
+            </div>
+        </aside>
+
+        <!-- Orta Taraf: KPI'lar, Akademik Grafikler ve Analiz -->
+        <section class="content-area">
+            <!-- Üst KPI Kartları -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-icon">📊</div>
+                    <div class="kpi-meta">
+                        <span class="kpi-label">Haftalık Tonaj</span>
+                        <span class="kpi-val" id="valWeeklyTonnage">0 kg</span>
+                        <span class="kpi-sub">Kaldırılan Toplam Yük</span>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-icon">🎯</div>
+                    <div class="kpi-meta">
+                        <span class="kpi-label">Efektif Tekrar (Beardsley)</span>
+                        <span class="kpi-val" id="valEffectiveReps">0</span>
+                        <span class="kpi-sub">Gerçek Mekanik Gerilim</span>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-icon">⚖️</div>
+                    <div class="kpi-meta">
+                        <span class="kpi-label">İtiş / Çekiş Oranı</span>
+                        <span class="kpi-val" id="valPushPull">1.00</span>
+                        <span class="kpi-sub">İdeal: 1.0 - 1.2</span>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-icon">🧹</div>
+                    <div class="kpi-meta">
+                        <span class="kpi-label">Çöp Hacim (Junk Volume)</span>
+                        <span class="kpi-val" id="valJunkVolume">0 Set</span>
+                        <span class="kpi-sub">RIR > 4 veya Aşırı Set</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Akademik Hacim Eşikleri Grafiği (Dr. Mike Israetel Kriterleri) -->
+            <div class="chart-container-box">
+                <div class="chart-header">
+                    <div>
+                        <h3>🔬 Haftalık Kas Hacmi vs. Bilimsel Eşikler</h3>
+                        <p class="chart-desc">Mekanik Gerilim Ağırlıklı Efektif Setler (Ağır Serbest Ağırlık: %100 • Vücut Ağırlığı: %65-85 • Kondisyon/Burpee: %0) | MEV, MAV, MRV Sınırları</p>
+                    </div>
+                    <div class="chart-legend-custom">
+                        <span class="legend-badge legend-mev">MEV Eşiği</span>
+                        <span class="legend-badge legend-mav">MAV Altın Oranı</span>
+                        <span class="legend-badge legend-mrv">MRV Tavanı</span>
+                    </div>
+                </div>
+                <div class="canvas-wrap">
+                    <canvas id="volumeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Web Analiz ve Çubuklar Hızlı Erişim Kartı -->
+            <div class="dashboard-analytics-preview-card" style="background: linear-gradient(135deg, rgba(234,179,8,0.08), rgba(56,189,248,0.04)); border: 1px solid rgba(234,179,8,0.3); border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 26px;">🧬</span>
+                    <div>
+                        <h4 style="font-size: 14px; font-weight: 800; color: #fff; margin: 0;">Biyomekanik Analiz, Kas Yeterlilik Karnesi & Dağılım Çubukları</h4>
+                        <p style="font-size: 11.5px; color: var(--text-secondary); margin: 3px 0 0 0;">Web uygulamasındaki haftalık dinamik kas doluluk çubukları, set/hacim oranları ve 5 sütun yük dağılımı.</p>
+                    </div>
+                </div>
+                <button class="btn-action" style="background: var(--gold); color: #000; font-weight: 800; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 12px;" onclick="switchView('analytics')">
+                    🧬 Tam Analiz Çubuklarını Aç ➔
+                </button>
+            </div>
+
+            <!-- AI Akademik Koçluk ve Web Reçete Merkezi -->
+            <div class="ai-console-box">
+                <div class="ai-console-header">
+                    <div class="ai-title-wrap">
+                        <span class="ai-sparkle">✨</span>
+                        <div>
+                            <h3>Google Gemini Spor Bilimci & Reçete Motoru</h3>
+                            <p>Sporcunun verilerini akademik makaleler ışığında analiz edip web uygulamasına yönerge ve program hazırlar.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-input-row">
+                    <input type="text" id="aiCustomPrompt" placeholder="Antrenör Notu (Örn: Bu hafta göğüste platoyu kıracak dalgalı yüklenme planla, RIR 2 hedefle...)" />
+                    <button class="btn-primary" id="btnRunAiAnalysis">
+                        <span class="icon">🧠</span> Akademik Analiz & Reçete Üret
+                    </button>
+                </div>
+
+                <!-- AI Çıktı ve Web Gönderim Alanı -->
+                <div class="ai-output-wrap" id="aiOutputWrap" style="display:none;">
+                    <div class="ai-output-actions">
+                        <span class="badge-status-ready">✅ Akademik Reçete Hazır</span>
+                        <div class="action-btn-group">
+                            <button class="btn-action btn-send-directive" id="btnPushDirectiveToWeb" title="Sporcunun telefonundaki web uygulamasına anında koç yönergesi olarak fırlat">
+                                📱 Web'e Koç Yönergesi Gönder
+                            </button>
+                            <button class="btn-action btn-send-program" id="btnPushProgramToWeb" title="Web uygulamasına yeni bilimsel antrenman programı şablonu ata">
+                                📋 Web'e Yeni Programı Yükle
+                            </button>
+                            <button class="btn-action" id="btnPushToCalendar" onclick="sendAiPrescriptionToCalendar()" style="background: linear-gradient(135deg, rgba(245,158,11,0.25), rgba(217,119,6,0.35)); border: 1px solid var(--gold); color: #fff; font-weight: 800;" title="Reçeteyi doğrudan Apple / Google Takvim'e işle">
+                                📅 Takvimime İşle & Senkronize Et
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="ai-report-content" id="aiReportContent">
+                        <!-- AI Çıktısı Buraya Gelecek -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Tartı & Vücut Kompozisyonu Bölümü (FitLab BIA / InBody / Unique Health İstasyonu) -->
+    <section class="bodycomp-layout" id="viewBodyComp" style="display: none;">
+        <div class="bodycomp-container">
+            <!-- Üst Başlık & Hızlı Özet Çubuğu -->
+            <div class="bodycomp-top-header">
+                <div class="bodycomp-header-title">
+                    <div class="bodycomp-icon-badge">⚖️</div>
+                    <div>
+                        <h2>Vücut Kompozisyonu & Biyomekanik Tartı Analiz Masası</h2>
+                        <p class="bodycomp-header-sub" id="bodyCompHeaderSub">Unique Health, InBody, Tanita BIA analizleri & antrenman periyodizasyonu uyarlaması</p>
+                    </div>
+                </div>
+                <div class="bodycomp-header-actions">
+                    <button type="button" class="btn-primary" id="btnTriggerAiWithBodyComp" style="background:linear-gradient(135deg, #eab308, #ca8a04); color:#000; font-weight:800;">
+                        🧠 Bu Tartı ile AI Programı Çıkar
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="switchView('dashboard')">
+                        📊 Kokpite Dön
+                    </button>
+                </div>
+            </div>
+
+            <!-- Ana 2 Sütunlu Çalışma Masası -->
+            <div class="bodycomp-grid">
+                <!-- Sol Sütun: Yükleme Masası & Manuel Form -->
+                <div class="bodycomp-col-card">
+                    <div class="card-header-row">
+                        <h3>📥 Rapor Yükleme & Veri Girişi</h3>
+                        <span class="badge-source" id="scaleSourceBadge">Hazır</span>
+                    </div>
+
+                    <!-- Akıllı Sürükle-Bırak Yükleme Alanı -->
+                    <div class="scale-dropzone" id="scaleDropzone">
+                        <div class="dropzone-inner">
+                            <span class="drop-icon">📄</span>
+                            <h4>Unique Health / InBody / Tanita Raporu</h4>
+                            <p>PDF veya Rapor Fotoğrafını (PNG/JPG) buraya sürükleyin veya seçin</p>
+                            <div class="dropzone-btns">
+                                <label for="scaleFileInput" class="btn-file-select">
+                                    📁 Dosyadan Rapor Seç
+                                </label>
+                                <input type="file" id="scaleFileInput" accept=".pdf,image/*" style="display:none;" />
+                                <button type="button" class="btn-outline-sm" id="btnPasteScaleClipboard" title="Panodaki metin veya PDF/görseli yapıştır">
+                                    📋 Panodan Oku (Cmd+V)
+                                </button>
+                                <button type="button" class="btn-outline-sm btn-demo" id="btnLoadSampleScale" title="Örnek 07.10.2026 Unique Health 3. raporunu yükle">
+                                    ✨ Örnek Rapor
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- OCR & Ayrıştırma Durum Kutusu -->
+                    <div class="scale-status-banner" id="scaleStatusBanner" style="display:none;"></div>
+
+                    <!-- Değer İnceleme ve Kaydetme Formu -->
+                    <form id="scaleEntryForm" class="scale-form-grid" onsubmit="event.preventDefault();">
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="inputScaleDate">📅 Ölçüm Tarihi</label>
+                                <input type="date" id="inputScaleDate" required />
+                            </div>
+                            <div class="form-field">
+                                <label for="inputScaleWeight">⚖️ Ağırlık / Kilo (kg)</label>
+                                <input type="number" step="0.05" id="inputScaleWeight" placeholder="Örn: 77.6" required />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="inputScaleBodyFat">🔥 Vücut Yağ Oranı (%)</label>
+                                <input type="number" step="0.1" id="inputScaleBodyFat" placeholder="Örn: 15.9" />
+                            </div>
+                            <div class="form-field">
+                                <label for="inputScaleMuscleMass">💪 İskelet Kası Kütlesi (kg)</label>
+                                <input type="number" step="0.1" id="inputScaleMuscleMass" placeholder="Örn: 37.2" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="inputScaleWaterPct">💧 Toplam Vücut Suyu (%)</label>
+                                <input type="number" step="0.1" id="inputScaleWaterPct" placeholder="Örn: 59.8" />
+                            </div>
+                            <div class="form-field">
+                                <label for="inputScaleVisceralFat">⚠️ Viseral (İç) Yağ (1-15)</label>
+                                <input type="number" step="1" id="inputScaleVisceralFat" placeholder="Örn: 6" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="inputScaleBmr">⚡ Bazal Metabolizma (BMR kcal)</label>
+                                <input type="number" step="1" id="inputScaleBmr" placeholder="Örn: 1778" />
+                            </div>
+                            <div class="form-field">
+                                <label for="inputScaleScore">🏆 Vücut Puanı / Yaşı</label>
+                                <input type="text" id="inputScaleScore" placeholder="Örn: 84 Puan • 39 Yaş" />
+                            </div>
+                        </div>
+
+                        <div class="form-field full-width">
+                            <label for="inputScaleNotes">📝 Notlar / Analiz Modeli</label>
+                            <input type="text" id="inputScaleNotes" placeholder="Unique Health BIA Analizi / InBody 270" />
+                        </div>
+
+                        <div class="form-actions-row">
+                            <button type="button" class="btn-clear-form" id="btnClearScaleForm">
+                                🧹 Temizle
+                            </button>
+                            <button type="button" class="btn-save-scale" id="btnSaveScaleEntry">
+                                💾 Tartı Analizini Kaydet & Buluta Aktar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Sağ Sütun: Akademik Kompozisyon Analitiği & Biyomekanik Teşhis -->
+                <div class="bodycomp-col-card">
+                    <div class="card-header-row">
+                        <h3>🧬 Biyomekanik Kompozisyon Teşhisi</h3>
+                        <span class="badge-phase" id="bodyCompPhaseBadge">Analiz Bekleniyor</span>
+                    </div>
+
+                    <!-- Büyük KPI Göstergeleri -->
+                    <div class="bodycomp-kpi-grid">
+                        <div class="b-kpi-card">
+                            <span class="b-kpi-label">Güncel Kilo</span>
+                            <span class="b-kpi-val" id="bKpiWeight">- kg</span>
+                            <span class="b-kpi-delta" id="bKpiWeightDelta">-</span>
+                        </div>
+                        <div class="b-kpi-card">
+                            <span class="b-kpi-label">Yağ Oranı</span>
+                            <span class="b-kpi-val highlight-fat" id="bKpiFat">-%</span>
+                            <span class="b-kpi-delta" id="bKpiFatDelta">-</span>
+                        </div>
+                        <div class="b-kpi-card">
+                            <span class="b-kpi-label">İskelet Kası</span>
+                            <span class="b-kpi-val highlight-muscle" id="bKpiMuscle">- kg</span>
+                            <span class="b-kpi-delta" id="bKpiMuscleDelta">-</span>
+                        </div>
+                        <div class="b-kpi-card">
+                            <span class="b-kpi-label">Yağsız Kütle (FFM)</span>
+                            <span class="b-kpi-val" id="bKpiLeanMass">- kg</span>
+                            <span class="b-kpi-sub">Kas, İskelet & Organ</span>
+                        </div>
+                        <div class="b-kpi-card">
+                            <span class="b-kpi-label">Yağ Kütlesi</span>
+                            <span class="b-kpi-val" id="bKpiFatMass">- kg</span>
+                            <span class="b-kpi-sub">Toplam Adipoz Doku</span>
+                        </div>
+                        <div class="b-kpi-card">
+                            <span class="b-kpi-label">Viseral Yağ / BMR</span>
+                            <span class="b-kpi-val" id="bKpiViscBmr">-</span>
+                            <span class="b-kpi-sub">İç Yağ & Bazal Enerji</span>
+                        </div>
+                    </div>
+
+                    <!-- Fizyolojik Teşhis ve Spor Bilimi Çıkarımı -->
+                    <div class="academic-diagnosis-box" id="academicDiagnosisBox">
+                        <div class="empty-state">Sporcuya ait tartı kaydı yüklendiğinde akademik değerlendirme burada görünecek.</div>
+                    </div>
+
+                    <!-- Bölgesel Segmental Dağılım Kartı (Unique Health / InBody) -->
+                    <div class="segmental-box" id="segmentalBox" style="display:none;">
+                        <h4>📐 Bölgesel Kas & Yağ Segmentasyonu (BIA)</h4>
+                        <div class="segmental-grid" id="segmentalGrid">
+                            <!-- Dinamik doldurulacak -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alt Kısım: Zaman Çizelgesi Grafiği & Kayıt Geçmişi -->
+            <div class="bodycomp-bottom-grid">
+                <!-- Vücut Kompozisyonu Gelişim Grafiği (Chart.js) -->
+                <div class="bodycomp-chart-card">
+                    <div class="card-header-row">
+                        <div>
+                            <h3>📈 Vücut Kompozisyonu Zaman Çizelgesi</h3>
+                            <p class="chart-desc">Kilo (kg), Vücut Yağ Oranı (%) ve İskelet Kası (kg) Değişim Eğrisi</p>
+                        </div>
+                    </div>
+                    <div class="canvas-wrap" style="height: 240px; position:relative;">
+                        <canvas id="scaleTimelineChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Geçmiş Tartı Kayıtları Tablosu -->
+                <div class="bodycomp-history-card">
+                    <div class="card-header-row">
+                        <h3>📋 Tartı Analizleri Geçmişi</h3>
+                        <span class="count-badge" id="scaleHistoryCount">0 Kayıt</span>
+                    </div>
+                    <div class="table-scroll-wrap">
+                        <table class="scale-history-table">
+                            <thead>
+                                <tr>
+                                    <th>Tarih</th>
+                                    <th>Kilo</th>
+                                    <th>Yağ %</th>
+                                    <th>Kas kg</th>
+                                    <th>Su %</th>
+                                    <th>Viseral</th>
+                                    <th>BMR</th>
+                                    <th>İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scaleHistoryTableBody">
+                                <tr>
+                                    <td colspan="8" class="text-center" style="color:var(--text-muted); padding:16px;">Kayıt bulunamadı.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Biyomekanik Analiz ve Gelişim Çubukları Bölümü (Web PWA ile Birebir Eşit) -->
+    <section class="analytics-layout" id="viewAnalytics" style="display: none;">
+        <div id="desktopAnalyticsContainer" class="desktop-analytics-scroll">
+            <!-- Dinamik Olarak Web Analiz Çubukları ve Karnesi Doldurulacak -->
+        </div>
+    </section>
+
+    <!-- Antrenman Takvimi & Planlayıcı Bölümü (Google & Apple Takvim Canlı Masası) -->
+    <section class="calendar-layout" id="viewCalendar" style="display: none; width: 100%; height: calc(100vh - 60px); overflow-y: auto;">
+        <div id="desktopCalendarContainer" style="width: 100%; max-width: 1300px; margin: 0 auto; padding: 24px;">
+            <!-- Dinamik Olarak renderDesktopCalendar() ile doldurulacak -->
+        </div>
+    </section>
+ 
+    <!-- Lab Bölümü (Biyomekanik Atlas ve Egzersiz Detay Masası) -->
+    <section class="lab-layout" id="viewLab" style="display: none;">
+        <!-- Sol/Orta Alan: Egzersiz Listesi ve Filtreleme -->
+        <div class="lab-main-area">
+            <div class="lab-toolbar">
+                <div class="lab-search-wrap">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="labSearchInput" placeholder="Egzersiz ara (örn: Bench, Squat, Burpee, Swing, Şınav)..." autocomplete="off" />
+                    <button class="btn-clear-search" id="btnClearLabSearch" style="display: none;">✕</button>
+                </div>
+                <div class="lab-stats-badge" id="labStatsBadge">
+                    <span class="count" id="labExerciseCount">94</span> egzersiz listeleniyor
+                </div>
+            </div>
+
+            <!-- Kas Grubu / Tip Filtre Çipleri -->
+            <div class="lab-filter-bar" id="labFilterBar">
+                <button class="filter-chip active" data-filter="ALL">Tümü</button>
+                <button class="filter-chip" data-filter="Göğüs">Göğüs</button>
+                <button class="filter-chip" data-filter="Sırt">Sırt</button>
+                <button class="filter-chip" data-filter="Omuz">Omuz</button>
+                <button class="filter-chip" data-filter="Ön Bacak">Ön Bacak</button>
+                <button class="filter-chip" data-filter="Arka Bacak">Arka Bacak</button>
+                <button class="filter-chip" data-filter="Glute">Kalça / Glute</button>
+                <button class="filter-chip" data-filter="Kol">Kol (Bi/Tri)</button>
+                <button class="filter-chip" data-filter="Karın/Core">Karın / Core</button>
+                <button class="filter-chip" data-filter="Kondisyon / Kardiyo">⚡ Kondisyon</button>
+                <button class="filter-chip chip-excluded" data-filter="EXCLUDED" id="chipLabExcluded" title="Kişisel havuzunuzdan gizlediğiniz egzersizleri görüntüleyin ve geri alın">👁️ Gizlenenler (<span id="labExcludedBadgeCount">0</span>)</button>
+            </div>
+
+            <!-- Egzersiz Grid Kartları -->
+            <div class="lab-grid" id="labGrid">
+                <!-- Dinamik JavaScript ile doldurulacak -->
+            </div>
+        </div>
+
+        <!-- Genişlik Ayar Çubuğu (Sürüklenebilir Resizer) -->
+        <div class="lab-resizer" id="labResizer" title="Pencere genişliğini ayarlamak için iki yana sürükleyin"></div>
+
+        <!-- Sağ Taraf: Egzersiz Biyomekanik İnceleme Penceresi (Drawer/Inspector) -->
+        <aside class="lab-inspector" id="labInspector">
+            <!-- Boş Durum (Egzersiz seçilmediğinde) -->
+            <div class="inspector-placeholder" id="inspectorPlaceholder">
+                <div class="placeholder-icon">🔬</div>
+                <h3>Biyomekanik İnceleme Masası</h3>
+                <p>Sol taraftaki listeden herhangi bir harekete tıklayarak detaylı tekniğini, kas aktivasyonunu ve MTF etki katsayısını inceleyin.</p>
+                <div class="placeholder-hint">💡 <i>Tüm veriler Schoenfeld, Beardsley ve Israetel akademik katsayı modelleriyle eşleşmiştir.</i></div>
+            </div>
+
+            <!-- Aktif Egzersiz Detay İçeriği -->
+            <div class="inspector-content" id="inspectorContent" style="display: none;">
+                <div class="inspector-header">
+                    <div class="header-badges">
+                        <span class="badge-type" id="inspTypeBadge">Ağır Bileşik</span>
+                        <span class="badge-sfr" id="inspSfrBadge">SFR: Yüksek</span>
+                        <span class="badge-lengthened" id="inspLengthenedBadge">Uzamış Gerilim: Var</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <button class="btn-toggle-exclude" id="btnToggleHideExercise" title="Kişisel havuzunuzdan gizleyin">
+                            <span id="btnToggleHideIcon">👁️</span>
+                            <span id="btnToggleHideText">Gizle</span>
+                        </button>
+                        <button class="btn-close-inspector" id="btnCloseInspector" title="Pencereyi Kapat">✕</button>
+                    </div>
+                </div>
+
+                <h2 class="inspector-title" id="inspTitle">Dambıl Bench Press</h2>
+                <div class="inspector-subtitle">
+                    <span class="tag-muscle" id="inspMuscleTag">Göğüs & İtiş</span>
+                    <span class="tag-key" id="inspKeyTag">ex_bench_press</span>
+                </div>
+
+                <!-- Görsel Sekmeleri (Form & Anatomi) -->
+                <div class="visual-tabs">
+                    <button class="vtab-btn active" id="btnTabForm" data-tab="form">📐 Form Şeması & Kılavuz</button>
+                    <button class="vtab-btn" id="btnTabAnatomi" data-tab="anatomi">🧬 Kas Anatomisi & Odak</button>
+                </div>
+
+                <!-- Görsel Alanı -->
+                <div class="inspector-image-container">
+                    <img id="inspImage" src="" alt="Egzersiz Görseli" />
+                    <div class="image-fallback" id="inspImageFallback" style="display: none;">
+                        <span>📷</span>
+                        <p>Görsel Hazırlanıyor</p>
+                    </div>
+                </div>
+
+                <!-- Kas Aktivasyon & Etki Dağılımı (Akademik Kademeli Etki Barları) -->
+                <div class="inspector-section">
+                    <div class="section-title-wrap">
+                        <h4>🎯 1 Çalışma Setinin Kaslara Dağılımı</h4>
+                        <span class="methodology-badge">Schoenfeld & RP Modeli</span>
+                    </div>
+                    <p class="section-desc">1 set yapıldığında her bir kas grubuna yazılan efektif hipertrofi hacmi:</p>
+                    
+                    <div class="activation-bars" id="inspActivationBars">
+                        <!-- Dinamik doldurulacak -->
+                    </div>
+                </div>
+
+                <!-- Koçluk & Form Talimatları -->
+                <div class="inspector-section">
+                    <h4>📋 Biyomekanik İpucu & Form Rehberi</h4>
+                    <div class="cue-box" id="inspCueBox">
+                        <p id="inspCueText">-</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </section>
+
+    <!-- AI Biyomekanik İstişare & Koçluk Odası (Interactive Consultation Chamber) -->
+    <section class="consult-layout" id="viewConsult" style="display: none;">
+        <!-- Sol Panel: Sporcu Bağlamı & Hızlı İstişare Senaryoları -->
+        <aside class="consult-sidebar">
+            <div class="panel-box">
+                <div class="panel-box-header">
+                    <h3>👤 Sporcu Durumu & Bağlam</h3>
+                </div>
+                <div class="consult-context-box" id="consultAthleteBrief">
+                    <div style="font-size:13px; font-weight:800; color:#fff;" id="consultAthleteName">Sporcu Seçilmedi</div>
+                    <div style="font-size:11.5px; color:var(--text-secondary); margin-top:3px;" id="consultAthleteMetrics">Tartı ve antrenman verisi bekleniyor...</div>
+                </div>
+            </div>
+
+            <div class="panel-box">
+                <div class="panel-box-header">
+                    <h3>💡 Hızlı İstişare Senaryoları</h3>
+                </div>
+                <p style="font-size:11px; color:var(--text-secondary); margin:0 0 10px 0;">
+                    Karşılaştığın bir zorluğu seçerek doğrudan istişareyi başlatabilirsin:
+                </p>
+                <div class="quick-consult-buttons">
+                    <button type="button" class="btn-quick-consult" onclick="triggerQuickConsult('pullup_regression')">
+                        🧗‍♂️ <strong>"Barfiks çekemiyorum"</strong>
+                        <span>Hareketi nasıl kazanırım veya yerine ne yapmalıyım?</span>
+                    </button>
+                    <button type="button" class="btn-quick-consult" onclick="triggerQuickConsult('squat_knee_pain')">
+                        🦵 <strong>"Squat dizimi zorluyor"</strong>
+                        <span>Diz dostu ikame veya regresyon nedir?</span>
+                    </button>
+                    <button type="button" class="btn-quick-consult" onclick="triggerQuickConsult('shoulder_impingement')">
+                        ⚔️ <strong>"Lateral raise boynumu kasıyor"</strong>
+                        <span>Deltoidi tecrit eden alternatifler nelerdir?</span>
+                    </button>
+                    <button type="button" class="btn-quick-consult" onclick="triggerQuickConsult('kettlebell_substitute')">
+                        🔔 <strong>"Salonda Kettlebell yok"</strong>
+                        <span>Kettlebell hareketlerini dambılla nasıl ikame ederiz?</span>
+                    </button>
+                    <button type="button" class="btn-quick-consult" onclick="triggerQuickConsult('compact_routine')">
+                        ⏱️ <strong>"Seans sürem çok uzuyor"</strong>
+                        <span>Hacmi koruyarak süreyi nasıl kısaltabiliriz?</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel-box">
+                <div class="panel-box-header">
+                    <h3>📚 Akademik İstişare Metodolojisi</h3>
+                </div>
+                <ul style="font-size:11.5px; color:var(--text-secondary); line-height:1.5; padding-left:16px; margin:0;">
+                    <li><strong>Progresyon / Regresyon:</strong> Hareketi basitleştirerek adım adım kazandırma.</li>
+                    <li><strong>Biyomekanik İkiz (Substitution):</strong> Kas liflerini aynı açıda vuran alternatif hareket.</li>
+                    <li><strong>Karşılıklı Karar:</strong> Sporcunun tercihine göre programı şekillendirme.</li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Sağ Taraf: İnteraktif Sohbet / İstişare Konsolu -->
+        <main class="consult-main">
+            <div class="consult-header-bar">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div class="consult-avatar">🧠</div>
+                    <div>
+                        <h2 style="font-size:15px; font-weight:800; color:#fff; margin:0;">AI Biyomekanik İstişare Odası</h2>
+                        <span style="font-size:11px; color:var(--text-secondary);">Antrenmandaki zorlukları, hareket ikamelerini ve progresyonları birlikte tartışalım.</span>
+                    </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <div class="consult-save-badge" id="consultSaveStatusBadge" title="Yapılan tüm görüşmeler sporcu bazında yerel olarak kaydedilir ve kaldığınız yerden devam eder">
+                        <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#10b981;"></span>
+                        <span id="consultSaveStatusText">Oturum Kayıtlı</span>
+                    </div>
+                    <button type="button" class="btn-action" style="font-size:11px; padding:6px 12px; background:rgba(239,68,68,0.15); color:#fca5a5; border:1px solid rgba(239,68,68,0.3);" onclick="clearConsultationChat()">
+                        🗑️ Sohbeti Sıfırla
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mesaj Akışı -->
+            <div class="consult-messages-stream" id="consultMessagesStream">
+                <!-- Hoş geldin mesajı -->
+                <div class="chat-bubble chat-bubble-ai">
+                    <div class="chat-bubble-sender">🧠 FitLAB Biyomekanik Danışmanı</div>
+                    <div class="chat-bubble-text">
+                        Merhaba Şampiyon! Antrenmanında takıldığın, yapamadığın ya da değiştirmek istediğin bir hareket olduğunda buradayım.
+                        <br><br>
+                        Örneğin: <em>"Verilen programda Barfiks var ama ben hiç barfiks çekemiyorum; bunu nasıl çözelim?"</em> gibi sorular sorabilirsin.
+                        İster o hareketi sıfırdan kazandıracak <strong>progresyon protokolü</strong> çalışalım, ister aynı kası çalıştıracak <strong>daha basit bir ikame hareket</strong> koyalım.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Giriş Kutusu -->
+            <div class="consult-input-bar">
+                <textarea id="consultUserInput" placeholder="Koç ile istişare et (Örn: Barfiks çekemiyorum, bunun yerine ne koyabiliriz veya nasıl barfiks öğrenebilirim?)..." rows="2"></textarea>
+                <button type="button" class="btn-primary" id="btnSendConsultMsg" onclick="sendConsultationMessage()">
+                    <span>Gönder ➔</span>
+                </button>
+            </div>
+        </main>
+    </section>
+
+    <!-- Ayarlar Modalı -->
+    <div class="modal-backdrop" id="settingsModal" style="display:none;">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>⚙️ Sistem ve AI Ayarları</h3>
+                <button class="btn-close" id="btnCloseSettings">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="inputApiKey">Google Gemini API Anahtarı:</label>
+                    <input type="password" id="inputApiKey" placeholder="AIzaSy..." />
+                    <small>Spor bilimi analizi ve program üretimi için Google Generative AI (Gemini) API anahtarınızı girin.</small>
+                </div>
+                <div class="form-group">
+                    <label>Firebase Firestore Projesi:</label>
+                    <input type="text" value="fitness-4f427 (Canlı Bulut Veritabanı)" disabled />
+                    <small>Web uygulaması (fitness.kantarci.io) ile eşleşmiş durumdadır.</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="btnCancelSettings">İptal</button>
+                <button class="btn-primary" id="btnSaveSettings">Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Takvim Modalı (Apple / Google Takvim Entegrasyonu) -->
+    <div class="modal-backdrop" id="calendarModal" style="display:none;">
+        <div class="modal-box" style="max-width: 520px;">
+            <div class="modal-header">
+                <h3>📅 FitLAB Canlı Takvim Merkezi</h3>
+                <button class="btn-close" onclick="closeDesktopCalendarModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;">
+                    FitLAB masaüstünden oluşturulan programları ve AI reçetelerini doğrudan <strong>Apple Takvim (macOS)</strong> veya <strong>Google Takvim</strong>'e işleyebilirsiniz.
+                </p>
+
+                <div class="form-group" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                    <h4 style="margin: 0 0 6px 0; font-size: 14px; color: #fff;">🍏 macOS Apple Takvim'e Doğrudan Aktar</h4>
+                    <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 10px 0;">
+                        Seçili sporcunun haftalık planını veya son AI reçetesini Mac Takvim uygulamanıza anında işler.
+                    </p>
+                    <button type="button" class="btn-primary" onclick="exportSelectedAthleteToAppleCalendar()" style="width: 100%; font-size: 12.5px;">
+                        🍏 macOS Takviminde Aç & Ekle
+                    </button>
+                </div>
+
+                <div class="form-group" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
+                    <h4 style="margin: 0 0 6px 0; font-size: 14px; color: #fff;">🌐 Google Takvim ile Canlı Eşitle</h4>
+                    <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 10px 0;">
+                        Google Takvim web arayüzünü açar veya "FitLab • Antrenmanlarım" takvimine seansı işler.
+                    </p>
+                    <button type="button" class="btn-secondary" onclick="openGoogleCalendarFromDesktop()" style="width: 100%; font-size: 12.5px;">
+                        📅 Google Takvimi Aç
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeDesktopCalendarModal()">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Günlük Program & Seans Yönetim Modalı -->
+    <div class="modal-backdrop" id="desktopDayScheduleModal" style="display:none;">
+        <div class="modal-box" style="max-width: 640px; max-height: 85vh; display: flex; flex-direction: column;">
+            <div class="modal-header">
+                <div>
+                    <h3 id="desktopDayModalTitle" style="margin: 0; font-size: 16px; font-weight: 800;">📅 Günlük Seans & Program Planı</h3>
+                    <div id="desktopDayModalSubtitle" style="font-size: 11.5px; color: var(--gold); margin-top: 2px;"></div>
+                </div>
+                <button class="btn-close" onclick="closeDesktopDayScheduleModal()">✕</button>
+            </div>
+            <div class="modal-body" style="overflow-y: auto; flex: 1; padding: 18px;" id="desktopDayModalBody">
+                <!-- Dynamically populated -->
+            </div>
+            <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+                <button class="btn-secondary" style="color: #fca5a5; border-color: rgba(239, 68, 68, 0.4);" onclick="setDesktopActiveDayRest()">
+                    🛌 Bu Günü Dinlenmeye Al
+                </button>
+                <button class="btn-secondary" onclick="closeDesktopDayScheduleModal()">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bildirim Toast -->
+    <div class="toast-notification" id="toastNotification"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

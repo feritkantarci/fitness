@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Doğrulama ve Rol Yardımcı Fonksiyonları
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.admin == true || 
+        request.auth.token.role == 'admin'
+      );
+    }
+
+    // Sporcu Antrenman Kayıtları: Yalnızca sporcu kendisi veya antrenör okuyup yazabilir
+    match /workout_logs/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow write: if isOwner(uid) || isAdmin();
+    }
+
+    // Vücut Kompozisyonu ve Tartı Geçmişi: Yalnızca sporcu ve antrenör
+    match /scale_logs/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow write: if isOwner(uid) || isAdmin();
+    }
+
+    // Koç Direktifleri: Sporcu okuyabilir, yalnızca yetkili koç yazabilir
+    match /coach_directives/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Özel Akademik Programlar: Sporcu okuyabilir, yalnızca koç yazabilir
+    match /custom_programs/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Egzersiz Hata Bildirim Havuzu: Sporcular hata raporu oluşturabilir, yalnızca koç/admin silebilir/düzenleyebilir
+    match /exercise_bug_reports/{docId} {
+      allow create: if request.resource.data.exerciseId is string;
+      allow read: if isAuthenticated() || isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
+    // Sistem Konfigürasyonu ve Kullanıcı Listesi: Yalnızca yöneticiler okuyup yazabilir
+    match /app_system/{docId} {
+      allow read, write: if isAdmin();
+    }
+  }
+}
