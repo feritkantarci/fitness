@@ -7414,7 +7414,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const schedule = isNextWeek ? getNextWeeklySchedule(uid) : getWeeklySchedule(uid);
             const plan = schedule ? schedule[dayIdx] : null;
             if (!plan || plan.rest) {
-                alert("Bu gün dinlenme günü olarak ayarlanmış. Bir antrenman başlatmak isterseniz aşağıdaki hazır programlardan birini seçebilirsiniz.");
+                openScheduleDayModal(dayIdx);
                 return;
             }
 
@@ -7425,9 +7425,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 return;
             }
 
-            if (plan.type === 'official') {
-                loadOfficialRoutine(plan.id);
-            } else if (plan.type === 'custom' || plan.type === 'custom_saved' || (plan.id && plan.id.startsWith('saved_'))) {
+            if (plan.type === 'official' || (plan.id && plan.id.startsWith('la_forja_'))) {
+                loadOfficialRoutine(plan.id || 'la_forja_day1');
+            } else if (plan.type === 'custom' || plan.type === 'custom_saved' || (plan.id && (plan.id.startsWith('saved_') || plan.type === 'custom'))) {
                 loadSavedProgram(plan.id);
             } else if (plan.type === 'custom_generated' && plan.customWorkout) {
                 currentGeneratedWorkout = plan.customWorkout;
@@ -15266,7 +15266,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=168')
+                navigator.serviceWorker.register('./sw.js?v=170')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
