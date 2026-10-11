@@ -3387,6 +3387,618 @@
             transform: scale(0.92);
         }
 
+        /* ==================== HEVY / STRONG STYLE MOBILE WORKOUT UI ==================== */
+        .hevy-workout-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* 1. EXERCISE NAVIGATION STEPPER */
+        .hevy-exercise-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 8px 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+        .hevy-nav-arrow {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            flex-shrink: 0;
+            user-select: none;
+        }
+        .hevy-nav-arrow:hover:not(:disabled) {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: rgba(245, 158, 11, 0.12);
+        }
+        .hevy-nav-arrow:disabled {
+            opacity: 0.25;
+            cursor: not-allowed;
+        }
+        .hevy-nav-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            flex: 1;
+            min-width: 0;
+        }
+        .hevy-nav-counter {
+            font-size: 11px;
+            font-weight: 900;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+        .hevy-nav-pills {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            max-width: 100%;
+            overflow-x: auto;
+            padding: 2px 4px;
+            scrollbar-width: none;
+        }
+        .hevy-nav-pills::-webkit-scrollbar {
+            display: none;
+        }
+        .hevy-pill-dot {
+            min-width: 28px;
+            height: 26px;
+            padding: 0 6px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        .hevy-pill-dot.active {
+            background: rgba(245, 158, 11, 0.22);
+            border-color: var(--gold);
+            color: var(--gold);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.35);
+        }
+        .hevy-pill-dot.done {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: #22c55e;
+            color: #86efac;
+            font-weight: 900;
+        }
+
+        /* 2. EXERCISE CARD & HEADER */
+        .hevy-exercise-card {
+            background: var(--bg-card);
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            padding: 14px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            position: relative;
+        }
+        .hevy-exercise-header {
+            margin-bottom: 10px;
+        }
+        .hevy-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .hevy-exercise-title {
+            font-size: 18px;
+            font-weight: 900;
+            color: #fff;
+            margin: 0;
+            line-height: 1.25;
+        }
+        .hevy-equip-badge {
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            color: var(--cyan);
+            font-size: 10.5px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .hevy-meta-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+        .hevy-meta-item strong {
+            color: var(--gold);
+        }
+
+        /* 3. COLLAPSIBLE FORM GUIDE */
+        .hevy-form-collapsible {
+            margin: 8px 0 12px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px dashed rgba(255, 255, 255, 0.14);
+            overflow: hidden;
+        }
+        .btn-hevy-form-toggle {
+            width: 100%;
+            padding: 8px 12px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 11.5px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-hevy-form-toggle:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .hevy-form-guide-body {
+            padding: 8px 10px 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        /* 4. GHOST PERFORMANCE BAR */
+        .hevy-ghost-bar {
+            background: rgba(56, 189, 248, 0.08);
+            border: 1px dashed rgba(56, 189, 248, 0.35);
+            border-radius: 8px;
+            padding: 7px 10px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 11.5px;
+            color: #bae6fd;
+        }
+        .hevy-ghost-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-hevy-ghost-apply {
+            background: var(--cyan);
+            color: #090d16;
+            border: none;
+            border-radius: 5px;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 4px 8px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: transform 0.15s;
+        }
+        .btn-hevy-ghost-apply:active {
+            transform: scale(0.95);
+        }
+
+        /* 5. HEVY SETS TABLE */
+        .hevy-sets-card {
+            background: rgba(11, 17, 32, 0.85);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+        .hevy-sets-table {
+            display: flex;
+            flex-direction: column;
+        }
+        .hevy-th-row {
+            display: grid;
+            grid-template-columns: 36px 58px 1fr 1fr 48px;
+            gap: 4px;
+            padding: 7px 8px;
+            background: rgba(0, 0, 0, 0.4);
+            border-bottom: 1px solid var(--border);
+            font-size: 10px;
+            font-weight: 900;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+            text-align: center;
+            align-items: center;
+        }
+        .hevy-th {
+            user-select: none;
+        }
+        .hevy-tr-row {
+            display: grid;
+            grid-template-columns: 36px 58px 1fr 1fr 48px;
+            gap: 4px;
+            padding: 7px 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            align-items: center;
+            transition: background 0.15s;
+        }
+        .hevy-tr-row:last-child {
+            border-bottom: none;
+        }
+        .hevy-tr-row.active-target {
+            background: rgba(245, 158, 11, 0.08);
+            border-left: 3px solid var(--gold);
+        }
+        .hevy-tr-row.done {
+            background: rgba(34, 197, 94, 0.06);
+        }
+        .hevy-td {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hevy-set-pill {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border);
+            color: #cbd5e1;
+            font-size: 12px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hevy-set-pill.target {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: rgba(245, 158, 11, 0.18);
+        }
+        .hevy-set-pill.done {
+            background: #16a34a;
+            border-color: #22c55e;
+            color: #fff;
+        }
+        .hevy-prev-text {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 700;
+            text-align: center;
+            line-height: 1.2;
+        }
+        .hevy-prev-text.clickable {
+            cursor: pointer;
+            color: #7dd3fc;
+            text-decoration: underline dotted;
+        }
+        .hevy-prev-text.clickable:hover {
+            color: var(--gold);
+        }
+        .hevy-cell-stepper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            width: 100%;
+        }
+        .btn-hevy-step {
+            width: 26px;
+            height: 32px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: #e2e8f0;
+            font-size: 13px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s;
+            user-select: none;
+            flex-shrink: 0;
+            padding: 0;
+        }
+        .btn-hevy-step:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+        .btn-hevy-step:active {
+            transform: scale(0.92);
+        }
+        .hevy-input-kg, .hevy-input-reps {
+            width: 44px;
+            height: 32px;
+            background: #090d16;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 14.5px;
+            font-weight: 800;
+            text-align: center;
+            outline: none;
+            box-sizing: border-box;
+            padding: 2px;
+            transition: border-color 0.15s;
+        }
+        .hevy-input-kg:focus, .hevy-input-reps:focus {
+            border-color: var(--gold);
+            background: #030712;
+        }
+        .hevy-tr-row.done .hevy-input-kg, .hevy-tr-row.done .hevy-input-reps {
+            color: #86efac;
+            border-color: rgba(34, 197, 94, 0.35);
+        }
+        .btn-hevy-check {
+            width: 38px;
+            height: 34px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            user-select: none;
+        }
+        .btn-hevy-check:active {
+            transform: scale(0.92);
+        }
+        .btn-hevy-check.target {
+            border: 2px solid var(--gold);
+            background: rgba(245, 158, 11, 0.18);
+            color: var(--gold);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+            animation: targetPulse 1.8s infinite ease-in-out;
+        }
+        @keyframes targetPulse {
+            0%, 100% { border-color: rgba(245, 158, 11, 0.6); box-shadow: 0 0 8px rgba(245, 158, 11, 0.25); }
+            50% { border-color: rgba(245, 158, 11, 1); box-shadow: 0 0 16px rgba(245, 158, 11, 0.55); }
+        }
+        .btn-hevy-check.checked {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            border: 1.5px solid #22c55e;
+            color: #fff;
+            font-weight: 900;
+            box-shadow: 0 2px 10px rgba(34, 197, 94, 0.4);
+        }
+        .hevy-table-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.25);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .btn-hevy-add-set {
+            background: transparent;
+            border: 1px dashed var(--gold);
+            color: var(--gold);
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 5px 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-hevy-add-set:hover {
+            background: rgba(245, 158, 11, 0.12);
+        }
+        .btn-hevy-del-set {
+            background: transparent;
+            border: 1px dashed rgba(239, 68, 68, 0.4);
+            color: #f87171;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-hevy-del-set:hover {
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        /* 6. EXERCISE COMPLETION & PROGRESSION BANNER */
+        .hevy-exercise-done-banner {
+            background: rgba(34, 197, 94, 0.12);
+            border: 1.5px solid #22c55e;
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+            margin: 12px 0;
+            animation: fadeInScale 0.25s ease-out;
+        }
+        .hevy-done-title {
+            font-size: 15px;
+            font-weight: 900;
+            color: #86efac;
+        }
+        .hevy-done-sub {
+            font-size: 11.5px;
+            color: #cbd5e1;
+            margin-top: 3px;
+        }
+        .btn-hevy-next-cta {
+            width: 100%;
+            margin-top: 10px;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--gold), #b45309);
+            border: none;
+            border-radius: 10px;
+            color: #090d16;
+            font-size: 13.5px;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+            transition: transform 0.15s;
+        }
+        .btn-hevy-next-cta:active {
+            transform: scale(0.98);
+        }
+        .btn-hevy-finish-cta {
+            width: 100%;
+            margin-top: 10px;
+            padding: 13px;
+            background: linear-gradient(135deg, #10b981, #047857);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        /* 7. MORE ACTIONS & BOTTOM NAV */
+        .hevy-more-wrapper {
+            margin-top: 12px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.08);
+            padding-top: 10px;
+        }
+        .btn-hevy-more-toggle {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 11.5px;
+            font-weight: 700;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .hevy-more-drawer {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+            background: rgba(9, 13, 22, 0.95);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 8px;
+        }
+        .btn-hevy-action {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: #cbd5e1;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 8px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.15s;
+        }
+        .btn-hevy-action:hover {
+            border-color: var(--gold);
+            color: #fff;
+        }
+        .btn-hevy-action.danger {
+            color: #f87171;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        /* 8. FOOTER CONTROLS */
+        .hevy-footer-nav {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: 14px;
+        }
+        .btn-hevy-nav {
+            flex: 1;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 800;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-hevy-nav:hover:not(:disabled) {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+        .btn-hevy-nav:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .hevy-workout-finish-bar {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px dashed var(--border);
+        }
+        .btn-hevy-workout-cancel {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            color: #fca5a5;
+            font-size: 11.5px;
+            font-weight: 700;
+            border-radius: 8px;
+            padding: 11px 14px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .btn-hevy-workout-finish {
+            flex: 1;
+            background: linear-gradient(135deg, var(--gold), #b45309);
+            border: none;
+            border-radius: 8px;
+            color: #090d16;
+            font-size: 13px;
+            font-weight: 900;
+            padding: 11px;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+        }
+
+        /* REST TIMER PULSE EFFECT IN STICKY HUD */
+        .hud-rest-col.resting {
+            background: rgba(245, 158, 11, 0.22) !important;
+            border: 1.5px solid var(--gold) !important;
+            box-shadow: 0 0 14px rgba(245, 158, 11, 0.45) !important;
+            animation: hudRestPulse 1.8s infinite ease-in-out;
+        }
+        @keyframes hudRestPulse {
+            0%, 100% { border-color: rgba(245, 158, 11, 0.6); box-shadow: 0 0 10px rgba(245, 158, 11, 0.3); }
+            50% { border-color: rgba(245, 158, 11, 1); box-shadow: 0 0 20px rgba(245, 158, 11, 0.65); }
+        }
+
         /* FOCUS MODE CARDS & CONTROLS */
         .focus-workout-card {
             background: var(--bg-card);
@@ -4092,7 +4704,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v137</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v138</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -4128,7 +4740,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v137</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v138</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -10497,6 +11109,44 @@ KURALLAR:
             return null;
         }
 
+        let workoutFormGuideOpenState = {};
+        function toggleWorkoutFormGuide(exId) {
+            workoutFormGuideOpenState[exId] = !workoutFormGuideOpenState[exId];
+            const body = document.getElementById(`formGuideBody_${exId}`);
+            const arrow = document.getElementById(`formGuideArrow_${exId}`);
+            if (body) body.style.display = workoutFormGuideOpenState[exId] ? 'block' : 'none';
+            if (arrow) arrow.innerText = workoutFormGuideOpenState[exId] ? '▲ Gizle' : '▼ Göster';
+        }
+
+        function applyGhostToSet(exId, setIdx, weight, reps) {
+            const sets = activeWorkoutSetsData[exId];
+            if (!sets || !sets[setIdx]) return;
+            sets[setIdx].weight = weight;
+            sets[setIdx].reps = reps;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+            if (typeof showToast === 'function') showToast(`⚡ Set ${setIdx + 1}'e ${weight}kg × ${reps}tk uygulandı!`);
+        }
+
+        function jumpToExercise(idx) {
+            if (!activeWorkoutSession || idx < 0 || idx >= activeWorkoutSession.exercises.length) return;
+            activeFocusExIndex = idx;
+            activeFocusSetIndex = null;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function handleSetCheckClick(exId, setIdx) {
+            const sets = activeWorkoutSetsData[exId];
+            if (!sets || !sets[setIdx]) return;
+            if (sets[setIdx].completed) {
+                toggleSetStatus(exId, setIdx);
+            } else {
+                completeSetAndStartRest(exId, setIdx);
+            }
+        }
+
         function copyLastPerformanceToCurrent(exId, weight, reps) {
             const sets = activeWorkoutSetsData[exId];
             if (!sets) return;
@@ -11175,411 +11825,417 @@ KURALLAR:
             if (activeFocusExIndex < 0) activeFocusExIndex = 0;
             if (activeFocusExIndex >= s.exercises.length) activeFocusExIndex = s.exercises.length - 1;
 
-            // ==================== MODE 1: CANLI ODAK MODU (FOCUS MODE) ====================
+            // ==================== MODE 1: CANLI ODAK MODU (FOCUS MODE - HEVY / STRONG STYLE) ====================
             if (activeWorkoutViewMode === 'focus') {
                 const ex = s.exercises[activeFocusExIndex];
                 const sets = activeWorkoutSetsData[ex.id] || [];
                 const firstIncompleteIdx = sets.findIndex(st => !st.completed);
-                let currentSetIdx = (activeFocusSetIndex !== null && activeFocusSetIndex >= 0 && activeFocusSetIndex < sets.length)
-                    ? activeFocusSetIndex
-                    : (firstIncompleteIdx !== -1 ? firstIncompleteIdx : sets.length - 1);
-
-                const currentSet = sets[currentSetIdx];
-                const lastPerf = getLastExercisePerformance(ex.id) || getLastExercisePerformance(ex.name);
                 const isAllSetsDone = sets.length > 0 && sets.every(st => st.completed);
-
-                let allWorkoutDone = true;
-                s.exercises.forEach(e => {
-                    const eSets = activeWorkoutSetsData[e.id] || [];
-                    if (!eSets.every(st => st.completed)) allWorkoutDone = false;
-                });
-
-                // Update and display floating bottom dock
-                if (dock) {
-                    dock.style.display = 'flex';
-                    const dockCounter = document.getElementById('dockExCounter');
-                    const dockName = document.getElementById('dockExName');
-                    const btnDockPrev = document.getElementById('btnDockPrev');
-                    const btnDockNext = document.getElementById('btnDockNext');
-                    if (dockCounter) dockCounter.innerText = `EGZERSİZ ${activeFocusExIndex + 1} / ${s.exercises.length}`;
-                    if (dockName) dockName.innerText = ex ? ex.name : '';
-                    if (btnDockPrev) btnDockPrev.disabled = (activeFocusExIndex === 0);
-                    if (btnDockNext) btnDockNext.disabled = (activeFocusExIndex === s.exercises.length - 1);
-                }
+                const allWorkoutDone = s.exercises.every(e => (activeWorkoutSetsData[e.id] || []).every(st => st.completed));
+                const lastPerf = getLastExercisePerformance(ex.id) || getLastExercisePerformance(ex.name);
+                const isFormOpen = !!workoutFormGuideOpenState[ex.id];
 
                 container.innerHTML = `
-                    <!-- FOCUS CARD -->
-                    <div class="focus-workout-card">
-                        <!-- NAV STEPPER BAR -->
-                        <div class="focus-nav-bar">
-                            <button class="btn-focus-nav" onclick="goToPrevExercise()" ${activeFocusExIndex === 0 ? 'disabled' : ''}>
-                                ⬅️ Önceki
+                    <div class="hevy-workout-wrapper">
+                        <!-- TOP EXERCISE NAVIGATION STEPPER -->
+                        <div class="hevy-exercise-nav">
+                            <button type="button" class="hevy-nav-arrow" onclick="goToPrevExercise()" ${activeFocusExIndex === 0 ? 'disabled' : ''} title="Önceki Egzersiz">
+                                ◀
                             </button>
-                            <div style="text-align:center;">
-                                <div style="font-size:11px; font-weight:900; color:var(--gold); text-transform:uppercase; letter-spacing:0.5px;">
-                                    EGZERSİZ ${activeFocusExIndex + 1} / ${s.exercises.length}
-                                </div>
-                                <div style="font-size:11.5px; font-weight:700; color:var(--text-secondary); margin-top:2px;">
-                                    ${activeFocusExIndex + 1 < s.exercises.length ? `Sıradaki: ${escapeHTML(s.exercises[activeFocusExIndex + 1].name.substring(0, 18))}...` : 'Son Egzersiz'}
+                            <div class="hevy-nav-center">
+                                <div class="hevy-nav-counter">EGZERSİZ ${activeFocusExIndex + 1} / ${s.exercises.length}</div>
+                                <div class="hevy-nav-pills">
+                                    ${s.exercises.map((e, eIdx) => {
+                                        const eSets = activeWorkoutSetsData[e.id] || [];
+                                        const isDone = eSets.length > 0 && eSets.every(st => st.completed);
+                                        const isCur = eIdx === activeFocusExIndex;
+                                        return `
+                                            <button type="button" 
+                                                    class="hevy-pill-dot ${isCur ? 'active' : ''} ${isDone ? 'done' : ''}" 
+                                                    onclick="jumpToExercise(${eIdx})" 
+                                                    title="${escapeHTML(e.name)}">
+                                                ${isDone ? '✓' : (eIdx + 1)}
+                                            </button>
+                                        `;
+                                    }).join('')}
                                 </div>
                             </div>
-                            <button class="btn-focus-nav" onclick="goToNextExercise()" ${activeFocusExIndex === s.exercises.length - 1 ? 'disabled' : ''}>
-                                Sonraki ➡️
+                            <button type="button" class="hevy-nav-arrow" onclick="goToNextExercise()" ${activeFocusExIndex === s.exercises.length - 1 ? 'disabled' : ''} title="Sonraki Egzersiz">
+                                ▶
                             </button>
                         </div>
 
-                        <!-- EXERCISE INFO & TITLE (HER ZAMAN GÖRÜNÜR) -->
-                        <div style="margin-bottom:8px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                                <h2 style="font-size:19px; font-weight:900; color:#fff; line-height:1.2; margin:0;">
-                                    ${escapeHTML(ex.name)}
-                                </h2>
-                                <div style="display:flex; gap:4px; flex-shrink:0; align-items:center;">
-                                    <span class="ex-badge badge-equip">${equipLabels[ex.equipment] || ex.equipment}</span>
+                        <!-- EXERCISE CARD -->
+                        <div class="hevy-exercise-card">
+                            <!-- HEADER -->
+                            <div class="hevy-exercise-header">
+                                <div class="hevy-title-row">
+                                    <h2 class="hevy-exercise-title">${escapeHTML(ex.name)}</h2>
+                                    <span class="hevy-equip-badge">${equipLabels[ex.equipment] || ex.equipment}</span>
+                                </div>
+                                <div class="hevy-meta-row">
+                                    <span class="hevy-meta-item">🎯 Hedef: <strong>${sets.length} Set × ${s.scheme.reps}</strong></span>
+                                    <span class="hevy-meta-item">⏱️ Dinlenme: <strong>${s.scheme.rest || 45}s</strong></span>
                                 </div>
                             </div>
-                            <div style="font-size:11.5px; color:var(--text-secondary); margin-top:3px;">
-                                🎯 Hedef: <strong style="color:var(--gold);">${sets.length} Set x ${s.scheme.reps}</strong> • Dinlenme: ${s.scheme.rest}s
-                            </div>
-                        </div>
 
-                        <!-- BİYOMEKANİK FORM, ANATOMİ VE GÖRSEL REHBERİ (TAM GENİŞLİK) -->
-                        <div style="margin-bottom:8px;">
-                            ${renderExercisePositionsHtml(ex, `focus_${ex.id}`, false)}
-                        </div>
-
-                        <!-- SETS BREADCRUMBS & SET ARTIŞ/AZALIŞ STEPPER BAR (YAN YANA) -->
-                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin:10px 0 10px;">
-                            <div class="focus-breadcrumbs" style="margin:0; flex:1; min-width:200px;">
-                                ${sets.map((st, sIdx) => {
-                                    const isDone = st.completed;
-                                    const isCurrent = sIdx === currentSetIdx;
-                                    const cls = isDone ? 'focus-crumb done' : (isCurrent ? 'focus-crumb active' : 'focus-crumb');
-                                    return `
-                                        <button type="button" class="${cls}" onclick="selectFocusSet('${ex.id}', ${sIdx})">
-                                            ${isDone ? '✓ ' : ''}Set ${st.setNo}${st.weight ? `: ${st.weight}kg` : ''} ${st.reps ? `× ${st.reps}` : ''}
-                                        </button>
-                                    `;
-                                }).join('')}
-                            </div>
-
-                            <!-- BASİT SET ARTIŞ / AZALIŞ (+-1 SET) -->
-                            <div style="display:inline-flex; align-items:center; gap:5px; background:rgba(15, 23, 42, 0.9); border:1px solid var(--border); padding:3px 8px; border-radius:8px;">
-                                <span style="font-size:11px; font-weight:800; color:var(--text-secondary);">Set:</span>
-                                <button type="button" class="btn-step-mini" style="width:28px; height:28px; font-size:14px;" onclick="stepExerciseSets('${ex.id}', -1)" title="1 Set Çıkar">-</button>
-                                <span style="font-size:12px; font-weight:900; color:var(--gold); min-width:16px; text-align:center;">${sets.length}</span>
-                                <button type="button" class="btn-step-mini" style="width:28px; height:28px; font-size:14px;" onclick="stepExerciseSets('${ex.id}', 1)" title="1 Set Ekle">+</button>
-                            </div>
-                        </div>
-
-                        <!-- ACTIVE SET HERO SPOTLIGHT -->
-                        ${currentSet ? `
-                            <div class="focus-set-hero">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                                    <div style="display:flex; align-items:center; gap:8px;">
-                                        <span class="set-badge" style="font-size:13px; padding:4px 8px; background:var(--gold); color:#090d16; font-weight:900;">
-                                            SET ${currentSet.setNo}
-                                        </span>
-                                        <span style="font-size:12.5px; font-weight:800; color:#fff;">
-                                            ${currentSet.completed ? '✅ Tamamlandı' : '⚡ ŞİMDİKİ HEDEF'}
-                                        </span>
-                                    </div>
-                                    <div style="font-size:12px; color:var(--gold); font-weight:700;">
-                                        Hedef: ${s.scheme.reps} Tk
-                                    </div>
+                            <!-- COLLAPSIBLE FORM & BIOMECHANICS GUIDE -->
+                            <div class="hevy-form-collapsible">
+                                <button type="button" class="btn-hevy-form-toggle" onclick="toggleWorkoutFormGuide('${ex.id}')">
+                                    <span>📖 Form & Biyomekanik Rehberi</span>
+                                    <span id="formGuideArrow_${ex.id}" style="color:var(--gold); font-weight:800;">${isFormOpen ? '▲ Gizle' : '▼ Göster'}</span>
+                                </button>
+                                <div id="formGuideBody_${ex.id}" class="hevy-form-guide-body" style="display:${isFormOpen ? 'block' : 'none'};">
+                                    ${renderExercisePositionsHtml(ex, `focus_${ex.id}`, false)}
                                 </div>
+                            </div>
 
-                                <!-- GHOST PERFORMANCE BADGE -->
-                                ${lastPerf ? `
-                                    <div class="history-ghost-badge">
-                                        <span>📌 <strong>Son Seans:</strong> ${lastPerf.weight} kg × ${lastPerf.reps} tk <span style="font-size:10px; opacity:0.8;">(${lastPerf.dateFormatted})</span></span>
-                                        <button type="button" class="btn-ghost-copy" onclick="copyLastPerformanceToCurrent('${ex.id}', ${lastPerf.weight}, ${lastPerf.reps})">⚡ Aynısını Al</button>
+                            <!-- GHOST PERFORMANCE REFERENCE -->
+                            ${lastPerf ? `
+                                <div class="hevy-ghost-bar">
+                                    <div class="hevy-ghost-info">
+                                        <span>📌 Önceki: <strong>${lastPerf.weight} kg × ${lastPerf.reps} tk</strong> <span style="font-size:10px; opacity:0.75;">(${lastPerf.dateFormatted})</span></span>
                                     </div>
-                                ` : ''}
-
-                                <!-- SADELEŞTİRİLMİŞ KİLO & TEKRAR GİRİŞİ (YAN YANA DEV ALAN) -->
-                                <div class="input-duo-grid">
-                                    <div class="input-duo-cell">
-                                        <div class="input-duo-label">⚖️ Ağırlık (KG)</div>
-                                        <div class="stepper-extended">
-                                            <button type="button" class="btn-step-delta neg" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, -2.5)" title="-2.5 kg">-2.5</button>
-                                            <button type="button" class="btn-step-delta neg" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, -1)" title="-1 kg">-1</button>
-                                            <input type="number" step="0.5" class="input-huge-val" 
-                                                   id="w_${ex.id}_${currentSetIdx}" 
-                                                   value="${currentSet.weight !== '' && currentSet.weight !== null ? currentSet.weight : ''}" 
-                                                   placeholder="0" 
-                                                   oninput="onSetWeightInput('${ex.id}', ${currentSetIdx}, this.value)">
-                                            <button type="button" class="btn-step-delta pos" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, 1)" title="+1 kg">+1</button>
-                                            <button type="button" class="btn-step-delta pos" onclick="stepSetWeight('${ex.id}', ${currentSetIdx}, 2.5)" title="+2.5 kg">+2.5</button>
-                                        </div>
-                                    </div>
-
-                                    <div class="input-duo-cell">
-                                        <div class="input-duo-label">🔄 Tekrar Sayısı</div>
-                                        <div class="input-stepper-row">
-                                            <button type="button" class="btn-step-mini" onclick="stepSetReps('${ex.id}', ${currentSetIdx}, -1)">-</button>
-                                            <input type="number" step="1" class="input-huge-val" 
-                                                   id="r_${ex.id}_${currentSetIdx}" 
-                                                   value="${currentSet.reps !== '' && currentSet.reps !== null ? currentSet.reps : ''}" 
-                                                   placeholder="0" 
-                                                   oninput="onSetRepsInput('${ex.id}', ${currentSetIdx}, this.value)">
-                                            <button type="button" class="btn-step-mini" onclick="stepSetReps('${ex.id}', ${currentSetIdx}, 1)">+</button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- HERO COMPLETE SET ACTION -->
-                                ${currentSet.completed ? `
-                                    <button class="btn btn-outline" style="width:100%; padding:13px; font-size:13.5px; border-color:#22c55e; color:#86efac; font-weight:800;" onclick="toggleSetStatus('${ex.id}', ${currentSetIdx})">
-                                        ✅ Bu Set Tamamlandı (Düzeltmek İçin Dokun)
+                                    <button type="button" class="btn-hevy-ghost-apply" onclick="copyLastPerformanceToCurrent('${ex.id}', ${lastPerf.weight}, ${lastPerf.reps})" title="Tüm boş setlere uygula">
+                                        ⚡ Tümüne Yaz
                                     </button>
-                                    ${firstIncompleteIdx !== -1 ? `
-                                        <button class="btn btn-gold" style="width:100%; padding:14px; font-size:14.5px; font-weight:900; margin-top:8px; box-shadow:0 4px 15px rgba(245,158,11,0.4);" onclick="selectFocusSet('${ex.id}', ${firstIncompleteIdx})">
-                                            ▶️ Sıradaki Sete Geç (Set ${sets[firstIncompleteIdx].setNo})
+                                </div>
+                            ` : ''}
+
+                            <!-- HEVY / STRONG STYLE SETS TABLE -->
+                            <div class="hevy-sets-card">
+                                <div class="hevy-sets-table">
+                                    <div class="hevy-th-row">
+                                        <div class="hevy-th">SET</div>
+                                        <div class="hevy-th">ÖNCEKİ</div>
+                                        <div class="hevy-th">KG</div>
+                                        <div class="hevy-th">TEKRAR</div>
+                                        <div class="hevy-th">✓</div>
+                                    </div>
+
+                                    ${sets.map((st, sIdx) => {
+                                        const isDone = st.completed;
+                                        const isTarget = !isDone && sIdx === firstIncompleteIdx;
+                                        const prevText = lastPerf ? `${lastPerf.weight}kg × ${lastPerf.reps}` : '-';
+
+                                        return `
+                                            <div class="hevy-tr-row ${isDone ? 'done' : ''} ${isTarget ? 'active-target' : ''}" id="setRow_${ex.id}_${sIdx}">
+                                                <!-- SET NO -->
+                                                <div class="hevy-td">
+                                                    <span class="hevy-set-pill ${isDone ? 'done' : (isTarget ? 'target' : '')}">${st.setNo}</span>
+                                                </div>
+
+                                                <!-- ÖNCEKİ SEANS / GHOST -->
+                                                <div class="hevy-td" 
+                                                     title="${lastPerf && !isDone ? 'Bu sete önceki veriyi aktarmak için dokunun' : ''}"
+                                                     ${lastPerf && !isDone ? `onclick="applyGhostToSet('${ex.id}', ${sIdx}, ${lastPerf.weight}, ${lastPerf.reps})"` : ''}>
+                                                    <span class="hevy-prev-text ${lastPerf && !isDone ? 'clickable' : ''}">${prevText}</span>
+                                                </div>
+
+                                                <!-- AĞIRLIK (KG) -->
+                                                <div class="hevy-td">
+                                                    <div class="hevy-cell-stepper">
+                                                        <button type="button" class="btn-hevy-step" onclick="stepSetWeight('${ex.id}', ${sIdx}, -2.5)" title="-2.5 kg">-</button>
+                                                        <input type="number" step="0.5" inputmode="decimal" class="hevy-input-kg" 
+                                                               id="w_${ex.id}_${sIdx}" 
+                                                               value="${st.weight !== '' && st.weight !== null ? st.weight : ''}" 
+                                                               placeholder="0" 
+                                                               oninput="onSetWeightInput('${ex.id}', ${sIdx}, this.value)">
+                                                        <button type="button" class="btn-hevy-step pos" onclick="stepSetWeight('${ex.id}', ${sIdx}, 2.5)" title="+2.5 kg">+</button>
+                                                    </div>
+                                                </div>
+
+                                                <!-- TEKRAR -->
+                                                <div class="hevy-td">
+                                                    <div class="hevy-cell-stepper">
+                                                        <button type="button" class="btn-hevy-step" onclick="stepSetReps('${ex.id}', ${sIdx}, -1)" title="-1 tekrar">-</button>
+                                                        <input type="number" step="1" inputmode="numeric" class="hevy-input-reps" 
+                                                               id="r_${ex.id}_${sIdx}" 
+                                                               value="${st.reps !== '' && st.reps !== null ? st.reps : ''}" 
+                                                               placeholder="0" 
+                                                               oninput="onSetRepsInput('${ex.id}', ${sIdx}, this.value)">
+                                                        <button type="button" class="btn-hevy-step pos" onclick="stepSetReps('${ex.id}', ${sIdx}, 1)" title="+1 tekrar">+</button>
+                                                    </div>
+                                                </div>
+
+                                                <!-- TİK BUTONU -->
+                                                <div class="hevy-td">
+                                                    <button type="button" 
+                                                            class="btn-hevy-check ${isDone ? 'checked' : (isTarget ? 'target' : '')}" 
+                                                            onclick="handleSetCheckClick('${ex.id}', ${sIdx})"
+                                                            title="${isDone ? 'Set Tamamlandı (Geri Almak İçin Dokunun)' : 'Seti Bitir ve Dinlenmeyi Başlat'}">
+                                                        ${isDone ? '✓' : (isTarget ? '⚡' : '○')}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+
+                                <!-- SET EKLE / SİL -->
+                                <div class="hevy-table-footer">
+                                    <button type="button" class="btn-hevy-add-set" onclick="addSetToExercise('${ex.id}')">
+                                        ➕ Set Ekle
+                                    </button>
+                                    ${sets.length > 1 ? `
+                                        <button type="button" class="btn-hevy-del-set" onclick="removeSetFromExercise('${ex.id}')" title="Son seti sil">
+                                            🗑️ Set Sil
                                         </button>
                                     ` : ''}
-                                ` : `
-                                    <button class="btn btn-gold" style="width:100%; padding:15px; font-size:15px; font-weight:900; box-shadow:0 4px 15px rgba(245,158,11,0.4);" onclick="completeSetAndStartRest('${ex.id}', ${currentSetIdx})">
-                                        ▶️ SETİ BİTİR & DİNLEN (${s.scheme.rest || 45}s)
-                                    </button>
-                                `}
+                                </div>
                             </div>
-                        ` : ''}
 
-                        <!-- EXERCISE COMPLETION BANNER -->
-                        ${isAllSetsDone ? `
-                            <div style="background:rgba(34, 197, 94, 0.15); border:1.5px solid #22c55e; border-radius:12px; padding:16px; text-align:center; color:#86efac; margin:14px 0;">
-                                <div style="font-weight:900; font-size:16px;">🎉 ${escapeHTML(ex.name)} Tüm Setleri Bitti!</div>
-                                ${activeFocusExIndex < s.exercises.length - 1 ? `
-                                    <button class="btn-hero-next-ex" onclick="goToNextExercise()">
-                                        Sıradaki Harekete Geç (${activeFocusExIndex + 2}/${s.exercises.length}) ➔
-                                    </button>
-                                ` : `
-                                    <div style="margin-top:8px; font-size:12.5px; color:#fde68a;">
-                                        Tüm planlanan egzersizler bitti! İster ilave finisher ekleyin, ister günlüğe kaydedin.
-                                    </div>
-                                    <div style="display:flex; gap:8px; justify-content:center; margin-top:12px; flex-wrap:wrap;">
-                                        <button class="btn btn-outline" style="border-color:var(--cyan); color:var(--cyan); font-weight:800; font-size:12.5px; padding:11px 18px;" onclick="openAddFinisherModal()">
-                                            ➕ İlave Finisher Ekle
+                            <!-- EXERCISE COMPLETION BANNER -->
+                            ${isAllSetsDone ? `
+                                <div class="hevy-exercise-done-banner">
+                                    <div class="hevy-done-title">🎉 ${escapeHTML(ex.name)} Bitti!</div>
+                                    <div class="hevy-done-sub">Tüm ${sets.length} set başarıyla tamamlandı.</div>
+                                    ${activeFocusExIndex < s.exercises.length - 1 ? `
+                                        <button type="button" class="btn-hevy-next-cta" onclick="goToNextExercise()">
+                                            Sıradaki Egzersize Geç (${activeFocusExIndex + 2}/${s.exercises.length}) ➔
                                         </button>
-                                        <button class="btn btn-gold" style="font-weight:900; font-size:13.5px; padding:11px 22px;" onclick="openCompleteModal()">
-                                            🏁 Antrenmanı Bitir & Kaydet
+                                    ` : `
+                                        <button type="button" class="btn-hevy-finish-cta" onclick="openCompleteModal()">
+                                            🏁 Antrenmanı Tamamla & Günlüğe Kaydet
                                         </button>
-                                    </div>
-                                `}
-                            </div>
-                        ` : ''}
+                                    `}
+                                </div>
+                            ` : ''}
 
-                        <!-- GİZLENEBİLİR DİĞER İŞLEMLER PANELİ (...) -->
-                        <div class="workout-more-actions-wrapper">
-                            <button type="button" class="btn-workout-more-toggle" onclick="toggleExerciseMoreActions('${ex.id}')" id="btnMoreActions_${ex.id}">
-                                <span>⚙️ Diğer Seçenekler (Alternatif, Alet, Sıralama...)</span>
-                                <span class="more-toggle-icon">${activeWorkoutMoreDrawersState[ex.id] ? '▲ Kapat' : '•••'}</span>
-                            </button>
-                            <div class="workout-more-actions-drawer" id="moreActionsDrawer_${ex.id}" style="display:${activeWorkoutMoreDrawersState[ex.id] ? 'block' : 'none'};">
-                                <div class="more-drawer-grid">
-                                    <button class="btn-drawer-action" onclick="openAlternativeModal('${ex.id}', 'active')">
-                                        📋 Alternatif Hareket
+                            <!-- MORE ACTIONS DRAWER -->
+                            <div class="hevy-more-wrapper">
+                                <button type="button" class="btn-hevy-more-toggle" onclick="toggleExerciseMoreActions('${ex.id}')" id="btnMoreActions_${ex.id}">
+                                    <span>⚙️ Diğer Seçenekler (Alternatif, Alet...)</span>
+                                    <span class="more-toggle-icon">${activeWorkoutMoreDrawersState[ex.id] ? '▲ Kapat' : '•••'}</span>
+                                </button>
+                                <div class="hevy-more-drawer" id="moreActionsDrawer_${ex.id}" style="display:${activeWorkoutMoreDrawersState[ex.id] ? 'grid' : 'none'};">
+                                    <button class="btn-hevy-action" onclick="openAlternativeModal('${ex.id}', 'active')">
+                                        📋 Alternatif Seç
                                     </button>
-                                    <button class="btn-drawer-action warn" onclick="deferExerciseToEnd('${ex.id}')">
-                                        ⏳ Alet Dolu (Sona Ertele)
+                                    <button class="btn-hevy-action" onclick="deferExerciseToEnd('${ex.id}')" style="color:#f59e0b;">
+                                        ⏳ Alet Dolu (Sona At)
                                     </button>
-                                    <button class="btn-drawer-action" onclick="moveExerciseOrder('${ex.id}', -1)">
+                                    <button class="btn-hevy-action" onclick="moveExerciseOrder('${ex.id}', -1)">
                                         ⬆️ Sırayı Öne Al
                                     </button>
-                                    <button class="btn-drawer-action" onclick="moveExerciseOrder('${ex.id}', 1)">
+                                    <button class="btn-hevy-action" onclick="moveExerciseOrder('${ex.id}', 1)">
                                         ⬇️ Sırayı Arkaya Al
                                     </button>
-                                    <button class="btn-drawer-action" onclick="openAddFinisherModal()">
-                                        ➕ Finisher / İlave Egzersiz
+                                    <button class="btn-hevy-action" onclick="openAddFinisherModal()">
+                                        ➕ Finisher Ekle
                                     </button>
-                                    <button class="btn-drawer-action" onclick="openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}')">
+                                    <button class="btn-hevy-action" onclick="openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}')">
                                         ⚠️ Hata Bildir
                                     </button>
-                                    <button class="btn-drawer-action danger" onclick="removeExerciseFromWorkout('${ex.id}', 'active')">
+                                    <button class="btn-hevy-action danger" onclick="removeExerciseFromWorkout('${ex.id}', 'active')">
                                         🗑️ Hareketi Kaldır
                                     </button>
-                                    <button class="btn-drawer-action danger" onclick="cancelActiveWorkout()">
-                                        🛑 Antrenmanı İptal Et
+                                    <button class="btn-hevy-action danger" onclick="cancelActiveWorkout()">
+                                        🛑 İptal Et
                                     </button>
                                 </div>
                             </div>
+
+                            <!-- NAVIGATION FOOTER -->
+                            <div class="hevy-footer-nav">
+                                <button type="button" class="btn-hevy-nav" onclick="goToPrevExercise()" ${activeFocusExIndex === 0 ? 'disabled' : ''}>
+                                    ◀ Önceki Hrk
+                                </button>
+                                <button type="button" class="btn-hevy-nav" style="border-color:var(--gold); color:var(--gold); font-weight:900;" onclick="openCompleteModal()">
+                                    🏁 Seansı Bitir
+                                </button>
+                                <button type="button" class="btn-hevy-nav" onclick="goToNextExercise()" ${activeFocusExIndex === s.exercises.length - 1 ? 'disabled' : ''}>
+                                    Sonraki Hrk ▶
+                                </button>
+                            </div>
                         </div>
 
-                        <!-- NAVIGATION FOOTER (SADELEŞTİRİLMİŞ MOBİL ERİŞİM) -->
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; gap:8px;">
-                            <button class="btn btn-outline" style="flex:1; padding:12px 6px; font-size:12px; font-weight:800;" onclick="goToPrevExercise()" ${activeFocusExIndex === 0 ? 'disabled' : ''}>
-                                ⬅️ Önceki
-                            </button>
-                            <button class="btn btn-gold" style="flex:1.4; padding:12px 8px; font-size:12.5px; font-weight:900;" onclick="openCompleteModal()">
-                                🏁 Bitir & Kaydet
-                            </button>
-                            <button class="btn btn-outline" style="flex:1; padding:12px 6px; font-size:12px; font-weight:800;" onclick="goToNextExercise()" ${activeFocusExIndex === s.exercises.length - 1 ? 'disabled' : ''}>
-                                Sonraki ➡️
-                            </button>
-                        </div>
+                        ${allWorkoutDone ? `
+                            <div style="text-align:center; margin:14px 0 20px;">
+                                <button type="button" class="btn-hevy-finish-cta" style="padding:16px; font-size:15px; box-shadow:0 0 25px rgba(245,158,11,0.6);" onclick="openCompleteModal()">
+                                    🏆 TEBRİKLER! TÜM SETLER BİTTİ • BİTİR & GÜNLÜĞE KAYDET
+                                </button>
+                            </div>
+                        ` : ''}
+
                         <!-- ODAK MODU ALT İPTAL BUTONU -->
-                        <div style="display:flex; justify-content:center; margin-top:16px; padding-top:14px; border-top:1px dashed var(--border);">
-                            <button type="button" class="btn btn-danger-soft" style="padding:10px 20px; font-size:12.5px; font-weight:700;" onclick="cancelActiveWorkout()">
+                        <div style="display:flex; justify-content:center; margin-top:6px; padding-top:10px; border-top:1px dashed var(--border);">
+                            <button type="button" class="btn btn-danger-soft" style="padding:8px 18px; font-size:12px; font-weight:700;" onclick="cancelActiveWorkout()">
                                 🛑 Antrenmanı İptal Et
                             </button>
                         </div>
                     </div>
-
-                    ${allWorkoutDone ? `
-                        <div style="text-align:center; margin:24px 0; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-                            <button class="btn btn-danger-soft" style="padding:14px 20px; font-size:13.5px; font-weight:700;" onclick="cancelActiveWorkout()">
-                                🛑 İptal Et
-                            </button>
-                            <button class="btn btn-gold" style="padding:16px 28px; font-size:15px; font-weight:900; box-shadow:0 0 25px rgba(245,158,11,0.6);" onclick="openCompleteModal()">
-                                🏆 TEBRİKLER! TÜM SETLER BİTTİ • BİTİR & GÜNLÜĞE KAYDET
-                            </button>
-                        </div>
-                    ` : ''}
                 `;
                 return;
             }
 
-            // ==================== MODE 2: TÜM LİSTE GÖRÜNÜMÜ (LIST VIEW) ====================
+            // ==================== MODE 2: TÜM LİSTE GÖRÜNÜMÜ (LIST VIEW - HEVY / STRONG STYLE) ====================
             if (dock) dock.style.display = 'none';
 
             container.innerHTML = `
-                ${s.exercises.map((ex, idx) => {
-                    const sets = activeWorkoutSetsData[ex.id] || [];
-                    const nextUncompletedIdx = sets.findIndex(st => !st.completed);
-                    const lastPerf = getLastExercisePerformance(ex.id) || getLastExercisePerformance(ex.name);
+                <div class="hevy-workout-wrapper">
+                    ${s.exercises.map((ex, idx) => {
+                        const sets = activeWorkoutSetsData[ex.id] || [];
+                        const firstIncompleteIdx = sets.findIndex(st => !st.completed);
+                        const isAllSetsDone = sets.length > 0 && sets.every(st => st.completed);
+                        const lastPerf = getLastExercisePerformance(ex.id) || getLastExercisePerformance(ex.name);
+                        const isFormOpen = !!workoutFormGuideOpenState[ex.id];
 
-                    return `
-                        <div class="ex-card" data-exercise-id="${ex.id}">
-                            <div class="ex-card-header">
-                                <div class="ex-name">
-                                    <span style="color:var(--gold); font-weight:900;">${idx + 1}.</span>
-                                    <span>${escapeHTML(ex.name)}</span>
-                                </div>
-                                <div class="ex-tag-group">
-                                    <span class="ex-badge badge-equip">${equipLabels[ex.equipment] || ex.equipment}</span>
-                                    <button type="button" class="btn-report-mini" onclick="openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}')" title="Bu egzersiz veya görsel hatalıysa bildir">
-                                        ⚠️ Bildir
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div style="font-size:12px; color:var(--text-secondary); margin-bottom:6px;">
-                                🎯 Hedef Şema: <strong style="color:var(--gold);">${s.scheme.sets} Set x ${s.scheme.reps}</strong> • Dinlenme: ${s.scheme.rest}s
-                            </div>
-
-                            ${lastPerf ? `
-                                <div class="history-ghost-badge">
-                                    <span>📌 <strong>Son:</strong> ${lastPerf.weight} kg × ${lastPerf.reps} tk</span>
-                                    <button type="button" class="btn-ghost-copy" onclick="copyLastPerformanceToCurrent('${ex.id}', ${lastPerf.weight}, ${lastPerf.reps})">⚡ Uygula</button>
-                                </div>
-                            ` : ''}
-
-                            ${renderExercisePositionsHtml(ex, `active_${idx}`, false)}
-
-                            <!-- SET-BY-SET WORKFLOW TABLE -->
-                            <div class="sets-management-wrap">
-                                <div class="sets-header-row">
-                                    <span>SET</span>
-                                    <span>HEDEF</span>
-                                    <span>KİLO (KG)</span>
-                                    <span>TEKRAR</span>
-                                    <span>İŞLEM</span>
-                                </div>
-
-                                ${sets.map((st, setIdx) => {
-                                    const isTarget = setIdx === nextUncompletedIdx;
-                                    const rowClass = st.completed ? 'set-completed' : (isTarget ? 'set-active-target' : '');
-
-                                    return `
-                                        <div class="set-row ${rowClass}" id="setRow_${ex.id}_${setIdx}">
-                                            <div style="text-align:center;">
-                                                <span class="set-badge">${st.setNo}</span>
-                                            </div>
-                                            <div class="set-col-target">
-                                                ${s.scheme.reps}
-                                            </div>
-                                            <div class="set-col-input">
-                                                <div class="stepper-wrap">
-                                                    <button class="stepper-btn" onclick="stepSetWeight('${ex.id}', ${setIdx}, -2.5)" title="-2.5 kg" style="padding:2px 4px; font-size:10px;">-2.5</button>
-                                                    <button class="stepper-btn" onclick="stepSetWeight('${ex.id}', ${setIdx}, -1)" title="-1 kg" style="padding:2px 4px; font-size:10px;">-1</button>
-                                                    <input type="number" step="0.5" class="set-input-weight" 
-                                                           id="w_${ex.id}_${setIdx}" 
-                                                           value="${st.weight !== '' && st.weight !== null ? st.weight : ''}" 
-                                                           placeholder="kg" 
-                                                           oninput="onSetWeightInput('${ex.id}', ${setIdx}, this.value)">
-                                                    <button class="stepper-btn" onclick="stepSetWeight('${ex.id}', ${setIdx}, 1)" title="+1 kg" style="padding:2px 4px; font-size:10px;">+1</button>
-                                                    <button class="stepper-btn" onclick="stepSetWeight('${ex.id}', ${setIdx}, 2.5)" title="+2.5 kg" style="padding:2px 4px; font-size:10px;">+2.5</button>
-                                                </div>
-                                            </div>
-                                            <div class="set-col-input">
-                                                <div class="stepper-wrap">
-                                                    <button class="stepper-btn" onclick="stepSetReps('${ex.id}', ${setIdx}, -1)" title="-1 tekrar">-</button>
-                                                    <input type="number" step="1" class="set-input-reps" 
-                                                           id="r_${ex.id}_${setIdx}" 
-                                                           value="${st.reps !== '' && st.reps !== null ? st.reps : ''}" 
-                                                           placeholder="tk" 
-                                                           oninput="onSetRepsInput('${ex.id}', ${setIdx}, this.value)">
-                                                    <button class="stepper-btn" onclick="stepSetReps('${ex.id}', ${setIdx}, 1)" title="+1 tekrar">+</button>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                ${st.completed
-                                                    ? `<button class="btn-set-status done" onclick="toggleSetStatus('${ex.id}', ${setIdx})" title="Geri Al / Düzelt">✅ Bitti</button>`
-                                                    : `<button class="btn-set-status start" onclick="completeSetAndStartRest('${ex.id}', ${setIdx})">▶ Bitir & Dinlen</button>`
-                                                }
-                                            </div>
+                        return `
+                            <div class="hevy-exercise-card" data-exercise-id="${ex.id}">
+                                <div class="hevy-exercise-header">
+                                    <div class="hevy-title-row">
+                                        <div class="hevy-exercise-title">
+                                            <span style="color:var(--gold); font-weight:900;">${idx + 1}.</span>
+                                            <span>${escapeHTML(ex.name)}</span>
                                         </div>
-                                    `;
-                                }).join('')}
+                                        <span class="hevy-equip-badge">${equipLabels[ex.equipment] || ex.equipment}</span>
+                                    </div>
+                                    <div class="hevy-meta-row">
+                                        <span class="hevy-meta-item">🎯 <strong>${sets.length} Set × ${s.scheme.reps}</strong></span>
+                                        <span class="hevy-meta-item">⏱️ Dinlenme: <strong>${s.scheme.rest || 45}s</strong></span>
+                                    </div>
+                                </div>
 
-                                <div class="sets-footer-actions">
-                                    <button class="btn-set-mini" onclick="stepExerciseSets('${ex.id}', -1)" title="1 Set Çıkar">➖ 1 Set Çıkar</button>
-                                    <button class="btn-set-mini" onclick="stepExerciseSets('${ex.id}', 1)" title="1 Set Ekle">➕ 1 Set Ekle</button>
+                                <div class="hevy-form-collapsible">
+                                    <button type="button" class="btn-hevy-form-toggle" onclick="toggleWorkoutFormGuide('${ex.id}')">
+                                        <span>📖 Form & Biyomekanik Rehberi</span>
+                                        <span id="formGuideArrow_${ex.id}" style="color:var(--gold); font-weight:800;">${isFormOpen ? '▲ Gizle' : '▼ Göster'}</span>
+                                    </button>
+                                    <div id="formGuideBody_${ex.id}" class="hevy-form-guide-body" style="display:${isFormOpen ? 'block' : 'none'};">
+                                        ${renderExercisePositionsHtml(ex, `active_${idx}`, false)}
+                                    </div>
+                                </div>
+
+                                ${lastPerf ? `
+                                    <div class="hevy-ghost-bar">
+                                        <div class="hevy-ghost-info">
+                                            <span>📌 Önceki: <strong>${lastPerf.weight} kg × ${lastPerf.reps} tk</strong></span>
+                                        </div>
+                                        <button type="button" class="btn-hevy-ghost-apply" onclick="copyLastPerformanceToCurrent('${ex.id}', ${lastPerf.weight}, ${lastPerf.reps})">
+                                            ⚡ Tümüne Yaz
+                                        </button>
+                                    </div>
+                                ` : ''}
+
+                                <div class="hevy-sets-card">
+                                    <div class="hevy-sets-table">
+                                        <div class="hevy-th-row">
+                                            <div class="hevy-th">SET</div>
+                                            <div class="hevy-th">ÖNCEKİ</div>
+                                            <div class="hevy-th">KG</div>
+                                            <div class="hevy-th">TEKRAR</div>
+                                            <div class="hevy-th">✓</div>
+                                        </div>
+
+                                        ${sets.map((st, sIdx) => {
+                                            const isDone = st.completed;
+                                            const isTarget = !isDone && sIdx === firstIncompleteIdx;
+                                            const prevText = lastPerf ? `${lastPerf.weight}kg × ${lastPerf.reps}` : '-';
+
+                                            return `
+                                                <div class="hevy-tr-row ${isDone ? 'done' : ''} ${isTarget ? 'active-target' : ''}" id="setRow_${ex.id}_${sIdx}">
+                                                    <div class="hevy-td">
+                                                        <span class="hevy-set-pill ${isDone ? 'done' : (isTarget ? 'target' : '')}">${st.setNo}</span>
+                                                    </div>
+
+                                                    <div class="hevy-td"
+                                                         title="${lastPerf && !isDone ? 'Bu sete önceki veriyi aktarmak için dokunun' : ''}"
+                                                         ${lastPerf && !isDone ? `onclick="applyGhostToSet('${ex.id}', ${sIdx}, ${lastPerf.weight}, ${lastPerf.reps})"` : ''}>
+                                                        <span class="hevy-prev-text ${lastPerf && !isDone ? 'clickable' : ''}">${prevText}</span>
+                                                    </div>
+
+                                                    <div class="hevy-td">
+                                                        <div class="hevy-cell-stepper">
+                                                            <button type="button" class="btn-hevy-step" onclick="stepSetWeight('${ex.id}', ${sIdx}, -2.5)" title="-2.5 kg">-</button>
+                                                            <input type="number" step="0.5" inputmode="decimal" class="hevy-input-kg" 
+                                                                   id="w_${ex.id}_${sIdx}" 
+                                                                   value="${st.weight !== '' && st.weight !== null ? st.weight : ''}" 
+                                                                   placeholder="0" 
+                                                                   oninput="onSetWeightInput('${ex.id}', ${sIdx}, this.value)">
+                                                            <button type="button" class="btn-hevy-step pos" onclick="stepSetWeight('${ex.id}', ${sIdx}, 2.5)" title="+2.5 kg">+</button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="hevy-td">
+                                                        <div class="hevy-cell-stepper">
+                                                            <button type="button" class="btn-hevy-step" onclick="stepSetReps('${ex.id}', ${sIdx}, -1)" title="-1 tekrar">-</button>
+                                                            <input type="number" step="1" inputmode="numeric" class="hevy-input-reps" 
+                                                                   id="r_${ex.id}_${sIdx}" 
+                                                                   value="${st.reps !== '' && st.reps !== null ? st.reps : ''}" 
+                                                                   placeholder="0" 
+                                                                   oninput="onSetRepsInput('${ex.id}', ${sIdx}, this.value)">
+                                                            <button type="button" class="btn-hevy-step pos" onclick="stepSetReps('${ex.id}', ${sIdx}, 1)" title="+1 tekrar">+</button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="hevy-td">
+                                                        <button type="button" 
+                                                                class="btn-hevy-check ${isDone ? 'checked' : (isTarget ? 'target' : '')}" 
+                                                                onclick="handleSetCheckClick('${ex.id}', ${sIdx})"
+                                                                title="${isDone ? 'Set Tamamlandı (Geri Almak İçin Dokunun)' : 'Seti Bitir ve Dinlenmeyi Başlat'}">
+                                                            ${isDone ? '✓' : (isTarget ? '⚡' : '○')}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            `;
+                                        }).join('')}
+                                    </div>
+
+                                    <div class="hevy-table-footer">
+                                        <button type="button" class="btn-hevy-add-set" onclick="addSetToExercise('${ex.id}')">
+                                            ➕ Set Ekle
+                                        </button>
+                                        ${sets.length > 1 ? `
+                                            <button type="button" class="btn-hevy-del-set" onclick="removeSetFromExercise('${ex.id}')" title="Son seti sil">
+                                                🗑️ Set Sil
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding-top:6px; border-top:1px dashed var(--border); flex-wrap:wrap; gap:6px;">
+                                    <div style="display:flex; gap:6px;">
+                                        <button class="btn-swap-ex" style="color:#f59e0b; border-color:rgba(245,158,11,0.4);" onclick="deferExerciseToEnd('${ex.id}')" title="Bu istasyon doluysa en sona at">
+                                            ⏳ Sona Ertele
+                                        </button>
+                                        <button class="btn-swap-ex" onclick="moveExerciseOrder('${ex.id}', -1)" title="Sırayı öne al">
+                                            ⬆️
+                                        </button>
+                                        <button class="btn-swap-ex" onclick="moveExerciseOrder('${ex.id}', 1)" title="Sırayı arkaya al">
+                                            ⬇️
+                                        </button>
+                                    </div>
+                                    <div style="display:flex; gap:6px;">
+                                        <button class="btn-swap-ex" onclick="openAlternativeModal('${ex.id}', 'active')" title="Listeden alternatif seç">
+                                            📋 Alternatif
+                                        </button>
+                                        <button class="btn-swap-ex" style="color:#f87171; border-color:rgba(239,68,68,0.3);" onclick="removeExerciseFromWorkout('${ex.id}', 'active')" title="Bu hareketi kaldır">
+                                            🗑️ Kaldır
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
+                        `;
+                    }).join('')}
 
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:8px; border-top:1px dashed var(--border); flex-wrap:wrap; gap:6px;">
-                                <div style="display:flex; gap:6px;">
-                                    <button class="btn-swap-ex" style="color:#f59e0b; border-color:rgba(245,158,11,0.4);" onclick="deferExerciseToEnd('${ex.id}')" title="Bu istasyon doluysa en sona at">
-                                        ⏳ Sona Ertele
-                                    </button>
-                                    <button class="btn-swap-ex" onclick="moveExerciseOrder('${ex.id}', -1)" title="Sırayı öne al">
-                                        ⬆️
-                                    </button>
-                                    <button class="btn-swap-ex" onclick="moveExerciseOrder('${ex.id}', 1)" title="Sırayı arkaya al">
-                                        ⬇️
-                                    </button>
-                                </div>
-                                <div style="display:flex; gap:6px;">
-                                    <button class="btn-swap-ex" onclick="openAlternativeModal('${ex.id}', 'active')" title="Listeden alternatif seç">
-                                        📋 Alternatif Seç
-                                    </button>
-                                    <button class="btn-swap-ex" style="color:#f87171; border-color:rgba(239,68,68,0.3);" onclick="removeExerciseFromWorkout('${ex.id}', 'active')" title="Bu hareketi kaldır">
-                                        🗑️ Kaldır
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('')}
+                    <div style="text-align:center; margin:16px 0 20px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+                        <button class="btn btn-outline" style="border-style:dashed; border-color:var(--cyan); color:var(--cyan); font-size:12px; padding:9px 16px; font-weight:700;" onclick="openAddExerciseModal('active')">
+                            ➕ Yeni Hareket Ekle
+                        </button>
+                        <button class="btn btn-outline" style="border-color:var(--gold); color:var(--gold); font-size:12px; padding:9px 16px; font-weight:800;" onclick="openAddFinisherModal()">
+                            ⚡ Hızlı Finisher Ekle
+                        </button>
+                    </div>
 
-                <div style="text-align:center; margin:16px 0 24px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-                    <button class="btn btn-outline" style="border-style:dashed; border-color:var(--cyan); color:var(--cyan); font-size:12.5px; padding:10px 18px; font-weight:700;" onclick="openAddExerciseModal('active')">
-                        ➕ Yeni Hareket Ekle
-                    </button>
-                    <button class="btn btn-outline" style="border-color:var(--gold); color:var(--gold); font-size:12.5px; padding:10px 18px; font-weight:800;" onclick="openAddFinisherModal()">
-                        ⚡ Hızlı Finisher / İlave Set Ekle
-                    </button>
-                </div>
-
-                <div style="display:flex; justify-content:center; gap:10px; margin:30px 0; flex-wrap:wrap;">
-                    <button class="btn btn-danger-soft" style="padding:15px 22px; font-size:14px; font-weight:700;" onclick="cancelActiveWorkout()">
-                        🛑 Antrenmanı İptal Et
-                    </button>
-                    <button class="btn btn-gold" style="padding:16px 28px; font-size:15px; font-weight:900;" onclick="openCompleteModal()">
-                        🏁 ANTRENMANI TAMAMLA & GÜNLÜĞE KAYDET
-                    </button>
+                    <div class="hevy-workout-finish-bar" style="margin-bottom:24px;">
+                        <button type="button" class="btn-hevy-workout-cancel" onclick="cancelActiveWorkout()">
+                            🛑 Antrenmanı İptal Et
+                        </button>
+                        <button type="button" class="btn-hevy-workout-finish" onclick="openCompleteModal()">
+                            🏁 ANTRENMANI TAMAMLA & GÜNLÜĞE KAYDET
+                        </button>
+                    </div>
                 </div>
             `;
         }
@@ -11617,26 +12273,8 @@ KURALLAR:
                 }
             }
 
-            // In focus mode: if this was the last incomplete set of this exercise, advance focus to next exercise!
-            let movedExercise = false;
-            if (activeWorkoutViewMode === 'focus' && activeWorkoutSession) {
-                const allDoneForEx = sets.every(s => s.completed);
-                if (allDoneForEx && activeFocusExIndex < activeWorkoutSession.exercises.length - 1) {
-                    activeFocusExIndex++;
-                    activeFocusSetIndex = null;
-                    movedExercise = true;
-                } else {
-                    const nextInc = sets.findIndex(s => !s.completed);
-                    activeFocusSetIndex = nextInc !== -1 ? nextInc : null;
-                }
-            }
-
             saveActiveWorkoutStateToStorage();
             renderActiveWorkout();
-
-            if (movedExercise) {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
 
             // TRIGGER REST TIMER
             const restSecs = activeWorkoutSession && activeWorkoutSession.scheme ? (activeWorkoutSession.scheme.rest || 45) : 45;
@@ -11703,6 +12341,8 @@ KURALLAR:
             updateTimerDisplay();
             const btn = document.getElementById('btnPlayPauseTimer');
             if (btn) btn.innerText = "▶ Başlat";
+            const restBox = document.getElementById('hudRestBox');
+            if (restBox) restBox.classList.remove('resting');
             playAlertSound();
             if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
         }
@@ -11714,6 +12354,8 @@ KURALLAR:
             updateTimerDisplay();
             const btn = document.getElementById('btnPlayPauseTimer');
             if (btn) btn.innerText = "▶ Başlat";
+            const restBox = document.getElementById('hudRestBox');
+            if (restBox) restBox.classList.remove('resting');
         }
 
         function toggleTimer() {
@@ -11722,6 +12364,8 @@ KURALLAR:
                 isTimerRunning = false;
                 const btn = document.getElementById('btnPlayPauseTimer');
                 if (btn) btn.innerText = "▶ Başlat";
+                const restBox = document.getElementById('hudRestBox');
+                if (restBox) restBox.classList.remove('resting');
             } else {
                 startTimer();
             }
@@ -11732,6 +12376,8 @@ KURALLAR:
             isTimerRunning = true;
             const btn = document.getElementById('btnPlayPauseTimer');
             if (btn) btn.innerText = "⏸ Duraklat";
+            const restBox = document.getElementById('hudRestBox');
+            if (restBox) restBox.classList.add('resting');
 
             timerInterval = setInterval(() => {
                 if (timerRemaining > 0) {
@@ -11748,6 +12394,8 @@ KURALLAR:
                     isTimerRunning = false;
                     const btn = document.getElementById('btnPlayPauseTimer');
                     if (btn) btn.innerText = "▶ Başlat";
+                    const restBox = document.getElementById('hudRestBox');
+                    if (restBox) restBox.classList.remove('resting');
                     playAlertSound();
                     if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100]);
                 }
@@ -21472,7 +22120,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=137')
+                navigator.serviceWorker.register('./sw.js?v=138')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
