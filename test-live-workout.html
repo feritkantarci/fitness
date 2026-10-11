@@ -1116,7 +1116,16 @@
         const st = ex.sets[currentPickerState.setIdx];
         if (currentPickerState.type === 'weight') {
             st.weight = val;
-            showToast(`⚖️ Set ${st.setNo}: ${val} kg seçildi`);
+            for (let i = currentPickerState.setIdx + 1; i < ex.sets.length; i++) {
+                if (!ex.sets[i].completed) {
+                    ex.sets[i].weight = val;
+                }
+            }
+            if (currentPickerState.setIdx === 0 && ex.sets.length > 1) {
+                showToast(`⚖️ Set 1: ${val} kg seçildi (Sonraki setlere aktarıldı)`);
+            } else {
+                showToast(`⚖️ Set ${st.setNo}: ${val} kg seçildi`);
+            }
         } else {
             st.reps = val;
             showToast(`🔄 Set ${st.setNo}: ${val} tekrar seçildi`);
@@ -1148,14 +1157,14 @@
 
         if (st.completed) {
             for (let i = setIdx + 1; i < ex.sets.length; i++) {
-                if (!ex.sets[i].completed && !ex.sets[i].weight) {
+                if (!ex.sets[i].completed) {
                     ex.sets[i].weight = st.weight;
                 }
             }
             playBeep(700);
             if (navigator.vibrate) navigator.vibrate([100, 40, 100]);
             startRestTimer(ex.rest || 45);
-            showToast(`✅ Set ${st.setNo} Tamamlandı! Dinlenme başladı (${ex.rest}s)`);
+            showToast(`✅ Set ${st.setNo} Tamamlandı! Sonraki setler ${st.weight} kg yapıldı`);
         } else {
             showToast(`↩️ Set ${st.setNo} geri alındı`);
         }

@@ -4837,7 +4837,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v143</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v144</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -4873,7 +4873,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v143</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v144</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -11400,7 +11400,20 @@ KURALLAR:
 
             if (type === 'weight') {
                 st.weight = val;
-                if (typeof showToast === 'function') showToast(`⚖️ Set ${st.setNo}: ${val} kg seçildi`);
+                // 1. sette veya mevcut sette seçilen kiloyu henüz tamamlanmamış sonraki setlere otomatik aktar
+                const sets = activeWorkoutSetsData[exId];
+                for (let i = setIdx + 1; i < sets.length; i++) {
+                    if (!sets[i].completed) {
+                        sets[i].weight = val;
+                    }
+                }
+                if (typeof showToast === 'function') {
+                    if (setIdx === 0 && sets.length > 1) {
+                        showToast(`⚖️ Set 1: ${val} kg seçildi (Sonraki setlere aktarıldı)`);
+                    } else {
+                        showToast(`⚖️ Set ${st.setNo}: ${val} kg seçildi`);
+                    }
+                }
             } else {
                 st.reps = val;
                 if (typeof showToast === 'function') showToast(`🔄 Set ${st.setNo}: ${val} tekrar seçildi`);
@@ -12577,10 +12590,12 @@ KURALLAR:
             st.completed = true;
             st.completedAt = Date.now();
 
-            // Auto-propagate weight to subsequent incomplete sets if they have no weight
-            for (let i = setIdx + 1; i < sets.length; i++) {
-                if (!sets[i].completed && (sets[i].weight === '' || sets[i].weight === null || sets[i].weight === undefined)) {
-                    sets[i].weight = st.weight;
+            // Tamamlanan setin kilosunu henüz tamamlanmamış sonraki tüm setlere aktar (kullanıcı isterse sonra değiştirebilir)
+            if (st.weight !== '' && st.weight !== null && st.weight !== undefined && !isNaN(st.weight)) {
+                for (let i = setIdx + 1; i < sets.length; i++) {
+                    if (!sets[i].completed) {
+                        sets[i].weight = st.weight;
+                    }
                 }
             }
 
@@ -22435,7 +22450,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=143')
+                navigator.serviceWorker.register('./sw.js?v=144')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
