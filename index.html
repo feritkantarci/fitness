@@ -22,7 +22,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=158">
+    <link rel="stylesheet" href="css/style.css?v=159">
 </head>
 <body>
 
@@ -30,7 +30,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v158</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v159</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -66,7 +66,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v158</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v159</span>
                 </div>
                 <div class="modern-bar-actions" style="position: relative;">
                     <div class="modern-user-badge" onclick="if(window.innerWidth <= 768){ openMoreSheet(); } else { switchTab('profileTab'); }" title="Profil & Menü">
@@ -1694,22 +1694,27 @@
                 </div>
             </div>
 
-            <!-- BÖLÜM 2: AI TEŞHİS VE BİYOMEKANİK RAPORU -->
-            <div style="background:linear-gradient(135deg, rgba(30,27,75,0.6), rgba(15,23,42,0.8)); border:1px solid rgba(168,85,247,0.35); border-radius:12px; padding:14px; margin-bottom:16px;">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:8px; flex-wrap:wrap;">
-                    <div style="display:flex; align-items:center; gap:6px;">
-                        <span style="font-size:15px;">🧠</span>
-                        <strong style="font-size:13.5px; color:#fff;" id="aiDiagnosticHeadline">Biyomekanik Durum Teşhisi Çıkarılıyor...</strong>
+            <!-- BÖLÜM 2: AI TEŞHİS VE BİYOMEKANİK RAPORU (VARSAYILAN GİZLENEBİLİR AKORDİYON) -->
+            <div style="background:linear-gradient(135deg, rgba(30,27,75,0.6), rgba(15,23,42,0.8)); border:1px solid rgba(168,85,247,0.35); border-radius:12px; padding:12px 14px; margin-bottom:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleAiDiagnosticAccordion()">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:14px;">🧠</span>
+                        <strong style="font-size:12.5px; color:#fff;" id="aiDiagnosticHeadline">AI Biyomekanik Teşhis Raporu</strong>
                     </div>
-                    <button type="button" class="btn btn-outline" id="btnTriggerGeminiLiveReport" onclick="requestGeminiDeepHybridReport()" style="font-size:11px; padding:4px 10px; border-color:#c084fc; color:#c084fc; font-weight:800; display:flex; align-items:center; gap:5px;">
-                        <span>✨ Canlı Gemini Analizi</span>
-                    </button>
+                    <span id="aiDiagnosticToggleLabel" style="font-size:11px; color:var(--cyan); font-weight:700;">▼ Göster</span>
                 </div>
-                <div id="aiDiagnosticContent" style="font-size:12.5px; color:var(--text-secondary); line-height:1.55;">
-                    <!-- Populated by JS -->
-                </div>
-                <div id="aiGeminiExtraReportContainer" style="display:none; margin-top:12px; padding-top:12px; border-top:1px dashed rgba(168,85,247,0.3); font-size:12.5px; color:#e2e8f0; line-height:1.55;">
-                    <!-- Gemini live output will be streamed/rendered here -->
+                <div id="aiDiagnosticAccordionBody" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed rgba(168,85,247,0.3);">
+                    <div id="aiDiagnosticContent" style="font-size:12px; color:var(--text-secondary); line-height:1.55; margin-bottom:8px;">
+                        <!-- Populated by JS -->
+                    </div>
+                    <div style="display:flex; justify-content:flex-end;">
+                        <button type="button" class="btn btn-outline" id="btnTriggerGeminiLiveReport" onclick="requestGeminiDeepHybridReport()" style="font-size:11px; padding:4px 10px; border-color:#c084fc; color:#c084fc; font-weight:800; display:flex; align-items:center; gap:5px;">
+                            <span>✨ Canlı Gemini Analizi</span>
+                        </button>
+                    </div>
+                    <div id="aiGeminiExtraReportContainer" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed rgba(168,85,247,0.3); font-size:12px; color:#e2e8f0; line-height:1.55;">
+                        <!-- Gemini live output will be streamed/rendered here -->
+                    </div>
                 </div>
             </div>
 
@@ -2290,6 +2295,19 @@
                 menu.style.display = 'none';
             }
         });
+        function toggleAiDiagnosticAccordion() {
+            const body = document.getElementById('aiDiagnosticAccordionBody');
+            const label = document.getElementById('aiDiagnosticToggleLabel');
+            if (body && label) {
+                if (body.style.display === 'none') {
+                    body.style.display = 'block';
+                    label.innerText = '▲ Gizle';
+                } else {
+                    body.style.display = 'none';
+                    label.innerText = '▼ Göster';
+                }
+            }
+        }
     </script>
 
     <!-- AKADEMİK SPOR BİLİMİ RAPOR MODALI -->
