@@ -4837,7 +4837,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v142</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v143</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -4873,7 +4873,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v142</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v143</span>
                 </div>
                 <div class="modern-bar-actions">
                     <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">☁️ Bulut Aktif</span>
@@ -8144,6 +8144,14 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             }
         }
 
+        function startActiveWorkoutSession(workout) {
+            if (workout) {
+                currentGeneratedWorkout = workout;
+            }
+            startActiveWorkoutFromGenerated();
+        }
+        window.startActiveWorkoutSession = startActiveWorkoutSession;
+
         function pickRandom(arr) {
             if (!arr || arr.length === 0) return null;
             return arr[Math.floor(Math.random() * arr.length)];
@@ -8454,8 +8462,10 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             if (!w || !container) return;
 
             const user = getActiveUser();
-            const weights = user.weights || {};
-            const tomorrowIdx = (new Date().getDay() + 1) % 7;
+            const weights = user ? (user.weights || {}) : {};
+            const todayIdx = new Date().getDay();
+            const todayName = DAY_NAMES_TR[todayIdx] || 'Bugün';
+            const tomorrowIdx = (todayIdx + 1) % 7;
             const tomorrowName = DAY_NAMES_TR[tomorrowIdx] || 'Yarın';
 
             let blocksHtml = '';
@@ -11577,7 +11587,10 @@ KURALLAR:
         }
 
         function startActiveWorkoutFromGenerated() {
-            if (!currentGeneratedWorkout) return;
+            if (!currentGeneratedWorkout) {
+                console.warn("startActiveWorkoutFromGenerated: currentGeneratedWorkout boş.");
+                return;
+            }
             activeWorkoutSession = JSON.parse(JSON.stringify(currentGeneratedWorkout));
             activeWorkoutStartTime = Date.now();
             activeWorkoutIsPaused = false;
@@ -11589,13 +11602,33 @@ KURALLAR:
             activeFocusSetIndex = null;
 
             const user = getActiveUser();
-            const userWeights = user.weights || {};
+            const userWeights = user ? (user.weights || {}) : {};
+
+            if (!activeWorkoutSession.scheme) {
+                activeWorkoutSession.scheme = { sets: 3, reps: '8-12', rest: 45 };
+            }
+
+            if (!Array.isArray(activeWorkoutSession.exercises) || activeWorkoutSession.exercises.length === 0) {
+                alert("Bu antrenmanda egzersiz bulunamadı.");
+                return;
+            }
+
+            // Normalise string ID exercises to full exercise objects if needed
+            activeWorkoutSession.exercises = activeWorkoutSession.exercises.filter(Boolean).map(ex => {
+                if (typeof ex === 'string') {
+                    const dbEx = EXERCISES_DB.find(e => e.id === ex);
+                    return dbEx || { id: ex, name: ex, equipment: 'bodyweight' };
+                }
+                return ex;
+            });
 
             activeWorkoutSession.exercises.forEach(ex => {
-                const numSets = activeWorkoutSession.scheme.sets || 3;
+                if (!ex || !ex.id) return;
+                const numSets = (ex.targetSets || (activeWorkoutSession.scheme && activeWorkoutSession.scheme.sets)) || 3;
                 let defaultReps = 10;
-                if (activeWorkoutSession.scheme.reps) {
-                    const firstPart = String(activeWorkoutSession.scheme.reps).split('-')[0].trim();
+                const repsSpec = ex.targetReps || (activeWorkoutSession.scheme && activeWorkoutSession.scheme.reps);
+                if (repsSpec) {
+                    const firstPart = String(repsSpec).split('-')[0].trim();
                     defaultReps = parseInt(firstPart) || 10;
                 }
                 const defaultWeight = ex.weightKey && userWeights[ex.weightKey] ? (parseFloat(userWeights[ex.weightKey]) || '') : '';
@@ -11616,7 +11649,7 @@ KURALLAR:
             startWorkoutTimer();
             renderActiveWorkout();
             switchTab('activeWorkoutTab');
-            resetTimer(activeWorkoutSession.scheme.rest || 45);
+            resetTimer((activeWorkoutSession.scheme && activeWorkoutSession.scheme.rest) || 45);
             playAlertSound();
             requestWakeLock();
         }
@@ -12039,13 +12072,37 @@ KURALLAR:
 
             const s = activeWorkoutSession;
             const user = getActiveUser();
-            const weights = user.weights || {};
+            const weights = user ? (user.weights || {}) : {};
+
+            if (!s.scheme) {
+                s.scheme = { sets: 3, reps: '8-12', rest: 45 };
+            }
+
+            if (!Array.isArray(s.exercises) || s.exercises.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:40px 20px; color:var(--text-secondary);">
+                        <p style="font-size:16px; font-weight:700; color:#fff;">Bu antrenmanda egzersiz bulunamadı.</p>
+                        <button class="btn btn-gold" onclick="cancelActiveWorkout()" style="margin-top:12px;">Antrenmanı İptal Et</button>
+                    </div>
+                `;
+                return;
+            }
+
+            s.exercises = s.exercises.filter(Boolean).map(ex => {
+                if (typeof ex === 'string') {
+                    const dbEx = EXERCISES_DB.find(e => e.id === ex);
+                    return dbEx || { id: ex, name: ex, equipment: 'bodyweight' };
+                }
+                return ex;
+            });
 
             // Ensure setsData exists for each exercise
             s.exercises.forEach(ex => {
+                if (!ex || !ex.id) return;
                 if (!activeWorkoutSetsData[ex.id]) {
-                    const numSets = s.scheme.sets || 3;
-                    const defaultReps = parseInt(String(s.scheme.reps).split('-')[0].trim()) || 10;
+                    const numSets = (ex.targetSets || (s.scheme && s.scheme.sets)) || 3;
+                    const repsSpec = ex.targetReps || (s.scheme && s.scheme.reps) || '10';
+                    const defaultReps = parseInt(String(repsSpec).split('-')[0].trim()) || 10;
                     const defaultWeight = ex.weightKey && weights[ex.weightKey] ? (parseFloat(weights[ex.weightKey]) || '') : '';
                     activeWorkoutSetsData[ex.id] = [];
                     for (let st = 1; st <= numSets; st++) {
@@ -14152,6 +14209,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 }
 
                 const isExpanded = !!localStorage.getItem(`celik_kodu_incoming_prog_expanded_${uid}`);
+                const todayIdx = new Date().getDay();
 
                 return `
                     <div class="collapsible-panel ${isExpanded ? 'open' : ''}" id="incomingProgramPanel_${uid}">
@@ -14542,15 +14600,18 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         }
 
         function startScheduledWorkoutForDay(dayIdx) {
-            const schedule = getWeeklySchedule();
-            const plan = schedule[dayIdx];
+            const user = getActiveUser();
+            const uid = user ? user.id : 'default';
+            const isNextWeek = activePlannerWeek === 'next';
+            const schedule = isNextWeek ? getNextWeeklySchedule(uid) : getWeeklySchedule(uid);
+            const plan = schedule ? schedule[dayIdx] : null;
             if (!plan || plan.rest) {
-                alert("Bu gün dinlenme günü olarak ayarlanmış. Bir antrenman başlatmak isterseniz aşağıdaki programlardan birini seçebilirsiniz.");
+                alert("Bu gün dinlenme günü olarak ayarlanmış. Bir antrenman başlatmak isterseniz aşağıdaki hazır programlardan birini seçebilirsiniz.");
                 return;
             }
 
             const details = getWorkoutDetailsForPlan(plan);
-            if (details && details.exercises && details.exercises.length > 0) {
+            if (details && Array.isArray(details.exercises) && details.exercises.length > 0) {
                 currentGeneratedWorkout = JSON.parse(JSON.stringify(details));
                 startActiveWorkoutFromGenerated();
                 return;
@@ -22374,7 +22435,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=142')
+                navigator.serviceWorker.register('./sw.js?v=143')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
