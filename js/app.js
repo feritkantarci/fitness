@@ -5694,16 +5694,25 @@ KURALLAR:
             return prs;
         }
 
+        function cancelActiveWorkoutFromModal() {
+            closeScheduleDayModal();
+            cancelActiveWorkout();
+        }
+
         function cancelActiveWorkout() {
-            if (!activeWorkoutSession) return;
+            const user = getActiveUser();
+            const uid = user ? user.id : 'default';
+            const hasActive = activeWorkoutSession || localStorage.getItem(`celik_kodu_active_state_${uid}`);
+            if (!hasActive) {
+                alert("Aktif bir antrenman bulunmuyor.");
+                return;
+            }
             const ok = confirm("Antrenmanı iptal etmek istediğinize emin misiniz?\n\nBu seans sonlandırılacak ve yapılan ilerlemeler günlüğe kaydedilmeyecektir.");
             if (!ok) return;
 
-            const user = getActiveUser();
-            const uid = user ? user.id : 'default';
             localStorage.removeItem(`celik_kodu_active_state_${uid}`);
-            clearInterval(workoutTimerInterval);
-            clearInterval(timerInterval);
+            if (typeof workoutTimerInterval !== 'undefined') clearInterval(workoutTimerInterval);
+            if (typeof timerInterval !== 'undefined') clearInterval(timerInterval);
             activeWorkoutSession = null;
             activeWorkoutStartTime = null;
             activeWorkoutIsPaused = false;
@@ -5712,10 +5721,12 @@ KURALLAR:
             activeWorkoutSetsData = {};
             activeFocusExIndex = 0;
             activeFocusSetIndex = null;
-            releaseWakeLock();
+            if (typeof releaseWakeLock === 'function') releaseWakeLock();
 
-            closeCompleteModal();
-            renderActiveWorkout();
+            if (typeof closeCompleteModal === 'function') closeCompleteModal();
+            if (typeof closeScheduleDayModal === 'function') closeScheduleDayModal();
+            if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
+            alert("Antrenman iptal edildi.");
         }
 
         function openCompleteModal() {
@@ -15266,7 +15277,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=172')
+                navigator.serviceWorker.register('./sw.js?v=173')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
