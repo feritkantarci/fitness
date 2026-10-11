@@ -3753,6 +3753,98 @@ function toggleMuscleLineage(muscleId) {
 }
 window.toggleMuscleLineage = toggleMuscleLineage;
 
+// ==================== DESKTOP CALENDAR INTEGRATION ====================
+function openDesktopCalendarModal() {
+    const modal = document.getElementById('calendarModal');
+    if (modal) modal.style.display = 'flex';
+}
+window.openDesktopCalendarModal = openDesktopCalendarModal;
+
+function closeDesktopCalendarModal() {
+    const modal = document.getElementById('calendarModal');
+    if (modal) modal.style.display = 'none';
+}
+window.closeDesktopCalendarModal = closeDesktopCalendarModal;
+
+function generateAthleteIcsString(athleteName, scheduleOrPrescription) {
+    const formatIcsDate = d => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    const now = new Date();
+    
+    let ics = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//FitLAB Desktop//Sports Science Engine//TR',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        'X-WR-CALNAME:FitLab • ' + (athleteName || 'Antrenmanlarım'),
+        'X-WR-TIMEZONE:Europe/Istanbul'
+    ];
+
+    const daysOffset = [1, 3, 5];
+    const sessions = [
+        { name: 'FitLAB Gün 1: Üst Gövde & İtiş Kuvveti', desc: 'Bench Press, Overhead Press, Goblet Squat, Lateral Raise' },
+        { name: 'FitLAB Gün 2: Arka Zincir & Çekiş Gücü', desc: 'Deadlift, Saw Row, RDL, Hammer Curl' },
+        { name: 'FitLAB Gün 3: Kompleks & Balistik Güç', desc: 'Kettlebell Clean, Thruster, Front Squat, Core' }
+    ];
+
+    daysOffset.forEach((dayOffset, idx) => {
+        const sess = sessions[idx];
+        const startDate = new Date(now);
+        startDate.setDate(now.getDate() + (dayOffset - now.getDay() + 7) % 7);
+        startDate.setHours(18, 30, 0, 0);
+        const endDate = new Date(startDate.getTime() + (55 * 60 * 1000));
+
+        ics.push(
+            'BEGIN:VEVENT',
+            `UID:fitlab-desktop-${idx}-${startDate.getTime()}@fitlab.kantarci.io`,
+            `DTSTAMP:${formatIcsDate(new Date())}`,
+            `DTSTART:${formatIcsDate(startDate)}`,
+            `DTEND:${formatIcsDate(endDate)}`,
+            `SUMMARY:⚔️ ${sess.name}`,
+            `DESCRIPTION:${sess.desc}\\n\\nAkademik FitLAB İstasyonu tarafından planlandı.`,
+            'BEGIN:VALARM',
+            'ACTION:DISPLAY',
+            'TRIGGER:-PT30M',
+            'DESCRIPTION:FitLAB Antrenman Vakti!',
+            'END:VALARM',
+            'END:VEVENT'
+        );
+    });
+
+    ics.push('END:VCALENDAR');
+    return ics.join('\r\n');
+}
+
+async function exportSelectedAthleteToAppleCalendar() {
+    try {
+        const athlete = state.selectedUser ? state.selectedUser.name : 'Sporcu';
+        const icsContent = generateAthleteIcsString(athlete);
+        if (window.coachAPI && window.coachAPI.exportAndOpenCalendar) {
+            const res = await window.coachAPI.exportAndOpenCalendar(icsContent);
+            if (res && res.success) {
+                showToast("🍏 Apple Takvim açılıyor! Seanslar takviminize işlendi.");
+                closeDesktopCalendarModal();
+            } else {
+                alert("Takvim dosyası açılamadı: " + (res ? res.error : 'Bilinmeyen hata'));
+            }
+        }
+    } catch(err) {
+        alert("Hata: " + err.message);
+    }
+}
+window.exportSelectedAthleteToAppleCalendar = exportSelectedAthleteToAppleCalendar;
+
+function openGoogleCalendarFromDesktop() {
+    const url = 'https://calendar.google.com/calendar/u/0/r';
+    if (window.coachAPI && window.coachAPI.openCalendarUrl) {
+        window.coachAPI.openCalendarUrl(url);
+    } else {
+        window.open(url, '_blank');
+    }
+    closeDesktopCalendarModal();
+}
+window.openGoogleCalendarFromDesktop = openGoogleCalendarFromDesktop;
+
 
 
 

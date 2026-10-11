@@ -186,6 +186,28 @@ ipcMain.handle('firebase:sendProgram', async (event, { uid, program }) => {
     return await firebaseService.sendCustomProgramToWeb(uid, program);
 });
 
+// Takvim Entegrasyonu (Apple Takvim / iCal / Google Takvim)
+ipcMain.handle('calendar:exportAndOpenICS', async (event, icsContent) => {
+    try {
+        const tmpPath = path.join(app.getPath('temp'), `fitlab-program-${Date.now()}.ics`);
+        fs.writeFileSync(tmpPath, icsContent, 'utf-8');
+        await shell.openPath(tmpPath);
+        return { success: true, path: tmpPath };
+    } catch(err) {
+        console.error("Takvim dosyası açılamadı:", err);
+        return { success: false, error: err.message };
+    }
+});
+
+ipcMain.handle('calendar:openUrl', async (event, url) => {
+    try {
+        await shell.openExternal(url);
+        return { success: true };
+    } catch(err) {
+        return { success: false, error: err.message };
+    }
+});
+
 // Akademik Spor Bilimi Motoru & Egzersiz Atlası
 ipcMain.handle('academic:analyze', async (event, { logs, profile, scaleLogs }) => {
     return academicEngine.analyzeAthleteHistory(logs, profile, scaleLogs);

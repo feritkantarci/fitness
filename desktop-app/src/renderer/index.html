@@ -60,6 +60,9 @@
             <div class="status-pill status-ai" id="aiStatusPill" title="Google Gemini AI Spor Bilimci Motoru">
                 <span class="dot"></span> AI: Hazır
             </div>
+            <button class="btn-refresh" id="btnOpenCalendarModal" title="FitLAB Takvim Merkezi (Apple / Google Takvim)" onclick="openDesktopCalendarModal()">
+                <span class="icon">📅</span>
+            </button>
             <button class="btn-settings" id="btnOpenSettings" title="Ayarlar ve API Anahtarı">⚙️</button>
         </div>
     </header>
@@ -694,6 +697,44 @@
             <div class="modal-footer">
                 <button class="btn-secondary" id="btnCancelSettings">İptal</button>
                 <button class="btn-primary" id="btnSaveSettings">Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Takvim Modalı (Apple / Google Takvim Entegrasyonu) -->
+    <div class="modal-backdrop" id="calendarModal" style="display:none;">
+        <div class="modal-box" style="max-width: 520px;">
+            <div class="modal-header">
+                <h3>📅 FitLAB Canlı Takvim Merkezi</h3>
+                <button class="btn-close" onclick="closeDesktopCalendarModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;">
+                    FitLAB masaüstünden oluşturulan programları ve AI reçetelerini doğrudan <strong>Apple Takvim (macOS)</strong> veya <strong>Google Takvim</strong>'e işleyebilirsiniz.
+                </p>
+
+                <div class="form-group" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                    <h4 style="margin: 0 0 6px 0; font-size: 14px; color: #fff;">🍏 macOS Apple Takvim'e Doğrudan Aktar</h4>
+                    <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 10px 0;">
+                        Seçili sporcunun haftalık planını veya son AI reçetesini Mac Takvim uygulamanıza anında işler.
+                    </p>
+                    <button type="button" class="btn-primary" onclick="exportSelectedAthleteToAppleCalendar()" style="width: 100%; font-size: 12.5px;">
+                        🍏 macOS Takviminde Aç & Ekle
+                    </button>
+                </div>
+
+                <div class="form-group" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
+                    <h4 style="margin: 0 0 6px 0; font-size: 14px; color: #fff;">🌐 Google Takvim ile Canlı Eşitle</h4>
+                    <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 10px 0;">
+                        Google Takvim web arayüzünü açar veya "FitLab • Antrenmanlarım" takvimine seansı işler.
+                    </p>
+                    <button type="button" class="btn-secondary" onclick="openGoogleCalendarFromDesktop()" style="width: 100%; font-size: 12.5px;">
+                        📅 Google Takvimi Aç
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeDesktopCalendarModal()">Kapat</button>
             </div>
         </div>
     </div>

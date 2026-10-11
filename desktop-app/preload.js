@@ -29,6 +29,10 @@ contextBridge.exposeInMainWorld('coachAPI', {
     // Masaüstü Bildirimi
     showNotification: (title, body) => ipcRenderer.invoke('app:notify', { title, body }),
 
+    // Takvim Entegrasyonu (Apple Takvim & Google Takvim)
+    exportAndOpenCalendar: (icsContent) => ipcRenderer.invoke('calendar:exportAndOpenICS', icsContent),
+    openCalendarUrl: (url) => ipcRenderer.invoke('calendar:openUrl', url),
+
     // Canlı Olay Dinleyicileri
     onLiveWorkoutUpdated: (callback) => {
         ipcRenderer.on('live:workoutUpdated', (event, data) => callback(data));
