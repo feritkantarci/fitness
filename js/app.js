@@ -492,6 +492,22 @@
         }
 
                 // ==================== OPENGYM MEDYA KATALOĞU (95 ONAYLI HAREKET) ====================
+        
+        // ==================== EVRENSEL GÖRSEL MEDYA ÇÖZÜMLEYİCİ ====================
+        function getExerciseVisualMedia(exId, category) {
+            const opengym = (typeof OPENGYM_GLOBAL_CATALOG !== 'undefined' && OPENGYM_GLOBAL_CATALOG) ? OPENGYM_GLOBAL_CATALOG[exId] : null;
+            const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[exId]) 
+                || (typeof categoryFallback !== 'undefined' && category && categoryFallback[category]) 
+                || null;
+            return {
+                clip: opengym ? opengym.clip : null,
+                still: opengym ? opengym.still : (guide ? guide.form : null),
+                form: (guide && guide.form) ? guide.form : (opengym ? opengym.still : null),
+                anatomi: (guide && guide.anatomi) ? guide.anatomi : null,
+                hasVideo: !!opengym
+            };
+        }
+    
         window.OPENGYM_GLOBAL_CATALOG = {
             'db_bench_press': { id: '0289', name: "Dambıl Bench Press", clip: 'assets/opengym/clips/0289.mp4', still: 'assets/opengym/stills/0289.webp' },
             'db_incline_press': { id: '0314', name: "Incline Dambıl Press", clip: 'assets/opengym/clips/0314.mp4', still: 'assets/opengym/stills/0314.webp' },
@@ -3240,10 +3256,8 @@ KURALLAR:
             }
 
             let cardsHtml = filtered.map(ex => {
-                const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) 
-                    || (typeof categoryFallback !== 'undefined' && categoryFallback[ex.category]) 
-                    || null;
-                const thumbImg = (guide && guide.form) ? guide.form : '';
+                const media = getExerciseVisualMedia(ex.id, ex.category);
+                const thumbImg = media.still || '';
                 const eqMeta = EQUIP_LABELS[ex.equipment] || { label: ex.equipment || '', icon: '🏋️' };
                 const anatomy = getExerciseAnatomy(ex);
 
@@ -6276,10 +6290,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             let html = '';
             filtered.forEach(ex => {
                 const isExcluded = excludedIds.includes(ex.id);
-                const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) 
-                    || (typeof categoryFallback !== 'undefined' && categoryFallback[ex.category]) 
-                    || (typeof guideLibrary !== 'undefined' ? guideLibrary.goblet_squat : null);
-                const thumbImg = guide?.form || '';
+                const media = getExerciseVisualMedia(ex.id, ex.category);
+                const thumbImg = media.still || '';
                 
                 const eqInfo = (typeof EQUIP_LABELS !== 'undefined' && EQUIP_LABELS[ex.equipment]) 
                     ? `${EQUIP_LABELS[ex.equipment].icon} ${EQUIP_LABELS[ex.equipment].label}` 
@@ -15409,7 +15421,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=174')
+                navigator.serviceWorker.register('./sw.js?v=175')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
@@ -15656,10 +15668,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 const ex = EXERCISES_DB.find(e => e.id === item.exId);
                 if (!ex) return;
 
-                const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) 
-                    || (typeof categoryFallback !== 'undefined' && categoryFallback[ex.category]) 
-                    || null;
-                const thumbImg = guide ? guide.form || '' : '';
+                const media = getExerciseVisualMedia(ex.id, ex.category);
+                const thumbImg = media.still || '';
 
                 const anatomy = getExerciseAnatomy(ex);
 
@@ -15787,10 +15797,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             let html = '';
             filtered.forEach(ex => {
-                const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) 
-                    || (typeof categoryFallback !== 'undefined' && categoryFallback[ex.category]) 
-                    || null;
-                const thumbImg = guide ? guide.form || '' : '';
+                const media = getExerciseVisualMedia(ex.id, ex.category);
+                const thumbImg = media.still || '';
                 const isAlreadyInRoutine = customRoutineState.exercises.some(item => item.exId === ex.id);
 
                 const anatomy = getExerciseAnatomy(ex);
@@ -16197,12 +16205,37 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 }).join('');
             }
 
-            // Form Tab
+            // Form Tab (OpenGym Canlı Animasyon Öncelikli)
             const formContainer = document.getElementById('exDetailTabContentForm');
+            const opengymEx = (typeof OPENGYM_GLOBAL_CATALOG !== 'undefined') ? OPENGYM_GLOBAL_CATALOG[ex.id] : null;
             const photoSrc = (photoGuide && photoGuide.form) ? photoGuide.form : (ex.formImage || null);
 
             let visualsHtml = '';
-            if (photoSrc) {
+            if (opengymEx) {
+                visualsHtml = `
+                    <div style="background:#000; border-radius:12px; overflow:hidden; border:1.5px solid rgba(56,189,248,0.4); margin-bottom:12px; box-shadow:0 6px 24px rgba(0,0,0,0.6);">
+                        <div style="background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.08); padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:11.5px; font-weight:900; color:var(--cyan); letter-spacing:0.5px;">⚡ OPENGYM CANLI HAREKET ANİMASYONU</span>
+                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 9px; border-radius:4px; color:var(--cyan); border-color:var(--cyan); font-weight:700;" onclick="openImageLightbox('${opengymEx.clip}', '${escapeHTML(ex.name)} - Canlı Animasyon')">⛶ Tam Ekran Oynat</button>
+                        </div>
+                        <div style="text-align:center; padding:6px; cursor:pointer;" onclick="openImageLightbox('${opengymEx.clip}', '${escapeHTML(ex.name)} - Canlı Animasyon')" title="Tam ekran oynatmak için dokunun">
+                            <video src="${opengymEx.clip}" poster="${opengymEx.still}" autoplay loop muted playsinline style="max-width:100%; max-height:46vh; object-fit:contain; display:block; margin:0 auto; border-radius:6px;"></video>
+                            <div style="font-size:10.5px; color:var(--text-secondary); margin-top:6px; font-weight:600;">🔍 Dokunarak tam ekranda canlı döngüde izleyebilirsiniz</div>
+                        </div>
+                    </div>
+                    ${photoSrc ? `
+                        <div style="margin-bottom:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); overflow:hidden;">
+                            <div style="padding:6px 10px; background:rgba(255,255,255,0.03); display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="const el=document.getElementById('ex_detail_legacy_photo'); if(el) el.style.display=el.style.display==='none'?'block':'none';">
+                                <span style="font-size:11px; font-weight:700; color:var(--text-secondary);">📸 Statik Fotoğraf & Form Kılavuzu</span>
+                                <span style="font-size:10px; color:var(--gold);">Gör ▼</span>
+                            </div>
+                            <div id="ex_detail_legacy_photo" style="display:none; padding:8px; text-align:center;">
+                                <img src="${photoSrc}" style="max-width:100%; max-height:38vh; object-fit:contain; border-radius:6px;" alt="${escapeHTML(ex.name)}">
+                            </div>
+                        </div>
+                    ` : ''}
+                `;
+            } else if (photoSrc) {
                 visualsHtml = `
                     <div style="background:#000; border-radius:12px; overflow:hidden; border:1.5px solid rgba(245,158,11,0.4); margin-bottom:12px; box-shadow:0 6px 24px rgba(0,0,0,0.6);">
                         <div style="background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.08); padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
