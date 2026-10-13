@@ -803,7 +803,22 @@
         /* RESPONSIVE TOGGLES: Desktop tabs vs Mobile Bottom Nav */
         @media (max-width: 768px) {
             .tab-nav {
-                display: none !important;
+                display: flex !important;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                padding: 4px 6px;
+                margin-bottom: 14px;
+                gap: 5px;
+            }
+            .tab-nav::-webkit-scrollbar {
+                display: none;
+            }
+            .tab-btn {
+                min-width: auto;
+                padding: 7px 11px;
+                font-size: 11.5px;
+                flex: none;
             }
             .hero-banner {
                 display: none !important;
