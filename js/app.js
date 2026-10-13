@@ -7690,36 +7690,20 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         `;
                     } else {
                         exercisesHtml = exercises.map((ex, idx) => {
-                            const guide = (exerciseGuideMap && exerciseGuideMap[ex.id]) || (categoryFallback && categoryFallback[ex.category]) || {};
-                            const thumb = guide.form || '';
-                            const sets = ex.targetSets || (details.scheme ? details.scheme.sets : 3);
-                            const reps = ex.targetReps || (details.scheme ? details.scheme.reps : '8-12');
-                            const anatomy = getExerciseAnatomy(ex);
+                            const exName = escapeHTML(ex.name || 'Egzersiz');
+                            const exIdParam = encodeURIComponent(ex.id || ex.name || '');
 
                             return `
-                                <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:7px 10px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:10px 12px; gap:8px;">
                                     <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:0;">
-                                        <span style="font-size:11.5px; font-weight:900; color:var(--gold); width:18px;">${idx + 1}.</span>
-                                        <div class="ex-thumb-wrap" style="width:38px; height:38px; border-radius:6px; flex-shrink:0;">
-                                            ${thumb ? `<img src="${thumb}" class="ex-thumb-img" alt="${escapeHTML(ex.name)}">` : '🏋️'}
-                                        </div>
-                                        <div style="min-width:0; flex:1;">
-                                            <div style="font-size:12.5px; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id || escapeHTML(ex.name)}')">
-                                                ${escapeHTML(ex.name)}
-                                            </div>
-                                            <div style="font-size:10.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;">
-                                                <span style="color:var(--gold); font-weight:800;">🎯 ${escapeHTML(anatomy.primary)}</span>
-                                                ${anatomy.secondary ? `<span style="color:var(--cyan); font-weight:600;"> • ⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''}
-                                                ${ex.equipment ? ` • <span style="color:var(--text-secondary);">${escapeHTML(ex.equipment)}</span>` : ''}
-                                            </div>
+                                        <span style="font-size:12.5px; font-weight:900; color:var(--gold); width:20px; flex-shrink:0;">${idx + 1}.</span>
+                                        <div style="font-size:13.5px; font-weight:800; color:#fff; word-break:break-word; line-height:1.35; cursor:pointer;" onclick="openExerciseDetailModal(decodeURIComponent('${exIdParam}'))" title="Detayı İncele">
+                                            ${exName}
                                         </div>
                                     </div>
-                                    <div style="display:flex; align-items:center; gap:5px; flex-shrink:0;">
-                                        <span style="background:rgba(245,158,11,0.15); color:var(--gold); border:1px solid rgba(245,158,11,0.3); font-size:10.5px; font-weight:700; border-radius:4px; padding:2px 7px;">
-                                            ${sets} x ${reps}
-                                        </span>
-                                        <button type="button" class="btn btn-outline" style="padding:3px 7px; font-size:10px; color:var(--cyan); border-color:rgba(56,189,248,0.4); font-weight:700;" onclick="openScheduleExerciseAlternativeModal(${dayIdx}, '${ex.id || escapeHTML(ex.name)}', ${idx})" title="Bu hareket için alternatif bul">🔄 Alternatif</button>
-                                        <button type="button" class="btn btn-outline" style="padding:3px 7px; font-size:10px;" onclick="openExerciseDetailModal('${ex.id || escapeHTML(ex.name)}')" title="İncele">👁️</button>
+                                    <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                                        <button type="button" class="btn btn-outline" style="padding:5px 9px; font-size:11px; color:var(--cyan); border-color:rgba(56,189,248,0.4); font-weight:700; border-radius:6px;" onclick="openScheduleExerciseAlternativeModal(${dayIdx}, decodeURIComponent('${exIdParam}'), ${idx})" title="Bu hareket için alternatif bul">🔄 Alternatif</button>
+                                        <button type="button" class="btn btn-outline" style="padding:5px 9px; font-size:11px; border-radius:6px;" onclick="openExerciseDetailModal(decodeURIComponent('${exIdParam}'))" title="İncele">👁️</button>
                                     </div>
                                 </div>
                             `;
@@ -15421,7 +15405,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=177')
+                navigator.serviceWorker.register('./sw.js?v=178')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
