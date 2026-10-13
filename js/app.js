@@ -2787,14 +2787,34 @@ KURALLAR:
         }
 
         function openScheduleExerciseAlternativeModal(dayIdx, currentExId, exIdx) {
-            const currentEx = EXERCISES_DB.find(e => e.id === currentExId);
-            if (!currentEx) return;
+            let currentEx = EXERCISES_DB.find(e => e.id === currentExId);
+            if (!currentEx) {
+                currentEx = EXERCISES_DB.find(e => e.name && e.name.toLowerCase() === String(currentExId).toLowerCase());
+            }
+            if (!currentEx && typeof findBestExerciseMatch === 'function') {
+                currentEx = findBestExerciseMatch(currentExId);
+            }
+            if (!currentEx) {
+                const sched = typeof activePlannerWeek !== 'undefined' && activePlannerWeek === 'next' ? getNextWeeklySchedule() : getWeeklySchedule();
+                const plan = sched && sched[dayIdx];
+                if (plan) {
+                    const det = typeof getWorkoutDetailsForPlan === 'function' ? getWorkoutDetailsForPlan(plan) : null;
+                    if (det && Array.isArray(det.exercises) && det.exercises[exIdx]) {
+                        const targetItem = det.exercises[exIdx];
+                        currentEx = EXERCISES_DB.find(e => e.id === targetItem.id) || (typeof findBestExerciseMatch === 'function' ? findBestExerciseMatch(targetItem.name || targetItem.id) : null) || targetItem;
+                    }
+                }
+            }
+            if (!currentEx) {
+                showToast('⚠️ Hareket alternatifi bulunamadı.');
+                return;
+            }
 
-            const primaryM = (currentEx.primaryMuscles && currentEx.primaryMuscles[0]) || 'chest';
+            const primaryM = (currentEx.primaryMuscles && currentEx.primaryMuscles[0]) || (currentEx.muscle && currentEx.muscle.toLowerCase().includes('sırt') ? 'back' : 'chest');
 
             pickerContext = {
                 mode: 'replace',
-                targetExId: currentEx.id,
+                targetExId: currentEx.id || currentExId,
                 scope: 'day_schedule',
                 studioIndex: null,
                 dayIdx: dayIdx,
@@ -7006,7 +7026,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             return String(str).toLowerCase()
                 .replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ı/g, 'i').replace(/i̇/g, 'i')
                 .replace(/ö/g, 'o').replace(/ş/g, 's').replace(/ü/g, 'u')
-                .replace(/\(.*?\)/g, '')
+                .replace(/[()]/g, ' ')
                 .replace(/[^a-z0-9\s]/g, ' ')
                 .replace(/\s+/g, ' ')
                 .trim();
@@ -7017,9 +7037,46 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const catalog = customCatalog || (typeof EXERCISES_DB !== 'undefined' ? EXERCISES_DB : []);
             if (!Array.isArray(catalog) || catalog.length === 0) return null;
 
-            const cleanRaw = String(rawName).replace(/\*+/g, '').trim();
+            let cleanRaw = String(rawName).replace(/\*+/g, '').trim();
+            if (cleanRaw.toLowerCase().startsWith('ai_')) {
+                cleanRaw = cleanRaw.substring(3).replace(/_/g, ' ');
+            }
+
+            const exerciseAliases = {
+                'pullup': 'bw_pullup', 'pull up': 'bw_pullup', 'pull-up': 'bw_pullup', 'barfiks': 'bw_pullup',
+                'chinup': 'bw_chinup', 'chin up': 'bw_chinup', 'chin-up': 'bw_chinup', 'ters barfiks': 'bw_chinup',
+                'pushup': 'bw_pushup', 'push up': 'bw_pushup', 'push-up': 'bw_pushup', 'sinav': 'bw_pushup', 'şınav': 'bw_pushup',
+                'dips': 'bw_dips', 'dip': 'bw_dips',
+                'burpee': 'bw_burpee',
+                'deadlift': 'bb_deadlift', 'barbell deadlift': 'bb_deadlift',
+                'rdl': 'db_rdl', 'romanian deadlift': 'db_rdl',
+                'swing': 'kb_swing', 'kettlebell swing': 'kb_swing', 'dambıl swing': 'db_swing',
+                'saw row': 'db_saw_row', 'dambıl saw row': 'db_saw_row',
+                'farmers walk': 'db_farmers_walk', 'farmer walk': 'db_farmers_walk', "farmer's walk": 'db_farmers_walk',
+                'bench press': 'bb_bench_press', 'incline bench': 'bb_incline_bench',
+                'overhead press': 'db_overhead_press', 'shoulder press': 'db_overhead_press',
+                'goblet squat': 'db_goblet_squat', 'front squat': 'db_front_squat', 'back squat': 'bb_back_squat',
+                'bulgarian split squat': 'db_bulgarian_squat', 'walking lunge': 'db_walking_lunge'
+            };
+
+            const lowerClean = cleanRaw.toLowerCase();
+            const compactClean = lowerClean.replace(/[^a-z0-9]/g, '');
+
+            if (exerciseAliases[lowerClean]) {
+                const found = catalog.find(e => e.id === exerciseAliases[lowerClean]);
+                if (found) return found;
+            }
+            if (exerciseAliases[compactClean]) {
+                const found = catalog.find(e => e.id === exerciseAliases[compactClean]);
+                if (found) return found;
+            }
+
+            // Stripped prefix ID match (e.g. 'pullup' matches 'bw_pullup')
+            let match = catalog.find(e => e.id.replace(/^(bw|db|bb|kb|mach)_/, '').replace(/_/g, '') === compactClean);
+            if (match) return match;
+
             // 1. Doğrudan ID veya İsim Eşleşmesi
-            let match = catalog.find(e => e.id === cleanRaw || (e.name && e.name.toLowerCase() === cleanRaw.toLowerCase()));
+            match = catalog.find(e => e.id === cleanRaw || (e.name && e.name.toLowerCase() === lowerClean));
             if (match) return match;
 
             const normRaw = normalizeExerciseName(cleanRaw);
@@ -7028,7 +7085,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (match) return match;
 
             // 3. Kelime/Token skoru eşleşmesi
-            const rawTokens = normRaw.split(' ').filter(t => t.length > 2);
+            const rawTokens = normRaw.split(' ').filter(t => t.length >= 3);
             let bestMatch = null;
             let maxScore = 0;
 
@@ -7040,7 +7097,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         score += (token.length > 4 ? 2 : 1);
                     }
                 }
-                if (score > maxScore && score >= 2) {
+                if (score > maxScore && score >= 1) {
                     maxScore = score;
                     bestMatch = ex;
                 }
@@ -7690,20 +7747,26 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         `;
                     } else {
                         exercisesHtml = exercises.map((ex, idx) => {
-                            const exName = escapeHTML(ex.name || 'Egzersiz');
-                            const exIdParam = encodeURIComponent(ex.id || ex.name || '');
+                            let dbEx = EXERCISES_DB.find(e => e.id === ex.id);
+                            if (!dbEx && (ex.name || ex.id)) {
+                                dbEx = findBestExerciseMatch(ex.name || ex.id);
+                            }
+                            const effectiveId = (dbEx ? dbEx.id : ex.id) || '';
+                            const displayName = (ex.name && !ex.name.startsWith('ai_')) ? ex.name : (dbEx ? dbEx.name : (ex.name || 'Egzersiz'));
+                            const exName = escapeHTML(displayName);
+                            const targetExParam = encodeURIComponent(effectiveId || displayName);
 
                             return `
                                 <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:10px 12px; gap:8px;">
                                     <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:0;">
                                         <span style="font-size:12.5px; font-weight:900; color:var(--gold); width:20px; flex-shrink:0;">${idx + 1}.</span>
-                                        <div style="font-size:13.5px; font-weight:800; color:#fff; word-break:break-word; line-height:1.35; cursor:pointer;" onclick="openExerciseDetailModal(decodeURIComponent('${exIdParam}'))" title="Detayı İncele">
+                                        <div style="font-size:13.5px; font-weight:800; color:#fff; word-break:break-word; line-height:1.35; cursor:pointer;" onclick="openExerciseDetailModal(decodeURIComponent('${targetExParam}'))" title="Detayı İncele">
                                             ${exName}
                                         </div>
                                     </div>
                                     <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
-                                        <button type="button" class="btn btn-outline" style="padding:5px 9px; font-size:11px; color:var(--cyan); border-color:rgba(56,189,248,0.4); font-weight:700; border-radius:6px;" onclick="openScheduleExerciseAlternativeModal(${dayIdx}, decodeURIComponent('${exIdParam}'), ${idx})" title="Bu hareket için alternatif bul">🔄 Alternatif</button>
-                                        <button type="button" class="btn btn-outline" style="padding:5px 9px; font-size:11px; border-radius:6px;" onclick="openExerciseDetailModal(decodeURIComponent('${exIdParam}'))" title="İncele">👁️</button>
+                                        <button type="button" class="btn btn-outline" style="padding:5px 9px; font-size:11px; color:var(--cyan); border-color:rgba(56,189,248,0.4); font-weight:700; border-radius:6px;" onclick="openScheduleExerciseAlternativeModal(${dayIdx}, decodeURIComponent('${targetExParam}'), ${idx})" title="Bu hareket için alternatif bul">🔄 Alternatif</button>
+                                        <button type="button" class="btn btn-outline" style="padding:5px 9px; font-size:11px; border-radius:6px;" onclick="openExerciseDetailModal(decodeURIComponent('${targetExParam}'))" title="İncele">👁️</button>
                                     </div>
                                 </div>
                             `;
@@ -15405,7 +15468,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=178')
+                navigator.serviceWorker.register('./sw.js?v=179')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
@@ -16076,11 +16139,17 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             let ex = null;
             if (typeof exIdOrObj === 'object' && exIdOrObj !== null) {
                 ex = exIdOrObj;
+                if (!EXERCISES_DB.some(e => e.id === ex.id) && typeof findBestExerciseMatch === 'function') {
+                    const dbMatch = findBestExerciseMatch(ex.name || ex.id);
+                    if (dbMatch) {
+                        ex = Object.assign({}, dbMatch, ex, { id: dbMatch.id, name: dbMatch.name });
+                    }
+                }
             } else if (typeof exIdOrObj === 'string' && exIdOrObj.trim() && exIdOrObj !== 'undefined' && exIdOrObj !== 'null') {
                 const query = exIdOrObj.trim();
                 ex = EXERCISES_DB.find(e => e.id === query);
                 if (!ex) ex = EXERCISES_DB.find(e => e.name && e.name.toLowerCase() === query.toLowerCase());
-                if (!ex) ex = findBestExerciseMatch(query);
+                if (!ex && typeof findBestExerciseMatch === 'function') ex = findBestExerciseMatch(query);
                 if (!ex) {
                     const nextSched = typeof getNextWeeklySchedule === 'function' ? getNextWeeklySchedule() : null;
                     if (nextSched) {
@@ -16088,7 +16157,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             const p = nextSched[d];
                             if (p && Array.isArray(p.exercises)) {
                                 const found = p.exercises.find(x => x && (x.id === query || x.name === query || x.originalAiName === query));
-                                if (found) { ex = found; break; }
+                                if (found) {
+                                    ex = (typeof findBestExerciseMatch === 'function' ? findBestExerciseMatch(found.name || found.id) : null) || found;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -16100,7 +16172,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             const p = currSched[d];
                             if (p && Array.isArray(p.exercises)) {
                                 const found = p.exercises.find(x => x && (x.id === query || x.name === query || x.originalAiName === query));
-                                if (found) { ex = found; break; }
+                                if (found) {
+                                    ex = (typeof findBestExerciseMatch === 'function' ? findBestExerciseMatch(found.name || found.id) : null) || found;
+                                    break;
+                                }
                             }
                         }
                     }
