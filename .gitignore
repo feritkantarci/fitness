@@ -16,3 +16,12 @@ source_archive/
 temp_ai_studio/
 *.bak*
 *.zip
+assets/opengym_all/
+assets/opengym_sample/
+test-opengym-catalog-approval.html
+test-opengym-showcase.html
+scripts/build_full_catalog_portal.py
+scripts/enrich_*.py
+scripts/refine_*.py
+scripts/generate_approval_portal.cjs
+scripts/test-server.js
