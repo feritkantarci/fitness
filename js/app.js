@@ -4966,16 +4966,10 @@ KURALLAR:
                 if (liveTrackerBar) liveTrackerBar.style.display = 'none';
                 if (hud) hud.style.display = 'none';
                 if (dock) dock.style.display = 'none';
-                if (studioSec) studioSec.style.display = 'block';
+                if (studioSec) studioSec.style.display = 'none';
                 if (container) {
                     try {
                         const user = getActiveUser();
-                    const key = `celik_kodu_custom_programs_${user.id}`;
-                    let customSaved = [];
-                    try {
-                        const raw = localStorage.getItem(key);
-                        if (raw) customSaved = JSON.parse(raw);
-                    } catch(e) {}
 
                     const todayIdx = new Date().getDay();
                     const tomorrowIdx = (todayIdx + 1) % 7;
@@ -5135,35 +5129,6 @@ KURALLAR:
                                     <button type="button" class="planner-template-btn" onclick="resetWeeklyScheduleTemplate('split_4day')" title="4 Günlük Bölünmüş Şablon">⚡ 4 Gün</button>
                                 </div>
                             </div>
-
-                            ${customSaved.length > 0 ? `
-                                <div style="font-size:12px; font-weight:900; color:var(--gold); margin-bottom:10px;">
-                                    ⭐ KAYITLI ÖZEL PROGRAMLARIM
-                                </div>
-                                <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
-                                    ${customSaved.map(p => `
-                                        <div class="log-history-card" style="padding:14px; margin-bottom:0;">
-                                            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                                                <div>
-                                                    <div style="font-size:14px; font-weight:800; color:#fff;">${escapeHTML(p.title)}</div>
-                                                    <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">${(p.exercises || []).length} Hareket • ${p.duration || Math.round((p.exercises || []).length * 7)} Dk</div>
-                                                </div>
-                                                <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
-                                                    <button class="btn btn-outline" style="padding:7px 10px; font-size:11px; color:var(--cyan); border-color:var(--cyan);" onclick="previewWorkoutModal('${p.id}')">
-                                                        👁️ İncele
-                                                    </button>
-                                                    <button class="btn btn-outline" style="padding:7px 10px; font-size:11px; color:var(--gold); border-color:var(--gold);" onclick="editSavedProgram('${p.id}')">
-                                                        ✏️ Düzenle
-                                                    </button>
-                                                    <button class="btn btn-gold" style="padding:7px 12px; font-size:11.5px; font-weight:800;" onclick="loadSavedProgram('${p.id}')">
-                                                        ▶ Başlat
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            ` : ''}
                         </div>
                     `;
                     } catch(renderErr) {
@@ -15770,7 +15735,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=190')
+                navigator.serviceWorker.register('./sw.js?v=191')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
