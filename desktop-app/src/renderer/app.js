@@ -4282,7 +4282,7 @@ function getDefaultDesktopAthleteSchedule() {
         2: { dayIndex: 2, title: '🧘 Dinlenme & Aktif Toparlanma', time: '18:30', duration: 30, isRest: true, exercises: [] },
         3: { dayIndex: 3, title: '⚔️ Gün 2: Sırt Çekiş & Balistik Güç', time: '18:30', duration: 60, isRest: false, exercises: ['Saw Dumbbell Row', 'Romanian Deadlift (RDL)', 'Kettlebell Swing', 'Pull-up', 'Farmer\'s Walk'] },
         4: { dayIndex: 4, title: '🧘 Dinlenme & Mobilite', time: '18:30', duration: 30, isRest: true, exercises: [] },
-        5: { dayIndex: 5, title: '⚔️ Gün 3: Kompleks & Merdiven', time: '18:30', duration: 60, isRest: false, exercises: ['Snatch + Lunge', 'Row + Squat', 'Burpee Finisher', 'Hanging Leg Raise'] },
+        5: { dayIndex: 5, title: '⚔️ Gün 3: Kompleks & Merdiven', time: '18:30', duration: 60, isRest: false, exercises: ['Dambıl Snatch', 'Walking Lunge', 'Dambıl Saw Row', 'Front Squat', 'Burpee Finisher', 'Hanging Leg Raise'] },
         6: { dayIndex: 6, title: '🧘 Serbest Kardiyo / Core', time: '11:00', duration: 30, isRest: true, exercises: [] },
         0: { dayIndex: 0, title: '🧘 Tam Dinlenme & Zihinsel Hazırlık', time: '12:00', duration: 30, isRest: true, exercises: [] }
     };

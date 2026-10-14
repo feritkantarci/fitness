@@ -9354,6 +9354,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             const data = docSnap.data();
                             if (data && data.active) {
                                 processIncomingCoachDirective(uid, data);
+                                recoverLostFridayWorkout(uid);
                             }
                         }
                     }, (e) => {
@@ -9368,6 +9369,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         processIncomingCoachDirective(uid, data);
                     }
                 }
+                recoverLostFridayWorkout(uid);
             } catch(e) {
                 console.warn("Koç direktifi buluttan çekilemedi:", e);
             }
@@ -9451,13 +9453,135 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             };
         }
 
+        // ==================== CUMA GÜNÜ & ÖZEL PROGRAM KURTARMA MOTORU ====================
+        function recoverLostFridayWorkout(targetUid) {
+            try {
+                const user = (typeof getActiveUser === 'function') ? getActiveUser() : null;
+                const uid = targetUid || (user ? user.id : 'usr_admin');
+                const schedule = getWeeklySchedule(uid);
+                const fridayPlan = schedule[5];
+
+                const fridayDetails = (typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(fridayPlan) : null;
+                const curExCount = (fridayDetails && Array.isArray(fridayDetails.exercises)) 
+                    ? fridayDetails.exercises.length 
+                    : (fridayPlan && Array.isArray(fridayPlan.exercises) ? fridayPlan.exercises.length : 0);
+
+                // Eğer Cuma günü zaten 6 veya 7 hareketli özel bir programsa ve fitlab_day_ ile ezilmemişse dokunma
+                if (curExCount >= 6 && fridayPlan && !fridayPlan.id?.startsWith('fitlab_day_')) {
+                    return null;
+                }
+
+                let candidates = [];
+
+                // 1. celik_kodu_custom_programs_* anahtarlarını tara
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    if (k && k.startsWith('celik_kodu_custom_programs')) {
+                        try {
+                            const list = JSON.parse(localStorage.getItem(k) || '[]');
+                            if (Array.isArray(list)) {
+                                list.forEach(p => {
+                                    if (p && Array.isArray(p.exercises) && p.exercises.length >= 4) {
+                                        candidates.push(p);
+                                    }
+                                });
+                            }
+                        } catch(e) {}
+                    }
+                }
+
+                // 2. Kullanıcı nesnesindeki savedWorkouts listesini tara
+                if (user && Array.isArray(user.savedWorkouts)) {
+                    user.savedWorkouts.forEach(p => {
+                        if (p && Array.isArray(p.exercises) && p.exercises.length >= 4) {
+                            candidates.push(p);
+                        }
+                    });
+                }
+
+                // 3. Haftalık takvim yedeklerini tara
+                try {
+                    const backupRaw = localStorage.getItem(`celik_kodu_weekly_schedule_backup_${uid}`);
+                    if (backupRaw) {
+                        const bSched = JSON.parse(backupRaw);
+                        if (bSched && bSched[5]) {
+                            const bWork = bSched[5].customWorkout || bSched[5];
+                            if (bWork && Array.isArray(bWork.exercises) && bWork.exercises.length >= 4) {
+                                candidates.push(bWork);
+                            }
+                        }
+                    }
+                } catch(e) {}
+
+                // Cuma ile en ilişkili olanı öne al
+                candidates.sort((a, b) => {
+                    const aIsFriday = (a.id && a.id.includes('custom_day_5')) || 
+                                      (a.title && (a.title.toLowerCase().includes('cuma') || a.title.toLowerCase().includes('gün 3')));
+                    const bIsFriday = (b.id && b.id.includes('custom_day_5')) || 
+                                      (b.title && (b.title.toLowerCase().includes('cuma') || b.title.toLowerCase().includes('gün 3')));
+                    if (aIsFriday && !bIsFriday) return -1;
+                    if (!aIsFriday && bIsFriday) return 1;
+
+                    // 7 hareket tam eşleşmesine öncelik ver
+                    if (a.exercises.length === 7 && b.exercises.length !== 7) return -1;
+                    if (a.exercises.length !== 7 && b.exercises.length === 7) return 1;
+
+                    // Daha çok hareketli olan
+                    if (b.exercises.length !== a.exercises.length) return b.exercises.length - a.exercises.length;
+
+                    // En güncel olan
+                    return (b.updatedAt || 0) - (a.updatedAt || 0);
+                });
+
+                if (candidates.length > 0) {
+                    const best = candidates[0];
+                    if (best && best.exercises.length > curExCount) {
+                        schedule[5] = {
+                            id: best.id || ('custom_day_5_' + Date.now()),
+                            title: best.title || '⚔️ Cuma: Özel Zırh Programım',
+                            type: 'custom_saved',
+                            desc: `${best.exercises.length} Hareket • ${best.duration || Math.round(best.exercises.length * 7)} Dk`,
+                            rest: false,
+                            customWorkout: best,
+                            exercises: best.exercises,
+                            isCustom: true
+                        };
+                        saveWeeklySchedule(schedule, uid);
+                        console.log(`[Cuma Program Kurtarma] ${best.exercises.length} hareketli özel program başarıyla geri yüklendi:`, best.title);
+                        if (typeof renderActiveWorkout === 'function') {
+                            renderActiveWorkout();
+                        }
+                        if (typeof showToast === 'function') {
+                            showToast(`🛡️ Cuma günkü ${best.exercises.length} hareketli programınız ("${best.title}") geri yüklendi ve korumaya alındı!`);
+                        }
+                        return best;
+                    }
+                }
+            } catch(e) {
+                console.warn("recoverLostFridayWorkout hatası:", e);
+            }
+            return null;
+        }
+
         function processIncomingCoachDirective(uid, data) {
             try {
+                if (!data) return;
+
+                // Idempotency: Zaten işlenmiş aynı sentAt zamanlı direktifleri tekrar çalıştırma
+                const appliedKey = `celik_kodu_applied_coach_directive_${uid}`;
+                const lastAppliedSentAt = localStorage.getItem(appliedKey);
+                if (data.sentAt && lastAppliedSentAt === data.sentAt && !data.forceReload) {
+                    return;
+                }
+
                 if (!data.parsedWorkout && data.fullReport) {
                     data.parsedWorkout = parseDirectiveWorkout(data.fullReport, data.title);
                 }
 
                 localStorage.setItem(`celik_kodu_coach_directive_${uid}`, JSON.stringify(data));
+                if (data.sentAt) {
+                    localStorage.setItem(appliedKey, data.sentAt);
+                }
 
                 let hasCalendarChange = false;
 
@@ -9508,56 +9632,59 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 // 2. TÜM HAFTALIK PLAN GÜNCELLEMESİ (FitLAB Haftalık Şablonu)
                 if (data.schedule) {
                     const sched = getWeeklySchedule(uid);
+                    try {
+                        localStorage.setItem(`celik_kodu_weekly_schedule_backup_${uid}`, JSON.stringify(sched));
+                    } catch(e) {}
+
+                    const applyDaySchedule = (d, dIdx) => {
+                        if (!d || dIdx < 0 || dIdx > 6) return;
+                        const existingPlan = sched[dIdx];
+                        const existingDetails = (typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(existingPlan) : null;
+                        const existingExCount = (existingDetails && Array.isArray(existingDetails.exercises)) ? existingDetails.exercises.length : (existingPlan && Array.isArray(existingPlan.exercises) ? existingPlan.exercises.length : 0);
+                        const incomingExCount = Array.isArray(d.exercises) ? d.exercises.length : 0;
+
+                        // GÜVENLİK KALKANI: Kullanıcı bu güne özel program tanımladıysa veya kullanıcının hareket sayısı gelen şablondan fazlaysa EZME!
+                        if (existingPlan && (existingPlan.type === 'custom_saved' || existingPlan.isCustom || (existingPlan.id && existingPlan.id.startsWith('custom_day_'))) && existingExCount > incomingExCount) {
+                            console.log(`[CoachDirective] Gün ${dIdx} kullanıcının özel programı (${existingExCount} hareket) korundu, bulut şablonu (${incomingExCount} hareket) ile EZİLMEDİ.`);
+                            return;
+                        }
+
+                        const isRest = !!(d.isRest || d.rest || d.type === 'rest');
+                        const exList = (d.exercises || []).map(e => typeof e === 'string' ? { name: e, sets: 3, reps: '8-12' } : e);
+                        sched[dIdx] = {
+                            id: 'fitlab_day_' + dIdx,
+                            title: d.title || (isRest ? 'Dinlenme' : 'Antrenman'),
+                            time: d.time || '18:30',
+                            duration: d.duration || (isRest ? 30 : 60),
+                            rest: isRest,
+                            type: isRest ? 'rest' : 'custom_saved',
+                            desc: isRest ? 'Aktif Dinlenme & Mobilite' : `${exList.length} Hareket • ${d.duration || 60} Dk`,
+                            exercises: exList,
+                            customWorkout: isRest ? null : {
+                                id: 'fitlab_workout_' + dIdx + '_' + Date.now(),
+                                title: d.title,
+                                duration: d.duration || 60,
+                                exercises: exList
+                            }
+                        };
+                        hasCalendarChange = true;
+                    };
+
                     if (Array.isArray(data.schedule)) {
                         data.schedule.forEach((d, idx) => {
-                            if (!d) return;
                             const dIdx = typeof d.dayIndex === 'number' ? d.dayIndex : idx;
-                            const isRest = !!(d.isRest || d.rest || d.type === 'rest');
-                            const exList = (d.exercises || []).map(e => typeof e === 'string' ? { name: e, sets: 3, reps: '8-12' } : e);
-                            sched[dIdx] = {
-                                id: 'fitlab_day_' + dIdx,
-                                title: d.title || (isRest ? 'Dinlenme' : 'Antrenman'),
-                                time: d.time || '18:30',
-                                duration: d.duration || (isRest ? 30 : 60),
-                                rest: isRest,
-                                type: isRest ? 'rest' : 'custom_saved',
-                                desc: isRest ? 'Aktif Dinlenme & Mobilite' : `${exList.length} Hareket • ${d.duration || 60} Dk`,
-                                exercises: exList,
-                                customWorkout: isRest ? null : {
-                                    id: 'fitlab_workout_' + dIdx + '_' + Date.now(),
-                                    title: d.title,
-                                    duration: d.duration || 60,
-                                    exercises: exList
-                                }
-                            };
+                            applyDaySchedule(d, dIdx);
                         });
                     } else if (typeof data.schedule === 'object') {
                         Object.keys(data.schedule).forEach(k => {
                             const d = data.schedule[k];
-                            if (!d) return;
                             const dIdx = parseInt(k, 10);
-                            const isRest = !!(d.isRest || d.rest || d.type === 'rest');
-                            const exList = (d.exercises || []).map(e => typeof e === 'string' ? { name: e, sets: 3, reps: '8-12' } : e);
-                            sched[dIdx] = {
-                                id: 'fitlab_day_' + dIdx,
-                                title: d.title || (isRest ? 'Dinlenme' : 'Antrenman'),
-                                time: d.time || '18:30',
-                                duration: d.duration || (isRest ? 30 : 60),
-                                rest: isRest,
-                                type: isRest ? 'rest' : 'custom_saved',
-                                desc: isRest ? 'Aktif Dinlenme & Mobilite' : `${exList.length} Hareket • ${d.duration || 60} Dk`,
-                                exercises: exList,
-                                customWorkout: isRest ? null : {
-                                    id: 'fitlab_workout_' + dIdx + '_' + Date.now(),
-                                    title: d.title,
-                                    duration: d.duration || 60,
-                                    exercises: exList
-                                }
-                            };
+                            applyDaySchedule(d, dIdx);
                         });
                     }
-                    saveWeeklySchedule(sched, uid);
-                    hasCalendarChange = true;
+                    if (hasCalendarChange) {
+                        saveWeeklySchedule(sched, uid);
+                    }
                 }
 
                 // 3. TARİH BAZLI OVERRIDE LİSTESİ
@@ -15723,7 +15850,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=188')
+                navigator.serviceWorker.register('./sw.js?v=189')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
@@ -15759,6 +15886,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             syncAppViewState();
             initCalendarLiveSyncOnLoad();
             applyWednesdayHammerCurlPatch();
+            recoverLostFridayWorkout();
             updateProfileGeminiStatusUI();
             renderAiHybridHeroBanner();
             updateSelectedSplitLabel();
