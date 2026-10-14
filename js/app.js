@@ -6312,25 +6312,17 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         }
 
         // ==================== LIBRARY SUB-TABS & EXERCISE CATALOG ====================
-        let currentLibrarySubTab = 'programs';
+        let currentLibrarySubTab = 'exercises';
 
         function switchLibrarySubTab(tab) {
-            currentLibrarySubTab = tab;
-            const btnProg = document.getElementById('libSubTabProgramsBtn');
-            const btnEx = document.getElementById('libSubTabExercisesBtn');
+            currentLibrarySubTab = 'exercises';
             const paneProg = document.getElementById('libPanePrograms');
             const paneEx = document.getElementById('libPaneExercises');
 
-            if (btnProg) btnProg.classList.toggle('active', tab === 'programs');
-            if (btnEx) btnEx.classList.toggle('active', tab === 'exercises');
-            if (paneProg) paneProg.style.display = (tab === 'programs') ? 'block' : 'none';
-            if (paneEx) paneEx.style.display = (tab === 'exercises') ? 'block' : 'none';
+            if (paneProg) paneProg.style.display = 'none';
+            if (paneEx) paneEx.style.display = 'block';
 
-            if (tab === 'exercises') {
-                renderLibraryExerciseCatalog();
-            } else if (tab === 'programs') {
-                renderLibrary();
-            }
+            renderLibraryExerciseCatalog();
         }
 
         function openExerciseLibraryTab(searchQuery = '') {
@@ -6524,34 +6516,6 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         </div>
                         <div style="font-size:12px; color:var(--gold); font-weight:800;">Güne Ata ➔</div>
                     </div>
-
-                    <!-- SEÇENEK 2: PROGRAM ATÖLYESİNE EKLE -->
-                    <div class="add-to-prog-card" style="cursor:default; align-items:flex-start;">
-                        <div style="font-size:24px; flex-shrink:0; margin-top:2px;">🎯</div>
-                        <div style="flex:1;">
-                            <div style="font-size:13px; font-weight:800; color:#fff;">Program Atölyesi Taslağına Ekle</div>
-                            <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
-                                Kendi özel programınızı kurduğunuz Atölye taslağına ilave eder.
-                            </div>
-                            <div style="display:flex; align-items:center; gap:6px; margin-top:8px; flex-wrap:wrap;">
-                                <select id="addToStudioSetsSelect" style="background:#111; color:#fff; border:1px solid var(--border); font-size:11px; padding:5px 8px; border-radius:6px;">
-                                    <option value="3" selected>3 Set</option>
-                                    <option value="4">4 Set</option>
-                                    <option value="5">5 Set</option>
-                                    <option value="2">2 Set</option>
-                                </select>
-                                <select id="addToStudioRepsSelect" style="background:#111; color:#fff; border:1px solid var(--border); font-size:11px; padding:5px 8px; border-radius:6px;">
-                                    <option value="8-12" selected>8-12 Tekrar</option>
-                                    <option value="4-6">4-6 Tekrar</option>
-                                    <option value="12-15">12-15 Tekrar</option>
-                                    <option value="15-20">15-20 Tekrar</option>
-                                </select>
-                                <button type="button" class="btn btn-gold" style="font-size:11px; padding:5px 12px; font-weight:800;" onclick="applyAddToStudioRoutine('${ex.id}')">
-                                    ➕ Atölyeye Ekle
-                                </button>
-                            </div>
-                        </div>
-                    </div>
             `;
 
             if (isWorkoutActive) {
@@ -6722,10 +6686,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         }
 
         function renderLibrary() {
-            if (currentLibrarySubTab === 'exercises') {
-                renderLibraryExerciseCatalog();
-                return;
-            }
+            const paneProg = document.getElementById('libPanePrograms');
+            const paneEx = document.getElementById('libPaneExercises');
+            if (paneProg) paneProg.style.display = 'none';
+            if (paneEx) paneEx.style.display = 'block';
+            renderLibraryExerciseCatalog();
+            return;
             const user = getActiveUser();
             const key = `celik_kodu_custom_programs_${user.id}`;
             let saved = [];
@@ -15735,7 +15701,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=191')
+                navigator.serviceWorker.register('./sw.js?v=192')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();

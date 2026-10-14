@@ -22,7 +22,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=191">
+    <link rel="stylesheet" href="css/style.css?v=192">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH */
         .tab-nav { display: flex !important; gap: 6px; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.1); padding: 6px; border-radius: 16px; margin-bottom: 20px; overflow-x: auto; }
@@ -37,7 +37,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v191</div>
+            <div class="badge-brand" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v192</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -73,7 +73,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v191</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v192</span>
                 </div>
                 <div class="modern-bar-actions" style="position: relative;">
                     <div class="modern-user-badge" onclick="if(window.innerWidth <= 768){ openMoreSheet(); } else { switchTab('profileTab'); }" title="Profil & Menü">
@@ -126,7 +126,7 @@
                     <span>📅 Takvim</span>
                 </button>
                 <button class="tab-btn" onclick="switchTab('libraryTab')">
-                    <span>📚 Program & Hareketler</span>
+                    <span>📖 Hareketler</span>
                 </button>
                 <button class="tab-btn" onclick="switchTab('historyTab')">
                     <span>📋 Geçmiş</span>
@@ -587,21 +587,21 @@
                 </div>
             </div>
 
-            <!-- ==================== TAB 3: PROGRAM LIBRARY & EXERCISE ARCHIVE ==================== -->
+            <!-- ==================== TAB 3: EXERCISE ARCHIVE ==================== -->
             <div id="libraryTab" class="tab-content">
                 <div class="generator-card">
-                    <!-- SUB-TAB SWITCHER -->
-                    <div class="library-subnav">
-                        <button type="button" id="libSubTabProgramsBtn" class="lib-subtab-btn active" onclick="switchLibrarySubTab('programs')">
+                    <!-- SUB-TAB SWITCHER (HIDDEN FOR SIMPLICITY) -->
+                    <div class="library-subnav" style="display:none;">
+                        <button type="button" id="libSubTabProgramsBtn" class="lib-subtab-btn" onclick="switchLibrarySubTab('programs')">
                             📋 Hazır Programlar
                         </button>
-                        <button type="button" id="libSubTabExercisesBtn" class="lib-subtab-btn" onclick="switchLibrarySubTab('exercises')">
+                        <button type="button" id="libSubTabExercisesBtn" class="lib-subtab-btn active" onclick="switchLibrarySubTab('exercises')">
                             📖 Egzersiz Kütüphanesi
                         </button>
                     </div>
 
-                    <!-- PANE 1: HAZIR VE KAYITLI PROGRAMLAR -->
-                    <div id="libPanePrograms">
+                    <!-- PANE 1: HAZIR VE KAYITLI PROGRAMLAR (HIDDEN) -->
+                    <div id="libPanePrograms" style="display:none;">
                         <h2 style="font-size:18px; font-weight:900; color:#fff; margin-bottom:12px;">📚 Kayıtlı ve Hazır Programlar</h2>
                         
                         <h3 style="font-size:13px; font-weight:800; color:var(--gold); margin-bottom:10px;">⭐ Kişisel Kayıtlı Programlarım</h3>
@@ -616,7 +616,7 @@
                     </div>
 
                     <!-- PANE 2: EGZERSİZ KÜTÜPHANESİ VE HAREKET REHBERİ -->
-                    <div id="libPaneExercises" style="display:none;">
+                    <div id="libPaneExercises" style="display:block;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
                             <div>
                                 <h2 style="font-size:18px; font-weight:900; color:#fff; margin:0;">📖 Egzersiz Kütüphanesi & Rehber</h2>
@@ -2293,8 +2293,8 @@
     </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
-    <script src="js/exercises-db.js?v=191"></script>
-    <script src="js/app.js?v=191"></script>
+    <script src="js/exercises-db.js?v=192"></script>
+    <script src="js/app.js?v=192"></script>
     <script>
         function toggleHeaderPopupMenu(e) {
             if (e) e.stopPropagation();
