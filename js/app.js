@@ -8941,6 +8941,23 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 const doc = await docRef.get();
                 const localLogs = getUserLogsById(uid);
 
+                // Mükerrer yerel usr_ferit kayıtlarını da güvenle dahil et
+                if (uid === 'usr_admin') {
+                    try {
+                        const feritRaw = localStorage.getItem('celik_kodu_history_usr_ferit');
+                        if (feritRaw) {
+                            const feritLocal = JSON.parse(feritRaw);
+                            if (Array.isArray(feritLocal)) {
+                                feritLocal.forEach(fl => {
+                                    if (!localLogs.some(l => l.id === fl.id || (l.date === fl.date && l.totalSetsCompleted === fl.totalSetsCompleted))) {
+                                        localLogs.push(fl);
+                                    }
+                                });
+                            }
+                        }
+                    } catch(e) {}
+                }
+
                 if (doc.exists) {
                     const data = doc.data();
                     if (data && Array.isArray(data.logs)) {
@@ -11370,24 +11387,11 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     {
                         id: 'usr_admin',
                         username: 'admin',
+                        aliases: ['ferit', 'admin'],
                         passwordHash: defaultHash,
                         salt: defaultSalt,
                         role: 'admin',
                         name: 'Ferit (Admin)',
-                        avatar: '🥋',
-                        theme: 'gold',
-                        level: 'İleri Seviye',
-                        gender: 'Erkek',
-                        weights: { press: '16', squat: '22', row: '20', rdl: '24', swing: '18', lunge: '14' },
-                        createdAt: Date.now()
-                    },
-                    {
-                        id: 'usr_ferit',
-                        username: 'ferit',
-                        passwordHash: defaultHash,
-                        salt: defaultSalt,
-                        role: 'admin',
-                        name: 'Ferit',
                         avatar: '🥋',
                         theme: 'gold',
                         level: 'İleri Seviye',
@@ -11411,6 +11415,18 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     }
                 ];
                 localStorage.setItem('celik_kodu_auth_users', JSON.stringify(users));
+            } else {
+                // Otomatik temizleme: Eski mükerrer usr_ferit varsa usr_admin ile birleştir ve kaldır
+                const hasFerit = users.some(u => u.id === 'usr_ferit');
+                if (hasFerit) {
+                    users = users.filter(u => u.id !== 'usr_ferit');
+                    const adminUser = users.find(u => u.id === 'usr_admin');
+                    if (adminUser) {
+                        adminUser.aliases = ['ferit', 'admin'];
+                        adminUser.name = 'Ferit (Admin)';
+                    }
+                    localStorage.setItem('celik_kodu_auth_users', JSON.stringify(users));
+                }
             }
             return users;
         }
@@ -11468,8 +11484,19 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         function getActiveUserId() {
             const session = getSession();
-            if (session && session.userId) return session.userId;
+            if (session && session.userId) {
+                if (session.userId === 'usr_ferit') {
+                    session.userId = 'usr_admin';
+                    session.name = 'Ferit (Admin)';
+                    setSession(session);
+                }
+                return session.userId;
+            }
             const fallback = localStorage.getItem('celik_kodu_active_user_id');
+            if (fallback === 'usr_ferit') {
+                localStorage.setItem('celik_kodu_active_user_id', 'usr_admin');
+                return 'usr_admin';
+            }
             return fallback || 'usr_admin';
         }
 
@@ -11528,7 +11555,11 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             let matched = null;
 
             for (const u of users) {
-                if ((u.username || '').toLowerCase() !== uname) continue;
+                const isUnameMatch = (u.username || '').toLowerCase() === uname ||
+                    (u.id === 'usr_admin' && (uname === 'admin' || uname === 'ferit')) ||
+                    (Array.isArray(u.aliases) && u.aliases.map(a => a.toLowerCase()).includes(uname));
+                if (!isUnameMatch) continue;
+
                 // 1. Salted SHA-256 hash kontrolü
                 if (u.passwordHash) {
                     const enteredHash = await sha256Hex((u.salt || '') + pass);
@@ -15494,7 +15525,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=181')
+                navigator.serviceWorker.register('./sw.js?v=182')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
