@@ -14774,7 +14774,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 else if (m.status === 'insufficient') barColor = '#f59e0b';
 
                 // Subregion Grid
-                const subregionHTML = renderMuscleSubregionGrid(m);
+                const subregionHTML = (typeof renderMuscleCompartmentDiagram === 'function') ? renderMuscleCompartmentDiagram(m) : '';
 
                 // Quick Action Button
                 let actionBtnHTML = '';
@@ -14878,10 +14878,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         <div>
                             <div style="display:flex; align-items:center; gap:8px;">
                                 <span style="font-size:22px;">🧬</span>
-                                <h3 style="font-size:16px; font-weight:900; color:#fff; margin:0;">Haftalık Anatomik Kas Haritası</h3>
+                                <h3 style="font-size:16px; font-weight:900; color:#fff; margin:0;">Haftalık Kas Yükü & Anatomik Harita</h3>
                             </div>
                             <div style="font-size:11px; color:var(--text-secondary); margin-top:3px;">
-                                Vücut üzerindeki kaslara dokunarak haftalık yükü inceleyin.
+                                Bu haftaki antrenmanların kas gruplarına etkisi • Kaslara dokunarak inceleyin
                             </div>
                         </div>
 
@@ -14971,7 +14971,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             const filteredLogs = cutoff ? allLogs.filter(l => new Date(l.date) >= cutoff) : allLogs;
 
-            const weeklySufficiencyHTML = renderWeeklyMuscleSufficiencySection();
+            let weeklySufficiencyHTML = '';
+            try {
+                weeklySufficiencyHTML = renderWeeklyMuscleSufficiencySection();
+            } catch (err) {
+                console.error("Weekly muscle sufficiency error:", err);
+                weeklySufficiencyHTML = `<div style="padding:14px; background:rgba(239,68,68,0.15); border:1px solid #ef4444; border-radius:10px; color:#fca5a5; font-size:12px; margin-bottom:14px;">⚠️ Kas Haritası yüklenirken bir sorun oluştu: ${escapeHTML(err.message)}</div>`;
+            }
 
             const timeFilterHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:14px; background:rgba(0,0,0,0.25); padding:8px 12px; border-radius:10px; border:1px solid var(--border);">
@@ -15717,7 +15723,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=187')
+                navigator.serviceWorker.register('./sw.js?v=188')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
