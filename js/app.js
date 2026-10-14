@@ -221,6 +221,7 @@
 
 
         // GLOBAL APP STATE
+        let selectedSplits = ['full_body'];
         let selectedSplit = 'full_body';
         let selectedEquipments = ['dumbbell', 'kettlebell', 'bodyweight'];
         let currentGeneratedWorkout = null;
@@ -357,20 +358,33 @@
 
         // ==================== WORKOUT GENERATOR ENGINE ====================
         const SPLIT_METAS = {
-            full_body: { name: "Tüm Vücut (Full Body)", icon: "⚡" },
-            upper_push: { name: "Üst İtiş (Push)", icon: "🛡️" },
-            upper_pull: { name: "Üst Çekiş (Pull)", icon: "⚔️" },
-            lower: { name: "Alt Vücut & Bacak", icon: "🦵" },
-            upper: { name: "Tüm Üst Vücut", icon: "🦅" },
-            core: { name: "Karın & Core Zırhı", icon: "🧱" },
-            functional: { name: "Fonksiyonel Fitness & Kondisyon", icon: "⚡" }
+            full_body: { name: "Tüm Vücut (Full Body)", shortName: "Tüm Vücut", icon: "⚡" },
+            upper_push: { name: "Üst İtiş (Push)", shortName: "İtiş", icon: "🛡️" },
+            upper_pull: { name: "Üst Çekiş (Pull)", shortName: "Çekiş", icon: "⚔️" },
+            lower: { name: "Alt Vücut & Bacak", shortName: "Bacak", icon: "🦵" },
+            upper: { name: "Tüm Üst Vücut", shortName: "Üst Vücut", icon: "🦅" },
+            core: { name: "Karın & Core Zırhı", shortName: "Core", icon: "🧱" },
+            functional: { name: "Fonksiyonel Fitness & Kondisyon", shortName: "Fonksiyonel", icon: "⚡" }
         };
 
         function updateSelectedSplitLabel() {
             const el = document.getElementById('selectedSplitLabel');
             if (!el) return;
-            const meta = SPLIT_METAS[selectedSplit] || { name: selectedSplit, icon: "⚡" };
-            el.innerHTML = `${meta.icon} ${meta.name}`;
+            if (!selectedSplits || selectedSplits.length === 0) {
+                el.innerText = '⚠️ Seçilmedi';
+                return;
+            }
+            if (selectedSplits.length === 1) {
+                const s = selectedSplits[0];
+                const meta = SPLIT_METAS[s] || { name: s, icon: "⚡" };
+                el.innerHTML = `${meta.icon} ${meta.name}`;
+            } else {
+                const names = selectedSplits.map(s => {
+                    const m = SPLIT_METAS[s];
+                    return m ? `${m.icon} ${m.shortName || m.name}` : s;
+                });
+                el.innerHTML = `${names.join(', ')} (${selectedSplits.length} Bölge)`;
+            }
         }
 
         function updateSelectedEquipLabel() {
@@ -425,20 +439,60 @@
             if (arrow) arrow.classList.remove('arrow-up');
         }
 
+        function renderSplitCards() {
+            document.querySelectorAll('#splitGrid .split-card').forEach(card => {
+                const onclickVal = card.getAttribute('onclick') || '';
+                const match = onclickVal.match(/'([^']+)'/);
+                if (match) {
+                    const splitKey = match[1];
+                    const isSelected = selectedSplits.includes(splitKey);
+                    card.classList.toggle('selected', isSelected);
+                }
+            });
+        }
+
+        function toggleSplit(split) {
+            if (split === 'full_body') {
+                selectedSplits = ['full_body'];
+            } else {
+                const fbIdx = selectedSplits.indexOf('full_body');
+                if (fbIdx > -1) {
+                    selectedSplits.splice(fbIdx, 1);
+                }
+
+                const idx = selectedSplits.indexOf(split);
+                if (idx > -1) {
+                    if (selectedSplits.length === 1) {
+                        selectedSplits = ['full_body'];
+                    } else {
+                        selectedSplits.splice(idx, 1);
+                    }
+                } else {
+                    selectedSplits.push(split);
+                }
+            }
+            selectedSplit = selectedSplits[0] || 'full_body';
+            renderSplitCards();
+            updateSelectedSplitLabel();
+        }
+
+        function selectSplit(split) {
+            if (Array.isArray(split)) {
+                selectedSplits = split.length > 0 ? split : ['full_body'];
+            } else if (typeof split === 'string') {
+                selectedSplits = [split];
+            }
+            selectedSplit = selectedSplits[0] || 'full_body';
+            renderSplitCards();
+            updateSelectedSplitLabel();
+        }
+
         window.toggleGenSection = toggleGenSection;
         window.closeGenSection = closeGenSection;
         window.updateSelectedParamLabel = updateSelectedParamLabel;
-
-        function selectSplit(split) {
-            selectedSplit = split;
-            document.querySelectorAll('#splitGrid .split-card').forEach(card => {
-                card.classList.toggle('selected', card.getAttribute('onclick').includes(split));
-            });
-            updateSelectedSplitLabel();
-            if (window.innerWidth <= 768) {
-                closeGenSection('splitSection');
-            }
-        }
+        window.toggleSplit = toggleSplit;
+        window.selectSplit = selectSplit;
+        window.renderSplitCards = renderSplitCards;
 
         function toggleEquip(eq) {
             const idx = selectedEquipments.indexOf(eq);
@@ -1181,201 +1235,287 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             }
 
             // ==================== DOKTRİN BAZLI EGZERSİZ DİZİLİM MİMARİSİ ====================
-            if (activeDoctrineKey === 'bb_pure') {
-                // 1. SAF BODYBUILDING (Yalnızca Hipertrofi Bileşikleri & İzole Kas Tecritleri)
-                if (selectedSplit === 'full_body') {
-                    addEx('legs_quad', 'bb_compound');
-                    addEx('pull', 'bb_compound');
-                    addEx('legs_hinge', 'bb_compound');
-                    addEx('push', 'bb_compound');
-                    if (duration >= 45) {
-                        addEx('push', 'bb_isolation');
-                        addEx('pull', 'bb_isolation');
+            function getExercisesForSplitSlot(splitKey, roundIndex, doctrineKey) {
+                if (splitKey === 'upper_push') {
+                    if (doctrineKey === 'bb_pure') {
+                        return roundIndex === 0 ? { cat: 'push', mode: 'bb_compound' } : { cat: 'push', mode: 'bb_isolation' };
+                    } else if (doctrineKey === 'bb_hybrid') {
+                        if (roundIndex === 0) return { cat: 'push', mode: 'bb_compound' };
+                        if (roundIndex === 1) return { cat: 'push', mode: 'bb_isolation' };
+                        return { cat: ['conditioning', 'push'], mode: 'functional' };
+                    } else if (doctrineKey === 'balanced_hybrid') {
+                        return roundIndex % 2 === 0 ? { cat: 'push', mode: 'bb_compound' } : { cat: ['push', 'conditioning'], mode: 'functional' };
+                    } else {
+                        return { cat: ['push', 'legs_quad'], mode: 'functional' };
                     }
-                    if (duration >= 60) {
-                        addEx('core', 'any');
-                        addEx('legs_quad', 'bb_isolation');
+                } else if (splitKey === 'upper_pull') {
+                    if (doctrineKey === 'bb_pure') {
+                        return roundIndex === 0 ? { cat: 'pull', mode: 'bb_compound' } : { cat: 'pull', mode: 'bb_isolation' };
+                    } else if (doctrineKey === 'bb_hybrid') {
+                        if (roundIndex === 0) return { cat: 'pull', mode: 'bb_compound' };
+                        if (roundIndex === 1) return { cat: 'pull', mode: 'bb_isolation' };
+                        return { cat: ['legs_hinge', 'pull'], mode: 'functional' };
+                    } else if (doctrineKey === 'balanced_hybrid') {
+                        return roundIndex % 2 === 0 ? { cat: 'pull', mode: 'bb_compound' } : { cat: ['legs_hinge', 'pull'], mode: 'functional' };
+                    } else {
+                        return { cat: ['pull', 'legs_hinge'], mode: 'functional' };
                     }
-                } else if (selectedSplit === 'upper_push') {
-                    addEx('push', 'bb_compound');
-                    addEx('push', 'bb_compound');
-                    addEx('push', 'bb_isolation');
-                    addEx('push', 'bb_isolation');
-                    if (duration >= 45) {
-                        addEx('push', 'bb_isolation');
-                        addEx('core', 'any');
+                } else if (splitKey === 'lower') {
+                    if (doctrineKey === 'bb_pure') {
+                        return roundIndex % 2 === 0 ? { cat: 'legs_quad', mode: 'bb_compound' } : { cat: 'legs_hinge', mode: 'bb_compound' };
+                    } else if (doctrineKey === 'bb_hybrid') {
+                        if (roundIndex === 0) return { cat: 'legs_quad', mode: 'bb_compound' };
+                        if (roundIndex === 1) return { cat: 'legs_hinge', mode: 'bb_compound' };
+                        return { cat: ['conditioning', 'legs_hinge'], mode: 'functional' };
+                    } else if (doctrineKey === 'balanced_hybrid') {
+                        return roundIndex % 2 === 0 ? { cat: 'legs_quad', mode: 'bb_compound' } : { cat: ['legs_hinge', 'conditioning'], mode: 'functional' };
+                    } else {
+                        return { cat: ['legs_quad', 'conditioning'], mode: 'functional' };
                     }
-                    if (duration >= 60) {
-                        addEx('push', 'bb_isolation');
-                        addEx('core', 'any');
+                } else if (splitKey === 'upper') {
+                    if (doctrineKey === 'bb_pure') {
+                        return roundIndex % 2 === 0 ? { cat: 'push', mode: 'bb_compound' } : { cat: 'pull', mode: 'bb_compound' };
+                    } else if (doctrineKey === 'bb_hybrid') {
+                        if (roundIndex === 0) return { cat: 'push', mode: 'bb_compound' };
+                        if (roundIndex === 1) return { cat: 'pull', mode: 'bb_compound' };
+                        return { cat: ['conditioning', 'pull'], mode: 'functional' };
+                    } else {
+                        return roundIndex % 2 === 0 ? { cat: 'push', mode: 'functional' } : { cat: 'pull', mode: 'functional' };
                     }
-                } else if (selectedSplit === 'upper_pull') {
-                    addEx('pull', 'bb_compound');
-                    addEx('pull', 'bb_compound');
-                    addEx('pull', 'bb_isolation');
-                    addEx('legs_hinge', 'bb_compound');
-                    if (duration >= 45) {
-                        addEx('pull', 'bb_isolation');
-                        addEx('core', 'any');
-                    }
-                    if (duration >= 60) {
-                        addEx('pull', 'bb_isolation');
-                        addEx('core', 'any');
-                    }
-                } else if (selectedSplit === 'lower') {
-                    addEx('legs_quad', 'bb_compound');
-                    addEx('legs_hinge', 'bb_compound');
-                    addEx('legs_quad', 'bb_isolation');
-                    addEx('legs_hinge', 'bb_isolation');
-                    if (duration >= 45) {
-                        addEx('legs_quad', 'bb_isolation');
-                        addEx('core', 'any');
-                    }
-                    if (duration >= 60) {
-                        addEx('legs_hinge', 'bb_isolation');
-                        addEx('core', 'any');
-                    }
-                } else {
-                    addEx('push', 'bb_compound');
-                    addEx('pull', 'bb_compound');
-                    addEx('push', 'bb_isolation');
-                    addEx('pull', 'bb_isolation');
-                    if (duration >= 45) { addEx('core', 'any'); addEx('core', 'any'); }
+                } else if (splitKey === 'core') {
+                    return { cat: 'core', mode: (doctrineKey === 'bb_pure' ? 'any' : 'functional') };
+                } else if (splitKey === 'functional') {
+                    return { cat: ['conditioning', 'push', 'pull', 'legs_quad', 'legs_hinge'], mode: 'functional' };
+                } else { // full_body
+                    const fbCats = ['legs_quad', 'push', 'pull', 'legs_hinge', 'core'];
+                    const chosenCat = fbCats[roundIndex % fbCats.length];
+                    return { cat: chosenCat, mode: doctrineKey === 'bb_pure' ? 'bb_compound' : 'any' };
                 }
+            }
 
-            } else if (activeDoctrineKey === 'bb_hybrid') {
-                // 2. BB-DOMINANT HİBRİT (%70 Hipertrofi + %30 Fonksiyonel Kondisyon)
-                if (selectedSplit === 'full_body') {
-                    addEx('legs_quad', 'bb_compound');
-                    addEx('pull', 'bb_compound');
-                    addEx('legs_hinge', 'bb_compound');
-                    addEx('push', 'bb_compound');
-                    if (duration >= 45) {
-                        // Fonksiyonel Kettlebell / Kondisyon Bloğu
-                        addEx(['conditioning', 'legs_hinge', 'pull'], 'functional');
-                        addEx('core', 'functional');
+            if (selectedSplits.length > 1) {
+                // ÇOKLU BÖLGE SEÇİMİ: Hedef süreye göre seçilen bölgeler arasında dengeli dağıtım
+                const targetCount = duration >= 60 ? 8 : (duration >= 45 ? 6 : 4);
+                let roundIndex = 0;
+                while (chosenExercises.length < targetCount && roundIndex < 10) {
+                    for (let sIdx = 0; sIdx < selectedSplits.length && chosenExercises.length < targetCount; sIdx++) {
+                        const splitKey = selectedSplits[sIdx];
+                        const spec = getExercisesForSplitSlot(splitKey, roundIndex, activeDoctrineKey);
+                        addEx(spec.cat, spec.mode);
                     }
-                    if (duration >= 60) {
-                        addEx('push', 'bb_isolation');
-                        addEx(['conditioning', 'legs_quad'], 'functional');
-                    }
-                } else if (selectedSplit === 'upper_push') {
-                    addEx('push', 'bb_compound');
-                    addEx('push', 'bb_compound');
-                    addEx('push', 'bb_isolation');
-                    addEx(['conditioning', 'push'], 'functional'); // Thruster veya push press
-                    if (duration >= 45) {
-                        addEx('push', 'bb_isolation');
-                        addEx('core', 'functional');
-                    }
-                    if (duration >= 60) {
-                        addEx('push', 'bb_isolation');
-                        addEx(['conditioning', 'core'], 'functional');
-                    }
-                } else if (selectedSplit === 'upper_pull') {
-                    addEx('pull', 'bb_compound');
-                    addEx('pull', 'bb_compound');
-                    addEx('pull', 'bb_isolation');
-                    addEx(['legs_hinge', 'pull'], 'functional'); // Gorilla row veya swing
-                    if (duration >= 45) {
-                        addEx('pull', 'bb_isolation');
-                        addEx('core', 'functional');
-                    }
-                    if (duration >= 60) {
-                        addEx(['conditioning', 'pull'], 'functional');
-                        addEx('core', 'functional');
-                    }
-                } else if (selectedSplit === 'lower') {
-                    addEx('legs_quad', 'bb_compound');
-                    addEx('legs_hinge', 'bb_compound');
-                    addEx('legs_quad', 'bb_isolation');
-                    addEx(['conditioning', 'legs_hinge'], 'functional'); // Swing / Goblet
-                    if (duration >= 45) {
-                        addEx('legs_hinge', 'bb_isolation');
-                        addEx('core', 'functional');
-                    }
-                    if (duration >= 60) {
-                        addEx(['conditioning', 'legs_quad'], 'functional');
-                        addEx('core', 'functional');
-                    }
-                } else {
-                    addEx('push', 'bb_compound');
-                    addEx('pull', 'bb_compound');
-                    addEx('push', 'bb_isolation');
-                    addEx(['conditioning', 'pull'], 'functional');
-                    if (duration >= 45) { addEx('core', 'functional'); addEx('pull', 'bb_isolation'); }
+                    roundIndex++;
                 }
-
-            } else if (activeDoctrineKey === 'balanced_hybrid') {
-                // 3. DENGELİ HİBRİT ATLET (50/50 Eşit: 1 Hipertrofi + 1 Fonksiyonel Süperset)
-                if (selectedSplit === 'full_body') {
-                    addEx('legs_quad', 'bb_compound');
-                    addEx(['pull', 'legs_hinge'], 'functional'); // Swing / Clean
-                    addEx('push', 'bb_compound');
-                    addEx(['conditioning', 'legs_quad'], 'functional'); // Thruster / Manmaker
-                    if (duration >= 45) {
+                while (chosenExercises.length < targetCount) {
+                    const fallbackSplit = selectedSplits[chosenExercises.length % selectedSplits.length];
+                    const spec = getExercisesForSplitSlot(fallbackSplit, 0, activeDoctrineKey);
+                    const beforeLen = chosenExercises.length;
+                    addEx(spec.cat, 'any');
+                    if (chosenExercises.length === beforeLen) break;
+                }
+            } else if (selectedSplits.length === 1 && selectedSplits[0] === 'core') {
+                // Tek Bölge: Sırf Core
+                const targetCount = duration >= 60 ? 8 : (duration >= 45 ? 6 : 4);
+                for (let i = 0; i < targetCount; i++) {
+                    addEx('core', activeDoctrineKey === 'bb_pure' ? 'any' : 'functional');
+                }
+            } else {
+                const effectiveSplit = selectedSplits[0] || 'full_body';
+                if (activeDoctrineKey === 'bb_pure') {
+                    // 1. SAF BODYBUILDING (Yalnızca Hipertrofi Bileşikleri & İzole Kas Tecritleri)
+                    if (effectiveSplit === 'full_body') {
+                        addEx('legs_quad', 'bb_compound');
                         addEx('pull', 'bb_compound');
-                        addEx('core', 'functional'); // Carry / Rotation
-                    }
-                    if (duration >= 60) {
+                        addEx('legs_hinge', 'bb_compound');
+                        addEx('push', 'bb_compound');
+                        if (duration >= 45) {
+                            addEx('push', 'bb_isolation');
+                            addEx('pull', 'bb_isolation');
+                        }
+                        if (duration >= 60) {
+                            addEx('core', 'any');
+                            addEx('legs_quad', 'bb_isolation');
+                        }
+                    } else if (effectiveSplit === 'upper_push') {
+                        addEx('push', 'bb_compound');
+                        addEx('push', 'bb_compound');
                         addEx('push', 'bb_isolation');
-                        addEx(['conditioning', 'legs_hinge'], 'functional');
+                        addEx('push', 'bb_isolation');
+                        if (duration >= 45) {
+                            addEx('push', 'bb_isolation');
+                            addEx('core', 'any');
+                        }
+                        if (duration >= 60) {
+                            addEx('push', 'bb_isolation');
+                            addEx('core', 'any');
+                        }
+                    } else if (effectiveSplit === 'upper_pull') {
+                        addEx('pull', 'bb_compound');
+                        addEx('pull', 'bb_compound');
+                        addEx('pull', 'bb_isolation');
+                        addEx('legs_hinge', 'bb_compound');
+                        if (duration >= 45) {
+                            addEx('pull', 'bb_isolation');
+                            addEx('core', 'any');
+                        }
+                        if (duration >= 60) {
+                            addEx('pull', 'bb_isolation');
+                            addEx('core', 'any');
+                        }
+                    } else if (effectiveSplit === 'lower') {
+                        addEx('legs_quad', 'bb_compound');
+                        addEx('legs_hinge', 'bb_compound');
+                        addEx('legs_quad', 'bb_isolation');
+                        addEx('legs_hinge', 'bb_isolation');
+                        if (duration >= 45) {
+                            addEx('legs_quad', 'bb_isolation');
+                            addEx('core', 'any');
+                        }
+                        if (duration >= 60) {
+                            addEx('legs_hinge', 'bb_isolation');
+                            addEx('core', 'any');
+                        }
+                    } else {
+                        addEx('push', 'bb_compound');
+                        addEx('pull', 'bb_compound');
+                        addEx('push', 'bb_isolation');
+                        addEx('pull', 'bb_isolation');
+                        if (duration >= 45) { addEx('core', 'any'); addEx('core', 'any'); }
                     }
-                } else if (selectedSplit === 'upper_push') {
-                    addEx('push', 'bb_compound');
-                    addEx(['push', 'conditioning'], 'functional');
-                    addEx('push', 'bb_isolation');
-                    addEx('core', 'functional');
-                    if (duration >= 45) {
+
+                } else if (activeDoctrineKey === 'bb_hybrid') {
+                    // 2. BB-DOMINANT HİBRİT (%70 Hipertrofi + %30 Fonksiyonel Kondisyon)
+                    if (effectiveSplit === 'full_body') {
+                        addEx('legs_quad', 'bb_compound');
+                        addEx('pull', 'bb_compound');
+                        addEx('legs_hinge', 'bb_compound');
+                        addEx('push', 'bb_compound');
+                        if (duration >= 45) {
+                            // Fonksiyonel Kettlebell / Kondisyon Bloğu
+                            addEx(['conditioning', 'legs_hinge', 'pull'], 'functional');
+                            addEx('core', 'functional');
+                        }
+                        if (duration >= 60) {
+                            addEx('push', 'bb_isolation');
+                            addEx(['conditioning', 'legs_quad'], 'functional');
+                        }
+                    } else if (effectiveSplit === 'upper_push') {
+                        addEx('push', 'bb_compound');
+                        addEx('push', 'bb_compound');
+                        addEx('push', 'bb_isolation');
+                        addEx(['conditioning', 'push'], 'functional'); // Thruster veya push press
+                        if (duration >= 45) {
+                            addEx('push', 'bb_isolation');
+                            addEx('core', 'functional');
+                        }
+                        if (duration >= 60) {
+                            addEx('push', 'bb_isolation');
+                            addEx(['conditioning', 'core'], 'functional');
+                        }
+                    } else if (effectiveSplit === 'upper_pull') {
+                        addEx('pull', 'bb_compound');
+                        addEx('pull', 'bb_compound');
+                        addEx('pull', 'bb_isolation');
+                        addEx(['legs_hinge', 'pull'], 'functional'); // Gorilla row veya swing
+                        if (duration >= 45) {
+                            addEx('pull', 'bb_isolation');
+                            addEx('core', 'functional');
+                        }
+                        if (duration >= 60) {
+                            addEx(['conditioning', 'pull'], 'functional');
+                            addEx('core', 'functional');
+                        }
+                    } else if (effectiveSplit === 'lower') {
+                        addEx('legs_quad', 'bb_compound');
+                        addEx('legs_hinge', 'bb_compound');
+                        addEx('legs_quad', 'bb_isolation');
+                        addEx(['conditioning', 'legs_hinge'], 'functional'); // Swing / Goblet
+                        if (duration >= 45) {
+                            addEx('legs_hinge', 'bb_isolation');
+                            addEx('core', 'functional');
+                        }
+                        if (duration >= 60) {
+                            addEx(['conditioning', 'legs_quad'], 'functional');
+                            addEx('core', 'functional');
+                        }
+                    } else {
+                        addEx('push', 'bb_compound');
+                        addEx('pull', 'bb_compound');
+                        addEx('push', 'bb_isolation');
+                        addEx(['conditioning', 'pull'], 'functional');
+                        if (duration >= 45) { addEx('core', 'functional'); addEx('pull', 'bb_isolation'); }
+                    }
+
+                } else if (activeDoctrineKey === 'balanced_hybrid') {
+                    // 3. DENGELİ HİBRİT ATLET (50/50 Eşit: 1 Hipertrofi + 1 Fonksiyonel Süperset)
+                    if (effectiveSplit === 'full_body') {
+                        addEx('legs_quad', 'bb_compound');
+                        addEx(['pull', 'legs_hinge'], 'functional'); // Swing / Clean
+                        addEx('push', 'bb_compound');
+                        addEx(['conditioning', 'legs_quad'], 'functional'); // Thruster / Manmaker
+                        if (duration >= 45) {
+                            addEx('pull', 'bb_compound');
+                            addEx('core', 'functional'); // Carry / Rotation
+                        }
+                        if (duration >= 60) {
+                            addEx('push', 'bb_isolation');
+                            addEx(['conditioning', 'legs_hinge'], 'functional');
+                        }
+                    } else if (effectiveSplit === 'upper_push') {
+                        addEx('push', 'bb_compound');
+                        addEx(['push', 'conditioning'], 'functional');
+                        addEx('push', 'bb_isolation');
+                        addEx('core', 'functional');
+                        if (duration >= 45) {
+                            addEx('push', 'bb_compound');
+                            addEx('core', 'functional');
+                        }
+                    } else if (effectiveSplit === 'upper_pull') {
+                        addEx('pull', 'bb_compound');
+                        addEx(['legs_hinge', 'pull'], 'functional');
+                        addEx('pull', 'bb_isolation');
+                        addEx('core', 'functional');
+                        if (duration >= 45) {
+                            addEx('pull', 'bb_compound');
+                            addEx(['conditioning', 'pull'], 'functional');
+                        }
+                    } else {
+                        addEx('legs_quad', 'bb_compound');
+                        addEx(['legs_hinge', 'conditioning'], 'functional');
                         addEx('push', 'bb_compound');
                         addEx('core', 'functional');
+                        if (duration >= 45) { addEx('pull', 'bb_compound'); addEx(['conditioning', 'legs_quad'], 'functional'); }
                     }
-                } else if (selectedSplit === 'upper_pull') {
-                    addEx('pull', 'bb_compound');
-                    addEx(['legs_hinge', 'pull'], 'functional');
-                    addEx('pull', 'bb_isolation');
-                    addEx('core', 'functional');
+
+                } else if (activeDoctrineKey === 'func_hybrid') {
+                    // 4. FONKSİYONEL-DOMİNANT HİBRİT (%70 Fonksiyonel + %30 Zayıf Bölge Kas İğnesi)
+                    addEx(['push', 'legs_quad'], 'functional'); // Thruster / Push Press
+                    addEx(['pull', 'legs_hinge'], 'functional'); // Clean & Press / Swing
+                    addEx('core', 'functional'); // Carries / Rotations
+                    addEx(['legs_quad', 'conditioning'], 'functional'); // Manmaker / Burpee
                     if (duration >= 45) {
-                        addEx('pull', 'bb_compound');
-                        addEx(['conditioning', 'pull'], 'functional');
+                        // Kas İğnesi (Hypertrophy Boost)
+                        addEx(['push', 'pull'], 'bb_isolation');
+                        addEx('core', 'functional');
                     }
+                    if (duration >= 60) {
+                        addEx(['push', 'pull'], 'bb_isolation');
+                        addEx(['conditioning', 'legs_hinge'], 'functional');
+                    }
+
                 } else {
-                    addEx('legs_quad', 'bb_compound');
-                    addEx(['legs_hinge', 'conditioning'], 'functional');
-                    addEx('push', 'bb_compound');
+                    // 5. SAF FONKSİYONEL FITNESS & KONDİSYON
+                    addEx(['push', 'legs_quad'], 'functional');
+                    addEx(['pull', 'legs_hinge'], 'functional');
                     addEx('core', 'functional');
-                    if (duration >= 45) { addEx('pull', 'bb_compound'); addEx(['conditioning', 'legs_quad'], 'functional'); }
-                }
-
-            } else if (activeDoctrineKey === 'func_hybrid') {
-                // 4. FONKSİYONEL-DOMİNANT HİBRİT (%70 Fonksiyonel + %30 Zayıf Bölge Kas İğnesi)
-                addEx(['push', 'legs_quad'], 'functional'); // Thruster / Push Press
-                addEx(['pull', 'legs_hinge'], 'functional'); // Clean & Press / Swing
-                addEx('core', 'functional'); // Carries / Rotations
-                addEx(['legs_quad', 'conditioning'], 'functional'); // Manmaker / Burpee
-                if (duration >= 45) {
-                    // Kas İğnesi (Hypertrophy Boost)
-                    addEx(['push', 'pull'], 'bb_isolation');
-                    addEx('core', 'functional');
-                }
-                if (duration >= 60) {
-                    addEx(['push', 'pull'], 'bb_isolation');
-                    addEx(['conditioning', 'legs_hinge'], 'functional');
-                }
-
-            } else {
-                // 5. SAF FONKSİYONEL FITNESS & KONDİSYON
-                addEx(['push', 'legs_quad'], 'functional');
-                addEx(['pull', 'legs_hinge'], 'functional');
-                addEx('core', 'functional');
-                addEx(['legs_quad', 'conditioning'], 'functional');
-                if (duration >= 45) {
-                    addEx('core', 'functional');
-                    addEx(['pull', 'push'], 'functional');
-                }
-                if (duration >= 60) {
-                    addEx(['conditioning', 'core'], 'functional');
-                    addEx(['legs_hinge', 'conditioning'], 'functional');
+                    addEx(['legs_quad', 'conditioning'], 'functional');
+                    if (duration >= 45) {
+                        addEx('core', 'functional');
+                        addEx(['pull', 'push'], 'functional');
+                    }
+                    if (duration >= 60) {
+                        addEx(['conditioning', 'core'], 'functional');
+                        addEx(['legs_hinge', 'conditioning'], 'functional');
+                    }
                 }
             }
 
@@ -1402,11 +1542,29 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 functional: "Fonksiyonel Fitness & Kondisyon"
             };
 
+            const splitShortNames = {
+                full_body: "Tüm Vücut",
+                upper_push: "İtiş",
+                upper_pull: "Çekiş",
+                lower: "Bacak",
+                upper: "Üst Vücut",
+                core: "Core",
+                functional: "Fonksiyonel"
+            };
+
+            let generatedSplitTitle = '';
+            if (selectedSplits.length === 1) {
+                generatedSplitTitle = splitNames[selectedSplits[0]] || selectedSplits[0];
+            } else {
+                generatedSplitTitle = selectedSplits.map(s => splitShortNames[s] || s).join(' + ');
+            }
+
             currentGeneratedWorkout = {
                 id: 'gen_' + Date.now(),
-                title: `${activeDoc.name} • ${splitNames[selectedSplit]}`,
-                split: selectedSplit,
-                splitName: splitNames[selectedSplit],
+                title: `${activeDoc.name} • ${generatedSplitTitle}`,
+                split: selectedSplits.length === 1 ? selectedSplits[0] : 'custom',
+                splits: [...selectedSplits],
+                splitName: generatedSplitTitle,
                 doctrine: activeDoctrineKey,
                 doctrineName: activeDoc.name,
                 doctrineShort: activeDoc.shortTag,
@@ -15525,7 +15683,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=184')
+                navigator.serviceWorker.register('./sw.js?v=185')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et

@@ -37,7 +37,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v184</div>
+            <div class="badge-brand">LA FORJA • EL CÓDIGO DEL ACERO • v185</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -73,7 +73,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v184</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v185</span>
                 </div>
                 <div class="modern-bar-actions" style="position: relative;">
                     <div class="modern-user-badge" onclick="if(window.innerWidth <= 768){ openMoreSheet(); } else { switchTab('profileTab'); }" title="Profil & Menü">
@@ -171,64 +171,64 @@
 
                 <div class="generator-card">
                     
-                    <!-- STEP 1: MUSCLE SPLIT -->
+                    <!-- STEP 1: MUSCLE SPLIT (MULTI-SELECT) -->
                     <div class="gen-mobile-picker-bar" id="mobileSplitPickerBar" onclick="toggleGenSection('splitSection')">
                         <div class="picker-label-wrap">
                             <span class="gen-step-badge">1</span>
-                            <span class="picker-step-title">Hedef Bölge:</span>
+                            <span class="picker-step-title">Bölge:</span>
                             <span class="picker-selected-val" id="selectedSplitLabel">⚡ Tüm Vücut (Full Body)</span>
                         </div>
                         <span class="picker-arrow" id="splitPickerArrow">▼</span>
                     </div>
                     <div class="gen-step-title desktop-only-title">
                         <span class="gen-step-badge">1</span>
-                        <span>Hangi Bölgeyi Çalıştıracağız?</span>
+                        <span>Bölge</span>
                     </div>
                     <div class="gen-collapsible-section" id="splitSection">
                         <div class="split-grid" id="splitGrid">
-                            <div class="split-card selected" onclick="selectSplit('full_body')">
+                            <div class="split-card selected" onclick="toggleSplit('full_body')">
                                 <div class="split-card-content">
                                     <span class="split-icon">⚡</span>
                                     <span class="split-name">Tüm Vücut (Full Body)</span>
                                 </div>
                                 <span class="split-radio">✓</span>
                             </div>
-                            <div class="split-card" onclick="selectSplit('upper_push')">
+                            <div class="split-card" onclick="toggleSplit('upper_push')">
                                 <div class="split-card-content">
                                     <span class="split-icon">🛡️</span>
                                     <span class="split-name">Üst İtiş (Push)</span>
                                 </div>
                                 <span class="split-radio">✓</span>
                             </div>
-                            <div class="split-card" onclick="selectSplit('upper_pull')">
+                            <div class="split-card" onclick="toggleSplit('upper_pull')">
                                 <div class="split-card-content">
                                     <span class="split-icon">⚔️</span>
                                     <span class="split-name">Üst Çekiş (Pull)</span>
                                 </div>
                                 <span class="split-radio">✓</span>
                             </div>
-                            <div class="split-card" onclick="selectSplit('lower')">
+                            <div class="split-card" onclick="toggleSplit('lower')">
                                 <div class="split-card-content">
                                     <span class="split-icon">🦵</span>
                                     <span class="split-name">Alt Vücut & Bacak</span>
                                 </div>
                                 <span class="split-radio">✓</span>
                             </div>
-                            <div class="split-card" onclick="selectSplit('upper')">
+                            <div class="split-card" onclick="toggleSplit('upper')">
                                 <div class="split-card-content">
                                     <span class="split-icon">🦅</span>
                                     <span class="split-name">Tüm Üst Vücut</span>
                                 </div>
                                 <span class="split-radio">✓</span>
                             </div>
-                            <div class="split-card" onclick="selectSplit('core')">
+                            <div class="split-card" onclick="toggleSplit('core')">
                                 <div class="split-card-content">
                                     <span class="split-icon">🧱</span>
                                     <span class="split-name">Karın & Core Zırhı</span>
                                 </div>
                                 <span class="split-radio">✓</span>
                             </div>
-                            <div class="split-card" onclick="selectSplit('functional')">
+                            <div class="split-card" onclick="toggleSplit('functional')">
                                 <div class="split-card-content">
                                     <span class="split-icon">⚡</span>
                                     <span class="split-name">Fonksiyonel Fitness & Kondisyon</span>
