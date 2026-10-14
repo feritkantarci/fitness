@@ -221,7 +221,6 @@ ipcMain.handle('firebase:getUsers', async () => {
 
 ipcMain.handle('firebase:getWorkoutLogs', async (event, uid) => {
     const logs = await firebaseService.fetchWorkoutLogs(uid);
-    subscribeToAthlete(uid);
     return logs;
 });
 

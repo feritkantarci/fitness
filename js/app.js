@@ -7546,6 +7546,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             const normalizeExerciseItem = (e) => {
                 if (!e) return null;
+                if (typeof e === 'string') {
+                    e = { name: e, sets: 3, reps: '8-12' };
+                }
                 const exId = e.id || e.exId;
                 let dbEx = EXERCISES_DB.find(x => x.id === exId);
                 if (!dbEx && (e.name || exId)) {
@@ -8982,14 +8985,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 // 2. Kullanıcıları eşitle
                 await syncUsersFromCloud();
 
-                // 3. Aktif kullanıcının verilerini eşitle
+                // 3. Aktif kullanıcının verilerini eşitle (FitLAB otomatik direktif/program dinleme stabilite için kapalıdır)
                 const uid = getActiveUserId();
                 if (uid) {
                     await syncUserWorkoutLogsFromCloud(uid);
                     await syncUserScaleLogsFromCloud(uid);
                     await syncUserMeasurementsFromCloud(uid);
-                    await syncCoachDirectiveFromCloud(uid);
-                    await syncCustomProgramsFromCloud(uid);
                 }
 
                 updateCloudSyncBadge('synced', 'Bulut Aktif');
@@ -9257,24 +9258,6 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (!isFirebaseReady || !fbDb || !uid) return;
             try {
                 const docRef = fbDb.collection('scale_logs').doc(uid);
-
-                // Canlı dinleyici: FitLAB masaüstünden tartı yüklendiği an telefonda anında yakala
-                if (!scaleLogsLiveUnsub) {
-                    scaleLogsLiveUnsub = docRef.onSnapshot((docSnap) => {
-                        if (docSnap && docSnap.exists) {
-                            const data = docSnap.data();
-                            if (data && Array.isArray(data.logs)) {
-                                localStorage.setItem(`celik_kodu_scale_${uid}`, JSON.stringify(data.logs));
-                                if (typeof renderAnalytics === 'function' && document.getElementById('analyticsModal')?.classList.contains('active')) {
-                                    renderAnalytics();
-                                }
-                            }
-                        }
-                    }, (e) => {
-                        console.warn("scale_logs onSnapshot hatası:", e);
-                    });
-                }
-
                 const doc = await docRef.get();
                 const localLogs = getScaleLogs();
 
@@ -9342,37 +9325,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         // ==================== AKADEMİK KOÇ İSTASYONU KÖPRÜSÜ ====================
         let coachDirectiveLiveUnsub = null;
 
-        async function syncCoachDirectiveFromCloud(uid) {
-            if (!isFirebaseReady || !fbDb || !uid) return;
-            try {
-                const docRef = fbDb.collection('coach_directives').doc(uid);
-
-                // Gerçek zamanlı dinleyici: FitLAB masaüstünden 'Web\'e Gönder' veya 'Bugüne Ata' dendiğinde canlı yakalama
-                if (!coachDirectiveLiveUnsub) {
-                    coachDirectiveLiveUnsub = docRef.onSnapshot((docSnap) => {
-                        if (docSnap && docSnap.exists) {
-                            const data = docSnap.data();
-                            if (data && data.active) {
-                                processIncomingCoachDirective(uid, data);
-                                recoverLostFridayWorkout(uid);
-                            }
-                        }
-                    }, (e) => {
-                        console.warn("Koç Direktifi onSnapshot hatası:", e);
-                    });
-                }
-
-                const docSnap = await docRef.get();
-                if (docSnap.exists) {
-                    const data = docSnap.data();
-                    if (data && data.active) {
-                        processIncomingCoachDirective(uid, data);
-                    }
-                }
-                recoverLostFridayWorkout(uid);
-            } catch(e) {
-                console.warn("Koç direktifi buluttan çekilemedi:", e);
-            }
+        // Web açılışında FitLAB direktiflerini otomatik dinleme/çekme stabilite için kapatıldı
+        async function syncCoachDirectiveFromCloud() {
+            return;
         }
 
         function parseDirectiveWorkout(fullReport, directiveTitle) {
@@ -9874,34 +9829,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         let aiProgramLiveUnsub = null;
 
-        async function syncCustomProgramsFromCloud(uid) {
-            if (!isFirebaseReady || !fbDb || !uid) return;
-            try {
-                const docRef = fbDb.collection('custom_programs').doc(uid);
-                
-                if (!aiProgramLiveUnsub) {
-                    aiProgramLiveUnsub = docRef.onSnapshot((docSnap) => {
-                        if (docSnap && docSnap.exists) {
-                            const data = docSnap.data();
-                            if (data && data.active) {
-                                processIncomingAiProgram(uid, data);
-                            }
-                        }
-                    }, (e) => {
-                        console.warn("AI Program onSnapshot hatası:", e);
-                    });
-                }
-
-                const docSnap = await docRef.get();
-                if (docSnap.exists) {
-                    const data = docSnap.data();
-                    if (data && data.active) {
-                        processIncomingAiProgram(uid, data);
-                    }
-                }
-            } catch(e) {
-                console.warn("AI programı buluttan çekilemedi:", e);
-            }
+        // Web açılışında FitLAB özel programlarını otomatik dinleme/çekme stabilite için kapatıldı
+        async function syncCustomProgramsFromCloud() {
+            return;
         }
 
         function processIncomingAiProgram(uid, data) {
@@ -11227,18 +11157,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         }
 
         function initCalendarLiveSyncOnLoad() {
-            try {
-                if (isGoogleCalendarConnected()) {
-                    const prefs = getCalendarPreferences();
-                    if (prefs.autoSync !== false) {
-                        setTimeout(() => {
-                            syncGoogleCalendarToFitLab().then(() => {
-                                if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
-                            }).catch(() => {});
-                        }, 2500);
-                    }
-                }
-            } catch(e) {}
+            // Açılışta otomatik takvim dinleme/çekme stabilite için kapatıldı
+            return;
         }
 
         // ==================== SMART CALENDAR SCREEN ENGINE (WEEKLY & MONTHLY) ====================
@@ -15850,22 +15770,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=189')
+                navigator.serviceWorker.register('./sw.js?v=190')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
-                        // Yeni sürümü hemen kontrol et
                         if (reg.update) reg.update();
                     })
                     .catch(err => console.log('SW err:', err));
-            });
-
-            // Kullanıcı uygulamaya geri döndüğünde (sekme açıldığında) güncellemeyi anında tara
-            document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState === 'visible') {
-                    navigator.serviceWorker.getRegistration().then(reg => {
-                        if (reg && reg.update) reg.update();
-                    });
-                }
             });
 
             // Yeni SW devraldığında sayfayı yenileyerek güncel içeriği yükle
@@ -15880,13 +15790,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         // INITIALIZE APPLICATION
         window.addEventListener('DOMContentLoaded', () => {
-            fastFetchCloudAiConfig();
             initAuthDatabase();
             initFirebaseEngine();
             syncAppViewState();
-            initCalendarLiveSyncOnLoad();
             applyWednesdayHammerCurlPatch();
-            recoverLostFridayWorkout();
             updateProfileGeminiStatusUI();
             renderAiHybridHeroBanner();
             updateSelectedSplitLabel();
