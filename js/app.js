@@ -15683,13 +15683,22 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=185')
+                navigator.serviceWorker.register('./sw.js?v=186')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
                         if (reg.update) reg.update();
                     })
                     .catch(err => console.log('SW err:', err));
+            });
+
+            // Kullanıcı uygulamaya geri döndüğünde (sekme açıldığında) güncellemeyi anında tara
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    navigator.serviceWorker.getRegistration().then(reg => {
+                        if (reg && reg.update) reg.update();
+                    });
+                }
             });
 
             // Yeni SW devraldığında sayfayı yenileyerek güncel içeriği yükle
