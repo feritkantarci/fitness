@@ -13190,17 +13190,43 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         }
 
         function openMeasurementsModal() {
-            openScaleModal();
+            const todayStr = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('measureDate');
+            if (dateInput && !dateInput.value) dateInput.value = todayStr;
+            const m = document.getElementById('measurementsModal');
+            if (m) m.classList.add('active');
         }
 
         function closeMeasurementsModal() {
-            closeScaleModal();
             const m = document.getElementById('measurementsModal');
             if (m) m.classList.remove('active');
         }
 
         function saveMeasurementsEntry() {
-            saveScaleEntry();
+            const date = document.getElementById('measureDate')?.value || new Date().toISOString().split('T')[0];
+            const waist = parseFloat(document.getElementById('measureWaist')?.value);
+            if (!waist || isNaN(waist)) {
+                alert("Lütfen en azından Bel Çevresi (cm) değerini giriniz.");
+                return;
+            }
+            const entry = {
+                id: 'meas_' + Date.now(),
+                date: date,
+                waist: waist,
+                chest: parseFloat(document.getElementById('measureChest')?.value) || null,
+                shoulder: parseFloat(document.getElementById('measureShoulder')?.value) || null,
+                arms: parseFloat(document.getElementById('measureArms')?.value) || null,
+                thigh: parseFloat(document.getElementById('measureThigh')?.value) || null,
+                hips: parseFloat(document.getElementById('measureHips')?.value) || null,
+                neck: parseFloat(document.getElementById('measureNeck')?.value) || null,
+                notes: document.getElementById('measureNotes')?.value || ''
+            };
+            let logs = getMeasurementsLogs();
+            logs.unshift(entry);
+            setMeasurementsLogs(logs);
+            closeMeasurementsModal();
+            renderAnalytics();
+            alert("✅ Vücut ölçüleri başarıyla kaydedildi!");
         }
 
         function deleteMeasurementsEntry(id) {
@@ -15468,7 +15494,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=180')
+                navigator.serviceWorker.register('./sw.js?v=181')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
