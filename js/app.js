@@ -14029,6 +14029,25 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             };
         }
 
+        let currentSelectedAnatomyMuscle = null;
+
+        function selectAnatomyMuscle(muscleId) {
+            if (currentSelectedAnatomyMuscle === muscleId) {
+                currentSelectedAnatomyMuscle = null;
+            } else {
+                currentSelectedAnatomyMuscle = muscleId;
+            }
+            if (typeof renderAnalytics === 'function') {
+                renderAnalytics();
+            }
+            setTimeout(() => {
+                const card = document.getElementById('anatomyFocusCard');
+                if (card && currentSelectedAnatomyMuscle) {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }, 60);
+        }
+
         function setWeeklyMuscleFilter(filter) {
             currentWeeklyMuscleFilter = filter;
             if (typeof renderAnalytics === 'function') {
@@ -14523,383 +14542,398 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             `;
         }
 
+        function renderAnatomicalBodySVG(muscles, selectedId) {
+            const mMap = {};
+            muscles.forEach(m => { mMap[m.id] = m; });
+
+            const getStyle = (id) => {
+                const m = mMap[id] || { status: 'unworked', effectiveDone: 0 };
+                let fill = 'rgba(239, 68, 68, 0.48)';
+                let stroke = '#ef4444';
+                let animClass = 'muscle-unworked-anim';
+                if (m.status === 'optimal' || m.status === 'high') {
+                    fill = 'rgba(16, 185, 129, 0.58)';
+                    stroke = '#10b981';
+                    animClass = '';
+                } else if (m.status === 'insufficient') {
+                    fill = 'rgba(245, 158, 11, 0.58)';
+                    stroke = '#f59e0b';
+                    animClass = '';
+                }
+                const isSel = (selectedId === id);
+                return {
+                    fill,
+                    stroke,
+                    cls: `anatomy-muscle ${animClass} ${isSel ? 'active-selected' : ''}`,
+                    tooltip: `${m.name || id}: ${m.effectiveDone ? m.effectiveDone.toFixed(1) : 0} Set (${m.statusLabel || m.status})`
+                };
+            };
+
+            const sChest = getStyle('chest');
+            const sBack = getStyle('back');
+            const sShld = getStyle('shoulders');
+            const sBic = getStyle('biceps');
+            const sTri = getStyle('triceps');
+            const sCore = getStyle('core');
+            const sQuads = getStyle('quads');
+            const sHams = getStyle('hamstrings');
+            const sGlut = getStyle('glutes');
+            const sCalf = getStyle('calves');
+
+            return `
+            <svg class="anatomy-svg" viewBox="0 0 540 430" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="bodyBgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#1e293b" stop-opacity="0.3"/>
+                        <stop offset="100%" stop-color="#0f172a" stop-opacity="0.5"/>
+                    </linearGradient>
+                </defs>
+
+                <!-- ==================== FRONT VIEW (ÖN GÖRÜNÜM) ==================== -->
+                <g id="frontBodyView">
+                    <!-- Title -->
+                    <text x="135" y="24" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="800" letter-spacing="0.8">ÖN VÜCUT (ANTERIOR)</text>
+                    
+                    <!-- Head & Neck -->
+                    <circle cx="135" cy="48" r="16" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.2)" stroke-width="1.2"/>
+                    <path d="M 129 63 L 141 63 L 143 74 L 127 74 Z" fill="rgba(255,255,255,0.05)"/>
+
+                    <!-- Forearms / Hands (Front) -->
+                    <path d="M 72 165 C 66 182, 60 205, 56 226 C 60 228, 66 224, 72 208 C 76 194, 78 178, 78 165 Z" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.12)" stroke-width="0.8"/>
+                    <path d="M 198 165 C 204 182, 210 205, 214 226 C 210 228, 204 224, 198 208 C 194 194, 192 178, 192 165 Z" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.12)" stroke-width="0.8"/>
+
+                    <!-- Feet (Front) -->
+                    <ellipse cx="114" cy="410" rx="9" ry="5" fill="rgba(255,255,255,0.06)"/>
+                    <ellipse cx="156" cy="410" rx="9" ry="5" fill="rgba(255,255,255,0.06)"/>
+
+                    <!-- SHOULDERS (Front Delts) -->
+                    <path class="${sShld.cls}" data-muscle="shoulders" onclick="selectAnatomyMuscle('shoulders')" d="M 98 74 C 84 78, 72 90, 74 110 C 78 116, 88 112, 94 102 C 98 92, 100 82, 98 74 Z" fill="${sShld.fill}" stroke="${sShld.stroke}" stroke-width="1.4"><title>${sShld.tooltip}</title></path>
+                    <path class="${sShld.cls}" data-muscle="shoulders" onclick="selectAnatomyMuscle('shoulders')" d="M 172 74 C 186 78, 198 90, 196 110 C 192 116, 182 112, 176 102 C 172 92, 170 82, 172 74 Z" fill="${sShld.fill}" stroke="${sShld.stroke}" stroke-width="1.4"><title>${sShld.tooltip}</title></path>
+
+                    <!-- CHEST (Göğüs) -->
+                    <path class="${sChest.cls}" data-muscle="chest" onclick="selectAnatomyMuscle('chest')" d="M 102 78 C 114 74, 131 76, 133 90 C 133 112, 108 120, 96 108 C 92 96, 94 84, 102 78 Z" fill="${sChest.fill}" stroke="${sChest.stroke}" stroke-width="1.5"><title>${sChest.tooltip}</title></path>
+                    <path class="${sChest.cls}" data-muscle="chest" onclick="selectAnatomyMuscle('chest')" d="M 168 78 C 156 74, 139 76, 137 90 C 137 112, 162 120, 174 108 C 178 96, 176 84, 168 78 Z" fill="${sChest.fill}" stroke="${sChest.stroke}" stroke-width="1.5"><title>${sChest.tooltip}</title></path>
+
+                    <!-- BICEPS (Front Arms) -->
+                    <path class="${sBic.cls}" data-muscle="biceps" onclick="selectAnatomyMuscle('biceps')" d="M 73 114 C 65 128, 67 150, 75 162 C 82 160, 85 146, 84 132 C 83 120, 78 116, 73 114 Z" fill="${sBic.fill}" stroke="${sBic.stroke}" stroke-width="1.3"><title>${sBic.tooltip}</title></path>
+                    <path class="${sBic.cls}" data-muscle="biceps" onclick="selectAnatomyMuscle('biceps')" d="M 197 114 C 205 128, 203 150, 195 162 C 188 160, 185 146, 186 132 C 187 120, 192 116, 197 114 Z" fill="${sBic.fill}" stroke="${sBic.stroke}" stroke-width="1.3"><title>${sBic.tooltip}</title></path>
+
+                    <!-- CORE (Karın & Abdominals) -->
+                    <path class="${sCore.cls}" data-muscle="core" onclick="selectAnatomyMuscle('core')" d="M 112 114 C 122 110, 148 110, 158 114 C 156 148, 152 182, 146 208 C 140 211, 130 211, 124 208 C 118 182, 114 148, 112 114 Z" fill="${sCore.fill}" stroke="${sCore.stroke}" stroke-width="1.4"><title>${sCore.tooltip}</title></path>
+                    <!-- Core Inner divisions (subtle sixpack lines) -->
+                    <line x1="135" y1="116" x2="135" y2="204" stroke="rgba(0,0,0,0.35)" stroke-width="1.2" pointer-events="none"/>
+                    <line x1="120" y1="144" x2="150" y2="144" stroke="rgba(0,0,0,0.35)" stroke-width="1" pointer-events="none"/>
+                    <line x1="122" y1="174" x2="148" y2="174" stroke="rgba(0,0,0,0.35)" stroke-width="1" pointer-events="none"/>
+
+                    <!-- QUADS (Ön Bacak) -->
+                    <path class="${sQuads.cls}" data-muscle="quads" onclick="selectAnatomyMuscle('quads')" d="M 102 216 C 112 210, 131 210, 132 218 C 134 252, 130 294, 124 318 C 112 318, 102 310, 98 280 C 96 254, 96 228, 102 216 Z" fill="${sQuads.fill}" stroke="${sQuads.stroke}" stroke-width="1.4"><title>${sQuads.tooltip}</title></path>
+                    <path class="${sQuads.cls}" data-muscle="quads" onclick="selectAnatomyMuscle('quads')" d="M 168 216 C 158 210, 139 210, 138 218 C 136 252, 140 294, 146 318 C 158 318, 168 310, 172 280 C 174 254, 174 228, 168 216 Z" fill="${sQuads.fill}" stroke="${sQuads.stroke}" stroke-width="1.4"><title>${sQuads.tooltip}</title></path>
+
+                    <!-- Knees (Front) -->
+                    <circle cx="114" cy="325" r="4.5" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
+                    <circle cx="156" cy="325" r="4.5" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
+
+                    <!-- CALVES (Front Shins / Calves) -->
+                    <path class="${sCalf.cls}" data-muscle="calves" onclick="selectAnatomyMuscle('calves')" d="M 106 334 C 100 346, 102 374, 110 398 C 120 398, 124 384, 124 368 C 124 350, 120 336, 106 334 Z" fill="${sCalf.fill}" stroke="${sCalf.stroke}" stroke-width="1.3"><title>${sCalf.tooltip}</title></path>
+                    <path class="${sCalf.cls}" data-muscle="calves" onclick="selectAnatomyMuscle('calves')" d="M 164 334 C 170 346, 168 374, 160 398 C 150 398, 146 384, 146 368 C 146 350, 150 336, 164 334 Z" fill="${sCalf.fill}" stroke="${sCalf.stroke}" stroke-width="1.3"><title>${sCalf.tooltip}</title></path>
+                </g>
+
+                <!-- Center Divider -->
+                <line x1="270" y1="18" x2="270" y2="415" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="4,4"/>
+
+                <!-- ==================== BACK VIEW (ARKA GÖRÜNÜM) ==================== -->
+                <g id="backBodyView">
+                    <!-- Title -->
+                    <text x="405" y="24" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="800" letter-spacing="0.8">ARKA VÜCUT (POSTERIOR)</text>
+                    
+                    <!-- Head & Neck -->
+                    <circle cx="405" cy="48" r="16" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.2)" stroke-width="1.2"/>
+                    <path d="M 399 63 L 411 63 L 413 74 L 397 74 Z" fill="rgba(255,255,255,0.05)"/>
+
+                    <!-- Forearms / Hands (Back) -->
+                    <path d="M 342 165 C 336 182, 330 205, 326 226 C 330 228, 336 224, 342 208 C 346 194, 348 178, 348 165 Z" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.12)" stroke-width="0.8"/>
+                    <path d="M 468 165 C 474 182, 480 205, 484 226 C 480 228, 474 224, 468 208 C 464 194, 462 178, 462 165 Z" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.12)" stroke-width="0.8"/>
+
+                    <!-- Feet (Back) -->
+                    <ellipse cx="384" cy="410" rx="9" ry="5" fill="rgba(255,255,255,0.06)"/>
+                    <ellipse cx="426" cy="410" rx="9" ry="5" fill="rgba(255,255,255,0.06)"/>
+
+                    <!-- BACK (Traps / Upper Back) -->
+                    <path class="${sBack.cls}" data-muscle="back" onclick="selectAnatomyMuscle('back')" d="M 390 68 L 405 58 L 420 68 L 434 82 L 405 98 L 376 82 Z" fill="${sBack.fill}" stroke="${sBack.stroke}" stroke-width="1.4"><title>${sBack.tooltip}</title></path>
+
+                    <!-- SHOULDERS (Rear Delts) -->
+                    <path class="${sShld.cls}" data-muscle="shoulders" onclick="selectAnatomyMuscle('shoulders')" d="M 368 74 C 354 78, 342 90, 344 110 C 348 116, 358 112, 364 102 C 368 92, 370 82, 368 74 Z" fill="${sShld.fill}" stroke="${sShld.stroke}" stroke-width="1.4"><title>${sShld.tooltip}</title></path>
+                    <path class="${sShld.cls}" data-muscle="shoulders" onclick="selectAnatomyMuscle('shoulders')" d="M 442 74 C 456 78, 468 90, 466 110 C 462 116, 452 112, 446 102 C 442 92, 440 82, 442 74 Z" fill="${sShld.fill}" stroke="${sShld.stroke}" stroke-width="1.4"><title>${sShld.tooltip}</title></path>
+
+                    <!-- BACK (Latissimus Dorsi / Mid Back) -->
+                    <path class="${sBack.cls}" data-muscle="back" onclick="selectAnatomyMuscle('back')" d="M 374 96 C 358 110, 356 140, 362 172 C 374 176, 386 168, 388 152 C 390 132, 388 110, 374 96 Z" fill="${sBack.fill}" stroke="${sBack.stroke}" stroke-width="1.4"><title>${sBack.tooltip}</title></path>
+                    <path class="${sBack.cls}" data-muscle="back" onclick="selectAnatomyMuscle('back')" d="M 436 96 C 452 110, 454 140, 448 172 C 436 176, 424 168, 422 152 C 420 132, 422 110, 436 96 Z" fill="${sBack.fill}" stroke="${sBack.stroke}" stroke-width="1.4"><title>${sBack.tooltip}</title></path>
+
+                    <!-- TRICEPS (Arka Kol) -->
+                    <path class="${sTri.cls}" data-muscle="triceps" onclick="selectAnatomyMuscle('triceps')" d="M 343 114 C 335 128, 337 150, 345 162 C 353 160, 356 146, 355 132 C 354 120, 348 116, 343 114 Z" fill="${sTri.fill}" stroke="${sTri.stroke}" stroke-width="1.3"><title>${sTri.tooltip}</title></path>
+                    <path class="${sTri.cls}" data-muscle="triceps" onclick="selectAnatomyMuscle('triceps')" d="M 467 114 C 475 128, 473 150, 465 162 C 457 160, 454 146, 455 132 C 456 120, 462 116, 467 114 Z" fill="${sTri.fill}" stroke="${sTri.stroke}" stroke-width="1.3"><title>${sTri.tooltip}</title></path>
+
+                    <!-- GLUTES (Kalça) -->
+                    <path class="${sGlut.cls}" data-muscle="glutes" onclick="selectAnatomyMuscle('glutes')" d="M 366 182 C 366 174, 402 174, 404 182 C 404 214, 386 230, 368 228 C 364 214, 364 196, 366 182 Z" fill="${sGlut.fill}" stroke="${sGlut.stroke}" stroke-width="1.4"><title>${sGlut.tooltip}</title></path>
+                    <path class="${sGlut.cls}" data-muscle="glutes" onclick="selectAnatomyMuscle('glutes')" d="M 444 182 C 444 174, 408 174, 406 182 C 406 214, 424 230, 442 228 C 446 214, 446 196, 444 182 Z" fill="${sGlut.fill}" stroke="${sGlut.stroke}" stroke-width="1.4"><title>${sGlut.tooltip}</title></path>
+
+                    <!-- HAMSTRINGS (Arka Bacak) -->
+                    <path class="${sHams.cls}" data-muscle="hamstrings" onclick="selectAnatomyMuscle('hamstrings')" d="M 368 232 C 374 228, 401 228, 402 232 C 402 266, 398 296, 394 318 C 382 318, 372 312, 368 286 C 366 266, 366 248, 368 232 Z" fill="${sHams.fill}" stroke="${sHams.stroke}" stroke-width="1.4"><title>${sHams.tooltip}</title></path>
+                    <path class="${sHams.cls}" data-muscle="hamstrings" onclick="selectAnatomyMuscle('hamstrings')" d="M 442 232 C 436 228, 409 228, 408 232 C 408 266, 412 296, 416 318 C 428 318, 438 312, 442 286 C 444 266, 444 248, 442 232 Z" fill="${sHams.fill}" stroke="${sHams.stroke}" stroke-width="1.4"><title>${sHams.tooltip}</title></path>
+
+                    <!-- Popliteal Fossa / Knee Back -->
+                    <ellipse cx="384" cy="324" rx="4" ry="2.5" fill="rgba(0,0,0,0.3)"/>
+                    <ellipse cx="426" cy="324" rx="4" ry="2.5" fill="rgba(0,0,0,0.3)"/>
+
+                    <!-- CALVES (Kalf / Gastrocnemius - Back) -->
+                    <path class="${sCalf.cls}" data-muscle="calves" onclick="selectAnatomyMuscle('calves')" d="M 366 332 C 358 346, 362 374, 372 398 C 384 398, 388 384, 390 368 C 392 348, 388 334, 366 332 Z" fill="${sCalf.fill}" stroke="${sCalf.stroke}" stroke-width="1.3"><title>${sCalf.tooltip}</title></path>
+                    <path class="${sCalf.cls}" data-muscle="calves" onclick="selectAnatomyMuscle('calves')" d="M 444 332 C 452 346, 448 374, 438 398 C 426 398, 422 384, 420 368 C 418 348, 422 334, 444 332 Z" fill="${sCalf.fill}" stroke="${sCalf.stroke}" stroke-width="1.3"><title>${sCalf.tooltip}</title></path>
+                </g>
+            </svg>
+            `;
+        }
+
         function renderWeeklyMuscleSufficiencySection() {
             const analysis = calculateWeeklyMuscleSufficiency(currentWeeklyMuscleSource, currentWeeklyMuscleWeekOffset);
-            const filter = currentWeeklyMuscleFilter;
-
-            let filteredMuscles = analysis.muscles;
-            if (filter === 'optimal') {
-                filteredMuscles = analysis.muscles.filter(m => m.status === 'optimal' || m.status === 'high');
-            } else if (filter === 'insufficient') {
-                filteredMuscles = analysis.muscles.filter(m => m.status === 'insufficient');
-            } else if (filter === 'unworked') {
-                filteredMuscles = analysis.muscles.filter(m => m.status === 'unworked');
-            }
-
             const { summary, bounds, sourceMode, weekOffset } = analysis;
             const optimalTotal = summary.optimalCount + summary.highCount;
 
-            // Source buttons
+            // Resolve currently selected muscle for focus card
+            let activeId = currentSelectedAnatomyMuscle;
+            let activeMuscle = analysis.muscles.find(m => m.id === activeId);
+            if (!activeMuscle) {
+                // Smart auto-select: First unworked, else first insufficient, else first muscle
+                activeMuscle = analysis.muscles.find(m => m.status === 'unworked')
+                    || analysis.muscles.find(m => m.status === 'insufficient')
+                    || analysis.muscles[0];
+                activeId = activeMuscle ? activeMuscle.id : 'chest';
+                currentSelectedAnatomyMuscle = activeId;
+            }
+
+            // Quick source buttons
             const sourceButtons = `
                 <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
                     <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; border-radius:14px; ${sourceMode === 'week_projected' ? 'background:var(--gold); color:#000; font-weight:800;' : ''}" onclick="setWeeklyMuscleSource('week_projected')">
-                        📅 Bu Hafta: Yapılan + Kalan Plan
+                        📅 Bu Hafta: Yapılan + Plan
                     </button>
                     <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; border-radius:14px; ${sourceMode === 'week_done' ? 'background:var(--gold); color:#000; font-weight:800;' : ''}" onclick="setWeeklyMuscleSource('week_done')">
                         ✅ Sadece Yapılanlar (${analysis.totalDoneSessions} Seans)
                     </button>
                     <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; border-radius:14px; ${sourceMode === 'schedule_full' ? 'background:var(--gold); color:#000; font-weight:800;' : ''}" onclick="setWeeklyMuscleSource('schedule_full')">
-                        📋 Haftalık Program Şablonu
+                        📋 Şablon
                     </button>
                 </div>
             `;
 
-            // Filter pills
-            const filterPills = `
-                <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:10px;">
-                    <button class="btn btn-outline" style="font-size:11px; padding:5px 12px; border-radius:16px; ${filter === 'all' ? 'background:#38bdf8; color:#000; font-weight:800;' : ''}" onclick="setWeeklyMuscleFilter('all')">
-                        Tümü (${summary.totalMuscles})
-                    </button>
-                    <button class="btn btn-outline" style="font-size:11px; padding:5px 12px; border-radius:16px; ${filter === 'optimal' ? 'background:#10b981; color:#000; font-weight:800;' : ''}" onclick="setWeeklyMuscleFilter('optimal')">
-                        ✅ Yeterli / Optimal (${optimalTotal})
-                    </button>
-                    <button class="btn btn-outline" style="font-size:11px; padding:5px 12px; border-radius:16px; ${filter === 'insufficient' ? 'background:#f59e0b; color:#000; font-weight:800;' : ''}" onclick="setWeeklyMuscleFilter('insufficient')">
-                        ⚠️ Yetersiz Hacim (${summary.insufficientCount})
-                    </button>
-                    <button class="btn btn-outline" style="font-size:11px; padding:5px 12px; border-radius:16px; ${filter === 'unworked' ? 'background:#ef4444; color:#fff; font-weight:800;' : ''}" onclick="setWeeklyMuscleFilter('unworked')">
-                        ❌ Çalıştırılmayan (${summary.unworkedCount})
-                    </button>
-                </div>
-            `;
+            // SVG Body Model
+            const bodySvgHTML = renderAnatomicalBodySVG(analysis.muscles, activeId);
 
-            // Diagnostic coach alert
-            let coachAlertHTML = '';
-            if (summary.unworkedCount > 0) {
-                coachAlertHTML = `
-                    <div style="background:rgba(239, 68, 68, 0.08); border:1px solid rgba(239, 68, 68, 0.3); border-radius:10px; padding:10px 12px; margin-top:12px; display:flex; align-items:flex-start; gap:8px;">
-                        <span style="font-size:16px;">🚨</span>
-                        <div style="font-size:11.5px; color:#fca5a5; line-height:1.4;">
-                            <strong>Atlanan / Çalıştırılmayan Kaslar:</strong> Bu hafta <strong>${escapeHTML(analysis.unworkedNames.join(', '))}</strong> bölgesi için henüz antrenman hacmi bulunmuyor. Kas dengesizliğini ve sakatlık riskini önlemek için aşağıda önerilen hareketleri kalan günlere ekleyebilirsiniz.
-                        </div>
-                    </div>
-                `;
-            } else if (summary.insufficientCount > 0) {
-                coachAlertHTML = `
-                    <div style="background:rgba(245, 158, 11, 0.08); border:1px solid rgba(245, 158, 11, 0.3); border-radius:10px; padding:10px 12px; margin-top:12px; display:flex; align-items:flex-start; gap:8px;">
-                        <span style="font-size:16px;">⚠️</span>
-                        <div style="font-size:11.5px; color:#fde68a; line-height:1.4;">
-                            <strong>Düşük Hacim Uyarısı:</strong> <strong>${escapeHTML(analysis.insufficientNames.join(', '))}</strong> bölgesi minimum gelişim eşiğinin altında kaldı. Kalan günlere hareket veya set ekleyerek hipertrofi eşiğine ulaşabilirsiniz.
-                        </div>
-                    </div>
-                `;
-            } else {
-                coachAlertHTML = `
-                    <div style="background:rgba(16, 185, 129, 0.08); border:1px solid rgba(16, 185, 129, 0.3); border-radius:10px; padding:10px 12px; margin-top:12px; display:flex; align-items:flex-start; gap:8px;">
-                        <span style="font-size:16px;">🏆</span>
-                        <div style="font-size:11.5px; color:#6ee7b7; line-height:1.4;">
-                            <strong>Kusursuz Kas Dengesi!</strong> Tüm kas gruplarınız bu hafta bilimsel olarak önerilen optimal hipertrofi ve güç kazanım aralığında yer alıyor.
-                        </div>
-                    </div>
-                `;
-            }
-
-            // Build Upcoming Days cards for current week
-            const schedule = (typeof getWeeklySchedule === 'function') ? getWeeklySchedule() : {};
-            const allLogs = (typeof getWorkoutLogs === 'function') ? getWorkoutLogs() : [];
-            const weekLogs = allLogs.filter(l => {
-                const dt = new Date(l.date);
-                return dt >= bounds.monday && dt <= bounds.sunday;
-            });
-            const loggedDays = new Set(weekLogs.map(l => new Date(l.date).getDay()));
-            const todayDay = (new Date()).getDay();
-            const getIsoDay = (d) => d === 0 ? 7 : d;
-            const todayIso = getIsoDay(todayDay);
-            const dayKeys = [1, 2, 3, 4, 5, 6, 0];
-
-            const upcomingDaysList = [];
-            if (bounds.isCurrentWeek) {
-                dayKeys.forEach(dKey => {
-                    const isCompleted = loggedDays.has(dKey);
-                    const planIso = getIsoDay(dKey);
-                    if (!isCompleted && planIso >= todayIso) {
-                        const plan = schedule[dKey];
-                        const isRest = !plan || plan.rest;
-                        const details = isRest ? null : ((typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(plan) : null);
-                        const exCount = (details && details.exercises) ? details.exercises.length : 0;
-                        upcomingDaysList.push({
-                            dayIdx: dKey,
-                            dayName: DAY_NAMES_TR[dKey],
-                            isToday: planIso === todayIso,
-                            isRest,
-                            plan,
-                            details,
-                            exCount
-                        });
-                    }
-                });
-            }
-
-            const upcomingDaysHTML = (bounds.isCurrentWeek && upcomingDaysList.length > 0) ? `
-                <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(245,158,11,0.25); border-radius:10px; padding:12px; margin-top:14px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
-                        <div style="display:flex; align-items:center; gap:6px;">
-                            <span style="font-size:16px;">🗓️</span>
-                            <span style="font-size:12.5px; font-weight:800; color:#fff;">Bu Haftanın Kalan Günleri & Hızlı Program Derleme</span>
-                        </div>
-                        <span style="font-size:10px; color:var(--gold); font-weight:700;">Doğrudan Stüdyoda Düzenleyin</span>
-                    </div>
-
-                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:8px;">
-                        ${upcomingDaysList.map(item => `
-                            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                                <div>
-                                    <div style="display:flex; align-items:center; gap:6px;">
-                                        <strong style="font-size:12px; color:#fff;">${item.dayName}</strong>
-                                        ${item.isToday ? '<span style="font-size:9.5px; background:var(--gold); color:#000; font-weight:800; padding:1px 5px; border-radius:4px;">BUGÜN</span>' : ''}
-                                    </div>
-                                    <div style="font-size:10.5px; color:var(--text-secondary); margin-top:2px;">
-                                        ${item.isRest ? '🧘 Dinlenme Günü' : `${escapeHTML(item.plan.title || 'Program')} (${item.exCount} Hrk)`}
-                                    </div>
-                                </div>
-
-                                <div>
-                                    ${!item.isRest ? `
-                                        <button class="btn btn-outline" style="font-size:10.5px; padding:4px 8px; color:var(--gold); border-color:rgba(245,158,11,0.5); font-weight:700;" onclick="editProgramForDay(${item.dayIdx})" title="Bu programı stüdyoda derle ve düzenle">
-                                            ✏️ Derle / Düzenle
-                                        </button>
-                                    ` : `
-                                        <button class="btn btn-outline" style="font-size:10.5px; padding:4px 8px; color:var(--cyan); border-color:rgba(56,189,248,0.4);" onclick="startNewStudioProgramForDay(${item.dayIdx})" title="Bu güne yeni antrenman programı ata">
-                                            ➕ Antrenman Ata
-                                        </button>
-                                    `}
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            ` : '';
-
-            // Muscle Cards HTML
-            const muscleCardsHTML = filteredMuscles.length === 0 ? `
-                <div style="text-align:center; padding:20px; color:var(--text-secondary); font-size:12px; background:rgba(0,0,0,0.2); border-radius:8px; margin-top:10px;">
-                    Bu filtreye uyan kas grubu bulunamadı.
-                </div>
-            ` : `
-                <div style="display:flex; flex-direction:column; gap:10px; margin-top:12px;">
-                    ${filteredMuscles.map(m => {
-                        const maxBar = Math.max(22, m.optimalMax + 4);
-                        const donePct = Math.min(100, Math.round((m.effectiveDone / maxBar) * 100));
-                        const planPct = Math.min(100 - donePct, Math.round((m.effectivePlan / maxBar) * 100));
-
-                        const recs = getRecommendationsForMuscle(m.id, 4);
-                        const isWeak = (m.status === 'unworked' || m.status === 'insufficient');
-                        const recTitle = isWeak 
-                            ? '💡 Koç Tavsiyesi (Eksik Bölge Takviyesi) — Önerilen Egzersizler:'
-                            : '✨ Bu Bölgeyi Takviye Et / Güne Ekle:';
-
+            // Horizontal Quick Muscle Chips
+            const chipsHTML = `
+                <div class="anatomy-chips-scroll">
+                    ${analysis.muscles.map(m => {
+                        let dotColor = (m.status === 'optimal' || m.status === 'high') ? '#10b981' : (m.status === 'insufficient' ? '#f59e0b' : '#ef4444');
+                        let isSelected = (m.id === activeId);
                         return `
-                            <div style="background:rgba(0,0,0,0.3); border:1px solid ${m.statusColor}33; border-left:4px solid ${m.statusColor}; border-radius:10px; padding:12px 14px;">
-                                <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
-                                    <div>
-                                        <div style="display:flex; align-items:center; gap:6px;">
-                                            <span style="font-size:18px;">${m.icon}</span>
-                                            <h4 style="font-size:14px; font-weight:800; color:#fff; margin:0;">${m.name}</h4>
-                                        </div>
-                                    </div>
-                                    <span class="badge" style="background:${m.statusBg}; color:${m.statusColor}; border:1px solid ${m.statusColor}44; font-size:11px; padding:3px 10px; font-weight:800; border-radius:12px;">
-                                        ${m.statusBadge}
-                                    </span>
-                                </div>
-
-                                <!-- PROGRESS BAR & BENCHMARK -->
-                                <div style="margin-top:10px;">
-                                    <div style="position:relative; height:12px; background:rgba(255,255,255,0.06); border-radius:6px; overflow:hidden; display:flex;">
-                                        <div style="width:${donePct}%; background:${m.statusColor}; height:100%; transition:width 0.3s ease;" title="Yapılan: ${m.effectiveDone.toFixed(1)} Efektif Set"></div>
-                                        <div style="width:${planPct}%; background:repeating-linear-gradient(45deg, #f59e0b, #f59e0b 6px, #d97706 6px, #d97706 12px); height:100%; opacity:0.85; transition:width 0.3s ease;" title="Planlanan: ${m.effectivePlan.toFixed(1)} Efektif Set"></div>
-                                    </div>
-                                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:10px; color:var(--text-secondary); margin-top:4px; flex-wrap:wrap; gap:4px;">
-                                        <span>🟢 Yapılan: <strong style="color:#fff;">${m.effectiveDone.toFixed(1)}</strong> set <span style="font-size:9.5px; opacity:0.8;">(${m.doneDirectSets.toFixed(1)} ana + ${m.doneSecondarySets.toFixed(1)} destek)</span></span>
-                                        <span>🟡 Kalan Plan: <strong style="color:#fff;">${m.effectivePlan.toFixed(1)}</strong> set</span>
-                                        <span>🎯 Hedef: <strong style="color:var(--gold);">${m.optimalMin}-${m.optimalMax} set/hf</strong></span>
-                                    </div>
-                                </div>
-
-                                <!-- KULLANICI ANATOMİK DİYAGRAMI (ALT BÖLGE DAĞILIMI) -->
-                                ${renderMuscleCompartmentDiagram(m)}
-
-                                <!-- STATUS DESCRIPTION & EXERCISES -->
-                                <div style="margin-top:8px; font-size:11.5px; color:#cbd5e1; display:flex; flex-direction:column; gap:4px;">
-                                    <div>
-                                        <span style="color:${m.statusColor}; font-weight:700;">${m.statusDesc}</span>
-                                        <span style="color:var(--text-secondary);"> (Toplam Efektif: <strong style="color:#fff;">${m.effectiveTotal.toFixed(1)} set</strong>)</span>
-                                    </div>
-
-                                    ${m.doneExercises.length > 0 ? `
-                                        <div style="font-size:11px; margin-top:2px;">
-                                            <span style="color:var(--text-secondary);">✅ Bu Hafta Yapılanlar:</span>
-                                            <span style="color:#fff; font-weight:600;">${m.doneExercises.map(escapeHTML).join(', ')}</span>
-                                        </div>
-                                    ` : ''}
-
-                                    ${m.plannedExercises.length > 0 ? `
-                                        <div style="font-size:11px; margin-top:4px;">
-                                            <span style="color:var(--text-secondary);">📋 Kalan Planda Olanlar:</span>
-                                            <div style="display:inline-flex; flex-wrap:wrap; gap:4px; margin-top:2px;">
-                                                ${m.plannedExercises.map(pe => `
-                                                    <button class="btn btn-outline" style="font-size:10px; padding:2px 6px; border-radius:6px; color:#fcd34d; border-color:rgba(245,158,11,0.4); background:rgba(0,0,0,0.3);" onclick="editProgramForDay(${pe.dayIdx})" title="Bu antrenmanı stüdyoda derle & düzenle">
-                                                        ${escapeHTML(pe.name)} <span style="opacity:0.75;">(${pe.dayName}) ✏️</span>
-                                                    </button>
-                                                `).join('')}
-                                            </div>
-                                        </div>
-                                    ` : ''}
-                                </div>
-
-                                <!-- BİYOMEKANİK KAYNAK & KATKI DÖKÜMÜ (DRILL-DOWN) -->
-                                <div style="margin-top:10px; padding-top:8px; border-top:1px dashed rgba(255,255,255,0.1);">
-                                    <button id="lineage_btn_${m.id}" class="btn btn-outline" style="width:100%; font-size:11px; padding:6px 10px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); border-color:rgba(255,255,255,0.12); cursor:pointer;" onclick="toggleMuscleLineage('${m.id}')">
-                                        <span>🔬 Hangi Seans & Hareketten Geldi? (${(m.contributions || []).length} Kayıt)</span>
-                                        <span style="color:var(--gold); font-size:10px; font-weight:800;">▼ Detay</span>
-                                    </button>
-
-                                    <div id="lineage_box_${m.id}" data-count="${(m.contributions || []).length}" style="display:none; margin-top:8px; background:rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:10px;">
-                                        ${(m.contributions && m.contributions.length > 0) ? `
-                                            <div style="display:flex; flex-direction:column; gap:6px;">
-                                                <div style="font-size:10.5px; color:var(--text-secondary); margin-bottom:2px; font-weight:700;">
-                                                    📋 Tamamlanan Seanslar & Puan Katkısı:
-                                                </div>
-                                                ${m.contributions.map(c => `
-                                                    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:6px 10px; font-size:11px;">
-                                                        <div>
-                                                            <div style="display:flex; align-items:center; gap:6px;">
-                                                                <strong style="color:#fff;">${escapeHTML(c.exercise)}</strong>
-                                                                <span style="font-size:9.5px; padding:1px 5px; border-radius:4px; font-weight:700; ${c.role === 'Birincil' ? 'background:rgba(234,179,8,0.18); color:var(--gold);' : 'background:rgba(6,182,212,0.18); color:#06b6d4;'}">
-                                                                    ${c.role} (${c.factor}x)
-                                                                </span>
-                                                            </div>
-                                                            <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">
-                                                                📅 ${escapeHTML(c.date)} • ${escapeHTML(c.sessionTitle)}
-                                                            </div>
-                                                        </div>
-                                                        <div style="text-align:right;">
-                                                            <div style="font-size:12.5px; font-weight:900; color:#10b981;">+${c.earnedSets.toFixed(1)} Set</div>
-                                                            <div style="font-size:9.5px; color:var(--text-secondary);">${c.rawSets} Set Yapıldı</div>
-                                                        </div>
-                                                    </div>
-                                                `).join('')}
-                                                <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 4px 2px 4px; border-top:1px dashed rgba(255,255,255,0.1); font-size:11px;">
-                                                    <span style="color:var(--text-secondary);">Haftalık Toplam Katkı:</span>
-                                                    <strong style="color:var(--gold); font-size:12px;">${m.effectiveDone.toFixed(1)} Efektif Set</strong>
-                                                </div>
-                                            </div>
-                                        ` : `
-                                            <div style="font-size:11px; color:var(--text-secondary); text-align:center; padding:8px 6px;">
-                                                Bu hafta bu kas grubu için henüz tamamlanmış bir seans kaydı bulunmuyor.
-                                            </div>
-                                        `}
-                                    </div>
-                                </div>
-
-                                <!-- RECOMMENDATIONS ACCORDION (GİZLENEBİLİR / AÇILABİLİR) -->
-                                ${recs.length > 0 ? `
-                                    <div style="margin-top:10px; padding-top:8px; border-top:1px dashed rgba(255,255,255,0.1);">
-                                        <button id="recs_btn_${m.id}" class="btn btn-outline" style="width:100%; font-size:11px; padding:6px 10px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); border-color:rgba(255,255,255,0.12); cursor:pointer;" onclick="toggleMuscleRecommendations('${m.id}')">
-                                            <span style="color:${isWeak ? 'var(--gold)' : 'var(--cyan)'}; font-weight:700;">
-                                                ${isWeak ? '💡 Koç Tavsiyesi (Eksik Bölge Takviyesi)' : '✨ Bu Bölgeyi Takviye Et'} (${recs.length} Öneri)
-                                            </span>
-                                            <span id="recs_icon_${m.id}" style="color:var(--gold); font-size:10px; font-weight:800;">▼ Göster</span>
-                                        </button>
-
-                                        <div id="recs_box_${m.id}" style="display:none; margin-top:8px; background:rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:10px;">
-                                            <div style="font-size:10.5px; color:${isWeak ? 'var(--gold)' : 'var(--cyan)'}; font-weight:700; margin-bottom:8px;">
-                                                ${recTitle}
-                                            </div>
-                                            <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                                                ${recs.map(r => `
-                                                    <div style="display:inline-flex; align-items:center; background:rgba(0,0,0,0.4); border:1px solid var(--border); border-radius:6px; overflow:hidden;">
-                                                        <button class="btn btn-outline" style="font-size:10px; padding:3px 7px; border:none; border-right:1px solid rgba(255,255,255,0.08);" onclick="openExerciseDetailModal('${r.id}')" title="Form ve Detayları Gör">
-                                                            🏋️ ${escapeHTML(r.name)} <span style="color:var(--text-secondary); font-size:9px;">(${r.equipment})</span>
-                                                        </button>
-                                                        <button class="btn ${isWeak ? 'btn-gold' : 'btn-outline'}" style="font-size:9.5px; padding:3px 8px; border-radius:0; font-weight:800; ${!isWeak ? 'color:var(--cyan); border-color:var(--cyan);' : ''}" onclick="openQuickAddToDayModal('${r.id}')" title="Bu egzersizi haftanın bir gününe ekle">
-                                                            ➕ Güne Ekle
-                                                        </button>
-                                                    </div>
-                                                `).join('')}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ` : ''}
-                            </div>
+                            <button class="anatomy-chip ${isSelected ? 'selected' : ''}" onclick="selectAnatomyMuscle('${m.id}')" title="${escapeHTML(m.name)}: ${m.effectiveDone.toFixed(1)} Set (${m.statusLabel})">
+                                <span>${m.icon}</span>
+                                <span>${escapeHTML(m.name)}</span>
+                                <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:${dotColor};"></span>
+                                <span style="font-size:9.5px; opacity:0.85;">${m.effectiveDone.toFixed(0)}s</span>
+                            </button>
                         `;
                     }).join('')}
                 </div>
             `;
 
+            // Build Focused Muscle Card Content
+            let focusCardHTML = '';
+            if (activeMuscle) {
+                const m = activeMuscle;
+                const def = MUSCLE_DIAGRAM_DEFS[m.id];
+                const recCol = def && def.columns && def.columns[0] ? def.columns[0] : null;
+                const recExId = recCol ? recCol.recId : 'db_bench_press';
+                const recExName = recCol ? recCol.recName : 'Temel Egzersiz';
+
+                let statusBadge = '';
+                let statusClass = 'status-optimal';
+                if (m.status === 'optimal' || m.status === 'high') {
+                    statusClass = 'status-optimal';
+                    statusBadge = `<span style="background:rgba(16,185,129,0.18); border:1px solid #10b981; color:#10b981; font-size:11px; font-weight:800; padding:3px 9px; border-radius:6px;">✅ Yeterli / Optimal (${m.effectiveDone.toFixed(1)} Set)</span>`;
+                } else if (m.status === 'insufficient') {
+                    statusClass = 'status-insufficient';
+                    statusBadge = `<span style="background:rgba(245,158,11,0.18); border:1px solid #f59e0b; color:#f59e0b; font-size:11px; font-weight:800; padding:3px 9px; border-radius:6px;">⚠️ Düşük Hacim (${m.effectiveDone.toFixed(1)} / Hedef: ${m.optimalMin}-${m.optimalMax} Set)</span>`;
+                } else {
+                    statusClass = 'status-unworked';
+                    statusBadge = `<span style="background:rgba(239,68,68,0.18); border:1px solid #ef4444; color:#ef4444; font-size:11px; font-weight:800; padding:3px 9px; border-radius:6px;">❌ 0 Set — Bu Hafta Atlandı!</span>`;
+                }
+
+                const pct = Math.min(100, Math.round((m.effectiveDone / m.optimalMin) * 100));
+                let barColor = '#ef4444';
+                if (m.status === 'optimal' || m.status === 'high') barColor = '#10b981';
+                else if (m.status === 'insufficient') barColor = '#f59e0b';
+
+                // Subregion Grid
+                const subregionHTML = renderMuscleSubregionGrid(m);
+
+                // Quick Action Button
+                let actionBtnHTML = '';
+                if (m.status === 'unworked' || m.status === 'insufficient') {
+                    actionBtnHTML = `
+                        <div style="margin-top:12px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                            <button class="btn btn-gold" style="flex:1; min-width:180px; padding:9px 12px; font-size:12px; font-weight:900; border-radius:8px;" onclick="openQuickAddToDayModal('${recExId}')">
+                                ➕ ${escapeHTML(recExName)} Ekle (${escapeHTML(m.name)} Takviyesi)
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    actionBtnHTML = `
+                        <div style="margin-top:10px; font-size:11px; color:#10b981; font-weight:700; display:flex; align-items:center; gap:6px;">
+                            <span>🏆</span>
+                            <span>Haftalık hipertrofi ve kuvvet eşiği sağlandı (${m.effectiveDone.toFixed(1)} Efektif Set).</span>
+                        </div>
+                    `;
+                }
+
+                focusCardHTML = `
+                    <div id="anatomyFocusCard" class="anatomy-focus-card ${statusClass}">
+                        <!-- Card Header -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="font-size:22px;">${m.icon}</span>
+                                <div>
+                                    <h4 style="font-size:15px; font-weight:900; color:#fff; margin:0;">${escapeHTML(m.name)}</h4>
+                                    <div style="font-size:10.5px; color:var(--text-secondary); margin-top:2px;">${escapeHTML(m.desc)}</div>
+                                </div>
+                            </div>
+                            <div>${statusBadge}</div>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div style="margin-top:12px;">
+                            <div style="display:flex; justify-content:space-between; font-size:10.5px; color:var(--text-secondary); margin-bottom:4px;">
+                                <span>Haftalık Tamamlanma: % ${pct}</span>
+                                <span>${m.effectiveDone.toFixed(1)} / ${m.optimalMin}-${m.optimalMax} Set</span>
+                            </div>
+                            <div style="height:6px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden;">
+                                <div style="height:100%; width:${pct}%; background:${barColor}; border-radius:3px; transition:width 0.3s ease;"></div>
+                            </div>
+                        </div>
+
+                        <!-- 2-Katmanlı Anatomik Alt Bölge Grid -->
+                        ${subregionHTML}
+
+                        <!-- Action Button -->
+                        ${actionBtnHTML}
+
+                        <!-- Collapsible Lineage Dropdown -->
+                        <div style="margin-top:10px; padding-top:8px; border-top:1px dashed rgba(255,255,255,0.1);">
+                            <button id="lineage_btn_${m.id}" class="btn btn-outline" style="width:100%; font-size:11px; padding:6px 10px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); border-color:rgba(255,255,255,0.12); cursor:pointer;" onclick="toggleMuscleLineage('${m.id}')">
+                                <span>🔬 Hangi Seans & Hareketten Geldi? (${(m.contributions || []).length} Kayıt)</span>
+                                <span style="color:var(--gold); font-size:10px; font-weight:800;">▼ Detay</span>
+                            </button>
+
+                            <div id="lineage_box_${m.id}" data-count="${(m.contributions || []).length}" style="display:none; margin-top:8px; background:rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:10px;">
+                                ${(m.contributions && m.contributions.length > 0) ? `
+                                    <div style="display:flex; flex-direction:column; gap:6px;">
+                                        <div style="font-size:10.5px; color:var(--text-secondary); margin-bottom:2px; font-weight:700;">
+                                            📋 Tamamlanan Seanslar & Puan Katkısı:
+                                        </div>
+                                        ${m.contributions.map(c => `
+                                            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:6px 10px; font-size:11px;">
+                                                <div>
+                                                    <div style="display:flex; align-items:center; gap:6px;">
+                                                        <strong style="color:#fff;">${escapeHTML(c.exercise)}</strong>
+                                                        <span style="font-size:9.5px; padding:1px 5px; border-radius:4px; font-weight:700; ${c.role === 'Birincil' ? 'background:rgba(234,179,8,0.18); color:var(--gold);' : 'background:rgba(6,182,212,0.18); color:#06b6d4;'}">
+                                                            ${c.role} (${c.factor}x)
+                                                        </span>
+                                                    </div>
+                                                    <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">
+                                                        📅 ${escapeHTML(c.date)} • ${escapeHTML(c.sessionTitle)}
+                                                    </div>
+                                                </div>
+                                                <div style="text-align:right;">
+                                                    <div style="font-size:12.5px; font-weight:900; color:#10b981;">+${c.earnedSets.toFixed(1)} Set</div>
+                                                    <div style="font-size:9.5px; color:var(--text-secondary);">${c.rawSets} Set Yapıldı</div>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                ` : `
+                                    <div style="font-size:11px; color:var(--text-secondary); text-align:center; padding:8px 6px;">
+                                        Bu hafta bu kas grubu için henüz tamamlanmış bir seans kaydı bulunmuyor.
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
             return `
-                <!-- WEEKLY MUSCLE BALANCE & SUFFICIENCY REPORT CARD -->
-                <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:20px; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+                <!-- ANATOMICAL BODY & WEEKLY SUFFICIENCY HERO -->
+                <div class="anatomy-hero-wrapper">
                     <!-- HEADER -->
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
+                    <div class="anatomy-top-bar">
                         <div>
                             <div style="display:flex; align-items:center; gap:8px;">
                                 <span style="font-size:22px;">🧬</span>
-                                <h3 style="font-size:16px; font-weight:900; color:#fff; margin:0;">Haftalık Kas Dengesi & Yeterlilik Karnesi</h3>
+                                <h3 style="font-size:16px; font-weight:900; color:#fff; margin:0;">Haftalık Anatomik Kas Haritası</h3>
                             </div>
-                            <p style="font-size:11.5px; color:var(--text-secondary); margin:4px 0 0 0;">
-                                Tamamlanan antrenmanlar ve haftalık planlanan program birlikte analiz edilir.
-                            </p>
+                            <div style="font-size:11px; color:var(--text-secondary); margin-top:3px;">
+                                Vücut üzerindeki kaslara dokunarak haftalık yükü inceleyin.
+                            </div>
                         </div>
 
-                        <!-- WEEK SELECTOR -->
-                        <div style="display:flex; align-items:center; gap:6px; background:rgba(0,0,0,0.3); padding:4px 8px; border-radius:20px; border:1px solid var(--border);">
-                            <button class="btn btn-outline" style="font-size:11px; padding:2px 8px; border-radius:12px;" onclick="setWeeklyMuscleOffset(${weekOffset - 1})" title="Önceki Hafta">◀</button>
-                            <span style="font-size:11px; font-weight:800; color:var(--gold); padding:0 4px;">${bounds.label} ${bounds.isCurrentWeek ? '<span style="color:#10b981;">(Bu Hafta)</span>' : ''}</span>
-                            <button class="btn btn-outline" style="font-size:11px; padding:2px 8px; border-radius:12px;" onclick="setWeeklyMuscleOffset(${weekOffset + 1})" title="Sonraki Hafta">▶</button>
-                            ${!bounds.isCurrentWeek ? `<button class="btn btn-outline" style="font-size:10px; padding:2px 6px; border-radius:10px; color:var(--cyan);" onclick="setWeeklyMuscleOffset(0)">Bu Hafta</button>` : ''}
+                        <!-- Mini Week Switcher -->
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <button class="btn btn-outline" style="padding:4px 8px; font-size:11px; border-radius:6px;" onclick="setWeeklyMuscleOffset(${weekOffset - 1})" title="Önceki Hafta">◀</button>
+                            <span style="font-size:11px; font-weight:800; color:var(--gold); padding:3px 8px; background:rgba(0,0,0,0.35); border-radius:6px; border:1px solid var(--border);">
+                                ${escapeHTML(bounds.label)}
+                            </span>
+                            <button class="btn btn-outline" style="padding:4px 8px; font-size:11px; border-radius:6px;" onclick="setWeeklyMuscleOffset(${weekOffset + 1})" title="Sonraki Hafta">▶</button>
+                            ${weekOffset !== 0 ? `<button class="btn btn-outline" style="padding:4px 8px; font-size:10px; border-radius:6px; color:var(--cyan); border-color:var(--cyan);" onclick="setWeeklyMuscleOffset(0)">Bu Hafta</button>` : ''}
                         </div>
                     </div>
 
                     <!-- SOURCE TOGGLES -->
                     ${sourceButtons}
 
-                    <!-- KPI SUMMARY MINI CARDS -->
-                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(115px, 1fr)); gap:8px; margin-top:14px;">
-                        <div class="analytics-kpi-card" style="padding:10px;">
-                            <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">YETERLİ / OPTİMAL</div>
-                            <div style="font-size:18px; font-weight:900; color:#10b981; margin-top:2px;">✅ ${optimalTotal}</div>
-                            <div style="font-size:9.5px; color:var(--text-secondary);">Kas Grubu</div>
+                    <!-- 3 VISUAL STATUS COUNTERS (OPENGYM STYLE) -->
+                    <div class="anatomy-legend">
+                        <div class="anatomy-legend-item optimal" onclick="setWeeklyMuscleFilter('optimal')">
+                            <div class="badge-dot"></div>
+                            <div>
+                                <span class="badge-val">${optimalTotal}</span>
+                                <span class="badge-label">Yeterli / Optimal</span>
+                            </div>
                         </div>
-                        <div class="analytics-kpi-card" style="padding:10px;">
-                            <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">DÜŞÜK / YETERSİZ</div>
-                            <div style="font-size:18px; font-weight:900; color:#f59e0b; margin-top:2px;">⚠️ ${summary.insufficientCount}</div>
-                            <div style="font-size:9.5px; color:var(--text-secondary);">Gelişim Eşiği Altı</div>
+                        <div class="anatomy-legend-item insufficient" onclick="setWeeklyMuscleFilter('insufficient')">
+                            <div class="badge-dot"></div>
+                            <div>
+                                <span class="badge-val">${summary.insufficientCount}</span>
+                                <span class="badge-label">Düşük / Planda</span>
+                            </div>
                         </div>
-                        <div class="analytics-kpi-card" style="padding:10px;">
-                            <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">ÇALIŞTIRILMAYAN</div>
-                            <div style="font-size:18px; font-weight:900; color:#ef4444; margin-top:2px;">❌ ${summary.unworkedCount}</div>
-                            <div style="font-size:9.5px; color:var(--text-secondary);">Sıfır Hacim / Atlanan</div>
-                        </div>
-                        <div class="analytics-kpi-card" style="padding:10px;">
-                            <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">HAFTALIK SEANS</div>
-                            <div style="font-size:18px; font-weight:900; color:var(--cyan); margin-top:2px;">🎯 ${analysis.totalDoneSessions} / ${analysis.totalPlannedSessions}</div>
-                            <div style="font-size:9.5px; color:var(--text-secondary);">Yapılan / Planlanan</div>
+                        <div class="anatomy-legend-item unworked" onclick="setWeeklyMuscleFilter('unworked')">
+                            <div class="badge-dot"></div>
+                            <div>
+                                <span class="badge-val">${summary.unworkedCount}</span>
+                                <span class="badge-label">Çalışmayan (Boşta)</span>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- COACH ALERT BOX -->
-                    ${coachAlertHTML}
-
-                    <!-- BU HAFTANIN KALAN GÜNLERİ & HIZLI PROGRAM DERLEME -->
-                    ${upcomingDaysHTML}
-
-                    <!-- FILTER BUTTONS -->
-                    <div style="margin-top:14px;">
-                        <div style="font-size:11px; font-weight:800; color:var(--text-secondary); text-transform:uppercase;">Filtrele:</div>
-                        ${filterPills}
+                    <!-- INTERACTIVE ANATOMICAL BODY SVG -->
+                    <div class="anatomy-svg-box">
+                        ${bodySvgHTML}
                     </div>
 
-                    <!-- MUSCLE DETAIL CARDS -->
-                    ${muscleCardsHTML}
+                    <!-- QUICK SELECT CHIPS -->
+                    ${chipsHTML}
+
+                    <!-- SELECTED MUSCLE FOCUS CARD -->
+                    ${focusCardHTML}
                 </div>
             `;
         }
@@ -15683,7 +15717,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=186')
+                navigator.serviceWorker.register('./sw.js?v=187')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et

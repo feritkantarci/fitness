@@ -5452,3 +5452,152 @@
         }
         .btn-adjust:active {
             transform: scale(0.96);
+        }
+
+        /* ==================== ANATOMICAL BODY VISUAL (OPENGYM MODEL) ==================== */
+        .anatomy-hero-wrapper {
+            background: radial-gradient(circle at 50% 25%, rgba(30, 41, 59, 0.75), rgba(9, 13, 22, 0.96));
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 18px;
+            padding: 16px 14px;
+            margin-bottom: 16px;
+            box-shadow: 0 12px 36px -8px rgba(0, 0, 0, 0.75);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .anatomy-hero-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .anatomy-counter-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .anatomy-counter-pill {
+            font-size: 11px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .anatomy-svg-box {
+            width: 100%;
+            max-width: 480px;
+            margin: 4px auto 12px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .anatomy-svg {
+            width: 100%;
+            height: auto;
+            max-height: 380px;
+            filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.6));
+            user-select: none;
+        }
+
+        .anatomy-muscle {
+            cursor: pointer;
+            transition: all 0.22s ease;
+            stroke-linejoin: round;
+        }
+
+        .anatomy-muscle:hover {
+            filter: brightness(1.3) drop-shadow(0 0 10px rgba(255, 255, 255, 0.7));
+            stroke: #ffffff !important;
+            stroke-width: 2px !important;
+        }
+
+        .anatomy-muscle.active-selected {
+            stroke: #ffffff !important;
+            stroke-width: 2.5px !important;
+            filter: brightness(1.35) drop-shadow(0 0 14px var(--gold)) !important;
+        }
+
+        @keyframes unworkedPulseAnim {
+            0%, 100% { opacity: 0.65; }
+            50% { opacity: 1; }
+        }
+
+        .muscle-unworked-anim {
+            animation: unworkedPulseAnim 2.2s infinite ease-in-out;
+        }
+
+        /* KAS ODAK KARTI */
+        .anatomy-focus-card {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-top: 6px;
+            backdrop-filter: blur(12px);
+            transition: all 0.25s ease;
+        }
+
+        .anatomy-focus-card.status-optimal {
+            border-left: 4px solid #10b981;
+        }
+
+        .anatomy-focus-card.status-insufficient {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .anatomy-focus-card.status-unworked {
+            border-left: 4px solid #ef4444;
+        }
+
+        /* QUICK MUSCLE CHIPS */
+        .anatomy-chips-scroll {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            width: 100%;
+            padding: 8px 2px 4px;
+            margin-top: 10px;
+        }
+
+        .anatomy-chip {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 5px 11px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #e2e8f0;
+            white-space: nowrap;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .anatomy-chip:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .anatomy-chip.selected {
+            background: rgba(245, 158, 11, 0.18);
+            border-color: var(--gold);
+            color: #ffffff;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.25);
+        }
