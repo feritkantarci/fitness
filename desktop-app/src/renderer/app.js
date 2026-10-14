@@ -2999,7 +2999,71 @@ function calculateDesktopWeeklyMuscleSufficiency(sourceMode = 'week_projected', 
         });
     });
 
-    // 2. Metrikleri ve Kademeli Hipertrofi Değerlendirmesini Sonuçlandır
+    // 2. Haftalık Planlanan Antrenmanları Biyomekanik Katsayılarla İşle
+    const schedule = (typeof getDesktopAthleteSchedule === 'function') ? getDesktopAthleteSchedule() : {};
+    const loggedDays = new Set(weekLogs.map(l => {
+        let dt = new Date(l.date);
+        if (isNaN(dt.getTime()) && typeof l.timestamp === 'number') dt = new Date(l.timestamp);
+        return dt.getDay();
+    }));
+    const todayDay = (new Date()).getDay();
+    const getIsoDay = (d) => d === 0 ? 7 : d;
+    const todayIso = getIsoDay(todayDay);
+    const dayKeys = [1, 2, 3, 4, 5, 6, 0];
+    let totalPlannedSessions = 0;
+
+    dayKeys.forEach(dKey => {
+        const plan = schedule[dKey];
+        if (!plan || plan.isRest || plan.rest) return;
+
+        const planIso = getIsoDay(dKey);
+        const isCompleted = loggedDays.has(dKey);
+        const isRemaining = bounds.isCurrentWeek ? (!isCompleted && planIso >= todayIso) : (!bounds.isCurrentWeek && weekOffset > 0);
+
+        totalPlannedSessions++;
+
+        const exList = plan.exercises || (plan.customWorkout && plan.customWorkout.exercises) || [];
+        if (!Array.isArray(exList)) return;
+
+        exList.forEach(ex => {
+            const exName = typeof ex === 'string' ? ex : (ex.name || '');
+            if (!exName) return;
+            const pSets = typeof ex === 'object' ? (Number(ex.targetSets || ex.sets) || 3) : 3;
+
+            const spec = resolveExerciseBiomechanics(exName, ex.muscle, ex.category);
+            if (!spec || spec.type === 'CONDITIONING' || spec.pFactor === 0) return;
+
+            const primId = ACADEMIC_MUSCLE_TO_ID[spec.primary] || spec.primary;
+            if (primId && map[primId] && spec.pFactor > 0) {
+                const directPlan = pSets * spec.pFactor;
+                map[primId].scheduledTotalSets += directPlan;
+                if (isRemaining || sourceMode === 'schedule_full') {
+                    map[primId].planDirectSets += directPlan;
+                    map[primId].plannedExercises.set(`${exName}_${dKey}`, {
+                        name: exName,
+                        dayIdx: dKey,
+                        dayName: DESKTOP_DAY_NAMES_TR[dKey] || `Gün ${dKey}`,
+                        sets: directPlan
+                    });
+                }
+            }
+
+            if (spec.sec && typeof spec.sec === 'object') {
+                Object.entries(spec.sec).forEach(([secName, secFactor]) => {
+                    const secId = ACADEMIC_MUSCLE_TO_ID[secName] || secName;
+                    if (secId && map[secId] && secFactor > 0) {
+                        const secPlan = pSets * secFactor;
+                        map[secId].scheduledSecondarySets += secPlan;
+                        if (isRemaining || sourceMode === 'schedule_full') {
+                            map[secId].planSecondarySets += secPlan;
+                        }
+                    }
+                });
+            }
+        });
+    });
+
+    // 3. Metrikleri ve Kademeli Hipertrofi Değerlendirmesini Sonuçlandır
     const summary = {
         totalMuscles: WEEKLY_MUSCLE_CONFIG.length,
         workedCount: 0,
@@ -3018,8 +3082,12 @@ function calculateDesktopWeeklyMuscleSufficiency(sourceMode = 'week_projected', 
         const effectiveDone = Math.round((data.doneDirectSets + data.doneSecondarySets) * 10) / 10;
         const effectivePlan = Math.round((data.planDirectSets + data.planSecondarySets) * 10) / 10;
         const effectiveProjected = Math.round((effectiveDone + effectivePlan) * 10) / 10;
+        const effectiveScheduledTotal = Math.round((data.scheduledTotalSets + data.scheduledSecondarySets) * 10) / 10;
 
-        let evalVolume = effectiveDone;
+        let evalVolume = effectiveProjected;
+        if (sourceMode === 'week_done') evalVolume = effectiveDone;
+        if (sourceMode === 'schedule_full') evalVolume = effectiveScheduledTotal;
+
         if (effectiveDone > 0) summary.workedCount++;
 
         let status = 'unworked';
@@ -3032,6 +3100,9 @@ function calculateDesktopWeeklyMuscleSufficiency(sourceMode = 'week_projected', 
             status = 'unworked';
             summary.unworkedCount++;
             unworkedNames.push(cfg.name);
+            if (effectiveScheduledTotal > 0 && sourceMode === 'week_done') {
+                statusDesc = `Planda ${effectiveScheduledTotal.toFixed(1)} set var ancak henüz seans yapılmadı.`;
+            }
         } else if (evalVolume < cfg.optimalMin) {
             status = 'insufficient';
             statusBadge = '⚠️ Yetersiz Hacim';
@@ -3073,12 +3144,14 @@ function calculateDesktopWeeklyMuscleSufficiency(sourceMode = 'week_projected', 
             effectivePlan,
             projectedSets: effectiveProjected,
             effectiveTotal: evalVolume,
+            scheduledTotalSets: effectiveScheduledTotal,
             status,
             statusBadge,
             statusColor,
             statusBg,
             statusDesc,
             doneExercises: Array.from(data.doneExercises),
+            plannedExercises: Array.from(data.plannedExercises.values()),
             contributions: data.contributions || []
         };
     });
@@ -3088,6 +3161,7 @@ function calculateDesktopWeeklyMuscleSufficiency(sourceMode = 'week_projected', 
         sourceMode,
         weekOffset,
         totalDoneSessions: weekLogs.length,
+        totalPlannedSessions,
         summary,
         unworkedNames,
         insufficientNames,
@@ -3361,6 +3435,38 @@ function renderDesktopAnalytics() {
     const { summary, bounds, sourceMode, weekOffset } = analysis;
     const optimalTotal = summary.optimalCount + summary.highCount;
 
+    // Source buttons
+    const sourceButtons = `
+        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:10px;">
+            <button class="btn-outline" style="font-size:11px; padding:5px 12px; border-radius:16px; ${sourceMode === 'week_projected' ? 'background:var(--gold); color:#000; font-weight:800;' : ''}" onclick="setDesktopWeeklyMuscleSource('week_projected')">
+                📅 Bu Hafta: Yapılan + Kalan Plan
+            </button>
+            <button class="btn-outline" style="font-size:11px; padding:5px 12px; border-radius:16px; ${sourceMode === 'week_done' ? 'background:var(--gold); color:#000; font-weight:800;' : ''}" onclick="setDesktopWeeklyMuscleSource('week_done')">
+                ✅ Sadece Yapılanlar (${analysis.totalDoneSessions} Seans)
+            </button>
+            <button class="btn-outline" style="font-size:11px; padding:5px 12px; border-radius:16px; ${sourceMode === 'schedule_full' ? 'background:var(--gold); color:#000; font-weight:800;' : ''}" onclick="setDesktopWeeklyMuscleSource('schedule_full')">
+                📋 Haftalık Program Şablonu
+            </button>
+        </div>
+    `;
+
+    // Smart Week Banner
+    let smartBannerHTML = '';
+    const allWorkoutLogs = state.workoutLogs || [];
+    if (bounds.isCurrentWeek && analysis.totalDoneSessions === 0 && allWorkoutLogs.length > 0) {
+        smartBannerHTML = `
+            <div style="background:rgba(56, 189, 248, 0.08); border:1px solid rgba(56, 189, 248, 0.3); border-radius:10px; padding:10px 14px; margin-top:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <div style="font-size:12px; color:#bae6fd; display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:18px;">💡</span>
+                    <span>Bu hafta (<strong>${bounds.label}</strong>) henüz tamamlanmış antrenman kaydı yok; programınızdaki seanslar listelenmektedir.</span>
+                </div>
+                <button class="btn-outline" style="font-size:11px; padding:5px 12px; border-radius:14px; border-color:var(--gold); color:var(--gold); font-weight:800; background:rgba(0,0,0,0.3); cursor:pointer;" onclick="setDesktopWeeklyMuscleOffset(-1)" title="Geçen haftanın tamamlanan 3 seansını incele">
+                    ◀ Geçen Haftayı İncele (5 - 11 Ekim)
+                </button>
+            </div>
+        `;
+    }
+
     // Filter pills
     const filterPills = `
         <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:10px;">
@@ -3420,6 +3526,7 @@ function renderDesktopAnalytics() {
             ${filteredMuscles.map(m => {
                 const maxBar = Math.max(22, m.optimalMax + 4);
                 const donePct = Math.min(100, Math.round((m.effectiveDone / maxBar) * 100));
+                const planPct = Math.min(100 - donePct, Math.round((m.effectivePlan / maxBar) * 100));
                 const recs = getDesktopRecommendationsForMuscle(m.id, 3);
                 const isWeak = (m.status === 'unworked' || m.status === 'insufficient');
 
@@ -3441,9 +3548,13 @@ function renderDesktopAnalytics() {
                         <div style="margin-top:10px;">
                             <div style="position:relative; height:12px; background:rgba(255,255,255,0.06); border-radius:6px; overflow:hidden; display:flex;">
                                 <div style="width:${donePct}%; background:${m.statusColor}; height:100%; transition:width 0.4s ease;" title="Yapılan: ${m.effectiveDone.toFixed(1)} Efektif Set"></div>
+                                <div style="width:${planPct}%; background:repeating-linear-gradient(45deg, #f59e0b, #f59e0b 6px, #d97706 6px, #d97706 12px); height:100%; opacity:0.85; transition:width 0.3s ease;" title="Planlanan: ${m.effectivePlan.toFixed(1)} Efektif Set"></div>
                             </div>
                             <div style="display:flex; justify-content:space-between; align-items:center; font-size:10.5px; color:var(--text-secondary); margin-top:4px; flex-wrap:wrap; gap:4px;">
-                                <span>🟢 Yapılan: <strong style="color:#fff;">${m.effectiveDone.toFixed(1)}</strong> set <span style="font-size:9.5px; opacity:0.8;">(${m.doneDirectSets.toFixed(1)} ana + ${m.doneSecondarySets.toFixed(1)} destek)</span></span>
+                                <span>
+                                    🟢 Yapılan: <strong style="color:#fff;">${m.effectiveDone.toFixed(1)}</strong> set
+                                    ${m.effectivePlan > 0 ? ` + 🟡 Planda: <strong style="color:#fcd34d;">${m.effectivePlan.toFixed(1)}</strong> set` : ''}
+                                </span>
                                 <span>🎯 Hedef: <strong style="color:var(--gold);">${m.optimalMin}-${m.optimalMax} set/hf</strong></span>
                             </div>
                         </div>
@@ -3459,6 +3570,12 @@ function renderDesktopAnalytics() {
                                 <div style="font-size:11px; margin-top:2px;">
                                     <span style="color:var(--text-secondary);">✅ Bu Hafta Yapılanlar:</span>
                                     <span style="color:#fff; font-weight:600;">${m.doneExercises.map(escapeHTML).join(', ')}</span>
+                                </div>
+                            ` : ''}
+                            ${m.plannedExercises && m.plannedExercises.length > 0 ? `
+                                <div style="font-size:11px; margin-top:2px;">
+                                    <span style="color:var(--text-secondary);">🟡 Kalan Günlerde Planda:</span>
+                                    <span style="color:#fcd34d; font-weight:600;">${m.plannedExercises.map(pe => `${escapeHTML(pe.name)} (${pe.dayName})`).join(', ')}</span>
                                 </div>
                             ` : ''}
                         </div>
@@ -3534,9 +3651,10 @@ function renderDesktopAnalytics() {
 
     // 2. KÜMÜLATİF ANALİZ VE 5 SÜTUN YÜK DAĞILIMI
     const allLogs = state.workoutLogs || [];
-    const days = state.currentAnalyticsPeriodDays || 7;
+    const days = state.currentAnalyticsPeriodDays !== undefined ? state.currentAnalyticsPeriodDays : 30;
     const now = new Date();
-    const cutoff = days > 0 ? new Date(now.getTime() - (days * 24 * 60 * 60 * 1000)) : null;
+    // Tam gün başlangıcı (gece yarısı) baz alınarak saat farkından ötürü seans kaybı önlenir
+    const cutoff = days > 0 ? new Date(now.getFullYear(), now.getMonth(), now.getDate() - days, 0, 0, 0) : null;
 
     const filteredLogs = cutoff ? allLogs.filter(l => {
         let dt = new Date(l.date);
@@ -3685,6 +3803,8 @@ function renderDesktopAnalytics() {
                 </div>
             </div>
 
+            ${smartBannerHTML}
+            ${sourceButtons}
             ${filterPills}
             ${coachAlertHTML}
             ${muscleCardsHTML}
