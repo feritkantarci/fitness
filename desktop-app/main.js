@@ -5,9 +5,24 @@
  * donanım hızlandırma, sistem bildirimleri ve arka plan Firebase/AI köprüsü.
  */
 
-const { app, BrowserWindow, ipcMain, Notification, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, Notification, shell, protocol, net } = require('electron');
+const { pathToFileURL } = require('url');
 const path = require('path');
 const fs = require('fs');
+
+// Güvenli yerel görsel/medya şeması kaydı
+protocol.registerSchemesAsPrivileged([
+    {
+        scheme: 'fitlab-asset',
+        privileges: {
+            standard: true,
+            secure: true,
+            supportFetchAPI: true,
+            corsEnabled: true,
+            stream: true
+        }
+    }
+]);
 
 // Servisler
 const firebaseService = require('./src/services/firebase-service');
@@ -109,6 +124,46 @@ function createWindow() {
 
 // Uygulama Yaşam Döngüsü
 app.whenReady().then(() => {
+    // Protokol Dinleyicisi (Offline-First Görsel & Medya Sunumu)
+    protocol.handle('fitlab-asset', (request) => {
+        try {
+            const url = new URL(request.url);
+            const relativePath = decodeURIComponent(url.pathname).replace(/^\/+/, '');
+
+            // 1. Paket içi kaynaklar (FitLAB.app/Contents/Resources/assets/...)
+            if (app.isPackaged) {
+                const resPath = path.join(process.resourcesPath, relativePath);
+                if (fs.existsSync(resPath)) {
+                    return net.fetch(pathToFileURL(resPath).toString());
+                }
+            }
+
+            // 2. Geliştirici/Yerel depo kökü (FITNESS/assets/...)
+            const rootPath = path.join(__dirname, '..', relativePath);
+            if (fs.existsSync(rootPath)) {
+                return net.fetch(pathToFileURL(rootPath).toString());
+            }
+
+            // 3. desktop-app klasörü
+            const appPath = path.join(__dirname, relativePath);
+            if (fs.existsSync(appPath)) {
+                return net.fetch(pathToFileURL(appPath).toString());
+            }
+
+            // 4. Renderer klasörü
+            const rendererPath = path.join(__dirname, 'src', 'renderer', relativePath);
+            if (fs.existsSync(rendererPath)) {
+                return net.fetch(pathToFileURL(rendererPath).toString());
+            }
+
+            // 5. Bulut / CDN Yedek Yolu
+            return net.fetch(`https://fitness.kantarci.io/${relativePath}`);
+        } catch (err) {
+            console.error('[FitLAB Asset Protocol Hatası]', err);
+            return new Response('Asset not found', { status: 404 });
+        }
+    });
+
     // Kayıtlı API anahtarını yükle
     loadSavedApiKey();
 
@@ -246,3 +301,14 @@ ipcMain.handle('app:notify', (event, { title, body }) => {
     }
     return false;
 });
+
+// Medya & Görsel Çözümleyici (fitlab-asset:// URL türetici)
+ipcMain.handle('app:resolveAssetUrl', async (event, relativePath) => {
+    if (!relativePath) return '';
+    if (relativePath.startsWith('http://') || relativePath.startsWith('https://') || relativePath.startsWith('data:')) {
+        return relativePath;
+    }
+    const cleanRel = relativePath.replace(/^(\.\/|\/)+/, '');
+    return `fitlab-asset://app/${cleanRel}`;
+});
+

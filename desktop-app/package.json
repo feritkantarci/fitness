@@ -34,6 +34,20 @@
     "directories": {
       "output": "dist"
     },
+    "extraResources": [
+      {
+        "from": "../assets/guides",
+        "to": "assets/guides"
+      },
+      {
+        "from": "../assets/diagrams",
+        "to": "assets/diagrams"
+      },
+      {
+        "from": "../assets/exercises",
+        "to": "assets/exercises"
+      }
+    ],
     "mac": {
       "category": "public.app-category.sports",
       "identity": null,

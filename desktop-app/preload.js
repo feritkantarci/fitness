@@ -20,6 +20,7 @@ contextBridge.exposeInMainWorld('coachAPI', {
     // Akademik Spor Bilimi Analizi & Biyomekanik Atlas
     analyzeHistory: (logs, profile, scaleLogs) => ipcRenderer.invoke('academic:analyze', { logs, profile, scaleLogs }),
     getExerciseCatalog: () => ipcRenderer.invoke('catalog:getExercises'),
+    resolveAssetUrl: (relativePath) => ipcRenderer.invoke('app:resolveAssetUrl', relativePath),
 
     // AI Koçluk & Gemini Reçete & İstişare
     generatePrescription: (payload) => ipcRenderer.invoke('ai:generatePrescription', payload),

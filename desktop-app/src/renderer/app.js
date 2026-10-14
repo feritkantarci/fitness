@@ -147,12 +147,23 @@ const el = {
     inspKeyTag: document.getElementById('inspKeyTag'),
     btnTabForm: document.getElementById('btnTabForm'),
     btnTabAnatomi: document.getElementById('btnTabAnatomi'),
+    inspImageContainer: document.getElementById('inspImageContainer'),
     inspImage: document.getElementById('inspImage'),
     inspImageFallback: document.getElementById('inspImageFallback'),
     inspLengthenedBadge: document.getElementById('inspLengthenedBadge'),
     labResizer: document.getElementById('labResizer'),
     inspActivationBars: document.getElementById('inspActivationBars'),
     inspCueText: document.getElementById('inspCueText'),
+
+    // Egzersiz Görsel Büyütme (Lightbox)
+    imageLightboxModal: document.getElementById('imageLightboxModal'),
+    lightboxImg: document.getElementById('lightboxImg'),
+    lightboxTitle: document.getElementById('lightboxTitle'),
+    lightboxTabBadge: document.getElementById('lightboxTabBadge'),
+    lightboxMuscle: document.getElementById('lightboxMuscle'),
+    lightboxCue: document.getElementById('lightboxCue'),
+    btnLightboxZoom: document.getElementById('btnLightboxZoom'),
+    btnCloseLightbox: document.getElementById('btnCloseLightbox'),
 
     // Sistem & Ayarlar
     btnOpenSettings: document.getElementById('btnOpenSettings'),
@@ -402,6 +413,9 @@ function setupEventListeners() {
 
     // Resizer (Sürüklenebilir Genişlik Ayarı)
     setupLabResizer();
+
+    // Egzersiz Görsel Büyütme Modalı (Lightbox)
+    initImageLightbox();
 }
 
 // ==================== DATA LOADING ====================
@@ -2587,31 +2601,136 @@ function setVisualTab(tabName) {
     updateInspectorImage();
 }
 
-function updateInspectorImage() {
+let currentImageLoadToken = 0;
+
+async function updateInspectorImage() {
     if (!state.selectedExercise) return;
     const ex = state.selectedExercise;
-    // Form sekmesinde sadece Gerçek İnsan Fotoğraflı Form Rehberi (formImage), anatomi sekmesinde anatomi görseli
-    const imgSrc = state.visualTab === 'form' 
-        ? (ex.formImage || null) 
+    // Form sekmesinde öncelikli olarak formImage, yoksa diagramImage; Anatomi sekmesinde anatomiImage, yoksa formImage
+    const rawSrc = state.visualTab === 'form' 
+        ? (ex.formImage || ex.diagramImage || null) 
         : (ex.anatomiImage || ex.formImage || null);
 
+    const token = ++currentImageLoadToken;
     el.inspImageFallback.style.display = 'none';
-    el.inspImage.style.display = 'block';
+    el.inspImage.style.display = 'none';
 
-    if (imgSrc) {
-        el.inspImage.onerror = () => {
+    if (!rawSrc) {
+        el.inspImageFallback.style.display = 'flex';
+        return;
+    }
+
+    const cleanRel = rawSrc.replace(/^(\.\/|\/)+/, '');
+    const cdnUrl = `https://fitness.kantarci.io/${cleanRel}`;
+
+    let resolvedUrl = rawSrc;
+    if (window.coachAPI && window.coachAPI.resolveAssetUrl) {
+        try {
+            resolvedUrl = await window.coachAPI.resolveAssetUrl(rawSrc);
+        } catch (e) {
+            resolvedUrl = `fitlab-asset://app/${cleanRel}`;
+        }
+    } else {
+        resolvedUrl = `fitlab-asset://app/${cleanRel}`;
+    }
+
+    if (token !== currentImageLoadToken) return;
+
+    let triedCdn = false;
+
+    el.inspImage.onload = () => {
+        if (token !== currentImageLoadToken) return;
+        el.inspImage.style.display = 'block';
+        el.inspImageFallback.style.display = 'none';
+    };
+
+    el.inspImage.onerror = () => {
+        if (token !== currentImageLoadToken) return;
+        if (!triedCdn && el.inspImage.src !== cdnUrl) {
+            triedCdn = true;
+            console.log(`[FitLAB Image] Yerel görsel çözümlenemedi, CDN deneniyor: ${cdnUrl}`);
+            el.inspImage.src = cdnUrl;
+        } else {
+            console.warn(`[FitLAB Image] Görsel yüklenemedi: ${rawSrc}`);
             el.inspImage.style.display = 'none';
             el.inspImageFallback.style.display = 'flex';
-        };
-        el.inspImage.onload = () => {
-            el.inspImage.style.display = 'block';
-            el.inspImageFallback.style.display = 'none';
-        };
-        el.inspImage.src = imgSrc;
-    } else {
-        el.inspImage.style.display = 'none';
-        el.inspImageFallback.style.display = 'flex';
+        }
+    };
+
+    el.inspImage.src = resolvedUrl;
+}
+
+function initImageLightbox() {
+    if (!el.imageLightboxModal) return;
+
+    if (el.inspImageContainer) {
+        el.inspImageContainer.addEventListener('click', () => {
+            if (el.inspImage && el.inspImage.style.display !== 'none' && el.inspImage.src) {
+                openImageLightbox();
+            }
+        });
     }
+
+    if (el.btnCloseLightbox) {
+        el.btnCloseLightbox.addEventListener('click', closeImageLightbox);
+    }
+
+    el.imageLightboxModal.addEventListener('click', (e) => {
+        if (e.target === el.imageLightboxModal) {
+            closeImageLightbox();
+        }
+    });
+
+    if (el.btnLightboxZoom && el.lightboxImg) {
+        el.btnLightboxZoom.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isZoomed = el.lightboxImg.classList.toggle('zoomed');
+            el.btnLightboxZoom.textContent = isZoomed ? '🔍 Sığdır' : '🔍 %150 Büyüt';
+        });
+    }
+
+    if (el.lightboxImg) {
+        el.lightboxImg.addEventListener('click', () => {
+            const isZoomed = el.lightboxImg.classList.toggle('zoomed');
+            if (el.btnLightboxZoom) {
+                el.btnLightboxZoom.textContent = isZoomed ? '🔍 Sığdır' : '🔍 %150 Büyüt';
+            }
+        });
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && el.imageLightboxModal && el.imageLightboxModal.style.display === 'flex') {
+            closeImageLightbox();
+        }
+    });
+}
+
+function openImageLightbox() {
+    const ex = state.selectedExercise;
+    if (!ex || !el.imageLightboxModal || !el.lightboxImg) return;
+
+    el.lightboxImg.src = el.inspImage.src;
+    el.lightboxImg.classList.remove('zoomed');
+    if (el.btnLightboxZoom) el.btnLightboxZoom.textContent = '🔍 %150 Büyüt';
+
+    if (el.lightboxTitle) el.lightboxTitle.textContent = ex.name;
+    if (el.lightboxTabBadge) {
+        el.lightboxTabBadge.textContent = state.visualTab === 'form' ? '📐 Form Şeması & Kılavuz' : '🧬 Kas Anatomisi & Odak';
+    }
+    if (el.lightboxMuscle) {
+        el.lightboxMuscle.textContent = `${ex.primary} Odaklı`;
+    }
+
+    if (el.lightboxCue) {
+        el.lightboxCue.innerHTML = `<strong>💡 Biyomekanik Form Notu:</strong> ${escapeHTML(ex.cue || 'Standart eklem açısı ve form hizalamasına dikkat edin.')}`;
+    }
+
+    el.imageLightboxModal.style.display = 'flex';
+}
+
+function closeImageLightbox() {
+    if (el.imageLightboxModal) el.imageLightboxModal.style.display = 'none';
+    if (el.lightboxImg) el.lightboxImg.classList.remove('zoomed');
 }
 
 function renderActivationBars(ex) {

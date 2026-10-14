@@ -554,11 +554,14 @@
                 </div>
 
                 <!-- Görsel Alanı -->
-                <div class="inspector-image-container">
+                <div class="inspector-image-container" id="inspImageContainer" title="Görseli büyütmek için tıklayın">
                     <img id="inspImage" src="" alt="Egzersiz Görseli" />
                     <div class="image-fallback" id="inspImageFallback" style="display: none;">
                         <span>📷</span>
                         <p>Görsel Hazırlanıyor</p>
+                    </div>
+                    <div class="image-zoom-overlay" id="inspZoomOverlay">
+                        <span class="zoom-badge">🔍 Büyüt & İncele</span>
                     </div>
                 </div>
 
@@ -770,6 +773,31 @@
                     🛌 Bu Günü Dinlenmeye Al
                 </button>
                 <button class="btn-secondary" onclick="closeDesktopDayScheduleModal()">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Egzersiz Görseli Büyütme (Lightbox Modal) -->
+    <div class="modal-backdrop" id="imageLightboxModal" style="display:none;">
+        <div class="lightbox-modal-box">
+            <div class="lightbox-header">
+                <div class="lightbox-title-wrap">
+                    <span class="lightbox-badge" id="lightboxTabBadge">📐 Form Şeması</span>
+                    <h3 id="lightboxTitle">Egzersiz Form Kılavuzu</h3>
+                    <span class="lightbox-muscle" id="lightboxMuscle">Göğüs Odaklı</span>
+                </div>
+                <div class="lightbox-actions">
+                    <button class="btn-lightbox-action" id="btnLightboxZoom">🔍 %150 Büyüt</button>
+                    <button class="btn-lightbox-close" id="btnCloseLightbox" title="Kapat (ESC)">✕</button>
+                </div>
+            </div>
+            <div class="lightbox-body" id="lightboxBody">
+                <div class="lightbox-image-wrapper" id="lightboxImgWrapper">
+                    <img id="lightboxImg" src="" alt="Büyütülmüş Egzersiz Görseli" />
+                </div>
+            </div>
+            <div class="lightbox-footer" id="lightboxFooter">
+                <div class="lightbox-cue" id="lightboxCue"></div>
             </div>
         </div>
     </div>
