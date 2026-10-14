@@ -15468,7 +15468,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=179')
+                navigator.serviceWorker.register('./sw.js?v=180')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         // Yeni sürümü hemen kontrol et
@@ -16307,7 +16307,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         </div>
                     </div>
                 `;
+            }
 
+            if (visualsHtml) {
                 formContainer.innerHTML = `
                     ${visualsHtml}
                     <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-bottom:10px;">
@@ -16397,7 +16399,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 if (btnAdd) {
                     btnAdd.innerText = (pickerContext.mode === 'replace') ? '✓ Bu Alternatifi Seç' : '➕ Programa Ekle';
                     btnAdd.onclick = () => {
-                        selectExerciseFromPicker(exId);
+                        selectExerciseFromPicker(ex.id);
                         closeExerciseDetailModal();
                     };
                 }
@@ -16406,14 +16408,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     btnAlt.style.display = 'inline-block';
                     btnAlt.onclick = () => {
                         closeExerciseDetailModal();
-                        openAlternativeModal(exId, pickerContext.scope || 'studio');
+                        openAlternativeModal(ex.id, pickerContext.scope || 'studio');
                     };
                 }
                 if (btnAdd) {
                     btnAdd.innerText = '➕ Programa Ekle';
                     btnAdd.onclick = () => {
                         closeExerciseDetailModal();
-                        openAddToProgramOptions(exId);
+                        openAddToProgramOptions(ex.id);
                     };
                 }
             }
