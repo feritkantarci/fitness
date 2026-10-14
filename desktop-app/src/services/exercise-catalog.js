@@ -3482,7 +3482,123 @@ const STATIC_FALLBACK_CATALOG = [
   }
 ];
 
+// 95 Onaylı OpenGym 3D Canlı Animasyon Kataloğu
+const OPENGYM_GLOBAL_CATALOG = {
+  "db_bench_press": { id: "0289", name: "Dambıl Bench Press", clip: "assets/opengym/clips/0289.mp4", still: "assets/opengym/stills/0289.webp" },
+  "db_incline_press": { id: "0314", name: "Incline Dambıl Press", clip: "assets/opengym/clips/0314.mp4", still: "assets/opengym/stills/0314.webp" },
+  "db_floor_press": { id: "3668", name: "Dambıl Floor Press", clip: "assets/opengym/clips/3668.mp4", still: "assets/opengym/stills/3668.webp" },
+  "db_overhead_press": { id: "0405", name: "Oturarak Dambıl Omuz Presi (Seated)", clip: "assets/opengym/clips/0405.mp4", still: "assets/opengym/stills/0405.webp" },
+  "db_standing_overhead_press": { id: "0426", name: "Ayakta Dambıl Omuz Presi (Standing)", clip: "assets/opengym/clips/0426.mp4", still: "assets/opengym/stills/0426.webp" },
+  "db_arnold_press": { id: "2137", name: "Arnold Press", clip: "assets/opengym/clips/2137.mp4", still: "assets/opengym/stills/2137.webp" },
+  "db_lateral_raise": { id: "0334", name: "Dambıl Lateral Raise", clip: "assets/opengym/clips/0334.mp4", still: "assets/opengym/stills/0334.webp" },
+  "db_triceps_overhead": { id: "2188", name: "Dambıl Başüstü Triceps", clip: "assets/opengym/clips/2188.mp4", still: "assets/opengym/stills/2188.webp" },
+  "db_skullcrusher": { id: "2589", name: "Dambıl Skullcrusher", clip: "assets/opengym/clips/2589.mp4", still: "assets/opengym/stills/2589.webp" },
+  "db_goblet_squat": { id: "4816", name: "Dambıl Goblet Squat", clip: "assets/opengym/clips/4816.mp4", still: "assets/opengym/stills/4816.webp" },
+  "db_front_squat": { id: "1760", name: "Çift Dambıl Ön Squat (Front Squat)", clip: "assets/opengym/clips/1760.mp4", still: "assets/opengym/stills/1760.webp" },
+  "db_bulgarian_squat": { id: "7590", name: "Bulgar Split Squat", clip: "assets/opengym/clips/7590.mp4", still: "assets/opengym/stills/7590.webp" },
+  "db_walking_lunge": { id: "4295", name: "Walking Lunge", clip: "assets/opengym/clips/4295.mp4", still: "assets/opengym/stills/4295.webp" },
+  "db_reverse_lunge": { id: "0381", name: "Reverse Lunge", clip: "assets/opengym/clips/0381.mp4", still: "assets/opengym/stills/0381.webp" },
+  "db_rdl": { id: "1459", name: "Dambıl RDL", clip: "assets/opengym/clips/1459.mp4", still: "assets/opengym/stills/1459.webp" },
+  "db_single_leg_rdl": { id: "1757", name: "Tek Bacak RDL", clip: "assets/opengym/clips/1757.mp4", still: "assets/opengym/stills/1757.webp" },
+  "db_saw_row": { id: "0292", name: "Dambıl Saw Row", clip: "assets/opengym/clips/0292.mp4", still: "assets/opengym/stills/0292.webp" },
+  "db_chest_supported_row": { id: "0293", name: "Göğüs Destekli Dambıl Row", clip: "assets/opengym/clips/0293.mp4", still: "assets/opengym/stills/0293.webp" },
+  "db_renegade_row": { id: "2980", name: "Renegade Row", clip: "assets/opengym/clips/2980.mp4", still: "assets/opengym/stills/2980.webp" },
+  "db_pullover": { id: "0375", name: "Dambıl Pullover", clip: "assets/opengym/clips/0375.mp4", still: "assets/opengym/stills/0375.webp" },
+  "db_hammer_curl": { id: "0313", name: "Dambıl Hammer Curl", clip: "assets/opengym/clips/0313.mp4", still: "assets/opengym/stills/0313.webp" },
+  "db_incline_curl": { id: "0317", name: "Incline Dambıl Curl", clip: "assets/opengym/clips/0317.mp4", still: "assets/opengym/stills/0317.webp" },
+  "db_farmers_walk": { id: "2917", name: "Dambıl Çiftçi Yürüyüşü (Farmer's Walk)", clip: "assets/opengym/clips/2917.mp4", still: "assets/opengym/stills/2917.webp" },
+  "db_suitcase_carry": { id: "4133", name: "Suitcase Carry", clip: "assets/opengym/clips/4133.mp4", still: "assets/opengym/stills/4133.webp" },
+  "db_russian_twist": { id: "3449", name: "Dambıl Russian Twist", clip: "assets/opengym/clips/3449.mp4", still: "assets/opengym/stills/3449.webp" },
+  "db_snatch": { id: "3888", name: "Dambıl Snatch", clip: "assets/opengym/clips/3888.mp4", still: "assets/opengym/stills/3888.webp" },
+  "db_swing": { id: "0549", name: "Dambıl Swing", clip: "assets/opengym/clips/0549.mp4", still: "assets/opengym/stills/0549.webp" },
+  "kb_swing": { id: "0549", name: "Kettlebell Swing", clip: "assets/opengym/clips/0549.mp4", still: "assets/opengym/stills/0549.webp" },
+  "kb_clean": { id: "4543", name: "Kettlebell Clean", clip: "assets/opengym/clips/4543.mp4", still: "assets/opengym/stills/4543.webp" },
+  "kb_press": { id: "0538", name: "Kettlebell Press", clip: "assets/opengym/clips/0538.mp4", still: "assets/opengym/stills/0538.webp" },
+  "kb_half_snatch": { id: "0529", name: "Kettlebell Half Snatch", clip: "assets/opengym/clips/0529.mp4", still: "assets/opengym/stills/0529.webp" },
+  "kb_goblet_squat": { id: "2993", name: "Kettlebell Goblet Squat", clip: "assets/opengym/clips/2993.mp4", still: "assets/opengym/stills/2993.webp" },
+  "kb_gorilla_row": { id: "0522", name: "Kettlebell Gorilla Row", clip: "assets/opengym/clips/0522.mp4", still: "assets/opengym/stills/0522.webp" },
+  "kb_windmill": { id: "0554", name: "Kettlebell Windmill", clip: "assets/opengym/clips/0554.mp4", still: "assets/opengym/stills/0554.webp" },
+  "kb_turkish_getup": { id: "4057", name: "Kettlebell Turkish Get-Up", clip: "assets/opengym/clips/4057.mp4", still: "assets/opengym/stills/4057.webp" },
+  "kb_halo": { id: "6077", name: "Kettlebell Halo", clip: "assets/opengym/clips/6077.mp4", still: "assets/opengym/stills/6077.webp" },
+  "kb_thruster": { id: "0538", name: "Kettlebell Thruster", clip: "assets/opengym/clips/0538.mp4", still: "assets/opengym/stills/0538.webp" },
+  "bb_bench_press": { id: "0025", name: "Barbell Bench Press", clip: "assets/opengym/clips/0025.mp4", still: "assets/opengym/stills/0025.webp" },
+  "bb_incline_bench": { id: "0047", name: "Incline Barbell Bench Press", clip: "assets/opengym/clips/0047.mp4", still: "assets/opengym/stills/0047.webp" },
+  "bb_overhead_press": { id: "0091", name: "Overhead Press (Askeri Pres)", clip: "assets/opengym/clips/0091.mp4", still: "assets/opengym/stills/0091.webp" },
+  "bb_back_squat": { id: "3593", name: "Barbell Back Squat", clip: "assets/opengym/clips/3593.mp4", still: "assets/opengym/stills/3593.webp" },
+  "bb_front_squat": { id: "0042", name: "Barbell Front Squat", clip: "assets/opengym/clips/0042.mp4", still: "assets/opengym/stills/0042.webp" },
+  "bb_deadlift": { id: "1543", name: "Geleneksel Deadlift (Conventional)", clip: "assets/opengym/clips/1543.mp4", still: "assets/opengym/stills/1543.webp" },
+  "bb_rdl": { id: "0085", name: "Barbell RDL", clip: "assets/opengym/clips/0085.mp4", still: "assets/opengym/stills/0085.webp" },
+  "bb_hip_thrust": { id: "0044", name: "Barbell Hip Thrust", clip: "assets/opengym/clips/0044.mp4", still: "assets/opengym/stills/0044.webp" },
+  "bb_bent_over_row": { id: "0027", name: "Bent-Over Barbell Row", clip: "assets/opengym/clips/0027.mp4", still: "assets/opengym/stills/0027.webp" },
+  "bb_pendlay_row": { id: "3017", name: "Pendlay Row", clip: "assets/opengym/clips/3017.mp4", still: "assets/opengym/stills/3017.webp" },
+  "bb_biceps_curl": { id: "0031", name: "Barbell Biceps Curl", clip: "assets/opengym/clips/0031.mp4", still: "assets/opengym/stills/0031.webp" },
+  "bb_close_grip_bench": { id: "0030", name: "Close Grip Bench Press", clip: "assets/opengym/clips/0030.mp4", still: "assets/opengym/stills/0030.webp" },
+  "mach_lat_pulldown": { id: "0150", name: "Lat Pulldown", clip: "assets/opengym/clips/0150.mp4", still: "assets/opengym/stills/0150.webp" },
+  "mach_cable_row": { id: "0861", name: "Seated Cable Row", clip: "assets/opengym/clips/0861.mp4", still: "assets/opengym/stills/0861.webp" },
+  "mach_face_pull": { id: "5656", name: "Kablo Face Pull", clip: "assets/opengym/clips/5656.mp4", still: "assets/opengym/stills/5656.webp" },
+  "mach_cable_crossover": { id: "8141", name: "Cable Crossover", clip: "assets/opengym/clips/8141.mp4", still: "assets/opengym/stills/8141.webp" },
+  "mach_pec_deck": { id: "1030", name: "Pec Deck Fly", clip: "assets/opengym/clips/1030.mp4", still: "assets/opengym/stills/1030.webp" },
+  "mach_triceps_pushdown": { id: "0241", name: "Kablo Triceps Pushdown", clip: "assets/opengym/clips/0241.mp4", still: "assets/opengym/stills/0241.webp" },
+  "mach_cable_biceps": { id: "1607", name: "Kablo Biceps Curl", clip: "assets/opengym/clips/1607.mp4", still: "assets/opengym/stills/1607.webp" },
+  "mach_cable_lateral": { id: "0178", name: "Kablo Lateral Raise", clip: "assets/opengym/clips/0178.mp4", still: "assets/opengym/stills/0178.webp" },
+  "mach_leg_press": { id: "0599", name: "Leg Press", clip: "assets/opengym/clips/0599.mp4", still: "assets/opengym/stills/0599.webp" },
+  "mach_leg_extension": { id: "0585", name: "Leg Extension", clip: "assets/opengym/clips/0585.mp4", still: "assets/opengym/stills/0585.webp" },
+  "mach_leg_curl": { id: "3195", name: "Lying Leg Curl", clip: "assets/opengym/clips/3195.mp4", still: "assets/opengym/stills/3195.webp" },
+  "mach_calf_raise": { id: "3018", name: "Standing Calf Raise", clip: "assets/opengym/clips/3018.mp4", still: "assets/opengym/stills/3018.webp" },
+  "mach_cable_woodchopper": { id: "11251", name: "Cable Woodchopper", clip: "assets/opengym/clips/11251.mp4", still: "assets/opengym/stills/11251.webp" },
+  "bw_pushup": { id: "0662", name: "Klasik Şınav (Push-Up)", clip: "assets/opengym/clips/0662.mp4", still: "assets/opengym/stills/0662.webp" },
+  "bw_decline_pushup": { id: "0662", name: "Decline Push-Up", clip: "assets/opengym/clips/0662.mp4", still: "assets/opengym/stills/0662.webp" },
+  "bw_diamond_pushup": { id: "0283", name: "Elmas Şınav (Diamond Push-Up)", clip: "assets/opengym/clips/0283.mp4", still: "assets/opengym/stills/0283.webp" },
+  "bw_dips": { id: "1399", name: "Parallel Bar Dips", clip: "assets/opengym/clips/1399.mp4", still: "assets/opengym/stills/1399.webp" },
+  "bw_pullup": { id: "0652", name: "Barfiks (Pull-Up)", clip: "assets/opengym/clips/0652.mp4", still: "assets/opengym/stills/0652.webp" },
+  "bw_chinup": { id: "0670", name: "Ters Tutuş Barfiks (Chin-Up)", clip: "assets/opengym/clips/0670.mp4", still: "assets/opengym/stills/0670.webp" },
+  "bw_inverted_row": { id: "0498", name: "Inverted Row", clip: "assets/opengym/clips/0498.mp4", still: "assets/opengym/stills/0498.webp" },
+  "bw_air_squat": { id: "3948", name: "Vücut Ağırlığı Squat", clip: "assets/opengym/clips/3948.mp4", still: "assets/opengym/stills/3948.webp" },
+  "bw_jump_squat": { id: "3222", name: "Zıplayan Squat (Jump Squat)", clip: "assets/opengym/clips/3222.mp4", still: "assets/opengym/stills/3222.webp" },
+  "bw_glute_bridge": { id: "3013", name: "Glute Bridge", clip: "assets/opengym/clips/3013.mp4", still: "assets/opengym/stills/3013.webp" },
+  "bw_hanging_knee_raise": { id: "9819", name: "Asılarak Diz Çekme", clip: "assets/opengym/clips/9819.mp4", still: "assets/opengym/stills/9819.webp" },
+  "bw_hollow_body": { id: "1246", name: "Hollow Body Hold", clip: "assets/opengym/clips/1246.mp4", still: "assets/opengym/stills/1246.webp" },
+  "bw_burpee": { id: "1160", name: "Burpee", clip: "assets/opengym/clips/1160.mp4", still: "assets/opengym/stills/1160.webp" },
+  "bw_mountain_climber": { id: "0630", name: "Dağ Tırmanışı (Mountain Climber)", clip: "assets/opengym/clips/0630.mp4", still: "assets/opengym/stills/0630.webp" },
+  "kneeling_plate_front_raise": { id: "0310", name: "Dizüstü Ön Omuz Kaldırma", clip: "assets/opengym/clips/0310.mp4", still: "assets/opengym/stills/0310.webp" },
+  "half_kneeling_plate_chop": { id: "4572", name: "Half-Kneeling Rotational Chop", clip: "assets/opengym/clips/4572.mp4", still: "assets/opengym/stills/4572.webp" },
+  "db_thruster": { id: "2968", name: "Dambıl Thruster", clip: "assets/opengym/clips/2968.mp4", still: "assets/opengym/stills/2968.webp" },
+  "db_push_press": { id: "0426", name: "Dambıl Push Press", clip: "assets/opengym/clips/0426.mp4", still: "assets/opengym/stills/0426.webp" },
+  "db_renegade_pushup": { id: "4736", name: "Renegade Row + Push-Up", clip: "assets/opengym/clips/4736.mp4", still: "assets/opengym/stills/4736.webp" },
+  "bear_crawl_pull_through": { id: "3360", name: "Bear Crawl Dumbbell Pull-Through", clip: "assets/opengym/clips/3360.mp4", still: "assets/opengym/stills/3360.webp" },
+  "db_clean_and_press": { id: "3400", name: "Tek Kol Dambıl Clean & Press", clip: "assets/opengym/clips/3400.mp4", still: "assets/opengym/stills/3400.webp" },
+  "db_manmaker": { id: "3886", name: "Dambıl Manmaker", clip: "assets/opengym/clips/3886.mp4", still: "assets/opengym/stills/3886.webp" },
+  "waiters_carry": { id: "9697", name: "Tek Kol Waiter's Walk", clip: "assets/opengym/clips/9697.mp4", still: "assets/opengym/stills/9697.webp" },
+  "cross_body_carry": { id: "2911", name: "Cross-Body Carry", clip: "assets/opengym/clips/2911.mp4", still: "assets/opengym/stills/2911.webp" },
+  "lunge_with_twist": { id: "5069", name: "Dambıl Lunge Rotasyonu", clip: "assets/opengym/clips/5069.mp4", still: "assets/opengym/stills/5069.webp" },
+  "step_up_press": { id: "4185", name: "Box Step-Up + Press", clip: "assets/opengym/clips/4185.mp4", still: "assets/opengym/stills/4185.webp" },
+  "bb_thruster": { id: "1540", name: "Barbell Thruster", clip: "assets/opengym/clips/1540.mp4", still: "assets/opengym/stills/1540.webp" },
+  "bb_hang_power_clean": { id: "5704", name: "Barbell Hang Power Clean", clip: "assets/opengym/clips/5704.mp4", still: "assets/opengym/stills/5704.webp" },
+  "bb_push_press": { id: "1540", name: "Barbell Push Press", clip: "assets/opengym/clips/1540.mp4", still: "assets/opengym/stills/1540.webp" },
+  "bb_zercher_squat": { id: "5670", name: "Zercher Squat", clip: "assets/opengym/clips/5670.mp4", still: "assets/opengym/stills/5670.webp" },
+  "bb_landmine_squat_press": { id: "1540", name: "Landmine Squat to Press", clip: "assets/opengym/clips/1540.mp4", still: "assets/opengym/stills/1540.webp" },
+  "db_standing_calf_raise": { id: "0417", name: "Ayakta Dambıl Calf Raise", clip: "assets/opengym/clips/0417.mp4", still: "assets/opengym/stills/0417.webp" },
+  "db_lying_leg_curl": { id: "6161", name: "Dambıl ile Yatarak Bacak Bükme", clip: "assets/opengym/clips/6161.mp4", still: "assets/opengym/stills/6161.webp" }
+};
+
+function enrichExerciseWithOpengym(ex) {
+    const og = OPENGYM_GLOBAL_CATALOG[ex.id] || null;
+    return {
+        ...ex,
+        opengym: og ? {
+            id: og.id,
+            name: og.name,
+            clip: og.clip,
+            still: og.still
+        } : null,
+        videoClip: og ? og.clip : null,
+        videoStill: og ? og.still : null,
+        hasVideo: !!og
+    };
+}
+
 function getFullCatalog() {
+    let rawCatalog = STATIC_FALLBACK_CATALOG;
     try {
         const candidatePaths = [
             path.join(__dirname, "../../../index.html"),
@@ -3498,16 +3614,13 @@ function getFullCatalog() {
         if (html) {
             const dbMatch = html.match(/const EXERCISES_DB = (\[[\s\S]*?\]);/m);
             const egmMatch = html.match(/const exerciseGuideMap = ({[\s\S]*?^        };)/m);
-            const glMatch = html.match(/const guideLibrary = ({[\s\S]*?^        };)/m);
-            if (dbMatch && egmMatch && glMatch) {
-                let guideLibrary = {};
-                eval("guideLibrary = " + glMatch[1].replace(/;$/, ""));
+            if (dbMatch && egmMatch) {
                 let exerciseGuideMap = {};
                 eval("exerciseGuideMap = " + egmMatch[1].replace(/;$/, ""));
                 let EXERCISES_DB = [];
                 eval("EXERCISES_DB = " + dbMatch[1]);
 
-                return EXERCISES_DB.map(ex => {
+                rawCatalog = EXERCISES_DB.map(ex => {
                     const guide = exerciseGuideMap[ex.id] || {};
                     const biomech = academicEngine.resolveExerciseBiomechanics(ex.name);
                     return {
@@ -3534,7 +3647,7 @@ function getFullCatalog() {
     } catch (e) {
         // Fallback to static catalog
     }
-    return STATIC_FALLBACK_CATALOG;
+    return rawCatalog.map(enrichExerciseWithOpengym);
 }
 
 function findExercise(query) {
@@ -3546,5 +3659,6 @@ function findExercise(query) {
 
 module.exports = {
     getFullCatalog,
-    findExercise
+    findExercise,
+    OPENGYM_GLOBAL_CATALOG
 };

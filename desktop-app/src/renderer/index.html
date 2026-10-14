@@ -547,21 +547,23 @@
                     <span class="tag-key" id="inspKeyTag">ex_bench_press</span>
                 </div>
 
-                <!-- Görsel Sekmeleri (Form & Anatomi) -->
+                <!-- Görsel Sekmeleri (OpenGym 3D Canlı Animasyon, Form & Anatomi) -->
                 <div class="visual-tabs">
-                    <button class="vtab-btn active" id="btnTabForm" data-tab="form">📐 Form Şeması & Kılavuz</button>
-                    <button class="vtab-btn" id="btnTabAnatomi" data-tab="anatomi">🧬 Kas Anatomisi & Odak</button>
+                    <button class="vtab-btn active" id="btnTabOpengym" data-tab="opengym">⚡ 3D Canlı Animasyon</button>
+                    <button class="vtab-btn" id="btnTabForm" data-tab="form">📐 Form Şeması</button>
+                    <button class="vtab-btn" id="btnTabAnatomi" data-tab="anatomi">🧬 Kas Anatomisi</button>
                 </div>
 
-                <!-- Görsel Alanı -->
-                <div class="inspector-image-container" id="inspImageContainer" title="Görseli büyütmek için tıklayın">
-                    <img id="inspImage" src="" alt="Egzersiz Görseli" />
+                <!-- Görsel / Video Alanı -->
+                <div class="inspector-image-container" id="inspImageContainer" title="Tam ekran büyütmek için tıklayın">
+                    <video id="inspVideo" autoplay loop muted playsinline style="display:none; width:100%; height:100%; object-fit:contain; border-radius:12px; background:#000;"></video>
+                    <img id="inspImage" src="" alt="Egzersiz Görseli" style="display:none;" />
                     <div class="image-fallback" id="inspImageFallback" style="display: none;">
                         <span>📷</span>
                         <p>Görsel Hazırlanıyor</p>
                     </div>
                     <div class="image-zoom-overlay" id="inspZoomOverlay">
-                        <span class="zoom-badge">🔍 Büyüt & İncele</span>
+                        <span class="zoom-badge" id="inspZoomBadge">⚡ 3D Tam Ekran</span>
                     </div>
                 </div>
 
@@ -793,7 +795,8 @@
             </div>
             <div class="lightbox-body" id="lightboxBody">
                 <div class="lightbox-image-wrapper" id="lightboxImgWrapper">
-                    <img id="lightboxImg" src="" alt="Büyütülmüş Egzersiz Görseli" />
+                    <video id="lightboxVideo" autoplay loop muted playsinline style="display:none; max-width:100%; max-height:calc(88vh - 150px); object-fit:contain; border-radius:8px;"></video>
+                    <img id="lightboxImg" src="" alt="Büyütülmüş Egzersiz Görseli" style="display:none;" />
                 </div>
             </div>
             <div class="lightbox-footer" id="lightboxFooter">

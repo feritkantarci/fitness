@@ -145,11 +145,14 @@ const el = {
     inspTitle: document.getElementById('inspTitle'),
     inspMuscleTag: document.getElementById('inspMuscleTag'),
     inspKeyTag: document.getElementById('inspKeyTag'),
+    btnTabOpengym: document.getElementById('btnTabOpengym'),
     btnTabForm: document.getElementById('btnTabForm'),
     btnTabAnatomi: document.getElementById('btnTabAnatomi'),
     inspImageContainer: document.getElementById('inspImageContainer'),
+    inspVideo: document.getElementById('inspVideo'),
     inspImage: document.getElementById('inspImage'),
     inspImageFallback: document.getElementById('inspImageFallback'),
+    inspZoomBadge: document.getElementById('inspZoomBadge'),
     inspLengthenedBadge: document.getElementById('inspLengthenedBadge'),
     labResizer: document.getElementById('labResizer'),
     inspActivationBars: document.getElementById('inspActivationBars'),
@@ -157,6 +160,7 @@ const el = {
 
     // Egzersiz Görsel Büyütme (Lightbox)
     imageLightboxModal: document.getElementById('imageLightboxModal'),
+    lightboxVideo: document.getElementById('lightboxVideo'),
     lightboxImg: document.getElementById('lightboxImg'),
     lightboxTitle: document.getElementById('lightboxTitle'),
     lightboxTabBadge: document.getElementById('lightboxTabBadge'),
@@ -402,6 +406,12 @@ function setupEventListeners() {
     el.btnCloseInspector.addEventListener('click', () => {
         closeInspector();
     });
+
+    if (el.btnTabOpengym) {
+        el.btnTabOpengym.addEventListener('click', () => {
+            setVisualTab('opengym');
+        });
+    }
 
     el.btnTabForm.addEventListener('click', () => {
         setVisualTab('form');
@@ -2462,15 +2472,26 @@ function renderLabGrid(exercises) {
         const isActive = state.selectedExercise && state.selectedExercise.id === ex.id;
         const isExcluded = (state.excludedExerciseIds || []).includes(ex.id);
         const typeLabel = ex.typeLabel ? ex.typeLabel.split(' ')[0] : 'Kuvvet';
+        const has3d = !!(ex.opengym && ex.opengym.clip);
+        const stillRel = (ex.opengym && ex.opengym.still) ? ex.opengym.still : (ex.formImage || '');
+        const stillPath = stillRel ? `fitlab-asset://app/${stillRel.replace(/^(\.\/|\/)+/, '')}` : '';
 
         return `
             <div class="lab-card ${isActive ? 'active' : ''} ${isExcluded ? 'is-card-excluded' : ''}" data-id="${ex.id}">
-                <div class="lab-card-header">
-                    <div class="lab-card-title">${ex.name} ${isExcluded ? '<span style="color:#f87171; font-size:10px; font-weight:800; margin-left:4px;">[GİZLİ]</span>' : ''}</div>
-                </div>
-                <div class="lab-card-tags">
-                    <span class="muscle-pill">${ex.primary}</span>
-                    <span class="type-pill">${typeLabel}</span>
+                ${stillPath ? `
+                    <div class="lab-card-thumb-wrap">
+                        <img class="lab-card-thumb" src="${stillPath}" alt="${escapeHTML(ex.name)}" loading="lazy" onerror="this.parentElement.style.display='none'" />
+                        ${has3d ? `<span class="badge-card-3d">▶ 3D</span>` : ''}
+                    </div>
+                ` : ''}
+                <div class="lab-card-info">
+                    <div class="lab-card-header">
+                        <div class="lab-card-title">${escapeHTML(ex.name)} ${isExcluded ? '<span style="color:#f87171; font-size:10px; font-weight:800; margin-left:4px;">[GİZLİ]</span>' : ''}</div>
+                    </div>
+                    <div class="lab-card-tags">
+                        <span class="muscle-pill">${escapeHTML(ex.primary)}</span>
+                        <span class="type-pill">${escapeHTML(typeLabel)}</span>
+                    </div>
                 </div>
             </div>
         `;
@@ -2587,7 +2608,14 @@ function selectLabExercise(ex) {
         el.inspCueText.textContent = ex.cue || 'Standart biyomekanik form ve eklem hizalanmasına dikkat edin.';
     }
 
-    // Görseli Güncelle
+    // OpenGym 3D videosu varsa varsayılan olarak opengym sekmesine geç, yoksa form sekmesine
+    if (ex.opengym && ex.opengym.clip) {
+        state.visualTab = 'opengym';
+    } else if (state.visualTab === 'opengym') {
+        state.visualTab = 'form';
+    }
+
+    // Görsel / Videoyu Güncelle
     updateInspectorImage();
 
     // Kas Aktivasyon Barlarını Oluştur
@@ -2596,8 +2624,9 @@ function selectLabExercise(ex) {
 
 function setVisualTab(tabName) {
     state.visualTab = tabName;
-    el.btnTabForm.classList.toggle('active', tabName === 'form');
-    el.btnTabAnatomi.classList.toggle('active', tabName === 'anatomi');
+    if (el.btnTabOpengym) el.btnTabOpengym.classList.toggle('active', tabName === 'opengym');
+    if (el.btnTabForm) el.btnTabForm.classList.toggle('active', tabName === 'form');
+    if (el.btnTabAnatomi) el.btnTabAnatomi.classList.toggle('active', tabName === 'anatomi');
     updateInspectorImage();
 }
 
@@ -2606,14 +2635,62 @@ let currentImageLoadToken = 0;
 async function updateInspectorImage() {
     if (!state.selectedExercise) return;
     const ex = state.selectedExercise;
-    // Form sekmesinde öncelikli olarak formImage, yoksa diagramImage; Anatomi sekmesinde anatomiImage, yoksa formImage
+    const token = ++currentImageLoadToken;
+
+    // Elementleri sıfırla
+    el.inspImageFallback.style.display = 'none';
+    if (el.inspVideo) {
+        try { el.inspVideo.pause(); } catch(e) {}
+        el.inspVideo.style.display = 'none';
+        el.inspVideo.src = '';
+    }
+    el.inspImage.style.display = 'none';
+
+    const hasOpengym = !!(ex.opengym && ex.opengym.clip);
+    if (el.btnTabOpengym) {
+        el.btnTabOpengym.style.display = hasOpengym ? 'inline-flex' : 'none';
+        if (!hasOpengym && state.visualTab === 'opengym') {
+            state.visualTab = 'form';
+        }
+    }
+
+    if (el.btnTabOpengym) el.btnTabOpengym.classList.toggle('active', state.visualTab === 'opengym');
+    if (el.btnTabForm) el.btnTabForm.classList.toggle('active', state.visualTab === 'form');
+    if (el.btnTabAnatomi) el.btnTabAnatomi.classList.toggle('active', state.visualTab === 'anatomi');
+
+    // 1. Durum: OpenGym 3D Canlı Animasyon (Video)
+    if (state.visualTab === 'opengym' && hasOpengym && el.inspVideo) {
+        if (el.inspZoomBadge) el.inspZoomBadge.textContent = '⚡ 3D Tam Ekran';
+        const rawClip = ex.opengym.clip;
+        const rawStill = ex.opengym.still;
+        const cleanClip = rawClip.replace(/^(\.\/|\/)+/, '');
+        const cleanStill = rawStill.replace(/^(\.\/|\/)+/, '');
+
+        let resolvedClip = `fitlab-asset://app/${cleanClip}`;
+        let resolvedStill = `fitlab-asset://app/${cleanStill}`;
+
+        if (window.coachAPI && window.coachAPI.resolveAssetUrl) {
+            try {
+                resolvedClip = await window.coachAPI.resolveAssetUrl(rawClip);
+                resolvedStill = await window.coachAPI.resolveAssetUrl(rawStill);
+            } catch(e) {}
+        }
+
+        if (token !== currentImageLoadToken) return;
+
+        el.inspVideo.poster = resolvedStill;
+        el.inspVideo.src = resolvedClip;
+        el.inspVideo.style.display = 'block';
+        el.inspVideo.play().catch(() => {});
+        return;
+    }
+
+    // 2. Durum: Statik Form veya Kas Anatomisi Görseli
+    if (el.inspZoomBadge) el.inspZoomBadge.textContent = '🔍 Büyüt & İncele';
+
     const rawSrc = state.visualTab === 'form' 
         ? (ex.formImage || ex.diagramImage || null) 
         : (ex.anatomiImage || ex.formImage || null);
-
-    const token = ++currentImageLoadToken;
-    el.inspImageFallback.style.display = 'none';
-    el.inspImage.style.display = 'none';
 
     if (!rawSrc) {
         el.inspImageFallback.style.display = 'flex';
@@ -2623,15 +2700,11 @@ async function updateInspectorImage() {
     const cleanRel = rawSrc.replace(/^(\.\/|\/)+/, '');
     const cdnUrl = `https://fitness.kantarci.io/${cleanRel}`;
 
-    let resolvedUrl = rawSrc;
+    let resolvedUrl = `fitlab-asset://app/${cleanRel}`;
     if (window.coachAPI && window.coachAPI.resolveAssetUrl) {
         try {
             resolvedUrl = await window.coachAPI.resolveAssetUrl(rawSrc);
-        } catch (e) {
-            resolvedUrl = `fitlab-asset://app/${cleanRel}`;
-        }
-    } else {
-        resolvedUrl = `fitlab-asset://app/${cleanRel}`;
+        } catch (e) {}
     }
 
     if (token !== currentImageLoadToken) return;
@@ -2648,10 +2721,10 @@ async function updateInspectorImage() {
         if (token !== currentImageLoadToken) return;
         if (!triedCdn && el.inspImage.src !== cdnUrl) {
             triedCdn = true;
-            console.log(`[FitLAB Image] Yerel görsel çözümlenemedi, CDN deneniyor: ${cdnUrl}`);
+            console.log(`[FitLAB Visual] Yerel dosya başarısız, CDN deneniyor: ${cdnUrl}`);
             el.inspImage.src = cdnUrl;
         } else {
-            console.warn(`[FitLAB Image] Görsel yüklenemedi: ${rawSrc}`);
+            console.warn(`[FitLAB Visual] Görsel yüklenemedi: ${rawSrc}`);
             el.inspImage.style.display = 'none';
             el.inspImageFallback.style.display = 'flex';
         }
@@ -2665,7 +2738,9 @@ function initImageLightbox() {
 
     if (el.inspImageContainer) {
         el.inspImageContainer.addEventListener('click', () => {
-            if (el.inspImage && el.inspImage.style.display !== 'none' && el.inspImage.src) {
+            const hasVideo = el.inspVideo && el.inspVideo.style.display !== 'none' && el.inspVideo.src;
+            const hasImg = el.inspImage && el.inspImage.style.display !== 'none' && el.inspImage.src;
+            if (hasVideo || hasImg) {
                 openImageLightbox();
             }
         });
@@ -2707,19 +2782,40 @@ function initImageLightbox() {
 
 function openImageLightbox() {
     const ex = state.selectedExercise;
-    if (!ex || !el.imageLightboxModal || !el.lightboxImg) return;
+    if (!ex || !el.imageLightboxModal) return;
 
-    el.lightboxImg.src = el.inspImage.src;
-    el.lightboxImg.classList.remove('zoomed');
-    if (el.btnLightboxZoom) el.btnLightboxZoom.textContent = '🔍 %150 Büyüt';
+    const isVideo = state.visualTab === 'opengym' && ex.opengym && ex.opengym.clip;
+
+    if (isVideo && el.lightboxVideo) {
+        if (el.lightboxImg) el.lightboxImg.style.display = 'none';
+        el.lightboxVideo.src = el.inspVideo ? el.inspVideo.src : '';
+        el.lightboxVideo.poster = el.inspVideo ? el.inspVideo.poster : '';
+        el.lightboxVideo.style.display = 'block';
+        el.lightboxVideo.play().catch(() => {});
+        if (el.btnLightboxZoom) el.btnLightboxZoom.style.display = 'none';
+        if (el.lightboxTabBadge) el.lightboxTabBadge.textContent = '⚡ OpenGym 3D Canlı Animasyon';
+    } else {
+        if (el.lightboxVideo) {
+            try { el.lightboxVideo.pause(); } catch(e) {}
+            el.lightboxVideo.style.display = 'none';
+            el.lightboxVideo.src = '';
+        }
+        if (el.lightboxImg && el.inspImage) {
+            el.lightboxImg.src = el.inspImage.src;
+            el.lightboxImg.style.display = 'block';
+            el.lightboxImg.classList.remove('zoomed');
+        }
+        if (el.btnLightboxZoom) {
+            el.btnLightboxZoom.style.display = 'inline-block';
+            el.btnLightboxZoom.textContent = '🔍 %150 Büyüt';
+        }
+        if (el.lightboxTabBadge) {
+            el.lightboxTabBadge.textContent = state.visualTab === 'form' ? '📐 Form Şeması' : '🧬 Kas Anatomisi & Odak';
+        }
+    }
 
     if (el.lightboxTitle) el.lightboxTitle.textContent = ex.name;
-    if (el.lightboxTabBadge) {
-        el.lightboxTabBadge.textContent = state.visualTab === 'form' ? '📐 Form Şeması & Kılavuz' : '🧬 Kas Anatomisi & Odak';
-    }
-    if (el.lightboxMuscle) {
-        el.lightboxMuscle.textContent = `${ex.primary} Odaklı`;
-    }
+    if (el.lightboxMuscle) el.lightboxMuscle.textContent = `${ex.primary} Odaklı`;
 
     if (el.lightboxCue) {
         el.lightboxCue.innerHTML = `<strong>💡 Biyomekanik Form Notu:</strong> ${escapeHTML(ex.cue || 'Standart eklem açısı ve form hizalamasına dikkat edin.')}`;
@@ -2730,6 +2826,10 @@ function openImageLightbox() {
 
 function closeImageLightbox() {
     if (el.imageLightboxModal) el.imageLightboxModal.style.display = 'none';
+    if (el.lightboxVideo) {
+        try { el.lightboxVideo.pause(); } catch(e) {}
+        el.lightboxVideo.src = '';
+    }
     if (el.lightboxImg) el.lightboxImg.classList.remove('zoomed');
 }
 

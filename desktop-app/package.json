@@ -46,6 +46,10 @@
       {
         "from": "../assets/exercises",
         "to": "assets/exercises"
+      },
+      {
+        "from": "../assets/opengym",
+        "to": "assets/opengym"
       }
     ],
     "mac": {
