@@ -23,7 +23,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=201">
+    <link rel="stylesheet" href="css/style.css?v=202">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH (CANVA OBSIDIAN & LIME V201) */
         html, body { background-color: #0B0F17; color: #F3F6FA; color-scheme: dark; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -35,7 +35,7 @@
     <!-- ==================== LOGIN SCREEN ==================== -->
     <div id="loginScreen">
         <div class="login-card">
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v201</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v202</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -72,7 +72,7 @@
                     <span class="canva-brand-monogram" aria-hidden="true" translate="no">Ç</span>
                     <div class="canva-brand-stack">
                         <span class="modern-brand-title" translate="no">Çelik Kodu</span>
-                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v201</span>
+                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v202</span>
                     </div>
                 </div>
                 <div class="modern-bar-actions">
@@ -907,7 +907,7 @@
         <div class="modal-box" style="max-width: 600px; width: 95%;">
             <div class="modal-header">
                 <span class="modal-title">👑 Sporcu Yönetim Portalı (Admin)</span>
-                <button type=\"button\" class=\"modal-close\" aria-label=\"Kapat\" onclick=\"closeAdminModal()\">✕</button>
+                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeAdminModal()">✕</button>
             </div>
 
             <!-- ADMIN NAVIGATION TABS -->
@@ -1039,7 +1039,7 @@
                     <h3 class="modal-title" id="addToProgModalTitle" style="font-size:16px; margin-top:4px;">Egzersizi Ekle</h3>
                     <div id="addToProgModalSubtitle" style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;"></div>
                 </div>
-                <button type=\"button\" class=\"modal-close\" aria-label=\"Kapat\" onclick=\"closeAddToProgramOptionsModal()\">✕</button>
+                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeAddToProgramOptionsModal()">✕</button>
             </div>
             <div id="addToProgModalBody" style="margin-top: 14px;">
                 <!-- Populated dynamically -->
@@ -1055,7 +1055,7 @@
                     <span class="auth-role-tag role-admin" style="font-size:10px; background:rgba(245,158,11,0.2); color:var(--gold);">⚡ HIZLI KAS DENGESİ</span>
                     <h3 class="modal-title" id="quickAddModalTitle" style="font-size:16px; margin-top:4px;">Egzersizi Güne Ekle</h3>
                 </div>
-                <button type=\"button\" class=\"modal-close\" aria-label=\"Kapat\" onclick=\"closeQuickAddToDayModal()\">✕</button>
+                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeQuickAddToDayModal()">✕</button>
             </div>
             <div id="quickAddModalBody" style="margin-top: 14px;">
                 <!-- Populated dynamically -->
@@ -1071,7 +1071,7 @@
                     <span class="auth-role-tag role-admin" id="schedModalDayBadge" style="font-size:10px;">HAFTALIK PLAN</span>
                     <h3 class="modal-title" id="schedModalDayTitle" style="font-size:16px; margin-top:4px;">Günü Programla</h3>
                 </div>
-                <button type=\"button\" class=\"modal-close\" aria-label=\"Kapat\" onclick=\"closeScheduleDayModal()\">✕</button>
+                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeScheduleDayModal()">✕</button>
             </div>
 
             <p id="schedModalDaySubDesc" style="font-size:12px; color:var(--text-secondary); margin:0 0 14px 0; line-height:1.4;">
@@ -1147,7 +1147,7 @@
                     <span class="auth-role-tag role-admin" style="font-size:10px; background:var(--gold); color:#000;">CANLI SENKRONİZASYON</span>
                     <h3 class="modal-title" style="font-size:16px; margin-top:4px;">Google & Cihaz Takvim Merkezi</h3>
                 </div>
-                <button type=\"button\" class=\"modal-close\" aria-label=\"Kapat\" onclick=\"closeCalendarSyncModal()\">✕</button>
+                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeCalendarSyncModal()">✕</button>
             </div>
             
             <p style="font-size:12px; color:var(--text-secondary); margin:0 0 14px 0; line-height:1.5;">
@@ -1249,7 +1249,7 @@
                     <span class="auth-role-tag role-admin" style="font-size:10px; background:var(--gold); color:#000;">GOOGLE TAKVİM AKTARIMI</span>
                     <h3 class="modal-title" style="font-size:16px; margin-top:4px;" id="gcalExportModalTitle">📅 Google Takvim'e Aktar</h3>
                 </div>
-                <button type=\"button\" class=\"modal-close\" aria-label=\"Kapat\" onclick=\"closeGoogleCalendarExportModal()\">✕</button>
+                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeGoogleCalendarExportModal()">✕</button>
             </div>
             
             <p style="font-size:12px; color:var(--text-secondary); margin:0 0 14px 0; line-height:1.5;">
@@ -1342,7 +1342,7 @@
                     <span class="auth-role-tag role-admin" id="previewModalBadge" style="font-size:10px;">PROGRAM DETAYI</span>
                     <h3 class="modal-title" id="previewModalTitle" style="font-size:16px; margin-top:4px;">Program Detayları</h3>
                 </div>
-                <button type=\"button\" class=\"modal-close\" aria-label=\"Kapat\" onclick=\"closeWorkoutPreviewModal()\">✕</button>
+                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeWorkoutPreviewModal()">✕</button>
             </div>
 
             <div id="previewModalMeta" style="margin-bottom:12px;">
@@ -1382,7 +1382,7 @@
         <div class="modal-box" style="max-width: 560px; max-height: 92vh; overflow-y: auto;">
             <div class="modal-header">
                 <span class="modal-title">🏁 Antrenmanı Tamamla & Kaydet</span>
-                <button type=\"button\" class=\"modal-close\" aria-label=\"Kapat\" onclick=\"closeCompleteModal()\">✕</button>
+                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeCompleteModal()">✕</button>
             </div>
 
             <div class="form-group">
@@ -1466,7 +1466,7 @@
         <div class="modal-box" style="max-width: 520px; max-height: 90vh; overflow-y: auto;">
             <div class="modal-header">
                 <span class="modal-title">⚖️📏 Vücut Analizi & Mezura Ölçümü Ekle</span>
-                <button type=\"button\" class=\"modal-close\" aria-label=\"Kapat\" onclick=\"closeScaleModal()\">✕</button>
+                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeScaleModal()">✕</button>
             </div>
 
             <!-- UNIQUE HEALTH SMART PDF & IMAGE DROPZONE -->
@@ -1617,7 +1617,7 @@
         <div class="modal-box" style="max-width: 520px; max-height: 90vh; overflow-y: auto;">
             <div class="modal-header">
                 <span class="modal-title">📏 Mezura Vücut Ölçüleri Ekle</span>
-                <button type=\"button\" class=\"modal-close\" aria-label=\"Kapat\" onclick=\"closeMeasurementsModal()\">✕</button>
+                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeMeasurementsModal()">✕</button>
             </div>
 
             <div class="form-group">
@@ -1688,7 +1688,7 @@
                         Yapay zeka antrenman geçmişini, tartı/bel trendini ve hedeflerini analiz ederek program öncesi doktrini belirler.
                     </div>
                 </div>
-                <button type=\"button\" class=\"modal-close\" aria-label=\"Kapat\" onclick=\"closeAiHybridArchitectModal()\">✕</button>
+                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeAiHybridArchitectModal()">✕</button>
             </div>
 
             <!-- BÖLÜM 1: CANLI TELEMETRİ (VARSAYILAN GİZLENEBİLİR AKORDİYON) -->
@@ -1836,7 +1836,7 @@
                     <button type="button" class="btn-report-mini" id="btnExDetailReport" style="padding:6px 10px; font-size:11px;" title="Bu egzersizde hata bildir">
                         ⚠️ Hata Bildir
                     </button>
-                    <button type=\"button\" class=\"modal-close\" aria-label=\"Kapat\" onclick=\"closeExerciseDetailModal()\">✕</button>
+                    <button type="button" class="modal-close" aria-label="Kapat" onclick="closeExerciseDetailModal()">✕</button>
                 </div>
             </div>
 
@@ -1871,7 +1871,7 @@
         <div class="modal-box" style="max-width: 640px; max-height: 92vh; display: flex; flex-direction: column;">
             <div class="modal-header" style="margin-bottom: 6px;">
                 <span class="modal-title" id="pickerModalTitle">🔄 Alternatif Egzersiz Seçici</span>
-                <button type=\"button\" class=\"modal-close\" aria-label=\"Kapat\" onclick=\"closeExercisePickerModal()\">✕</button>
+                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeExercisePickerModal()">✕</button>
             </div>
 
             <!-- CURRENT EXERCISE CONTEXT BANNER -->
@@ -2021,7 +2021,7 @@
         <div class="modal-box" style="max-width: 520px;">
             <div class="modal-header">
                 <span class="modal-title" style="color:#fca5a5;">⚠️ Egzersiz Hata Bildirimi</span>
-                <button type=\"button\" class=\"modal-close\" aria-label=\"Kapat\" onclick=\"closeExerciseBugReportModal()\">✕</button>
+                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeExerciseBugReportModal()">✕</button>
             </div>
 
             <!-- Egzersiz Künyesi & Görsel Özeti -->
@@ -2085,7 +2085,7 @@
                         <p style="font-size:11px; color:var(--text-secondary); margin:2px 0 0;">Firebase Firestore Canlı Veritabanı</p>
                     </div>
                 </div>
-                <button type=\"button\" class=\"modal-close\" aria-label=\"Kapat\" onclick=\"closeBugReportsPoolModal()\">✕</button>
+                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeBugReportsPoolModal()">✕</button>
             </div>
 
             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.3); padding:10px 12px; border-radius:10px;">
@@ -2113,7 +2113,7 @@
                     <h3 class="modal-title" style="font-size:16px; margin:0;">➕ İlave Hareket & Finisher Ekle</h3>
                     <p style="font-size:11px; color:var(--text-secondary); margin:2px 0 0;">Antrenman erken bittiğinde veya pump hissetmek istediğinizde seansa ekleyin.</p>
                 </div>
-                <button type=\"button\" class=\"modal-close\" aria-label=\"Kapat\" onclick=\"closeAddFinisherModal()\">✕</button>
+                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeAddFinisherModal()">✕</button>
             </div>
 
             <!-- 1. HIZLI FINISHER PAKETLERİ (TEK DOKUNUŞLA 3 SET) -->
@@ -2285,8 +2285,8 @@
     </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
-    <script src="js/exercises-db.js?v=201"></script>
-    <script src="js/app.js?v=201"></script>
+    <script src="js/exercises-db.js?v=202"></script>
+    <script src="js/app.js?v=202"></script>
     <script>
         function toggleHeaderPopupMenu(e) {
             if (e) e.stopPropagation();

@@ -1832,7 +1832,9 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 const modal = document.getElementById('imageLightboxModal');
                 if (modal && modal.classList.contains('active')) {
                     closeImageLightbox();
+                    return;
                 }
+                document.querySelectorAll('.modal-overlay.active').forEach(el => el.classList.remove('active'));
             }
         });
 
@@ -15680,7 +15682,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=201')
+                navigator.serviceWorker.register('./sw.js?v=202')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
