@@ -1,29 +1,30 @@
         :root {
-            /* Surface & Background Palette (La Forja: Carbon Obsidian & Machined Gunmetal) */
-            --bg-base: #08090C;
-            --bg-surface: #11131A;
-            --bg-elevated: #191C26;
-            --bg-card: rgba(17, 19, 26, 0.92);
+            /* Surface & Background Palette (Studio Daylight: Warm Alabaster & Pure White) */
+            --bg-base: #F4F3EE;
+            --bg-surface: #FFFFFF;
+            --bg-elevated: #EAE8E1;
+            --bg-card: #FFFFFF;
 
-            /* Borders & Metallic Rim Highlights */
-            --border: rgba(255, 255, 255, 0.09);
-            --border-glass: rgba(255, 255, 255, 0.14);
-            --border-hover: rgba(245, 158, 11, 0.55);
+            /* Borders & Subtle Hairlines */
+            --border: rgba(17, 19, 23, 0.08);
+            --border-glass: rgba(17, 19, 23, 0.10);
+            --border-hover: rgba(255, 79, 0, 0.45);
 
-            /* Brand & Semantic Accents (Molten Forge Amber & Telemetry Cyan) */
-            --gold: #F59E0B;
-            --gold-light: #FDE68A;
-            --gold-glow: rgba(245, 158, 11, 0.26);
-            --cyan: #38BDF8;
-            --cyan-glow: rgba(56, 189, 248, 0.24);
-            --green-success: #10B981;
-            --green: #10B981;
-            --red-alert: #F43F5E;
+            /* Brand & Semantic Accents (International Athletic Orange & Telemetry Cobalt) */
+            --gold: #FF4F00;
+            --gold-light: #D94300;
+            --gold-glow: rgba(255, 79, 0, 0.16);
+            --cyan: #0066FF;
+            --cyan-glow: rgba(0, 102, 255, 0.15);
+            --green-success: #059669;
+            --green: #059669;
+            --red-alert: #E11D48;
 
-            /* Text Hierarchy */
-            --text-primary: #F8FAFC;
-            --text-secondary: #A1A1AA;
-            --text-tertiary: #71717A;
+            /* Text Hierarchy (High-Contrast Editorial Ink) */
+            --text-primary: #111317;
+            --text-secondary: #525866;
+            --text-tertiary: #848C9E;
+            --text-muted: #64748B;
 
             /* Typography Stack */
             --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -43,9 +44,9 @@
             --space-3: 12px;
             --space-4: 16px;
             --space-6: 24px;
-            --radius-sm: 8px;
-            --radius-md: 10px;
-            --radius-lg: 14px;
+            --radius-sm: 10px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
         }
 
         * {
@@ -58,7 +59,7 @@
         html {
             font-size: 16px;
             -webkit-text-size-adjust: 100%;
-            color-scheme: dark;
+            color-scheme: light;
         }
 
         @media (pointer: fine) {
@@ -69,18 +70,14 @@
 
         body {
             background-color: var(--bg-base);
-            background-image: 
-                radial-gradient(ellipse 85% 40% at 50% -5%, rgba(245, 158, 11, 0.14) 0%, transparent 70%),
-                radial-gradient(ellipse 60% 40% at 100% 100%, rgba(56, 189, 248, 0.06) 0%, transparent 60%),
-                radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px);
-            background-size: 100% 100%, 100% 100%, 24px 24px;
+            background-image: radial-gradient(ellipse 90% 35% at 50% -10%, rgba(255, 79, 0, 0.06) 0%, transparent 70%);
             background-attachment: fixed;
             color: var(--text-primary);
             font-family: var(--font-sans);
             font-size: var(--text-base);
             line-height: 1.5;
             min-height: 100vh;
-            padding-bottom: 90px;
+            padding-bottom: 104px;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             overflow-x: hidden;
@@ -5889,20 +5886,21 @@
             box-shadow: 0 0 0 4px var(--gold-glow) !important;
         }
 
-        /* 2. Native Dark Mode Select & Option Contrast (Windows / Mobile / Desktop) */
+        /* 2. Native Light Mode Select & Option Contrast (Studio Daylight) */
         select,
         .param-select,
         .form-select {
-            background-color: var(--bg-surface);
-            color: var(--text-primary);
-            color-scheme: dark;
+            background-color: #FFFFFF;
+            color: #111317;
+            color-scheme: light;
+            border: 1px solid #D5D2C8;
         }
 
         select option,
         .param-select option,
         .form-select option {
-            background-color: #0F172A;
-            color: #F8FAFC;
+            background-color: #FFFFFF;
+            color: #111317;
         }
 
         /* 3. Touch Interaction: Eliminate 300ms Double-Tap Delay on Gym Controls */
@@ -5960,165 +5958,538 @@
         }
 
         /* ==========================================================================
-           LA FORJA VISUAL ARCHITECTURE (FRONTEND-DESIGN OVERHAUL • V196)
+           STUDIO DAYLIGHT & MOBILE-FIRST THUMB-ZONE ARCHITECTURE (V197)
+           Aesthetic: Nike Training Club / Hevy Daylight / Teenage Engineering
            ========================================================================== */
 
-        /* 1. Command Bar & Machined Brand Lockup */
+        /* PILLAR 1: Single Thumb-Zone Navigation (No Double Menu on Mobile) */
         .modern-app-bar {
-            background: rgba(11, 13, 18, 0.94);
-            border-bottom: 1px solid rgba(245, 158, 11, 0.32);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65), 0 1px 0 rgba(245, 158, 11, 0.15);
-            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.92) !important;
+            backdrop-filter: blur(20px) saturate(180%) !important;
+            -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+            border-bottom: 1px solid #E2E0D8 !important;
+            box-shadow: 0 2px 12px rgba(17, 19, 23, 0.05) !important;
+            padding: 10px 16px !important;
         }
 
         .modern-brand-title {
-            font-family: var(--font-display);
-            font-size: 15px;
-            font-weight: 900;
-            letter-spacing: 0.06em;
-            background: linear-gradient(135deg, #FFFFFF 0%, #FDE68A 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-family: var(--font-display) !important;
+            font-size: 15px !important;
+            font-weight: 900 !important;
+            letter-spacing: 0.04em !important;
+            color: #111317 !important;
+            background: none !important;
+            -webkit-text-fill-color: #111317 !important;
         }
 
         .app-version-badge {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.24) 0%, rgba(180, 83, 9, 0.18) 100%);
-            border: 1px solid rgba(245, 158, 11, 0.65);
-            color: #FEF3C7;
-            padding: 3px 8px;
-            border-radius: 6px;
-            box-shadow: 0 0 12px rgba(245, 158, 11, 0.28);
+            background: rgba(255, 79, 0, 0.1) !important;
+            border: 1px solid rgba(255, 79, 0, 0.35) !important;
+            color: #D94100 !important;
+            padding: 3px 8px !important;
+            border-radius: 999px !important;
+            font-weight: 800 !important;
+            box-shadow: none !important;
         }
 
-        /* 2. Recessed Segmented Control Bar (.tab-nav & .tab-btn) */
+        .modern-icon-btn {
+            background: #F4F3EE !important;
+            border: 1px solid #E2E0D8 !important;
+            color: #111317 !important;
+        }
+
+        .modern-icon-btn:hover {
+            background: #EAE8E1 !important;
+            border-color: #FF4F00 !important;
+            color: #FF4F00 !important;
+        }
+
+        .modern-profile-pill {
+            background: #F4F3EE !important;
+            border: 1px solid #E2E0D8 !important;
+        }
+
+        .modern-profile-name {
+            color: #111317 !important;
+        }
+
+        /* Desktop Segmented Pill Bar */
         .tab-nav {
-            background: #0D0F15;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.75), 0 6px 20px rgba(0, 0, 0, 0.45);
-            padding: 5px;
-            border-radius: 12px;
-            gap: 6px;
+            background: #EAE8E1 !important;
+            border: 1px solid #DCD9CE !important;
+            box-shadow: inset 0 1px 2px rgba(17, 19, 23, 0.06) !important;
+            padding: 4px !important;
+            border-radius: 14px !important;
+            gap: 4px !important;
         }
 
         .tab-btn {
-            border-radius: 8px;
-            color: #A1A1AA;
-            font-weight: 700;
-            letter-spacing: 0.01em;
-            position: relative;
-            transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+            border-radius: 10px !important;
+            color: #525866 !important;
+            background: transparent !important;
+            border: 1px solid transparent !important;
+            font-weight: 700 !important;
+            font-size: 13px !important;
+        }
+
+        .tab-btn:hover {
+            color: #111317 !important;
+            background: rgba(255, 255, 255, 0.55) !important;
         }
 
         .tab-btn.active {
-            background: linear-gradient(180deg, rgba(245, 158, 11, 0.24) 0%, rgba(217, 119, 6, 0.1) 100%);
-            border-color: rgba(245, 158, 11, 0.65);
-            color: #FEF3C7;
-            box-shadow: 0 4px 14px rgba(245, 158, 11, 0.22), inset 0 1px 0 rgba(254, 243, 199, 0.25);
+            background: #FFFFFF !important;
+            border-color: rgba(17, 19, 23, 0.08) !important;
+            color: #FF4F00 !important;
+            box-shadow: 0 2px 8px rgba(17, 19, 23, 0.08) !important;
         }
 
-        /* 3. Tactical Telemetry Console (.ai-hybrid-hero-banner) */
+        /* Mobile: Hide Top Tab Bar, Activate Floating Frosted Bottom Dock */
+        @media (max-width: 768px) {
+            .tab-nav {
+                display: none !important;
+            }
+            .container {
+                padding: 12px 12px 104px 12px !important;
+            }
+        }
+
+        .bottom-nav-wrapper {
+            background: transparent !important;
+            border-top: none !important;
+            padding: 0 12px calc(10px + env(safe-area-inset-bottom, 6px)) 12px !important;
+            pointer-events: none !important;
+        }
+
+        .bottom-nav-bar {
+            pointer-events: auto !important;
+            background: rgba(255, 255, 255, 0.94) !important;
+            backdrop-filter: blur(20px) saturate(180%) !important;
+            -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+            border: 1px solid rgba(17, 19, 23, 0.1) !important;
+            border-radius: 22px !important;
+            box-shadow: 0 12px 32px rgba(17, 19, 23, 0.14), 0 2px 6px rgba(17, 19, 23, 0.06) !important;
+            height: 62px !important;
+            padding: 4px 6px !important;
+        }
+
+        .bottom-nav-item {
+            color: #64748B !important;
+            border-radius: 16px !important;
+            gap: 3px !important;
+        }
+
+        .bottom-nav-item .nav-icon {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            height: 22px !important;
+        }
+
+        .bottom-nav-item .nav-label {
+            font-size: 10.5px !important;
+            font-weight: 700 !important;
+            letter-spacing: -0.01em !important;
+        }
+
+        .bottom-nav-item.active {
+            color: #FF4F00 !important;
+            background: rgba(255, 79, 0, 0.08) !important;
+        }
+
+        .bottom-nav-item.active::after {
+            background: #FF4F00 !important;
+            box-shadow: none !important;
+            bottom: 3px !important;
+        }
+
+        /* PILLAR 2 & 5: Clean Editorial AI Banner & Pure White Tactile Cards */
         .ai-hybrid-hero-banner {
-            background: linear-gradient(135deg, #141722 0%, #0C0E14 100%);
-            border: 1px solid rgba(245, 158, 11, 0.32);
-            border-left: 4px solid var(--gold);
-            border-radius: 10px;
-            padding: 10px 14px;
-            margin-bottom: 14px;
-            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+            background: #FFFFFF !important;
+            border: 1px solid #E2E0D8 !important;
+            border-left: 4px solid #FF4F00 !important;
+            border-radius: 14px !important;
+            padding: 12px 14px !important;
+            margin-bottom: 14px !important;
+            box-shadow: 0 4px 14px rgba(17, 19, 23, 0.05) !important;
         }
 
         .ai-hybrid-hero-banner::before {
-            display: none;
+            display: none !important;
+        }
+
+        .ai-hero-icon-pulse {
+            width: 36px !important;
+            height: 36px !important;
+            border-radius: 10px !important;
+            background: rgba(255, 79, 0, 0.1) !important;
+            border: 1px solid rgba(255, 79, 0, 0.25) !important;
+            color: #FF4F00 !important;
+            font-family: var(--font-mono) !important;
+            font-size: 13px !important;
+            font-weight: 900 !important;
+            box-shadow: none !important;
+        }
+
+        .ai-hero-title {
+            color: #111317 !important;
+            font-size: 13.5px !important;
         }
 
         .ai-hero-tag {
-            background: rgba(245, 158, 11, 0.18);
-            border: 1px solid rgba(245, 158, 11, 0.55);
-            color: #FDE68A;
-            font-family: var(--font-mono);
-            letter-spacing: 0.04em;
+            background: #F4F3EE !important;
+            border: 1px solid #DCD9CE !important;
+            color: #FF4F00 !important;
+            font-family: var(--font-mono) !important;
+            font-weight: 800 !important;
         }
 
-        /* 4. Machined Steel Cards & Bento Target Split Matrix */
+        .ai-hero-desc {
+            color: #525866 !important;
+            font-size: 11.5px !important;
+        }
+
+        .ai-hero-desc strong {
+            color: #111317 !important;
+        }
+
+        /* PILLAR 3: Zero-Scroll Mobile Setup (2-Column Bento Split + 3-Col Params + No Accordions) */
         .generator-card {
-            background: linear-gradient(180deg, rgba(22, 25, 34, 0.95) 0%, rgba(13, 15, 21, 0.96) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.11);
-            border-radius: 14px;
-            padding: 18px 16px;
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            background: #FFFFFF !important;
+            border: 1px solid #E2E0D8 !important;
+            border-radius: 18px !important;
+            padding: 16px !important;
+            box-shadow: 0 6px 20px rgba(17, 19, 23, 0.05) !important;
         }
 
-        @media (min-width: 600px) {
-            .split-grid {
-                display: grid;
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-                gap: 8px;
-            }
-            .split-grid > .split-card:first-child {
-                grid-column: 1 / -1;
-            }
+        .gen-mobile-picker-bar {
+            display: none !important;
+        }
+
+        .gen-step-title,
+        .gen-step-title.desktop-only-title {
+            display: flex !important;
+            color: #525866 !important;
+            font-size: 11px !important;
+            font-weight: 800 !important;
+            letter-spacing: 0.06em !important;
+            margin-bottom: 8px !important;
+        }
+
+        .gen-step-num {
+            background: #111317 !important;
+            color: #FFFFFF !important;
+            border-radius: 6px !important;
+            width: 20px !important;
+            height: 20px !important;
+            font-size: 11px !important;
+        }
+
+        .gen-collapsible-section {
+            display: block !important;
+            max-height: none !important;
+            opacity: 1 !important;
+            overflow: visible !important;
+            padding: 0 !important;
+            margin-bottom: 14px !important;
+            background: transparent !important;
+            border: none !important;
+        }
+
+        .split-grid {
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 8px !important;
+            margin-bottom: 6px !important;
+        }
+
+        .split-grid > .split-card:first-child {
+            grid-column: 1 / -1 !important;
         }
 
         .split-card {
-            background: #10131B;
-            border: 1px solid rgba(255, 255, 255, 0.09);
-            border-radius: 9px;
-            padding: 11px 14px;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-            transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+            background: #F8F7F3 !important;
+            border: 1.5px solid #E2E0D8 !important;
+            border-radius: 12px !important;
+            padding: 10px 12px !important;
+            box-shadow: none !important;
+            min-height: 54px !important;
         }
 
         .split-card:hover {
-            border-color: rgba(245, 158, 11, 0.45);
-            background: #161A25;
-            transform: translateY(-1px);
+            border-color: #111317 !important;
+            background: #FFFFFF !important;
         }
 
         .split-card.selected {
-            background: linear-gradient(90deg, rgba(245, 158, 11, 0.18) 0%, rgba(245, 158, 11, 0.05) 100%);
-            border-color: var(--gold);
-            box-shadow: inset 4px 0 0 var(--gold), 0 4px 16px rgba(245, 158, 11, 0.18);
+            background: #FFF5F0 !important;
+            border-color: #FF4F00 !important;
+            box-shadow: 0 4px 12px rgba(255, 79, 0, 0.12) !important;
         }
 
-        /* 5. Knurled Equipment Plates & Full-Width Forge Ignition CTA */
+        .split-card-icon {
+            display: none !important;
+        }
+
+        .split-card-title {
+            color: #111317 !important;
+            font-size: 13px !important;
+            font-weight: 800 !important;
+        }
+
+        .split-card.selected .split-card-title {
+            color: #D94100 !important;
+        }
+
+        .split-card-desc {
+            color: #525866 !important;
+            font-size: 11px !important;
+            line-height: 1.25 !important;
+        }
+
+        /* 3-Column Parameter Pill Row on Mobile & Desktop */
+        .param-grid {
+            display: grid !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            gap: 8px !important;
+            margin-bottom: 4px !important;
+        }
+
+        .param-box {
+            background: #F8F7F3 !important;
+            border: 1px solid #E2E0D8 !important;
+            border-radius: 12px !important;
+            padding: 8px 10px !important;
+        }
+
+        .param-label {
+            color: #525866 !important;
+            font-size: 10px !important;
+            font-weight: 800 !important;
+            margin-bottom: 4px !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+        }
+
+        .param-select {
+            background-color: #FFFFFF !important;
+            border: 1px solid #D5D2C8 !important;
+            color: #111317 !important;
+            font-size: 12px !important;
+            font-weight: 700 !important;
+            padding: 6px 22px 6px 8px !important;
+            border-radius: 8px !important;
+        }
+
+        /* Tactile Equipment Chips */
+        .equip-grid {
+            gap: 6px !important;
+            margin-bottom: 8px !important;
+        }
+
         .equip-chip {
-            background: #10131B;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 8px;
-            padding: 8px 14px;
-            font-weight: 700;
-            transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+            background: #F8F7F3 !important;
+            border: 1.5px solid #E2E0D8 !important;
+            border-radius: 999px !important;
+            padding: 8px 14px !important;
+            color: #111317 !important;
+            font-size: 12.5px !important;
+            font-weight: 700 !important;
+            box-shadow: none !important;
         }
 
         .equip-chip.selected {
-            background: linear-gradient(180deg, rgba(245, 158, 11, 0.22) 0%, rgba(245, 158, 11, 0.08) 100%);
-            border-color: var(--gold);
-            color: #FEF3C7;
-            box-shadow: 0 3px 12px rgba(245, 158, 11, 0.22), inset 0 1px 0 rgba(254, 243, 199, 0.2);
+            background: #111317 !important;
+            border-color: #111317 !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 4px 10px rgba(17, 19, 23, 0.16) !important;
         }
 
+        /* High-Contrast Athletic Orange CTA Button */
         .btn-generate-cta {
-            width: 100%;
-            max-width: 100%;
-            margin: 14px 0 0 0;
-            padding: 14px 24px;
-            font-family: var(--font-display);
-            font-size: 15px;
-            font-weight: 900;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-            color: #08090C;
-            background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #D97706 100%);
-            border: 1px solid #FDE68A;
-            border-radius: 10px;
-            box-shadow: 0 8px 24px rgba(245, 158, 11, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.45);
-            transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 10px 0 0 0 !important;
+            padding: 15px 24px !important;
+            min-height: 54px !important;
+            font-family: var(--font-display) !important;
+            font-size: 15px !important;
+            font-weight: 900 !important;
+            letter-spacing: 0.03em !important;
+            text-transform: uppercase !important;
+            color: #FFFFFF !important;
+            background: #FF4F00 !important;
+            border: none !important;
+            border-radius: 14px !important;
+            box-shadow: 0 8px 20px rgba(255, 79, 0, 0.3) !important;
         }
 
         .btn-generate-cta:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.05);
-            box-shadow: 0 12px 28px rgba(245, 158, 11, 0.52), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            background: #E04400 !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 10px 24px rgba(255, 79, 0, 0.38) !important;
+        }
+
+        /* PILLAR 4: Active Workout Giant 56px Steppers & Crisp Daylight HUD */
+        .workout-sticky-hud {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+            border: 1px solid #E2E0D8 !important;
+            box-shadow: 0 6px 20px rgba(17, 19, 23, 0.08) !important;
+            color: #111317 !important;
+        }
+
+        .hud-stat-val {
+            color: #111317 !important;
+        }
+
+        .workout-header-card,
+        .exercise-visual-card,
+        .superset-group,
+        .log-card,
+        .history-card,
+        .stat-metric-card,
+        .lib-ex-card,
+        .lib-controls-bar,
+        .routine-toolbar,
+        .day-pill {
+            background: #FFFFFF !important;
+            border-color: #E2E0D8 !important;
+            color: #111317 !important;
+            box-shadow: 0 4px 14px rgba(17, 19, 23, 0.05) !important;
+        }
+
+        .day-pill.active {
+            background: #111317 !important;
+            border-color: #111317 !important;
+            color: #FFFFFF !important;
+        }
+
+        .day-pill.active .day-pill-name,
+        .day-pill.active .day-pill-sub {
+            color: #FFFFFF !important;
+        }
+
+        .day-pill-name {
+            color: #111317 !important;
+        }
+
+        .input-duo-cell {
+            background: #F4F3EE !important;
+            border: 1.5px solid #DCD9CE !important;
+            border-radius: 16px !important;
+            padding: 12px !important;
+        }
+
+        .btn-step-mini {
+            width: 56px !important;
+            height: 56px !important;
+            border-radius: 14px !important;
+            background: #FFFFFF !important;
+            border: 1.5px solid #D5D2C8 !important;
+            color: #111317 !important;
+            font-size: 24px !important;
+            font-weight: 800 !important;
+            box-shadow: 0 2px 6px rgba(17, 19, 23, 0.06) !important;
+        }
+
+        .btn-step-mini:active {
+            background: #FF4F00 !important;
+            border-color: #FF4F00 !important;
+            color: #FFFFFF !important;
+            transform: scale(0.95) !important;
+        }
+
+        .input-huge-val {
+            color: #111317 !important;
+            font-size: 30px !important;
+            font-weight: 900 !important;
+            font-family: var(--font-mono) !important;
+        }
+
+        .rest-timer-luxury,
+        .workout-floating-dock {
+            background: rgba(255, 255, 255, 0.96) !important;
+            border: 1px solid #E2E0D8 !important;
+            color: #111317 !important;
+            box-shadow: 0 12px 32px rgba(17, 19, 23, 0.14) !important;
+        }
+
+        .timer-digits-huge,
+        .dock-timer-digits {
+            color: #111317 !important;
+        }
+
+        /* Daylight Overrides for Login, Modals, Sheets & Dynamic Inline Dark Styles */
+        .login-screen {
+            background: radial-gradient(circle at 50% 0%, rgba(255, 79, 0, 0.08) 0%, #F4F3EE 70%) !important;
+        }
+
+        .login-card,
+        .modal-box,
+        .more-sheet {
+            background: #FFFFFF !important;
+            border: 1px solid #E2E0D8 !important;
+            color: #111317 !important;
+            box-shadow: 0 20px 50px rgba(17, 19, 23, 0.15) !important;
+        }
+
+        .login-title,
+        .modal-title,
+        .more-sheet-header,
+        .ex-visual-name,
+        .lib-ex-title,
+        .stat-metric-val {
+            color: #111317 !important;
+        }
+
+        .login-input,
+        .lib-search-input {
+            background: #F8F7F3 !important;
+            border: 1px solid #D5D2C8 !important;
+            color: #111317 !important;
+        }
+
+        .login-btn,
+        .btn-gold {
+            background: #FF4F00 !important;
+            color: #FFFFFF !important;
+            border: none !important;
+        }
+
+        .more-sheet-btn {
+            background: #F8F7F3 !important;
+            border: 1px solid #E2E0D8 !important;
+            color: #111317 !important;
+        }
+
+        /* Rescue Dynamic JS Inline Dark Backgrounds & White Text on Daylight Cards */
+        .tab-panel [style*="background:rgba(15,23,42"],
+        .tab-panel [style*="background: rgba(15, 23, 42"],
+        .tab-panel [style*="background:rgba(0,0,0"],
+        .tab-panel [style*="background: rgba(0, 0, 0"],
+        .tab-panel [style*="background:#0f172a"],
+        .tab-panel [style*="background: #0f172a"],
+        .tab-panel [style*="background:#090d16"],
+        .modal-box [style*="background:rgba(15,23,42"],
+        .modal-box [style*="background: rgba(15, 23, 42"],
+        .modal-box [style*="background:rgba(0,0,0"],
+        .modal-box [style*="background: rgba(0, 0, 0"] {
+            background: #F8F7F3 !important;
+            border-color: #E2E0D8 !important;
+            color: #111317 !important;
+        }
+
+        .tab-panel [style*="color:#fff"]:not(.btn-gold):not(.btn-generate-cta):not(.equip-chip),
+        .tab-panel [style*="color: #fff"]:not(.btn-gold):not(.btn-generate-cta):not(.equip-chip),
+        .tab-panel [style*="color:#f8fafc"],
+        .tab-panel [style*="color: #f8fafc"],
+        .modal-box [style*="color:#fff"]:not(.btn-gold),
+        .modal-box [style*="color: #fff"]:not(.btn-gold),
+        .modal-box [style*="color:#f8fafc"] {
+            color: #111317 !important;
         }
 
 
