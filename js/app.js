@@ -263,6 +263,8 @@
             if (tabId === 'studioTab') {
                 tabId = 'activeWorkoutTab';
                 requestedStudio = true;
+            } else if (tabId === 'calendarTab') {
+                tabId = 'activeWorkoutTab';
             }
 
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -294,7 +296,6 @@
             }
 
             if (tabId === 'generatorTab') renderAiHybridHeroBanner();
-            if (tabId === 'calendarTab') renderCalendarScreen();
             if (tabId === 'libraryTab') renderLibrary();
             if (tabId === 'historyTab') renderHistory();
             if (tabId === 'analyticsTab') renderAnalytics();
@@ -4961,180 +4962,112 @@ KURALLAR:
             const hud = document.getElementById('activeWorkoutHUD');
             const dock = document.getElementById('workoutFloatingDock');
             const studioSec = document.getElementById('studioSectionInWorkout');
+            const calSec = document.getElementById('embeddedCalendarSection');
 
             if (!activeWorkoutSession || !container) {
                 if (liveTrackerBar) liveTrackerBar.style.display = 'none';
                 if (hud) hud.style.display = 'none';
                 if (dock) dock.style.display = 'none';
                 if (studioSec) studioSec.style.display = 'none';
+                if (calSec) calSec.style.display = 'block';
                 if (container) {
                     try {
                         const user = getActiveUser();
 
-                    const todayIdx = new Date().getDay();
-                    const tomorrowIdx = (todayIdx + 1) % 7;
-                    const isNextWeek = activePlannerWeek === 'next';
-                    const schedule = isNextWeek ? getNextWeeklySchedule(user.id) : getWeeklySchedule(user.id);
-                    const todayPlan = schedule[todayIdx] || { id: 'rest', rest: true, title: 'Dinlenme & Aktif Toparlanma' };
-                    const tomorrowPlan = schedule[tomorrowIdx] || { id: 'rest', rest: true, title: 'Dinlenme & Aktif Toparlanma' };
+                        const todayIdx = new Date().getDay();
+                        const isNextWeek = activePlannerWeek === 'next';
+                        const schedule = isNextWeek ? getNextWeeklySchedule(user.id) : getWeeklySchedule(user.id);
+                        const todayPlan = schedule[todayIdx] || { id: 'rest', rest: true, title: 'Dinlenme & Aktif Toparlanma' };
 
-                    let aiProgData = null;
-                    try {
-                        const rawAi = localStorage.getItem(`celik_kodu_ai_program_${user.id}`);
-                        if (rawAi) aiProgData = JSON.parse(rawAi);
-                    } catch(e) {}
-                    const hasIncomingAi = !!(aiProgData && aiProgData.active);
+                        let aiProgData = null;
+                        try {
+                            const rawAi = localStorage.getItem(`celik_kodu_ai_program_${user.id}`);
+                            if (rawAi) aiProgData = JSON.parse(rawAi);
+                        } catch(e) {}
+                        const hasIncomingAi = !!(aiProgData && aiProgData.active);
 
-                    let heroBannerHtml = '';
-                    if (isNextWeek) {
-                        const isExpandedNext = !!localStorage.getItem(`celik_kodu_next_week_expanded_${user.id}`);
-                        heroBannerHtml = `
-                            <div class="collapsible-panel ${isExpandedNext ? 'open' : ''}" id="nextWeekHeroPanel_${user.id}">
-                                <div class="collapsible-panel-header" onclick="toggleNextWeekHeroPanel('${user.id}')">
-                                    <div class="collapsible-panel-title">
-                                        <span class="icon">🚀</span>
-                                        <span class="text">Gelecek Hafta Antrenman Planı (Önizleme)</span>
+                        let heroBannerHtml = '';
+                        if (isNextWeek) {
+                            const isExpandedNext = !!localStorage.getItem(`celik_kodu_next_week_expanded_${user.id}`);
+                            heroBannerHtml = `
+                                <div class="collapsible-panel ${isExpandedNext ? 'open' : ''}" id="nextWeekHeroPanel_${user.id}">
+                                    <div class="collapsible-panel-header" onclick="toggleNextWeekHeroPanel('${user.id}')">
+                                        <div class="collapsible-panel-title">
+                                            <span class="icon">🚀</span>
+                                            <span class="text">Gelecek Hafta Antrenman Planı (Önizleme)</span>
+                                        </div>
+                                        <div class="collapsible-panel-meta">
+                                            <span class="collapsible-panel-badge">${hasIncomingAi ? 'FitLAB Reçetesi' : 'Plan Hazır'}</span>
+                                            <span class="collapsible-panel-arrow">▼</span>
+                                        </div>
                                     </div>
-                                    <div class="collapsible-panel-meta">
-                                        <span class="collapsible-panel-badge">${hasIncomingAi ? 'FitLAB Reçetesi' : 'Plan Hazır'}</span>
-                                        <span class="collapsible-panel-arrow">▼</span>
+                                    <div class="collapsible-panel-body">
+                                        <h3 style="font-size:13.5px; font-weight:800; color:#fff; margin:0 0 6px 0;">Gelecek Haftaya Özel Hipertrofi Bloğu</h3>
+                                        <p style="font-size:12px; color:#cbd5e1; line-height:1.5; margin:0 0 12px 0;">Masaüstü istasyonundan gelen bilimsel reçete gün gün takviminize işlendi. Salona girmeden önce günlerin içeriğini inceleyebilir veya tek dokunuşla bu planı aktif haftanız olarak başlatabilirsiniz.</p>
+                                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                            <button class="btn btn-gold" style="padding:9px 16px; font-size:12px; font-weight:900; flex:1;" onclick="promoteNextWeekToCurrent('${user.id}')">
+                                                ⚡ BU PROGRAMI AKTİF HAFTAM YAP
+                                            </button>
+                                            <button class="btn btn-outline" style="padding:9px 14px; font-size:12px; font-weight:700; border-color:rgba(255,255,255,0.2); color:#cbd5e1;" onclick="switchPlannerWeek('current')">
+                                                ⬅️ Bu Haftaya Dön
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="collapsible-panel-body">
-                                    <h3 style="font-size:13.5px; font-weight:800; color:#fff; margin:0 0 6px 0;">Gelecek Haftaya Özel Hipertrofi Bloğu</h3>
-                                    <p style="font-size:12px; color:#cbd5e1; line-height:1.5; margin:0 0 12px 0;">Masaüstü istasyonundan gelen bilimsel reçete gün gün takviminize işlendi. Salona girmeden önce günlerin içeriğini inceleyebilir veya tek dokunuşla bu planı aktif haftanız olarak başlatabilirsiniz.</p>
-                                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                                        <button class="btn btn-gold" style="padding:9px 16px; font-size:12px; font-weight:900; flex:1;" onclick="promoteNextWeekToCurrent('${user.id}')">
-                                            ⚡ BU PROGRAMI AKTİF HAFTAM YAP
+                            `;
+                        } else if (!todayPlan.rest) {
+                            const todayDetails = getWorkoutDetailsForPlan(todayPlan);
+                            const todayExCount = todayDetails && todayDetails.exercises ? todayDetails.exercises.length : null;
+                            heroBannerHtml = `
+                                <div class="today-workout-hero">
+                                    <div class="today-workout-header">
+                                        <div class="today-workout-badge">🔥 BUGÜN • ${DAY_NAMES_TR[todayIdx].toUpperCase()}</div>
+                                        <span style="font-size:11px; color:#cbd5e1; font-weight:700;">${todayExCount ? `${todayExCount} Hareket` : ''}</span>
+                                    </div>
+                                    <h2 class="today-workout-title">${escapeHTML(todayPlan.title)}</h2>
+                                    <div class="today-workout-actions">
+                                        <button class="btn btn-gold" style="padding:9px 18px; font-size:12.5px; font-weight:900;" onclick="startScheduledWorkoutForDay(${todayIdx})">
+                                            ▶️ SEANSI BAŞLAT
                                         </button>
-                                        <button class="btn btn-outline" style="padding:9px 14px; font-size:12px; font-weight:700; border-color:rgba(255,255,255,0.2); color:#cbd5e1;" onclick="switchPlannerWeek('current')">
-                                            ⬅️ Bu Haftaya Dön
+                                        <button class="btn btn-outline" style="padding:9px 14px; font-size:12px; font-weight:700; border-color:rgba(255,255,255,0.2); color:#cbd5e1;" onclick="openScheduleDayModal(${todayIdx})">
+                                            👁️ İncele & Düzenle
                                         </button>
                                     </div>
                                 </div>
+                            `;
+                        } else {
+                            heroBannerHtml = `
+                                <div class="today-rest-bar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                                    <div class="today-rest-info">
+                                        <span style="font-size:16px;">🧘</span>
+                                        <span class="today-rest-title">Bugün (${DAY_NAMES_TR[todayIdx]}) Dinlenme Olarak Ayarlı</span>
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:6px 14px; font-weight:900;" onclick="openScheduleDayModal(${todayIdx})">
+                                            ⚡ Bugün Çalış (Antrenman Seç)
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        }
+
+                        container.innerHTML = `
+                            <div style="padding:8px 4px 2px;">
+                                <!-- FİTLAB MASAÜSTÜ YENİ PROGRAM BİLDİRİMİ -->
+                                ${getFitLabIncomingProgramHtml(user.id)}
+
+                                <!-- AKADEMİK KOÇ İSTASYONU DİREKTİFİ -->
+                                ${getCoachStationDirectiveHtml(user.id)}
+
+                                <!-- GÜNLÜK DURUM / HERO SEANS KARTI -->
+                                ${heroBannerHtml}
                             </div>
                         `;
-                    } else if (!todayPlan.rest) {
-                        const todayDetails = getWorkoutDetailsForPlan(todayPlan);
-                        const todayExCount = todayDetails && todayDetails.exercises ? todayDetails.exercises.length : null;
-                        heroBannerHtml = `
-                            <div class="today-workout-hero">
-                                <div class="today-workout-header">
-                                    <div class="today-workout-badge">🔥 BUGÜN • ${DAY_NAMES_TR[todayIdx].toUpperCase()}</div>
-                                    <span style="font-size:11px; color:#cbd5e1; font-weight:700;">${todayExCount ? `${todayExCount} Hareket` : ''}</span>
-                                </div>
-                                <h2 class="today-workout-title">${escapeHTML(todayPlan.title)}</h2>
-                                <div class="today-workout-actions">
-                                    <button class="btn btn-gold" style="padding:9px 18px; font-size:12.5px; font-weight:900;" onclick="startScheduledWorkoutForDay(${todayIdx})">
-                                        ▶️ SEANSI BAŞLAT
-                                    </button>
-                                    <button class="btn btn-outline" style="padding:9px 14px; font-size:12px; font-weight:700; border-color:rgba(255,255,255,0.2); color:#cbd5e1;" onclick="openScheduleDayModal(${todayIdx})">
-                                        👁️ İncele & Düzenle
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        heroBannerHtml = `
-                            <div class="today-rest-bar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                                <div class="today-rest-info">
-                                    <span style="font-size:16px;">🧘</span>
-                                    <span class="today-rest-title">Bugün (${DAY_NAMES_TR[todayIdx]}) Dinlenme Olarak Ayarlı</span>
-                                </div>
-                                <div style="display:flex; align-items:center; gap:8px;">
-                                    <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:6px 14px; font-weight:900;" onclick="openScheduleDayModal(${todayIdx})">
-                                        ⚡ Bugün Çalış (Antrenman Seç)
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                    }
-
-                    const daysSequence = [1, 2, 3, 4, 5, 6, 0];
-                    const weeklyStripHtml = daysSequence.map(d => {
-                        const plan = schedule[d] || { id: 'rest', rest: true, title: 'Dinlenme' };
-                        const isToday = !isNextWeek && d === todayIdx;
-                        const isTomorrow = !isNextWeek && d === tomorrowIdx;
-                        let pillClass = 'weekly-day-pill';
-                        if (isToday) pillClass += ' active-today';
-                        else if (isTomorrow) pillClass += ' active-tomorrow';
-
-                        const icon = plan.rest ? '🧘' : (plan.source === 'FitLAB AI' ? '🔬' : '⚔️');
-                        const planDetails = getWorkoutDetailsForPlan(plan);
-                        const exCount = (!plan.rest && planDetails && planDetails.exercises) ? planDetails.exercises.length : null;
-                        const statusText = plan.rest ? 'Dinlen' : (exCount ? `${exCount} Hrk` : 'Plan');
-                        const timeTagHtml = (!plan.rest && plan.time) ? `
-                            <span class="weekly-day-time-tag" title="Saat: ${plan.time}">
-                                ${plan.time} ${plan.googleEventId ? '<span class="weekly-day-sync-dot" title="Google Takvimde Canlı"></span>' : ''}
-                            </span>
-                        ` : '';
-
-                        return `
-                            <div class="${pillClass}" onclick="openScheduleDayModal(${d})" title="${DAY_NAMES_TR[d]}: ${escapeHTML(plan.title)}">
-                                <span class="weekly-day-name">${DAY_SHORT_TR[d]}</span>
-                                <span class="weekly-day-icon">${icon}</span>
-                                <span class="weekly-day-status">${statusText}</span>
-                                ${timeTagHtml}
-                            </div>
-                        `;
-                    }).join('');
-
-                    container.innerHTML = `
-                        <div style="padding:8px 4px 10px;">
-                            <!-- FİTLAB MASAÜSTÜ YENİ PROGRAM BİLDİRİMİ -->
-                            ${getFitLabIncomingProgramHtml(user.id)}
-
-                            <!-- AKADEMİK KOÇ İSTASYONU DİREKTİFİ -->
-                            ${getCoachStationDirectiveHtml(user.id)}
-
-                            <!-- 1. GÜNLÜK DURUM / HERO SEANS KARTI -->
-                            ${heroBannerHtml}
-
-                            <!-- 2. HAFTALIK ANTRENMAN TAKVİMİ (KOMPAKT & NİZAMİ) -->
-                            <div class="weekly-planner-section">
-                                <div class="planner-top-bar">
-                                    <div class="planner-title-wrap">
-                                        <span style="font-size:15px;">📅</span>
-                                        <span class="planner-title">${isNextWeek ? 'Gelecek Hafta Planı' : 'Haftalık Antrenman Takvimi'}</span>
-                                    </div>
-                                    <div class="mini-week-segmented">
-                                        <button type="button" class="mini-week-btn ${!isNextWeek ? 'active' : ''}" onclick="switchPlannerWeek('current')">
-                                            Bu Hafta
-                                        </button>
-                                        <button type="button" class="mini-week-btn ${isNextWeek ? 'active' : ''}" onclick="switchPlannerWeek('next')">
-                                            Gelecek Hafta ${hasIncomingAi ? '<span style="color:var(--gold);">•</span>' : ''}
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- CANLI TAKVİM ENTEGRASYON BARI -->
-                                ${typeof getCalendarLiveBarHtml === 'function' ? getCalendarLiveBarHtml() : ''}
-
-                                ${isNextWeek ? `
-                                    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.25); border-radius:8px; padding:8px 12px; margin-bottom:10px; gap:8px;">
-                                        <span style="font-size:11.5px; color:#f8fafc; font-weight:700;">🚀 Gelecek Hafta Reçetesi Takvimde</span>
-                                        <button type="button" class="btn btn-gold" style="font-size:11px; padding:5px 12px; font-weight:900;" onclick="promoteNextWeekToCurrent('${user.id}')">
-                                            ⚡ Aktif Haftam Yap
-                                        </button>
-                                    </div>
-                                ` : ''}
-
-                                <div class="weekly-strip">
-                                    ${weeklyStripHtml}
-                                </div>
-
-                                <div class="planner-template-bar">
-                                    <span class="planner-template-lbl">Hızlı Şablon:</span>
-                                    <button type="button" class="planner-template-btn" onclick="resetWeeklyScheduleTemplate('standard_3day')" title="Standart 3 Günlük Çelik Şablonu">⚡ 3 Gün</button>
-                                    <button type="button" class="planner-template-btn" onclick="resetWeeklyScheduleTemplate('split_4day')" title="4 Günlük Bölünmüş Şablon">⚡ 4 Gün</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
                     } catch(renderErr) {
                         console.error("renderActiveWorkout hatası:", renderErr);
                     }
                 }
+                if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
                 updateLiveProgressBar();
                 return;
             }
@@ -5142,6 +5075,7 @@ KURALLAR:
             if (liveTrackerBar) liveTrackerBar.style.display = 'block';
             if (hud) hud.style.display = 'block';
             if (studioSec) studioSec.style.display = 'none';
+            if (calSec) calSec.style.display = 'none';
 
             const s = activeWorkoutSession;
             const user = getActiveUser();
@@ -15701,7 +15635,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=192')
+                navigator.serviceWorker.register('./sw.js?v=193')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();

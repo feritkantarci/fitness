@@ -22,7 +22,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=192">
+    <link rel="stylesheet" href="css/style.css?v=193">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH */
         .tab-nav { display: flex !important; gap: 6px; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.1); padding: 6px; border-radius: 16px; margin-bottom: 20px; overflow-x: auto; }
@@ -37,7 +37,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo">⚔️</div>
-            <div class="badge-brand" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v192</div>
+            <div class="badge-brand" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v193</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -73,7 +73,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo">⚔️</span>
                     <span class="modern-brand-title">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v192</span>
+                    <span class="app-version-badge" id="appVersionBadge" onclick="event.stopPropagation(); forceAppUpdate();" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v193</span>
                 </div>
                 <div class="modern-bar-actions" style="position: relative;">
                     <div class="modern-user-badge" onclick="if(window.innerWidth <= 768){ openMoreSheet(); } else { switchTab('profileTab'); }" title="Profil & Menü">
@@ -121,9 +121,6 @@
                 </button>
                 <button class="tab-btn" onclick="switchTab('activeWorkoutTab')" id="tabBtnActiveWorkout">
                     <span>🏋️ Antrenman</span>
-                </button>
-                <button class="tab-btn" onclick="switchTab('calendarTab')" id="tabBtnCalendar">
-                    <span>📅 Takvim</span>
                 </button>
                 <button class="tab-btn" onclick="switchTab('libraryTab')">
                     <span>📖 Hareketler</span>
@@ -523,66 +520,73 @@
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- ==================== TAB: AKILLI ANTRENMAN TAKVİMİ ==================== -->
-            <div id="calendarTab" class="tab-content">
-                <div class="generator-card">
-                    <!-- TOP TOOLBAR -->
-                    <div class="calendar-screen-header">
-                        <div class="cal-header-title-box">
-                            <h2>
-                                <span>📅</span>
-                                <span>AKILLI ANTRENMAN TAKVİMİ</span>
-                            </h2>
-                            <p>
-                                Haftalık ve aylık seans planlama, geçmiş tamamlanan antrenman kayıtları ve program yönetimi.
-                            </p>
+                <!-- ==================== GÖMÜLÜ AKILLI ANTRENMAN TAKVİMİ (ANTRENMAN SEKMESİ İÇİNDE) ==================== -->
+                <div id="embeddedCalendarSection" style="margin-top:8px;">
+                    <div class="generator-card">
+                        <!-- TOP TOOLBAR -->
+                        <div class="calendar-screen-header">
+                            <div class="cal-header-title-box">
+                                <h2>
+                                    <span>📅</span>
+                                    <span>ANTRENMAN TAKVİMİ</span>
+                                </h2>
+                                <p>
+                                    Haftalık ve aylık seans planlama, geçmiş tamamlanan antrenman kayıtları ve program yönetimi.
+                                </p>
+                            </div>
+                            <div class="calendar-screen-nav-bar">
+                                <div class="cal-view-pills">
+                                    <button type="button" class="cal-pill-btn active" id="calViewWeeklyBtn" onclick="setCalendarViewMode('weekly')">
+                                        📅 Haftalık
+                                    </button>
+                                    <button type="button" class="cal-pill-btn" id="calViewMonthlyBtn" onclick="setCalendarViewMode('monthly')">
+                                        🗓️ Aylık
+                                    </button>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:4px;">
+                                    <button type="button" class="btn btn-outline cal-nav-btn" onclick="navigateCalendar(-1)" title="Önceki Dönem">
+                                        ◀
+                                    </button>
+                                    <button type="button" class="btn btn-outline cal-nav-btn" style="font-weight:800; color:var(--gold); border-color:rgba(245,158,11,0.4);" onclick="jumpCalendarToToday()">
+                                        Bugün
+                                    </button>
+                                    <button type="button" class="btn btn-outline cal-nav-btn" onclick="navigateCalendar(1)" title="Sonraki Dönem">
+                                        ▶
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="calendar-screen-nav-bar">
-                            <div class="cal-view-pills">
-                                <button type="button" class="cal-pill-btn active" id="calViewWeeklyBtn" onclick="setCalendarViewMode('weekly')">
-                                    📅 Haftalık
+
+                        <!-- PERIOD TITLE & DIRECT EXPORT BAR -->
+                        <div class="calendar-screen-period-bar">
+                            <div class="cal-period-title" id="calPeriodTitle">
+                                <!-- E.g. 5 - 11 Ekim 2026 -->
+                            </div>
+                            <div class="cal-actions-wrap">
+                                <button type="button" class="btn btn-gold cal-action-btn" onclick="openGoogleCalendarWeb()" title="Google Takvim uygulamasını aç">
+                                    📅 Google Takvim
                                 </button>
-                                <button type="button" class="cal-pill-btn" id="calViewMonthlyBtn" onclick="setCalendarViewMode('monthly')">
-                                    🗓️ Aylık
+                                <button type="button" class="btn btn-outline cal-action-btn" style="color:#cbd5e1;" onclick="downloadFullScheduleICS()" title="Tüm haftayı cihaz takvimine aktar (.ics)">
+                                    🍏 Cihaza Aktar (.ics)
+                                </button>
+                                <button type="button" class="btn btn-outline cal-action-btn" style="padding:4px 6px;" onclick="openCalendarSyncModal()" title="Takvim Ayarları">
+                                    ⚙️
                                 </button>
                             </div>
-                            <div style="display:flex; align-items:center; gap:4px;">
-                                <button type="button" class="btn btn-outline cal-nav-btn" onclick="navigateCalendar(-1)" title="Önceki Dönem">
-                                    ◀
-                                </button>
-                                <button type="button" class="btn btn-outline cal-nav-btn" style="font-weight:800; color:var(--gold); border-color:rgba(245,158,11,0.4);" onclick="jumpCalendarToToday()">
-                                    Bugün
-                                </button>
-                                <button type="button" class="btn btn-outline cal-nav-btn" onclick="navigateCalendar(1)" title="Sonraki Dönem">
-                                    ▶
-                                </button>
-                            </div>
                         </div>
-                    </div>
 
-                    <!-- PERIOD TITLE & DIRECT EXPORT BAR -->
-                    <div class="calendar-screen-period-bar">
-                        <div class="cal-period-title" id="calPeriodTitle">
-                            <!-- E.g. 5 - 11 Ekim 2026 -->
+                        <!-- MAIN CALENDAR CONTAINER (WEEKLY OR MONTHLY VIEW) -->
+                        <div id="calendarMainContainer">
+                            <!-- Populated dynamically by renderCalendarScreen() -->
                         </div>
-                        <div class="cal-actions-wrap">
-                            <button type="button" class="btn btn-gold cal-action-btn" onclick="openGoogleCalendarWeb()" title="Google Takvim uygulamasını aç">
-                                📅 Google Takvim
-                            </button>
-                            <button type="button" class="btn btn-outline cal-action-btn" style="color:#cbd5e1;" onclick="downloadFullScheduleICS()" title="Tüm haftayı cihaz takvimine aktar (.ics)">
-                                🍏 Cihaza Aktar (.ics)
-                            </button>
-                            <button type="button" class="btn btn-outline cal-action-btn" style="padding:4px 6px;" onclick="openCalendarSyncModal()" title="Takvim Ayarları">
-                                ⚙️
-                            </button>
-                        </div>
-                    </div>
 
-                    <!-- MAIN CALENDAR CONTAINER (WEEKLY OR MONTHLY VIEW) -->
-                    <div id="calendarMainContainer">
-                        <!-- Populated dynamically by renderCalendarScreen() -->
+                        <!-- QUICK TEMPLATE BAR -->
+                        <div class="planner-template-bar" style="margin-top:12px;">
+                            <span class="planner-template-lbl">Hızlı Şablon:</span>
+                            <button type="button" class="planner-template-btn" onclick="resetWeeklyScheduleTemplate('standard_3day')" title="Standart 3 Günlük Çelik Şablonu">⚡ 3 Gün</button>
+                            <button type="button" class="planner-template-btn" onclick="resetWeeklyScheduleTemplate('split_4day')" title="4 Günlük Bölünmüş Şablon">⚡ 4 Gün</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2204,9 +2208,9 @@
                 <span class="nav-icon">🏋️</span>
                 <span>Antrenman</span>
             </div>
-            <div class="bottom-nav-item" data-tab="calendarTab" onclick="switchTab('calendarTab')">
-                <span class="nav-icon">📅</span>
-                <span>Takvim</span>
+            <div class="bottom-nav-item" data-tab="libraryTab" onclick="switchTab('libraryTab')">
+                <span class="nav-icon">📖</span>
+                <span>Hareketler</span>
             </div>
             <div class="bottom-nav-item" data-tab="historyTab" onclick="switchTab('historyTab')">
                 <span class="nav-icon">📋</span>
@@ -2233,18 +2237,6 @@
             <button onclick="closeMoreSheet()" style="background:none; border:none; color:var(--text-secondary); font-size:18px; cursor:pointer;">✕</button>
         </div>
         <div class="more-sheet-grid">
-            <div class="more-sheet-btn" onclick="closeMoreSheet(); switchTab('calendarTab');">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#94a3b8;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                <span>Akıllı Takvim</span>
-            </div>
-            <div class="more-sheet-btn" onclick="closeMoreSheet(); switchTab('studioTab');">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#94a3b8;"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
-                <span>Program Atölyesi</span>
-            </div>
-            <div class="more-sheet-btn" onclick="closeMoreSheet(); switchTab('libraryTab'); switchLibrarySubTab('programs');">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#94a3b8;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                <span>Hazır Programlar</span>
-            </div>
             <div class="more-sheet-btn" onclick="closeMoreSheet(); openExerciseLibraryTab();">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#94a3b8;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
                 <span>Egzersiz Kütüphanesi</span>
@@ -2293,8 +2285,8 @@
     </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
-    <script src="js/exercises-db.js?v=192"></script>
-    <script src="js/app.js?v=192"></script>
+    <script src="js/exercises-db.js?v=193"></script>
+    <script src="js/app.js?v=193"></script>
     <script>
         function toggleHeaderPopupMenu(e) {
             if (e) e.stopPropagation();
