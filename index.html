@@ -22,7 +22,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=197">
+    <link rel="stylesheet" href="css/style.css?v=198">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH (STUDIO DAYLIGHT V197) */
         html, body { background-color: #F4F3EE; color: #111317; color-scheme: light; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -34,7 +34,7 @@
     <div id="loginScreen">
         <div class="login-card">
             <div class="login-logo" aria-hidden="true">⚔️</div>
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v197</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v198</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -70,7 +70,7 @@
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="modern-brand-logo" aria-hidden="true">⚔️</span>
                     <span class="modern-brand-title" translate="no">ÇELİK KODU</span>
-                    <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v197 • DAYLIGHT</span>
+                    <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v198 • DAYLIGHT</span>
                 </div>
                 <div class="modern-bar-actions">
                     <div class="modern-user-badge" onclick="if(window.innerWidth <= 768){ openMoreSheet(); } else { switchTab('profileTab'); }" title="Profil & Menü">
@@ -422,7 +422,7 @@
                             <!-- TOP BAR: Title & Actions -->
                             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; border-bottom:1px solid var(--border); padding-bottom:12px;">
                                 <div>
-                                    <span style="font-size:14px; font-weight:800; color:#fff;" id="studioHeaderTitle">Özel Antrenman Taslağı</span>
+                                    <span style="font-size:14px; font-weight:800; color:#111317;" id="studioHeaderTitle">Özel Antrenman Taslağı</span>
                                     <p style="font-size:11px; color:var(--text-secondary); margin-top:2px;" id="studioHeaderSub">Bölge seçin, hareketleri ekleyin, dengeyi görün.</p>
                                 </div>
                                 <div style="display:flex; gap:6px; flex-wrap:wrap;">
@@ -435,7 +435,7 @@
                             <!-- SECTION 1: HEDEF BÖLGELER (Region Selectors) -->
                             <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:12px; margin-bottom:14px;">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                    <span style="font-size:12.5px; font-weight:800; color:#fff;">Hedef Bölgeler</span>
+                                    <span style="font-size:12.5px; font-weight:800; color:#111317;">Hedef Bölgeler</span>
                                     <div style="display:flex; gap:6px;">
                                         <button class="btn btn-outline" style="font-size:10px; padding:3px 8px;" onclick="selectPresetRegions('all')">Tüm Vücut</button>
                                         <button class="btn btn-outline" style="font-size:10px; padding:3px 8px;" onclick="selectPresetRegions('clear')">Temizle</button>
@@ -451,7 +451,7 @@
                             <!-- SECTION 2: BÖLGE DURUMU (Visual Progress: Seçildi / Kaldı) -->
                             <div id="studioRegionStatusBox" style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:12px; margin-bottom:14px;">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                    <span style="font-size:12.5px; font-weight:800; color:#fff;">Bölge Durumu</span>
+                                    <span style="font-size:12.5px; font-weight:800; color:#111317;">Bölge Durumu</span>
                                     <span id="studioRegionSummaryBadge" style="font-size:11px; font-weight:700;"></span>
                                 </div>
                                 <div id="studioRegionStatusGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:6px;">
@@ -489,7 +489,7 @@
                             <!-- SECTION 4: UYGUN HAREKETLER -->
                             <div>
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                    <div style="font-size:12.5px; font-weight:800; color:#fff;">
+                                    <div style="font-size:12.5px; font-weight:800; color:#111317;">
                                         Uygun Hareketler <span id="studioExTotalCount" style="color:var(--text-secondary); font-size:11px; font-weight:normal;"></span>
                                     </div>
                                     <label style="font-size:11px; color:var(--cyan); cursor:pointer; display:flex; align-items:center; gap:4px;">
@@ -564,7 +564,7 @@
                                 <button type="button" class="btn btn-gold cal-action-btn" onclick="openGoogleCalendarWeb()" title="Google Takvim uygulamasını aç">
                                     📅 Google Takvim
                                 </button>
-                                <button type="button" class="btn btn-outline cal-action-btn" style="color:#cbd5e1;" onclick="downloadFullScheduleICS()" title="Tüm haftayı cihaz takvimine aktar (.ics)">
+                                <button type="button" class="btn btn-outline cal-action-btn" style="color:#111317;" onclick="downloadFullScheduleICS()" title="Tüm haftayı cihaz takvimine aktar (.ics)">
                                     🍏 Cihaza Aktar (.ics)
                                 </button>
                                 <button type="button" class="btn btn-outline cal-action-btn" style="padding:4px 6px;" onclick="openCalendarSyncModal()" title="Takvim Ayarları">
@@ -603,7 +603,7 @@
 
                     <!-- PANE 1: HAZIR VE KAYITLI PROGRAMLAR (HIDDEN) -->
                     <div id="libPanePrograms" style="display:none;">
-                        <h2 style="font-size:18px; font-weight:900; color:#fff; margin-bottom:12px;">📚 Kayıtlı ve Hazır Programlar</h2>
+                        <h2 style="font-size:18px; font-weight:900; color:#111317; margin-bottom:12px;">📚 Kayıtlı ve Hazır Programlar</h2>
                         
                         <h3 style="font-size:13px; font-weight:800; color:var(--gold); margin-bottom:10px;">⭐ Kişisel Kayıtlı Programlarım</h3>
                         <div id="savedProgramsList">
@@ -620,7 +620,7 @@
                     <div id="libPaneExercises" style="display:block;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
                             <div>
-                                <h2 style="font-size:18px; font-weight:900; color:#fff; margin:0;">📖 Egzersiz Kütüphanesi & Rehber</h2>
+                                <h2 style="font-size:18px; font-weight:900; color:#111317; margin:0;">📖 Egzersiz Kütüphanesi & Rehber</h2>
                                 <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
                                     Tüm hareketleri inceleyin, form ipuçlarına bakın veya doğrudan programınıza ekleyin.
                                 </div>
@@ -631,11 +631,11 @@
                         </div>
 
                         <!-- SEARCH & FILTERS -->
-                        <div style="background:rgba(0,0,0,0.25); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:16px;">
+                        <div class="lib-filter-panel" style="background:#F4F3EE; border:1px solid #E2E0D8; border-radius:14px; padding:12px; margin-bottom:16px;">
                             <!-- Search bar -->
                             <div style="position:relative; margin-bottom:10px;">
                                 <input type="text" id="libExSearchInput" class="form-input" aria-label="Egzersiz, kas grubu veya ipucu ara" spellcheck="false" autocomplete="off"
-                                       style="width:100%; padding:10px 36px 10px 36px; font-size:12.5px; border-radius:8px; background:rgba(0,0,0,0.5);" 
+                                       style="width:100%; padding:10px 36px 10px 36px; font-size:12.5px; border-radius:10px; background:#FFFFFF; color:#111317; border:1px solid #D5D2C8;" 
                                        placeholder="🔍 Hareket, kas grubu veya ipucu ara (Örn: Bench, Kettlebell, Squat, Omuz)…" 
                                        oninput="renderLibraryExerciseCatalog()">
                                 <span aria-hidden="true" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:14px; opacity:0.6;">🔍</span>
@@ -672,7 +672,7 @@
 
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding:0 2px;">
                                 <div style="font-size:11px; font-weight:700; color:var(--text-secondary);" id="libExCountBadge">93 Egzersiz</div>
-                                <label style="font-size:11px; font-weight:700; color:#fca5a5; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+                                <label style="font-size:11px; font-weight:700; color:#DC2626; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
                                     <input type="checkbox" id="chkLibShowExcluded" onchange="renderLibraryExerciseCatalog()" style="cursor:pointer; accent-color:#ef4444;">
                                     <span>👁️ Gizlenenleri Göster (<span id="libExcludedCount">0</span>)</span>
                                 </label>
@@ -691,7 +691,7 @@
             <div id="historyTab" class="tab-content">
                 <div class="generator-card">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                        <h2 style="font-size:16px; font-weight:800; color:#fff;">Antrenman Geçmişi</h2>
+                        <h2 style="font-size:16px; font-weight:800; color:#111317;">Antrenman Geçmişi</h2>
                         <div style="display:flex; gap:6px;">
                             <button class="btn btn-outline" style="font-size:11.5px; padding:6px 12px; display:flex; align-items:center; gap:6px;" onclick="exportCSV()" title="CSV Olarak Dışa Aktar">
                                 <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--cyan);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line></svg>
@@ -737,7 +737,7 @@
                     <!-- HEADER & ACTION BUTTONS -->
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
                         <div>
-                            <h2 style="font-size:18px; font-weight:900; color:#fff;">📈 Gelişim, Kas Yükü & Vücut Analizi</h2>
+                            <h2 style="font-size:18px; font-weight:900; color:#111317;">📈 Gelişim, Kas Yükü & Vücut Analizi</h2>
                             <p style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Biyomekanik kas tonajı, akıllı tartı kompozisyonu ve mezura ölçüleri takibi</p>
                         </div>
                         <div style="display:flex; gap:6px; flex-wrap:wrap;">
@@ -777,7 +777,7 @@
                         <div style="display:flex; align-items:center; gap:12px;">
                             <span style="font-size:36px; background:var(--bg-surface); width:54px; height:54px; display:flex; align-items:center; justify-content:center; border-radius:12px; border:2px solid var(--gold);" id="profileCardAvatar">🥋</span>
                             <div>
-                                <h2 style="font-size:18px; font-weight:800; color:#fff;" id="profileCardName">Ferit</h2>
+                                <h2 style="font-size:18px; font-weight:800; color:#111317;" id="profileCardName">Ferit</h2>
                                 <p style="font-size:12px; color:var(--text-secondary);" id="profileCardMeta">Kişisel Sporcu Profili & Hedef Kilolar</p>
                             </div>
                         </div>
@@ -934,7 +934,7 @@
 
                 <!-- ATHLETES LIVE CARDS -->
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <h3 style="font-size:13px; font-weight:800; color:#fff; margin:0;">📋 Sporcuların Antrenman & Kilo Durumları</h3>
+                    <h3 style="font-size:13px; font-weight:800; color:#111317; margin:0;">📋 Sporcuların Antrenman & Kilo Durumları</h3>
                     <span style="font-size:10.5px; color:var(--text-secondary);">Hesap değiştirmeden canlı teftiş</span>
                 </div>
                 <div id="adminAthleteStatusContainer"></div>
@@ -1006,7 +1006,7 @@
                 </div>
 
                 <!-- ATHLETES LIST -->
-                <h3 style="font-size:13px; font-weight:800; color:#fff; margin-bottom:10px;">📋 Kayıtlı Sporcu Hesapları</h3>
+                <h3 style="font-size:13px; font-weight:800; color:#111317; margin-bottom:10px;">📋 Kayıtlı Sporcu Hesapları</h3>
                 <div id="adminUserListContainer"></div>
             </div>
         </div>
@@ -1091,12 +1091,12 @@
             </div>
 
             <!-- SEANS SAATİ & CANLI TAKVİM ENTEGRASYON KARTI -->
-            <div id="schedDayTimingSection" style="background:rgba(15,23,42,0.85); border:1px solid rgba(255,255,255,0.12); border-radius:10px; padding:12px; margin-bottom:14px;">
+            <div id="schedDayTimingSection" style="background:#F4F3EE; border:1px solid rgba(255,255,255,0.12); border-radius:10px; padding:12px; margin-bottom:14px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <span style="font-size:12px; font-weight:800; color:#fff; display:flex; align-items:center; gap:6px;">
+                    <span style="font-size:12px; font-weight:800; color:#111317; display:flex; align-items:center; gap:6px;">
                         <span>🕒</span> Seans Saati & Takvim Durumu
                     </span>
-                    <span id="schedDaySyncStatusBadge" style="font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; background:rgba(255,255,255,0.06); color:#cbd5e1;">
+                    <span id="schedDaySyncStatusBadge" style="font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; background:rgba(255,255,255,0.06); color:#111317;">
                         Yerel Plan
                     </span>
                 </div>
@@ -1117,7 +1117,7 @@
                     <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 10px; color:var(--cyan); border-color:rgba(56,189,248,0.4);" onclick="openSingleDayDirectGoogleCalendar()" title="Google Takvimde Aç veya Ekle">
                         🔗 Takvimde Aç
                     </button>
-                    <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 10px; color:#cbd5e1;" onclick="downloadSingleDayICS()" title="Apple Takvim / iCal Olarak İndir">
+                    <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 10px; color:#111317;" onclick="downloadSingleDayICS()" title="Apple Takvim / iCal Olarak İndir">
                         📥 .ics
                     </button>
                 </div>
@@ -1169,7 +1169,7 @@
             <!-- HIZLI AKSİYONLAR -->
             <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
                 <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px;">
-                    <div style="font-size:12.5px; font-weight:800; color:#fff; margin-bottom:4px;">🔄 İki Yönlü Canlı Eşitleme</div>
+                    <div style="font-size:12.5px; font-weight:800; color:#111317; margin-bottom:4px;">🔄 İki Yönlü Canlı Eşitleme</div>
                     <div style="font-size:11px; color:var(--text-secondary); margin-bottom:10px; line-height:1.5;">
                         • Google Takvim'deki "FitLab • Antrenmanlarım" takviminde taşıdığınız saat veya günleri FitLab'e çeker.<br>
                         • FitLab'deki yeni veya güncellenmiş antrenmanları Google Takvim'e yazar.
@@ -1186,18 +1186,18 @@
 
                 <!-- APPLE TAKVİM / iCAL / WEBCAL SEKMESİ -->
                 <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px;">
-                    <div style="font-size:12.5px; font-weight:800; color:#fff; margin-bottom:4px;">🍏 Apple Takvim / Mac & iPhone Desteği</div>
+                    <div style="font-size:12.5px; font-weight:800; color:#111317; margin-bottom:4px;">🍏 Apple Takvim / Mac & iPhone Desteği</div>
                     <div style="font-size:11px; color:var(--text-secondary); margin-bottom:10px; line-height:1.5;">
                         • <strong>Yöntem 1 (Önerilen):</strong> macOS ve iOS Sistem Ayarları > İnternet Hesapları'ndan Google hesabınızı açın; "FitLab • Antrenmanlarım" anında Apple Takvim uygulamanıza yansır.<br>
                         • <strong>Yöntem 2:</strong> Tüm haftalık programınızı anında Apple Takvim'e aktarmak için .ics dosyasını tek dokunuşla indirin.
                     </div>
-                    <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 12px; color:#cbd5e1;" onclick="downloadFullScheduleICS()">
+                    <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 12px; color:#111317;" onclick="downloadFullScheduleICS()">
                         📥 Tüm Haftalık Takvimi (.ics) İndir
                     </button>
                 </div>
 
                 <!-- TERCİHLER VE GELİŞMİŞ AYARLAR -->
-                <div style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:12px;">
+                <div style="background:#F4F3EE; border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:12px;">
                     <div style="font-size:12px; font-weight:800; color:var(--gold); margin-bottom:8px;">⚙️ Takvim Tercihleri</div>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
                         <div>
@@ -1269,7 +1269,7 @@
                     <div style="flex:1; min-width:240px;">
                         <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
                             <span style="font-size:16px;">⚡</span>
-                            <span style="font-size:13.5px; font-weight:900; color:#fff;" id="gcalAutoSyncCardTitle">1 Kereye Mahsus Onay: Sıfır Tıklama & Tam Otomasyon</span>
+                            <span style="font-size:13.5px; font-weight:900; color:#111317;" id="gcalAutoSyncCardTitle">1 Kereye Mahsus Onay: Sıfır Tıklama & Tam Otomasyon</span>
                             <span class="auth-role-tag" id="gcalAutoSyncCardBadge" style="background:#10b981; color:#000; font-weight:900; font-size:9px;">CANLI API</span>
                         </div>
                         <p style="font-size:11.5px; color:#a7f3d0; margin:0; line-height:1.5;" id="gcalAutoSyncCardDesc">
@@ -1287,12 +1287,12 @@
             <!-- YÖNTEM 1: TÜM HAFTAYI TEK SEFERDE AKTAR -->
             <div style="background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(15,23,42,0.8)); border: 1.5px solid var(--gold); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                    <div style="font-size:13.5px; font-weight:800; color:#fff; display:flex; align-items:center; gap:6px;">
+                    <div style="font-size:13.5px; font-weight:800; color:#111317; display:flex; align-items:center; gap:6px;">
                         <span>⚡ Yöntem 1: Tüm Haftayı Tek Seferde Aktar</span>
                         <span style="font-size:9.5px; background:var(--gold); color:#000; font-weight:900; padding:2px 6px; border-radius:4px;">ÖNERİLEN</span>
                     </div>
                 </div>
-                <div style="font-size:11.5px; color:#cbd5e1; line-height:1.5; margin-bottom:12px;">
+                <div style="font-size:11.5px; color:#111317; line-height:1.5; margin-bottom:12px;">
                     Haftadaki tüm antrenman seanslarını tek bir takvim dosyası (.ics) halinde indirir ve Google Takvim'in içe aktarma sayfasını açar.
                 </div>
                 
@@ -1300,13 +1300,13 @@
                     <button type="button" class="btn btn-gold" style="font-size:12px; padding:9px 16px; font-weight:900; box-shadow:0 0 15px rgba(245,158,11,0.3);" onclick="executeOneClickGoogleCalendarExport()">
                         🚀 Tek Tıkla İndir & Google Takvim'e Yükle
                     </button>
-                    <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 12px; color:#cbd5e1;" onclick="downloadFullScheduleICS()">
+                    <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 12px; color:#111317;" onclick="downloadFullScheduleICS()">
                         📥 Yalnızca Dosyayı İndir (.ics)
                     </button>
                 </div>
 
                 <!-- 2 ADIMLI REHBER -->
-                <div style="background:rgba(0,0,0,0.35); border-radius:8px; padding:10px 12px; font-size:11px; color:#94a3b8; line-height:1.6;">
+                <div style="background:#F4F3EE; border-radius:8px; padding:10px 12px; font-size:11px; color:#94a3b8; line-height:1.6;">
                     <div style="color:var(--gold); font-weight:800; margin-bottom:4px;">📋 Nasıl Yapılır? (10 Saniyelik İşlem)</div>
                     <div>1. <strong>"Tek Tıkla İndir & Google Takvim'e Yükle"</strong> butonuna basın (takvim dosyanız iner ve Google Takvim İçe Aktar ekranı açılır).</div>
                     <div>2. Açılan Google Takvim ekranında <strong>"Bilgisayarınızdan bir dosya seçin"</strong>e tıklayıp indirilen <code>fitlab-takvim-....ics</code> dosyasını seçin ve <strong>"İçe Aktar"</strong>a basın. Tüm hafta takviminize işlenir!</div>
@@ -1315,7 +1315,7 @@
 
             <!-- YÖNTEM 2: GÜNLERİ TEK TEK GOOGLE TAKVİM'E EKLE -->
             <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
-                <div style="font-size:13px; font-weight:800; color:#fff; margin-bottom:4px;">
+                <div style="font-size:13px; font-weight:800; color:#111317; margin-bottom:4px;">
                     📅 Yöntem 2: Dosyasız — Günleri Tek Tıkla Google Takvim'e Ekle
                 </div>
                 <div style="font-size:11.5px; color:var(--text-secondary); margin-bottom:10px; line-height:1.4;">
@@ -1482,7 +1482,7 @@
                  ondragleave="this.classList.remove('dragover');" 
                  ondrop="handleScalePdfDrop(event)">
                 <div style="font-size:32px; margin-bottom:4px;">📊</div>
-                <div style="font-weight:900; font-size:14.5px; color:#fff;">Unique Health Raporu (PDF veya PNG) Yükleyin</div>
+                <div style="font-weight:900; font-size:14.5px; color:#111317;">Unique Health Raporu (PDF veya PNG) Yükleyin</div>
                 <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px; margin-bottom:12px;">
                     PDF dosyasını veya galerideki PNG/JPG görselini seçin, sürükleyin veya yapıştırın
                 </div>
@@ -1502,7 +1502,7 @@
                     </button>
                 </div>
 
-                <div id="scaleManualPasteContainer" style="display:none; margin-top:12px; text-align:left; background:rgba(15,23,42,0.9); border:1px solid var(--border); border-radius:10px; padding:12px;">
+                <div id="scaleManualPasteContainer" style="display:none; margin-top:12px; text-align:left; background:#F4F3EE; border:1px solid var(--border); border-radius:10px; padding:12px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                         <span style="font-size:11.5px; font-weight:800; color:var(--cyan);">📋 Rapor Metnini Yapıştırın</span>
                         <button type="button" onclick="toggleScalePasteBox(false)" style="background:none; border:none; color:var(--text-secondary); font-size:14px; cursor:pointer;">✕</button>
@@ -1703,7 +1703,7 @@
                 <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleAiTelemetryAccordion()">
                     <div style="display:flex; align-items:center; gap:8px;">
                         <span style="font-size:13px;">📊</span>
-                        <strong style="font-size:12px; color:#fff;">Durum Telemetrisi</strong>
+                        <strong style="font-size:12px; color:#111317;">Durum Telemetrisi</strong>
                     </div>
                     <span id="aiTelemetryToggleLabel" style="font-size:11px; color:var(--cyan); font-weight:700;">▼ Göster</span>
                 </div>
@@ -1719,7 +1719,7 @@
                 <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleAiDiagnosticAccordion()">
                     <div style="display:flex; align-items:center; gap:8px;">
                         <span style="font-size:14px;">🧠</span>
-                        <strong style="font-size:12.5px; color:#fff;" id="aiDiagnosticHeadline">AI Biyomekanik Teşhis Raporu</strong>
+                        <strong style="font-size:12.5px; color:#111317;" id="aiDiagnosticHeadline">AI Biyomekanik Teşhis Raporu</strong>
                     </div>
                     <span id="aiDiagnosticToggleLabel" style="font-size:11px; color:var(--cyan); font-weight:700;">▼ Göster</span>
                 </div>
@@ -1732,7 +1732,7 @@
                             <span>✨ Canlı Gemini Analizi</span>
                         </button>
                     </div>
-                    <div id="aiGeminiExtraReportContainer" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed rgba(168,85,247,0.3); font-size:12px; color:#e2e8f0; line-height:1.55;">
+                    <div id="aiGeminiExtraReportContainer" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed rgba(168,85,247,0.3); font-size:12px; color:#111317; line-height:1.55;">
                         <!-- Gemini live output will be streamed/rendered here -->
                     </div>
                 </div>
@@ -1740,7 +1740,7 @@
 
             <!-- BÖLÜM 3: HİBRİT DOKTRİN SEÇİMİ (EN BAŞTA KARAR VERİLECEK YAKLAŞIM) -->
             <div style="margin-bottom:16px;">
-                <div style="font-size:12.5px; font-weight:800; color:#fff; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+                <div style="font-size:12.5px; font-weight:800; color:#111317; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
                     <span>🎯</span> <span>Programın Temel Doktrinini Belirle (En Başta Yaklaşım)</span>
                 </div>
                 <p style="font-size:11.5px; color:var(--text-secondary); margin:0 0 10px 0;">
@@ -1750,7 +1750,7 @@
                     <!-- 1. Pure Bodybuilding -->
                     <div class="doctrine-card" id="docCard_bb_pure" onclick="selectAiDoctrine('bb_pure')" style="padding:10px 14px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <strong style="color:#fff; font-size:12.5px;">🛡️ Saf Bodybuilding</strong>
+                            <strong style="color:#111317; font-size:12.5px;">🛡️ Saf Bodybuilding</strong>
                             <span style="font-size:11px; color:var(--gold); font-weight:800;">%90 Kas</span>
                         </div>
                     </div>
@@ -1767,7 +1767,7 @@
                     <!-- 3. Balanced Hybrid (50/50) -->
                     <div class="doctrine-card" id="docCard_balanced_hybrid" onclick="selectAiDoctrine('balanced_hybrid')" style="padding:10px 14px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <strong style="color:#fff; font-size:12.5px;">⚖️ Dengeli Atlet</strong>
+                            <strong style="color:#111317; font-size:12.5px;">⚖️ Dengeli Atlet</strong>
                             <span style="font-size:11px; color:#38bdf8; font-weight:800;">%50 / %50</span>
                         </div>
                     </div>
@@ -1775,7 +1775,7 @@
                     <!-- 4. Functional-Dominant Hybrid -->
                     <div class="doctrine-card" id="docCard_func_hybrid" onclick="selectAiDoctrine('func_hybrid')" style="padding:10px 14px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <strong style="color:#fff; font-size:12.5px;">🔥 Fonk-Dominant</strong>
+                            <strong style="color:#111317; font-size:12.5px;">🔥 Fonk-Dominant</strong>
                             <span style="font-size:11px; color:#f97316; font-weight:800;">%70 Fonk</span>
                         </div>
                     </div>
@@ -1783,7 +1783,7 @@
                     <!-- 5. Pure Functional -->
                     <div class="doctrine-card" id="docCard_func_pure" onclick="selectAiDoctrine('func_pure')" style="padding:10px 14px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <strong style="color:#fff; font-size:12.5px;">🌪️ Saf Kondisyon</strong>
+                            <strong style="color:#111317; font-size:12.5px;">🌪️ Saf Kondisyon</strong>
                             <span style="font-size:11px; color:#4ade80; font-weight:800;">%90 Fonk</span>
                         </div>
                     </div>
@@ -1887,7 +1887,7 @@
                     <div id="pickerCurrentExThumb" style="width:28px; height:28px; border-radius:5px; background:#000; overflow:hidden; flex-shrink:0; border:1px solid var(--border); display:flex; align-items:center; justify-content:center;">
                         🏋️
                     </div>
-                    <div id="pickerCurrentExName" style="font-size:13px; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                    <div id="pickerCurrentExName" style="font-size:13px; font-weight:800; color:#111317; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                         -
                     </div>
                 </div>
@@ -1897,7 +1897,7 @@
             </div>
 
             <!-- 4 SMART TABS -->
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 8px; background: rgba(0,0,0,0.35); padding: 4px; border-radius: 8px; border: 1px solid var(--border);">
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 8px; background:#F4F3EE; padding: 4px; border-radius: 8px; border: 1px solid var(--border);">
                 <button type="button" class="btn btn-outline" id="pickerTabBtnSame" style="padding: 7px 2px; font-size: 10.5px; font-weight: 800; border-radius: 6px; border-color: transparent;" onclick="switchPickerTab('same_muscle')">
                     🎯 Biyomekanik
                 </button>
@@ -2037,7 +2037,7 @@
                     <img id="bugReportImgPreview" src="" alt="Önizleme" style="max-width:100%; max-height:100%; object-fit:contain;">
                 </div>
                 <div>
-                    <div style="font-size:14.5px; font-weight:900; color:#fff;" id="bugReportExName">Egzersiz Adı</div>
+                    <div style="font-size:14.5px; font-weight:900; color:#111317;" id="bugReportExName">Egzersiz Adı</div>
                     <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;" id="bugReportExMeta">Ekipman • Kas</div>
                     <div style="font-size:10.5px; color:var(--gold); margin-top:2px;">Bulut: Firebase Firestore Havuzuna Aktarılacak</div>
                 </div>
@@ -2130,7 +2130,7 @@
 
             <div class="finisher-preset-card">
                 <div>
-                    <div style="font-size:13.5px; font-weight:800; color:#fff;">🛡️ Core & Karın Çelik Zırhı</div>
+                    <div style="font-size:13.5px; font-weight:800; color:#111317;">🛡️ Core & Karın Çelik Zırhı</div>
                     <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Plank + Hollow Body / Knee Raise</div>
                     <span class="finisher-badge">3 Set • 30-45s / 12 Tk</span>
                 </div>
@@ -2141,7 +2141,7 @@
 
             <div class="finisher-preset-card">
                 <div>
-                    <div style="font-size:13.5px; font-weight:800; color:#fff;">🦾 Kol Pump Süperset</div>
+                    <div style="font-size:13.5px; font-weight:800; color:#111317;">🦾 Kol Pump Süperset</div>
                     <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Dambıl Biceps Curl + Triceps Overhead</div>
                     <span class="finisher-badge">3 Set • 10-12 Tekrar</span>
                 </div>
@@ -2152,7 +2152,7 @@
 
             <div class="finisher-preset-card">
                 <div>
-                    <div style="font-size:13.5px; font-weight:800; color:#fff;">🦅 3D Omuz & Trapez Genişletme</div>
+                    <div style="font-size:13.5px; font-weight:800; color:#111317;">🦅 3D Omuz & Trapez Genişletme</div>
                     <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Lateral Raise + Face Pull / Halo</div>
                     <span class="finisher-badge">3 Set • 12-15 Tekrar</span>
                 </div>
@@ -2163,7 +2163,7 @@
 
             <div class="finisher-preset-card">
                 <div>
-                    <div style="font-size:13.5px; font-weight:800; color:#fff;">🧳 Kavrama & Trapez: Çift Ağırlık Taşıma</div>
+                    <div style="font-size:13.5px; font-weight:800; color:#111317;">🧳 Kavrama & Trapez: Çift Ağırlık Taşıma</div>
                     <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Dambıl / Kettlebell Farmer's Walk</div>
                     <span class="finisher-badge">3 Set • 45 Metre / Adım</span>
                 </div>
@@ -2174,7 +2174,7 @@
 
             <div class="finisher-preset-card">
                 <div>
-                    <div style="font-size:13.5px; font-weight:800; color:#fff;">🔥 Kalori & Patlayıcı Güç Finisher</div>
+                    <div style="font-size:13.5px; font-weight:800; color:#111317;">🔥 Kalori & Patlayıcı Güç Finisher</div>
                     <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Kettlebell / Dambıl Swing + Burpee</div>
                     <span class="finisher-badge">3 Set • 15 Swing + 8 Burpee</span>
                 </div>
@@ -2292,8 +2292,8 @@
     </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
-    <script src="js/exercises-db.js?v=197"></script>
-    <script src="js/app.js?v=197"></script>
+    <script src="js/exercises-db.js?v=198"></script>
+    <script src="js/app.js?v=198"></script>
     <script>
         function toggleHeaderPopupMenu(e) {
             if (e) e.stopPropagation();
@@ -2354,7 +2354,7 @@
                 </div>
                 <button type="button" onclick="document.getElementById('academicReportModal').style.display='none'" style="background:transparent; border:none; color:var(--text-secondary); font-size:20px; cursor:pointer; padding:4px 8px;">✕</button>
             </div>
-            <div style="padding:18px 20px; overflow-y:auto; font-size:13px; line-height:1.65; color:#f1f5f9; white-space:pre-wrap; font-family:var(--font-sans);" id="academicReportModalContent">
+            <div style="padding:18px 20px; overflow-y:auto; font-size:13px; line-height:1.65; color:#111317; white-space:pre-wrap; font-family:var(--font-sans);" id="academicReportModalContent">
             </div>
             <div style="padding:14px 20px; border-top:1px solid var(--border, rgba(255,255,255,0.1)); display:flex; justify-content:flex-end;">
                 <button type="button" class="btn btn-gold" onclick="document.getElementById('academicReportModal').style.display='none'" style="padding:8px 18px; font-size:12.5px; font-weight:800;">
