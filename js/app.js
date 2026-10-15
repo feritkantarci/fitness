@@ -250,11 +250,11 @@
         let selectedTheme = 'gold';
 
         const THEMES = {
-            gold: { gold: '#A83000', goldLight: '#9A3412', glow: 'rgba(168, 48, 0, 0.16)' },
-            cyan: { gold: '#0369A1', goldLight: '#075985', glow: 'rgba(3, 105, 161, 0.16)' },
-            green: { gold: '#15803D', goldLight: '#166534', glow: 'rgba(21, 128, 61, 0.16)' },
+            gold: { gold: '#B6F059', goldLight: '#9A3412', glow: 'rgba(168, 48, 0, 0.16)' },
+            cyan: { gold: '#60A5FA', goldLight: '#075985', glow: 'rgba(3, 105, 161, 0.16)' },
+            green: { gold: '#B6F059', goldLight: '#166534', glow: 'rgba(21, 128, 61, 0.16)' },
             red: { gold: '#BE123C', goldLight: '#9F1239', glow: 'rgba(190, 18, 60, 0.16)' },
-            purple: { gold: '#111317', goldLight: '#334155', glow: 'rgba(17, 19, 23, 0.16)' }
+            purple: { gold: '#F3F6FA', goldLight: '#CBD5E1', glow: 'rgba(17, 19, 23, 0.16)' }
         };
 
         // TAB SWITCHING & BOTTOM NAV CONTROL
@@ -758,7 +758,7 @@
                 id: 'bb_pure',
                 name: 'Saf Bodybuilding',
                 shortTag: '%90 Kas / %10 Kond.',
-                badgeColor: '#B45309',
+                badgeColor: '#E5B85B',
                 summary: 'Maksimum mekanik gerilim, izole kas tecridi ve simetri. Estetik ve hacim odaklı saf hipertrofi yaklaşımı.',
                 academicRatio: { bb: 0.90, func: 0.10 }
             },
@@ -766,7 +766,7 @@
                 id: 'bb_hybrid',
                 name: 'BB-Dominant Hibrit',
                 shortTag: '%70 Kas / %30 Fonk.',
-                badgeColor: '#111317',
+                badgeColor: '#F3F6FA',
                 summary: 'Ana gövde ağır hipertrofi; seans sonlarına veya aralara Kettlebell, Carry ve metabolik kondisyon. Kas yaparken eklemleri korur ve iş kapasitesini artırır.',
                 academicRatio: { bb: 0.70, func: 0.30 }
             },
@@ -774,7 +774,7 @@
                 id: 'balanced_hybrid',
                 name: 'Dengeli Hibrit Atlet',
                 shortTag: '%50 / %50 Eşit',
-                badgeColor: '#0369A1',
+                badgeColor: '#60A5FA',
                 summary: 'Ağır compound güç blokları ile patlayıcı kettlebell, dinamik rotasyon ve core zırhının 50/50 eşit sinerjisi.',
                 academicRatio: { bb: 0.50, func: 0.50 }
             },
@@ -782,7 +782,7 @@
                 id: 'func_hybrid',
                 name: 'Fonksiyonel-Dominant',
                 shortTag: '%70 Fonk. / %30 Kas',
-                badgeColor: '#D94100',
+                badgeColor: '#E5B85B',
                 summary: 'Ana omurga atletik güç ve yüksek dayanıklılık; zayıf kalan omuz, kol veya göğüs bölgelerine hedefe yönelik izole hipertrofi iğneleri.',
                 academicRatio: { bb: 0.30, func: 0.70 }
             },
@@ -790,7 +790,7 @@
                 id: 'func_pure',
                 name: 'Saf Fonksiyonel & Kondisyon',
                 shortTag: '%90 Fonksiyonel',
-                badgeColor: '#15803D',
+                badgeColor: '#B6F059',
                 summary: 'Çok düzlemli hareket kalıpları, kettlebell kompleksleri, yüksek VO2 Max ve kardiyovasküler savaşçı dayanıklılığı.',
                 academicRatio: { bb: 0.10, func: 0.90 }
             }
@@ -962,21 +962,21 @@
                         </div>
                         <div class="telemetry-pill">
                             <span class="telemetry-pill-label">Kas/Fonk:</span>
-                            <span class="telemetry-pill-val" style="color:#A83000;">%${Math.round(telemetry.bbRatio * 100)}/%${Math.round(telemetry.funcRatio * 100)}</span>
+                            <span class="telemetry-pill-val" style="color:#B6F059;">%${Math.round(telemetry.bbRatio * 100)}/%${Math.round(telemetry.funcRatio * 100)}</span>
                         </div>
                     `;
                 }
                 if (telemetry.currentWeight) {
                     html += `
                         <div class="telemetry-pill">
-                            <span class="telemetry-pill-val" style="color:#0369A1;">${telemetry.currentWeight} kg</span>
+                            <span class="telemetry-pill-val" style="color:#60A5FA;">${telemetry.currentWeight} kg</span>
                         </div>
                     `;
                 }
                 if (telemetry.currentWaist) {
                     html += `
                         <div class="telemetry-pill">
-                            <span class="telemetry-pill-val" style="color:#111317;">${telemetry.currentWaist} cm</span>
+                            <span class="telemetry-pill-val" style="color:#F3F6FA;">${telemetry.currentWaist} cm</span>
                         </div>
                     `;
                 }
@@ -1020,7 +1020,7 @@
                     </div>
                     <div class="telemetry-pill">
                         <span class="telemetry-pill-label">Son Kilo Durumu</span>
-                        <span class="telemetry-pill-val" style="color:#0369A1;">${telemetry.currentWeight ? telemetry.currentWeight + ' kg' : 'Girilmedi'}</span>
+                        <span class="telemetry-pill-val" style="color:#60A5FA;">${telemetry.currentWeight ? telemetry.currentWeight + ' kg' : 'Girilmedi'}</span>
                     </div>
                     <div class="telemetry-pill">
                         <span class="telemetry-pill-label">Bel Çevresi</span>
@@ -1110,7 +1110,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                                 <span style="font-size:14px;">✨</span>
                                 <strong style="color:#c084fc; font-size:13px;">Google Gemini AI Canlı Akademik Biyomekanik Raporu</strong>
                             </div>
-                            <div style="font-size:12.5px; color:#111317; line-height:1.6; white-space:pre-line;">${reply}</div>
+                            <div style="font-size:12.5px; color:#F3F6FA; line-height:1.6; white-space:pre-line;">${reply}</div>
                         </div>
                     `;
                 } else {
@@ -1121,7 +1121,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 container.innerHTML = `
                     <div style="background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); border-radius:10px; padding:12px; margin-top:4px;">
                         <strong style="color:var(--gold); font-size:12.5px;">📚 Schumann et al. (2022) Hibrit Literatür Notu:</strong>
-                        <p style="margin:6px 0 0 0; font-size:12px; color:#334155; line-height:1.5;">
+                        <p style="margin:6px 0 0 0; font-size:12px; color:#CBD5E1; line-height:1.5;">
                             Seçilen <strong>${activeDoc.name}</strong> doktrini; izole hipertrofi ile yüksek eşikli motor üniteleri rekrüte ederken, fonksiyonel kettlebell ve core kompleksleriyle mitokondriyal toparlanma hızını maksimize eder. Eklemler tek düzlemli aşınmadan korunur ve iş kapasitesi artar.
                         </p>
                     </div>
@@ -1623,7 +1623,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 </div>
             ` : '';
             const wishBadge = w.customWish ? `
-                <div style="font-size:11.5px; color:#334155; background:#F8F7F3; padding:4px 8px; border-radius:6px; margin-top:4px; display:inline-block;">
+                <div style="font-size:11.5px; color:#CBD5E1; background:#151C26; padding:4px 8px; border-radius:6px; margin-top:4px; display:inline-block;">
                     🎯 <strong>Özel İstek/Not:</strong> "${escapeHTML(w.customWish)}"
                 </div>
             ` : '';
@@ -1655,7 +1655,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                         <button class="btn-action-secondary" style="border-color:var(--cyan); color:var(--cyan); font-weight:800;" onclick="scheduleTomorrowFromGenerated()">
                             <span>📅 Yarın İçin Programla (${tomorrowName})</span>
                         </button>
-                        <button class="btn-action-secondary" style="border-color:#D5D2C8;" onclick="promptAssignGeneratedToAnyDay()">
+                        <button class="btn-action-secondary" style="border-color:#263244;" onclick="promptAssignGeneratedToAnyDay()">
                             <span>📅 Haftanın Gününe Planla</span>
                         </button>
                         <button class="btn-action-secondary" onclick="saveGeneratedToLibrary()">
@@ -1668,10 +1668,10 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
                     <!-- WARMUP SECTION -->
                     <div class="block-header" style="margin-top:24px;">🧘 Dinamik Isınma & Mobilite (5 Dakika)</div>
-                    <div style="background:#F4F3EE; border-radius:10px; padding:10px 14px;">
+                    <div style="background:#0E131B; border-radius:10px; padding:10px 14px;">
                         ${w.warmups.map(wm => `
                             <div style="font-size:12.5px; margin-bottom:6px;">
-                                <strong style="color:#111317;">${escapeHTML(wm.name)}</strong> (${wm.dur}): 
+                                <strong style="color:#F3F6FA;">${escapeHTML(wm.name)}</strong> (${wm.dur}): 
                                 <span style="color:var(--text-secondary);">${escapeHTML(wm.cue)}</span>
                             </div>
                         `).join('')}
@@ -1689,7 +1689,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     <!-- FINISHER -->
                     <div class="block-header">🔥 Balistik Bitiş / Finisher</div>
                     <div style="background:rgba(225, 29, 72, 0.1); border-left:4px solid var(--red-alert); border-radius:8px; padding:10px 14px;">
-                        <strong style="color:#111317; font-size:13px;">${escapeHTML(w.finisher.name)}</strong>
+                        <strong style="color:#F3F6FA; font-size:13px;">${escapeHTML(w.finisher.name)}</strong>
                         <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">${escapeHTML(w.finisher.desc)}</div>
                     </div>
                 </div>
@@ -2097,7 +2097,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                         <span class="pos-info-arrow" id="arrow_${extraInfoId}">▼ Göster</span>
                     </button>
                     <div class="pos-extra-info-body" id="body_${extraInfoId}" style="display:none; margin-top:8px;">
-                        <div style="background:#F4F3EE; border:1px solid var(--border); border-radius:8px; padding:8px 10px; margin-bottom:8px;">
+                        <div style="background:#0E131B; border:1px solid var(--border); border-radius:8px; padding:8px 10px; margin-bottom:8px;">
                             <div style="font-size:10.5px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:5px;">🎯 Çalıştırılan Kas Grupları:</div>
                             <div style="display:flex; flex-wrap:wrap; gap:5px;">
                                 ${(ex.primaryMuscles || []).map(m => `<span style="background:rgba(245,158,11,0.2); color:var(--gold); border:1px solid rgba(245,158,11,0.4); padding:2px 7px; border-radius:10px; font-size:10.5px; font-weight:800;">${(typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m] ? STUDIO_REGION_MAP[m].icon + ' ' + STUDIO_REGION_MAP[m].name : m)} (Primer)</span>`).join('')}
@@ -2165,7 +2165,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 `;
             } else {
                 anatomiVisualHtml = `
-                    <div style="background:#F4F3EE; border-radius:8px; padding:16px; text-align:center; color:var(--text-secondary); font-size:12px;">
+                    <div style="background:#0E131B; border-radius:8px; padding:16px; text-align:center; color:var(--text-secondary); font-size:12px;">
                         🎯 <strong>Hedeflenen Kas Grubu:</strong> <span style="color:var(--gold); font-weight:800;">${escapeHTML(ex.muscle || '')}</span>
                     </div>
                 `;
@@ -2259,7 +2259,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     ${renderExercisePositionsHtml(ex, `${scope}_${label}`, false)}
 
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:8px; border-top:1px dashed var(--border);">
-                        <button class="btn-swap-ex" style="color:#DC2626; border-color:rgba(239,68,68,0.3);" onclick="removeExerciseFromWorkout('${ex.id}', '${scope}')" title="Bu hareketi kaldır">
+                        <button class="btn-swap-ex" style="color:#F87171; border-color:rgba(239,68,68,0.3);" onclick="removeExerciseFromWorkout('${ex.id}', '${scope}')" title="Bu hareketi kaldır">
                             🗑️ Kaldır
                         </button>
                         <div style="display:flex; gap:6px;">
@@ -2697,7 +2697,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             if (resArea) {
                 resArea.style.display = 'block';
                 resArea.innerHTML = `
-                    <div style="text-align:center; padding:24px 14px; background:#F4F3EE; border-radius:8px; border:1px dashed #c084fc;">
+                    <div style="text-align:center; padding:24px 14px; background:#0E131B; border-radius:8px; border:1px dashed #c084fc;">
                         <div style="font-size:24px; animation:spin 1s linear infinite; display:inline-block; margin-bottom:8px;">🧠</div>
                         <div style="font-size:12.5px; font-weight:800; color:#e9d5ff;">Gemini Biyomekanik Motoru Analiz Ediyor...</div>
                         <div style="font-size:11px; color:var(--text-secondary); margin-top:4px;">"${escapeHTML(currentEx.name)}" için en güvenli ve bilimsel ikameler hesaplanıyor.</div>
@@ -2746,7 +2746,7 @@ KURALLAR:
             } catch (err) {
                 if (resArea) {
                     resArea.innerHTML = `
-                        <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:8px; padding:12px; font-size:11.5px; color:#DC2626;">
+                        <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:8px; padding:12px; font-size:11.5px; color:#F87171;">
                             ⚠️ <strong>Gemini Bağlantı Hatası:</strong> ${escapeHTML(err.message || 'Bilinmeyen hata')}<br>
                             <span style="font-size:10.5px; color:var(--text-secondary); margin-top:4px; display:inline-block;">API anahtarınızın geçerli olduğundan ve internet bağlantınızdan emin olun.</span>
                         </div>
@@ -2757,7 +2757,7 @@ KURALLAR:
 
         function formatAiCoachInline(str) {
             return escapeHTML(str)
-                .replace(/\*\*(.*?)\*\*/g, '<strong style="color:#111317; font-weight:700;">$1</strong>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong style="color:#F3F6FA; font-weight:700;">$1</strong>')
                 .replace(/\*(.*?)\*/g, '<em style="color:#d8b4fe;">$1</em>')
                 .replace(/`([^`]+)`/g, '<code style="background:rgba(255,255,255,0.1); padding:1px 4px; border-radius:3px; font-size:11px; color:#fbcfe8;">$1</code>');
         }
@@ -2881,17 +2881,17 @@ KURALLAR:
                             <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
                                 <div style="flex:1; min-width:0;">
                                     <div style="font-size:9.5px; color:#c084fc; font-weight:800; text-transform:uppercase; letter-spacing:0.5px;">ÖNERİLEN İKAME</div>
-                                    <div style="font-size:14px; font-weight:800; color:#111317; line-height:1.25; margin:2px 0 3px 0; word-break:break-word;">
+                                    <div style="font-size:14px; font-weight:800; color:#F3F6FA; line-height:1.25; margin:2px 0 3px 0; word-break:break-word;">
                                         ${escapeHTML(ex.name)}
                                     </div>
                                     <div style="font-size:10px; color:var(--text-secondary); display:flex; flex-wrap:wrap; gap:4px; align-items:center;">
-                                        <span style="color:#334155; font-weight:700;">${eqMeta.icon} ${eqMeta.label}</span>
+                                        <span style="color:#CBD5E1; font-weight:700;">${eqMeta.icon} ${eqMeta.label}</span>
                                         <span>•</span>
                                         <span style="color:var(--gold); font-weight:700;">🎯 ${escapeHTML(ex.muscle || '')}</span>
                                     </div>
                                 </div>
                                 <div style="flex-shrink:0;">
-                                    <button type="button" class="btn btn-gold" style="font-size:12px; padding:6px 14px; font-weight:800; background:#9333ea; border-color:#a855f7; color:#111317; white-space:nowrap; box-shadow:0 0 10px rgba(168,85,247,0.35); border-radius:6px;" onclick="selectExerciseFromPicker('${ex.id}')">
+                                    <button type="button" class="btn btn-gold" style="font-size:12px; padding:6px 14px; font-weight:800; background:#9333ea; border-color:#a855f7; color:#F3F6FA; white-space:nowrap; box-shadow:0 0 10px rgba(168,85,247,0.35); border-radius:6px;" onclick="selectExerciseFromPicker('${ex.id}')">
                                         ✓ Seç
                                     </button>
                                 </div>
@@ -2901,21 +2901,21 @@ KURALLAR:
                             ${thumbImg ? `
                                 <div style="width:100%; height:115px; border-radius:6px; background:#000; overflow:hidden; border:1px solid rgba(192,132,252,0.25); margin-top:8px; display:flex; align-items:center; justify-content:center; position:relative; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')" title="Form rehberini incele">
                                     <img src="${thumbImg}" style="max-width:100%; max-height:100%; object-fit:contain;" alt="${escapeHTML(ex.name)}" loading="lazy">
-                                    <div style="position:absolute; bottom:4px; right:4px; background:#F4F3EE; backdrop-filter:blur(4px); border:1px solid #E2E0D8; border-radius:4px; padding:2px 6px; font-size:9.5px; color:#e9d5ff; font-weight:700; display:flex; align-items:center; gap:3px;">
+                                    <div style="position:absolute; bottom:4px; right:4px; background:#0E131B; backdrop-filter:blur(4px); border:1px solid #222C3A; border-radius:4px; padding:2px 6px; font-size:9.5px; color:#e9d5ff; font-weight:700; display:flex; align-items:center; gap:3px;">
                                         <span>🔍 Büyüt / İncele</span>
                                     </div>
                                 </div>
                             ` : ''}
 
                             <!-- FORM İPUCU -->
-                            ${ex.cue ? `<div style="font-size:10.5px; color:#e9d5ff; margin-top:6px; background:#F4F3EE; padding:5px 8px; border-radius:4px; border:1px solid rgba(192,132,252,0.15); line-height:1.35;">💡 <strong>İpucu:</strong> ${escapeHTML(ex.cue)}</div>` : ''}
+                            ${ex.cue ? `<div style="font-size:10.5px; color:#e9d5ff; margin-top:6px; background:#0E131B; padding:5px 8px; border-radius:4px; border:1px solid rgba(192,132,252,0.15); line-height:1.35;">💡 <strong>İpucu:</strong> ${escapeHTML(ex.cue)}</div>` : ''}
                         </div>
                     `;
                 }
             });
 
             resArea.innerHTML = `
-                <div style="background:#F4F3EE; border:1px solid rgba(192, 132, 252, 0.35); border-radius:10px; padding:10px 12px; margin-top:6px;">
+                <div style="background:#0E131B; border:1px solid rgba(192, 132, 252, 0.35); border-radius:10px; padding:10px 12px; margin-top:6px;">
                     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid rgba(192,132,252,0.2); padding-bottom:5px;">
                         <div style="display:flex; align-items:center; gap:6px;">
                             <span style="font-size:15px;">🤖</span>
@@ -2933,7 +2933,7 @@ KURALLAR:
                             <button type="button" class="btn btn-outline" style="font-size:10px; padding:4px 8px; border:none; color:var(--text-secondary); width:100%; text-align:center; display:flex; align-items:center; justify-content:center; gap:4px; cursor:pointer;" onclick="const b = document.getElementById('aiCoachWhyBox'); if(b) b.style.display = b.style.display === 'none' ? 'block' : 'none';">
                                 <span>💡 Biyomekanik Gerekçeyi Gör / Gizle</span>
                             </button>
-                            <div id="aiCoachWhyBox" style="display:none; background:rgba(192, 132, 252, 0.06); border:1px solid rgba(192, 132, 252, 0.2); border-radius:6px; padding:8px 10px; margin-top:4px; font-size:10.5px; color:#334155; line-height:1.4;">
+                            <div id="aiCoachWhyBox" style="display:none; background:rgba(192, 132, 252, 0.06); border:1px solid rgba(192, 132, 252, 0.2); border-radius:6px; padding:8px 10px; margin-top:4px; font-size:10.5px; color:#CBD5E1; line-height:1.4;">
                                 ${formattedHtml}
                             </div>
                         </div>
@@ -3419,9 +3419,9 @@ KURALLAR:
 
             if (filtered.length === 0) {
                 container.innerHTML = `
-                    <div style="text-align:center; padding:32px 14px; background:#F4F3EE; border-radius:8px; border:1px dashed var(--border);">
+                    <div style="text-align:center; padding:32px 14px; background:#0E131B; border-radius:8px; border:1px dashed var(--border);">
                         <div style="font-size:20px; margin-bottom:6px;">🔍</div>
-                        <div style="font-size:12.5px; font-weight:700; color:#111317;">Bu kriterlere uygun başka egzersiz bulunamadı</div>
+                        <div style="font-size:12.5px; font-weight:700; color:#F3F6FA;">Bu kriterlere uygun başka egzersiz bulunamadı</div>
                         <div style="font-size:11px; color:var(--text-secondary); margin:4px 0 12px;">Mevcut listenizde yer almayan alternatifler için farklı bir ekipman filtresi seçebilir veya tüm kataloğu inceleyebilirsiniz.</div>
                         <button type="button" class="btn btn-gold" style="font-size:11px; padding:6px 14px; font-weight:800;" onclick="switchPickerTab('catalog')">
                             ➕ Diğer (Tüm Egzersiz Kataloğunu Aç)
@@ -3445,7 +3445,7 @@ KURALLAR:
                                     ${thumbImg ? `<img src="${thumbImg}" style="width:100%; height:100%; object-fit:contain;" alt="${escapeHTML(ex.name)}">` : '🏋️'}
                                 </div>
                                 <div style="min-width:0; flex:1;">
-                                    <div style="font-size:13.5px; font-weight:800; color:#111317; line-height:1.2;">
+                                    <div style="font-size:13.5px; font-weight:800; color:#F3F6FA; line-height:1.2;">
                                         ${escapeHTML(ex.name)}
                                     </div>
                                     <div style="display:flex; gap:4px; flex-wrap:wrap; margin-top:3px;">
@@ -3464,13 +3464,13 @@ KURALLAR:
                         </div>
 
                         ${ex.cue ? `
-                            <div style="font-size:11px; color:var(--text-secondary); line-height:1.3; background:#F4F3EE; border-radius:4px; padding:5px 8px; margin-top:6px;">
+                            <div style="font-size:11px; color:var(--text-secondary); line-height:1.3; background:#0E131B; border-radius:4px; padding:5px 8px; margin-top:6px;">
                                 💡 ${escapeHTML(ex.cue)}
                             </div>
                         ` : ''}
 
                         <!-- INLINE FORM EXPANDER -->
-                        <div id="picker_form_expand_${ex.id}" style="display:none; margin-top:8px; padding-top:8px; border-top:1px dashed #E2E0D8;">
+                        <div id="picker_form_expand_${ex.id}" style="display:none; margin-top:8px; padding-top:8px; border-top:1px dashed #222C3A;">
                             ${thumbImg ? `
                                 <div style="text-align:center; background:#000; border-radius:8px; overflow:hidden; border:1px solid var(--border); margin-bottom:6px; min-height:160px; display:flex; align-items:center; justify-content:center;">
                                     <img src="${thumbImg}" style="max-width:100%; max-height:42vh; object-fit:contain; display:block; margin:0 auto;" alt="${escapeHTML(ex.name)} Form">
@@ -3482,7 +3482,7 @@ KURALLAR:
                                 <div style="text-align:center; padding:16px; color:var(--text-secondary); font-size:11.5px;">Görsel form rehberi optimize ediliyor.</div>
                             `}
                             
-                            <div style="background:#F4F3EE; border:1px solid var(--border); border-radius:6px; padding:6px 8px; margin-bottom:6px;">
+                            <div style="background:#0E131B; border:1px solid var(--border); border-radius:6px; padding:6px 8px; margin-bottom:6px;">
                                 <div style="font-size:10px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:4px;">🎯 Hedef Kaslar:</div>
                                 <div style="display:flex; flex-wrap:wrap; gap:4px;">
                                     ${(ex.primaryMuscles || []).map(m => `<span style="background:rgba(245,158,11,0.2); color:var(--gold); border:1px solid rgba(245,158,11,0.4); padding:2px 6px; border-radius:8px; font-size:10px; font-weight:800;">${(typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m] ? STUDIO_REGION_MAP[m].icon + ' ' + STUDIO_REGION_MAP[m].name : m)} (Primer)</span>`).join('')}
@@ -3491,7 +3491,7 @@ KURALLAR:
                             </div>
 
                             ${(ex.positions && ex.positions.length > 0) ? `
-                                <div style="background:#F4F3EE; border-radius:6px; padding:6px 8px; margin-bottom:6px; font-size:11px; line-height:1.35;">
+                                <div style="background:#0E131B; border-radius:6px; padding:6px 8px; margin-bottom:6px; font-size:11px; line-height:1.35;">
                                     <div style="font-size:10px; font-weight:800; color:var(--cyan); text-transform:uppercase; margin-bottom:3px;">📋 Uygulama Adımları:</div>
                                     ${ex.positions.map(p => `<div><span style="color:var(--text-secondary); font-weight:700;">• ${escapeHTML(p.phase)}:</span> ${escapeHTML(p.desc)}</div>`).join('')}
                                 </div>
@@ -3525,7 +3525,7 @@ KURALLAR:
             // If in tab 1 or 2, add the helpful "Diğer" shortcut banner at bottom
             if (tab === 'same_muscle' || tab === 'other_muscle') {
                 cardsHtml += `
-                    <div style="text-align:center; padding:12px; margin-top:8px; border-top:1px dashed var(--border); background:#F4F3EE; border-radius:8px;">
+                    <div style="text-align:center; padding:12px; margin-top:8px; border-top:1px dashed var(--border); background:#0E131B; border-radius:8px;">
                         <div style="font-size:11px; color:var(--text-secondary); margin-bottom:6px;">Aradığınız hareketi bulamadınız mı?</div>
                         <button type="button" class="btn btn-outline" style="color:var(--gold); border-color:var(--gold); font-size:11.5px; padding:5px 12px; font-weight:800;" onclick="switchPickerTab('catalog')">
                             ➕ Diğer (Genişletilmiş Tüm Kataloğu Aç) ➔
@@ -4024,7 +4024,7 @@ KURALLAR:
                     listEl.innerHTML = `
                         <div style="text-align:center; padding:40px 20px; color:var(--text-secondary);">
                             <span style="font-size:36px;">🎉</span>
-                            <div style="font-size:14px; font-weight:800; color:#111317; margin-top:8px;">Hata Havuzu Tertemiz!</div>
+                            <div style="font-size:14px; font-weight:800; color:#F3F6FA; margin-top:8px;">Hata Havuzu Tertemiz!</div>
                             <p style="font-size:12px; margin-top:4px;">Şu an bekleyen veya bildirilmiş bir egzersiz hatası bulunmuyor.</p>
                         </div>
                     `;
@@ -4043,33 +4043,33 @@ KURALLAR:
                         <div class="bug-pool-card ${isPending ? 'pending' : (isProcessed ? 'processed' : 'resolved')}">
                             <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
                                 <div>
-                                    <div style="font-size:14px; font-weight:900; color:#111317;">
+                                    <div style="font-size:14px; font-weight:900; color:#F3F6FA;">
                                         ${escapeHTML(r.exerciseName || r.exerciseId)}
                                     </div>
                                     <div style="font-size:11px; color:var(--gold); font-weight:700; margin-top:2px;">
                                         ${escapeHTML(r.categoryLabel || r.category)}
                                     </div>
                                 </div>
-                                <span style="font-size:10.5px; font-weight:800; padding:2px 7px; border-radius:4px; background:#F8F7F3;">
+                                <span style="font-size:10.5px; font-weight:800; padding:2px 7px; border-radius:4px; background:#151C26;">
                                     ${statusText}
                                 </span>
                             </div>
 
                             ${r.userNote ? `
-                                <div style="font-size:12px; color:#334155; margin-top:8px; background:#F4F3EE; padding:6px 10px; border-radius:6px; border-left:2px solid var(--cyan);">
+                                <div style="font-size:12px; color:#CBD5E1; margin-top:8px; background:#0E131B; padding:6px 10px; border-radius:6px; border-left:2px solid var(--cyan);">
                                     💬 <em>"${escapeHTML(r.userNote)}"</em>
                                 </div>
                             ` : ''}
 
                             ${r.aiResolutionNote ? `
-                                <div style="font-size:11.5px; color:#15803D; margin-top:6px; background:rgba(34,197,94,0.1); padding:6px 10px; border-radius:6px;">
+                                <div style="font-size:11.5px; color:#B6F059; margin-top:6px; background:rgba(34,197,94,0.1); padding:6px 10px; border-radius:6px;">
                                     🤖 <strong>AI Notu:</strong> ${escapeHTML(r.aiResolutionNote)}
                                 </div>
                             ` : ''}
 
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; font-size:10.5px; color:var(--text-secondary); flex-wrap:wrap; gap:6px;">
                                 <span>📅 ${escapeHTML(r.createdAtFormatted || (r.createdAt ? r.createdAt.substring(0, 16) : ''))}</span>
-                                <button type="button" class="btn btn-outline" style="border-color:#22c55e; color:#15803D; font-size:11px; padding:4px 10px; font-weight:800;" onclick="confirmAndDeleteBugReport(decodeURIComponent('${encodeURIComponent(docId)}'))">
+                                <button type="button" class="btn btn-outline" style="border-color:#22c55e; color:#B6F059; font-size:11px; padding:4px 10px; font-weight:800;" onclick="confirmAndDeleteBugReport(decodeURIComponent('${encodeURIComponent(docId)}'))">
                                     ✅ Onayla & Havuzdan Sil
                                 </button>
                             </div>
@@ -4999,13 +4999,13 @@ KURALLAR:
                                         </div>
                                     </div>
                                     <div class="collapsible-panel-body">
-                                        <h3 style="font-size:13.5px; font-weight:800; color:#111317; margin:0 0 6px 0;">Gelecek Haftaya Özel Hipertrofi Bloğu</h3>
-                                        <p style="font-size:12px; color:#334155; line-height:1.5; margin:0 0 12px 0;">Masaüstü istasyonundan gelen bilimsel reçete gün gün takviminize işlendi. Salona girmeden önce günlerin içeriğini inceleyebilir veya tek dokunuşla bu planı aktif haftanız olarak başlatabilirsiniz.</p>
+                                        <h3 style="font-size:13.5px; font-weight:800; color:#F3F6FA; margin:0 0 6px 0;">Gelecek Haftaya Özel Hipertrofi Bloğu</h3>
+                                        <p style="font-size:12px; color:#CBD5E1; line-height:1.5; margin:0 0 12px 0;">Masaüstü istasyonundan gelen bilimsel reçete gün gün takviminize işlendi. Salona girmeden önce günlerin içeriğini inceleyebilir veya tek dokunuşla bu planı aktif haftanız olarak başlatabilirsiniz.</p>
                                         <div style="display:flex; gap:8px; flex-wrap:wrap;">
                                             <button class="btn btn-gold" style="padding:9px 16px; font-size:12px; font-weight:900; flex:1;" onclick="promoteNextWeekToCurrent('${user.id}')">
                                                 ⚡ BU PROGRAMI AKTİF HAFTAM YAP
                                             </button>
-                                            <button class="btn btn-outline" style="padding:9px 14px; font-size:12px; font-weight:700; border-color:#D5D2C8; color:#334155;" onclick="switchPlannerWeek('current')">
+                                            <button class="btn btn-outline" style="padding:9px 14px; font-size:12px; font-weight:700; border-color:#263244; color:#CBD5E1;" onclick="switchPlannerWeek('current')">
                                                 ⬅️ Bu Haftaya Dön
                                             </button>
                                         </div>
@@ -5019,14 +5019,14 @@ KURALLAR:
                                 <div class="today-workout-hero">
                                     <div class="today-workout-header">
                                         <div class="today-workout-badge">🔥 BUGÜN • ${DAY_NAMES_TR[todayIdx].toUpperCase()}</div>
-                                        <span style="font-size:11px; color:#334155; font-weight:700;">${todayExCount ? `${todayExCount} Hareket` : ''}</span>
+                                        <span style="font-size:11px; color:#CBD5E1; font-weight:700;">${todayExCount ? `${todayExCount} Hareket` : ''}</span>
                                     </div>
                                     <h2 class="today-workout-title">${escapeHTML(todayPlan.title)}</h2>
                                     <div class="today-workout-actions">
                                         <button class="btn btn-gold" style="padding:9px 18px; font-size:12.5px; font-weight:900;" onclick="startScheduledWorkoutForDay(${todayIdx})">
                                             ▶️ SEANSI BAŞLAT
                                         </button>
-                                        <button class="btn btn-outline" style="padding:9px 14px; font-size:12px; font-weight:700; border-color:#D5D2C8; color:#334155;" onclick="openScheduleDayModal(${todayIdx})">
+                                        <button class="btn btn-outline" style="padding:9px 14px; font-size:12px; font-weight:700; border-color:#263244; color:#CBD5E1;" onclick="openScheduleDayModal(${todayIdx})">
                                             👁️ İncele & Düzenle
                                         </button>
                                     </div>
@@ -5085,7 +5085,7 @@ KURALLAR:
             if (!Array.isArray(s.exercises) || s.exercises.length === 0) {
                 container.innerHTML = `
                     <div style="text-align:center; padding:40px 20px; color:var(--text-secondary);">
-                        <p style="font-size:16px; font-weight:700; color:#111317;">Bu antrenmanda egzersiz bulunamadı.</p>
+                        <p style="font-size:16px; font-weight:700; color:#F3F6FA;">Bu antrenmanda egzersiz bulunamadı.</p>
                         <button class="btn btn-gold" onclick="cancelActiveWorkout()" style="margin-top:12px;">Antrenmanı İptal Et</button>
                     </div>
                 `;
@@ -5518,7 +5518,7 @@ KURALLAR:
                                         <button class="btn-swap-ex" onclick="openAlternativeModal('${ex.id}', 'active')" title="Listeden alternatif seç">
                                             📋 Alternatif
                                         </button>
-                                        <button class="btn-swap-ex" style="color:#DC2626; border-color:rgba(239,68,68,0.3);" onclick="removeExerciseFromWorkout('${ex.id}', 'active')" title="Bu hareketi kaldır">
+                                        <button class="btn-swap-ex" style="color:#F87171; border-color:rgba(239,68,68,0.3);" onclick="removeExerciseFromWorkout('${ex.id}', 'active')" title="Bu hareketi kaldır">
                                             🗑️ Kaldır
                                         </button>
                                     </div>
@@ -6018,10 +6018,10 @@ KURALLAR:
             const summaryHint = document.getElementById('logWorkoutSummaryHint');
             if (summaryHint) {
                 summaryHint.innerHTML = `
-                    <div style="background:#F4F3EE; border: 1.5px solid var(--gold); border-radius: 10px; padding: 12px; margin-bottom: 14px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #E2E0D8; padding-bottom:8px;">
+                    <div style="background:#0E131B; border: 1.5px solid var(--gold); border-radius: 10px; padding: 12px; margin-bottom: 14px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #222C3A; padding-bottom:8px;">
                             <span style="font-size:11px; font-weight:800; color:var(--gold); text-transform:uppercase; letter-spacing:0.5px;">📋 Seans Özeti & Performans</span>
-                            <span style="font-size:12px; font-weight:800; color:#111317;">⏱️ ${formatSecondsToHMS(elapsedSecs)}</span>
+                            <span style="font-size:12px; font-weight:800; color:#F3F6FA;">⏱️ ${formatSecondsToHMS(elapsedSecs)}</span>
                         </div>
 
                         ${prs.length > 0 ? `
@@ -6031,7 +6031,7 @@ KURALLAR:
                                 </div>
                                 ${prs.map(p => `
                                     <div class="pr-badge-item">
-                                        🏆 <strong>${escapeHTML(p.name)}:</strong> Yeni Ağırlık: <strong style="color:#111317;">${p.newWeight} kg</strong> (Eski Zirve: ${p.oldWeight} kg ➔ <strong style="color:var(--green-success);">+${p.diff} kg</strong> Artış!)
+                                        🏆 <strong>${escapeHTML(p.name)}:</strong> Yeni Ağırlık: <strong style="color:#F3F6FA;">${p.newWeight} kg</strong> (Eski Zirve: ${p.oldWeight} kg ➔ <strong style="color:var(--green-success);">+${p.diff} kg</strong> Artış!)
                                     </div>
                                 `).join('')}
                             </div>
@@ -6059,10 +6059,10 @@ KURALLAR:
                         </div>
                         <div style="max-height: 220px; overflow-y: auto; padding-right: 4px; display:flex; flex-direction:column; gap:6px;">
                             ${exerciseSummaries.map(ex => `
-                                <div style="background:#F4F3EE; border-radius: 6px; padding: 8px 10px; border-left: 3px solid ${ex.completedCount > 0 ? 'var(--green-success)' : 'var(--border)'};">
+                                <div style="background:#0E131B; border-radius: 6px; padding: 8px 10px; border-left: 3px solid ${ex.completedCount > 0 ? 'var(--green-success)' : 'var(--border)'};">
                                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                                         <div>
-                                            <strong style="color:#111317; font-size:12.5px;">${escapeHTML(ex.name)}</strong>
+                                            <strong style="color:#F3F6FA; font-size:12.5px;">${escapeHTML(ex.name)}</strong>
                                             ${ex.muscle ? `<span style="font-size:10.5px; color:var(--cyan); margin-left:6px;">[${escapeHTML(ex.muscle)}]</span>` : ''}
                                         </div>
                                         <span style="font-size:11px; font-weight:800; color:var(--gold);">
@@ -6071,11 +6071,11 @@ KURALLAR:
                                     </div>
                                     <div style="display:flex; flex-wrap:wrap; gap:4px;">
                                         ${ex.sets.map(st => st.completed ? `
-                                            <span style="background:rgba(34, 197, 94, 0.12); border:1px solid rgba(34, 197, 94, 0.4); color:#15803D; border-radius:4px; padding:2px 6px; font-size:10.5px; font-weight:700;">
+                                            <span style="background:rgba(34, 197, 94, 0.12); border:1px solid rgba(34, 197, 94, 0.4); color:#B6F059; border-radius:4px; padding:2px 6px; font-size:10.5px; font-weight:700;">
                                                 Set ${st.setNo}: <strong>${st.weight || 0} kg</strong> x ${st.reps || 0} ✓
                                             </span>
                                         ` : `
-                                            <span style="background:rgba(239, 68, 68, 0.08); border:1px dashed rgba(239, 68, 68, 0.3); color:#DC2626; opacity:0.65; border-radius:4px; padding:2px 6px; font-size:10.5px; font-weight:600; text-decoration:line-through;" title="Bitir butonuna basılmadı">
+                                            <span style="background:rgba(239, 68, 68, 0.08); border:1px dashed rgba(239, 68, 68, 0.3); color:#F87171; opacity:0.65; border-radius:4px; padding:2px 6px; font-size:10.5px; font-weight:600; text-decoration:line-through;" title="Bitir butonuna basılmadı">
                                                 Set ${st.setNo}: Atlandı
                                             </span>
                                         `).join('')}
@@ -6343,9 +6343,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             if (filtered.length === 0) {
                 container.innerHTML = `
-                    <div style="grid-column: 1 / -1; text-align:center; padding:32px 16px; background:#F4F3EE; border-radius:12px; border:1px dashed var(--border);">
+                    <div style="grid-column: 1 / -1; text-align:center; padding:32px 16px; background:#0E131B; border-radius:12px; border:1px dashed var(--border);">
                         <div style="font-size:28px; margin-bottom:8px;">${showExcluded ? '✨' : '🔍'}</div>
-                        <div style="font-size:13.5px; font-weight:800; color:#111317; margin-bottom:4px;">${showExcluded ? 'Kişisel Havuzunuzdan Gizlenmiş Egzersiz Yok' : 'Aramanıza Uygun Egzersiz Bulunamadı'}</div>
+                        <div style="font-size:13.5px; font-weight:800; color:#F3F6FA; margin-bottom:4px;">${showExcluded ? 'Kişisel Havuzunuzdan Gizlenmiş Egzersiz Yok' : 'Aramanıza Uygun Egzersiz Bulunamadı'}</div>
                         <div style="font-size:12px; color:var(--text-secondary); margin-bottom:12px;">${showExcluded ? 'Bir hareketi istemediğinizde "👁️‍🗨️ Gizle" butonuna basarak bu listeye alabilirsiniz.' : 'Filtreleri veya arama kelimesini değiştirerek tekrar deneyebilirsiniz.'}</div>
                         ${!showExcluded ? `<button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 12px;" onclick="document.getElementById('libExSearchInput').value=''; document.getElementById('libExMuscleFilter').value='all'; document.getElementById('libExEquipFilter').value='all'; renderLibraryExerciseCatalog();">Filtreleri Sıfırla</button>` : ''}
                     </div>
@@ -6372,9 +6372,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 ${thumbImg ? `<img src="${thumbImg}" class="ex-thumb-img" alt="${escapeHTML(ex.name)}" loading="lazy">` : '🏋️'}
                             </div>
                             <div style="flex:1; min-width:0;">
-                                <div style="font-size:13.5px; font-weight:800; color:#111317; line-height:1.25; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
+                                <div style="font-size:13.5px; font-weight:800; color:#F3F6FA; line-height:1.25; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
                                     ${escapeHTML(ex.name)}
-                                    ${isExcluded ? '<span style="background:rgba(239,68,68,0.25); color:#DC2626; font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px; margin-left:6px; vertical-align:middle;">Gizli</span>' : ''}
+                                    ${isExcluded ? '<span style="background:rgba(239,68,68,0.25); color:#F87171; font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px; margin-left:6px; vertical-align:middle;">Gizli</span>' : ''}
                                 </div>
                                 <div style="display:flex; gap:4px; flex-wrap:wrap; margin-top:5px;">
                                     <span class="ex-chip-badge equip">${escapeHTML(eqInfo)}</span>
@@ -6386,16 +6386,16 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         </div>
 
                         ${ex.cue ? `
-                            <div style="font-size:11px; color:#334155; margin-top:8px; line-height:1.35; background:#F4F3EE; padding:6px 8px; border-radius:6px; border-left:2px solid var(--gold);">
+                            <div style="font-size:11px; color:#CBD5E1; margin-top:8px; line-height:1.35; background:#0E131B; padding:6px 8px; border-radius:6px; border-left:2px solid var(--gold);">
                                 💡 <em>${escapeHTML(ex.cue.length > 90 ? ex.cue.substring(0, 90) + '...' : ex.cue)}</em>
                             </div>
                         ` : ''}
 
-                        <div style="display:flex; gap:6px; margin-top:10px; padding-top:8px; border-top:1px solid #E2E0D8;">
+                        <div style="display:flex; gap:6px; margin-top:10px; padding-top:8px; border-top:1px solid #222C3A;">
                             <button type="button" class="btn btn-outline" style="flex:1; font-size:11px; padding:6px 8px;" onclick="openExerciseDetailModal('${ex.id}')">
                                 👁️ Detay
                             </button>
-                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 8px; ${isExcluded ? 'color:#15803D; border-color:#10b981; background:rgba(16,185,129,0.12);' : 'color:#DC2626; border-color:rgba(239,68,68,0.35);'}" onclick="event.stopPropagation(); toggleExerciseExclusionAndRefresh('${ex.id}')" title="${isExcluded ? 'Aktif havuzunuza geri ekleyin' : 'Kişisel havuzunuzdan gizleyin'}">
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 8px; ${isExcluded ? 'color:#B6F059; border-color:#10b981; background:rgba(16,185,129,0.12);' : 'color:#F87171; border-color:rgba(239,68,68,0.35);'}" onclick="event.stopPropagation(); toggleExerciseExclusionAndRefresh('${ex.id}')" title="${isExcluded ? 'Aktif havuzunuza geri ekleyin' : 'Kişisel havuzunuzdan gizleyin'}">
                                 ${isExcluded ? '🔄 Geri Al' : '👁️ Gizle'}
                             </button>
                             ${!isExcluded ? `
@@ -6440,7 +6440,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     <div class="add-to-prog-card" onclick="closeAddToProgramOptionsModal(); openQuickAddToDayModal('${ex.id}');">
                         <div style="font-size:24px; flex-shrink:0;">📅</div>
                         <div style="flex:1;">
-                            <div style="font-size:13px; font-weight:800; color:#111317;">Haftalık Programıma Planla</div>
+                            <div style="font-size:13px; font-weight:800; color:#F3F6FA;">Haftalık Programıma Planla</div>
                             <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
                                 Pazartesi-Pazar günlerinden birine ilave hareket veya yeni takviye seansı olarak bağlayın.
                             </div>
@@ -6643,7 +6643,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     <div class="log-history-card">
                         <div class="log-card-header">
                             <div>
-                                <strong style="color:#111317; font-size:14px;">${escapeHTML(p.title)}</strong>
+                                <strong style="color:#F3F6FA; font-size:14px;">${escapeHTML(p.title)}</strong>
                                 <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
                                     ${(p.exercises || []).length} Egzersiz • ${p.duration || Math.round((p.exercises || []).length * 7)} Dk • ${p.style === 'superset' ? 'Süperset' : 'Klasik'}
                                 </div>
@@ -6700,13 +6700,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             officialContainer.innerHTML = officialRoutines.map(r => `
                 <div class="log-history-card" style="border-color:rgba(234,179,8,0.25); background:linear-gradient(135deg, rgba(30,27,75,0.3), rgba(15,23,42,0.6)); border-radius:12px; padding:12px 14px; margin-bottom:10px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:8px;">
-                        <strong style="color:#111317; font-size:12.5px; font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; min-width:0;">${escapeHTML(r.title)}</strong>
+                        <strong style="color:#F3F6FA; font-size:12.5px; font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; min-width:0;">${escapeHTML(r.title)}</strong>
                         <span style="font-size:10px; padding:2px 7px; background:rgba(56,189,248,0.15); color:var(--cyan); border:1px solid rgba(56,189,248,0.3); border-radius:6px; font-weight:700; white-space:nowrap; flex-shrink:0;">⏱️ ${r.duration} Dk</span>
                     </div>
                     <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.4; margin-bottom:10px;">
                         ${escapeHTML(r.desc)}
                     </div>
-                    <div style="display:flex; justify-content:flex-end; gap:6px; flex-wrap:wrap; align-items:center; border-top:1px solid #E2E0D8; padding-top:8px;">
+                    <div style="display:flex; justify-content:flex-end; gap:6px; flex-wrap:wrap; align-items:center; border-top:1px solid #222C3A; padding-top:8px;">
                         <button class="btn btn-outline" style="font-size:11px; padding:5px 10px; color:var(--cyan); border-color:rgba(56,189,248,0.4);" onclick="previewWorkoutModal('${r.id}')">
                             👁️ İncele
                         </button>
@@ -7265,10 +7265,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         </div>
                         <div class="collapsible-panel-body">
                             <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:8px;">
-                                <h3 style="font-size:13.5px; font-weight:800; color:#111317; margin:0;">${escapeHTML(prog.title || 'Gelecek Hafta İçin AI Reçetesi Hazır')}</h3>
+                                <h3 style="font-size:13.5px; font-weight:800; color:#F3F6FA; margin:0;">${escapeHTML(prog.title || 'Gelecek Hafta İçin AI Reçetesi Hazır')}</h3>
                                 <button type="button" onclick="dismissFitLabProgram('${uid}')" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size:14px; padding:2px 6px;" title="Bildirimi Kapat">✕</button>
                             </div>
-                            <p style="font-size:12px; color:#334155; line-height:1.5; margin:0 0 12px; background:#F4F3EE; padding:8px 10px; border-radius:8px; border:1px solid #E2E0D8;">
+                            <p style="font-size:12px; color:#CBD5E1; line-height:1.5; margin:0 0 12px; background:#0E131B; padding:8px 10px; border-radius:8px; border:1px solid #222C3A;">
                                 <strong>Koç Analizi:</strong> ${escapeHTML(shortSummary)}
                             </p>
                             <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -7734,7 +7734,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                                 <div>
                                     <span class="auth-role-tag" style="background:#10b981; color:#000; font-weight:900; font-size:9.5px;">✅ BU GÜN SEANS TAMAMLANDI</span>
-                                    <h3 style="font-size:14px; font-weight:800; color:#111317; margin:4px 0 2px;">${escapeHTML(cLog.program || cLog.title || 'Antrenman')}</h3>
+                                    <h3 style="font-size:14px; font-weight:800; color:#F3F6FA; margin:4px 0 2px;">${escapeHTML(cLog.program || cLog.title || 'Antrenman')}</h3>
                                     <div style="font-size:11px; color:#a7f3d0;">
                                         ${cDur ? `⏱️ ${cDur}` : ''} ${cVol ? ` • 🏋️ ${cVol}` : ''} ${cLog.totalSetsCompleted ? `• 🎯 ${cLog.totalSetsCompleted} Set` : ''}
                                     </div>
@@ -7758,7 +7758,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     let exercisesHtml = '';
                     if (exercises.length === 0) {
                         exercisesHtml = `
-                            <div style="text-align:center; padding:16px 12px; font-size:12px; color:var(--text-secondary); background:#F4F3EE; border-radius:8px;">
+                            <div style="text-align:center; padding:16px 12px; font-size:12px; color:var(--text-secondary); background:#0E131B; border-radius:8px;">
                                 <div style="font-size:20px; margin-bottom:6px;">⚠️</div>
                                 Bu programın hareket detayları henüz yapılandırılmamış.
                                 <div style="margin-top:8px;">
@@ -7780,10 +7780,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             const targetExParam = encodeURIComponent(effectiveId || displayName);
 
                             return `
-                                <div style="display:flex; justify-content:space-between; align-items:center; background:#F4F3EE; border:1px solid #E2E0D8; border-radius:8px; padding:10px 12px; gap:8px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; background:#0E131B; border:1px solid #222C3A; border-radius:8px; padding:10px 12px; gap:8px;">
                                     <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:0;">
                                         <span style="font-size:12.5px; font-weight:900; color:var(--gold); width:20px; flex-shrink:0;">${idx + 1}.</span>
-                                        <div style="font-size:13.5px; font-weight:800; color:#111317; word-break:break-word; line-height:1.35; cursor:pointer;" onclick="openExerciseDetailModal(decodeURIComponent('${targetExParam}'))" title="Detayı İncele">
+                                        <div style="font-size:13.5px; font-weight:800; color:#F3F6FA; word-break:break-word; line-height:1.35; cursor:pointer;" onclick="openExerciseDetailModal(decodeURIComponent('${targetExParam}'))" title="Detayı İncele">
                                             ${exName}
                                         </div>
                                     </div>
@@ -7803,7 +7803,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                     <span class="auth-role-tag role-admin" style="font-size:9.5px; background:var(--gold); color:#000; font-weight:900;">
                                         📌 ${dayName.toUpperCase()} GÜNÜNE ATANMIŞ PROGRAM
                                     </span>
-                                    <h3 style="font-size:16px; font-weight:900; color:#111317; margin:6px 0 2px;">
+                                    <h3 style="font-size:16px; font-weight:900; color:#F3F6FA; margin:6px 0 2px;">
                                         ${escapeHTML(titleStr)}
                                     </h3>
                                     <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
@@ -7831,7 +7831,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:8px 12px; color:var(--cyan); border-color:var(--cyan);" onclick="toggleSchedModalExerciseList()">
                                     <span id="schedModalExListToggleBtn">👁️ Egzersizleri Gizle ▲</span>
                                 </button>
-                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:8px 10px; color:#DC2626; border-color:rgba(239,68,68,0.35);" onclick="setDayAsRest()" title="Bu günü dinlenme gününe çevir">
+                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:8px 10px; color:#F87171; border-color:rgba(239,68,68,0.35);" onclick="setDayAsRest()" title="Bu günü dinlenme gününe çevir">
                                     🧘 Dinlenmeye Al
                                 </button>
                             </div>
@@ -7846,7 +7846,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     assignedSection.innerHTML = completedBannerHtml + `
                         <div style="background:rgba(148,163,184,0.06); border:1px dashed var(--border); border-radius:10px; padding:14px; text-align:center;">
                             <div style="font-size:24px; margin-bottom:4px;">🧘</div>
-                            <div style="font-size:14px; font-weight:800; color:#111317;">${dayName} Günü Dinlenme Olarak Ayarlı</div>
+                            <div style="font-size:14px; font-weight:800; color:#F3F6FA;">${dayName} Günü Dinlenme Olarak Ayarlı</div>
                             <div style="font-size:11.5px; color:var(--text-secondary); margin:4px 0 12px;">
                                 Bu güne bir antrenman atamak için aşağıdaki programlardan birine dokunabilir veya yeni bir program tasarlayabilirsiniz.
                             </div>
@@ -7900,7 +7900,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:8px; border:1.5px solid var(--gold); background:rgba(245,158,11,0.08);" onclick="assignDirectiveToActiveDay()">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <div>
-                                    <div style="font-size:13px; font-weight:800; color:#111317;">${escapeHTML(dirTitle)}</div>
+                                    <div style="font-size:13px; font-weight:800; color:#F3F6FA;">${escapeHTML(dirTitle)}</div>
                                     <div style="font-size:11px; color:var(--gold); font-weight:700;">${dirCount} Hareket • ~${dirDur} Dk • Masaüstünden Aktarıldı</div>
                                 </div>
                                 <div style="display:flex; align-items:center; gap:6px;">
@@ -7929,7 +7929,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:${currentPlan.id === 'la_forja_day1' ? 'var(--gold)' : 'var(--border)'};" onclick="assignRoutineToActiveDay('la_forja_day1', '⚔️ Gün 1: Omuz & Bacak Ön Zırhı', 'official', 'Press + Squat • Şınav + Front Squat • Core', true)">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div>
-                            <div style="font-size:13px; font-weight:800; color:#111317;">Gün 1: Omuz & Bacak Ön Zırhı</div>
+                            <div style="font-size:13px; font-weight:800; color:#F3F6FA;">Gün 1: Omuz & Bacak Ön Zırhı</div>
                             <div style="font-size:11px; color:var(--text-secondary);">Press + Squat • Şınav + Front Squat • Core</div>
                         </div>
                         <div style="display:flex; align-items:center; gap:6px;">
@@ -7942,7 +7942,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:${currentPlan.id === 'la_forja_day2' ? 'var(--gold)' : 'var(--border)'};" onclick="assignRoutineToActiveDay('la_forja_day2', '⚔️ Gün 2: Sırt Çekiş & Balistik Güç', 'official', 'Saw Row + RDL • Swing + Pullup • Çanta Taşıma', true)">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div>
-                            <div style="font-size:13px; font-weight:800; color:#111317;">Gün 2: Sırt Çekiş & Balistik Güç</div>
+                            <div style="font-size:13px; font-weight:800; color:#F3F6FA;">Gün 2: Sırt Çekiş & Balistik Güç</div>
                             <div style="font-size:11px; color:var(--text-secondary);">Saw Row + RDL • Swing + Pullup • Çanta Taşıma</div>
                         </div>
                         <div style="display:flex; align-items:center; gap:6px;">
@@ -7955,7 +7955,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:${currentPlan.id === 'la_forja_day3' ? 'var(--gold)' : 'var(--border)'};" onclick="assignRoutineToActiveDay('la_forja_day3', '⚔️ Gün 3: Kompleks & Merdiven', 'official', 'Snatch + Lunge • Row + Squat • Burpee Finisher', true)">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div>
-                            <div style="font-size:13px; font-weight:800; color:#111317;">Gün 3: Kompleks & Merdiven</div>
+                            <div style="font-size:13px; font-weight:800; color:#F3F6FA;">Gün 3: Kompleks & Merdiven</div>
                             <div style="font-size:11px; color:var(--text-secondary);">Snatch + Lunge • Row + Squat • Burpee Finisher</div>
                         </div>
                         <div style="display:flex; align-items:center; gap:6px;">
@@ -7983,7 +7983,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:var(--cyan);" onclick="assignGeneratedToActiveDay(true)">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <div>
-                                <div style="font-size:13px; font-weight:800; color:#111317;">${escapeHTML(displayGen.title)}</div>
+                                <div style="font-size:13px; font-weight:800; color:#F3F6FA;">${escapeHTML(displayGen.title)}</div>
                                 <div style="font-size:11px; color:var(--text-secondary);">${displayGen.exercises.length} Hareket • ${displayGen.duration} Dk</div>
                             </div>
                             <div style="display:flex; align-items:center; gap:6px;">
@@ -8008,7 +8008,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:${isSelected ? 'var(--gold)' : 'var(--border)'};" onclick="assignRoutineToActiveDay('${p.id}', '${escapeHTML(p.title)}', 'custom', '${exCount} Hareket Özel Program', true)">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <div>
-                                    <div style="font-size:13px; font-weight:800; color:#111317;">${escapeHTML(p.title)}</div>
+                                    <div style="font-size:13px; font-weight:800; color:#F3F6FA;">${escapeHTML(p.title)}</div>
                                     <div style="font-size:11px; color:var(--text-secondary);">${exCount} Hareket • Özel Program</div>
                                 </div>
                                 <div style="display:flex; align-items:center; gap:6px;">
@@ -8226,7 +8226,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             <div style="font-size:10px; font-weight:900; color:var(--gold); text-transform:uppercase; letter-spacing:0.5px;">
                                 ✏️ ${DAY_NAMES_TR[dayIdx].toUpperCase()} GÜNÜ PROGRAMI DÜZENLENİYOR
                             </div>
-                            <div style="font-size:14px; font-weight:800; color:#111317; margin-top:2px;">
+                            <div style="font-size:14px; font-weight:800; color:#F3F6FA; margin-top:2px;">
                                 "${escapeHTML(title || '')}"
                             </div>
                             <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
@@ -8250,7 +8250,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             <div style="font-size:10px; font-weight:900; color:var(--cyan); text-transform:uppercase; letter-spacing:0.5px;">
                                 ✏️ KAYITLI PROGRAM DÜZENLENİYOR
                             </div>
-                            <div style="font-size:14px; font-weight:800; color:#111317; margin-top:2px;">
+                            <div style="font-size:14px; font-weight:800; color:#F3F6FA; margin-top:2px;">
                                 "${escapeHTML(title || '')}"
                             </div>
                             <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
@@ -8440,14 +8440,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     const pNames = (ex.primaryMuscles || []).map(m => (TARGET_REGIONS[m] ? TARGET_REGIONS[m].name : m)).join(', ') || ex.muscle || '';
 
                     return `
-                        <div style="display:flex; justify-content:space-between; align-items:center; background:#F4F3EE; border:1px solid #E2E0D8; border-radius:8px; padding:8px 10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; background:#0E131B; border:1px solid #222C3A; border-radius:8px; padding:8px 10px;">
                             <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0;">
                                 <span style="font-size:12px; font-weight:900; color:var(--gold); width:18px;">${idx + 1}.</span>
                                 <div class="ex-thumb-wrap" style="width:42px; height:42px; border-radius:6px; flex-shrink:0;">
                                     ${thumb ? `<img src="${thumb}" class="ex-thumb-img" alt="${escapeHTML(ex.name)}">` : '🏋️'}
                                 </div>
                                 <div style="min-width:0; flex:1;">
-                                    <div style="font-size:13px; font-weight:800; color:#111317; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
+                                    <div style="font-size:13px; font-weight:800; color:#F3F6FA; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
                                         ${escapeHTML(ex.name)}
                                     </div>
                                     <div style="font-size:11px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;">
@@ -9788,7 +9788,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 const todayName = DAY_NAMES_TR[todayIdx];
 
                 let formattedText = escapeHTML(dir.text || '')
-                    .replace(/\*\*(.*?)\*\*/g, '<strong style="color:#111317;">$1</strong>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong style="color:#F3F6FA;">$1</strong>')
                     .replace(/•/g, '<span style="color:var(--gold); margin-right:4px;">•</span>')
                     .replace(/#/g, '')
                     .trim();
@@ -9808,13 +9808,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             </div>
                         </div>
                         <div class="collapsible-panel-body">
-                            <div style="font-size:12px; color:#334155; line-height:1.55; margin-bottom:12px;">
+                            <div style="font-size:12px; color:#CBD5E1; line-height:1.55; margin-bottom:12px;">
                                 ${formattedText}
                             </div>
                             ${workout ? `
-                                <div style="margin-bottom:12px; background:#F4F3EE; border:1px solid rgba(245,158,11,0.3); border-radius:8px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                                <div style="margin-bottom:12px; background:#0E131B; border:1px solid rgba(245,158,11,0.3); border-radius:8px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                                     <div>
-                                        <div style="font-size:13px; font-weight:900; color:#111317;">⚡ ${escapeHTML(workout.title)}</div>
+                                        <div style="font-size:13px; font-weight:900; color:#F3F6FA;">⚡ ${escapeHTML(workout.title)}</div>
                                         <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
                                             🎯 ${workout.exercises.length} Egzersiz • ⏱️ ${workout.duration || 45} Dk Hedef Süre
                                         </div>
@@ -9835,7 +9835,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                         🔬 Bilimsel Analiz Raporunu İncele
                                     </button>
                                 ` : '<div></div>'}
-                                <button type="button" onclick="dismissCoachStationDirective('${uid}')" style="background:transparent; border:1px solid #E2E0D8; border-radius:6px; color:var(--text-muted); cursor:pointer; font-size:11px; padding:5px 10px;" title="Direktifi Gizle">
+                                <button type="button" onclick="dismissCoachStationDirective('${uid}')" style="background:transparent; border:1px solid #222C3A; border-radius:6px; color:var(--text-muted); cursor:pointer; font-size:11px; padding:5px 10px;" title="Direktifi Gizle">
                                     ✕ Kapat
                                 </button>
                             </div>
@@ -10589,7 +10589,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:7px 14px; font-weight:800;" onclick="performFullCalendarSync()">
                             🔄 Şimdi Eşitle
                         </button>
-                        <button type="button" class="btn btn-outline" style="font-size:11px; padding:7px 10px; color:#DC2626; border-color:rgba(239,68,68,0.4);" onclick="disconnectGoogleCalendar(); openGoogleCalendarExportModal();">
+                        <button type="button" class="btn btn-outline" style="font-size:11px; padding:7px 10px; color:#F87171; border-color:rgba(239,68,68,0.4);" onclick="disconnectGoogleCalendar(); openGoogleCalendarExportModal();">
                             Bağlantıyı Kes
                         </button>
                     `;
@@ -10633,12 +10633,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         const mName = CAL_MONTH_NAMES_TR[dayDate.getMonth()].slice(0, 3);
 
                         itemsHtml += `
-                            <div style="display:flex; justify-content:space-between; align-items:center; background:#F4F3EE; border:1px solid #E2E0D8; border-radius:8px; padding:9px 12px; gap:8px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:#0E131B; border:1px solid #222C3A; border-radius:8px; padding:9px 12px; gap:8px;">
                                 <div style="min-width:0; flex:1;">
-                                    <div style="font-size:12.5px; font-weight:800; color:#111317;">
+                                    <div style="font-size:12.5px; font-weight:800; color:#F3F6FA;">
                                         ⚔️ ${dName}, ${dNum} ${mName} • <span style="color:var(--gold);">${timeStr}</span>
                                     </div>
-                                    <div style="font-size:11px; color:#334155; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                    <div style="font-size:11px; color:#CBD5E1; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                                         ${escapeHTML(cleanTitle)} • ${durMin} Dk
                                     </div>
                                 </div>
@@ -10806,7 +10806,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     <div class="calendar-live-bar">
                         <div class="calendar-live-info">
                             <span class="weekly-day-sync-dot"></span>
-                            <span style="color:#111317;">FitLab • Antrenmanlarım</span>
+                            <span style="color:#F3F6FA;">FitLab • Antrenmanlarım</span>
                             <span style="font-size:10px; color:#10b981; font-weight:800;">(Canlı Eşitli)</span>
                         </div>
                         <div class="calendar-live-actions">
@@ -10827,13 +10827,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     <div class="calendar-live-bar" style="background:rgba(245,158,11,0.06); border-color:rgba(245,158,11,0.25);">
                         <div class="calendar-live-info" style="font-size:11px;">
                             <span>📅</span>
-                            <span style="font-weight:700; color:#111317;">Takvim Entegrasyonu</span>
+                            <span style="font-weight:700; color:#F3F6FA;">Takvim Entegrasyonu</span>
                         </div>
                         <div class="calendar-live-actions">
                             <button type="button" class="btn btn-gold" style="font-size:11px; padding:3px 9px; font-weight:800;" onclick="openGoogleCalendarWeb()" title="Google Takvim uygulamasını aç">
                                 📅 Google Takvim'i Aç
                             </button>
-                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:3px 8px; color:#334155;" onclick="downloadFullScheduleICS()" title="Apple / Cihaz Takvimine Aktar (.ics)">
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:3px 8px; color:#CBD5E1;" onclick="downloadFullScheduleICS()" title="Apple / Cihaz Takvimine Aktar (.ics)">
                                 🍏 Cihaza Aktar
                             </button>
                             <button type="button" class="btn btn-outline" style="font-size:11px; padding:3px 7px;" onclick="openCalendarSyncModal()" title="Takvim Yönetimi & Ayarları">
@@ -10957,11 +10957,11 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             <div style="display:flex; align-items:center; gap:8px;">
                                 <span style="font-size:22px;">🟢</span>
                                 <div>
-                                    <div style="font-size:13px; font-weight:800; color:#111317;">Google Takvim Canlı Bağlı</div>
+                                    <div style="font-size:13px; font-weight:800; color:#F3F6FA;">Google Takvim Canlı Bağlı</div>
                                     <div style="font-size:11px; color:#a7f3d0; margin-top:2px;">Özel Takvim: <strong>FitLab • Antrenmanlarım</strong></div>
                                 </div>
                             </div>
-                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:5px 10px; color:#DC2626; border-color:rgba(239,68,68,0.4);" onclick="disconnectGoogleCalendar()">
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:5px 10px; color:#F87171; border-color:rgba(239,68,68,0.4);" onclick="disconnectGoogleCalendar()">
                                 Bağlantıyı Kes
                             </button>
                         </div>
@@ -10971,7 +10971,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 card.innerHTML = `
                     <div style="background:rgba(245,158,11,0.08); border:1.5px solid rgba(245,158,11,0.3); border-radius:10px; padding:12px;">
                         <div style="margin-bottom:8px;">
-                            <div style="font-size:13px; font-weight:800; color:#111317;">📅 Google & Cihaz Takvim Entegrasyonu</div>
+                            <div style="font-size:13px; font-weight:800; color:#F3F6FA;">📅 Google & Cihaz Takvim Entegrasyonu</div>
                             <div style="font-size:11px; color:var(--text-secondary); margin-top:3px; line-height:1.4;">
                                 Antrenman seanslarınızı Google Takvim web uygulamasında doğrudan açabilir veya tüm haftayı Apple / cihaz takviminize tek dokunuşla aktarabilirsiniz.
                             </div>
@@ -10980,7 +10980,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:7px 14px; font-weight:800;" onclick="openGoogleCalendarWeb()">
                                 📅 Google Takvim'i Aç
                             </button>
-                            <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 12px; color:#334155;" onclick="downloadFullScheduleICS()">
+                            <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 12px; color:#CBD5E1;" onclick="downloadFullScheduleICS()">
                                 🍏 Tüm Programı İndir (.ics)
                             </button>
                         </div>
@@ -11297,10 +11297,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     const logDur = log.durationFormatted || (log.duration ? `${log.duration} Dk` : '');
                     bodyContent = `
                         <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
-                            <div style="font-size:12px; font-weight:800; color:#111317; margin-bottom:4px; line-height:1.3; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;" title="${escapeHTML(log.program || log.title || 'Antrenman')}">
+                            <div style="font-size:12px; font-weight:800; color:#F3F6FA; margin-bottom:4px; line-height:1.3; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;" title="${escapeHTML(log.program || log.title || 'Antrenman')}">
                                 ${escapeHTML(log.program || log.title || 'Antrenman')}
                             </div>
-                            <div style="font-size:11px; color:#15803D; font-weight:700; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                            <div style="font-size:11px; color:#B6F059; font-weight:700; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                                 ${logDur ? `⏱️ ${logDur}` : ''} ${logVol ? ` • 🏋️ ${logVol}` : ''}
                             </div>
                             ${log.totalSetsCompleted ? `<div style="font-size:10px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">🎯 ${log.totalSetsCompleted} Set Tamamlandı</div>` : ''}
@@ -11316,7 +11316,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     const exCount = (planDetails && Array.isArray(planDetails.exercises)) ? planDetails.exercises.length : null;
                     bodyContent = `
                         <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
-                            <div style="font-size:12px; font-weight:800; color:#111317; margin-bottom:4px; line-height:1.3; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;" title="${escapeHTML(plan.title || 'Planlı Antrenman')}">
+                            <div style="font-size:12px; font-weight:800; color:#F3F6FA; margin-bottom:4px; line-height:1.3; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;" title="${escapeHTML(plan.title || 'Planlı Antrenman')}">
                                 ${escapeHTML(plan.title || 'Planlı Antrenman')}
                             </div>
                             <div style="font-size:11px; color:var(--gold); font-weight:700; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
@@ -11329,7 +11329,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 <button type="button" class="btn btn-gold" style="width:100%; font-size:11px; padding:6px 4px; font-weight:900; text-align:center;" onclick="event.stopPropagation(); startScheduledWorkoutForDay(${dayIdx})">
                                     ▶️ Başlat
                                 </button>
-                                <button type="button" class="btn btn-outline" style="width:100%; font-size:10px; padding:4px; color:#334155; text-align:center;" onclick="event.stopPropagation(); openScheduleDayModal(${dayIdx}, '${dayYMD}')">
+                                <button type="button" class="btn btn-outline" style="width:100%; font-size:10px; padding:4px; color:#CBD5E1; text-align:center;" onclick="event.stopPropagation(); openScheduleDayModal(${dayIdx}, '${dayYMD}')">
                                     ✏️ Düzenle
                                 </button>
                             ` : `
@@ -11346,7 +11346,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             <div style="font-size:11.5px; font-weight:700; color:var(--text-secondary);">Dinlenme & Toparlanma</div>
                         </div>
                         <div style="margin-top:8px;">
-                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 4px; width:100%; border-color:#D5D2C8; color:#334155; text-align:center;" onclick="event.stopPropagation(); openScheduleDayModal(${dayIdx}, '${dayYMD}')">
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 4px; width:100%; border-color:#263244; color:#CBD5E1; text-align:center;" onclick="event.stopPropagation(); openScheduleDayModal(${dayIdx}, '${dayYMD}')">
                                 ➕ Program Ata
                             </button>
                         </div>
@@ -11863,10 +11863,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 if (lastLog) {
                     const exList = lastLog.exercises || lastLog.detailedExercises || [];
                     lastLogDetailsHTML = `
-                        <div id="adminExDetails_${u.id}" style="display:none; margin-top:10px; padding:10px 12px; background:#F4F3EE; border-radius:8px; border:1px solid rgba(245,158,11,0.25);">
+                        <div id="adminExDetails_${u.id}" style="display:none; margin-top:10px; padding:10px 12px; background:#0E131B; border-radius:8px; border:1px solid rgba(245,158,11,0.25);">
                             <div style="font-size:11px; font-weight:800; color:var(--gold); margin-bottom:8px; text-transform:uppercase; display:flex; justify-content:space-between;">
                                 <span>📋 ${escapeHTML(lastLog.title)}</span>
-                                <span style="color:#111317;">${lastLog.dateFormatted || lastLog.date}</span>
+                                <span style="color:#F3F6FA;">${lastLog.dateFormatted || lastLog.date}</span>
                             </div>
                             ${exList.length > 0 ? `
                                 <div style="display:flex; flex-direction:column; gap:6px; max-height:200px; overflow-y:auto; padding-right:4px;">
@@ -11876,9 +11876,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                             ? sets.map((s, idx) => `Set ${idx+1}: <strong style="color:var(--gold);">${s.weight}kg</strong> x ${s.reps}`).join(' • ')
                                             : '<span style="color:var(--text-secondary);">Set kaydı yok</span>';
                                         return `
-                                            <div style="font-size:11px; padding:6px 8px; background:#F8F7F3; border-radius:6px; border-left:3px solid var(--gold);">
+                                            <div style="font-size:11px; padding:6px 8px; background:#151C26; border-radius:6px; border-left:3px solid var(--gold);">
                                                 <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
-                                                    <strong style="color:#111317;">${escapeHTML(ex.name)}</strong>
+                                                    <strong style="color:#F3F6FA;">${escapeHTML(ex.name)}</strong>
                                                     ${ex.muscle ? `<span style="font-size:10px; color:var(--cyan);">[${escapeHTML(ex.muscle)}]</span>` : ''}
                                                 </div>
                                                 <div style="font-size:10.5px; color:var(--text-secondary);">${setsStr}</div>
@@ -11892,14 +11892,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 }
 
                 return `
-                    <div style="background:var(--bg-surface); border:1px solid #E2E0D8; border-radius:12px; padding:14px; margin-bottom:12px; box-shadow:0 4px 15px rgba(0,0,0,0.3);">
+                    <div style="background:var(--bg-surface); border:1px solid #222C3A; border-radius:12px; padding:14px; margin-bottom:12px; box-shadow:0 4px 15px rgba(0,0,0,0.3);">
                         <!-- ATHLETE HEADER -->
                         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
                             <div style="display:flex; align-items:center; gap:10px;">
                                 <span style="font-size:26px; width:44px; height:44px; display:flex; align-items:center; justify-content:center; background:var(--bg-elevated); border-radius:10px; border:1px solid var(--gold);">${u.avatar || '🥋'}</span>
                                 <div>
                                     <div style="display:flex; align-items:center; gap:6px;">
-                                        <strong style="color:#111317; font-size:14px;">${escapeHTML(u.name)}</strong>
+                                        <strong style="color:#F3F6FA; font-size:14px;">${escapeHTML(u.name)}</strong>
                                         <span style="font-size:11px; color:var(--text-secondary);">@${escapeHTML(u.username)}</span>
                                         <span class="auth-role-tag ${u.role === 'admin' ? 'role-admin' : 'role-athlete'}" style="font-size:9px; padding:2px 6px;">
                                             ${u.role === 'admin' ? 'YÖNETİCİ' : 'SPORCU'}
@@ -11920,22 +11920,22 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
                         <!-- 3-COL KPI STATS -->
                         <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-bottom:10px; text-align:center;">
-                            <div style="background:var(--bg-card); padding:8px 4px; border-radius:8px; border:1px solid #E2E0D8;">
+                            <div style="background:var(--bg-card); padding:8px 4px; border-radius:8px; border:1px solid #222C3A;">
                                 <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">TOPLAM SEANS</div>
-                                <div style="font-size:13px; font-weight:800; color:#111317; margin-top:2px;">🏋️ ${sessionCount} Seans</div>
+                                <div style="font-size:13px; font-weight:800; color:#F3F6FA; margin-top:2px;">🏋️ ${sessionCount} Seans</div>
                             </div>
-                            <div style="background:var(--bg-card); padding:8px 4px; border-radius:8px; border:1px solid #E2E0D8;">
+                            <div style="background:var(--bg-card); padding:8px 4px; border-radius:8px; border:1px solid #222C3A;">
                                 <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">SERİ DURUMU</div>
                                 <div style="font-size:13px; font-weight:800; color:var(--gold); margin-top:2px;">🔥 ${streak} Gün</div>
                             </div>
-                            <div style="background:var(--bg-card); padding:8px 4px; border-radius:8px; border:1px solid #E2E0D8;">
+                            <div style="background:var(--bg-card); padding:8px 4px; border-radius:8px; border:1px solid #222C3A;">
                                 <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">TOPLAM TONAJ</div>
                                 <div style="font-size:13px; font-weight:800; color:var(--cyan); margin-top:2px;">⚡ ${Math.round(userTonaj).toLocaleString('tr-TR')} kg</div>
                             </div>
                         </div>
 
                         <!-- LAST WORKOUT PREVIEW -->
-                        <div style="background:var(--bg-card); border-radius:8px; padding:10px 12px; border:1px solid #E2E0D8; font-size:11.5px; margin-bottom:10px;">
+                        <div style="background:var(--bg-card); border-radius:8px; padding:10px 12px; border:1px solid #222C3A; font-size:11.5px; margin-bottom:10px;">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                                 <span style="font-weight:700; color:var(--gold);">Son Antrenman Seansı:</span>
                                 <span style="color:var(--text-secondary); font-size:10.5px;">
@@ -11943,9 +11943,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 </span>
                             </div>
                             ${lastLog ? `
-                                <div style="color:#111317; font-weight:600; display:flex; justify-content:space-between; align-items:center;">
+                                <div style="color:#F3F6FA; font-weight:600; display:flex; justify-content:space-between; align-items:center;">
                                     <span>${escapeHTML(lastLog.title)}</span>
-                                    <span style="color:#111317; font-size:11px;">⏱️ ${lastLog.duration || 0} dk • ${lastLog.totalSetsCompleted || 0} Set</span>
+                                    <span style="color:#F3F6FA; font-size:11px;">⏱️ ${lastLog.duration || 0} dk • ${lastLog.totalSetsCompleted || 0} Set</span>
                                 </div>
                             ` : `
                                 <div style="color:var(--text-secondary); font-style:italic;">Henüz tamamlanmış antrenman seansı bulunmuyor.</div>
@@ -11957,27 +11957,27 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             🎯 Sporcunun Hedef / Çalışma Kiloları:
                         </div>
                         <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:4px; text-align:center; font-size:10.5px; margin-bottom:10px;">
-                            <div style="background:#F8F7F3; padding:4px 2px; border-radius:4px; border:1px solid #E2E0D8;">
+                            <div style="background:#151C26; padding:4px 2px; border-radius:4px; border:1px solid #222C3A;">
                                 <div style="color:var(--text-secondary); font-size:9px;">Press</div>
                                 <strong style="color:var(--gold);">${w.press || '-'}k</strong>
                             </div>
-                            <div style="background:#F8F7F3; padding:4px 2px; border-radius:4px; border:1px solid #E2E0D8;">
+                            <div style="background:#151C26; padding:4px 2px; border-radius:4px; border:1px solid #222C3A;">
                                 <div style="color:var(--text-secondary); font-size:9px;">Squat</div>
                                 <strong style="color:var(--gold);">${w.squat || '-'}k</strong>
                             </div>
-                            <div style="background:#F8F7F3; padding:4px 2px; border-radius:4px; border:1px solid #E2E0D8;">
+                            <div style="background:#151C26; padding:4px 2px; border-radius:4px; border:1px solid #222C3A;">
                                 <div style="color:var(--text-secondary); font-size:9px;">Row</div>
                                 <strong style="color:var(--gold);">${w.row || '-'}k</strong>
                             </div>
-                            <div style="background:#F8F7F3; padding:4px 2px; border-radius:4px; border:1px solid #E2E0D8;">
+                            <div style="background:#151C26; padding:4px 2px; border-radius:4px; border:1px solid #222C3A;">
                                 <div style="color:var(--text-secondary); font-size:9px;">RDL</div>
                                 <strong style="color:var(--gold);">${w.rdl || '-'}k</strong>
                             </div>
-                            <div style="background:#F8F7F3; padding:4px 2px; border-radius:4px; border:1px solid #E2E0D8;">
+                            <div style="background:#151C26; padding:4px 2px; border-radius:4px; border:1px solid #222C3A;">
                                 <div style="color:var(--text-secondary); font-size:9px;">Swing</div>
                                 <strong style="color:var(--gold);">${w.swing || '-'}k</strong>
                             </div>
-                            <div style="background:#F8F7F3; padding:4px 2px; border-radius:4px; border:1px solid #E2E0D8;">
+                            <div style="background:#151C26; padding:4px 2px; border-radius:4px; border:1px solid #222C3A;">
                                 <div style="color:var(--text-secondary); font-size:9px;">Lunge</div>
                                 <strong style="color:var(--gold);">${w.lunge || '-'}k</strong>
                             </div>
@@ -11996,15 +11996,15 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             if (kpisEl) {
                 kpisEl.innerHTML = `
-                    <div style="background:var(--bg-surface); padding:8px 6px; border-radius:8px; border:1px solid #E2E0D8; text-align:center;">
+                    <div style="background:var(--bg-surface); padding:8px 6px; border-radius:8px; border:1px solid #222C3A; text-align:center;">
                         <div style="font-size:9px; color:var(--text-secondary); font-weight:700;">KAYITLI SPORCU</div>
                         <div style="font-size:14px; font-weight:900; color:var(--gold); margin-top:2px;">👥 ${users.length}</div>
                     </div>
-                    <div style="background:var(--bg-surface); padding:8px 6px; border-radius:8px; border:1px solid #E2E0D8; text-align:center;">
+                    <div style="background:var(--bg-surface); padding:8px 6px; border-radius:8px; border:1px solid #222C3A; text-align:center;">
                         <div style="font-size:9px; color:var(--text-secondary); font-weight:700;">TOPLAM SEANS</div>
                         <div style="font-size:14px; font-weight:900; color:var(--green-success); margin-top:2px;">✅ ${totalWorkoutsAll}</div>
                     </div>
-                    <div style="background:var(--bg-surface); padding:8px 6px; border-radius:8px; border:1px solid #E2E0D8; text-align:center;">
+                    <div style="background:var(--bg-surface); padding:8px 6px; border-radius:8px; border:1px solid #222C3A; text-align:center;">
                         <div style="font-size:9px; color:var(--text-secondary); font-weight:700;">TOPLAM TONAJ</div>
                         <div style="font-size:14px; font-weight:900; color:var(--cyan); margin-top:2px;">⚡ ${Math.round(totalTonajAll).toLocaleString('tr-TR')} kg</div>
                     </div>
@@ -12041,7 +12041,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 <span style="font-size:22px;">${u.avatar || '🥋'}</span>
                                 <div>
                                     <div style="display:flex; align-items:center; gap:6px;">
-                                        <strong style="color:#111317; font-size:13px;">${escapeHTML(u.name)}</strong>
+                                        <strong style="color:#F3F6FA; font-size:13px;">${escapeHTML(u.name)}</strong>
                                         <span style="font-size:11px; color:var(--text-secondary);">(@${escapeHTML(u.username)})</span>
                                         ${isSelf ? '<span class="auth-role-tag role-admin" style="font-size:9px; padding:1px 6px;">GİRİŞ YAPILAN HESAP</span>' : ''}
                                     </div>
@@ -12058,8 +12058,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 ` : '<span style="font-size:11px; color:var(--gold); font-weight:700;">Aktif</span>'}
                             </div>
                         </div>
-                        <div style="font-size:11px; color:var(--text-secondary); display:flex; justify-content:space-between; border-top:1px solid #E2E0D8; padding-top:6px; margin-top:6px;">
-                            <span>Şifre: <code style="color:#111317; background:#F4F3EE; padding:2px 6px; border-radius:4px; font-family:monospace;">${escapeHTML(u.password)}</code></span>
+                        <div style="font-size:11px; color:var(--text-secondary); display:flex; justify-content:space-between; border-top:1px solid #222C3A; padding-top:6px; margin-top:6px;">
+                            <span>Şifre: <code style="color:#F3F6FA; background:#0E131B; padding:2px 6px; border-radius:4px; font-family:monospace;">${escapeHTML(u.password)}</code></span>
                             <span>${logs.length} Seans • Seri: ${streak} Gün</span>
                         </div>
                     </div>
@@ -12353,7 +12353,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                         ${locIcon} ${escapeHTML(locName)}
                                     </span>
                                 </div>
-                                <h3 style="font-size:15px; font-weight:800; color:#111317; line-height:1.3;">${escapeHTML(l.program)}</h3>
+                                <h3 style="font-size:15px; font-weight:800; color:#F3F6FA; line-height:1.3;">${escapeHTML(l.program)}</h3>
                             </div>
                             <div style="display:flex; align-items:center; gap:6px;">
                                 <span class="ex-badge badge-equip">${escapeHTML(rpeLabel)}</span>
@@ -12390,7 +12390,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 ${l.exercises.map(ex => `
                                     <div class="log-exercise-item">
                                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                                            <strong style="color:#111317; font-size:12px;">${escapeHTML(ex.name)}</strong>
+                                            <strong style="color:#F3F6FA; font-size:12px;">${escapeHTML(ex.name)}</strong>
                                             <span style="font-size:11px; color:var(--text-secondary);">${escapeHTML(ex.muscle ? ex.muscle.split(',')[0] : '')}${ex.exerciseVolume ? ` • ${Math.round(ex.exerciseVolume).toLocaleString('tr-TR')} kg` : ''}</span>
                                         </div>
                                         <div class="log-sets-summary">
@@ -14164,7 +14164,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     subtitleText = `${escapeHTML(planTitle)} • Tamamlanmış seans`;
                     buttonHtml = `
                         <div style="display:flex; align-items:center; gap:6px;">
-                            <select id="quickAddSetsSelect_${dKey}" style="background:#111; color:#111317; border:1px solid var(--border); font-size:11px; padding:4px 6px; border-radius:6px;">
+                            <select id="quickAddSetsSelect_${dKey}" style="background:#111; color:#F3F6FA; border:1px solid var(--border); font-size:11px; padding:4px 6px; border-radius:6px;">
                                 <option value="3" selected>3 Set</option>
                                 <option value="4">4 Set</option>
                                 <option value="5">5 Set</option>
@@ -14180,7 +14180,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     subtitleText = `⚡ Eklendiğinde bu güne yeni bir Özel Takviye Seansı açılır`;
                     buttonHtml = `
                         <div style="display:flex; align-items:center; gap:6px;">
-                            <select id="quickAddSetsSelect_${dKey}" style="background:#111; color:#111317; border:1px solid var(--border); font-size:11px; padding:4px 6px; border-radius:6px;">
+                            <select id="quickAddSetsSelect_${dKey}" style="background:#111; color:#F3F6FA; border:1px solid var(--border); font-size:11px; padding:4px 6px; border-radius:6px;">
                                 <option value="3" selected>3 Set</option>
                                 <option value="4">4 Set</option>
                                 <option value="5">5 Set</option>
@@ -14196,7 +14196,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     subtitleText = `${escapeHTML(planTitle)} • ${exCount} Hareket Mevcut (Sonuna eklenir)`;
                     buttonHtml = `
                         <div style="display:flex; align-items:center; gap:6px;">
-                            <select id="quickAddSetsSelect_${dKey}" style="background:#111; color:#111317; border:1px solid var(--border); font-size:11px; padding:4px 6px; border-radius:6px;">
+                            <select id="quickAddSetsSelect_${dKey}" style="background:#111; color:#F3F6FA; border:1px solid var(--border); font-size:11px; padding:4px 6px; border-radius:6px;">
                                 <option value="3" selected>3 Set</option>
                                 <option value="4">4 Set</option>
                                 <option value="5">5 Set</option>
@@ -14210,10 +14210,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 }
 
                 daysHTML += `
-                    <div style="background:#F4F3EE; border:1px solid ${isRest ? 'rgba(56,189,248,0.25)' : (isAvailable ? 'rgba(245,158,11,0.35)' : 'var(--border)')}; border-radius:10px; padding:10px 12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                    <div style="background:#0E131B; border:1px solid ${isRest ? 'rgba(56,189,248,0.25)' : (isAvailable ? 'rgba(245,158,11,0.35)' : 'var(--border)')}; border-radius:10px; padding:10px 12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                         <div>
                             <div style="display:flex; align-items:center; gap:6px;">
-                                <strong style="font-size:13px; color:#111317;">${dayName}</strong>
+                                <strong style="font-size:13px; color:#F3F6FA;">${dayName}</strong>
                                 ${statusBadge}
                                 ${planIso === todayIso ? '<span style="font-size:9px; background:var(--gold); color:#000; font-weight:900; padding:1px 4px; border-radius:3px;">BUGÜN</span>' : ''}
                             </div>
@@ -14229,10 +14229,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             bodyEl.innerHTML = `
                 <div style="background:rgba(245,158,11,0.06); border:1px solid rgba(245,158,11,0.25); border-radius:10px; padding:12px; margin-bottom:14px;">
-                    <div style="font-size:12px; color:#B45309;">
+                    <div style="font-size:12px; color:#E5B85B;">
                         <strong>Hedef Kas Grubu:</strong> ${escapeHTML(pNames)} • <strong>Ekipman:</strong> ${ex.equipment ? ex.equipment.toUpperCase() : 'SERBEST'}
                     </div>
-                    <div style="font-size:11px; color:#334155; margin-top:8px; line-height:1.45; background:#F4F3EE; padding:8px 10px; border-radius:6px;">
+                    <div style="font-size:11px; color:#CBD5E1; margin-top:8px; line-height:1.45; background:#0E131B; padding:8px 10px; border-radius:6px;">
                         💡 <strong>Nasıl Çalışır?</strong>
                         <br>• <strong>Antrenman olan gün:</strong> Hareketi mevcut seansın sonuna (${ex.name}) olarak ilave eder.
                         <br>• <strong>Dinlenme günü:</strong> O gün dinlenmeden çıkar ve bu hareketle başlayan yeni bir <em>"Takviye Seansı"</em>na dönüşür. (Dinlenmenizi korumak istiyorsanız antrenman olan günleri tercih edebilirsiniz.)
@@ -14455,14 +14455,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 if (isDone) {
                     cellBg = '#F0FDF4';
                     cellBorder = '1px solid #86EFAC';
-                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#15803D; background:#DCFCE7; border:1px solid #86EFAC; border-radius:6px; padding:2px 7px;">${data.earnedSets.toFixed(1)} Set</span>`;
+                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#B6F059; background:#DCFCE7; border:1px solid #86EFAC; border-radius:6px; padding:2px 7px;">${data.earnedSets.toFixed(1)} Set</span>`;
                     const exList = Array.from(data.doneExs).map(escapeHTML).join(', ');
-                    const planList = data.plannedExs.size > 0 ? `<div style="font-size:11px; color:#B45309; margin-top:3px; font-weight:700;">+ ${Array.from(data.plannedExs).map(escapeHTML).join(', ')} (Planda)</div>` : '';
+                    const planList = data.plannedExs.size > 0 ? `<div style="font-size:11px; color:#E5B85B; margin-top:3px; font-weight:700;">+ ${Array.from(data.plannedExs).map(escapeHTML).join(', ')} (Planda)</div>` : '';
                     contentHTML = `<div style="font-size:11.5px; color:#1E293B; margin-top:5px; line-height:1.35;"><strong>${exList}</strong>${planList}</div>`;
                 } else if (isPlanned) {
                     cellBg = '#FFFBEB';
                     cellBorder = '1px solid #FCD34D';
-                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#B45309; background:#FEF3C7; border:1px solid #FCD34D; border-radius:6px; padding:2px 7px;">Planda (${data.plannedCount} Hrk)</span>`;
+                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#E5B85B; background:#FEF3C7; border:1px solid #FCD34D; border-radius:6px; padding:2px 7px;">Planda (${data.plannedCount} Hrk)</span>`;
                     const planList = Array.from(data.plannedExs).map(escapeHTML).join(', ');
                     contentHTML = `<div style="font-size:11.5px; color:#92400E; margin-top:5px; line-height:1.35; font-weight:600;">${planList}</div>`;
                 } else {
@@ -14471,7 +14471,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#B91C1C; background:#FEE2E2; border:1px solid #FCA5A5; border-radius:6px; padding:2px 7px;">0 Set (Boşta)</span>`;
                     contentHTML = `
                         <div style="margin-top:6px;">
-                            <button class="btn btn-outline" style="font-size:11px; padding:6px 8px; border-radius:6px; color:#D94100; border-color:#FF4F00; width:100%; text-align:center; font-weight:800; background:#FFFFFF;" onclick="openQuickAddToDayModal('${col.recId}')" title="Bu başı çalıştırmak için ${col.recName} ekle">
+                            <button class="btn btn-outline" style="font-size:11px; padding:6px 8px; border-radius:6px; color:#E5B85B; border-color:#B6F059; width:100%; text-align:center; font-weight:800; background:#121821;" onclick="openQuickAddToDayModal('${col.recId}')" title="Bu başı çalıştırmak için ${col.recName} ekle">
                                 + ${escapeHTML(col.recName)} Ekle
                             </button>
                         </div>
@@ -14481,7 +14481,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 return `
                     <div style="background:${cellBg}; border:${cellBorder}; border-radius:8px; padding:10px; display:flex; flex-direction:column; justify-content:space-between;">
                         <div>
-                            <div style="font-size:11.5px; font-weight:800; color:#111317; margin-bottom:5px; letter-spacing:0.2px;">${escapeHTML(col.label)}</div>
+                            <div style="font-size:11.5px; font-weight:800; color:#F3F6FA; margin-bottom:5px; letter-spacing:0.2px;">${escapeHTML(col.label)}</div>
                             <div>${statusBadge}</div>
                         </div>
                         ${contentHTML}
@@ -14490,9 +14490,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }).join('');
 
             return `
-                <div style="margin-top:12px; border:1px solid #DCD9CE; border-radius:12px; overflow:hidden; background:#F4F3EE;">
-                    <div style="background:#EAE8E1; border-bottom:1px solid #DCD9CE; padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:11.5px; font-weight:900; letter-spacing:0.5px; color:#111317; text-transform:uppercase;">
+                <div style="margin-top:12px; border:1px solid #222C3A; border-radius:12px; overflow:hidden; background:#0E131B;">
+                    <div style="background:#18202C; border-bottom:1px solid #222C3A; padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:11.5px; font-weight:900; letter-spacing:0.5px; color:#F3F6FA; text-transform:uppercase;">
                             ${escapeHTML(def.title)} — ANATOMİK ALT BÖLGE DAĞILIMI
                         </span>
                         <span style="font-size:11px; color:var(--text-secondary); font-weight:600;">
@@ -14556,19 +14556,19 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 <!-- ==================== FRONT VIEW (ÖN GÖRÜNÜM) ==================== -->
                 <g id="frontBodyView">
                     <!-- Title -->
-                    <text x="135" y="24" text-anchor="middle" fill="#475569" font-size="11" font-weight="800" letter-spacing="0.8">ÖN VÜCUT (ANTERIOR)</text>
+                    <text x="135" y="24" text-anchor="middle" fill="#94A3B8" font-size="11" font-weight="800" letter-spacing="0.8">ÖN VÜCUT (ANTERIOR)</text>
                     
                     <!-- Head & Neck -->
-                    <circle cx="135" cy="48" r="16" fill="#E2E0D8" stroke="#94A3B8" stroke-width="1.2"/>
-                    <path d="M 129 63 L 141 63 L 143 74 L 127 74 Z" fill="#E2E0D8"/>
+                    <circle cx="135" cy="48" r="16" fill="#222C3A" stroke="#94A3B8" stroke-width="1.2"/>
+                    <path d="M 129 63 L 141 63 L 143 74 L 127 74 Z" fill="#222C3A"/>
 
                     <!-- Forearms / Hands (Front) -->
-                    <path d="M 72 165 C 66 182, 60 205, 56 226 C 60 228, 66 224, 72 208 C 76 194, 78 178, 78 165 Z" fill="#E2E0D8" stroke="#94A3B8" stroke-width="0.8"/>
-                    <path d="M 198 165 C 204 182, 210 205, 214 226 C 210 228, 204 224, 198 208 C 194 194, 192 178, 192 165 Z" fill="#E2E0D8" stroke="#94A3B8" stroke-width="0.8"/>
+                    <path d="M 72 165 C 66 182, 60 205, 56 226 C 60 228, 66 224, 72 208 C 76 194, 78 178, 78 165 Z" fill="#222C3A" stroke="#94A3B8" stroke-width="0.8"/>
+                    <path d="M 198 165 C 204 182, 210 205, 214 226 C 210 228, 204 224, 198 208 C 194 194, 192 178, 192 165 Z" fill="#222C3A" stroke="#94A3B8" stroke-width="0.8"/>
 
                     <!-- Feet (Front) -->
-                    <ellipse cx="114" cy="410" rx="9" ry="5" fill="#DCD9CE"/>
-                    <ellipse cx="156" cy="410" rx="9" ry="5" fill="#DCD9CE"/>
+                    <ellipse cx="114" cy="410" rx="9" ry="5" fill="#222C3A"/>
+                    <ellipse cx="156" cy="410" rx="9" ry="5" fill="#222C3A"/>
 
                     <!-- SHOULDERS (Front Delts) -->
                     <path class="${sShld.cls}" data-muscle="shoulders" onclick="selectAnatomyMuscle('shoulders')" d="M 98 74 C 84 78, 72 90, 74 110 C 78 116, 88 112, 94 102 C 98 92, 100 82, 98 74 Z" fill="${sShld.fill}" stroke="${sShld.stroke}" stroke-width="1.4"><title>${sShld.tooltip}</title></path>
@@ -14594,8 +14594,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     <path class="${sQuads.cls}" data-muscle="quads" onclick="selectAnatomyMuscle('quads')" d="M 168 216 C 158 210, 139 210, 138 218 C 136 252, 140 294, 146 318 C 158 318, 168 310, 172 280 C 174 254, 174 228, 168 216 Z" fill="${sQuads.fill}" stroke="${sQuads.stroke}" stroke-width="1.4"><title>${sQuads.tooltip}</title></path>
 
                     <!-- Knees (Front) -->
-                    <circle cx="114" cy="325" r="4.5" fill="#E2E0D8" stroke="#94A3B8" stroke-width="0.8"/>
-                    <circle cx="156" cy="325" r="4.5" fill="#E2E0D8" stroke="#94A3B8" stroke-width="0.8"/>
+                    <circle cx="114" cy="325" r="4.5" fill="#222C3A" stroke="#94A3B8" stroke-width="0.8"/>
+                    <circle cx="156" cy="325" r="4.5" fill="#222C3A" stroke="#94A3B8" stroke-width="0.8"/>
 
                     <!-- CALVES (Front Shins / Calves) -->
                     <path class="${sCalf.cls}" data-muscle="calves" onclick="selectAnatomyMuscle('calves')" d="M 106 334 C 100 346, 102 374, 110 398 C 120 398, 124 384, 124 368 C 124 350, 120 336, 106 334 Z" fill="${sCalf.fill}" stroke="${sCalf.stroke}" stroke-width="1.3"><title>${sCalf.tooltip}</title></path>
@@ -14608,19 +14608,19 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 <!-- ==================== BACK VIEW (ARKA GÖRÜNÜM) ==================== -->
                 <g id="backBodyView">
                     <!-- Title -->
-                    <text x="405" y="24" text-anchor="middle" fill="#475569" font-size="11" font-weight="800" letter-spacing="0.8">ARKA VÜCUT (POSTERIOR)</text>
+                    <text x="405" y="24" text-anchor="middle" fill="#94A3B8" font-size="11" font-weight="800" letter-spacing="0.8">ARKA VÜCUT (POSTERIOR)</text>
                     
                     <!-- Head & Neck -->
-                    <circle cx="405" cy="48" r="16" fill="#E2E0D8" stroke="#94A3B8" stroke-width="1.2"/>
-                    <path d="M 399 63 L 411 63 L 413 74 L 397 74 Z" fill="#E2E0D8"/>
+                    <circle cx="405" cy="48" r="16" fill="#222C3A" stroke="#94A3B8" stroke-width="1.2"/>
+                    <path d="M 399 63 L 411 63 L 413 74 L 397 74 Z" fill="#222C3A"/>
 
                     <!-- Forearms / Hands (Back) -->
-                    <path d="M 342 165 C 336 182, 330 205, 326 226 C 330 228, 336 224, 342 208 C 346 194, 348 178, 348 165 Z" fill="#E2E0D8" stroke="#94A3B8" stroke-width="0.8"/>
-                    <path d="M 468 165 C 474 182, 480 205, 484 226 C 480 228, 474 224, 468 208 C 464 194, 462 178, 462 165 Z" fill="#E2E0D8" stroke="#94A3B8" stroke-width="0.8"/>
+                    <path d="M 342 165 C 336 182, 330 205, 326 226 C 330 228, 336 224, 342 208 C 346 194, 348 178, 348 165 Z" fill="#222C3A" stroke="#94A3B8" stroke-width="0.8"/>
+                    <path d="M 468 165 C 474 182, 480 205, 484 226 C 480 228, 474 224, 468 208 C 464 194, 462 178, 462 165 Z" fill="#222C3A" stroke="#94A3B8" stroke-width="0.8"/>
 
                     <!-- Feet (Back) -->
-                    <ellipse cx="384" cy="410" rx="9" ry="5" fill="#DCD9CE"/>
-                    <ellipse cx="426" cy="410" rx="9" ry="5" fill="#DCD9CE"/>
+                    <ellipse cx="384" cy="410" rx="9" ry="5" fill="#222C3A"/>
+                    <ellipse cx="426" cy="410" rx="9" ry="5" fill="#222C3A"/>
 
                     <!-- BACK (Traps / Upper Back) -->
                     <path class="${sBack.cls}" data-muscle="back" onclick="selectAnatomyMuscle('back')" d="M 390 68 L 405 58 L 420 68 L 434 82 L 405 98 L 376 82 Z" fill="${sBack.fill}" stroke="${sBack.stroke}" stroke-width="1.4"><title>${sBack.tooltip}</title></path>
@@ -14677,13 +14677,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             // Quick source buttons
             const sourceButtons = `
                 <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
-                    <button class="btn btn-outline" style="font-size:12px; padding:5px 12px; border-radius:14px; ${sourceMode === 'week_projected' ? 'background:#111317; color:#FFFFFF; border-color:#111317; font-weight:800;' : ''}" onclick="setWeeklyMuscleSource('week_projected')">
+                    <button class="btn btn-outline" style="font-size:12px; padding:5px 12px; border-radius:14px; ${sourceMode === 'week_projected' ? 'background:#F3F6FA; color:#FFFFFF; border-color:#F3F6FA; font-weight:800;' : ''}" onclick="setWeeklyMuscleSource('week_projected')">
                         Bu Hafta: Yapılan + Plan
                     </button>
-                    <button class="btn btn-outline" style="font-size:12px; padding:5px 12px; border-radius:14px; ${sourceMode === 'week_done' ? 'background:#111317; color:#FFFFFF; border-color:#111317; font-weight:800;' : ''}" onclick="setWeeklyMuscleSource('week_done')">
+                    <button class="btn btn-outline" style="font-size:12px; padding:5px 12px; border-radius:14px; ${sourceMode === 'week_done' ? 'background:#F3F6FA; color:#FFFFFF; border-color:#F3F6FA; font-weight:800;' : ''}" onclick="setWeeklyMuscleSource('week_done')">
                         Sadece Yapılanlar (${analysis.totalDoneSessions} Seans)
                     </button>
-                    <button class="btn btn-outline" style="font-size:12px; padding:5px 12px; border-radius:14px; ${sourceMode === 'schedule_full' ? 'background:#111317; color:#FFFFFF; border-color:#111317; font-weight:800;' : ''}" onclick="setWeeklyMuscleSource('schedule_full')">
+                    <button class="btn btn-outline" style="font-size:12px; padding:5px 12px; border-radius:14px; ${sourceMode === 'schedule_full' ? 'background:#F3F6FA; color:#FFFFFF; border-color:#F3F6FA; font-weight:800;' : ''}" onclick="setWeeklyMuscleSource('schedule_full')">
                         Şablon
                     </button>
                 </div>
@@ -14722,10 +14722,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 let statusClass = 'status-optimal';
                 if (m.status === 'optimal' || m.status === 'high') {
                     statusClass = 'status-optimal';
-                    statusBadge = `<span style="background:#DCFCE7; border:1px solid #86EFAC; color:#15803D; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">Yeterli / Optimal (${m.effectiveDone.toFixed(1)} Set)</span>`;
+                    statusBadge = `<span style="background:#DCFCE7; border:1px solid #86EFAC; color:#B6F059; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">Yeterli / Optimal (${m.effectiveDone.toFixed(1)} Set)</span>`;
                 } else if (m.status === 'insufficient') {
                     statusClass = 'status-insufficient';
-                    statusBadge = `<span style="background:#FEF3C7; border:1px solid #FCD34D; color:#B45309; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">Düşük Hacim (${m.effectiveDone.toFixed(1)} / Hedef: ${m.optimalMin}-${m.optimalMax} Set)</span>`;
+                    statusBadge = `<span style="background:#FEF3C7; border:1px solid #FCD34D; color:#E5B85B; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">Düşük Hacim (${m.effectiveDone.toFixed(1)} / Hedef: ${m.optimalMin}-${m.optimalMax} Set)</span>`;
                 } else {
                     statusClass = 'status-unworked';
                     statusBadge = `<span style="background:#FEE2E2; border:1px solid #FCA5A5; color:#B91C1C; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">0 Set — Bu Hafta Atlandı</span>`;
@@ -14751,7 +14751,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     `;
                 } else {
                     actionBtnHTML = `
-                        <div style="margin-top:10px; font-size:12px; color:#15803D; font-weight:700; display:flex; align-items:center; gap:6px;">
+                        <div style="margin-top:10px; font-size:12px; color:#B6F059; font-weight:700; display:flex; align-items:center; gap:6px;">
                             <span>Haftalık hipertrofi ve kuvvet eşiği sağlandı (${m.effectiveDone.toFixed(1)} Efektif Set).</span>
                         </div>
                     `;
@@ -14762,7 +14762,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         <!-- Card Header -->
                         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                             <div style="display:flex; align-items:center; gap:8px;">
-                                <h4 style="font-size:16px; font-weight:900; color:#111317; margin:0;">${escapeHTML(m.name)}</h4>
+                                <h4 style="font-size:16px; font-weight:900; color:#F3F6FA; margin:0;">${escapeHTML(m.name)}</h4>
                             </div>
                             <div>${statusBadge}</div>
                         </div>
@@ -14773,7 +14773,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 <span>Haftalık Tamamlanma: % ${pct}</span>
                                 <span>${m.effectiveDone.toFixed(1)} / ${m.optimalMin}-${m.optimalMax} Set</span>
                             </div>
-                            <div style="height:6px; background:#EAE8E1; border-radius:3px; overflow:hidden;">
+                            <div style="height:6px; background:#18202C; border-radius:3px; overflow:hidden;">
                                 <div style="height:100%; width:${pct}%; background:${barColor}; border-radius:3px; transition:width 0.3s ease;"></div>
                             </div>
                         </div>
@@ -14785,24 +14785,24 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         ${actionBtnHTML}
 
                         <!-- Collapsible Lineage Dropdown -->
-                        <div style="margin-top:10px; padding-top:8px; border-top:1px solid #E2E0D8;">
-                            <button id="lineage_btn_${m.id}" class="btn btn-outline" style="width:100%; font-size:12px; padding:8px 12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; background:#F4F3EE; border-color:#D5D2C8; cursor:pointer;" onclick="toggleMuscleLineage('${m.id}')">
+                        <div style="margin-top:10px; padding-top:8px; border-top:1px solid #222C3A;">
+                            <button id="lineage_btn_${m.id}" class="btn btn-outline" style="width:100%; font-size:12px; padding:8px 12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; background:#0E131B; border-color:#263244; cursor:pointer;" onclick="toggleMuscleLineage('${m.id}')">
                                 <span>Hangi Seans & Hareketten Geldi? (${(m.contributions || []).length} Kayıt)</span>
-                                <span style="color:#D94100; font-size:11.5px; font-weight:800;">Detay</span>
+                                <span style="color:#E5B85B; font-size:11.5px; font-weight:800;">Detay</span>
                             </button>
 
-                            <div id="lineage_box_${m.id}" data-count="${(m.contributions || []).length}" style="display:none; margin-top:8px; background:#F4F3EE; border:1px solid #E2E0D8; border-radius:8px; padding:10px;">
+                            <div id="lineage_box_${m.id}" data-count="${(m.contributions || []).length}" style="display:none; margin-top:8px; background:#0E131B; border:1px solid #222C3A; border-radius:8px; padding:10px;">
                                 ${(m.contributions && m.contributions.length > 0) ? `
                                     <div style="display:flex; flex-direction:column; gap:6px;">
                                         <div style="font-size:11.5px; color:var(--text-secondary); margin-bottom:2px; font-weight:700;">
                                             Tamamlanan Seanslar & Puan Katkısı:
                                         </div>
                                         ${m.contributions.map(c => `
-                                            <div style="display:flex; justify-content:space-between; align-items:center; background:#F8F7F3; border:1px solid #E2E0D8; border-radius:6px; padding:6px 10px; font-size:12px;">
+                                            <div style="display:flex; justify-content:space-between; align-items:center; background:#151C26; border:1px solid #222C3A; border-radius:6px; padding:6px 10px; font-size:12px;">
                                                 <div>
                                                     <div style="display:flex; align-items:center; gap:6px;">
-                                                        <strong style="color:#111317;">${escapeHTML(c.exercise)}</strong>
-                                                        <span style="font-size:10.5px; padding:2px 6px; border-radius:4px; font-weight:700; ${c.role === 'Birincil' ? 'background:#FEF3C7; color:#B45309;' : 'background:#E0F2FE; color:#0369A1;'}">
+                                                        <strong style="color:#F3F6FA;">${escapeHTML(c.exercise)}</strong>
+                                                        <span style="font-size:10.5px; padding:2px 6px; border-radius:4px; font-weight:700; ${c.role === 'Birincil' ? 'background:#FEF3C7; color:#E5B85B;' : 'background:#E0F2FE; color:#60A5FA;'}">
                                                             ${c.role} (${c.factor}x)
                                                         </span>
                                                     </div>
@@ -14811,7 +14811,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                                     </div>
                                                 </div>
                                                 <div style="text-align:right;">
-                                                    <div style="font-size:12.5px; font-weight:900; color:#15803D;">+${c.earnedSets.toFixed(1)} Set</div>
+                                                    <div style="font-size:12.5px; font-weight:900; color:#B6F059;">+${c.earnedSets.toFixed(1)} Set</div>
                                                     <div style="font-size:10.5px; color:var(--text-secondary);">${c.rawSets} Set Yapıldı</div>
                                                 </div>
                                             </div>
@@ -14835,7 +14835,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     <div class="anatomy-top-bar">
                         <div>
                             <div style="display:flex; align-items:center; gap:8px;">
-                                <h3 style="font-size:17px; font-weight:900; color:#111317; margin:0;">Haftalık Kas Yükü & Anatomik Harita</h3>
+                                <h3 style="font-size:17px; font-weight:900; color:#F3F6FA; margin:0;">Haftalık Kas Yükü & Anatomik Harita</h3>
                             </div>
                             <div style="font-size:12px; color:var(--text-secondary); margin-top:3px;">
                                 Bu haftaki antrenmanların kas gruplarına etkisi • Kaslara dokunarak inceleyin
@@ -14845,11 +14845,11 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         <!-- Mini Week Switcher -->
                         <div style="display:flex; align-items:center; gap:4px;">
                             <button class="btn btn-outline" style="padding:4px 8px; font-size:12px; border-radius:6px;" onclick="setWeeklyMuscleOffset(${weekOffset - 1})" title="Önceki Hafta">&lsaquo;</button>
-                            <span style="font-size:12px; font-weight:800; color:#111317; padding:4px 10px; background:#F4F3EE; border-radius:6px; border:1px solid var(--border);">
+                            <span style="font-size:12px; font-weight:800; color:#F3F6FA; padding:4px 10px; background:#0E131B; border-radius:6px; border:1px solid var(--border);">
                                 ${escapeHTML(bounds.label)}
                             </span>
                             <button class="btn btn-outline" style="padding:4px 8px; font-size:12px; border-radius:6px;" onclick="setWeeklyMuscleOffset(${weekOffset + 1})" title="Sonraki Hafta">&rsaquo;</button>
-                            ${weekOffset !== 0 ? `<button class="btn btn-outline" style="padding:4px 8px; font-size:11px; border-radius:6px; color:#0369A1; border-color:#0369A1;" onclick="setWeeklyMuscleOffset(0)">Bu Hafta</button>` : ''}
+                            ${weekOffset !== 0 ? `<button class="btn btn-outline" style="padding:4px 8px; font-size:11px; border-radius:6px; color:#60A5FA; border-color:#60A5FA;" onclick="setWeeklyMuscleOffset(0)">Bu Hafta</button>` : ''}
                         </div>
                     </div>
 
@@ -14904,8 +14904,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (elBtn) {
                 const count = elBox.dataset.count || 0;
                 elBtn.innerHTML = isHidden 
-                    ? `<span>Hangi Seans & Hareketten Geldi? (${count} Kayıt)</span><span style="color:#D94100; font-size:11.5px; font-weight:800;">Kapat</span>`
-                    : `<span>Hangi Seans & Hareketten Geldi? (${count} Kayıt)</span><span style="color:#D94100; font-size:11.5px; font-weight:800;">Detay</span>`;
+                    ? `<span>Hangi Seans & Hareketten Geldi? (${count} Kayıt)</span><span style="color:#E5B85B; font-size:11.5px; font-weight:800;">Kapat</span>`
+                    : `<span>Hangi Seans & Hareketten Geldi? (${count} Kayıt)</span><span style="color:#E5B85B; font-size:11.5px; font-weight:800;">Detay</span>`;
             }
         }
 
@@ -14937,16 +14937,16 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
 
             const timeFilterHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:14px; background:#F4F3EE; padding:10px 14px; border-radius:10px; border:1px solid var(--border);">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:14px; background:#0E131B; padding:10px 14px; border-radius:10px; border:1px solid var(--border);">
                     <div>
-                        <span style="font-size:13px; font-weight:800; color:#111317; display:block;">Kümülatif Tonaj & Biyomekanik Geçmişi</span>
+                        <span style="font-size:13px; font-weight:800; color:#F3F6FA; display:block;">Kümülatif Tonaj & Biyomekanik Geçmişi</span>
                         <span style="font-size:11.5px; color:var(--text-secondary);">Geçmiş antrenman seanslarının kümülatif analizi</span>
                     </div>
                     <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                        <button class="btn btn-outline" style="font-size:12px; padding:5px 12px; border-radius:16px; ${days === 7 ? 'background:#111317; color:#FFFFFF; font-weight:800;' : ''}" onclick="setAnalyticsPeriod(7)">Son 7 Gün</button>
-                        <button class="btn btn-outline" style="font-size:12px; padding:5px 12px; border-radius:16px; ${days === 30 ? 'background:#111317; color:#FFFFFF; font-weight:800;' : ''}" onclick="setAnalyticsPeriod(30)">Son 30 Gün</button>
-                        <button class="btn btn-outline" style="font-size:12px; padding:5px 12px; border-radius:16px; ${days === 90 ? 'background:#111317; color:#FFFFFF; font-weight:800;' : ''}" onclick="setAnalyticsPeriod(90)">Son 90 Gün</button>
-                        <button class="btn btn-outline" style="font-size:12px; padding:5px 12px; border-radius:16px; ${days === 0 ? 'background:#111317; color:#FFFFFF; font-weight:800;' : ''}" onclick="setAnalyticsPeriod(0)">Tüm Zamanlar</button>
+                        <button class="btn btn-outline" style="font-size:12px; padding:5px 12px; border-radius:16px; ${days === 7 ? 'background:#F3F6FA; color:#FFFFFF; font-weight:800;' : ''}" onclick="setAnalyticsPeriod(7)">Son 7 Gün</button>
+                        <button class="btn btn-outline" style="font-size:12px; padding:5px 12px; border-radius:16px; ${days === 30 ? 'background:#F3F6FA; color:#FFFFFF; font-weight:800;' : ''}" onclick="setAnalyticsPeriod(30)">Son 30 Gün</button>
+                        <button class="btn btn-outline" style="font-size:12px; padding:5px 12px; border-radius:16px; ${days === 90 ? 'background:#F3F6FA; color:#FFFFFF; font-weight:800;' : ''}" onclick="setAnalyticsPeriod(90)">Son 90 Gün</button>
+                        <button class="btn btn-outline" style="font-size:12px; padding:5px 12px; border-radius:16px; ${days === 0 ? 'background:#F3F6FA; color:#FFFFFF; font-weight:800;' : ''}" onclick="setAnalyticsPeriod(0)">Tüm Zamanlar</button>
                     </div>
                 </div>
             `;
@@ -15089,7 +15089,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 <!-- MUSCLE PILLARS VOLUME BARS -->
                 <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:16px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                        <h3 style="font-size:13.5px; font-weight:800; color:#111317;">🧬 Kas Grubu Tonaj & Hacim Dağılımı</h3>
+                        <h3 style="font-size:13.5px; font-weight:800; color:#F3F6FA;">🧬 Kas Grubu Tonaj & Hacim Dağılımı</h3>
                         <span style="font-size:11px; color:var(--gold); font-weight:700;">Kümülatif Yük</span>
                     </div>
 
@@ -15100,7 +15100,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             return `
                                 <div>
                                     <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:700;">
-                                        <span style="color:#111317;">${p.icon} ${p.label}</span>
+                                        <span style="color:#F3F6FA;">${p.icon} ${p.label}</span>
                                         <span style="color:${p.color};">${Math.round(p.volume).toLocaleString('tr-TR')} kg <span style="color:var(--text-secondary); font-size:11px;">(%${pct})</span></span>
                                     </div>
                                     <div class="analytics-bar-bg">
@@ -15120,12 +15120,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 <div style="background:rgba(245, 158, 11, 0.04); border:1px solid rgba(245, 158, 11, 0.25); border-radius:12px; padding:14px; margin-bottom:16px;">
                     <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
                         <span style="font-size:18px;">🩺</span>
-                        <h3 style="font-size:13.5px; font-weight:800; color:#111317;">Biyomekanik Postür & Sakatlık Önleme Raporu</h3>
+                        <h3 style="font-size:13.5px; font-weight:800; color:#F3F6FA;">Biyomekanik Postür & Sakatlık Önleme Raporu</h3>
                     </div>
-                    <p style="font-size:12px; color:#334155; line-height:1.5; margin-bottom:8px;">
+                    <p style="font-size:12px; color:#CBD5E1; line-height:1.5; margin-bottom:8px;">
                         ${balanceDesc} Çekiş hacminiz: <strong>${Math.round(pullTotal).toLocaleString('tr-TR')} kg</strong>, İtiş hacminiz: <strong>${Math.round(pushTotal).toLocaleString('tr-TR')} kg</strong>.
                     </p>
-                    <div style="font-size:11.5px; color:var(--text-secondary); background:#F4F3EE; padding:8px 10px; border-radius:8px;">
+                    <div style="font-size:11.5px; color:var(--text-secondary); background:#0E131B; padding:8px 10px; border-radius:8px;">
                         💡 <strong>Koç Tavsiyesi:</strong> Bacak ve arka zincir kasları metabolik motorunuzdur. Her seans öncesi kalça ve omuz mobilite protokolünü (CARs) eksiksiz uygulayarak eklem hareket açıklığınızı maksimize edin.
                     </div>
                 </div>
@@ -15134,14 +15134,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 ${sortedPrs.length > 0 ? `
                     <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; padding:14px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                            <h3 style="font-size:13.5px; font-weight:800; color:#111317;">🏆 Kişisel Ağırlık Rekorları (PR)</h3>
+                            <h3 style="font-size:13.5px; font-weight:800; color:#F3F6FA;">🏆 Kişisel Ağırlık Rekorları (PR)</h3>
                             <span style="font-size:11px; color:var(--cyan); font-weight:700;">Zirve Kilolar</span>
                         </div>
                         <div style="display:flex; flex-direction:column; gap:6px;">
                             ${sortedPrs.map((pr, idx) => `
-                                <div style="display:flex; justify-content:space-between; align-items:center; background:#F4F3EE; padding:8px 10px; border-radius:8px; border-left:3px solid var(--gold);">
+                                <div style="display:flex; justify-content:space-between; align-items:center; background:#0E131B; padding:8px 10px; border-radius:8px; border-left:3px solid var(--gold);">
                                     <div>
-                                        <div style="font-size:12.5px; font-weight:800; color:#111317;">#${idx+1} ${escapeHTML(pr.name)}</div>
+                                        <div style="font-size:12.5px; font-weight:800; color:#F3F6FA;">#${idx+1} ${escapeHTML(pr.name)}</div>
                                         <div style="font-size:10.5px; color:var(--text-secondary);">${escapeHTML(pr.muscle || '')} • ${escapeHTML(pr.date)}</div>
                                     </div>
                                     <div style="font-size:15px; font-weight:900; color:var(--gold);">
@@ -15164,7 +15164,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 container.innerHTML = `
                     <div style="background:var(--bg-surface); padding:28px 20px; text-align:center; border:1px dashed var(--border); border-radius:14px;">
                         <span style="font-size:42px; display:block; margin-bottom:12px;">⚖️📏</span>
-                        <h3 style="font-size:16px; font-weight:900; color:#111317; margin-bottom:8px;">Henüz Vücut Analizi & Ölçüm Kaydı Eklenmemiş</h3>
+                        <h3 style="font-size:16px; font-weight:900; color:#F3F6FA; margin-bottom:8px;">Henüz Vücut Analizi & Ölçüm Kaydı Eklenmemiş</h3>
                         <p style="font-size:12px; color:var(--text-secondary); max-width:420px; margin:0 auto 18px; line-height:1.5;">
                             Unique Health 3. PDF raporunuzu yükleyerek veya manuel kilo ve mezura ölçülerinizi girerek gelişim eğrinizi tek ekranda takip edebilirsiniz.
                         </p>
@@ -15205,7 +15205,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             <div style="display:flex; align-items:center; gap:10px;">
                                 <span style="font-size:22px;">🟢</span>
                                 <div>
-                                    <div style="font-size:12.5px; font-weight:900; color:#15803D;">
+                                    <div style="font-size:12.5px; font-weight:900; color:#B6F059;">
                                         Taze & Aktif Analiz (${daysDiff === 0 ? 'Bugün ölçüldü' : `${daysDiff} gün önce`})
                                     </div>
                                     <div style="font-size:11px; color:var(--text-secondary); margin-top:1px;">
@@ -15221,7 +15221,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             <div style="display:flex; align-items:center; gap:10px;">
                                 <span style="font-size:22px;">🟡</span>
                                 <div>
-                                    <div style="font-size:12.5px; font-weight:900; color:#B45309;">
+                                    <div style="font-size:12.5px; font-weight:900; color:#E5B85B;">
                                         Kararlı Blok Dönemi (${daysDiff} gün önce)
                                     </div>
                                     <div style="font-size:11px; color:var(--text-secondary); margin-top:1px;">
@@ -15237,7 +15237,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             <div style="display:flex; align-items:center; gap:10px;">
                                 <span style="font-size:22px;">🔴</span>
                                 <div>
-                                    <div style="font-size:12.5px; font-weight:900; color:#DC2626;">
+                                    <div style="font-size:12.5px; font-weight:900; color:#F87171;">
                                         Yenileme Zamanı Geldi (${daysDiff} gün önce)
                                     </div>
                                     <div style="font-size:11px; color:var(--text-secondary); margin-top:1px;">
@@ -15262,7 +15262,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     <div>
                         <div style="display:flex; align-items:center; gap:8px;">
                             <span style="font-size:20px;">⚡</span>
-                            <h3 style="font-size:14.5px; font-weight:900; color:#111317;">Bu Analize Göre Özel Çelik Kodu Programı Oluştur</h3>
+                            <h3 style="font-size:14.5px; font-weight:900; color:#F3F6FA;">Bu Analize Göre Özel Çelik Kodu Programı Oluştur</h3>
                         </div>
                         <div style="font-size:11.5px; color:var(--text-secondary); margin-top:3px;">
                             ${latestScale.muscleMass || 37.2} kg iskelet kasını koruyup, gövdedeki yağlanmayı hedefleyen 45 dakikalık süperset reçetesi.
@@ -15293,7 +15293,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         <div style="font-size:20px; font-weight:900; color:var(--green-success); margin-top:2px;">
                             ${latestScale?.muscleMass ? `${latestScale.muscleMass} kg` : '-'}
                         </div>
-                        <div style="font-size:10.5px; color:#15803D; font-weight:800; margin-top:2px;">
+                        <div style="font-size:10.5px; color:#B6F059; font-weight:800; margin-top:2px;">
                             ${latestScale?.muscleMass ? '🟢 Kas Kütlesi' : 'Analiz Bekleniyor'}
                         </div>
                     </div>
@@ -15303,7 +15303,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         <div style="font-size:20px; font-weight:900; color:var(--cyan); margin-top:2px;">
                             ${latestScale?.bodyFat ? `%${latestScale.bodyFat}` : '-'}
                         </div>
-                        <div style="font-size:10.5px; color:#0369A1; font-weight:800; margin-top:2px;">
+                        <div style="font-size:10.5px; color:#60A5FA; font-weight:800; margin-top:2px;">
                             ${uh?.bodyFatKg ? `${uh.bodyFatKg} kg Yağ` : (latestScale?.bodyFat ? 'Fit Aralık' : '-')}
                         </div>
                     </div>
@@ -15322,7 +15322,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
                     <div class="analytics-kpi-card">
                         <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">KOL / OMUZ</div>
-                        <div style="font-size:18px; font-weight:900; color:#111317; margin-top:2px;">
+                        <div style="font-size:18px; font-weight:900; color:#F3F6FA; margin-top:2px;">
                             ${(latestMeas?.arms || latestMeas?.shoulder) ? `${latestMeas.arms || '-'} / ${latestMeas.shoulder || '-'} cm` : '-'}
                         </div>
                         ${deltaArms !== null ? `
@@ -15339,33 +15339,33 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                         <div style="display:flex; align-items:center; gap:8px;">
                             <span style="font-size:18px;">🧬</span>
-                            <h3 style="font-size:13.5px; font-weight:900; color:#111317;">Hücresel Denge, Su & Protein Dağılımı</h3>
+                            <h3 style="font-size:13.5px; font-weight:900; color:#F3F6FA;">Hücresel Denge, Su & Protein Dağılımı</h3>
                         </div>
-                        <span style="font-size:11px; color:#15803D; font-weight:800; background:rgba(16,185,129,0.15); padding:3px 8px; border-radius:12px;">Ödem Yok (Saf Kas Hidrasyonu)</span>
+                        <span style="font-size:11px; color:#B6F059; font-weight:800; background:rgba(16,185,129,0.15); padding:3px 8px; border-radius:12px;">Ödem Yok (Saf Kas Hidrasyonu)</span>
                     </div>
 
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:8px; margin-bottom:10px;">
-                        <div style="background:#F4F3EE; padding:10px; border-radius:8px;">
+                        <div style="background:#0E131B; padding:10px; border-radius:8px;">
                             <div style="font-size:10.5px; color:var(--text-secondary);">TOPLAM SU</div>
                             <div style="font-size:16px; font-weight:900; color:var(--cyan); margin-top:2px;">${uh?.totalWater || (latestScale?.waterPct ? ((latestScale.weight * latestScale.waterPct) / 100).toFixed(1) : 47.8)} kg</div>
                             <div style="font-size:10px; color:var(--text-secondary);">Hücre İçi: ${uh?.intraWater || 29.8}kg / Dışı: ${uh?.extraWater || 18.0}kg</div>
                         </div>
 
-                        <div style="background:#F4F3EE; padding:10px; border-radius:8px;">
+                        <div style="background:#0E131B; padding:10px; border-radius:8px;">
                             <div style="font-size:10.5px; color:var(--text-secondary);">PROTEİN MİKTARI</div>
                             <div style="font-size:16px; font-weight:900; color:var(--gold); margin-top:2px;">${uh?.protein || 12.9} kg</div>
-                            <div style="font-size:10px; color:#15803D;">Mükemmel (%16.6)</div>
+                            <div style="font-size:10px; color:#B6F059;">Mükemmel (%16.6)</div>
                         </div>
 
-                        <div style="background:#F4F3EE; padding:10px; border-radius:8px;">
+                        <div style="background:#0E131B; padding:10px; border-radius:8px;">
                             <div style="font-size:10.5px; color:var(--text-secondary);">MİNERALLER</div>
-                            <div style="font-size:16px; font-weight:900; color:#111317; margin-top:2px;">${uh?.minerals || 4.5} kg</div>
-                            <div style="font-size:10px; color:#15803D;">Mükemmel Referans</div>
+                            <div style="font-size:16px; font-weight:900; color:#F3F6FA; margin-top:2px;">${uh?.minerals || 4.5} kg</div>
+                            <div style="font-size:10px; color:#B6F059;">Mükemmel Referans</div>
                         </div>
 
-                        <div style="background:#F4F3EE; padding:10px; border-radius:8px;">
+                        <div style="background:#0E131B; padding:10px; border-radius:8px;">
                             <div style="font-size:10.5px; color:var(--text-secondary);">KEMİK KÜTLESİ</div>
-                            <div style="font-size:16px; font-weight:900; color:#111317; margin-top:2px;">${uh?.bone || 3.6} kg</div>
+                            <div style="font-size:16px; font-weight:900; color:#F3F6FA; margin-top:2px;">${uh?.bone || 3.6} kg</div>
                             <div style="font-size:10px; color:var(--text-secondary);">Sağlam İskelet Yapısı</div>
                         </div>
                     </div>
@@ -15376,34 +15376,34 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                         <div style="display:flex; align-items:center; gap:8px;">
                             <span style="font-size:18px;">🧍</span>
-                            <h3 style="font-size:13.5px; font-weight:900; color:#111317;">Bölgesel (Segmental) Kas & Yağ Simetrisi</h3>
+                            <h3 style="font-size:13.5px; font-weight:900; color:#F3F6FA;">Bölgesel (Segmental) Kas & Yağ Simetrisi</h3>
                         </div>
                         <span style="font-size:11px; color:var(--cyan); font-weight:700;">Unique Health BIA</span>
                     </div>
 
                     <div class="scale-segmental-grid">
                         <div class="scale-segmental-card" style="border-left:3px solid var(--cyan);">
-                            <div style="font-weight:900; color:#111317; margin-bottom:4px;">🦾 KOLLAR (Üst Gövde)</div>
+                            <div style="font-weight:900; color:#F3F6FA; margin-bottom:4px;">🦾 KOLLAR (Üst Gövde)</div>
                             <div style="color:var(--text-secondary); font-size:11px;">Sol Kol: <strong>${uh?.segmental?.leftArm?.muscleKg || 3.4}kg Kas</strong> (%${uh?.segmental?.leftArm?.musclePct || 103})</div>
                             <div style="color:var(--text-secondary); font-size:11px;">Sağ Kol: <strong>${uh?.segmental?.rightArm?.muscleKg || 3.4}kg Kas</strong> (%${uh?.segmental?.rightArm?.musclePct || 103})</div>
-                            <div style="color:#15803D; font-size:10.5px; font-weight:800; margin-top:3px;">%100 Kusursuz Simetri</div>
+                            <div style="color:#B6F059; font-size:10.5px; font-weight:800; margin-top:3px;">%100 Kusursuz Simetri</div>
                             <div style="color:var(--text-secondary); font-size:10px; margin-top:2px;">Yağ: 0.8 kg (%114.2)</div>
                         </div>
 
                         <div class="scale-segmental-card" style="border-left:3px solid var(--gold); background:rgba(245,158,11,0.06);">
-                            <div style="font-weight:900; color:#111317; margin-bottom:4px;">🎯 GÖVDE & BEL (Öncelikli Hedef)</div>
-                            <div style="color:#111317; font-size:11px;">Gövde Kası: <strong>${uh?.segmental?.trunk?.muscleKg || 28.6}kg</strong> (%${uh?.segmental?.trunk?.musclePct || 107.8})</div>
-                            <div style="color:#DC2626; font-size:11px; font-weight:800; margin-top:2px;">Gövde Yağı: <strong>${uh?.segmental?.trunk?.fatKg || 6.3}kg</strong> (%${uh?.segmental?.trunk?.fatPct || 140}) ⚠️</div>
-                            <div style="color:#111317; font-size:10px; margin-top:4px; line-height:1.3;">
+                            <div style="font-weight:900; color:#F3F6FA; margin-bottom:4px;">🎯 GÖVDE & BEL (Öncelikli Hedef)</div>
+                            <div style="color:#F3F6FA; font-size:11px;">Gövde Kası: <strong>${uh?.segmental?.trunk?.muscleKg || 28.6}kg</strong> (%${uh?.segmental?.trunk?.musclePct || 107.8})</div>
+                            <div style="color:#F87171; font-size:11px; font-weight:800; margin-top:2px;">Gövde Yağı: <strong>${uh?.segmental?.trunk?.fatKg || 6.3}kg</strong> (%${uh?.segmental?.trunk?.fatPct || 140}) ⚠️</div>
+                            <div style="color:#F3F6FA; font-size:10px; margin-top:4px; line-height:1.3;">
                                 💡 Yağın %51'i gövdede toplandı. Programda karın zırhı ve yüksek kalori yakan bileşikler hedeflendi.
                             </div>
                         </div>
 
                         <div class="scale-segmental-card" style="border-left:3px solid var(--green-success);">
-                            <div style="font-weight:900; color:#15803D; margin-bottom:4px;">🦵 BACAKLAR (Güç Kaidesi)</div>
+                            <div style="font-weight:900; color:#B6F059; margin-bottom:4px;">🦵 BACAKLAR (Güç Kaidesi)</div>
                             <div style="color:var(--text-secondary); font-size:11px;">Sol Bacak: <strong>${uh?.segmental?.leftLeg?.muscleKg || 10.6}kg Kas</strong> (%${uh?.segmental?.leftLeg?.musclePct || 115.2})</div>
                             <div style="color:var(--text-secondary); font-size:11px;">Sağ Bacak: <strong>${uh?.segmental?.rightLeg?.muscleKg || 10.4}kg Kas</strong> (%${uh?.segmental?.rightLeg?.musclePct || 113.0})</div>
-                            <div style="color:#15803D; font-size:10.5px; font-weight:800; margin-top:3px;">Normun %15 Üzerinde Kuvvet!</div>
+                            <div style="color:#B6F059; font-size:10.5px; font-weight:800; margin-top:3px;">Normun %15 Üzerinde Kuvvet!</div>
                             <div style="color:var(--text-secondary); font-size:10px; margin-top:2px;">Bacak Yağı: %88.8 (Oldukça Düşük)</div>
                         </div>
                     </div>
@@ -15413,24 +15413,24 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 <!-- UNIFIED BODY COMPOSITION & MEASUREMENTS HISTORY LIST -->
                 <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; padding:14px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                        <h3 style="font-size:13.5px; font-weight:800; color:#111317;">📋 Vücut Kompozisyonu & Mezura Ölçüm Geçmişi (${unified.length} Kayıt)</h3>
+                        <h3 style="font-size:13.5px; font-weight:800; color:#F3F6FA;">📋 Vücut Kompozisyonu & Mezura Ölçüm Geçmişi (${unified.length} Kayıt)</h3>
                     </div>
 
                     <div style="display:flex; flex-direction:column; gap:10px;">
                         ${unified.map((u, idx) => `
-                            <div style="background:#F4F3EE; padding:12px 14px; border-radius:10px; border-left:4px solid ${u.weight ? 'var(--gold)' : 'var(--cyan)'};">
+                            <div style="background:#0E131B; padding:12px 14px; border-radius:10px; border-left:4px solid ${u.weight ? 'var(--gold)' : 'var(--cyan)'};">
                                 <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
                                     <div>
                                         <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                                             <span style="font-size:12px; color:var(--text-secondary); font-weight:700;">📅 ${escapeHTML(u.date)}</span>
-                                            ${u.weight ? `<strong style="font-size:15px; color:#111317;">${u.weight} kg</strong>` : ''}
+                                            ${u.weight ? `<strong style="font-size:15px; color:#F3F6FA;">${u.weight} kg</strong>` : ''}
                                             ${u.waist ? `<span style="font-size:13px; color:var(--cyan); font-weight:800; background:rgba(56,189,248,0.12); padding:2px 8px; border-radius:6px;">📏 Bel: ${u.waist} cm</span>` : ''}
                                             ${u.uniqueHealth ? '<span style="font-size:9.5px; background:rgba(56,189,248,0.2); color:var(--cyan); padding:2px 6px; border-radius:4px; font-weight:700;">Unique Health BIA</span>' : ''}
                                         </div>
 
                                         <!-- SCALE METRICS PILLS -->
                                         ${(u.bodyFat || u.muscleMass || u.waterPct || u.visceralFat || u.bmr) ? `
-                                            <div style="font-size:11.5px; color:#334155; margin-top:5px; display:flex; gap:8px; flex-wrap:wrap;">
+                                            <div style="font-size:11.5px; color:#CBD5E1; margin-top:5px; display:flex; gap:8px; flex-wrap:wrap;">
                                                 ${u.bodyFat ? `<span>Yağ: <strong>%${u.bodyFat}</strong></span>` : ''}
                                                 ${u.muscleMass ? `<span>İskelet Kası: <strong>${u.muscleMass} kg</strong></span>` : ''}
                                                 ${u.waterPct ? `<span>Sıvı: <strong>%${u.waterPct}</strong></span>` : ''}
@@ -15451,7 +15451,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                             </div>
                                         ` : ''}
 
-                                        ${u.notes ? `<div style="font-size:11px; color:#111317; margin-top:4px;">📝 ${escapeHTML(u.notes)}</div>` : ''}
+                                        ${u.notes ? `<div style="font-size:11px; color:#F3F6FA; margin-top:4px;">📝 ${escapeHTML(u.notes)}</div>` : ''}
                                     </div>
                                     <div>
                                         <button class="btn-delete-log" onclick="deleteUnifiedBodyEntry(decodeURIComponent('${encodeURIComponent(u.date)}'), decodeURIComponent('${encodeURIComponent(u.scaleId || '')}'), decodeURIComponent('${encodeURIComponent(u.measId || '')}'))" title="Kaydı Sil">✕</button>
@@ -15501,13 +15501,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         <div style="display:flex; align-items:center; gap:10px;">
                             <span style="font-size:26px;">🎯</span>
                             <div>
-                                <h3 style="font-size:15px; font-weight:900; color:#111317;">TARTI & BİYO-EMPEDANS ANALİZİNİZE ÖZEL REÇETE</h3>
-                                <div style="font-size:11.5px; color:#334155; margin-top:2px;">
+                                <h3 style="font-size:15px; font-weight:900; color:#F3F6FA;">TARTI & BİYO-EMPEDANS ANALİZİNİZE ÖZEL REÇETE</h3>
+                                <div style="font-size:11.5px; color:#CBD5E1; margin-top:2px;">
                                     <strong>${latest.muscleMass || 37.2} kg İskelet Kası</strong> Koruması • <strong>%${latest.bodyFat || 15.9} Yağ</strong> • <strong>Gövde Yağını (%140) Eritme Odaklı</strong> Rekompozisyon
                                 </div>
                             </div>
                         </div>
-                        <div style="margin-top:10px; font-size:11.5px; color:#334155; background:#F4F3EE; padding:10px 12px; border-radius:8px; border-left:3px solid var(--cyan); line-height:1.45;">
+                        <div style="margin-top:10px; font-size:11.5px; color:#CBD5E1; background:#0E131B; padding:10px 12px; border-radius:8px; border-left:3px solid var(--cyan); line-height:1.45;">
                             💡 <strong>Biyomekanik Strateji:</strong> Bacak kas kütleniz (%115) normun üzerinde olduğundan kettlebell & squat bileşikleri ana metabolik kalori motoru olarak kurgulandı. Karın ve gövdedeki 6.3 kg yağı hedeflemek için seans sonuna anti-rotasyonel core zırhı (Farmer's Carry / Suitcase Carry) dahil edildi.
                         </div>
                     </div>
@@ -15599,19 +15599,19 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
                         <span style="font-size:26px;">🧠</span>
                         <div>
-                            <h3 style="font-size:16px; font-weight:900; color:#111317;">Bütünleşik Koç Değerlendirmesi & Biyomekanik Karne</h3>
+                            <h3 style="font-size:16px; font-weight:900; color:#F3F6FA;">Bütünleşik Koç Değerlendirmesi & Biyomekanik Karne</h3>
                             <p style="font-size:11.5px; color:var(--text-secondary);">Antrenman hacmi, kilo dalgalanması ve bel ölçümü korelasyonu</p>
                         </div>
                     </div>
 
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-bottom:14px;">
-                        <div style="background:#F4F3EE; padding:10px; border-radius:8px; text-align:center;">
+                        <div style="background:#0E131B; padding:10px; border-radius:8px; text-align:center;">
                             <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">TOPLAM KALDIRILAN</div>
                             <div style="font-size:17px; font-weight:900; color:var(--gold); margin-top:2px;">${Math.round(totalVolume).toLocaleString('tr-TR')} kg</div>
                             <div style="font-size:10px; color:var(--text-secondary);">${workoutLogs.length} Seans / ${totalSets} Set</div>
                         </div>
 
-                        <div style="background:#F4F3EE; padding:10px; border-radius:8px; text-align:center;">
+                        <div style="background:#0E131B; padding:10px; border-radius:8px; text-align:center;">
                             <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">KİLO & YAĞ DEĞİŞİMİ</div>
                             <div style="font-size:17px; font-weight:900; color:var(--cyan); margin-top:2px;">
                                 ${deltaWeight !== null ? `${parseFloat(deltaWeight) > 0 ? '+' : ''}${deltaWeight} kg` : (latestScale ? `${latestScale.weight} kg` : '-')}
@@ -15621,7 +15621,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             </div>
                         </div>
 
-                        <div style="background:#F4F3EE; padding:10px; border-radius:8px; text-align:center;">
+                        <div style="background:#0E131B; padding:10px; border-radius:8px; text-align:center;">
                             <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">BEL İNCELMESİ</div>
                             <div style="font-size:17px; font-weight:900; color:var(--green-success); margin-top:2px;">
                                 ${deltaWaist !== null ? `${parseFloat(deltaWaist) > 0 ? '+' : ''}${deltaWaist} cm` : (latestMeas ? `${latestMeas.waist} cm` : '-')}
@@ -15630,9 +15630,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         </div>
                     </div>
 
-                    <div style="background:#F4F3EE; border-radius:10px; padding:14px; border-left:4px solid var(--gold);">
-                        <h4 style="font-size:13px; font-weight:800; color:#111317; margin-bottom:6px;">📊 Bilimsel Değerlendirme & Gelecek Planı:</h4>
-                        <p style="font-size:12px; color:#334155; line-height:1.6; margin-bottom:8px;">
+                    <div style="background:#0E131B; border-radius:10px; padding:14px; border-left:4px solid var(--gold);">
+                        <h4 style="font-size:13px; font-weight:800; color:#F3F6FA; margin-bottom:6px;">📊 Bilimsel Değerlendirme & Gelecek Planı:</h4>
+                        <p style="font-size:12px; color:#CBD5E1; line-height:1.6; margin-bottom:8px;">
                             ${totalVolume > 0 ? `
                                 Kaldırdığınız toplam <strong>${Math.round(totalVolume).toLocaleString('tr-TR')} kg</strong> mekanik tonaj, kas dokularında mikro-hasar ve protein sentezi uyarımı sağladı.
                             ` : 'Henüz antrenman tonajınız kaydedilmedi.'}
@@ -15680,7 +15680,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=200')
+                navigator.serviceWorker.register('./sw.js?v=201')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
@@ -15849,7 +15849,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                     missingSubList.push(`${reg.name}: ${sub.name}`);
                                 }
                                 return `
-                                    <span style="font-size:8.5px; font-weight:800; padding:1px 5px; border-radius:4px; ${isCovered ? 'background:rgba(16,185,129,0.25); color:#10b981; border:1px solid rgba(16,185,129,0.45);' : 'background:rgba(239,68,68,0.18); color:#DC2626; border:1px solid rgba(239,68,68,0.35);'}">
+                                    <span style="font-size:8.5px; font-weight:800; padding:1px 5px; border-radius:4px; ${isCovered ? 'background:rgba(16,185,129,0.25); color:#10b981; border:1px solid rgba(16,185,129,0.45);' : 'background:rgba(239,68,68,0.18); color:#F87171; border:1px solid rgba(239,68,68,0.35);'}">
                                         ${sub.name} ${isCovered ? '✅' : '⚠️'}
                                     </span>
                                 `;
@@ -15865,7 +15865,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     html += `
                         <div style="background:${cardBg}; border:1px solid ${cardBorder}; border-radius:6px; padding:6px 8px; display:flex; flex-direction:column; justify-content:space-between;">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <div style="font-size:11px; font-weight:800; color:#111317;">${reg.icon} ${reg.name}</div>
+                                <div style="font-size:11px; font-weight:800; color:#F3F6FA;">${reg.icon} ${reg.name}</div>
                                 <div style="font-size:9.5px; color:${hasUncoveredSub ? 'var(--gold)' : '#10b981'}; font-weight:700;">
                                     ${hasUncoveredSub ? '⚠️ Kısmi' : '✅ Tam'} (${stat.count} Hrk • ${stat.sets} Set)
                                 </div>
@@ -15878,7 +15878,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     html += `
                         <div style="background:rgba(245, 158, 11, 0.06); border:1px dashed var(--gold); border-radius:6px; padding:6px 8px; display:flex; flex-direction:column; justify-content:space-between;">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <div style="font-size:11px; font-weight:800; color:#111317;">${reg.icon} ${reg.name}</div>
+                                <div style="font-size:11px; font-weight:800; color:#F3F6FA;">${reg.icon} ${reg.name}</div>
                                 <div style="font-size:9.5px; color:var(--gold); font-weight:700;">⏳ Kaldı (0 Hareket)</div>
                             </div>
                             ${subPillsHtml}
@@ -15895,7 +15895,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 } else if (missingList.length > 0) {
                     summaryBadge.innerHTML = `<span style="color:var(--gold);">${readyCount} / ${selectedTargetMuscles.length} bölge hazır • Eksik: ${missingList.join(', ')}</span>`;
                 } else {
-                    summaryBadge.innerHTML = `<span style="color:#DC2626; font-weight:700;">⚠️ Boşta Kalan Alt Bölgeler: ${missingSubList.slice(0, 3).join(', ')}${missingSubList.length > 3 ? '...' : ''}</span>`;
+                    summaryBadge.innerHTML = `<span style="color:#F87171; font-weight:700;">⚠️ Boşta Kalan Alt Bölgeler: ${missingSubList.slice(0, 3).join(', ')}${missingSubList.length > 3 ? '...' : ''}</span>`;
                 }
             }
         }
@@ -15912,8 +15912,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             if (customRoutineState.exercises.length === 0) {
                 container.innerHTML = `
-                    <div style="text-align:center; padding:16px; color:var(--text-secondary); background:#F4F3EE; border-radius:6px; border:1px dashed var(--border);">
-                        <div style="font-size:11.5px; color:#111317; font-weight:700;">Henüz hareket eklenmedi</div>
+                    <div style="text-align:center; padding:16px; color:var(--text-secondary); background:#0E131B; border-radius:6px; border:1px dashed var(--border);">
+                        <div style="font-size:11.5px; color:#F3F6FA; font-weight:700;">Henüz hareket eklenmedi</div>
                         <div style="font-size:10.5px; margin-top:2px;">Aşağıdaki uygun hareketlerden <strong>[ ➕ Ekle ]</strong> butonuna basarak programınızı kurun.</div>
                     </div>
                 `;
@@ -15938,7 +15938,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 ${thumbImg ? `<img src="${thumbImg}" class="ex-thumb-img" alt="${escapeHTML(ex.name)}">` : '🏋️'}
                             </div>
                             <div>
-                                <div style="font-size:12px; font-weight:800; color:#111317; line-height:1.2; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
+                                <div style="font-size:12px; font-weight:800; color:#F3F6FA; line-height:1.2; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
                                     ${escapeHTML(ex.name)}
                                 </div>
                                 <div style="font-size:10px; margin-top:2px;">
@@ -15969,7 +15969,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             <button type="button" class="btn btn-outline" style="padding:3px 5px; font-size:9px;" onclick="moveCustomRoutineExercise(${index}, 1)" ${index === customRoutineState.exercises.length - 1 ? 'disabled' : ''}>▼</button>
                             <button type="button" class="btn btn-outline" style="padding:3px 7px; font-size:10px; color:var(--cyan); border-color:rgba(56,189,248,0.4); font-weight:700;" onclick="openStudioExerciseAlternativeModal(${index})" title="Bu hareket için alternatif bul">🔄 Alternatif</button>
                             <button type="button" class="btn btn-outline" style="padding:3px 6px; font-size:10px;" onclick="openExerciseDetailModal('${ex.id}')" title="İncele">👁️</button>
-                            <button type="button" class="btn btn-outline" style="padding:3px 6px; font-size:10px; color:#DC2626; border-color:rgba(239,68,68,0.3);" onclick="event.stopPropagation(); openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '${thumbImg}', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}', 'Atölye Seçilenler')" title="Bu harekette hata bildir">⚠️</button>
+                            <button type="button" class="btn btn-outline" style="padding:3px 6px; font-size:10px; color:#F87171; border-color:rgba(239,68,68,0.3);" onclick="event.stopPropagation(); openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '${thumbImg}', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}', 'Atölye Seçilenler')" title="Bu harekette hata bildir">⚠️</button>
                             <button type="button" class="btn btn-outline" style="padding:3px 6px; font-size:10px; color:#ef4444; border-color:rgba(239,68,68,0.4);" onclick="removeExerciseFromCustomRoutine(${index})" title="Çıkar">✕</button>
                         </div>
                     </div>
@@ -15982,7 +15982,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 const isProgEdit = Boolean(customRoutineState.editingProgramId);
 
                 html += `
-                    <div style="margin-top:12px; padding:10px 12px; background:#F4F3EE; border:1px solid rgba(245,158,11,0.3); border-radius:8px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; box-shadow:0 0 15px rgba(245,158,11,0.1);">
+                    <div style="margin-top:12px; padding:10px 12px; background:#0E131B; border:1px solid rgba(245,158,11,0.3); border-radius:8px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; box-shadow:0 0 15px rgba(245,158,11,0.1);">
                         ${isDayEdit ? `
                             <button type="button" class="btn btn-gold" style="flex:1; min-width:200px; font-size:12.5px; padding:10px 16px; font-weight:900; box-shadow:0 0 15px rgba(245,158,11,0.35);" onclick="saveEditingRoutineToDay()">
                                 💾 Değişiklikleri ${DAY_NAMES_TR[dayIdx]} Gününe Kaydet
@@ -16067,7 +16067,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 ${thumbImg ? `<img src="${thumbImg}" class="ex-thumb-img" alt="${escapeHTML(ex.name)}" loading="lazy">` : '🏋️'}
                             </div>
                             <div style="flex:1;">
-                                <div style="font-size:12px; font-weight:800; color:#111317; line-height:1.2; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
+                                <div style="font-size:12px; font-weight:800; color:#F3F6FA; line-height:1.2; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
                                     ${escapeHTML(ex.name)}
                                 </div>
                                 <div style="font-size:10px; margin-top:3px; line-height:1.35;">
@@ -16082,7 +16082,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             <button type="button" class="btn btn-outline" style="flex:1; font-size:10px; padding:4px 6px;" onclick="openExerciseDetailModal('${ex.id}')">
                                 👁️ İncele
                             </button>
-                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:4px 6px; color:#DC2626; border-color:rgba(239,68,68,0.3);" onclick="event.stopPropagation(); openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '${thumbImg}', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}', 'Program Atölyesi')" title="Hata Bildir">
+                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:4px 6px; color:#F87171; border-color:rgba(239,68,68,0.3);" onclick="event.stopPropagation(); openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '${thumbImg}', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}', 'Program Atölyesi')" title="Hata Bildir">
                                 ⚠️ Bildir
                             </button>
                             <button type="button" class="btn ${isAlreadyInRoutine ? 'btn-outline' : 'btn-gold'}" style="flex:1.3; font-size:10px; padding:4px 6px; font-weight:800;" onclick="addExerciseToCustomRoutine('${ex.id}')">
@@ -16483,7 +16483,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (opengymEx) {
                 visualsHtml = `
                     <div style="background:#000; border-radius:12px; overflow:hidden; border:1.5px solid rgba(56,189,248,0.4); margin-bottom:12px; box-shadow:0 6px 24px rgba(0,0,0,0.6);">
-                        <div style="background:#F8F7F3; border-bottom:1px solid #E2E0D8; padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
+                        <div style="background:#151C26; border-bottom:1px solid #222C3A; padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
                             <span style="font-size:11.5px; font-weight:900; color:var(--cyan); letter-spacing:0.5px;">⚡ OPENGYM CANLI HAREKET ANİMASYONU</span>
                             <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 9px; border-radius:4px; color:var(--cyan); border-color:var(--cyan); font-weight:700;" onclick="openImageLightbox('${opengymEx.clip}', '${escapeHTML(ex.name)} - Canlı Animasyon')">⛶ Tam Ekran Oynat</button>
                         </div>
@@ -16493,8 +16493,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         </div>
                     </div>
                     ${photoSrc ? `
-                        <div style="margin-bottom:12px; border-radius:8px; border:1px solid #E2E0D8; background:#F4F3EE; overflow:hidden;">
-                            <div style="padding:6px 10px; background:#F8F7F3; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="const el=document.getElementById('ex_detail_legacy_photo'); if(el) el.style.display=el.style.display==='none'?'block':'none';">
+                        <div style="margin-bottom:12px; border-radius:8px; border:1px solid #222C3A; background:#0E131B; overflow:hidden;">
+                            <div style="padding:6px 10px; background:#151C26; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="const el=document.getElementById('ex_detail_legacy_photo'); if(el) el.style.display=el.style.display==='none'?'block':'none';">
                                 <span style="font-size:11px; font-weight:700; color:var(--text-secondary);">📸 Statik Fotoğraf & Form Kılavuzu</span>
                                 <span style="font-size:10px; color:var(--gold);">Gör ▼</span>
                             </div>
@@ -16507,7 +16507,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             } else if (photoSrc) {
                 visualsHtml = `
                     <div style="background:#000; border-radius:12px; overflow:hidden; border:1.5px solid rgba(245,158,11,0.4); margin-bottom:12px; box-shadow:0 6px 24px rgba(0,0,0,0.6);">
-                        <div style="background:#F8F7F3; border-bottom:1px solid #E2E0D8; padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
+                        <div style="background:#151C26; border-bottom:1px solid #222C3A; padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
                             <span style="font-size:11.5px; font-weight:900; color:var(--gold); letter-spacing:0.5px;">📸 GERÇEK FORM REHBERİ</span>
                             <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 9px; border-radius:4px; color:var(--cyan); border-color:var(--cyan); font-weight:700;" onclick="openImageLightbox('${photoSrc}', '${escapeHTML(ex.name)} - Form Rehberi')">⛶ Tam Ekran Büyüt</button>
                         </div>
@@ -16522,7 +16522,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (visualsHtml) {
                 formContainer.innerHTML = `
                     ${visualsHtml}
-                    <div style="background:#F4F3EE; border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-bottom:10px;">
+                    <div style="background:#0E131B; border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-bottom:10px;">
                         <div style="font-size:11px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:6px;">🎯 Çalıştırılan Kas Grupları & Yük Dağılımı:</div>
                         <div style="display:flex; flex-wrap:wrap; gap:6px;">
                             ${pMuscleLabels}
@@ -16544,9 +16544,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 `;
             } else {
                 formContainer.innerHTML = `
-                    <div style="padding:24px 16px; text-align:center; background:#F4F3EE; border-radius:8px; border:1px dashed var(--border);">
+                    <div style="padding:24px 16px; text-align:center; background:#0E131B; border-radius:8px; border:1px dashed var(--border);">
                         <div style="font-size:24px; margin-bottom:6px;">🏋️</div>
-                        <div style="font-weight:700; color:#111317; font-size:13.5px;">${escapeHTML(ex.name)}</div>
+                        <div style="font-weight:700; color:#F3F6FA; font-size:13.5px;">${escapeHTML(ex.name)}</div>
                         <div style="color:var(--text-secondary); font-size:11.5px; margin-top:4px;">Görsel form rehberi optimize ediliyor.</div>
                         <div style="margin-top:10px; display:flex; justify-content:center; gap:6px; flex-wrap:wrap;">
                             ${pMuscleLabels}
@@ -16569,8 +16569,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     <div style="text-align:center; background:#000; border-radius:8px; overflow:hidden; border:1px solid var(--border); min-height:160px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="openImageLightbox('${photoGuide.anatomi}', '${escapeHTML(ex.name)} - Anatomi')">
                         <img src="${photoGuide.anatomi}" style="max-width:100%; max-height:48vh; object-fit:contain; display:block; margin:0 auto;" alt="${escapeHTML(ex.name)} Anatomi">
                     </div>
-                    <div style="background:#F4F3EE; border:1px solid var(--border); border-radius:8px; padding:12px; margin-top:10px;">
-                        <div style="font-size:12px; font-weight:800; color:#111317; margin-bottom:6px;">🎯 1 Çalışma Setinin Kaslara Dağılımı:</div>
+                    <div style="background:#0E131B; border:1px solid var(--border); border-radius:8px; padding:12px; margin-top:10px;">
+                        <div style="font-size:12px; font-weight:800; color:#F3F6FA; margin-bottom:6px;">🎯 1 Çalışma Setinin Kaslara Dağılımı:</div>
                         <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.6;">
                             • <strong>Ana Kas Grubu:</strong> ${pMuscleLabels}<br>
                             • <strong>Destekleyici (Sinerjist):</strong> ${sMuscleLabels || '<span style="color:var(--text-secondary);">Yok (Saf İzolasyon)</span>'}<br>
@@ -16580,8 +16580,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 `;
             } else {
                 anatomyContainer.innerHTML = `
-                    <div style="padding:20px; text-align:center; background:#F4F3EE; border-radius:8px;">
-                        <div style="font-size:13px; font-weight:800; color:#111317; margin-bottom:6px;">🧬 Hedef Kaslar:</div>
+                    <div style="padding:20px; text-align:center; background:#0E131B; border-radius:8px;">
+                        <div style="font-size:13px; font-weight:800; color:#F3F6FA; margin-bottom:6px;">🧬 Hedef Kaslar:</div>
                         <div style="display:flex; justify-content:center; gap:6px; flex-wrap:wrap; margin-top:6px;">
                             ${pMuscleLabels}
                             ${sMuscleLabels}

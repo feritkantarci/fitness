@@ -1,35 +1,34 @@
         :root {
-            /* Surface & Background Palette (Studio Daylight: Warm Alabaster & Pure White) */
-            --bg-base: #F4F3EE;
-            --bg-surface: #FFFFFF;
-            --bg-elevated: #EAE8E1;
-            --bg-card: #FFFFFF;
+            /* Surface & Background Palette (La Forja: Carbon Obsidian & Machined Gunmetal) */
+            --bg-base: #08090C;
+            --bg-surface: #11131A;
+            --bg-elevated: #191C26;
+            --bg-card: rgba(17, 19, 26, 0.92);
 
-            /* Borders & Subtle Hairlines */
-            --border: rgba(17, 19, 23, 0.08);
-            --border-glass: rgba(17, 19, 23, 0.10);
-            --border-hover: rgba(255, 79, 0, 0.45);
+            /* Borders & Metallic Rim Highlights */
+            --border: rgba(255, 255, 255, 0.09);
+            --border-glass: rgba(255, 255, 255, 0.14);
+            --border-hover: rgba(245, 158, 11, 0.55);
 
-            /* Brand & Semantic Accents (International Athletic Orange & Telemetry Cobalt) */
-            --gold: #D94100;
-            --gold-light: #B45309;
-            --gold-glow: rgba(217, 65, 0, 0.16);
-            --cyan: #0369A1;
-            --cyan-glow: rgba(3, 105, 161, 0.15);
-            --green-success: #059669;
-            --green: #059669;
-            --red-alert: #E11D48;
+            /* Brand & Semantic Accents (Molten Forge Amber & Telemetry Cyan) */
+            --gold: #F59E0B;
+            --gold-light: #FDE68A;
+            --gold-glow: rgba(245, 158, 11, 0.26);
+            --cyan: #38BDF8;
+            --cyan-glow: rgba(56, 189, 248, 0.24);
+            --green-success: #10B981;
+            --green: #10B981;
+            --red-alert: #F43F5E;
 
-            /* Text Hierarchy (High-Contrast Editorial Ink) */
-            --text-primary: #111317;
-            --text-secondary: #525866;
-            --text-tertiary: #848C9E;
-            --text-muted: #525866;
+            /* Text Hierarchy */
+            --text-primary: #F8FAFC;
+            --text-secondary: #A1A1AA;
+            --text-tertiary: #71717A;
 
             /* Typography Stack */
             --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
             --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            --font-mono: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
 
             /* Minimum Accessible Typography Scale (>= 11px) */
             --text-xs: 0.6875rem;   /* 11px - Alt sınır (rozet/etiket) */
@@ -44,9 +43,9 @@
             --space-3: 12px;
             --space-4: 16px;
             --space-6: 24px;
-            --radius-sm: 10px;
-            --radius-md: 14px;
-            --radius-lg: 20px;
+            --radius-sm: 8px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
         }
 
         * {
@@ -59,7 +58,7 @@
         html {
             font-size: 16px;
             -webkit-text-size-adjust: 100%;
-            color-scheme: light;
+            color-scheme: dark;
         }
 
         @media (pointer: fine) {
@@ -70,14 +69,18 @@
 
         body {
             background-color: var(--bg-base);
-            background-image: radial-gradient(ellipse 90% 35% at 50% -10%, rgba(255, 79, 0, 0.06) 0%, transparent 70%);
+            background-image: 
+                radial-gradient(ellipse 85% 40% at 50% -5%, rgba(245, 158, 11, 0.14) 0%, transparent 70%),
+                radial-gradient(ellipse 60% 40% at 100% 100%, rgba(56, 189, 248, 0.06) 0%, transparent 60%),
+                radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 24px 24px;
             background-attachment: fixed;
             color: var(--text-primary);
             font-family: var(--font-sans);
             font-size: var(--text-base);
             line-height: 1.5;
             min-height: 100vh;
-            padding-bottom: 104px;
+            padding-bottom: 90px;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             overflow-x: hidden;
@@ -121,7 +124,7 @@
             display: flex;
         }
         .login-card {
-            background: #FFFFFF;
+            background: rgba(19, 28, 46, 0.95);
             border: 1px solid var(--gold);
             border-radius: 20px;
             padding: 32px 24px;
@@ -139,7 +142,7 @@
         .login-title {
             font-size: 22px;
             font-weight: 800;
-            color: #111317;
+            color: #fff;
             letter-spacing: 0.5px;
             margin-bottom: 4px;
         }
@@ -173,11 +176,11 @@
         }
         .login-input {
             width: 100%;
-            background: #F4F3EE;
+            background: #090d16;
             border: 1px solid var(--border);
             border-radius: 10px;
             padding: 13px 14px;
-            color: #111317;
+            color: #fff;
             font-size: 14px;
             box-sizing: border-box;
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -212,7 +215,7 @@
             margin-top: 18px;
             font-size: 11px;
             color: var(--text-secondary);
-            background: #F4F3EE;
+            background: rgba(0,0,0,0.3);
             padding: 8px 10px;
             border-radius: 8px;
             border: 1px solid rgba(255,255,255,0.05);
@@ -230,7 +233,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #FFFFFF;
+            background: rgba(19, 28, 46, 0.95);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
             padding: 10px 14px;
@@ -257,7 +260,7 @@
         .auth-name-title {
             font-size: 14px;
             font-weight: 800;
-            color: #111317;
+            color: #fff;
         }
         .auth-role-tag {
             font-size: var(--text-xs);
@@ -299,7 +302,7 @@
         .cloud-sync-badge.offline {
             background: rgba(148, 163, 184, 0.15);
             border-color: rgba(148, 163, 184, 0.3);
-            color: #334155;
+            color: #cbd5e1;
         }
         .auth-actions {
             display: flex;
@@ -354,7 +357,7 @@
         .hero-title {
             font-size: 24px;
             font-weight: 900;
-            color: #111317;
+            color: #fff;
             letter-spacing: 0.5px;
             text-shadow: 0 2px 10px rgba(0,0,0,0.5);
             margin-bottom: 6px;
@@ -370,7 +373,7 @@
         .tab-nav {
             display: flex;
             gap: var(--space-2);
-            background: #FFFFFF;
+            background: rgba(15, 23, 42, 0.85);
             border: 1px solid var(--border);
             padding: 6px;
             border-radius: var(--radius-lg);
@@ -421,7 +424,7 @@
             align-items: center;
             justify-content: space-between;
             padding: 8px 14px;
-            background: #FFFFFF;
+            background: rgba(15, 23, 42, 0.92);
             border-bottom: 1px solid var(--border);
             backdrop-filter: blur(14px);
             position: sticky;
@@ -442,7 +445,7 @@
             font-size: 14px;
             font-weight: 900;
             letter-spacing: 0.5px;
-            color: #111317;
+            color: #fff;
         }
         .app-version-badge {
             font-size: var(--text-xs);
@@ -525,7 +528,7 @@
             position: absolute;
             top: calc(100% + 10px);
             right: 0;
-            background: #FFFFFF;
+            background: rgba(15, 23, 42, 0.96);
             border: 1px solid var(--border-glass);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
@@ -620,7 +623,7 @@
         .bottom-pull-handle {
             width: 56px;
             height: 14px;
-            background: #FFFFFF;
+            background: rgba(30, 41, 59, 0.95);
             border: 1px solid var(--border);
             border-bottom: none;
             margin: 0 auto;
@@ -643,13 +646,13 @@
             background: var(--gold);
         }
         .bottom-pull-handle:hover::after {
-            background: #F4F3EE;
+            background: #090d16;
         }
         .bottom-nav-bar {
             display: flex;
             justify-content: space-around;
             align-items: center;
-            background: #FFFFFF;
+            background: rgba(15, 23, 42, 0.97);
             border-top: 1px solid rgba(255, 255, 255, 0.12);
             padding: 8px 6px calc(8px + env(safe-area-inset-bottom, 8px));
             backdrop-filter: blur(18px);
@@ -677,7 +680,7 @@
             transition: transform 0.2s;
         }
         .bottom-nav-item:hover {
-            color: #111317;
+            color: #fff;
         }
         .bottom-nav-item.active {
             color: var(--gold);
@@ -741,7 +744,7 @@
         .more-sheet {
             position: fixed;
             left: 0; right: 0; bottom: -450px;
-            background: #F4F3EE;
+            background: #0f172a;
             border-top: 1px solid rgba(255,255,255,0.18);
             border-radius: 20px 20px 0 0;
             padding: 16px 18px calc(20px + env(safe-area-inset-bottom, 12px));
@@ -785,7 +788,7 @@
             border: 1px solid var(--border);
             padding: 12px 10px;
             border-radius: 12px;
-            color: #111317;
+            color: #fff;
             font-size: 12px;
             font-weight: 700;
             display: flex;
@@ -808,7 +811,7 @@
 
         /* ==================== WORKOUT FOCUS VISUAL & COLLAPSIBLE TOOLS ==================== */
         .exercise-visual-card {
-            background: #FFFFFF;
+            background: rgba(15, 23, 42, 0.7);
             border: 1px solid var(--border);
             border-radius: 14px;
             padding: 10px 12px;
@@ -821,7 +824,7 @@
         .visual-illustration {
             width: 100px;
             min-height: 80px;
-            background: #F4F3EE;
+            background: #090d16;
             border: 1px solid rgba(56, 189, 248, 0.3);
             border-radius: 10px;
             display: flex;
@@ -849,7 +852,7 @@
         }
         .visual-cue-text {
             font-size: 11px;
-            color: #334155;
+            color: #cbd5e1;
             line-height: 1.35;
         }
 
@@ -867,7 +870,7 @@
             }
         }
         .input-duo-cell {
-            background: #F4F3EE;
+            background: #090d16;
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 10px 12px;
@@ -890,7 +893,7 @@
         .btn-step-mini {
             background: var(--bg-elevated);
             border: 1px solid var(--border);
-            color: #111317;
+            color: #fff;
             width: 44px;
             height: 38px;
             border-radius: 8px;
@@ -914,7 +917,7 @@
             width: 75px;
             background: transparent;
             border: none;
-            color: #111317;
+            color: #fff;
             font-size: 24px;
             font-weight: 900;
             text-align: center;
@@ -923,7 +926,7 @@
 
         /* COLLAPSIBLE TOOLS */
         .tools-collapsible {
-            background: #FFFFFF;
+            background: rgba(15, 23, 42, 0.8);
             border: 1px dashed rgba(245, 158, 11, 0.4);
             border-radius: 10px;
             margin-bottom: 12px;
@@ -960,7 +963,7 @@
         .tools-body {
             padding: 10px;
             border-top: 1px dashed rgba(255,255,255,0.08);
-            background: #F4F3EE;
+            background: #090d16;
         }
         .fine-steppers-row {
             display: flex;
@@ -971,7 +974,7 @@
             flex: 1;
             background: var(--bg-elevated);
             border: 1px solid var(--border);
-            color: #334155;
+            color: #cbd5e1;
             padding: 6px 2px;
             border-radius: 6px;
             font-size: var(--text-xs);
@@ -1142,7 +1145,7 @@
             gap: 6px;
         }
         .lib-subtab-btn:hover {
-            color: #111317;
+            color: #fff;
             background: rgba(255, 255, 255, 0.06);
         }
         .lib-subtab-btn.active {
@@ -1273,7 +1276,7 @@
         .gen-step-title {
             font-size: 14px;
             font-weight: 800;
-            color: #111317;
+            color: #fff;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -1296,7 +1299,7 @@
         /* ==================== AI HYBRID BLUEPRINT & DOCTRINE ARCHITECT ==================== */
         /* ==================== AI HYBRID BLUEPRINT & DOCTRINE ARCHITECT ==================== */
         .ai-hybrid-hero-banner {
-            background: #FFFFFF;
+            background: linear-gradient(135deg, rgba(30, 27, 75, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
             border: 1px solid rgba(168, 85, 247, 0.35);
             border-radius: var(--radius-md, 10px);
             padding: 8px 12px;
@@ -1355,7 +1358,7 @@
         .ai-hero-title {
             font-size: 12px;
             font-weight: 800;
-            color: #111317;
+            color: #fff;
             margin: 0;
             letter-spacing: -0.2px;
             white-space: nowrap;
@@ -1363,7 +1366,7 @@
         .ai-hero-info-btn {
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.18);
-            color: #111317;
+            color: #f1f5f9;
             font-size: var(--text-xs);
             width: 20px;
             height: 20px;
@@ -1380,7 +1383,7 @@
         .ai-hero-info-btn:hover, .ai-hero-info-btn.active {
             background: rgba(168, 85, 247, 0.3);
             border-color: rgba(168, 85, 247, 0.7);
-            color: #111317;
+            color: #fff;
             transform: scale(1.08);
         }
         .ai-hero-action-btn {
@@ -1440,7 +1443,7 @@
         .ai-hero-info-drawer {
             margin-top: 6px;
             padding: 8px 10px;
-            background: #FFFFFF;
+            background: rgba(15, 23, 42, 0.85);
             border: 1px solid rgba(168, 85, 247, 0.25);
             border-radius: 6px;
             font-size: 11.5px;
@@ -1481,7 +1484,7 @@
             margin: 12px 0;
         }
         .doctrine-card {
-            background: #FFFFFF;
+            background: rgba(15, 23, 42, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             padding: 12px 14px;
@@ -1494,7 +1497,7 @@
         }
         .doctrine-card:hover {
             border-color: rgba(168, 85, 247, 0.5);
-            background: #FFFFFF;
+            background: rgba(30, 27, 75, 0.5);
             transform: translateY(-1px);
         }
         .doctrine-card.selected {
@@ -1534,7 +1537,7 @@
         .telemetry-pill-val {
             font-size: 13.5px;
             font-weight: 900;
-            color: #111317;
+            color: #fff;
         }
 
         /* COLLAPSIBLE NOTIFICATION / DIRECTIVE / NEXT-WEEK BANNER (UNIFIED DESIGN) */
@@ -1579,7 +1582,7 @@
         .collapsible-panel-title .text {
             font-size: 12px;
             font-weight: 800;
-            color: #111317;
+            color: #fff;
             letter-spacing: 0.4px;
             text-transform: uppercase;
             white-space: nowrap;
@@ -1615,7 +1618,7 @@
             display: none;
             padding: 12px 14px 14px;
             border-top: 1px solid rgba(255, 255, 255, 0.06);
-            background: #F4F3EE;
+            background: rgba(0, 0, 0, 0.2);
             animation: fadeInPanel 0.2s ease;
         }
         .collapsible-panel.open .collapsible-panel-body {
@@ -1642,7 +1645,7 @@
         }
         .gen-mobile-picker-bar:hover {
             border-color: rgba(245, 158, 11, 0.5);
-            background: #FFFFFF;
+            background: rgba(24, 32, 50, 0.95);
         }
         .picker-label-wrap {
             display: flex;
@@ -1690,7 +1693,7 @@
                 display: none;
                 margin-bottom: 10px;
                 padding: 8px 10px;
-                background: #FFFFFF;
+                background: rgba(10, 14, 24, 0.7);
                 border: 1px solid rgba(255, 255, 255, 0.08);
                 border-radius: 10px;
                 animation: fadeInGenSection 0.2s ease;
@@ -1763,7 +1766,7 @@
         .split-name {
             font-size: 13px;
             font-weight: 700;
-            color: #111317;
+            color: #f8fafc;
             margin-bottom: 0;
             white-space: nowrap;
             overflow: hidden;
@@ -1803,7 +1806,7 @@
             padding: 7px 12px;
             font-size: 12px;
             font-weight: 700;
-            color: #334155;
+            color: #cbd5e1;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -1813,7 +1816,7 @@
         }
         .equip-chip:hover {
             border-color: rgba(245, 158, 11, 0.4);
-            color: #111317;
+            color: #fff;
         }
         .equip-chip.selected {
             border-color: var(--gold);
@@ -1863,7 +1866,7 @@
             background: var(--bg-surface);
             border: 1px solid var(--border);
             border-radius: 10px;
-            color: #111317;
+            color: #fff;
             padding: 10px 12px;
             font-size: 13px;
             outline: none;
@@ -1914,7 +1917,7 @@
             margin-top: 24px;
         }
         .workout-header-card {
-            background: #FFFFFF;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
             border: 1.5px solid var(--gold);
             border-radius: var(--radius-lg);
             padding: 20px;
@@ -1932,7 +1935,7 @@
         .workout-main-title {
             font-size: 20px;
             font-weight: 900;
-            color: #111317;
+            color: #fff;
         }
         .workout-meta-badges {
             display: flex;
@@ -2036,7 +2039,7 @@
         .ex-name {
             font-size: 15px;
             font-weight: 800;
-            color: #111317;
+            color: #fff;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -2080,7 +2083,7 @@
             margin-bottom: 8px;
         }
         .ex-cue-box {
-            background: #F4F3EE;
+            background: rgba(0, 0, 0, 0.3);
             border-left: 3px solid var(--gold);
             border-radius: 0 6px 6px 0;
             padding: 8px 10px;
@@ -2110,7 +2113,7 @@
 
         /* ==================== EXERCISE POSITIONS & BIOMECHANICAL FLOW ==================== */
         .pos-guide-wrapper {
-            background: #FFFFFF;
+            background: rgba(15, 23, 42, 0.65);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 10px;
             margin: 10px 0 12px 0;
@@ -2191,7 +2194,7 @@
             display: flex;
             gap: 6px;
             margin-bottom: 10px;
-            background: #F4F3EE;
+            background: rgba(0, 0, 0, 0.4);
             padding: 4px;
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -2210,7 +2213,7 @@
             text-align: center;
         }
         .btn-guide-tab:hover {
-            color: #111317;
+            color: #fff;
             background: rgba(255, 255, 255, 0.05);
         }
         .btn-guide-tab.active {
@@ -2228,7 +2231,7 @@
         .pos-diagram-wrap {
             margin-bottom: 10px;
             text-align: center;
-            background: #F4F3EE;
+            background: #060911;
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             padding: 6px 6px 4px 6px;
@@ -2248,7 +2251,7 @@
         .btn-diagram-tool {
             background: rgba(255, 255, 255, 0.06);
             border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #334155;
+            color: #cbd5e1;
             font-size: 11px;
             font-weight: 700;
             padding: 4px 9px;
@@ -2277,7 +2280,7 @@
             border-radius: 6px;
             overflow: hidden;
             cursor: zoom-in;
-            background: #F4F3EE;
+            background: #020408;
             transition: transform 0.15s ease;
         }
         .pos-diagram-img-box:hover .pos-diagram-zoom-hint {
@@ -2365,7 +2368,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #FFFFFF;
+            background: rgba(15, 23, 42, 0.75);
             border: 1px dashed rgba(245, 158, 11, 0.35);
             color: var(--text-secondary);
             font-size: 11px;
@@ -2378,7 +2381,7 @@
         .btn-toggle-pos-info:hover, .btn-toggle-pos-info:active {
             background: rgba(245, 158, 11, 0.12);
             border-color: var(--gold);
-            color: #111317;
+            color: #fff;
         }
         .pos-info-arrow {
             font-size: var(--text-xs);
@@ -2425,7 +2428,7 @@
             to { opacity: 1; transform: scale(1); }
         }
         .lightbox-content-box {
-            background: #F4F3EE;
+            background: #090e1a;
             border: 1px solid rgba(245, 158, 11, 0.35);
             border-radius: 14px;
             width: 100%;
@@ -2441,7 +2444,7 @@
             align-items: center;
             justify-content: space-between;
             padding: 10px 14px;
-            background: #FFFFFF;
+            background: rgba(15, 23, 42, 0.95);
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             gap: 10px;
         }
@@ -2466,7 +2469,7 @@
             margin: 0;
             font-size: 13.5px;
             font-weight: 700;
-            color: #111317;
+            color: #fff;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -2480,7 +2483,7 @@
         .btn-lightbox-action {
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.18);
-            color: #111317;
+            color: #f1f5f9;
             font-size: 11px;
             font-weight: 600;
             padding: 6px 12px;
@@ -2513,7 +2516,7 @@
         }
         .btn-lightbox-close:hover {
             background: rgba(239, 68, 68, 0.45);
-            color: #111317;
+            color: #fff;
         }
         .lightbox-body {
             position: relative;
@@ -2522,7 +2525,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #F4F3EE;
+            background: #020408;
             padding: 10px;
             touch-action: pan-x pan-y pinch-zoom;
             -webkit-overflow-scrolling: touch;
@@ -2546,7 +2549,7 @@
         }
         .lightbox-footer {
             padding: 8px 14px;
-            background: #FFFFFF;
+            background: rgba(10, 15, 26, 0.96);
             border-top: 1px solid rgba(255, 255, 255, 0.06);
             font-size: 11px;
             color: #94a3b8;
@@ -2569,7 +2572,7 @@
             }
         }
         .pos-step-card {
-            background: #F4F3EE;
+            background: rgba(0, 0, 0, 0.28);
             border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 8px;
             padding: 8px 10px;
@@ -2591,7 +2594,7 @@
         }
         .pos-step-desc {
             font-size: 11.5px;
-            color: #334155;
+            color: #cbd5e1;
             line-height: 1.4;
         }
 
@@ -2621,13 +2624,13 @@
         .planner-title {
             font-size: 13px;
             font-weight: 800;
-            color: #111317;
+            color: #fff;
             letter-spacing: -0.2px;
         }
         /* MINI COMPACT WEEK SWITCHER */
         .mini-week-segmented {
             display: inline-flex;
-            background: #F4F3EE;
+            background: rgba(0, 0, 0, 0.4);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 8px;
             padding: 2px;
@@ -2748,7 +2751,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #FFFFFF;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.95));
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
             padding: 6px 10px;
@@ -2761,7 +2764,7 @@
             align-items: center;
             gap: 6px;
             font-size: 11.5px;
-            color: #334155;
+            color: #cbd5e1;
             font-weight: 700;
             min-width: 0;
         }
@@ -2798,7 +2801,7 @@
             transition: all 0.15s ease;
         }
         .planner-template-btn:hover {
-            color: #111317;
+            color: #fff;
             border-color: rgba(255, 255, 255, 0.25);
         }
 
@@ -2822,7 +2825,7 @@
         .calendar-screen-header .cal-header-title-box h2 {
             font-size: 15px;
             font-weight: 800;
-            color: #111317;
+            color: #fff;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -2855,7 +2858,7 @@
         }
         .cal-view-pills {
             display: inline-flex;
-            background: #F4F3EE;
+            background: rgba(0, 0, 0, 0.45);
             border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 6px;
             padding: 2px;
@@ -2948,7 +2951,7 @@
             }
         }
         .cal-week-card {
-            background: #FFFFFF;
+            background: rgba(15, 23, 42, 0.85);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 12px;
             padding: 10px 8px;
@@ -2965,12 +2968,12 @@
         }
         .cal-week-card:hover {
             border-color: rgba(245, 158, 11, 0.45);
-            background: #FFFFFF;
+            background: rgba(30, 41, 59, 0.9);
             transform: translateY(-2px);
         }
         .cal-week-card.is-today {
             border: 1.5px solid var(--gold);
-            background: #FFFFFF;
+            background: linear-gradient(180deg, rgba(245, 158, 11, 0.12), rgba(15, 23, 42, 0.95));
             box-shadow: 0 0 18px rgba(245, 158, 11, 0.22);
         }
         .cal-week-card-header {
@@ -2990,7 +2993,7 @@
         .cal-week-card-day {
             font-size: 13px;
             font-weight: 900;
-            color: #111317;
+            color: #fff;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -3072,7 +3075,7 @@
             gap: 4px;
         }
         .cal-month-cell {
-            background: #FFFFFF;
+            background: rgba(15, 23, 42, 0.65);
             border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 8px;
             min-height: 85px;
@@ -3085,7 +3088,7 @@
         }
         .cal-month-cell:hover {
             border-color: rgba(245, 158, 11, 0.45);
-            background: #FFFFFF;
+            background: rgba(30, 41, 59, 0.9);
         }
         .cal-month-cell.is-other-month {
             opacity: 0.3;
@@ -3101,7 +3104,7 @@
             align-items: center;
             font-size: 11px;
             font-weight: 800;
-            color: #334155;
+            color: #cbd5e1;
             margin-bottom: 4px;
         }
         .cal-month-cell.is-today .cal-month-cell-header {
@@ -3162,7 +3165,7 @@
         .today-rest-title {
             font-size: 12.5px;
             font-weight: 700;
-            color: #111317;
+            color: #f1f5f9;
         }
         .today-rest-badge {
             font-size: var(--text-xs);
@@ -3204,7 +3207,7 @@
         .today-workout-title {
             font-size: 14.5px;
             font-weight: 800;
-            color: #111317;
+            color: #fff;
             margin: 0 0 10px 0;
             line-height: 1.25;
         }
@@ -3219,7 +3222,7 @@
             position: sticky;
             top: 10px;
             z-index: 100;
-            background: #FFFFFF;
+            background: rgba(15, 23, 42, 0.95);
             border: 1.5px solid var(--gold);
             border-radius: var(--radius-md);
             padding: 10px 14px;
@@ -3317,7 +3320,7 @@
             position: sticky;
             top: 6px;
             z-index: 120;
-            background: #FFFFFF;
+            background: rgba(11, 17, 32, 0.94);
             border: 1.5px solid var(--border);
             border-radius: var(--radius-md);
             padding: 8px 12px;
@@ -3328,7 +3331,7 @@
         }
         .workout-sticky-hud.collapsed {
             padding: 6px 10px;
-            background: #FFFFFF;
+            background: rgba(11, 17, 32, 0.98);
             border-color: rgba(245, 158, 11, 0.35);
         }
         .workout-sticky-hud.collapsed .hud-collapsible-part {
@@ -3376,7 +3379,7 @@
             flex-direction: row;
             align-items: center;
             gap: 6px;
-            background: #FFFFFF;
+            background: rgba(15, 23, 42, 0.85);
             border: 1px solid rgba(245, 158, 11, 0.35);
             border-radius: var(--radius-sm);
             padding: 4px 8px;
@@ -3449,7 +3452,7 @@
         .hud-view-toggle-group {
             display: flex;
             gap: 2px;
-            background: #F4F3EE;
+            background: rgba(0, 0, 0, 0.35);
             border-radius: 8px;
             padding: 2px;
         }
@@ -3469,7 +3472,7 @@
             transition: all 0.2s;
         }
         .btn-hud-collapse:hover {
-            color: #111317;
+            color: #fff;
             border-color: var(--gold);
         }
         .hud-progress-row {
@@ -3511,7 +3514,7 @@
             width: calc(100% - 20px);
             max-width: 580px;
             z-index: 140;
-            background: #FFFFFF;
+            background: rgba(15, 23, 42, 0.96);
             border: 1.5px solid rgba(245, 158, 11, 0.5);
             border-radius: 14px;
             padding: 8px 12px;
@@ -3539,7 +3542,7 @@
         .btn-dock-nav {
             background: var(--bg-elevated);
             border: 1px solid var(--border);
-            color: #111317;
+            color: #fff;
             padding: 9px 13px;
             border-radius: 9px;
             font-size: 12px;
@@ -3578,7 +3581,7 @@
         .dock-ex-name {
             font-size: 13px;
             font-weight: 800;
-            color: #111317;
+            color: #fff;
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
@@ -3638,7 +3641,7 @@
         }
         .btn-report-mini:hover {
             background: rgba(239, 68, 68, 0.25);
-            color: #111317;
+            color: #fff;
             border-color: #ef4444;
         }
         .btn-diagram-tool.btn-report-bug {
@@ -3648,7 +3651,7 @@
         }
         .btn-diagram-tool.btn-report-bug:hover {
             background: rgba(239, 68, 68, 0.25);
-            color: #111317;
+            color: #fff;
         }
 
         /* ==================== BUG REPORT & FINISHER MODAL STYLES ==================== */
@@ -3676,7 +3679,7 @@
         .bug-cat-chip.selected {
             border-color: #ef4444;
             background: rgba(239, 68, 68, 0.18);
-            color: #111317;
+            color: #fff;
             box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
         }
         .finisher-preset-card {
@@ -3725,7 +3728,7 @@
 
         /* SETS MANAGEMENT WRAP & ROWS */
         .sets-management-wrap {
-            background: #F4F3EE;
+            background: #090d16;
             border: 1px solid var(--border);
             border-radius: 10px;
             padding: 8px 10px;
@@ -3765,8 +3768,8 @@
             background: rgba(245, 158, 11, 0.08);
         }
         .set-badge {
-            background: #F4F3EE;
-            color: #111317;
+            background: #1e293b;
+            color: #fff;
             border-radius: 6px;
             padding: 4px 6px;
             font-size: 11px;
@@ -3791,10 +3794,10 @@
             position: relative;
         }
         .set-input-weight, .set-input-reps {
-            background: #F4F3EE;
+            background: #0f172a;
             border: 1px solid var(--border);
             border-radius: 6px;
-            color: #111317;
+            color: #fff;
             font-weight: 800;
             font-size: 13px;
             text-align: center;
@@ -3893,7 +3896,7 @@
         /* VIEW MODE TOGGLE GROUP */
         .view-mode-toggle-group {
             display: inline-flex;
-            background: #F4F3EE;
+            background: rgba(0, 0, 0, 0.4);
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 2px;
@@ -3949,7 +3952,7 @@
         .stepper-btn {
             background: var(--bg-elevated);
             border: 1px solid var(--border);
-            color: #111317;
+            color: #fff;
             font-size: 11px;
             font-weight: 800;
             width: 20px;
@@ -3987,7 +3990,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 8px;
-            background: #FFFFFF;
+            background: rgba(15, 23, 42, 0.75);
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 8px 12px;
@@ -4002,7 +4005,7 @@
             background: var(--bg-elevated);
             border: 1px solid var(--border);
             border-radius: 8px;
-            color: #111317;
+            color: #fff;
             font-size: 14px;
             font-weight: 800;
             cursor: pointer;
@@ -4098,7 +4101,7 @@
         .hevy-exercise-title {
             font-size: 18px;
             font-weight: 900;
-            color: #111317;
+            color: #fff;
             margin: 0;
             line-height: 1.25;
         }
@@ -4130,7 +4133,7 @@
         .hevy-form-collapsible {
             margin: 8px 0 12px;
             border-radius: 8px;
-            background: #F4F3EE;
+            background: rgba(0, 0, 0, 0.25);
             border: 1px dashed rgba(255, 255, 255, 0.14);
             overflow: hidden;
         }
@@ -4149,7 +4152,7 @@
             transition: all 0.2s;
         }
         .btn-hevy-form-toggle:hover {
-            color: #111317;
+            color: #fff;
             background: rgba(255, 255, 255, 0.05);
         }
         .hevy-form-guide-body {
@@ -4194,7 +4197,7 @@
 
         /* 5. HEVY SETS TABLE */
         .hevy-sets-card {
-            background: #FFFFFF;
+            background: rgba(11, 17, 32, 0.85);
             border: 1px solid var(--border);
             border-radius: 12px;
             overflow: hidden;
@@ -4209,7 +4212,7 @@
             grid-template-columns: 36px 58px 1fr 1fr 48px;
             gap: 4px;
             padding: 7px 8px;
-            background: #F4F3EE;
+            background: rgba(0, 0, 0, 0.4);
             border-bottom: 1px solid var(--border);
             font-size: var(--text-xs);
             font-weight: 900;
@@ -4251,7 +4254,7 @@
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.06);
             border: 1px solid var(--border);
-            color: #334155;
+            color: #cbd5e1;
             font-size: 12px;
             font-weight: 800;
             display: flex;
@@ -4287,10 +4290,10 @@
         .hevy-listbox-btn {
             width: 100%;
             height: 36px;
-            background: #FFFFFF;
+            background: rgba(15, 23, 42, 0.9);
             border: 1px solid var(--border);
             border-radius: 8px;
-            color: #111317;
+            color: #fff;
             font-size: 13.5px;
             font-weight: 800;
             display: flex;
@@ -4351,7 +4354,7 @@
             width: 100%;
             max-width: 500px;
             max-height: 75vh;
-            background: #F4F3EE;
+            background: #0c1220;
             border: 1px solid var(--border-highlight);
             border-top-left-radius: 20px;
             border-top-right-radius: 20px;
@@ -4376,7 +4379,7 @@
         .quick-listbox-title {
             font-size: 16px;
             font-weight: 900;
-            color: #111317;
+            color: #fff;
         }
         .quick-listbox-sub {
             font-size: 11.5px;
@@ -4389,7 +4392,7 @@
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.08);
             border: none;
-            color: #111317;
+            color: #fff;
             font-size: 14px;
             cursor: pointer;
             display: flex;
@@ -4419,7 +4422,7 @@
             justify-content: space-between;
             font-size: 15px;
             font-weight: 800;
-            color: #334155;
+            color: #e2e8f0;
             cursor: pointer;
             transition: all 0.12s;
         }
@@ -4442,14 +4445,14 @@
             border-top: 1px solid var(--border);
             display: flex;
             gap: 8px;
-            background: #F4F3EE;
+            background: rgba(0, 0, 0, 0.3);
         }
         .listbox-custom-input {
             flex: 1;
-            background: #F4F3EE;
+            background: #090d16;
             border: 1px solid var(--border);
             border-radius: 8px;
-            color: #111317;
+            color: #fff;
             padding: 10px 14px;
             font-size: 14px;
             font-weight: 800;
@@ -4512,7 +4515,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 8px 12px;
-            background: #F4F3EE;
+            background: rgba(0, 0, 0, 0.25);
             border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
         .btn-hevy-add-set {
@@ -4561,7 +4564,7 @@
         }
         .hevy-done-sub {
             font-size: 11.5px;
-            color: #334155;
+            color: #cbd5e1;
             margin-top: 3px;
         }
         .btn-hevy-next-cta {
@@ -4619,7 +4622,7 @@
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 6px;
-            background: #FFFFFF;
+            background: rgba(9, 13, 22, 0.95);
             border: 1px solid var(--border);
             border-radius: 10px;
             padding: 10px;
@@ -4629,7 +4632,7 @@
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid var(--border);
             border-radius: 6px;
-            color: #334155;
+            color: #cbd5e1;
             font-size: 11px;
             font-weight: 700;
             padding: 8px;
@@ -4639,7 +4642,7 @@
         }
         .btn-hevy-action:hover {
             border-color: var(--gold);
-            color: #111317;
+            color: #fff;
         }
         .btn-hevy-action.danger {
             color: #f87171;
@@ -4658,7 +4661,7 @@
             background: var(--bg-elevated);
             border: 1px solid var(--border);
             border-radius: 8px;
-            color: #111317;
+            color: #fff;
             font-size: 12px;
             font-weight: 800;
             padding: 10px;
@@ -4737,7 +4740,7 @@
         .btn-focus-nav {
             background: var(--bg-elevated);
             border: 1px solid var(--border);
-            color: #111317;
+            color: #fff;
             padding: 8px 12px;
             border-radius: 8px;
             font-size: 11.5px;
@@ -4757,7 +4760,7 @@
             cursor: not-allowed;
         }
         .focus-set-hero {
-            background: #FFFFFF;
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.75), rgba(15, 23, 42, 0.95));
             border: 2px solid var(--gold);
             border-radius: 12px;
             padding: 16px;
@@ -4838,7 +4841,7 @@
             background: rgba(255, 255, 255, 0.06);
             border: 1px solid var(--border);
             border-radius: 6px;
-            color: #334155;
+            color: #e2e8f0;
             font-size: 11px;
             font-weight: 700;
             padding: 5px 9px;
@@ -4878,7 +4881,7 @@
         }
         .btn-gym-action:hover {
             border-color: var(--cyan);
-            color: #111317;
+            color: #fff;
         }
         .btn-gym-action.warn {
             color: #f59e0b;
@@ -4905,7 +4908,7 @@
         .btn-step-delta {
             background: var(--bg-elevated);
             border: 1px solid var(--border);
-            color: #111317;
+            color: #fff;
             min-width: 44px;
             height: 38px;
             padding: 0 6px;
@@ -4943,7 +4946,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #FFFFFF;
+            background: rgba(15, 23, 42, 0.6);
             border: 1px solid var(--border);
             border-radius: 10px;
             padding: 7px 10px;
@@ -4970,7 +4973,7 @@
             padding: 5px 9px;
             cursor: pointer;
             transition: all 0.15s;
-            color: #334155;
+            color: #e2e8f0;
             user-select: none;
         }
         .btn-set-step-delta:active {
@@ -5015,7 +5018,7 @@
             transition: all 0.2s;
         }
         .btn-workout-more-toggle:hover {
-            color: #111317;
+            color: #fff;
             border-color: rgba(255, 255, 255, 0.3);
             background: rgba(255, 255, 255, 0.08);
         }
@@ -5026,7 +5029,7 @@
             color: var(--gold);
         }
         .workout-more-actions-drawer {
-            background: #FFFFFF;
+            background: rgba(9, 13, 22, 0.95);
             border: 1px solid var(--border);
             border-radius: 10px;
             padding: 12px;
@@ -5041,7 +5044,7 @@
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid var(--border);
             border-radius: 8px;
-            color: #334155;
+            color: #cbd5e1;
             font-size: 11.5px;
             font-weight: 700;
             padding: 9px 10px;
@@ -5054,7 +5057,7 @@
         }
         .btn-drawer-action:hover {
             border-color: var(--gold);
-            color: #111317;
+            color: #fff;
             background: rgba(245, 158, 11, 0.1);
         }
         .btn-drawer-action.warn {
@@ -5089,7 +5092,7 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 6px;
-            background: #FFFFFF;
+            background: rgba(15, 23, 42, 0.6);
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 8px 10px;
@@ -5129,7 +5132,7 @@
             gap: 6px;
         }
         .log-exercise-item {
-            background: #F4F3EE;
+            background: rgba(0, 0, 0, 0.25);
             border-radius: 6px;
             padding: 8px 10px;
             border-left: 3px solid var(--gold);
@@ -5141,7 +5144,7 @@
             margin-top: 4px;
         }
         .log-set-pill {
-            background: #F4F3EE;
+            background: #0f172a;
             border: 1px solid var(--border);
             border-radius: 4px;
             padding: 2px 6px;
@@ -5156,7 +5159,7 @@
         .log-notes-box {
             font-size: 11.5px;
             color: var(--text-secondary);
-            background: #F4F3EE;
+            background: rgba(0,0,0,0.3);
             padding: 6px 10px;
             border-radius: 6px;
             margin-top: 8px;
@@ -5202,7 +5205,7 @@
         .btn-danger-soft:hover {
             background: rgba(239, 68, 68, 0.28);
             border-color: rgba(239, 68, 68, 0.6);
-            color: #111317;
+            color: #fff;
         }
 
         /* MODALS */
@@ -5233,7 +5236,7 @@
             z-index: 100001 !important;
         }
         .modal-box {
-            background: #F4F3EE;
+            background: #0f172a;
             border: 1px solid var(--gold);
             border-radius: var(--radius-lg);
             padding: 24px;
@@ -5252,7 +5255,7 @@
         .modal-title {
             font-size: 16px;
             font-weight: 800;
-            color: #111317;
+            color: #fff;
         }
         .modal-close {
             background: transparent;
@@ -5275,11 +5278,11 @@
         }
         .form-input, .form-select {
             width: 100%;
-            background: #F4F3EE;
+            background: #090d16;
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 10px 12px;
-            color: #111317;
+            color: #fff;
             font-size: 13.5px;
             outline: none;
             box-sizing: border-box;
@@ -5348,7 +5351,7 @@
         .log-date {
             font-size: 12.5px;
             font-weight: 800;
-            color: #111317;
+            color: #fff;
         }
         .btn-delete-log {
             background: transparent;
@@ -5370,7 +5373,7 @@
 
         /* UNIQUE HEALTH & BODY COMPOSITION STYLES */
         .scale-pdf-dropzone {
-            background: #FFFFFF;
+            background: rgba(15, 23, 42, 0.7);
             border: 2px dashed rgba(245, 158, 11, 0.45);
             border-radius: 12px;
             padding: 16px 14px;
@@ -5395,7 +5398,7 @@
             margin-top: 8px;
         }
         .scale-segmental-card {
-            background: #F4F3EE;
+            background: rgba(0, 0, 0, 0.28);
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 10px;
@@ -5439,7 +5442,7 @@
             margin-bottom: var(--space-2);
         }
         .stat-metric-card {
-            background: #FFFFFF;
+            background: rgba(15, 23, 42, 0.65);
             border: 1px solid var(--border-glass);
             border-radius: var(--radius-sm);
             padding: 8px 10px;
@@ -5484,7 +5487,7 @@
             flex: 1;
             min-width: 56px;
             min-height: 40px;
-            background: #FFFFFF;
+            background: rgba(15, 23, 42, 0.65);
             border: 1px solid var(--border-glass);
             border-radius: var(--radius-sm);
             padding: 6px 8px;
@@ -5545,7 +5548,7 @@
 
         /* 3. LUXURY REST TIMER WITH CIRCULAR PROGRESS BAR */
         .rest-timer-luxury {
-            background: #FFFFFF;
+            background: linear-gradient(145deg, rgba(19, 29, 48, 0.85) 0%, rgba(10, 16, 28, 0.92) 100%);
             border: 1px solid rgba(245, 158, 11, 0.35);
             border-radius: var(--radius-lg);
             padding: 12px;
@@ -5718,7 +5721,7 @@
 
         /* ==================== ANATOMICAL BODY VISUAL (OPENGYM MODEL) ==================== */
         .anatomy-hero-wrapper {
-            background: #FFFFFF;
+            background: radial-gradient(circle at 50% 25%, rgba(30, 41, 59, 0.75), rgba(9, 13, 22, 0.96));
             border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 18px;
             padding: 16px 14px;
@@ -5805,7 +5808,7 @@
         /* KAS ODAK KARTI */
         .anatomy-focus-card {
             width: 100%;
-            background: #FFFFFF;
+            background: rgba(15, 23, 42, 0.85);
             border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 14px;
             padding: 14px 16px;
@@ -5834,11 +5837,6 @@
             width: 100%;
             padding: 8px 2px 4px;
             margin-top: 10px;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-        .anatomy-chips-scroll::-webkit-scrollbar {
-            display: none;
         }
 
         .anatomy-chip {
@@ -5848,7 +5846,7 @@
             padding: 5px 11px;
             font-size: 11px;
             font-weight: 700;
-            color: #334155;
+            color: #e2e8f0;
             white-space: nowrap;
             cursor: pointer;
             display: flex;
@@ -5865,7 +5863,7 @@
         .anatomy-chip.selected {
             background: rgba(245, 158, 11, 0.18);
             border-color: var(--gold);
-            color: #111317;
+            color: #ffffff;
             box-shadow: 0 0 10px rgba(245, 158, 11, 0.25);
         }
 
@@ -5891,21 +5889,20 @@
             box-shadow: 0 0 0 4px var(--gold-glow) !important;
         }
 
-        /* 2. Native Light Mode Select & Option Contrast (Studio Daylight) */
+        /* 2. Native Dark Mode Select & Option Contrast (Windows / Mobile / Desktop) */
         select,
         .param-select,
         .form-select {
-            background-color: #111317;
-            color: #111317;
-            color-scheme: light;
-            border: 1px solid #D5D2C8;
+            background-color: var(--bg-surface);
+            color: var(--text-primary);
+            color-scheme: dark;
         }
 
         select option,
         .param-select option,
         .form-select option {
-            background-color: #111317;
-            color: #111317;
+            background-color: #0F172A;
+            color: #F8FAFC;
         }
 
         /* 3. Touch Interaction: Eliminate 300ms Double-Tap Delay on Gym Controls */
@@ -5963,99 +5960,361 @@
         }
 
         /* ==========================================================================
-           STUDIO DAYLIGHT & MOBILE-FIRST THUMB-ZONE ARCHITECTURE (V197)
-           Aesthetic: Nike Training Club / Hevy Daylight / Teenage Engineering
+           LA FORJA VISUAL ARCHITECTURE (FRONTEND-DESIGN OVERHAUL • V196)
            ========================================================================== */
 
-        /* PILLAR 1: Single Thumb-Zone Navigation (No Double Menu on Mobile) */
+        /* 1. Command Bar & Machined Brand Lockup */
         .modern-app-bar {
-            background: rgba(255, 255, 255, 0.92) !important;
-            backdrop-filter: blur(20px) saturate(180%) !important;
-            -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-            border-bottom: 1px solid #E2E0D8 !important;
-            box-shadow: 0 2px 12px rgba(17, 19, 23, 0.05) !important;
-            padding: 10px 16px !important;
+            background: rgba(11, 13, 18, 0.94);
+            border-bottom: 1px solid rgba(245, 158, 11, 0.32);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65), 0 1px 0 rgba(245, 158, 11, 0.15);
+            padding: 10px 16px;
+        }
+
+        .modern-brand-title {
+            font-family: var(--font-display);
+            font-size: 15px;
+            font-weight: 900;
+            letter-spacing: 0.06em;
+            background: linear-gradient(135deg, #FFFFFF 0%, #FDE68A 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .app-version-badge {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.24) 0%, rgba(180, 83, 9, 0.18) 100%);
+            border: 1px solid rgba(245, 158, 11, 0.65);
+            color: #FEF3C7;
+            padding: 3px 8px;
+            border-radius: 6px;
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.28);
+        }
+
+        /* 2. Recessed Segmented Control Bar (.tab-nav & .tab-btn) */
+        .tab-nav {
+            background: #0D0F15;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.75), 0 6px 20px rgba(0, 0, 0, 0.45);
+            padding: 5px;
+            border-radius: 12px;
+            gap: 6px;
+        }
+
+        .tab-btn {
+            border-radius: 8px;
+            color: #A1A1AA;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            position: relative;
+            transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(180deg, rgba(245, 158, 11, 0.24) 0%, rgba(217, 119, 6, 0.1) 100%);
+            border-color: rgba(245, 158, 11, 0.65);
+            color: #FEF3C7;
+            box-shadow: 0 4px 14px rgba(245, 158, 11, 0.22), inset 0 1px 0 rgba(254, 243, 199, 0.25);
+        }
+
+        /* 3. Tactical Telemetry Console (.ai-hybrid-hero-banner) */
+        .ai-hybrid-hero-banner {
+            background: linear-gradient(135deg, #141722 0%, #0C0E14 100%);
+            border: 1px solid rgba(245, 158, 11, 0.32);
+            border-left: 4px solid var(--gold);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 14px;
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+        }
+
+        .ai-hybrid-hero-banner::before {
+            display: none;
+        }
+
+        .ai-hero-tag {
+            background: rgba(245, 158, 11, 0.18);
+            border: 1px solid rgba(245, 158, 11, 0.55);
+            color: #FDE68A;
+            font-family: var(--font-mono);
+            letter-spacing: 0.04em;
+        }
+
+        /* 4. Machined Steel Cards & Bento Target Split Matrix */
+        .generator-card {
+            background: linear-gradient(180deg, rgba(22, 25, 34, 0.95) 0%, rgba(13, 15, 21, 0.96) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.11);
+            border-radius: 14px;
+            padding: 18px 16px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        @media (min-width: 600px) {
+            .split-grid {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+            }
+            .split-grid > .split-card:first-child {
+                grid-column: 1 / -1;
+            }
+        }
+
+        .split-card {
+            background: #10131B;
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            border-radius: 9px;
+            padding: 11px 14px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+            transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+        }
+
+        .split-card:hover {
+            border-color: rgba(245, 158, 11, 0.45);
+            background: #161A25;
+            transform: translateY(-1px);
+        }
+
+        .split-card.selected {
+            background: linear-gradient(90deg, rgba(245, 158, 11, 0.18) 0%, rgba(245, 158, 11, 0.05) 100%);
+            border-color: var(--gold);
+            box-shadow: inset 4px 0 0 var(--gold), 0 4px 16px rgba(245, 158, 11, 0.18);
+        }
+
+        /* 5. Knurled Equipment Plates & Full-Width Forge Ignition CTA */
+        .equip-chip {
+            background: #10131B;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-weight: 700;
+            transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+        }
+
+        .equip-chip.selected {
+            background: linear-gradient(180deg, rgba(245, 158, 11, 0.22) 0%, rgba(245, 158, 11, 0.08) 100%);
+            border-color: var(--gold);
+            color: #FEF3C7;
+            box-shadow: 0 3px 12px rgba(245, 158, 11, 0.22), inset 0 1px 0 rgba(254, 243, 199, 0.2);
+        }
+
+        .btn-generate-cta {
+            width: 100%;
+            max-width: 100%;
+            margin: 14px 0 0 0;
+            padding: 14px 24px;
+            font-family: var(--font-display);
+            font-size: 15px;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #08090C;
+            background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #D97706 100%);
+            border: 1px solid #FDE68A;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(245, 158, 11, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+        }
+
+        .btn-generate-cta:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+            box-shadow: 0 12px 28px rgba(245, 158, 11, 0.52), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+
+
+
+
+        /* ==========================================================================
+           CANVA OBSIDIAN & ELECTRIC LIME DESIGN SYSTEM (V201)
+           Faithful implementation of the Canva AI Redesign + Mobile Thumb-Zone Layout
+           ========================================================================== */
+
+        :root {
+            --bg-base: #0B0F17;
+            --bg-surface: #121821;
+            --bg-elevated: #18202C;
+            --bg-card: #121821;
+            --border: #222C3A;
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(182, 240, 89, 0.55);
+            --lime: #B6F059;
+            --lime-glow: rgba(182, 240, 89, 0.28);
+            --gold: #E5B85B;
+            --gold-light: #F3D078;
+            --gold-glow: rgba(229, 184, 91, 0.22);
+            --cyan: #60A5FA;
+            --cyan-glow: rgba(96, 165, 250, 0.22);
+            --green-success: #B6F059;
+            --green: #B6F059;
+            --red-alert: #F87171;
+            --text-primary: #F3F6FA;
+            --text-secondary: #94A3B8;
+            --text-tertiary: #64748B;
+            --text-muted: #94A3B8;
+            --font-display: "Outfit", -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: "JetBrains Mono", "Plus Jakarta Sans", monospace;
+            --radius-sm: 10px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            color-scheme: dark;
+            accent-color: #B6F059;
+        }
+
+        html {
+            color-scheme: dark !important;
+            accent-color: #B6F059 !important;
+        }
+
+        body {
+            background-color: #0B0F17 !important;
+            background-image: radial-gradient(ellipse 80% 35% at 50% -10%, rgba(182, 240, 89, 0.07) 0%, transparent 70%) !important;
+            color: #F3F6FA !important;
+        }
+
+        /* 1. Keyboard Focus & Touch Accessibility */
+        button:focus-visible,
+        [role="button"]:focus-visible,
+        a:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible {
+            outline: 2px solid #B6F059 !important;
+            outline-offset: 2px !important;
+            box-shadow: 0 0 0 4px rgba(182, 240, 89, 0.22) !important;
+        }
+
+        button, [role="button"], a, label, select, input, .tab-btn, .split-card, .equip-chip, .bottom-nav-item {
+            touch-action: manipulation;
+        }
+
+        /* 2. Canva Top App Bar & Lime Monogram Badge */
+        .modern-app-bar {
+            background: rgba(11, 15, 23, 0.92) !important;
+            backdrop-filter: blur(18px) !important;
+            -webkit-backdrop-filter: blur(18px) !important;
+            border-bottom: 1px solid #1C2432 !important;
+            padding: 12px 16px !important;
+            box-shadow: none !important;
+        }
+
+        .modern-brand {
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+        }
+
+        .canva-brand-monogram {
+            width: 38px !important;
+            height: 38px !important;
+            border-radius: 11px !important;
+            background: #B6F059 !important;
+            color: #0B0F17 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-family: var(--font-display) !important;
+            font-size: 20px !important;
+            font-weight: 900 !important;
+            flex-shrink: 0 !important;
+            box-shadow: 0 0 18px rgba(182, 240, 89, 0.28) !important;
+        }
+
+        .canva-brand-stack {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 2px !important;
+            line-height: 1.1 !important;
         }
 
         .modern-brand-title {
             font-family: var(--font-display) !important;
-            font-size: 15px !important;
-            font-weight: 900 !important;
-            letter-spacing: 0.04em !important;
-            color: #111317 !important;
+            font-size: 16px !important;
+            font-weight: 800 !important;
+            letter-spacing: -0.01em !important;
+            color: #F3F6FA !important;
             background: none !important;
-            -webkit-text-fill-color: #111317 !important;
+            -webkit-text-fill-color: #F3F6FA !important;
         }
 
         .app-version-badge {
-            background: rgba(255, 79, 0, 0.1) !important;
-            border: 1px solid rgba(255, 79, 0, 0.35) !important;
-            color: #D94100 !important;
-            padding: 3px 8px !important;
-            border-radius: 999px !important;
-            font-weight: 800 !important;
+            background: rgba(182, 240, 89, 0.14) !important;
+            border: 1px solid rgba(182, 240, 89, 0.28) !important;
+            color: #B6F059 !important;
+            padding: 2px 8px !important;
+            border-radius: 6px !important;
+            font-family: var(--font-mono) !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.04em !important;
             box-shadow: none !important;
         }
 
+        .modern-user-badge,
+        .btn-header-popup-toggle,
         .modern-icon-btn {
-            background: #F4F3EE !important;
-            border: 1px solid #E2E0D8 !important;
-            color: #111317 !important;
+            background: #151C26 !important;
+            border: 1px solid #253041 !important;
+            border-radius: 12px !important;
+            color: #E2E8F0 !important;
         }
 
-        .modern-icon-btn:hover {
-            background: #EAE8E1 !important;
-            border-color: #FF4F00 !important;
-            color: #FF4F00 !important;
+        .modern-user-name,
+        #headerUserName {
+            color: #F3F6FA !important;
+            font-size: 13px !important;
+            font-weight: 700 !important;
         }
 
-        .modern-profile-pill {
-            background: #F4F3EE !important;
-            border: 1px solid #E2E0D8 !important;
+        #headerUserRoleBadge,
+        .auth-role-tag {
+            background: rgba(182, 240, 89, 0.14) !important;
+            border: 1px solid rgba(182, 240, 89, 0.3) !important;
+            color: #B6F059 !important;
+            font-size: 11px !important;
         }
 
-        .modern-profile-name {
-            color: #111317 !important;
-        }
-
-        /* Desktop Segmented Pill Bar */
+        /* 3. Canva Pill Segmented Navigation Bar */
         .tab-nav {
-            background: #EAE8E1 !important;
-            border: 1px solid #DCD9CE !important;
-            box-shadow: inset 0 1px 2px rgba(17, 19, 23, 0.06) !important;
-            padding: 4px !important;
-            border-radius: 14px !important;
-            gap: 4px !important;
+            background: #121821 !important;
+            border: 1px solid #222C3A !important;
+            border-radius: 999px !important;
+            padding: 6px !important;
+            gap: 6px !important;
+            box-shadow: none !important;
         }
 
         .tab-btn {
-            border-radius: 10px !important;
-            color: #525866 !important;
+            border-radius: 999px !important;
+            color: #CBD5E1 !important;
             background: transparent !important;
             border: 1px solid transparent !important;
             font-weight: 700 !important;
-            font-size: 13px !important;
+            font-size: 13.5px !important;
+            padding: 10px 16px !important;
         }
 
         .tab-btn:hover {
-            color: #111317 !important;
-            background: rgba(255, 255, 255, 0.55) !important;
+            color: #F3F6FA !important;
+            background: rgba(255, 255, 255, 0.04) !important;
         }
 
         .tab-btn.active {
-            background: #FFFFFF !important;
-            border-color: rgba(17, 19, 23, 0.08) !important;
-            color: #FF4F00 !important;
-            box-shadow: 0 2px 8px rgba(17, 19, 23, 0.08) !important;
+            background: #B6F059 !important;
+            border-color: #B6F059 !important;
+            color: #0B0F17 !important;
+            font-weight: 800 !important;
+            box-shadow: 0 0 22px rgba(182, 240, 89, 0.32) !important;
         }
 
-        /* Mobile: Hide Top Tab Bar, Activate Floating Frosted Bottom Dock */
+        /* Mobile Bottom Dock in Canva Obsidian & Lime */
         @media (max-width: 768px) {
             .tab-nav {
                 display: none !important;
             }
             .container {
-                padding: 12px 12px 104px 12px !important;
+                padding: 8px 10px 92px 10px !important;
             }
         }
 
@@ -6068,764 +6327,31 @@
 
         .bottom-nav-bar {
             pointer-events: auto !important;
-            background: rgba(255, 255, 255, 0.94) !important;
+            background: rgba(18, 24, 33, 0.94) !important;
             backdrop-filter: blur(20px) saturate(180%) !important;
             -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-            border: 1px solid rgba(17, 19, 23, 0.1) !important;
+            border: 1px solid #253041 !important;
             border-radius: 22px !important;
-            box-shadow: 0 12px 32px rgba(17, 19, 23, 0.14), 0 2px 6px rgba(17, 19, 23, 0.06) !important;
+            box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55) !important;
             height: 62px !important;
             padding: 4px 6px !important;
         }
 
         .bottom-nav-item {
-            color: #64748B !important;
+            color: #94A3B8 !important;
             border-radius: 16px !important;
-            gap: 3px !important;
-        }
-
-        .bottom-nav-item .nav-icon {
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            height: 22px !important;
-        }
-
-        .bottom-nav-item .nav-label {
-            font-size: 10.5px !important;
-            font-weight: 700 !important;
-            letter-spacing: -0.01em !important;
+            font-size: 12.5px !important;
         }
 
         .bottom-nav-item.active {
-            color: #FF4F00 !important;
-            background: rgba(255, 79, 0, 0.08) !important;
+            background: #B6F059 !important;
+            color: #0B0F17 !important;
+            font-weight: 800 !important;
+            box-shadow: 0 0 16px rgba(182, 240, 89, 0.28) !important;
         }
 
         .bottom-nav-item.active::after {
-            background: #FF4F00 !important;
-            box-shadow: none !important;
-            bottom: 3px !important;
-        }
-
-        /* PILLAR 2 & 5: Clean Editorial AI Banner & Pure White Tactile Cards */
-        .ai-hybrid-hero-banner {
-            background: #FFFFFF !important;
-            border: 1px solid #E2E0D8 !important;
-            border-left: 4px solid #FF4F00 !important;
-            border-radius: 14px !important;
-            padding: 12px 14px !important;
-            margin-bottom: 14px !important;
-            box-shadow: 0 4px 14px rgba(17, 19, 23, 0.05) !important;
-        }
-
-        .ai-hybrid-hero-banner::before {
             display: none !important;
-        }
-
-        .ai-hero-icon-pulse {
-            width: 36px !important;
-            height: 36px !important;
-            border-radius: 10px !important;
-            background: rgba(255, 79, 0, 0.1) !important;
-            border: 1px solid rgba(255, 79, 0, 0.25) !important;
-            color: #FF4F00 !important;
-            font-family: var(--font-mono) !important;
-            font-size: 13px !important;
-            font-weight: 900 !important;
-            box-shadow: none !important;
-        }
-
-        .ai-hero-title {
-            color: #111317 !important;
-            font-size: 13.5px !important;
-        }
-
-        .ai-hero-tag {
-            background: #F4F3EE !important;
-            border: 1px solid #DCD9CE !important;
-            color: #FF4F00 !important;
-            font-family: var(--font-mono) !important;
-            font-weight: 800 !important;
-        }
-
-        .ai-hero-desc {
-            color: #525866 !important;
-            font-size: 11.5px !important;
-        }
-
-        .ai-hero-desc strong {
-            color: #111317 !important;
-        }
-
-        /* PILLAR 3: Zero-Scroll Mobile Setup (2-Column Bento Split + 3-Col Params + No Accordions) */
-        .generator-card {
-            background: #FFFFFF !important;
-            border: 1px solid #E2E0D8 !important;
-            border-radius: 18px !important;
-            padding: 16px !important;
-            box-shadow: 0 6px 20px rgba(17, 19, 23, 0.05) !important;
-        }
-
-        .gen-mobile-picker-bar {
-            display: none !important;
-        }
-
-        .gen-step-title,
-        .gen-step-title.desktop-only-title {
-            display: flex !important;
-            color: #525866 !important;
-            font-size: 11px !important;
-            font-weight: 800 !important;
-            letter-spacing: 0.06em !important;
-            margin-bottom: 8px !important;
-        }
-
-        .gen-step-num {
-            background: #111317 !important;
-            color: #FFFFFF !important;
-            border-radius: 6px !important;
-            width: 20px !important;
-            height: 20px !important;
-            font-size: 11px !important;
-        }
-
-        .gen-collapsible-section {
-            display: block !important;
-            max-height: none !important;
-            opacity: 1 !important;
-            overflow: visible !important;
-            padding: 0 !important;
-            margin-bottom: 14px !important;
-            background: transparent !important;
-            border: none !important;
-        }
-
-        .split-grid {
-            display: grid !important;
-            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-            gap: 8px !important;
-            margin-bottom: 6px !important;
-        }
-
-        .split-grid > .split-card:first-child {
-            grid-column: 1 / -1 !important;
-        }
-
-        .split-card {
-            background: #F8F7F3 !important;
-            border: 1.5px solid #E2E0D8 !important;
-            border-radius: 12px !important;
-            padding: 10px 12px !important;
-            box-shadow: none !important;
-            min-height: 54px !important;
-        }
-
-        .split-card:hover {
-            border-color: #111317 !important;
-            background: #FFFFFF !important;
-        }
-
-        .split-card.selected {
-            background: #FFF5F0 !important;
-            border-color: #FF4F00 !important;
-            box-shadow: 0 4px 12px rgba(255, 79, 0, 0.12) !important;
-        }
-
-        .split-card-icon {
-            display: none !important;
-        }
-
-        .split-name,
-        .split-card-title {
-            color: #111317 !important;
-            font-size: 13px !important;
-            font-weight: 800 !important;
-        }
-
-        .split-card.selected .split-name,
-        .split-card.selected .split-card-title {
-            color: #D94100 !important;
-        }
-
-        .split-radio {
-            background: #FFFFFF !important;
-            border: 1.5px solid #D5D2C8 !important;
-            color: transparent !important;
-        }
-
-        .split-card.selected .split-radio {
-            background: #FF4F00 !important;
-            border-color: #FF4F00 !important;
-            color: #FFFFFF !important;
-        }
-
-        .split-card-desc {
-            color: #525866 !important;
-            font-size: 11px !important;
-            line-height: 1.25 !important;
-        }
-
-        .telemetry-pill-val,
-        .ai-hero-stats-wrap strong {
-            color: #111317 !important;
-        }
-
-        .btn-quick-equip {
-            background: #F4F3EE !important;
-            border: 1px solid #D5D2C8 !important;
-            color: #111317 !important;
-            font-weight: 700 !important;
-        }
-
-        .btn-quick-equip:hover {
-            background: #EAE8E1 !important;
-            border-color: #111317 !important;
-        }
-
-        /* 3-Column Parameter Pill Row on Mobile & Desktop */
-        .param-grid {
-            display: grid !important;
-            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-            gap: 8px !important;
-            margin-bottom: 4px !important;
-        }
-
-        .param-box,
-        .param-group {
-            background: #F8F7F3 !important;
-            border: 1px solid #E2E0D8 !important;
-            border-radius: 12px !important;
-            padding: 8px 10px !important;
-        }
-
-        .param-label,
-        .param-group label {
-            color: #525866 !important;
-            font-size: 10px !important;
-            font-weight: 800 !important;
-            margin-bottom: 4px !important;
-            white-space: nowrap !important;
-            overflow: hidden !important;
-            text-overflow: ellipsis !important;
-        }
-
-        .param-select,
-        .form-input,
-        .form-select {
-            background-color: #FFFFFF !important;
-            border: 1px solid #D5D2C8 !important;
-            color: #111317 !important;
-            border-radius: 8px !important;
-        }
-
-        /* Tactile Equipment Chips */
-        .equip-grid,
-        .equip-chips-wrap {
-            gap: 6px !important;
-            margin-bottom: 8px !important;
-        }
-
-        .equip-chip {
-            background: #F8F7F3 !important;
-            border: 1.5px solid #E2E0D8 !important;
-            border-radius: 999px !important;
-            padding: 8px 14px !important;
-            color: #111317 !important;
-            font-size: 12.5px !important;
-            font-weight: 700 !important;
-            box-shadow: none !important;
-        }
-
-        .equip-chip.selected {
-            background: #111317 !important;
-            border-color: #111317 !important;
-            color: #FFFFFF !important;
-            box-shadow: 0 4px 10px rgba(17, 19, 23, 0.16) !important;
-        }
-
-        /* High-Contrast Athletic Orange CTA Button */
-        .btn-generate-cta {
-            width: 100% !important;
-            max-width: 100% !important;
-            margin: 10px 0 0 0 !important;
-            padding: 15px 24px !important;
-            min-height: 54px !important;
-            font-family: var(--font-display) !important;
-            font-size: 15px !important;
-            font-weight: 900 !important;
-            letter-spacing: 0.03em !important;
-            text-transform: uppercase !important;
-            color: #FFFFFF !important;
-            background: #FF4F00 !important;
-            border: none !important;
-            border-radius: 14px !important;
-            box-shadow: 0 8px 20px rgba(255, 79, 0, 0.3) !important;
-        }
-
-        .btn-generate-cta:hover {
-            background: #E04400 !important;
-            transform: translateY(-1px) !important;
-            box-shadow: 0 10px 24px rgba(255, 79, 0, 0.38) !important;
-        }
-
-        /* PILLAR 4: Active Workout Giant 56px Steppers & Crisp Daylight HUD */
-        .workout-sticky-hud {
-            background: rgba(255, 255, 255, 0.95) !important;
-            backdrop-filter: blur(16px) !important;
-            -webkit-backdrop-filter: blur(16px) !important;
-            border: 1px solid #E2E0D8 !important;
-            box-shadow: 0 6px 20px rgba(17, 19, 23, 0.08) !important;
-            color: #111317 !important;
-        }
-
-        .hud-stat-val,
-        .hud-time-val,
-        .hud-rest-val {
-            color: #111317 !important;
-        }
-
-        .hud-rest-col {
-            background: #F4F3EE !important;
-            border: 1px solid #DCD9CE !important;
-        }
-
-        /* Calendar & Today Banner Daylight Architecture (Workout Tab) */
-        .today-rest-banner,
-        .today-workout-banner,
-        .live-tracker-bar,
-        .calendar-live-bar {
-            background: #FFFFFF !important;
-            border: 1.5px solid #E2E0D8 !important;
-            color: #111317 !important;
-            box-shadow: 0 4px 14px rgba(17, 19, 23, 0.05) !important;
-        }
-
-        .today-rest-title,
-        .today-workout-title,
-        .calendar-screen-header .cal-header-title-box h2,
-        .cal-period-title {
-            color: #111317 !important;
-        }
-
-        .cal-view-pills {
-            background: #EAE8E1 !important;
-            border: 1px solid #DCD9CE !important;
-        }
-
-        .cal-pill-btn {
-            color: #525866 !important;
-            background: transparent !important;
-        }
-
-        .cal-pill-btn.active {
-            background: #FFFFFF !important;
-            color: #FF4F00 !important;
-            box-shadow: 0 2px 6px rgba(17, 19, 23, 0.08) !important;
-        }
-
-        .cal-week-card {
-            background: #F8F7F3 !important;
-            border: 1.5px solid #E2E0D8 !important;
-            color: #111317 !important;
-            box-shadow: 0 2px 8px rgba(17, 19, 23, 0.04) !important;
-        }
-
-        .cal-week-card:hover {
-            background: #FFFFFF !important;
-            border-color: #111317 !important;
-        }
-
-        .cal-week-card.is-completed {
-            background: #F0FDF4 !important;
-            border-color: #86EFAC !important;
-        }
-
-        .cal-week-card.is-today {
-            background: #FFF7ED !important;
-            border: 2px solid #FF4F00 !important;
-            box-shadow: 0 8px 20px rgba(255, 79, 0, 0.14) !important;
-        }
-
-        .cal-week-card-day {
-            color: #111317 !important;
-            font-weight: 800 !important;
-        }
-
-        .cal-week-card-date {
-            color: #525866 !important;
-            font-weight: 700 !important;
-        }
-
-        .cal-week-badge-pill.completed {
-            background: #DCFCE7 !important;
-            color: #15803D !important;
-            border: 1px solid #86EFAC !important;
-        }
-
-        .cal-week-badge-pill.today {
-            background: #FF4F00 !important;
-            color: #FFFFFF !important;
-        }
-
-        .cal-week-badge-pill.planned {
-            background: #FEF3C7 !important;
-            color: #B45309 !important;
-            border: 1px solid #FCD34D !important;
-        }
-
-        .cal-week-badge-pill.rest {
-            background: #EAE8E1 !important;
-            color: #475569 !important;
-            border: 1px solid #D5D2C8 !important;
-        }
-
-        .cal-week-card .btn-outline {
-            background: #FFFFFF !important;
-            border-color: #D5D2C8 !important;
-            color: #111317 !important;
-            font-weight: 700 !important;
-        }
-
-        .cal-month-cell {
-            background: #F8F7F3 !important;
-            border: 1px solid #E2E0D8 !important;
-            color: #111317 !important;
-        }
-
-        .cal-month-cell-header {
-            color: #111317 !important;
-        }
-
-        .planner-template-bar {
-            background: #F4F3EE !important;
-            border: 1px solid #E2E0D8 !important;
-        }
-
-        .planner-template-btn {
-            background: #FFFFFF !important;
-            border: 1px solid #D5D2C8 !important;
-            color: #111317 !important;
-        }
-
-        /* Library Cards & Chips Daylight Architecture (Library Tab) */
-        .workout-header-card,
-        .exercise-visual-card,
-        .superset-group,
-        .log-card,
-        .history-card,
-        .log-history-card,
-        .stat-metric-card,
-        .lib-ex-card,
-        .lib-controls-bar,
-        .routine-toolbar,
-        .day-pill {
-            background: #FFFFFF !important;
-            border-color: #E2E0D8 !important;
-            color: #111317 !important;
-            box-shadow: 0 4px 14px rgba(17, 19, 23, 0.05) !important;
-        }
-
-        .ex-thumb-wrap {
-            background: #F8F7F3 !important;
-            border: 1px solid #E2E0D8 !important;
-        }
-
-        .ex-chip-badge {
-            background: #F4F3EE !important;
-            border: 1px solid #DCD9CE !important;
-            color: #334155 !important;
-            font-weight: 700 !important;
-        }
-
-        .ex-chip-badge.muscle {
-            background: #FFF7ED !important;
-            border-color: #FDBA74 !important;
-            color: #C2410C !important;
-        }
-
-        /* History Tab Daylight Architecture */
-        .log-date {
-            color: #111317 !important;
-            font-weight: 800 !important;
-        }
-
-        .log-stats-bar {
-            background: #F4F3EE !important;
-            border: 1px solid #E2E0D8 !important;
-        }
-
-        .log-stat-label {
-            color: #525866 !important;
-            font-weight: 700 !important;
-        }
-
-        .log-stat-val {
-            color: #111317 !important;
-            font-weight: 900 !important;
-        }
-
-        .muscle-tag {
-            background: #EFF6FF !important;
-            border: 1px solid #BFDBFE !important;
-            color: #1D4ED8 !important;
-            font-weight: 700 !important;
-        }
-
-        .log-exercise-item {
-            background: #F8F7F3 !important;
-            border: 1px solid #E2E0D8 !important;
-            border-left: 3px solid #FF4F00 !important;
-            color: #111317 !important;
-        }
-
-        .log-set-pill {
-            background: #FFFFFF !important;
-            border: 1px solid #D5D2C8 !important;
-            color: #475569 !important;
-        }
-
-        .log-set-pill.completed {
-            background: #DCFCE7 !important;
-            border: 1px solid #86EFAC !important;
-            color: #14532D !important;
-            font-weight: 700 !important;
-        }
-
-        /* Analytics & Anatomy Body Map Daylight Architecture (Analytics Tab) */
-        .anatomy-hero-wrapper {
-            background: #FFFFFF !important;
-            border: 1.5px solid #E2E0D8 !important;
-            box-shadow: 0 6px 20px rgba(17, 19, 23, 0.05) !important;
-            color: #111317 !important;
-        }
-
-        .anatomy-svg-box {
-            background: #F8F7F3 !important;
-            border: 1px solid #E2E0D8 !important;
-            border-radius: 16px !important;
-            padding: 12px !important;
-        }
-
-        .anatomy-svg {
-            filter: drop-shadow(0 4px 10px rgba(17, 19, 23, 0.08)) !important;
-        }
-
-        .anatomy-muscle:hover,
-        .anatomy-muscle.active-selected {
-            stroke: #111317 !important;
-            filter: brightness(1.06) drop-shadow(0 2px 8px rgba(255, 79, 0, 0.35)) !important;
-        }
-
-        .anatomy-legend-item {
-            background: #F8F7F3 !important;
-            border: 1px solid #E2E0D8 !important;
-            color: #111317 !important;
-        }
-
-        .anatomy-legend-item .badge-val {
-            color: #111317 !important;
-        }
-
-        .anatomy-legend-item .badge-label {
-            color: #525866 !important;
-        }
-
-        .anatomy-chip {
-            background: #F8F7F3 !important;
-            border: 1px solid #DCD9CE !important;
-            color: #111317 !important;
-            font-weight: 700 !important;
-        }
-
-        .anatomy-chip:hover {
-            background: #EAE8E1 !important;
-            border-color: #111317 !important;
-        }
-
-        .anatomy-chip.selected {
-            background: #FFF7ED !important;
-            border-color: #FF4F00 !important;
-            color: #D94100 !important;
-            box-shadow: 0 2px 8px rgba(255, 79, 0, 0.15) !important;
-        }
-
-        .anatomy-focus-card {
-            background: #FFFFFF !important;
-            border: 1.5px solid #E2E0D8 !important;
-            color: #111317 !important;
-            box-shadow: 0 4px 16px rgba(17, 19, 23, 0.06) !important;
-        }
-
-        .day-pill.active {
-            background: #111317 !important;
-            border-color: #111317 !important;
-            color: #FFFFFF !important;
-        }
-
-        .day-pill.active .day-pill-name,
-        .day-pill.active .day-pill-sub {
-            color: #FFFFFF !important;
-        }
-
-        .day-pill-name {
-            color: #111317 !important;
-        }
-
-        .input-duo-cell {
-            background: #F4F3EE !important;
-            border: 1.5px solid #DCD9CE !important;
-            border-radius: 16px !important;
-            padding: 12px !important;
-        }
-
-        .btn-step-mini {
-            width: 56px !important;
-            height: 56px !important;
-            border-radius: 14px !important;
-            background: #FFFFFF !important;
-            border: 1.5px solid #D5D2C8 !important;
-            color: #111317 !important;
-            font-size: 24px !important;
-            font-weight: 800 !important;
-            box-shadow: 0 2px 6px rgba(17, 19, 23, 0.06) !important;
-        }
-
-        .btn-step-mini:active {
-            background: #FF4F00 !important;
-            border-color: #FF4F00 !important;
-            color: #FFFFFF !important;
-            transform: scale(0.95) !important;
-        }
-
-        .input-huge-val {
-            color: #111317 !important;
-            font-size: 30px !important;
-            font-weight: 900 !important;
-            font-family: var(--font-mono) !important;
-        }
-
-        .rest-timer-luxury,
-        .workout-floating-dock {
-            background: rgba(255, 255, 255, 0.96) !important;
-            border: 1px solid #E2E0D8 !important;
-            color: #111317 !important;
-            box-shadow: 0 12px 32px rgba(17, 19, 23, 0.14) !important;
-        }
-
-        .timer-digits-huge,
-        .dock-timer-digits,
-        .dock-ex-name,
-        .btn-dock-nav {
-            color: #111317 !important;
-        }
-
-        /* Daylight Overrides for Login, Modals, Sheets & Dynamic Inline Dark Styles */
-        .login-screen {
-            background: radial-gradient(circle at 50% 0%, rgba(255, 79, 0, 0.08) 0%, #F4F3EE 70%) !important;
-        }
-
-        .login-card,
-        .modal-box,
-        .more-sheet,
-        .quick-listbox-sheet,
-        .lightbox-content-box {
-            background: #FFFFFF !important;
-            border: 1px solid #E2E0D8 !important;
-            color: #111317 !important;
-            box-shadow: 0 20px 50px rgba(17, 19, 23, 0.15) !important;
-        }
-
-        .login-title,
-        .modal-title,
-        .more-sheet-header,
-        .ex-visual-name,
-        .ex-name,
-        .workout-main-title,
-        .hevy-exercise-title,
-        .lib-ex-title,
-        .stat-metric-val {
-            color: #111317 !important;
-        }
-
-        .login-input,
-        .lib-search-input {
-            background: #FFFFFF !important;
-            border: 1px solid #D5D2C8 !important;
-            color: #111317 !important;
-        }
-
-        .login-btn,
-        .btn-gold {
-            background: #FF4F00 !important;
-            color: #FFFFFF !important;
-            border: none !important;
-        }
-
-        .more-sheet-btn {
-            background: #F8F7F3 !important;
-            border: 1px solid #E2E0D8 !important;
-            color: #111317 !important;
-        }
-
-        /* Rescue Any Remaining Dynamic Inline Dark Backgrounds & White Text inside .tab-content / .modal-box */
-        .tab-content [style*="background:rgba(15,23,42"],
-        .tab-content [style*="background: rgba(15, 23, 42"],
-        .tab-content [style*="background:rgba(0,0,0"],
-        .tab-content [style*="background: rgba(0, 0, 0"],
-        .tab-content [style*="background:#0f172a"],
-        .tab-content [style*="background: #0f172a"],
-        .tab-content [style*="background:#090d16"],
-        .modal-box [style*="background:rgba(15,23,42"],
-        .modal-box [style*="background: rgba(15, 23, 42"],
-        .modal-box [style*="background:rgba(0,0,0"],
-        .modal-box [style*="background: rgba(0, 0, 0"] {
-            background: #F4F3EE !important;
-            border-color: #E2E0D8 !important;
-            color: #111317 !important;
-        }
-
-        .tab-content [style*="color:#fff"]:not(.btn-gold):not(.btn-generate-cta):not(.equip-chip):not(.theme-pill),
-        .tab-content [style*="color: #fff"]:not(.btn-gold):not(.btn-generate-cta):not(.equip-chip):not(.theme-pill),
-        .tab-content [style*="color:#f8fafc"],
-        .tab-content [style*="color: #f8fafc"],
-        .modal-box [style*="color:#fff"]:not(.btn-gold),
-        .modal-box [style*="color: #fff"]:not(.btn-gold),
-        .modal-box [style*="color:#f8fafc"] {
-            color: #111317 !important;
-        }
-
-        /* ==========================================================================
-           V199 STUDIO DAYLIGHT POLISH: ANTI-TRUNCATION, CONTRAST & ICON-FREE UI
-           ========================================================================== */
-
-        /* 1. Tonal Separation Without Resting Box Shadows, Outlined Boxes, or 1px Hairlines */
-        .modern-app-bar {
-            border-bottom: none !important;
-            box-shadow: none !important;
-            background: #FFFFFF !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-        }
-
-        .tab-nav,
-        .tab-btn.active,
-        .ai-hybrid-hero-banner,
-        .generator-card,
-        .split-card.selected,
-        .equip-chip.selected,
-        .btn-generate-cta,
-        .bottom-nav-bar {
-            box-shadow: none !important;
-        }
-
-        .tab-nav,
-        .param-box,
-        .param-group,
-        .modern-user-badge,
-        .modern-profile-pill,
-        .ai-hero-stats-wrap .telemetry-pill {
-            border: none !important;
         }
 
         .bottom-pull-handle,
@@ -6833,86 +6359,18 @@
             display: none !important;
         }
 
+        /* 4. Canva Olive Status Banner (AI Hybrid Hero Banner) */
         .ai-hybrid-hero-banner {
-            border: none !important;
-            border-left: 4px solid #A83000 !important;
-            background: #FFFFFF !important;
+            background: rgba(182, 240, 89, 0.08) !important;
+            border: 1px solid rgba(182, 240, 89, 0.28) !important;
+            border-radius: 14px !important;
+            padding: 10px 14px !important;
+            margin-bottom: 14px !important;
+            box-shadow: none !important;
         }
 
-        .ai-hero-stats-wrap {
-            display: flex !important;
-            flex-direction: row !important;
-            align-items: center !important;
-            border-top: none !important;
-            flex-wrap: wrap !important;
-            overflow: visible !important;
-            gap: 6px !important;
-        }
-
-        .generator-card {
-            border: none !important;
-            background: #FFFFFF !important;
-        }
-
-        .more-sheet-header {
-            border-bottom: none !important;
-        }
-
-        /* 2. High-Contrast WCAG AA (>5.5:1) Athletic Terracotta Tokens */
-        .app-version-badge,
-        .tab-btn.active,
-        .ai-hero-tag,
-        .split-card.selected .split-name,
-        .split-card.selected .split-card-title,
-        .bottom-nav-item.active,
-        .btn-header-popup-toggle,
-        #headerUserRoleBadge,
-        .auth-role-tag {
-            color: #A83000 !important;
-        }
-
-        .btn-generate-cta,
-        .login-btn,
-        .btn-gold,
-        .ai-hero-action-btn,
-        .split-card.selected .split-radio {
-            background: #A83000 !important;
-            border-color: #A83000 !important;
-            color: #FFFFFF !important;
-        }
-
-        .split-card.selected {
-            border-color: #A83000 !important;
-            background: #FFF5F0 !important;
-        }
-
-        /* 3. Crisp CSS Checkmark for Split Cards (No Unicode Emoji/Symbol) */
-        .split-radio {
-            position: relative !important;
-            width: 20px !important;
-            height: 20px !important;
-            border-radius: 6px !important;
-        }
-
-        .split-card.selected .split-radio::after {
-            content: '';
-            display: block;
-            width: 5px;
-            height: 9px;
-            border-right: 2px solid #FFFFFF;
-            border-bottom: 2px solid #FFFFFF;
-            transform: rotate(45deg);
-            margin-top: -2px;
-        }
-
-        /* 4. Zero Text Truncation on Split Cards & AI Banner */
-        .split-name,
-        .split-card-title {
-            white-space: normal !important;
-            overflow: visible !important;
-            text-overflow: clip !important;
-            line-height: 1.2 !important;
-            font-size: 13px !important;
+        .ai-hybrid-hero-banner::before {
+            display: none !important;
         }
 
         .ai-hero-top-bar {
@@ -6931,136 +6389,312 @@
             flex: 1 !important;
         }
 
-        /* 5. Accessible First-Viewport Typography Scale (>= 13px, No Micro-Labels) */
-        .app-version-badge,
-        .modern-user-name,
-        #headerUserName,
-        .auth-role-tag,
-        #headerUserRoleBadge,
-        .modern-profile-name,
-        .modern-profile-role,
-        .modern-icon-btn,
-        .btn-header-popup-toggle,
-        .btn-header-popup-toggle span,
         .ai-hero-tag,
-        .ai-hero-doc-badge,
-        .ai-hero-title,
-        .ai-hero-info-btn,
-        .ai-hero-action-btn,
-        .ai-hero-action-btn span,
-        .ai-hero-stats-wrap .telemetry-pill,
-        .ai-hero-stats-wrap .telemetry-pill-label,
-        .ai-hero-stats-wrap .telemetry-pill-val,
-        .telemetry-pill-label,
-        .telemetry-pill-val,
+        .ai-hero-doc-badge {
+            background: rgba(182, 240, 89, 0.15) !important;
+            border: 1px solid rgba(182, 240, 89, 0.32) !important;
+            color: #B6F059 !important;
+            font-size: 12.5px !important;
+            font-weight: 800 !important;
+            border-radius: 999px !important;
+            padding: 3px 10px !important;
+        }
+
+        .ai-hero-title {
+            color: #F3F6FA !important;
+            font-size: 13.5px !important;
+            font-weight: 800 !important;
+        }
+
+        .ai-hero-stats-wrap {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            flex-wrap: wrap !important;
+            gap: 6px !important;
+            border-top: none !important;
+            margin-top: 6px !important;
+            padding-top: 0 !important;
+        }
+
+        .ai-hero-stats-wrap .telemetry-pill {
+            display: inline-flex !important;
+            width: auto !important;
+            background: rgba(11, 15, 23, 0.65) !important;
+            border: 1px solid rgba(182, 240, 89, 0.2) !important;
+            border-radius: 8px !important;
+            padding: 3px 8px !important;
+            font-size: 12.5px !important;
+        }
+
+        /* 5. Canva Main Protocol Card & Bento Setup Grid */
+        .generator-card,
+        .workout-header-card,
+        .exercise-visual-card,
+        .superset-group,
+        .log-card,
+        .history-card,
+        .log-history-card,
+        .stat-metric-card,
+        .lib-ex-card,
+        .anatomy-hero-wrapper,
+        .anatomy-focus-card {
+            background: #121821 !important;
+            border: 1px solid #222C3A !important;
+            border-radius: 20px !important;
+            color: #F3F6FA !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35) !important;
+        }
+
+        .gen-mobile-picker-bar {
+            display: none !important;
+        }
+
         .gen-step-title,
-        .gen-step-title.desktop-only-title,
-        .gen-step-num,
-        .split-card-desc,
-        .equip-chip,
-        .btn-quick-equip,
-        .param-label,
-        .param-group label,
-        .param-select,
-        .bottom-nav-item,
-        .bottom-nav-item span {
+        .gen-step-title.desktop-only-title {
+            display: flex !important;
+            color: #E5B85B !important;
+            font-size: 12.5px !important;
+            font-weight: 800 !important;
+            letter-spacing: 0.06em !important;
+            text-transform: uppercase !important;
+            margin-bottom: 8px !important;
+        }
+
+        .gen-step-badge {
+            background: rgba(229, 184, 91, 0.16) !important;
+            border: 1px solid rgba(229, 184, 91, 0.35) !important;
+            color: #E5B85B !important;
+        }
+
+        .gen-collapsible-section {
+            display: block !important;
+            max-height: none !important;
+            opacity: 1 !important;
+            overflow: visible !important;
+            padding: 0 !important;
+            margin-bottom: 12px !important;
+            background: transparent !important;
+            border: none !important;
+        }
+
+        .split-grid {
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 8px !important;
+        }
+
+        .split-grid > .split-card:first-child {
+            grid-column: 1 / -1 !important;
+        }
+
+        .split-card {
+            background: #161E29 !important;
+            border: 1px solid #253041 !important;
+            border-radius: 14px !important;
+            padding: 10px 12px !important;
+            min-height: 46px !important;
+        }
+
+        .split-card:hover {
+            border-color: rgba(182, 240, 89, 0.45) !important;
+            background: #1A2432 !important;
+        }
+
+        .split-card.selected {
+            background: rgba(182, 240, 89, 0.10) !important;
+            border-color: #B6F059 !important;
+            box-shadow: 0 0 18px rgba(182, 240, 89, 0.12) !important;
+        }
+
+        .split-name,
+        .split-card-title {
+            color: #F3F6FA !important;
             font-size: 13px !important;
+            font-weight: 700 !important;
+            white-space: normal !important;
+            overflow: visible !important;
+            text-overflow: clip !important;
+            line-height: 1.2 !important;
+        }
+
+        .split-card.selected .split-name,
+        .split-card.selected .split-card-title {
+            color: #B6F059 !important;
+            font-weight: 800 !important;
+        }
+
+        .split-radio {
+            position: relative !important;
+            width: 20px !important;
+            height: 20px !important;
+            border-radius: 6px !important;
+            background: #0E131B !important;
+            border: 1.5px solid #2E3C51 !important;
+        }
+
+        .split-card.selected .split-radio {
+            background: #B6F059 !important;
+            border-color: #B6F059 !important;
+        }
+
+        .split-card.selected .split-radio::after {
+            content: "";
+            display: block;
+            width: 5px;
+            height: 9px;
+            border-right: 2px solid #0B0F17;
+            border-bottom: 2px solid #0B0F17;
+            transform: rotate(45deg);
+            margin-top: -2px;
+        }
+
+        /* Equipment Chips & Parameter Selects */
+        .equip-chip {
+            background: #161E29 !important;
+            border: 1px solid #253041 !important;
+            border-radius: 999px !important;
+            color: #CBD5E1 !important;
+            font-size: 13px !important;
+            font-weight: 700 !important;
+            padding: 7px 14px !important;
+        }
+
+        .equip-chip.selected {
+            background: rgba(182, 240, 89, 0.14) !important;
+            border-color: #B6F059 !important;
+            color: #B6F059 !important;
+            font-weight: 800 !important;
+        }
+
+        .param-grid {
+            display: grid !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            gap: 8px !important;
+        }
+
+        .param-box,
+        .param-group {
+            background: #161E29 !important;
+            border: 1px solid #253041 !important;
+            border-radius: 12px !important;
+            padding: 8px 10px !important;
         }
 
         .param-label,
-        .param-group label,
-        .gen-step-title,
-        .gen-step-title.desktop-only-title,
-        .telemetry-pill-label {
-            text-transform: none !important;
-            letter-spacing: 0 !important;
-            color: #111317 !important;
+        .param-group label {
+            color: #94A3B8 !important;
+            font-size: 12.5px !important;
             font-weight: 700 !important;
         }
 
-        /* 6. Mobile 390px Viewport Fit: Single-Row AI Header, Unclipped Stats & Visible CTA Above Fold */
+        select,
+        .param-select,
+        .form-select,
+        .form-input {
+            background-color: #0E131B !important;
+            border: 1px solid #253041 !important;
+            color: #F3F6FA !important;
+            color-scheme: dark !important;
+            border-radius: 8px !important;
+            font-size: 13px !important;
+        }
+
+        /* 6. Canva Electric Lime Primary Buttons (+ Set ekle / Program Üret) */
+        .btn-generate-cta,
+        .btn-gold,
+        .login-btn,
+        .ai-hero-action-btn {
+            background: #B6F059 !important;
+            border: 1px solid #B6F059 !important;
+            color: #0B0F17 !important;
+            font-family: var(--font-display) !important;
+            font-weight: 800 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 4px 18px rgba(182, 240, 89, 0.25) !important;
+        }
+
+        .btn-generate-cta:hover,
+        .btn-gold:hover,
+        .login-btn:hover {
+            background: #C5F578 !important;
+            border-color: #C5F578 !important;
+            color: #0B0F17 !important;
+            box-shadow: 0 6px 24px rgba(182, 240, 89, 0.38) !important;
+        }
+
+        /* 7. Canva Warm Amber Rest Timer Box (Dinlenme Sayacı) */
+        .rest-timer-luxury,
+        .workout-sticky-hud,
+        .hud-rest-col,
+        .workout-floating-dock {
+            background: rgba(212, 168, 83, 0.09) !important;
+            border: 1px solid rgba(212, 168, 83, 0.35) !important;
+            border-radius: 16px !important;
+            color: #F3F6FA !important;
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45) !important;
+        }
+
+        .timer-digits-huge,
+        .dock-timer-digits,
+        .hud-rest-val,
+        .ring-time-val {
+            color: #E6C275 !important;
+            font-family: var(--font-mono) !important;
+            font-weight: 800 !important;
+            letter-spacing: 0.03em !important;
+        }
+
+        /* 8. Muscle Target Badges (Ön başlar • Göğüs Olive Pill) */
+        .ex-chip-badge.muscle,
+        .muscle-tag {
+            background: rgba(182, 240, 89, 0.14) !important;
+            border: 1px solid rgba(182, 240, 89, 0.3) !important;
+            color: #C5F578 !important;
+            border-radius: 999px !important;
+            font-weight: 700 !important;
+        }
+
+        /* 9. Mobile 390px Compact Viewport Fit */
         @media (max-width: 768px) {
             #aiDoctrineInfoBtn,
             .ai-hero-title {
                 display: none !important;
             }
-            .container {
-                padding: 6px 10px 84px 10px !important;
-            }
             .ai-hybrid-hero-banner {
-                padding: 6px 10px !important;
-                margin-bottom: 6px !important;
-            }
-            .ai-hero-stats-wrap {
-                margin-top: 4px !important;
-                padding-top: 0 !important;
-                gap: 6px !important;
-            }
-            .ai-hero-stats-wrap .telemetry-pill {
-                display: inline-flex !important;
-                width: auto !important;
-                padding: 2px 7px !important;
-                background: #F4F3EE !important;
+                padding: 8px 10px !important;
+                margin-bottom: 8px !important;
             }
         }
 
         @media (max-width: 640px) {
             .modern-app-bar {
-                padding: 6px 10px !important;
-                gap: 6px !important;
-            }
-            .modern-brand {
-                gap: 6px !important;
-            }
-            .modern-brand-title {
-                font-size: 14px !important;
-                letter-spacing: 0.01em !important;
-            }
-            .modern-bar-actions {
-                gap: 6px !important;
-            }
-            #headerUserRoleBadge,
-            .auth-role-tag,
-            .modern-profile-role {
-                display: none !important;
-            }
-            .modern-user-badge {
-                padding: 4px 10px !important;
-            }
-            .generator-card {
                 padding: 8px 10px !important;
             }
-            .gen-collapsible-section {
-                margin-bottom: 6px !important;
+            #headerUserRoleBadge,
+            .auth-role-tag {
+                display: none !important;
             }
-            .gen-step-title,
-            .gen-step-title.desktop-only-title {
-                margin-bottom: 4px !important;
+            .generator-card {
+                padding: 10px 12px !important;
             }
             .split-grid {
                 gap: 5px !important;
             }
             .split-card {
-                padding: 5px 8px !important;
-                min-height: 34px !important;
+                padding: 6px 9px !important;
+                min-height: 36px !important;
             }
             .equip-chips-wrap {
-                gap: 4px !important;
-                margin-bottom: 5px !important;
+                gap: 5px !important;
+                margin-bottom: 6px !important;
             }
             .equip-chip {
-                padding: 4px 9px !important;
-            }
-            .equip-quick-actions {
-                margin-bottom: 4px !important;
-                gap: 4px !important;
-            }
-            .btn-quick-equip {
-                padding: 3px 7px !important;
+                padding: 5px 10px !important;
             }
             .param-grid {
                 grid-template-columns: 1fr !important;
-                gap: 4px !important;
+                gap: 5px !important;
             }
             .param-box,
             .param-group {
@@ -7068,21 +6702,19 @@
                 align-items: center !important;
                 justify-content: space-between !important;
                 gap: 8px !important;
-                padding: 3px 8px !important;
+                padding: 4px 10px !important;
             }
             .param-group label {
                 margin-bottom: 0 !important;
                 flex-shrink: 0 !important;
             }
             .param-select {
-                max-width: 70% !important;
-                padding: 3px 6px !important;
+                max-width: 68% !important;
+                padding: 4px 8px !important;
             }
             .btn-generate-cta {
-                margin-top: 6px !important;
-                padding: 10px 16px !important;
-                min-height: 42px !important;
+                margin-top: 8px !important;
+                padding: 11px 16px !important;
+                min-height: 44px !important;
             }
         }
-
-
