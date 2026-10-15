@@ -7467,7 +7467,62 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 }
             }
 
-            // 3. Official classic routines
+            // 3. Search ALL custom program keys in localStorage FIRST (user custom workouts always win over official templates)
+            try {
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    if (k && k.startsWith('celik_kodu_custom_programs')) {
+                        const saved = JSON.parse(localStorage.getItem(k) || '[]');
+                        if (Array.isArray(saved)) {
+                            let found = saved.find(p => p && p.id === planId);
+                            if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return normalizeWorkout(found);
+                            if (planTitle) {
+                                found = saved.find(p => p && p.title && p.title.trim().toLowerCase() === planTitle);
+                                if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return normalizeWorkout(found);
+                            }
+                        }
+                    }
+                }
+            } catch(e) {}
+
+            // 4. Search in all users' savedWorkouts
+            try {
+                const users = JSON.parse(localStorage.getItem('celik_kodu_auth_users') || '[]');
+                if (Array.isArray(users)) {
+                    for (const u of users) {
+                        if (u && Array.isArray(u.savedWorkouts)) {
+                            let found = u.savedWorkouts.find(p => p && p.id === planId);
+                            if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return normalizeWorkout(found);
+                            if (planTitle) {
+                                found = u.savedWorkouts.find(p => p && p.title && p.title.trim().toLowerCase() === planTitle);
+                                if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return normalizeWorkout(found);
+                            }
+                        }
+                    }
+                }
+            } catch(e) {}
+
+            // 5. Currently generated workout in memory
+            if (currentGeneratedWorkout && Array.isArray(currentGeneratedWorkout.exercises) && currentGeneratedWorkout.exercises.length > 0) {
+                if (currentGeneratedWorkout.id === planId || planId.startsWith('gen_') || (planTitle && currentGeneratedWorkout.title && currentGeneratedWorkout.title.toLowerCase().includes(planTitle))) {
+                    return currentGeneratedWorkout;
+                }
+            }
+
+            // 6. Last generated workout persisted in localStorage
+            try {
+                const rawLastGen = localStorage.getItem('celik_kodu_last_generated_workout');
+                if (rawLastGen) {
+                    const lastGen = JSON.parse(rawLastGen);
+                    if (lastGen && Array.isArray(lastGen.exercises) && lastGen.exercises.length > 0) {
+                        if (lastGen.id === planId || planId.startsWith('gen_') || plan.type === 'custom_generated' || (planTitle && lastGen.title && lastGen.title.toLowerCase().includes(planTitle))) {
+                            return lastGen;
+                        }
+                    }
+                }
+            } catch(e) {}
+
+            // 7. Official classic routines
             const officialRoutines = {
                 la_forja_day1: {
                     id: 'la_forja_day1',
@@ -7524,61 +7579,6 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (planTitle.includes('gün 3') || planTitle.includes('kompleks') || planTitle.includes('merdiven')) {
                 return buildOfficial(officialRoutines.la_forja_day3);
             }
-
-            // 4. Currently generated workout in memory
-            if (currentGeneratedWorkout && Array.isArray(currentGeneratedWorkout.exercises) && currentGeneratedWorkout.exercises.length > 0) {
-                if (currentGeneratedWorkout.id === planId || planId.startsWith('gen_') || (planTitle && currentGeneratedWorkout.title && currentGeneratedWorkout.title.toLowerCase().includes(planTitle))) {
-                    return currentGeneratedWorkout;
-                }
-            }
-
-            // 5. Last generated workout persisted in localStorage
-            try {
-                const rawLastGen = localStorage.getItem('celik_kodu_last_generated_workout');
-                if (rawLastGen) {
-                    const lastGen = JSON.parse(rawLastGen);
-                    if (lastGen && Array.isArray(lastGen.exercises) && lastGen.exercises.length > 0) {
-                        if (lastGen.id === planId || planId.startsWith('gen_') || plan.type === 'custom_generated' || (planTitle && lastGen.title && lastGen.title.toLowerCase().includes(planTitle))) {
-                            return lastGen;
-                        }
-                    }
-                }
-            } catch(e) {}
-
-            // 6. Search ALL custom program keys in localStorage
-            try {
-                for (let i = 0; i < localStorage.length; i++) {
-                    const k = localStorage.key(i);
-                    if (k && k.startsWith('celik_kodu_custom_programs')) {
-                        const saved = JSON.parse(localStorage.getItem(k) || '[]');
-                        if (Array.isArray(saved)) {
-                            let found = saved.find(p => p && p.id === planId);
-                            if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return normalizeWorkout(found);
-                            if (planTitle) {
-                                found = saved.find(p => p && p.title && p.title.trim().toLowerCase() === planTitle);
-                                if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return normalizeWorkout(found);
-                            }
-                        }
-                    }
-                }
-            } catch(e) {}
-
-            // 7. Search in all users' savedWorkouts
-            try {
-                const users = JSON.parse(localStorage.getItem('celik_kodu_auth_users') || '[]');
-                if (Array.isArray(users)) {
-                    for (const u of users) {
-                        if (u && Array.isArray(u.savedWorkouts)) {
-                            let found = u.savedWorkouts.find(p => p && p.id === planId);
-                            if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return normalizeWorkout(found);
-                            if (planTitle) {
-                                found = u.savedWorkouts.find(p => p && p.title && p.title.trim().toLowerCase() === planTitle);
-                                if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return normalizeWorkout(found);
-                            }
-                        }
-                    }
-                }
-            } catch(e) {}
 
             // 8. If customRoutineState has exercises and matches
             if (typeof customRoutineState !== 'undefined' && Array.isArray(customRoutineState.exercises) && customRoutineState.exercises.length > 0) {
@@ -9279,17 +9279,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 const user = (typeof getActiveUser === 'function') ? getActiveUser() : null;
                 const uid = targetUid || (user ? user.id : 'usr_admin');
                 const schedule = getWeeklySchedule(uid);
-                const fridayPlan = schedule[5];
+                let fridayPlan = schedule[5];
 
                 const fridayDetails = (typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(fridayPlan) : null;
                 const curExCount = (fridayDetails && Array.isArray(fridayDetails.exercises)) 
                     ? fridayDetails.exercises.length 
                     : (fridayPlan && Array.isArray(fridayPlan.exercises) ? fridayPlan.exercises.length : 0);
-
-                // Eğer Cuma günü zaten 6 veya 7 hareketli özel bir programsa ve fitlab_day_ ile ezilmemişse dokunma
-                if (curExCount >= 6 && fridayPlan && !fridayPlan.id?.startsWith('fitlab_day_')) {
-                    return null;
-                }
 
                 let candidates = [];
 
@@ -9333,6 +9328,22 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     }
                 } catch(e) {}
 
+                // 4. Tarih bazlı override kayıtlarını da aday olarak tara
+                try {
+                    const overrides = getDateScheduleOverrides(uid);
+                    if (overrides && typeof overrides === 'object') {
+                        Object.keys(overrides).forEach(dStr => {
+                            const dObj = new Date(dStr + 'T00:00:00');
+                            if (dObj.getDay() === 5 && overrides[dStr]) {
+                                const oWork = overrides[dStr].customWorkout || overrides[dStr];
+                                if (oWork && Array.isArray(oWork.exercises) && oWork.exercises.length >= 6) {
+                                    candidates.push(oWork);
+                                }
+                            }
+                        });
+                    }
+                } catch(e) {}
+
                 // Cuma ile en ilişkili olanı öne al
                 candidates.sort((a, b) => {
                     const aIsFriday = (a.id && a.id.includes('custom_day_5')) || 
@@ -9353,9 +9364,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     return (b.updatedAt || 0) - (a.updatedAt || 0);
                 });
 
+                let recovered = false;
                 if (candidates.length > 0) {
                     const best = candidates[0];
-                    if (best && best.exercises.length > curExCount) {
+                    if (best && (best.exercises.length > curExCount || (fridayPlan && fridayPlan.id?.startsWith('fitlab_day_') && best.exercises.length >= 6))) {
                         schedule[5] = {
                             id: best.id || ('custom_day_5_' + Date.now()),
                             title: best.title || '⚔️ Cuma: Özel Zırh Programım',
@@ -9367,15 +9379,42 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             isCustom: true
                         };
                         saveWeeklySchedule(schedule, uid);
+                        fridayPlan = schedule[5];
+                        recovered = true;
                         console.log(`[Cuma Program Kurtarma] ${best.exercises.length} hareketli özel program başarıyla geri yüklendi:`, best.title);
-                        if (typeof renderActiveWorkout === 'function') {
-                            renderActiveWorkout();
-                        }
-                        if (typeof showToast === 'function') {
-                            showToast(`🛡️ Cuma günkü ${best.exercises.length} hareketli programınız ("${best.title}") geri yüklendi ve korumaya alındı!`);
-                        }
-                        return best;
                     }
+                }
+
+                // 5. KRİTİK: Tarih bazlı override (celik_kodu_date_schedule_*) içinde Cuma gününü 5 harekete düşüren eski kayıt varsa temizle!
+                try {
+                    const finalFridayDetails = (typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(fridayPlan) : fridayPlan;
+                    const finalExCount = (finalFridayDetails && Array.isArray(finalFridayDetails.exercises)) ? finalFridayDetails.exercises.length : 0;
+                    const overrides = getDateScheduleOverrides(uid);
+                    let overridesCleaned = false;
+                    if (overrides && typeof overrides === 'object') {
+                        Object.keys(overrides).forEach(dStr => {
+                            const dObj = new Date(dStr + 'T00:00:00');
+                            if (dObj.getDay() === 5) {
+                                const ovPlan = overrides[dStr];
+                                const ovDetails = (typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(ovPlan) : ovPlan;
+                                const ovExCount = (ovDetails && Array.isArray(ovDetails.exercises)) ? ovDetails.exercises.length : 0;
+                                if (ovExCount < finalExCount || (ovPlan && ovPlan.id && ovPlan.id.startsWith('fitlab_'))) {
+                                    delete overrides[dStr];
+                                    overridesCleaned = true;
+                                }
+                            }
+                        });
+                        if (overridesCleaned) {
+                            localStorage.setItem(`celik_kodu_date_schedule_${uid}`, JSON.stringify(overrides));
+                        }
+                    }
+                } catch(e) {}
+
+                if (recovered) {
+                    if (typeof renderActiveWorkout === 'function') {
+                        renderActiveWorkout();
+                    }
+                    return schedule[5];
                 }
             } catch(e) {
                 console.warn("recoverLostFridayWorkout hatası:", e);
@@ -11079,13 +11118,27 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         function getPlanForDate(dateObj) {
             const dStr = formatDateYMD(dateObj);
-            const overrides = getDateScheduleOverrides();
-            if (overrides && overrides[dStr]) {
-                return overrides[dStr];
-            }
             const dayIdx = dateObj.getDay();
             const schedule = (typeof getWeeklySchedule === 'function') ? getWeeklySchedule() : {};
-            return schedule[dayIdx] || { id: 'rest', title: '🧘 Dinlenme & Toparlanma', rest: true, type: 'rest' };
+            const basePlan = schedule[dayIdx] || { id: 'rest', title: '🧘 Dinlenme & Toparlanma', rest: true, type: 'rest' };
+
+            const overrides = getDateScheduleOverrides();
+            if (overrides && overrides[dStr]) {
+                const ovPlan = overrides[dStr];
+                // Eğer ana haftalık planda daha fazla hareketli özel bir program varsa (örn. Cuma 7 hareket), eski 5 hareketli dateOverride kaydının onu ezmesine izin verme!
+                if (!basePlan.rest && !ovPlan.rest && typeof getWorkoutDetailsForPlan === 'function') {
+                    const baseDetails = getWorkoutDetailsForPlan(basePlan);
+                    const ovDetails = getWorkoutDetailsForPlan(ovPlan);
+                    const baseExCount = (baseDetails && Array.isArray(baseDetails.exercises)) ? baseDetails.exercises.length : 0;
+                    const ovExCount = (ovDetails && Array.isArray(ovDetails.exercises)) ? ovDetails.exercises.length : 0;
+                    if (baseExCount > ovExCount) {
+                        saveDateScheduleOverride(dStr, null);
+                        return basePlan;
+                    }
+                }
+                return ovPlan;
+            }
+            return basePlan;
         }
 
         function setCalendarViewMode(mode) {
@@ -11262,13 +11315,15 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         </div>
                     `;
                 } else if (!isRest) {
+                    const planDetails = (typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(plan) : null;
+                    const exCount = (planDetails && Array.isArray(planDetails.exercises)) ? planDetails.exercises.length : null;
                     bodyContent = `
                         <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
                             <div style="font-size:12px; font-weight:800; color:#fff; margin-bottom:4px; line-height:1.3; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;" title="${escapeHTML(plan.title || 'Planlı Antrenman')}">
                                 ${escapeHTML(plan.title || 'Planlı Antrenman')}
                             </div>
                             <div style="font-size:11px; color:var(--gold); font-weight:700; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                                ⏱️ ${plan.time || '18:30'} • ${plan.duration || 45} Dk
+                                ${exCount ? `🎯 ${exCount} Hrk • ` : ''}⏱️ ${plan.time || '18:30'}
                             </div>
                             ${plan.desc ? `<div style="font-size:10px; color:var(--text-secondary); line-height:1.25; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">${escapeHTML(plan.desc)}</div>` : ''}
                         </div>
@@ -15635,7 +15690,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=193')
+                navigator.serviceWorker.register('./sw.js?v=194')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
@@ -15659,6 +15714,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             initFirebaseEngine();
             syncAppViewState();
             applyWednesdayHammerCurlPatch();
+            recoverLostFridayWorkout();
             updateProfileGeminiStatusUI();
             renderAiHybridHeroBanner();
             updateSelectedSplitLabel();
