@@ -1,0 +1,13 @@
+rank,skill,platform,vendor,source_skillssh,slug_clawhub,match,description,description_zh,x_mentions_7d,x_truncated,hn_hits_7d,hn_raw_7d,bsky_hits_7d,bsky_raw_7d,gh_mentions_7d,x_engagement_7d,buzz_score,buzz_shared
+1,grill-me,skills.sh,mattpocock,mattpocock/skills,,single,,,100,true,1,4,,,28,3037,0.845,false
+2,agent-browser,skills.sh,vercel-labs,vercel-labs/agent-browser,,single,,,100,true,1,4,,,21,1263,0.84,true
+3,self-improving,clawhub,,,self-improving,upstream,"Self-reflection + Self-criticism + Self-learning + Self-organizing memory. Agent evaluates its own work, catches mistakes, and improves permanently. Use when...",自我反思+自我批评+自我学习+自组织记忆。智能体评估自身工作、发现错误并持续改进。,100,true,7,16,,,1,6269,0.795,false
+4,self-improving-agent,clawhub,,,self-improving-agent,upstream,"Captures learnings, errors, and corrections to enable continuous improvement. Use when: (1) A command or operation fails unexpectedly, (2) User corrects Claude ('No, that's wrong...', 'Actually...'), ",记录自身发现以实现自我改进的技能,47,false,1,1,4,8,0,3048,0.641,false
+5,frontend-design,skills.sh,anthropics,anthropics/skills,,single,,,77,false,0,1,,,76,4642,0.639,true
+6,skill-creator,skills.sh,anthropics,anthropics/skills,,single,,,68,false,0,0,,,105,1892,0.634,true
+7,browser-use,skills.sh,browser-use,browser-use/browser-use,,single,,,,false,1,9,,,12,,0.568,true
+8,find-skills,skills.sh,vercel-labs,vercel-labs/skills,,single,,,41,false,0,0,0,2,104,1595,0.562,true
+9,grill-with-docs,skills.sh,mattpocock,mattpocock/skills,,single,,,28,false,0,1,,,11,622,0.557,false
+10,browser-automation,clawhub,,,browser-automation,upstream,"Automate web browser interactions using natural language via CLI commands. Use when the user asks to browse websites, navigate web pages, extract data from websites, take screenshots, fill forms, clic",使用自然语言通过 CLI 命令自动化网页浏览器交互。适用于浏览网站、导航网页、提取数据、截屏、填表、点击按钮或与网页应用交互的场景。,,false,1,9,,,4,,0.55,false
+11,improve-codebase-architecture,skills.sh,mattpocock,mattpocock/skills,,single,,,8,false,0,0,,,4,2694,0.519,false
+12,setup-matt-pocock-skills,skills.sh,mattpocock,mattpocock/skills,,single,,,1,false,0,0,,,7,5,0.477,false

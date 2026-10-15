@@ -58,6 +58,13 @@
         html {
             font-size: 16px;
             -webkit-text-size-adjust: 100%;
+            color-scheme: dark;
+        }
+
+        @media (pointer: fine) {
+            html {
+                overscroll-behavior: none;
+            }
         }
 
         body {
@@ -74,12 +81,14 @@
             padding-bottom: 90px;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
         }
 
         /* Tipografi Hiyerarşisi & Sayısal/Sayaç Tabular-Nums Standardı */
-        h1, h2, h3, h4, .brand-heading, .login-title, .modern-brand-title {
+        h1, h2, h3, h4, .brand-heading, .login-title, .modern-brand-title, .modal-title {
             font-family: var(--font-display);
             letter-spacing: -0.02em;
+            text-wrap: balance;
         }
 
         small, .badge, .pill, .stat-metric-label, .day-sub, .ring-sub-label, .timer-badge-tag {
@@ -90,6 +99,10 @@
         .stat-metric-value,
         .ring-time-val,
         .app-version-badge,
+        .dock-ex-counter,
+        #statTotalWorkouts,
+        #statWeekWorkouts,
+        #statStreak,
         input[type="number"] {
             font-family: var(--font-mono);
             font-variant-numeric: tabular-nums;
@@ -153,12 +166,11 @@
         }
         .login-label {
             display: block;
-            font-size: 11.5px;
+            font-size: 12px;
             font-weight: 700;
             color: var(--text-secondary);
             margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.01em;
         }
         .login-input {
             width: 100%;
@@ -168,11 +180,13 @@
             padding: 13px 14px;
             color: #fff;
             font-size: 14px;
-            outline: none;
             box-sizing: border-box;
-            transition: all 0.2s;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
-        .login-input:focus {
+        .login-input:focus,
+        .login-input:focus-visible {
+            outline: 2px solid var(--gold);
+            outline-offset: 1px;
             border-color: var(--gold);
             box-shadow: 0 0 10px var(--gold-glow);
         }
@@ -188,7 +202,8 @@
             cursor: pointer;
             box-shadow: 0 6px 18px rgba(245, 158, 11, 0.4);
             margin-top: 8px;
-            transition: all 0.2s;
+            touch-action: manipulation;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .login-btn:hover {
             transform: translateY(-1px);
@@ -5849,3 +5864,96 @@
             color: #ffffff;
             box-shadow: 0 0 10px rgba(245, 158, 11, 0.25);
         }
+
+        /* ==========================================================================
+           WEB INTERFACE GUIDELINES & MODERN WEB GUIDANCE COMPLIANCE
+           ========================================================================== */
+
+        /* 1. Keyboard Accessibility: Visible :focus-visible Rings */
+        button:focus-visible,
+        [role="button"]:focus-visible,
+        a:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible,
+        .tab-btn:focus-visible,
+        .split-card:focus-visible,
+        .equip-chip:focus-visible,
+        .bottom-nav-item:focus-visible,
+        .more-sheet-btn:focus-visible,
+        .modal-close:focus-visible {
+            outline: 2px solid var(--gold) !important;
+            outline-offset: 2px !important;
+            box-shadow: 0 0 0 4px var(--gold-glow) !important;
+        }
+
+        /* 2. Native Dark Mode Select & Option Contrast (Windows / Mobile / Desktop) */
+        select,
+        .param-select,
+        .form-select {
+            background-color: var(--bg-surface);
+            color: var(--text-primary);
+            color-scheme: dark;
+        }
+
+        select option,
+        .param-select option,
+        .form-select option {
+            background-color: #0F172A;
+            color: #F8FAFC;
+        }
+
+        /* 3. Touch Interaction: Eliminate 300ms Double-Tap Delay on Gym Controls */
+        button,
+        [role="button"],
+        a,
+        label,
+        select,
+        input[type="checkbox"],
+        input[type="radio"],
+        .tab-btn,
+        .split-card,
+        .equip-chip,
+        .bottom-nav-item,
+        .more-sheet-btn,
+        .gen-mobile-picker-bar,
+        .anatomy-chip {
+            touch-action: manipulation;
+        }
+
+        /* 4. Modal & Drawer Overscroll Containment + Safe-Area Insets */
+        .modal-overlay,
+        .modal-box,
+        .more-sheet,
+        #academicReportModal,
+        #academicReportModalContent {
+            overscroll-behavior: contain;
+        }
+
+        .workout-floating-dock {
+            bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+        }
+
+        /* 5. Defer Rendering Heavy Off-Screen Cards (modern-web-guidance: defer-rendering-heavy-content) */
+        .lib-ex-card,
+        .history-card,
+        .log-card {
+            content-visibility: auto;
+            contain-intrinsic-size: auto none auto 280px;
+        }
+
+        /* 6. Reduced Motion Accessibility Support */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+            .muscle-unworked-anim {
+                animation: none !important;
+            }
+        }
+

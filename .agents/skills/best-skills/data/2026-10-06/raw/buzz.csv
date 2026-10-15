@@ -1,0 +1,101 @@
+skill_key,query,hn_hits_7d,hn_raw_7d,bsky_hits_7d,bsky_raw_7d,gh_mentions_7d,x_mentions_7d,x_truncated,x_pages,x_engagement_7d,llm_filtered,x_raw_7d,x_filtered,judge_model
+find-skills,"""find-skills""",0,0,1,1,227,14,false,1,835,true,17,true,typesafe/jev-1.13
+self-improving-agent,"""self-improving-agent""",1,1,0,0,2,46,false,4,438,true,60,true,typesafe/jev-1.13
+grill-me,"""grill-me""",6,8,5,9,27,60,false,5,2591,true,80,true,typesafe/jev-1.13
+skill-vetter,"""skill-vetter""",0,0,0,0,4,0,false,1,0,false,0,false,
+grill-with-docs,"""grill-with-docs""",0,0,3,3,11,11,false,1,46,true,16,true,typesafe/jev-1.13
+self-improving,"""self-improving""",4,16,48,145,8,66,true,5,3956,true,100,true,typesafe/jev-1.13
+improve-codebase-architecture,"""improve-codebase-architecture""",0,0,0,0,8,6,false,1,229,false,11,true,typesafe/jev-1.13
+github,"""github"" skill",0,190,0,74,7017,1,true,5,0,true,100,true,typesafe/jev-1.13
+agent-browser,"""agent-browser""",1,2,2,2,50,72,true,5,1338,true,100,true,typesafe/jev-1.13
+ontology,"""ontology"" skill",0,0,0,0,25,30,true,5,406,false,100,true,typesafe/jev-1.13
+tdd,"""tdd"" skill",0,3,0,0,49,55,true,5,729,true,100,true,typesafe/jev-1.13
+gog,"""gog"" skill",0,4,0,1,2,1,false,2,1,true,20,true,typesafe/jev-1.13
+frontend-design,"""frontend-design""",0,1,0,5,96,30,false,4,399,true,61,true,typesafe/jev-1.13
+skillscan,"""skillscan"" skill",0,0,0,0,1,0,false,1,0,false,0,false,
+setup-matt-pocock-skills,"""setup-matt-pocock-skills""",0,0,1,1,13,3,false,1,2596,true,4,true,typesafe/jev-1.13
+proactive-agent,"""proactive-agent""",1,1,2,3,1,76,false,5,1010,true,85,true,typesafe/jev-1.13
+handoff,"""handoff"" skill",3,6,2,6,236,50,true,5,48,true,100,true,typesafe/jev-1.13
+weather,"""weather"" skill",0,11,0,8,15,7,true,5,19,true,100,true,typesafe/jev-1.13
+triage,"""triage"" skill",0,5,1,7,201,17,true,5,14,true,100,true,typesafe/jev-1.13
+multi-search-engine,"""multi-search-engine""",0,0,0,0,0,0,false,1,0,false,0,false,
+prototype,"""prototype"" skill",0,10,0,2,56,0,true,5,0,true,100,true,typesafe/jev-1.13
+agent-browser-clawdbot,"""agent-browser-clawdbot""",0,0,0,0,0,0,false,1,0,false,0,false,
+grilling,"""grilling"" skill",1,1,0,1,40,23,false,3,310,true,51,true,typesafe/jev-1.13
+admapix,"""admapix"" skill",0,0,0,0,0,1,false,2,0,false,1,true,typesafe/jev-1.13
+hyperframes-cli,"""hyperframes-cli""",0,0,0,0,0,0,false,1,0,false,0,false,
+humanizer,"""humanizer"" skill",0,1,1,1,32,39,false,4,1735,true,68,true,typesafe/jev-1.13
+reddit-automation,"""reddit-automation""",0,0,0,0,0,5,false,1,21,false,5,true,typesafe/jev-1.13
+nano-pdf,"""nano-pdf""",0,0,0,0,1,0,false,1,0,false,0,false,
+hyperframes,"""hyperframes"" skill",0,0,1,1,47,81,true,5,4081,true,100,true,typesafe/jev-1.13
+obsidian,"""obsidian"" skill",1,4,0,4,44,60,true,5,913,true,100,true,typesafe/jev-1.13
+vercel-react-best-practices,"""vercel-react-best-practices""",0,0,0,0,5,1,false,1,0,false,3,true,typesafe/jev-1.13
+openclaw-tavily-search,"""openclaw-tavily-search""",0,0,0,0,0,0,false,1,0,false,0,false,
+domain-modeling,"""domain-modeling""",0,0,0,1,13,2,false,1,62,true,5,true,typesafe/jev-1.13
+nano-banana-pro,"""nano-banana-pro""",2,2,9,9,8,26,false,3,589,true,45,true,typesafe/jev-1.13
+teach,"""teach"" skill",0,41,0,67,184,1,true,5,2,true,100,true,typesafe/jev-1.13
+notion,"""notion"" skill",0,19,0,1,30,17,true,5,408,true,99,true,typesafe/jev-1.13
+lark-doc,"""lark-doc""",0,0,0,0,0,0,false,1,0,false,0,false,
+skill-creator,"""skill-creator""",0,0,6,6,145,32,false,3,316,true,54,true,typesafe/jev-1.13
+lark-base,"""lark-base""",0,0,0,0,0,0,false,1,0,false,1,true,typesafe/jev-1.13
+pollyreach,"""pollyreach"" skill",0,0,0,0,0,0,false,1,0,false,0,false,
+lark-drive,"""lark-drive""",0,0,0,0,0,0,false,1,0,false,0,false,
+auto-updater,"""auto-updater""",0,0,0,9,0,0,false,1,0,true,2,true,typesafe/jev-1.13
+lark-shared,"""lark-shared""",0,0,0,0,0,0,false,1,0,false,0,false,
+word-docx,"""word-docx""",0,0,1,9,1,0,false,1,0,true,3,true,typesafe/jev-1.13
+lark-im,"""lark-im""",0,0,0,0,0,0,false,1,0,false,0,false,
+baidu-search,"""baidu-search""",0,0,0,1,0,0,false,1,0,true,0,false,typesafe/jev-1.13
+lark-calendar,"""lark-calendar""",0,0,0,0,0,0,false,1,0,false,0,false,
+evolver,"""evolver"" skill",0,0,0,0,0,1,false,1,0,false,2,true,typesafe/jev-1.13
+lark-approval,"""lark-approval""",0,0,0,0,0,0,false,1,0,false,0,false,
+sonoscli,"""sonoscli"" skill",0,0,0,0,0,0,false,1,0,false,0,false,
+lark-sheets,"""lark-sheets""",0,0,0,0,0,,false,,,false,,false,
+openai-whisper,"""openai-whisper""",1,1,3,4,1,,false,,,true,,false,typesafe/jev-1.13
+lark-wiki,"""lark-wiki""",0,0,0,0,0,,false,,,false,,false,
+api-gateway,"""api-gateway""",0,4,0,61,9,,false,,,true,,false,typesafe/jev-1.13
+lark-contact,"""lark-contact""",0,0,0,0,0,,false,,,false,,false,
+automation-workflows,"""automation-workflows""",0,2,0,11,2,,false,,,true,,false,typesafe/jev-1.13
+lark-task,"""lark-task""",0,0,0,0,1,,false,,,false,,false,
+prismfy-search,"""prismfy-search""",0,0,0,0,0,,false,,,false,,false,
+lark-slides,"""lark-slides""",0,0,0,0,0,,false,,,false,,false,
+excel-xlsx,"""excel-xlsx""",0,0,0,4,0,,false,,,true,,false,typesafe/jev-1.13
+lark-mail,"""lark-mail""",0,0,0,0,0,,false,,,false,,false,
+feishu-evolver-wrapper,"""feishu-evolver-wrapper""",0,0,0,0,0,,false,,,false,,false,
+lark-whiteboard,"""lark-whiteboard""",0,0,0,0,0,,false,,,false,,false,
+browser-use,"""browser-use""",2,8,13,16,14,,false,,,true,,false,typesafe/jev-1.13
+lark-event,"""lark-event""",0,0,0,0,0,,false,,,false,,false,
+agent-phone-call,"""agent-phone-call""",0,0,0,1,1,,false,,,true,,false,typesafe/jev-1.13
+lark-openapi-explorer,"""lark-openapi-explorer""",0,0,0,0,0,,false,,,false,,false,
+free-ride,"""free-ride""",0,4,0,153,0,,false,,,true,,false,typesafe/jev-1.13
+lark-attendance,"""lark-attendance""",0,0,0,0,0,,false,,,false,,false,
+mcporter,"""mcporter"" skill",0,0,0,0,2,,false,,,false,,false,
+lark-minutes,"""lark-minutes""",0,0,0,0,0,,false,,,false,,false,
+elite-longterm-memory,"""elite-longterm-memory""",0,0,0,0,0,,false,,,false,,false,
+lark-skill-maker,"""lark-skill-maker""",0,0,0,0,0,,false,,,false,,false,
+desktop-control,"""desktop-control""",0,0,3,3,2,,false,,,true,,false,typesafe/jev-1.13
+lark-workflow-meeting-summary,"""lark-workflow-meeting-summary""",0,0,0,0,0,,false,,,false,,false,
+brave-search,"""brave-search""",3,5,0,72,1,,false,,,true,,false,typesafe/jev-1.13
+lark-vc,"""lark-vc""",0,0,0,0,0,,false,,,false,,false,
+find-skills-skill,"""find-skills-skill""",0,0,0,0,226,,false,,,false,,false,
+lark-workflow-standup-report,"""lark-workflow-standup-report""",0,0,0,0,0,,false,,,false,,false,
+stock-analysis,"""stock-analysis""",0,1,0,363,2,,false,,,true,,false,typesafe/jev-1.13
+codebase-design,"""codebase-design""",0,0,2,2,14,,false,,,true,,false,typesafe/jev-1.13
+video-frames,"""video-frames""",0,2,0,7,4,,false,,,true,,false,typesafe/jev-1.13
+lark-okr,"""lark-okr""",0,0,0,0,0,,false,,,false,,false,
+powerpoint-pptx,"""powerpoint-pptx""",0,0,0,2,0,,false,,,true,,false,typesafe/jev-1.13
+diagnosing-bugs,"""diagnosing-bugs""",0,0,0,0,11,,false,,,false,,false,
+youtube-watcher,"""youtube-watcher""",0,0,0,1,0,,false,,,true,,false,typesafe/jev-1.13
+lark-markdown,"""lark-markdown""",0,0,0,0,0,,false,,,false,,false,
+slack,"""slack"" skill",0,12,0,4,35,,false,,,true,,false,typesafe/jev-1.13
+hyperframes-registry,"""hyperframes-registry""",0,0,0,0,0,,false,,,false,,false,
+himalaya,"""himalaya"" skill",0,0,0,0,1,,false,,,false,,false,
+web-design-guidelines,"""web-design-guidelines""",0,0,0,0,12,,false,,,false,,false,
+clawcall-dev,"""clawcall-dev""",0,0,0,0,0,,false,,,false,,false,
+media-use,"""media-use""",0,1,0,127,0,,false,,,true,,false,typesafe/jev-1.13
+news-summary,"""news-summary""",0,0,0,72,0,,false,,,true,,false,typesafe/jev-1.13
+lark-vc-agent,"""lark-vc-agent""",0,0,0,0,0,,false,,,false,,false,
+imap-smtp-email,"""imap-smtp-email""",0,0,0,0,0,,false,,,false,,false,
+ai-video-generation,"""ai-video-generation""",0,1,13,23,0,,false,,,true,,false,typesafe/jev-1.13
+pdf,"""pdf"" skill",0,24,3,64,105,,false,,,true,,false,typesafe/jev-1.13
+ai-image-generation,"""ai-image-generation""",1,4,49,51,1,,false,,,true,,false,typesafe/jev-1.13
+xiucheng-self-improving-agent,"""xiucheng-self-improving-agent""",0,0,0,0,0,,false,,,false,,false,

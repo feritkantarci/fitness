@@ -1,0 +1,101 @@
+skill_key,query,hn_hits_7d,hn_raw_7d,bsky_hits_7d,bsky_raw_7d,gh_mentions_7d,x_mentions_7d,x_truncated,x_pages,x_engagement_7d,llm_filtered
+find-skills,"""find-skills""",1,1,1,1,119,21,false,2,308,true
+self-improving-agent,"""self-improving-agent""",0,0,2,2,2,48,false,3,1170,true
+grill-me,"""grill-me""",0,5,6,11,34,100,true,5,4851,true
+skill-vetter,"""skill-vetter""",0,0,0,0,3,0,false,1,0,false
+grill-with-docs,"""grill-with-docs""",0,0,2,3,5,25,false,2,3078,true
+self-improving,"""self-improving""",3,10,129,206,8,100,true,5,4573,true
+improve-codebase-architecture,"""improve-codebase-architecture""",0,0,0,0,0,1,false,1,0,false
+ontology,"""ontology"" skill",0,2,0,0,5,100,true,5,1487,true
+tdd,"""tdd"" skill",0,1,1,3,37,100,true,5,3294,true
+github,"""github"" skill",0,190,16,99,645,100,true,5,298,true
+frontend-design,"""frontend-design""",0,5,3,6,53,60,false,4,1595,true
+gog,"""gog"" skill",0,0,0,1,5,11,false,1,302,true
+agent-browser,"""agent-browser""",0,2,9,11,24,100,true,5,1992,true
+skillscan,"""skillscan"" skill",0,0,0,0,2,0,false,1,0,false
+setup-matt-pocock-skills,"""setup-matt-pocock-skills""",0,0,0,0,3,1,false,1,12,false
+proactive-agent,"""proactive-agent""",0,0,0,0,1,44,false,3,589,false
+handoff,"""handoff"" skill",0,1,0,2,184,100,true,5,350,true
+weather,"""weather"" skill",1,12,1,6,11,100,true,5,979,true
+triage,"""triage"" skill",1,3,1,2,151,100,true,5,2278,true
+multi-search-engine,"""multi-search-engine""",0,0,0,1,2,1,false,1,8,true
+prototype,"""prototype"" skill",0,8,0,2,40,100,true,5,1413,true
+agent-browser-clawdbot,"""agent-browser-clawdbot""",0,0,0,0,0,0,false,1,0,false
+grilling,"""grilling"" skill",0,0,0,0,24,30,false,2,426,false
+admapix,"""admapix"" skill",0,0,0,0,0,0,false,1,0,false
+vercel-react-best-practices,"""vercel-react-best-practices""",0,0,0,0,3,6,false,1,151,false
+humanizer,"""humanizer"" skill",1,3,1,1,28,63,false,4,4433,true
+lark-doc,"""lark-doc""",0,0,0,0,0,0,false,1,0,false
+nano-pdf,"""nano-pdf""",0,0,0,0,0,0,false,1,0,false
+lark-base,"""lark-base""",0,0,0,0,0,0,false,1,0,false
+obsidian,"""obsidian"" skill",1,7,2,2,22,100,true,5,1639,true
+lark-drive,"""lark-drive""",0,0,0,0,0,0,false,1,0,false
+nano-banana-pro,"""nano-banana-pro""",0,1,2,3,4,32,false,2,1278,true
+lark-shared,"""lark-shared""",0,0,0,0,0,0,false,1,0,false
+openclaw-tavily-search,"""openclaw-tavily-search""",0,0,0,0,0,0,false,1,0,false
+lark-im,"""lark-im""",0,0,0,0,0,0,false,1,0,false
+notion,"""notion"" skill",0,19,1,5,20,100,true,5,6047,true
+lark-approval,"""lark-approval""",0,0,0,0,0,0,false,1,0,false
+skill-creator,"""skill-creator""",0,0,0,1,85,75,false,4,3225,true
+lark-calendar,"""lark-calendar""",0,0,0,0,0,0,false,1,0,false
+pollyreach,"""pollyreach"" skill",0,0,0,0,0,0,false,1,0,false
+lark-sheets,"""lark-sheets""",0,0,0,0,0,0,false,1,0,false
+auto-updater,"""auto-updater""",0,0,2,12,1,0,false,1,0,true
+lark-wiki,"""lark-wiki""",0,0,0,0,0,1,false,1,0,false
+word-docx,"""word-docx""",0,0,2,2,0,0,false,1,0,true
+lark-contact,"""lark-contact""",0,0,0,0,0,0,false,1,0,false
+baidu-search,"""baidu-search""",0,0,0,0,0,0,false,1,0,false
+lark-slides,"""lark-slides""",0,0,0,0,0,0,false,1,0,false
+evolver,"""evolver"" skill",0,0,0,0,1,7,false,1,105,false
+lark-minutes,"""lark-minutes""",0,0,0,0,0,0,false,1,0,false
+sonoscli,"""sonoscli"" skill",0,0,0,0,0,0,false,1,0,false
+lark-mail,"""lark-mail""",0,0,0,0,0,,false,,,false
+openai-whisper,"""openai-whisper""",0,0,0,0,0,,false,,,false
+lark-task,"""lark-task""",0,0,0,0,0,,false,,,false
+api-gateway,"""api-gateway""",1,5,28,58,2,,false,,,true
+lark-event,"""lark-event""",0,0,0,0,0,,false,,,false
+prismfy-search,"""prismfy-search""",0,0,0,0,0,,false,,,false
+lark-whiteboard,"""lark-whiteboard""",0,0,0,0,0,,false,,,false
+automation-workflows,"""automation-workflows""",0,0,32,36,2,,false,,,true
+lark-attendance,"""lark-attendance""",0,0,0,0,0,,false,,,false
+excel-xlsx,"""excel-xlsx""",0,0,0,2,0,,false,,,true
+lark-openapi-explorer,"""lark-openapi-explorer""",0,0,0,0,0,,false,,,false
+feishu-evolver-wrapper,"""feishu-evolver-wrapper""",0,0,0,0,0,,false,,,false
+lark-skill-maker,"""lark-skill-maker""",0,0,0,0,0,,false,,,false
+browser-use,"""browser-use""",3,7,34,39,7,,false,,,true
+lark-vc,"""lark-vc""",0,0,0,0,0,,false,,,false
+agent-phone-call,"""agent-phone-call""",0,0,0,0,0,,false,,,false
+lark-workflow-meeting-summary,"""lark-workflow-meeting-summary""",0,0,0,0,0,,false,,,false
+free-ride,"""free-ride""",0,3,0,153,0,,false,,,true
+lark-workflow-standup-report,"""lark-workflow-standup-report""",0,0,0,0,0,,false,,,false
+mcporter,"""mcporter"" skill",0,0,0,0,2,,false,,,false
+lark-okr,"""lark-okr""",0,0,0,0,0,,false,,,false
+elite-longterm-memory,"""elite-longterm-memory""",0,0,0,0,0,,false,,,false
+teach,"""teach"" skill",1,27,9,56,95,,false,,,true
+desktop-control,"""desktop-control""",0,0,1,1,0,,false,,,true
+lark-markdown,"""lark-markdown""",0,0,0,0,0,,false,,,false
+brave-search,"""brave-search""",0,1,11,26,0,,false,,,true
+domain-modeling,"""domain-modeling""",0,1,1,2,5,,false,,,true
+find-skills-skill,"""find-skills-skill""",0,0,0,0,116,,false,,,false
+lark-vc-agent,"""lark-vc-agent""",0,0,0,0,0,,false,,,false
+stock-analysis,"""stock-analysis""",0,0,145,290,1,,false,,,true
+codebase-design,"""codebase-design""",0,0,1,1,4,,false,,,true
+video-frames,"""video-frames""",0,0,2,11,0,,false,,,true
+web-design-guidelines,"""web-design-guidelines""",0,0,0,0,2,,false,,,false
+powerpoint-pptx,"""powerpoint-pptx""",0,0,0,0,0,,false,,,false
+diagnosing-bugs,"""diagnosing-bugs""",0,1,0,0,5,,false,,,true
+youtube-watcher,"""youtube-watcher""",0,0,0,1,0,,false,,,true
+hyperframes-cli,"""hyperframes-cli""",0,0,0,0,0,,false,,,false
+slack,"""slack"" skill",0,10,1,5,19,,false,,,true
+lark-apps,"""lark-apps""",0,0,0,0,0,,false,,,false
+himalaya,"""himalaya"" skill",0,0,0,0,0,,false,,,false
+hyperframes,"""hyperframes"" skill",0,0,0,0,31,,false,,,false
+imap-smtp-email,"""imap-smtp-email""",0,0,0,0,0,,false,,,false
+video-edit,"""video-edit""",0,0,4,49,4,,false,,,true
+news-summary,"""news-summary""",0,0,48,70,0,,false,,,true
+microsoft-foundry,"""microsoft-foundry""",0,0,33,33,0,,false,,,true
+xiucheng-self-improving-agent,"""xiucheng-self-improving-agent""",0,0,0,0,0,,false,,,false
+ai-music,"""ai-music""",4,8,335,399,0,,false,,,true
+pdf,"""pdf"" skill",1,27,3,29,67,,false,,,true
+ai-video-generation,"""ai-video-generation""",0,0,72,75,0,,false,,,true
+markdown-converter,"""markdown-converter""",1,1,2,3,1,,false,,,true

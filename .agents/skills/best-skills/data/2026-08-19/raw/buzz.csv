@@ -1,0 +1,101 @@
+skill_key,query,hn_hits_7d,hn_raw_7d,bsky_hits_7d,bsky_raw_7d,gh_mentions_7d,x_mentions_7d,x_truncated,x_pages,x_engagement_7d,llm_filtered
+find-skills,"""find-skills""",0,0,0,2,112,,false,,,true
+self-improving-agent,"""self-improving-agent""",1,1,4,7,1,,false,,,true
+grill-me,"""grill-me""",1,4,5,13,22,,false,,,true
+skill-vetter,"""skill-vetter""",0,0,0,0,2,,false,,,false
+frontend-design,"""frontend-design""",0,4,3,36,72,,false,,,true
+self-improving,"""self-improving""",7,12,58,72,2,,false,,,true
+grill-with-docs,"""grill-with-docs""",0,1,1,2,11,,false,,,true
+ontology,"""ontology"" skill",0,0,0,0,5,,false,,,false
+improve-codebase-architecture,"""improve-codebase-architecture""",0,0,0,1,3,,false,,,true
+github,"""github"" skill",0,237,31,65,625,,false,,,true
+tdd,"""tdd"" skill",1,3,1,1,25,,false,,,true
+gog,"""gog"" skill",0,0,0,0,2,,false,,,false
+agent-browser,"""agent-browser""",1,6,14,15,21,,false,,,true
+skillscan,"""skillscan"" skill",0,0,0,0,0,,false,,,false
+setup-matt-pocock-skills,"""setup-matt-pocock-skills""",0,0,0,1,6,,false,,,true
+proactive-agent,"""proactive-agent""",0,1,0,1,1,,false,,,true
+vercel-react-best-practices,"""vercel-react-best-practices""",0,0,0,0,2,,false,,,false
+weather,"""weather"" skill",0,20,1,10,5,,false,,,true
+handoff,"""handoff"" skill",1,9,1,1,117,,false,,,true
+multi-search-engine,"""multi-search-engine""",0,0,0,0,0,,false,,,false
+triage,"""triage"" skill",0,5,0,1,136,,false,,,true
+agent-browser-clawdbot,"""agent-browser-clawdbot""",0,0,0,0,0,,false,,,false
+prototype,"""prototype"" skill",0,7,1,2,28,,false,,,true
+admapix,"""admapix"" skill",0,0,0,0,0,,false,,,false
+lark-doc,"""lark-doc""",0,0,0,0,2,,false,,,false
+humanizer,"""humanizer"" skill",0,1,4,5,16,,false,,,true
+lark-base,"""lark-base""",0,0,0,0,0,,false,,,false
+nano-pdf,"""nano-pdf""",0,0,0,0,0,,false,,,false
+lark-approval,"""lark-approval""",0,0,0,0,0,,false,,,false
+obsidian,"""obsidian"" skill",0,3,1,1,26,,false,,,true
+lark-drive,"""lark-drive""",0,0,0,0,0,,false,,,false
+nano-banana-pro,"""nano-banana-pro""",0,0,8,17,0,,false,,,true
+lark-shared,"""lark-shared""",0,0,0,0,0,,false,,,false
+openclaw-tavily-search,"""openclaw-tavily-search""",0,0,0,0,0,,false,,,false
+lark-calendar,"""lark-calendar""",0,0,0,0,0,,false,,,false
+notion,"""notion"" skill",0,16,2,6,22,,false,,,true
+lark-im,"""lark-im""",0,0,0,0,2,,false,,,false
+pollyreach,"""pollyreach"" skill",0,0,0,0,0,,false,,,false
+lark-contact,"""lark-contact""",0,0,0,0,0,,false,,,false
+skill-creator,"""skill-creator""",0,0,1,1,119,,false,,,true
+lark-sheets,"""lark-sheets""",0,0,0,0,0,,false,,,false
+auto-updater,"""auto-updater""",0,0,2,13,2,,false,,,true
+lark-wiki,"""lark-wiki""",0,0,0,0,0,,false,,,false
+baidu-search,"""baidu-search""",0,0,0,0,0,,false,,,false
+lark-event,"""lark-event""",0,0,0,0,0,,false,,,false
+word-docx,"""word-docx""",0,0,0,1,0,,false,,,true
+lark-minutes,"""lark-minutes""",0,0,0,0,0,,false,,,false
+sonoscli,"""sonoscli"" skill",0,0,0,0,0,,false,,,false
+lark-attendance,"""lark-attendance""",0,0,0,0,0,,false,,,false
+openai-whisper,"""openai-whisper""",0,0,1,1,0,,false,,,true
+lark-whiteboard,"""lark-whiteboard""",0,0,0,0,0,,false,,,false
+api-gateway,"""api-gateway""",0,6,24,42,1,,false,,,true
+lark-openapi-explorer,"""lark-openapi-explorer""",0,0,0,0,0,,false,,,false
+evolver,"""evolver"" skill",0,0,1,1,0,,false,,,true
+lark-task,"""lark-task""",0,0,0,0,0,,false,,,false
+prismfy-search,"""prismfy-search""",0,0,0,0,0,,false,,,false
+lark-mail,"""lark-mail""",0,0,0,0,0,,false,,,false
+automation-workflows,"""automation-workflows""",0,0,8,13,0,,false,,,true
+lark-slides,"""lark-slides""",0,0,0,0,0,,false,,,false
+excel-xlsx,"""excel-xlsx""",0,0,0,0,0,,false,,,false
+lark-skill-maker,"""lark-skill-maker""",0,0,0,0,0,,false,,,false
+browser-use,"""browser-use""",1,12,13,19,13,,false,,,true
+lark-vc,"""lark-vc""",0,0,0,0,0,,false,,,false
+feishu-evolver-wrapper,"""feishu-evolver-wrapper""",0,0,0,0,0,,false,,,false
+lark-workflow-meeting-summary,"""lark-workflow-meeting-summary""",0,0,0,0,1,,false,,,false
+agent-phone-call,"""agent-phone-call""",0,0,0,0,0,,false,,,false
+lark-workflow-standup-report,"""lark-workflow-standup-report""",0,0,0,0,0,,false,,,false
+free-ride,"""free-ride""",0,1,0,197,0,,false,,,true
+lark-okr,"""lark-okr""",0,0,0,0,0,,false,,,false
+mcporter,"""mcporter"" skill",0,0,0,0,0,,false,,,false
+lark-markdown,"""lark-markdown""",0,0,0,0,0,,false,,,false
+elite-longterm-memory,"""elite-longterm-memory""",0,0,0,0,0,,false,,,false
+web-design-guidelines,"""web-design-guidelines""",0,0,1,1,5,,false,,,true
+desktop-control,"""desktop-control""",0,1,0,5,1,,false,,,true
+microsoft-foundry,"""microsoft-foundry""",0,0,27,41,0,,false,,,true
+brave-search,"""brave-search""",0,2,37,39,3,,false,,,true
+lark-vc-agent,"""lark-vc-agent""",0,0,0,0,0,,false,,,false
+stock-analysis,"""stock-analysis""",0,0,233,243,5,,false,,,true
+azure-diagnostics,"""azure-diagnostics""",0,0,0,0,0,,false,,,false
+find-skills-skill,"""find-skills-skill""",0,0,0,0,112,,false,,,false
+azure-ai,"""azure-ai""",0,0,29,43,0,,false,,,true
+video-frames,"""video-frames""",0,0,4,7,0,,false,,,true
+azure-deploy,"""azure-deploy""",0,0,0,1,0,,false,,,true
+youtube-watcher,"""youtube-watcher""",0,0,0,1,0,,false,,,true
+azure-prepare,"""azure-prepare""",0,0,0,0,0,,false,,,false
+powerpoint-pptx,"""powerpoint-pptx""",0,0,0,1,0,,false,,,true
+azure-validate,"""azure-validate""",0,0,0,0,0,,false,,,false
+slack,"""slack"" skill",0,9,1,3,23,,false,,,true
+azure-storage,"""azure-storage""",0,0,2,3,0,,false,,,true
+himalaya,"""himalaya"" skill",0,0,0,0,0,,false,,,false
+entra-app-registration,"""entra-app-registration""",0,0,0,0,0,,false,,,false
+imap-smtp-email,"""imap-smtp-email""",0,0,0,0,0,,false,,,false
+appinsights-instrumentation,"""appinsights-instrumentation""",0,0,0,0,0,,false,,,false
+news-summary,"""news-summary""",0,0,90,94,0,,false,,,true
+azure-resource-lookup,"""azure-resource-lookup""",0,0,0,0,0,,false,,,false
+xiucheng-self-improving-agent,"""xiucheng-self-improving-agent""",0,0,0,0,0,,false,,,false
+azure-compliance,"""azure-compliance""",0,0,0,0,0,,false,,,false
+atxp,"""atxp"" skill",0,0,0,0,0,,false,,,false
+azure-aigateway,"""azure-aigateway""",0,0,0,0,0,,false,,,false
+markdown-converter,"""markdown-converter""",0,0,1,4,0,,false,,,true

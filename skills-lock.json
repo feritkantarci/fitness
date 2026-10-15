@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "skills": {
+    "best-skills": {
+      "source": "LinklyAI/best-skills",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "0c0abfc76b537b4143b3a696f833c883e268cd2536d2101c8cf48d81e712d65d"
+    },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "89496d5dd00f4810205f351759594fc2742bf8eea85a2f2b2d1de59f4bd91576"
+    },
+    "web-design-guidelines": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/web-design-guidelines/SKILL.md",
+      "computedHash": "a6a44d5498f7e8f68289902f3dedfc6f38ae0cee1e96527c80724cf27f727c2a"
+    }
+  }
+}

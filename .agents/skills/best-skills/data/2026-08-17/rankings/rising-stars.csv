@@ -1,0 +1,101 @@
+rank,skill,platform,vendor,source_skillssh,slug_clawhub,match,description,description_zh,first_seen_days,installs_skillssh,downloads_clawhub,downloads_skillhub_cn,pop_score
+1,paperless-business-system-from-files,skillhub-cn,,,,single,将纸质表单对应的 Excel、CSV、Word、PDF、JSON、TXT、ZIP、电子表单或已有 Python/Web 源码，转换或升级为可填写、可查询、可导入导出、可本地/局域网部署的中文电子化业务系统。用于“根据报表或附件生成系统”“把 Excel 做成系统”“生成可运行 ZIP/完整部署包”“做成类似 V1.5.11 的局域网包”“生成服务端和 Windows 填写客户端”，以及诊断、修复、,读取用户提示词和上传的业务附件，自动识别业务类型、字段、公式、流程、权限和报表规则，生成对应的完整本地部署 Python Web 系统。支持能源、点工、生产、质量、设备、库存、审批及组合业务，并交付完整源码、SQLite 数据库、导入导出、权限审计、备份恢复和 Windows EXE 打包代码。 生产日报与班报系统 质量问题与整改闭环系统 设备点检、保养与维修系统 库存管理与采购预警系统 考勤与交,17,,,50331,0.906
+2,heilongjiang-bid-analysis-shibo,skillhub-cn,,,,single,,黑龙江省招投标分析【世舶科技】。需配置世舶科技 API Key 使用。当搜索词包含黑龙江、黑龙江省、黑、哈尔滨、齐齐哈尔、鸡西、鹤岗、双鸭山、大庆、哈尔滨新区、哈大齐工业走廊、自贸试验区黑龙江片区、对俄合作区、招标公告、中标结果、合同公告、采购意向等内容时触发，基于世舶科技全行业招投标数据 API，覆盖黑龙江省范围内政府采购、公共资源交易、央国企招采、事业单位采购、学校医院采购、园区平台采购、企业,4,,,41212,0.881
+3,hubei-bid-analysis-shibo,skillhub-cn,,,,single,,湖北省招投标分析【世舶科技】。需配置世舶科技 API Key 使用。当搜索词包含湖北、湖北省、鄂、武汉、黄石、十堰、宜昌、襄阳、鄂州、武汉都市圈、光谷、东湖高新区、长江中游城市群、招标公告、中标结果、合同公告、采购意向等内容时触发，基于世舶科技全行业招投标数据 API，覆盖湖北省范围内政府采购、公共资源交易、央国企招采、事业单位采购、学校医院采购、园区平台采购、企业采购和拟在建项目信息，分析采购方,4,,,32452,0.845
+4,henan-bid-analysis-shibo,skillhub-cn,,,,single,,河南省招投标分析【世舶科技】。需配置世舶科技 API Key 使用。当搜索词包含河南、河南省、豫、中原、郑州、开封、洛阳、平顶山、安阳、鹤壁、郑州航空港区、中原城市群、郑洛新国家自主创新示范区、洛阳都市圈、招标公告、中标结果、合同公告、采购意向等内容时触发，基于世舶科技全行业招投标数据 API，覆盖河南省范围内政府采购、公共资源交易、央国企招采、事业单位采购、学校医院采购、园区平台采购、企业采购和,4,,,32200,0.842
+5,forestry-bid-analysis-shibo-aliyun,skillhub-cn,,,,single,【阿里云世舶API：1898610788】。需配置世舶科技 API Key 使用。当搜索词包含林业、森林、造林、苗木、绿化、林场、林草、防火、湿地、生态修复 等内容时触发，基于世舶科技全行业招投标数据 API，重点提取采购方、供应商、预算/中标/合同金额，并分析林业 客户、Top 供应商体系、合同公告、拟在建项目和企业画像。,林业招标采购分析【阿里云世舶API：1898610788】。需配置世舶科技 API Key 使用。当搜索词包含林业、森林、造林、苗木、绿化、林场、林草、防火、湿地、生态修复 等内容时触发，基于世舶科技全行业招投标数据 API，重点提取采购方、供应商、预算/中标/合同金额，并分析林业 客户、Top 供应商体系、合同公告、拟在建项目和企业画像。,4,,,32171,0.841
+6,repair-services-bid-analysis-shibo,skillhub-cn,,,,single,,修理业招标采购分析【世舶科技】。需配置世舶科技 API Key 使用。当搜索词包含维修、修理、维保、保养、检修、设备维修、车辆维修、家电维修等内容时触发，基于世舶科技全行业招投标数据 API，重点提取采购方、供应商、预算/中标/合同金额，并分析修理业客户、Top 供应商体系、合同公告、拟在建项目和企业画像。,5,,,32093,0.839
+7,catering-bid-analysis-shibo,skillhub-cn,,,,single,,餐饮业招标采购分析【世舶科技】。需配置世舶科技 API Key 使用。当搜索词包含餐饮、食堂、餐厅、膳食、配餐、厨房、餐厨、食品配送等内容时触发，基于世舶科技全行业招投标数据 API，重点提取采购方、供应商、预算/中标/合同金额，并分析餐饮业客户、Top 供应商体系、合同公告、拟在建项目和企业画像。,5,,,31927,0.837
+8,hainan-bid-analysis-shibo,skillhub-cn,,,,single,,海南省招投标分析【世舶科技】。需配置世舶科技 API Key 使用。当搜索词包含海南、海南省、琼、自贸港、海口、三亚、三沙、儋州、五指山、琼海、海南自由贸易港、海口江东新区、三亚崖州湾科技城、洋浦经济开发区、招标公告、中标结果、合同公告、采购意向等内容时触发，基于世舶科技全行业招投标数据 API，覆盖海南省范围内政府采购、公共资源交易、央国企招采、事业单位采购、学校医院采购、园区平台采购、企业采购,4,,,31909,0.836
+9,gansu-bid-analysis-shibo,skillhub-cn,,,,single,,甘肃省招投标分析【世舶科技】。需配置世舶科技 API Key 使用。当搜索词包含甘肃、甘肃省、陇、兰州、嘉峪关、金昌、白银、天水、武威、兰州新区、河西走廊、丝绸之路经济带甘肃段、兰白科技创新改革试验区、招标公告、中标结果、合同公告、采购意向等内容时触发，基于世舶科技全行业招投标数据 API，覆盖甘肃省范围内政府采购、公共资源交易、央国企招采、事业单位采购、学校医院采购、园区平台采购、企业采购和拟在,4,,,31842,0.835
+10,hong-kong-bid-analysis-shibo,skillhub-cn,,,,single,,香港特别行政区招投标分析【世舶科技】。需配置世舶科技 API Key 使用。当搜索词包含香港、香港特别行政区、港、Hong Kong、中西区、湾仔、东区、南区、油尖旺、深水埗、粤港澳大湾区、香港国际机场、港珠澳大桥香港口岸、北部都会区、招标公告、中标结果、合同公告、采购意向等内容时触发，基于世舶科技全行业招投标数据 API，覆盖香港特别行政区范围内政府采购、公共资源交易、央国企招采、事业单位采购、,4,,,31769,0.834
+11,hebei-bid-analysis-shibo,skillhub-cn,,,,single,,河北省招投标分析【世舶科技】。需配置世舶科技 API Key 使用。当搜索词包含河北、河北省、冀、京津冀、石家庄、唐山、秦皇岛、邯郸、邢台、保定、雄安新区、京津冀协同发展区、曹妃甸区、北戴河新区、招标公告、中标结果、合同公告、采购意向等内容时触发，基于世舶科技全行业招投标数据 API，覆盖河北省范围内政府采购、公共资源交易、央国企招采、事业单位采购、学校医院采购、园区平台采购、企业采购和拟在建项目,4,,,31642,0.833
+12,sbkj-ztb,skillhub-cn,世舶科技（武汉）有限公司,,,single,世舶科技提供全网招标、中标、采购与商机数据查询分析服务，覆盖招标公告、中标公告、政府采购、工程建设、企业采购、合同公告、变更公告、废标流标、拟在建项目、临期项目、即将到期项目等招投标信息场景。用户可通过世舶科技快速搜索标讯、订阅项目、挖掘潜在商机、预测采购需求、分析历史中标记录，并支持按地区、行业、采购单位、中标单位、标的物、项目金额、发布时间、开标时间等维度进行数据筛选与统计分析。 世舶科技适用,世舶科技提供全网招标、中标、采购与商机数据查询分析服务，覆盖招标公告、中标公告、政府采购、工程建设、企业采购、合同公告、变更公告、废标流标、拟在建项目、临期项目、即将到期项目等招投标信息场景。用户可通过世舶科技快速搜索标讯、订阅项目、挖掘潜在商机、预测采购需求、分析历史中标记录，并支持按地区、行业、采购单位、中标单位、标的物、项目金额、发布时间、开标时间等维度进行数据筛选与统计分析。 世舶科技适用,1,,,19828,0.71
+13,beatra,skillhub-cn,乐萱同行科技（深圳）有限公司,,,single,通过同一个 AI 创作工具完成 AI 图片、视频、音乐与语音创作，编辑视觉成果，并集中查看和管理生成资产。Beatra 全能创作支持 AI 图片生成（文生图）、AI 视频生成（图生视频）和 AI 视频编辑，通过 AI 音乐生成把想法做成歌曲或纯音乐，也可用 AI 语音生成（文字转语音）、多语言旁白和 AI 语音克隆完成跨媒介内容。它是一款面向 AI 内容创作与多模态内容制作的 AI 创作套件，适用,通过同一个 AI 创作工具完成 AI 图片、视频、音乐与语音创作，编辑视觉成果，并集中查看和管理生成资产。Beatra 全能创作支持 AI 图片生成（文生图）、AI 视频生成（图生视频）和 AI 视频编辑，通过 AI 音乐生成把想法做成歌曲或纯音乐，也可用 AI 语音生成（文字转语音）、多语言旁白和 AI 语音克隆完成跨媒介内容。它是一款面向 AI 内容创作与多模态内容制作的 AI 创作套件，适用,1,,,16057,0.624
+14,sbkj,skillhub-cn,世舶科技（武汉）有限公司,,,single,世舶科技提供全网招标、中标、采购与商机数据查询分析服务，覆盖招标公告、中标公告、政府采购、工程建设、企业采购、合同公告、变更公告、废标流标、拟在建项目、临期项目、即将到期项目等招投标信息场景。用户可通过世舶科技快速搜索标讯、订阅项目、挖掘潜在商机、预测采购需求、分析历史中标记录，并支持按地区、行业、采购单位、中标单位、标的物、项目金额、发布时间、开标时间等维度进行数据筛选与统计分析。 世舶科技适用,世舶科技提供全网招标、中标、采购与商机数据查询分析服务，覆盖招标公告、中标公告、政府采购、工程建设、企业采购、合同公告、变更公告、废标流标、拟在建项目、临期项目、即将到期项目等招投标信息场景。用户可通过世舶科技快速搜索标讯、订阅项目、挖掘潜在商机、预测采购需求、分析历史中标记录，并支持按地区、行业、采购单位、中标单位、标的物、项目金额、发布时间、开标时间等维度进行数据筛选与统计分析。 世舶科技适用,1,,,14702,0.588
+15,live-commerce-script-studio,skillhub-cn,乐萱同行科技（深圳）有限公司,,,single,把一份排品清单，变成主播真的能在镜头前照着念的一整场直播脚本。这个直播带货脚本工作流会排出整场分钟级流程表，为每个主推品写出七步讲解话术，配一套涵盖开场、留人、互动、逼单、催单、收尾的十二类照念话术库，并对所有措辞做一遍合规检查；然后把主播和场控真正拿在手上的话术卡、倒计时卡渲染出来，再把那些靠语气而不是靠文字取胜的句子做成示范音。适合抖音、视频号、淘宝、快手、小红书的直播带货，也可以当成直播脚本,把一份排品清单，变成主播真的能在镜头前照着念的一整场直播脚本。这个直播带货脚本工作流会排出整场分钟级流程表，为每个主推品写出七步讲解话术，配一套涵盖开场、留人、互动、逼单、催单、收尾的十二类照念话术库，并对所有措辞做一遍合规检查；然后把主播和场控真正拿在手上的话术卡、倒计时卡渲染出来，再把那些靠语气而不是靠文字取胜的句子做成示范音。适合抖音、视频号、淘宝、快手、小红书的直播带货，也可以当成直播脚本,1,,,14201,0.566
+16,image-to-video,skills.sh,genmedia-labs,genmedia-labs/skills,,single,,,1,36118,,,0.552
+17,ai-video-generation,skills.sh,genmedia-labs,genmedia-labs/skills,,single,,,1,36116,,,0.551
+18,ai-image-generation,skills.sh,genmedia-labs,genmedia-labs/skills,,single,,,1,36019,,,0.548
+19,video-edit,skills.sh,genmedia-labs,genmedia-labs/skills,,single,,,1,35945,,,0.547
+20,ai-music,skills.sh,genmedia-labs,genmedia-labs/skills,,single,,,1,35784,,,0.545
+21,ai-toolbox,skillhub-cn,,,,single,,你的 AI 电商助手。竞品监控、爆款文案、客服话术、数据日报——一个 Skill 搞定开店全流程。,26,,,12858,0.516
+22,reddit-automation,skills.sh,flowkit-labs,flowkit-labs/skills,,single,,,1,11228,,,0.516
+23,1688-diagnosis,skillhub-cn,,,,single,1688店铺全面诊断报告生成。通过 Python 直连 1688 生意参谋 + 工作台 API 采集数据，生成覆盖店铺概况、流量诊断、商品诊断、客户诊断、服务体验、平台配置 7 大维度的 Markdown 诊断报告。当用户提到 1688 诊断、店铺诊断、1688 数据分析、诊断报告、店铺分析、1688 体检 时触发。,AI一键生成1688店铺多维度专业诊断报告，精准定位问题并给出可执行的优化建议。,19,,,12571,0.502
+24,beatra-ai-video-studio,skillhub-cn,乐萱同行科技（深圳）有限公司,,,single,从一段镜头描述、一张图片、首尾帧、参考素材或已有视频出发，规划并制作短视频。Beatra AI 视频工作室支持文生视频、图生视频、参考生视频、首尾帧视频、AI 视频编辑和 AI 视频延长，覆盖产品视频、广告创意、社交短视频、AI 空镜素材、转场、揭示和电影感概念镜头。交付后检查动作、主体稳定性、运镜、连续性与发布场景；如果请求或结果包含音频，也一并检查音频，再决定最小有效的修改、延长或重新生成。,从一段镜头描述、一张图片、首尾帧、参考素材或已有视频出发，规划并制作短视频。Beatra AI 视频工作室支持文生视频、图生视频、参考生视频、首尾帧视频、AI 视频编辑和 AI 视频延长，覆盖产品视频、广告创意、社交短视频、AI 空镜素材、转场、揭示和电影感概念镜头。交付后检查动作、主体稳定性、运镜、连续性与发布场景；如果请求或结果包含音频，也一并检查音频，再决定最小有效的修改、延长或重新生成。,1,,,12090,0.482
+25,construction-industry-bid-analysis-shibo,skillhub-cn,,,,single,建筑业招标采购分析【世舶API：1898610788】。需配置世舶科技 API Key 使用。当搜索词包含建筑、工程、建设、施工、EPC、设计、监理、勘察、造价、市政、道路、桥梁、管网、园区、厂房、装饰装修等内容时触发，基于世舶科技全行业招投标数据 API，重点提取建设单位、施工/设计/监理中标方、预算/中标/合同金额，并分析业主客户、Top承包商体系、合同公告、拟在建项目和企业画像。,建筑业招标采购分析【世舶API：18986107388】。需配置世舶科技 API Key 使用。当搜索词包含建筑、工程、建设、施工、EPC、设计、监理、勘察、造价、市政、道路、桥梁、管网、园区、厂房、装饰装修等内容时触发，基于世舶科技全行业招投标数据 API，重点提取建设单位、施工/设计/监理中标方、预算/中标/合同金额，并分析业主客户、Top承包商体系、合同公告、拟在建项目和企业画像。,5,,,10819,0.402
+26,alibabacloud-migration-mas-cloud-migration-survey,clawhub,sdk-team,,alibabacloud-migration-mas-cloud-migration-survey,single,当用户提供迁云调研材料（Excel/Word/文本/CSV文件）并要求生成结构化调研报告时，自动分析汇总并输出 .docx 文档。涵盖客户画像、架构现状、云产品映射、版本兼容性风险、迁移风险、待确认事项。支持 AWS/Azure/GCP/华为云/腾讯云/百度云/IDC 到阿里云的迁移评估。适用于阿里云迁云项目售前...,,27,,8062,,0.4
+27,better-writing,skills.sh,jakubkrehel,jakubkrehel/skills,,single,,,1,310,,,0.397
+28,momentic-mobile-test,skills.sh,momentic-ai,momentic-ai/skills,,single,,,1,228,,,0.378
+29,momentic-explore-prompt,skills.sh,momentic-ai,momentic-ai/skills,,single,,,1,226,,,0.376
+30,momentic-maintain,skills.sh,momentic-ai,momentic-ai/skills,,single,,,1,226,,,0.376
+31,momentic-spec,skills.sh,momentic-ai,momentic-ai/skills,,single,,,1,226,,,0.376
+32,sbkj-official-en,skillhub-cn,世舶科技（武汉）有限公司,,,single,招投标行业情报分析是世舶科技旗下保标招标网提供的招投标数据分析能力，支持按行业、地区、时间、项目分类、采购分类、项目金额等维度，对招标公告、中标公告、合同公告、政府采购、工程建设项目和企业采购数据进行统计分析，帮助用户快速了解招投标市场规模、采购趋势、区域分布、行业热度、客户结构和金额变化。 适用于行业研究、区域市场分析、招投标趋势分析、市场容量评估、客户结构分析、采购需求洞察、竞争格局判断和企业,招投标行业情报分析是世舶科技旗下保标招标网提供的招投标数据分析能力，支持按行业、地区、时间、项目分类、采购分类、项目金额等维度，对招标公告、中标公告、合同公告、政府采购、工程建设项目和企业采购数据进行统计分析，帮助用户快速了解招投标市场规模、采购趋势、区域分布、行业热度、客户结构和金额变化。 适用于行业研究、区域市场分析、招投标趋势分析、市场容量评估、客户结构分析、采购需求洞察、竞争格局判断和企业,1,,,10084,0.359
+33,ci-security-scanning-with-strix,skills.sh,usestrix,usestrix/strix,,single,,,1,218,,,0.356
+34,managed-pentesting-with-strix,skills.sh,usestrix,usestrix/strix,,single,,,1,212,,,0.354
+35,prisma-next-migrations,skills.sh,prisma,prisma/prisma-next,,single,,,1,23,,,0.348
+36,prisma-next-build,skills.sh,prisma,prisma/prisma-next,,single,,,1,23,,,0.348
+37,prisma-next,skills.sh,prisma,prisma/prisma-next,,single,,,1,23,,,0.348
+38,prisma-next-contract,skills.sh,prisma,prisma/prisma-next,,single,,,1,23,,,0.348
+39,prisma-next-queries,skills.sh,prisma,prisma/prisma-next,,single,,,1,23,,,0.348
+40,prisma-next-feedback,skills.sh,prisma,prisma/prisma-next,,single,,,1,23,,,0.348
+41,prisma-next-migration-review,skills.sh,prisma,prisma/prisma-next,,single,,,1,23,,,0.348
+42,prisma-next-quickstart,skills.sh,prisma,prisma/prisma-next,,single,,,1,23,,,0.348
+43,prisma-next-runtime,skills.sh,prisma,prisma/prisma-next,,single,,,1,23,,,0.348
+44,prisma-next-debug,skills.sh,prisma,prisma/prisma-next,,single,,,1,23,,,0.348
+45,tiktok-shop-product-video-maker,skillhub-cn,乐萱同行科技（深圳）有限公司,,,single,使用 AI 将商品信息、产品图、卖点和英语或日语受众需求制作成 TikTok Shop 商品视频方案。生成开场钩子、可直接拍摄的脚本、镜头节拍、字幕提示、本地化标题、话题标签和适合商品页事实的行动引导，适用于商品展示、演示、开箱、测评和达人带货视频。,使用 AI 将商品信息、产品图、卖点和英语或日语受众需求制作成 TikTok Shop 商品视频方案。生成开场钩子、可直接拍摄的脚本、镜头节拍、字幕提示、本地化标题、话题标签和适合商品页事实的行动引导，适用于商品展示、演示、开箱、测评和达人带货视频。,1,,,9897,0.347
+46,fusion-code-conventions,skills.sh,equinor,equinor/fusion-skills,,single,,,1,15,,,0.344
+47,fusion-github-review-resolution,skills.sh,equinor,equinor/fusion-skills,,single,,,1,14,,,0.343
+48,fusion-dependency-review,skills.sh,equinor,equinor/fusion-skills,,single,,,1,14,,,0.343
+49,fusion-issue-authoring,skills.sh,equinor,equinor/fusion-skills,,single,,,1,13,,,0.342
+50,fusion,skills.sh,equinor,equinor/fusion-skills,,single,,,1,12,,,0.341
+51,i-have-adhd,skills.sh,ayghri,ayghri/i-have-adhd,,single,,,1,11,,,0.34
+52,fusion-issue-solving,skills.sh,equinor,equinor/fusion-skills,,single,,,1,10,,,0.331
+53,fusion-devtools,skills.sh,equinor,equinor/fusion-skills,,single,,,1,10,,,0.331
+54,interface-review,skills.sh,jakubkrehel,jakubkrehel/skills,,single,,,1,10,,,0.331
+55,huawei-cloud-terraform-generator,skills.sh,huaweicloud,huaweicloud/huaweicloud-skills,,single,,,1,10,,,0.331
+56,huawei-cloud-monitoring-query,skills.sh,huaweicloud,huaweicloud/huaweicloud-skills,,single,,,1,10,,,0.331
+57,huawei-cloud-terraform-installer,skills.sh,huaweicloud,huaweicloud/huaweicloud-skills,,single,,,1,10,,,0.331
+58,huawei-cloud-obs-bucket-create,skills.sh,huaweicloud,huaweicloud/huaweicloud-skills,,single,,,1,10,,,0.331
+59,huawei-cloud-obs-stats,skills.sh,huaweicloud,huaweicloud/huaweicloud-skills,,single,,,1,10,,,0.331
+60,huawei-cloud-computing-query,skills.sh,huaweicloud,huaweicloud/huaweicloud-skills,,single,,,1,10,,,0.331
+61,huawei-cloud-storage-query,skills.sh,huaweicloud,huaweicloud/huaweicloud-skills,,single,,,1,10,,,0.331
+62,huawei-cloud-network-query,skills.sh,huaweicloud,huaweicloud/huaweicloud-skills,,single,,,1,10,,,0.331
+63,huawei-cloud-functiongraph-function-create,skills.sh,huaweicloud,huaweicloud/huaweicloud-skills,,single,,,1,10,,,0.331
+64,huawei-cloud-obs-website-host,skills.sh,huaweicloud,huaweicloud/huaweicloud-skills,,single,,,1,10,,,0.331
+65,huawei-cloud-cci-instance-management,skills.sh,huaweicloud,huaweicloud/huaweicloud-skills,,single,,,1,10,,,0.331
+66,huawei-cloud-find-skills,skills.sh,huaweicloud,huaweicloud/huaweicloud-skills,,single,,,1,10,,,0.331
+67,huawei-cloud-billing-scout,skills.sh,huaweicloud,huaweicloud/huaweicloud-skills,,single,,,1,10,,,0.331
+68,huawei-cloud-vod-collector,skills.sh,huaweicloud,huaweicloud/huaweicloud-skills,,single,,,1,10,,,0.331
+69,huawei-cloud-iam-query,skills.sh,huaweicloud,huaweicloud/huaweicloud-skills,,single,,,1,10,,,0.331
+70,huawei-cloud-functiongraph-trigger-create,skills.sh,huaweicloud,huaweicloud/huaweicloud-skills,,single,,,1,10,,,0.331
+71,huawei-cloud-obs-upload,skills.sh,huaweicloud,huaweicloud/huaweicloud-skills,,single,,,1,10,,,0.331
+72,feature-sliced-design,skills.sh,feature-sliced,feature-sliced/skills,,single,,,1,10,,,0.331
+73,fusion-skills,skills.sh,equinor,equinor/fusion-skills,,single,,,1,8,,,0.321
+74,fusion-skill-authoring,skills.sh,equinor,equinor/fusion-skills,,single,,,1,8,,,0.321
+75,fusion-mcp,skills.sh,equinor,equinor/fusion-skills,,single,,,1,8,,,0.321
+76,mastra,skills.sh,mastra-ai,mastra-ai/skills,,single,,,1,8,,,0.321
+77,fusion-infra-cli,skills.sh,equinor,equinor/fusion-skills,,single,,,1,7,,,0.317
+78,fusion-pm-mcp,skills.sh,equinor,equinor/fusion-skills,,single,,,1,7,,,0.317
+79,fusion-issue-task-planning,skills.sh,equinor,equinor/fusion-skills,,single,,,1,7,,,0.317
+80,nx-workspace,skills.sh,nrwl,nrwl/nx-ai-agents-config,,single,,,1,7,,,0.317
+81,write,skills.sh,tw93,tw93/waza,,single,,,1,7,,,0.317
+82,fusion-design,skills.sh,equinor,equinor/fusion-skills,,single,,,1,6,,,0.309
+83,fusion-roles-cli,skills.sh,equinor,equinor/fusion-skills,,single,,,1,6,,,0.309
+84,fusion-developer-app,skills.sh,equinor,equinor/fusion-skills,,single,,,1,6,,,0.309
+85,gh-issue-sync,skills.sh,mitsuhiko,mitsuhiko/gh-issue-sync,,single,,,1,6,,,0.309
+86,argent-react-native-optimization,skills.sh,software-mansion,software-mansion/argent,,single,,,1,6,,,0.309
+87,argent-android-emulator-setup,skills.sh,software-mansion,software-mansion/argent,,single,,,1,6,,,0.309
+88,argent-device-interact,skills.sh,software-mansion,software-mansion/argent,,single,,,1,6,,,0.309
+89,argent-metro-debugger,skills.sh,software-mansion,software-mansion/argent,,single,,,1,6,,,0.309
+90,argent-react-native-app-workflow,skills.sh,software-mansion,software-mansion/argent,,single,,,1,6,,,0.309
+91,argent-react-native-profiler,skills.sh,software-mansion,software-mansion/argent,,single,,,1,6,,,0.309
+92,argent-create-flow,skills.sh,software-mansion,software-mansion/argent,,single,,,1,6,,,0.309
+93,argent-native-profiler,skills.sh,software-mansion,software-mansion/argent,,single,,,1,6,,,0.309
+94,argent-test-ui-flow,skills.sh,software-mansion,software-mansion/argent,,single,,,1,6,,,0.309
+95,argent-ios-simulator-setup,skills.sh,software-mansion,software-mansion/argent,,single,,,1,6,,,0.309
+96,angular-developer,skills.sh,angular,angular/skills,,single,,,1,6,,,0.309
+97,fusion-package-scribe,skills.sh,equinor,equinor/fusion-skills,,single,,,1,5,,,0.293
+98,fusion-rules,skills.sh,equinor,equinor/fusion-skills,,single,,,1,5,,,0.293
+99,fusion-research,skills.sh,equinor,equinor/fusion-skills,,single,,,1,5,,,0.293
+100,argent-tv-interact,skills.sh,software-mansion,software-mansion/argent,,single,,,1,5,,,0.293
