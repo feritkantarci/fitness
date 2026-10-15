@@ -11,11 +11,11 @@
             --border-hover: rgba(255, 79, 0, 0.45);
 
             /* Brand & Semantic Accents (International Athletic Orange & Telemetry Cobalt) */
-            --gold: #FF4F00;
-            --gold-light: #D94300;
-            --gold-glow: rgba(255, 79, 0, 0.16);
-            --cyan: #0066FF;
-            --cyan-glow: rgba(0, 102, 255, 0.15);
+            --gold: #D94100;
+            --gold-light: #B45309;
+            --gold-glow: rgba(217, 65, 0, 0.16);
+            --cyan: #0369A1;
+            --cyan-glow: rgba(3, 105, 161, 0.15);
             --green-success: #059669;
             --green: #059669;
             --red-alert: #E11D48;
@@ -24,12 +24,12 @@
             --text-primary: #111317;
             --text-secondary: #525866;
             --text-tertiary: #848C9E;
-            --text-muted: #64748B;
+            --text-muted: #525866;
 
             /* Typography Stack */
             --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
             --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+            --font-mono: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
 
             /* Minimum Accessible Typography Scale (>= 11px) */
             --text-xs: 0.6875rem;   /* 11px - Alt sınır (rozet/etiket) */
@@ -5834,6 +5834,11 @@
             width: 100%;
             padding: 8px 2px 4px;
             margin-top: 10px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .anatomy-chips-scroll::-webkit-scrollbar {
+            display: none;
         }
 
         .anatomy-chip {
@@ -6788,6 +6793,296 @@
         .modal-box [style*="color: #fff"]:not(.btn-gold),
         .modal-box [style*="color:#f8fafc"] {
             color: #111317 !important;
+        }
+
+        /* ==========================================================================
+           V199 STUDIO DAYLIGHT POLISH: ANTI-TRUNCATION, CONTRAST & ICON-FREE UI
+           ========================================================================== */
+
+        /* 1. Tonal Separation Without Resting Box Shadows, Outlined Boxes, or 1px Hairlines */
+        .modern-app-bar {
+            border-bottom: none !important;
+            box-shadow: none !important;
+            background: #FFFFFF !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+
+        .tab-nav,
+        .tab-btn.active,
+        .ai-hybrid-hero-banner,
+        .generator-card,
+        .split-card.selected,
+        .equip-chip.selected,
+        .btn-generate-cta,
+        .bottom-nav-bar {
+            box-shadow: none !important;
+        }
+
+        .tab-nav,
+        .param-box,
+        .param-group,
+        .modern-user-badge,
+        .modern-profile-pill,
+        .ai-hero-stats-wrap .telemetry-pill {
+            border: none !important;
+        }
+
+        .bottom-pull-handle,
+        .floating-restore-pill {
+            display: none !important;
+        }
+
+        .ai-hybrid-hero-banner {
+            border: none !important;
+            border-left: 4px solid #A83000 !important;
+            background: #FFFFFF !important;
+        }
+
+        .ai-hero-stats-wrap {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            border-top: none !important;
+            flex-wrap: wrap !important;
+            overflow: visible !important;
+            gap: 6px !important;
+        }
+
+        .generator-card {
+            border: none !important;
+            background: #FFFFFF !important;
+        }
+
+        .more-sheet-header {
+            border-bottom: none !important;
+        }
+
+        /* 2. High-Contrast WCAG AA (>5.5:1) Athletic Terracotta Tokens */
+        .app-version-badge,
+        .tab-btn.active,
+        .ai-hero-tag,
+        .split-card.selected .split-name,
+        .split-card.selected .split-card-title,
+        .bottom-nav-item.active,
+        .btn-header-popup-toggle,
+        #headerUserRoleBadge,
+        .auth-role-tag {
+            color: #A83000 !important;
+        }
+
+        .btn-generate-cta,
+        .login-btn,
+        .btn-gold,
+        .ai-hero-action-btn,
+        .split-card.selected .split-radio {
+            background: #A83000 !important;
+            border-color: #A83000 !important;
+            color: #FFFFFF !important;
+        }
+
+        .split-card.selected {
+            border-color: #A83000 !important;
+            background: #FFF5F0 !important;
+        }
+
+        /* 3. Crisp CSS Checkmark for Split Cards (No Unicode Emoji/Symbol) */
+        .split-radio {
+            position: relative !important;
+            width: 20px !important;
+            height: 20px !important;
+            border-radius: 6px !important;
+        }
+
+        .split-card.selected .split-radio::after {
+            content: '';
+            display: block;
+            width: 5px;
+            height: 9px;
+            border-right: 2px solid #FFFFFF;
+            border-bottom: 2px solid #FFFFFF;
+            transform: rotate(45deg);
+            margin-top: -2px;
+        }
+
+        /* 4. Zero Text Truncation on Split Cards & AI Banner */
+        .split-name,
+        .split-card-title {
+            white-space: normal !important;
+            overflow: visible !important;
+            text-overflow: clip !important;
+            line-height: 1.2 !important;
+            font-size: 13px !important;
+        }
+
+        .ai-hero-top-bar {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 8px !important;
+        }
+
+        .ai-hero-title-group {
+            display: flex !important;
+            align-items: center !important;
+            flex-wrap: wrap !important;
+            gap: 6px !important;
+            min-width: 0 !important;
+            flex: 1 !important;
+        }
+
+        /* 5. Accessible First-Viewport Typography Scale (>= 13px, No Micro-Labels) */
+        .app-version-badge,
+        .modern-user-name,
+        #headerUserName,
+        .auth-role-tag,
+        #headerUserRoleBadge,
+        .modern-profile-name,
+        .modern-profile-role,
+        .modern-icon-btn,
+        .btn-header-popup-toggle,
+        .btn-header-popup-toggle span,
+        .ai-hero-tag,
+        .ai-hero-doc-badge,
+        .ai-hero-title,
+        .ai-hero-info-btn,
+        .ai-hero-action-btn,
+        .ai-hero-action-btn span,
+        .ai-hero-stats-wrap .telemetry-pill,
+        .ai-hero-stats-wrap .telemetry-pill-label,
+        .ai-hero-stats-wrap .telemetry-pill-val,
+        .telemetry-pill-label,
+        .telemetry-pill-val,
+        .gen-step-title,
+        .gen-step-title.desktop-only-title,
+        .gen-step-num,
+        .split-card-desc,
+        .equip-chip,
+        .btn-quick-equip,
+        .param-label,
+        .param-group label,
+        .param-select,
+        .bottom-nav-item,
+        .bottom-nav-item span {
+            font-size: 13px !important;
+        }
+
+        .param-label,
+        .param-group label,
+        .gen-step-title,
+        .gen-step-title.desktop-only-title,
+        .telemetry-pill-label {
+            text-transform: none !important;
+            letter-spacing: 0 !important;
+            color: #111317 !important;
+            font-weight: 700 !important;
+        }
+
+        /* 6. Mobile 390px Viewport Fit: Single-Row AI Header, Unclipped Stats & Visible CTA Above Fold */
+        @media (max-width: 768px) {
+            #aiDoctrineInfoBtn,
+            .ai-hero-title {
+                display: none !important;
+            }
+            .container {
+                padding: 6px 10px 84px 10px !important;
+            }
+            .ai-hybrid-hero-banner {
+                padding: 6px 10px !important;
+                margin-bottom: 6px !important;
+            }
+            .ai-hero-stats-wrap {
+                margin-top: 4px !important;
+                padding-top: 0 !important;
+                gap: 6px !important;
+            }
+            .ai-hero-stats-wrap .telemetry-pill {
+                display: inline-flex !important;
+                width: auto !important;
+                padding: 2px 7px !important;
+                background: #F4F3EE !important;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .modern-app-bar {
+                padding: 6px 10px !important;
+                gap: 6px !important;
+            }
+            .modern-brand {
+                gap: 6px !important;
+            }
+            .modern-brand-title {
+                font-size: 14px !important;
+                letter-spacing: 0.01em !important;
+            }
+            .modern-bar-actions {
+                gap: 6px !important;
+            }
+            #headerUserRoleBadge,
+            .auth-role-tag,
+            .modern-profile-role {
+                display: none !important;
+            }
+            .modern-user-badge {
+                padding: 4px 10px !important;
+            }
+            .generator-card {
+                padding: 8px 10px !important;
+            }
+            .gen-collapsible-section {
+                margin-bottom: 6px !important;
+            }
+            .gen-step-title,
+            .gen-step-title.desktop-only-title {
+                margin-bottom: 4px !important;
+            }
+            .split-grid {
+                gap: 5px !important;
+            }
+            .split-card {
+                padding: 5px 8px !important;
+                min-height: 34px !important;
+            }
+            .equip-chips-wrap {
+                gap: 4px !important;
+                margin-bottom: 5px !important;
+            }
+            .equip-chip {
+                padding: 4px 9px !important;
+            }
+            .equip-quick-actions {
+                margin-bottom: 4px !important;
+                gap: 4px !important;
+            }
+            .btn-quick-equip {
+                padding: 3px 7px !important;
+            }
+            .param-grid {
+                grid-template-columns: 1fr !important;
+                gap: 4px !important;
+            }
+            .param-box,
+            .param-group {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                gap: 8px !important;
+                padding: 3px 8px !important;
+            }
+            .param-group label {
+                margin-bottom: 0 !important;
+                flex-shrink: 0 !important;
+            }
+            .param-select {
+                max-width: 70% !important;
+                padding: 3px 6px !important;
+            }
+            .btn-generate-cta {
+                margin-top: 6px !important;
+                padding: 10px 16px !important;
+                min-height: 42px !important;
+            }
         }
 
 
