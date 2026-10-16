@@ -1515,6 +1515,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 draftSchedule
             };
 
+            window.activeWeeklyPreviewDayIdx = 0;
             closeAiHybridArchitectModal();
             switchTab('generatorTab');
             renderPendingWeeklyPlanPreview();
@@ -1526,15 +1527,28 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 }, 100);
             }
             if (typeof showToast === 'function') {
-                showToast(`📋 AI Haftalık Program taslağı hazırlandı! İnceleyip onaylayarak takvime aktarabilirsiniz.`);
+                showToast(`AI Haftalık Program taslağı hazırlandı! Gün sekmelerinden inceleyip onaylayabilirsiniz.`);
             }
         }
         window.applyAiWeeklySchedule = applyAiWeeklySchedule;
 
+        window.activeWeeklyPreviewDayIdx = 0;
+        function selectWeeklyPreviewDay(dayIdx) {
+            window.activeWeeklyPreviewDayIdx = Number(dayIdx) || 0;
+            renderPendingWeeklyPlanPreview();
+        }
+        window.selectWeeklyPreviewDay = selectWeeklyPreviewDay;
+
         function renderPendingWeeklyPlanPreview() {
             const plan = window.pendingAiWeeklyPlan;
             const container = document.getElementById('generatedWorkoutOutput');
-            if (!plan || !container) return;
+            if (!plan || !container || !Array.isArray(plan.days) || plan.days.length === 0) return;
+
+            let activeIdx = Number(window.activeWeeklyPreviewDayIdx) || 0;
+            if (activeIdx < 0 || activeIdx >= plan.days.length) {
+                activeIdx = 0;
+                window.activeWeeklyPreviewDayIdx = 0;
+            }
 
             const wkStatus = getWeeklyTrainingStatus();
             const isNextWeekRecommended = wkStatus.isThisWeekComplete;
@@ -1552,7 +1566,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                             GELECEK HAFTA PLANI${escapeHTML(nextRangeStr)} • Bu Hafta ${wkStatus.completedThisWeekCount} Antrenman Tamamlandı (${escapeHTML(wkStatus.todayName)})
                         </div>
                         <div>
-                            Bu haftanın antrenman döngüsü tamamlandığı için program <strong>takvime otomatik atanmadı</strong>. Aşağıdaki <strong>${plan.days.length} günlük biyomekanik paketi</strong> inceleyip onaylayarak <strong>Gelecek Hafta</strong> takvimine aktarabilirsiniz.
+                            Bu haftanın antrenman döngüsü tamamlandığı için program <strong>takvime otomatik atanmadı</strong>. Aşağıdaki sekmelerden <strong>1., 2. ve ${plan.days.length}. günleri</strong> inceleyip onaylayarak <strong>Gelecek Hafta</strong> takvimine aktarabilirsiniz.
                         </div>
                     </div>
                 </div>
@@ -1564,7 +1578,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                             HAFTALIK PROGRAM TASLAĞI • Takvime Henüz İşlenmedi
                         </div>
                         <div>
-                            Günler arası hareket ve açı tekrarı olmadan hazırlanan <strong>${escapeHTML(plan.templateName)}</strong> paketini aşağıdan inceleyin. Onayladığınızda geçmişte tamamlanan günlerinize dokunulmadan takvime uygulanır.
+                            Günler arası hareket ve açı tekrarı olmadan hazırlanan <strong>${escapeHTML(plan.templateName)}</strong> paketini aşağıdaki gün sekmelerinden inceleyin. Onayladığınızda geçmişte tamamlanan günlerinize dokunulmadan takvime uygulanır.
                         </div>
                     </div>
                 </div>
@@ -1576,65 +1590,81 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 return `<option value="${k}" ${sel}>Şablon: ${escapeHTML(t.name)}</option>`;
             }).join('');
 
-            const daysCardsHtml = plan.days.map((dItem, dIdx) => {
+            // 1. GÜN, 2. GÜN, 3. GÜN SEKME ÇUBUĞU (Tıklanan gün aşağıda tek kart olarak açılır)
+            const dayTabsHtml = plan.days.map((dItem, dIdx) => {
                 const w = dItem.workout;
-                const cleanDayTitle = dItem.label.replace(/^(Pzt|Sal|Çar|Per|Cum|Cmt|Paz):\s*/i, '');
-                const exRowsHtml = (w.exercises || []).map((ex, eIdx) => {
-                    const anatomy = typeof getExerciseAnatomy === 'function' ? getExerciseAnatomy(ex) : { primary: ex.muscle || '' };
-                    const shortMuscle = String(anatomy.primary || ex.muscle || '').split('(')[0].trim();
-                    const lbl = ex.blockLabel || (eIdx + 1);
-                    const pillStateCls = ex.isWishFocus ? 'pill-focus' : (ex.synergyBadge ? 'pill-synergy' : '');
-                    const dotStateCls = ex.isWishFocus ? 'dot-gold' : (ex.synergyBadge ? 'dot-cyan' : '');
-                    const synSuffix = (!ex.isWishFocus && ex.synergyBadge)
-                        ? ` <span style="color:#4ADE80; font-weight:800; font-size:10.5px;">(${escapeHTML(ex.synergyBadge)})</span>`
-                        : '';
-                    return `
-                        <div class="wk-ex-row">
-                            <div><span class="wk-ex-code">${escapeHTML(String(lbl))}</span></div>
-                            <div class="wk-ex-name" title="${escapeHTML(ex.name)}">${escapeHTML(ex.name)}</div>
-                            <div class="wk-col-muscle">
-                                <span class="wk-ex-muscle-pill ${pillStateCls}" title="Birincil: ${escapeHTML(anatomy.primary || '')}${anatomy.secondary ? ' • Sekonder: ' + escapeHTML(anatomy.secondary) : ''}">
-                                    <span class="cv-muscle-dot ${dotStateCls}"></span>${CANVA_ICONS.crosshair}<span>${escapeHTML(shortMuscle)}${synSuffix}</span>
-                                </span>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-
+                const cleanTitle = dItem.label.replace(/^(Pzt|Sal|Çar|Per|Cum|Cmt|Paz):\s*/i, '');
+                const isActive = dIdx === activeIdx;
                 return `
-                    <div class="wk-day-card">
-                        <div>
-                            <div class="wk-day-card-header">
-                                <div>
-                                    <div class="wk-day-badge-row" style="margin-bottom:4px;">
-                                        <span class="wk-day-num-pill">${dIdx + 1}. GÜN • ${escapeHTML(dItem.dayName.toUpperCase())}</span>
-                                        <span class="wk-day-meta-pill">${(w.exercises || []).length} Hrk • ${w.duration || 45} Dk</span>
-                                    </div>
-                                    <h3 class="wk-day-title">${escapeHTML(cleanDayTitle)}</h3>
-                                </div>
-                            </div>
-
-                            <div class="wk-ex-table">
-                                <div class="wk-ex-row wk-th">
-                                    <div>KOD</div>
-                                    <div>HAREKET</div>
-                                    <div class="wk-col-muscle" style="text-align:right;">HEDEF KAS</div>
-                                </div>
-                                ${exRowsHtml}
-                            </div>
+                    <button type="button" class="wk-day-tab-btn ${isActive ? 'active' : ''}" onclick="selectWeeklyPreviewDay(${dIdx})">
+                        <div class="wk-day-tab-top">
+                            <span class="wk-day-tab-num">${dIdx + 1}. GÜN • ${escapeHTML(dItem.dayName.toUpperCase())}</span>
+                            <span class="wk-day-tab-count">${(w.exercises || []).length} Hrk</span>
                         </div>
+                        <div class="wk-day-tab-sub">${escapeHTML(cleanTitle)}</div>
+                    </button>
+                `;
+            }).join('');
 
-                        <div class="wk-day-card-footer">
-                            <button type="button" class="btn-action-secondary" style="padding:6px 10px; font-size:11.5px; border-color:rgba(182,240,89,0.35); color:#B6F059; flex:1;" onclick="inspectDayFromPendingWeeklyPlan(${dIdx})">
-                                ${CANVA_ICONS.sliders} Detay &amp; Düzenle
-                            </button>
-                            <button type="button" class="btn-action-secondary" style="padding:6px 10px; font-size:11.5px; border-color:#283548; color:#F8FAFC;" onclick="startSingleDayFromPendingWeeklyPlan(${dIdx})" title="Sadece bu günü şimdi başlat">
-                                ${CANVA_ICONS.play} Başlat
-                            </button>
+            // Sadece seçili olan günün programını tam genişlikte oluştur
+            const activeDayItem = plan.days[activeIdx];
+            const activeW = activeDayItem.workout;
+            const activeCleanTitle = activeDayItem.label.replace(/^(Pzt|Sal|Çar|Per|Cum|Cmt|Paz):\s*/i, '');
+
+            const exRowsHtml = (activeW.exercises || []).map((ex, eIdx) => {
+                const anatomy = typeof getExerciseAnatomy === 'function' ? getExerciseAnatomy(ex) : { primary: ex.muscle || '' };
+                const shortMuscle = String(anatomy.primary || ex.muscle || '').split('(')[0].trim();
+                const lbl = ex.blockLabel || (eIdx + 1);
+                const pillStateCls = ex.isWishFocus ? 'pill-focus' : (ex.synergyBadge ? 'pill-synergy' : '');
+                const dotStateCls = ex.isWishFocus ? 'dot-gold' : (ex.synergyBadge ? 'dot-cyan' : '');
+                const synSuffix = (!ex.isWishFocus && ex.synergyBadge)
+                    ? ` <span style="color:#4ADE80; font-weight:800; font-size:10.5px;">(${escapeHTML(ex.synergyBadge)})</span>`
+                    : '';
+                return `
+                    <div class="wk-ex-row">
+                        <div><span class="wk-ex-code">${escapeHTML(String(lbl))}</span></div>
+                        <div class="wk-ex-name" title="${escapeHTML(ex.name)}">${escapeHTML(ex.name)}</div>
+                        <div class="wk-col-muscle">
+                            <span class="wk-ex-muscle-pill ${pillStateCls}" title="Birincil: ${escapeHTML(anatomy.primary || '')}${anatomy.secondary ? ' • Sekonder: ' + escapeHTML(anatomy.secondary) : ''}">
+                                <span class="cv-muscle-dot ${dotStateCls}"></span>${CANVA_ICONS.crosshair}<span>${escapeHTML(shortMuscle)}${synSuffix}</span>
+                            </span>
                         </div>
                     </div>
                 `;
             }).join('');
+
+            const singleDayCardHtml = `
+                <div class="wk-day-card wk-single-active-card">
+                    <div>
+                        <div class="wk-day-card-header">
+                            <div>
+                                <div class="wk-day-badge-row" style="margin-bottom:4px;">
+                                    <span class="wk-day-num-pill">${activeIdx + 1}. GÜN • ${escapeHTML(activeDayItem.dayName.toUpperCase())}</span>
+                                    <span class="wk-day-meta-pill">${(activeW.exercises || []).length} Hareket • ${activeW.duration || 45} Dk</span>
+                                </div>
+                                <h3 class="wk-day-title">${escapeHTML(activeCleanTitle)}</h3>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <button type="button" class="btn-action-secondary" style="padding:7px 12px; font-size:12px; border-color:rgba(182,240,89,0.35); color:#B6F059;" onclick="inspectDayFromPendingWeeklyPlan(${activeIdx})">
+                                    ${CANVA_ICONS.sliders} Detay &amp; Düzenle
+                                </button>
+                                <button type="button" class="btn-action-secondary" style="padding:7px 12px; font-size:12px; border-color:#283548; color:#F8FAFC;" onclick="startSingleDayFromPendingWeeklyPlan(${activeIdx})" title="Sadece bu günü şimdi başlat">
+                                    ${CANVA_ICONS.play} Başlat
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="wk-ex-table">
+                            <div class="wk-ex-row wk-th">
+                                <div>KOD</div>
+                                <div>HAREKET</div>
+                                <div class="wk-col-muscle" style="text-align:right;">HEDEF KAS</div>
+                            </div>
+                            ${exRowsHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
 
             const wishNoticeHtml = plan.userWish ? `
                 <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(250,204,21,0.12); border:1px solid rgba(250,204,21,0.38); color:#FDE047; font-size:11.5px; font-weight:800; padding:4px 11px; border-radius:999px; margin-top:6px;">
@@ -1665,9 +1695,11 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
                     ${timingBannerHtml}
 
-                    <div class="wk-days-grid">
-                        ${daysCardsHtml}
+                    <div class="wk-day-tabs-bar" role="tablist" aria-label="Haftalık Gün Seçimi">
+                        ${dayTabsHtml}
                     </div>
+
+                    ${singleDayCardHtml}
 
                     <div class="wk-confirm-bar">
                         <button type="button" class="btn-ai-create-primary" style="flex:1; min-width:240px;" onclick="confirmPendingAiWeeklyPlan('next')">
@@ -17031,7 +17063,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=218')
+                navigator.serviceWorker.register('./sw.js?v=219')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
