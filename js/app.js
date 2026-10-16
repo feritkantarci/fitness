@@ -1038,27 +1038,35 @@
             }
         }
 
-        function handleQuickAiGenerate() {
+        function handleQuickAiGenerate(preferredTplKey = null) {
             const telemetry = getAiDoctrineTelemetry();
             if (telemetry && telemetry.recommendedDoctrine && AI_DOCTRINES[telemetry.recommendedDoctrine]) {
                 currentSelectedDoctrine = telemetry.recommendedDoctrine;
             }
-            window.pendingAiWeeklyPlan = null;
-            renderAiHybridHeroBanner();
-            handleGenerateWorkout(currentSelectedDoctrine, '');
+            if (preferredTplKey) {
+                const wkTplSelect = document.getElementById('aiModalWeeklyTemplateSelect');
+                if (wkTplSelect && AI_WEEKLY_TEMPLATES[preferredTplKey]) {
+                    wkTplSelect.value = preferredTplKey;
+                }
+            }
+            applyAiWeeklySchedule(preferredTplKey);
             const hintEl = document.getElementById('aiQuickPreviewHint');
             if (hintEl) {
-                hintEl.textContent = '✅ Taslak önizleme aşağıda hazırlandı — inceleyip onaylayarak takvime atayabilirsiniz';
+                hintEl.textContent = '✅ Haftalık program taslağı aşağıda hazırlandı — inceleyip onaylayarak takvime aktarabilirsiniz';
                 hintEl.style.color = '#9BE15D';
-            }
-            const outEl = document.getElementById('generatedWorkoutOutput');
-            if (outEl) {
-                setTimeout(() => {
-                    outEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 80);
             }
         }
         window.handleQuickAiGenerate = handleQuickAiGenerate;
+
+        function switchQuickAiToSingleDay() {
+            window.pendingAiWeeklyPlan = null;
+            handleGenerateWorkout(currentSelectedDoctrine, '');
+            const outEl = document.getElementById('generatedWorkoutOutput');
+            if (outEl) {
+                outEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+        window.switchQuickAiToSingleDay = switchQuickAiToSingleDay;
 
         function toggleAiDoctrineTeaser() {
             const el = document.getElementById('aiDoctrineHeroQuickTeaser');
@@ -1290,14 +1298,19 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
         };
         window.AI_WEEKLY_TEMPLATES = AI_WEEKLY_TEMPLATES;
 
-        function applyAiWeeklySchedule() {
+        function applyAiWeeklySchedule(overrideTplKey = null) {
             const durSelect = document.getElementById('aiModalDurationSelect');
             const styleSelect = document.getElementById('aiModalStyleSelect');
             const wkTplSelect = document.getElementById('aiModalWeeklyTemplateSelect');
             const wishInput = document.getElementById('aiModalUserWishInput');
             const chosenDur = durSelect ? parseInt(durSelect.value, 10) : 45;
             const chosenStyle = styleSelect ? styleSelect.value : 'superset';
-            const chosenTplKey = (wkTplSelect && AI_WEEKLY_TEMPLATES[wkTplSelect.value]) ? wkTplSelect.value : 'upper_lower_full';
+            const chosenTplKey = (overrideTplKey && AI_WEEKLY_TEMPLATES[overrideTplKey])
+                ? overrideTplKey
+                : ((wkTplSelect && AI_WEEKLY_TEMPLATES[wkTplSelect.value]) ? wkTplSelect.value : 'upper_lower_full');
+            if (wkTplSelect && wkTplSelect.value !== chosenTplKey) {
+                wkTplSelect.value = chosenTplKey;
+            }
             const userWish = wishInput ? wishInput.value.trim() : '';
 
             const paramDurEl = document.getElementById('paramDuration');
@@ -1359,6 +1372,9 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 }
             });
 
+            // Varsayılan split'i tekrar Tüm Vücut'a çek
+            selectSplit('full_body');
+
             window.pendingAiWeeklyPlan = {
                 templateKey: chosenTplKey,
                 templateName: tpl.name,
@@ -1398,83 +1414,138 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             const fmtShort = (d) => d ? `${d.getDate()}.${String(d.getMonth() + 1).padStart(2, '0')}` : '';
             const nextRangeStr = (nextMonDate && nextFriDate) ? ` (${fmtShort(nextMonDate)} - ${fmtShort(nextFriDate)})` : '';
 
-            const timingAlertHtml = isNextWeekRecommended ? `
-                <div style="background:rgba(182, 240, 89, 0.10); border:1px solid rgba(182, 240, 89, 0.35); border-radius:14px; padding:12px 14px; margin-bottom:14px;">
-                    <div style="display:flex; align-items:center; gap:8px; color:#B6F059; font-size:13px; font-weight:800; margin-bottom:4px;">
-                        <span>🧠</span>
-                        <span>Zamanlama Zekası: Bu Hafta ${wkStatus.completedThisWeekCount} Antrenman Tamamlandı (Bugün ${wkStatus.todayName})</span>
-                    </div>
-                    <div style="font-size:12.5px; color:#CBD5E1; line-height:1.45;">
-                        Bu haftanın antrenman döngüsünü tamamladığınız için program <strong>mevcut haftanıza otomatik yazılmadı</strong>. Aşağıdaki <strong>${escapeHTML(plan.templateName)}</strong> paketini inceleyip <strong>Gelecek Hafta${escapeHTML(nextRangeStr)}</strong> takvimine tek dokunuşla onaylayabilirsiniz.
+            const timingBannerHtml = isNextWeekRecommended ? `
+                <div class="wk-timing-banner">
+                    <span style="font-size:18px; line-height:1;">📅</span>
+                    <div>
+                        <div style="color:#B6F059; font-weight:800; font-size:13px; margin-bottom:2px;">
+                            GELECEK HAFTA PLANI${escapeHTML(nextRangeStr)} • Bu Hafta ${wkStatus.completedThisWeekCount} Antrenman Tamamlandı (${escapeHTML(wkStatus.todayName)})
+                        </div>
+                        <div>
+                            Bu haftanın antrenman döngüsü tamamlandığı için program <strong>takvime otomatik atanmadı</strong>. Aşağıdaki <strong>${plan.days.length} günlük biyomekanik paketi</strong> inceleyip onaylayarak <strong>Gelecek Hafta</strong> takvimine aktarabilirsiniz.
+                        </div>
                     </div>
                 </div>
             ` : `
-                <div style="background:rgba(56, 189, 248, 0.10); border:1px solid rgba(56, 189, 248, 0.35); border-radius:14px; padding:12px 14px; margin-bottom:14px;">
-                    <div style="display:flex; align-items:center; gap:8px; color:#38BDF8; font-size:13px; font-weight:800; margin-bottom:4px;">
-                        <span>📋</span>
-                        <span>Taslak Önizleme (Takvime Otomatik Atanmadı)</span>
-                    </div>
-                    <div style="font-size:12.5px; color:#CBD5E1; line-height:1.45;">
-                        Hazırlanan <strong>${escapeHTML(plan.templateName)}</strong> paketini aşağıdan gün gün inceleyin. Onayladığınızda geçmişte tamamlanan günlerinize dokunulmadan takvime işlenir.
+                <div class="wk-timing-banner" style="background:rgba(56,189,248,0.08); border-color:rgba(56,189,248,0.28);">
+                    <span style="font-size:18px; line-height:1;">📋</span>
+                    <div>
+                        <div style="color:#38BDF8; font-weight:800; font-size:13px; margin-bottom:2px;">
+                            HAFTALIK PROGRAM TASLAĞI • Takvime Henüz İşlenmedi
+                        </div>
+                        <div>
+                            Günler arası hareket ve açı tekrarı olmadan hazırlanan <strong>${escapeHTML(plan.templateName)}</strong> paketini aşağıdan inceleyin. Onayladığınızda geçmişte tamamlanan günlerinize dokunulmadan takvime uygulanır.
+                        </div>
                     </div>
                 </div>
             `;
 
+            const tplOptionsHtml = Object.keys(AI_WEEKLY_TEMPLATES).map(k => {
+                const t = AI_WEEKLY_TEMPLATES[k];
+                const sel = k === plan.templateKey ? 'selected' : '';
+                return `<option value="${k}" ${sel}>📐 Şablon: ${escapeHTML(t.name)}</option>`;
+            }).join('');
+
             const daysCardsHtml = plan.days.map((dItem, dIdx) => {
                 const w = dItem.workout;
-                const exRows = (w.exercises || []).map((ex, eIdx) => {
+                const cleanDayTitle = dItem.label.replace(/^(Pzt|Sal|Çar|Per|Cum|Cmt|Paz):\s*/i, '');
+                const exRowsHtml = (w.exercises || []).map((ex, eIdx) => {
                     const anatomy = typeof getExerciseAnatomy === 'function' ? getExerciseAnatomy(ex) : { primary: ex.muscle || '' };
                     const lbl = ex.blockLabel || (eIdx + 1);
                     return `
-                        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:7px 10px; background:#0E131B; border:1px solid #1E293B; border-radius:10px; margin-bottom:6px;">
-                            <div style="min-width:0; flex:1;">
-                                <span style="color:#B6F059; font-weight:800; font-size:12px; margin-right:5px;">${escapeHTML(String(lbl))}.</span>
-                                <strong style="color:#F8FAFC; font-size:13px;">${escapeHTML(ex.name)}</strong>
-                                <span style="display:inline-block; margin-left:6px; font-size:11px; color:#94A3B8;">🎯 ${escapeHTML(anatomy.primary)}</span>
+                        <div class="wk-ex-row">
+                            <div><span class="wk-ex-code">${escapeHTML(String(lbl))}</span></div>
+                            <div class="wk-ex-name" title="${escapeHTML(ex.name)}">${escapeHTML(ex.name)}</div>
+                            <div class="wk-col-muscle">
+                                <span class="wk-ex-muscle-pill">🎯 ${escapeHTML(anatomy.primary)}</span>
                             </div>
-                            <span style="font-size:11.5px; font-weight:700; color:#E5B85B; white-space:nowrap;">${w.scheme.sets}×${w.scheme.reps}</span>
+                            <div class="wk-ex-scheme">${w.scheme.sets}×${w.scheme.reps}</div>
                         </div>
                     `;
                 }).join('');
 
                 return `
-                    <div style="background:#161E29; border:1px solid #253041; border-radius:16px; padding:14px; margin-bottom:12px;">
-                        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
-                            <div>
-                                <div style="font-size:11px; font-weight:800; color:#B6F059; text-transform:uppercase; letter-spacing:0.05em;">
-                                    ${isNextWeekRecommended ? `GELECEK HAFTA • ${escapeHTML(dItem.dayName.toUpperCase())}` : escapeHTML(dItem.dayName.toUpperCase())}
+                    <div class="wk-day-card">
+                        <div>
+                            <div class="wk-day-card-header">
+                                <div>
+                                    <div class="wk-day-badge-row" style="margin-bottom:4px;">
+                                        <span class="wk-day-num-pill">${dIdx + 1}. GÜN • ${escapeHTML(dItem.dayName.toUpperCase())}</span>
+                                        <span class="wk-day-meta-pill">${(w.exercises || []).length} Hrk • ${w.duration || 45} Dk</span>
+                                    </div>
+                                    <h3 class="wk-day-title">${escapeHTML(cleanDayTitle)}</h3>
                                 </div>
-                                <h3 style="font-size:15px; font-weight:800; color:#F8FAFC; margin:2px 0 0 0;">${escapeHTML(dItem.label)}</h3>
                             </div>
-                            <button type="button" class="btn-action-secondary" style="padding:6px 12px; font-size:11.5px; border-color:rgba(182,240,89,0.35); color:#B6F059;" onclick="inspectDayFromPendingWeeklyPlan(${dIdx})">
-                                🔍 Hareketleri Düzenle / Detay
+
+                            <div class="wk-ex-table">
+                                <div class="wk-ex-row wk-th">
+                                    <div>KOD</div>
+                                    <div>HAREKET</div>
+                                    <div class="wk-col-muscle">HEDEF KAS</div>
+                                    <div style="text-align:right;">SET×TK</div>
+                                </div>
+                                ${exRowsHtml}
+                            </div>
+                        </div>
+
+                        <div class="wk-day-card-footer">
+                            <button type="button" class="btn-action-secondary" style="padding:6px 10px; font-size:11.5px; border-color:rgba(182,240,89,0.35); color:#B6F059; flex:1;" onclick="inspectDayFromPendingWeeklyPlan(${dIdx})">
+                                🔍 Detay &amp; Düzenle
+                            </button>
+                            <button type="button" class="btn-action-secondary" style="padding:6px 10px; font-size:11.5px; border-color:#283548; color:#F8FAFC;" onclick="startSingleDayFromPendingWeeklyPlan(${dIdx})" title="Sadece bu günü şimdi başlat">
+                                ▶️ Başlat
                             </button>
                         </div>
-                        ${exRows}
                     </div>
                 `;
             }).join('');
 
             container.innerHTML = `
-                <div class="workout-header-card">
-                    <div class="badge-brand" style="color:#B6F059;">HAFTALIK AI PROGRAM TASLAĞI (ÖNİZLEME)</div>
-                    <h2 class="workout-main-title" style="margin-bottom:10px;">${escapeHTML(plan.templateName)}</h2>
-                    ${timingAlertHtml}
-
-                    <div class="workout-actions-bar" style="margin-bottom:16px;">
-                        <button class="btn-start-workout" style="background:#B6F059 !important; color:#0B0F17 !important; font-weight:900;" onclick="confirmPendingAiWeeklyPlan('next')">
-                            <span>📅 ONAYLA & GELECEK HAFTA TAKVİMİNE UYGULA${escapeHTML(nextRangeStr)}</span>
-                        </button>
-                        <button class="btn-action-secondary" style="border-color:var(--cyan); color:var(--cyan); font-weight:800;" onclick="confirmPendingAiWeeklyPlan('current_safe')">
-                            <span>⚡ Bu Haftanın Kalan Günlerine Uygula (Tamamlanan Günlere Dokunma)</span>
-                        </button>
+                <div class="wk-preview-shell">
+                    <div class="wk-preview-top-bar">
+                        <div>
+                            <div class="wk-preview-pill">✨ AI HAFTALIK PROGRAM ÖNİZLEMESİ • CANVA DÜZENİ</div>
+                            <h2 class="wk-preview-title">${escapeHTML(plan.templateName)}</h2>
+                        </div>
+                        <div class="wk-preview-controls">
+                            <select class="wk-tpl-select" onchange="handleQuickAiGenerate(this.value)" aria-label="Haftalık Şablon Seç">
+                                ${tplOptionsHtml}
+                            </select>
+                            <button type="button" class="btn-action-secondary" style="padding:7px 12px; font-size:12px; border-color:#283548;" onclick="handleQuickAiGenerate('${plan.templateKey}')" title="Farklı hareketlerle yeniden üret">
+                                🎲 Yenile
+                            </button>
+                            <button type="button" class="btn-action-secondary" style="padding:7px 12px; font-size:12px; border-color:#283548; color:#94A3B8;" onclick="switchQuickAiToSingleDay()" title="Haftalık paket yerine tek günlük antrenman üret">
+                                ⚡ Tek Günlük Üret
+                            </button>
+                        </div>
                     </div>
 
-                    ${daysCardsHtml}
+                    ${timingBannerHtml}
+
+                    <div class="wk-days-grid">
+                        ${daysCardsHtml}
+                    </div>
+
+                    <div class="wk-confirm-bar">
+                        <button type="button" class="btn-ai-create-primary" style="flex:1; min-width:240px;" onclick="confirmPendingAiWeeklyPlan('next')">
+                            📅 Onayla ve Gelecek Hafta Takvimine Uygula${escapeHTML(nextRangeStr)}
+                        </button>
+                        <button type="button" class="btn-action-secondary" style="padding:12px 16px; font-size:13px; border-color:rgba(56,189,248,0.4); color:#38BDF8; font-weight:800;" onclick="confirmPendingAiWeeklyPlan('current_safe')">
+                            ⚡ Bu Haftanın Kalan Günlerine Uygula (Geçmişe Dokunma)
+                        </button>
+                    </div>
                 </div>
             `;
         }
         window.renderPendingWeeklyPlanPreview = renderPendingWeeklyPlanPreview;
+
+        function startSingleDayFromPendingWeeklyPlan(dayIndexInList) {
+            const plan = window.pendingAiWeeklyPlan;
+            if (!plan || !plan.days || !plan.days[dayIndexInList]) return;
+            currentGeneratedWorkout = plan.days[dayIndexInList].workout;
+            startActiveWorkoutFromGenerated();
+        }
+        window.startSingleDayFromPendingWeeklyPlan = startSingleDayFromPendingWeeklyPlan;
 
         function inspectDayFromPendingWeeklyPlan(dayIndexInList) {
             const plan = window.pendingAiWeeklyPlan;
@@ -16714,7 +16785,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=211')
+                navigator.serviceWorker.register('./sw.js?v=212')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
