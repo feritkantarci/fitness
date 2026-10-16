@@ -1570,12 +1570,16 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     const anatomy = typeof getExerciseAnatomy === 'function' ? getExerciseAnatomy(ex) : { primary: ex.muscle || '' };
                     const shortMuscle = String(anatomy.primary || ex.muscle || '').split('(')[0].trim();
                     const lbl = ex.blockLabel || (eIdx + 1);
+                    const focusPillStyle = ex.isWishFocus
+                        ? 'background:rgba(250,204,21,0.16); border-color:rgba(250,204,21,0.45); color:#FDE047;'
+                        : '';
+                    const focusIcon = ex.isWishFocus ? '⭐' : '🎯';
                     return `
                         <div class="wk-ex-row">
                             <div><span class="wk-ex-code">${escapeHTML(String(lbl))}</span></div>
                             <div class="wk-ex-name" title="${escapeHTML(ex.name)}">${escapeHTML(ex.name)}</div>
                             <div class="wk-col-muscle">
-                                <span class="wk-ex-muscle-pill" title="${escapeHTML(anatomy.primary || '')}">🎯 ${escapeHTML(shortMuscle)}</span>
+                                <span class="wk-ex-muscle-pill" style="${focusPillStyle}" title="${escapeHTML(anatomy.primary || '')}">${focusIcon} ${escapeHTML(shortMuscle)}</span>
                             </div>
                         </div>
                     `;
@@ -1616,12 +1620,19 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 `;
             }).join('');
 
+            const wishNoticeHtml = plan.userWish ? `
+                <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(250,204,21,0.12); border:1px solid rgba(250,204,21,0.38); color:#FDE047; font-size:11.5px; font-weight:800; padding:4px 11px; border-radius:999px; margin-top:6px;">
+                    ⭐ Özel AI Odağı Uygulandı: "${escapeHTML(plan.userWish)}"
+                </div>
+            ` : '';
+
             container.innerHTML = `
                 <div class="wk-preview-shell">
                     <div class="wk-preview-top-bar">
                         <div>
                             <div class="wk-preview-pill">✨ AI HAFTALIK PROGRAM ÖNİZLEMESİ • CANVA DÜZENİ</div>
                             <h2 class="wk-preview-title">${escapeHTML(plan.templateName)}</h2>
+                            ${wishNoticeHtml}
                         </div>
                         <div class="wk-preview-controls">
                             <select class="wk-tpl-select" onchange="handleQuickAiGenerate(this.value)" aria-label="Haftalık Şablon Seç">
@@ -2411,32 +2422,68 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     }
                 }
 
-                // 2. Zayıf bölge / özel kas odaklarını (sırt, kol, omuz, göğüs, bacak, karın) ikiz oluşturmadan programa enjekte et
+                // 2. Zayıf bölge / özel kas odaklarını (sırt, kol, omuz, göğüs, bacak, karın) seans bölgesiyle uyumlu şekilde önceliklendir
+                const currentSplitPrimary = selectedSplits[0] || 'full_body';
+                const isUpperCompatibleSplit = ['full_body', 'upper', 'upper_push', 'upper_pull', 'functional'].includes(currentSplitPrimary);
+                const isLowerCompatibleSplit = ['full_body', 'lower', 'functional'].includes(currentSplitPrimary);
+
                 const focusMatchers = [
-                    { regex: /sırt|kanat|row|çekiş|lat/, testEx: e => getEffectiveExerciseCategory(e) === 'pull' || /sırt|kanat|lat|rhomboid|row|pull/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
-                    { regex: /kol|biceps|triceps|pazu|arka kol/, testEx: e => /biceps|triceps|kol|curl|extension|pushdown|kickback|hammer/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
-                    { regex: /arka omuz|rear delt|face pull/, testEx: e => /arka omuz|rear|face pull|reverse fly|band pull/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
-                    { regex: /omuz|deltoid|trapez/, testEx: e => /omuz|deltoid|press|lateral|shrug|trapez/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
-                    { regex: /göğüs|chest|pectoral|şınav|bench/, testEx: e => /göğüs|pectoral|bench|fly|şınav|push-up|floor press/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
-                    { regex: /bacak|kalça|glute|squat|hamstring|quad/, testEx: e => getEffectiveExerciseCategory(e) === 'legs_quad' || getEffectiveExerciseCategory(e) === 'legs_hinge' },
-                    { regex: /karın|core|abs|plank/, testEx: e => getEffectiveExerciseCategory(e) === 'core' }
+                    { key: 'back', allow: isUpperCompatibleSplit, targetMin: currentSplitPrimary === 'upper' ? 3 : 2, regex: /sırt|kanat|row|çekiş|lat|barfiks/, testEx: e => getEffectiveExerciseCategory(e) === 'pull' || /sırt|kanat|lat|rhomboid|row|pull/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
+                    { key: 'arms', allow: isUpperCompatibleSplit, targetMin: currentSplitPrimary === 'upper' ? 2 : 2, regex: /kol|biceps|triceps|pazu|arka kol/, testEx: e => /biceps|triceps|kol|curl|extension|pushdown|kickback|hammer|skullcrusher/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
+                    { key: 'rear_delt', allow: isUpperCompatibleSplit, targetMin: 1, regex: /arka omuz|rear delt|face pull/, testEx: e => /arka omuz|rear|face pull|reverse fly|band pull/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
+                    { key: 'shoulders', allow: isUpperCompatibleSplit, targetMin: 2, regex: /omuz|deltoid|trapez/, testEx: e => /omuz|deltoid|press|lateral|shrug|trapez/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
+                    { key: 'chest', allow: isUpperCompatibleSplit, targetMin: 2, regex: /göğüs|chest|pectoral|şınav|bench/, testEx: e => /göğüs|pectoral|bench|fly|şınav|push-up|floor press/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
+                    { key: 'legs', allow: isLowerCompatibleSplit, targetMin: currentSplitPrimary === 'lower' ? 4 : 2, regex: /bacak|kalça|glute|squat|hamstring|quad/, testEx: e => getEffectiveExerciseCategory(e) === 'legs_quad' || getEffectiveExerciseCategory(e) === 'legs_hinge' },
+                    { key: 'core', allow: true, targetMin: 2, regex: /karın|core|abs|plank/, testEx: e => getEffectiveExerciseCategory(e) === 'core' }
                 ];
 
-                focusMatchers.forEach(fm => {
-                    if (fm.regex.test(wishLower)) {
-                        const existingMatchCount = chosenExercises.filter(fm.testEx).length;
-                        if (existingMatchCount < 2) {
-                            const candidates = EXERCISES_DB.filter(e =>
-                                isCandidateBiochemicallyCompatible(e, hasLowerOrFullOrFuncSplit) &&
-                                fm.testEx(e)
-                            );
-                            const picked = pickRandom(candidates);
-                            if (picked) {
-                                recordChosenExercise(picked);
+                const activeFocusMatchers = focusMatchers.filter(fm => fm.allow && fm.regex.test(wishLower));
+                const isAnyFocusMatch = (ex) => activeFocusMatchers.some(fm => fm.testEx(ex));
+
+                activeFocusMatchers.forEach(fm => {
+                    let existingMatches = chosenExercises.filter(fm.testEx);
+                    while (existingMatches.length < fm.targetMin) {
+                        const candidates = EXERCISES_DB.filter(e =>
+                            isCandidateBiochemicallyCompatible(e, hasLowerOrFullOrFuncSplit) &&
+                            fm.testEx(e)
+                        );
+                        const picked = pickRandom(candidates);
+                        if (!picked) break;
+
+                        const pickedClone = Object.assign({}, picked, { isWishFocus: true });
+                        usedIds.push(pickedClone.id);
+                        weeklyUsedIds.add(pickedClone.id);
+                        const fam = getExerciseMovementFamily(pickedClone);
+                        if (fam) usedFamilies.add(fam);
+                        const mId = getExerciseMediaId(pickedClone);
+                        if (mId) usedMediaIds.add(mId);
+
+                        // Toplam hareket sayısını (targetCount) şişirmemek için odak dışı bir hareketin yerine koy
+                        let replaceIdx = -1;
+                        for (let r = chosenExercises.length - 1; r >= 0; r--) {
+                            if (!isAnyFocusMatch(chosenExercises[r])) {
+                                replaceIdx = r;
+                                break;
                             }
                         }
+                        if (replaceIdx > -1 && chosenExercises.length >= targetCount) {
+                            chosenExercises[replaceIdx] = pickedClone;
+                        } else if (chosenExercises.length < targetCount) {
+                            chosenExercises.push(pickedClone);
+                        } else {
+                            break;
+                        }
+                        existingMatches = chosenExercises.filter(fm.testEx);
                     }
                 });
+
+                // Odak kas grubu hareketlerini işaretle ve seansın ilk sıralarına (A1/A2...) taşı
+                if (activeFocusMatchers.length > 0) {
+                    chosenExercises.forEach(ex => {
+                        if (isAnyFocusMatch(ex)) ex.isWishFocus = true;
+                    });
+                    chosenExercises.sort((a, b) => (b.isWishFocus ? 1 : 0) - (a.isWishFocus ? 1 : 0));
+                }
             }
 
             // KATMAN 4: Seçilen Süperset Yoğunluğuna Göre Akademik Blok Etiketlerini Ata
@@ -16901,7 +16948,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=215')
+                navigator.serviceWorker.register('./sw.js?v=216')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
