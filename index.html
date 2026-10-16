@@ -23,7 +23,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=204">
+    <link rel="stylesheet" href="css/style.css?v=205">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH (CANVA OBSIDIAN & LIME V201) */
         html, body { background-color: #0B0F17; color: #F3F6FA; color-scheme: dark; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -35,7 +35,7 @@
     <!-- ==================== LOGIN SCREEN ==================== -->
     <div id="loginScreen">
         <div class="login-card">
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v204</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v205</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -72,7 +72,7 @@
                     <span class="canva-brand-monogram" aria-hidden="true" translate="no">Ç</span>
                     <div class="canva-brand-stack">
                         <span class="modern-brand-title" translate="no">Çelik Kodu</span>
-                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v204</span>
+                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v205</span>
                     </div>
                 </div>
                 <div class="modern-bar-actions">
@@ -1676,149 +1676,151 @@
 
     <!-- ==================== AI HYBRID BLUEPRINT & DOCTRINE ARCHITECT MODAL ==================== -->
     <div id="aiHybridArchitectModal" class="modal-overlay" onclick="if(event.target === this) closeAiHybridArchitectModal()">
-        <div class="modal-box" style="max-width: 740px; max-height: 92vh; overflow-y: auto; border: 1px solid rgba(168, 85, 247, 0.45); box-shadow: 0 10px 40px rgba(147, 51, 234, 0.25);">
-            <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px; margin-bottom:14px;">
-                <div>
-                    <div style="display:flex; align-items:center; gap:8px;">
+        <div class="modal-box ai-architect-modal-box" style="max-width: 740px; border: 1px solid rgba(168, 85, 247, 0.45); box-shadow: 0 10px 40px rgba(147, 51, 234, 0.25);">
+            <!-- SABİT ÜST BAŞLIK (STICKY HEADER) -->
+            <div class="modal-header ai-architect-modal-header">
+                <div style="min-width:0; padding-right:8px;">
+                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
                         <span class="auth-role-tag" style="background:linear-gradient(135deg, rgba(168,85,247,0.35), rgba(245,158,11,0.25)); color:#e9d5ff; border:1px solid rgba(168,85,247,0.5); font-size:10px; font-weight:800; padding:2px 7px; border-radius:6px;">🧠 AKADEMİK AI MİMARI</span>
                         <span style="font-size:10.5px; color:var(--gold); font-weight:800;" id="aiModalVersionTag">Schumann (2022) Hibrit Model</span>
                     </div>
-                    <span class="modal-title" style="font-size:18px; margin-top:4px; display:block;">Bodybuilding & Fonksiyonel Hibrit Doktrini</span>
-                    <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">
-                        Yapay zeka antrenman geçmişini, tartı/bel trendini ve hedeflerini analiz ederek program öncesi doktrini belirler.
-                    </div>
+                    <span class="modal-title" style="font-size:16px; margin-top:3px; display:block; line-height:1.25;">Bodybuilding & Fonksiyonel Hibrit Doktrini</span>
                 </div>
-                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeAiHybridArchitectModal()">✕</button>
+                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeAiHybridArchitectModal()" style="width:34px; height:34px; border-radius:8px; background:rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center; flex-shrink:0;">✕</button>
             </div>
 
-            <!-- BÖLÜM 1: CANLI TELEMETRİ (VARSAYILAN GİZLENEBİLİR AKORDİYON) -->
-            <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:10px 14px; margin-bottom:14px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleAiTelemetryAccordion()">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <span style="font-size:13px;">📊</span>
-                        <strong style="font-size:12px; color:#F3F6FA;">Durum Telemetrisi</strong>
-                    </div>
-                    <span id="aiTelemetryToggleLabel" style="font-size:11px; color:var(--cyan); font-weight:700;">▼ Göster</span>
-                </div>
-                <div id="aiTelemetryAccordionBody" style="display:none; margin-top:8px; padding-top:8px; border-top:1px dashed rgba(255,255,255,0.08);">
-                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(110px, 1fr)); gap:6px;" id="aiTelemetryGrid">
-                        <!-- Populated by JS -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- BÖLÜM 2: AI TEŞHİS VE BİYOMEKANİK RAPORU (VARSAYILAN GİZLENEBİLİR AKORDİYON) -->
-            <div style="background:linear-gradient(135deg, rgba(30,27,75,0.6), rgba(15,23,42,0.8)); border:1px solid rgba(168,85,247,0.35); border-radius:12px; padding:12px 14px; margin-bottom:16px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleAiDiagnosticAccordion()">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <span style="font-size:14px;">🧠</span>
-                        <strong style="font-size:12.5px; color:#F3F6FA;" id="aiDiagnosticHeadline">AI Biyomekanik Teşhis Raporu</strong>
-                    </div>
-                    <span id="aiDiagnosticToggleLabel" style="font-size:11px; color:var(--cyan); font-weight:700;">▼ Göster</span>
-                </div>
-                <div id="aiDiagnosticAccordionBody" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed rgba(168,85,247,0.3);">
-                    <div id="aiDiagnosticContent" style="font-size:12px; color:var(--text-secondary); line-height:1.55; margin-bottom:8px;">
-                        <!-- Populated by JS -->
-                    </div>
-                    <div style="display:flex; justify-content:flex-end;">
-                        <button type="button" class="btn btn-outline" id="btnTriggerGeminiLiveReport" onclick="requestGeminiDeepHybridReport()" style="font-size:11px; padding:4px 10px; border-color:#c084fc; color:#c084fc; font-weight:800; display:flex; align-items:center; gap:5px;">
-                            <span>✨ Canlı Gemini Analizi</span>
-                        </button>
-                    </div>
-                    <div id="aiGeminiExtraReportContainer" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed rgba(168,85,247,0.3); font-size:12px; color:#F3F6FA; line-height:1.55;">
-                        <!-- Gemini live output will be streamed/rendered here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- BÖLÜM 3: HİBRİT DOKTRİN SEÇİMİ (EN BAŞTA KARAR VERİLECEK YAKLAŞIM) -->
-            <div style="margin-bottom:16px;">
-                <div style="font-size:12.5px; font-weight:800; color:#F3F6FA; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
-                    <span>🎯</span> <span>Programın Temel Doktrinini Belirle (En Başta Yaklaşım)</span>
-                </div>
-                <p style="font-size:11.5px; color:var(--text-secondary); margin:0 0 10px 0;">
-                    Yapay zekanın durumuna göre önerdiği doktrini onaylayabilir veya farklı bir hibrit denge seçebilirsin:
-                </p>
-                <div class="doctrine-grid" id="doctrineSelectionGrid">
-                    <!-- 1. Pure Bodybuilding -->
-                    <div class="doctrine-card" id="docCard_bb_pure" onclick="selectAiDoctrine('bb_pure')" style="padding:10px 14px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <strong style="color:#F3F6FA; font-size:12.5px;">🛡️ Saf Bodybuilding</strong>
-                            <span style="font-size:11px; color:var(--gold); font-weight:800;">%90 Kas</span>
+            <!-- KAYDIRILABİLİR ORTA GÖVDE (SCROLLABLE BODY) -->
+            <div class="ai-architect-modal-body">
+                <!-- BÖLÜM 1: CANLI TELEMETRİ (VARSAYILAN GİZLENEBİLİR AKORDİYON) -->
+                <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:9px 12px; margin-bottom:8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleAiTelemetryAccordion()">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:13px;">📊</span>
+                            <strong style="font-size:12px; color:#F3F6FA;">Durum Telemetrisi</strong>
                         </div>
+                        <span id="aiTelemetryToggleLabel" style="font-size:11px; color:var(--cyan); font-weight:700;">▼ Göster</span>
                     </div>
-
-                    <!-- 2. BB-Dominant Hybrid -->
-                    <div class="doctrine-card selected ai-recommended" id="docCard_bb_hybrid" onclick="selectAiDoctrine('bb_hybrid')" style="padding:10px 14px;">
-                        <div class="doctrine-ai-badge" style="font-size:8.5px; padding:1px 5px;">⭐ AI</div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
-                            <strong style="color:var(--gold); font-size:12.5px;">⚡ BB Hibrit</strong>
-                            <span style="font-size:11px; color:var(--gold); font-weight:800;">%70 Kas</span>
-                        </div>
-                    </div>
-
-                    <!-- 3. Balanced Hybrid (50/50) -->
-                    <div class="doctrine-card" id="docCard_balanced_hybrid" onclick="selectAiDoctrine('balanced_hybrid')" style="padding:10px 14px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <strong style="color:#F3F6FA; font-size:12.5px;">⚖️ Dengeli Atlet</strong>
-                            <span style="font-size:11px; color:#38bdf8; font-weight:800;">%50 / %50</span>
-                        </div>
-                    </div>
-
-                    <!-- 4. Functional-Dominant Hybrid -->
-                    <div class="doctrine-card" id="docCard_func_hybrid" onclick="selectAiDoctrine('func_hybrid')" style="padding:10px 14px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <strong style="color:#F3F6FA; font-size:12.5px;">🔥 Fonk-Dominant</strong>
-                            <span style="font-size:11px; color:#f97316; font-weight:800;">%70 Fonk</span>
-                        </div>
-                    </div>
-
-                    <!-- 5. Pure Functional -->
-                    <div class="doctrine-card" id="docCard_func_pure" onclick="selectAiDoctrine('func_pure')" style="padding:10px 14px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <strong style="color:#F3F6FA; font-size:12.5px;">🌪️ Saf Kondisyon</strong>
-                            <span style="font-size:11px; color:#4ade80; font-weight:800;">%90 Fonk</span>
+                    <div id="aiTelemetryAccordionBody" style="display:none; margin-top:8px; padding-top:8px; border-top:1px dashed rgba(255,255,255,0.08);">
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(110px, 1fr)); gap:6px;" id="aiTelemetryGrid">
+                            <!-- Populated by JS -->
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- BÖLÜM 4: HIZLI PARAMETRE VE ÖZEL İSTEKLER -->
-            <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:12px 14px; margin-bottom:16px;">
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; align-items:stretch;">
-                    <div style="min-width:0;">
-                        <label class="form-label" style="font-size:11px; margin-bottom:4px; display:block;">Bölge / Split</label>
-                        <select id="aiModalSplitSelect" class="form-input" style="font-size:12px; padding:8px 10px; width:100%; box-sizing:border-box;">
-                            <option value="full_body" selected>⚡ Tüm Vücut</option>
-                            <option value="upper_push">🛡️ İtiş</option>
-                            <option value="upper_pull">⚔️ Çekiş</option>
-                            <option value="lower">🦵 Alt Vücut</option>
-                            <option value="upper">🦅 Üst Vücut</option>
-                            <option value="core">🧱 Core</option>
-                        </select>
+                <!-- BÖLÜM 2: AI TEŞHİS VE BİYOMEKANİK RAPORU (VARSAYILAN GİZLENEBİLİR AKORDİYON) -->
+                <div style="background:linear-gradient(135deg, rgba(30,27,75,0.6), rgba(15,23,42,0.8)); border:1px solid rgba(168,85,247,0.35); border-radius:10px; padding:10px 12px; margin-bottom:10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; gap:8px;" onclick="toggleAiDiagnosticAccordion()">
+                        <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+                            <span style="font-size:14px; flex-shrink:0;">🧠</span>
+                            <strong style="font-size:12px; color:#F3F6FA; line-height:1.35;" id="aiDiagnosticHeadline">AI Biyomekanik Teşhis Raporu</strong>
+                        </div>
+                        <span id="aiDiagnosticToggleLabel" style="font-size:11px; color:var(--cyan); font-weight:700; flex-shrink:0;">▼ Göster</span>
                     </div>
-                    <div style="min-width:0;">
-                        <label class="form-label" style="font-size:11px; margin-bottom:4px; display:block;">Süre</label>
-                        <select id="aiModalDurationSelect" class="form-input" style="font-size:12px; padding:8px 10px; width:100%; box-sizing:border-box;">
-                            <option value="30">⏱️ 30 Dk</option>
-                            <option value="45" selected>⏱️ 45 Dk</option>
-                            <option value="60">⏱️ 60 Dk</option>
-                        </select>
+                    <div id="aiDiagnosticAccordionBody" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed rgba(168,85,247,0.3);">
+                        <div id="aiDiagnosticContent" style="font-size:12px; color:var(--text-secondary); line-height:1.55; margin-bottom:8px;">
+                            <!-- Populated by JS -->
+                        </div>
+                        <div style="display:flex; justify-content:flex-end;">
+                            <button type="button" class="btn btn-outline" id="btnTriggerGeminiLiveReport" onclick="requestGeminiDeepHybridReport()" style="font-size:11px; padding:4px 10px; border-color:#c084fc; color:#c084fc; font-weight:800; display:flex; align-items:center; gap:5px;">
+                                <span>✨ Canlı Gemini Analizi</span>
+                            </button>
+                        </div>
+                        <div id="aiGeminiExtraReportContainer" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed rgba(168,85,247,0.3); font-size:12px; color:#F3F6FA; line-height:1.55;">
+                            <!-- Gemini live output will be streamed/rendered here -->
+                        </div>
                     </div>
                 </div>
-                <div>
-                    <label class="form-label" style="font-size:11px;">Özel İstek, Zayıf Bölge veya Sakatlık Durumu (Opsiyonel)</label>
-                    <input type="text" id="aiModalUserWishInput" class="form-input" placeholder="Örn: Dizimde hafif hassasiyet var, arka omuzlarımı da vurmak istiyorum..." style="font-size:12px;">
+
+                <!-- BÖLÜM 3: HİBRİT DOKTRİN SEÇİMİ -->
+                <div style="margin-bottom:10px;">
+                    <div style="font-size:12px; font-weight:800; color:#F3F6FA; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+                        <span>🎯</span> <span>Programın Temel Doktrinini Seç:</span>
+                    </div>
+                    <div class="doctrine-grid" id="doctrineSelectionGrid">
+                        <!-- 1. Pure Bodybuilding -->
+                        <div class="doctrine-card" id="docCard_bb_pure" onclick="selectAiDoctrine('bb_pure')" style="padding:9px 11px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:4px;">
+                                <strong style="color:#F3F6FA; font-size:12px;">🛡️ Saf BB</strong>
+                                <span style="font-size:10.5px; color:var(--gold); font-weight:800;">%90 Kas</span>
+                            </div>
+                        </div>
+
+                        <!-- 2. BB-Dominant Hybrid -->
+                        <div class="doctrine-card selected ai-recommended" id="docCard_bb_hybrid" onclick="selectAiDoctrine('bb_hybrid')" style="padding:9px 11px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:4px;">
+                                <strong style="color:var(--gold); font-size:12px;">⚡ BB Hibrit ⭐</strong>
+                                <span style="font-size:10.5px; color:var(--gold); font-weight:800;">%70 Kas</span>
+                            </div>
+                        </div>
+
+                        <!-- 3. Balanced Hybrid (50/50) -->
+                        <div class="doctrine-card" id="docCard_balanced_hybrid" onclick="selectAiDoctrine('balanced_hybrid')" style="padding:9px 11px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:4px;">
+                                <strong style="color:#F3F6FA; font-size:12px;">⚖️ Dengeli</strong>
+                                <span style="font-size:10.5px; color:#38bdf8; font-weight:800;">%50/%50</span>
+                            </div>
+                        </div>
+
+                        <!-- 4. Functional-Dominant Hybrid -->
+                        <div class="doctrine-card" id="docCard_func_hybrid" onclick="selectAiDoctrine('func_hybrid')" style="padding:9px 11px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:4px;">
+                                <strong style="color:#F3F6FA; font-size:12px;">🔥 Fonk-Hibrit</strong>
+                                <span style="font-size:10.5px; color:#f97316; font-weight:800;">%70 Fonk</span>
+                            </div>
+                        </div>
+
+                        <!-- 5. Pure Functional -->
+                        <div class="doctrine-card" id="docCard_func_pure" onclick="selectAiDoctrine('func_pure')" style="padding:9px 11px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:4px;">
+                                <strong style="color:#F3F6FA; font-size:12px;">🌪️ Saf Kondisyon & Fonksiyonel</strong>
+                                <span style="font-size:10.5px; color:#4ade80; font-weight:800;">%90 Fonk</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BÖLÜM 4: HIZLI PARAMETRE VE ÖZEL İSTEKLER -->
+                <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:10px 12px;">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; align-items:stretch;">
+                        <div style="min-width:0;">
+                            <label class="form-label" style="font-size:10.5px; margin-bottom:3px; display:block;">Bölge / Split</label>
+                            <select id="aiModalSplitSelect" class="form-input" style="font-size:12px; padding:7px 9px; width:100%; box-sizing:border-box;">
+                                <option value="full_body" selected>⚡ Tüm Vücut</option>
+                                <option value="upper_push">🛡️ İtiş</option>
+                                <option value="upper_pull">⚔️ Çekiş</option>
+                                <option value="lower">🦵 Alt Vücut</option>
+                                <option value="upper">🦅 Üst Vücut</option>
+                                <option value="core">🧱 Core</option>
+                            </select>
+                        </div>
+                        <div style="min-width:0;">
+                            <label class="form-label" style="font-size:10.5px; margin-bottom:3px; display:block;">Süre</label>
+                            <select id="aiModalDurationSelect" class="form-input" style="font-size:12px; padding:7px 9px; width:100%; box-sizing:border-box;">
+                                <option value="30">⏱️ 30 Dk</option>
+                                <option value="45" selected>⏱️ 45 Dk</option>
+                                <option value="60">⏱️ 60 Dk</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label" style="font-size:10.5px; margin-bottom:3px;">Özel İstek, Zayıf Bölge veya Sakatlık Durumu (Opsiyonel)</label>
+                        <input type="text" id="aiModalUserWishInput" class="form-input" placeholder="Örn: Geçen hafta sırt ve kol az çalıştım, dizimde hassasiyet var..." style="font-size:12px; padding:8px 10px;">
+                    </div>
                 </div>
             </div>
 
-            <!-- BÖLÜM 5: AKSİYON BUTONLARI -->
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <button type="button" class="btn btn-outline" style="width:100%; padding:11px 14px; font-weight:800; font-size:12.5px; display:flex; justify-content:center; align-items:center; gap:6px; border-color:var(--gold); color:var(--gold);" onclick="applyAiHybridProgram(false)">
-                    <span>⚡ Programı Oluştur</span>
-                </button>
-                <button type="button" class="btn btn-gold" style="width:100%; padding:11px 14px; font-weight:800; font-size:12.5px; display:flex; justify-content:center; align-items:center; gap:6px;" onclick="applyAiHybridProgram(true)">
-                    <span>🚀 Hemen Başlat</span>
+            <!-- SABİT ALT AKSİYON ÇUBUĞU (HER ZAMAN EKRANDA GÖRÜNÜR - STICKY FOOTER) -->
+            <div class="ai-architect-modal-footer">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:8px;">
+                    <button type="button" class="btn btn-outline" style="width:100%; padding:11px 10px; font-weight:800; font-size:12.5px; display:flex; justify-content:center; align-items:center; gap:5px; border-color:var(--gold); color:var(--gold);" onclick="applyAiHybridProgram(false)">
+                        <span>⚡ Programı Oluştur</span>
+                    </button>
+                    <button type="button" class="btn btn-gold" style="width:100%; padding:11px 10px; font-weight:800; font-size:12.5px; display:flex; justify-content:center; align-items:center; gap:5px;" onclick="applyAiHybridProgram(true)">
+                        <span>🚀 Hemen Başlat</span>
+                    </button>
+                </div>
+                <button type="button" class="btn btn-outline" style="width:100%; padding:10px 12px; font-weight:800; font-size:12px; display:flex; justify-content:center; align-items:center; gap:6px; border-color:#38bdf8; color:#38bdf8; background:rgba(56,189,248,0.08);" onclick="applyAiWeeklySchedule()">
+                    <span>📅 Tüm Haftalık Programı AI İle Kur (Pzt • Çar • Cum)</span>
                 </button>
             </div>
         </div>
@@ -2285,8 +2287,8 @@
     </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
-    <script src="js/exercises-db.js?v=204"></script>
-    <script src="js/app.js?v=204"></script>
+    <script src="js/exercises-db.js?v=205"></script>
+    <script src="js/app.js?v=205"></script>
     <script>
         function toggleHeaderPopupMenu(e) {
             if (e) e.stopPropagation();

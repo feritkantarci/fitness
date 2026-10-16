@@ -1149,6 +1149,76 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             }
         }
 
+        function applyAiWeeklySchedule() {
+            const durSelect = document.getElementById('aiModalDurationSelect');
+            const wishInput = document.getElementById('aiModalUserWishInput');
+            const chosenDur = durSelect ? parseInt(durSelect.value, 10) : 45;
+            const userWish = wishInput ? wishInput.value.trim() : '';
+
+            const paramDurEl = document.getElementById('paramDuration');
+            if (paramDurEl) paramDurEl.value = String(chosenDur);
+
+            renderAiHybridHeroBanner();
+
+            const weeklyDays = [
+                { dayIdx: 1, split: 'upper_push', label: 'Pzt: İtiş & Üst Zırh' },
+                { dayIdx: 3, split: 'upper_pull', label: 'Çar: Çekiş, Sırt & Kol' },
+                { dayIdx: 5, split: 'full_body',  label: 'Cum: Tam Vücut & Kondisyon' }
+            ];
+
+            const schedule = getWeeklySchedule();
+            // Önce tüm günleri dinlenmeye çek, ardından Pzt-Çar-Cum AI seanslarını yerleştir
+            for (let d = 0; d <= 6; d++) {
+                schedule[d] = {
+                    id: 'rest',
+                    title: '🧘 Dinlenme & Aktif Toparlanma',
+                    type: 'rest',
+                    desc: 'Hafif yürüyüş, mobilite veya tam istirahat',
+                    rest: true
+                };
+            }
+
+            let firstGenerated = null;
+            weeklyDays.forEach((slot, idx) => {
+                selectSplit(slot.split);
+                handleGenerateWorkout(currentSelectedDoctrine, userWish);
+                if (currentGeneratedWorkout) {
+                    const wClone = JSON.parse(JSON.stringify(currentGeneratedWorkout));
+                    wClone.id = 'ai_wk_' + slot.dayIdx + '_' + (Date.now() + idx);
+                    wClone.title = `⚔️ ${slot.label} (${wClone.doctrineShort || 'AI Hibrit'})`;
+                    schedule[slot.dayIdx] = {
+                        id: wClone.id,
+                        title: wClone.title,
+                        type: 'custom_generated',
+                        desc: `${wClone.exercises.length} Hareket • ${wClone.duration} Dk${userWish ? ' • Özel Odak' : ''}`,
+                        rest: false,
+                        customWorkout: wClone,
+                        exercises: wClone.exercises
+                    };
+                    if (!firstGenerated) firstGenerated = wClone;
+                }
+            });
+
+            if (firstGenerated) {
+                currentGeneratedWorkout = firstGenerated;
+                renderGeneratedWorkout();
+            }
+
+            saveWeeklySchedule(schedule);
+            closeAiHybridArchitectModal();
+            switchTab('activeWorkoutTab');
+            renderActiveWorkout();
+            if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
+            setTimeout(() => {
+                const calEl = document.getElementById('embeddedCalendarSection');
+                if (calEl) calEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 150);
+            if (typeof showToast === 'function') {
+                showToast('✅ AI Haftalık Programınız (Pazartesi • Çarşamba • Cuma) takviminize işlendi!');
+            }
+        }
+        window.applyAiWeeklySchedule = applyAiWeeklySchedule;
+
         function startActiveWorkoutSession(workout) {
             if (workout) {
                 currentGeneratedWorkout = workout;
@@ -1494,6 +1564,66 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                         addEx(['legs_hinge', 'conditioning'], 'functional');
                     }
                 }
+            }
+
+            // Özel İstek / Zayıf Bölge & Eklem Hassasiyeti Uyarlaması (customWish)
+            if (customWish && customWish.trim()) {
+                const wishLower = customWish.toLocaleLowerCase('tr-TR');
+                const hasPainWord = /ağrı|hassas|sakat|zorla|incin|problem|fıtık/.test(wishLower);
+
+                // 1. Eklem hassasiyeti varsa zorlayıcı hareketleri güvenli alternatiflerle filtrele
+                if (hasPainWord) {
+                    for (let idx = chosenExercises.length - 1; idx >= 0; idx--) {
+                        const ex = chosenExercises[idx];
+                        const nameCue = `${ex.name || ''} ${ex.muscle || ''} ${ex.cue || ''}`.toLocaleLowerCase('tr-TR');
+                        const kneeStress = /diz/.test(wishLower) && /jump|sıçra|pistol|snatch|thruster|derin squat|burpee/.test(nameCue);
+                        const backStress = /bel|fıtık|omurga/.test(wishLower) && /deadlift|swing|snatch|clean|good morning|bent over/.test(nameCue);
+                        const shoulderStress = /omuz/.test(wishLower) && /overhead|snatch|strict press|push press|thruster|handstand/.test(nameCue);
+                        if (kneeStress || backStress || shoulderStress) {
+                            const safeReplacement = EXERCISES_DB.find(c =>
+                                !isExerciseExcludedByUser(c.id) &&
+                                selectedEquipments.includes(c.equipment) &&
+                                !usedIds.includes(c.id) &&
+                                c.category === ex.category &&
+                                !/jump|snatch|thruster|burpee|deadlift/.test((c.name || '').toLocaleLowerCase('tr-TR'))
+                            );
+                            if (safeReplacement) {
+                                usedIds.push(safeReplacement.id);
+                                chosenExercises[idx] = safeReplacement;
+                            }
+                        }
+                    }
+                }
+
+                // 2. Zayıf bölge / özel kas odaklarını (sırt, kol, omuz, göğüs, bacak, karın) programa enjekte et
+                const focusMatchers = [
+                    { regex: /sırt|kanat|row|çekiş|lat/, testEx: e => e.category === 'pull' || /sırt|kanat|lat|rhomboid|row|pull/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
+                    { regex: /kol|biceps|triceps|pazu|arka kol/, testEx: e => /biceps|triceps|kol|curl|extension|pushdown|kickback|hammer/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
+                    { regex: /arka omuz|rear delt|face pull/, testEx: e => /arka omuz|rear|face pull|reverse fly|band pull/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
+                    { regex: /omuz|deltoid|trapez/, testEx: e => /omuz|deltoid|press|lateral|shrug|trapez/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
+                    { regex: /göğüs|chest|pectoral|şınav|bench/, testEx: e => /göğüs|pectoral|bench|fly|şınav|push-up|floor press/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
+                    { regex: /bacak|kalça|glute|squat|hamstring|quad/, testEx: e => e.category === 'legs_quad' || e.category === 'legs_hinge' },
+                    { regex: /karın|core|abs|plank/, testEx: e => e.category === 'core' }
+                ];
+
+                focusMatchers.forEach(fm => {
+                    if (fm.regex.test(wishLower)) {
+                        const existingMatchCount = chosenExercises.filter(fm.testEx).length;
+                        if (existingMatchCount < 2) {
+                            const candidates = EXERCISES_DB.filter(e =>
+                                !isExerciseExcludedByUser(e.id) &&
+                                selectedEquipments.includes(e.equipment) &&
+                                !usedIds.includes(e.id) &&
+                                fm.testEx(e)
+                            );
+                            const picked = pickRandom(candidates);
+                            if (picked) {
+                                usedIds.push(picked.id);
+                                chosenExercises.push(picked);
+                            }
+                        }
+                    }
+                });
             }
 
             // Dynamic Warmups
@@ -15661,7 +15791,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=204')
+                navigator.serviceWorker.register('./sw.js?v=205')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();

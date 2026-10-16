@@ -1468,9 +1468,12 @@
         }
         .doctrine-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-            gap: 10px;
-            margin: 12px 0;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            margin: 8px 0;
+        }
+        .doctrine-grid .doctrine-card:last-child {
+            grid-column: span 2;
         }
         .doctrine-card {
             background: rgba(15, 23, 42, 0.7);
@@ -5203,37 +5206,72 @@
             position: fixed;
             top: 0;
             left: 0;
+            right: 0;
+            bottom: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 1000;
+            height: 100dvh;
+            background: rgba(5, 8, 15, 0.88);
+            z-index: 10050 !important;
             align-items: center;
             justify-content: center;
-            padding: 16px;
+            padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px)) 12px;
+            box-sizing: border-box;
         }
         .modal-overlay.active {
             display: flex;
         }
         #exercisePickerModal {
-            z-index: 1050;
+            z-index: 10100 !important;
         }
         #exerciseDetailModal {
-            z-index: 99999 !important;
+            z-index: 10200 !important;
         }
         #exerciseBugReportModal {
-            z-index: 100001 !important;
+            z-index: 10300 !important;
         }
         .modal-box {
             background: #0f172a;
             border: 1px solid var(--gold);
             border-radius: var(--radius-lg);
-            padding: 24px;
+            padding: 20px;
             max-width: 480px;
             width: 100%;
             max-height: 90vh;
+            max-height: calc(100dvh - 24px - env(safe-area-inset-bottom, 0px));
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            box-sizing: border-box;
             box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px var(--gold-glow);
+        }
+        .ai-architect-modal-box {
+            display: flex !important;
+            flex-direction: column !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            max-height: 90vh !important;
+            max-height: calc(100dvh - 20px - env(safe-area-inset-bottom, 0px)) !important;
+        }
+        .ai-architect-modal-header {
+            flex-shrink: 0;
+            padding: 14px 16px 10px 16px;
+            margin-bottom: 0 !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: #0f172a;
+        }
+        .ai-architect-modal-body {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 12px 16px;
+        }
+        .ai-architect-modal-footer {
+            flex-shrink: 0;
+            padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)) 16px;
+            border-top: 1px solid rgba(168, 85, 247, 0.3);
+            background: #0B0F17;
+            box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.65);
         }
         .modal-header {
             display: flex;
