@@ -7151,3 +7151,167 @@
             }
         }
 
+        /* =========================================================================
+           UNIFIED AI PROGRAM ARCHITECT CARD (CANVA DESIGN DAHYNdwI6Eo)
+           ========================================================================= */
+        .ai-unified-architect-card {
+            background: #131720 !important;
+            border: 1px solid #262C3A !important;
+            border-radius: 22px !important;
+            padding: 26px 26px 24px 26px !important;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(74, 222, 128, 0.10) !important;
+            margin-bottom: 20px !important;
+        }
+
+        .ai-pill-dot {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #4ADE80;
+            box-shadow: 0 0 8px rgba(74, 222, 128, 0.85);
+            margin-right: 7px;
+            vertical-align: middle;
+        }
+
+        .ai-unified-divider {
+            height: 1px;
+            background: linear-gradient(90deg, rgba(38, 44, 58, 0.25), rgba(45, 55, 72, 0.85), rgba(38, 44, 58, 0.25));
+            margin: 20px 0 18px 0;
+        }
+
+        .ai-scope-toggle-bar {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #0D1017;
+            border: 1px solid #232A38;
+            padding: 5px;
+            border-radius: 999px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .ai-scope-pill {
+            appearance: none;
+            border: 1px solid transparent;
+            background: transparent;
+            color: #9CA3AF;
+            font-size: 12.5px;
+            font-weight: 800;
+            padding: 7px 16px;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+
+        .ai-scope-pill:hover {
+            color: #F3F4F6;
+        }
+
+        .ai-scope-pill.active {
+            background: #4ADE80;
+            color: #08140C;
+            border-color: #4ADE80;
+            box-shadow: 0 4px 14px rgba(74, 222, 128, 0.28);
+        }
+
+        .ai-unified-architect-card .split-card {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            gap: 12px !important;
+            padding: 13px 16px !important;
+            background: #171C27 !important;
+            border: 1px solid #262E3D !important;
+            border-radius: 13px !important;
+            transition: all 0.18s ease !important;
+        }
+
+        .ai-unified-architect-card .split-card:hover {
+            border-color: rgba(74, 222, 128, 0.45) !important;
+            background: #1B2230 !important;
+        }
+
+        .ai-unified-architect-card .split-card.selected {
+            background: rgba(22, 48, 36, 0.72) !important;
+            border-color: #4ADE80 !important;
+            box-shadow: 0 0 0 1px rgba(74, 222, 128, 0.25), 0 8px 20px rgba(16, 185, 129, 0.12) !important;
+        }
+
+        .ai-unified-architect-card .split-card-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .ai-unified-architect-card .split-sub-desc {
+            font-size: 11px;
+            color: #94A3B8;
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        .ai-unified-architect-card .split-card.selected .split-sub-desc {
+            color: #A7F3D0;
+        }
+
+        .equip-chip .equip-check-icon {
+            display: none;
+            font-size: 11px;
+            font-weight: 900;
+            color: #4ADE80;
+            margin-right: 5px;
+        }
+
+        .equip-chip.selected .equip-check-icon {
+            display: inline-block;
+        }
+
+        .ai-unified-wish-row {
+            margin-top: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .ai-unified-wish-label {
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: 0.7px;
+            color: #94A3B8;
+            text-transform: uppercase;
+        }
+
+        .ai-unified-wish-input {
+            width: 100%;
+            background: #0E131B;
+            border: 1px solid #283244;
+            border-radius: 11px;
+            padding: 11px 14px;
+            color: #F3F4F6;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .ai-unified-wish-input:focus {
+            border-color: #4ADE80;
+            box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.18);
+        }
+
+        .ai-unified-cta-row {
+            margin-top: 22px !important;
+        }
+
+        .btn-ai-unified-cta {
+            width: 100% !important;
+            padding: 15px 22px !important;
+            font-size: 15px !important;
+            font-weight: 900 !important;
+            letter-spacing: 0.3px !important;
+            border-radius: 14px !important;
+        }
+
+

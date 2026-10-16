@@ -350,6 +350,17 @@
         function updateSelectedSplitLabel() {
             const el = document.getElementById('selectedSplitLabel');
             if (!el) return;
+            if (window.aiGeneratorScope === 'weekly') {
+                const tplMap = {
+                    ai_auto: 'Haftalık • AI Otomatik Teşhis',
+                    upper_lower_full: 'Haftalık • Üst / Alt / Tüm Vücut (3 Gün)',
+                    ppl_3day: 'Haftalık • İtiş / Çekiş / Bacak (3 Gün)',
+                    fullbody_3day: 'Haftalık • 3 Gün Tüm Vücut (A/B/C)',
+                    upper_lower_4day: 'Haftalık • 4 Gün Üst / Alt Vücut'
+                };
+                el.innerText = tplMap[window.selectedAiWeeklyTemplate] || 'Haftalık • AI Otomatik Teşhis';
+                return;
+            }
             if (!selectedSplits || selectedSplits.length === 0) {
                 el.innerText = '⚠️ Seçilmedi';
                 return;
@@ -1038,29 +1049,129 @@
             }
         }
 
-        function handleQuickAiGenerate(preferredTplKey = null) {
-            const telemetry = getAiDoctrineTelemetry();
-            if (telemetry && telemetry.recommendedDoctrine && AI_DOCTRINES[telemetry.recommendedDoctrine]) {
-                currentSelectedDoctrine = telemetry.recommendedDoctrine;
-            }
-            if (preferredTplKey) {
-                const wkTplSelect = document.getElementById('aiModalWeeklyTemplateSelect');
-                if (wkTplSelect && AI_WEEKLY_TEMPLATES[preferredTplKey]) {
-                    wkTplSelect.value = preferredTplKey;
+        window.aiGeneratorScope = 'weekly';
+        window.selectedAiWeeklyTemplate = 'ai_auto';
+
+        const AI_WEEKLY_TPL_LABELS = {
+            ai_auto: 'Haftalık • AI Otomatik Teşhis',
+            upper_lower_full: 'Haftalık • Üst / Alt / Tüm Vücut (3 Gün)',
+            ppl_3day: 'Haftalık • İtiş / Çekiş / Bacak (3 Gün)',
+            fullbody_3day: 'Haftalık • 3 Gün Tüm Vücut (A/B/C)',
+            upper_lower_4day: 'Haftalık • 4 Gün Üst / Alt Vücut'
+        };
+
+        function resolveAutoWeeklyTemplateKey() {
+            const diag = (typeof buildCoachWeeklyDiagnostic === 'function') ? buildCoachWeeklyDiagnostic() : null;
+            if (diag && Array.isArray(diag.deficitMuscles) && diag.deficitMuscles.length > 0) {
+                const topDef = diag.deficitMuscles[0].key;
+                if (topDef === 'chest' || topDef === 'back' || topDef === 'shoulders') {
+                    return 'upper_lower_full';
                 }
             }
-            applyAiWeeklySchedule(preferredTplKey);
+            return 'upper_lower_full';
+        }
+
+        function setAiGeneratorScope(scope) {
+            window.aiGeneratorScope = (scope === 'single') ? 'single' : 'weekly';
+            const btnW = document.getElementById('aiScopeBtnWeekly');
+            const btnS = document.getElementById('aiScopeBtnSingle');
+            const gridW = document.getElementById('aiWeeklyTemplateGrid');
+            const gridS = document.getElementById('splitGrid');
+            const ctaBtn = document.getElementById('btnUnifiedAiGenerate');
+
+            if (btnW) btnW.classList.toggle('active', window.aiGeneratorScope === 'weekly');
+            if (btnS) btnS.classList.toggle('active', window.aiGeneratorScope === 'single');
+            if (gridW) gridW.style.display = (window.aiGeneratorScope === 'weekly') ? '' : 'none';
+            if (gridS) gridS.style.display = (window.aiGeneratorScope === 'single') ? '' : 'none';
+
+            if (window.aiGeneratorScope === 'weekly') {
+                const lblEl = document.getElementById('selectedSplitLabel');
+                if (lblEl) {
+                    lblEl.innerText = AI_WEEKLY_TPL_LABELS[window.selectedAiWeeklyTemplate] || 'Haftalık • AI Otomatik Teşhis';
+                }
+                if (ctaBtn) ctaBtn.innerHTML = '⚡ AI ile programı oluştur';
+            } else {
+                if (typeof updateSelectedSplitLabel === 'function') updateSelectedSplitLabel();
+                if (ctaBtn) ctaBtn.innerHTML = '⚡ AI ile günlük antrenmanı oluştur';
+            }
+        }
+        window.setAiGeneratorScope = setAiGeneratorScope;
+
+        function selectAiWeeklyTemplateCard(tplKey) {
+            window.selectedAiWeeklyTemplate = tplKey || 'ai_auto';
+            document.querySelectorAll('#aiWeeklyTemplateGrid .split-card').forEach(card => {
+                const key = card.getAttribute('data-wk-tpl');
+                card.classList.toggle('selected', key === window.selectedAiWeeklyTemplate);
+            });
+            const lblEl = document.getElementById('selectedSplitLabel');
+            if (lblEl && window.aiGeneratorScope === 'weekly') {
+                lblEl.innerText = AI_WEEKLY_TPL_LABELS[window.selectedAiWeeklyTemplate] || 'Haftalık • AI Otomatik Teşhis';
+            }
+            const wkTplSelect = document.getElementById('aiModalWeeklyTemplateSelect');
+            if (wkTplSelect && AI_WEEKLY_TEMPLATES[window.selectedAiWeeklyTemplate]) {
+                wkTplSelect.value = window.selectedAiWeeklyTemplate;
+            }
+        }
+        window.selectAiWeeklyTemplateCard = selectAiWeeklyTemplateCard;
+
+        function handleQuickAiGenerate(preferredTplKey = null) {
+            const goalEl = document.getElementById('paramGoal');
+            const goalVal = goalEl ? goalEl.value : 'hypertrophy';
+            const telemetry = getAiDoctrineTelemetry();
+
+            if (goalVal === 'strength' && AI_DOCTRINES.power_hypertrophy) {
+                currentSelectedDoctrine = 'power_hypertrophy';
+            } else if (goalVal === 'endurance' && AI_DOCTRINES.metcon_athletic) {
+                currentSelectedDoctrine = 'metcon_athletic';
+            } else if (telemetry && telemetry.recommendedDoctrine && AI_DOCTRINES[telemetry.recommendedDoctrine]) {
+                currentSelectedDoctrine = telemetry.recommendedDoctrine;
+            } else {
+                currentSelectedDoctrine = 'bb_hybrid';
+            }
+
+            const unifiedWishEl = document.getElementById('aiUnifiedWishInput');
+            const userWish = unifiedWishEl ? unifiedWishEl.value.trim() : '';
+
+            // Eğer kullanıcı "Tek Günlük Seans" modundaysa ve dışarıdan haftalık şablon zorlanmadıysa tek günlük AI antrenmanı üret
+            if (window.aiGeneratorScope === 'single' && !preferredTplKey) {
+                window.pendingAiWeeklyPlan = null;
+                handleGenerateWorkout(currentSelectedDoctrine, userWish);
+                const hintEl = document.getElementById('aiQuickPreviewHint');
+                if (hintEl) {
+                    hintEl.textContent = '✅ Seçtiğiniz bölge ve ekipmanlara göre günlük AI antrenmanı aşağıda hazırlandı';
+                    hintEl.style.color = '#9BE15D';
+                }
+                const outEl = document.getElementById('generatedWorkoutOutput');
+                if (outEl) {
+                    outEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                return;
+            }
+
+            let targetTplKey = preferredTplKey;
+            if (!targetTplKey) {
+                targetTplKey = (window.selectedAiWeeklyTemplate && window.selectedAiWeeklyTemplate !== 'ai_auto')
+                    ? window.selectedAiWeeklyTemplate
+                    : resolveAutoWeeklyTemplateKey();
+            } else {
+                selectAiWeeklyTemplateCard(targetTplKey);
+            }
+
+            applyAiWeeklySchedule(targetTplKey);
             const hintEl = document.getElementById('aiQuickPreviewHint');
             if (hintEl) {
-                hintEl.textContent = '✅ Haftalık program taslağı aşağıda hazırlandı — inceleyip onaylayarak takvime aktarabilirsiniz';
+                hintEl.textContent = '✅ Seçimlerinize göre haftalık AI programı aşağıda hazırlandı — inceleyip onaylayarak takvime aktarabilirsiniz';
                 hintEl.style.color = '#9BE15D';
             }
         }
         window.handleQuickAiGenerate = handleQuickAiGenerate;
 
         function switchQuickAiToSingleDay() {
+            setAiGeneratorScope('single');
             window.pendingAiWeeklyPlan = null;
-            handleGenerateWorkout(currentSelectedDoctrine, '');
+            const unifiedWishEl = document.getElementById('aiUnifiedWishInput');
+            const userWish = unifiedWishEl ? unifiedWishEl.value.trim() : '';
+            handleGenerateWorkout(currentSelectedDoctrine, userWish);
             const outEl = document.getElementById('generatedWorkoutOutput');
             if (outEl) {
                 outEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1299,24 +1410,30 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
         window.AI_WEEKLY_TEMPLATES = AI_WEEKLY_TEMPLATES;
 
         function applyAiWeeklySchedule(overrideTplKey = null) {
+            const paramDurEl = document.getElementById('paramDuration');
+            const paramStyleEl = document.getElementById('paramStyle');
             const durSelect = document.getElementById('aiModalDurationSelect');
             const styleSelect = document.getElementById('aiModalStyleSelect');
             const wkTplSelect = document.getElementById('aiModalWeeklyTemplateSelect');
-            const wishInput = document.getElementById('aiModalUserWishInput');
-            const chosenDur = durSelect ? parseInt(durSelect.value, 10) : 45;
-            const chosenStyle = styleSelect ? styleSelect.value : 'superset';
+            const unifiedWishEl = document.getElementById('aiUnifiedWishInput');
+            const modalWishEl = document.getElementById('aiModalUserWishInput');
+
+            const chosenDur = paramDurEl ? parseInt(paramDurEl.value, 10) : (durSelect ? parseInt(durSelect.value, 10) : 45);
+            const chosenStyle = paramStyleEl ? paramStyleEl.value : (styleSelect ? styleSelect.value : 'superset');
             const chosenTplKey = (overrideTplKey && AI_WEEKLY_TEMPLATES[overrideTplKey])
                 ? overrideTplKey
-                : ((wkTplSelect && AI_WEEKLY_TEMPLATES[wkTplSelect.value]) ? wkTplSelect.value : 'upper_lower_full');
+                : ((window.selectedAiWeeklyTemplate && AI_WEEKLY_TEMPLATES[window.selectedAiWeeklyTemplate])
+                    ? window.selectedAiWeeklyTemplate
+                    : ((wkTplSelect && AI_WEEKLY_TEMPLATES[wkTplSelect.value]) ? wkTplSelect.value : 'upper_lower_full'));
             if (wkTplSelect && wkTplSelect.value !== chosenTplKey) {
                 wkTplSelect.value = chosenTplKey;
             }
-            const userWish = wishInput ? wishInput.value.trim() : '';
+            const userWish = (unifiedWishEl && unifiedWishEl.value.trim())
+                ? unifiedWishEl.value.trim()
+                : (modalWishEl ? modalWishEl.value.trim() : '');
 
-            const paramDurEl = document.getElementById('paramDuration');
-            if (paramDurEl) paramDurEl.value = String(chosenDur);
-            const paramStyleEl = document.getElementById('paramStyle');
-            if (paramStyleEl && chosenStyle) paramStyleEl.value = chosenStyle;
+            if (durSelect) durSelect.value = String(chosenDur);
+            if (styleSelect && chosenStyle) styleSelect.value = chosenStyle;
             if (typeof updateSelectedParamLabel === 'function') updateSelectedParamLabel();
 
             renderAiHybridHeroBanner();
@@ -16785,7 +16902,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=212')
+                navigator.serviceWorker.register('./sw.js?v=213')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();

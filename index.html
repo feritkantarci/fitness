@@ -23,7 +23,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=212">
+    <link rel="stylesheet" href="css/style.css?v=213">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH (CANVA OBSIDIAN & LIME V201) */
         html, body { background-color: #0B0F17; color: #F3F6FA; color-scheme: dark; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -35,7 +35,7 @@
     <!-- ==================== LOGIN SCREEN ==================== -->
     <div id="loginScreen">
         <div class="login-card">
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v212</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v213</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -72,7 +72,7 @@
                     <span class="canva-brand-monogram" aria-hidden="true" translate="no">Ç</span>
                     <div class="canva-brand-stack">
                         <span class="modern-brand-title" translate="no">Çelik Kodu</span>
-                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v212</span>
+                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v213</span>
                     </div>
                 </div>
                 <div class="modern-bar-actions">
@@ -138,19 +138,19 @@
             <!-- ==================== TAB 1: WORKOUT GENERATOR ==================== -->
             <div id="generatorTab" class="tab-content active">
 
-                <!-- CARD 1: AI İLE HAZIRLA (CANVA DESIGN DAHYHNoxNdE) -->
-                <div class="ai-hybrid-hero-banner" id="aiHybridHeroBanner">
+                <!-- UNIFIED AI PROGRAM ARCHITECT CARD (CANVA DESIGN DAHYNdwI6Eo) -->
+                <div class="ai-hybrid-hero-banner ai-unified-architect-card" id="aiHybridHeroBanner">
                     <div class="ai-prep-top-row">
-                        <span class="ai-prep-pill">AI İLE HAZIRLA</span>
+                        <span class="ai-prep-pill"><span class="ai-pill-dot"></span>AI İLE HAZIRLA</span>
                     </div>
                     <h2 class="ai-prep-title">Programını AI ile oluştur</h2>
-                    <p class="ai-prep-subtitle">Sana uygun antrenman planına tek dokunuşla başla. Önerilen programı aşağıda görebilirsin.</p>
+                    <p class="ai-prep-subtitle">Kapsamı, ekipmanını ve antrenman ayrıntılarını seç; hareket seçimini, eksik kas telafisini ve bilimsel süperset kurgusunu AI senin için hazırlasın.</p>
 
                     <div class="ai-recommended-box">
-                        <div class="ai-rec-label">SENİN İÇİN ÖNERİLEN</div>
+                        <div class="ai-rec-label">✨ SENİN İÇİN ÖNERİLEN</div>
                         <div class="ai-rec-main-title" id="aiDoctrineCurrentBadge">Bodybuilding &amp; Fonksiyonel • Tüm Vücut</div>
                         <div id="aiDoctrineHeroQuickStats" class="ai-rec-pills-row">
-                            <span class="ai-rec-pill">12 seans</span>
+                            <span class="ai-rec-pill">Haftalık 3 Gün</span>
                             <span class="ai-rec-pill">Kas ve fonksiyonel gelişim</span>
                         </div>
                     </div>
@@ -158,90 +158,119 @@
                     <!-- COLLAPSIBLE INFO DRAWER -->
                     <div id="aiDoctrineHeroQuickTeaser" class="ai-hero-info-drawer" style="display:none;"></div>
 
-                    <div class="ai-prep-actions-row">
-                        <button type="button" class="btn-ai-create-primary" onclick="handleQuickAiGenerate()">
-                            AI ile program oluştur
-                        </button>
-                        <button type="button" class="btn-ai-customize-link" onclick="openAiHybridArchitectModal()" title="Özel İstek, Bölge veya Haftalık Şablon Seç">
-                            ⚙️ AI Ayarları &amp; Haftalık Plan
-                        </button>
-                    </div>
-                    <div class="ai-prep-hint" id="aiQuickPreviewHint">Önizlemeyi görmek için butona dokunun</div>
-                </div>
+                    <div class="ai-unified-divider"></div>
 
-                <!-- DIVIDER: VEYA KENDİN SEÇ -->
-                <div class="gen-or-divider">
-                    <span class="gen-or-line"></span>
-                    <span class="gen-or-text">VEYA KENDİN SEÇ</span>
-                    <span class="gen-or-line"></span>
-                </div>
-
-                <!-- CARD 2: PROGRAMINI KENDİN OLUŞTUR -->
-                <div class="generator-card">
-                    <div class="manual-gen-header">
-                        <h2 class="manual-gen-title">Programını kendin oluştur</h2>
-                        <p class="manual-gen-subtitle">Hedef bölgeyi, ekipmanını ve program ayrıntılarını sırayla seç.</p>
-                    </div>
-
-                    <!-- STEP 1: MUSCLE SPLIT -->
+                    <!-- STEP 1: PROGRAM KAPSAMI & BÖLÜNME (HAFTALIK VEYA TEK GÜN) -->
                     <div class="gen-mobile-picker-bar" id="mobileSplitPickerBar" onclick="toggleGenSection('splitSection')">
                         <div class="picker-label-wrap">
                             <span class="gen-step-badge">1</span>
-                            <span class="picker-step-title">Bölge:</span>
-                            <span class="picker-selected-val" id="selectedSplitLabel">Tüm Vücut (Full Body)</span>
+                            <span class="picker-step-title">Kapsam &amp; Bölünme:</span>
+                            <span class="picker-selected-val" id="selectedSplitLabel">Haftalık • AI Otomatik Teşhis</span>
                         </div>
                         <span class="picker-arrow" id="splitPickerArrow">▼</span>
                     </div>
                     <div class="gen-step-title desktop-only-title">
                         <span class="gen-step-badge">1</span>
-                        <span>HEDEF BÖLGE</span>
+                        <span>PROGRAM KAPSAMI &amp; BÖLÜNME</span>
                     </div>
                     <div class="gen-collapsible-section" id="splitSection">
-                        <div class="split-grid" id="splitGrid">
+                        <!-- Kapsam Seçici (Haftalık Plan vs Tek Günlük Seans) -->
+                        <div class="ai-scope-toggle-bar" role="tablist" aria-label="Program Kapsamı">
+                            <button type="button" class="ai-scope-pill active" id="aiScopeBtnWeekly" onclick="setAiGeneratorScope('weekly')">
+                                📅 Haftalık Plan (3-4 Gün)
+                            </button>
+                            <button type="button" class="ai-scope-pill" id="aiScopeBtnSingle" onclick="setAiGeneratorScope('single')">
+                                ⚡ Tek Günlük Seans
+                            </button>
+                        </div>
+
+                        <!-- 1A: Haftalık Şablon Seçici Grid (Varsayılan Açık) -->
+                        <div class="split-grid ai-weekly-split-grid" id="aiWeeklyTemplateGrid">
+                            <div class="split-card selected" data-wk-tpl="ai_auto" onclick="selectAiWeeklyTemplateCard('ai_auto')">
+                                <span class="split-radio" aria-hidden="true"></span>
+                                <div class="split-card-content">
+                                    <span class="split-name">🤖 AI Otomatik Teşhis (Önerilen)</span>
+                                    <span class="split-sub-desc">Eksik kaslara göre en uygun 3 günlük kurgu</span>
+                                </div>
+                            </div>
+                            <div class="split-card" data-wk-tpl="upper_lower_full" onclick="selectAiWeeklyTemplateCard('upper_lower_full')">
+                                <span class="split-radio" aria-hidden="true"></span>
+                                <div class="split-card-content">
+                                    <span class="split-name">Üst • Alt • Tüm Vücut (3 Gün)</span>
+                                    <span class="split-sub-desc">Pazartesi • Çarşamba • Cuma dengeli hibrit</span>
+                                </div>
+                            </div>
+                            <div class="split-card" data-wk-tpl="ppl_3day" onclick="selectAiWeeklyTemplateCard('ppl_3day')">
+                                <span class="split-radio" aria-hidden="true"></span>
+                                <div class="split-card-content">
+                                    <span class="split-name">İtiş • Çekiş • Bacak — PPL (3 Gün)</span>
+                                    <span class="split-sub-desc">Bölgesel kas odaklanması (Push / Pull / Legs)</span>
+                                </div>
+                            </div>
+                            <div class="split-card" data-wk-tpl="fullbody_3day" onclick="selectAiWeeklyTemplateCard('fullbody_3day')">
+                                <span class="split-radio" aria-hidden="true"></span>
+                                <div class="split-card-content">
+                                    <span class="split-name">3 Gün Tüm Vücut (A / B / C)</span>
+                                    <span class="split-sub-desc">Her seansta tüm vücut yüksek frekans</span>
+                                </div>
+                            </div>
+                            <div class="split-card" data-wk-tpl="upper_lower_4day" onclick="selectAiWeeklyTemplateCard('upper_lower_4day')">
+                                <span class="split-radio" aria-hidden="true"></span>
+                                <div class="split-card-content">
+                                    <span class="split-name">4 Gün Üst / Alt Vücut</span>
+                                    <span class="split-sub-desc">Pzt • Sal • Per • Cum yüksek hacimli seri</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 1B: Tek Günlük Bölge Seçici Grid (Tek Gün seçildiğinde açılır) -->
+                        <div class="split-grid" id="splitGrid" style="display:none;">
                             <div class="split-card selected" onclick="toggleSplit('full_body')">
+                                <span class="split-radio" aria-hidden="true"></span>
                                 <div class="split-card-content">
                                     <span class="split-name">Tüm Vücut (Full Body)</span>
                                 </div>
-                                <span class="split-radio" aria-hidden="true"></span>
                             </div>
                             <div class="split-card" onclick="toggleSplit('upper_push')">
+                                <span class="split-radio" aria-hidden="true"></span>
                                 <div class="split-card-content">
                                     <span class="split-name">Üst İtiş (Push)</span>
                                 </div>
-                                <span class="split-radio" aria-hidden="true"></span>
                             </div>
                             <div class="split-card" onclick="toggleSplit('upper_pull')">
+                                <span class="split-radio" aria-hidden="true"></span>
                                 <div class="split-card-content">
                                     <span class="split-name">Üst Çekiş (Pull)</span>
                                 </div>
-                                <span class="split-radio" aria-hidden="true"></span>
                             </div>
                             <div class="split-card" onclick="toggleSplit('lower')">
+                                <span class="split-radio" aria-hidden="true"></span>
                                 <div class="split-card-content">
                                     <span class="split-name">Alt Vücut &amp; Bacak</span>
                                 </div>
-                                <span class="split-radio" aria-hidden="true"></span>
                             </div>
                             <div class="split-card" onclick="toggleSplit('upper')">
+                                <span class="split-radio" aria-hidden="true"></span>
                                 <div class="split-card-content">
                                     <span class="split-name">Tüm Üst Vücut</span>
                                 </div>
-                                <span class="split-radio" aria-hidden="true"></span>
                             </div>
                             <div class="split-card" onclick="toggleSplit('core')">
+                                <span class="split-radio" aria-hidden="true"></span>
                                 <div class="split-card-content">
                                     <span class="split-name">Karın &amp; Core</span>
                                 </div>
-                                <span class="split-radio" aria-hidden="true"></span>
                             </div>
                             <div class="split-card" onclick="toggleSplit('functional')">
+                                <span class="split-radio" aria-hidden="true"></span>
                                 <div class="split-card-content">
                                     <span class="split-name">Fonksiyonel &amp; Kondisyon</span>
                                 </div>
-                                <span class="split-radio" aria-hidden="true"></span>
                             </div>
                         </div>
                     </div>
+
+                    <div class="ai-unified-divider"></div>
 
                     <!-- STEP 2: AVAILABLE EQUIPMENT -->
                     <div class="gen-mobile-picker-bar" id="mobileEquipPickerBar" onclick="toggleGenSection('equipSection')">
@@ -259,24 +288,26 @@
                     <div class="gen-collapsible-section" id="equipSection">
                         <div class="equip-chips-wrap" id="equipChipsWrap">
                             <div class="equip-chip selected" onclick="toggleEquip('dumbbell')">
-                                <span>Dambıl</span>
+                                <span class="equip-check-icon">✓</span><span>Dambıl</span>
                             </div>
                             <div class="equip-chip selected" onclick="toggleEquip('kettlebell')">
-                                <span>Kettlebell</span>
+                                <span class="equip-check-icon">✓</span><span>Kettlebell</span>
                             </div>
                             <div class="equip-chip" onclick="toggleEquip('barbell')">
-                                <span>Bar &amp; Plaka</span>
+                                <span class="equip-check-icon">✓</span><span>Bar &amp; Plaka</span>
                             </div>
                             <div class="equip-chip" onclick="toggleEquip('machine')">
-                                <span>Makine</span>
+                                <span class="equip-check-icon">✓</span><span>Makine</span>
                             </div>
                             <div class="equip-chip selected" onclick="toggleEquip('bodyweight')">
-                                <span>Vücut Ağırlığı</span>
+                                <span class="equip-check-icon">✓</span><span>Vücut Ağırlığı</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- STEP 3: WORKOUT PARAMETERS -->
+                    <div class="ai-unified-divider"></div>
+
+                    <!-- STEP 3: WORKOUT PARAMETERS & AI NOTE -->
                     <div class="gen-mobile-picker-bar" id="mobileParamPickerBar" onclick="toggleGenSection('paramSection')">
                         <div class="picker-label-wrap">
                             <span class="gen-step-badge">3</span>
@@ -287,7 +318,7 @@
                     </div>
                     <div class="gen-step-title desktop-only-title">
                         <span class="gen-step-badge">3</span>
-                        <span>MODEL, HEDEF &amp; SÜRE</span>
+                        <span>MODEL, HEDEF, SÜRE &amp; AI NOTU</span>
                     </div>
                     <div class="gen-collapsible-section" id="paramSection">
                         <div class="param-grid">
@@ -318,12 +349,19 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="ai-unified-wish-row">
+                            <label for="aiUnifiedWishInput" class="ai-unified-wish-label">💬 AI ÖZEL NOTU / ODAK &amp; HASSASİYET (İSTEĞE BAĞLI)</label>
+                            <input type="text" id="aiUnifiedWishInput" class="ai-unified-wish-input" placeholder="Örn: Omuz ve sırt odaklı olsun, diz yormasın...">
+                        </div>
                     </div>
 
-                    <!-- GENERATE CTA -->
-                    <button class="btn-generate-cta" onclick="handleGenerateWorkout()">
-                        <span>Seçimlerimle program oluştur</span>
-                    </button>
+                    <!-- SINGLE UNIFIED AI GENERATE CTA -->
+                    <div class="ai-prep-actions-row ai-unified-cta-row">
+                        <button type="button" class="btn-ai-create-primary btn-ai-unified-cta" id="btnUnifiedAiGenerate" onclick="handleQuickAiGenerate()">
+                            ⚡ AI ile programı oluştur
+                        </button>
+                    </div>
+                    <div class="ai-prep-hint" id="aiQuickPreviewHint">Seçimlerinize göre hareketleri ve süpersetleri AI otomatik kurgular • Takvime onaysız yazılmaz</div>
                 </div>
 
                 <!-- GENERATED WORKOUT CONTAINER -->
@@ -2319,8 +2357,8 @@
     </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
-    <script src="js/exercises-db.js?v=212"></script>
-    <script src="js/app.js?v=212"></script>
+    <script src="js/exercises-db.js?v=213"></script>
+    <script src="js/app.js?v=213"></script>
     <script>
         function toggleHeaderPopupMenu(e) {
             if (e) e.stopPropagation();
