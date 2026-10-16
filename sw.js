@@ -1,4 +1,4 @@
-const CACHE_NAME = 'celik-kodu-cache-v206';
+const CACHE_NAME = 'celik-kodu-cache-v207';
 const ASSETS = [
   './',
   './index.html',
@@ -222,7 +222,7 @@ self.addEventListener('fetch', (event) => {
       event.request.url.includes('.css') ||
       event.request.url.includes('index.html')) {
     event.respondWith(
-      fetch(event.request)
+      fetch(event.request, { cache: 'no-cache' })
         .then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
             const responseToCache = networkResponse.clone();

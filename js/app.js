@@ -3512,12 +3512,13 @@ KURALLAR:
                 });
             } else {
                 // 'catalog' / 'diğer' tab
+                ensureBilingualExerciseNames();
                 const q = (document.getElementById('pickerSearchInput')?.value || '').trim();
                 const cat = pickerContext.categoryFilter;
 
                 filtered = EXERCISES_DB.filter(ex => {
-                    // Exclude hidden exercises
-                    if (isExerciseExcludedByUser(ex.id)) return false;
+                    // Exclude hidden exercises unless explicitly searched by query
+                    if (!q && isExerciseExcludedByUser(ex.id)) return false;
                     // Exclude all exercises already in current routine
                     if (existingIds.includes(ex.id)) return false;
 
@@ -6381,18 +6382,36 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             return String(str)
                 .toLocaleLowerCase('tr-TR')
                 .replace(/ı/g, 'i')
+                .replace(/İ/g, 'i')
                 .replace(/ğ/g, 'g')
                 .replace(/ü/g, 'u')
                 .replace(/ş/g, 's')
                 .replace(/ö/g, 'o')
                 .replace(/ç/g, 'c')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
                 .replace(/['’`\-_\/()]/g, ' ')
                 .replace(/\s+/g, ' ')
                 .trim();
         }
 
+        const EXERCISE_BILINGUAL_NAME_PATCHES = {
+            db_farmers_walk: "Çiftçi Yürüyüşü (Farmer's Walk / Carry)",
+            db_suitcase_carry: "Tek El Çanta Taşıma (Suitcase Carry)",
+            db_walking_lunge: "Yürüyerek Lunge (Walking Lunge)"
+        };
+
+        function ensureBilingualExerciseNames() {
+            if (typeof EXERCISES_DB === 'undefined' || !Array.isArray(EXERCISES_DB)) return;
+            EXERCISES_DB.forEach(ex => {
+                if (ex && EXERCISE_BILINGUAL_NAME_PATCHES[ex.id]) {
+                    ex.name = EXERCISE_BILINGUAL_NAME_PATCHES[ex.id];
+                }
+            });
+        }
+
         const EXERCISE_SEARCH_SYNONYMS = {
-            db_farmers_walk: "ciftci yuruyusu ciftci tasimasi farmer walk farmers walk farmer carry farmers carry agirlik tasima",
+            db_farmers_walk: "ciftci yuruyusu ciftci tasimasi cift yuruyus farmer walk farmers walk farmer carry farmers carry agirlik tasima",
             db_suitcase_carry: "tek el canta tasima valiz tasima suitcase carry",
             db_walking_lunge: "yuruyerek lunge adim lunge walking lunge",
             db_swing: "kettlebell dambil swing salinim rus swing",
@@ -6409,8 +6428,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (!qNorm) return true;
             const eqLabel = (typeof EQUIP_LABELS !== 'undefined' && EQUIP_LABELS[ex.equipment]?.label) || '';
             const syn = EXERCISE_SEARCH_SYNONYMS[ex.id] || '';
+            const patchedName = EXERCISE_BILINGUAL_NAME_PATCHES[ex.id] || '';
             const haystack = normalizeSearchTextTR(
                 (ex.name || '') + ' ' +
+                patchedName + ' ' +
                 (ex.id || '') + ' ' +
                 (ex.muscle || '') + ' ' +
                 (ex.cue || '') + ' ' +
@@ -6430,8 +6451,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         }
 
         function renderLibraryExerciseCatalog() {
+            ensureBilingualExerciseNames();
             const container = document.getElementById('libExercisesCatalogGrid');
             const countBadge = document.getElementById('libExCountBadge');
+            const subCountBadge = document.getElementById('libExSubCountBadge');
             const clearBtn = document.getElementById('libExClearSearchBtn');
             const excludedCountEl = document.getElementById('libExcludedCount');
             if (!container) return;
@@ -6452,8 +6475,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             const filtered = EXERCISES_DB.filter(ex => {
                 const isExcluded = excludedIds.includes(ex.id);
-                // Gizlenenler modunda sadece gizlenenleri, normal modda ise gizlenmeyenleri göster
-                if (showExcluded ? !isExcluded : isExcluded) return false;
+                // Arama kutusu doluyken (q varsa) gizlenmiş egzersiz de aramayla eşleşiyorsa kullanıcıya gösterilsin (Gizli etiketiyle)
+                if (!q && (showExcluded ? !isExcluded : isExcluded)) return false;
 
                 if (equip !== 'all' && ex.equipment !== equip) return false;
 
@@ -6485,9 +6508,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 return true;
             });
 
-            if (countBadge) {
-                countBadge.innerText = `${filtered.length} Egzersiz ${showExcluded ? '(Gizlenenler)' : ''}`;
-            }
+            const badgeText = `${filtered.length} Egzersiz ${showExcluded ? '(Gizlenenler)' : ''}`;
+            if (countBadge) countBadge.innerText = badgeText;
+            if (subCountBadge) subCountBadge.innerText = badgeText;
 
             if (filtered.length === 0) {
                 container.innerHTML = `
@@ -6546,11 +6569,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 8px; ${isExcluded ? 'color:#B6F059; border-color:#10b981; background:rgba(16,185,129,0.12);' : 'color:#F87171; border-color:rgba(239,68,68,0.35);'}" onclick="event.stopPropagation(); toggleExerciseExclusionAndRefresh('${ex.id}')" title="${isExcluded ? 'Aktif havuzunuza geri ekleyin' : 'Kişisel havuzunuzdan gizleyin'}">
                                 ${isExcluded ? '🔄 Geri Al' : '👁️ Gizle'}
                             </button>
-                            ${!isExcluded ? `
-                                <button type="button" class="btn btn-gold" style="flex:1.2; font-size:11px; padding:6px 8px; font-weight:800;" onclick="openAddToProgramOptions('${ex.id}')">
-                                    ➕ Ekle
-                                </button>
-                            ` : ''}
+                            <button type="button" class="btn btn-gold" style="flex:1.2; font-size:11px; padding:6px 8px; font-weight:800;" onclick="openAddToProgramOptions('${ex.id}')">
+                                ➕ Ekle
+                            </button>
                         </div>
                     </div>
                 `;
@@ -15828,7 +15849,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=206')
+                navigator.serviceWorker.register('./sw.js?v=207')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
@@ -15848,6 +15869,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         // INITIALIZE APPLICATION
         window.addEventListener('DOMContentLoaded', () => {
+            ensureBilingualExerciseNames();
             initAuthDatabase();
             initFirebaseEngine();
             syncAppViewState();
@@ -16161,6 +16183,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         }
 
         function renderStudioExerciseCatalog() {
+            ensureBilingualExerciseNames();
             const container = document.getElementById('studioExercisesCatalog');
             const totalCountEl = document.getElementById('studioExTotalCount');
             if (!container) return;
@@ -16170,8 +16193,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const showAll = document.getElementById('chkShowAllExercises')?.checked;
 
             const filtered = EXERCISES_DB.filter(ex => {
-                // Gizlenen hareketleri stüdyo kataloğunda gösterme
-                if (isExerciseExcludedByUser(ex.id)) return false;
+                // Gizlenen hareketleri stüdyo kataloğunda gösterme (açıkça aranmadıkça)
+                if (!q && isExerciseExcludedByUser(ex.id)) return false;
                 if (equip !== 'all' && ex.equipment !== equip) return false;
                 if (q && !matchesExerciseSearch(ex, q)) return false;
                 // Target Region Filtering
