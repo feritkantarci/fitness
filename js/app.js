@@ -1046,6 +1046,11 @@
             window.pendingAiWeeklyPlan = null;
             renderAiHybridHeroBanner();
             handleGenerateWorkout(currentSelectedDoctrine, '');
+            const hintEl = document.getElementById('aiQuickPreviewHint');
+            if (hintEl) {
+                hintEl.textContent = '✅ Taslak önizleme aşağıda hazırlandı — inceleyip onaylayarak takvime atayabilirsiniz';
+                hintEl.style.color = '#9BE15D';
+            }
             const outEl = document.getElementById('generatedWorkoutOutput');
             if (outEl) {
                 setTimeout(() => {
@@ -16709,7 +16714,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=210')
+                navigator.serviceWorker.register('./sw.js?v=211')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();

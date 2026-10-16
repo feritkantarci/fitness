@@ -6393,12 +6393,14 @@
             display: none !important;
         }
 
-        /* 4. Canva Olive AI Prep Card (AI İLE HAZIRLA) */
+        /* 4. Canva Olive AI Prep Card (AI İLE HAZIRLA - Design ID: DAHYHNoxNdE) */
         .ai-hybrid-hero-banner {
-            background: linear-gradient(180deg, rgba(43, 61, 34, 0.55) 0%, rgba(22, 32, 24, 0.72) 100%) !important;
-            border: 1px solid rgba(182, 240, 89, 0.30) !important;
+            background:
+                radial-gradient(circle at 92% 8%, rgba(163, 230, 53, 0.22) 0%, rgba(163, 230, 53, 0) 42%),
+                linear-gradient(180deg, #172318 0%, #121A14 100%) !important;
+            border: 1px solid rgba(182, 240, 89, 0.26) !important;
             border-radius: 22px !important;
-            padding: 18px !important;
+            padding: 20px !important;
             margin-bottom: 0 !important;
             box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35) !important;
         }
@@ -6410,8 +6412,8 @@
         .ai-prep-pill {
             display: inline-flex !important;
             align-items: center !important;
-            background: rgba(182, 240, 89, 0.16) !important;
-            border: 1px solid rgba(182, 240, 89, 0.32) !important;
+            background: rgba(182, 240, 89, 0.14) !important;
+            border: 1px solid rgba(182, 240, 89, 0.30) !important;
             color: #C5F578 !important;
             font-size: 11px !important;
             font-weight: 800 !important;
@@ -6419,7 +6421,7 @@
             text-transform: uppercase !important;
             border-radius: 999px !important;
             padding: 5px 12px !important;
-            margin-bottom: 10px !important;
+            margin-bottom: 12px !important;
         }
 
         .ai-prep-title {
@@ -6435,30 +6437,30 @@
             color: #CBD5E1 !important;
             font-size: 13.5px !important;
             line-height: 1.45 !important;
-            margin: 0 0 14px 0 !important;
+            margin: 0 0 16px 0 !important;
             font-weight: 500 !important;
         }
 
         .ai-recommended-box {
-            background: rgba(13, 19, 26, 0.68) !important;
+            background: rgba(14, 21, 16, 0.65) !important;
             border: 1px solid rgba(182, 240, 89, 0.22) !important;
             border-radius: 16px !important;
-            padding: 13px 15px !important;
-            margin-bottom: 14px !important;
+            padding: 14px 16px !important;
+            margin-bottom: 16px !important;
         }
 
         .ai-rec-label {
-            color: #94A3B8 !important;
+            color: #9BE15D !important;
             font-size: 10.5px !important;
             font-weight: 800 !important;
             letter-spacing: 0.06em !important;
             text-transform: uppercase !important;
-            margin-bottom: 4px !important;
+            margin-bottom: 5px !important;
         }
 
         .ai-rec-main-title {
             color: #F8FAFC !important;
-            font-size: 16px !important;
+            font-size: 15.5px !important;
             font-weight: 800 !important;
             line-height: 1.3 !important;
             margin-bottom: 10px !important;
@@ -6474,27 +6476,35 @@
         .ai-rec-pill {
             display: inline-flex !important;
             align-items: center !important;
-            background: rgba(182, 240, 89, 0.14) !important;
-            border: 1px solid rgba(182, 240, 89, 0.28) !important;
-            color: #D9F99D !important;
+            background: rgba(182, 240, 89, 0.12) !important;
+            border: 1px solid rgba(182, 240, 89, 0.26) !important;
+            color: #E2E8F0 !important;
             font-size: 12px !important;
             font-weight: 700 !important;
             border-radius: 999px !important;
             padding: 5px 12px !important;
         }
 
+        .ai-prep-actions-row {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            flex-wrap: wrap !important;
+            gap: 10px !important;
+        }
+
         .btn-ai-create-primary {
-            width: 100% !important;
+            width: auto !important;
             background: #B6F059 !important;
             border: 1px solid #B6F059 !important;
             color: #0B0F17 !important;
             font-family: var(--font-display) !important;
-            font-size: 15px !important;
+            font-size: 14.5px !important;
             font-weight: 800 !important;
             border-radius: 14px !important;
-            padding: 13px 18px !important;
+            padding: 12px 22px !important;
             cursor: pointer !important;
-            display: flex !important;
+            display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
             box-shadow: 0 4px 18px rgba(182, 240, 89, 0.22) !important;
@@ -6505,12 +6515,6 @@
             background: #C5F578 !important;
             border-color: #C5F578 !important;
             box-shadow: 0 6px 24px rgba(182, 240, 89, 0.35) !important;
-        }
-
-        .ai-secondary-actions-row {
-            display: flex !important;
-            justify-content: flex-end !important;
-            margin-top: 8px !important;
         }
 
         .btn-ai-customize-link {
@@ -6526,6 +6530,13 @@
 
         .btn-ai-customize-link:hover {
             color: #B6F059 !important;
+        }
+
+        .ai-prep-hint {
+            color: #7C8B99 !important;
+            font-size: 12px !important;
+            font-weight: 500 !important;
+            margin-top: 8px !important;
         }
 
         /* VEYA KENDİN SEÇ Divider */
