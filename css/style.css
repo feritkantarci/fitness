@@ -6393,72 +6393,161 @@
             display: none !important;
         }
 
-        /* 4. Canva Olive Status Banner (AI Hybrid Hero Banner) */
+        /* 4. Canva Olive AI Prep Card (AI İLE HAZIRLA) */
         .ai-hybrid-hero-banner {
-            background: rgba(182, 240, 89, 0.08) !important;
-            border: 1px solid rgba(182, 240, 89, 0.28) !important;
-            border-radius: 14px !important;
-            padding: 10px 14px !important;
-            margin-bottom: 14px !important;
-            box-shadow: none !important;
+            background: linear-gradient(180deg, rgba(43, 61, 34, 0.55) 0%, rgba(22, 32, 24, 0.72) 100%) !important;
+            border: 1px solid rgba(182, 240, 89, 0.30) !important;
+            border-radius: 22px !important;
+            padding: 18px !important;
+            margin-bottom: 0 !important;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35) !important;
         }
 
         .ai-hybrid-hero-banner::before {
             display: none !important;
         }
 
-        .ai-hero-top-bar {
-            display: flex !important;
+        .ai-prep-pill {
+            display: inline-flex !important;
             align-items: center !important;
-            justify-content: space-between !important;
+            background: rgba(182, 240, 89, 0.16) !important;
+            border: 1px solid rgba(182, 240, 89, 0.32) !important;
+            color: #C5F578 !important;
+            font-size: 11px !important;
+            font-weight: 800 !important;
+            letter-spacing: 0.06em !important;
+            text-transform: uppercase !important;
+            border-radius: 999px !important;
+            padding: 5px 12px !important;
+            margin-bottom: 10px !important;
+        }
+
+        .ai-prep-title {
+            font-family: var(--font-display) !important;
+            color: #F8FAFC !important;
+            font-size: 22px !important;
+            font-weight: 800 !important;
+            line-height: 1.2 !important;
+            margin: 0 0 6px 0 !important;
+        }
+
+        .ai-prep-subtitle {
+            color: #CBD5E1 !important;
+            font-size: 13.5px !important;
+            line-height: 1.45 !important;
+            margin: 0 0 14px 0 !important;
+            font-weight: 500 !important;
+        }
+
+        .ai-recommended-box {
+            background: rgba(13, 19, 26, 0.68) !important;
+            border: 1px solid rgba(182, 240, 89, 0.22) !important;
+            border-radius: 16px !important;
+            padding: 13px 15px !important;
+            margin-bottom: 14px !important;
+        }
+
+        .ai-rec-label {
+            color: #94A3B8 !important;
+            font-size: 10.5px !important;
+            font-weight: 800 !important;
+            letter-spacing: 0.06em !important;
+            text-transform: uppercase !important;
+            margin-bottom: 4px !important;
+        }
+
+        .ai-rec-main-title {
+            color: #F8FAFC !important;
+            font-size: 16px !important;
+            font-weight: 800 !important;
+            line-height: 1.3 !important;
+            margin-bottom: 10px !important;
+        }
+
+        .ai-rec-pills-row {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            align-items: center !important;
             gap: 8px !important;
         }
 
-        .ai-hero-title-group {
-            display: flex !important;
-            align-items: center !important;
-            flex-wrap: wrap !important;
-            gap: 6px !important;
-            min-width: 0 !important;
-            flex: 1 !important;
-        }
-
-        .ai-hero-tag,
-        .ai-hero-doc-badge {
-            background: rgba(182, 240, 89, 0.15) !important;
-            border: 1px solid rgba(182, 240, 89, 0.32) !important;
-            color: #B6F059 !important;
-            font-size: 12.5px !important;
-            font-weight: 800 !important;
-            border-radius: 999px !important;
-            padding: 3px 10px !important;
-        }
-
-        .ai-hero-title {
-            color: #F3F6FA !important;
-            font-size: 13.5px !important;
-            font-weight: 800 !important;
-        }
-
-        .ai-hero-stats-wrap {
-            display: flex !important;
-            flex-direction: row !important;
-            align-items: center !important;
-            flex-wrap: wrap !important;
-            gap: 6px !important;
-            border-top: none !important;
-            margin-top: 6px !important;
-            padding-top: 0 !important;
-        }
-
-        .ai-hero-stats-wrap .telemetry-pill {
+        .ai-rec-pill {
             display: inline-flex !important;
-            width: auto !important;
-            background: rgba(11, 15, 23, 0.65) !important;
-            border: 1px solid rgba(182, 240, 89, 0.2) !important;
-            border-radius: 8px !important;
-            padding: 3px 8px !important;
-            font-size: 12.5px !important;
+            align-items: center !important;
+            background: rgba(182, 240, 89, 0.14) !important;
+            border: 1px solid rgba(182, 240, 89, 0.28) !important;
+            color: #D9F99D !important;
+            font-size: 12px !important;
+            font-weight: 700 !important;
+            border-radius: 999px !important;
+            padding: 5px 12px !important;
+        }
+
+        .btn-ai-create-primary {
+            width: 100% !important;
+            background: #B6F059 !important;
+            border: 1px solid #B6F059 !important;
+            color: #0B0F17 !important;
+            font-family: var(--font-display) !important;
+            font-size: 15px !important;
+            font-weight: 800 !important;
+            border-radius: 14px !important;
+            padding: 13px 18px !important;
+            cursor: pointer !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-shadow: 0 4px 18px rgba(182, 240, 89, 0.22) !important;
+            transition: all 0.2s ease !important;
+        }
+
+        .btn-ai-create-primary:hover {
+            background: #C5F578 !important;
+            border-color: #C5F578 !important;
+            box-shadow: 0 6px 24px rgba(182, 240, 89, 0.35) !important;
+        }
+
+        .ai-secondary-actions-row {
+            display: flex !important;
+            justify-content: flex-end !important;
+            margin-top: 8px !important;
+        }
+
+        .btn-ai-customize-link {
+            background: transparent !important;
+            border: none !important;
+            color: #94A3B8 !important;
+            font-size: 12px !important;
+            font-weight: 700 !important;
+            cursor: pointer !important;
+            padding: 4px 6px !important;
+            transition: color 0.15s ease !important;
+        }
+
+        .btn-ai-customize-link:hover {
+            color: #B6F059 !important;
+        }
+
+        /* VEYA KENDİN SEÇ Divider */
+        .gen-or-divider {
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+            margin: 14px 0 !important;
+        }
+
+        .gen-or-line {
+            flex: 1 !important;
+            height: 1px !important;
+            background: rgba(148, 163, 184, 0.18) !important;
+        }
+
+        .gen-or-text {
+            font-size: 11px !important;
+            font-weight: 800 !important;
+            letter-spacing: 0.08em !important;
+            color: #64748B !important;
+            text-transform: uppercase !important;
         }
 
         /* 5. Canva Main Protocol Card & Bento Setup Grid */
@@ -6475,9 +6564,34 @@
         .anatomy-focus-card {
             background: #121821 !important;
             border: 1px solid #222C3A !important;
-            border-radius: 20px !important;
+            border-radius: 22px !important;
             color: #F3F6FA !important;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35) !important;
+        }
+
+        .generator-card {
+            padding: 18px !important;
+        }
+
+        .manual-gen-header {
+            margin-bottom: 14px !important;
+        }
+
+        .manual-gen-title {
+            font-family: var(--font-display) !important;
+            font-size: 20px !important;
+            font-weight: 800 !important;
+            color: #F8FAFC !important;
+            margin: 0 0 4px 0 !important;
+            line-height: 1.25 !important;
+        }
+
+        .manual-gen-subtitle {
+            font-size: 13px !important;
+            color: #94A3B8 !important;
+            margin: 0 !important;
+            line-height: 1.4 !important;
+            font-weight: 500 !important;
         }
 
         .gen-mobile-picker-bar {
@@ -6487,18 +6601,28 @@
         .gen-step-title,
         .gen-step-title.desktop-only-title {
             display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
             color: #E5B85B !important;
-            font-size: 12.5px !important;
+            font-size: 12px !important;
             font-weight: 800 !important;
             letter-spacing: 0.06em !important;
             text-transform: uppercase !important;
-            margin-bottom: 8px !important;
+            margin-bottom: 10px !important;
         }
 
         .gen-step-badge {
             background: rgba(229, 184, 91, 0.16) !important;
             border: 1px solid rgba(229, 184, 91, 0.35) !important;
             color: #E5B85B !important;
+            width: 22px !important;
+            height: 22px !important;
+            border-radius: 50% !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 11.5px !important;
+            font-weight: 800 !important;
         }
 
         .gen-collapsible-section {
@@ -6507,7 +6631,7 @@
             opacity: 1 !important;
             overflow: visible !important;
             padding: 0 !important;
-            margin-bottom: 12px !important;
+            margin-bottom: 14px !important;
             background: transparent !important;
             border: none !important;
         }
@@ -6523,10 +6647,14 @@
         }
 
         .split-card {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 10px !important;
             background: #161E29 !important;
             border: 1px solid #253041 !important;
             border-radius: 14px !important;
-            padding: 10px 12px !important;
+            padding: 11px 14px !important;
             min-height: 46px !important;
         }
 
@@ -6544,7 +6672,7 @@
         .split-name,
         .split-card-title {
             color: #F3F6FA !important;
-            font-size: 13px !important;
+            font-size: 13.5px !important;
             font-weight: 700 !important;
             white-space: normal !important;
             overflow: visible !important;
@@ -6565,6 +6693,10 @@
             border-radius: 6px !important;
             background: #0E131B !important;
             border: 1.5px solid #2E3C51 !important;
+            flex-shrink: 0 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
         }
 
         .split-card.selected .split-radio {
@@ -6591,7 +6723,7 @@
             color: #CBD5E1 !important;
             font-size: 13px !important;
             font-weight: 700 !important;
-            padding: 7px 14px !important;
+            padding: 8px 14px !important;
         }
 
         .equip-chip.selected {
@@ -6611,15 +6743,19 @@
         .param-group {
             background: #161E29 !important;
             border: 1px solid #253041 !important;
-            border-radius: 12px !important;
-            padding: 8px 10px !important;
+            border-radius: 14px !important;
+            padding: 10px 12px !important;
         }
 
         .param-label,
         .param-group label {
             color: #94A3B8 !important;
-            font-size: 12.5px !important;
-            font-weight: 700 !important;
+            font-size: 11px !important;
+            font-weight: 800 !important;
+            letter-spacing: 0.04em !important;
+            text-transform: uppercase !important;
+            margin-bottom: 6px !important;
+            display: block !important;
         }
 
         select,
@@ -6630,8 +6766,9 @@
             border: 1px solid #253041 !important;
             color: #F3F6FA !important;
             color-scheme: dark !important;
-            border-radius: 8px !important;
+            border-radius: 10px !important;
             font-size: 13px !important;
+            font-weight: 700 !important;
         }
 
         /* 6. Canva Electric Lime Primary Buttons (+ Set ekle / Program Üret) */
@@ -6644,8 +6781,15 @@
             color: #0B0F17 !important;
             font-family: var(--font-display) !important;
             font-weight: 800 !important;
-            border-radius: 12px !important;
+            border-radius: 14px !important;
             box-shadow: 0 4px 18px rgba(182, 240, 89, 0.25) !important;
+        }
+
+        .btn-generate-cta {
+            width: 100% !important;
+            font-size: 15px !important;
+            padding: 13px 18px !important;
+            margin-top: 6px !important;
         }
 
         .btn-generate-cta:hover,
@@ -6689,18 +6833,7 @@
             font-weight: 700 !important;
         }
 
-        /* 9. Mobile 390px Compact Viewport Fit */
-        @media (max-width: 768px) {
-            #aiDoctrineInfoBtn,
-            .ai-hero-title {
-                display: none !important;
-            }
-            .ai-hybrid-hero-banner {
-                padding: 8px 10px !important;
-                margin-bottom: 8px !important;
-            }
-        }
-
+        /* 9. Mobile Responsive Fit */
         @media (max-width: 640px) {
             .modern-app-bar {
                 padding: 8px 10px !important;
@@ -6709,46 +6842,34 @@
             .auth-role-tag {
                 display: none !important;
             }
+            .ai-hybrid-hero-banner {
+                padding: 15px !important;
+            }
+            .ai-prep-title {
+                font-size: 19px !important;
+            }
             .generator-card {
-                padding: 10px 12px !important;
+                padding: 15px !important;
+            }
+            .manual-gen-title {
+                font-size: 18px !important;
             }
             .split-grid {
-                gap: 5px !important;
+                gap: 6px !important;
             }
             .split-card {
-                padding: 6px 9px !important;
-                min-height: 36px !important;
+                padding: 9px 11px !important;
+                min-height: 42px !important;
             }
             .equip-chips-wrap {
-                gap: 5px !important;
-                margin-bottom: 6px !important;
+                gap: 6px !important;
+                margin-bottom: 8px !important;
             }
             .equip-chip {
-                padding: 5px 10px !important;
+                padding: 6px 12px !important;
             }
             .param-grid {
                 grid-template-columns: 1fr !important;
-                gap: 5px !important;
-            }
-            .param-box,
-            .param-group {
-                display: flex !important;
-                align-items: center !important;
-                justify-content: space-between !important;
                 gap: 8px !important;
-                padding: 4px 10px !important;
-            }
-            .param-group label {
-                margin-bottom: 0 !important;
-                flex-shrink: 0 !important;
-            }
-            .param-select {
-                max-width: 68% !important;
-                padding: 4px 8px !important;
-            }
-            .btn-generate-cta {
-                margin-top: 8px !important;
-                padding: 11px 16px !important;
-                min-height: 44px !important;
             }
         }

@@ -931,17 +931,87 @@
             };
         }
 
+        function getWeeklyTrainingStatus() {
+            const logs = typeof getWorkoutLogs === 'function' ? getWorkoutLogs() : [];
+            const now = new Date();
+            const todayIdx = now.getDay(); // 0=Paz, 1=Pzt ... 5=Cum, 6=Cmt
+            const diffToMonday = todayIdx === 0 ? -6 : 1 - todayIdx;
+            const monday = new Date(now);
+            monday.setHours(0, 0, 0, 0);
+            monday.setDate(now.getDate() + diffToMonday);
+
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+            sunday.setHours(23, 59, 59, 999);
+
+            const completedLogsThisWeek = [];
+            const completedDaysSet = new Set();
+            let completedToday = false;
+
+            logs.forEach(lg => {
+                const rawD = lg.date || lg.timestamp || lg.completedAt;
+                if (!rawD) return;
+                const dObj = new Date(rawD);
+                if (isNaN(dObj.getTime())) return;
+                if (dObj >= monday && dObj <= sunday) {
+                    completedLogsThisWeek.push(lg);
+                    completedDaysSet.add(dObj.getDay());
+                    if (
+                        dObj.getFullYear() === now.getFullYear() &&
+                        dObj.getMonth() === now.getMonth() &&
+                        dObj.getDate() === now.getDate()
+                    ) {
+                        completedToday = true;
+                    }
+                }
+            });
+
+            const completedThisWeekCount = Math.max(completedLogsThisWeek.length, completedDaysSet.size);
+            // Cuma günü antrenman tamamlanmışsa, veya bu hafta >=3 antrenman bittiyse, veya Cumartesi/Pazar ise bu haftanın ana döngüsü tamamlanmıştır -> Gelecek Hafta hedeflenir
+            const isThisWeekComplete =
+                completedThisWeekCount >= 3 ||
+                (todayIdx === 5 && completedToday) ||
+                todayIdx === 6 ||
+                todayIdx === 0;
+
+            const splitLabelMap = {
+                full_body: 'Tüm Vücut',
+                upper: 'Üst Vücut',
+                lower: 'Alt Vücut & Bacak',
+                upper_push: 'İtiş (Göğüs • Omuz • Triceps)',
+                upper_pull: 'Çekiş (Sırt • Kanat • Biceps)',
+                arms_shoulders: 'Kol & Omuz Zırhı',
+                core_cond: 'Karın & Kondisyon'
+            };
+
+            const activeSplit = (Array.isArray(selectedSplits) && selectedSplits.length > 0) ? selectedSplits[0] : 'full_body';
+            const activeSplitLabel = splitLabelMap[activeSplit] || 'Tüm Vücut';
+
+            return {
+                completedThisWeekCount,
+                completedDays: Array.from(completedDaysSet),
+                completedToday,
+                todayIdx,
+                todayName: (typeof DAY_NAMES_TR !== 'undefined' && DAY_NAMES_TR[todayIdx]) ? DAY_NAMES_TR[todayIdx] : 'Bugün',
+                isThisWeekComplete,
+                recommendedTargetWeek: isThisWeekComplete ? 'next' : 'current',
+                activeSplit,
+                activeSplitLabel
+            };
+        }
+        window.getWeeklyTrainingStatus = getWeeklyTrainingStatus;
+
         function renderAiHybridHeroBanner() {
             const telemetry = getAiDoctrineTelemetry();
+            const wkStatus = getWeeklyTrainingStatus();
             const badge = document.getElementById('aiDoctrineCurrentBadge');
             const teaser = document.getElementById('aiDoctrineHeroQuickTeaser');
             const stats = document.getElementById('aiDoctrineHeroQuickStats');
 
+            const activeDoc = AI_DOCTRINES[currentSelectedDoctrine] || AI_DOCTRINES.bb_hybrid;
+
             if (badge) {
-                const activeDoc = AI_DOCTRINES[currentSelectedDoctrine] || AI_DOCTRINES.bb_hybrid;
-                badge.innerHTML = activeDoc.name;
-                badge.style.color = activeDoc.badgeColor;
-                badge.style.borderColor = activeDoc.badgeColor;
+                badge.textContent = `${activeDoc.name} • ${wkStatus.activeSplitLabel}`;
             }
 
             if (teaser) {
@@ -952,36 +1022,38 @@
                     teaser.innerHTML = `Yapay zeka antrenman geçmişini, tartı trendini ve vücut ölçülerini analiz ederek sana özel <strong>Hipertrofi + Fonksiyonel Fitness</strong> dengesini program öncesinde baştan kurgular.${note}`;
                 }
             }
+
             if (stats) {
-                let html = '';
-                if (telemetry.totalLogsCount > 0) {
-                    html += `
-                        <div class="telemetry-pill">
-                            <span class="telemetry-pill-val">${telemetry.totalLogsCount} Seans</span>
-                        </div>
-                        <div class="telemetry-pill">
-                            <span class="telemetry-pill-label">Kas/Fonk:</span>
-                            <span class="telemetry-pill-val" style="color:#B6F059;">%${Math.round(telemetry.bbRatio * 100)}/%${Math.round(telemetry.funcRatio * 100)}</span>
-                        </div>
-                    `;
+                const pills = [];
+                pills.push(`<span class="ai-rec-pill">${telemetry.totalLogsCount || 0} seans</span>`);
+                pills.push(`<span class="ai-rec-pill">Kas ve fonksiyonel gelişim</span>`);
+                if (wkStatus.completedThisWeekCount > 0) {
+                    if (wkStatus.isThisWeekComplete) {
+                        pills.push(`<span class="ai-rec-pill" style="border-color:rgba(74,222,128,0.45); color:#86EFAC;">✅ Bu hafta ${wkStatus.completedThisWeekCount} seans bitti • Hedef: Gelecek Hafta</span>`);
+                    } else {
+                        pills.push(`<span class="ai-rec-pill">Bu hafta ${wkStatus.completedThisWeekCount}/3 tamamlandı</span>`);
+                    }
                 }
-                if (telemetry.currentWeight) {
-                    html += `
-                        <div class="telemetry-pill">
-                            <span class="telemetry-pill-val" style="color:#60A5FA;">${telemetry.currentWeight} kg</span>
-                        </div>
-                    `;
-                }
-                if (telemetry.currentWaist) {
-                    html += `
-                        <div class="telemetry-pill">
-                            <span class="telemetry-pill-val" style="color:#F3F6FA;">${telemetry.currentWaist} cm</span>
-                        </div>
-                    `;
-                }
-                stats.innerHTML = html;
+                stats.innerHTML = pills.join('');
             }
         }
+
+        function handleQuickAiGenerate() {
+            const telemetry = getAiDoctrineTelemetry();
+            if (telemetry && telemetry.recommendedDoctrine && AI_DOCTRINES[telemetry.recommendedDoctrine]) {
+                currentSelectedDoctrine = telemetry.recommendedDoctrine;
+            }
+            window.pendingAiWeeklyPlan = null;
+            renderAiHybridHeroBanner();
+            handleGenerateWorkout(currentSelectedDoctrine, '');
+            const outEl = document.getElementById('generatedWorkoutOutput');
+            if (outEl) {
+                setTimeout(() => {
+                    outEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 80);
+            }
+        }
+        window.handleQuickAiGenerate = handleQuickAiGenerate;
 
         function toggleAiDoctrineTeaser() {
             const el = document.getElementById('aiDoctrineHeroQuickTeaser');
@@ -1144,6 +1216,8 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             const chosenStyle = styleSelect ? styleSelect.value : 'superset';
             const userWish = wishInput ? wishInput.value.trim() : '';
 
+            window.pendingAiWeeklyPlan = null;
+
             // Split, süre ve süperset yoğunluğu seçimlerini ana ekrana yansıt
             selectSplit(chosenSplit);
             const paramDurEl = document.getElementById('paramDuration');
@@ -1155,7 +1229,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             // Doktrini hero banner'a yansıt
             renderAiHybridHeroBanner();
 
-            // Programı üret
+            // Programı üret (Takvime otomatik yazmaz, önizleme kartı açar)
             handleGenerateWorkout(currentSelectedDoctrine, userWish);
 
             closeAiHybridArchitectModal();
@@ -1231,11 +1305,12 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
             const tpl = AI_WEEKLY_TEMPLATES[chosenTplKey];
             const weeklyDays = tpl.days;
+            const wkStatus = getWeeklyTrainingStatus();
 
-            const schedule = getWeeklySchedule();
-            // Önce tüm günleri dinlenmeye çek, ardından seçilen şablonun AI seanslarını yerleştir
+            // Taslak takvim objesi (DOĞRUDAN TAKVİME YAZILMAZ — Kullanıcı onaylayana kadar önizlemede bekler!)
+            const draftSchedule = {};
             for (let d = 0; d <= 6; d++) {
-                schedule[d] = {
+                draftSchedule[d] = {
                     id: 'rest',
                     title: '🧘 Dinlenme & Aktif Toparlanma',
                     type: 'rest',
@@ -1245,8 +1320,6 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             }
 
             // KATMAN 5: HAFTALIK GÜNLER ARASI HAFIZA (A/B/C ROTASYONU & EKSİK ALT KAS TAKİBİ)
-            // Pazartesi seçilen hareketler Çarşamba/Cuma günlerinde tekrar edilmez;
-            // Pazartesi vurulmayan alt kas açıları (örn. Üst Göğüs, Arka Omuz, Kalf) sonraki günlerde önceliklendirilir!
             const weeklyContext = {
                 usedExerciseIds: new Set(),
                 usedMovementFamiliesBySplit: {},
@@ -1254,7 +1327,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 usedFinishers: new Set()
             };
 
-            let firstGenerated = null;
+            const generatedDaysList = [];
             weeklyDays.forEach((slot, idx) => {
                 selectSplit(slot.split);
                 handleGenerateWorkout(currentSelectedDoctrine, userWish, weeklyContext);
@@ -1263,7 +1336,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     wClone.id = 'ai_wk_' + slot.dayIdx + '_' + (Date.now() + idx);
                     wClone.title = `⚔️ ${slot.label} (${wClone.doctrineShort || 'AI Hibrit'})`;
                     wClone.weeklyTemplate = chosenTplKey;
-                    schedule[slot.dayIdx] = {
+                    draftSchedule[slot.dayIdx] = {
                         id: wClone.id,
                         title: wClone.title,
                         type: 'custom_generated',
@@ -1272,29 +1345,185 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                         customWorkout: wClone,
                         exercises: wClone.exercises
                     };
-                    if (!firstGenerated) firstGenerated = wClone;
+                    generatedDaysList.push({
+                        dayIdx: slot.dayIdx,
+                        dayName: DAY_NAMES_TR[slot.dayIdx] || '',
+                        label: slot.label,
+                        workout: wClone
+                    });
                 }
             });
 
-            if (firstGenerated) {
-                currentGeneratedWorkout = firstGenerated;
-                renderGeneratedWorkout();
-            }
+            window.pendingAiWeeklyPlan = {
+                templateKey: chosenTplKey,
+                templateName: tpl.name,
+                userWish,
+                targetWeek: wkStatus.recommendedTargetWeek,
+                wkStatus,
+                days: generatedDaysList,
+                draftSchedule
+            };
 
-            saveWeeklySchedule(schedule);
             closeAiHybridArchitectModal();
-            switchTab('activeWorkoutTab');
-            renderActiveWorkout();
-            if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
-            setTimeout(() => {
-                const calEl = document.getElementById('embeddedCalendarSection');
-                if (calEl) calEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 150);
+            switchTab('generatorTab');
+            renderPendingWeeklyPlanPreview();
+
+            const outEl = document.getElementById('generatedWorkoutOutput');
+            if (outEl) {
+                setTimeout(() => {
+                    outEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
             if (typeof showToast === 'function') {
-                showToast(`✅ AI Haftalık Programınız (${tpl.name}) günler arası tekrarsız A/B/C rotasyonuyla takvime işlendi!`);
+                showToast(`📋 AI Haftalık Program taslağı hazırlandı! İnceleyip onaylayarak takvime aktarabilirsiniz.`);
             }
         }
         window.applyAiWeeklySchedule = applyAiWeeklySchedule;
+
+        function renderPendingWeeklyPlanPreview() {
+            const plan = window.pendingAiWeeklyPlan;
+            const container = document.getElementById('generatedWorkoutOutput');
+            if (!plan || !container) return;
+
+            const wkStatus = getWeeklyTrainingStatus();
+            const isNextWeekRecommended = wkStatus.isThisWeekComplete;
+
+            const nextMonDate = typeof getDateForScheduleDay === 'function' ? getDateForScheduleDay(1, true) : null;
+            const nextFriDate = typeof getDateForScheduleDay === 'function' ? getDateForScheduleDay(5, true) : null;
+            const fmtShort = (d) => d ? `${d.getDate()}.${String(d.getMonth() + 1).padStart(2, '0')}` : '';
+            const nextRangeStr = (nextMonDate && nextFriDate) ? ` (${fmtShort(nextMonDate)} - ${fmtShort(nextFriDate)})` : '';
+
+            const timingAlertHtml = isNextWeekRecommended ? `
+                <div style="background:rgba(182, 240, 89, 0.10); border:1px solid rgba(182, 240, 89, 0.35); border-radius:14px; padding:12px 14px; margin-bottom:14px;">
+                    <div style="display:flex; align-items:center; gap:8px; color:#B6F059; font-size:13px; font-weight:800; margin-bottom:4px;">
+                        <span>🧠</span>
+                        <span>Zamanlama Zekası: Bu Hafta ${wkStatus.completedThisWeekCount} Antrenman Tamamlandı (Bugün ${wkStatus.todayName})</span>
+                    </div>
+                    <div style="font-size:12.5px; color:#CBD5E1; line-height:1.45;">
+                        Bu haftanın antrenman döngüsünü tamamladığınız için program <strong>mevcut haftanıza otomatik yazılmadı</strong>. Aşağıdaki <strong>${escapeHTML(plan.templateName)}</strong> paketini inceleyip <strong>Gelecek Hafta${escapeHTML(nextRangeStr)}</strong> takvimine tek dokunuşla onaylayabilirsiniz.
+                    </div>
+                </div>
+            ` : `
+                <div style="background:rgba(56, 189, 248, 0.10); border:1px solid rgba(56, 189, 248, 0.35); border-radius:14px; padding:12px 14px; margin-bottom:14px;">
+                    <div style="display:flex; align-items:center; gap:8px; color:#38BDF8; font-size:13px; font-weight:800; margin-bottom:4px;">
+                        <span>📋</span>
+                        <span>Taslak Önizleme (Takvime Otomatik Atanmadı)</span>
+                    </div>
+                    <div style="font-size:12.5px; color:#CBD5E1; line-height:1.45;">
+                        Hazırlanan <strong>${escapeHTML(plan.templateName)}</strong> paketini aşağıdan gün gün inceleyin. Onayladığınızda geçmişte tamamlanan günlerinize dokunulmadan takvime işlenir.
+                    </div>
+                </div>
+            `;
+
+            const daysCardsHtml = plan.days.map((dItem, dIdx) => {
+                const w = dItem.workout;
+                const exRows = (w.exercises || []).map((ex, eIdx) => {
+                    const anatomy = typeof getExerciseAnatomy === 'function' ? getExerciseAnatomy(ex) : { primary: ex.muscle || '' };
+                    const lbl = ex.blockLabel || (eIdx + 1);
+                    return `
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:7px 10px; background:#0E131B; border:1px solid #1E293B; border-radius:10px; margin-bottom:6px;">
+                            <div style="min-width:0; flex:1;">
+                                <span style="color:#B6F059; font-weight:800; font-size:12px; margin-right:5px;">${escapeHTML(String(lbl))}.</span>
+                                <strong style="color:#F8FAFC; font-size:13px;">${escapeHTML(ex.name)}</strong>
+                                <span style="display:inline-block; margin-left:6px; font-size:11px; color:#94A3B8;">🎯 ${escapeHTML(anatomy.primary)}</span>
+                            </div>
+                            <span style="font-size:11.5px; font-weight:700; color:#E5B85B; white-space:nowrap;">${w.scheme.sets}×${w.scheme.reps}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <div style="background:#161E29; border:1px solid #253041; border-radius:16px; padding:14px; margin-bottom:12px;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+                            <div>
+                                <div style="font-size:11px; font-weight:800; color:#B6F059; text-transform:uppercase; letter-spacing:0.05em;">
+                                    ${isNextWeekRecommended ? `GELECEK HAFTA • ${escapeHTML(dItem.dayName.toUpperCase())}` : escapeHTML(dItem.dayName.toUpperCase())}
+                                </div>
+                                <h3 style="font-size:15px; font-weight:800; color:#F8FAFC; margin:2px 0 0 0;">${escapeHTML(dItem.label)}</h3>
+                            </div>
+                            <button type="button" class="btn-action-secondary" style="padding:6px 12px; font-size:11.5px; border-color:rgba(182,240,89,0.35); color:#B6F059;" onclick="inspectDayFromPendingWeeklyPlan(${dIdx})">
+                                🔍 Hareketleri Düzenle / Detay
+                            </button>
+                        </div>
+                        ${exRows}
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                <div class="workout-header-card">
+                    <div class="badge-brand" style="color:#B6F059;">HAFTALIK AI PROGRAM TASLAĞI (ÖNİZLEME)</div>
+                    <h2 class="workout-main-title" style="margin-bottom:10px;">${escapeHTML(plan.templateName)}</h2>
+                    ${timingAlertHtml}
+
+                    <div class="workout-actions-bar" style="margin-bottom:16px;">
+                        <button class="btn-start-workout" style="background:#B6F059 !important; color:#0B0F17 !important; font-weight:900;" onclick="confirmPendingAiWeeklyPlan('next')">
+                            <span>📅 ONAYLA & GELECEK HAFTA TAKVİMİNE UYGULA${escapeHTML(nextRangeStr)}</span>
+                        </button>
+                        <button class="btn-action-secondary" style="border-color:var(--cyan); color:var(--cyan); font-weight:800;" onclick="confirmPendingAiWeeklyPlan('current_safe')">
+                            <span>⚡ Bu Haftanın Kalan Günlerine Uygula (Tamamlanan Günlere Dokunma)</span>
+                        </button>
+                    </div>
+
+                    ${daysCardsHtml}
+                </div>
+            `;
+        }
+        window.renderPendingWeeklyPlanPreview = renderPendingWeeklyPlanPreview;
+
+        function inspectDayFromPendingWeeklyPlan(dayIndexInList) {
+            const plan = window.pendingAiWeeklyPlan;
+            if (!plan || !plan.days || !plan.days[dayIndexInList]) return;
+            currentGeneratedWorkout = plan.days[dayIndexInList].workout;
+            renderGeneratedWorkout();
+        }
+        window.inspectDayFromPendingWeeklyPlan = inspectDayFromPendingWeeklyPlan;
+
+        function confirmPendingAiWeeklyPlan(mode = 'next') {
+            const plan = window.pendingAiWeeklyPlan;
+            if (!plan || !plan.draftSchedule) {
+                if (typeof showToast === 'function') showToast("⚠️ Onaylanacak haftalık taslak bulunamadı.");
+                return;
+            }
+            const user = getActiveUser();
+            const uid = user ? user.id : 'default';
+
+            if (mode === 'next') {
+                saveNextWeeklySchedule(JSON.parse(JSON.stringify(plan.draftSchedule)), uid);
+                activePlannerWeek = 'next';
+                switchTab('activeWorkoutTab');
+                renderActiveWorkout();
+                if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
+                if (typeof showToast === 'function') {
+                    showToast(`✅ "${plan.templateName}" Gelecek Hafta takvimine işlendi! Bu haftaki tamamlanan antrenmanlarınız korundu.`);
+                }
+            } else {
+                // 'current_safe': Bu haftada tamamlanmış günlere veya geçmiş günlere dokunmadan sadece kalan günleri güncelle
+                const wkStatus = getWeeklyTrainingStatus();
+                const currentSched = getWeeklySchedule(uid);
+                const todayIdx = new Date().getDay();
+                const isoOrder = (d) => (d === 0 ? 7 : d);
+                const todayIso = isoOrder(todayIdx);
+
+                for (let d = 0; d <= 6; d++) {
+                    const isAlreadyCompleted = wkStatus.completedDays.includes(d);
+                    const isPastDay = isoOrder(d) < todayIso;
+                    if (isAlreadyCompleted || isPastDay) {
+                        continue; // Geçmiş veya antrenmanı yapılmış günleri koru!
+                    }
+                    currentSched[d] = JSON.parse(JSON.stringify(plan.draftSchedule[d]));
+                }
+                saveWeeklySchedule(currentSched, uid);
+                activePlannerWeek = 'current';
+                switchTab('activeWorkoutTab');
+                renderActiveWorkout();
+                if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
+                if (typeof showToast === 'function') {
+                    showToast(`✅ Program bu haftanın kalan günlerine uygulandı (tamamlanan günleriniz korundu).`);
+                }
+            }
+        }
+        window.confirmPendingAiWeeklyPlan = confirmPendingAiWeeklyPlan;
 
         function startActiveWorkoutSession(workout) {
             if (workout) {
@@ -2163,12 +2392,32 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 </div>
             ` : '';
 
+            const wkStatus = typeof getWeeklyTrainingStatus === 'function' ? getWeeklyTrainingStatus() : { isThisWeekComplete: false, completedThisWeekCount: 0, todayName };
+            const timingNoticeHtml = wkStatus.isThisWeekComplete ? `
+                <div style="background:rgba(182, 240, 89, 0.10); border:1px solid rgba(182, 240, 89, 0.35); border-radius:12px; padding:10px 12px; margin:10px 0 12px 0; font-size:12px; color:#CBD5E1; line-height:1.45;">
+                    <strong style="color:#B6F059;">🧠 Zamanlama Zekası:</strong> Bu hafta <strong>${wkStatus.completedThisWeekCount} antrenman</strong> tamamlandı (Bugün ${escapeHTML(wkStatus.todayName)}). Mevcut haftanızın kaydını bozmamak için bu program <strong>takvime otomatik eklenmedi</strong> — aşağıdan inceleyip <strong>Gelecek Hafta Pazartesi</strong>'ye (veya istediğiniz güne) onaylayabilirsiniz.
+                </div>
+            ` : `
+                <div style="background:rgba(56, 189, 248, 0.08); border:1px solid rgba(56, 189, 248, 0.28); border-radius:12px; padding:9px 12px; margin:10px 0 12px 0; font-size:12px; color:#CBD5E1;">
+                    📋 <strong>Taslak Önizleme:</strong> Programınız takvime otomatik atanmadı. Aşağıdan hareketleri inceleyip onaylayarak istediğiniz güne atayabilirsiniz.
+                </div>
+            `;
+
+            const backToWeeklyBtn = window.pendingAiWeeklyPlan ? `
+                <div style="margin-bottom:10px;">
+                    <button type="button" class="btn-action-secondary" style="border-color:#B6F059; color:#B6F059; font-weight:800;" onclick="renderPendingWeeklyPlanPreview()">
+                        ⬅️ Haftalık Paket Önizlemesine Dön (${escapeHTML(window.pendingAiWeeklyPlan.templateName)})
+                    </button>
+                </div>
+            ` : '';
+
             container.innerHTML = `
                 <div class="workout-header-card">
+                    ${backToWeeklyBtn}
                     <div class="workout-title-row">
                         <div>
                             ${docBadge}
-                            <div class="badge-brand">HAZIRLANAN HİBRİT ANTRENMAN</div>
+                            <div class="badge-brand">HAZIRLANAN HİBRİT ANTRENMAN (TASLAK ÖNİZLEME)</div>
                             <h2 class="workout-main-title">${escapeHTML(w.title)}</h2>
                             ${wishBadge}
                         </div>
@@ -2179,20 +2428,34 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                         </div>
                     </div>
 
+                    ${timingNoticeHtml}
+
                     <!-- ACTION BUTTONS -->
                     <div class="workout-actions-bar">
                         <button class="btn-start-workout" onclick="startActiveWorkoutFromGenerated()">
                             <span>▶️ ŞİMDİ BAŞLAT (SAYAÇ & SETLER)</span>
                         </button>
-                        <button class="btn-action-secondary" style="border-color:var(--gold); color:var(--gold); font-weight:900; background:rgba(245,158,11,0.12);" onclick="assignGeneratedToToday()">
-                            <span>🔥 BUGÜNE ATA (${DAY_NAMES_TR[todayIdx]})</span>
-                        </button>
-                        <button class="btn-action-secondary" style="border-color:var(--cyan); color:var(--cyan); font-weight:800;" onclick="scheduleTomorrowFromGenerated()">
-                            <span>📅 Yarın İçin Programla (${tomorrowName})</span>
-                        </button>
-                        <button class="btn-action-secondary" style="border-color:#263244;" onclick="promptAssignGeneratedToAnyDay()">
-                            <span>📅 Haftanın Gününe Planla</span>
-                        </button>
+                        ${wkStatus.isThisWeekComplete ? `
+                            <button class="btn-action-secondary" style="border-color:#B6F059; color:#B6F059; font-weight:900; background:rgba(182,240,89,0.14);" onclick="assignGeneratedToNextWeekDay(1)">
+                                <span>📅 GELECEK HAFTA PAZARTESİ'YE ATA (ONAYLA)</span>
+                            </button>
+                            <button class="btn-action-secondary" style="border-color:var(--cyan); color:var(--cyan); font-weight:800;" onclick="promptAssignGeneratedToAnyDay()">
+                                <span>📅 Başka Güne Planla</span>
+                            </button>
+                            <button class="btn-action-secondary" style="border-color:#263244;" onclick="assignGeneratedToToday()">
+                                <span>🔥 Yine de Bugüne Ata (${DAY_NAMES_TR[todayIdx]})</span>
+                            </button>
+                        ` : `
+                            <button class="btn-action-secondary" style="border-color:var(--gold); color:var(--gold); font-weight:900; background:rgba(245,158,11,0.12);" onclick="assignGeneratedToToday()">
+                                <span>🔥 BUGÜNE ATA (${DAY_NAMES_TR[todayIdx]})</span>
+                            </button>
+                            <button class="btn-action-secondary" style="border-color:var(--cyan); color:var(--cyan); font-weight:800;" onclick="scheduleTomorrowFromGenerated()">
+                                <span>📅 Yarın İçin Programla (${tomorrowName})</span>
+                            </button>
+                            <button class="btn-action-secondary" style="border-color:#263244;" onclick="promptAssignGeneratedToAnyDay()">
+                                <span>📅 Haftanın Gününe Planla</span>
+                            </button>
+                        `}
                         <button class="btn-action-secondary" onclick="saveGeneratedToLibrary()">
                             <span>💾 Programlarıma Kaydet</span>
                         </button>
@@ -2235,6 +2498,43 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
             if (container.scrollIntoView) container.scrollIntoView({ behavior: 'smooth' });
         }
+
+        function assignGeneratedToNextWeekDay(targetDayIdx = 1) {
+            let workout = currentGeneratedWorkout;
+            if (!workout) {
+                try {
+                    const raw = localStorage.getItem('celik_kodu_last_generated_workout');
+                    if (raw) workout = JSON.parse(raw);
+                } catch(e) {}
+            }
+            if (!workout || !Array.isArray(workout.exercises) || workout.exercises.length === 0) {
+                if (typeof showToast === 'function') showToast("⚠️ Atanacak hazır program bulunamadı.");
+                return;
+            }
+            const user = getActiveUser();
+            const uid = user ? user.id : 'default';
+            const nextSched = getNextWeeklySchedule(uid);
+            const dayName = DAY_NAMES_TR[targetDayIdx] || 'Pazartesi';
+
+            nextSched[targetDayIdx] = {
+                id: workout.id || ('gen_next_' + targetDayIdx + '_' + Date.now()),
+                title: workout.title || `Gelecek Hafta ${dayName} Programı`,
+                type: 'custom_generated',
+                desc: `${workout.exercises.length} Hareket • ${workout.duration || 45} Dk`,
+                rest: false,
+                customWorkout: JSON.parse(JSON.stringify(workout)),
+                exercises: workout.exercises
+            };
+            saveNextWeeklySchedule(nextSched, uid);
+            activePlannerWeek = 'next';
+            if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
+            if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
+            if (typeof playAlertSound === 'function') playAlertSound();
+            if (typeof showToast === 'function') {
+                showToast(`📅 "${workout.title}" Gelecek Hafta ${dayName} gününe başarıyla atandı! Bu haftaki tamamlanan antrenmanlarınız korundu.`);
+            }
+        }
+        window.assignGeneratedToNextWeekDay = assignGeneratedToNextWeekDay;
 
         function switchGuideTab(collapseId, tabName) {
             const panels = ['animasyon', 'form', 'anatomi', 'adimlar'];
@@ -16409,7 +16709,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=209')
+                navigator.serviceWorker.register('./sw.js?v=210')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();

@@ -23,7 +23,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=209">
+    <link rel="stylesheet" href="css/style.css?v=210">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH (CANVA OBSIDIAN & LIME V201) */
         html, body { background-color: #0B0F17; color: #F3F6FA; color-scheme: dark; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -35,7 +35,7 @@
     <!-- ==================== LOGIN SCREEN ==================== -->
     <div id="loginScreen">
         <div class="login-card">
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v209</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v210</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -72,7 +72,7 @@
                     <span class="canva-brand-monogram" aria-hidden="true" translate="no">Ç</span>
                     <div class="canva-brand-stack">
                         <span class="modern-brand-title" translate="no">Çelik Kodu</span>
-                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v209</span>
+                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v210</span>
                     </div>
                 </div>
                 <div class="modern-bar-actions">
@@ -138,36 +138,49 @@
             <!-- ==================== TAB 1: WORKOUT GENERATOR ==================== -->
             <div id="generatorTab" class="tab-content active">
 
-                <!-- AI HYBRID BLUEPRINT & DOCTRINE ARCHITECT BANNER -->
+                <!-- CARD 1: AI İLE HAZIRLA (CANVA OLIVE HERO CARD) -->
                 <div class="ai-hybrid-hero-banner" id="aiHybridHeroBanner">
-                    <div class="ai-hero-top-bar">
-                        <div class="ai-hero-title-group">
-                            <span class="ai-hero-tag">AI Koç</span>
-                            <span id="aiDoctrineCurrentBadge" class="ai-hero-doc-badge">Hibrit Doktrin</span>
-                            <h3 class="ai-hero-title">Bodybuilding & Fonksiyonel</h3>
-                            <button type="button" id="aiDoctrineInfoBtn" class="ai-hero-info-btn" onclick="toggleAiDoctrineTeaser()" title="Açıklamayı Göster / Gizle" aria-expanded="false" aria-label="Bilgi">i</button>
-                        </div>
-                        <button type="button" class="btn btn-gold ai-hero-action-btn" onclick="openAiHybridArchitectModal()" title="AI Doktrin Teşhisini Aç">
-                            <span>Teşhis</span>
-                        </button>
+                    <div class="ai-prep-top-row">
+                        <span class="ai-prep-pill">AI İLE HAZIRLA</span>
                     </div>
+                    <h2 class="ai-prep-title">Programını AI ile oluştur</h2>
+                    <p class="ai-prep-subtitle">Sana uygun antrenman planına tek dokunuşla başla. Önerilen programı aşağıda görebilirsin.</p>
 
-                    <div id="aiDoctrineHeroQuickStats" class="ai-hero-stats-wrap">
-                        <!-- Live Telemetry snippet populated by JS -->
+                    <div class="ai-recommended-box">
+                        <div class="ai-rec-label">SENİN İÇİN ÖNERİLEN</div>
+                        <div class="ai-rec-main-title" id="aiDoctrineCurrentBadge">Bodybuilding &amp; Fonksiyonel • Tüm Vücut</div>
+                        <div id="aiDoctrineHeroQuickStats" class="ai-rec-pills-row">
+                            <span class="ai-rec-pill">12 seans</span>
+                            <span class="ai-rec-pill">Kas ve fonksiyonel gelişim</span>
+                        </div>
                     </div>
 
                     <!-- COLLAPSIBLE INFO DRAWER -->
-                    <div id="aiDoctrineHeroQuickTeaser" class="ai-hero-info-drawer" style="display:none;">
-                        Yapay zeka antrenman geçmişini, tartı trendini ve vücut ölçülerini analiz ederek sana özel <strong>Hipertrofi + Fonksiyonel Fitness</strong> dengesini program öncesinde baştan kurgular.
-                        <div style="margin-top:4px; font-size:12px; color:var(--text-secondary); font-weight:600;">
-                            Schumann (2022) Concurrent Training Destekli
-                        </div>
+                    <div id="aiDoctrineHeroQuickTeaser" class="ai-hero-info-drawer" style="display:none;"></div>
+
+                    <div class="ai-prep-actions-row">
+                        <button type="button" class="btn-ai-create-primary" onclick="handleQuickAiGenerate()">
+                            AI ile program oluştur
+                        </button>
+                        <button type="button" class="btn-ai-customize-link" onclick="openAiHybridArchitectModal()" title="Özel İstek, Bölge veya Haftalık Şablon Seç">
+                            ⚙️ AI Ayarları &amp; Haftalık Plan
+                        </button>
                     </div>
                 </div>
 
+                <!-- DIVIDER: VEYA KENDİN SEÇ -->
+                <div class="gen-or-divider">
+                    <span>VEYA KENDİN SEÇ</span>
+                </div>
+
+                <!-- CARD 2: PROGRAMINI KENDİN OLUŞTUR -->
                 <div class="generator-card">
-                    
-                    <!-- STEP 1: MUSCLE SPLIT (ZERO-SCROLL BENTO GRID) -->
+                    <div class="manual-gen-header">
+                        <h2 class="manual-gen-title">Programını kendin oluştur</h2>
+                        <p class="manual-gen-subtitle">Hedef bölgeyi, ekipmanını ve program ayrıntılarını sırayla seç.</p>
+                    </div>
+
+                    <!-- STEP 1: MUSCLE SPLIT -->
                     <div class="gen-mobile-picker-bar" id="mobileSplitPickerBar" onclick="toggleGenSection('splitSection')">
                         <div class="picker-label-wrap">
                             <span class="gen-step-badge">1</span>
@@ -178,7 +191,7 @@
                     </div>
                     <div class="gen-step-title desktop-only-title">
                         <span class="gen-step-badge">1</span>
-                        <span>Hedef Bölge</span>
+                        <span>HEDEF BÖLGE</span>
                     </div>
                     <div class="gen-collapsible-section" id="splitSection">
                         <div class="split-grid" id="splitGrid">
@@ -202,7 +215,7 @@
                             </div>
                             <div class="split-card" onclick="toggleSplit('lower')">
                                 <div class="split-card-content">
-                                    <span class="split-name">Alt Vücut & Bacak</span>
+                                    <span class="split-name">Alt Vücut &amp; Bacak</span>
                                 </div>
                                 <span class="split-radio" aria-hidden="true"></span>
                             </div>
@@ -214,13 +227,13 @@
                             </div>
                             <div class="split-card" onclick="toggleSplit('core')">
                                 <div class="split-card-content">
-                                    <span class="split-name">Karın & Core</span>
+                                    <span class="split-name">Karın &amp; Core</span>
                                 </div>
                                 <span class="split-radio" aria-hidden="true"></span>
                             </div>
                             <div class="split-card" onclick="toggleSplit('functional')">
                                 <div class="split-card-content">
-                                    <span class="split-name">Fonksiyonel & Kondisyon</span>
+                                    <span class="split-name">Fonksiyonel &amp; Kondisyon</span>
                                 </div>
                                 <span class="split-radio" aria-hidden="true"></span>
                             </div>
@@ -238,7 +251,7 @@
                     </div>
                     <div class="gen-step-title desktop-only-title">
                         <span class="gen-step-badge">2</span>
-                        <span>Ekipman Seçimi</span>
+                        <span>EKİPMAN SEÇİMİ</span>
                     </div>
                     <div class="gen-collapsible-section" id="equipSection">
                         <div class="equip-chips-wrap" id="equipChipsWrap">
@@ -249,7 +262,7 @@
                                 <span>Kettlebell</span>
                             </div>
                             <div class="equip-chip" onclick="toggleEquip('barbell')">
-                                <span>Bar & Plaka</span>
+                                <span>Bar &amp; Plaka</span>
                             </div>
                             <div class="equip-chip" onclick="toggleEquip('machine')">
                                 <span>Makine</span>
@@ -258,53 +271,47 @@
                                 <span>Vücut Ağırlığı</span>
                             </div>
                         </div>
-                        <div class="equip-quick-actions">
-                            <button class="btn-quick-equip" onclick="setQuickEquip('all')">Tüm Salon</button>
-                            <button class="btn-quick-equip" onclick="setQuickEquip('db_only')">Sadece Dambıl</button>
-                            <button class="btn-quick-equip" onclick="setQuickEquip('db_kb_bw')">Dambıl + KB + Vücut</button>
-                            <button class="btn-quick-equip" onclick="setQuickEquip('bw_only')">Sadece Vücut (Ev)</button>
-                        </div>
                     </div>
 
                     <!-- STEP 3: WORKOUT PARAMETERS -->
                     <div class="gen-mobile-picker-bar" id="mobileParamPickerBar" onclick="toggleGenSection('paramSection')">
                         <div class="picker-label-wrap">
                             <span class="gen-step-badge">3</span>
-                            <span class="picker-step-title">Yapı & Süre:</span>
+                            <span class="picker-step-title">Yapı &amp; Süre:</span>
                             <span class="picker-selected-val" id="selectedParamLabel">Süperset • Kas • 45 Dk</span>
                         </div>
                         <span class="picker-arrow" id="paramPickerArrow">▼</span>
                     </div>
                     <div class="gen-step-title desktop-only-title">
                         <span class="gen-step-badge">3</span>
-                        <span>Model, Hedef & Süre</span>
+                        <span>MODEL, HEDEF &amp; SÜRE</span>
                     </div>
                     <div class="gen-collapsible-section" id="paramSection">
                         <div class="param-grid">
                             <div class="param-group">
-                                <label for="paramStyle">Model & Süperset Düzeyi</label>
+                                <label for="paramStyle">MODEL &amp; SÜPERSET DÜZEYİ</label>
                                 <select id="paramStyle" class="param-select" onchange="updateSelectedParamLabel()">
-                                    <option value="superset" selected>⚖️ Orta Süperset (1 Düz + 1 Süperset)</option>
-                                    <option value="superset_light">🌱 Az Süperset (Sadece Son Blok)</option>
-                                    <option value="superset_intense">🔥 Yoğun Süperset (Tam İkili Blok)</option>
-                                    <option value="straight">🏋️ Klasik Düz Set (Süpersetsiz)</option>
-                                    <option value="emom">⚡ EMOM / Kondisyon</option>
+                                    <option value="superset" selected>Bodybuilding &amp; Fonksiyonel (Orta Süperset)</option>
+                                    <option value="superset_light">Az Süperset (Düz + Son Blok Süperset)</option>
+                                    <option value="superset_intense">Yoğun Süperset (Tam İkili Blok)</option>
+                                    <option value="straight">Klasik Düz Set (Süpersetsiz)</option>
+                                    <option value="emom">EMOM / Kondisyon Döngüsü</option>
                                 </select>
                             </div>
                             <div class="param-group">
-                                <label for="paramGoal">Hedef</label>
+                                <label for="paramGoal">HEDEF</label>
                                 <select id="paramGoal" class="param-select" onchange="updateSelectedParamLabel()">
-                                    <option value="hypertrophy" selected>Kas & Hacim (8-12)</option>
-                                    <option value="strength">Kuvvet & Güç (4-6)</option>
-                                    <option value="endurance">Kondisyon (12-15+)</option>
+                                    <option value="hypertrophy" selected>Kas &amp; Hacim</option>
+                                    <option value="strength">Kuvvet &amp; Güç</option>
+                                    <option value="endurance">Kondisyon &amp; Dayanıklılık</option>
                                 </select>
                             </div>
                             <div class="param-group">
-                                <label for="paramDuration">Süre</label>
+                                <label for="paramDuration">SÜRE</label>
                                 <select id="paramDuration" class="param-select" onchange="updateSelectedParamLabel()">
-                                    <option value="30">30 Dk (Hızlı)</option>
-                                    <option value="45" selected>45 Dk (İdeal)</option>
-                                    <option value="60">60 Dk (Tam Hacim)</option>
+                                    <option value="30">30 dk (Hızlı seans)</option>
+                                    <option value="45" selected>45 dk (Tam seans)</option>
+                                    <option value="60">60 dk (Uzun seans)</option>
                                 </select>
                             </div>
                         </div>
@@ -312,7 +319,7 @@
 
                     <!-- GENERATE CTA -->
                     <button class="btn-generate-cta" onclick="handleGenerateWorkout()">
-                        <span>PROGRAMI OLUŞTUR</span>
+                        <span>Seçimlerimle program oluştur</span>
                     </button>
                 </div>
 
@@ -2309,8 +2316,8 @@
     </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
-    <script src="js/exercises-db.js?v=209"></script>
-    <script src="js/app.js?v=209"></script>
+    <script src="js/exercises-db.js?v=210"></script>
+    <script src="js/app.js?v=210"></script>
     <script>
         function toggleHeaderPopupMenu(e) {
             if (e) e.stopPropagation();
