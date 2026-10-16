@@ -1572,14 +1572,19 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     const lbl = ex.blockLabel || (eIdx + 1);
                     const focusPillStyle = ex.isWishFocus
                         ? 'background:rgba(250,204,21,0.16); border-color:rgba(250,204,21,0.45); color:#FDE047;'
-                        : '';
+                        : (ex.synergyBadge
+                            ? 'background:rgba(56,189,248,0.13); border-color:rgba(56,189,248,0.38); color:#7DD3FC;'
+                            : '');
                     const focusIcon = ex.isWishFocus ? '⭐' : '🎯';
+                    const synSuffix = (!ex.isWishFocus && ex.synergyBadge)
+                        ? ` <span style="color:#B6F059; font-weight:800; font-size:10px;">(${escapeHTML(ex.synergyBadge)})</span>`
+                        : '';
                     return `
                         <div class="wk-ex-row">
                             <div><span class="wk-ex-code">${escapeHTML(String(lbl))}</span></div>
                             <div class="wk-ex-name" title="${escapeHTML(ex.name)}">${escapeHTML(ex.name)}</div>
                             <div class="wk-col-muscle">
-                                <span class="wk-ex-muscle-pill" style="${focusPillStyle}" title="${escapeHTML(anatomy.primary || '')}">${focusIcon} ${escapeHTML(shortMuscle)}</span>
+                                <span class="wk-ex-muscle-pill" style="${focusPillStyle}" title="Birincil: ${escapeHTML(anatomy.primary || '')}${anatomy.secondary ? ' • Sekonder: ' + escapeHTML(anatomy.secondary) : ''}">${focusIcon} ${escapeHTML(shortMuscle)}${synSuffix}</span>
                             </div>
                         </div>
                     `;
@@ -2222,6 +2227,42 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     // ADIM 3: Haftanın önceki günlerinde kullanılmamış (A/B/C rotasyonuna uygun) hareketleri tercih et
                     subKeyMatches = preferWeeklyFreshExercises(subKeyMatches);
 
+                    // ADIM 3.5 (SİNERJİST / SEKONDER ODAK): Kullanıcı özel bir odak belirttiyse (örn. "sırt ve kol ağırlıklı"),
+                    // diğer bölgelerin (Bacak, Kalça, İtiş, Core) hareketlerini seçerken istenen kası SEKONDER olarak da çalıştıran bileşik hareketleri (örn. Front/Goblet Squat, RDL/Deadlift, Dips/Şınav, Farmer's Walk) önceliklendir!
+                    if (customWish && customWish.trim() && subKeyMatches.length > 1) {
+                        const wLow = customWish.toLocaleLowerCase('tr-TR');
+                        const getSynergyTags = (ex) => {
+                            const anat = getExerciseAnatomy(ex);
+                            const secText = `${anat.secondary || ''} ${(ex.secondaryMuscles || []).join(' ')} ${ex.cue || ''} ${ex.name || ''}`.toLocaleLowerCase('tr-TR');
+                            const idStr = String(ex.id || '');
+                            const tags = [];
+                            if (/sırt|kanat|row|çekiş|lat|trapez/.test(wLow)) {
+                                const hitsBackSec = /sırt|kanat|trapez|rhomboid|arka omuz|alt bel|torasik/.test(secText) ||
+                                    /front_squat|goblet_squat|zercher_squat|deadlift|rdl|swing|clean|snatch|farmers_walk|suitcase_carry|renegade|pull_through/.test(idStr);
+                                if (hitsBackSec) tags.push('Sırt');
+                            }
+                            if (/kol|biceps|triceps|pazu|arka kol|ön kol/.test(wLow)) {
+                                const hitsArmSec = /triceps|biceps|ön kol|kavrama|kol/.test(secText) ||
+                                    /pushup|bench|incline_press|floor_press|dips|overhead_press|arnold_press|push_press|thruster|clean|row|pullup|chinup|pulldown|farmers_walk|suitcase_carry|deadlift|rdl|swing|goblet_squat|front_squat|hanging/.test(idStr);
+                                if (hitsArmSec) tags.push('Kol');
+                            }
+                            if (/omuz|deltoid/.test(wLow)) {
+                                if (/omuz|deltoid|trapez/.test(secText)) tags.push('Omuz');
+                            }
+                            if (/göğüs|chest|şınav|bench/.test(wLow)) {
+                                if (/göğüs|pectoral/.test(secText)) tags.push('Göğüs');
+                            }
+                            if (/karın|core|abs|plank/.test(wLow)) {
+                                if (/core|karın|oblik/.test(secText)) tags.push('Core');
+                            }
+                            return tags;
+                        };
+                        const withSynergy = subKeyMatches.filter(ex => getSynergyTags(ex).length > 0);
+                        if (withSynergy.length > 0) {
+                            subKeyMatches = withSynergy;
+                        }
+                    }
+
                     // ADIM 4: Birden fazla aday varsa, hem bugünkü hem haftalık alt kas çakışması en düşük olanı seç
                     if (subKeyMatches.length > 1) {
                         let minOverlapScore = Infinity;
@@ -2484,6 +2525,37 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     });
                     chosenExercises.sort((a, b) => (b.isWishFocus ? 1 : 0) - (a.isWishFocus ? 1 : 0));
                 }
+
+                // 3. SEKONDER (SİNERJİST) KAS ETİKETLEMESİ:
+                // Diğer bölgelerin hareketlerinde (örn. Bacak, Kalça, Göğüs, Core) istenen odak kası sekonder olarak çalışıyorsa (Front/Goblet Squat, Deadlift/RDL, Şınav/Bench, Farmer's Walk vb.) etiketle!
+                const computeExSynergyLabel = (ex) => {
+                    if (!ex || ex.isWishFocus) return '';
+                    const anat = getExerciseAnatomy(ex);
+                    const secText = `${anat.secondary || ''} ${(ex.secondaryMuscles || []).join(' ')} ${ex.cue || ''} ${ex.name || ''}`.toLocaleLowerCase('tr-TR');
+                    const idStr = String(ex.id || '');
+                    const matchedSec = [];
+                    if (/sırt|kanat|row|çekiş|lat|trapez/.test(wishLower)) {
+                        if (/sırt|kanat|trapez|rhomboid|arka omuz|alt bel|torasik/.test(secText) ||
+                            /front_squat|goblet_squat|zercher_squat|deadlift|rdl|swing|clean|snatch|farmers_walk|suitcase_carry|renegade|pull_through/.test(idStr)) {
+                            matchedSec.push('Sırt');
+                        }
+                    }
+                    if (/kol|biceps|triceps|pazu|arka kol|ön kol/.test(wishLower)) {
+                        if (/triceps|biceps|ön kol|kavrama|kol/.test(secText) ||
+                            /pushup|bench|incline_press|floor_press|dips|overhead_press|arnold_press|push_press|thruster|clean|row|pullup|chinup|pulldown|farmers_walk|suitcase_carry|deadlift|rdl|swing|goblet_squat|front_squat|hanging/.test(idStr)) {
+                            matchedSec.push('Kol');
+                        }
+                    }
+                    if (/omuz|deltoid/.test(wishLower) && /omuz|deltoid|trapez/.test(secText)) matchedSec.push('Omuz');
+                    if (/göğüs|chest|şınav|bench/.test(wishLower) && /göğüs|pectoral/.test(secText)) matchedSec.push('Göğüs');
+                    if (/karın|core|abs|plank/.test(wishLower) && /core|karın|oblik/.test(secText)) matchedSec.push('Core');
+                    return matchedSec.length > 0 ? `+${matchedSec.join('/')}` : '';
+                };
+
+                chosenExercises.forEach(ex => {
+                    const synLbl = computeExSynergyLabel(ex);
+                    if (synLbl) ex.synergyBadge = synLbl;
+                });
             }
 
             // KATMAN 4: Seçilen Süperset Yoğunluğuna Göre Akademik Blok Etiketlerini Ata
@@ -16948,7 +17020,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=216')
+                navigator.serviceWorker.register('./sw.js?v=217')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
