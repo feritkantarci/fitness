@@ -48,13 +48,13 @@
             bw_pushup: { primary: 'Orta Göğüs', secondary: 'Ön Omuz, Triceps, Core', subKey: 'chest_mid' },
             bw_decline_pushup: { primary: 'Üst Göğüs', secondary: 'Ön Omuz, Triceps', subKey: 'chest_upper' },
             bw_diamond_pushup: { primary: 'Triceps (İtiş)', secondary: 'İç Göğüs, Ön Omuz', subKey: 'triceps_lateral' },
-            bw_dips: { primary: 'Alt Göğüs', secondary: 'Triceps, Ön Omuz', subKey: 'chest_lower' },
-            db_renegade_pushup: { primary: 'Orta Göğüs & Sırt', secondary: 'Triceps, Yan Karın (Oblik)', subKey: 'chest_mid' },
+            bw_dips: { primary: 'Alt Göğüs', secondary: 'Triceps, Ön Omuz', subKey: 'chest_lower', allSubKeys: ['chest_lower', 'triceps_lateral'] },
+            db_renegade_pushup: { primary: 'Orta Göğüs & Sırt', secondary: 'Triceps, Yan Karın (Oblik)', subKey: 'chest_mid', allSubKeys: ['chest_mid', 'back_mid', 'core_obliques'] },
 
             // SHOULDERS / OMUZ
             db_overhead_press: { primary: 'Ön Omuz (Seated)', secondary: 'Triceps, Üst Göğüs, Core', subKey: 'shoulders_front' },
             db_standing_overhead_press: { primary: 'Ön Omuz (Standing)', secondary: 'Triceps, Üst Göğüs, Core', subKey: 'shoulders_front' },
-            db_arnold_press: { primary: 'Tüm Omuz (Ön & Yan)', secondary: 'Triceps, Üst Göğüs', subKey: 'shoulders_front' },
+            db_arnold_press: { primary: 'Tüm Omuz (Ön & Yan)', secondary: 'Triceps, Üst Göğüs', subKey: 'shoulders_front', allSubKeys: ['shoulders_front', 'shoulders_side'] },
             db_lateral_raise: { primary: 'Yan Omuz', secondary: 'Üst Trapez', subKey: 'shoulders_side' },
             mach_cable_lateral: { primary: 'Yan Omuz (İzole)', secondary: 'Üst Trapez', subKey: 'shoulders_side' },
             mach_face_pull: { primary: 'Arka Omuz', secondary: 'Üst Sırt (Trapez/Rhomboid), Dış Rotatör', subKey: 'shoulders_rear' },
@@ -64,28 +64,28 @@
             bb_push_press: { primary: 'Ön Omuz & Güç', secondary: 'Triceps, Ön Bacak, Core', subKey: 'shoulders_front' },
             db_push_press: { primary: 'Ön Omuz & Güç', secondary: 'Triceps, Ön Bacak, Core', subKey: 'shoulders_front' },
             kb_halo: { primary: 'Omuz Kapsülü (Mobilite)', secondary: 'Üst Sırt, Core', subKey: 'shoulders_rear' },
-            waiters_carry: { primary: 'Omuz Stabilitesi', secondary: 'Trapez, Derin Core', subKey: 'shoulders_front' },
+            waiters_carry: { primary: 'Omuz Stabilitesi', secondary: 'Trapez, Derin Core', subKey: 'core_front', allSubKeys: ['core_front', 'shoulders_front'] },
 
             // BACK / SIRT
             db_saw_row: { primary: 'Kanat (Geniş Sırt)', secondary: 'Biceps, Arka Omuz, Rhomboid', subKey: 'back_lats' },
             db_chest_supported_row: { primary: 'Orta Sırt (Kalınlık)', secondary: 'Rhomboid, Arka Omuz, Biceps', subKey: 'back_mid' },
-            db_renegade_row: { primary: 'Orta Sırt & Kanat', secondary: 'Derin Karın (Oblik), Arka Omuz', subKey: 'back_mid' },
+            db_renegade_row: { primary: 'Orta Sırt & Kanat', secondary: 'Derin Karın (Oblik), Arka Omuz', subKey: 'back_mid', allSubKeys: ['back_mid', 'core_obliques'] },
             db_pullover: { primary: 'Kanat (Geniş Sırt)', secondary: 'Üst Göğüs, Triceps Uzun Baş, Serratus', subKey: 'back_lats' },
             mach_lat_pulldown: { primary: 'Kanat (Geniş Sırt)', secondary: 'Biceps, Arka Omuz, Ön Kol', subKey: 'back_lats' },
             mach_cable_row: { primary: 'Orta Sırt (Kalınlık)', secondary: 'Rhomboid, Kanat, Biceps', subKey: 'back_mid' },
             bw_pullup: { primary: 'Kanat (Geniş Sırt)', secondary: 'Biceps, Arka Omuz, Core', subKey: 'back_lats' },
-            bw_chinup: { primary: 'Kanat & Biceps', secondary: 'Arka Omuz, Ön Kol', subKey: 'back_lats' },
+            bw_chinup: { primary: 'Kanat & Biceps', secondary: 'Arka Omuz, Ön Kol', subKey: 'back_lats', allSubKeys: ['back_lats', 'biceps'] },
             bw_inverted_row: { primary: 'Orta Sırt (Kalınlık)', secondary: 'Rhomboid, Biceps, Arka Omuz', subKey: 'back_mid' },
             bb_bent_over_row: { primary: 'Orta Sırt (Kalınlık)', secondary: 'Kanat, Biceps, Alt Bel', subKey: 'back_mid' },
             bb_pendlay_row: { primary: 'Orta Sırt (Patlayıcı)', secondary: 'Rhomboid, Kanat, Alt Bel', subKey: 'back_mid' },
-            kb_gorilla_row: { primary: 'Kanat & Orta Sırt', secondary: 'Biceps, Arka Omuz, Statik Bacak', subKey: 'back_mid' },
+            kb_gorilla_row: { primary: 'Kanat & Orta Sırt', secondary: 'Biceps, Arka Omuz, Statik Bacak', subKey: 'back_mid', allSubKeys: ['back_mid', 'back_lats'] },
 
             // LEGS - QUADS / ÖN BACAK
             db_goblet_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Büyük Kalça (Glute), Core', subKey: 'legs_quad' },
             db_front_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Büyük Kalça, Üst Sırt, Core', subKey: 'legs_quad' },
-            db_bulgarian_squat: { primary: 'Ön Bacak & Kalça', secondary: 'Arka Bacak, Denge/Adduktor', subKey: 'legs_quad' },
-            db_walking_lunge: { primary: 'Ön Bacak (Quad)', secondary: 'Kalça, Arka Bacak, Baldır', subKey: 'legs_quad' },
-            db_reverse_lunge: { primary: 'Ön Bacak & Kalça', secondary: 'Arka Bacak, Diz Stabilitesi', subKey: 'legs_quad' },
+            db_bulgarian_squat: { primary: 'Ön Bacak & Kalça', secondary: 'Arka Bacak, Denge/Adduktor', subKey: 'legs_quad', allSubKeys: ['legs_quad', 'legs_glutes'] },
+            db_walking_lunge: { primary: 'Ön Bacak (Quad)', secondary: 'Kalça, Arka Bacak, Baldır', subKey: 'legs_quad', allSubKeys: ['legs_quad', 'legs_glutes'] },
+            db_reverse_lunge: { primary: 'Ön Bacak & Kalça', secondary: 'Arka Bacak, Diz Stabilitesi', subKey: 'legs_quad', allSubKeys: ['legs_quad', 'legs_glutes'] },
             kb_goblet_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Kalça, Core, Ayak Bileği', subKey: 'legs_quad' },
             bb_back_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Büyük Kalça, Alt Bel, Core', subKey: 'legs_quad' },
             bb_front_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Büyük Kalça, Üst Sırt Dikliği', subKey: 'legs_quad' },
@@ -94,8 +94,8 @@
             mach_leg_extension: { primary: 'Ön Bacak (Quad İzole)', secondary: 'Gözyaşı Kası (VMO)', subKey: 'legs_quad' },
             bw_air_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Kalça, Ayak Bileği Açıklığı', subKey: 'legs_quad' },
             bw_jump_squat: { primary: 'Ön Bacak & Patlayıcı', secondary: 'Kalça, Baldır (Kalf)', subKey: 'legs_quad' },
-            lunge_with_twist: { primary: 'Ön Bacak & Kalça', secondary: 'Yan Karın (Oblik), Denge', subKey: 'legs_quad' },
-            step_up_press: { primary: 'Ön Bacak & Omuz', secondary: 'Kalça, Triceps, Denge', subKey: 'legs_quad' },
+            lunge_with_twist: { primary: 'Ön Bacak & Kalça', secondary: 'Yan Karın (Oblik), Denge', subKey: 'legs_quad', allSubKeys: ['legs_quad', 'core_obliques'] },
+            step_up_press: { primary: 'Ön Bacak & Omuz', secondary: 'Kalça, Triceps, Denge', subKey: 'legs_quad', allSubKeys: ['legs_quad', 'shoulders_front'], isLowerUpperComplex: true },
 
             // LEGS - HAMSTRINGS & GLUTES / ARKA BACAK & KALÇA
             db_rdl: { primary: 'Arka Bacak (Hamstring)', secondary: 'Büyük Kalça (Glute), Alt Bel', subKey: 'legs_hamstrings' },
@@ -134,21 +134,21 @@
             cross_body_carry: { primary: 'Yan Karın & Omuz', secondary: 'Trapez, Denge', subKey: 'core_obliques' },
 
             // BALLISTIC & FUNCTIONAL POWER / BALİSTİK & BİLEŞİK
-            db_swing: { primary: 'Büyük Kalça & Arka Bacak', secondary: 'Alt Bel, Core, Kavrama', subKey: 'legs_hamstrings' },
-            kb_swing: { primary: 'Büyük Kalça & Arka Bacak', secondary: 'Alt Bel, Core, Kavrama', subKey: 'legs_hamstrings' },
-            kb_clean: { primary: 'Kalça & Sırt Patlaması', secondary: 'Ön Kol, Omuz Rack, Core', subKey: 'back_mid' },
-            kb_half_snatch: { primary: 'Tüm Arka Zincir & Omuz', secondary: 'Kalça, Sırt, Nabız', subKey: 'shoulders_front' },
-            db_snatch: { primary: 'Tüm Arka Zincir & Omuz', secondary: 'Kalça, Sırt, Patlayıcı Güç', subKey: 'shoulders_front' },
-            kb_windmill: { primary: 'Yan Karın & Omuz Stabilitesi', secondary: 'Arka Bacak Esnekliği', subKey: 'core_obliques' },
-            kb_turkish_getup: { primary: 'Tüm Vücut & Omuz Stabilitesi', secondary: 'Kalça, Core, Ön Bacak', subKey: 'shoulders_front' },
-            db_thruster: { primary: 'Ön Bacak & Omuz', secondary: 'Triceps, Kalça, Core', subKey: 'shoulders_front' },
-            kb_thruster: { primary: 'Ön Bacak & Omuz', secondary: 'Triceps, Kalça, Core', subKey: 'shoulders_front' },
-            bb_thruster: { primary: 'Ön Bacak & Omuz', secondary: 'Triceps, Kalça, Core', subKey: 'shoulders_front' },
-            db_clean_and_press: { primary: 'Kalça, Sırt & Omuz', secondary: 'Triceps, Arka Bacak', subKey: 'shoulders_front' },
-            db_manmaker: { primary: 'Tüm Vücut Zırhı', secondary: 'Göğüs, Sırt, Omuz, Bacak, Core', subKey: 'chest_mid' },
-            bb_hang_power_clean: { primary: 'Kalça & Üst Sırt (Trapez)', secondary: 'Arka Bacak, Ön Kol, Omuz', subKey: 'back_mid' },
-            bb_landmine_squat_press: { primary: 'Ön Bacak, Omuz & Üst Göğüs', secondary: 'Triceps, Kalça, Core', subKey: 'chest_upper' },
-            bw_burpee: { primary: 'Tüm Vücut Kondisyonu', secondary: 'Göğüs, Bacak, Core, Nabız', subKey: 'chest_mid' }
+            db_swing: { primary: 'Büyük Kalça & Arka Bacak', secondary: 'Alt Bel, Core, Kavrama', subKey: 'legs_hamstrings', allSubKeys: ['legs_hamstrings', 'legs_glutes'] },
+            kb_swing: { primary: 'Büyük Kalça & Arka Bacak', secondary: 'Alt Bel, Core, Kavrama', subKey: 'legs_hamstrings', allSubKeys: ['legs_hamstrings', 'legs_glutes'] },
+            kb_clean: { primary: 'Kalça & Sırt Patlaması', secondary: 'Ön Kol, Omuz Rack, Core', subKey: 'back_mid', allSubKeys: ['legs_hamstrings', 'back_mid'] },
+            kb_half_snatch: { primary: 'Tüm Arka Zincir & Omuz', secondary: 'Kalça, Sırt, Nabız', subKey: 'shoulders_front', allSubKeys: ['legs_hamstrings', 'shoulders_front'], isLowerUpperComplex: true },
+            db_snatch: { primary: 'Tüm Arka Zincir & Omuz', secondary: 'Kalça, Sırt, Patlayıcı Güç', subKey: 'shoulders_front', allSubKeys: ['legs_hamstrings', 'shoulders_front'], isLowerUpperComplex: true },
+            kb_windmill: { primary: 'Yan Karın & Omuz Stabilitesi', secondary: 'Arka Bacak Esnekliği', subKey: 'core_obliques', allSubKeys: ['core_obliques', 'shoulders_front'] },
+            kb_turkish_getup: { primary: 'Tüm Vücut & Omuz Stabilitesi', secondary: 'Kalça, Core, Ön Bacak', subKey: 'shoulders_front', allSubKeys: ['shoulders_front', 'core_obliques', 'legs_quad'], isLowerUpperComplex: true },
+            db_thruster: { primary: 'Ön Bacak & Omuz', secondary: 'Triceps, Kalça, Core', subKey: 'shoulders_front', allSubKeys: ['legs_quad', 'shoulders_front'], isLowerUpperComplex: true },
+            kb_thruster: { primary: 'Ön Bacak & Omuz', secondary: 'Triceps, Kalça, Core', subKey: 'shoulders_front', allSubKeys: ['legs_quad', 'shoulders_front'], isLowerUpperComplex: true },
+            bb_thruster: { primary: 'Ön Bacak & Omuz', secondary: 'Triceps, Kalça, Core', subKey: 'shoulders_front', allSubKeys: ['legs_quad', 'shoulders_front'], isLowerUpperComplex: true },
+            db_clean_and_press: { primary: 'Kalça, Sırt & Omuz', secondary: 'Triceps, Arka Bacak', subKey: 'shoulders_front', allSubKeys: ['legs_hamstrings', 'back_mid', 'shoulders_front'], isLowerUpperComplex: true },
+            db_manmaker: { primary: 'Tüm Vücut Zırhı', secondary: 'Göğüs, Sırt, Omuz, Bacak, Core', subKey: 'core_front', allSubKeys: ['chest_mid', 'back_mid', 'legs_quad', 'shoulders_front', 'core_front'], isLowerUpperComplex: true, isFullBodyMetcon: true },
+            bb_hang_power_clean: { primary: 'Kalça & Üst Sırt (Trapez)', secondary: 'Arka Bacak, Ön Kol, Omuz', subKey: 'back_mid', allSubKeys: ['legs_hamstrings', 'back_mid'] },
+            bb_landmine_squat_press: { primary: 'Ön Bacak & Omuz', secondary: 'Üst Göğüs, Triceps, Kalça, Core', subKey: 'shoulders_front', allSubKeys: ['legs_quad', 'shoulders_front'], isLowerUpperComplex: true },
+            bw_burpee: { primary: 'Tüm Vücut Kondisyonu', secondary: 'Göğüs, Bacak, Core, Nabız', subKey: 'core_front', allSubKeys: ['chest_mid', 'legs_quad', 'core_front'], isLowerUpperComplex: true, isFullBodyMetcon: true }
         };
 
         const STUDIO_SUB_REGIONS = {
@@ -731,14 +731,22 @@
             }
         }
 
+        function getEffectiveExerciseCategory(ex) {
+            if (!ex) return '';
+            if (ex.id === 'db_lying_leg_curl') return 'legs_hinge';
+            if (ex.id === 'db_standing_calf_raise' || ex.id === 'bw_sissy_squat') return 'legs_quad';
+            return ex.category || '';
+        }
+
         function filterExercises(category, excludeIds = []) {
             return EXERCISES_DB.filter(ex => {
                 if (isExerciseExcludedByUser(ex.id)) return false;
                 if (excludeIds.includes(ex.id)) return false;
                 if (!selectedEquipments.includes(ex.equipment)) return false;
                 if (category === 'any') return true;
-                if (Array.isArray(category)) return category.includes(ex.category);
-                return ex.category === category;
+                const effCat = getEffectiveExerciseCategory(ex);
+                if (Array.isArray(category)) return category.includes(effCat);
+                return effCat === category;
             });
         }
 
@@ -1254,128 +1262,132 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             return arr[Math.floor(Math.random() * arr.length)];
         }
 
-        // ==================== KATMAN 1: BİYOMEKANİK HAREKET AİLESİ HARİTASI (İKİZ ENGELLEYİCİ) ====================
+        // ==================== KATMAN 1: BİYOMEKANİK HAREKET KALIBI HARİTASI (VEKTÖR & KAS ÇAKIŞMA ENGELLEYİCİ) ====================
+        // Aynı biyomekanik vektörü ve aynı birincil kas kombinasyonunu çalıştıran hareketler AYNI AİLEYİ paylaşır.
+        // Böylece aynı antrenmana 2 Squat, 2 Dikey Omuz Pres, 2 Squat-to-Press (Thruster + Landmine Squat to Press),
+        // 2 RDL/Deadlift, 2 Lunge veya 2 Loaded Carry ASLA atanamaz.
         const EXERCISE_MOVEMENT_FAMILY_MAP = {
-            // Yatay Orta Göğüs İtiş
+            // 1. Yatay Orta Göğüs İtiş (Horizontal Mid-Chest Press)
             db_bench_press: 'horiz_chest_press',
             bb_bench_press: 'horiz_chest_press',
             db_floor_press: 'horiz_chest_press',
             bw_pushup: 'horiz_chest_press',
-            // Üst Göğüs (Incline) İtiş
+            // 2. Üst Göğüs (Incline) İtiş
             db_incline_press: 'incline_chest_press',
             bb_incline_bench: 'incline_chest_press',
             bw_decline_pushup: 'incline_chest_press',
-            bb_landmine_squat_press: 'incline_chest_press',
-            // Alt Göğüs & Göğüs İzolasyon
+            // 3. Alt Göğüs & Göğüs İzolasyon (Fly / Dips)
             bw_dips: 'lower_chest_dips',
             mach_cable_crossover: 'chest_fly_iso',
             mach_pec_deck: 'chest_fly_iso',
-            db_renegade_pushup: 'renegade_pushup_complex',
-            // Dikey Omuz Pres (Strict / Seated / Standing / Arnold)
+            // 4. Dikey Omuz Pres & Ön Omuz (Strict / Seated / Standing / Arnold / Push Press / Front Raise)
             db_overhead_press: 'vertical_shoulder_press',
             db_standing_overhead_press: 'vertical_shoulder_press',
             db_arnold_press: 'vertical_shoulder_press',
             bb_overhead_press: 'vertical_shoulder_press',
             kb_press: 'vertical_shoulder_press',
-            kneeling_plate_front_raise: 'front_delt_raise',
-            // Patlayıcı Başüstü İtiş & Thruster
-            db_push_press: 'explosive_push_press',
-            bb_push_press: 'explosive_push_press',
-            db_thruster: 'thruster_complex',
-            kb_thruster: 'thruster_complex',
-            bb_thruster: 'thruster_complex',
-            // Yan Omuz İzolasyon
+            db_push_press: 'vertical_shoulder_press',
+            bb_push_press: 'vertical_shoulder_press',
+            kneeling_plate_front_raise: 'vertical_shoulder_press',
+            // 5. Squat-to-Press & Clean-to-Press Hibrit Kompleksler (Bacak + Omuz + Triceps + Core)
+            // Thruster, Landmine Squat to Press, Step-up to Press, Clean & Press, Turkish Get-Up aynı seansta ÇAKIŞMAZ!
+            db_thruster: 'squat_or_clean_press_complex',
+            kb_thruster: 'squat_or_clean_press_complex',
+            bb_thruster: 'squat_or_clean_press_complex',
+            bb_landmine_squat_press: 'squat_or_clean_press_complex',
+            step_up_press: 'squat_or_clean_press_complex',
+            db_clean_and_press: 'squat_or_clean_press_complex',
+            kb_turkish_getup: 'squat_or_clean_press_complex',
+            // 6. Yan Omuz İzolasyon
             db_lateral_raise: 'lateral_raise_iso',
             mach_cable_lateral: 'lateral_raise_iso',
-            // Arka Omuz & Rotatör
+            // 7. Arka Omuz & Omuz Mobilite
             mach_face_pull: 'rear_delt_pull',
             kb_halo: 'shoulder_halo_mobility',
-            // Triceps Uzun Baş & Yan Baş
-            db_triceps_overhead: 'triceps_long_iso',
+            // 8. Triceps (Uzun Baş Overhead / Skullcrusher / Yan Baş Pushdown & Dar İtiş)
+            db_triceps_overhead: 'triceps_long_overhead',
             db_skullcrusher: 'triceps_skullcrusher_iso',
             mach_triceps_pushdown: 'triceps_lateral_push',
             bb_close_grip_bench: 'triceps_close_grip_press',
             bw_diamond_pushup: 'triceps_close_grip_press',
-            // Dikey Kanat Çekiş (Vertical Pull)
+            // 9. Dikey Kanat Çekiş (Vertical Pull)
             bw_pullup: 'vertical_lat_pull',
             bw_chinup: 'vertical_chinup_pull',
             mach_lat_pulldown: 'vertical_lat_pull',
-            // Tek Kol Kanat & Pullover
+            // 10. Tek Kol Kanat & Pullover
             db_saw_row: 'unilateral_lat_row',
             db_pullover: 'lat_pullover',
-            // Yatay Orta Sırt Çekiş (Horizontal Row)
+            // 11. Yatay Orta Sırt Çekiş (Horizontal Row)
             db_chest_supported_row: 'supported_midback_row',
-            mach_cable_row: 'seated_cable_row',
+            mach_cable_row: 'supported_midback_row',
             bw_inverted_row: 'inverted_body_row',
             bb_bent_over_row: 'barbell_hinge_row',
             bb_pendlay_row: 'barbell_hinge_row',
-            kb_gorilla_row: 'gorilla_renegade_row',
-            db_renegade_row: 'gorilla_renegade_row',
-            // Biceps (Supinated / Incline / Hammer)
+            kb_gorilla_row: 'plank_or_hinge_renegade_row',
+            db_renegade_row: 'plank_or_hinge_renegade_row',
+            db_renegade_pushup: 'plank_or_hinge_renegade_row',
+            // 12. Biceps (Supinated / Incline / Hammer)
             db_biceps_curl: 'biceps_supinated_curl',
             bb_biceps_curl: 'biceps_supinated_curl',
             mach_cable_biceps: 'biceps_supinated_curl',
             db_incline_curl: 'biceps_long_incline_curl',
             db_hammer_curl: 'biceps_hammer_brachialis',
-            // Bilateral Squat (Çift Bacak)
-            db_goblet_squat: 'bilateral_goblet_squat',
-            kb_goblet_squat: 'bilateral_goblet_squat',
-            db_front_squat: 'bilateral_front_squat',
-            bb_back_squat: 'bilateral_barbell_squat',
-            bb_front_squat: 'bilateral_front_squat',
-            bb_zercher_squat: 'bilateral_zercher_squat',
-            mach_leg_press: 'bilateral_leg_press',
-            bw_air_squat: 'bodyweight_squat',
-            bw_jump_squat: 'plyo_jump_squat',
-            // Unilateral Bacak (Lunge / Split Squat)
-            db_bulgarian_squat: 'unilateral_split_squat',
-            db_walking_lunge: 'unilateral_lunge',
-            db_reverse_lunge: 'unilateral_lunge',
-            lunge_with_twist: 'unilateral_lunge_twist',
-            step_up_press: 'unilateral_step_up',
-            // Quad İzolasyon
+            // 13. Bilateral Squat & Leg Press (Çift Bacak Diz Baskın Çömelme)
+            db_goblet_squat: 'bilateral_squat',
+            kb_goblet_squat: 'bilateral_squat',
+            db_front_squat: 'bilateral_squat',
+            bb_back_squat: 'bilateral_squat',
+            bb_front_squat: 'bilateral_squat',
+            bb_zercher_squat: 'bilateral_squat',
+            mach_leg_press: 'bilateral_squat',
+            bw_air_squat: 'bilateral_squat',
+            bw_jump_squat: 'bilateral_squat',
+            // 14. Unilateral Bacak (Lunge / Split Squat)
+            db_bulgarian_squat: 'unilateral_lunge_split',
+            db_walking_lunge: 'unilateral_lunge_split',
+            db_reverse_lunge: 'unilateral_lunge_split',
+            lunge_with_twist: 'unilateral_lunge_split',
+            // 15. Quad İzolasyon
             mach_leg_extension: 'quad_extension_iso',
             bw_sissy_squat: 'quad_extension_iso',
-            // Kalça Menteşesi (RDL / Deadlift)
-            db_rdl: 'bilateral_rdl',
-            bb_rdl: 'bilateral_rdl',
-            bb_deadlift: 'conventional_deadlift',
-            db_single_leg_rdl: 'unilateral_hinge_rdl',
-            // Hamstring İzolasyon
+            // 16. Kalça Menteşesi (RDL / Deadlift)
+            db_rdl: 'hip_hinge_rdl_deadlift',
+            bb_rdl: 'hip_hinge_rdl_deadlift',
+            db_single_leg_rdl: 'hip_hinge_rdl_deadlift',
+            bb_deadlift: 'hip_hinge_rdl_deadlift',
+            // 17. Hamstring İzolasyon (Leg Curl)
             mach_leg_curl: 'hamstring_curl_iso',
             db_lying_leg_curl: 'hamstring_curl_iso',
-            // Kalça (Glute Thrust / Bridge)
+            // 18. Kalça (Glute Thrust / Bridge)
             bb_hip_thrust: 'glute_bridge_thrust',
             bw_glute_bridge: 'glute_bridge_thrust',
-            // Kalf
+            // 19. Kalf
             mach_calf_raise: 'calf_raise_iso',
             db_standing_calf_raise: 'calf_raise_iso',
-            // Balistik Patlayıcı (Swing / Clean / Snatch)
-            db_swing: 'ballistic_swing',
-            kb_swing: 'ballistic_swing',
-            kb_clean: 'ballistic_clean',
-            bb_hang_power_clean: 'ballistic_clean',
-            db_clean_and_press: 'ballistic_clean_press',
-            db_snatch: 'ballistic_snatch',
-            kb_half_snatch: 'ballistic_snatch',
-            kb_turkish_getup: 'turkish_getup_complex',
-            // Yük Taşımaları (Loaded Carries)
-            db_farmers_walk: 'loaded_carry_farmers',
-            db_suitcase_carry: 'loaded_carry_unilateral',
-            waiters_carry: 'loaded_carry_overhead',
-            cross_body_carry: 'loaded_carry_unilateral',
-            // Core Rotasyon (Oblik)
-            db_russian_twist: 'core_rotation_twist',
-            mach_cable_woodchopper: 'core_rotation_chop',
-            half_kneeling_plate_chop: 'core_rotation_chop',
-            kb_windmill: 'core_windmill_oblique',
-            // Core Ön Karın & Anti-Ekstansiyon
+            // 20. Balistik Patlayıcı Kalça Menteşesi (Swing / Clean / Snatch)
+            db_swing: 'ballistic_hip_hinge',
+            kb_swing: 'ballistic_hip_hinge',
+            kb_clean: 'ballistic_hip_hinge',
+            bb_hang_power_clean: 'ballistic_hip_hinge',
+            db_snatch: 'ballistic_hip_hinge',
+            kb_half_snatch: 'ballistic_hip_hinge',
+            // 21. Yük Taşımaları (Loaded Carries)
+            db_farmers_walk: 'loaded_carry',
+            db_suitcase_carry: 'loaded_carry',
+            waiters_carry: 'loaded_carry',
+            cross_body_carry: 'loaded_carry',
+            // 22. Core Rotasyon (Oblik Twist / Woodchopper / Windmill)
+            db_russian_twist: 'core_rotation',
+            mach_cable_woodchopper: 'core_rotation',
+            half_kneeling_plate_chop: 'core_rotation',
+            kb_windmill: 'core_rotation',
+            // 23. Core Ön Karın & Anti-Ekstansiyon
             bw_plank: 'core_anterior_plank',
             bw_hollow_body: 'core_anterior_hollow',
             bw_hanging_knee_raise: 'core_hanging_raise',
             bw_mountain_climber: 'core_dynamic_climber',
             bear_crawl_pull_through: 'core_bear_crawl',
-            // Tüm Vücut Metcon
+            // 24. Tüm Vücut Metcon (Man Maker / Burpee)
             db_manmaker: 'fullbody_metcon_burpee',
             bw_burpee: 'fullbody_metcon_burpee'
         };
@@ -1386,8 +1398,23 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             if (EXERCISE_MOVEMENT_FAMILY_MAP[id]) return EXERCISE_MOVEMENT_FAMILY_MAP[id];
             return id;
         }
+        function getExerciseMediaId(ex) {
+            if (!ex) return '';
+            const id = ex.id || ex.exId || '';
+            const catalog = (typeof window !== 'undefined' && window.OPENGYM_GLOBAL_CATALOG) ? window.OPENGYM_GLOBAL_CATALOG : null;
+            const entry = catalog ? catalog[id] : null;
+            return entry && entry.id ? String(entry.id) : '';
+        }
+        function getExerciseCoveredSubKeys(ex) {
+            const anat = getExerciseAnatomy(ex);
+            if (!anat) return [];
+            if (Array.isArray(anat.allSubKeys) && anat.allSubKeys.length > 0) return anat.allSubKeys;
+            return anat.subKey ? [anat.subKey] : [];
+        }
         window.EXERCISE_MOVEMENT_FAMILY_MAP = EXERCISE_MOVEMENT_FAMILY_MAP;
         window.getExerciseMovementFamily = getExerciseMovementFamily;
+        window.getExerciseMediaId = getExerciseMediaId;
+        window.getExerciseCoveredSubKeys = getExerciseCoveredSubKeys;
 
         // ==================== KATMAN 4: 3 KADEMELİ AKADEMİK SÜPERSET BLOK MOTORU ====================
         function assignAcademicBlockStructure(exercises, style, baseScheme) {
@@ -1520,7 +1547,37 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             const chosenExercises = [];
             const usedIds = [];
             const usedFamilies = new Set();
+            const usedMediaIds = new Set();
             const subKeyCounts = {};
+
+            // Saf Üst Vücut veya Saf Core seçiliyse Bacak+Omuz hibrit komplekslerini (Thruster, Landmine Squat to Press, Man Maker vb.) dışla
+            const hasLowerOrFullOrFuncSplit = selectedSplits.some(s =>
+                s === 'full_body' || s === 'lower' || s === 'functional'
+            );
+
+            function isCandidateBiochemicallyCompatible(ex, allowLowerUpperComplexInSlot = false) {
+                if (!ex || isExerciseExcludedByUser(ex.id)) return false;
+                if (!selectedEquipments.includes(ex.equipment)) return false;
+                if (usedIds.includes(ex.id)) return false;
+
+                const fam = getExerciseMovementFamily(ex);
+                if (fam && usedFamilies.has(fam)) return false;
+
+                // Squat-to-Press kompleksleri ile Dikey Omuz Pres veya Çift Bacak Squat aynı seansta çakışmasın
+                // (Örn: Squat yapılmışken üstüne Thruster/Landmine Squat-to-Press veya Thruster yapılmışken üstüne Push Press/OHP gelmesin)
+                if (fam === 'squat_or_clean_press_complex' && (usedFamilies.has('vertical_shoulder_press') || usedFamilies.has('bilateral_squat'))) return false;
+                if ((fam === 'vertical_shoulder_press' || fam === 'bilateral_squat') && usedFamilies.has('squat_or_clean_press_complex')) return false;
+
+                // Aynı OpenGym video/görsel ID'sine sahip hareketler (örn. 1540, 0426, 0538) aynı seansta yan yana gelmesin
+                const mediaId = getExerciseMediaId(ex);
+                if (mediaId && usedMediaIds.has(mediaId)) return false;
+
+                const anat = getExerciseAnatomy(ex);
+                if (!hasLowerOrFullOrFuncSplit || !allowLowerUpperComplexInSlot) {
+                    if (anat && (anat.isLowerUpperComplex || anat.isFullBodyMetcon)) return false;
+                }
+                return true;
+            }
 
             function recordChosenExercise(chosen) {
                 if (!chosen) return false;
@@ -1528,98 +1585,115 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 usedIds.push(clone.id);
                 const fam = getExerciseMovementFamily(clone);
                 if (fam) usedFamilies.add(fam);
-                const anat = getExerciseAnatomy(clone);
-                if (anat && anat.subKey) {
-                    subKeyCounts[anat.subKey] = (subKeyCounts[anat.subKey] || 0) + 1;
-                }
+                const mediaId = getExerciseMediaId(clone);
+                if (mediaId) usedMediaIds.add(mediaId);
+                const coveredKeys = getExerciseCoveredSubKeys(clone);
+                coveredKeys.forEach(sk => {
+                    subKeyCounts[sk] = (subKeyCounts[sk] || 0) + 1;
+                });
                 chosenExercises.push(clone);
                 return true;
             }
 
-            // KATMAN 2: Alt Kas Grubu (subKey) + Hareket Ailesi (Movement Family) Seçici
+            function applyDoctrineModeFilter(pool, filterMode) {
+                if (!Array.isArray(pool) || pool.length === 0) return [];
+                if (filterMode === 'functional') {
+                    const funcPool = pool.filter(e => isExerciseFunctionalCategory(e));
+                    if (funcPool.length > 0) return funcPool;
+                } else if (filterMode === 'bb_isolation') {
+                    const isoPool = pool.filter(e => !isExerciseFunctionalCategory(e) && (e.mechanic === 'isolation' || e.category === 'core'));
+                    if (isoPool.length > 0) return isoPool;
+                } else if (filterMode === 'bb_compound') {
+                    const compPool = pool.filter(e => !isExerciseFunctionalCategory(e) && e.mechanic === 'compound');
+                    if (compPool.length > 0) return compPool;
+                } else if (filterMode === 'bb_only') {
+                    const bbPool = pool.filter(e => !isExerciseFunctionalCategory(e));
+                    if (bbPool.length > 0) return bbPool;
+                }
+                return pool;
+            }
+
+            // KATMAN 2: Önce Anatomik Alt Kas Grubu (subKey) -> Sonra Doktrin Mekanik Modu -> Sonra En Taze Kas Profili Seçici
             function addSlotEx(slotSpec) {
                 const cat = slotSpec.cat || 'push';
                 const filterMode = slotSpec.mode || 'any';
+                const allowComplex = Boolean(slotSpec.allowComplex);
                 const preferredSubKeys = Array.isArray(slotSpec.subKeys) ? slotSpec.subKeys : (slotSpec.subKeys ? [slotSpec.subKeys] : []);
 
-                let basePool = filterExercises(cat, usedIds);
-                // Öncelikle aynı hareket ailesinden (ikiz/varyasyon) olmayanları filtrele
-                const nonTwinBase = basePool.filter(e => !usedFamilies.has(getExerciseMovementFamily(e)));
-                if (nonTwinBase.length > 0) basePool = nonTwinBase;
+                // KURAL 1: Aday havuzu KESİN OLARAK hem ID hem Biyomekanik Aile hem Medya açısından benzersiz olmak zorundadır!
+                const basePool = filterExercises(cat, usedIds).filter(e => isCandidateBiochemicallyCompatible(e, allowComplex));
 
-                // Doktrin mekanik filtresi (compound / isolation / functional)
-                let modePool = basePool;
-                if (filterMode === 'functional') {
-                    const funcPool = basePool.filter(e => isExerciseFunctionalCategory(e));
-                    if (funcPool.length > 0) modePool = funcPool;
-                } else if (filterMode === 'bb_isolation') {
-                    const isoPool = basePool.filter(e => !isExerciseFunctionalCategory(e) && (e.mechanic === 'isolation' || e.category === 'core'));
-                    if (isoPool.length > 0) modePool = isoPool;
-                } else if (filterMode === 'bb_compound') {
-                    const compPool = basePool.filter(e => !isExerciseFunctionalCategory(e) && e.mechanic === 'compound');
-                    if (compPool.length > 0) modePool = compPool;
-                } else if (filterMode === 'bb_only') {
-                    const bbPool = basePool.filter(e => !isExerciseFunctionalCategory(e));
-                    if (bbPool.length > 0) modePool = bbPool;
-                }
-
-                // Alt kas grubu (subKey) eşleşmesi ve en az çalışmış alt baş önceliği
-                let finalPool = modePool;
+                let finalPool = [];
                 if (preferredSubKeys.length > 0) {
-                    // Önce henüz 0 set almış preferredSubKey'leri dene
                     const untouchedSubKeys = preferredSubKeys.filter(sk => !subKeyCounts[sk]);
                     const targetKeys = untouchedSubKeys.length > 0 ? untouchedSubKeys : preferredSubKeys;
 
-                    let subKeyMatches = modePool.filter(e => {
-                        const anat = getExerciseAnatomy(e);
+                    const matchesPrimarySubKey = (ex) => {
+                        const anat = getExerciseAnatomy(ex);
                         return anat && targetKeys.includes(anat.subKey);
-                    });
+                    };
+                    const matchesAnyCoveredSubKey = (ex) => {
+                        const allKeys = getExerciseCoveredSubKeys(ex);
+                        return allKeys.some(k => targetKeys.includes(k));
+                    };
+
+                    // ADIM 1: Önce hedef anatomik alt kası (örn. chest_mid, shoulders_side) vuran hareketleri bul
+                    let subKeyMatches = basePool.filter(matchesPrimarySubKey);
                     if (subKeyMatches.length === 0) {
-                        // Mode filtresini esnetip basePool içinde aynı subKey'i ara (alt baş boş kalmasın!)
-                        subKeyMatches = basePool.filter(e => {
-                            const anat = getExerciseAnatomy(e);
-                            return anat && targetKeys.includes(anat.subKey);
-                        });
+                        subKeyMatches = basePool.filter(matchesAnyCoveredSubKey);
                     }
                     if (subKeyMatches.length === 0) {
                         // Tüm EXERCISES_DB içinde seçili ekipmanlarla bu subKey'i vuran ve ikiz olmayan hareketi ara
                         subKeyMatches = EXERCISES_DB.filter(ex =>
-                            !isExerciseExcludedByUser(ex.id) &&
-                            selectedEquipments.includes(ex.equipment) &&
-                            !usedIds.includes(ex.id) &&
-                            !usedFamilies.has(getExerciseMovementFamily(ex)) &&
-                            targetKeys.includes(getExerciseAnatomy(ex)?.subKey)
+                            isCandidateBiochemicallyCompatible(ex, allowComplex) &&
+                            (matchesPrimarySubKey(ex) || matchesAnyCoveredSubKey(ex))
                         );
                     }
-                    if (subKeyMatches.length > 0) {
-                        finalPool = subKeyMatches;
+
+                    // ADIM 2: Bulunan alt kas adaylarının İÇİNDE doktrin modunu (functional / bb_compound / bb_isolation) uygula
+                    // (Böylece Omuz hareketinin functional olması, Göğüs slotundaki Barbell Bench Press'i ASLA ezmez!)
+                    subKeyMatches = applyDoctrineModeFilter(subKeyMatches, filterMode);
+
+                    // ADIM 3: Birden fazla aday varsa, daha önce vurulmuş alt kasları en az tekrar eden (en taze kas profiline sahip) adayları seç
+                    if (subKeyMatches.length > 1) {
+                        let minOverlapScore = Infinity;
+                        const scored = subKeyMatches.map(ex => {
+                            const keys = getExerciseCoveredSubKeys(ex);
+                            const overlapScore = keys.reduce((sum, k) => sum + (subKeyCounts[k] || 0), 0);
+                            if (overlapScore < minOverlapScore) minOverlapScore = overlapScore;
+                            return { ex, overlapScore };
+                        });
+                        const freshest = scored.filter(item => item.overlapScore === minOverlapScore).map(item => item.ex);
+                        if (freshest.length > 0) subKeyMatches = freshest;
                     }
+
+                    finalPool = subKeyMatches;
+                } else {
+                    finalPool = applyDoctrineModeFilter(basePool, filterMode);
                 }
 
                 let chosen = pickRandom(finalPool);
+                if (!chosen) {
+                    const modeBase = applyDoctrineModeFilter(basePool, filterMode);
+                    chosen = pickRandom(modeBase);
+                }
                 if (!chosen) {
                     let relatedCat = cat;
                     if (cat === 'push') relatedCat = ['push', 'core'];
                     else if (cat === 'pull') relatedCat = ['pull', 'core'];
                     else if (cat === 'legs_quad' || cat === 'legs_hinge') relatedCat = ['legs_quad', 'legs_hinge', 'core'];
 
-                    const fallbackPool = EXERCISES_DB.filter(ex =>
-                        !isExerciseExcludedByUser(ex.id) &&
-                        selectedEquipments.includes(ex.equipment) &&
-                        !usedIds.includes(ex.id) &&
-                        !usedFamilies.has(getExerciseMovementFamily(ex)) &&
-                        (Array.isArray(relatedCat) ? relatedCat.includes(ex.category) : ex.category === relatedCat)
-                    );
+                    const fallbackPool = EXERCISES_DB.filter(ex => {
+                        if (!isCandidateBiochemicallyCompatible(ex, allowComplex)) return false;
+                        const effCat = getEffectiveExerciseCategory(ex);
+                        return Array.isArray(relatedCat) ? relatedCat.includes(effCat) : effCat === relatedCat;
+                    });
                     chosen = pickRandom(fallbackPool);
                 }
                 if (!chosen) {
-                    // Son çare: yalnızca ID tekrarı olmayan herhangi bir uygun hareket
-                    const lastResortPool = EXERCISES_DB.filter(ex =>
-                        !isExerciseExcludedByUser(ex.id) &&
-                        selectedEquipments.includes(ex.equipment) &&
-                        !usedIds.includes(ex.id)
-                    );
-                    chosen = pickRandom(lastResortPool);
+                    // Son çare: yine de ASLA aynı hareket ailesinden (ikiz) veya aynı medyadan olmayan, en az çakışan hareketi seç
+                    const nonTwinAnyCatPool = EXERCISES_DB.filter(ex => isCandidateBiochemicallyCompatible(ex, hasLowerOrFullOrFuncSplit));
+                    chosen = pickRandom(nonTwinAnyCatPool);
                 }
                 if (chosen) {
                     recordChosenExercise(chosen);
@@ -1634,15 +1708,16 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
                 if (splitKey === 'upper_push') {
                     // İTİŞ: Orta Göğüs + Yan Omuz + Üst Göğüs + Ön Omuz + Triceps Uzun Baş + Core + Alt Göğüs + Triceps Yan Baş
+                    // Not: Saf İtiş gününde Squat-to-Press (Thruster / Landmine Squat to Press) YASAKTIR; saf üst vücut omuz/göğüs hareketleri seçilir.
                     return [
                         { subKeys: ['chest_mid'], cat: 'push', mode: isFuncDom ? 'functional' : 'bb_compound' },           // Slot 1 (Düz 1): Ana Orta Göğüs Pres
                         { subKeys: ['shoulders_side'], cat: 'push', mode: 'bb_isolation' },                                // Slot 2 (A1): Yan Omuz İzolasyon
                         { subKeys: ['chest_upper'], cat: 'push', mode: 'bb_compound' },                                    // Slot 3 (A2): Üst Göğüs Incline Pres
-                        { subKeys: ['shoulders_front'], cat: ['push', 'conditioning'], mode: (isPureBb ? 'bb_compound' : (isFuncDom || isBalanced ? 'functional' : 'bb_compound')) }, // Slot 4 (Düz 2): Ön Omuz Pres / Push Press
-                        { subKeys: ['triceps_long', 'triceps_lateral'], cat: 'push', mode: 'bb_isolation' },               // Slot 5 (B1): Triceps Uzun/Yan Baş
+                        { subKeys: ['shoulders_front'], cat: 'push', mode: (isPureBb ? 'bb_compound' : (isFuncDom || isBalanced ? 'functional' : 'bb_compound')) }, // Slot 4 (Düz 2): Dikey Omuz Pres / Push Press
+                        { subKeys: ['triceps_long'], cat: 'push', mode: 'bb_isolation' },                                  // Slot 5 (B1): Triceps Uzun Baş (Overhead / Skullcrusher)
                         { subKeys: ['core_front', 'core_obliques'], cat: 'core', mode: isPureBb ? 'any' : 'functional' },  // Slot 6 (B2): Core / Anti-Rotasyon
                         { subKeys: ['chest_lower', 'chest_mid'], cat: 'push', mode: 'any' },                               // Slot 7 (60dk): Alt Göğüs / Dips / Fly
-                        { subKeys: ['triceps_lateral', 'shoulders_front'], cat: ['push', 'conditioning'], mode: isPureBb ? 'bb_isolation' : 'functional' } // Slot 8 (60dk): Triceps Yan Baş / Kondisyon
+                        { subKeys: ['triceps_lateral'], cat: 'push', mode: 'any' }                                         // Slot 8 (60dk): Triceps Yan Baş (Pushdown / Close-Grip / Diamond)
                     ];
                 } else if (splitKey === 'upper_pull') {
                     // ÇEKİŞ: Kanat (Lats) + Arka Omuz + Biceps + Orta Sırt (Kalınlık) + Biceps/Brachialis + Oblik/Hinge
@@ -1652,7 +1727,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                         { subKeys: ['biceps'], cat: 'pull', mode: 'bb_isolation' },                                        // Slot 3 (A2): Biceps Ana Curl
                         { subKeys: ['back_mid'], cat: 'pull', mode: isFuncDom ? 'functional' : 'bb_compound' },            // Slot 4 (Düz 2): Orta Sırt Kalınlık Row
                         { subKeys: ['biceps'], cat: 'pull', mode: 'bb_isolation' },                                        // Slot 5 (B1): Biceps Farklı Açı (Hammer / Incline)
-                        { subKeys: ['core_obliques', 'legs_hamstrings'], cat: ['core', 'legs_hinge'], mode: isPureBb ? 'any' : 'functional' }, // Slot 6 (B2): Oblik Taşıma / Swing
+                        { subKeys: ['core_obliques', 'core_front'], cat: 'core', mode: isPureBb ? 'any' : 'functional' },  // Slot 6 (B2): Oblik Taşıma / Anti-Rotasyon
                         { subKeys: ['back_lats', 'back_mid'], cat: 'pull', mode: 'any' },                                  // Slot 7 (60dk): Pullover / İkincil Sırt
                         { subKeys: ['core_front', 'core_obliques'], cat: 'core', mode: isPureBb ? 'any' : 'functional' }   // Slot 8 (60dk): Ön Karın Zırhı
                     ];
@@ -1660,13 +1735,13 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     // ALT VÜCUT: Ön Bacak (Quad) + Arka Bacak (Hamstring) + Kalça (Glute) + Kalf + Core
                     return [
                         { subKeys: ['legs_quad'], cat: 'legs_quad', mode: 'bb_compound' },                                 // Slot 1 (Düz 1): Ana Squat / Leg Press
-                        { subKeys: ['legs_hamstrings'], cat: 'legs_hinge', mode: isPureBb ? 'bb_isolation' : 'any' },      // Slot 2 (A1): Hamstring Curl / Tek Bacak RDL
+                        { subKeys: ['legs_hamstrings'], cat: 'legs_hinge', mode: isPureBb ? 'bb_isolation' : 'any' },      // Slot 2 (A1): Hamstring Curl / RDL
                         { subKeys: ['legs_calves', 'legs_glutes'], cat: ['legs_quad', 'legs_hinge'], mode: 'any' },        // Slot 3 (A2): Kalf veya Glute Bridge
                         { subKeys: ['legs_hamstrings', 'legs_glutes'], cat: 'legs_hinge', mode: isFuncDom ? 'functional' : 'bb_compound' }, // Slot 4 (Düz 2): RDL / Deadlift / Hip Thrust
                         { subKeys: ['legs_quad'], cat: 'legs_quad', mode: isFuncDom ? 'functional' : 'any' },              // Slot 5 (B1): Unilateral Lunge / Split Squat / Extension
                         { subKeys: ['core_front', 'core_obliques'], cat: 'core', mode: isPureBb ? 'any' : 'functional' },  // Slot 6 (B2): Core Stabilizasyon
                         { subKeys: ['legs_glutes', 'legs_calves'], cat: ['legs_hinge', 'legs_quad'], mode: 'any' },        // Slot 7 (60dk): Kalça / Kalf Tamamlayıcı
-                        { subKeys: ['legs_hamstrings', 'core_front'], cat: ['conditioning', 'legs_hinge'], mode: isPureBb ? 'bb_isolation' : 'functional' } // Slot 8 (60dk)
+                        { subKeys: ['legs_hamstrings', 'core_front'], cat: ['legs_hinge', 'core'], mode: isPureBb ? 'bb_isolation' : 'functional' } // Slot 8 (60dk)
                     ];
                 } else if (splitKey === 'upper') {
                     // ÜST VÜCUT: Göğüs + Kanat + Omuz + Orta Sırt + Triceps + Biceps + Arka Omuz + Core
@@ -1693,33 +1768,33 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                         { subKeys: ['core_obliques'], cat: 'core', mode: 'any' }
                     ];
                 } else if (splitKey === 'functional') {
-                    // FONKSİYONEL FITNESS & KONDİSYON
+                    // FONKSİYONEL FITNESS & KONDİSYON (Her slotta farklı bir biyomekanik vektör!)
                     return [
-                        { subKeys: ['shoulders_front', 'legs_quad'], cat: ['conditioning', 'push', 'legs_quad'], mode: 'functional' },
-                        { subKeys: ['legs_hamstrings', 'back_mid'], cat: ['legs_hinge', 'pull', 'conditioning'], mode: 'functional' },
-                        { subKeys: ['core_obliques', 'core_front'], cat: 'core', mode: 'functional' },
-                        { subKeys: ['chest_mid', 'legs_quad'], cat: ['conditioning', 'push', 'legs_quad'], mode: 'functional' },
-                        { subKeys: ['back_mid', 'back_lats'], cat: ['pull', 'conditioning'], mode: 'functional' },
-                        { subKeys: ['core_front', 'core_obliques'], cat: 'core', mode: 'functional' },
-                        { subKeys: ['legs_hamstrings', 'legs_glutes'], cat: ['legs_hinge', 'conditioning'], mode: 'functional' },
-                        { subKeys: ['shoulders_rear', 'core_obliques'], cat: ['pull', 'core'], mode: 'functional' }
+                        { subKeys: ['shoulders_front', 'legs_quad'], cat: ['conditioning', 'push', 'legs_quad'], mode: 'functional', allowComplex: true }, // Slot 1: Squat-to-Press / Overhead Kompleks
+                        { subKeys: ['legs_hamstrings', 'legs_glutes'], cat: ['legs_hinge', 'conditioning'], mode: 'functional', allowComplex: true },      // Slot 2: Balistik Hinge (Swing / Clean / Snatch)
+                        { subKeys: ['back_mid', 'back_lats'], cat: 'pull', mode: 'functional', allowComplex: true },                                       // Slot 3: Fonksiyonel Çekiş (Gorilla / Renegade / Inverted Row)
+                        { subKeys: ['core_obliques'], cat: 'core', mode: 'functional', allowComplex: true },                                               // Slot 4: Yük Taşıma / Anti-Rotasyon (Carry / Chop / Windmill)
+                        { subKeys: ['legs_quad'], cat: 'legs_quad', mode: 'functional', allowComplex: true },                                              // Slot 5: Unilateral Bacak / Goblet / Zercher Squat
+                        { subKeys: ['chest_mid', 'triceps_lateral'], cat: ['push', 'conditioning'], mode: 'functional', allowComplex: true },              // Slot 6: Yatay İtiş / Man Maker / Burpee
+                        { subKeys: ['core_front'], cat: 'core', mode: 'functional', allowComplex: true },                                                  // Slot 7 (60dk): Ön Core (Plank / Bear Crawl / Hanging Raise)
+                        { subKeys: ['shoulders_rear'], cat: 'pull', mode: 'functional', allowComplex: true }                                               // Slot 8 (60dk): Omuz Mobilite & Arka Zincir (Halo / Face Pull)
                     ];
                 } else {
                     // FULL BODY (TÜM VÜCUT):
                     // Slot 1 (Düz 1): Ön Bacak Squat
                     // Slot 2+3 (Süperset A1+A2): Göğüs İtiş + Sırt Çekiş (Agonist-Antagonist Eşleşme!)
                     // Slot 4 (Düz 2): Arka Zincir RDL / Deadlift / Swing
-                    // Slot 5+6 (Süperset B1+B2): Omuz (Ön/Yan) + Core Zırhı
-                    // Slot 7+8 (60dk): Kol (Biceps/Triceps) + Arka Omuz/Kondisyon
+                    // Slot 5+6 (Süperset B1+B2): Omuz (Yan/Ön) + Core Zırhı
+                    // Slot 7+8 (60dk): Kol (Biceps/Triceps) + Arka Omuz/Kalf
                     return [
-                        { subKeys: ['legs_quad'], cat: 'legs_quad', mode: isFuncDom ? 'functional' : 'bb_compound' },
-                        { subKeys: ['chest_mid', 'chest_upper'], cat: 'push', mode: isFuncDom ? 'functional' : 'bb_compound' },
-                        { subKeys: ['back_lats', 'back_mid'], cat: 'pull', mode: isFuncDom ? 'functional' : 'bb_compound' },
-                        { subKeys: ['legs_hamstrings', 'legs_glutes'], cat: 'legs_hinge', mode: (isPureBb ? 'bb_compound' : (isFuncDom || isBalanced ? 'functional' : 'bb_compound')) },
-                        { subKeys: ['shoulders_side', 'shoulders_front'], cat: ['push', 'conditioning'], mode: (isPureBb ? 'bb_isolation' : (isFuncDom ? 'functional' : 'any')) },
-                        { subKeys: ['core_front', 'core_obliques'], cat: 'core', mode: isPureBb ? 'any' : 'functional' },
-                        { subKeys: ['biceps', 'triceps_long', 'triceps_lateral'], cat: ['pull', 'push'], mode: 'bb_isolation' },
-                        { subKeys: ['shoulders_rear', 'core_obliques', 'legs_calves'], cat: ['pull', 'core', 'conditioning'], mode: isPureBb ? 'bb_isolation' : 'functional' }
+                        { subKeys: ['legs_quad'], cat: 'legs_quad', mode: isFuncDom ? 'functional' : 'bb_compound', allowComplex: false },
+                        { subKeys: ['chest_mid', 'chest_upper'], cat: 'push', mode: isFuncDom ? 'functional' : 'bb_compound', allowComplex: false },
+                        { subKeys: ['back_lats', 'back_mid'], cat: 'pull', mode: isFuncDom ? 'functional' : 'bb_compound', allowComplex: false },
+                        { subKeys: ['legs_hamstrings', 'legs_glutes'], cat: 'legs_hinge', mode: (isPureBb ? 'bb_compound' : (isFuncDom || isBalanced ? 'functional' : 'bb_compound')), allowComplex: false },
+                        { subKeys: ['shoulders_side', 'shoulders_front'], cat: ['push', 'conditioning'], mode: (isPureBb ? 'bb_isolation' : (isFuncDom ? 'functional' : 'any')), allowComplex: true },
+                        { subKeys: ['core_front', 'core_obliques'], cat: 'core', mode: isPureBb ? 'any' : 'functional', allowComplex: false },
+                        { subKeys: ['biceps', 'triceps_long', 'triceps_lateral'], cat: ['pull', 'push'], mode: 'bb_isolation', allowComplex: false },
+                        { subKeys: ['shoulders_rear', 'legs_calves'], cat: ['pull', 'legs_quad'], mode: isPureBb ? 'bb_isolation' : 'any', allowComplex: false }
                     ];
                 }
             }
@@ -1761,17 +1836,16 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                         const shoulderStress = /omuz/.test(wishLower) && /overhead|snatch|strict press|push press|thruster|handstand/.test(nameCue);
                         if (kneeStress || backStress || shoulderStress) {
                             const safeReplacement = EXERCISES_DB.find(c =>
-                                !isExerciseExcludedByUser(c.id) &&
-                                selectedEquipments.includes(c.equipment) &&
-                                !usedIds.includes(c.id) &&
-                                !usedFamilies.has(getExerciseMovementFamily(c)) &&
-                                c.category === ex.category &&
+                                isCandidateBiochemicallyCompatible(c, hasLowerOrFullOrFuncSplit) &&
+                                getEffectiveExerciseCategory(c) === getEffectiveExerciseCategory(ex) &&
                                 !/jump|snatch|thruster|burpee|deadlift/.test((c.name || '').toLocaleLowerCase('tr-TR'))
                             );
                             if (safeReplacement) {
                                 const repClone = Object.assign({}, safeReplacement);
                                 usedIds.push(repClone.id);
                                 usedFamilies.add(getExerciseMovementFamily(repClone));
+                                const mId = getExerciseMediaId(repClone);
+                                if (mId) usedMediaIds.add(mId);
                                 chosenExercises[idx] = repClone;
                             }
                         }
@@ -1780,13 +1854,13 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
                 // 2. Zayıf bölge / özel kas odaklarını (sırt, kol, omuz, göğüs, bacak, karın) ikiz oluşturmadan programa enjekte et
                 const focusMatchers = [
-                    { regex: /sırt|kanat|row|çekiş|lat/, testEx: e => e.category === 'pull' || /sırt|kanat|lat|rhomboid|row|pull/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
+                    { regex: /sırt|kanat|row|çekiş|lat/, testEx: e => getEffectiveExerciseCategory(e) === 'pull' || /sırt|kanat|lat|rhomboid|row|pull/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
                     { regex: /kol|biceps|triceps|pazu|arka kol/, testEx: e => /biceps|triceps|kol|curl|extension|pushdown|kickback|hammer/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
                     { regex: /arka omuz|rear delt|face pull/, testEx: e => /arka omuz|rear|face pull|reverse fly|band pull/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
                     { regex: /omuz|deltoid|trapez/, testEx: e => /omuz|deltoid|press|lateral|shrug|trapez/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
                     { regex: /göğüs|chest|pectoral|şınav|bench/, testEx: e => /göğüs|pectoral|bench|fly|şınav|push-up|floor press/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
-                    { regex: /bacak|kalça|glute|squat|hamstring|quad/, testEx: e => e.category === 'legs_quad' || e.category === 'legs_hinge' },
-                    { regex: /karın|core|abs|plank/, testEx: e => e.category === 'core' }
+                    { regex: /bacak|kalça|glute|squat|hamstring|quad/, testEx: e => getEffectiveExerciseCategory(e) === 'legs_quad' || getEffectiveExerciseCategory(e) === 'legs_hinge' },
+                    { regex: /karın|core|abs|plank/, testEx: e => getEffectiveExerciseCategory(e) === 'core' }
                 ];
 
                 focusMatchers.forEach(fm => {
@@ -1794,10 +1868,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                         const existingMatchCount = chosenExercises.filter(fm.testEx).length;
                         if (existingMatchCount < 2) {
                             const candidates = EXERCISES_DB.filter(e =>
-                                !isExerciseExcludedByUser(e.id) &&
-                                selectedEquipments.includes(e.equipment) &&
-                                !usedIds.includes(e.id) &&
-                                !usedFamilies.has(getExerciseMovementFamily(e)) &&
+                                isCandidateBiochemicallyCompatible(e, hasLowerOrFullOrFuncSplit) &&
                                 fm.testEx(e)
                             );
                             const picked = pickRandom(candidates);
@@ -1819,10 +1890,10 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 { name: "Kedi - Deve & Kuş Köpeği (Omurga Aktivasyonu)", dur: "60 sn", cue: "Nefes alarak beli çukurlaştır, nefes vererek sırtı kabart." }
             ];
 
-            // KATMAN 3: FINISHER ÇAKIŞMA KORUMASI (Ana antrenmanda seçilen hareket Finisher olamaz!)
+            // KATMAN 3: FINISHER ÇAKIŞMA KORUMASI (Ana antrenmanda seçilen hareket veya ailesi Finisher olamaz!)
             const finisherCandidates = [
-                { exId: "db_swing", family: "ballistic_swing", name: "3 Dk Tabata Balistik Bitiş", desc: "20 sn Maksimum Tempolu Swing / Burpee + 10 sn Dinlenme (4 Tur)" },
-                { exId: "db_farmers_walk", family: "loaded_carry_farmers", name: "Çiftçi Yürüyüşü (Farmer's Walk / Carry Burnout)", desc: "Mümkün olan en ağır dambıllarla 3 tur 40 metre kesintisiz yürüyüş." },
+                { exId: "db_swing", family: "ballistic_hip_hinge", name: "3 Dk Tabata Balistik Bitiş", desc: "20 sn Maksimum Tempolu Swing / Snatch + 10 sn Dinlenme (4 Tur)" },
+                { exId: "db_farmers_walk", family: "loaded_carry", name: "Çiftçi Yürüyüşü (Farmer's Walk / Carry Burnout)", desc: "Mümkün olan en ağır dambıllarla 3 tur 40 metre kesintisiz yürüyüş." },
                 { exId: "bw_burpee", family: "fullbody_metcon_burpee", name: "3 Dk EMOM Kondisyon Zırhı (Burpee / Mountain Climber)", desc: "Her dakika başında 10 Burpee veya 30 sn Mountain Climber, kalan sürede aktif dinlenme." },
                 { exId: "bw_plank", family: "core_anterior_plank", name: "2 Dk İzometrik Core & Hollow Hold Burnout", desc: "40 sn RKC Plank + 20 sn Dinlenme × 2 Tur maksimum karın duvarı sıkışı." }
             ];
@@ -16192,7 +16263,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=207')
+                navigator.serviceWorker.register('./sw.js?v=208')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
