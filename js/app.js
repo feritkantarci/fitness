@@ -1081,8 +1081,8 @@
 
             if (btnW) btnW.classList.toggle('active', window.aiGeneratorScope === 'weekly');
             if (btnS) btnS.classList.toggle('active', window.aiGeneratorScope === 'single');
-            if (gridW) gridW.style.display = (window.aiGeneratorScope === 'weekly') ? '' : 'none';
-            if (gridS) gridS.style.display = (window.aiGeneratorScope === 'single') ? '' : 'none';
+            if (gridW) { gridW.style.display = (window.aiGeneratorScope === 'weekly') ? '' : 'none'; gridW.classList.toggle('is-hidden-grid', window.aiGeneratorScope !== 'weekly'); }
+            if (gridS) { gridS.style.display = (window.aiGeneratorScope === 'single') ? '' : 'none'; gridS.classList.toggle('is-hidden-grid', window.aiGeneratorScope !== 'single'); }
 
             if (window.aiGeneratorScope === 'weekly') {
                 const lblEl = document.getElementById('selectedSplitLabel');
@@ -16902,7 +16902,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=213')
+                navigator.serviceWorker.register('./sw.js?v=214')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();

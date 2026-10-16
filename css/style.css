@@ -6647,10 +6647,16 @@
             border: none !important;
         }
 
-        .split-grid {
+        .split-grid:not(.is-hidden-grid) {
             display: grid !important;
             grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
             gap: 8px !important;
+        }
+
+        .split-grid.is-hidden-grid,
+        .split-grid[style*="display:none"],
+        .split-grid[style*="display: none"] {
+            display: none !important;
         }
 
         .split-grid > .split-card:first-child {
