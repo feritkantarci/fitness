@@ -306,22 +306,13 @@
             }
         }
 
-        // ==================== BOTTOM BAR HIDE / SHOW & SHEET LOGIC ====================
+        // ==================== BOTTOM BAR & SHEET LOGIC ====================
         function toggleBottomBar() {
-            const w = document.getElementById('bottomNavWrapper');
-            if (!w) return;
-            if (w.classList.contains('hidden')) {
-                showBottomBar();
-            } else {
-                hideBottomBar();
-            }
+            showBottomBar();
         }
 
         function hideBottomBar() {
-            const w = document.getElementById('bottomNavWrapper');
-            const pill = document.getElementById('bottomRestorePill');
-            if (w) w.classList.add('hidden');
-            if (pill) pill.classList.add('visible');
+            showBottomBar();
         }
 
         function showBottomBar() {
@@ -344,18 +335,6 @@
             if (overlay) overlay.classList.remove('open');
             if (sheet) sheet.classList.remove('open');
         }
-
-        // Akıllı Scroll ile Otomatik Gizleme (Aşağı inerken gizle, yukarı çıkarken göster)
-        let lastWindowScrollTop = 0;
-        window.addEventListener('scroll', () => {
-            const st = window.pageYOffset || document.documentElement.scrollTop;
-            if (st > lastWindowScrollTop && st > 80) {
-                hideBottomBar();
-            } else if (st < lastWindowScrollTop) {
-                showBottomBar();
-            }
-            lastWindowScrollTop = st <= 0 ? 0 : st;
-        }, { passive: true });
 
         // ==================== WORKOUT GENERATOR ENGINE ====================
         const SPLIT_METAS = {
@@ -15682,7 +15661,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=202')
+                navigator.serviceWorker.register('./sw.js?v=203')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();

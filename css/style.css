@@ -614,11 +614,10 @@
             right: 0;
             bottom: 0;
             z-index: 150;
-            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-            will-change: transform;
+            transform: translate3d(0, 0, 0);
         }
         .bottom-nav-wrapper.hidden {
-            transform: translateY(calc(100% - 14px));
+            transform: translate3d(0, 0, 0) !important;
         }
         .bottom-pull-handle {
             width: 56px;
