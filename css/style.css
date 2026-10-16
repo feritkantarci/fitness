@@ -7306,6 +7306,90 @@
             font-weight: 900 !important;
             letter-spacing: 0.3px !important;
             border-radius: 14px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 8px !important;
         }
+
+        /* =========================================================================
+           CANVA MINIMALIST VECTOR ICON & MUSCLE PILL SYSTEM (DESIGN DAHYNZmpUlM)
+           ========================================================================= */
+        .cv-ico {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            vertical-align: -2.5px;
+            flex-shrink: 0;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .cv-ico-lg {
+            width: 17px;
+            height: 17px;
+            vertical-align: -3px;
+        }
+
+        .cv-muscle-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4ADE80;
+            box-shadow: 0 0 6px rgba(74, 222, 128, 0.75);
+            flex-shrink: 0;
+        }
+
+        .cv-muscle-dot.dot-cyan {
+            background: #38BDF8;
+            box-shadow: 0 0 6px rgba(56, 189, 248, 0.75);
+        }
+
+        .cv-muscle-dot.dot-gold {
+            background: #FACC15;
+            box-shadow: 0 0 6px rgba(250, 204, 21, 0.8);
+        }
+
+        .wk-ex-muscle-pill {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            background: rgba(15, 24, 22, 0.85) !important;
+            border: 1px solid rgba(74, 222, 128, 0.32) !important;
+            color: #E2E8F0 !important;
+            font-size: 11.5px !important;
+            font-weight: 700 !important;
+            padding: 4px 10px !important;
+            border-radius: 999px !important;
+            white-space: nowrap !important;
+            letter-spacing: 0.1px !important;
+        }
+
+        .wk-ex-muscle-pill .cv-ico {
+            color: #4ADE80;
+            width: 13px;
+            height: 13px;
+        }
+
+        .wk-ex-muscle-pill.pill-synergy {
+            background: rgba(12, 24, 36, 0.85) !important;
+            border-color: rgba(56, 189, 248, 0.38) !important;
+        }
+
+        .wk-ex-muscle-pill.pill-synergy .cv-ico {
+            color: #38BDF8;
+        }
+
+        .wk-ex-muscle-pill.pill-focus {
+            background: rgba(34, 28, 12, 0.85) !important;
+            border-color: rgba(250, 204, 21, 0.45) !important;
+            color: #FEF08A !important;
+        }
+
+        .wk-ex-muscle-pill.pill-focus .cv-ico {
+            color: #FACC15;
+        }
+
 
 

@@ -23,7 +23,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=217">
+    <link rel="stylesheet" href="css/style.css?v=218">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH (CANVA OBSIDIAN & LIME V201) */
         html, body { background-color: #0B0F17; color: #F3F6FA; color-scheme: dark; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -35,7 +35,7 @@
     <!-- ==================== LOGIN SCREEN ==================== -->
     <div id="loginScreen">
         <div class="login-card">
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v217</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v218</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -72,7 +72,7 @@
                     <span class="canva-brand-monogram" aria-hidden="true" translate="no">Ç</span>
                     <div class="canva-brand-stack">
                         <span class="modern-brand-title" translate="no">Çelik Kodu</span>
-                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v217</span>
+                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v218</span>
                     </div>
                 </div>
                 <div class="modern-bar-actions">
@@ -147,7 +147,7 @@
                     <p class="ai-prep-subtitle">Kapsamı, ekipmanını ve antrenman ayrıntılarını seç; hareket seçimini, eksik kas telafisini ve bilimsel süperset kurgusunu AI senin için hazırlasın.</p>
 
                     <div class="ai-recommended-box">
-                        <div class="ai-rec-label">✨ SENİN İÇİN ÖNERİLEN</div>
+                        <div class="ai-rec-label"><svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M8 1.5L9.6 6.4L14.5 8L9.6 9.6L8 14.5L6.4 9.6L1.5 8L6.4 6.4L8 1.5Z"/><path d="M13 2v2M12 3h2M3 12v2M2 13h2"/></svg> SENİN İÇİN ÖNERİLEN</div>
                         <div class="ai-rec-main-title" id="aiDoctrineCurrentBadge">Bodybuilding &amp; Fonksiyonel • Tüm Vücut</div>
                         <div id="aiDoctrineHeroQuickStats" class="ai-rec-pills-row">
                             <span class="ai-rec-pill">Haftalık 3 Gün</span>
@@ -177,10 +177,10 @@
                         <!-- Kapsam Seçici (Haftalık Plan vs Tek Günlük Seans) -->
                         <div class="ai-scope-toggle-bar" role="tablist" aria-label="Program Kapsamı">
                             <button type="button" class="ai-scope-pill active" id="aiScopeBtnWeekly" onclick="setAiGeneratorScope('weekly')">
-                                📅 Haftalık Plan (3-4 Gün)
+                                <svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1.5v2.5M11 1.5v2.5M2 6.5h12"/><rect x="4.5" y="8.8" width="1.5" height="1.5" rx="0.3"/><rect x="7.2" y="8.8" width="1.5" height="1.5" rx="0.3"/><rect x="10" y="8.8" width="1.5" height="1.5" rx="0.3"/></svg> Haftalık Plan (3-4 Gün)
                             </button>
                             <button type="button" class="ai-scope-pill" id="aiScopeBtnSingle" onclick="setAiGeneratorScope('single')">
-                                ⚡ Tek Günlük Seans
+                                <svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 1.5L3 9h4.5L6.8 14.5L13 7H8.5L9 1.5Z"/></svg> Tek Günlük Seans
                             </button>
                         </div>
 
@@ -189,7 +189,7 @@
                             <div class="split-card selected" data-wk-tpl="ai_auto" onclick="selectAiWeeklyTemplateCard('ai_auto')">
                                 <span class="split-radio" aria-hidden="true"></span>
                                 <div class="split-card-content">
-                                    <span class="split-name">🤖 AI Otomatik Teşhis (Önerilen)</span>
+                                    <span class="split-name"><svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M8 1.5L9.6 6.4L14.5 8L9.6 9.6L8 14.5L6.4 9.6L1.5 8L6.4 6.4L8 1.5Z"/><path d="M13 2v2M12 3h2M3 12v2M2 13h2"/></svg> AI Otomatik Teşhis (Önerilen)</span>
                                     <span class="split-sub-desc">Eksik kaslara göre en uygun 3 günlük kurgu</span>
                                 </div>
                             </div>
@@ -350,7 +350,7 @@
                             </div>
                         </div>
                         <div class="ai-unified-wish-row">
-                            <label for="aiUnifiedWishInput" class="ai-unified-wish-label">💬 AI ÖZEL NOTU / ODAK &amp; HASSASİYET (İSTEĞE BAĞLI)</label>
+                            <label for="aiUnifiedWishInput" class="ai-unified-wish-label"><svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2.5 3.5A1.5 1.5 0 0 1 4 2h8a1.5 1.5 0 0 1 1.5 1.5v6A1.5 1.5 0 0 1 12 11H6.5L3.8 13.5V11H4a1.5 1.5 0 0 1-1.5-1.5v-6Z"/><path d="M5.5 5.5h5M5.5 8h3.5"/></svg> AI ÖZEL NOTU / ODAK &amp; HASSASİYET (İSTEĞE BAĞLI)</label>
                             <input type="text" id="aiUnifiedWishInput" class="ai-unified-wish-input" placeholder="Örn: Omuz ve sırt odaklı olsun, diz yormasın...">
                         </div>
                     </div>
@@ -358,7 +358,7 @@
                     <!-- SINGLE UNIFIED AI GENERATE CTA -->
                     <div class="ai-prep-actions-row ai-unified-cta-row">
                         <button type="button" class="btn-ai-create-primary btn-ai-unified-cta" id="btnUnifiedAiGenerate" onclick="handleQuickAiGenerate()">
-                            ⚡ AI ile programı oluştur
+                            <svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 1.5L3 9h4.5L6.8 14.5L13 7H8.5L9 1.5Z"/></svg> AI ile programı oluştur
                         </button>
                     </div>
                     <div class="ai-prep-hint" id="aiQuickPreviewHint">Seçimlerinize göre hareketleri ve süpersetleri AI otomatik kurgular • Takvime onaysız yazılmaz</div>
@@ -2357,8 +2357,8 @@
     </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
-    <script src="js/exercises-db.js?v=217"></script>
-    <script src="js/app.js?v=217"></script>
+    <script src="js/exercises-db.js?v=218"></script>
+    <script src="js/app.js?v=218"></script>
     <script>
         function toggleHeaderPopupMenu(e) {
             if (e) e.stopPropagation();

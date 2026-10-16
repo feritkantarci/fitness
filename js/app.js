@@ -1,4 +1,17 @@
 // ==================== APPLICATION CORE LOGIC ====================
+        // ==================== CANVA MINIMALIST VECTOR ICON SYSTEM (DAHYNZmpUlM) ====================
+        const CANVA_ICONS = {
+            crosshair: `<svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="4.5"/><circle cx="8" cy="8" r="1.2" fill="currentColor"/><path d="M8 1.5v2.2M8 12.3v2.2M1.5 8h2.2M12.3 8h2.2"/></svg>`,
+            sparkle: `<svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M8 1.5L9.6 6.4L14.5 8L9.6 9.6L8 14.5L6.4 9.6L1.5 8L6.4 6.4L8 1.5Z"/><path d="M13 2v2M12 3h2M3 12v2M2 13h2"/></svg>`,
+            calendar: `<svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1.5v2.5M11 1.5v2.5M2 6.5h12"/><rect x="4.5" y="8.8" width="1.5" height="1.5" rx="0.3"/><rect x="7.2" y="8.8" width="1.5" height="1.5" rx="0.3"/><rect x="10" y="8.8" width="1.5" height="1.5" rx="0.3"/></svg>`,
+            bolt: `<svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 1.5L3 9h4.5L6.8 14.5L13 7H8.5L9 1.5Z"/></svg>`,
+            refresh: `<svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 0 1-9.4 3.9M2.5 8a5.5 5.5 0 0 1 9.4-3.9"/><path d="M10 1.8l2.2 2.3L9.8 6M6 14.2L3.8 11.9 6.2 10"/></svg>`,
+            sliders: `<svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 4h3.5M8.5 4H14M2 8h6.5M11.5 8H14M2 12h2.5M7.5 12H14"/><circle cx="7" cy="4" r="1.5"/><circle cx="10" cy="8" r="1.5"/><circle cx="6" cy="12" r="1.5"/></svg>`,
+            play: `<svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4.5 2.8L12.8 8L4.5 13.2V2.8Z"/></svg>`,
+            note: `<svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2.5 3.5A1.5 1.5 0 0 1 4 2h8a1.5 1.5 0 0 1 1.5 1.5v6A1.5 1.5 0 0 1 12 11H6.5L3.8 13.5V11H4a1.5 1.5 0 0 1-1.5-1.5v-6Z"/><path d="M5.5 5.5h5M5.5 8h3.5"/></svg>`
+        };
+        window.CANVA_ICONS = CANVA_ICONS;
+
 
         // ==================== MUSCLE RADAR & REGION DEFINITIONS ====================
         
@@ -1089,10 +1102,10 @@
                 if (lblEl) {
                     lblEl.innerText = AI_WEEKLY_TPL_LABELS[window.selectedAiWeeklyTemplate] || 'Haftalık • AI Otomatik Teşhis';
                 }
-                if (ctaBtn) ctaBtn.innerHTML = '⚡ AI ile programı oluştur';
+                if (ctaBtn) ctaBtn.innerHTML = `${CANVA_ICONS.bolt} AI ile programı oluştur`;
             } else {
                 if (typeof updateSelectedSplitLabel === 'function') updateSelectedSplitLabel();
-                if (ctaBtn) ctaBtn.innerHTML = '⚡ AI ile günlük antrenmanı oluştur';
+                if (ctaBtn) ctaBtn.innerHTML = `${CANVA_ICONS.bolt} AI ile günlük antrenmanı oluştur`;
             }
         }
         window.setAiGeneratorScope = setAiGeneratorScope;
@@ -1533,7 +1546,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
             const timingBannerHtml = isNextWeekRecommended ? `
                 <div class="wk-timing-banner">
-                    <span style="font-size:18px; line-height:1;">📅</span>
+                    <span style="color:#4ADE80; display:flex; align-items:center; margin-top:2px;">${CANVA_ICONS.calendar}</span>
                     <div>
                         <div style="color:#B6F059; font-weight:800; font-size:13px; margin-bottom:2px;">
                             GELECEK HAFTA PLANI${escapeHTML(nextRangeStr)} • Bu Hafta ${wkStatus.completedThisWeekCount} Antrenman Tamamlandı (${escapeHTML(wkStatus.todayName)})
@@ -1545,7 +1558,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 </div>
             ` : `
                 <div class="wk-timing-banner" style="background:rgba(56,189,248,0.08); border-color:rgba(56,189,248,0.28);">
-                    <span style="font-size:18px; line-height:1;">📋</span>
+                    <span style="color:#38BDF8; display:flex; align-items:center; margin-top:2px;">${CANVA_ICONS.calendar}</span>
                     <div>
                         <div style="color:#38BDF8; font-weight:800; font-size:13px; margin-bottom:2px;">
                             HAFTALIK PROGRAM TASLAĞI • Takvime Henüz İşlenmedi
@@ -1560,7 +1573,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             const tplOptionsHtml = Object.keys(AI_WEEKLY_TEMPLATES).map(k => {
                 const t = AI_WEEKLY_TEMPLATES[k];
                 const sel = k === plan.templateKey ? 'selected' : '';
-                return `<option value="${k}" ${sel}>📐 Şablon: ${escapeHTML(t.name)}</option>`;
+                return `<option value="${k}" ${sel}>Şablon: ${escapeHTML(t.name)}</option>`;
             }).join('');
 
             const daysCardsHtml = plan.days.map((dItem, dIdx) => {
@@ -1570,21 +1583,19 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     const anatomy = typeof getExerciseAnatomy === 'function' ? getExerciseAnatomy(ex) : { primary: ex.muscle || '' };
                     const shortMuscle = String(anatomy.primary || ex.muscle || '').split('(')[0].trim();
                     const lbl = ex.blockLabel || (eIdx + 1);
-                    const focusPillStyle = ex.isWishFocus
-                        ? 'background:rgba(250,204,21,0.16); border-color:rgba(250,204,21,0.45); color:#FDE047;'
-                        : (ex.synergyBadge
-                            ? 'background:rgba(56,189,248,0.13); border-color:rgba(56,189,248,0.38); color:#7DD3FC;'
-                            : '');
-                    const focusIcon = ex.isWishFocus ? '⭐' : '🎯';
+                    const pillStateCls = ex.isWishFocus ? 'pill-focus' : (ex.synergyBadge ? 'pill-synergy' : '');
+                    const dotStateCls = ex.isWishFocus ? 'dot-gold' : (ex.synergyBadge ? 'dot-cyan' : '');
                     const synSuffix = (!ex.isWishFocus && ex.synergyBadge)
-                        ? ` <span style="color:#B6F059; font-weight:800; font-size:10px;">(${escapeHTML(ex.synergyBadge)})</span>`
+                        ? ` <span style="color:#4ADE80; font-weight:800; font-size:10.5px;">(${escapeHTML(ex.synergyBadge)})</span>`
                         : '';
                     return `
                         <div class="wk-ex-row">
                             <div><span class="wk-ex-code">${escapeHTML(String(lbl))}</span></div>
                             <div class="wk-ex-name" title="${escapeHTML(ex.name)}">${escapeHTML(ex.name)}</div>
                             <div class="wk-col-muscle">
-                                <span class="wk-ex-muscle-pill" style="${focusPillStyle}" title="Birincil: ${escapeHTML(anatomy.primary || '')}${anatomy.secondary ? ' • Sekonder: ' + escapeHTML(anatomy.secondary) : ''}">${focusIcon} ${escapeHTML(shortMuscle)}${synSuffix}</span>
+                                <span class="wk-ex-muscle-pill ${pillStateCls}" title="Birincil: ${escapeHTML(anatomy.primary || '')}${anatomy.secondary ? ' • Sekonder: ' + escapeHTML(anatomy.secondary) : ''}">
+                                    <span class="cv-muscle-dot ${dotStateCls}"></span>${CANVA_ICONS.crosshair}<span>${escapeHTML(shortMuscle)}${synSuffix}</span>
+                                </span>
                             </div>
                         </div>
                     `;
@@ -1615,10 +1626,10 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
                         <div class="wk-day-card-footer">
                             <button type="button" class="btn-action-secondary" style="padding:6px 10px; font-size:11.5px; border-color:rgba(182,240,89,0.35); color:#B6F059; flex:1;" onclick="inspectDayFromPendingWeeklyPlan(${dIdx})">
-                                🔍 Detay &amp; Düzenle
+                                ${CANVA_ICONS.sliders} Detay &amp; Düzenle
                             </button>
                             <button type="button" class="btn-action-secondary" style="padding:6px 10px; font-size:11.5px; border-color:#283548; color:#F8FAFC;" onclick="startSingleDayFromPendingWeeklyPlan(${dIdx})" title="Sadece bu günü şimdi başlat">
-                                ▶️ Başlat
+                                ${CANVA_ICONS.play} Başlat
                             </button>
                         </div>
                     </div>
@@ -1627,7 +1638,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
             const wishNoticeHtml = plan.userWish ? `
                 <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(250,204,21,0.12); border:1px solid rgba(250,204,21,0.38); color:#FDE047; font-size:11.5px; font-weight:800; padding:4px 11px; border-radius:999px; margin-top:6px;">
-                    ⭐ Özel AI Odağı Uygulandı: "${escapeHTML(plan.userWish)}"
+                    ${CANVA_ICONS.sparkle} Özel AI Odağı Uygulandı: "${escapeHTML(plan.userWish)}"
                 </div>
             ` : '';
 
@@ -1635,7 +1646,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 <div class="wk-preview-shell">
                     <div class="wk-preview-top-bar">
                         <div>
-                            <div class="wk-preview-pill">✨ AI HAFTALIK PROGRAM ÖNİZLEMESİ • CANVA DÜZENİ</div>
+                            <div class="wk-preview-pill">${CANVA_ICONS.sparkle} AI HAFTALIK PROGRAM ÖNİZLEMESİ</div>
                             <h2 class="wk-preview-title">${escapeHTML(plan.templateName)}</h2>
                             ${wishNoticeHtml}
                         </div>
@@ -1644,10 +1655,10 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                                 ${tplOptionsHtml}
                             </select>
                             <button type="button" class="btn-action-secondary" style="padding:7px 12px; font-size:12px; border-color:#283548;" onclick="handleQuickAiGenerate('${plan.templateKey}')" title="Farklı hareketlerle yeniden üret">
-                                🎲 Yenile
+                                ${CANVA_ICONS.refresh} Yenile
                             </button>
                             <button type="button" class="btn-action-secondary" style="padding:7px 12px; font-size:12px; border-color:#283548; color:#94A3B8;" onclick="switchQuickAiToSingleDay()" title="Haftalık paket yerine tek günlük antrenman üret">
-                                ⚡ Tek Günlük Üret
+                                ${CANVA_ICONS.bolt} Tek Günlük Üret
                             </button>
                         </div>
                     </div>
@@ -1660,10 +1671,10 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
                     <div class="wk-confirm-bar">
                         <button type="button" class="btn-ai-create-primary" style="flex:1; min-width:240px;" onclick="confirmPendingAiWeeklyPlan('next')">
-                            📅 Onayla ve Gelecek Hafta Takvimine Uygula${escapeHTML(nextRangeStr)}
+                            ${CANVA_ICONS.calendar} Onayla ve Gelecek Hafta Takvimine Uygula${escapeHTML(nextRangeStr)}
                         </button>
                         <button type="button" class="btn-action-secondary" style="padding:12px 16px; font-size:13px; border-color:rgba(56,189,248,0.4); color:#38BDF8; font-weight:800;" onclick="confirmPendingAiWeeklyPlan('current_safe')">
-                            ⚡ Bu Haftanın Kalan Günlerine Uygula (Geçmişe Dokunma)
+                            ${CANVA_ICONS.bolt} Bu Haftanın Kalan Günlerine Uygula (Geçmişe Dokunma)
                         </button>
                     </div>
                 </div>
@@ -3389,9 +3400,9 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                         </div>
                         <div class="ex-tag-group">
                             <span class="ex-badge badge-equip">${equipLabels[ex.equipment] || ex.equipment}</span>
-                            <span class="ex-badge badge-muscle" style="color:var(--gold); font-weight:800;">🎯 ${escapeHTML(anatomy.primary)}</span>
+                            <span class="ex-badge badge-muscle" style="color:var(--gold); font-weight:800;">${CANVA_ICONS.crosshair} ${escapeHTML(anatomy.primary)}</span>
                             ${anatomy.secondary ? `<span class="ex-badge" style="background:rgba(56,189,248,0.12); color:var(--cyan); border:1px solid rgba(56,189,248,0.3); font-size:10px; font-weight:700;">⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''}
-                            ${targetW ? `<span class="badge-target-weight">🎯 Hedefin: ${targetW} kg</span>` : ''}
+                            ${targetW ? `<span class="badge-target-weight">${CANVA_ICONS.crosshair} Hedefin: ${targetW} kg</span>` : ''}
                             <button type="button" class="btn-report-mini" onclick="event.stopPropagation(); openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}', 'Sihirbaz (Oluştur)')" title="Bu egzersiz veya görsel hatalıysa bildir">
                                 ⚠️ Bildir
                             </button>
@@ -4038,7 +4049,7 @@ KURALLAR:
                                     <div style="font-size:10px; color:var(--text-secondary); display:flex; flex-wrap:wrap; gap:4px; align-items:center;">
                                         <span style="color:#CBD5E1; font-weight:700;">${eqMeta.icon} ${eqMeta.label}</span>
                                         <span>•</span>
-                                        <span style="color:var(--gold); font-weight:700;">🎯 ${escapeHTML(ex.muscle || '')}</span>
+                                        <span style="color:var(--gold); font-weight:700;">${CANVA_ICONS.crosshair} ${escapeHTML(ex.muscle || '')}</span>
                                     </div>
                                 </div>
                                 <div style="flex-shrink:0;">
@@ -4216,7 +4227,7 @@ KURALLAR:
                 if (badgesEl) {
                     badgesEl.innerHTML = `
                         <span class="ex-badge badge-equip">${eqMeta.icon} ${eqMeta.label}</span>
-                        <span class="ex-badge badge-muscle" style="color:var(--gold); font-weight:800;">🎯 ${escapeHTML(anatomy.primary)}</span>
+                        <span class="ex-badge badge-muscle" style="color:var(--gold); font-weight:800;">${CANVA_ICONS.crosshair} ${escapeHTML(anatomy.primary)}</span>
                     `;
                 }
             } else {
@@ -4598,7 +4609,7 @@ KURALLAR:
                                     </div>
                                     <div style="display:flex; gap:4px; flex-wrap:wrap; margin-top:3px;">
                                         <span class="ex-badge badge-equip">${eqMeta.icon} ${eqMeta.label}</span>
-                                        <span class="ex-badge badge-muscle" style="color:var(--gold); font-weight:800;">🎯 ${escapeHTML(anatomy.primary)}</span>
+                                        <span class="ex-badge badge-muscle" style="color:var(--gold); font-weight:800;">${CANVA_ICONS.crosshair} ${escapeHTML(anatomy.primary)}</span>
                                         ${anatomy.secondary ? `<span class="ex-badge" style="background:rgba(56,189,248,0.12); color:var(--cyan); border:1px solid rgba(56,189,248,0.3); font-size:10px; font-weight:700;">⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''}
                                     </div>
                                 </div>
@@ -7623,7 +7634,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 </div>
                                 <div style="display:flex; gap:4px; flex-wrap:wrap; margin-top:5px;">
                                     <span class="ex-chip-badge equip">${escapeHTML(eqInfo)}</span>
-                                    <span class="ex-chip-badge muscle" style="background:rgba(245, 158, 11, 0.15); border:1px solid rgba(245, 158, 11, 0.4); color:var(--gold); font-weight:800;">🎯 ${escapeHTML(anatomy.primary)}</span>
+                                    <span class="ex-chip-badge muscle" style="background:rgba(245, 158, 11, 0.15); border:1px solid rgba(245, 158, 11, 0.4); color:var(--gold); font-weight:800;">${CANVA_ICONS.crosshair} ${escapeHTML(anatomy.primary)}</span>
                                     ${anatomy.secondary ? `<span class="ex-chip-badge" style="background:rgba(56, 189, 248, 0.1); border:1px solid rgba(56, 189, 248, 0.3); color:var(--cyan); font-weight:700;">⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''}
                                     <span class="ex-chip-badge mechanic">${ex.mechanic === 'compound' ? '⚡ Bileşik' : '🎯 İzolasyon'}</span>
                                 </div>
@@ -7673,7 +7684,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 ? `${EQUIP_LABELS[ex.equipment].icon} ${EQUIP_LABELS[ex.equipment].label}` 
                 : (ex.equipment || 'Serbest');
 
-            if (subEl) subEl.innerHTML = `<strong style="color:var(--gold);">🎯 Ana:</strong> ${escapeHTML(anatomy.primary)}${anatomy.secondary ? ` • <strong style="color:var(--cyan);">⚡ Destek:</strong> ${escapeHTML(anatomy.secondary)}` : ''} • <strong>Ekipman:</strong> ${escapeHTML(eqInfo)}`;
+            if (subEl) subEl.innerHTML = `<strong style="color:var(--gold);">${CANVA_ICONS.crosshair} Ana:</strong> ${escapeHTML(anatomy.primary)}${anatomy.secondary ? ` • <strong style="color:var(--cyan);">⚡ Destek:</strong> ${escapeHTML(anatomy.secondary)}` : ''} • <strong>Ekipman:</strong> ${escapeHTML(eqInfo)}`;
 
             const isWorkoutActive = Boolean(activeWorkoutSession && Array.isArray(activeWorkoutSession.exercises));
 
@@ -17020,7 +17031,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=217')
+                navigator.serviceWorker.register('./sw.js?v=218')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
@@ -17284,7 +17295,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                     ${escapeHTML(ex.name)}
                                 </div>
                                 <div style="font-size:10px; margin-top:2px;">
-                                    <span style="color:var(--gold); font-weight:800;">🎯 ${escapeHTML(anatomy.primary)}</span>
+                                    <span style="color:var(--gold); font-weight:800;">${CANVA_ICONS.crosshair} ${escapeHTML(anatomy.primary)}</span>
                                     ${anatomy.secondary ? `<span style="color:var(--cyan); font-weight:600;"> • ⚡ ${escapeHTML(anatomy.secondary)}</span>` : ''}
                                 </div>
                             </div>
@@ -17411,7 +17422,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                     ${escapeHTML(ex.name)}
                                 </div>
                                 <div style="font-size:10px; margin-top:3px; line-height:1.35;">
-                                    <span style="color:var(--gold); font-weight:800;">🎯 Ana: ${escapeHTML(anatomy.primary)}</span>
+                                    <span style="color:var(--gold); font-weight:800;">${CANVA_ICONS.crosshair} Ana: ${escapeHTML(anatomy.primary)}</span>
                                     ${anatomy.secondary ? `<span style="color:var(--cyan); font-weight:600;"> • ⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''}
                                 </div>
                             </div>
@@ -17748,7 +17759,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const anatomy = getExerciseAnatomy(ex);
             const subTitleEl = document.getElementById('exDetailModalSubtitle');
             if (subTitleEl) {
-                subTitleEl.innerHTML = `<span style="color:var(--gold); font-weight:800;">🎯 Ana: ${escapeHTML(anatomy.primary)}</span>${anatomy.secondary ? ` • <span style="color:var(--cyan); font-weight:700;">⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''} • <span style="color:var(--text-secondary);">${ex.equipment ? ex.equipment.toUpperCase() : ''}</span>`;
+                subTitleEl.innerHTML = `<span style="color:var(--gold); font-weight:800;">${CANVA_ICONS.crosshair} Ana: ${escapeHTML(anatomy.primary)}</span>${anatomy.secondary ? ` • <span style="color:var(--cyan); font-weight:700;">⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''} • <span style="color:var(--text-secondary);">${ex.equipment ? ex.equipment.toUpperCase() : ''}</span>`;
             }
 
             let photoGuide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) ? exerciseGuideMap[ex.id] : null;
