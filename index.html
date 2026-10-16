@@ -23,7 +23,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=220">
+    <link rel="stylesheet" href="css/style.css?v=221">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH (CANVA OBSIDIAN & LIME V201) */
         html, body { background-color: #0B0F17; color: #F3F6FA; color-scheme: dark; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -35,7 +35,7 @@
     <!-- ==================== LOGIN SCREEN ==================== -->
     <div id="loginScreen">
         <div class="login-card">
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v220</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v221</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -72,7 +72,7 @@
                     <span class="canva-brand-monogram" aria-hidden="true" translate="no">Ç</span>
                     <div class="canva-brand-stack">
                         <span class="modern-brand-title" translate="no">Çelik Kodu</span>
-                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v220</span>
+                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v221</span>
                     </div>
                 </div>
                 <div class="modern-bar-actions">
@@ -174,13 +174,13 @@
                         <span>PROGRAM KAPSAMI &amp; BÖLÜNME</span>
                     </div>
                     <div class="gen-collapsible-section" id="splitSection">
-                        <!-- Kapsam Seçici (Haftalık Plan vs Tek Günlük Seans) -->
+                        <!-- Kapsam Seçici (Haftalık Plan vs Tek Gün) -->
                         <div class="ai-scope-toggle-bar" role="tablist" aria-label="Program Kapsamı">
                             <button type="button" class="ai-scope-pill active" id="aiScopeBtnWeekly" onclick="setAiGeneratorScope('weekly')">
-                                <svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1.5v2.5M11 1.5v2.5M2 6.5h12"/><rect x="4.5" y="8.8" width="1.5" height="1.5" rx="0.3"/><rect x="7.2" y="8.8" width="1.5" height="1.5" rx="0.3"/><rect x="10" y="8.8" width="1.5" height="1.5" rx="0.3"/></svg> Haftalık Plan (3-4 Gün)
+                                <svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1.5v2.5M11 1.5v2.5M2 6.5h12"/><rect x="4.5" y="8.8" width="1.5" height="1.5" rx="0.3"/><rect x="7.2" y="8.8" width="1.5" height="1.5" rx="0.3"/><rect x="10" y="8.8" width="1.5" height="1.5" rx="0.3"/></svg> Haftalık Plan
                             </button>
                             <button type="button" class="ai-scope-pill" id="aiScopeBtnSingle" onclick="setAiGeneratorScope('single')">
-                                <svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 1.5L3 9h4.5L6.8 14.5L13 7H8.5L9 1.5Z"/></svg> Tek Günlük Seans
+                                <svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 1.5L3 9h4.5L6.8 14.5L13 7H8.5L9 1.5Z"/></svg> Tek Gün
                             </button>
                         </div>
 
@@ -358,10 +358,10 @@
                     <!-- SINGLE UNIFIED AI GENERATE CTA -->
                     <div class="ai-prep-actions-row ai-unified-cta-row">
                         <button type="button" class="btn-ai-create-primary btn-ai-unified-cta" id="btnUnifiedAiGenerate" onclick="handleQuickAiGenerate()">
-                            <svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 1.5L3 9h4.5L6.8 14.5L13 7H8.5L9 1.5Z"/></svg> AI ile programı oluştur
+                            <svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 1.5L3 9h4.5L6.8 14.5L13 7H8.5L9 1.5Z"/></svg> Programı Oluştur
                         </button>
                     </div>
-                    <div class="ai-prep-hint" id="aiQuickPreviewHint">Seçimlerinize göre hareketleri ve süpersetleri AI otomatik kurgular • Takvime onaysız yazılmaz</div>
+                    <div class="ai-prep-hint" id="aiQuickPreviewHint">Onaylamadan takvime eklenmez</div>
                 </div>
 
                 <!-- GENERATED WORKOUT CONTAINER -->
@@ -2357,8 +2357,8 @@
     </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
-    <script src="js/exercises-db.js?v=220"></script>
-    <script src="js/app.js?v=220"></script>
+    <script src="js/exercises-db.js?v=221"></script>
+    <script src="js/app.js?v=221"></script>
     <script>
         function toggleHeaderPopupMenu(e) {
             if (e) e.stopPropagation();

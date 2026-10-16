@@ -1102,10 +1102,10 @@
                 if (lblEl) {
                     lblEl.innerText = AI_WEEKLY_TPL_LABELS[window.selectedAiWeeklyTemplate] || 'Haftalık • AI Otomatik Teşhis';
                 }
-                if (ctaBtn) ctaBtn.innerHTML = `${CANVA_ICONS.bolt} AI ile programı oluştur`;
+                if (ctaBtn) ctaBtn.innerHTML = `${CANVA_ICONS.bolt} Programı Oluştur`;
             } else {
                 if (typeof updateSelectedSplitLabel === 'function') updateSelectedSplitLabel();
-                if (ctaBtn) ctaBtn.innerHTML = `${CANVA_ICONS.bolt} AI ile günlük antrenmanı oluştur`;
+                if (ctaBtn) ctaBtn.innerHTML = `${CANVA_ICONS.bolt} Antrenmanı Oluştur`;
             }
         }
         window.setAiGeneratorScope = setAiGeneratorScope;
@@ -1151,7 +1151,7 @@
                 handleGenerateWorkout(currentSelectedDoctrine, userWish);
                 const hintEl = document.getElementById('aiQuickPreviewHint');
                 if (hintEl) {
-                    hintEl.textContent = '✅ Seçtiğiniz bölge ve ekipmanlara göre günlük AI antrenmanı aşağıda hazırlandı';
+                    hintEl.textContent = '✅ Günlük antrenman hazırlandı';
                     hintEl.style.color = '#9BE15D';
                 }
                 const outEl = document.getElementById('generatedWorkoutOutput');
@@ -1173,7 +1173,7 @@
             applyAiWeeklySchedule(targetTplKey);
             const hintEl = document.getElementById('aiQuickPreviewHint');
             if (hintEl) {
-                hintEl.textContent = '✅ Seçimlerinize göre haftalık AI programı aşağıda hazırlandı — inceleyip onaylayarak takvime aktarabilirsiniz';
+                hintEl.textContent = '✅ Haftalık program hazırlandı';
                 hintEl.style.color = '#9BE15D';
             }
         }
@@ -1573,27 +1573,17 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             const nextRangeStr = (nextMonDate && nextFriDate) ? ` (${fmtShort(nextMonDate)} - ${fmtShort(nextFriDate)})` : '';
 
             const timingBannerHtml = isNextWeekRecommended ? `
-                <div class="wk-timing-banner">
-                    <span style="color:#4ADE80; display:flex; align-items:center; margin-top:2px;">${CANVA_ICONS.calendar}</span>
-                    <div>
-                        <div style="color:#B6F059; font-weight:800; font-size:13px; margin-bottom:2px;">
-                            GELECEK HAFTA PLANI${escapeHTML(nextRangeStr)} • Bu Hafta ${wkStatus.completedThisWeekCount} Antrenman Tamamlandı (${escapeHTML(wkStatus.todayName)})
-                        </div>
-                        <div>
-                            Bu haftanın antrenman döngüsü tamamlandığı için program <strong>takvime otomatik atanmadı</strong>. Aşağıdaki sekmelerden <strong>1., 2. ve ${plan.days.length}. günleri</strong> inceleyip onaylayarak <strong>Gelecek Hafta</strong> takvimine aktarabilirsiniz.
-                        </div>
+                <div class="wk-timing-banner" style="padding:8px 12px; align-items:center;">
+                    <span style="color:#4ADE80; display:flex; align-items:center;">${CANVA_ICONS.calendar}</span>
+                    <div style="font-size:12px;">
+                        <strong style="color:#B6F059;">Gelecek Hafta${escapeHTML(nextRangeStr)}</strong> • Bu hafta ${wkStatus.completedThisWeekCount} antrenman tamamlandı
                     </div>
                 </div>
             ` : `
-                <div class="wk-timing-banner" style="background:rgba(56,189,248,0.08); border-color:rgba(56,189,248,0.28);">
-                    <span style="color:#38BDF8; display:flex; align-items:center; margin-top:2px;">${CANVA_ICONS.calendar}</span>
-                    <div>
-                        <div style="color:#38BDF8; font-weight:800; font-size:13px; margin-bottom:2px;">
-                            HAFTALIK PROGRAM TASLAĞI • Takvime Henüz İşlenmedi
-                        </div>
-                        <div>
-                            Günler arası hareket ve açı tekrarı olmadan hazırlanan <strong>${escapeHTML(plan.templateName)}</strong> paketini aşağıdaki gün sekmelerinden inceleyin. Onayladığınızda geçmişte tamamlanan günlerinize dokunulmadan takvime uygulanır.
-                        </div>
+                <div class="wk-timing-banner" style="background:rgba(56,189,248,0.08); border-color:rgba(56,189,248,0.28); padding:8px 12px; align-items:center;">
+                    <span style="color:#38BDF8; display:flex; align-items:center;">${CANVA_ICONS.calendar}</span>
+                    <div style="font-size:12px;">
+                        <strong style="color:#38BDF8;">Taslak Hazır</strong> • Günleri inceleyip takvime ekleyin
                     </div>
                 </div>
             `;
@@ -1601,7 +1591,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             const tplOptionsHtml = Object.keys(AI_WEEKLY_TEMPLATES).map(k => {
                 const t = AI_WEEKLY_TEMPLATES[k];
                 const sel = k === plan.templateKey ? 'selected' : '';
-                return `<option value="${k}" ${sel}>Şablon: ${escapeHTML(t.name)}</option>`;
+                return `<option value="${k}" ${sel}>${escapeHTML(t.name)}</option>`;
             }).join('');
 
             // 1. GÜN, 2. GÜN, 3. GÜN SEKME ÇUBUĞU (Tıklanan gün aşağıda tek kart olarak açılır)
@@ -1651,7 +1641,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                             <div><span class="wk-ex-code">${escapeHTML(String(lbl))}</span></div>
                             <div class="wk-ex-name">
                                 <span>${escapeHTML(ex.name)}</span>
-                                <span class="wk-ex-expand-hint">${isExpanded ? '▲ Kartı Gizle' : '▼ Detaylı Kart'}</span>
+                                <span class="wk-ex-expand-hint">${isExpanded ? '▲ Gizle' : '▼ Detay'}</span>
                             </div>
                             <div class="wk-col-muscle">
                                 <span class="wk-ex-muscle-pill ${pillStateCls}">
@@ -1671,15 +1661,15 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                             <div>
                                 <div class="wk-day-badge-row" style="margin-bottom:4px;">
                                     <span class="wk-day-num-pill">${activeIdx + 1}. GÜN • ${escapeHTML(activeDayItem.dayName.toUpperCase())}</span>
-                                    <span class="wk-day-meta-pill">${(activeW.exercises || []).length} Hareket • ${activeW.duration || 45} Dk</span>
+                                    <span class="wk-day-meta-pill">${(activeW.exercises || []).length} Hrk • ${activeW.duration || 45} Dk</span>
                                 </div>
                                 <h3 class="wk-day-title">${escapeHTML(activeCleanTitle)}</h3>
                             </div>
                             <div style="display:flex; align-items:center; gap:8px;">
-                                <button type="button" class="btn-action-secondary" style="padding:7px 12px; font-size:12px; border-color:rgba(182,240,89,0.35); color:#B6F059;" onclick="inspectDayFromPendingWeeklyPlan(${activeIdx})">
-                                    ${CANVA_ICONS.sliders} Detay &amp; Düzenle
+                                <button type="button" class="btn-action-secondary" style="padding:7px 11px; font-size:12px; border-color:rgba(182,240,89,0.35); color:#B6F059;" onclick="inspectDayFromPendingWeeklyPlan(${activeIdx})">
+                                    ${CANVA_ICONS.sliders} Düzenle
                                 </button>
-                                <button type="button" class="btn-action-secondary" style="padding:7px 12px; font-size:12px; border-color:#283548; color:#F8FAFC;" onclick="startSingleDayFromPendingWeeklyPlan(${activeIdx})" title="Sadece bu günü şimdi başlat">
+                                <button type="button" class="btn-action-secondary" style="padding:7px 11px; font-size:12px; border-color:#283548; color:#F8FAFC;" onclick="startSingleDayFromPendingWeeklyPlan(${activeIdx})" title="Sadece bu günü şimdi başlat">
                                     ${CANVA_ICONS.play} Başlat
                                 </button>
                             </div>
@@ -1699,7 +1689,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
             const wishNoticeHtml = plan.userWish ? `
                 <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(250,204,21,0.12); border:1px solid rgba(250,204,21,0.38); color:#FDE047; font-size:11.5px; font-weight:800; padding:4px 11px; border-radius:999px; margin-top:6px;">
-                    ${CANVA_ICONS.sparkle} Özel AI Odağı Uygulandı: "${escapeHTML(plan.userWish)}"
+                    ${CANVA_ICONS.sparkle} Odak: "${escapeHTML(plan.userWish)}"
                 </div>
             ` : '';
 
@@ -1707,7 +1697,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 <div class="wk-preview-shell">
                     <div class="wk-preview-top-bar">
                         <div>
-                            <div class="wk-preview-pill">${CANVA_ICONS.sparkle} AI HAFTALIK PROGRAM ÖNİZLEMESİ</div>
+                            <div class="wk-preview-pill">${CANVA_ICONS.sparkle} HAFTALIK PROGRAM</div>
                             <h2 class="wk-preview-title">${escapeHTML(plan.templateName)}</h2>
                             ${wishNoticeHtml}
                         </div>
@@ -1715,11 +1705,11 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                             <select class="wk-tpl-select" onchange="handleQuickAiGenerate(this.value)" aria-label="Haftalık Şablon Seç">
                                 ${tplOptionsHtml}
                             </select>
-                            <button type="button" class="btn-action-secondary" style="padding:7px 12px; font-size:12px; border-color:#283548;" onclick="handleQuickAiGenerate('${plan.templateKey}')" title="Farklı hareketlerle yeniden üret">
+                            <button type="button" class="btn-action-secondary" style="padding:7px 11px; font-size:12px; border-color:#283548;" onclick="handleQuickAiGenerate('${plan.templateKey}')" title="Farklı hareketlerle yeniden üret">
                                 ${CANVA_ICONS.refresh} Yenile
                             </button>
-                            <button type="button" class="btn-action-secondary" style="padding:7px 12px; font-size:12px; border-color:#283548; color:#94A3B8;" onclick="switchQuickAiToSingleDay()" title="Haftalık paket yerine tek günlük antrenman üret">
-                                ${CANVA_ICONS.bolt} Tek Günlük Üret
+                            <button type="button" class="btn-action-secondary" style="padding:7px 11px; font-size:12px; border-color:#283548; color:#94A3B8;" onclick="switchQuickAiToSingleDay()" title="Tek günlük antrenman üret">
+                                ${CANVA_ICONS.bolt} Tek Gün
                             </button>
                         </div>
                     </div>
@@ -1733,11 +1723,11 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     ${singleDayCardHtml}
 
                     <div class="wk-confirm-bar">
-                        <button type="button" class="btn-ai-create-primary" style="flex:1; min-width:240px;" onclick="confirmPendingAiWeeklyPlan('next')">
-                            ${CANVA_ICONS.calendar} Onayla ve Gelecek Hafta Takvimine Uygula${escapeHTML(nextRangeStr)}
+                        <button type="button" class="btn-ai-create-primary" style="flex:1; min-width:170px;" onclick="confirmPendingAiWeeklyPlan('next')">
+                            ${CANVA_ICONS.calendar} Gelecek Haftaya Ekle
                         </button>
-                        <button type="button" class="btn-action-secondary" style="padding:12px 16px; font-size:13px; border-color:rgba(56,189,248,0.4); color:#38BDF8; font-weight:800;" onclick="confirmPendingAiWeeklyPlan('current_safe')">
-                            ${CANVA_ICONS.bolt} Bu Haftanın Kalan Günlerine Uygula (Geçmişe Dokunma)
+                        <button type="button" class="btn-action-secondary" style="flex:1; min-width:160px; padding:12px 14px; font-size:13px; border-color:rgba(56,189,248,0.4); color:#38BDF8; font-weight:800; justify-content:center;" onclick="confirmPendingAiWeeklyPlan('current_safe')">
+                            ${CANVA_ICONS.bolt} Bu Haftaya Ekle
                         </button>
                     </div>
                 </div>
@@ -2779,19 +2769,19 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
             const wkStatus = typeof getWeeklyTrainingStatus === 'function' ? getWeeklyTrainingStatus() : { isThisWeekComplete: false, completedThisWeekCount: 0, todayName };
             const timingNoticeHtml = wkStatus.isThisWeekComplete ? `
-                <div style="background:rgba(182, 240, 89, 0.10); border:1px solid rgba(182, 240, 89, 0.35); border-radius:12px; padding:10px 12px; margin:10px 0 12px 0; font-size:12px; color:#CBD5E1; line-height:1.45;">
-                    <strong style="color:#B6F059;">🧠 Zamanlama Zekası:</strong> Bu hafta <strong>${wkStatus.completedThisWeekCount} antrenman</strong> tamamlandı (Bugün ${escapeHTML(wkStatus.todayName)}). Mevcut haftanızın kaydını bozmamak için bu program <strong>takvime otomatik eklenmedi</strong> — aşağıdan inceleyip <strong>Gelecek Hafta Pazartesi</strong>'ye (veya istediğiniz güne) onaylayabilirsiniz.
+                <div style="background:rgba(182, 240, 89, 0.10); border:1px solid rgba(182, 240, 89, 0.35); border-radius:10px; padding:8px 12px; margin:8px 0 10px 0; font-size:12px; color:#CBD5E1;">
+                    <strong style="color:#B6F059;">Gelecek Hafta Önerilir</strong> • Bu hafta ${wkStatus.completedThisWeekCount} antrenman tamamlandı
                 </div>
             ` : `
-                <div style="background:rgba(56, 189, 248, 0.08); border:1px solid rgba(56, 189, 248, 0.28); border-radius:12px; padding:9px 12px; margin:10px 0 12px 0; font-size:12px; color:#CBD5E1;">
-                    📋 <strong>Taslak Önizleme:</strong> Programınız takvime otomatik atanmadı. Aşağıdan hareketleri inceleyip onaylayarak istediğiniz güne atayabilirsiniz.
+                <div style="background:rgba(56, 189, 248, 0.08); border:1px solid rgba(56, 189, 248, 0.28); border-radius:10px; padding:8px 12px; margin:8px 0 10px 0; font-size:12px; color:#CBD5E1;">
+                    <strong style="color:#38BDF8;">Taslak Hazır</strong> • İnceleyip takvime ekleyebilirsiniz
                 </div>
             `;
 
             const backToWeeklyBtn = window.pendingAiWeeklyPlan ? `
                 <div style="margin-bottom:10px;">
                     <button type="button" class="btn-action-secondary" style="border-color:#B6F059; color:#B6F059; font-weight:800;" onclick="renderPendingWeeklyPlanPreview()">
-                        ⬅️ Haftalık Paket Önizlemesine Dön (${escapeHTML(window.pendingAiWeeklyPlan.templateName)})
+                        ⬅️ Haftalık Programa Dön
                     </button>
                 </div>
             ` : '';
@@ -2802,14 +2792,14 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     <div class="workout-title-row">
                         <div>
                             ${docBadge}
-                            <div class="badge-brand">HAZIRLANAN HİBRİT ANTRENMAN (TASLAK ÖNİZLEME)</div>
+                            <div class="badge-brand">HAZIRLANAN ANTRENMAN</div>
                             <h2 class="workout-main-title">${escapeHTML(w.title)}</h2>
                             ${wishBadge}
                         </div>
                         <div class="workout-meta-badges">
                             <span class="meta-pill">⏱️ ${w.duration} Dk</span>
-                            <span class="meta-pill">🎯 ${w.scheme.sets} Set x ${w.scheme.reps}</span>
-                            <span class="meta-pill">⏳ ${w.scheme.straightRest ? `${w.scheme.supersetRest}-${w.scheme.straightRest}s` : `${w.scheme.rest}s`} Dinlenme</span>
+                            <span class="meta-pill">🎯 ${w.scheme.sets}×${w.scheme.reps}</span>
+                            <span class="meta-pill">⏳ ${w.scheme.straightRest ? `${w.scheme.supersetRest}-${w.scheme.straightRest}s` : `${w.scheme.rest}s`}</span>
                         </div>
                     </div>
 
@@ -2818,34 +2808,34 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     <!-- ACTION BUTTONS -->
                     <div class="workout-actions-bar">
                         <button class="btn-start-workout" onclick="startActiveWorkoutFromGenerated()">
-                            <span>▶️ ŞİMDİ BAŞLAT (SAYAÇ & SETLER)</span>
+                            <span>${CANVA_ICONS.play} Şimdi Başlat</span>
                         </button>
                         ${wkStatus.isThisWeekComplete ? `
                             <button class="btn-action-secondary" style="border-color:#B6F059; color:#B6F059; font-weight:900; background:rgba(182,240,89,0.14);" onclick="assignGeneratedToNextWeekDay(1)">
-                                <span>📅 GELECEK HAFTA PAZARTESİ'YE ATA (ONAYLA)</span>
+                                <span>${CANVA_ICONS.calendar} Gelecek Haftaya Ekle</span>
                             </button>
                             <button class="btn-action-secondary" style="border-color:var(--cyan); color:var(--cyan); font-weight:800;" onclick="promptAssignGeneratedToAnyDay()">
-                                <span>📅 Başka Güne Planla</span>
+                                <span>${CANVA_ICONS.calendar} Gün Seç</span>
                             </button>
                             <button class="btn-action-secondary" style="border-color:#263244;" onclick="assignGeneratedToToday()">
-                                <span>🔥 Yine de Bugüne Ata (${DAY_NAMES_TR[todayIdx]})</span>
+                                <span>${CANVA_ICONS.bolt} Bugüne Ekle</span>
                             </button>
                         ` : `
                             <button class="btn-action-secondary" style="border-color:var(--gold); color:var(--gold); font-weight:900; background:rgba(245,158,11,0.12);" onclick="assignGeneratedToToday()">
-                                <span>🔥 BUGÜNE ATA (${DAY_NAMES_TR[todayIdx]})</span>
+                                <span>${CANVA_ICONS.bolt} Bugüne Ekle</span>
                             </button>
                             <button class="btn-action-secondary" style="border-color:var(--cyan); color:var(--cyan); font-weight:800;" onclick="scheduleTomorrowFromGenerated()">
-                                <span>📅 Yarın İçin Programla (${tomorrowName})</span>
+                                <span>${CANVA_ICONS.calendar} Yarına Ekle</span>
                             </button>
                             <button class="btn-action-secondary" style="border-color:#263244;" onclick="promptAssignGeneratedToAnyDay()">
-                                <span>📅 Haftanın Gününe Planla</span>
+                                <span>${CANVA_ICONS.calendar} Gün Seç</span>
                             </button>
                         `}
                         <button class="btn-action-secondary" onclick="saveGeneratedToLibrary()">
-                            <span>💾 Programlarıma Kaydet</span>
+                            <span>💾 Kaydet</span>
                         </button>
                         <button class="btn-action-secondary" onclick="handleGenerateWorkout()">
-                            <span>🎲 Farklı Varyasyon</span>
+                            <span>${CANVA_ICONS.refresh} Yenile</span>
                         </button>
                     </div>
 
@@ -2865,7 +2855,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
                     <div style="text-align:center; margin:16px 0 24px;">
                         <button class="btn btn-outline" style="border-style:dashed; border-color:var(--cyan); color:var(--cyan); font-size:12.5px; padding:10px 18px;" onclick="openAddExerciseModal('generated')">
-                            ➕ Bu Antrenmana Yeni Hareket Ekle
+                            ➕ Hareket Ekle
                         </button>
                     </div>
 
@@ -17104,7 +17094,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=220')
+                navigator.serviceWorker.register('./sw.js?v=221')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
