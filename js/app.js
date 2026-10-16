@@ -1533,11 +1533,25 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
         window.applyAiWeeklySchedule = applyAiWeeklySchedule;
 
         window.activeWeeklyPreviewDayIdx = 0;
+        window.expandedWeeklyExIndex = null;
+
         function selectWeeklyPreviewDay(dayIdx) {
             window.activeWeeklyPreviewDayIdx = Number(dayIdx) || 0;
+            window.expandedWeeklyExIndex = null;
             renderPendingWeeklyPlanPreview();
         }
         window.selectWeeklyPreviewDay = selectWeeklyPreviewDay;
+
+        function toggleWeeklyPreviewExDetail(exIdx) {
+            const idx = Number(exIdx);
+            if (window.expandedWeeklyExIndex === idx) {
+                window.expandedWeeklyExIndex = null;
+            } else {
+                window.expandedWeeklyExIndex = idx;
+            }
+            renderPendingWeeklyPlanPreview();
+        }
+        window.toggleWeeklyPreviewExDetail = toggleWeeklyPreviewExDetail;
 
         function renderPendingWeeklyPlanPreview() {
             const plan = window.pendingAiWeeklyPlan;
@@ -1609,7 +1623,10 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             // Sadece seçili olan günün programını tam genişlikte oluştur
             const activeDayItem = plan.days[activeIdx];
             const activeW = activeDayItem.workout;
+            currentGeneratedWorkout = activeW;
             const activeCleanTitle = activeDayItem.label.replace(/^(Pzt|Sal|Çar|Per|Cum|Cmt|Paz):\s*/i, '');
+            const user = typeof getActiveUser === 'function' ? getActiveUser() : null;
+            const weights = user ? (user.weights || {}) : {};
 
             const exRowsHtml = (activeW.exercises || []).map((ex, eIdx) => {
                 const anatomy = typeof getExerciseAnatomy === 'function' ? getExerciseAnatomy(ex) : { primary: ex.muscle || '' };
@@ -1620,15 +1637,29 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 const synSuffix = (!ex.isWishFocus && ex.synergyBadge)
                     ? ` <span style="color:#4ADE80; font-weight:800; font-size:10.5px;">(${escapeHTML(ex.synergyBadge)})</span>`
                     : '';
+                const isExpanded = window.expandedWeeklyExIndex === eIdx;
+                const exScheme = Object.assign({}, activeW.scheme || { sets: 3, reps: '8-12', rest: 60 }, {
+                    rest: ex.customRest || (activeW.scheme ? activeW.scheme.rest : 60)
+                });
+                const detailCardHtml = isExpanded
+                    ? `<div class="wk-ex-detail-drawer" onclick="event.stopPropagation();">${renderSingleExerciseCard(ex, String(lbl), exScheme, weights, 'weekly_preview')}</div>`
+                    : '';
+
                 return `
-                    <div class="wk-ex-row">
-                        <div><span class="wk-ex-code">${escapeHTML(String(lbl))}</span></div>
-                        <div class="wk-ex-name" title="${escapeHTML(ex.name)}">${escapeHTML(ex.name)}</div>
-                        <div class="wk-col-muscle">
-                            <span class="wk-ex-muscle-pill ${pillStateCls}" title="Birincil: ${escapeHTML(anatomy.primary || '')}${anatomy.secondary ? ' • Sekonder: ' + escapeHTML(anatomy.secondary) : ''}">
-                                <span class="cv-muscle-dot ${dotStateCls}"></span>${CANVA_ICONS.crosshair}<span>${escapeHTML(shortMuscle)}${synSuffix}</span>
-                            </span>
+                    <div class="wk-ex-item-wrap ${isExpanded ? 'is-expanded' : ''}">
+                        <div class="wk-ex-row wk-ex-row-clickable ${isExpanded ? 'active' : ''}" onclick="toggleWeeklyPreviewExDetail(${eIdx})" title="Detaylı hareket kartını açmak için tıklayın">
+                            <div><span class="wk-ex-code">${escapeHTML(String(lbl))}</span></div>
+                            <div class="wk-ex-name">
+                                <span>${escapeHTML(ex.name)}</span>
+                                <span class="wk-ex-expand-hint">${isExpanded ? '▲ Kartı Gizle' : '▼ Detaylı Kart'}</span>
+                            </div>
+                            <div class="wk-col-muscle">
+                                <span class="wk-ex-muscle-pill ${pillStateCls}">
+                                    <span class="cv-muscle-dot ${dotStateCls}"></span>${CANVA_ICONS.crosshair}<span>${escapeHTML(shortMuscle)}${synSuffix}</span>
+                                </span>
+                            </div>
                         </div>
+                        ${detailCardHtml}
                     </div>
                 `;
             }).join('');
@@ -4185,7 +4216,7 @@ KURALLAR:
             let currentEx = null;
             if (scope === 'active' && activeWorkoutSession) {
                 currentEx = activeWorkoutSession.exercises.find(e => e.id === currentExId);
-            } else if (scope === 'generated' && currentGeneratedWorkout) {
+            } else if ((scope === 'generated' || scope === 'weekly_preview') && currentGeneratedWorkout) {
                 currentEx = currentGeneratedWorkout.exercises.find(e => e.id === currentExId);
             } else {
                 currentEx = EXERCISES_DB.find(e => e.id === currentExId);
@@ -4903,6 +4934,10 @@ KURALLAR:
                 renderActiveWorkout();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 showToast(`✅ Aktif antrenmanda "${newEx.name}" alternatifi seçildi!`);
+            } else if (pickerContext.scope === 'weekly_preview' && window.pendingAiWeeklyPlan) {
+                workout.exercises = assignAcademicBlockStructure(workout.exercises, workout.style || 'superset', workout.scheme);
+                renderPendingWeeklyPlanPreview();
+                showToast(`✅ "${newEx.name}" alternatifi seçildi!`);
             } else {
                 renderGeneratedWorkout();
                 showToast(`✅ "${newEx.name}" alternatifi seçildi!`);
@@ -5361,6 +5396,10 @@ KURALLAR:
                 workout.exercises = workout.exercises.filter(e => e.id !== exId);
                 if (scope === 'active') {
                     renderActiveWorkout();
+                } else if (scope === 'weekly_preview' && window.pendingAiWeeklyPlan) {
+                    workout.exercises = assignAcademicBlockStructure(workout.exercises, workout.style || 'superset', workout.scheme);
+                    window.expandedWeeklyExIndex = null;
+                    renderPendingWeeklyPlanPreview();
                 } else {
                     renderGeneratedWorkout();
                 }
@@ -5410,6 +5449,8 @@ KURALLAR:
                 workout.exercises = assignAcademicBlockStructure(workout.exercises, workout.style || 'superset', workout.scheme);
                 if (scope === 'active') {
                     renderActiveWorkout();
+                } else if (scope === 'weekly_preview' && window.pendingAiWeeklyPlan) {
+                    renderPendingWeeklyPlanPreview();
                 } else {
                     renderGeneratedWorkout();
                 }
@@ -17063,7 +17104,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=219')
+                navigator.serviceWorker.register('./sw.js?v=220')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();

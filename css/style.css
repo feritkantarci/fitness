@@ -7490,3 +7490,53 @@
 
 
 
+
+        .wk-ex-row-clickable {
+            cursor: pointer;
+            transition: background 0.16s ease;
+        }
+
+        .wk-ex-row-clickable:hover {
+            background: rgba(74, 222, 128, 0.06);
+        }
+
+        .wk-ex-row-clickable.active {
+            background: rgba(74, 222, 128, 0.10);
+            border-bottom-color: rgba(74, 222, 128, 0.25);
+        }
+
+        .wk-ex-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .wk-ex-expand-hint {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: #64748B;
+            padding: 2px 7px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid rgba(51, 65, 85, 0.65);
+            transition: all 0.16s ease;
+            flex-shrink: 0;
+        }
+
+        .wk-ex-row-clickable:hover .wk-ex-expand-hint,
+        .wk-ex-row-clickable.active .wk-ex-expand-hint {
+            color: #4ADE80;
+            border-color: rgba(74, 222, 128, 0.4);
+            background: rgba(16, 38, 28, 0.8);
+        }
+
+        .wk-ex-detail-drawer {
+            padding: 14px 18px 18px 18px;
+            background: #0B0F17;
+            border-bottom: 1px solid #243042;
+        }
+
+        .wk-ex-detail-drawer .ex-card {
+            margin-bottom: 0 !important;
+            border-color: rgba(74, 222, 128, 0.35) !important;
+        }
