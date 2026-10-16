@@ -1635,8 +1635,8 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
             // Finisher
             const finishers = [
-                { name: "3 Dk Tabata Balistik Bitiş", desc: "20 sn Maksimum Tempolu Swing / Burpee + 10 sn Dinlenme (4 Tur)" },
-                { name: "Çiftçi Taşıması (Farmer's Carry Burnout)", desc: "Mümkün olan en ağır dambıllarla 3 tur 40 metre kesintisiz yürüyüş." }
+                { exId: "db_swing", name: "3 Dk Tabata Balistik Bitiş", desc: "20 sn Maksimum Tempolu Swing / Burpee + 10 sn Dinlenme (4 Tur)" },
+                { exId: "db_farmers_walk", name: "Çiftçi Yürüyüşü (Farmer's Walk / Carry Burnout)", desc: "Mümkün olan en ağır dambıllarla 3 tur 40 metre kesintisiz yürüyüş." }
             ];
 
             const splitNames = {
@@ -1797,9 +1797,12 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
                     <!-- FINISHER -->
                     <div class="block-header">🔥 Balistik Bitiş / Finisher</div>
-                    <div style="background:rgba(225, 29, 72, 0.1); border-left:4px solid var(--red-alert); border-radius:8px; padding:10px 14px;">
-                        <strong style="color:#F3F6FA; font-size:13px;">${escapeHTML(w.finisher.name)}</strong>
-                        <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">${escapeHTML(w.finisher.desc)}</div>
+                    <div style="background:rgba(225, 29, 72, 0.1); border-left:4px solid var(--red-alert); border-radius:8px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                        <div style="flex:1; min-width:200px;">
+                            <strong style="color:#F3F6FA; font-size:13px;">${escapeHTML(w.finisher.name)}</strong>
+                            <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">${escapeHTML(w.finisher.desc)}</div>
+                        </div>
+                        <button type="button" class="btn btn-outline" style="padding:6px 10px; font-size:11px; border-color:rgba(244,63,94,0.45); color:#FDA4AF; white-space:nowrap;" onclick="openExerciseDetailModal(decodeURIComponent('${encodeURIComponent(w.finisher.exId || (w.finisher.name && w.finisher.name.toLowerCase().includes('tabata') ? 'db_swing' : 'db_farmers_walk'))}'))">📸 Form Rehberi</button>
                     </div>
                 </div>
             `;
@@ -3509,7 +3512,7 @@ KURALLAR:
                 });
             } else {
                 // 'catalog' / 'diğer' tab
-                const q = (document.getElementById('pickerSearchInput')?.value || '').trim().toLowerCase();
+                const q = (document.getElementById('pickerSearchInput')?.value || '').trim();
                 const cat = pickerContext.categoryFilter;
 
                 filtered = EXERCISES_DB.filter(ex => {
@@ -3519,11 +3522,7 @@ KURALLAR:
                     if (existingIds.includes(ex.id)) return false;
 
                     if (cat !== 'all' && ex.category !== cat) return false;
-                    if (q) {
-                        const eqLabel = (EQUIP_LABELS[ex.equipment]?.label || '').toLowerCase();
-                        const combined = (ex.name + ' ' + (ex.muscle || '') + ' ' + (ex.cue || '') + ' ' + eqLabel).toLowerCase();
-                        if (!combined.includes(q)) return false;
-                    }
+                    if (q && !matchesExerciseSearch(ex, q)) return false;
                     return true;
                 });
             }
@@ -6377,6 +6376,53 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             renderLibraryExerciseCatalog();
         }
 
+        function normalizeSearchTextTR(str) {
+            if (!str) return '';
+            return String(str)
+                .toLocaleLowerCase('tr-TR')
+                .replace(/ı/g, 'i')
+                .replace(/ğ/g, 'g')
+                .replace(/ü/g, 'u')
+                .replace(/ş/g, 's')
+                .replace(/ö/g, 'o')
+                .replace(/ç/g, 'c')
+                .replace(/['’`\-_\/()]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        const EXERCISE_SEARCH_SYNONYMS = {
+            db_farmers_walk: "ciftci yuruyusu ciftci tasimasi farmer walk farmers walk farmer carry farmers carry agirlik tasima",
+            db_suitcase_carry: "tek el canta tasima valiz tasima suitcase carry",
+            db_walking_lunge: "yuruyerek lunge adim lunge walking lunge",
+            db_swing: "kettlebell dambil swing salinim rus swing",
+            bw_pushup: "sinav push up pushup",
+            bw_pullup: "barfiks pull up pullup",
+            bw_chinup: "barfiks chin up chinup",
+            bw_plank: "plank karin",
+            bw_burpee: "burpee kondisyon"
+        };
+
+        function matchesExerciseSearch(ex, rawQuery) {
+            if (!rawQuery) return true;
+            const qNorm = normalizeSearchTextTR(rawQuery);
+            if (!qNorm) return true;
+            const eqLabel = (typeof EQUIP_LABELS !== 'undefined' && EQUIP_LABELS[ex.equipment]?.label) || '';
+            const syn = EXERCISE_SEARCH_SYNONYMS[ex.id] || '';
+            const haystack = normalizeSearchTextTR(
+                (ex.name || '') + ' ' +
+                (ex.id || '') + ' ' +
+                (ex.muscle || '') + ' ' +
+                (ex.cue || '') + ' ' +
+                (ex.equipment || '') + ' ' +
+                eqLabel + ' ' +
+                (ex.category || '') + ' ' +
+                syn
+            );
+            const tokens = qNorm.split(' ').filter(Boolean);
+            return tokens.every(tok => haystack.includes(tok));
+        }
+
         function clearLibExSearch() {
             const inp = document.getElementById('libExSearchInput');
             if (inp) inp.value = '';
@@ -6390,7 +6436,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const excludedCountEl = document.getElementById('libExcludedCount');
             if (!container) return;
 
-            const q = (document.getElementById('libExSearchInput')?.value || '').toLowerCase().trim();
+            const q = (document.getElementById('libExSearchInput')?.value || '').trim();
             const muscle = document.getElementById('libExMuscleFilter')?.value || 'all';
             const equip = document.getElementById('libExEquipFilter')?.value || 'all';
             const showExcluded = !!document.getElementById('chkLibShowExcluded')?.checked;
@@ -6434,16 +6480,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     }
                 }
 
-                if (q) {
-                    const combined = (
-                        (ex.name || '') + ' ' + 
-                        (ex.muscle || '') + ' ' + 
-                        (ex.cue || '') + ' ' + 
-                        (ex.equipment || '') + ' ' + 
-                        (ex.category || '')
-                    ).toLowerCase();
-                    if (!combined.includes(q)) return false;
-                }
+                if (q && !matchesExerciseSearch(ex, q)) return false;
 
                 return true;
             });
@@ -15791,7 +15828,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=205')
+                navigator.serviceWorker.register('./sw.js?v=206')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
@@ -16128,7 +16165,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const totalCountEl = document.getElementById('studioExTotalCount');
             if (!container) return;
 
-            const q = (document.getElementById('studioSearchInput')?.value || '').toLowerCase().trim();
+            const q = (document.getElementById('studioSearchInput')?.value || '').trim();
             const equip = document.getElementById('studioEquipFilter')?.value || 'all';
             const showAll = document.getElementById('chkShowAllExercises')?.checked;
 
@@ -16136,10 +16173,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 // Gizlenen hareketleri stüdyo kataloğunda gösterme
                 if (isExerciseExcludedByUser(ex.id)) return false;
                 if (equip !== 'all' && ex.equipment !== equip) return false;
-                if (q) {
-                    const combined = (ex.name + ' ' + (ex.muscle || '') + ' ' + (ex.cue || '')).toLowerCase();
-                    if (!combined.includes(q)) return false;
-                }
+                if (q && !matchesExerciseSearch(ex, q)) return false;
                 // Target Region Filtering
                 if (!showAll && selectedTargetMuscles.length > 0) {
                     const pList = ex.primaryMuscles || [];
