@@ -23,7 +23,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=208">
+    <link rel="stylesheet" href="css/style.css?v=209">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH (CANVA OBSIDIAN & LIME V201) */
         html, body { background-color: #0B0F17; color: #F3F6FA; color-scheme: dark; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -35,7 +35,7 @@
     <!-- ==================== LOGIN SCREEN ==================== -->
     <div id="loginScreen">
         <div class="login-card">
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v208</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v209</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -72,7 +72,7 @@
                     <span class="canva-brand-monogram" aria-hidden="true" translate="no">Ç</span>
                     <div class="canva-brand-stack">
                         <span class="modern-brand-title" translate="no">Çelik Kodu</span>
-                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v208</span>
+                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v209</span>
                     </div>
                 </div>
                 <div class="modern-bar-actions">
@@ -1785,22 +1785,23 @@
                 <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:10px 12px;">
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; align-items:stretch;">
                         <div style="min-width:0;">
-                            <label class="form-label" style="font-size:10.5px; margin-bottom:3px; display:block;">Bölge / Split</label>
+                            <label class="form-label" style="font-size:10.5px; margin-bottom:3px; display:block;">Günlük Bölge / Split</label>
                             <select id="aiModalSplitSelect" class="form-input" style="font-size:12px; padding:7px 9px; width:100%; box-sizing:border-box;">
                                 <option value="full_body" selected>⚡ Tüm Vücut</option>
-                                <option value="upper_push">🛡️ İtiş</option>
-                                <option value="upper_pull">⚔️ Çekiş</option>
-                                <option value="lower">🦵 Alt Vücut</option>
-                                <option value="upper">🦅 Üst Vücut</option>
-                                <option value="core">🧱 Core</option>
+                                <option value="upper_push">🛡️ İtiş (Göğüs/Omuz/Triceps)</option>
+                                <option value="upper_pull">⚔️ Çekiş (Sırt/Arka Omuz/Biceps)</option>
+                                <option value="lower">🦵 Alt Vücut & Bacak</option>
+                                <option value="upper">🦅 Tüm Üst Vücut</option>
+                                <option value="core">🧱 Karın & Core Zırhı</option>
+                                <option value="functional">🔥 Fonksiyonel & Kondisyon</option>
                             </select>
                         </div>
                         <div style="min-width:0;">
-                            <label class="form-label" style="font-size:10.5px; margin-bottom:3px; display:block;">Süre</label>
+                            <label class="form-label" style="font-size:10.5px; margin-bottom:3px; display:block;">Seans Süresi</label>
                             <select id="aiModalDurationSelect" class="form-input" style="font-size:12px; padding:7px 9px; width:100%; box-sizing:border-box;">
-                                <option value="30">⏱️ 30 Dk</option>
-                                <option value="45" selected>⏱️ 45 Dk</option>
-                                <option value="60">⏱️ 60 Dk</option>
+                                <option value="30">⏱️ 30 Dk (4 Hareket)</option>
+                                <option value="45" selected>⏱️ 45 Dk (6 Hareket)</option>
+                                <option value="60">⏱️ 60 Dk (8 Hareket)</option>
                             </select>
                         </div>
                     </div>
@@ -1814,6 +1815,15 @@
                             <option value="emom">⏱️ EMOM / Kondisyon Döngüsü</option>
                         </select>
                     </div>
+                    <div style="margin-bottom:8px;">
+                        <label class="form-label" style="font-size:10.5px; margin-bottom:3px; display:block; color:#38bdf8;">Haftalık Program Mimarisi (Haftalık Kurulum İçin)</label>
+                        <select id="aiModalWeeklyTemplateSelect" class="form-input" style="font-size:12px; padding:7px 9px; width:100%; box-sizing:border-box; border-color:rgba(56,189,248,0.35);">
+                            <option value="upper_lower_full" selected>📅 3 Gün (Akademik Optimum): Pzt Üst • Çar Alt & Bacak • Cum Tüm Vücut (2x Frekans)</option>
+                            <option value="ppl_3day">📅 3 Gün (Klasik PPL): Pzt İtiş • Çar Çekiş • Cum Alt Vücut & Bacak</option>
+                            <option value="full_body_abc">📅 3 Gün (Tüm Vücut A/B/C): Pzt • Çar • Cum (Her Gün Farklı Hareket & Açı)</option>
+                            <option value="upper_lower_4day">📅 4 Gün (Üst/Alt A-B): Pzt Üst A • Sal Alt A • Per Üst B • Cum Alt B</option>
+                        </select>
+                    </div>
                     <div>
                         <label class="form-label" style="font-size:10.5px; margin-bottom:3px;">Özel İstek, Zayıf Bölge veya Sakatlık Durumu (Opsiyonel)</label>
                         <input type="text" id="aiModalUserWishInput" class="form-input" placeholder="Örn: Geçen hafta sırt ve kol az çalıştım, dizimde hassasiyet var..." style="font-size:12px; padding:8px 10px;">
@@ -1825,14 +1835,14 @@
             <div class="ai-architect-modal-footer">
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:8px;">
                     <button type="button" class="btn btn-outline" style="width:100%; padding:11px 10px; font-weight:800; font-size:12.5px; display:flex; justify-content:center; align-items:center; gap:5px; border-color:var(--gold); color:var(--gold);" onclick="applyAiHybridProgram(false)">
-                        <span>⚡ Programı Oluştur</span>
+                        <span>⚡ Günlük Program Oluştur</span>
                     </button>
                     <button type="button" class="btn btn-gold" style="width:100%; padding:11px 10px; font-weight:800; font-size:12.5px; display:flex; justify-content:center; align-items:center; gap:5px;" onclick="applyAiHybridProgram(true)">
-                        <span>🚀 Hemen Başlat</span>
+                        <span>🚀 Günlük Hemen Başlat</span>
                     </button>
                 </div>
                 <button type="button" class="btn btn-outline" style="width:100%; padding:10px 12px; font-weight:800; font-size:12px; display:flex; justify-content:center; align-items:center; gap:6px; border-color:#38bdf8; color:#38bdf8; background:rgba(56,189,248,0.08);" onclick="applyAiWeeklySchedule()">
-                    <span>📅 Tüm Haftalık Programı AI İle Kur (Pzt • Çar • Cum)</span>
+                    <span>📅 Haftalık Programı AI İle Kur (Günler Arası Tekrarsız A/B/C)</span>
                 </button>
             </div>
         </div>
@@ -2299,8 +2309,8 @@
     </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
-    <script src="js/exercises-db.js?v=208"></script>
-    <script src="js/app.js?v=208"></script>
+    <script src="js/exercises-db.js?v=209"></script>
+    <script src="js/app.js?v=209"></script>
     <script>
         function toggleHeaderPopupMenu(e) {
             if (e) e.stopPropagation();

@@ -1174,12 +1174,51 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             }
         }
 
+        const AI_WEEKLY_TEMPLATES = {
+            upper_lower_full: {
+                name: 'Üst • Alt • Tüm Vücut (2x Frekans)',
+                days: [
+                    { dayIdx: 1, split: 'upper',     label: 'Pzt: Üst Vücut Hipertrofi & Zırh' },
+                    { dayIdx: 3, split: 'lower',     label: 'Çar: Alt Vücut, Bacak & Core' },
+                    { dayIdx: 5, split: 'full_body', label: 'Cum: Tüm Vücut Hibrit & Kondisyon' }
+                ]
+            },
+            ppl_3day: {
+                name: 'İtiş • Çekiş • Bacak (Klasik PPL)',
+                days: [
+                    { dayIdx: 1, split: 'upper_push', label: 'Pzt: İtiş (Göğüs • Omuz • Triceps)' },
+                    { dayIdx: 3, split: 'upper_pull', label: 'Çar: Çekiş (Sırt • Arka Omuz • Biceps)' },
+                    { dayIdx: 5, split: 'lower',      label: 'Cum: Alt Vücut (Quad • Hamstring • Kalça)' }
+                ]
+            },
+            full_body_abc: {
+                name: '3 Gün Tüm Vücut (A / B / C Rotasyonu)',
+                days: [
+                    { dayIdx: 1, split: 'full_body', label: 'Pzt: Tüm Vücut A (Temel Kuvvet Açıları)' },
+                    { dayIdx: 3, split: 'full_body', label: 'Çar: Tüm Vücut B (Farklı Açı & Hipertrofi)' },
+                    { dayIdx: 5, split: 'full_body', label: 'Cum: Tüm Vücut C (Atletik Hibrit & Kondisyon)' }
+                ]
+            },
+            upper_lower_4day: {
+                name: '4 Gün Üst / Alt (A-B Rotasyonu)',
+                days: [
+                    { dayIdx: 1, split: 'upper', label: 'Pzt: Üst Vücut A (Yatay Odak & Kol)' },
+                    { dayIdx: 2, split: 'lower', label: 'Sal: Alt Vücut A (Diz Baskın & Core)' },
+                    { dayIdx: 4, split: 'upper', label: 'Per: Üst Vücut B (Dikey/Eğimli Odak & Kol)' },
+                    { dayIdx: 5, split: 'lower', label: 'Cum: Alt Vücut B (Kalça Baskın & Kondisyon)' }
+                ]
+            }
+        };
+        window.AI_WEEKLY_TEMPLATES = AI_WEEKLY_TEMPLATES;
+
         function applyAiWeeklySchedule() {
             const durSelect = document.getElementById('aiModalDurationSelect');
             const styleSelect = document.getElementById('aiModalStyleSelect');
+            const wkTplSelect = document.getElementById('aiModalWeeklyTemplateSelect');
             const wishInput = document.getElementById('aiModalUserWishInput');
             const chosenDur = durSelect ? parseInt(durSelect.value, 10) : 45;
             const chosenStyle = styleSelect ? styleSelect.value : 'superset';
+            const chosenTplKey = (wkTplSelect && AI_WEEKLY_TEMPLATES[wkTplSelect.value]) ? wkTplSelect.value : 'upper_lower_full';
             const userWish = wishInput ? wishInput.value.trim() : '';
 
             const paramDurEl = document.getElementById('paramDuration');
@@ -1190,14 +1229,11 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
             renderAiHybridHeroBanner();
 
-            const weeklyDays = [
-                { dayIdx: 1, split: 'upper_push', label: 'Pzt: İtiş & Üst Zırh' },
-                { dayIdx: 3, split: 'upper_pull', label: 'Çar: Çekiş, Sırt & Kol' },
-                { dayIdx: 5, split: 'full_body',  label: 'Cum: Tam Vücut & Kondisyon' }
-            ];
+            const tpl = AI_WEEKLY_TEMPLATES[chosenTplKey];
+            const weeklyDays = tpl.days;
 
             const schedule = getWeeklySchedule();
-            // Önce tüm günleri dinlenmeye çek, ardından Pzt-Çar-Cum AI seanslarını yerleştir
+            // Önce tüm günleri dinlenmeye çek, ardından seçilen şablonun AI seanslarını yerleştir
             for (let d = 0; d <= 6; d++) {
                 schedule[d] = {
                     id: 'rest',
@@ -1208,14 +1244,25 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 };
             }
 
+            // KATMAN 5: HAFTALIK GÜNLER ARASI HAFIZA (A/B/C ROTASYONU & EKSİK ALT KAS TAKİBİ)
+            // Pazartesi seçilen hareketler Çarşamba/Cuma günlerinde tekrar edilmez;
+            // Pazartesi vurulmayan alt kas açıları (örn. Üst Göğüs, Arka Omuz, Kalf) sonraki günlerde önceliklendirilir!
+            const weeklyContext = {
+                usedExerciseIds: new Set(),
+                usedMovementFamiliesBySplit: {},
+                subKeyVolume: {},
+                usedFinishers: new Set()
+            };
+
             let firstGenerated = null;
             weeklyDays.forEach((slot, idx) => {
                 selectSplit(slot.split);
-                handleGenerateWorkout(currentSelectedDoctrine, userWish);
+                handleGenerateWorkout(currentSelectedDoctrine, userWish, weeklyContext);
                 if (currentGeneratedWorkout) {
                     const wClone = JSON.parse(JSON.stringify(currentGeneratedWorkout));
                     wClone.id = 'ai_wk_' + slot.dayIdx + '_' + (Date.now() + idx);
                     wClone.title = `⚔️ ${slot.label} (${wClone.doctrineShort || 'AI Hibrit'})`;
+                    wClone.weeklyTemplate = chosenTplKey;
                     schedule[slot.dayIdx] = {
                         id: wClone.id,
                         title: wClone.title,
@@ -1244,7 +1291,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 if (calEl) calEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 150);
             if (typeof showToast === 'function') {
-                showToast('✅ AI Haftalık Programınız (Pazartesi • Çarşamba • Cuma) takviminize işlendi!');
+                showToast(`✅ AI Haftalık Programınız (${tpl.name}) günler arası tekrarsız A/B/C rotasyonuyla takvime işlendi!`);
             }
         }
         window.applyAiWeeklySchedule = applyAiWeeklySchedule;
@@ -1531,7 +1578,63 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
         }
         window.assignAcademicBlockStructure = assignAcademicBlockStructure;
 
-        function handleGenerateWorkout(doctrineOverride = null, customWish = '') {
+        // KATMAN 5: SON 7 GÜNLÜK ANTRENMAN GEÇMİŞİ & TAKVİM HAFIZASI (ALT KAS AÇIĞI VE HAREKET TEKRARI KORUMASI)
+        function getRecentAndScheduledMuscleContext() {
+            const usedExerciseIds = new Set();
+            const subKeyVolume = {};
+            const usedFinishers = new Set();
+
+            const recordExObj = (exItem, weightFactor = 1) => {
+                if (!exItem) return;
+                const exId = exItem.id || exItem.exId || '';
+                const dbEx = EXERCISES_DB.find(e => e.id === exId) || exItem;
+                if (exId) usedExerciseIds.add(exId);
+                const covered = getExerciseCoveredSubKeys(dbEx);
+                covered.forEach(sk => {
+                    subKeyVolume[sk] = (subKeyVolume[sk] || 0) + weightFactor;
+                });
+            };
+
+            try {
+                // 1. Son 7 gündeki tamamlanmış antrenman kayıtlarını tara
+                const user = typeof getActiveUser === 'function' ? getActiveUser() : null;
+                const logs = (user && Array.isArray(user.logs)) ? user.logs : [];
+                const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+                logs.forEach(log => {
+                    const logTs = log.timestamp || (log.date ? new Date(log.date).getTime() : 0);
+                    if (logTs && logTs >= sevenDaysAgo && Array.isArray(log.exercises)) {
+                        log.exercises.forEach(ex => recordExObj(ex, 1));
+                    }
+                });
+            } catch (e) {}
+
+            try {
+                // 2. Mevcut haftalık takvimde bugün dışındaki diğer günlerde planlı olan hareketleri tara
+                if (typeof getWeeklySchedule === 'function') {
+                    const sched = getWeeklySchedule();
+                    const todayIdx = new Date().getDay();
+                    if (sched && typeof sched === 'object') {
+                        Object.keys(sched).forEach(dKey => {
+                            if (Number(dKey) === todayIdx) return;
+                            const dayObj = sched[dKey];
+                            if (dayObj && !dayObj.rest) {
+                                const exList = dayObj.exercises || (dayObj.customWorkout && dayObj.customWorkout.exercises) || [];
+                                if (Array.isArray(exList)) {
+                                    exList.forEach(ex => recordExObj(ex, 1));
+                                }
+                                const fin = dayObj.customWorkout && dayObj.customWorkout.finisher;
+                                if (fin && fin.exId) usedFinishers.add(fin.exId);
+                            }
+                        });
+                    }
+                }
+            } catch (e) {}
+
+            return { usedExerciseIds, subKeyVolume, usedFinishers };
+        }
+        window.getRecentAndScheduledMuscleContext = getRecentAndScheduledMuscleContext;
+
+        function handleGenerateWorkout(doctrineOverride = null, customWish = '', weeklyContext = null) {
             const activeDoctrineKey = doctrineOverride || currentSelectedDoctrine || 'bb_hybrid';
             const activeDoc = AI_DOCTRINES[activeDoctrineKey] || AI_DOCTRINES.bb_hybrid;
 
@@ -1549,6 +1652,12 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             const usedFamilies = new Set();
             const usedMediaIds = new Set();
             const subKeyCounts = {};
+
+            // Haftalık kurulumdaysa ortak weeklyContext'i kullan; günlük üretimdeyse son 7 gün + takvim hafızasını baz al
+            const activeWeeklyCtx = weeklyContext || getRecentAndScheduledMuscleContext();
+            const weeklyUsedIds = (activeWeeklyCtx && activeWeeklyCtx.usedExerciseIds) ? activeWeeklyCtx.usedExerciseIds : new Set();
+            const weeklySubKeyVolume = (activeWeeklyCtx && activeWeeklyCtx.subKeyVolume) ? activeWeeklyCtx.subKeyVolume : {};
+            const weeklyUsedFinishers = (activeWeeklyCtx && activeWeeklyCtx.usedFinishers) ? activeWeeklyCtx.usedFinishers : new Set();
 
             // Saf Üst Vücut veya Saf Core seçiliyse Bacak+Omuz hibrit komplekslerini (Thruster, Landmine Squat to Press, Man Maker vb.) dışla
             const hasLowerOrFullOrFuncSplit = selectedSplits.some(s =>
@@ -1583,6 +1692,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 if (!chosen) return false;
                 const clone = Object.assign({}, chosen);
                 usedIds.push(clone.id);
+                weeklyUsedIds.add(clone.id);
                 const fam = getExerciseMovementFamily(clone);
                 if (fam) usedFamilies.add(fam);
                 const mediaId = getExerciseMediaId(clone);
@@ -1590,6 +1700,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 const coveredKeys = getExerciseCoveredSubKeys(clone);
                 coveredKeys.forEach(sk => {
                     subKeyCounts[sk] = (subKeyCounts[sk] || 0) + 1;
+                    weeklySubKeyVolume[sk] = (weeklySubKeyVolume[sk] || 0) + 1;
                 });
                 chosenExercises.push(clone);
                 return true;
@@ -1613,53 +1724,78 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 return pool;
             }
 
-            // KATMAN 2: Önce Anatomik Alt Kas Grubu (subKey) -> Sonra Doktrin Mekanik Modu -> Sonra En Taze Kas Profili Seçici
+            // Haftanın diğer günlerinde kullanılmamış (taze) hareketleri önceliklendirir;
+            // ancak ekipman havuzu darsa (örn. sadece Halter) seans içi tekilliği koruyarak güvenli geri dönüş yapar.
+            function preferWeeklyFreshExercises(pool) {
+                if (!Array.isArray(pool) || pool.length <= 1) return pool;
+                const freshInWeek = pool.filter(e => !weeklyUsedIds.has(e.id));
+                return freshInWeek.length > 0 ? freshInWeek : pool;
+            }
+
+            // KATMAN 2: Önce Anatomik Alt Kas Grubu (subKey) -> Sonra Haftalık Eksik Açı & Doktrin Modu -> Sonra Günler Arası Taze Hareket Seçici
             function addSlotEx(slotSpec) {
                 const cat = slotSpec.cat || 'push';
                 const filterMode = slotSpec.mode || 'any';
                 const allowComplex = Boolean(slotSpec.allowComplex);
                 const preferredSubKeys = Array.isArray(slotSpec.subKeys) ? slotSpec.subKeys : (slotSpec.subKeys ? [slotSpec.subKeys] : []);
 
-                // KURAL 1: Aday havuzu KESİN OLARAK hem ID hem Biyomekanik Aile hem Medya açısından benzersiz olmak zorundadır!
+                // KURAL 1: Aday havuzu KESİN OLARAK hem ID hem Biyomekanik Aile hem Medya açısından seansta benzersiz olmak zorundadır!
                 const basePool = filterExercises(cat, usedIds).filter(e => isCandidateBiochemicallyCompatible(e, allowComplex));
 
                 let finalPool = [];
                 if (preferredSubKeys.length > 0) {
-                    const untouchedSubKeys = preferredSubKeys.filter(sk => !subKeyCounts[sk]);
-                    const targetKeys = untouchedSubKeys.length > 0 ? untouchedSubKeys : preferredSubKeys;
+                    // Önce bugünkü seansta 0 set almış olanları, onların içinde de haftalık hacmi en düşük olan alt kasları seç!
+                    const untouchedToday = preferredSubKeys.filter(sk => !subKeyCounts[sk]);
+                    const candidateSubKeys = untouchedToday.length > 0 ? untouchedToday : preferredSubKeys;
 
-                    const matchesPrimarySubKey = (ex) => {
+                    let minWeeklyVol = Infinity;
+                    candidateSubKeys.forEach(sk => {
+                        const wVol = weeklySubKeyVolume[sk] || 0;
+                        if (wVol < minWeeklyVol) minWeeklyVol = wVol;
+                    });
+                    const lowestWeeklySubKeys = candidateSubKeys.filter(sk => (weeklySubKeyVolume[sk] || 0) === minWeeklyVol);
+                    const targetKeys = lowestWeeklySubKeys.length > 0 ? lowestWeeklySubKeys : candidateSubKeys;
+
+                    const matchesPrimaryFor = (keys) => (ex) => {
                         const anat = getExerciseAnatomy(ex);
-                        return anat && targetKeys.includes(anat.subKey);
+                        return anat && keys.includes(anat.subKey);
                     };
-                    const matchesAnyCoveredSubKey = (ex) => {
+                    const matchesAnyCoveredFor = (keys) => (ex) => {
                         const allKeys = getExerciseCoveredSubKeys(ex);
-                        return allKeys.some(k => targetKeys.includes(k));
+                        return allKeys.some(k => keys.includes(k));
                     };
 
-                    // ADIM 1: Önce hedef anatomik alt kası (örn. chest_mid, shoulders_side) vuran hareketleri bul
-                    let subKeyMatches = basePool.filter(matchesPrimarySubKey);
+                    // ADIM 1: Önce haftalık en az çalışmış hedef alt kası (targetKeys), bulunamazsa genel candidateSubKeys'i ara
+                    let subKeyMatches = basePool.filter(matchesPrimaryFor(targetKeys));
                     if (subKeyMatches.length === 0) {
-                        subKeyMatches = basePool.filter(matchesAnyCoveredSubKey);
+                        subKeyMatches = basePool.filter(matchesPrimaryFor(candidateSubKeys));
+                    }
+                    if (subKeyMatches.length === 0) {
+                        subKeyMatches = basePool.filter(matchesAnyCoveredFor(targetKeys));
+                    }
+                    if (subKeyMatches.length === 0) {
+                        subKeyMatches = basePool.filter(matchesAnyCoveredFor(candidateSubKeys));
                     }
                     if (subKeyMatches.length === 0) {
                         // Tüm EXERCISES_DB içinde seçili ekipmanlarla bu subKey'i vuran ve ikiz olmayan hareketi ara
                         subKeyMatches = EXERCISES_DB.filter(ex =>
                             isCandidateBiochemicallyCompatible(ex, allowComplex) &&
-                            (matchesPrimarySubKey(ex) || matchesAnyCoveredSubKey(ex))
+                            (matchesPrimaryFor(candidateSubKeys)(ex) || matchesAnyCoveredFor(candidateSubKeys)(ex))
                         );
                     }
 
                     // ADIM 2: Bulunan alt kas adaylarının İÇİNDE doktrin modunu (functional / bb_compound / bb_isolation) uygula
-                    // (Böylece Omuz hareketinin functional olması, Göğüs slotundaki Barbell Bench Press'i ASLA ezmez!)
                     subKeyMatches = applyDoctrineModeFilter(subKeyMatches, filterMode);
 
-                    // ADIM 3: Birden fazla aday varsa, daha önce vurulmuş alt kasları en az tekrar eden (en taze kas profiline sahip) adayları seç
+                    // ADIM 3: Haftanın önceki günlerinde kullanılmamış (A/B/C rotasyonuna uygun) hareketleri tercih et
+                    subKeyMatches = preferWeeklyFreshExercises(subKeyMatches);
+
+                    // ADIM 4: Birden fazla aday varsa, hem bugünkü hem haftalık alt kas çakışması en düşük olanı seç
                     if (subKeyMatches.length > 1) {
                         let minOverlapScore = Infinity;
                         const scored = subKeyMatches.map(ex => {
                             const keys = getExerciseCoveredSubKeys(ex);
-                            const overlapScore = keys.reduce((sum, k) => sum + (subKeyCounts[k] || 0), 0);
+                            const overlapScore = keys.reduce((sum, k) => sum + ((subKeyCounts[k] || 0) * 10) + (weeklySubKeyVolume[k] || 0), 0);
                             if (overlapScore < minOverlapScore) minOverlapScore = overlapScore;
                             return { ex, overlapScore };
                         });
@@ -1669,12 +1805,12 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
                     finalPool = subKeyMatches;
                 } else {
-                    finalPool = applyDoctrineModeFilter(basePool, filterMode);
+                    finalPool = preferWeeklyFreshExercises(applyDoctrineModeFilter(basePool, filterMode));
                 }
 
                 let chosen = pickRandom(finalPool);
                 if (!chosen) {
-                    const modeBase = applyDoctrineModeFilter(basePool, filterMode);
+                    const modeBase = preferWeeklyFreshExercises(applyDoctrineModeFilter(basePool, filterMode));
                     chosen = pickRandom(modeBase);
                 }
                 if (!chosen) {
@@ -1683,16 +1819,18 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     else if (cat === 'pull') relatedCat = ['pull', 'core'];
                     else if (cat === 'legs_quad' || cat === 'legs_hinge') relatedCat = ['legs_quad', 'legs_hinge', 'core'];
 
-                    const fallbackPool = EXERCISES_DB.filter(ex => {
+                    const fallbackPool = preferWeeklyFreshExercises(EXERCISES_DB.filter(ex => {
                         if (!isCandidateBiochemicallyCompatible(ex, allowComplex)) return false;
                         const effCat = getEffectiveExerciseCategory(ex);
                         return Array.isArray(relatedCat) ? relatedCat.includes(effCat) : effCat === relatedCat;
-                    });
+                    }));
                     chosen = pickRandom(fallbackPool);
                 }
                 if (!chosen) {
                     // Son çare: yine de ASLA aynı hareket ailesinden (ikiz) veya aynı medyadan olmayan, en az çakışan hareketi seç
-                    const nonTwinAnyCatPool = EXERCISES_DB.filter(ex => isCandidateBiochemicallyCompatible(ex, hasLowerOrFullOrFuncSplit));
+                    const nonTwinAnyCatPool = preferWeeklyFreshExercises(
+                        EXERCISES_DB.filter(ex => isCandidateBiochemicallyCompatible(ex, hasLowerOrFullOrFuncSplit))
+                    );
                     chosen = pickRandom(nonTwinAnyCatPool);
                 }
                 if (chosen) {
@@ -1900,7 +2038,15 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             const deconflictedFinishers = finisherCandidates.filter(f =>
                 !usedIds.includes(f.exId) && !usedFamilies.has(f.family)
             );
-            const selectedFinisher = pickRandom(deconflictedFinishers.length > 0 ? deconflictedFinishers : finisherCandidates);
+            const weeklyFreshFinishers = deconflictedFinishers.filter(f => !weeklyUsedFinishers.has(f.exId));
+            const selectedFinisher = pickRandom(
+                weeklyFreshFinishers.length > 0
+                    ? weeklyFreshFinishers
+                    : (deconflictedFinishers.length > 0 ? deconflictedFinishers : finisherCandidates)
+            );
+            if (selectedFinisher && selectedFinisher.exId) {
+                weeklyUsedFinishers.add(selectedFinisher.exId);
+            }
 
             const splitNames = {
                 full_body: "Tüm Vücut (Full Body)",
@@ -16263,7 +16409,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=208')
+                navigator.serviceWorker.register('./sw.js?v=209')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
