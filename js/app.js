@@ -1568,15 +1568,15 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 const cleanDayTitle = dItem.label.replace(/^(Pzt|Sal|Çar|Per|Cum|Cmt|Paz):\s*/i, '');
                 const exRowsHtml = (w.exercises || []).map((ex, eIdx) => {
                     const anatomy = typeof getExerciseAnatomy === 'function' ? getExerciseAnatomy(ex) : { primary: ex.muscle || '' };
+                    const shortMuscle = String(anatomy.primary || ex.muscle || '').split('(')[0].trim();
                     const lbl = ex.blockLabel || (eIdx + 1);
                     return `
                         <div class="wk-ex-row">
                             <div><span class="wk-ex-code">${escapeHTML(String(lbl))}</span></div>
                             <div class="wk-ex-name" title="${escapeHTML(ex.name)}">${escapeHTML(ex.name)}</div>
                             <div class="wk-col-muscle">
-                                <span class="wk-ex-muscle-pill">🎯 ${escapeHTML(anatomy.primary)}</span>
+                                <span class="wk-ex-muscle-pill" title="${escapeHTML(anatomy.primary || '')}">🎯 ${escapeHTML(shortMuscle)}</span>
                             </div>
-                            <div class="wk-ex-scheme">${w.scheme.sets}×${w.scheme.reps}</div>
                         </div>
                     `;
                 }).join('');
@@ -1598,8 +1598,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                                 <div class="wk-ex-row wk-th">
                                     <div>KOD</div>
                                     <div>HAREKET</div>
-                                    <div class="wk-col-muscle">HEDEF KAS</div>
-                                    <div style="text-align:right;">SET×TK</div>
+                                    <div class="wk-col-muscle" style="text-align:right;">HEDEF KAS</div>
                                 </div>
                                 ${exRowsHtml}
                             </div>
@@ -16902,7 +16901,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=214')
+                navigator.serviceWorker.register('./sw.js?v=215')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();

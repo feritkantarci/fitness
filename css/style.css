@@ -7052,7 +7052,7 @@
 
         .wk-ex-row {
             display: grid;
-            grid-template-columns: 42px minmax(0, 1.6fr) minmax(0, 1fr) 82px;
+            grid-template-columns: 36px minmax(0, 1fr) auto;
             align-items: center;
             gap: 10px;
             padding: 9px 16px;
@@ -7090,12 +7090,17 @@
 
         .wk-ex-name {
             color: #F8FAFC;
-            font-size: 13.5px;
+            font-size: 13px;
             font-weight: 700;
-            line-height: 1.25;
-            white-space: nowrap;
+            line-height: 1.3;
             overflow: hidden;
             text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .wk-col-muscle {
+            display: flex;
+            justify-content: flex-end;
         }
 
         .wk-ex-muscle-pill {
@@ -7109,19 +7114,6 @@
             font-weight: 700;
             padding: 3px 9px;
             border-radius: 999px;
-            width: fit-content;
-            max-width: 100%;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .wk-ex-scheme {
-            text-align: right;
-            font-family: var(--font-mono);
-            font-size: 12px;
-            font-weight: 800;
-            color: #E5B85B;
             white-space: nowrap;
         }
 
@@ -7148,12 +7140,8 @@
                 padding: 14px !important;
             }
             .wk-ex-row {
-                grid-template-columns: 36px minmax(0, 1fr) 68px;
+                grid-template-columns: 34px minmax(0, 1fr) auto;
                 padding: 8px 12px;
-            }
-            .wk-ex-row.wk-th .wk-col-muscle,
-            .wk-ex-row .wk-col-muscle {
-                display: none;
             }
         }
 
