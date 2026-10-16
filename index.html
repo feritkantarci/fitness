@@ -282,11 +282,13 @@
                     <div class="gen-collapsible-section" id="paramSection">
                         <div class="param-grid">
                             <div class="param-group">
-                                <label for="paramStyle">Model</label>
+                                <label for="paramStyle">Model & Süperset Düzeyi</label>
                                 <select id="paramStyle" class="param-select" onchange="updateSelectedParamLabel()">
-                                    <option value="superset" selected>Süperset (A1/A2)</option>
-                                    <option value="straight">Klasik Düz Set</option>
-                                    <option value="emom">EMOM / Kondisyon</option>
+                                    <option value="superset" selected>⚖️ Orta Süperset (1 Düz + 1 Süperset)</option>
+                                    <option value="superset_light">🌱 Az Süperset (Sadece Son Blok)</option>
+                                    <option value="superset_intense">🔥 Yoğun Süperset (Tam İkili Blok)</option>
+                                    <option value="straight">🏋️ Klasik Düz Set (Süpersetsiz)</option>
+                                    <option value="emom">⚡ EMOM / Kondisyon</option>
                                 </select>
                             </div>
                             <div class="param-group">
@@ -1801,6 +1803,16 @@
                                 <option value="60">⏱️ 60 Dk</option>
                             </select>
                         </div>
+                    </div>
+                    <div style="margin-bottom:8px;">
+                        <label class="form-label" style="font-size:10.5px; margin-bottom:3px; display:block;">Set & Süperset Yoğunluğu (Akademik Hibrit)</label>
+                        <select id="aiModalStyleSelect" class="form-input" style="font-size:12px; padding:7px 9px; width:100%; box-sizing:border-box;">
+                            <option value="superset" selected>⚖️ Orta Süperset (Akademik Hibrit: 1 Düz + 1 Süperset)</option>
+                            <option value="superset_light">🌱 Az Süperset (Düz Set + Son 2 Hareket Süperset)</option>
+                            <option value="superset_intense">🔥 Yoğun Süperset (Tamamı İkili Süperset)</option>
+                            <option value="straight">🛡️ Klasik Düz Set (Tamamı Tekli Set)</option>
+                            <option value="emom">⏱️ EMOM / Kondisyon Döngüsü</option>
+                        </select>
                     </div>
                     <div>
                         <label class="form-label" style="font-size:10.5px; margin-bottom:3px;">Özel İstek, Zayıf Bölge veya Sakatlık Durumu (Opsiyonel)</label>
