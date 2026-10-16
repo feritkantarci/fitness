@@ -7396,8 +7396,8 @@
            ========================================================================= */
         .wk-day-tabs-bar {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+            gap: 8px;
             margin-bottom: 14px;
         }
 
@@ -7405,73 +7405,31 @@
             appearance: none;
             background: #131924;
             border: 1px solid #242E3F;
-            border-radius: 13px;
-            padding: 11px 14px;
-            text-align: left;
+            border-radius: 11px;
+            padding: 10px 8px;
+            text-align: center;
             cursor: pointer;
             transition: all 0.18s ease;
             display: flex;
-            flex-direction: column;
-            gap: 4px;
+            align-items: center;
+            justify-content: center;
+            font-size: 13.5px;
+            font-weight: 800;
+            color: #94A3B8;
+            white-space: nowrap;
         }
 
         .wk-day-tab-btn:hover {
             border-color: rgba(182, 240, 89, 0.45);
             background: #182130;
+            color: #E2E8F0;
         }
 
         .wk-day-tab-btn.active {
-            background: linear-gradient(135deg, rgba(22, 48, 36, 0.82) 0%, rgba(18, 30, 26, 0.92) 100%);
+            background: linear-gradient(135deg, rgba(22, 48, 36, 0.88) 0%, rgba(18, 30, 26, 0.96) 100%);
             border-color: #4ADE80;
-            box-shadow: 0 0 0 1px rgba(74, 222, 128, 0.28), 0 8px 20px rgba(16, 185, 129, 0.14);
-        }
-
-        .wk-day-tab-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-        }
-
-        .wk-day-tab-num {
-            font-size: 11px;
-            font-weight: 900;
-            letter-spacing: 0.05em;
-            color: #94A3B8;
-            text-transform: uppercase;
-        }
-
-        .wk-day-tab-btn.active .wk-day-tab-num {
             color: #B6F059;
-        }
-
-        .wk-day-tab-count {
-            font-size: 10.5px;
-            font-weight: 700;
-            color: #64748B;
-            background: #0D121A;
-            padding: 2px 7px;
-            border-radius: 999px;
-            border: 1px solid #1F2837;
-        }
-
-        .wk-day-tab-btn.active .wk-day-tab-count {
-            color: #A7F3D0;
-            border-color: rgba(74, 222, 128, 0.35);
-            background: rgba(10, 24, 18, 0.85);
-        }
-
-        .wk-day-tab-sub {
-            font-size: 12.5px;
-            font-weight: 800;
-            color: #CBD5E1;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .wk-day-tab-btn.active .wk-day-tab-sub {
-            color: #F8FAFC;
+            box-shadow: 0 0 0 1px rgba(74, 222, 128, 0.28), 0 6px 16px rgba(16, 185, 129, 0.15);
         }
 
         .wk-single-active-card {
@@ -7480,16 +7438,12 @@
         }
 
         .wk-single-active-card .wk-ex-row {
-            padding: 11px 18px;
+            padding: 11px 16px;
         }
 
         .wk-single-active-card .wk-ex-name {
-            font-size: 14px;
+            font-size: 13.5px;
         }
-
-
-
-
 
         .wk-ex-row-clickable {
             cursor: pointer;
@@ -7508,17 +7462,29 @@
         .wk-ex-name {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        .wk-ex-name-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            min-width: 0;
         }
 
         .wk-ex-expand-hint {
-            font-size: 10.5px;
-            font-weight: 700;
+            font-size: 11px;
+            font-weight: 800;
             color: #64748B;
-            padding: 2px 7px;
-            border-radius: 999px;
-            background: rgba(15, 23, 42, 0.65);
-            border: 1px solid rgba(51, 65, 85, 0.65);
+            width: 20px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(51, 65, 85, 0.75);
             transition: all 0.16s ease;
             flex-shrink: 0;
         }
@@ -7526,8 +7492,8 @@
         .wk-ex-row-clickable:hover .wk-ex-expand-hint,
         .wk-ex-row-clickable.active .wk-ex-expand-hint {
             color: #4ADE80;
-            border-color: rgba(74, 222, 128, 0.4);
-            background: rgba(16, 38, 28, 0.8);
+            border-color: rgba(74, 222, 128, 0.45);
+            background: rgba(16, 38, 28, 0.85);
         }
 
         .wk-ex-detail-drawer {

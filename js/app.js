@@ -1594,18 +1594,12 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 return `<option value="${k}" ${sel}>${escapeHTML(t.name)}</option>`;
             }).join('');
 
-            // 1. GÜN, 2. GÜN, 3. GÜN SEKME ÇUBUĞU (Tıklanan gün aşağıda tek kart olarak açılır)
+            // 1. Gün, 2. Gün, 3. Gün sekme çubuğu (Tek satırda eşit aralıklı)
             const dayTabsHtml = plan.days.map((dItem, dIdx) => {
-                const w = dItem.workout;
-                const cleanTitle = dItem.label.replace(/^(Pzt|Sal|Çar|Per|Cum|Cmt|Paz):\s*/i, '');
                 const isActive = dIdx === activeIdx;
                 return `
                     <button type="button" class="wk-day-tab-btn ${isActive ? 'active' : ''}" onclick="selectWeeklyPreviewDay(${dIdx})">
-                        <div class="wk-day-tab-top">
-                            <span class="wk-day-tab-num">${dIdx + 1}. GÜN • ${escapeHTML(dItem.dayName.toUpperCase())}</span>
-                            <span class="wk-day-tab-count">${(w.exercises || []).length} Hrk</span>
-                        </div>
-                        <div class="wk-day-tab-sub">${escapeHTML(cleanTitle)}</div>
+                        ${dIdx + 1}. Gün
                     </button>
                 `;
             }).join('');
@@ -1640,8 +1634,8 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                         <div class="wk-ex-row wk-ex-row-clickable ${isExpanded ? 'active' : ''}" onclick="toggleWeeklyPreviewExDetail(${eIdx})" title="Detaylı hareket kartını açmak için tıklayın">
                             <div><span class="wk-ex-code">${escapeHTML(String(lbl))}</span></div>
                             <div class="wk-ex-name">
-                                <span>${escapeHTML(ex.name)}</span>
-                                <span class="wk-ex-expand-hint">${isExpanded ? '▲ Gizle' : '▼ Detay'}</span>
+                                <span class="wk-ex-name-text">${escapeHTML(ex.name)}</span>
+                                <span class="wk-ex-expand-hint" aria-hidden="true">${isExpanded ? '▴' : '▾'}</span>
                             </div>
                             <div class="wk-col-muscle">
                                 <span class="wk-ex-muscle-pill ${pillStateCls}">
@@ -17094,7 +17088,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=221')
+                navigator.serviceWorker.register('./sw.js?v=222')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
