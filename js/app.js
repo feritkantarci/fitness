@@ -643,13 +643,17 @@
         // ==================== EVRENSEL GÖRSEL MEDYA ÇÖZÜMLEYİCİ ====================
         function getExerciseVisualMedia(exId, category) {
             const opengym = (typeof OPENGYM_GLOBAL_CATALOG !== 'undefined' && OPENGYM_GLOBAL_CATALOG) ? OPENGYM_GLOBAL_CATALOG[exId] : null;
-            const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[exId]) 
-                || (typeof categoryFallback !== 'undefined' && category && categoryFallback[category]) 
-                || null;
+            const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[exId]) || null;
+            let diagram = null;
+            if (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB)) {
+                const ex = EXERCISES_DB.find(e => e.id === exId);
+                if (ex && ex.diagram) diagram = ex.diagram;
+            }
+            const fallbackVisual = (guide && guide.form) ? guide.form : (diagram || null);
             return {
                 clip: opengym ? opengym.clip : null,
-                still: opengym ? opengym.still : (guide ? guide.form : null),
-                form: (guide && guide.form) ? guide.form : (opengym ? opengym.still : null),
+                still: opengym ? opengym.still : fallbackVisual,
+                form: fallbackVisual || (opengym ? opengym.still : null),
                 anatomi: (guide && guide.anatomi) ? guide.anatomi : null,
                 hasVideo: !!opengym
             };
@@ -4018,19 +4022,27 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 'kb_turkish_getup': guideLibrary.windmill
             };
 
-            const categoryFallback = {
-                'legs_quad': guideLibrary.goblet_squat,
-                'legs_hinge': guideLibrary.deadlift,
-                'push': guideLibrary.bench,
-                'pull': guideLibrary.saw_row,
-                'core': guideLibrary.plank,
-                'conditioning': guideLibrary.pushup
-            };
+            // Sadece bu egzersize ait doğrulanmış fotoğraf kılavuzunu al
+            const activeGuideMap = (typeof window !== 'undefined' && window.exerciseGuideMap) 
+                ? window.exerciseGuideMap 
+                : (typeof exerciseGuideMap !== 'undefined' ? exerciseGuideMap : {});
+            let exactPhoto = activeGuideMap[ex.id] || null;
 
-            const photoGuide = (exerciseGuideMap && exerciseGuideMap[ex.id]) 
-                || (categoryFallback && categoryFallback[ex.category]) 
-                || null;
-            const hasAnatomy = !!(photoGuide && photoGuide.anatomi);
+            // Kompleks hareketlerde başka bir hareketin adını taşıyan ödünç fotoğraflar engellenir (başlık-görsel uyumsuzluğu olamaz)
+            if (isComplex && exactPhoto) {
+                const formPath = (exactPhoto.form || '').toLowerCase();
+                if (!formPath.includes(ex.id)) {
+                    exactPhoto = null; // Vektörel şemayı kullan
+                }
+            }
+
+            const diagramPath = ex.diagram || null;
+            // Öncelik: Varsa birebir fotoğrafı, yoksa kesinlikle hareketin kendi vektörel SVG diyagramını göster (kategori fallback yasak)
+            const visualSrc = (exactPhoto && exactPhoto.form) ? exactPhoto.form : diagramPath;
+            const isSvgDiagram = !!(visualSrc && visualSrc.toLowerCase().endsWith('.svg'));
+            const hasVisual = !!visualSrc;
+            const hasAnatomy = !!(exactPhoto && exactPhoto.anatomi);
+            const hasPhotoGuide = !!(exactPhoto && exactPhoto.form && ex.id !== 'db_hammer_curl');
 
             const extraInfoId = `extra_info_${collapseId}`;
             const extraInfoHtml = `
@@ -4057,26 +4069,28 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             `;
 
             let formVisualHtml = '';
-            if (photoGuide && photoGuide.form) {
+            if (hasVisual) {
+                const visualTitle = isSvgDiagram ? `${escapeHTML(ex.name)} - Form Diyagramı` : `${escapeHTML(ex.name)} - Form Rehberi`;
+                const scrollText = isSvgDiagram ? '↔️ Akış diyagramını sağa/sola kaydırarak inceleyin' : '↔️ Adımları yakından incelemek için sağa/sola kaydırın';
                 formVisualHtml = `
                     <div class="pos-diagram-wrap" id="wrap_form_${collapseId}">
                         <div class="pos-diagram-toolbar">
                             <button type="button" class="btn-diagram-tool btn-scroll-toggle" onclick="event.stopPropagation(); toggleDiagramScroll('wrap_form_${collapseId}')" title="Genişlet ve parmakla sağa-sola kaydırarak incele">
                                 <span class="tool-icon">↔️</span> <span class="tool-text">Kaydırarak Büyüt</span>
                             </button>
-                            <button type="button" class="btn-diagram-tool" onclick="event.stopPropagation(); openImageLightbox('${photoGuide.form}', '${escapeHTML(ex.name)} - Form Rehberi')" title="Tam ekran mod">
+                            <button type="button" class="btn-diagram-tool" onclick="event.stopPropagation(); openImageLightbox('${visualSrc}', '${visualTitle}')" title="Tam ekran mod">
                                 <span class="tool-icon">⛶</span> <span class="tool-text">Tam Ekran</span>
                             </button>
-                            <button type="button" class="btn-diagram-tool btn-report-bug" onclick="event.stopPropagation(); openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '${photoGuide.form}', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}')" title="Görsel veya hareket hatalıysa Firebase hata havuzuna bildir">
+                            <button type="button" class="btn-diagram-tool btn-report-bug" onclick="event.stopPropagation(); openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '${visualSrc}', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}')" title="Görsel veya hareket hatalıysa Firebase hata havuzuna bildir">
                                 <span class="tool-icon">⚠️</span> <span class="tool-text">Hata Bildir</span>
                             </button>
                         </div>
-                        <div class="pos-diagram-img-box" onclick="event.stopPropagation(); openImageLightbox('${photoGuide.form}', '${escapeHTML(ex.name)} - Form Rehberi')">
-                            <img src="${photoGuide.form}" alt="${escapeHTML(ex.name)} Form Rehberi" class="pos-diagram-img" loading="lazy">
+                        <div class="pos-diagram-img-box" onclick="event.stopPropagation(); openImageLightbox('${visualSrc}', '${visualTitle}')">
+                            <img src="${visualSrc}" alt="${visualTitle}" class="pos-diagram-img" loading="lazy">
                             <div class="pos-diagram-zoom-hint">🔍 Dokun: Büyüt</div>
                         </div>
                         <div class="pos-diagram-scroll-indicator">
-                            ↔️ Adımları yakından incelemek için sağa/sola kaydırın
+                            ${scrollText}
                         </div>
                     </div>
                     ${extraInfoHtml}
@@ -4093,12 +4107,12 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                             <button type="button" class="btn-diagram-tool btn-scroll-toggle" onclick="event.stopPropagation(); toggleDiagramScroll('wrap_anatomi_${collapseId}')" title="Genişlet ve incele">
                                 <span class="tool-icon">↔️</span> <span class="tool-text">Kaydırarak Büyüt</span>
                             </button>
-                            <button type="button" class="btn-diagram-tool" onclick="event.stopPropagation(); openImageLightbox('${photoGuide.anatomi}', '${escapeHTML(ex.name)} - Hedef Kas Anatomisi')" title="Tam ekran mod">
+                            <button type="button" class="btn-diagram-tool" onclick="event.stopPropagation(); openImageLightbox('${exactPhoto.anatomi}', '${escapeHTML(ex.name)} - Hedef Kas Anatomisi')" title="Tam ekran mod">
                                 <span class="tool-icon">⛶</span> <span class="tool-text">Tam Ekran</span>
                             </button>
                         </div>
-                        <div class="pos-diagram-img-box" onclick="event.stopPropagation(); openImageLightbox('${photoGuide.anatomi}', '${escapeHTML(ex.name)} - Hedef Kas Anatomisi')">
-                            <img src="${photoGuide.anatomi}" alt="${escapeHTML(ex.name)} Hedef Kaslar" class="pos-diagram-img" loading="lazy">
+                        <div class="pos-diagram-img-box" onclick="event.stopPropagation(); openImageLightbox('${exactPhoto.anatomi}', '${escapeHTML(ex.name)} - Hedef Kas Anatomisi')">
+                            <img src="${exactPhoto.anatomi}" alt="${escapeHTML(ex.name)} Hedef Kaslar" class="pos-diagram-img" loading="lazy">
                             <div class="pos-diagram-zoom-hint">🔍 Dokun: Büyüt</div>
                         </div>
                         <div class="pos-diagram-scroll-indicator">
@@ -4116,8 +4130,6 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
             const openGymMedia = (typeof window !== 'undefined' && window.OPENGYM_GLOBAL_CATALOG && window.OPENGYM_GLOBAL_CATALOG[ex.id]) ? window.OPENGYM_GLOBAL_CATALOG[ex.id] : null;
             const hasOpenGym = !!openGymMedia;
-            // Egzersize özel gerçek bir fotoğraf rehberi var mı (db_hammer_curl yanlış eşleşen curl rehberini almasın)
-            const hasPhotoGuide = !!(photoGuide && photoGuide.form && ex.id !== 'db_hammer_curl');
 
             const contentClass = defaultCollapsed ? 'pos-guide-content collapsed' : 'pos-guide-content';
             const btnText = defaultCollapsed ? '📖 Formu Gör ▼' : '📖 Formu Gizle ▲';
@@ -4138,16 +4150,12 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                                     🎬 Animasyon
                                 </button>
                             ` : ''}
-                            ${hasPhotoGuide ? `
-                                <button type="button" class="btn-guide-tab ${!hasOpenGym ? 'active' : ''}" id="tab_btn_form_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'form')" title="Form Rehberi" style="padding:5px 12px; font-size:12px; font-weight:800;">
-                                    📸 ${hasOpenGym ? 'Fotoğraf' : 'Form'}
+                            ${hasVisual ? `
+                                <button type="button" class="btn-guide-tab ${!hasOpenGym ? 'active' : ''}" id="tab_btn_form_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'form')" title="${isSvgDiagram ? 'Form Diyagramı' : 'Form Rehberi'}" style="padding:5px 12px; font-size:12px; font-weight:800;">
+                                    ${isSvgDiagram ? '📐 Diyagram' : (hasOpenGym ? '📸 Fotoğraf' : '📸 Form')}
                                 </button>
-                            ` : (!hasOpenGym ? `
-                                <button type="button" class="btn-guide-tab active" id="tab_btn_form_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'form')" title="Form Rehberi" style="padding:5px 12px; font-size:12px; font-weight:800;">
-                                    📸 Form
-                                </button>
-                            ` : '')}
-                            <button type="button" class="btn-guide-tab ${(!hasOpenGym && !hasPhotoGuide && !formVisualHtml) ? 'active' : ''}" id="tab_btn_anatomi_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'anatomi')" title="Çalışan Kaslar" style="padding:5px 12px; font-size:12px; font-weight:800;">
+                            ` : ''}
+                            <button type="button" class="btn-guide-tab ${(!hasOpenGym && !hasVisual) ? 'active' : ''}" id="tab_btn_anatomi_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'anatomi')" title="Çalışan Kaslar" style="padding:5px 12px; font-size:12px; font-weight:800;">
                                 🧬 Kaslar
                             </button>
                             <button type="button" class="btn-guide-tab" id="tab_btn_adimlar_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'adimlar')" title="Adım Adım Talimatlar" style="padding:5px 12px; font-size:12px; font-weight:800;">
@@ -4858,8 +4866,8 @@ KURALLAR:
                 const ex = EXERCISES_DB.find(e => e.id === exId);
                 if (ex) {
                     const eqMeta = EQUIP_LABELS[ex.equipment] || { label: ex.equipment || '', icon: '🏋️' };
-                    const guide = (exerciseGuideMap && exerciseGuideMap[ex.id]) || (categoryFallback && categoryFallback[ex.category]) || null;
-                    const thumbImg = (guide && guide.form) ? guide.form : '';
+                    const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) || null;
+                    const thumbImg = (guide && guide.form) ? guide.form : (ex.diagram || '');
 
                     cardsHtml += `
                         <div style="background:rgba(192, 132, 252, 0.08); border:1px solid rgba(192, 132, 252, 0.35); border-radius:8px; padding:10px 12px; margin-bottom:8px; box-shadow:0 2px 8px rgba(0,0,0,0.25);">
@@ -5180,8 +5188,8 @@ DEĞİŞMEZ 5 AKADEMİK DENETİM FİLTRESİ:
                 if (subEl) subEl.innerHTML = '';
                 if (banner) banner.style.display = 'flex';
 
-                const guide = (exerciseGuideMap && exerciseGuideMap[currentEx.id]) || (categoryFallback && categoryFallback[currentEx.category]) || null;
-                const thumbImg = (guide && guide.form) ? guide.form : '';
+                const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[currentEx.id]) || null;
+                const thumbImg = (guide && guide.form) ? guide.form : (currentEx.diagram || '');
                 if (thumbEl) {
                     thumbEl.innerHTML = thumbImg ? `<img src="${thumbImg}" style="width:100%; height:100%; object-fit:contain;" alt="${escapeHTML(currentEx.name)}">` : '🏋️';
                 }
@@ -5934,8 +5942,9 @@ DEĞİŞMEZ 5 AKADEMİK DENETİM FİLTRESİ:
                     if (!finalEquip) finalEquip = ex.equipment;
                     if (!finalMuscle) finalMuscle = ex.muscle;
                     if (!finalImage) {
-                        const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) || (typeof categoryFallback !== 'undefined' && categoryFallback[ex.category]) || null;
+                        const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) || null;
                         if (guide && guide.form) finalImage = guide.form;
+                        else if (ex.diagram) finalImage = ex.diagram;
                     }
                 }
             }
@@ -11237,8 +11246,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             if (listEl) {
                 listEl.innerHTML = exercises.map((ex, idx) => {
-                    const guide = (exerciseGuideMap && exerciseGuideMap[ex.id]) || (categoryFallback && categoryFallback[ex.category]) || {};
-                    const thumb = guide.form || '';
+                    const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) || {};
+                    const thumb = guide.form || ex.diagram || '';
                     const sets = ex.targetSets || (workout.scheme ? workout.scheme.sets : 3);
                     const reps = ex.targetReps || (workout.scheme ? workout.scheme.reps : '8-12');
                     const pNames = (ex.primaryMuscles || []).map(m => (TARGET_REGIONS[m] ? TARGET_REGIONS[m].name : m)).join(', ') || ex.muscle || '';
@@ -17420,16 +17429,16 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             const getStyle = (id) => {
                 const m = mMap[id] || { status: 'unworked', effectiveDone: 0 };
-                let fill = 'rgba(239, 68, 68, 0.48)';
-                let stroke = '#ef4444';
+                let fill = 'rgba(239, 68, 68, 0.72)';
+                let stroke = '#EF4444';
                 let animClass = 'muscle-unworked-anim';
                 if (m.status === 'optimal' || m.status === 'high') {
-                    fill = 'rgba(16, 185, 129, 0.58)';
-                    stroke = '#10b981';
+                    fill = '#16A34A';
+                    stroke = '#15803D';
                     animClass = '';
                 } else if (m.status === 'insufficient') {
-                    fill = 'rgba(245, 158, 11, 0.58)';
-                    stroke = '#f59e0b';
+                    fill = '#F59E0B';
+                    stroke = '#D97706';
                     animClass = '';
                 }
                 const isSel = (selectedId === id);
@@ -17453,113 +17462,120 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const sCalf = getStyle('calves');
 
             return `
-            <svg class="anatomy-svg" viewBox="0 0 540 430" xmlns="http://www.w3.org/2000/svg">
+            <svg class="anatomy-svg" viewBox="0 0 540 450" xmlns="http://www.w3.org/2000/svg">
                 <defs>
-                    <linearGradient id="bodyBgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stop-color="#1e293b" stop-opacity="0.3"/>
-                        <stop offset="100%" stop-color="#0f172a" stop-opacity="0.5"/>
-                    </linearGradient>
+                    <filter id="muscleGlow" x="-10%" y="-10%" width="120%" height="120%">
+                        <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#0F172A" flood-opacity="0.2"/>
+                    </filter>
                 </defs>
 
                 <!-- ==================== FRONT VIEW (ÖN GÖRÜNÜM) ==================== -->
                 <g id="frontBodyView">
                     <!-- Title -->
-                    <text x="135" y="24" text-anchor="middle" fill="#94A3B8" font-size="11" font-weight="800" letter-spacing="0.8">ÖN VÜCUT (ANTERIOR)</text>
+                    <text x="135" y="22" text-anchor="middle" fill="#475569" font-family="'Plus Jakarta Sans', sans-serif" font-size="11.5" font-weight="800" letter-spacing="0.8">ÖN VÜCUT (ANTERIOR)</text>
                     
-                    <!-- Head & Neck -->
-                    <circle cx="135" cy="48" r="16" fill="#222C3A" stroke="#94A3B8" stroke-width="1.2"/>
-                    <path d="M 129 63 L 141 63 L 143 74 L 127 74 Z" fill="#222C3A"/>
+                    <!-- BASE ATHLETIC MANNEQUIN (Front Chassis) -->
+                    <!-- Head & Jaw -->
+                    <path d="M 124 44 C 124 33, 129 28, 135 28 C 141 28, 146 33, 146 44 C 146 54, 142 63, 135 65 C 128 63, 124 54, 124 44 Z" fill="#1E293B" stroke="#475569" stroke-width="0.8"/>
+                    <!-- Neck, Torso & Limbs Chassis -->
+                    <path d="M 129 64 L 141 64 L 144 76 C 158 79, 172 84, 185 91 L 180 114 L 170 112 L 166 142 L 157 212 L 153 232 L 176 324 L 169 414 L 153 438 L 144 438 L 149 408 L 142 338 L 135 242 L 128 338 L 121 408 L 126 438 L 117 438 L 101 414 L 94 324 L 117 232 L 113 212 L 104 142 L 100 112 L 85 114 L 85 91 C 98 84, 112 79, 126 76 Z" fill="#1E293B"/>
 
                     <!-- Forearms / Hands (Front) -->
-                    <path d="M 72 165 C 66 182, 60 205, 56 226 C 60 228, 66 224, 72 208 C 76 194, 78 178, 78 165 Z" fill="#222C3A" stroke="#94A3B8" stroke-width="0.8"/>
-                    <path d="M 198 165 C 204 182, 210 205, 214 226 C 210 228, 204 224, 198 208 C 194 194, 192 178, 192 165 Z" fill="#222C3A" stroke="#94A3B8" stroke-width="0.8"/>
+                    <path d="M 72 168 C 65 186, 60 208, 56 228 C 60 230, 66 226, 72 210 C 76 196, 78 180, 78 168 Z" fill="#1E293B" stroke="#334155" stroke-width="0.8"/>
+                    <path d="M 198 168 C 205 186, 210 208, 214 228 C 210 230, 204 226, 198 210 C 194 196, 192 180, 192 168 Z" fill="#1E293B" stroke="#334155" stroke-width="0.8"/>
+                    <path d="M 56 228 C 54 236, 53 246, 55 250 C 57 252, 62 248, 63 240 C 64 234, 65 229, 65 225 Z" fill="#1E293B"/>
+                    <path d="M 214 228 C 216 236, 217 246, 215 250 C 213 252, 208 248, 207 240 C 206 234, 205 229, 205 225 Z" fill="#1E293B"/>
 
                     <!-- Feet (Front) -->
-                    <ellipse cx="114" cy="410" rx="9" ry="5" fill="#222C3A"/>
-                    <ellipse cx="156" cy="410" rx="9" ry="5" fill="#222C3A"/>
+                    <ellipse cx="122" cy="436" rx="8" ry="4.5" fill="#1E293B" stroke="#334155" stroke-width="0.8"/>
+                    <ellipse cx="148" cy="436" rx="8" ry="4.5" fill="#1E293B" stroke="#334155" stroke-width="0.8"/>
 
                     <!-- SHOULDERS (Front Delts) -->
-                    <path class="${sShld.cls}" data-muscle="shoulders" onclick="selectAnatomyMuscle('shoulders')" d="M 98 74 C 84 78, 72 90, 74 110 C 78 116, 88 112, 94 102 C 98 92, 100 82, 98 74 Z" fill="${sShld.fill}" stroke="${sShld.stroke}" stroke-width="1.4"><title>${sShld.tooltip}</title></path>
-                    <path class="${sShld.cls}" data-muscle="shoulders" onclick="selectAnatomyMuscle('shoulders')" d="M 172 74 C 186 78, 198 90, 196 110 C 192 116, 182 112, 176 102 C 172 92, 170 82, 172 74 Z" fill="${sShld.fill}" stroke="${sShld.stroke}" stroke-width="1.4"><title>${sShld.tooltip}</title></path>
+                    <path class="${sShld.cls}" data-muscle="shoulders" onclick="selectAnatomyMuscle('shoulders')" d="M 100 76 C 86 80, 74 91, 75 109 C 78 116, 88 114, 94 104 C 98 94, 100 84, 100 76 Z" fill="${sShld.fill}" stroke="${sShld.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sShld.tooltip}</title></path>
+                    <path class="${sShld.cls}" data-muscle="shoulders" onclick="selectAnatomyMuscle('shoulders')" d="M 170 76 C 184 80, 196 91, 195 109 C 192 116, 182 114, 176 104 C 172 94, 170 84, 170 76 Z" fill="${sShld.fill}" stroke="${sShld.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sShld.tooltip}</title></path>
 
-                    <!-- CHEST (Göğüs) -->
-                    <path class="${sChest.cls}" data-muscle="chest" onclick="selectAnatomyMuscle('chest')" d="M 102 78 C 114 74, 131 76, 133 90 C 133 112, 108 120, 96 108 C 92 96, 94 84, 102 78 Z" fill="${sChest.fill}" stroke="${sChest.stroke}" stroke-width="1.5"><title>${sChest.tooltip}</title></path>
-                    <path class="${sChest.cls}" data-muscle="chest" onclick="selectAnatomyMuscle('chest')" d="M 168 78 C 156 74, 139 76, 137 90 C 137 112, 162 120, 174 108 C 178 96, 176 84, 168 78 Z" fill="${sChest.fill}" stroke="${sChest.stroke}" stroke-width="1.5"><title>${sChest.tooltip}</title></path>
+                    <!-- CHEST (Göğüs / Pectorals) -->
+                    <path class="${sChest.cls}" data-muscle="chest" onclick="selectAnatomyMuscle('chest')" d="M 103 80 C 115 76, 131 77, 133 90 C 133 113, 109 123, 97 111 C 93 99, 95 86, 103 80 Z" fill="${sChest.fill}" stroke="${sChest.stroke}" stroke-width="1.4" filter="url(#muscleGlow)"><title>${sChest.tooltip}</title></path>
+                    <path class="${sChest.cls}" data-muscle="chest" onclick="selectAnatomyMuscle('chest')" d="M 167 80 C 155 76, 139 77, 137 90 C 137 113, 161 123, 173 111 C 177 99, 175 86, 167 80 Z" fill="${sChest.fill}" stroke="${sChest.stroke}" stroke-width="1.4" filter="url(#muscleGlow)"><title>${sChest.tooltip}</title></path>
 
                     <!-- BICEPS (Front Arms) -->
-                    <path class="${sBic.cls}" data-muscle="biceps" onclick="selectAnatomyMuscle('biceps')" d="M 73 114 C 65 128, 67 150, 75 162 C 82 160, 85 146, 84 132 C 83 120, 78 116, 73 114 Z" fill="${sBic.fill}" stroke="${sBic.stroke}" stroke-width="1.3"><title>${sBic.tooltip}</title></path>
-                    <path class="${sBic.cls}" data-muscle="biceps" onclick="selectAnatomyMuscle('biceps')" d="M 197 114 C 205 128, 203 150, 195 162 C 188 160, 185 146, 186 132 C 187 120, 192 116, 197 114 Z" fill="${sBic.fill}" stroke="${sBic.stroke}" stroke-width="1.3"><title>${sBic.tooltip}</title></path>
+                    <path class="${sBic.cls}" data-muscle="biceps" onclick="selectAnatomyMuscle('biceps')" d="M 75 113 C 67 127, 69 149, 77 161 C 84 159, 87 145, 86 131 C 85 119, 80 115, 75 113 Z" fill="${sBic.fill}" stroke="${sBic.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sBic.tooltip}</title></path>
+                    <path class="${sBic.cls}" data-muscle="biceps" onclick="selectAnatomyMuscle('biceps')" d="M 195 113 C 203 127, 201 149, 193 161 C 186 159, 183 145, 184 131 C 185 119, 190 115, 195 113 Z" fill="${sBic.fill}" stroke="${sBic.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sBic.tooltip}</title></path>
 
                     <!-- CORE (Karın & Abdominals) -->
-                    <path class="${sCore.cls}" data-muscle="core" onclick="selectAnatomyMuscle('core')" d="M 112 114 C 122 110, 148 110, 158 114 C 156 148, 152 182, 146 208 C 140 211, 130 211, 124 208 C 118 182, 114 148, 112 114 Z" fill="${sCore.fill}" stroke="${sCore.stroke}" stroke-width="1.4"><title>${sCore.tooltip}</title></path>
-                    <!-- Core Inner divisions (subtle sixpack lines) -->
-                    <line x1="135" y1="116" x2="135" y2="204" stroke="rgba(0,0,0,0.35)" stroke-width="1.2" pointer-events="none"/>
-                    <line x1="120" y1="144" x2="150" y2="144" stroke="rgba(0,0,0,0.35)" stroke-width="1" pointer-events="none"/>
-                    <line x1="122" y1="174" x2="148" y2="174" stroke="rgba(0,0,0,0.35)" stroke-width="1" pointer-events="none"/>
+                    <path class="${sCore.cls}" data-muscle="core" onclick="selectAnatomyMuscle('core')" d="M 112 116 C 122 112, 148 112, 158 116 C 156 148, 152 182, 146 210 C 140 213, 130 213, 124 210 C 118 182, 114 148, 112 116 Z" fill="${sCore.fill}" stroke="${sCore.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sCore.tooltip}</title></path>
+                    <!-- Core Inner divisions (subtle anatomical sixpack lines) -->
+                    <line x1="135" y1="117" x2="135" y2="206" stroke="rgba(15, 23, 42, 0.45)" stroke-width="1.3" pointer-events="none"/>
+                    <path d="M 122 143 Q 135 145 148 143" stroke="rgba(15, 23, 42, 0.4)" stroke-width="1.1" fill="none" pointer-events="none"/>
+                    <path d="M 124 169 Q 135 171 146 169" stroke="rgba(15, 23, 42, 0.4)" stroke-width="1.1" fill="none" pointer-events="none"/>
+                    <path d="M 126 193 Q 135 195 144 193" stroke="rgba(15, 23, 42, 0.4)" stroke-width="1.1" fill="none" pointer-events="none"/>
 
                     <!-- QUADS (Ön Bacak) -->
-                    <path class="${sQuads.cls}" data-muscle="quads" onclick="selectAnatomyMuscle('quads')" d="M 102 216 C 112 210, 131 210, 132 218 C 134 252, 130 294, 124 318 C 112 318, 102 310, 98 280 C 96 254, 96 228, 102 216 Z" fill="${sQuads.fill}" stroke="${sQuads.stroke}" stroke-width="1.4"><title>${sQuads.tooltip}</title></path>
-                    <path class="${sQuads.cls}" data-muscle="quads" onclick="selectAnatomyMuscle('quads')" d="M 168 216 C 158 210, 139 210, 138 218 C 136 252, 140 294, 146 318 C 158 318, 168 310, 172 280 C 174 254, 174 228, 168 216 Z" fill="${sQuads.fill}" stroke="${sQuads.stroke}" stroke-width="1.4"><title>${sQuads.tooltip}</title></path>
+                    <path class="${sQuads.cls}" data-muscle="quads" onclick="selectAnatomyMuscle('quads')" d="M 103 216 C 113 210, 131 210, 132 218 C 134 252, 131 298, 125 324 C 114 324, 104 316, 99 284 C 97 258, 97 228, 103 216 Z" fill="${sQuads.fill}" stroke="${sQuads.stroke}" stroke-width="1.4" filter="url(#muscleGlow)"><title>${sQuads.tooltip}</title></path>
+                    <path class="${sQuads.cls}" data-muscle="quads" onclick="selectAnatomyMuscle('quads')" d="M 167 216 C 157 210, 139 210, 138 218 C 136 252, 139 298, 145 324 C 156 324, 166 316, 171 284 C 173 258, 173 228, 167 216 Z" fill="${sQuads.fill}" stroke="${sQuads.stroke}" stroke-width="1.4" filter="url(#muscleGlow)"><title>${sQuads.tooltip}</title></path>
 
                     <!-- Knees (Front) -->
-                    <circle cx="114" cy="325" r="4.5" fill="#222C3A" stroke="#94A3B8" stroke-width="0.8"/>
-                    <circle cx="156" cy="325" r="4.5" fill="#222C3A" stroke="#94A3B8" stroke-width="0.8"/>
+                    <ellipse cx="114" cy="334" rx="4.5" ry="5.5" fill="#1E293B" stroke="#475569" stroke-width="0.8"/>
+                    <ellipse cx="156" cy="334" rx="4.5" ry="5.5" fill="#1E293B" stroke="#475569" stroke-width="0.8"/>
 
                     <!-- CALVES (Front Shins / Calves) -->
-                    <path class="${sCalf.cls}" data-muscle="calves" onclick="selectAnatomyMuscle('calves')" d="M 106 334 C 100 346, 102 374, 110 398 C 120 398, 124 384, 124 368 C 124 350, 120 336, 106 334 Z" fill="${sCalf.fill}" stroke="${sCalf.stroke}" stroke-width="1.3"><title>${sCalf.tooltip}</title></path>
-                    <path class="${sCalf.cls}" data-muscle="calves" onclick="selectAnatomyMuscle('calves')" d="M 164 334 C 170 346, 168 374, 160 398 C 150 398, 146 384, 146 368 C 146 350, 150 336, 164 334 Z" fill="${sCalf.fill}" stroke="${sCalf.stroke}" stroke-width="1.3"><title>${sCalf.tooltip}</title></path>
+                    <path class="${sCalf.cls}" data-muscle="calves" onclick="selectAnatomyMuscle('calves')" d="M 107 344 C 101 356, 103 384, 111 412 C 121 412, 125 398, 125 380 C 125 362, 121 346, 107 344 Z" fill="${sCalf.fill}" stroke="${sCalf.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sCalf.tooltip}</title></path>
+                    <path class="${sCalf.cls}" data-muscle="calves" onclick="selectAnatomyMuscle('calves')" d="M 163 344 C 169 356, 167 384, 159 412 C 149 412, 145 398, 145 380 C 145 362, 149 346, 163 344 Z" fill="${sCalf.fill}" stroke="${sCalf.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sCalf.tooltip}</title></path>
                 </g>
 
                 <!-- Center Divider -->
-                <line x1="270" y1="18" x2="270" y2="415" stroke="#CBD5E1" stroke-width="1" stroke-dasharray="4,4"/>
+                <line x1="270" y1="20" x2="270" y2="435" stroke="#CBD5E1" stroke-width="1" stroke-dasharray="4,4"/>
 
                 <!-- ==================== BACK VIEW (ARKA GÖRÜNÜM) ==================== -->
                 <g id="backBodyView">
                     <!-- Title -->
-                    <text x="405" y="24" text-anchor="middle" fill="#94A3B8" font-size="11" font-weight="800" letter-spacing="0.8">ARKA VÜCUT (POSTERIOR)</text>
+                    <text x="405" y="22" text-anchor="middle" fill="#475569" font-family="'Plus Jakarta Sans', sans-serif" font-size="11.5" font-weight="800" letter-spacing="0.8">ARKA VÜCUT (POSTERIOR)</text>
                     
                     <!-- Head & Neck -->
-                    <circle cx="405" cy="48" r="16" fill="#222C3A" stroke="#94A3B8" stroke-width="1.2"/>
-                    <path d="M 399 63 L 411 63 L 413 74 L 397 74 Z" fill="#222C3A"/>
+                    <path d="M 394 44 C 394 33, 399 28, 405 28 C 411 28, 416 33, 416 44 C 416 54, 412 63, 405 65 C 398 63, 394 54, 394 44 Z" fill="#1E293B" stroke="#475569" stroke-width="0.8"/>
+                    <!-- Traps slope & spine chassis -->
+                    <path d="M 399 64 L 411 64 L 414 76 C 428 79, 442 84, 455 91 L 450 114 L 440 112 L 436 142 L 427 212 L 423 232 L 446 324 L 439 414 L 423 438 L 414 438 L 419 408 L 412 338 L 405 242 L 398 338 L 391 408 L 396 438 L 387 438 L 371 414 L 364 324 L 387 232 L 383 212 L 374 142 L 370 112 L 355 114 L 355 91 C 368 84, 382 79, 396 76 Z" fill="#1E293B"/>
 
                     <!-- Forearms / Hands (Back) -->
-                    <path d="M 342 165 C 336 182, 330 205, 326 226 C 330 228, 336 224, 342 208 C 346 194, 348 178, 348 165 Z" fill="#222C3A" stroke="#94A3B8" stroke-width="0.8"/>
-                    <path d="M 468 165 C 474 182, 480 205, 484 226 C 480 228, 474 224, 468 208 C 464 194, 462 178, 462 165 Z" fill="#222C3A" stroke="#94A3B8" stroke-width="0.8"/>
+                    <path d="M 342 168 C 335 186, 330 208, 326 228 C 330 230, 336 226, 342 210 C 346 196, 348 180, 348 168 Z" fill="#1E293B" stroke="#334155" stroke-width="0.8"/>
+                    <path d="M 468 168 C 475 186, 480 208, 484 228 C 480 230, 474 226, 468 210 C 464 196, 462 180, 462 168 Z" fill="#1E293B" stroke="#334155" stroke-width="0.8"/>
+                    <path d="M 326 228 C 324 236, 323 246, 325 250 C 327 252, 332 248, 333 240 C 334 234, 335 229, 335 225 Z" fill="#1E293B"/>
+                    <path d="M 484 228 C 486 236, 487 246, 485 250 C 483 252, 478 248, 477 240 C 476 234, 475 229, 475 225 Z" fill="#1E293B"/>
 
                     <!-- Feet (Back) -->
-                    <ellipse cx="384" cy="410" rx="9" ry="5" fill="#222C3A"/>
-                    <ellipse cx="426" cy="410" rx="9" ry="5" fill="#222C3A"/>
+                    <ellipse cx="392" cy="436" rx="8" ry="4.5" fill="#1E293B" stroke="#334155" stroke-width="0.8"/>
+                    <ellipse cx="418" cy="436" rx="8" ry="4.5" fill="#1E293B" stroke="#334155" stroke-width="0.8"/>
 
                     <!-- BACK (Traps / Upper Back) -->
-                    <path class="${sBack.cls}" data-muscle="back" onclick="selectAnatomyMuscle('back')" d="M 390 68 L 405 58 L 420 68 L 434 82 L 405 98 L 376 82 Z" fill="${sBack.fill}" stroke="${sBack.stroke}" stroke-width="1.4"><title>${sBack.tooltip}</title></path>
+                    <path class="${sBack.cls}" data-muscle="back" onclick="selectAnatomyMuscle('back')" d="M 390 68 L 405 58 L 420 68 L 435 83 L 405 104 L 375 83 Z" fill="${sBack.fill}" stroke="${sBack.stroke}" stroke-width="1.4" filter="url(#muscleGlow)"><title>${sBack.tooltip}</title></path>
 
                     <!-- SHOULDERS (Rear Delts) -->
-                    <path class="${sShld.cls}" data-muscle="shoulders" onclick="selectAnatomyMuscle('shoulders')" d="M 368 74 C 354 78, 342 90, 344 110 C 348 116, 358 112, 364 102 C 368 92, 370 82, 368 74 Z" fill="${sShld.fill}" stroke="${sShld.stroke}" stroke-width="1.4"><title>${sShld.tooltip}</title></path>
-                    <path class="${sShld.cls}" data-muscle="shoulders" onclick="selectAnatomyMuscle('shoulders')" d="M 442 74 C 456 78, 468 90, 466 110 C 462 116, 452 112, 446 102 C 442 92, 440 82, 442 74 Z" fill="${sShld.fill}" stroke="${sShld.stroke}" stroke-width="1.4"><title>${sShld.tooltip}</title></path>
+                    <path class="${sShld.cls}" data-muscle="shoulders" onclick="selectAnatomyMuscle('shoulders')" d="M 368 76 C 354 80, 343 91, 345 109 C 349 116, 359 114, 365 104 C 369 94, 371 84, 368 76 Z" fill="${sShld.fill}" stroke="${sShld.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sShld.tooltip}</title></path>
+                    <path class="${sShld.cls}" data-muscle="shoulders" onclick="selectAnatomyMuscle('shoulders')" d="M 442 76 C 456 80, 467 91, 465 109 C 461 116, 451 114, 445 104 C 441 94, 439 84, 442 76 Z" fill="${sShld.fill}" stroke="${sShld.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sShld.tooltip}</title></path>
 
                     <!-- BACK (Latissimus Dorsi / Mid Back) -->
-                    <path class="${sBack.cls}" data-muscle="back" onclick="selectAnatomyMuscle('back')" d="M 374 96 C 358 110, 356 140, 362 172 C 374 176, 386 168, 388 152 C 390 132, 388 110, 374 96 Z" fill="${sBack.fill}" stroke="${sBack.stroke}" stroke-width="1.4"><title>${sBack.tooltip}</title></path>
-                    <path class="${sBack.cls}" data-muscle="back" onclick="selectAnatomyMuscle('back')" d="M 436 96 C 452 110, 454 140, 448 172 C 436 176, 424 168, 422 152 C 420 132, 422 110, 436 96 Z" fill="${sBack.fill}" stroke="${sBack.stroke}" stroke-width="1.4"><title>${sBack.tooltip}</title></path>
+                    <path class="${sBack.cls}" data-muscle="back" onclick="selectAnatomyMuscle('back')" d="M 374 96 C 358 111, 356 142, 362 174 C 374 178, 386 170, 388 153 C 390 133, 388 111, 374 96 Z" fill="${sBack.fill}" stroke="${sBack.stroke}" stroke-width="1.4" filter="url(#muscleGlow)"><title>${sBack.tooltip}</title></path>
+                    <path class="${sBack.cls}" data-muscle="back" onclick="selectAnatomyMuscle('back')" d="M 436 96 C 452 111, 454 142, 448 174 C 436 178, 424 170, 422 153 C 420 133, 422 111, 436 96 Z" fill="${sBack.fill}" stroke="${sBack.stroke}" stroke-width="1.4" filter="url(#muscleGlow)"><title>${sBack.tooltip}</title></path>
 
                     <!-- TRICEPS (Arka Kol) -->
-                    <path class="${sTri.cls}" data-muscle="triceps" onclick="selectAnatomyMuscle('triceps')" d="M 343 114 C 335 128, 337 150, 345 162 C 353 160, 356 146, 355 132 C 354 120, 348 116, 343 114 Z" fill="${sTri.fill}" stroke="${sTri.stroke}" stroke-width="1.3"><title>${sTri.tooltip}</title></path>
-                    <path class="${sTri.cls}" data-muscle="triceps" onclick="selectAnatomyMuscle('triceps')" d="M 467 114 C 475 128, 473 150, 465 162 C 457 160, 454 146, 455 132 C 456 120, 462 116, 467 114 Z" fill="${sTri.fill}" stroke="${sTri.stroke}" stroke-width="1.3"><title>${sTri.tooltip}</title></path>
+                    <path class="${sTri.cls}" data-muscle="triceps" onclick="selectAnatomyMuscle('triceps')" d="M 344 113 C 336 127, 338 149, 346 161 C 354 159, 357 145, 356 131 C 355 119, 349 115, 344 113 Z" fill="${sTri.fill}" stroke="${sTri.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sTri.tooltip}</title></path>
+                    <path class="${sTri.cls}" data-muscle="triceps" onclick="selectAnatomyMuscle('triceps')" d="M 466 113 C 474 127, 472 149, 464 161 C 456 159, 453 145, 454 131 C 455 119, 461 115, 466 113 Z" fill="${sTri.fill}" stroke="${sTri.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sTri.tooltip}</title></path>
 
                     <!-- GLUTES (Kalça) -->
-                    <path class="${sGlut.cls}" data-muscle="glutes" onclick="selectAnatomyMuscle('glutes')" d="M 366 182 C 366 174, 402 174, 404 182 C 404 214, 386 230, 368 228 C 364 214, 364 196, 366 182 Z" fill="${sGlut.fill}" stroke="${sGlut.stroke}" stroke-width="1.4"><title>${sGlut.tooltip}</title></path>
-                    <path class="${sGlut.cls}" data-muscle="glutes" onclick="selectAnatomyMuscle('glutes')" d="M 444 182 C 444 174, 408 174, 406 182 C 406 214, 424 230, 442 228 C 446 214, 446 196, 444 182 Z" fill="${sGlut.fill}" stroke="${sGlut.stroke}" stroke-width="1.4"><title>${sGlut.tooltip}</title></path>
+                    <path class="${sGlut.cls}" data-muscle="glutes" onclick="selectAnatomyMuscle('glutes')" d="M 367 184 C 367 175, 403 175, 404 184 C 404 216, 386 232, 368 230 C 364 216, 364 198, 367 184 Z" fill="${sGlut.fill}" stroke="${sGlut.stroke}" stroke-width="1.4" filter="url(#muscleGlow)"><title>${sGlut.tooltip}</title></path>
+                    <path class="${sGlut.cls}" data-muscle="glutes" onclick="selectAnatomyMuscle('glutes')" d="M 443 184 C 443 175, 407 175, 406 184 C 406 216, 424 232, 442 230 C 446 216, 446 198, 443 184 Z" fill="${sGlut.fill}" stroke="${sGlut.stroke}" stroke-width="1.4" filter="url(#muscleGlow)"><title>${sGlut.tooltip}</title></path>
 
                     <!-- HAMSTRINGS (Arka Bacak) -->
-                    <path class="${sHams.cls}" data-muscle="hamstrings" onclick="selectAnatomyMuscle('hamstrings')" d="M 368 232 C 374 228, 401 228, 402 232 C 402 266, 398 296, 394 318 C 382 318, 372 312, 368 286 C 366 266, 366 248, 368 232 Z" fill="${sHams.fill}" stroke="${sHams.stroke}" stroke-width="1.4"><title>${sHams.tooltip}</title></path>
-                    <path class="${sHams.cls}" data-muscle="hamstrings" onclick="selectAnatomyMuscle('hamstrings')" d="M 442 232 C 436 228, 409 228, 408 232 C 408 266, 412 296, 416 318 C 428 318, 438 312, 442 286 C 444 266, 444 248, 442 232 Z" fill="${sHams.fill}" stroke="${sHams.stroke}" stroke-width="1.4"><title>${sHams.tooltip}</title></path>
+                    <path class="${sHams.cls}" data-muscle="hamstrings" onclick="selectAnatomyMuscle('hamstrings')" d="M 368 234 C 374 229, 401 229, 402 234 C 402 268, 398 298, 394 322 C 382 322, 372 314, 368 288 C 366 268, 366 250, 368 234 Z" fill="${sHams.fill}" stroke="${sHams.stroke}" stroke-width="1.4" filter="url(#muscleGlow)"><title>${sHams.tooltip}</title></path>
+                    <path class="${sHams.cls}" data-muscle="hamstrings" onclick="selectAnatomyMuscle('hamstrings')" d="M 442 234 C 436 229, 409 229, 408 234 C 408 268, 412 298, 416 322 C 428 322, 438 314, 442 288 C 444 268, 444 250, 442 234 Z" fill="${sHams.fill}" stroke="${sHams.stroke}" stroke-width="1.4" filter="url(#muscleGlow)"><title>${sHams.tooltip}</title></path>
 
                     <!-- Popliteal Fossa / Knee Back -->
-                    <ellipse cx="384" cy="324" rx="4" ry="2.5" fill="rgba(0,0,0,0.3)"/>
-                    <ellipse cx="426" cy="324" rx="4" ry="2.5" fill="rgba(0,0,0,0.3)"/>
+                    <ellipse cx="384" cy="332" rx="4.5" ry="3" fill="#1E293B" stroke="#475569" stroke-width="0.8"/>
+                    <ellipse cx="426" cy="332" rx="4.5" ry="3" fill="#1E293B" stroke="#475569" stroke-width="0.8"/>
 
                     <!-- CALVES (Kalf / Gastrocnemius - Back) -->
-                    <path class="${sCalf.cls}" data-muscle="calves" onclick="selectAnatomyMuscle('calves')" d="M 366 332 C 358 346, 362 374, 372 398 C 384 398, 388 384, 390 368 C 392 348, 388 334, 366 332 Z" fill="${sCalf.fill}" stroke="${sCalf.stroke}" stroke-width="1.3"><title>${sCalf.tooltip}</title></path>
-                    <path class="${sCalf.cls}" data-muscle="calves" onclick="selectAnatomyMuscle('calves')" d="M 444 332 C 452 346, 448 374, 438 398 C 426 398, 422 384, 420 368 C 418 348, 422 334, 444 332 Z" fill="${sCalf.fill}" stroke="${sCalf.stroke}" stroke-width="1.3"><title>${sCalf.tooltip}</title></path>
+                    <path class="${sCalf.cls}" data-muscle="calves" onclick="selectAnatomyMuscle('calves')" d="M 366 342 C 358 356, 362 384, 372 410 C 384 410, 388 396, 390 378 C 392 358, 388 344, 366 342 Z" fill="${sCalf.fill}" stroke="${sCalf.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sCalf.tooltip}</title></path>
+                    <path class="${sCalf.cls}" data-muscle="calves" onclick="selectAnatomyMuscle('calves')" d="M 444 342 C 452 356, 448 384, 438 410 C 426 410, 422 396, 420 378 C 418 358, 422 344, 444 342 Z" fill="${sCalf.fill}" stroke="${sCalf.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sCalf.tooltip}</title></path>
                 </g>
             </svg>
             `;
@@ -19354,14 +19370,11 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
 
             let photoGuide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) ? exerciseGuideMap[ex.id] : null;
-            if (!photoGuide && typeof findBestExerciseMatch === 'function' && ex.name) {
-                const matched = findBestExerciseMatch(ex.name);
-                if (matched && typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[matched.id]) {
-                    photoGuide = exerciseGuideMap[matched.id];
+            if (ex.isComplex && photoGuide) {
+                const formPath = (photoGuide.form || '').toLowerCase();
+                if (!formPath.includes(ex.id)) {
+                    photoGuide = null; // Kompleks harekete başka hareketin tekil fotoğrafını basma
                 }
-            }
-            if (!photoGuide && typeof categoryFallback !== 'undefined' && ex.category && categoryFallback[ex.category]) {
-                photoGuide = categoryFallback[ex.category];
             }
             const guide = photoGuide;
 
@@ -19419,7 +19432,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             // Form Tab (OpenGym Canlı Animasyon Öncelikli)
             const formContainer = document.getElementById('exDetailTabContentForm');
             const opengymEx = (typeof OPENGYM_GLOBAL_CATALOG !== 'undefined') ? OPENGYM_GLOBAL_CATALOG[ex.id] : null;
-            const photoSrc = (photoGuide && photoGuide.form) ? photoGuide.form : (ex.formImage || null);
+            const photoSrc = (photoGuide && photoGuide.form) ? photoGuide.form : (ex.diagram || ex.formImage || null);
+            const isSvgForm = !!(photoSrc && photoSrc.toLowerCase().endsWith('.svg'));
 
             let visualsHtml = '';
             if (opengymEx) {
@@ -19437,7 +19451,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     ${photoSrc ? `
                         <div style="margin-bottom:12px; border-radius:8px; border:1px solid #222C3A; background:#0E131B; overflow:hidden;">
                             <div style="padding:6px 10px; background:#151C26; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="const el=document.getElementById('ex_detail_legacy_photo'); if(el) el.style.display=el.style.display==='none'?'block':'none';">
-                                <span style="font-size:11px; font-weight:700; color:var(--text-secondary);">📸 Statik Fotoğraf & Form Kılavuzu</span>
+                                <span style="font-size:11px; font-weight:700; color:var(--text-secondary);">${isSvgForm ? '📐 Vektörel Form Akışı' : '📸 Statik Fotoğraf & Form Kılavuzu'}</span>
                                 <span style="font-size:10px; color:var(--gold);">Gör ▼</span>
                             </div>
                             <div id="ex_detail_legacy_photo" style="display:none; padding:8px; text-align:center;">
@@ -19450,10 +19464,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 visualsHtml = `
                     <div style="background:#000; border-radius:12px; overflow:hidden; border:1.5px solid rgba(245,158,11,0.4); margin-bottom:12px; box-shadow:0 6px 24px rgba(0,0,0,0.6);">
                         <div style="background:#151C26; border-bottom:1px solid #222C3A; padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-size:11.5px; font-weight:900; color:var(--gold); letter-spacing:0.5px;">📸 GERÇEK FORM REHBERİ</span>
-                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 9px; border-radius:4px; color:var(--cyan); border-color:var(--cyan); font-weight:700;" onclick="openImageLightbox('${photoSrc}', '${escapeHTML(ex.name)} - Form Rehberi')">⛶ Tam Ekran Büyüt</button>
+                            <span style="font-size:11.5px; font-weight:900; color:var(--gold); letter-spacing:0.5px;">${isSvgForm ? '📐 FORM VEKTÖR DİYAGRAMI' : '📸 GERÇEK FORM REHBERİ'}</span>
+                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 9px; border-radius:4px; color:var(--cyan); border-color:var(--cyan); font-weight:700;" onclick="openImageLightbox('${photoSrc}', '${escapeHTML(ex.name)} - ${isSvgForm ? 'Form Diyagramı' : 'Form Rehberi'}')">⛶ Tam Ekran Büyüt</button>
                         </div>
-                        <div style="text-align:center; padding:6px; cursor:pointer;" onclick="openImageLightbox('${photoSrc}', '${escapeHTML(ex.name)} - Form Rehberi')" title="Büyütmek için dokunun">
+                        <div style="text-align:center; padding:6px; cursor:pointer;" onclick="openImageLightbox('${photoSrc}', '${escapeHTML(ex.name)} - ${isSvgForm ? 'Form Diyagramı' : 'Form Rehberi'}')" title="Büyütmek için dokunun">
                             <img src="${photoSrc}" style="max-width:100%; max-height:46vh; object-fit:contain; display:block; margin:0 auto; border-radius:6px;" alt="${escapeHTML(ex.name)} Form">
                             <div style="font-size:10.5px; color:var(--text-secondary); margin-top:6px; font-weight:600;">🔍 Dokunarak tam ekran inceleyebilirsiniz</div>
                         </div>
