@@ -86,6 +86,11 @@ Aşağıdaki 4 noktadaki sürüm numarası bir üst sürüme (örn. `v75` -> `v7
 * **Ajan Öz-Teşhisi (Döngü Kırıcı):**
   Bir hata 2 denemede çözülemezse spekülatif 3. deneme YASAKTIR. Ajan derhal durur, oturum transkriptini tarar, peşin kabul ettiği hatalı varsayımı (assumption) açıkça masaya yatırır ve kullanıcıdan tek bir net kanıt ister.
 
+---
 
-
-
+## 8. Görsel & Grafik Üretim Aracı Seçim Protokolü (Canva vs AI Görsel Üretici)
+* **Kullanıcı İradesine Saygı:** Görsel, afiş, antrenman şablonu, rozet veya illüstrasyon istendiğinde:
+  - Kullanıcı özel olarak bir araç belirtmişse doğrudan o araç çalıştırılır.
+  - Araç **belirtilmemişse**, varsayımla hareket edilmez; kullanıcıya şu seçeneklerle sorulur:
+    1. **🎨 Canva MCP:** Şablon, düzenlenebilir tasarım, tipografi, sporcu kartları ve afişler.
+    2. **🤖 AI Görsel Üretici (`image-generator`):** Sanatsal, gerçekçi veya stilize yapay zeka illüstrasyonları.
