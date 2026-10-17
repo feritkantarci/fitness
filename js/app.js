@@ -2129,15 +2129,295 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
         window.getExerciseMediaId = getExerciseMediaId;
         window.getExerciseCoveredSubKeys = getExerciseCoveredSubKeys;
 
-        // ==================== KATMAN 4: 3 KADEMELİ AKADEMİK SÜPERSET BLOK MOTORU ====================
+        // ==================== KATMAN 4: BİYOMEKANİK SÜPERSET EŞLEŞTİRME VE AKADEMİK BLOK MOTORU ====================
+        function isSpinalAxialLoadedExercise(ex) {
+            if (!ex) return false;
+            const id = ex.id || '';
+            const fam = getExerciseMovementFamily(ex);
+            if (fam === 'barbell_hinge_row' || fam === 'hip_hinge_rdl_deadlift' || fam === 'ballistic_hip_hinge') return true;
+            if (/deadlift|rdl|bent_over_row|pendlay_row|zercher_squat|back_squat|good_morning/.test(id)) return true;
+            return false;
+        }
+
+        // Biyomekanik Uyumluluk Testi: İki hareket arka arkaya SÜPERSET olarak güvenle ve verimle yapılabilir mi?
+        function isSupersetPairValid(exA, exB) {
+            if (!exA || !exB) return false;
+            if (exA.id === exB.id) return false;
+
+            const famA = getExerciseMovementFamily(exA);
+            const famB = getExerciseMovementFamily(exB);
+
+            // KURAL 1: Aynı hareket ailesi (twin family) asla süperset olamaz (Örn: Barbell Row + Pendlay Row)
+            if (famA && famB && famA === famB) return false;
+
+            // KURAL 2: Çift Eksenel/Omurga Yükü Yasağı (Double Spinal Hinge Collapse):
+            // İki serbest bel bükmeli (bent-over / hinge) hareket dinlenmeden peş peşe ASLA yapılamaz!
+            // (Örn: Barbell Row + Pendlay Row, Deadlift + Barbell Row, RDL + Pendlay Row)
+            if (isSpinalAxialLoadedExercise(exA) && isSpinalAxialLoadedExercise(exB)) {
+                return false;
+            }
+
+            const catA = getEffectiveExerciseCategory(exA);
+            const catB = getEffectiveExerciseCategory(exB);
+            const anatA = getExerciseAnatomy(exA);
+            const anatB = getExerciseAnatomy(exB);
+            const subA = anatA ? anatA.subKey : '';
+            const subB = anatB ? anatB.subKey : '';
+
+            // KURAL 3: İki Ağır Bileşik Çekiş (Double Heavy Compound Pull) Asla Süperset Olamaz!
+            // (Örn: Pendlay Row + Barbell Row, Barbell Row + Saw Row, Pullup + Barbell Row)
+            const isHeavyCompoundPull = (e) => {
+                const c = getEffectiveExerciseCategory(e);
+                return (c === 'pull' || /back|lat|row|pull/.test(e.category || '')) && e.mechanic === 'compound';
+            };
+            if (isHeavyCompoundPull(exA) && isHeavyCompoundPull(exB)) {
+                return false;
+            }
+
+            // KURAL 4: İki Ağır Bileşik İtiş (Double Heavy Compound Push) Asla Süperset Olamaz!
+            // (Örn: Bench Press + Incline Bench Press, Barbell OHP + Bench Press)
+            const isHeavyCompoundPush = (e) => {
+                const c = getEffectiveExerciseCategory(e);
+                return (c === 'push' || /push|press|chest/.test(e.category || '')) && e.mechanic === 'compound';
+            };
+            if (isHeavyCompoundPush(exA) && isHeavyCompoundPush(exB)) {
+                return false;
+            }
+
+            // KURAL 5: İki Ağır Çift Bacak Çömelme (Double Bilateral Compound Squat) Asla Süperset Olamaz!
+            // (Örn: Back Squat + Front Squat, Back Squat + Leg Press)
+            if (famA === 'bilateral_squat' && famB === 'bilateral_squat') {
+                return false;
+            }
+
+            // KURAL 6: Aynı İzole Kol Kası (Double Same Arm Isolation) Peş Peşe Olamaz!
+            if (subA && subB) {
+                if (subA === 'biceps' && subB === 'biceps') return false;
+                if ((subA === 'triceps_long' || subA === 'triceps_lateral') && (subB === 'triceps_long' || subB === 'triceps_lateral')) return false;
+            }
+
+            return true;
+        }
+
+        // Biyomekanik ve Nöromüsküler Süperset Uyumluluk Skoru
+        function getSupersetCompatibilityScore(exA, exB) {
+            if (!isSupersetPairValid(exA, exB)) return -1000;
+
+            let score = 10;
+            const catA = getEffectiveExerciseCategory(exA);
+            const catB = getEffectiveExerciseCategory(exB);
+            const anatA = getExerciseAnatomy(exA);
+            const anatB = getExerciseAnatomy(exB);
+            const subA = anatA ? anatA.subKey : '';
+            const subB = anatB ? anatB.subKey : '';
+
+            // 1. ANTAGONİSTİK İTİŞ - ÇEKİŞ (Agonist-Antagonist Upper): Altın Standart (+60)
+            const isPushPull = (catA === 'push' && catB === 'pull') || (catA === 'pull' && catB === 'push');
+            if (isPushPull) {
+                score += 60;
+                // Biceps + Triceps Antagonisti (+25)
+                const isArmAntagonist = (subA === 'biceps' && (subB === 'triceps_long' || subB === 'triceps_lateral')) ||
+                                        (subB === 'biceps' && (subA === 'triceps_long' || subA === 'triceps_lateral'));
+                if (isArmAntagonist) score += 25;
+            }
+
+            // 2. ALT VÜCUT - ÜST VÜCUT (PHA / Peripheral Heart Action): (+45)
+            const isUpperLower = ((catA.startsWith('legs') && (catB === 'push' || catB === 'pull')) ||
+                                  (catB.startsWith('legs') && (catA === 'push' || catA === 'pull')));
+            if (isUpperLower) {
+                score += 45;
+            }
+
+            // 3. ALT VÜCUT ANTAGONİST (Quad + Hamstring / Glute): (+40)
+            const isLegAntagonist = (catA === 'legs_quad' && catB === 'legs_hinge') || (catA === 'legs_hinge' && catB === 'legs_quad');
+            if (isLegAntagonist) {
+                score += 40;
+            }
+
+            // 4. BİLEŞİK / İTİŞ / ÇEKİŞ + CORE / KONDİSYON: (+35)
+            const isWithCore = (catA === 'core' && catB !== 'core') || (catB === 'core' && catA !== 'core');
+            if (isWithCore) {
+                score += 35;
+            }
+
+            // 5. İTİŞ + ARKA OMUZ / MOBİLİTE: (+30)
+            if ((catA === 'push' && subB === 'shoulders_rear') || (catB === 'push' && subA === 'shoulders_rear')) {
+                score += 30;
+            }
+
+            return score;
+        }
+
+        // Seans içi egzersizleri akademik blok ve süperset kurallarına göre akıllıca sıralar
+        function optimizeWorkoutExerciseOrderForSupersets(exercises, style) {
+            if (!Array.isArray(exercises) || exercises.length <= 2) return exercises;
+            if (style !== 'superset' && style !== 'superset_light' && style !== 'superset_intense') {
+                return exercises;
+            }
+
+            const pool = exercises.slice();
+            const result = [];
+            const getStraightPriority = (ex) => {
+                let p = 0;
+                if (isSpinalAxialLoadedExercise(ex)) p += 50;
+                if (ex.mechanic === 'compound') p += 30;
+                if (ex.equipment === 'barbell') p += 20;
+                return p;
+            };
+
+            if (style === 'superset') {
+                // SCHUMANN & WEAKLEY AKADEMİK HİBRİT MODELİ:
+                // Slot 0: Ana Bileşik Düz Set (En yüksek spinal/CNS bileşik)
+                // Slot 1 & 2: Süperset Blok A (A1 + A2)
+                // Slot 3: İkincil Düz Set (varsa ikinci ağır bileşik veya tek kalan hareket)
+                // Slot 4 & 5: Süperset Blok B (B1 + B2)
+                // Slot 6+: Tamamlayıcı Düz Setler
+
+                // 1. Slot 0 için Ana Bileşik hareketi seç
+                pool.sort((a, b) => getStraightPriority(b) - getStraightPriority(a));
+                result.push(pool.shift());
+
+                if (pool.length === 0) return result;
+
+                // 2. Kalan havuzdan en yüksek uyumluluk skoruna sahip EN İYİ SÜPERSET ÇİFTİNİ (A1 + A2) bul
+                let bestPair = null;
+                let bestPairScore = -Infinity;
+                let bestPairIndices = [-1, -1];
+
+                for (let i = 0; i < pool.length; i++) {
+                    for (let j = i + 1; j < pool.length; j++) {
+                        if (isSupersetPairValid(pool[i], pool[j])) {
+                            const sc = getSupersetCompatibilityScore(pool[i], pool[j]);
+                            if (sc > bestPairScore) {
+                                bestPairScore = sc;
+                                bestPair = [pool[i], pool[j]];
+                                bestPairIndices = [i, j];
+                            }
+                        }
+                    }
+                }
+
+                if (bestPair) {
+                    pool.splice(bestPairIndices[1], 1);
+                    pool.splice(bestPairIndices[0], 1);
+                    result.push(bestPair[0], bestPair[1]);
+                }
+
+                // 3. Slot 3 için İkincil Düz Set
+                if (pool.length > 0) {
+                    pool.sort((a, b) => getStraightPriority(b) - getStraightPriority(a));
+                    result.push(pool.shift());
+                }
+
+                // 4. Kalan havuzdan varsa ikinci süperset çiftini (B1 + B2) bul
+                if (pool.length >= 2) {
+                    let pairB = null;
+                    let pairBScore = -Infinity;
+                    let pairBIndices = [-1, -1];
+
+                    for (let i = 0; i < pool.length; i++) {
+                        for (let j = i + 1; j < pool.length; j++) {
+                            if (isSupersetPairValid(pool[i], pool[j])) {
+                                const sc = getSupersetCompatibilityScore(pool[i], pool[j]);
+                                if (sc > pairBScore) {
+                                    pairBScore = sc;
+                                    pairB = [pool[i], pool[j]];
+                                    pairBIndices = [i, j];
+                                }
+                            }
+                        }
+                    }
+
+                    if (pairB) {
+                        pool.splice(pairBIndices[1], 1);
+                        pool.splice(pairBIndices[0], 1);
+                        result.push(pairB[0], pairB[1]);
+                    }
+                }
+
+                // 5. Geriye kalan tüm hareketler düz set olarak sona eklenir
+                while (pool.length > 0) {
+                    result.push(pool.shift());
+                }
+
+                return result;
+            } else if (style === 'superset_intense') {
+                // YOĞUN SÜPERSET (Tüm hareketler biyomekanik olarak uyumlu ikililer halinde eşleştirilir)
+                while (pool.length >= 2) {
+                    let bestPair = null;
+                    let bestPairScore = -Infinity;
+                    let bestPairIndices = [-1, -1];
+
+                    for (let i = 0; i < pool.length; i++) {
+                        for (let j = i + 1; j < pool.length; j++) {
+                            if (isSupersetPairValid(pool[i], pool[j])) {
+                                const sc = getSupersetCompatibilityScore(pool[i], pool[j]);
+                                if (sc > bestPairScore) {
+                                    bestPairScore = sc;
+                                    bestPair = [pool[i], pool[j]];
+                                    bestPairIndices = [i, j];
+                                }
+                            }
+                        }
+                    }
+
+                    if (bestPair) {
+                        pool.splice(bestPairIndices[1], 1);
+                        pool.splice(bestPairIndices[0], 1);
+                        result.push(bestPair[0], bestPair[1]);
+                    } else {
+                        // Birbiriyle uyumsuz kalan egzersizleri güvenli düz set olarak sıraya ekle
+                        result.push(pool.shift());
+                    }
+                }
+                if (pool.length > 0) {
+                    result.push(pool.shift());
+                }
+                return result;
+            } else if (style === 'superset_light') {
+                // AZ SÜPERSET (Son 2 hareket kapanış süperseti, öncekiler düz set)
+                if (pool.length < 3) return exercises;
+
+                let bestPair = null;
+                let bestPairScore = -Infinity;
+                let bestPairIndices = [-1, -1];
+
+                for (let i = 0; i < pool.length; i++) {
+                    for (let j = i + 1; j < pool.length; j++) {
+                        if (isSupersetPairValid(pool[i], pool[j])) {
+                            const sc = getSupersetCompatibilityScore(pool[i], pool[j]);
+                            if (sc > bestPairScore) {
+                                bestPairScore = sc;
+                                bestPair = [pool[i], pool[j]];
+                                bestPairIndices = [i, j];
+                            }
+                        }
+                    }
+                }
+
+                if (bestPair) {
+                    pool.splice(bestPairIndices[1], 1);
+                    pool.splice(bestPairIndices[0], 1);
+                    pool.sort((a, b) => getStraightPriority(b) - getStraightPriority(a));
+                    return [...pool, bestPair[0], bestPair[1]];
+                }
+                return exercises;
+            }
+
+            return exercises;
+        }
+
         function assignAcademicBlockStructure(exercises, style, baseScheme) {
             if (!Array.isArray(exercises)) return [];
             const straightRest = (baseScheme && baseScheme.straightRest) || 90;
             const supersetRest = (baseScheme && baseScheme.supersetRest) || 45;
             const midRest = 60;
-            const total = exercises.length;
 
-            return exercises.map((rawEx, idx) => {
+            // ADIM 1: Biyomekanik süperset ve omurga güvenliği kurallarına göre egzersiz sırasını optimize et
+            const optimized = optimizeWorkoutExerciseOrderForSupersets(exercises, style);
+            const total = optimized.length;
+
+            return optimized.map((rawEx, idx) => {
                 const ex = Object.assign({}, rawEx);
                 if (style === 'superset') {
                     // ORTA / AKADEMİK HİBRİT (Schumann et al. 2022 & Weakley et al. 2017):
@@ -2148,30 +2428,62 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                         ex.blockHeader = `🎯 BLOK 1: ANA BİLEŞİK DÜZ SET (${straightRest} sn Tam Dinlenme)`;
                         ex.customRest = straightRest;
                     } else if (idx === 1 && total >= 3) {
-                        ex.blockType = 'superset';
-                        ex.blockLabel = 'A1';
-                        ex.blockHeader = `🔥 SÜPERSET BLOK A (A1 + A2 Peş Peşe • Tur Sonu ${midRest} sn Dinlenme)`;
-                        ex.customRest = midRest;
+                        const pairOk = (idx + 1 < total) && isSupersetPairValid(optimized[1], optimized[2]);
+                        if (pairOk) {
+                            ex.blockType = 'superset';
+                            ex.blockLabel = 'A1';
+                            ex.blockHeader = `🔥 SÜPERSET BLOK A (A1 + A2 Peş Peşe • Tur Sonu ${midRest} sn Dinlenme)`;
+                            ex.customRest = midRest;
+                        } else {
+                            ex.blockType = 'straight';
+                            ex.blockLabel = '2';
+                            ex.blockHeader = `🎯 BLOK 2: BİLEŞİK DÜZ SET (75 sn Dinlenme)`;
+                            ex.customRest = 75;
+                        }
                     } else if (idx === 2 && total >= 3) {
-                        ex.blockType = 'superset';
-                        ex.blockLabel = 'A2';
-                        ex.blockHeader = null;
-                        ex.customRest = midRest;
+                        const pairOk = isSupersetPairValid(optimized[1], optimized[2]);
+                        if (pairOk) {
+                            ex.blockType = 'superset';
+                            ex.blockLabel = 'A2';
+                            ex.blockHeader = null;
+                            ex.customRest = midRest;
+                        } else {
+                            ex.blockType = 'straight';
+                            ex.blockLabel = '3';
+                            ex.blockHeader = `🎯 BLOK 3: TAMAMLAYICI DÜZ SET (75 sn Dinlenme)`;
+                            ex.customRest = 75;
+                        }
                     } else if (idx === 3) {
                         ex.blockType = 'straight';
                         ex.blockLabel = '2';
                         ex.blockHeader = `🎯 BLOK 2: İKİNCİL BİLEŞİK DÜZ SET (75 sn Dinlenme)`;
                         ex.customRest = 75;
                     } else if (idx === 4 && total >= 6) {
-                        ex.blockType = 'superset';
-                        ex.blockLabel = 'B1';
-                        ex.blockHeader = `🔥 SÜPERSET BLOK B (B1 + B2 Peş Peşe • Tur Sonu ${supersetRest} sn Dinlenme)`;
-                        ex.customRest = supersetRest;
+                        const pairOk = (idx + 1 < total) && isSupersetPairValid(optimized[4], optimized[5]);
+                        if (pairOk) {
+                            ex.blockType = 'superset';
+                            ex.blockLabel = 'B1';
+                            ex.blockHeader = `🔥 SÜPERSET BLOK B (B1 + B2 Peş Peşe • Tur Sonu ${supersetRest} sn Dinlenme)`;
+                            ex.customRest = supersetRest;
+                        } else {
+                            ex.blockType = 'straight';
+                            ex.blockLabel = '4';
+                            ex.blockHeader = `🎯 BLOK 4: TAMAMLAYICI DÜZ SET (${supersetRest} sn Dinlenme)`;
+                            ex.customRest = supersetRest;
+                        }
                     } else if (idx === 5 && total >= 6) {
-                        ex.blockType = 'superset';
-                        ex.blockLabel = 'B2';
-                        ex.blockHeader = null;
-                        ex.customRest = supersetRest;
+                        const pairOk = isSupersetPairValid(optimized[4], optimized[5]);
+                        if (pairOk) {
+                            ex.blockType = 'superset';
+                            ex.blockLabel = 'B2';
+                            ex.blockHeader = null;
+                            ex.customRest = supersetRest;
+                        } else {
+                            ex.blockType = 'straight';
+                            ex.blockLabel = '5';
+                            ex.blockHeader = `🎯 BLOK 5: TAMAMLAYICI DÜZ SET (${supersetRest} sn Dinlenme)`;
+                            ex.customRest = supersetRest;
+                        }
                     } else if (idx === 6) {
                         ex.blockType = 'straight';
                         ex.blockLabel = '3';
@@ -2186,12 +2498,13 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 } else if (style === 'superset_light') {
                     // AZ SÜPERSET: İlk N-2 hareket Düz Set, yalnızca son 2 hareket Kapanış Süperseti (A1+A2)
                     const supersetStartIdx = total >= 3 ? total - 2 : -1;
-                    if (supersetStartIdx !== -1 && idx === supersetStartIdx) {
+                    const pairOk = supersetStartIdx !== -1 && isSupersetPairValid(optimized[supersetStartIdx], optimized[supersetStartIdx + 1]);
+                    if (pairOk && idx === supersetStartIdx) {
                         ex.blockType = 'superset';
                         ex.blockLabel = 'A1';
                         ex.blockHeader = `🔥 KAPANIŞ SÜPERSETİ BLOK A (A1 + A2 Peş Peşe • Tur Sonu ${supersetRest} sn Dinlenme)`;
                         ex.customRest = supersetRest;
-                    } else if (supersetStartIdx !== -1 && idx === supersetStartIdx + 1) {
+                    } else if (pairOk && idx === supersetStartIdx + 1) {
                         ex.blockType = 'superset';
                         ex.blockLabel = 'A2';
                         ex.blockHeader = null;
@@ -2211,21 +2524,26 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     const blockLetter = String.fromCharCode(65 + pairIdx);
                     const isFirstInPair = idx % 2 === 0;
                     const hasPartner = (idx + 1) < total;
-                    if (isFirstInPair && hasPartner) {
+                    const partnerIdx = isFirstInPair ? idx + 1 : idx - 1;
+                    const pairOk = hasPartner && isFirstInPair 
+                        ? isSupersetPairValid(optimized[idx], optimized[idx + 1])
+                        : (partnerIdx >= 0 && isSupersetPairValid(optimized[partnerIdx], optimized[idx]));
+
+                    if (isFirstInPair && hasPartner && pairOk) {
                         ex.blockType = 'superset';
                         ex.blockLabel = `${blockLetter}1`;
                         ex.blockHeader = `🔥 SÜPERSET BLOK ${blockLetter} (${blockLetter}1 + ${blockLetter}2 Dinlenmeden Peş Peşe • ${supersetRest} sn Dinlenme)`;
                         ex.customRest = supersetRest;
-                    } else if (!isFirstInPair) {
+                    } else if (!isFirstInPair && pairOk) {
                         ex.blockType = 'superset';
                         ex.blockLabel = `${blockLetter}2`;
                         ex.blockHeader = null;
                         ex.customRest = supersetRest;
                     } else {
                         ex.blockType = 'straight';
-                        ex.blockLabel = `${blockLetter}1`;
-                        ex.blockHeader = `🎯 KAPANIŞ SETİ ${blockLetter}`;
-                        ex.customRest = supersetRest;
+                        ex.blockLabel = String(idx + 1);
+                        ex.blockHeader = `🎯 GÜVENLİ DÜZ SET ${idx + 1} (${straightRest} sn Dinlenme)`;
+                        ex.customRest = straightRest;
                     }
                 } else if (style === 'emom') {
                     ex.blockType = 'emom';
@@ -2242,6 +2560,10 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 return ex;
             });
         }
+        window.isSpinalAxialLoadedExercise = isSpinalAxialLoadedExercise;
+        window.isSupersetPairValid = isSupersetPairValid;
+        window.getSupersetCompatibilityScore = getSupersetCompatibilityScore;
+        window.optimizeWorkoutExerciseOrderForSupersets = optimizeWorkoutExerciseOrderForSupersets;
         window.assignAcademicBlockStructure = assignAcademicBlockStructure;
 
         // KATMAN 5: SON 7 GÜNLÜK ANTRENMAN GEÇMİŞİ & TAKVİM HAFIZASI (ALT KAS AÇIĞI VE HAREKET TEKRARI KORUMASI)
@@ -2451,11 +2773,12 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                         );
                     }
                     if (subKeyMatches.length === 0 && strictIso) {
-                        // İzole kas modunda ekipman havuzu tükense bile farklı hareket ailesi kısıtını gevşeterek (sadece ID tekilliğiyle) aynı kastan hareket seç
+                        // İzole kas modunda ekipman havuzu dar olsa bile ikiz hareket ailesini (Örn: Barbell Row + Pendlay Row) ve çift eksenel omurga yükünü ASLA aynı seansa alma!
                         subKeyMatches = EXERCISES_DB.filter(ex =>
                             !isExerciseExcludedByUser(ex.id) &&
                             selectedEquipments.includes(ex.equipment) &&
                             !usedIds.includes(ex.id) &&
+                            !usedFamilies.has(getExerciseMovementFamily(ex)) &&
                             (matchesPrimaryFor(preferredSubKeys)(ex) || matchesAnyCoveredFor(preferredSubKeys)(ex))
                         );
                     }
@@ -2805,12 +3128,11 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     }
                 });
 
-                // Odak kas grubu hareketlerini işaretle ve seansın ilk sıralarına (A1/A2...) taşı
+                // Odak kas grubu hareketlerini işaretle (Sıralama ve blok eşleştirmesi Katman 4 optimizeWorkoutExerciseOrderForSupersets tarafından biyomekanik kurallarla yapılır)
                 if (activeFocusMatchers.length > 0) {
                     chosenExercises.forEach(ex => {
                         if (isAnyFocusMatch(ex)) ex.isWishFocus = true;
                     });
-                    chosenExercises.sort((a, b) => (b.isWishFocus ? 1 : 0) - (a.isWishFocus ? 1 : 0));
                 }
 
                 // 3. SEKONDER (SİNERJİST) KAS ETİKETLEMESİ:
@@ -3621,6 +3943,11 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 `;
             }
 
+            const openGymMedia = (typeof window !== 'undefined' && window.OPENGYM_GLOBAL_CATALOG && window.OPENGYM_GLOBAL_CATALOG[ex.id]) ? window.OPENGYM_GLOBAL_CATALOG[ex.id] : null;
+            const hasOpenGym = !!openGymMedia;
+            // Egzersize özel gerçek bir fotoğraf rehberi var mı (db_hammer_curl yanlış eşleşen curl rehberini almasın)
+            const hasPhotoGuide = !!(photoGuide && photoGuide.form && ex.id !== 'db_hammer_curl');
+
             const contentClass = defaultCollapsed ? 'pos-guide-content collapsed' : 'pos-guide-content';
             const btnText = defaultCollapsed ? '📖 Formu Gör ▼' : '📖 Formu Gizle ▲';
 
@@ -3635,10 +3962,21 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     <div class="${contentClass}" id="${collapseId}">
                         <!-- TABS SWITCHER (BASİT İKONLAR) -->
                         <div class="guide-toggle-tabs" style="display:flex; justify-content:center; gap:6px; padding:4px;">
-                            <button type="button" class="btn-guide-tab active" id="tab_btn_form_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'form')" title="Form Rehberi" style="padding:5px 12px; font-size:12px; font-weight:800;">
-                                📸 Form
-                            </button>
-                            <button type="button" class="btn-guide-tab" id="tab_btn_anatomi_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'anatomi')" title="Çalışan Kaslar" style="padding:5px 12px; font-size:12px; font-weight:800;">
+                            ${hasOpenGym ? `
+                                <button type="button" class="btn-guide-tab active" id="tab_btn_animasyon_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'animasyon')" title="Canlı Hareket Animasyonu" style="padding:5px 12px; font-size:12px; font-weight:800; background:rgba(56,189,248,0.15); color:var(--cyan); border:1px solid rgba(56,189,248,0.35);">
+                                    🎬 Animasyon
+                                </button>
+                            ` : ''}
+                            ${hasPhotoGuide ? `
+                                <button type="button" class="btn-guide-tab ${!hasOpenGym ? 'active' : ''}" id="tab_btn_form_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'form')" title="Form Rehberi" style="padding:5px 12px; font-size:12px; font-weight:800;">
+                                    📸 ${hasOpenGym ? 'Fotoğraf' : 'Form'}
+                                </button>
+                            ` : (!hasOpenGym ? `
+                                <button type="button" class="btn-guide-tab active" id="tab_btn_form_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'form')" title="Form Rehberi" style="padding:5px 12px; font-size:12px; font-weight:800;">
+                                    📸 Form
+                                </button>
+                            ` : '')}
+                            <button type="button" class="btn-guide-tab ${(!hasOpenGym && !hasPhotoGuide && !formVisualHtml) ? 'active' : ''}" id="tab_btn_anatomi_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'anatomi')" title="Çalışan Kaslar" style="padding:5px 12px; font-size:12px; font-weight:800;">
                                 🧬 Kaslar
                             </button>
                             <button type="button" class="btn-guide-tab" id="tab_btn_adimlar_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'adimlar')" title="Adım Adım Talimatlar" style="padding:5px 12px; font-size:12px; font-weight:800;">
@@ -3646,8 +3984,35 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                             </button>
                         </div>
 
+                        ${hasOpenGym ? `
+                            <!-- PANEL 0: OPENGYM ANIMATION -->
+                            <div class="guide-tab-panel active" id="panel_animasyon_${collapseId}">
+                                <div class="pos-diagram-wrap" id="wrap_anim_${collapseId}" style="position:relative; background:#000; border-radius:12px; overflow:hidden; border:1px solid rgba(56,189,248,0.3); padding:4px;">
+                                    <div class="pos-diagram-toolbar">
+                                        <button type="button" class="btn-diagram-tool" onclick="event.stopPropagation(); openImageLightbox('${openGymMedia.clip}', '${escapeHTML(ex.name)} - Canlı Animasyon')" title="Tam ekran oynat">
+                                            <span class="tool-icon">⛶</span> <span class="tool-text">Büyüt</span>
+                                        </button>
+                                        ${hasPhotoGuide ? `
+                                            <button type="button" class="btn-diagram-tool" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'form')" title="Fotoğraf rehberine bak">
+                                                <span class="tool-icon">📸</span> <span class="tool-text">Fotoğrafa Geç</span>
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                    <div style="cursor:pointer; display:flex; justify-content:center; align-items:center; min-height:200px; max-height:280px;" onclick="event.stopPropagation(); openImageLightbox('${openGymMedia.clip}', '${escapeHTML(ex.name)} - Canlı Animasyon')">
+                                        <video src="${openGymMedia.clip}" poster="${openGymMedia.still}" autoplay loop muted playsinline style="width:100%; max-height:260px; object-fit:contain; display:block;" onerror="this.style.display='none'; const st=document.getElementById('still_fallback_${collapseId}'); if(st) st.style.display='block';"></video>
+                                        <img id="still_fallback_${collapseId}" src="${openGymMedia.still}" alt="${escapeHTML(ex.name)}" style="display:none; width:100%; max-height:260px; object-fit:contain;">
+                                    </div>
+                                    <div style="font-size:11px; color:#38bdf8; font-weight:700; padding:6px 10px; background:rgba(0,0,0,0.6); display:flex; justify-content:space-between; align-items:center; border-top:1px solid rgba(255,255,255,0.06);">
+                                        <span>⚡ OpenGym Doğrulanmış Animasyon</span>
+                                        <span style="color:var(--text-secondary); font-size:10px;">🔍 Dokun: Büyüt</span>
+                                    </div>
+                                </div>
+                                ${extraInfoHtml}
+                            </div>
+                        ` : ''}
+
                         <!-- PANEL 1: FORM PHOTO / VECTOR -->
-                        <div class="guide-tab-panel active" id="panel_form_${collapseId}">
+                        <div class="guide-tab-panel ${!hasOpenGym ? 'active' : ''}" id="panel_form_${collapseId}">
                             ${formVisualHtml}
                         </div>
 
@@ -17901,7 +18266,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=227')
+                navigator.serviceWorker.register('./sw.js?v=228')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();

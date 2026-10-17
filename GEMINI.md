@@ -1,40 +1,36 @@
-# ÇELİK KODU (FITNESS PWA) - LIVE DEPLOYMENT & RELEASE RULES
+# ÇELİK KODU (FITNESS PWA) - LOCAL-FIRST & KATI CANLIYA ALMA YASAĞI
 
-Bu kurallar, projedeki her değişiklikten sonra canlıya alma (deployment) sürecinin eksiksiz ve otomatik yürütülmesi için ZORUNLUDUR.
-
----
-
-## 1. Mimari Gerçek: Canlı Ortam Yapısı
-* Bu proje **GitHub Pages** üzerinde çalışmaktadır ve doğrudan `origin/main` dalını takip eder (Özel alan adı: **`fitness.kantarci.io`**).
-* Kodların yalnızca yerel diskte (lokalde) düzenlenmesi **KULLANICI TARAFINDAN CANLIDA GÖRÜLEMEZ.**
-* Canlıya alınmamış her değişiklik tamamlanmamış sayılır.
+Bu kural İSTİSNASIZDIR ve tüm görevlerde en üst önceliğe sahiptir:
 
 ---
 
-## 2. Zorunlu Sürüm ve Canlı Dağıtım Protokolü (Her Görevde Uygulanacak)
+## 1. KESİN VE KATİ KURAL: ASLA KULLANICI İZNİ OLMADAN CANLIYA ALMA
+* **Her Şey Lokalde:** Tüm kod düzenlemeleri, stil güncellemeleri, hata düzeltmeleri ve testler YALNIZCA YEREL DİSKTE (lokalde) yapılır ve lokalde bırakılır.
+* **Otomatik `git push` Kesinlikle Yasaktır:** Kullanıcı açıkça ve doğrudan "canlıya al", "deploy et", "push yap" veya "yayınla" talimatı vermedikçe remote depoya ASLA `git push` çalıştırılamaz.
+* **Görev Bitiş Kriteri:** Bir görevin tamamlanması için canlıya çıkış ŞART DEĞİLDİR; yerel dosyaların doğru şekilde güncellenmesi, sözdizimi testinin geçmesi ve kullanıcıya lokal durumun bildirilmesi yeterlidir.
 
-Herhangi bir kod, stil veya arayüz değişikliği yapıldığında istisnasız şu adımlar sırasıyla uygulanmalıdır:
+---
+
+## 2. Canlıya Çıkış Protokolü (YALNIZCA KULLANICI AÇIKÇA İSTEDİĞİNDE)
+
+Kullanıcı "canlıya al / push et" dediğinde şu adımlar uygulanır:
 
 ### Adım 1: Sürüm Numarasını (Version Bump) 4 Noktada Eşitle
-Aşağıdaki 4 noktadaki sürüm numarası bir üst sürüme (örn. `v75` -> `v76`) BİREBİR AYNI ANDA güncellenmelidir:
 1. `index.html` Giriş Ekranı Rozeti: `<div class="badge-brand">... • vXX</div>`
 2. `index.html` Üst Bar Rozeti: `<span class="app-version-badge" id="appVersionBadge">vXX</span>`
 3. `sw.js` Service Worker Önbellek Adı: `const CACHE_NAME = 'celik-kodu-cache-vXX';`
 4. `index.html` Service Worker Kayıt Parametresi: `navigator.serviceWorker.register('./sw.js?v=XX')`
-*(Bu adım, mobil cihazlarda ve tarayıcılarda PWA Service Worker'ın eski sayfayı önbellekten vermesini engeller ve güncellemeyi anında tetikler).*
 
 ### Adım 2: Sözdizimi (Syntax) ve Bütünlük Kontrolü
 * Değiştirilen dosyalarda (özellikle `index.html` içindeki JS bloklarında) sözdizimi hatası olmadığını doğrula (`node -e ...`).
 
-### Adım 3: Git Commit ve Git Push (Canlıya Çıkış)
-* Değişiklikleri yerelde bırakma!
+### Adım 3: Kullanıcı Onaylı Git Commit ve Push
 * `git add <dosyalar>`
 * `git commit -m "feat/fix: <açıklayıcı mesaj> (vXX)"`
-* `git push origin main` komutunu ÇALIŞTIR. Push başarılı olmadan görev tamamlandı denilemez.
+* `git push origin main` komutunu YALNIZCA bu talimat geldiğinde çalıştır.
 
 ### Adım 4: Kullanıcıya Canlı Doğrulama Bilgisi Ver
-* Canlıya çıkan sürüm numarasını belirt (örn. `v76`).
-* PWA önbellek yenilemesi için gerekirse sayfayı yenilemelerini veya "Uygulamayı Güncelle / Önbelleği Temizle" butonunu kullanabileceklerini hatırlat.
+* Canlıya çıkan sürüm numarasını belirt.
 
 ---
 

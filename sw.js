@@ -1,4 +1,4 @@
-const CACHE_NAME = 'celik-kodu-cache-v227';
+const CACHE_NAME = 'celik-kodu-cache-v228';
 const ASSETS = [
   './',
   './index.html',
