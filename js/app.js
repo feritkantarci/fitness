@@ -464,7 +464,10 @@
             document.querySelectorAll('#isoMuscleGrid .iso-muscle-chip').forEach(chip => {
                 const isoKey = chip.getAttribute('data-iso-key');
                 if (isoKey) {
-                    chip.classList.toggle('selected', selectedSplits.includes(isoKey));
+                    const isSelected = selectedSplits.includes(isoKey);
+                    chip.classList.toggle('selected', isSelected);
+                    chip.classList.toggle('active', isSelected);
+                    chip.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
                 }
             });
         }
@@ -1138,6 +1141,7 @@
                 }
                 if (ctaBtn) ctaBtn.innerHTML = `${CANVA_ICONS.bolt} Programı Oluştur`;
             } else {
+                if (typeof renderSplitCards === 'function') renderSplitCards();
                 if (typeof updateSelectedSplitLabel === 'function') updateSelectedSplitLabel();
                 if (ctaBtn) ctaBtn.innerHTML = `${CANVA_ICONS.bolt} Antrenmanı Oluştur`;
             }
@@ -17325,7 +17329,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=224')
+                navigator.serviceWorker.register('./sw.js?v=225')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
@@ -17355,6 +17359,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             updateProfileGeminiStatusUI();
             renderAiHybridHeroBanner();
             updateSelectedSplitLabel();
+            renderSplitCards();
             updateSelectedEquipLabel();
             updateSelectedParamLabel();
             const hasRestored = restoreActiveWorkoutStateFromStorage();
