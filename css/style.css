@@ -5831,8 +5831,8 @@
         .anatomy-svg {
             width: 100%;
             height: auto;
-            max-height: 380px;
-            filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.6));
+            max-height: 400px;
+            filter: drop-shadow(0 4px 14px rgba(15, 23, 42, 0.08));
             user-select: none;
         }
 
@@ -6204,23 +6204,23 @@
             --green-success: #B6F059;
             --green: #B6F059;
             --red-alert: #F87171;
-            --text-primary: #F3F6FA;
-            --text-secondary: #94A3B8;
+            --text-primary: #0F172A;
+            --text-secondary: #475569;
             --text-tertiary: #64748B;
-            --text-muted: #94A3B8;
+            --text-muted: #64748B;
             --font-display: "Outfit", -apple-system, BlinkMacSystemFont, sans-serif;
             --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
             --font-mono: "JetBrains Mono", "Plus Jakarta Sans", monospace;
             --radius-sm: 10px;
             --radius-md: 14px;
             --radius-lg: 20px;
-            color-scheme: dark;
-            accent-color: #B6F059;
+            color-scheme: light;
+            accent-color: #84CC16;
         }
 
         html {
-            color-scheme: dark !important;
-            accent-color: #B6F059 !important;
+            color-scheme: light !important;
+            accent-color: #84CC16 !important;
         }
 
         body {
@@ -8472,6 +8472,263 @@
         .hud-progress-info,
         .hud-progress-detail {
             color: #64748B !important;
+        }
+
+        /* Active Workout Hevy Table & Set Controls (High Contrast) */
+        .hevy-exercise-card {
+            background: #FFFFFF !important;
+            border: 1.5px solid #E2E8F0 !important;
+            border-radius: 20px !important;
+            box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05) !important;
+        }
+
+        .hevy-exercise-title {
+            color: #0F172A !important;
+            font-weight: 900 !important;
+        }
+
+        .hevy-sets-card {
+            background: #FFFFFF !important;
+            border: 1.5px solid #CBD5E1 !important;
+            border-radius: 18px !important;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04) !important;
+            overflow: hidden !important;
+        }
+
+        .hevy-th-row {
+            background: #F1F5F9 !important;
+            border-bottom: 1.5px solid #CBD5E1 !important;
+            color: #334155 !important;
+            font-weight: 900 !important;
+        }
+
+        .hevy-th {
+            color: #334155 !important;
+            font-weight: 900 !important;
+        }
+
+        .hevy-tr-row {
+            background: #FFFFFF !important;
+            border-bottom: 1px solid #E2E8F0 !important;
+        }
+
+        .hevy-tr-row.active-target {
+            background: #FEF9C3 !important;
+            border-left: 3px solid #EAB308 !important;
+        }
+
+        .hevy-tr-row.done {
+            background: #F0FDF4 !important;
+        }
+
+        .hevy-set-pill {
+            background: #F1F5F9 !important;
+            border: 1.5px solid #CBD5E1 !important;
+            color: #0F172A !important;
+            font-size: 12px !important;
+            font-weight: 800 !important;
+        }
+
+        .hevy-set-pill.target {
+            background: #FEF08A !important;
+            border-color: #EAB308 !important;
+            color: #854D0E !important;
+        }
+
+        .hevy-set-pill.done {
+            background: #84CC16 !important;
+            border-color: #65A30D !important;
+            color: #0A0E17 !important;
+        }
+
+        .hevy-prev-text {
+            color: #64748B !important;
+            font-weight: 700 !important;
+        }
+
+        .hevy-prev-text.clickable {
+            color: #0284C7 !important;
+            text-decoration: underline dotted !important;
+        }
+
+        .hevy-listbox-btn {
+            background: #FFFFFF !important;
+            border: 1.5px solid #CBD5E1 !important;
+            color: #0F172A !important;
+            font-size: 13.5px !important;
+            font-weight: 800 !important;
+        }
+
+        .hevy-listbox-btn span {
+            color: #0F172A !important;
+            font-weight: 800 !important;
+        }
+
+        .hevy-listbox-btn:hover {
+            border-color: #84CC16 !important;
+            color: #0F172A !important;
+            background: #F7FEE7 !important;
+        }
+
+        .hevy-listbox-btn:hover span {
+            color: #0F172A !important;
+        }
+
+        .hevy-tr-row.active-target .hevy-listbox-btn {
+            background: #FFFFFF !important;
+            border-color: #EAB308 !important;
+            color: #0F172A !important;
+        }
+
+        .hevy-tr-row.active-target .hevy-listbox-btn span {
+            color: #0F172A !important;
+        }
+
+        .hevy-tr-row.done .hevy-listbox-btn {
+            background: #DCFCE7 !important;
+            border-color: #86EFAC !important;
+            color: #166534 !important;
+        }
+
+        .hevy-tr-row.done .hevy-listbox-btn span {
+            color: #166534 !important;
+        }
+
+        .hevy-listbox-btn.bw-load-btn {
+            color: #0284C7 !important;
+            border-color: #BAE6FD !important;
+            background: #F0F9FF !important;
+        }
+
+        .hevy-listbox-btn.bw-load-btn span {
+            color: #0284C7 !important;
+        }
+
+        .hevy-listbox-btn.time-metric-btn {
+            color: #D97706 !important;
+            border-color: #FDE68A !important;
+            background: #FFFBEB !important;
+        }
+
+        .hevy-listbox-btn.time-metric-btn span {
+            color: #D97706 !important;
+        }
+
+        .listbox-btn-arrow {
+            color: #475569 !important;
+            opacity: 1 !important;
+        }
+
+        .hevy-tr-row.active-target .listbox-btn-arrow {
+            color: #B45309 !important;
+        }
+
+        .hevy-tr-row.done .listbox-btn-arrow {
+            color: #166534 !important;
+        }
+
+        .btn-hevy-check {
+            background: #FFFFFF !important;
+            border: 1.5px solid #CBD5E1 !important;
+            color: #64748B !important;
+        }
+
+        .btn-hevy-check.target {
+            background: #FEF9C3 !important;
+            border: 2px solid #EAB308 !important;
+            color: #854D0E !important;
+        }
+
+        .btn-hevy-check.checked {
+            background: #84CC16 !important;
+            border: 1.5px solid #65A30D !important;
+            color: #0A0E17 !important;
+        }
+
+        .hevy-table-footer {
+            background: #F8FAFC !important;
+            border-top: 1.5px solid #E2E8F0 !important;
+        }
+
+        .btn-hevy-add-set {
+            background: #FFFFFF !important;
+            border: 1.5px solid #86EFAC !important;
+            color: #15803D !important;
+            font-weight: 800 !important;
+        }
+
+        .btn-hevy-add-set:hover {
+            background: #F0FDF4 !important;
+        }
+
+        .btn-hevy-del-set {
+            background: #FFFFFF !important;
+            border: 1.5px solid #FECACA !important;
+            color: #DC2626 !important;
+            font-weight: 800 !important;
+        }
+
+        .btn-hevy-del-set:hover {
+            background: #FEF2F2 !important;
+        }
+
+        .hevy-form-collapsible {
+            background: #FFFFFF !important;
+            border: 1.5px dashed #CBD5E1 !important;
+            border-radius: 12px !important;
+        }
+
+        .btn-hevy-form-toggle {
+            color: #475569 !important;
+            font-weight: 800 !important;
+        }
+
+        .btn-hevy-form-toggle:hover {
+            color: #0F172A !important;
+            background: #F8FAFC !important;
+        }
+
+        .hevy-meta-item {
+            color: #475569 !important;
+            font-weight: 700 !important;
+        }
+
+        .hevy-meta-item strong {
+            color: #0F172A !important;
+            font-weight: 900 !important;
+        }
+
+        .workout-floating-dock {
+            background: rgba(255, 255, 255, 0.98) !important;
+            border: 1.5px solid #CBD5E1 !important;
+            border-radius: 18px !important;
+            color: #0F172A !important;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12) !important;
+            backdrop-filter: blur(14px) !important;
+        }
+
+        .btn-dock-nav {
+            background: #F1F5F9 !important;
+            border: 1.5px solid #CBD5E1 !important;
+            color: #0F172A !important;
+            font-weight: 800 !important;
+        }
+
+        .btn-dock-nav.next {
+            background: #84CC16 !important;
+            border-color: #65A30D !important;
+            color: #0A0E17 !important;
+            box-shadow: 0 2px 10px rgba(132, 204, 22, 0.3) !important;
+        }
+
+        .dock-ex-name {
+            color: #0F172A !important;
+            font-weight: 800 !important;
+        }
+
+        .dock-ex-counter {
+            color: #15803D !important;
+            font-weight: 900 !important;
         }
 
         /* 7. Exercise Library Grid & Cards */
