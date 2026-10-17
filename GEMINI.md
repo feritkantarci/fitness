@@ -69,4 +69,13 @@ Aşağıdaki 4 noktadaki sürüm numarası bir üst sürüme (örn. `v75` -> `v7
 * **Varsayılan Kapalı (Collapsible) Tasarım:**
   Bu bloklar varsayılan olarak kapalı tutulur. Kullanıcı kart üzerinde yalnızca temiz ve kompakt bir toggle butonu görür (`💡 Koç Tavsiyesi (X Öneri) ▼ Göster`). Kullanıcı istediğinde tek dokunuşla açıp kapatabilir. Böylece haftalık analiz ekranı şişmez, son derece akıcı ve okunabilir kalır.
 
+---
+
+## 6. Hafif & Kanıta Dayalı Hata Ayıklama (Token Tasarrufu & Sıfır Regresyon)
+* **Spekülasyon & Tahmin Yasağı:**
+  Hatalarda veya beklenmeyen davranışlarda varsayımlarla rastgele kod değiştirilmez. Konsol çıktısı, DOM durumu veya veri akışındaki somut kanıt tespit edilmeden müdahale yapılamaz.
+* **Hafif Doğrulama & Canlı Bütünlük:**
+  Her değişiklik sonrası `node -e` ile sözdizimi doğrulanır ve yalnızca hedeflenen özelliğin değil, çevre bileşenlerin de bozulmadığı teyit edilir. Ağır çoklu ajan süreçleri yerine doğrudan ve hızlı doğrulama esastır.
+
+
 
