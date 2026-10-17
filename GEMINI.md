@@ -77,5 +77,15 @@ Aşağıdaki 4 noktadaki sürüm numarası bir üst sürüme (örn. `v75` -> `v7
 * **Hafif Doğrulama & Canlı Bütünlük:**
   Her değişiklik sonrası `node -e` ile sözdizimi doğrulanır ve yalnızca hedeflenen özelliğin değil, çevre bileşenlerin de bozulmadığı teyit edilir. Ağır çoklu ajan süreçleri yerine doğrudan ve hızlı doğrulama esastır.
 
+---
+
+## 7. İki Aşamalı Kod İnceleme & Öz-Teşhis (Superpowers Adaptasyonu)
+* **2 Aşamalı İnceleme Filtresi:** Kod teslim edilmeden ve canlıya basılmadan önce 2 filtre zorunludur:
+  1. *Şartname Doğrulaması:* Kullanıcının istediği tüm isterler ve fonksiyonlar eksiksiz tamamlandı mı?
+  2. *Bütünlük & Regresyon Kontrolü:* Yapılan değişiklik mevcut butonları, PWA önbelleğini, yerel veri saklamayı veya görsel hiyerarşiyi bozdu mu?
+* **Ajan Öz-Teşhisi (Döngü Kırıcı):**
+  Bir hata 2 denemede çözülemezse spekülatif 3. deneme YASAKTIR. Ajan derhal durur, oturum transkriptini tarar, peşin kabul ettiği hatalı varsayımı (assumption) açıkça masaya yatırır ve kullanıcıdan tek bir net kanıt ister.
+
+
 
 
