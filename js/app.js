@@ -3421,6 +3421,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 createdAt: Date.now()
             };
 
+            window.currentGeneratedWorkout = currentGeneratedWorkout;
             try {
                 localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(currentGeneratedWorkout));
             } catch(e) {}
@@ -10403,25 +10404,25 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 const targetParam = encodeURIComponent(ex.id || ex.name || '');
                                 const setsList = ex.sets || [];
                                 return `
-                                    <div class="log-exercise-item" style="background:#0E131B; border:1px solid #222C3A; border-radius:8px; padding:10px 12px; margin-bottom:6px;">
+                                    <div class="log-exercise-item" style="background:#FFFFFF; border:1.5px solid #E2E8F0; border-radius:12px; padding:10px 12px; margin-bottom:8px; box-shadow:0 2px 8px rgba(15,23,42,0.04);">
                                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:8px;">
                                             <div style="min-width:0; flex:1;">
-                                                <strong style="color:#F3F6FA; font-size:13px; word-break:break-word;">${exName}</strong>
-                                                <div style="font-size:11px; color:var(--text-secondary); margin-top:1px;">
+                                                <strong class="log-ex-name" style="color:#0F172A; font-size:13px; font-weight:800; word-break:break-word;">${exName}</strong>
+                                                <div style="font-size:11px; color:#64748B; margin-top:2px; font-weight:600;">
                                                     ${escapeHTML(ex.muscle ? ex.muscle.split(',')[0] : '')}${ex.exerciseVolume ? ` • ${Math.round(ex.exerciseVolume).toLocaleString('tr-TR')} kg` : ''}
                                                 </div>
                                             </div>
-                                            <button type="button" class="btn btn-outline" style="padding:4px 8px; font-size:11px; border-radius:6px; flex-shrink:0;" onclick="openExerciseDetailModal(decodeURIComponent('${targetParam}'))" title="Hareket Rehberi">
+                                            <button type="button" class="btn btn-outline" style="padding:4px 8px; font-size:11px; border-radius:6px; flex-shrink:0; font-weight:700;" onclick="openExerciseDetailModal(decodeURIComponent('${targetParam}'))" title="Hareket Rehberi">
                                                 👁️ Rehber
                                             </button>
                                         </div>
                                         <div class="log-sets-summary" style="display:flex; flex-wrap:wrap; gap:4px;">
                                             ${setsList.map(st => st.completed ? `
-                                                <span class="log-set-pill completed" style="background:rgba(34, 197, 94, 0.15); border:1px solid rgba(34, 197, 94, 0.4); color:#B6F059; border-radius:4px; padding:3px 7px; font-size:11px; font-weight:700;">
-                                                    S${st.setNo}: <strong>${st.weight || 0}kg</strong> x ${st.reps || 0} ✓
+                                                <span class="log-set-pill completed" style="background:rgba(34, 197, 94, 0.12); border:1px solid rgba(34, 197, 94, 0.4); color:#15803D; border-radius:5px; padding:3px 7px; font-size:11px; font-weight:700;">
+                                                    S${st.setNo}: <strong style="color:#15803D;">${st.weight || 0}kg</strong> x ${st.reps || 0} ✓
                                                 </span>
                                             ` : `
-                                                <span class="log-set-pill" style="opacity:0.4; border:1px dashed #ef4444; color:#fca5a5; border-radius:4px; padding:3px 7px; font-size:11px; text-decoration:line-through;">
+                                                <span class="log-set-pill" style="opacity:0.6; border:1px dashed #ef4444; color:#dc2626; border-radius:5px; padding:3px 7px; font-size:11px; text-decoration:line-through; font-weight:600;">
                                                     S${st.setNo}: Atlandı
                                                 </span>
                                             `).join('')}
@@ -15296,8 +15297,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                     return `
                                     <div class="log-exercise-item">
                                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                                            <strong style="color:#F3F6FA; font-size:12px;">${escapeHTML(ex.name)}</strong>
-                                            <span style="font-size:11px; color:var(--text-secondary);">${escapeHTML(ex.muscle ? ex.muscle.split(',')[0] : '')}${volText}</span>
+                                            <strong class="log-ex-name" style="color:#0F172A; font-size:12.5px; font-weight:800;">${escapeHTML(ex.name)}</strong>
+                                            <span style="font-size:11px; color:#64748B; font-weight:600;">${escapeHTML(ex.muscle ? ex.muscle.split(',')[0] : '')}${volText}</span>
                                         </div>
                                         <div class="log-sets-summary">
                                             ${(ex.sets || []).map(st => st.completed ? `
@@ -15305,7 +15306,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                                     S${st.setNo}: <strong>${formatSetWeightDisplay(isBw, st.weight)}</strong> × ${formatSetMetricDisplay(isTime, st.reps)} ✓
                                                 </span>
                                             ` : `
-                                                <span class="log-set-pill" style="opacity:0.4; border-style:dashed; text-decoration:line-through;">
+                                                <span class="log-set-pill" style="opacity:0.6; border-style:dashed; text-decoration:line-through; font-weight:600;">
                                                     S${st.setNo}: Atlandı
                                                 </span>
                                             `).join('')}

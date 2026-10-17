@@ -8533,10 +8533,50 @@
         }
 
         .log-exercise-item {
-            background: #F8FAFC !important;
-            border: 1px solid #E2E8F0 !important;
-            border-radius: 10px !important;
+            background: #FFFFFF !important;
+            border: 1.5px solid #E2E8F0 !important;
+            border-radius: 12px !important;
             color: #0F172A !important;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+        }
+
+        .log-exercise-item strong,
+        .log-exercise-item .log-ex-name,
+        .log-exercise-item [style*="color:#F3F6FA"],
+        .log-exercise-item [style*="color: #F3F6FA"],
+        .log-exercise-item [style*="color:#f3f6fa"],
+        .log-exercise-item [style*="color: #f3f6fa"],
+        .log-exercise-item [style*="color:#FFFFFF"],
+        .log-exercise-item [style*="color: #FFFFFF"],
+        .log-exercise-item [style*="color:#ffffff"],
+        .log-exercise-item [style*="color: #ffffff"],
+        .log-exercise-item [style*="color:#fff"],
+        .log-exercise-item [style*="color: #fff"],
+        .log-exercise-item [style*="color:white"],
+        .log-exercise-item [style*="color: white"] {
+            color: #0F172A !important;
+            font-weight: 800 !important;
+        }
+
+        .log-set-pill {
+            background: #F1F5F9 !important;
+            border: 1px solid #CBD5E1 !important;
+            border-radius: 6px !important;
+            padding: 2.5px 7px !important;
+            font-size: 11px !important;
+            color: #475569 !important;
+            font-weight: 700 !important;
+        }
+
+        .log-set-pill.completed {
+            background: rgba(34, 197, 94, 0.12) !important;
+            border: 1px solid rgba(34, 197, 94, 0.4) !important;
+            color: #15803D !important;
+            font-weight: 700 !important;
+        }
+
+        .log-set-pill.completed strong {
+            color: #15803D !important;
         }
 
         /* 9. Analytics Sub-Tabs & Tables (Rule 4 GEMINI.md) */
