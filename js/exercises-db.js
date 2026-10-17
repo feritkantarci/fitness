@@ -189,7 +189,17 @@
             'bw_mountain_climber': guideLibrary.mountain_climber,
             'bw_hanging_knee_raise': guideLibrary.hanging_knee_raise,
             'kb_windmill': guideLibrary.windmill,
-            'kb_turkish_getup': guideLibrary.windmill
+            'kb_turkish_getup': guideLibrary.windmill,
+            'db_clean_squat_press': guideLibrary.db_clean_and_press,
+            'db_seesaw_lunge': guideLibrary.lunge,
+            'db_rdl_to_high_pull': guideLibrary.rdl,
+            'db_swing_to_goblet_squat': guideLibrary.swing,
+            'db_pullover_to_halo': guideLibrary.pullover,
+            'db_lunge_to_curl_press': guideLibrary.lunge,
+            'db_gorilla_row_to_clean': guideLibrary.gorilla_row,
+            'db_floor_press_to_bridge': guideLibrary.floor_press,
+            'db_step_back_lunge_to_knee_drive': guideLibrary.lunge,
+            'bw_inchworm_to_pushup': guideLibrary.pushup
         };
 
         // Kategori bazlı yanıltıcı fallback kaldırıldı (başka hareketin adı yazan görsel basılamaz)

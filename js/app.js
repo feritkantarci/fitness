@@ -4019,25 +4019,29 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 'bw_mountain_climber': guideLibrary.mountain_climber,
                 'bw_hanging_knee_raise': guideLibrary.hanging_knee_raise,
                 'kb_windmill': guideLibrary.windmill,
-                'kb_turkish_getup': guideLibrary.windmill
+                'kb_turkish_getup': guideLibrary.windmill,
+
+                // Kompleks & Fonksiyonel Akışlar (Fotoğraf Kılavuzları)
+                'db_clean_squat_press': guideLibrary.db_clean_and_press,
+                'db_seesaw_lunge': guideLibrary.lunge,
+                'db_rdl_to_high_pull': guideLibrary.rdl,
+                'db_swing_to_goblet_squat': guideLibrary.swing,
+                'db_pullover_to_halo': guideLibrary.pullover,
+                'db_lunge_to_curl_press': guideLibrary.lunge,
+                'db_gorilla_row_to_clean': guideLibrary.gorilla_row,
+                'db_floor_press_to_bridge': guideLibrary.floor_press,
+                'db_step_back_lunge_to_knee_drive': guideLibrary.lunge,
+                'bw_inchworm_to_pushup': guideLibrary.pushup
             };
 
-            // Sadece bu egzersize ait doğrulanmış fotoğraf kılavuzunu al
+            // Egzersize ait gerçek fotoğraf kılavuzunu al
             const activeGuideMap = (typeof window !== 'undefined' && window.exerciseGuideMap) 
                 ? window.exerciseGuideMap 
                 : (typeof exerciseGuideMap !== 'undefined' ? exerciseGuideMap : {});
-            let exactPhoto = activeGuideMap[ex.id] || null;
-
-            // Kompleks hareketlerde başka bir hareketin adını taşıyan ödünç fotoğraflar engellenir (başlık-görsel uyumsuzluğu olamaz)
-            if (isComplex && exactPhoto) {
-                const formPath = (exactPhoto.form || '').toLowerCase();
-                if (!formPath.includes(ex.id)) {
-                    exactPhoto = null; // Vektörel şemayı kullan
-                }
-            }
+            const exactPhoto = (exerciseGuideMap && exerciseGuideMap[ex.id]) || activeGuideMap[ex.id] || null;
 
             const diagramPath = ex.diagram || null;
-            // Öncelik: Varsa birebir fotoğrafı, yoksa kesinlikle hareketin kendi vektörel SVG diyagramını göster (kategori fallback yasak)
+            // Öncelik: Gerçek fotoğraf rehberi; fotoğraf yoksa vektörel diyagram
             const visualSrc = (exactPhoto && exactPhoto.form) ? exactPhoto.form : diagramPath;
             const isSvgDiagram = !!(visualSrc && visualSrc.toLowerCase().endsWith('.svg'));
             const hasVisual = !!visualSrc;
@@ -19369,13 +19373,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 subTitleEl.innerHTML = `<span style="color:var(--gold); font-weight:800;">${CANVA_ICONS.crosshair} Ana: ${escapeHTML(anatomy.primary)}</span>${anatomy.secondary ? ` • <span style="color:var(--cyan); font-weight:700;">⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''} • <span style="color:var(--text-secondary);">${ex.equipment ? ex.equipment.toUpperCase() : ''}</span>`;
             }
 
-            let photoGuide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) ? exerciseGuideMap[ex.id] : null;
-            if (ex.isComplex && photoGuide) {
-                const formPath = (photoGuide.form || '').toLowerCase();
-                if (!formPath.includes(ex.id)) {
-                    photoGuide = null; // Kompleks harekete başka hareketin tekil fotoğrafını basma
-                }
-            }
+            const photoGuide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) ? exerciseGuideMap[ex.id] : null;
             const guide = photoGuide;
 
             const btnReport = document.getElementById('btnExDetailReport');
