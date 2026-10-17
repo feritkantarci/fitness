@@ -1,4 +1,4 @@
-const CACHE_NAME = 'celik-kodu-cache-v234';
+const CACHE_NAME = 'celik-kodu-cache-v239';
 const ASSETS = [
   './',
   './index.html',
@@ -176,7 +176,17 @@ const ASSETS = [
   './assets/diagrams/seq_russian_twist.svg',
   './assets/diagrams/seq_skull_crusher.svg',
   './assets/diagrams/seq_thruster.svg',
-  './assets/diagrams/seq_windmill.svg'
+  './assets/diagrams/seq_windmill.svg',
+  './assets/exercises/db_clean_squat_press.webp',
+  './assets/exercises/db_swing_to_goblet_squat.webp',
+  './assets/exercises/db_rdl_to_high_pull.webp',
+  './assets/exercises/db_lunge_to_curl_press.webp',
+  './assets/exercises/bw_inchworm_to_pushup.webp',
+  './assets/exercises/db_gorilla_row_to_clean.webp',
+  './assets/exercises/db_floor_press_to_bridge.webp',
+  './assets/exercises/db_step_back_lunge_to_knee_drive.webp',
+  './assets/exercises/db_pullover_to_halo.webp',
+  './assets/exercises/db_seesaw_lunge.webp'
 ];
 
 self.addEventListener('install', (event) => {

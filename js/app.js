@@ -643,7 +643,8 @@
         // ==================== EVRENSEL GÖRSEL MEDYA ÇÖZÜMLEYİCİ ====================
         function getExerciseVisualMedia(exId, category) {
             const opengym = (typeof OPENGYM_GLOBAL_CATALOG !== 'undefined' && OPENGYM_GLOBAL_CATALOG) ? OPENGYM_GLOBAL_CATALOG[exId] : null;
-            const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[exId]) || null;
+            const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[exId]) || 
+                          (typeof window !== 'undefined' && window.exerciseGuideMap && window.exerciseGuideMap[exId]) || null;
             let diagram = null;
             if (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB)) {
                 const ex = EXERCISES_DB.find(e => e.id === exId);
@@ -758,7 +759,15 @@
             'bw_plank': { id: '0463', name: "Klasik Plank", clip: 'assets/opengym/clips/0463.mp4', still: 'assets/opengym/stills/0463.webp' },
             'bw_sissy_squat': { id: '4723', name: "Sissy Squat (Quad İzolasyonu)", clip: 'assets/opengym/clips/4723.mp4', still: 'assets/opengym/stills/4723.webp' },
             'db_clean_squat_press': { id: 'db_clean_squat_press', name: "Dambıl Clean to Front Squat to Push Press", clip: 'assets/opengym/clips/db_clean_squat_press.mp4', still: 'assets/opengym/stills/db_clean_squat_press.webp' },
-            'db_swing_to_goblet_squat': { id: 'db_swing_to_goblet_squat', name: "Dambıl Swing to Goblet Squat", clip: 'assets/opengym/clips/db_swing_to_goblet_squat.mp4', still: 'assets/opengym/stills/db_swing_to_goblet_squat.webp' }
+            'db_swing_to_goblet_squat': { id: 'db_swing_to_goblet_squat', name: "Dambıl Swing to Goblet Squat", clip: 'assets/opengym/clips/db_swing_to_goblet_squat.mp4', still: 'assets/opengym/stills/db_swing_to_goblet_squat.webp' },
+            'db_rdl_to_high_pull': { id: 'db_rdl_to_high_pull', name: "Dambıl RDL to High Pull", clip: 'assets/opengym/clips/db_rdl_to_high_pull.mp4', still: 'assets/opengym/stills/db_rdl_to_high_pull.webp' },
+            'db_lunge_to_curl_press': { id: 'db_lunge_to_curl_press', name: "Dambıl Lunge to Biceps Curl to Overhead Press", clip: 'assets/opengym/clips/db_lunge_to_curl_press.mp4', still: 'assets/opengym/stills/db_lunge_to_curl_press.webp' },
+            'bw_inchworm_to_pushup': { id: 'bw_inchworm_to_pushup', name: "Vücut Ağırlığı Inchworm to Şınav", clip: 'assets/opengym/clips/bw_inchworm_to_pushup.mp4', still: 'assets/opengym/stills/bw_inchworm_to_pushup.webp' },
+            'db_gorilla_row_to_clean': { id: 'db_gorilla_row_to_clean', name: "Dambıl Goril Row to Clean", clip: 'assets/opengym/clips/db_gorilla_row_to_clean.mp4', still: 'assets/opengym/stills/db_gorilla_row_to_clean.webp' },
+            'db_floor_press_to_bridge': { id: 'db_floor_press_to_bridge', name: "Dambıl Floor Press to Glute Bridge", clip: 'assets/opengym/clips/db_floor_press_to_bridge.mp4', still: 'assets/opengym/stills/db_floor_press_to_bridge.webp' },
+            'db_step_back_lunge_to_knee_drive': { id: 'db_step_back_lunge_to_knee_drive', name: "Dambıl Step Back Lunge to Knee Drive Press", clip: 'assets/opengym/clips/db_step_back_lunge_to_knee_drive.mp4', still: 'assets/opengym/stills/db_step_back_lunge_to_knee_drive.webp' },
+            'db_pullover_to_halo': { id: 'db_pullover_to_halo', name: "Dambıl Pullover to Halo", clip: 'assets/opengym/clips/db_pullover_to_halo.mp4', still: 'assets/opengym/stills/db_pullover_to_halo.webp' },
+            'db_seesaw_lunge': { id: 'db_seesaw_lunge', name: "Dambıl Seesaw Lunge", clip: 'assets/opengym/clips/db_seesaw_lunge.mp4', still: 'assets/opengym/stills/db_seesaw_lunge.webp' }
         };
 
         // ==================== KULLANICI ÖZEL HAVUZ & GİZLEME YASASI ====================
@@ -4025,24 +4034,24 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 'kb_windmill': guideLibrary.windmill,
                 'kb_turkish_getup': guideLibrary.windmill,
 
-                // Kompleks & Fonksiyonel Akışlar (Fotoğraf Kılavuzları)
-                'db_clean_squat_press': guideLibrary.db_clean_and_press,
-                'db_seesaw_lunge': guideLibrary.lunge,
-                'db_rdl_to_high_pull': guideLibrary.rdl,
-                'db_swing_to_goblet_squat': guideLibrary.swing,
-                'db_pullover_to_halo': guideLibrary.pullover,
-                'db_lunge_to_curl_press': guideLibrary.lunge,
-                'db_gorilla_row_to_clean': guideLibrary.gorilla_row,
-                'db_floor_press_to_bridge': guideLibrary.floor_press,
-                'db_step_back_lunge_to_knee_drive': guideLibrary.lunge,
-                'bw_inchworm_to_pushup': guideLibrary.pushup
+                // Kompleks & Fonksiyonel Akışlar (Gerçek Animasyonlu Kılavuzlar)
+                'db_clean_squat_press': { form: 'assets/exercises/db_clean_squat_press.webp', anatomi: null },
+                'db_swing_to_goblet_squat': { form: 'assets/exercises/db_swing_to_goblet_squat.webp', anatomi: null },
+                'db_rdl_to_high_pull': { form: 'assets/exercises/db_rdl_to_high_pull.webp', anatomi: null },
+                'db_lunge_to_curl_press': { form: 'assets/exercises/db_lunge_to_curl_press.webp', anatomi: null },
+                'bw_inchworm_to_pushup': { form: 'assets/exercises/bw_inchworm_to_pushup.webp', anatomi: null },
+                'db_gorilla_row_to_clean': { form: 'assets/exercises/db_gorilla_row_to_clean.webp', anatomi: null },
+                'db_floor_press_to_bridge': { form: 'assets/exercises/db_floor_press_to_bridge.webp', anatomi: null },
+                'db_step_back_lunge_to_knee_drive': { form: 'assets/exercises/db_step_back_lunge_to_knee_drive.webp', anatomi: null },
+                'db_pullover_to_halo': { form: 'assets/exercises/db_pullover_to_halo.webp', anatomi: null },
+                'db_seesaw_lunge': { form: 'assets/exercises/db_seesaw_lunge.webp', anatomi: null }
             };
 
             // Egzersize ait gerçek fotoğraf kılavuzunu al
             const activeGuideMap = (typeof window !== 'undefined' && window.exerciseGuideMap) 
                 ? window.exerciseGuideMap 
                 : (typeof exerciseGuideMap !== 'undefined' ? exerciseGuideMap : {});
-            const exactPhoto = (exerciseGuideMap && exerciseGuideMap[ex.id]) || activeGuideMap[ex.id] || null;
+            const exactPhoto = (activeGuideMap && activeGuideMap[ex.id]) || (exerciseGuideMap && exerciseGuideMap[ex.id]) || null;
 
             const diagramPath = ex.diagram || null;
             // Öncelik: Gerçek fotoğraf rehberi; fotoğraf yoksa vektörel diyagram
@@ -17479,8 +17488,11 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             return `
             <svg class="anatomy-svg" viewBox="0 0 1150 1520" xmlns="http://www.w3.org/2000/svg">
                 <!-- TITLES -->
-                <text x="226" y="38" text-anchor="middle" fill="#475569" font-family="'Plus Jakarta Sans', sans-serif" font-size="22" font-weight="800" letter-spacing="1">ÖN VÜCUT (ANTERIOR)</text>
-                <text x="902" y="38" text-anchor="middle" fill="#475569" font-family="'Plus Jakarta Sans', sans-serif" font-size="22" font-weight="800" letter-spacing="1">ARKA VÜCUT (POSTERIOR)</text>
+                <text x="226" y="30" text-anchor="middle" fill="#0F172A" font-family="'Plus Jakarta Sans', sans-serif" font-size="34" font-weight="900" letter-spacing="1.5">ÖN VÜCUT</text>
+                <text x="226" y="52" text-anchor="middle" fill="#64748B" font-family="'Plus Jakarta Sans', sans-serif" font-size="20" font-weight="800" letter-spacing="1">ANTERIOR</text>
+                
+                <text x="902" y="30" text-anchor="middle" fill="#0F172A" font-family="'Plus Jakarta Sans', sans-serif" font-size="34" font-weight="900" letter-spacing="1.5">ARKA VÜCUT</text>
+                <text x="902" y="52" text-anchor="middle" fill="#64748B" font-family="'Plus Jakarta Sans', sans-serif" font-size="20" font-weight="800" letter-spacing="1">POSTERIOR</text>
                 
                 <!-- CENTER DIVIDER -->
                 <line x1="564" y1="20" x2="564" y2="1490" stroke="#CBD5E1" stroke-width="2.5" stroke-dasharray="8,8"/>
@@ -17533,13 +17545,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const chipsHTML = `
                 <div class="anatomy-chips-scroll">
                     ${analysis.muscles.map(m => {
-                        let dotColor = (m.status === 'optimal' || m.status === 'high') ? '#10b981' : (m.status === 'insufficient' ? '#f59e0b' : '#ef4444');
+                        let dotColor = (m.status === 'optimal' || m.status === 'high') ? '#16A34A' : (m.status === 'insufficient' ? '#F59E0B' : '#EF4444');
                         let isSelected = (m.id === activeId);
                         return `
-                            <button class="anatomy-chip ${isSelected ? 'selected' : ''}" onclick="selectAnatomyMuscle('${m.id}')" title="${escapeHTML(m.name)}: ${m.effectiveDone.toFixed(1)} Set (${m.statusLabel})">
-                                <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:${dotColor};"></span>
-                                <span>${escapeHTML(m.name)}</span>
-                                <span style="font-size:11px; opacity:0.85;">${m.effectiveDone.toFixed(0)}s</span>
+                            <button type="button" class="anatomy-chip ${isSelected ? 'selected' : ''}" onclick="selectAnatomyMuscle('${m.id}')" title="${escapeHTML(m.name)}: ${m.effectiveDone.toFixed(1)} Set (${m.statusLabel})">
+                                <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${dotColor}; flex-shrink:0;"></span>
+                                <span class="chip-name">${escapeHTML(m.name)}</span>
+                                <span class="chip-sets">${m.effectiveDone.toFixed(0)}s</span>
                             </button>
                         `;
                     }).join('')}
@@ -17697,24 +17709,18 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     <div class="anatomy-legend">
                         <div class="anatomy-legend-item optimal" onclick="setWeeklyMuscleFilter('optimal')">
                             <div class="badge-dot"></div>
-                            <div>
-                                <span class="badge-val">${optimalTotal}</span>
-                                <span class="badge-label">Yeterli / Optimal</span>
-                            </div>
+                            <span class="badge-val">${optimalTotal}</span>
+                            <span class="badge-label">Yeterli / Optimal</span>
                         </div>
                         <div class="anatomy-legend-item insufficient" onclick="setWeeklyMuscleFilter('insufficient')">
                             <div class="badge-dot"></div>
-                            <div>
-                                <span class="badge-val">${summary.insufficientCount}</span>
-                                <span class="badge-label">Düşük / Planda</span>
-                            </div>
+                            <span class="badge-val">${summary.insufficientCount}</span>
+                            <span class="badge-label">Düşük / Planda</span>
                         </div>
                         <div class="anatomy-legend-item unworked" onclick="setWeeklyMuscleFilter('unworked')">
                             <div class="badge-dot"></div>
-                            <div>
-                                <span class="badge-val">${summary.unworkedCount}</span>
-                                <span class="badge-label">Çalışmayan (Boşta)</span>
-                            </div>
+                            <span class="badge-val">${summary.unworkedCount}</span>
+                            <span class="badge-label">Boşta (0 Set)</span>
                         </div>
                     </div>
 
@@ -18542,7 +18548,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=234')
+                navigator.serviceWorker.register('./sw.js?v=239')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();

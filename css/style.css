@@ -5802,22 +5802,61 @@
             margin-bottom: 12px;
         }
 
-        .anatomy-counter-group {
+        /* 3 STATUS SUMMARY PILLS */
+        .anatomy-legend {
             display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 6px;
+            gap: 10px;
             flex-wrap: wrap;
+            margin: 10px auto 14px;
+            padding: 0 4px;
         }
 
-        .anatomy-counter-pill {
-            font-size: 11px;
-            font-weight: 800;
-            padding: 4px 10px;
-            border-radius: 20px;
+        .anatomy-legend-item {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
+            padding: 7px 15px;
+            border-radius: 20px;
+            background: #F8FAFC;
+            border: 1.5px solid #E2E8F0;
+            cursor: pointer;
             transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            user-select: none;
+        }
+
+        .anatomy-legend-item:hover {
+            transform: translateY(-1px);
+            border-color: #CBD5E1;
+            background: #F1F5F9;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .anatomy-legend-item .badge-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .anatomy-legend-item.optimal .badge-dot { background: #16A34A; }
+        .anatomy-legend-item.insufficient .badge-dot { background: #F59E0B; }
+        .anatomy-legend-item.unworked .badge-dot { background: #EF4444; }
+
+        .anatomy-legend-item .badge-val {
+            font-size: 13.5px;
+            font-weight: 900;
+            color: #0F172A;
+            line-height: 1;
+        }
+
+        .anatomy-legend-item .badge-label {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #334155;
+            line-height: 1;
         }
 
         .anatomy-svg-box {
@@ -5888,41 +5927,74 @@
         }
 
         /* QUICK MUSCLE CHIPS */
+        /* QUICK MUSCLE CHIPS */
         .anatomy-chips-scroll {
             display: flex;
-            gap: 6px;
+            gap: 8px;
             overflow-x: auto;
             width: 100%;
-            padding: 8px 2px 4px;
+            padding: 8px 4px 10px;
             margin-top: 10px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
         }
 
         .anatomy-chip {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #F8FAFC;
+            border: 1.5px solid #E2E8F0;
             border-radius: 20px;
-            padding: 5px 11px;
-            font-size: 11px;
+            padding: 7px 14px;
+            font-size: 12.5px;
             font-weight: 700;
-            color: #e2e8f0;
+            color: #0F172A !important;
             white-space: nowrap;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            flex-shrink: 0;
+            user-select: none;
         }
 
         .anatomy-chip:hover {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 255, 255, 0.25);
+            background: #F1F5F9;
+            border-color: #CBD5E1;
+            color: #0F172A !important;
         }
 
         .anatomy-chip.selected {
-            background: rgba(245, 158, 11, 0.18);
-            border-color: var(--gold);
-            color: #ffffff;
-            box-shadow: 0 0 10px rgba(245, 158, 11, 0.25);
+            background: #FEF3C7 !important;
+            border-color: #D97706 !important;
+            color: #92400E !important;
+            font-weight: 800;
+            box-shadow: 0 0 0 1px #D97706, 0 3px 10px rgba(217, 119, 6, 0.2);
+        }
+
+        .anatomy-chip .chip-name {
+            color: #0F172A;
+            font-weight: 700;
+        }
+
+        .anatomy-chip.selected .chip-name {
+            color: #92400E;
+            font-weight: 800;
+        }
+
+        .anatomy-chip .chip-sets {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #475569;
+            background: rgba(0, 0, 0, 0.06);
+            padding: 2px 7px;
+            border-radius: 10px;
+        }
+
+        .anatomy-chip.selected .chip-sets {
+            color: #78350F;
+            background: rgba(217, 119, 6, 0.18);
+            font-weight: 800;
         }
 
         /* ==========================================================================
