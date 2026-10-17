@@ -5882,6 +5882,141 @@ KURALLAR:
             }
         }
 
+        // ==================== AKADEMİK BİYOMEKANİK, VÜCUT AĞIRLIĞI & TUT (SÜRE) YÖNETİCİSİ ====================
+        // Brad Schoenfeld, Ebben et al. (2011) & Oranchuk et al. (2019) Biyomekanik Modeli
+        const ACADEMIC_BODYWEIGHT_RATIOS = {
+            'bw_pushup': 0.65,
+            'bw_decline_pushup': 0.74,
+            'bw_diamond_pushup': 0.68,
+            'push-up': 0.65,
+            'şınav': 0.65,
+            'bw_pullup': 0.95,
+            'bw_chinup': 0.95,
+            'bw_inverted_row': 0.60,
+            'bw_dips': 0.90,
+            'barfiks': 0.95,
+            'dips': 0.90,
+            'bw_air_squat': 0.68,
+            'bw_jump_squat': 0.75,
+            'bw_sissy_squat': 0.70,
+            'bw_glute_bridge': 0.40,
+            'air squat': 0.68,
+            'jump squat': 0.75,
+            'glute bridge': 0.40,
+            'bw_plank': 0.50,
+            'bw_hollow_body': 0.55,
+            'bw_hanging_knee_raise': 0.25,
+            'plank': 0.50,
+            'hollow body': 0.55,
+            'default': 0.60
+        };
+
+        function isExerciseTimeBased(ex) {
+            if (!ex) return false;
+            if (ex.trackingType === 'time' || ex.trackingType === 'duration' || ex.isTimeBased === true) return true;
+            const id = String(ex.id || '').toLowerCase();
+            const name = String(ex.name || '').toLowerCase();
+            const timeKeywords = ['plank', 'hollow', 'carry', 'farmers_walk', 'suitcase_carry', 'waiter', 'cross_body', 'taşıma', 'yürüyüşü', 'dead hang', 'wall sit', 'l-sit'];
+            return timeKeywords.some(kw => id.includes(kw) || name.includes(kw));
+        }
+
+        function isExerciseBodyweight(ex) {
+            if (!ex) return false;
+            if (ex.equipment === 'bodyweight' || ex.trackingType === 'bodyweight') return true;
+            if (Array.isArray(ex.tags) && ex.tags.includes('bodyweight')) return true;
+            const id = String(ex.id || '').toLowerCase();
+            const name = String(ex.name || '').toLowerCase();
+            if (id.startsWith('bw_')) return true;
+            const bwKeywords = ['şınav', 'push-up', 'pushup', 'barfiks', 'pull-up', 'pullup', 'chin-up', 'chinup', 'dips', 'air squat', 'jump squat', 'glute bridge', 'hollow body', 'plank', 'burpee', 'mountain climber', 'hanging knee', 'barda dize', 'sissy squat'];
+            return bwKeywords.some(kw => id.includes(kw) || name.includes(kw));
+        }
+
+        function getUserActiveBodyweightKg() {
+            try {
+                const u = getActiveUser();
+                if (u && u.telemetry && parseFloat(u.telemetry.currentWeight) > 30) {
+                    return parseFloat(u.telemetry.currentWeight);
+                }
+                if (u && parseFloat(u.bodyweight) > 30) {
+                    return parseFloat(u.bodyweight);
+                }
+            } catch(e) {}
+            return 75; // Standart akademik referans vücut ağırlığı (kg)
+        }
+
+        function calculateExerciseSetVolume(ex, weight, repsOrSecs) {
+            const isTime = isExerciseTimeBased(ex);
+            const isBw = isExerciseBodyweight(ex);
+            const userBw = getUserActiveBodyweightKg();
+            const w = (weight !== '' && weight !== null && !isNaN(weight)) ? parseFloat(weight) : 0;
+            const r = (repsOrSecs !== '' && repsOrSecs !== null && !isNaN(repsOrSecs)) ? parseFloat(repsOrSecs) : 0;
+            if (r <= 0) return 0;
+
+            let effectiveLoad = w;
+            if (isBw) {
+                const exId = String(ex ? (ex.id || '') : '').toLowerCase();
+                const exName = String(ex ? (ex.name || '') : '').toLowerCase();
+                let bwRatio = ACADEMIC_BODYWEIGHT_RATIOS['default'];
+                for (const [k, ratio] of Object.entries(ACADEMIC_BODYWEIGHT_RATIOS)) {
+                    if (exId.includes(k) || exName.includes(k)) {
+                        bwRatio = ratio;
+                        break;
+                    }
+                }
+                effectiveLoad = (userBw * bwRatio) + w; // Vücut kütlesi oranı + ek yük
+            }
+
+            if (isTime) {
+                // Akademik TUT & Dinamik Eşdeğerlik (Oranchuk 2019, Burd 2012):
+                // 1 dinamik tekrar ortalama 3.5 sn TUT üretir.
+                const eqReps = r / 3.5;
+                return effectiveLoad * eqReps;
+            }
+
+            return effectiveLoad * r;
+        }
+
+        function formatSetWeightDisplay(isBw, weight) {
+            if (isBw) {
+                const numW = parseFloat(weight);
+                if (!isNaN(numW) && numW > 0) {
+                    return `BW +${numW}k`;
+                }
+                return 'BW';
+            }
+            if (weight !== '' && weight !== null && weight !== undefined && !isNaN(weight)) {
+                return `${weight} kg`;
+            }
+            return '- kg';
+        }
+
+        function formatSetMetricDisplay(isTime, reps) {
+            if (isTime) {
+                const numSecs = parseInt(reps, 10);
+                return `${!isNaN(numSecs) && numSecs > 0 ? numSecs : 30} sn`;
+            }
+            if (reps !== '' && reps !== null && reps !== undefined && !isNaN(reps)) {
+                return `${reps} tk`;
+            }
+            return '- tk';
+        }
+
+        function formatPerformancePill(ex, weight, reps) {
+            const isTime = isExerciseTimeBased(ex);
+            const isBw = isExerciseBodyweight(ex);
+            const w = (weight !== '' && weight !== null && !isNaN(weight)) ? parseFloat(weight) : 0;
+            const r = (reps !== '' && reps !== null && !isNaN(reps)) ? parseInt(reps, 10) : (isTime ? 30 : 10);
+
+            let loadPart = '';
+            if (isBw) {
+                loadPart = w > 0 ? `BW(+${w}k)` : 'BW';
+            } else {
+                loadPart = `${w}kg`;
+            }
+            const metricPart = isTime ? `${r}sn` : `${r}tk`;
+            return `${loadPart} × ${metricPart}`;
+        }
+
         function getLastExercisePerformance(exIdOrName) {
             const uid = getActiveUserId();
             let history = [];
@@ -5894,12 +6029,36 @@ KURALLAR:
                 if (!log.detailedExercises || !Array.isArray(log.detailedExercises)) continue;
                 const found = log.detailedExercises.find(e => (e.id === exIdOrName || e.name === exIdOrName) && (e.completedSetsCount > 0 || (e.sets && e.sets.some(s => s.completed))));
                 if (found && found.sets) {
-                    const completedSets = found.sets.filter(s => s.completed && s.weight !== '' && s.weight !== null && s.weight !== undefined);
+                    const completedSets = found.sets.filter(s => s.completed);
                     if (completedSets.length > 0) {
-                        const heaviest = completedSets.reduce((prev, cur) => ((cur.weight || 0) > (prev.weight || 0) ? cur : prev), completedSets[0]);
+                        const isTime = isExerciseTimeBased(found);
+                        const isBw = isExerciseBodyweight(found);
+                        let bestSet = completedSets[0];
+                        if (isTime) {
+                            bestSet = completedSets.reduce((prev, cur) => ((parseInt(cur.reps, 10) || 0) > (parseInt(prev.reps, 10) || 0) ? cur : prev), completedSets[0]);
+                        } else if (isBw) {
+                            bestSet = completedSets.reduce((prev, cur) => {
+                                const curW = parseFloat(cur.weight) || 0;
+                                const prevW = parseFloat(prev.weight) || 0;
+                                if (curW > prevW) return cur;
+                                if (curW === prevW && (parseInt(cur.reps, 10) || 0) > (parseInt(prev.reps, 10) || 0)) return cur;
+                                return prev;
+                            }, completedSets[0]);
+                        } else {
+                            bestSet = completedSets.reduce((prev, cur) => {
+                                const curW = parseFloat(cur.weight) || 0;
+                                const prevW = parseFloat(prev.weight) || 0;
+                                if (curW > prevW) return cur;
+                                if (curW === prevW && (parseInt(cur.reps, 10) || 0) > (parseInt(prev.reps, 10) || 0)) return cur;
+                                return prev;
+                            }, completedSets[0]);
+                        }
+
                         return {
-                            weight: heaviest.weight || 0,
-                            reps: heaviest.reps || 10,
+                            weight: bestSet.weight !== '' && bestSet.weight !== null && !isNaN(bestSet.weight) ? parseFloat(bestSet.weight) : (isBw ? 0 : ''),
+                            reps: bestSet.reps || (isTime ? 30 : 10),
+                            isTimeBased: isTime,
+                            isBodyweight: isBw,
                             dateFormatted: log.dateFormatted || log.date || 'Önceki seans'
                         };
                     }
@@ -5981,13 +6140,20 @@ KURALLAR:
             if (!sets || !sets[setIdx]) return;
             const st = sets[setIdx];
             const isWeight = (type === 'weight');
-            const curVal = isWeight ? parseFloat(st.weight) : parseInt(st.reps);
 
+            let foundEx = null;
             let exName = 'Egzersiz';
             if (activeWorkoutSession && activeWorkoutSession.exercises) {
-                const found = activeWorkoutSession.exercises.find(e => e.id === exId);
-                if (found) exName = found.name;
+                foundEx = activeWorkoutSession.exercises.find(e => e.id === exId);
+                if (foundEx) exName = foundEx.name;
             }
+            if (!foundEx && typeof EXERCISES_DB !== 'undefined') {
+                foundEx = EXERCISES_DB.find(e => e.id === exId);
+            }
+            const isBw = isExerciseBodyweight(foundEx);
+            const isTime = isExerciseTimeBased(foundEx);
+
+            const curVal = isWeight ? parseFloat(st.weight) : parseInt(st.reps, 10);
 
             const titleEl = document.getElementById('listboxTitle');
             const subEl = document.getElementById('listboxSub');
@@ -5995,14 +6161,43 @@ KURALLAR:
             const modal = document.getElementById('quickListboxModal');
             const container = document.getElementById('listboxItemsContainer');
 
-            if (titleEl) titleEl.innerText = isWeight ? '⚖️ Ağırlık Seç (KG)' : '🔄 Tekrar Sayısı Seç';
-            if (subEl) subEl.innerText = `${exName} • Set ${st.setNo}`;
-            if (customInput) {
-                customInput.placeholder = isWeight ? 'Örn: 27.5' : 'Örn: 14';
-                customInput.value = '';
+            if (isWeight) {
+                if (isBw) {
+                    if (titleEl) titleEl.innerText = '⚖️ Vücut Ağırlığı & Ek Yük (KG)';
+                    if (subEl) subEl.innerText = `${exName} • Set ${st.setNo} (Calisthenics)`;
+                    if (customInput) customInput.placeholder = 'Ek ağırlık gir (örn: 5, 10)';
+                } else {
+                    if (titleEl) titleEl.innerText = '⚖️ Ağırlık Seç (KG)';
+                    if (subEl) subEl.innerText = `${exName} • Set ${st.setNo}`;
+                    if (customInput) customInput.placeholder = 'Örn: 27.5';
+                }
+            } else {
+                if (isTime) {
+                    if (titleEl) titleEl.innerText = '⏱️ Süre / TUT Seç (Saniye)';
+                    if (subEl) subEl.innerText = `${exName} • Set ${st.setNo} (İzometrik Tutuş)`;
+                    if (customInput) customInput.placeholder = 'Örn: 45 (saniye)';
+                } else {
+                    if (titleEl) titleEl.innerText = '🔄 Tekrar Sayısı Seç';
+                    if (subEl) subEl.innerText = `${exName} • Set ${st.setNo}`;
+                    if (customInput) customInput.placeholder = 'Örn: 14';
+                }
             }
 
-            const list = isWeight ? COMMON_WEIGHT_OPTIONS.slice() : COMMON_REPS_OPTIONS.slice();
+            let list = [];
+            if (isWeight) {
+                if (isBw) {
+                    list = [0, 2.5, 5, 7.5, 10, 12.5, 15, 17.5, 20, 25, 30, 35, 40, 50];
+                } else {
+                    list = COMMON_WEIGHT_OPTIONS.slice();
+                }
+            } else {
+                if (isTime) {
+                    list = [10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 75, 90, 105, 120, 150, 180];
+                } else {
+                    list = COMMON_REPS_OPTIONS.slice();
+                }
+            }
+
             if (!isNaN(curVal) && curVal !== null && curVal !== '' && !list.includes(curVal)) {
                 list.push(curVal);
                 list.sort((a, b) => a - b);
@@ -6010,8 +6205,21 @@ KURALLAR:
 
             if (container) {
                 container.innerHTML = list.map(val => {
-                    const isSelected = (val === curVal);
-                    const label = isWeight ? `${val} kg` : `${val} tekrar`;
+                    const isSelected = (val === curVal || (isWeight && isBw && (isNaN(curVal) || curVal === null || curVal === '') && val === 0));
+                    let label = '';
+                    if (isWeight) {
+                        if (isBw) {
+                            label = (val === 0) ? 'BW (Sadece Vücut Ağırlığın)' : `BW + ${val} kg (Ek Yük)`;
+                        } else {
+                            label = `${val} kg`;
+                        }
+                    } else {
+                        if (isTime) {
+                            label = `${val} saniye (${val} sn)`;
+                        } else {
+                            label = `${val} tekrar`;
+                        }
+                    }
                     return `
                         <div class="listbox-option-item ${isSelected ? 'selected' : ''}" 
                              onclick="selectListboxValue(${val})">
@@ -6036,6 +6244,16 @@ KURALLAR:
             if (!exId || setIdx === null || !activeWorkoutSetsData[exId] || !activeWorkoutSetsData[exId][setIdx]) return;
             const st = activeWorkoutSetsData[exId][setIdx];
 
+            let foundEx = null;
+            if (activeWorkoutSession && activeWorkoutSession.exercises) {
+                foundEx = activeWorkoutSession.exercises.find(e => e.id === exId);
+            }
+            if (!foundEx && typeof EXERCISES_DB !== 'undefined') {
+                foundEx = EXERCISES_DB.find(e => e.id === exId);
+            }
+            const isBw = isExerciseBodyweight(foundEx);
+            const isTime = isExerciseTimeBased(foundEx);
+
             if (type === 'weight') {
                 st.weight = val;
                 // 1. sette veya mevcut sette seçilen kiloyu henüz tamamlanmamış sonraki setlere otomatik aktar
@@ -6046,15 +6264,18 @@ KURALLAR:
                     }
                 }
                 if (typeof showToast === 'function') {
+                    const wStr = isBw ? (val === 0 ? 'BW (Vücut Ağırlığı)' : `BW +${val} kg`) : `${val} kg`;
                     if (setIdx === 0 && sets.length > 1) {
-                        showToast(`⚖️ Set 1: ${val} kg seçildi (Sonraki setlere aktarıldı)`);
+                        showToast(`⚖️ Set 1: ${wStr} seçildi (Sonraki setlere aktarıldı)`);
                     } else {
-                        showToast(`⚖️ Set ${st.setNo}: ${val} kg seçildi`);
+                        showToast(`⚖️ Set ${st.setNo}: ${wStr} seçildi`);
                     }
                 }
             } else {
                 st.reps = val;
-                if (typeof showToast === 'function') showToast(`🔄 Set ${st.setNo}: ${val} tekrar seçildi`);
+                if (typeof showToast === 'function') {
+                    showToast(isTime ? `⏱️ Set ${st.setNo}: ${val} saniye tutuş seçildi` : `🔄 Set ${st.setNo}: ${val} tekrar seçildi`);
+                }
             }
 
             saveActiveWorkoutStateToStorage();
@@ -6581,10 +6802,12 @@ KURALLAR:
             s.exercises.forEach(ex => {
                 if (!ex || !ex.id) return;
                 if (!activeWorkoutSetsData[ex.id]) {
+                    const isTime = isExerciseTimeBased(ex);
+                    const isBw = isExerciseBodyweight(ex);
                     const numSets = (ex.targetSets || (s.scheme && s.scheme.sets)) || 3;
-                    const repsSpec = ex.targetReps || (s.scheme && s.scheme.reps) || '10';
-                    const defaultReps = parseInt(String(repsSpec).split('-')[0].trim()) || 10;
-                    const defaultWeight = ex.weightKey && weights[ex.weightKey] ? (parseFloat(weights[ex.weightKey]) || '') : '';
+                    const repsSpec = ex.targetReps || (s.scheme && s.scheme.reps) || (isTime ? '30' : '10');
+                    const defaultReps = parseInt(String(repsSpec).split('-')[0].trim()) || (isTime ? 30 : 10);
+                    const defaultWeight = isBw ? 0 : (ex.weightKey && weights[ex.weightKey] ? (parseFloat(weights[ex.weightKey]) || '') : '');
                     activeWorkoutSetsData[ex.id] = [];
                     for (let st = 1; st <= numSets; st++) {
                         activeWorkoutSetsData[ex.id].push({
@@ -6624,6 +6847,8 @@ KURALLAR:
             // ==================== MODE 1: CANLI ODAK MODU (FOCUS MODE - HEVY / STRONG STYLE) ====================
             if (activeWorkoutViewMode === 'focus') {
                 const ex = s.exercises[activeFocusExIndex];
+                const isBw = isExerciseBodyweight(ex);
+                const isTime = isExerciseTimeBased(ex);
                 const sets = activeWorkoutSetsData[ex.id] || [];
                 const firstIncompleteIdx = sets.findIndex(st => !st.completed);
                 const isAllSetsDone = sets.length > 0 && sets.every(st => st.completed);
@@ -6634,6 +6859,7 @@ KURALLAR:
                 const exBlockTag = ex.blockType === 'superset'
                     ? `🔥 Süperset (${ex.blockLabel})`
                     : `🎯 Düz Set (${ex.blockLabel || (activeFocusExIndex + 1)})`;
+                const targetMetricStr = isTime ? (String(s.scheme.reps).includes('sn') ? s.scheme.reps : `${s.scheme.reps || 30} sn`) : `${s.scheme.reps}`;
 
                 container.innerHTML = `
                     <div class="hevy-workout-wrapper">
@@ -6682,7 +6908,7 @@ KURALLAR:
                                     <span class="hevy-equip-badge">${equipLabels[ex.equipment] || ex.equipment}</span>
                                 </div>
                                 <div class="hevy-meta-row">
-                                    <span class="hevy-meta-item">🎯 Hedef: <strong>${sets.length} Set × ${s.scheme.reps}</strong></span>
+                                    <span class="hevy-meta-item">🎯 Hedef: <strong>${sets.length} Set × ${targetMetricStr}</strong></span>
                                     <span class="hevy-meta-item">⏱️ Dinlenme: <strong>${exRestSecs}s</strong></span>
                                 </div>
                             </div>
@@ -6702,7 +6928,7 @@ KURALLAR:
                             ${lastPerf ? `
                                 <div class="hevy-ghost-bar">
                                     <div class="hevy-ghost-info">
-                                        <span>📌 Önceki: <strong>${lastPerf.weight} kg × ${lastPerf.reps} tk</strong> <span style="font-size:10px; opacity:0.75;">(${lastPerf.dateFormatted})</span></span>
+                                        <span>📌 Önceki: <strong>${formatPerformancePill(ex, lastPerf.weight, lastPerf.reps)}</strong> <span style="font-size:10px; opacity:0.75;">(${lastPerf.dateFormatted})</span></span>
                                     </div>
                                     <button type="button" class="btn-hevy-ghost-apply" onclick="copyLastPerformanceToCurrent('${ex.id}', ${lastPerf.weight}, ${lastPerf.reps})" title="Tüm boş setlere uygula">
                                         ⚡ Tümüne Yaz
@@ -6716,15 +6942,15 @@ KURALLAR:
                                     <div class="hevy-th-row">
                                         <div class="hevy-th">SET</div>
                                         <div class="hevy-th">ÖNCEKİ</div>
-                                        <div class="hevy-th">KG</div>
-                                        <div class="hevy-th">TEKRAR</div>
+                                        <div class="hevy-th">${isBw ? 'YÜK (BW)' : 'KG'}</div>
+                                        <div class="hevy-th">${isTime ? 'SÜRE (SN)' : 'TEKRAR'}</div>
                                         <div class="hevy-th">✓</div>
                                     </div>
 
                                     ${sets.map((st, sIdx) => {
                                         const isDone = st.completed;
                                         const isTarget = !isDone && sIdx === firstIncompleteIdx;
-                                        const prevText = lastPerf ? `${lastPerf.weight}kg × ${lastPerf.reps}` : '-';
+                                        const prevText = lastPerf ? formatPerformancePill(ex, lastPerf.weight, lastPerf.reps) : '-';
 
                                         return `
                                             <div class="hevy-tr-row ${isDone ? 'done' : ''} ${isTarget ? 'active-target' : ''}" id="setRow_${ex.id}_${sIdx}">
@@ -6740,18 +6966,18 @@ KURALLAR:
                                                     <span class="hevy-prev-text ${lastPerf && !isDone ? 'clickable' : ''}">${prevText}</span>
                                                 </div>
 
-                                                <!-- AĞIRLIK (KG) - LISTBOX PICKER -->
+                                                <!-- AĞIRLIK (KG / BW) - LISTBOX PICKER -->
                                                 <div class="hevy-td">
-                                                    <button type="button" class="hevy-listbox-btn" onclick="openListboxPicker('${ex.id}', ${sIdx}, 'weight')" title="Kilo seçmek için dokunun">
-                                                        <span>${st.weight !== '' && st.weight !== null && st.weight !== undefined ? `${st.weight} kg` : '- kg'}</span>
+                                                    <button type="button" class="hevy-listbox-btn ${isBw ? 'bw-load-btn' : ''}" onclick="openListboxPicker('${ex.id}', ${sIdx}, 'weight')" title="${isBw ? 'Vücut ağırlığı veya ek yük seçin' : 'Kilo seçmek için dokunun'}">
+                                                        <span>${formatSetWeightDisplay(isBw, st.weight)}</span>
                                                         <span class="listbox-btn-arrow">▾</span>
                                                     </button>
                                                 </div>
 
-                                                <!-- TEKRAR - LISTBOX PICKER -->
+                                                <!-- TEKRAR / SÜRE - LISTBOX PICKER -->
                                                 <div class="hevy-td">
-                                                    <button type="button" class="hevy-listbox-btn" onclick="openListboxPicker('${ex.id}', ${sIdx}, 'reps')" title="Tekrar seçmek için dokunun">
-                                                        <span>${st.reps !== '' && st.reps !== null && st.reps !== undefined ? `${st.reps} tk` : '- tk'}</span>
+                                                    <button type="button" class="hevy-listbox-btn ${isTime ? 'time-metric-btn' : ''}" onclick="openListboxPicker('${ex.id}', ${sIdx}, 'reps')" title="${isTime ? 'Süre (saniye) seçmek için dokunun' : 'Tekrar seçmek için dokunun'}">
+                                                        <span>${formatSetMetricDisplay(isTime, st.reps)}</span>
                                                         <span class="listbox-btn-arrow">▾</span>
                                                     </button>
                                                 </div>
@@ -6873,12 +7099,15 @@ KURALLAR:
             container.innerHTML = `
                 <div class="hevy-workout-wrapper">
                     ${s.exercises.map((ex, idx) => {
+                        const isBw = isExerciseBodyweight(ex);
+                        const isTime = isExerciseTimeBased(ex);
                         const sets = activeWorkoutSetsData[ex.id] || [];
                         const firstIncompleteIdx = sets.findIndex(st => !st.completed);
                         const isAllSetsDone = sets.length > 0 && sets.every(st => st.completed);
                         const lastPerf = getLastExercisePerformance(ex.id) || getLastExercisePerformance(ex.name);
                         const isFormOpen = !!workoutFormGuideOpenState[ex.id];
                         const exRestSecs = ex.customRest || (s.scheme && s.scheme.rest) || 45;
+                        const targetMetricStr = isTime ? (String(s.scheme.reps).includes('sn') ? s.scheme.reps : `${s.scheme.reps || 30} sn`) : `${s.scheme.reps}`;
                         const blockHdrHtml = ex.blockHeader ? `
                             <div class="block-header" style="${ex.blockType === 'superset' ? 'border-left:3px solid #f59e0b; background:rgba(245,158,11,0.08); color:#fbbf24;' : 'border-left:3px solid #38bdf8; background:rgba(56,189,248,0.08); color:#38bdf8;'} padding:6px 10px; border-radius:6px; margin-bottom:8px;">
                                 ${escapeHTML(ex.blockHeader)}
@@ -6897,7 +7126,7 @@ KURALLAR:
                                         <span class="hevy-equip-badge">${equipLabels[ex.equipment] || ex.equipment}</span>
                                     </div>
                                     <div class="hevy-meta-row">
-                                        <span class="hevy-meta-item">🎯 <strong>${sets.length} Set × ${s.scheme.reps}</strong></span>
+                                        <span class="hevy-meta-item">🎯 <strong>${sets.length} Set × ${targetMetricStr}</strong></span>
                                         <span class="hevy-meta-item">⏱️ Dinlenme: <strong>${exRestSecs}s</strong></span>
                                     </div>
                                 </div>
@@ -6915,7 +7144,7 @@ KURALLAR:
                                 ${lastPerf ? `
                                     <div class="hevy-ghost-bar">
                                         <div class="hevy-ghost-info">
-                                            <span>📌 Önceki: <strong>${lastPerf.weight} kg × ${lastPerf.reps} tk</strong></span>
+                                            <span>📌 Önceki: <strong>${formatPerformancePill(ex, lastPerf.weight, lastPerf.reps)}</strong></span>
                                         </div>
                                         <button type="button" class="btn-hevy-ghost-apply" onclick="copyLastPerformanceToCurrent('${ex.id}', ${lastPerf.weight}, ${lastPerf.reps})">
                                             ⚡ Tümüne Yaz
@@ -6928,15 +7157,15 @@ KURALLAR:
                                         <div class="hevy-th-row">
                                             <div class="hevy-th">SET</div>
                                             <div class="hevy-th">ÖNCEKİ</div>
-                                            <div class="hevy-th">KG</div>
-                                            <div class="hevy-th">TEKRAR</div>
+                                            <div class="hevy-th">${isBw ? 'YÜK (BW)' : 'KG'}</div>
+                                            <div class="hevy-th">${isTime ? 'SÜRE (SN)' : 'TEKRAR'}</div>
                                             <div class="hevy-th">✓</div>
                                         </div>
 
                                         ${sets.map((st, sIdx) => {
                                             const isDone = st.completed;
                                             const isTarget = !isDone && sIdx === firstIncompleteIdx;
-                                            const prevText = lastPerf ? `${lastPerf.weight}kg × ${lastPerf.reps}` : '-';
+                                            const prevText = lastPerf ? formatPerformancePill(ex, lastPerf.weight, lastPerf.reps) : '-';
 
                                             return `
                                                 <div class="hevy-tr-row ${isDone ? 'done' : ''} ${isTarget ? 'active-target' : ''}" id="setRow_${ex.id}_${sIdx}">
@@ -6950,18 +7179,18 @@ KURALLAR:
                                                         <span class="hevy-prev-text ${lastPerf && !isDone ? 'clickable' : ''}">${prevText}</span>
                                                     </div>
 
-                                                    <!-- AĞIRLIK (KG) - LISTBOX PICKER -->
+                                                    <!-- AĞIRLIK (KG / BW) - LISTBOX PICKER -->
                                                     <div class="hevy-td">
-                                                        <button type="button" class="hevy-listbox-btn" onclick="openListboxPicker('${ex.id}', ${sIdx}, 'weight')" title="Kilo seçmek için dokunun">
-                                                            <span>${st.weight !== '' && st.weight !== null && st.weight !== undefined ? `${st.weight} kg` : '- kg'}</span>
+                                                        <button type="button" class="hevy-listbox-btn ${isBw ? 'bw-load-btn' : ''}" onclick="openListboxPicker('${ex.id}', ${sIdx}, 'weight')" title="${isBw ? 'Vücut ağırlığı veya ek yük seçin' : 'Kilo seçmek için dokunun'}">
+                                                            <span>${formatSetWeightDisplay(isBw, st.weight)}</span>
                                                             <span class="listbox-btn-arrow">▾</span>
                                                         </button>
                                                     </div>
 
-                                                    <!-- TEKRAR - LISTBOX PICKER -->
+                                                    <!-- TEKRAR / SÜRE - LISTBOX PICKER -->
                                                     <div class="hevy-td">
-                                                        <button type="button" class="hevy-listbox-btn" onclick="openListboxPicker('${ex.id}', ${sIdx}, 'reps')" title="Tekrar seçmek için dokunun">
-                                                            <span>${st.reps !== '' && st.reps !== null && st.reps !== undefined ? `${st.reps} tk` : '- tk'}</span>
+                                                        <button type="button" class="hevy-listbox-btn ${isTime ? 'time-metric-btn' : ''}" onclick="openListboxPicker('${ex.id}', ${sIdx}, 'reps')" title="${isTime ? 'Süre (saniye) seçmek için dokunun' : 'Tekrar seçmek için dokunun'}">
+                                                            <span>${formatSetMetricDisplay(isTime, st.reps)}</span>
                                                             <span class="listbox-btn-arrow">▾</span>
                                                         </button>
                                                     </div>
@@ -7115,8 +7344,18 @@ KURALLAR:
 
         function addSetToExercise(exId) {
             const sets = activeWorkoutSetsData[exId] || [];
-            const lastWeight = sets.length > 0 ? sets[sets.length - 1].weight : '';
-            const lastReps = sets.length > 0 ? sets[sets.length - 1].reps : 10;
+            let ex = null;
+            if (activeWorkoutSession && Array.isArray(activeWorkoutSession.exercises)) {
+                ex = activeWorkoutSession.exercises.find(e => e.id === exId);
+            }
+            if (!ex && typeof EXERCISES_DB !== 'undefined') {
+                ex = EXERCISES_DB.find(e => e.id === exId);
+            }
+            const isBw = isExerciseBodyweight(ex);
+            const isTime = isExerciseTimeBased(ex);
+
+            const lastWeight = sets.length > 0 ? sets[sets.length - 1].weight : (isBw ? 0 : '');
+            const lastReps = sets.length > 0 ? sets[sets.length - 1].reps : (isTime ? 30 : 10);
             sets.push({
                 setNo: sets.length + 1,
                 weight: lastWeight,
@@ -7383,26 +7622,98 @@ KURALLAR:
 
             const prs = [];
             exerciseSummaries.forEach(ex => {
-                if (ex.completedCount === 0 || !ex.volume) return;
-                const currentMaxWeight = Math.max(0, ...ex.sets.filter(s => s.completed).map(s => s.weight));
-                if (currentMaxWeight <= 0) return;
+                if (!ex || ex.completedCount === 0) return;
+                const isTime = isExerciseTimeBased(ex);
+                const isBw = isExerciseBodyweight(ex);
+                const completedSets = (ex.sets || []).filter(s => s.completed);
+                if (completedSets.length === 0) return;
 
-                let previousAllTimeMax = 0;
-                history.forEach(log => {
-                    if (!log.detailedExercises || !Array.isArray(log.detailedExercises)) return;
-                    const prevEx = log.detailedExercises.find(e => e.name === ex.name || (e.id && e.id === ex.id));
-                    if (prevEx && prevEx.maxWeight) {
-                        if (prevEx.maxWeight > previousAllTimeMax) previousAllTimeMax = prevEx.maxWeight;
-                    }
-                });
+                if (isTime) {
+                    const currentMaxSecs = Math.max(0, ...completedSets.map(s => parseInt(s.reps, 10) || 0));
+                    if (currentMaxSecs <= 0) return;
 
-                if (previousAllTimeMax > 0 && currentMaxWeight > previousAllTimeMax) {
-                    prs.push({
-                        name: ex.name,
-                        newWeight: currentMaxWeight,
-                        oldWeight: previousAllTimeMax,
-                        diff: Math.round((currentMaxWeight - previousAllTimeMax) * 10) / 10
+                    let prevMaxSecs = 0;
+                    history.forEach(log => {
+                        if (!log.detailedExercises && !log.exercises) return;
+                        const list = log.detailedExercises || log.exercises || [];
+                        const prevEx = list.find(e => e.name === ex.name || (e.id && e.id === ex.id));
+                        if (prevEx && Array.isArray(prevEx.sets)) {
+                            prevEx.sets.filter(s => s.completed).forEach(s => {
+                                const r = parseInt(s.reps, 10) || 0;
+                                if (r > prevMaxSecs) prevMaxSecs = r;
+                            });
+                        }
                     });
+
+                    if (prevMaxSecs > 0 && currentMaxSecs > prevMaxSecs) {
+                        prs.push({
+                            name: ex.name,
+                            metricType: 'time',
+                            newVal: `${currentMaxSecs} sn`,
+                            oldVal: `${prevMaxSecs} sn`,
+                            diff: `+${currentMaxSecs - prevMaxSecs} sn`
+                        });
+                    }
+                } else if (isBw) {
+                    const currentMaxWeight = Math.max(0, ...completedSets.map(s => parseFloat(s.weight) || 0));
+                    const currentMaxReps = Math.max(0, ...completedSets.map(s => parseInt(s.reps, 10) || 0));
+
+                    let prevMaxWeight = 0;
+                    let prevMaxReps = 0;
+                    history.forEach(log => {
+                        if (!log.detailedExercises && !log.exercises) return;
+                        const list = log.detailedExercises || log.exercises || [];
+                        const prevEx = list.find(e => e.name === ex.name || (e.id && e.id === ex.id));
+                        if (prevEx && Array.isArray(prevEx.sets)) {
+                            prevEx.sets.filter(s => s.completed).forEach(s => {
+                                const w = parseFloat(s.weight) || 0;
+                                const r = parseInt(s.reps, 10) || 0;
+                                if (w > prevMaxWeight) prevMaxWeight = w;
+                                if (r > prevMaxReps) prevMaxReps = r;
+                            });
+                        }
+                    });
+
+                    if (currentMaxWeight > 0 && currentMaxWeight > prevMaxWeight) {
+                        prs.push({
+                            name: ex.name,
+                            metricType: 'weight',
+                            newVal: `BW +${currentMaxWeight} kg`,
+                            oldVal: prevMaxWeight > 0 ? `BW +${prevMaxWeight} kg` : 'BW (Ek Yüksüz)',
+                            diff: `+${Math.round((currentMaxWeight - prevMaxWeight) * 10) / 10} kg`
+                        });
+                    } else if (prevMaxReps > 0 && currentMaxReps > prevMaxReps) {
+                        prs.push({
+                            name: ex.name,
+                            metricType: 'reps',
+                            newVal: `${currentMaxReps} Tekrar`,
+                            oldVal: `${prevMaxReps} Tekrar`,
+                            diff: `+${currentMaxReps - prevMaxReps} Tk`
+                        });
+                    }
+                } else {
+                    const currentMaxWeight = Math.max(0, ...completedSets.map(s => parseFloat(s.weight) || 0));
+                    if (currentMaxWeight <= 0) return;
+
+                    let previousAllTimeMax = 0;
+                    history.forEach(log => {
+                        if (!log.detailedExercises && !log.exercises) return;
+                        const list = log.detailedExercises || log.exercises || [];
+                        const prevEx = list.find(e => e.name === ex.name || (e.id && e.id === ex.id));
+                        if (prevEx && prevEx.maxWeight && prevEx.maxWeight > previousAllTimeMax) {
+                            previousAllTimeMax = prevEx.maxWeight;
+                        }
+                    });
+
+                    if (previousAllTimeMax > 0 && currentMaxWeight > previousAllTimeMax) {
+                        prs.push({
+                            name: ex.name,
+                            metricType: 'weight',
+                            newVal: `${currentMaxWeight} kg`,
+                            oldVal: `${previousAllTimeMax} kg`,
+                            diff: `+${Math.round((currentMaxWeight - previousAllTimeMax) * 10) / 10} kg`
+                        });
+                    }
                 }
             });
             return prs;
@@ -7472,36 +7783,49 @@ KURALLAR:
             // Summary stats & detailed exercise breakdown calculation
             let totalCompletedSets = 0;
             let totalReps = 0;
+            let totalIsometricSecs = 0;
             let totalVolume = 0;
 
             const exerciseSummaries = activeWorkoutSession.exercises.map(ex => {
                 const sets = activeWorkoutSetsData[ex.id] || [];
+                const isBw = isExerciseBodyweight(ex);
+                const isTime = isExerciseTimeBased(ex);
                 let exVol = 0;
                 let exCompletedSets = 0;
                 const setSummaries = sets.map(st => {
-                    const w = parseFloat(st.weight) || 0;
-                    const r = parseInt(st.reps) || 0;
+                    const w = (st.weight !== '' && st.weight !== null && !isNaN(st.weight)) ? parseFloat(st.weight) : 0;
+                    const r = (st.reps !== '' && st.reps !== null && !isNaN(st.reps)) ? parseInt(st.reps, 10) : 0;
+                    const setVol = st.completed ? calculateExerciseSetVolume(ex, w, r) : 0;
                     if (st.completed) {
                         totalCompletedSets++;
                         exCompletedSets++;
-                        totalReps += r;
-                        totalVolume += (w * r);
-                        exVol += (w * r);
+                        if (isTime) {
+                            totalIsometricSecs += r;
+                        } else {
+                            totalReps += r;
+                        }
+                        totalVolume += setVol;
+                        exVol += setVol;
                     }
                     return {
                         setNo: st.setNo,
                         weight: w,
                         reps: r,
+                        isBodyweight: isBw,
+                        isTimeBased: isTime,
                         completed: st.completed
                     };
                 });
 
                 return {
+                    id: ex.id,
                     name: ex.name,
                     muscle: ex.muscle ? ex.muscle.split(',')[0].trim() : '',
                     equipment: ex.equipment,
+                    isBodyweight: isBw,
+                    isTimeBased: isTime,
                     sets: setSummaries,
-                    volume: exVol,
+                    volume: Math.round(exVol),
                     completedCount: exCompletedSets
                 };
             });
@@ -7525,7 +7849,7 @@ KURALLAR:
                                 </div>
                                 ${prs.map(p => `
                                     <div class="pr-badge-item">
-                                        🏆 <strong>${escapeHTML(p.name)}:</strong> Yeni Ağırlık: <strong style="color:#F3F6FA;">${p.newWeight} kg</strong> (Eski Zirve: ${p.oldWeight} kg ➔ <strong style="color:var(--green-success);">+${p.diff} kg</strong> Artış!)
+                                        🏆 <strong>${escapeHTML(p.name)}:</strong> Yeni Zirve: <strong style="color:#F3F6FA;">${escapeHTML(p.newVal || `${p.newWeight} kg`)}</strong> (Eski: ${escapeHTML(p.oldVal || `${p.oldWeight} kg`)} ➔ <strong style="color:var(--green-success);">${escapeHTML(p.diff)}</strong>)
                                     </div>
                                 `).join('')}
                             </div>
@@ -7534,7 +7858,7 @@ KURALLAR:
                         <!-- TOP STATS -->
                         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; margin-bottom:12px; text-align:center;">
                             <div style="background:var(--bg-elevated); padding:8px 4px; border-radius:6px; border:1px solid var(--border);">
-                                <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">TOPLAM TONAJ</div>
+                                <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">TOPLAM İŞ / TONAJ</div>
                                 <div style="font-size:14px; font-weight:900; color:var(--gold); margin-top:2px;">🏋️ ${Math.round(totalVolume).toLocaleString('tr-TR')} kg</div>
                             </div>
                             <div style="background:var(--bg-elevated); padding:8px 4px; border-radius:6px; border:1px solid var(--border);">
@@ -7542,8 +7866,8 @@ KURALLAR:
                                 <div style="font-size:14px; font-weight:900; color:var(--green-success); margin-top:2px;">✅ ${totalCompletedSets} Set</div>
                             </div>
                             <div style="background:var(--bg-elevated); padding:8px 4px; border-radius:6px; border:1px solid var(--border);">
-                                <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">TOPLAM TEKRAR</div>
-                                <div style="font-size:14px; font-weight:900; color:var(--cyan); margin-top:2px;">🎯 ${totalReps} Tk</div>
+                                <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">${totalIsometricSecs > 0 ? 'TEKRAR / TUT' : 'TOPLAM TEKRAR'}</div>
+                                <div style="font-size:14px; font-weight:900; color:var(--cyan); margin-top:2px;">🎯 ${totalReps} Tk ${totalIsometricSecs > 0 ? `• ⏱️ ${totalIsometricSecs}s` : ''}</div>
                             </div>
                         </div>
 
@@ -7566,7 +7890,7 @@ KURALLAR:
                                     <div style="display:flex; flex-wrap:wrap; gap:4px;">
                                         ${ex.sets.map(st => st.completed ? `
                                             <span style="background:rgba(34, 197, 94, 0.12); border:1px solid rgba(34, 197, 94, 0.4); color:#B6F059; border-radius:4px; padding:2px 6px; font-size:10.5px; font-weight:700;">
-                                                Set ${st.setNo}: <strong>${st.weight || 0} kg</strong> x ${st.reps || 0} ✓
+                                                Set ${st.setNo}: <strong>${formatSetWeightDisplay(ex.isBodyweight, st.weight)}</strong> × ${formatSetMetricDisplay(ex.isTimeBased, st.reps)} ✓
                                             </span>
                                         ` : `
                                             <span style="background:rgba(239, 68, 68, 0.08); border:1px dashed rgba(239, 68, 68, 0.3); color:#F87171; opacity:0.65; border-radius:4px; padding:2px 6px; font-size:10.5px; font-weight:600; text-decoration:line-through;" title="Bitir butonuna basılmadı">
@@ -7615,24 +7939,36 @@ KURALLAR:
             let totalVolume = 0;
             let totalCompletedSets = 0;
             let totalCompletedReps = 0;
+            let totalIsometricSeconds = 0;
             const allMuscles = [];
 
             const detailedExercises = activeWorkoutSession.exercises.map(ex => {
+                const isBw = isExerciseBodyweight(ex);
+                const isTime = isExerciseTimeBased(ex);
+
                 const sets = (activeWorkoutSetsData[ex.id] || []).map(st => {
                     const isDone = !!st.completed;
-                    const w = parseFloat(st.weight) || 0;
-                    const r = parseInt(st.reps) || 0;
+                    const w = (st.weight !== '' && st.weight !== null && !isNaN(st.weight)) ? parseFloat(st.weight) : 0;
+                    const r = (st.reps !== '' && st.reps !== null && !isNaN(st.reps)) ? parseInt(st.reps, 10) : 0;
+                    const setVol = isDone ? calculateExerciseSetVolume(ex, w, r) : 0;
+
                     if (isDone) {
                         totalCompletedSets++;
-                        totalCompletedReps += r;
-                        totalVolume += (w * r);
+                        if (isTime) {
+                            totalIsometricSeconds += r;
+                        } else {
+                            totalCompletedReps += r;
+                        }
+                        totalVolume += setVol;
                     }
                     return {
                         setNo: st.setNo,
                         weight: isDone ? w : 0,
                         reps: isDone ? r : 0,
+                        isBodyweight: isBw,
+                        isTimeBased: isTime,
                         completed: isDone,
-                        volume: isDone ? (w * r) : 0
+                        volume: isDone ? Math.round(setVol) : 0
                     };
                 });
 
@@ -7649,6 +7985,7 @@ KURALLAR:
                 }
 
                 const maxWeight = completedSets.length > 0 ? Math.max(0, ...completedSets.map(st => st.weight)) : 0;
+                const maxReps = completedSets.length > 0 ? Math.max(0, ...completedSets.map(st => st.reps)) : 0;
                 const exVolume = completedSets.reduce((sum, st) => sum + st.volume, 0);
 
                 return {
@@ -7658,10 +7995,13 @@ KURALLAR:
                     category: ex.category,
                     muscle: ex.muscle,
                     cue: ex.cue || '',
+                    isBodyweight: isBw,
+                    isTimeBased: isTime,
                     sets: sets,
                     completedSetsCount: completedSets.length,
                     maxWeight: maxWeight,
-                    exerciseVolume: exVolume
+                    maxReps: maxReps,
+                    exerciseVolume: Math.round(exVolume)
                 };
             });
 
@@ -7680,6 +8020,7 @@ KURALLAR:
                 totalVolumeKg: Math.round(totalVolume * 10) / 10,
                 totalSetsCompleted: totalCompletedSets,
                 totalRepsCompleted: totalCompletedReps,
+                totalIsometricSecsCompleted: totalIsometricSeconds,
                 muscleGroups: allMuscles,
                 exercises: detailedExercises,
                 timestamp: Date.now()
@@ -8082,12 +8423,18 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 activeWorkoutSetsData[ex.id] = [];
                 const user = getActiveUser();
                 const userWeights = user?.weights || {};
-                const defaultWeight = ex.weightKey && userWeights[ex.weightKey] ? (parseFloat(userWeights[ex.weightKey]) || '') : '';
+                const isBw = isExerciseBodyweight(ex);
+                const isTime = isExerciseTimeBased(ex);
+                let defaultWeight = ex.weightKey && userWeights[ex.weightKey] ? (parseFloat(userWeights[ex.weightKey]) || '') : '';
+                if (isBw && (defaultWeight === '' || defaultWeight === null || isNaN(defaultWeight))) {
+                    defaultWeight = 0;
+                }
+                const defaultReps = isTime ? 30 : 10;
                 for (let s = 1; s <= 3; s++) {
                     activeWorkoutSetsData[ex.id].push({
                         setNo: s,
                         weight: defaultWeight,
-                        reps: 10,
+                        reps: defaultReps,
                         completed: false,
                         completedAt: null
                     });
@@ -8144,14 +8491,20 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             const user = getActiveUser();
             const userWeights = user?.weights || {};
-            const defaultWeight = ex.weightKey && userWeights[ex.weightKey] ? (parseFloat(userWeights[ex.weightKey]) || '') : '';
+            const isBw = isExerciseBodyweight(ex);
+            const isTime = isExerciseTimeBased(ex);
+            let defaultWeight = ex.weightKey && userWeights[ex.weightKey] ? (parseFloat(userWeights[ex.weightKey]) || '') : '';
+            if (isBw && (defaultWeight === '' || defaultWeight === null || isNaN(defaultWeight))) {
+                defaultWeight = 0;
+            }
+            const defaultReps = isTime ? 30 : 10;
 
             activeWorkoutSetsData[ex.id] = [];
             for (let s = 1; s <= 3; s++) {
                 activeWorkoutSetsData[ex.id].push({
                     setNo: s,
                     weight: defaultWeight,
-                    reps: 10,
+                    reps: defaultReps,
                     completed: false,
                     completedAt: null
                 });
@@ -14145,7 +14498,19 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
 
             container.innerHTML = filterBarHTML + logs.map(l => {
-                const totalVol = l.totalVolumeKg ? `${Math.round(l.totalVolumeKg).toLocaleString('tr-TR')} kg` : 'Belirtilmedi';
+                let logVol = l.totalVolumeKg || 0;
+                if (logVol === 0 && Array.isArray(l.exercises)) {
+                    l.exercises.forEach(ex => {
+                        if (Array.isArray(ex.sets)) {
+                            ex.sets.forEach(st => {
+                                if (st.completed || parseInt(st.reps, 10) > 0) {
+                                    logVol += calculateExerciseSetVolume(ex, st.weight, st.reps);
+                                }
+                            });
+                        }
+                    });
+                }
+                const totalVol = logVol > 0 ? `${Math.round(logVol).toLocaleString('tr-TR')} kg` : 'Belirtilmedi';
                 const setsReps = l.totalSetsCompleted ? `${l.totalSetsCompleted} Set • ${l.totalRepsCompleted || 0} Tk` : '-';
                 const durStr = l.durationFormatted || `${l.duration} Dk`;
                 const rpeLabel = l.rpe ? (l.rpe.split(' ')[0] + ' ' + (l.rpe.split(' ')[1] || '')) : 'RPE 8';
@@ -14205,16 +14570,28 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         <!-- DETAILED EXERCISES & SETS -->
                         ${l.exercises && l.exercises.length > 0 ? `
                             <div class="log-exercises-list">
-                                ${l.exercises.map(ex => `
+                                ${l.exercises.map(ex => {
+                                    const isBw = isExerciseBodyweight(ex);
+                                    const isTime = isExerciseTimeBased(ex);
+                                    let exVol = ex.exerciseVolume || 0;
+                                    if (exVol === 0 && Array.isArray(ex.sets)) {
+                                        ex.sets.forEach(st => {
+                                            if (st.completed || parseInt(st.reps, 10) > 0) {
+                                                exVol += calculateExerciseSetVolume(ex, st.weight, st.reps);
+                                            }
+                                        });
+                                    }
+                                    const volText = exVol > 0 ? ` • ${Math.round(exVol).toLocaleString('tr-TR')} kg` : '';
+                                    return `
                                     <div class="log-exercise-item">
                                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                                             <strong style="color:#F3F6FA; font-size:12px;">${escapeHTML(ex.name)}</strong>
-                                            <span style="font-size:11px; color:var(--text-secondary);">${escapeHTML(ex.muscle ? ex.muscle.split(',')[0] : '')}${ex.exerciseVolume ? ` • ${Math.round(ex.exerciseVolume).toLocaleString('tr-TR')} kg` : ''}</span>
+                                            <span style="font-size:11px; color:var(--text-secondary);">${escapeHTML(ex.muscle ? ex.muscle.split(',')[0] : '')}${volText}</span>
                                         </div>
                                         <div class="log-sets-summary">
                                             ${(ex.sets || []).map(st => st.completed ? `
                                                 <span class="log-set-pill completed">
-                                                    S${st.setNo}: <strong>${st.weight || 0}kg</strong> x ${st.reps || 0} ✓
+                                                    S${st.setNo}: <strong>${formatSetWeightDisplay(isBw, st.weight)}</strong> × ${formatSetMetricDisplay(isTime, st.reps)} ✓
                                                 </span>
                                             ` : `
                                                 <span class="log-set-pill" style="opacity:0.4; border-style:dashed; text-decoration:line-through;">
@@ -14223,7 +14600,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                             `).join('')}
                                         </div>
                                     </div>
-                                `).join('')}
+                                    `;
+                                }).join('')}
                             </div>
                         ` : ''}
 
@@ -16793,14 +17171,23 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const prMap = {};
 
             filteredLogs.forEach(log => {
-                totalVolume += (log.totalVolumeKg || 0);
-                totalSets += (log.totalSetsCompleted || 0);
-                totalReps += (log.totalRepsCompleted || 0);
+                let logVol = (log.totalVolumeKg || 0);
+                let computedLogVol = 0;
 
                 if (log.exercises && log.exercises.length > 0) {
                     log.exercises.forEach(ex => {
-                        const exVol = ex.exerciseVolume || 0;
+                        let exVol = ex.exerciseVolume || 0;
                         const cSets = ex.completedSetsCount || (Array.isArray(ex.sets) ? ex.sets.filter(s => s.completed || parseInt(s.reps, 10) > 0).length : 0) || 0;
+                        
+                        // If exVol is 0 but sets were completed, calculate academic volume (BW / TUT equivalence)
+                        if (exVol === 0 && Array.isArray(ex.sets)) {
+                            ex.sets.forEach(st => {
+                                if (st.completed || parseInt(st.reps, 10) > 0) {
+                                    exVol += calculateExerciseSetVolume(ex, st.weight, st.reps);
+                                }
+                            });
+                        }
+                        computedLogVol += exVol;
                         if (cSets === 0 && exVol === 0) return;
 
                         const spec = resolveExerciseBiomechanics(ex.name, ex.muscle, ex.category);
@@ -16853,6 +17240,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         }
                     });
                 }
+
+                if (logVol === 0 && computedLogVol > 0) {
+                    logVol = computedLogVol;
+                }
+                totalVolume += logVol;
+                totalSets += (log.totalSetsCompleted || 0);
+                totalReps += (log.totalRepsCompleted || 0);
             });
 
             const sessionsCount = filteredLogs.length;
@@ -16879,7 +17273,16 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             const sortedPrs = Object.keys(prMap).map(k => ({ name: k, ...prMap[k] })).sort((a,b) => b.weight - a.weight).slice(0, 6);
 
-            container.innerHTML = weeklySufficiencyHTML + timeFilterHTML + `
+            const academicInfoBanner = `
+                <div style="background:rgba(56, 189, 248, 0.05); border:1px solid rgba(56, 189, 248, 0.25); border-radius:10px; padding:10px 14px; margin-bottom:14px; display:flex; align-items:center; gap:10px;">
+                    <span style="font-size:22px; flex-shrink:0;">🎓</span>
+                    <div style="font-size:11.5px; color:#bae6fd; line-height:1.4;">
+                        <strong>Akademik Biyomekanik & TUT Modeli:</strong> Vücut ağırlığı hareketleri (Şınav, Barfiks vb.) kaldırılan kaldıraç yüküyle (Ebben et al., 2011), izometrik tutuşlar (Plank, Hollow vb.) ise mekanik gerilim süresi (Oranchuk et al., 2019) formülüyle efektif tonaj ve hipertrofi havuzuna dahil edilir.
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = weeklySufficiencyHTML + timeFilterHTML + academicInfoBanner + `
                 <!-- KPI STATS -->
                 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-bottom:16px;">
                     <div class="analytics-kpi-card">
@@ -17498,7 +17901,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=226')
+                navigator.serviceWorker.register('./sw.js?v=227')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
@@ -18135,12 +18538,20 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             activeWorkoutSession.exercises.forEach(ex => {
                 const numSets = ex.targetSets || 3;
-                let defaultReps = 10;
+                const isBw = isExerciseBodyweight(ex);
+                const isTime = isExerciseTimeBased(ex);
+                let defaultReps = isTime ? 30 : 10;
                 if (ex.targetReps) {
                     const firstPart = String(ex.targetReps).split('-')[0].trim();
-                    defaultReps = parseInt(firstPart) || 10;
+                    const parsed = parseInt(firstPart, 10);
+                    if (!isNaN(parsed) && parsed > 0) {
+                        defaultReps = parsed;
+                    }
                 }
-                const defaultWeight = ex.weightKey && userWeights[ex.weightKey] ? (parseFloat(userWeights[ex.weightKey]) || '') : '';
+                let defaultWeight = ex.weightKey && userWeights[ex.weightKey] ? (parseFloat(userWeights[ex.weightKey]) || '') : '';
+                if (isBw && (defaultWeight === '' || defaultWeight === null || isNaN(defaultWeight))) {
+                    defaultWeight = 0;
+                }
 
                 activeWorkoutSetsData[ex.id] = [];
                 for (let s = 1; s <= numSets; s++) {
