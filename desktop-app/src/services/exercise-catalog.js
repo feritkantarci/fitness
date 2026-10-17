@@ -3578,7 +3578,9 @@ const OPENGYM_GLOBAL_CATALOG = {
   "bb_zercher_squat": { id: "5670", name: "Zercher Squat", clip: "assets/opengym/clips/5670.mp4", still: "assets/opengym/stills/5670.webp" },
   "bb_landmine_squat_press": { id: "1540", name: "Landmine Squat to Press", clip: "assets/opengym/clips/1540.mp4", still: "assets/opengym/stills/1540.webp" },
   "db_standing_calf_raise": { id: "0417", name: "Ayakta Dambıl Calf Raise", clip: "assets/opengym/clips/0417.mp4", still: "assets/opengym/stills/0417.webp" },
-  "db_lying_leg_curl": { id: "6161", name: "Dambıl ile Yatarak Bacak Bükme", clip: "assets/opengym/clips/6161.mp4", still: "assets/opengym/stills/6161.webp" }
+  "db_lying_leg_curl": { id: "6161", name: "Dambıl ile Yatarak Bacak Bükme", clip: "assets/opengym/clips/6161.mp4", still: "assets/opengym/stills/6161.webp" },
+  "mach_straight_arm_pulldown": { id: "0150", name: "Kablo Düz Kol Çekiş", clip: "assets/opengym/clips/0150.mp4", still: "assets/opengym/stills/0150.webp" },
+  "bw_hyperextension": { id: "0085", name: "45° Hiperekstansiyon", clip: "assets/opengym/clips/0085.mp4", still: "assets/opengym/stills/0085.webp" }
 };
 
 function enrichExerciseWithOpengym(ex) {

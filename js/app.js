@@ -92,6 +92,8 @@
             bb_bent_over_row: { primary: 'Orta Sırt (Kalınlık)', secondary: 'Kanat, Biceps, Alt Bel', subKey: 'back_mid' },
             bb_pendlay_row: { primary: 'Orta Sırt (Patlayıcı)', secondary: 'Rhomboid, Kanat, Alt Bel', subKey: 'back_mid' },
             kb_gorilla_row: { primary: 'Kanat & Orta Sırt', secondary: 'Biceps, Arka Omuz, Statik Bacak', subKey: 'back_mid', allSubKeys: ['back_mid', 'back_lats'] },
+            mach_straight_arm_pulldown: { primary: 'Alt Kanat (İzole Lats)', secondary: 'Triceps Uzun Baş, Core', subKey: 'back_lats' },
+            bw_hyperextension: { primary: 'Alt Sırt (Erector Spinae)', secondary: 'Büyük Kalça (Glute), Hamstring', subKey: 'back_mid', allSubKeys: ['back_mid', 'legs_hamstrings', 'legs_glutes'] },
 
             // LEGS - QUADS / ÖN BACAK
             db_goblet_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Büyük Kalça (Glute), Core', subKey: 'legs_quad' },
@@ -695,13 +697,13 @@
             'kb_goblet_squat': { id: '2993', name: "Kettlebell Goblet Squat", clip: 'assets/opengym/clips/2993.mp4', still: 'assets/opengym/stills/2993.webp' },
             'kb_gorilla_row': { id: '0522', name: "Kettlebell Gorilla Row", clip: 'assets/opengym/clips/0522.mp4', still: 'assets/opengym/stills/0522.webp' },
             'kb_windmill': { id: '0554', name: "Kettlebell Windmill", clip: 'assets/opengym/clips/0554.mp4', still: 'assets/opengym/stills/0554.webp' },
-            'kb_turkish_getup': { id: '4057', name: "Kettlebell Turkish Get-Up", clip: 'assets/opengym/clips/4057.mp4', still: 'assets/opengym/stills/4057.webp' },
+            'kb_turkish_getup': { id: 'kb_turkish_getup', name: "Kettlebell Turkish Get-Up", clip: 'assets/opengym/clips/kb_turkish_getup.mp4', still: 'assets/opengym/stills/kb_turkish_getup.webp' },
             'kb_halo': { id: '6077', name: "Kettlebell Halo", clip: 'assets/opengym/clips/6077.mp4', still: 'assets/opengym/stills/6077.webp' },
             'kb_thruster': { id: '0538', name: "Kettlebell Thruster", clip: 'assets/opengym/clips/0538.mp4', still: 'assets/opengym/stills/0538.webp' },
             'bb_bench_press': { id: '0025', name: "Barbell Bench Press", clip: 'assets/opengym/clips/0025.mp4', still: 'assets/opengym/stills/0025.webp' },
             'bb_incline_bench': { id: '0047', name: "Incline Barbell Bench Press", clip: 'assets/opengym/clips/0047.mp4', still: 'assets/opengym/stills/0047.webp' },
             'bb_overhead_press': { id: '0091', name: "Overhead Press (Askeri Pres)", clip: 'assets/opengym/clips/0091.mp4', still: 'assets/opengym/stills/0091.webp' },
-            'bb_back_squat': { id: '3593', name: "Barbell Back Squat", clip: 'assets/opengym/clips/3593.mp4', still: 'assets/opengym/stills/3593.webp' },
+            'bb_back_squat': { id: 'bb_back_squat', name: "Barbell Back Squat", clip: 'assets/opengym/clips/bb_back_squat.mp4', still: 'assets/opengym/stills/bb_back_squat.webp' },
             'bb_front_squat': { id: '0042', name: "Barbell Front Squat", clip: 'assets/opengym/clips/0042.mp4', still: 'assets/opengym/stills/0042.webp' },
             'bb_deadlift': { id: '1543', name: "Geleneksel Deadlift (Conventional)", clip: 'assets/opengym/clips/1543.mp4', still: 'assets/opengym/stills/1543.webp' },
             'bb_rdl': { id: '0085', name: "Barbell RDL", clip: 'assets/opengym/clips/0085.mp4', still: 'assets/opengym/stills/0085.webp' },
@@ -2136,6 +2138,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             // 10. Tek Kol Kanat & Pullover
             db_saw_row: 'unilateral_lat_row',
             db_pullover: 'lat_pullover',
+            mach_straight_arm_pulldown: 'lat_pullover',
             // 11. Yatay Orta Sırt Çekiş (Horizontal Row)
             db_chest_supported_row: 'supported_midback_row',
             mach_cable_row: 'supported_midback_row',
@@ -2175,6 +2178,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             bb_rdl: 'hip_hinge_rdl_deadlift',
             db_single_leg_rdl: 'hip_hinge_rdl_deadlift',
             bb_deadlift: 'hip_hinge_rdl_deadlift',
+            bw_hyperextension: 'posterior_hyperextension',
             // 17. Hamstring İzolasyon (Leg Curl)
             mach_leg_curl: 'hamstring_curl_iso',
             db_lying_leg_curl: 'hamstring_curl_iso',
@@ -3933,7 +3937,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 'kb_goblet_squat': guideLibrary.goblet_squat,
                 'bw_air_squat': guideLibrary.air_squat,
                 'bw_jump_squat': guideLibrary.air_squat,
-                'bb_back_squat': guideLibrary.back_squat,
+                'bb_back_squat': { form: 'assets/exercises/bb_back_squat.webp', anatomi: null },
                 'bb_front_squat': guideLibrary.back_squat,
                 'mach_leg_press': guideLibrary.leg_press,
                 'mach_leg_extension': guideLibrary.leg_extension,
@@ -4032,7 +4036,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 'bw_mountain_climber': guideLibrary.mountain_climber,
                 'bw_hanging_knee_raise': guideLibrary.hanging_knee_raise,
                 'kb_windmill': guideLibrary.windmill,
-                'kb_turkish_getup': guideLibrary.windmill,
+                'kb_turkish_getup': { form: 'assets/exercises/kb_turkish_getup.webp', anatomi: null },
 
                 // Kompleks & Fonksiyonel Akışlar (Gerçek Animasyonlu Kılavuzlar)
                 'db_clean_squat_press': { form: 'assets/exercises/db_clean_squat_press.webp', anatomi: null },
@@ -17227,8 +17231,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             back: {
                 title: 'SIRT',
                 columns: [
-                    { key: 'lats', label: 'LATİSSİMUS (KANAT)', subKeys: ['back_lats'], recId: 'mach_lat_pulldown', recName: 'Lat Pulldown', keywords: ['kanat', 'lats', 'latissimus', 'pulldown', 'pullup', 'chinup', 'saw row', 'pullover'] },
-                    { key: 'mid', label: 'RHOMBOİD (ORTA SIRT)', subKeys: ['back_mid'], recId: 'db_chest_supported_row', recName: 'Göğüs Destekli Row', keywords: ['orta sırt', 'rhomboid', 'row', 'kürek', 'pendlay', 'renegade row'] },
+                    { key: 'lats', label: 'LATİSSİMUS (KANAT)', subKeys: ['back_lats'], recId: 'mach_lat_pulldown', recName: 'Lat Pulldown', keywords: ['kanat', 'lats', 'latissimus', 'pulldown', 'pullup', 'chinup', 'saw row', 'pullover', 'straight arm', 'düz kol'] },
+                    { key: 'mid', label: 'RHOMBOİD (ORTA SIRT)', subKeys: ['back_mid'], recId: 'db_chest_supported_row', recName: 'Göğüs Destekli Row', keywords: ['orta sırt', 'rhomboid', 'row', 'kürek', 'pendlay', 'renegade row', 'hiperekstansiyon', 'hyperextension', 'back extension'] },
                     { key: 'traps', label: 'TRAPEZ (ÜST SIRT)', subKeys: ['traps'], recId: 'mach_face_pull', recName: 'Face Pull / Shrug', keywords: ['trapez', 'shrug', 'face pull', 'clean', 'farmers', 'halo', 'deadlift'] }
                 ]
             },
@@ -17253,7 +17257,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 columns: [
                     { key: 'biceps_fem', label: 'BICEPS FEMORIS (DIŞ)', subKeys: ['legs_hamstrings'], recId: 'mach_leg_curl', recName: 'Leg Curl', keywords: ['leg curl', 'curl', 'arka bacak'] },
                     { key: 'semitend', label: 'SEMİTENDİNOSUS (İÇ)', subKeys: ['legs_hamstrings'], recId: 'db_rdl', recName: 'Romanian Deadlift (RDL)', keywords: ['rdl', 'romanian', 'deadlift'] },
-                    { key: 'hinge_chain', label: 'POSTERIOR HİNGE ZİNCİRİ', subKeys: ['legs_hamstrings'], recId: 'db_swing', recName: 'Kettlebell Swing', keywords: ['swing', 'single leg rdl', 'good morning'] }
+                    { key: 'hinge_chain', label: 'POSTERIOR HİNGE ZİNCİRİ', subKeys: ['legs_hamstrings'], recId: 'db_swing', recName: 'Kettlebell Swing', keywords: ['swing', 'single leg rdl', 'good morning', 'hiperekstansiyon', 'hyperextension'] }
                 ]
             },
             glutes: {
@@ -18548,7 +18552,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=239')
+                navigator.serviceWorker.register('./sw.js?v=243')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
