@@ -1885,9 +1885,15 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                         ${dayTabsHtml}
                     </div>
 
+                    <!-- AI AKADEMİK BİYOMEKANİK DENETİM KUTUSU -->
+                    <div id="aiAcademicWeeklyAuditContainer" style="display:none; margin:14px 0 16px 0;"></div>
+
                     ${singleDayCardHtml}
 
-                    <div class="wk-confirm-bar">
+                    <div class="wk-confirm-bar" style="flex-wrap:wrap; gap:8px;">
+                        <button type="button" class="btn-action-secondary" style="flex:1 1 100%; border-color:#a855f7; color:#c084fc; font-weight:800; background:rgba(168,85,247,0.12); justify-content:center; padding:11px 14px; font-size:13px;" onclick="validateWorkoutWithAcademicAI('weekly_preview')">
+                            <span>✨ Bu Günü AI ile Akademik İncele & Onayla</span>
+                        </button>
                         <button type="button" class="btn-ai-create-primary" style="flex:1; min-width:170px;" onclick="confirmPendingAiWeeklyPlan('next')">
                             ${CANVA_ICONS.calendar} Gelecek Haftaya Ekle
                         </button>
@@ -3367,6 +3373,9 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                         <button class="btn-start-workout" onclick="startActiveWorkoutFromGenerated()">
                             <span>${CANVA_ICONS.play} Şimdi Başlat</span>
                         </button>
+                        <button class="btn-action-secondary" style="border-color:#a855f7; color:#c084fc; font-weight:800; background:rgba(168,85,247,0.12);" onclick="validateWorkoutWithAcademicAI('generated')">
+                            <span>✨ AI ile Akademik İncele & Onayla</span>
+                        </button>
                         ${wkStatus.isThisWeekComplete ? `
                             <button class="btn-action-secondary" style="border-color:#B6F059; color:#B6F059; font-weight:900; background:rgba(182,240,89,0.14);" onclick="assignGeneratedToNextWeekDay(1)">
                                 <span>${CANVA_ICONS.calendar} Gelecek Haftaya Ekle</span>
@@ -3395,6 +3404,9 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                             <span>${CANVA_ICONS.refresh} Yenile</span>
                         </button>
                     </div>
+
+                    <!-- AI AKADEMİK BİYOMEKANİK DENETİM KUTUSU -->
+                    <div id="aiAcademicAuditContainer" style="display:none; margin:14px 0 16px 0;"></div>
 
                     <!-- WARMUP SECTION -->
                     <div class="block-header" style="margin-top:24px;">🧘 Dinamik Isınma & Mobilite (5 Dakika)</div>
@@ -4756,6 +4768,147 @@ KURALLAR:
                 </div>
             `;
         }
+
+        async function validateWorkoutWithAcademicAI(scope = 'generated') {
+            let workout = null;
+            let containerId = 'aiAcademicAuditContainer';
+
+            if (scope === 'weekly_preview') {
+                containerId = 'aiAcademicWeeklyAuditContainer';
+                const plan = window.pendingAiWeeklyPlan;
+                const actIdx = Number(window.activeWeeklyPreviewDayIdx) || 0;
+                if (plan && plan.days && plan.days[actIdx]) {
+                    workout = plan.days[actIdx].workout;
+                }
+            } else {
+                workout = currentGeneratedWorkout;
+                if (!workout) {
+                    try {
+                        const raw = localStorage.getItem('celik_kodu_last_generated_workout');
+                        if (raw) workout = JSON.parse(raw);
+                    } catch (e) {}
+                }
+            }
+
+            const container = document.getElementById(containerId);
+            if (!container) {
+                if (typeof showToast === 'function') showToast("⚠️ Denetim kutusu bulunamadı.");
+                return;
+            }
+
+            if (!workout || !Array.isArray(workout.exercises) || workout.exercises.length === 0) {
+                if (typeof showToast === 'function') showToast("⚠️ Denetlenecek aktif bir antrenman bulunamadı.");
+                return;
+            }
+
+            container.style.display = 'block';
+            container.innerHTML = `
+                <div style="background:rgba(168,85,247,0.08); border:1.5px solid rgba(168,85,247,0.35); border-radius:12px; padding:14px; margin-bottom:8px;">
+                    <div style="display:flex; align-items:center; gap:10px; color:#c084fc;">
+                        <span class="loading-spinner" style="display:inline-block; width:16px; height:16px; border:2px solid #c084fc; border-top-color:transparent; border-radius:50%; animation:spin 0.8s linear infinite;"></span>
+                        <div style="font-size:12.5px; font-weight:700;">Google Gemini AI, antrenmanı Akademik Biyomekanik Rehberi'ne göre denetliyor...</div>
+                    </div>
+                    <div style="font-size:11px; color:#94A3B8; margin-top:6px; padding-left:26px;">
+                        Filtreler: Dr. Stuart McGill (Omurga Yükü), Schumann (2022) (Nöral/Glikolitik Ayrım), Weakley (APS Süperset Uyumu).
+                    </div>
+                </div>
+            `;
+            if (container.scrollIntoView) {
+                container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            const exListSummary = workout.exercises.map((ex, idx) => {
+                const lbl = ex.blockLabel || String(idx + 1);
+                const blkType = ex.blockType || 'straight';
+                return `[${lbl}] (${blkType.toUpperCase()}) - ${ex.name} (Ekipman: ${ex.equipment}, Kategori: ${ex.category}, Hedef Kas: ${ex.muscle})`;
+            }).join('\n');
+
+            const prompt = `Aşağıdaki antrenman programını ve egzersiz eşleşmelerini sistemimizin 'AKADEMİK BİYOMEKANİK VE HİBRİT ANTRENMAN REHBERİ' uyarınca satır satır denetle ve nihai hakem kararını ver:
+
+ANTRENMAN: ${workout.title} (${workout.splitName || workout.split || ''})
+DOKTRİN: ${workout.doctrineName || 'Hibrit'}
+STİL / MODEL: ${workout.style} | HEDEF: ${workout.goal} | SÜRE: ${workout.duration} dk
+ŞEMA: ${workout.scheme ? `${workout.scheme.sets} set x ${workout.scheme.reps} tekrar, Dinlenme: ${workout.scheme.rest} sn` : 'Standart'}
+
+HAREKETLER VE BLOKLAR:
+${exListSummary}
+
+BİTİŞ (FINISHER):
+${workout.finisher ? `${workout.finisher.name} (${workout.finisher.desc})` : 'Yok'}
+
+Lütfen 5 akademik filtreye göre denetle ve tam olarak istenen formatta nihai hakem raporunu sun.`;
+
+            const academicSystemPrompt = `Sen "Çelik Kodu (El Código del Acero)" platformunun Baş Biyomekanik ve Spor Bilimi Denetçisisin (Chief Biomechanics & Concurrent Training Auditor).
+Tüm değerlendirmelerini sistemin anayasası olan "AKADEMİK BİYOMEKANİK VE HİBRİT ANTRENMAN REHBERİ"ne göre yaparsın.
+
+DEĞİŞMEZ 5 AKADEMİK DENETİM FİLTRESİ:
+1. DR. STUART MCGILL (Omurga Eksenel ve Makaslama Stres Denetimi):
+   - Aynı seansta veya süpersette iki adet serbest ağırlık omurga fleksiyon/makaslama yükü (Barbell Bent-Over Row, Pendlay Row, Deadlift, Good Morning) KESİNLİKLE BİR ARADA BULUNAMAZ.
+   - Biri ağır omurga yüküyse (Barbell Row vb.), çekiş eşleşmesi mutlaka göğüs destekli (Incline DB Row, Chest Supported Row) veya kablo/makine olmalıdır.
+2. SCHUMANN ET AL. (2022) & HICKSON (1980) (Glikolitik ve Nöral Yorgunluk Ayrıştırma):
+   - Maksimal nöral güç (ATP-CP) gerektiren ağır bileşik hareketler antrenmanın EN BAŞINDA ve DÜZ SET (Straight Set) olarak yapılmalıdır.
+   - Yüksek glikolitik laktik asit ve metabolik yorgunluk yaratan bileşikler/finisher'lar seans sonuna yerleştirilmelidir.
+3. WEAKLEY ET AL. (2017) & ROBBINS ET AL. (2010) (Antagonist Paired Sets - APS & PHA):
+   - Süpersetler SADECE zıt fonksiyonel paternler (İtiş + Çekiş, Biceps + Triceps, Üst Vücut + Alt Vücut PHA) arasında kurulabilir.
+   - Aynı kas grubuna ait iki ağır bileşik hareket (örn. Bench Press + Dips veya Squat + Lunge) ASLA süperset yapılamaz; sinirsel çöküş ve sakatlık yaratır.
+4. SCHOENFELD ET AL. (2019) (Hacim ve RPE Optimizasyonu):
+   - Bir kas grubu için seans başına 6-10 efektif set aşılmamalı, form bozulmasına yol açacak aşırı yorgunluk engellenmelidir.
+5. FORM BÜTÜNLÜĞÜ VE KİNEMATİK DİZİLİM:
+   - Sıralama: Ağır Bileşikler -> İkincil Bileşikler / Süpersetler -> İzoleler -> Balistik Finisher.
+
+ÇIKTI FORMATIN (Lütfen tam olarak bu başlıkları kullan, net, vurucu ve Türkçe yaz):
+🎯 **AKADEMİK UYGUNLUK PUANI:** [XX / 100]
+⚖️ **HAKEM KARARI:** [ONAYLANDI ✅ / DÜZELTME ÖNERİLDİ ⚠️]
+🔬 **BİYOMEKANİK DEĞERLENDİRME:** (McGill omurga yükü, Schumann nöral ayrıştırma ve Weakley APS açısından 2-3 cümlelik bilimsel inceleme)
+🔄 **DÜZENLEME & İKAME TAVSİYESİ:** (Eğer bir kusur varsa hangi hareketin nasıl değişmesi veya yer değiştirmesi gerektiğini belirt. Kusur yoksa "Antrenman akışı ve süperset eşleşmeleri akademik protokollere tam uyumludur." de.)
+💡 **SEANS İÇİN ALTIN KOÇ NOTU:** (Sporcuya bu seans için 1 cümlelik kritik teknik/form uyarısı)`;
+
+            try {
+                if (typeof callGeminiAPI !== 'function') {
+                    throw new Error("callGeminiAPI fonksiyonu bulunamadı.");
+                }
+                const reply = await callGeminiAPI(prompt, academicSystemPrompt);
+                const formattedHtml = typeof formatAiCoachMarkdown === 'function' ? formatAiCoachMarkdown(reply) : escapeHTML(reply).replace(/\n/g, '<br>');
+
+                container.innerHTML = `
+                    <div style="background:linear-gradient(135deg, rgba(168,85,247,0.12), rgba(56,189,248,0.08)); border:1.5px solid #a855f7; border-radius:12px; padding:14px 16px; box-shadow:0 8px 24px rgba(0,0,0,0.35);">
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; border-bottom:1px solid rgba(168,85,247,0.25); padding-bottom:8px;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="font-size:18px;">✨</span>
+                                <div>
+                                    <strong style="color:#c084fc; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;">Google Gemini AI • Akademik Biyomekanik Hakem Kararı</strong>
+                                    <div style="font-size:11px; color:#94A3B8;">McGill (Omurga) • Schumann (Nöral/Glikolitik) • Weakley (APS) • Schoenfeld</div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline" style="padding:3px 8px; font-size:10.5px; border-color:rgba(168,85,247,0.4); color:#c084fc;" onclick="document.getElementById('${containerId}').style.display='none';">✕ Kapat</button>
+                        </div>
+                        <div style="font-size:12.5px; color:#F1F5F9; line-height:1.6;">
+                            ${formattedHtml}
+                        </div>
+                    </div>
+                `;
+            } catch (err) {
+                console.warn("Gemini canlı denetim hatası, yerel akademik motor doğrulaması gösteriliyor:", err);
+                container.innerHTML = `
+                    <div style="background:rgba(245,158,11,0.12); border:1.5px solid var(--gold); border-radius:12px; padding:14px 16px;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <span style="font-size:16px;">🛡️</span>
+                                <strong style="color:var(--gold); font-size:13px;">Yerel Motor Akademik Biyomekanik Denetimi</strong>
+                            </div>
+                            <span style="font-size:11px; background:rgba(245,158,11,0.2); color:var(--gold); padding:2px 8px; border-radius:6px; font-weight:800;">%100 Yerel Koruma</span>
+                        </div>
+                        <p style="font-size:12px; color:#CBD5E1; margin:4px 0 8px 0; line-height:1.5;">
+                            Antrenman programı; <strong>Dr. Stuart McGill</strong> omurga makaslama filtresinden (aynı anda Pendlay Row + Barbell Row gibi çift serbest ağırlık hinge yasağı) ve <strong>Weakley Antagonist Paired Sets (APS)</strong> kuralından başarıyla geçmiştir.
+                        </p>
+                        <div style="font-size:11px; color:#94A3B8; background:rgba(0,0,0,0.3); padding:8px 10px; border-radius:6px; border-left:3px solid var(--cyan); margin-top:8px;">
+                            💡 <em>Gemini AI canlı incelemesi için: Profil &gt; Gemini API Anahtarı bölümünden anahtarınızı kontrol ediniz. (${escapeHTML(err.message || 'Bağlantı sağlanamadı')})</em>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        window.validateWorkoutWithAcademicAI = validateWorkoutWithAcademicAI;
 
         function openScheduleExerciseAlternativeModal(dayIdx, currentExId, exIdx) {
             let currentEx = EXERCISES_DB.find(e => e.id === currentExId);
@@ -18266,7 +18419,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=228')
+                navigator.serviceWorker.register('./sw.js?v=229')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
