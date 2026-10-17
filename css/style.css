@@ -7617,3 +7617,80 @@
             border-radius: 999px;
         }
 
+        /* =========================================================================
+           TEK GÜN: 2x2 BÖLGE ŞABLONLARI + 6'LI İZOLE KAS SEÇİM ÇUBUĞU
+           ========================================================================= */
+        #splitGrid > .split-card:first-child {
+            grid-column: auto !important;
+        }
+
+        .iso-muscle-section {
+            grid-column: 1 / -1;
+            margin-top: 4px;
+            padding-top: 10px;
+            border-top: 1px dashed rgba(51, 65, 85, 0.65);
+        }
+
+        .iso-muscle-grid {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .iso-muscle-chip {
+            appearance: none;
+            background: #141923;
+            border: 1px solid #232C3D;
+            border-radius: 12px;
+            padding: 9px 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            color: #CBD5E1;
+            font-family: var(--font-main);
+            font-size: 12.5px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.16s ease;
+            min-width: 0;
+            user-select: none;
+        }
+
+        .iso-muscle-chip:hover {
+            border-color: rgba(74, 222, 128, 0.45);
+            background: #18202D;
+            color: #F8FAFC;
+        }
+
+        .iso-muscle-chip.active {
+            background: #11221C;
+            border-color: #4ADE80;
+            color: #4ADE80;
+            box-shadow: 0 0 12px rgba(74, 222, 128, 0.18);
+        }
+
+        .iso-chip-icon {
+            font-size: 14px;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .iso-chip-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @media (max-width: 640px) {
+            .iso-muscle-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 7px;
+            }
+            .iso-muscle-chip {
+                padding: 10px 6px;
+                font-size: 12px;
+            }
+        }
+
+

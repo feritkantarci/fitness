@@ -23,7 +23,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=223">
+    <link rel="stylesheet" href="css/style.css?v=224">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH (CANVA OBSIDIAN & LIME V201) */
         html, body { background-color: #0B0F17; color: #F3F6FA; color-scheme: dark; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -35,7 +35,7 @@
     <!-- ==================== LOGIN SCREEN ==================== -->
     <div id="loginScreen">
         <div class="login-card">
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v223</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v224</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -72,7 +72,7 @@
                     <span class="canva-brand-monogram" aria-hidden="true" translate="no">Ç</span>
                     <div class="canva-brand-stack">
                         <span class="modern-brand-title" translate="no">Çelik Kodu</span>
-                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v223</span>
+                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v224</span>
                     </div>
                 </div>
                 <div class="modern-bar-actions">
@@ -228,56 +228,59 @@
                             </div>
                         </div>
 
-                        <!-- 1B: Tek Günlük Bölge Seçici Grid (Tek Gün seçildiğinde açılır) -->
+                        <!-- 1B: Tek Günlük Bölge & İzole Kas Seçici (Tek Gün seçildiğinde açılır) -->
                         <div class="split-grid is-hidden-grid" id="splitGrid" style="display:none;">
-                            <div class="split-card selected" onclick="toggleSplit('full_body')">
+                            <div class="split-card selected" data-split-key="full_body" onclick="toggleSplit('full_body')">
                                 <span class="split-radio" aria-hidden="true"></span>
                                 <div class="split-card-content">
-                                    <span class="split-name">Tüm Vücut (Full Body)</span>
+                                    <span class="split-name">Tüm Vücut</span>
                                 </div>
                                 <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'full_body')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
                             </div>
-                            <div class="split-card" onclick="toggleSplit('upper_push')">
+                            <div class="split-card" data-split-key="upper_push" onclick="toggleSplit('upper_push')">
                                 <span class="split-radio" aria-hidden="true"></span>
                                 <div class="split-card-content">
-                                    <span class="split-name">Üst İtiş (Push)</span>
+                                    <span class="split-name">Üst İtiş</span>
                                 </div>
                                 <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'upper_push')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
                             </div>
-                            <div class="split-card" onclick="toggleSplit('upper_pull')">
+                            <div class="split-card" data-split-key="upper_pull" onclick="toggleSplit('upper_pull')">
                                 <span class="split-radio" aria-hidden="true"></span>
                                 <div class="split-card-content">
-                                    <span class="split-name">Üst Çekiş (Pull)</span>
+                                    <span class="split-name">Üst Çekiş</span>
                                 </div>
                                 <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'upper_pull')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
                             </div>
-                            <div class="split-card" onclick="toggleSplit('lower')">
+                            <div class="split-card" data-split-key="lower" onclick="toggleSplit('lower')">
                                 <span class="split-radio" aria-hidden="true"></span>
                                 <div class="split-card-content">
-                                    <span class="split-name">Alt Vücut &amp; Bacak</span>
+                                    <span class="split-name">Alt Vücut</span>
                                 </div>
                                 <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'lower')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
                             </div>
-                            <div class="split-card" onclick="toggleSplit('upper')">
-                                <span class="split-radio" aria-hidden="true"></span>
-                                <div class="split-card-content">
-                                    <span class="split-name">Tüm Üst Vücut</span>
+
+                            <!-- İzole Kas Seçimi (Masaüstünde 6'lı tek satır, Mobilde 3x2 eşit grid) -->
+                            <div class="iso-muscle-section" id="isoMuscleSection">
+                                <div class="iso-muscle-grid" id="isoMuscleGrid">
+                                    <button type="button" class="iso-muscle-chip" data-iso-key="iso_chest" onclick="toggleIsolatedMuscle('iso_chest')">
+                                        <span class="iso-check">✓</span><span>Göğüs</span>
+                                    </button>
+                                    <button type="button" class="iso-muscle-chip" data-iso-key="iso_back" onclick="toggleIsolatedMuscle('iso_back')">
+                                        <span class="iso-check">✓</span><span>Sırt</span>
+                                    </button>
+                                    <button type="button" class="iso-muscle-chip" data-iso-key="iso_shoulders" onclick="toggleIsolatedMuscle('iso_shoulders')">
+                                        <span class="iso-check">✓</span><span>Omuz</span>
+                                    </button>
+                                    <button type="button" class="iso-muscle-chip" data-iso-key="iso_arms" onclick="toggleIsolatedMuscle('iso_arms')">
+                                        <span class="iso-check">✓</span><span>Kol</span>
+                                    </button>
+                                    <button type="button" class="iso-muscle-chip" data-iso-key="iso_legs" onclick="toggleIsolatedMuscle('iso_legs')">
+                                        <span class="iso-check">✓</span><span>Bacak</span>
+                                    </button>
+                                    <button type="button" class="iso-muscle-chip" data-iso-key="iso_core" onclick="toggleIsolatedMuscle('iso_core')">
+                                        <span class="iso-check">✓</span><span>Karın</span>
+                                    </button>
                                 </div>
-                                <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'upper')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
-                            </div>
-                            <div class="split-card" onclick="toggleSplit('core')">
-                                <span class="split-radio" aria-hidden="true"></span>
-                                <div class="split-card-content">
-                                    <span class="split-name">Karın &amp; Core</span>
-                                </div>
-                                <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'core')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
-                            </div>
-                            <div class="split-card" onclick="toggleSplit('functional')">
-                                <span class="split-radio" aria-hidden="true"></span>
-                                <div class="split-card-content">
-                                    <span class="split-name">Fonksiyonel &amp; Kondisyon</span>
-                                </div>
-                                <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'functional')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
                             </div>
                         </div>
                     </div>
@@ -2369,8 +2372,8 @@
     </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
-    <script src="js/exercises-db.js?v=223"></script>
-    <script src="js/app.js?v=223"></script>
+    <script src="js/exercises-db.js?v=224"></script>
+    <script src="js/app.js?v=224"></script>
     <script>
         function toggleHeaderPopupMenu(e) {
             if (e) e.stopPropagation();

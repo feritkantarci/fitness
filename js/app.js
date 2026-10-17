@@ -351,13 +351,19 @@
 
         // ==================== WORKOUT GENERATOR ENGINE ====================
         const SPLIT_METAS = {
-            full_body: { name: "Tüm Vücut (Full Body)", shortName: "Tüm Vücut", icon: "⚡" },
-            upper_push: { name: "Üst İtiş (Push)", shortName: "İtiş", icon: "🛡️" },
-            upper_pull: { name: "Üst Çekiş (Pull)", shortName: "Çekiş", icon: "⚔️" },
-            lower: { name: "Alt Vücut & Bacak", shortName: "Bacak", icon: "🦵" },
+            full_body: { name: "Tüm Vücut", shortName: "Tüm Vücut", icon: "⚡" },
+            upper_push: { name: "Üst İtiş", shortName: "İtiş", icon: "🛡️" },
+            upper_pull: { name: "Üst Çekiş", shortName: "Çekiş", icon: "⚔️" },
+            lower: { name: "Alt Vücut", shortName: "Alt Vücut", icon: "🦵" },
             upper: { name: "Tüm Üst Vücut", shortName: "Üst Vücut", icon: "🦅" },
-            core: { name: "Karın & Core Zırhı", shortName: "Core", icon: "🧱" },
-            functional: { name: "Fonksiyonel Fitness & Kondisyon", shortName: "Fonksiyonel", icon: "⚡" }
+            core: { name: "Karın & Core", shortName: "Core", icon: "🧱" },
+            functional: { name: "Fonksiyonel & Kondisyon", shortName: "Fonksiyonel", icon: "⚡" },
+            iso_chest: { name: "Göğüs", shortName: "Göğüs", icon: "🎯" },
+            iso_back: { name: "Sırt & Kanat", shortName: "Sırt", icon: "🎯" },
+            iso_shoulders: { name: "Omuz", shortName: "Omuz", icon: "🎯" },
+            iso_arms: { name: "Kol (Biceps & Triceps)", shortName: "Kol", icon: "🎯" },
+            iso_legs: { name: "Bacak & Kalça", shortName: "Bacak", icon: "🎯" },
+            iso_core: { name: "Karın & Core", shortName: "Karın", icon: "🎯" }
         };
 
         function updateSelectedSplitLabel() {
@@ -381,13 +387,13 @@
             if (selectedSplits.length === 1) {
                 const s = selectedSplits[0];
                 const meta = SPLIT_METAS[s] || { name: s, icon: "⚡" };
-                el.innerHTML = `${meta.icon} ${meta.name}`;
+                el.innerText = meta.name;
             } else {
                 const names = selectedSplits.map(s => {
                     const m = SPLIT_METAS[s];
-                    return m ? `${m.icon} ${m.shortName || m.name}` : s;
+                    return m ? (m.shortName || m.name) : s;
                 });
-                el.innerHTML = `${names.join(', ')} (${selectedSplits.length} Bölge)`;
+                el.innerText = names.join(' + ');
             }
         }
 
@@ -445,17 +451,28 @@
 
         function renderSplitCards() {
             document.querySelectorAll('#splitGrid .split-card').forEach(card => {
-                const onclickVal = card.getAttribute('onclick') || '';
-                const match = onclickVal.match(/'([^']+)'/);
-                if (match) {
-                    const splitKey = match[1];
+                const splitKey = card.getAttribute('data-split-key') || (() => {
+                    const onclickVal = card.getAttribute('onclick') || '';
+                    const match = onclickVal.match(/'([^']+)'/);
+                    return match ? match[1] : '';
+                })();
+                if (splitKey) {
                     const isSelected = selectedSplits.includes(splitKey);
                     card.classList.toggle('selected', isSelected);
+                }
+            });
+            document.querySelectorAll('#isoMuscleGrid .iso-muscle-chip').forEach(chip => {
+                const isoKey = chip.getAttribute('data-iso-key');
+                if (isoKey) {
+                    chip.classList.toggle('selected', selectedSplits.includes(isoKey));
                 }
             });
         }
 
         function toggleSplit(split) {
+            // Bölge şablonu seçildiğinde izole kas seçimlerini temizle
+            selectedSplits = selectedSplits.filter(s => !String(s).startsWith('iso_'));
+
             if (split === 'full_body') {
                 selectedSplits = ['full_body'];
             } else {
@@ -479,6 +496,23 @@
             renderSplitCards();
             updateSelectedSplitLabel();
         }
+
+        function toggleIsolatedMuscle(isoKey) {
+            if (!isoKey) return;
+            // İzole kas seçildiğinde genel bölge şablonlarını (Tüm Vücut / İtiş / Çekiş / Alt Vücut) devre dışı bırak
+            const currentIso = selectedSplits.filter(s => String(s).startsWith('iso_'));
+            const idx = currentIso.indexOf(isoKey);
+            if (idx > -1) {
+                currentIso.splice(idx, 1);
+            } else {
+                currentIso.push(isoKey);
+            }
+            selectedSplits = currentIso.length > 0 ? currentIso : ['full_body'];
+            selectedSplit = selectedSplits[0] || 'full_body';
+            renderSplitCards();
+            updateSelectedSplitLabel();
+        }
+        window.toggleIsolatedMuscle = toggleIsolatedMuscle;
 
         function selectSplit(split) {
             if (Array.isArray(split)) {
@@ -2289,7 +2323,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
             // Saf Üst Vücut veya Saf Core seçiliyse Bacak+Omuz hibrit komplekslerini (Thruster, Landmine Squat to Press, Man Maker vb.) dışla
             const hasLowerOrFullOrFuncSplit = selectedSplits.some(s =>
-                s === 'full_body' || s === 'lower' || s === 'functional'
+                s === 'full_body' || s === 'lower' || s === 'iso_legs' || s === 'functional'
             );
 
             function isCandidateBiochemicallyCompatible(ex, allowLowerUpperComplexInSlot = false) {
@@ -2365,6 +2399,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 const cat = slotSpec.cat || 'push';
                 const filterMode = slotSpec.mode || 'any';
                 const allowComplex = Boolean(slotSpec.allowComplex);
+                const strictIso = Boolean(slotSpec.strictIso);
                 const preferredSubKeys = Array.isArray(slotSpec.subKeys) ? slotSpec.subKeys : (slotSpec.subKeys ? [slotSpec.subKeys] : []);
 
                 // KURAL 1: Aday havuzu KESİN OLARAK hem ID hem Biyomekanik Aile hem Medya açısından seansta benzersiz olmak zorundadır!
@@ -2409,6 +2444,15 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                         subKeyMatches = EXERCISES_DB.filter(ex =>
                             isCandidateBiochemicallyCompatible(ex, allowComplex) &&
                             (matchesPrimaryFor(candidateSubKeys)(ex) || matchesAnyCoveredFor(candidateSubKeys)(ex))
+                        );
+                    }
+                    if (subKeyMatches.length === 0 && strictIso) {
+                        // İzole kas modunda ekipman havuzu tükense bile farklı hareket ailesi kısıtını gevşeterek (sadece ID tekilliğiyle) aynı kastan hareket seç
+                        subKeyMatches = EXERCISES_DB.filter(ex =>
+                            !isExerciseExcludedByUser(ex.id) &&
+                            selectedEquipments.includes(ex.equipment) &&
+                            !usedIds.includes(ex.id) &&
+                            (matchesPrimaryFor(preferredSubKeys)(ex) || matchesAnyCoveredFor(preferredSubKeys)(ex))
                         );
                     }
 
@@ -2473,7 +2517,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 }
 
                 let chosen = pickRandom(finalPool);
-                if (!chosen) {
+                if (!chosen && !strictIso) {
                     const modeBase = preferWeeklyFreshExercises(applyDoctrineModeFilter(basePool, filterMode));
                     chosen = pickRandom(modeBase);
                 }
@@ -2508,7 +2552,79 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 const isFuncDom = doctrineKey === 'func_hybrid' || doctrineKey === 'func_pure';
                 const isBalanced = doctrineKey === 'balanced_hybrid';
 
-                if (splitKey === 'upper_push') {
+                if (splitKey === 'iso_chest') {
+                    // İZOLE GÖĞÜS: Orta Göğüs + Üst Göğüs + Alt Göğüs & Fly açıları
+                    return [
+                        { subKeys: ['chest_mid'], cat: 'push', mode: 'bb_compound', strictIso: true },
+                        { subKeys: ['chest_upper'], cat: 'push', mode: 'bb_compound', strictIso: true },
+                        { subKeys: ['chest_mid', 'chest_upper'], cat: 'push', mode: 'bb_isolation', strictIso: true },
+                        { subKeys: ['chest_lower', 'chest_mid'], cat: 'push', mode: 'any', strictIso: true },
+                        { subKeys: ['chest_upper', 'chest_mid'], cat: 'push', mode: 'any', strictIso: true },
+                        { subKeys: ['chest_mid', 'chest_lower'], cat: 'push', mode: 'any', strictIso: true },
+                        { subKeys: ['chest_upper', 'chest_mid'], cat: 'push', mode: 'any', strictIso: true },
+                        { subKeys: ['chest_lower', 'chest_mid'], cat: 'push', mode: 'any', strictIso: true }
+                    ];
+                } else if (splitKey === 'iso_back') {
+                    // İZOLE SIRT & KANAT: Lats (Genişlik) + Orta Sırt/Rhomboid (Kalınlık) + Trapez/Üst Sırt
+                    return [
+                        { subKeys: ['back_lats'], cat: 'pull', mode: 'bb_compound', strictIso: true },
+                        { subKeys: ['back_mid'], cat: 'pull', mode: isFuncDom ? 'functional' : 'bb_compound', strictIso: true },
+                        { subKeys: ['back_lats'], cat: 'pull', mode: 'any', strictIso: true },
+                        { subKeys: ['back_mid'], cat: 'pull', mode: 'any', strictIso: true },
+                        { subKeys: ['back_lats', 'back_mid'], cat: 'pull', mode: 'any', strictIso: true },
+                        { subKeys: ['back_mid', 'shoulders_rear'], cat: 'pull', mode: 'any', strictIso: true },
+                        { subKeys: ['back_lats'], cat: 'pull', mode: 'any', strictIso: true },
+                        { subKeys: ['back_mid'], cat: 'pull', mode: 'any', strictIso: true }
+                    ];
+                } else if (splitKey === 'iso_shoulders') {
+                    // İZOLE OMUZ (3D DELTOİD): Ön Omuz Pres + Yan Omuz Açış + Arka Omuz/Face Pull
+                    return [
+                        { subKeys: ['shoulders_front'], cat: 'push', mode: 'bb_compound', strictIso: true },
+                        { subKeys: ['shoulders_side'], cat: 'push', mode: 'bb_isolation', strictIso: true },
+                        { subKeys: ['shoulders_rear'], cat: 'pull', mode: 'bb_isolation', strictIso: true },
+                        { subKeys: ['shoulders_front', 'shoulders_side'], cat: 'push', mode: 'any', strictIso: true },
+                        { subKeys: ['shoulders_side'], cat: 'push', mode: 'any', strictIso: true },
+                        { subKeys: ['shoulders_rear'], cat: 'pull', mode: 'any', strictIso: true },
+                        { subKeys: ['shoulders_front'], cat: 'push', mode: 'any', strictIso: true },
+                        { subKeys: ['shoulders_side', 'shoulders_rear'], cat: ['push', 'pull'], mode: 'any', strictIso: true }
+                    ];
+                } else if (splitKey === 'iso_arms') {
+                    // İZOLE KOL (BICEPS & TRICEPS ANTAGONİST): Biceps + Triceps Uzun Baş + Hammer/Brachialis + Triceps Yan Baş
+                    return [
+                        { subKeys: ['biceps'], cat: 'pull', mode: 'bb_isolation', strictIso: true },
+                        { subKeys: ['triceps_long'], cat: 'push', mode: 'bb_isolation', strictIso: true },
+                        { subKeys: ['biceps'], cat: 'pull', mode: 'any', strictIso: true },
+                        { subKeys: ['triceps_lateral'], cat: 'push', mode: 'any', strictIso: true },
+                        { subKeys: ['biceps'], cat: 'pull', mode: 'any', strictIso: true },
+                        { subKeys: ['triceps_long', 'triceps_lateral'], cat: 'push', mode: 'any', strictIso: true },
+                        { subKeys: ['biceps'], cat: 'pull', mode: 'any', strictIso: true },
+                        { subKeys: ['triceps_lateral', 'triceps_long'], cat: 'push', mode: 'any', strictIso: true }
+                    ];
+                } else if (splitKey === 'iso_legs' || splitKey === 'lower') {
+                    // ALT VÜCUT / İZOLE BACAK: Ön Bacak (Quad) + Arka Bacak (Hamstring) + Kalça (Glute) + Kalf
+                    return [
+                        { subKeys: ['legs_quad'], cat: 'legs_quad', mode: 'bb_compound' },                                 // Slot 1 (Düz 1): Ana Squat / Leg Press
+                        { subKeys: ['legs_hamstrings'], cat: 'legs_hinge', mode: isPureBb ? 'bb_isolation' : 'any' },      // Slot 2 (A1): Hamstring Curl / RDL
+                        { subKeys: ['legs_calves', 'legs_glutes'], cat: ['legs_quad', 'legs_hinge'], mode: 'any' },        // Slot 3 (A2): Kalf veya Glute Bridge
+                        { subKeys: ['legs_hamstrings', 'legs_glutes'], cat: 'legs_hinge', mode: isFuncDom ? 'functional' : 'bb_compound' }, // Slot 4 (Düz 2): RDL / Deadlift / Hip Thrust
+                        { subKeys: ['legs_quad'], cat: 'legs_quad', mode: isFuncDom ? 'functional' : 'any' },              // Slot 5 (B1): Unilateral Lunge / Split Squat / Extension
+                        { subKeys: ['legs_glutes', 'legs_quad'], cat: ['legs_hinge', 'legs_quad'], mode: 'any' },          // Slot 6 (B2): Kalça / Bacak Tamamlayıcı
+                        { subKeys: ['legs_calves', 'legs_glutes'], cat: ['legs_hinge', 'legs_quad'], mode: 'any' },        // Slot 7 (60dk): Kalça / Kalf Tamamlayıcı
+                        { subKeys: ['legs_hamstrings', 'core_front'], cat: ['legs_hinge', 'core'], mode: isPureBb ? 'bb_isolation' : 'functional' } // Slot 8 (60dk)
+                    ];
+                } else if (splitKey === 'iso_core' || splitKey === 'core') {
+                    // İZOLE KARIN & CORE: Ön Karın + Oblik Rotasyon + Anti-Rotasyon Taşıma + Alt Karın
+                    return [
+                        { subKeys: ['core_front'], cat: 'core', mode: 'any', strictIso: true },
+                        { subKeys: ['core_obliques'], cat: 'core', mode: isPureBb ? 'any' : 'functional', strictIso: true },
+                        { subKeys: ['core_front'], cat: 'core', mode: 'any', strictIso: true },
+                        { subKeys: ['core_obliques'], cat: 'core', mode: 'functional', strictIso: true },
+                        { subKeys: ['core_front'], cat: 'core', mode: 'any', strictIso: true },
+                        { subKeys: ['core_obliques'], cat: 'core', mode: 'any', strictIso: true },
+                        { subKeys: ['core_front'], cat: 'core', mode: 'any', strictIso: true },
+                        { subKeys: ['core_obliques'], cat: 'core', mode: 'any', strictIso: true }
+                    ];
+                } else if (splitKey === 'upper_push') {
                     // İTİŞ: Orta Göğüs + Yan Omuz + Üst Göğüs + Ön Omuz + Triceps Uzun Baş + Core + Alt Göğüs + Triceps Yan Baş
                     // Not: Saf İtiş gününde Squat-to-Press (Thruster / Landmine Squat to Press) YASAKTIR; saf üst vücut omuz/göğüs hareketleri seçilir.
                     return [
@@ -2533,18 +2649,6 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                         { subKeys: ['back_lats', 'back_mid'], cat: 'pull', mode: 'any' },                                  // Slot 7 (60dk): Pullover / İkincil Sırt
                         { subKeys: ['core_front', 'core_obliques'], cat: 'core', mode: isPureBb ? 'any' : 'functional' }   // Slot 8 (60dk): Ön Karın Zırhı
                     ];
-                } else if (splitKey === 'lower') {
-                    // ALT VÜCUT: Ön Bacak (Quad) + Arka Bacak (Hamstring) + Kalça (Glute) + Kalf + Core
-                    return [
-                        { subKeys: ['legs_quad'], cat: 'legs_quad', mode: 'bb_compound' },                                 // Slot 1 (Düz 1): Ana Squat / Leg Press
-                        { subKeys: ['legs_hamstrings'], cat: 'legs_hinge', mode: isPureBb ? 'bb_isolation' : 'any' },      // Slot 2 (A1): Hamstring Curl / RDL
-                        { subKeys: ['legs_calves', 'legs_glutes'], cat: ['legs_quad', 'legs_hinge'], mode: 'any' },        // Slot 3 (A2): Kalf veya Glute Bridge
-                        { subKeys: ['legs_hamstrings', 'legs_glutes'], cat: 'legs_hinge', mode: isFuncDom ? 'functional' : 'bb_compound' }, // Slot 4 (Düz 2): RDL / Deadlift / Hip Thrust
-                        { subKeys: ['legs_quad'], cat: 'legs_quad', mode: isFuncDom ? 'functional' : 'any' },              // Slot 5 (B1): Unilateral Lunge / Split Squat / Extension
-                        { subKeys: ['core_front', 'core_obliques'], cat: 'core', mode: isPureBb ? 'any' : 'functional' },  // Slot 6 (B2): Core Stabilizasyon
-                        { subKeys: ['legs_glutes', 'legs_calves'], cat: ['legs_hinge', 'legs_quad'], mode: 'any' },        // Slot 7 (60dk): Kalça / Kalf Tamamlayıcı
-                        { subKeys: ['legs_hamstrings', 'core_front'], cat: ['legs_hinge', 'core'], mode: isPureBb ? 'bb_isolation' : 'functional' } // Slot 8 (60dk)
-                    ];
                 } else if (splitKey === 'upper') {
                     // ÜST VÜCUT: Göğüs + Kanat + Omuz + Orta Sırt + Triceps + Biceps + Arka Omuz + Core
                     return [
@@ -2556,18 +2660,6 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                         { subKeys: ['biceps'], cat: 'pull', mode: 'bb_isolation' },                                        // Slot 6 (B2): Biceps (Antagonist Kol 2)
                         { subKeys: ['shoulders_rear', 'chest_upper'], cat: ['pull', 'push'], mode: 'any' },                // Slot 7 (60dk): Arka Omuz / Üst Göğüs
                         { subKeys: ['core_front', 'core_obliques'], cat: 'core', mode: isPureBb ? 'any' : 'functional' }   // Slot 8 (60dk): Core
-                    ];
-                } else if (splitKey === 'core') {
-                    // KARIN & CORE ZIRHI: Ön Karın + Oblik Rotasyon + Anti-Rotasyon Taşıma + Alt Karın
-                    return [
-                        { subKeys: ['core_front'], cat: 'core', mode: 'any' },
-                        { subKeys: ['core_obliques'], cat: 'core', mode: isPureBb ? 'any' : 'functional' },
-                        { subKeys: ['core_front'], cat: 'core', mode: 'any' },
-                        { subKeys: ['core_obliques'], cat: 'core', mode: 'functional' },
-                        { subKeys: ['core_front'], cat: 'core', mode: 'any' },
-                        { subKeys: ['core_obliques'], cat: 'core', mode: 'any' },
-                        { subKeys: ['core_front'], cat: 'core', mode: 'any' },
-                        { subKeys: ['core_obliques'], cat: 'core', mode: 'any' }
                     ];
                 } else if (splitKey === 'functional') {
                     // FONKSİYONEL FITNESS & KONDİSYON (Her slotta farklı bir biyomekanik vektör!)
@@ -2784,6 +2876,12 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 upper_push: "Üst İtiş (Push)",
                 upper_pull: "Üst Çekiş (Pull)",
                 lower: "Alt Vücut & Bacak",
+                iso_chest: "Göğüs (İzole)",
+                iso_back: "Sırt & Kanat (İzole)",
+                iso_shoulders: "Omuz (İzole)",
+                iso_arms: "Kol (Biceps & Triceps)",
+                iso_legs: "Bacak & Kalça (İzole)",
+                iso_core: "Karın & Core (İzole)",
                 upper: "Tüm Üst Vücut",
                 core: "Karın & Core Zırhı",
                 functional: "Fonksiyonel Fitness & Kondisyon"
@@ -2791,9 +2889,15 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
             const splitShortNames = {
                 full_body: "Tüm Vücut",
-                upper_push: "İtiş",
-                upper_pull: "Çekiş",
-                lower: "Bacak",
+                upper_push: "Üst İtiş",
+                upper_pull: "Üst Çekiş",
+                lower: "Alt Vücut",
+                iso_chest: "Göğüs",
+                iso_back: "Sırt",
+                iso_shoulders: "Omuz",
+                iso_arms: "Kol",
+                iso_legs: "Bacak",
+                iso_core: "Karın",
                 upper: "Üst Vücut",
                 core: "Core",
                 functional: "Fonksiyonel"
@@ -17221,7 +17325,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=223')
+                navigator.serviceWorker.register('./sw.js?v=224')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
