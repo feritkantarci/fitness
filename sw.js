@@ -1,10 +1,11 @@
-const CACHE_NAME = 'celik-kodu-cache-v232';
+const CACHE_NAME = 'celik-kodu-cache-v234';
 const ASSETS = [
   './',
   './index.html',
   './css/style.css',
   './js/exercises-db.js',
   './js/app.js',
+  './assets/diagrams/canva_anatomy_neutral.png',
   './assets/diagrams/seq_manmaker.svg',
   './assets/guides/guide_bb_thruster_form.png',
   './assets/guides/guide_bb_hang_power_clean_form.png',

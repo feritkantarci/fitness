@@ -7,6 +7,8 @@
 
         // ==================== GLOBAL VISUAL GUIDES & ANATOMY LIBRARY ====================
         const guideLibrary = {
+            db_clean_squat_press: { form: 'assets/exercises/db_clean_squat_press.webp', anatomi: null },
+            db_swing_to_goblet_squat: { form: 'assets/exercises/db_swing_to_goblet_squat.webp', anatomi: null },
             db_thruster: { form: 'assets/guides/guide_db_thruster_form.jpg', anatomi: 'assets/guides/guide_db_thruster_anatomi.jpg' },
             db_push_press: { form: 'assets/guides/guide_db_push_press_form.jpg', anatomi: 'assets/guides/guide_db_push_press_anatomi.jpg' },
             db_renegade_pushup: { form: 'assets/guides/guide_db_renegade_pushup_form.jpg', anatomi: 'assets/guides/guide_db_renegade_pushup_anatomi.jpg' },
@@ -190,10 +192,10 @@
             'bw_hanging_knee_raise': guideLibrary.hanging_knee_raise,
             'kb_windmill': guideLibrary.windmill,
             'kb_turkish_getup': guideLibrary.windmill,
-            'db_clean_squat_press': guideLibrary.db_clean_and_press,
+            'db_clean_squat_press': guideLibrary.db_clean_squat_press,
             'db_seesaw_lunge': guideLibrary.lunge,
             'db_rdl_to_high_pull': guideLibrary.rdl,
-            'db_swing_to_goblet_squat': guideLibrary.swing,
+            'db_swing_to_goblet_squat': guideLibrary.db_swing_to_goblet_squat,
             'db_pullover_to_halo': guideLibrary.pullover,
             'db_lunge_to_curl_press': guideLibrary.lunge,
             'db_gorilla_row_to_clean': guideLibrary.gorilla_row,

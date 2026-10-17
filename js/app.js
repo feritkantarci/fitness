@@ -754,7 +754,11 @@
             'bb_zercher_squat': { id: '5670', name: "Zercher Squat", clip: 'assets/opengym/clips/5670.mp4', still: 'assets/opengym/stills/5670.webp' },
             'bb_landmine_squat_press': { id: '1540', name: "Landmine Squat to Press", clip: 'assets/opengym/clips/1540.mp4', still: 'assets/opengym/stills/1540.webp' },
             'db_standing_calf_raise': { id: '0417', name: "Ayakta Dambıl Calf Raise", clip: 'assets/opengym/clips/0417.mp4', still: 'assets/opengym/stills/0417.webp' },
-            'db_lying_leg_curl': { id: '6161', name: "Dambıl ile Yatarak Bacak Bükme", clip: 'assets/opengym/clips/6161.mp4', still: 'assets/opengym/stills/6161.webp' }
+            'db_lying_leg_curl': { id: '6161', name: "Dambıl ile Yatarak Bacak Bükme", clip: 'assets/opengym/clips/6161.mp4', still: 'assets/opengym/stills/6161.webp' },
+            'bw_plank': { id: '0463', name: "Klasik Plank", clip: 'assets/opengym/clips/0463.mp4', still: 'assets/opengym/stills/0463.webp' },
+            'bw_sissy_squat': { id: '4723', name: "Sissy Squat (Quad İzolasyonu)", clip: 'assets/opengym/clips/4723.mp4', still: 'assets/opengym/stills/4723.webp' },
+            'db_clean_squat_press': { id: 'db_clean_squat_press', name: "Dambıl Clean to Front Squat to Push Press", clip: 'assets/opengym/clips/db_clean_squat_press.mp4', still: 'assets/opengym/stills/db_clean_squat_press.webp' },
+            'db_swing_to_goblet_squat': { id: 'db_swing_to_goblet_squat', name: "Dambıl Swing to Goblet Squat", clip: 'assets/opengym/clips/db_swing_to_goblet_squat.mp4', still: 'assets/opengym/stills/db_swing_to_goblet_squat.webp' }
         };
 
         // ==================== KULLANICI ÖZEL HAVUZ & GİZLEME YASASI ====================
@@ -17427,160 +17431,65 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             `;
         }
 
+        const ANATOMY_MUSCLE_PATHS = {"chest": "M 165.0 570.5 L 139.0 566.5 L 118.0 551.5 L 99.5 528.0 L 88.5 503.0 L 92.5 487.0 L 116.5 453.0 L 140.0 434.5 L 153.0 429.5 L 186.0 431.5 L 207.0 437.5 L 217.5 447.0 L 223.5 464.0 L 223.5 533.0 L 220.5 543.0 L 211.0 555.5 L 197.0 564.5 L 165.0 570.5 Z M 295.0 569.5 L 280.0 569.5 L 254.0 563.5 L 242.0 556.5 L 230.5 541.0 L 227.5 528.0 L 228.5 462.0 L 234.5 446.0 L 248.0 435.5 L 291.0 429.5 L 307.0 431.5 L 319.0 438.5 L 337.5 455.0 L 363.5 494.0 L 364.5 503.0 L 360.5 514.0 L 340.5 545.0 L 319.0 563.5 L 295.0 569.5 Z", "shoulders": "M 40.0 546.5 L 36.5 542.0 L 31.5 522.0 L 29.5 489.0 L 34.5 469.0 L 41.5 455.0 L 58.0 437.5 L 77.0 427.5 L 85.0 425.5 L 97.5 427.0 L 89.0 430.5 L 89.0 432.5 L 108.0 426.5 L 128.0 428.5 L 131.5 434.0 L 130.5 439.0 L 110.5 459.0 L 82.5 501.0 L 50.0 533.5 L 46.5 507.0 L 44.5 506.0 L 44.5 541.0 L 40.0 546.5 Z M 412.0 545.5 L 406.5 539.0 L 408.5 537.0 L 407.5 506.0 L 404.5 526.0 L 401.0 533.5 L 367.5 499.0 L 342.5 460.0 L 324.5 441.0 L 321.5 435.0 L 323.0 429.5 L 332.0 426.5 L 353.0 429.5 L 356.5 429.0 L 354.0 425.5 L 370.0 426.5 L 389.0 434.5 L 405.5 449.0 L 417.5 470.0 L 422.5 490.0 L 421.5 516.0 L 416.5 538.0 L 412.0 545.5 Z M 712.0 532.5 L 706.5 509.0 L 708.5 482.0 L 718.5 457.0 L 734.0 439.5 L 754.0 431.5 L 760.5 433.0 L 756.0 437.5 L 766.0 433.5 L 779.0 432.5 L 796.0 439.5 L 803.5 446.0 L 804.5 452.0 L 792.5 468.0 L 762.0 498.5 L 731.0 516.5 L 717.0 527.5 L 718.0 511.5 L 712.0 532.5 Z M 1090.0 531.5 L 1083.0 510.5 L 1085.0 526.5 L 1042.0 499.5 L 1028.0 487.5 L 1000.5 455.0 L 998.5 452.0 L 999.5 446.0 L 1015.0 436.5 L 1028.0 432.5 L 1045.0 435.5 L 1046.0 431.5 L 1051.0 431.5 L 1071.0 441.5 L 1086.5 462.0 L 1094.5 483.0 L 1096.5 502.0 L 1090.0 531.5 Z", "biceps": "M 410.0 657.5 L 401.0 655.5 L 384.5 641.0 L 372.5 620.0 L 362.5 589.0 L 359.5 570.0 L 360.5 546.0 L 366.5 526.0 L 375.0 519.5 L 384.0 521.5 L 399.5 532.0 L 405.5 540.0 L 404.5 542.0 L 409.5 546.0 L 412.0 558.5 L 418.5 554.0 L 416.5 543.0 L 420.0 538.5 L 425.5 547.0 L 431.5 566.0 L 432.5 600.0 L 435.5 618.0 L 431.5 620.0 L 430.0 633.5 L 427.5 627.0 L 426.5 603.0 L 421.0 585.5 L 423.5 599.0 L 423.5 631.0 L 419.5 646.0 L 410.0 657.5 Z M 38.0 653.5 L 29.5 630.0 L 28.5 603.0 L 38.5 563.0 L 44.5 549.0 L 50.5 543.0 L 51.5 536.0 L 67.0 523.5 L 75.0 522.5 L 74.5 529.0 L 77.0 531.5 L 85.0 529.5 L 88.5 538.0 L 91.5 557.0 L 88.5 588.0 L 75.5 626.0 L 64.5 643.0 L 53.0 650.5 L 38.0 653.5 Z M 22.0 634.5 L 19.5 621.0 L 14.0 626.5 L 12.5 622.0 L 18.5 605.0 L 17.5 579.0 L 19.5 566.0 L 23.5 552.0 L 32.0 535.5 L 36.5 543.0 L 34.5 554.0 L 37.5 557.0 L 37.5 563.0 L 25.5 608.0 L 25.5 632.0 L 22.0 634.5 Z", "core": "M 279.0 614.5 L 254.0 604.5 L 231.5 601.0 L 227.5 588.0 L 227.5 573.0 L 228.5 567.0 L 234.0 559.5 L 239.0 558.5 L 249.0 561.5 L 269.0 570.5 L 277.5 578.0 L 283.5 599.0 L 279.0 614.5 Z M 177.0 614.5 L 174.0 614.5 L 169.5 607.0 L 169.5 590.0 L 175.5 577.0 L 181.0 571.5 L 207.0 560.5 L 220.0 560.5 L 224.5 572.0 L 224.5 588.0 L 221.5 599.0 L 218.0 602.5 L 206.0 602.5 L 196.0 605.5 L 177.0 614.5 Z M 249.0 826.5 L 249.5 820.0 L 272.5 763.0 L 282.5 749.0 L 280.5 744.0 L 281.5 721.0 L 284.5 699.0 L 290.5 685.0 L 285.5 680.0 L 286.5 655.0 L 293.5 642.0 L 286.5 643.0 L 285.5 619.0 L 287.5 606.0 L 297.5 599.0 L 291.0 601.5 L 285.5 599.0 L 284.5 578.0 L 291.0 571.5 L 314.0 567.5 L 314.5 577.0 L 304.5 592.0 L 309.0 590.5 L 316.0 580.5 L 322.5 583.0 L 317.5 598.0 L 323.5 601.0 L 321.5 619.0 L 324.5 621.0 L 324.5 627.0 L 316.5 648.0 L 324.0 632.5 L 325.5 676.0 L 323.5 683.0 L 325.5 682.0 L 326.5 687.0 L 326.5 711.0 L 317.5 735.0 L 302.5 749.0 L 304.5 752.0 L 298.5 763.0 L 265.5 810.0 L 249.0 826.5 Z M 201.0 824.5 L 178.5 799.0 L 149.5 758.0 L 143.5 745.0 L 133.5 737.0 L 125.5 715.0 L 124.5 702.0 L 128.5 662.0 L 127.5 621.0 L 131.5 622.0 L 128.5 601.0 L 135.5 597.0 L 133.5 584.0 L 136.0 580.5 L 140.5 588.0 L 145.5 590.0 L 137.5 577.0 L 138.0 568.5 L 164.0 572.5 L 168.5 577.0 L 166.5 597.0 L 158.5 600.0 L 165.5 609.0 L 166.5 618.0 L 166.5 635.0 L 165.5 640.0 L 162.5 642.0 L 166.5 658.0 L 166.5 681.0 L 162.5 685.0 L 168.5 702.0 L 171.5 735.0 L 169.5 749.0 L 178.5 761.0 L 190.5 796.0 L 200.5 817.0 L 201.0 824.5 Z M 180.0 654.5 L 175.0 654.5 L 169.5 647.0 L 169.5 627.0 L 172.5 621.0 L 179.0 615.5 L 203.0 605.5 L 220.0 605.5 L 224.5 616.0 L 224.5 642.0 L 222.5 648.0 L 218.0 652.5 L 180.0 654.5 Z M 276.0 654.5 L 234.0 652.5 L 229.5 648.0 L 227.5 616.0 L 229.5 608.0 L 233.0 604.5 L 250.0 605.5 L 266.0 611.5 L 279.5 620.0 L 283.5 633.0 L 283.5 644.0 L 280.5 651.0 L 276.0 654.5 Z M 308.5 628.0 L 314.5 621.0 L 317.0 613.5 L 308.5 628.0 Z M 220.0 832.5 L 208.5 827.0 L 199.5 811.0 L 174.5 733.0 L 174.5 705.0 L 185.5 703.0 L 178.0 700.5 L 170.5 690.0 L 170.5 664.0 L 175.0 657.5 L 179.0 656.5 L 214.0 654.5 L 220.0 656.5 L 223.5 664.0 L 223.5 695.0 L 220.5 702.0 L 214.0 705.5 L 186.5 703.0 L 201.0 707.5 L 220.0 707.5 L 223.5 715.0 L 224.5 823.0 L 220.0 832.5 Z M 237.0 832.5 L 232.0 832.5 L 227.5 825.0 L 228.5 714.0 L 233.0 707.5 L 256.0 707.5 L 267.5 704.0 L 233.5 704.0 L 228.5 696.0 L 228.5 664.0 L 236.0 654.5 L 273.0 656.5 L 280.5 661.0 L 282.5 674.0 L 280.5 693.0 L 272.5 702.0 L 278.5 706.0 L 279.5 712.0 L 277.5 732.0 L 255.5 803.0 L 246.5 822.0 L 237.0 832.5 Z", "quads": "M 298.0 1083.5 L 291.0 1082.5 L 283.5 1075.0 L 275.5 1060.0 L 267.5 1037.0 L 265.5 1009.0 L 274.5 940.0 L 278.5 922.0 L 281.5 918.0 L 279.5 905.0 L 284.5 870.0 L 300.5 806.0 L 304.5 770.0 L 310.0 765.5 L 314.5 770.0 L 332.5 811.0 L 339.5 862.0 L 337.5 831.0 L 342.0 827.5 L 346.5 833.0 L 348.5 842.0 L 350.5 842.0 L 354.5 850.0 L 362.5 871.0 L 369.5 920.0 L 369.5 989.0 L 366.5 1012.0 L 361.5 1028.0 L 347.5 1050.0 L 344.5 1059.0 L 338.0 1060.5 L 328.5 1047.0 L 325.5 1014.0 L 339.5 956.0 L 340.5 938.0 L 329.5 988.0 L 323.5 1003.0 L 320.0 1004.5 L 310.5 990.0 L 289.5 932.0 L 283.5 923.0 L 313.5 1003.0 L 317.5 1024.0 L 314.5 1062.0 L 304.5 1078.0 L 298.0 1083.5 Z M 113.0 1060.5 L 106.5 1057.0 L 98.5 1044.0 L 88.5 1024.0 L 84.5 1008.0 L 82.5 994.0 L 83.5 909.0 L 88.5 877.0 L 94.5 857.0 L 111.0 826.5 L 115.5 829.0 L 115.5 842.0 L 122.5 805.0 L 135.5 775.0 L 141.0 767.5 L 145.0 767.5 L 148.5 772.0 L 153.5 817.0 L 167.5 876.0 L 169.0 859.5 L 175.5 861.0 L 179.5 872.0 L 190.5 944.0 L 191.5 986.0 L 188.0 987.5 L 184.5 980.0 L 172.0 893.5 L 171.5 909.0 L 168.5 919.0 L 140.5 993.0 L 133.0 1005.5 L 128.5 1005.0 L 122.5 990.0 L 112.5 942.0 L 115.5 973.0 L 125.5 1011.0 L 123.5 1046.0 L 118.5 1056.0 L 113.0 1060.5 Z M 261.0 993.5 L 260.5 940.0 L 270.5 874.0 L 273.5 860.0 L 277.0 855.5 L 281.5 865.0 L 281.5 878.0 L 265.5 989.0 L 264.0 991.5 L 262.0 989.5 L 261.0 993.5 Z M 159.0 1084.5 L 154.0 1083.5 L 146.5 1076.0 L 138.5 1062.0 L 134.5 1025.0 L 138.5 1004.0 L 169.5 922.0 L 172.0 920.5 L 184.5 993.0 L 185.5 1022.0 L 178.5 1054.0 L 173.5 1065.0 L 159.0 1084.5 Z M 343.0 1336.5 L 331.5 1335.0 L 330.5 1195.0 L 341.5 1138.0 L 352.0 1122.5 L 355.5 1143.0 L 357.0 1145.5 L 358.0 1142.5 L 361.5 1148.0 L 367.5 1169.0 L 372.5 1200.0 L 372.5 1222.0 L 368.5 1246.0 L 360.0 1263.5 L 361.5 1173.0 L 358.0 1149.5 L 357.5 1222.0 L 345.5 1334.0 L 343.0 1336.5 Z M 313.0 1198.5 L 296.0 1144.5 L 308.5 1171.0 L 313.0 1198.5 Z M 91.0 1265.5 L 82.5 1244.0 L 78.5 1205.0 L 84.5 1169.0 L 92.0 1146.5 L 91.0 1265.5 Z M 142.0 1184.5 L 144.5 1169.0 L 152.0 1154.5 L 142.0 1184.5 Z M 313.0 1237.5 L 314.0 1218.5 L 315.5 1228.0 L 313.0 1237.5 Z", "calves": "M 119.0 1337.5 L 114.0 1334.5 L 108.0 1335.5 L 106.5 1333.0 L 98.5 1282.0 L 93.5 1214.0 L 93.5 1168.0 L 100.0 1121.5 L 107.5 1127.0 L 119.5 1183.0 L 122.5 1188.0 L 119.0 1337.5 Z M 319.0 1356.5 L 317.5 1349.0 L 320.0 1338.5 L 321.5 1353.0 L 319.0 1356.5 Z M 352.0 1359.5 L 349.5 1352.0 L 351.0 1340.5 L 353.5 1353.0 L 352.0 1359.5 Z M 1005.0 1343.5 L 1000.0 1342.5 L 991.5 1331.0 L 983.5 1297.0 L 983.5 1285.0 L 994.5 1266.0 L 1001.0 1244.5 L 1007.5 1261.0 L 1020.5 1277.0 L 1016.5 1324.0 L 1013.5 1335.0 L 1005.0 1343.5 Z M 802.0 1342.5 L 797.0 1342.5 L 788.5 1333.0 L 779.5 1292.0 L 779.5 1278.0 L 792.5 1265.0 L 801.0 1247.5 L 805.5 1261.0 L 818.5 1285.0 L 811.5 1328.0 L 802.0 1342.5 Z", "back": "M 831.0 523.5 L 820.0 522.5 L 810.5 514.0 L 792.5 478.0 L 792.5 472.0 L 804.5 454.0 L 812.0 448.5 L 821.0 451.5 L 831.5 461.0 L 842.5 496.0 L 850.5 513.0 L 847.0 517.5 L 831.0 523.5 Z M 982.0 522.5 L 966.0 520.5 L 956.0 515.5 L 954.5 511.0 L 969.5 472.0 L 970.5 462.0 L 980.0 453.5 L 988.0 449.5 L 994.0 449.5 L 1012.5 474.0 L 996.5 509.0 L 988.0 519.5 L 982.0 522.5 Z M 846.0 694.5 L 840.5 691.0 L 839.5 687.0 L 822.5 667.0 L 800.5 633.0 L 786.5 605.0 L 774.5 572.0 L 765.5 536.0 L 763.5 523.0 L 765.5 508.0 L 762.5 502.0 L 786.0 481.5 L 796.5 493.0 L 802.5 507.0 L 813.5 523.0 L 810.0 527.5 L 831.0 526.5 L 852.0 520.5 L 857.5 524.0 L 878.5 559.0 L 892.5 591.0 L 893.5 607.0 L 889.5 620.0 L 856.5 682.0 L 846.0 694.5 Z M 960.0 693.5 L 957.0 693.5 L 950.5 687.0 L 914.5 620.0 L 910.5 606.0 L 911.5 587.0 L 927.5 553.0 L 949.0 521.5 L 955.0 520.5 L 976.0 526.5 L 993.0 526.5 L 990.5 522.0 L 999.5 510.0 L 1008.5 491.0 L 1016.0 483.5 L 1020.0 483.5 L 1040.5 502.0 L 1037.5 535.0 L 1031.5 562.0 L 1018.5 599.0 L 1002.5 632.0 L 984.5 662.0 L 960.0 693.5 Z M 898.0 600.5 L 891.5 579.0 L 882.5 560.0 L 848.5 502.0 L 838.5 476.0 L 832.5 452.0 L 818.5 420.0 L 824.5 403.0 L 869.5 367.0 L 879.5 350.0 L 884.0 335.5 L 900.5 341.0 L 899.0 430.5 L 895.5 425.0 L 895.0 409.5 L 892.5 417.0 L 894.5 433.0 L 898.5 440.0 L 900.5 462.0 L 898.0 600.5 Z M 906.0 599.5 L 903.5 461.0 L 905.5 442.0 L 911.5 432.0 L 909.5 429.0 L 911.5 417.0 L 910.0 414.5 L 908.5 425.0 L 905.0 430.5 L 903.5 342.0 L 919.0 337.5 L 931.5 364.0 L 945.0 377.5 L 965.0 389.5 L 980.5 404.0 L 985.5 414.0 L 985.5 422.0 L 972.5 449.0 L 971.5 459.0 L 956.5 499.0 L 922.5 556.0 L 911.5 580.0 L 906.0 599.5 Z", "triceps": "M 697.0 641.5 L 694.5 637.0 L 694.5 609.0 L 698.5 598.0 L 696.5 582.0 L 702.5 558.0 L 718.5 531.0 L 727.0 522.5 L 740.0 515.5 L 741.5 521.0 L 732.5 568.0 L 728.5 576.0 L 711.5 592.0 L 706.5 602.0 L 701.5 636.0 L 697.0 641.5 Z M 1103.0 641.5 L 1093.5 597.0 L 1072.5 575.0 L 1060.0 516.5 L 1066.0 517.5 L 1080.5 527.0 L 1090.5 538.0 L 1099.5 556.0 L 1103.5 570.0 L 1104.5 602.0 L 1107.5 610.0 L 1106.5 633.0 L 1102.5 635.0 L 1104.5 639.0 L 1103.0 641.5 Z M 1069.0 651.5 L 1059.5 641.0 L 1046.5 616.0 L 1036.5 584.0 L 1038.5 552.0 L 1045.5 526.0 L 1050.0 518.5 L 1062.5 547.0 L 1069.5 574.0 L 1064.5 604.0 L 1068.5 624.0 L 1069.0 651.5 Z M 733.0 652.5 L 731.5 644.0 L 733.5 624.0 L 738.5 606.0 L 735.5 569.0 L 752.0 520.5 L 756.5 527.0 L 764.5 557.0 L 765.5 584.0 L 763.5 592.0 L 752.5 610.0 L 747.5 629.0 L 733.0 652.5 Z M 1148.0 792.5 L 1114.5 690.0 L 1109.5 658.0 L 1110.0 647.5 L 1122.5 661.0 L 1111.5 642.0 L 1112.0 627.5 L 1117.5 631.0 L 1132.5 657.0 L 1131.5 660.0 L 1145.5 702.0 L 1148.5 722.0 L 1148.0 792.5 Z", "glutes": "M 795.0 918.5 L 782.5 896.0 L 775.5 861.0 L 776.5 839.0 L 789.5 779.0 L 801.5 758.0 L 818.0 742.5 L 831.0 737.5 L 851.0 738.5 L 865.0 747.5 L 879.5 764.0 L 894.5 790.0 L 898.5 809.0 L 898.5 835.0 L 895.5 851.0 L 888.5 866.0 L 881.0 873.5 L 857.0 885.5 L 843.0 888.5 L 821.0 888.5 L 802.0 878.5 L 808.0 885.5 L 820.5 891.0 L 805.5 902.0 L 795.0 918.5 Z M 1009.0 919.5 L 1000.5 905.0 L 985.5 892.0 L 1003.5 878.0 L 1007.0 867.5 L 1001.5 877.0 L 991.0 885.5 L 975.0 889.5 L 960.0 888.5 L 938.0 882.5 L 923.0 873.5 L 913.5 863.0 L 907.5 850.0 L 904.5 836.0 L 904.5 809.0 L 910.5 785.0 L 918.5 771.0 L 935.5 750.0 L 956.0 737.5 L 975.0 738.5 L 991.0 747.5 L 1007.5 768.0 L 1016.5 790.0 L 1016.5 800.0 L 1025.5 837.0 L 1026.5 872.0 L 1021.5 894.0 L 1009.0 919.5 Z", "hamstrings": "M 843.0 1118.5 L 830.5 1082.0 L 825.5 1041.0 L 825.5 1014.0 L 829.5 977.0 L 836.5 942.0 L 848.5 905.0 L 854.5 894.0 L 857.0 893.5 L 867.5 926.0 L 871.5 966.0 L 866.5 1008.0 L 857.5 1042.0 L 851.5 1095.0 L 846.5 1114.0 L 843.0 1118.5 Z M 961.0 1122.5 L 955.5 1115.0 L 950.5 1099.0 L 944.5 1042.0 L 932.5 985.0 L 933.5 945.0 L 938.5 919.0 L 947.0 893.5 L 953.5 903.0 L 965.5 935.0 L 974.5 980.0 L 977.5 1015.0 L 974.5 1070.0 L 962.5 1110.0 L 961.0 1122.5 Z M 783.0 1105.5 L 779.5 1105.0 L 779.5 1097.0 L 786.5 966.0 L 793.5 935.0 L 801.5 916.0 L 812.0 902.5 L 823.0 896.5 L 826.5 904.0 L 829.5 934.0 L 829.5 959.0 L 824.5 994.0 L 806.5 1058.0 L 783.0 1105.5 Z M 1019.0 1103.5 L 995.5 1058.0 L 978.5 995.0 L 973.5 955.0 L 973.5 924.0 L 975.5 905.0 L 979.0 897.5 L 991.0 902.5 L 1002.5 916.0 L 1009.5 934.0 L 1015.5 961.0 L 1019.5 1004.0 L 1021.5 1082.0 L 1019.0 1103.5 Z M 926.0 988.5 L 922.5 981.0 L 923.0 974.5 L 926.5 976.0 L 926.0 988.5 Z"};
+
         function renderAnatomicalBodySVG(muscles, selectedId) {
             const mMap = {};
             muscles.forEach(m => { mMap[m.id] = m; });
 
             const getStyle = (id) => {
                 const m = mMap[id] || { status: 'unworked', effectiveDone: 0 };
-                let fill = 'rgba(239, 68, 68, 0.72)';
-                let stroke = '#EF4444';
+                let fill = '#EF4444';
+                let stroke = '#DC2626';
                 let animClass = 'muscle-unworked-anim';
+                let fillOpacity = 0.88;
                 if (m.status === 'optimal' || m.status === 'high') {
                     fill = '#16A34A';
                     stroke = '#15803D';
                     animClass = '';
+                    fillOpacity = 0.88;
                 } else if (m.status === 'insufficient') {
                     fill = '#F59E0B';
                     stroke = '#D97706';
                     animClass = '';
+                    fillOpacity = 0.88;
                 }
                 const isSel = (selectedId === id);
                 return {
                     fill,
                     stroke,
+                    fillOpacity,
                     cls: `anatomy-muscle ${animClass} ${isSel ? 'active-selected' : ''}`,
                     tooltip: `${m.name || id}: ${m.effectiveDone ? m.effectiveDone.toFixed(1) : 0} Set (${m.statusLabel || m.status})`
                 };
             };
 
-            const sChest = getStyle('chest');
-            const sBack = getStyle('back');
-            const sShld = getStyle('shoulders');
-            const sBic = getStyle('biceps');
-            const sTri = getStyle('triceps');
-            const sCore = getStyle('core');
-            const sQuads = getStyle('quads');
-            const sHams = getStyle('hamstrings');
-            const sGlut = getStyle('glutes');
-            const sCalf = getStyle('calves');
+            const muscleOrder = [
+                'chest', 'shoulders', 'biceps', 'triceps', 'core',
+                'back', 'glutes', 'quads', 'hamstrings', 'calves'
+            ];
+
+            const pathsHTML = muscleOrder.map(mId => {
+                const s = getStyle(mId);
+                const d = ANATOMY_MUSCLE_PATHS[mId] || '';
+                if (!d) return '';
+                return `<path class="${s.cls}" data-muscle="${mId}" onclick="selectAnatomyMuscle('${mId}')" d="${d}" fill="${s.fill}" fill-opacity="${s.fillOpacity}" stroke="${s.stroke}" stroke-width="1.5"><title>${s.tooltip}</title></path>`;
+            }).join('\n');
 
             return `
-            <svg class="anatomy-svg" viewBox="0 0 540 450" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <filter id="muscleGlow" x="-10%" y="-10%" width="120%" height="120%">
-                        <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#0F172A" flood-opacity="0.2"/>
-                    </filter>
-                </defs>
+            <svg class="anatomy-svg" viewBox="0 0 1150 1520" xmlns="http://www.w3.org/2000/svg">
+                <!-- TITLES -->
+                <text x="226" y="38" text-anchor="middle" fill="#475569" font-family="'Plus Jakarta Sans', sans-serif" font-size="22" font-weight="800" letter-spacing="1">ÖN VÜCUT (ANTERIOR)</text>
+                <text x="902" y="38" text-anchor="middle" fill="#475569" font-family="'Plus Jakarta Sans', sans-serif" font-size="22" font-weight="800" letter-spacing="1">ARKA VÜCUT (POSTERIOR)</text>
+                
+                <!-- CENTER DIVIDER -->
+                <line x1="564" y1="20" x2="564" y2="1490" stroke="#CBD5E1" stroke-width="2.5" stroke-dasharray="8,8"/>
 
-                <!-- ==================== FRONT VIEW (ÖN GÖRÜNÜM) ==================== -->
-                <g id="frontBodyView">
-                    <!-- Title -->
-                    <text x="135" y="22" text-anchor="middle" fill="#475569" font-family="'Plus Jakarta Sans', sans-serif" font-size="11.5" font-weight="800" letter-spacing="0.8">ÖN VÜCUT (ANTERIOR)</text>
-                    
-                    <!-- BASE ATHLETIC MANNEQUIN (Front Chassis) -->
-                    <!-- Head & Jaw -->
-                    <path d="M 124 44 C 124 33, 129 28, 135 28 C 141 28, 146 33, 146 44 C 146 54, 142 63, 135 65 C 128 63, 124 54, 124 44 Z" fill="#1E293B" stroke="#475569" stroke-width="0.8"/>
-                    <!-- Neck, Torso & Limbs Chassis -->
-                    <path d="M 129 64 L 141 64 L 144 76 C 158 79, 172 84, 185 91 L 180 114 L 170 112 L 166 142 L 157 212 L 153 232 L 176 324 L 169 414 L 153 438 L 144 438 L 149 408 L 142 338 L 135 242 L 128 338 L 121 408 L 126 438 L 117 438 L 101 414 L 94 324 L 117 232 L 113 212 L 104 142 L 100 112 L 85 114 L 85 91 C 98 84, 112 79, 126 76 Z" fill="#1E293B"/>
+                <!-- REAL CANVA HIGH-RES ATHLETIC BASE FIGURE -->
+                <image href="./assets/diagrams/canva_anatomy_neutral.png" x="0" y="60" width="1150" height="1475" />
 
-                    <!-- Forearms / Hands (Front) -->
-                    <path d="M 72 168 C 65 186, 60 208, 56 228 C 60 230, 66 226, 72 210 C 76 196, 78 180, 78 168 Z" fill="#1E293B" stroke="#334155" stroke-width="0.8"/>
-                    <path d="M 198 168 C 205 186, 210 208, 214 228 C 210 230, 204 226, 198 210 C 194 196, 192 180, 192 168 Z" fill="#1E293B" stroke="#334155" stroke-width="0.8"/>
-                    <path d="M 56 228 C 54 236, 53 246, 55 250 C 57 252, 62 248, 63 240 C 64 234, 65 229, 65 225 Z" fill="#1E293B"/>
-                    <path d="M 214 228 C 216 236, 217 246, 215 250 C 213 252, 208 248, 207 240 C 206 234, 205 229, 205 225 Z" fill="#1E293B"/>
-
-                    <!-- Feet (Front) -->
-                    <ellipse cx="122" cy="436" rx="8" ry="4.5" fill="#1E293B" stroke="#334155" stroke-width="0.8"/>
-                    <ellipse cx="148" cy="436" rx="8" ry="4.5" fill="#1E293B" stroke="#334155" stroke-width="0.8"/>
-
-                    <!-- SHOULDERS (Front Delts) -->
-                    <path class="${sShld.cls}" data-muscle="shoulders" onclick="selectAnatomyMuscle('shoulders')" d="M 100 76 C 86 80, 74 91, 75 109 C 78 116, 88 114, 94 104 C 98 94, 100 84, 100 76 Z" fill="${sShld.fill}" stroke="${sShld.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sShld.tooltip}</title></path>
-                    <path class="${sShld.cls}" data-muscle="shoulders" onclick="selectAnatomyMuscle('shoulders')" d="M 170 76 C 184 80, 196 91, 195 109 C 192 116, 182 114, 176 104 C 172 94, 170 84, 170 76 Z" fill="${sShld.fill}" stroke="${sShld.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sShld.tooltip}</title></path>
-
-                    <!-- CHEST (Göğüs / Pectorals) -->
-                    <path class="${sChest.cls}" data-muscle="chest" onclick="selectAnatomyMuscle('chest')" d="M 103 80 C 115 76, 131 77, 133 90 C 133 113, 109 123, 97 111 C 93 99, 95 86, 103 80 Z" fill="${sChest.fill}" stroke="${sChest.stroke}" stroke-width="1.4" filter="url(#muscleGlow)"><title>${sChest.tooltip}</title></path>
-                    <path class="${sChest.cls}" data-muscle="chest" onclick="selectAnatomyMuscle('chest')" d="M 167 80 C 155 76, 139 77, 137 90 C 137 113, 161 123, 173 111 C 177 99, 175 86, 167 80 Z" fill="${sChest.fill}" stroke="${sChest.stroke}" stroke-width="1.4" filter="url(#muscleGlow)"><title>${sChest.tooltip}</title></path>
-
-                    <!-- BICEPS (Front Arms) -->
-                    <path class="${sBic.cls}" data-muscle="biceps" onclick="selectAnatomyMuscle('biceps')" d="M 75 113 C 67 127, 69 149, 77 161 C 84 159, 87 145, 86 131 C 85 119, 80 115, 75 113 Z" fill="${sBic.fill}" stroke="${sBic.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sBic.tooltip}</title></path>
-                    <path class="${sBic.cls}" data-muscle="biceps" onclick="selectAnatomyMuscle('biceps')" d="M 195 113 C 203 127, 201 149, 193 161 C 186 159, 183 145, 184 131 C 185 119, 190 115, 195 113 Z" fill="${sBic.fill}" stroke="${sBic.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sBic.tooltip}</title></path>
-
-                    <!-- CORE (Karın & Abdominals) -->
-                    <path class="${sCore.cls}" data-muscle="core" onclick="selectAnatomyMuscle('core')" d="M 112 116 C 122 112, 148 112, 158 116 C 156 148, 152 182, 146 210 C 140 213, 130 213, 124 210 C 118 182, 114 148, 112 116 Z" fill="${sCore.fill}" stroke="${sCore.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sCore.tooltip}</title></path>
-                    <!-- Core Inner divisions (subtle anatomical sixpack lines) -->
-                    <line x1="135" y1="117" x2="135" y2="206" stroke="rgba(15, 23, 42, 0.45)" stroke-width="1.3" pointer-events="none"/>
-                    <path d="M 122 143 Q 135 145 148 143" stroke="rgba(15, 23, 42, 0.4)" stroke-width="1.1" fill="none" pointer-events="none"/>
-                    <path d="M 124 169 Q 135 171 146 169" stroke="rgba(15, 23, 42, 0.4)" stroke-width="1.1" fill="none" pointer-events="none"/>
-                    <path d="M 126 193 Q 135 195 144 193" stroke="rgba(15, 23, 42, 0.4)" stroke-width="1.1" fill="none" pointer-events="none"/>
-
-                    <!-- QUADS (Ön Bacak) -->
-                    <path class="${sQuads.cls}" data-muscle="quads" onclick="selectAnatomyMuscle('quads')" d="M 103 216 C 113 210, 131 210, 132 218 C 134 252, 131 298, 125 324 C 114 324, 104 316, 99 284 C 97 258, 97 228, 103 216 Z" fill="${sQuads.fill}" stroke="${sQuads.stroke}" stroke-width="1.4" filter="url(#muscleGlow)"><title>${sQuads.tooltip}</title></path>
-                    <path class="${sQuads.cls}" data-muscle="quads" onclick="selectAnatomyMuscle('quads')" d="M 167 216 C 157 210, 139 210, 138 218 C 136 252, 139 298, 145 324 C 156 324, 166 316, 171 284 C 173 258, 173 228, 167 216 Z" fill="${sQuads.fill}" stroke="${sQuads.stroke}" stroke-width="1.4" filter="url(#muscleGlow)"><title>${sQuads.tooltip}</title></path>
-
-                    <!-- Knees (Front) -->
-                    <ellipse cx="114" cy="334" rx="4.5" ry="5.5" fill="#1E293B" stroke="#475569" stroke-width="0.8"/>
-                    <ellipse cx="156" cy="334" rx="4.5" ry="5.5" fill="#1E293B" stroke="#475569" stroke-width="0.8"/>
-
-                    <!-- CALVES (Front Shins / Calves) -->
-                    <path class="${sCalf.cls}" data-muscle="calves" onclick="selectAnatomyMuscle('calves')" d="M 107 344 C 101 356, 103 384, 111 412 C 121 412, 125 398, 125 380 C 125 362, 121 346, 107 344 Z" fill="${sCalf.fill}" stroke="${sCalf.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sCalf.tooltip}</title></path>
-                    <path class="${sCalf.cls}" data-muscle="calves" onclick="selectAnatomyMuscle('calves')" d="M 163 344 C 169 356, 167 384, 159 412 C 149 412, 145 398, 145 380 C 145 362, 149 346, 163 344 Z" fill="${sCalf.fill}" stroke="${sCalf.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sCalf.tooltip}</title></path>
-                </g>
-
-                <!-- Center Divider -->
-                <line x1="270" y1="20" x2="270" y2="435" stroke="#CBD5E1" stroke-width="1" stroke-dasharray="4,4"/>
-
-                <!-- ==================== BACK VIEW (ARKA GÖRÜNÜM) ==================== -->
-                <g id="backBodyView">
-                    <!-- Title -->
-                    <text x="405" y="22" text-anchor="middle" fill="#475569" font-family="'Plus Jakarta Sans', sans-serif" font-size="11.5" font-weight="800" letter-spacing="0.8">ARKA VÜCUT (POSTERIOR)</text>
-                    
-                    <!-- Head & Neck -->
-                    <path d="M 394 44 C 394 33, 399 28, 405 28 C 411 28, 416 33, 416 44 C 416 54, 412 63, 405 65 C 398 63, 394 54, 394 44 Z" fill="#1E293B" stroke="#475569" stroke-width="0.8"/>
-                    <!-- Traps slope & spine chassis -->
-                    <path d="M 399 64 L 411 64 L 414 76 C 428 79, 442 84, 455 91 L 450 114 L 440 112 L 436 142 L 427 212 L 423 232 L 446 324 L 439 414 L 423 438 L 414 438 L 419 408 L 412 338 L 405 242 L 398 338 L 391 408 L 396 438 L 387 438 L 371 414 L 364 324 L 387 232 L 383 212 L 374 142 L 370 112 L 355 114 L 355 91 C 368 84, 382 79, 396 76 Z" fill="#1E293B"/>
-
-                    <!-- Forearms / Hands (Back) -->
-                    <path d="M 342 168 C 335 186, 330 208, 326 228 C 330 230, 336 226, 342 210 C 346 196, 348 180, 348 168 Z" fill="#1E293B" stroke="#334155" stroke-width="0.8"/>
-                    <path d="M 468 168 C 475 186, 480 208, 484 228 C 480 230, 474 226, 468 210 C 464 196, 462 180, 462 168 Z" fill="#1E293B" stroke="#334155" stroke-width="0.8"/>
-                    <path d="M 326 228 C 324 236, 323 246, 325 250 C 327 252, 332 248, 333 240 C 334 234, 335 229, 335 225 Z" fill="#1E293B"/>
-                    <path d="M 484 228 C 486 236, 487 246, 485 250 C 483 252, 478 248, 477 240 C 476 234, 475 229, 475 225 Z" fill="#1E293B"/>
-
-                    <!-- Feet (Back) -->
-                    <ellipse cx="392" cy="436" rx="8" ry="4.5" fill="#1E293B" stroke="#334155" stroke-width="0.8"/>
-                    <ellipse cx="418" cy="436" rx="8" ry="4.5" fill="#1E293B" stroke="#334155" stroke-width="0.8"/>
-
-                    <!-- BACK (Traps / Upper Back) -->
-                    <path class="${sBack.cls}" data-muscle="back" onclick="selectAnatomyMuscle('back')" d="M 390 68 L 405 58 L 420 68 L 435 83 L 405 104 L 375 83 Z" fill="${sBack.fill}" stroke="${sBack.stroke}" stroke-width="1.4" filter="url(#muscleGlow)"><title>${sBack.tooltip}</title></path>
-
-                    <!-- SHOULDERS (Rear Delts) -->
-                    <path class="${sShld.cls}" data-muscle="shoulders" onclick="selectAnatomyMuscle('shoulders')" d="M 368 76 C 354 80, 343 91, 345 109 C 349 116, 359 114, 365 104 C 369 94, 371 84, 368 76 Z" fill="${sShld.fill}" stroke="${sShld.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sShld.tooltip}</title></path>
-                    <path class="${sShld.cls}" data-muscle="shoulders" onclick="selectAnatomyMuscle('shoulders')" d="M 442 76 C 456 80, 467 91, 465 109 C 461 116, 451 114, 445 104 C 441 94, 439 84, 442 76 Z" fill="${sShld.fill}" stroke="${sShld.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sShld.tooltip}</title></path>
-
-                    <!-- BACK (Latissimus Dorsi / Mid Back) -->
-                    <path class="${sBack.cls}" data-muscle="back" onclick="selectAnatomyMuscle('back')" d="M 374 96 C 358 111, 356 142, 362 174 C 374 178, 386 170, 388 153 C 390 133, 388 111, 374 96 Z" fill="${sBack.fill}" stroke="${sBack.stroke}" stroke-width="1.4" filter="url(#muscleGlow)"><title>${sBack.tooltip}</title></path>
-                    <path class="${sBack.cls}" data-muscle="back" onclick="selectAnatomyMuscle('back')" d="M 436 96 C 452 111, 454 142, 448 174 C 436 178, 424 170, 422 153 C 420 133, 422 111, 436 96 Z" fill="${sBack.fill}" stroke="${sBack.stroke}" stroke-width="1.4" filter="url(#muscleGlow)"><title>${sBack.tooltip}</title></path>
-
-                    <!-- TRICEPS (Arka Kol) -->
-                    <path class="${sTri.cls}" data-muscle="triceps" onclick="selectAnatomyMuscle('triceps')" d="M 344 113 C 336 127, 338 149, 346 161 C 354 159, 357 145, 356 131 C 355 119, 349 115, 344 113 Z" fill="${sTri.fill}" stroke="${sTri.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sTri.tooltip}</title></path>
-                    <path class="${sTri.cls}" data-muscle="triceps" onclick="selectAnatomyMuscle('triceps')" d="M 466 113 C 474 127, 472 149, 464 161 C 456 159, 453 145, 454 131 C 455 119, 461 115, 466 113 Z" fill="${sTri.fill}" stroke="${sTri.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sTri.tooltip}</title></path>
-
-                    <!-- GLUTES (Kalça) -->
-                    <path class="${sGlut.cls}" data-muscle="glutes" onclick="selectAnatomyMuscle('glutes')" d="M 367 184 C 367 175, 403 175, 404 184 C 404 216, 386 232, 368 230 C 364 216, 364 198, 367 184 Z" fill="${sGlut.fill}" stroke="${sGlut.stroke}" stroke-width="1.4" filter="url(#muscleGlow)"><title>${sGlut.tooltip}</title></path>
-                    <path class="${sGlut.cls}" data-muscle="glutes" onclick="selectAnatomyMuscle('glutes')" d="M 443 184 C 443 175, 407 175, 406 184 C 406 216, 424 232, 442 230 C 446 216, 446 198, 443 184 Z" fill="${sGlut.fill}" stroke="${sGlut.stroke}" stroke-width="1.4" filter="url(#muscleGlow)"><title>${sGlut.tooltip}</title></path>
-
-                    <!-- HAMSTRINGS (Arka Bacak) -->
-                    <path class="${sHams.cls}" data-muscle="hamstrings" onclick="selectAnatomyMuscle('hamstrings')" d="M 368 234 C 374 229, 401 229, 402 234 C 402 268, 398 298, 394 322 C 382 322, 372 314, 368 288 C 366 268, 366 250, 368 234 Z" fill="${sHams.fill}" stroke="${sHams.stroke}" stroke-width="1.4" filter="url(#muscleGlow)"><title>${sHams.tooltip}</title></path>
-                    <path class="${sHams.cls}" data-muscle="hamstrings" onclick="selectAnatomyMuscle('hamstrings')" d="M 442 234 C 436 229, 409 229, 408 234 C 408 268, 412 298, 416 322 C 428 322, 438 314, 442 288 C 444 268, 444 250, 442 234 Z" fill="${sHams.fill}" stroke="${sHams.stroke}" stroke-width="1.4" filter="url(#muscleGlow)"><title>${sHams.tooltip}</title></path>
-
-                    <!-- Popliteal Fossa / Knee Back -->
-                    <ellipse cx="384" cy="332" rx="4.5" ry="3" fill="#1E293B" stroke="#475569" stroke-width="0.8"/>
-                    <ellipse cx="426" cy="332" rx="4.5" ry="3" fill="#1E293B" stroke="#475569" stroke-width="0.8"/>
-
-                    <!-- CALVES (Kalf / Gastrocnemius - Back) -->
-                    <path class="${sCalf.cls}" data-muscle="calves" onclick="selectAnatomyMuscle('calves')" d="M 366 342 C 358 356, 362 384, 372 410 C 384 410, 388 396, 390 378 C 392 358, 388 344, 366 342 Z" fill="${sCalf.fill}" stroke="${sCalf.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sCalf.tooltip}</title></path>
-                    <path class="${sCalf.cls}" data-muscle="calves" onclick="selectAnatomyMuscle('calves')" d="M 444 342 C 452 356, 448 384, 438 410 C 426 410, 422 396, 420 378 C 418 358, 422 344, 444 342 Z" fill="${sCalf.fill}" stroke="${sCalf.stroke}" stroke-width="1.3" filter="url(#muscleGlow)"><title>${sCalf.tooltip}</title></path>
-                </g>
+                <!-- DYNAMICALLY TINTED MUSCLE OVERLAYS -->
+                ${pathsHTML}
             </svg>
             `;
         }
@@ -18633,7 +18542,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=232')
+                navigator.serviceWorker.register('./sw.js?v=234')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
