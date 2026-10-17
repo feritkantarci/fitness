@@ -25,3 +25,6 @@ scripts/enrich_*.py
 scripts/refine_*.py
 scripts/generate_approval_portal.cjs
 scripts/test-server.js
+canva-export/
+canva_exports/
+.taste-skill/

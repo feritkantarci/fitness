@@ -161,7 +161,19 @@
             db_manmaker: { primary: 'Tüm Vücut Zırhı', secondary: 'Göğüs, Sırt, Omuz, Bacak, Core', subKey: 'core_front', allSubKeys: ['chest_mid', 'back_mid', 'legs_quad', 'shoulders_front', 'core_front'], isLowerUpperComplex: true, isFullBodyMetcon: true },
             bb_hang_power_clean: { primary: 'Kalça & Üst Sırt (Trapez)', secondary: 'Arka Bacak, Ön Kol, Omuz', subKey: 'back_mid', allSubKeys: ['legs_hamstrings', 'back_mid'] },
             bb_landmine_squat_press: { primary: 'Ön Bacak & Omuz', secondary: 'Üst Göğüs, Triceps, Kalça, Core', subKey: 'shoulders_front', allSubKeys: ['legs_quad', 'shoulders_front'], isLowerUpperComplex: true },
-            bw_burpee: { primary: 'Tüm Vücut Kondisyonu', secondary: 'Göğüs, Bacak, Core, Nabız', subKey: 'core_front', allSubKeys: ['chest_mid', 'legs_quad', 'core_front'], isLowerUpperComplex: true, isFullBodyMetcon: true }
+            bw_burpee: { primary: 'Tüm Vücut Kondisyonu', secondary: 'Göğüs, Bacak, Core, Nabız', subKey: 'core_front', allSubKeys: ['chest_mid', 'legs_quad', 'core_front'], isLowerUpperComplex: true, isFullBodyMetcon: true },
+
+            // AKADEMİK BİRLEŞİK HAREKETLER & AKIŞ (Javorek, McGill, Boyle & Myers)
+            db_pullover_to_halo: { primary: 'Kanat & Omuz Mobilite', secondary: 'Üst Göğüs, Triceps Uzun Baş, Torasik Core', subKey: 'back_lats', allSubKeys: ['back_lats', 'shoulders_rear', 'core_front'], isComplex: true },
+            db_seesaw_lunge: { primary: 'Ön Bacak & Kalça (Dinamik)', secondary: 'Arka Bacak, Denge & Core Stabilitesi', subKey: 'legs_quad', allSubKeys: ['legs_quad', 'legs_glutes', 'legs_hamstrings'], isComplex: true },
+            db_clean_squat_press: { primary: 'Ön Bacak, Kalça & Omuz', secondary: 'Sırt, Triceps, Patlayıcı Güç', subKey: 'shoulders_front', allSubKeys: ['legs_hamstrings', 'legs_quad', 'shoulders_front', 'back_mid'], isLowerUpperComplex: true, isComplex: true },
+            db_rdl_to_high_pull: { primary: 'Arka Bacak & Üst Sırt (Trapez)', secondary: 'Büyük Kalça, Arka Omuz, Ön Kol', subKey: 'legs_hamstrings', allSubKeys: ['legs_hamstrings', 'legs_glutes', 'back_mid', 'shoulders_rear'], isLowerUpperComplex: true, isComplex: true },
+            db_swing_to_goblet_squat: { primary: 'Kalça, Arka Bacak & Ön Bacak', secondary: 'Core Zırhı, Kavrama, Metabolik Güç', subKey: 'legs_quad', allSubKeys: ['legs_hamstrings', 'legs_glutes', 'legs_quad', 'core_front'], isComplex: true },
+            db_lunge_to_curl_press: { primary: 'Ön Bacak, Kalça & Biceps', secondary: 'Ön Omuz, Denge, Core', subKey: 'legs_quad', allSubKeys: ['legs_quad', 'legs_glutes', 'biceps', 'shoulders_front'], isLowerUpperComplex: true, isComplex: true },
+            db_gorilla_row_to_clean: { primary: 'Orta Sırt & Kalça Menteşesi', secondary: 'Lats, Trapez, Hamstrings', subKey: 'back_mid', allSubKeys: ['back_mid', 'legs_hamstrings', 'legs_glutes', 'shoulders_rear'], isLowerUpperComplex: true, isComplex: true },
+            db_floor_press_to_bridge: { primary: 'Orta Göğüs & Kalça (Glute)', secondary: 'Triceps, Hamstrings, Lomber Core', subKey: 'chest_mid', allSubKeys: ['chest_mid', 'legs_glutes', 'triceps_long'], isLowerUpperComplex: true, isComplex: true },
+            db_step_back_lunge_to_knee_drive: { primary: 'Ön Bacak & Ön Omuz', secondary: 'Gluteus Medius, Psoas, Rotasyonel Denge', subKey: 'shoulders_front', allSubKeys: ['legs_quad', 'shoulders_front', 'core_obliques'], isLowerUpperComplex: true, isComplex: true },
+            bw_inchworm_to_pushup: { primary: 'Hamstring Mobilite & Göğüs', secondary: 'Triceps, Ön Karın, Omuz Zırhı', subKey: 'chest_mid', allSubKeys: ['chest_mid', 'legs_hamstrings', 'core_front'], isLowerUpperComplex: true, isComplex: true }
         };
 
         const STUDIO_SUB_REGIONS = {
@@ -358,6 +370,7 @@
             upper: { name: "Tüm Üst Vücut", shortName: "Üst Vücut", icon: "🦅" },
             core: { name: "Karın & Core", shortName: "Core", icon: "🧱" },
             functional: { name: "Fonksiyonel & Kondisyon", shortName: "Fonksiyonel", icon: "⚡" },
+            flow_complex: { name: "⚔️ Çelik Akışı (Flow Kompleks)", shortName: "Çelik Akışı", icon: "⚔️" },
             iso_chest: { name: "Göğüs", shortName: "Göğüs", icon: "🎯" },
             iso_back: { name: "Sırt & Kanat", shortName: "Sırt", icon: "🎯" },
             iso_shoulders: { name: "Omuz", shortName: "Omuz", icon: "🎯" },
@@ -375,7 +388,8 @@
                     upper_lower_full: 'Haftalık • Üst / Alt / Tüm Vücut (3 Gün)',
                     ppl_3day: 'Haftalık • İtiş / Çekiş / Bacak (3 Gün)',
                     fullbody_3day: 'Haftalık • 3 Gün Tüm Vücut (A/B/C)',
-                    upper_lower_4day: 'Haftalık • 4 Gün Üst / Alt Vücut'
+                    upper_lower_4day: 'Haftalık • 4 Gün Üst / Alt Vücut',
+                    flow_complex_3day: 'Haftalık • 3 Gün Çelik Akışı (Kompleks)'
                 };
                 el.innerText = tplMap[window.selectedAiWeeklyTemplate] || 'Haftalık • AI Otomatik Teşhis';
                 return;
@@ -476,6 +490,22 @@
             // Bölge şablonu seçildiğinde izole kas seçimlerini temizle
             selectedSplits = selectedSplits.filter(s => !String(s).startsWith('iso_'));
 
+            if (split === 'flow_complex') {
+                selectedSplits = ['flow_complex'];
+                selectedSplit = 'flow_complex';
+                const styleEl = document.getElementById('paramStyle');
+                const durEl = document.getElementById('paramDuration');
+                if (styleEl) styleEl.value = 'complex';
+                if (durEl) durEl.value = '20';
+                if (typeof updateSelectedParamLabel === 'function') updateSelectedParamLabel();
+                renderSplitCards();
+                updateSelectedSplitLabel();
+                return;
+            }
+
+            // Normal bir bölge seçildiğinde flow_complex'i kaldır
+            selectedSplits = selectedSplits.filter(s => s !== 'flow_complex');
+
             if (split === 'full_body') {
                 selectedSplits = ['full_body'];
             } else {
@@ -524,6 +554,13 @@
                 selectedSplits = [split];
             }
             selectedSplit = selectedSplits[0] || 'full_body';
+            if (selectedSplit === 'flow_complex') {
+                const styleEl = document.getElementById('paramStyle');
+                const durEl = document.getElementById('paramDuration');
+                if (styleEl) styleEl.value = 'complex';
+                if (durEl) durEl.value = '20';
+                if (typeof updateSelectedParamLabel === 'function') updateSelectedParamLabel();
+            }
             renderSplitCards();
             updateSelectedSplitLabel();
         }
@@ -593,6 +630,9 @@
                     return { sets: 3, reps: '8 - 12', rest: 45, straightRest: 60, supersetRest: 45 };
                 } else if (style === 'emom') {
                     return { sets: 4, reps: '10 - 12', rest: 30, straightRest: 30, supersetRest: 30 };
+                } else if (style === 'complex' || style === 'flow') {
+                    // Akademik Kompleks (Javorek 1988 & McGill 2012): 4 Tur, 6-8 Akış Tekrarı, Dinlenme Sadece Tur Sonu 90s (İstasyon Arası 0s)
+                    return { sets: 4, reps: '6 - 8', rest: 90, straightRest: 90, supersetRest: 0 };
                 }
                 return { sets: 3, reps: '8 - 12', rest: 75, straightRest: 75, supersetRest: 60 };
             }
@@ -1194,6 +1234,14 @@
                 title: 'Fonksiyonel & Kondisyon',
                 muscles: ['Tüm Vücut Kas Zinciri', 'Kalça & Arka Zincir', 'Omuz & Merkez Stabilizasyon']
             },
+            flow_complex: {
+                title: 'Çelik Akışı (Flow Kompleks)',
+                muscles: ['Çok Fazlı Birleşik Hareketler', 'Kalça-Bacak-Omuz Hibrit İtiş', 'Arka Zincir & Torasik Mobilite']
+            },
+            flow_complex_3day: {
+                title: 'Çelik Akışı — Kompleks (3 Gün)',
+                muscles: ['1. Gün: Kuvvet & İtiş Akışı', '2. Gün: Arka Zincir & Omuz Akışı', '3. Gün: Tam Vücut Metcon Akışı']
+            },
             ai_auto: {
                 title: 'AI Otomatik Teşhis',
                 muscles: ['Haftalık Eksik Kalan Kaslar', 'Göğüs • Sırt • Omuz • Kol', 'Bacak • Kalça • Core']
@@ -1315,6 +1363,21 @@
 
             const unifiedWishEl = document.getElementById('aiUnifiedWishInput');
             const userWish = unifiedWishEl ? unifiedWishEl.value.trim() : '';
+
+            const isComplexRequested = /birleşik|kompleks|akış|flow|chain|zincir|hibrit|kombinasyon/.test(userWish.toLocaleLowerCase('tr-TR')) ||
+                                       selectedSplit === 'flow_complex' ||
+                                       window.selectedAiWeeklyTemplate === 'flow_complex_3day' ||
+                                       (document.getElementById('paramStyle') && document.getElementById('paramStyle').value === 'complex');
+
+            if (isComplexRequested) {
+                const styleEl = document.getElementById('paramStyle');
+                if (styleEl && styleEl.value !== 'complex') styleEl.value = 'complex';
+            }
+
+            // Eğer birleşik akış/kompleks istenmişse ve haftalık 3 günlük kompleks şablonu özellikle seçilmemişse tek günlük flow üret
+            if (isComplexRequested && window.selectedAiWeeklyTemplate !== 'flow_complex_3day' && !preferredTplKey) {
+                window.aiGeneratorScope = 'single';
+            }
 
             // Eğer kullanıcı "Tek Günlük Seans" modundaysa ve dışarıdan haftalık şablon zorlanmadıysa tek günlük AI antrenmanı üret
             if (window.aiGeneratorScope === 'single' && !preferredTplKey) {
@@ -1589,6 +1652,14 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     { dayIdx: 4, split: 'upper', label: 'Per: Üst Vücut B (Dikey/Eğimli Odak & Kol)' },
                     { dayIdx: 5, split: 'lower', label: 'Cum: Alt Vücut B (Kalça Baskın & Kondisyon)' }
                 ]
+            },
+            flow_complex_3day: {
+                name: '3 Gün Çelik Akışı (Flow Kompleks Serisi)',
+                days: [
+                    { dayIdx: 1, split: 'flow_complex', label: 'Pzt: Çelik Akışı A (Kuvvet & İtiş Akışı)' },
+                    { dayIdx: 3, split: 'flow_complex', label: 'Çar: Çelik Akışı B (Arka Zincir & Mobilite)' },
+                    { dayIdx: 5, split: 'flow_complex', label: 'Cum: Çelik Akışı C (Metabolik Tam Vücut)' }
+                ]
             }
         };
         window.AI_WEEKLY_TEMPLATES = AI_WEEKLY_TEMPLATES;
@@ -1602,13 +1673,22 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             const unifiedWishEl = document.getElementById('aiUnifiedWishInput');
             const modalWishEl = document.getElementById('aiModalUserWishInput');
 
-            const chosenDur = paramDurEl ? parseInt(paramDurEl.value, 10) : (durSelect ? parseInt(durSelect.value, 10) : 45);
-            const chosenStyle = paramStyleEl ? paramStyleEl.value : (styleSelect ? styleSelect.value : 'superset');
+            let chosenDur = paramDurEl ? parseInt(paramDurEl.value, 10) : (durSelect ? parseInt(durSelect.value, 10) : 45);
+            let chosenStyle = paramStyleEl ? paramStyleEl.value : (styleSelect ? styleSelect.value : 'superset');
             const chosenTplKey = (overrideTplKey && AI_WEEKLY_TEMPLATES[overrideTplKey])
                 ? overrideTplKey
                 : ((window.selectedAiWeeklyTemplate && AI_WEEKLY_TEMPLATES[window.selectedAiWeeklyTemplate])
                     ? window.selectedAiWeeklyTemplate
                     : ((wkTplSelect && AI_WEEKLY_TEMPLATES[wkTplSelect.value]) ? wkTplSelect.value : 'upper_lower_full'));
+            if (chosenTplKey === 'flow_complex_3day') {
+                chosenStyle = 'complex';
+                if (paramStyleEl) paramStyleEl.value = 'complex';
+                if (styleSelect) styleSelect.value = 'complex';
+                if (chosenDur > 25) {
+                    chosenDur = 25;
+                    if (paramDurEl) paramDurEl.value = '30';
+                }
+            }
             if (wkTplSelect && wkTplSelect.value !== chosenTplKey) {
                 wkTplSelect.value = chosenTplKey;
             }
@@ -1649,7 +1729,8 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             const generatedDaysList = [];
             weeklyDays.forEach((slot, idx) => {
                 selectSplit(slot.split);
-                handleGenerateWorkout(currentSelectedDoctrine, userWish, weeklyContext);
+                const dayDoctrine = (chosenTplKey === 'flow_complex_3day' || slot.split === 'flow_complex') ? 'metcon_athletic' : currentSelectedDoctrine;
+                handleGenerateWorkout(dayDoctrine, userWish, weeklyContext);
                 if (currentGeneratedWorkout) {
                     const wClone = JSON.parse(JSON.stringify(currentGeneratedWorkout));
                     wClone.id = 'ai_wk_' + slot.dayIdx + '_' + (Date.now() + idx);
@@ -2016,6 +2097,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             bb_landmine_squat_press: 'squat_or_clean_press_complex',
             step_up_press: 'squat_or_clean_press_complex',
             db_clean_and_press: 'squat_or_clean_press_complex',
+            db_clean_squat_press: 'squat_or_clean_press_complex',
             kb_turkish_getup: 'squat_or_clean_press_complex',
             // 6. Yan Omuz İzolasyon
             db_lateral_raise: 'lateral_raise_iso',
@@ -2023,6 +2105,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             // 7. Arka Omuz & Omuz Mobilite
             mach_face_pull: 'rear_delt_pull',
             kb_halo: 'shoulder_halo_mobility',
+            db_pullover_to_halo: 'shoulder_halo_mobility',
             // 8. Triceps (Uzun Baş Overhead / Skullcrusher / Yan Baş Pushdown & Dar İtiş)
             db_triceps_overhead: 'triceps_long_overhead',
             db_skullcrusher: 'triceps_skullcrusher_iso',
@@ -2066,6 +2149,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             db_walking_lunge: 'unilateral_lunge_split',
             db_reverse_lunge: 'unilateral_lunge_split',
             lunge_with_twist: 'unilateral_lunge_split',
+            db_seesaw_lunge: 'unilateral_lunge_split',
             // 15. Quad İzolasyon
             mach_leg_extension: 'quad_extension_iso',
             bw_sissy_squat: 'quad_extension_iso',
@@ -2106,7 +2190,14 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             bw_hanging_knee_raise: 'core_hanging_raise',
             bw_mountain_climber: 'core_dynamic_climber',
             bear_crawl_pull_through: 'core_bear_crawl',
-            // 24. Tüm Vücut Metcon (Man Maker / Burpee)
+            // 24. Birleşik Kompleks & Metcon Akışları (Akademik Javorek & McGill)
+            db_rdl_to_high_pull: 'rdl_high_pull_complex',
+            db_swing_to_goblet_squat: 'swing_goblet_complex',
+            db_lunge_to_curl_press: 'lunge_curl_press_complex',
+            db_gorilla_row_to_clean: 'gorilla_clean_complex',
+            db_floor_press_to_bridge: 'bridge_press_complex',
+            db_step_back_lunge_to_knee_drive: 'lunge_knee_drive_complex',
+            bw_inchworm_to_pushup: 'inchworm_pushup_complex',
             db_manmaker: 'fullbody_metcon_burpee',
             bw_burpee: 'fullbody_metcon_burpee'
         };
@@ -2556,6 +2647,11 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     ex.blockLabel = `DK ${idx + 1}`;
                     ex.blockHeader = idx === 0 ? `⏱️ EMOM İSTASYON DÖNGÜSÜ (Her Dakika Başında 1 İstasyon)` : null;
                     ex.customRest = 30;
+                } else if (style === 'complex' || style === 'flow') {
+                    ex.blockType = 'complex';
+                    ex.blockLabel = `İstasyon ${idx + 1}`;
+                    ex.blockHeader = idx === 0 ? `⚔️ ÇELİK AKIŞI • KESİNTİSİZ KOMPLEKS (4 Tur • Tur Sonu ${(baseScheme && baseScheme.rest) || 90} sn Dinlenme)` : null;
+                    ex.customRest = (idx === total - 1) ? ((baseScheme && baseScheme.rest) || 90) : 0;
                 } else {
                     // KLASİK DÜZ SET (straight)
                     ex.blockType = 'straight';
@@ -2654,7 +2750,10 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             const weeklyUsedFinishers = (activeWeeklyCtx && activeWeeklyCtx.usedFinishers) ? activeWeeklyCtx.usedFinishers : new Set();
 
             // Saf Üst Vücut veya Saf Core seçiliyse Bacak+Omuz hibrit komplekslerini (Thruster, Landmine Squat to Press, Man Maker vb.) dışla
-            const hasLowerOrFullOrFuncSplit = selectedSplits.some(s =>
+            const hasComplexWish = Boolean(customWish && /birleşik|kompleks|akış|flow|chain|zincir|hibrit|kombinasyon/i.test(customWish));
+            const isFlowSplit = selectedSplits.includes('flow_complex') || selectedSplit === 'flow_complex';
+            const isComplexFlow = style === 'complex' || style === 'flow' || isFlowSplit || hasComplexWish;
+            const hasLowerOrFullOrFuncSplit = isComplexFlow || selectedSplits.some(s =>
                 s === 'full_body' || s === 'lower' || s === 'iso_legs' || s === 'functional'
             );
 
@@ -2676,7 +2775,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 if (mediaId && usedMediaIds.has(mediaId)) return false;
 
                 const anat = getExerciseAnatomy(ex);
-                if (!hasLowerOrFullOrFuncSplit || !allowLowerUpperComplexInSlot) {
+                if (!isComplexFlow && (!hasLowerOrFullOrFuncSplit || !allowLowerUpperComplexInSlot)) {
                     if (anat && (anat.isLowerUpperComplex || anat.isFullBodyMetcon)) return false;
                 }
                 return true;
@@ -2733,6 +2832,49 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 const allowComplex = Boolean(slotSpec.allowComplex);
                 const strictIso = Boolean(slotSpec.strictIso);
                 const preferredSubKeys = Array.isArray(slotSpec.subKeys) ? slotSpec.subKeys : (slotSpec.subKeys ? [slotSpec.subKeys] : []);
+
+                // EĞER BİRLEŞİK AKIŞ / KOMPLEKS MODU AKTİFSE (100% Multi-Joint Kompleks ve Akış):
+                if (isComplexFlow) {
+                    let complexPool = EXERCISES_DB.filter(ex =>
+                        (ex.isComplex || (ex.tags && (ex.tags.includes('complex') || ex.tags.includes('flow')))) &&
+                        isCandidateBiochemicallyCompatible(ex, true)
+                    );
+
+                    // 1. Kategori uyumu
+                    const catFiltered = complexPool.filter(ex => {
+                        const effCat = getEffectiveExerciseCategory(ex);
+                        return Array.isArray(cat) ? cat.includes(effCat) : (cat === 'any' || effCat === cat);
+                    });
+                    if (catFiltered.length > 0) complexPool = catFiltered;
+
+                    // 2. Alt kas / kinetik hat uyumu
+                    if (preferredSubKeys.length > 0) {
+                        const subMatches = complexPool.filter(ex => {
+                            const covered = getExerciseCoveredSubKeys(ex);
+                            return covered.some(k => preferredSubKeys.includes(k));
+                        });
+                        if (subMatches.length > 0) complexPool = subMatches;
+                    }
+
+                    // 3. Haftalık gün tazeliği
+                    const freshPool = preferWeeklyFreshExercises(complexPool);
+                    let chosen = pickRandom(freshPool);
+
+                    // Fallback: Seans içi tekilliği koruyan herhangi bir taze kompleksten seç
+                    if (!chosen) {
+                        const anyFreshComplex = preferWeeklyFreshExercises(
+                            EXERCISES_DB.filter(ex =>
+                                (ex.isComplex || (ex.tags && (ex.tags.includes('complex') || ex.tags.includes('flow')))) &&
+                                isCandidateBiochemicallyCompatible(ex, true)
+                            )
+                        );
+                        chosen = pickRandom(anyFreshComplex);
+                    }
+                    if (chosen) {
+                        recordChosenExercise(chosen);
+                    }
+                    return;
+                }
 
                 // KURAL 1: Aday havuzu KESİN OLARAK hem ID hem Biyomekanik Aile hem Medya açısından seansta benzersiz olmak zorundadır!
                 const basePool = filterExercises(cat, usedIds).filter(e => isCandidateBiochemicallyCompatible(e, allowComplex));
@@ -2849,6 +2991,11 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     finalPool = preferWeeklyFreshExercises(applyDoctrineModeFilter(basePool, filterMode));
                 }
 
+                if (isComplexFlow && Array.isArray(finalPool)) {
+                    const complexPreferred = finalPool.filter(e => e.isComplex || (e.tags && (e.tags.includes('complex') || e.tags.includes('flow'))));
+                    if (complexPreferred.length > 0) finalPool = complexPreferred;
+                }
+
                 let chosen = pickRandom(finalPool);
                 if (!chosen && !strictIso) {
                     const modeBase = preferWeeklyFreshExercises(applyDoctrineModeFilter(basePool, filterMode));
@@ -2884,6 +3031,17 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 const isPureBb = doctrineKey === 'bb_pure';
                 const isFuncDom = doctrineKey === 'func_hybrid' || doctrineKey === 'func_pure';
                 const isBalanced = doctrineKey === 'balanced_hybrid';
+
+                if (isComplexFlow) {
+                    // AKADEMİK BİRLEŞİK AKIŞ & KOMPLEKS MOTORU (Javorek, McGill & Myers Ekolü)
+                    return [
+                        { subKeys: ['shoulders_front', 'legs_quad'], cat: ['push', 'legs_quad', 'conditioning'], mode: 'any', allowComplex: true },
+                        { subKeys: ['legs_quad', 'legs_glutes'], cat: 'legs_quad', mode: 'any', allowComplex: true },
+                        { subKeys: ['legs_hamstrings', 'back_mid'], cat: ['pull', 'legs_hinge'], mode: 'any', allowComplex: true },
+                        { subKeys: ['back_lats', 'shoulders_rear', 'core_front'], cat: ['pull', 'core'], mode: 'any', allowComplex: true },
+                        { subKeys: ['legs_quad', 'legs_hamstrings'], cat: ['legs_quad', 'legs_hinge', 'conditioning'], mode: 'any', allowComplex: true }
+                    ];
+                }
 
                 if (splitKey === 'iso_chest') {
                     // İZOLE GÖĞÜS: Orta Göğüs + Üst Göğüs + Alt Göğüs & Fly açıları
@@ -3026,7 +3184,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 }
             }
 
-            const targetCount = duration >= 60 ? 8 : (duration >= 45 ? 6 : 4);
+            const targetCount = isComplexFlow ? (duration >= 25 ? 5 : 4) : (duration >= 60 ? 8 : (duration >= 45 ? 6 : 4));
 
             if (selectedSplits.length > 1) {
                 // ÇOKLU BÖLGE SEÇİMİ: Seçilen bölgelerin anatomik slot şablonlarından sırayla (Round-Robin) çek
@@ -7044,6 +7202,37 @@ DEĞİŞMEZ 5 AKADEMİK DENETİM FİLTRESİ:
             requestWakeLock();
         }
 
+        function loadCelikAkisiWorkout() {
+            const flowWorkout = {
+                id: 'celik_akisi_20dk',
+                title: '⚔️ 20 Dk Çelik Akışı (Dambıl Kompleksi)',
+                split: 'full_body',
+                splitName: 'Çelik Akışı (Flow Complex)',
+                style: 'complex',
+                goal: 'endurance',
+                duration: 20,
+                scheme: { sets: 4, reps: '6-8', rest: 90 },
+                warmups: [
+                    { name: "World's Greatest Stretch", dur: "60 sn", cue: "Kalça ve göğüs kafesi mobilitesi." },
+                    { name: "Dambıl Halo Isınması", dur: "60 sn", cue: "Hafif dambılla omuz kapsülünü aç." }
+                ],
+                exercises: [
+                    { id: 'db_swing_to_goblet_squat', name: 'Dambıl Swing to Goblet Squat (Hinge-Squat Akışı)', equipment: 'dumbbell', targetSets: 4, targetReps: '6 - 8', cue: 'Kalça itişiyle yükselen dambılı göğüste dikey yakalayıp derin çömelmeye bağlanın.', customRest: 0, blockType: 'complex', blockLabel: 'İstasyon 1', blockHeader: '⚔️ ÇELİK AKIŞI • KESİNTİSİZ KOMPLEKS (4 Tur • Tur Sonu 90 sn Dinlenme)' },
+                    { id: 'db_clean_squat_press', name: 'Dambıl Clean to Front Squat to Push Press', equipment: 'dumbbell', targetSets: 4, targetReps: '6', cue: 'Hang clean ile omuzlara al, derin ön squat yap ve baş üstüne kilitle.', customRest: 0, blockType: 'complex', blockLabel: 'İstasyon 2' },
+                    { id: 'db_seesaw_lunge', name: 'Dambıl Seesaw Lunge (Dinamik İleri-Geri Lunge)', equipment: 'dumbbell', targetSets: 4, targetReps: '6', cue: 'Öne lunge çöküşünden dönerken ayağı yere basmadan duraksız geriye lunge yapın.', customRest: 0, blockType: 'complex', blockLabel: 'İstasyon 3' },
+                    { id: 'db_rdl_to_high_pull', name: 'Dambıl RDL to High Pull (Arka Zincir & Üst Çekiş)', equipment: 'dumbbell', targetSets: 4, targetReps: '6 - 8', cue: 'RDL ile gerilen hamstringleri patlatırken dambılları göğse çekip dirsekleri yükseltin.', customRest: 0, blockType: 'complex', blockLabel: 'İstasyon 4' },
+                    { id: 'db_pullover_to_halo', name: 'Dambıl Pullover to Halo (Torasik & Omuz Akışı)', equipment: 'dumbbell', targetSets: 4, targetReps: '6', cue: 'Pullover esnemesinden doğrulurken baş çevresinde akıcı 360° halo çizin.', customRest: 90, blockType: 'complex', blockLabel: 'İstasyon 5' }
+                ],
+                finisher: { name: "Nefes Toparlanması", desc: "Burundan derin nefes, nabzı düşür." },
+                createdAt: Date.now()
+            };
+            currentGeneratedWorkout = flowWorkout;
+            startActiveWorkoutFromGenerated();
+            switchTab('activeWorkoutTab');
+            if (typeof showToast === 'function') showToast("⚡ 20 Dk Çelik Akışı (Dambıl Kompleksi) Başlatıldı!");
+        }
+        window.loadCelikAkisiWorkout = loadCelikAkisiWorkout;
+
         function getWorkoutElapsedSeconds() {
             if (!activeWorkoutStartTime) return 0;
             if (activeWorkoutIsPaused && activeWorkoutPausedAt) {
@@ -7840,13 +8029,17 @@ DEĞİŞMEZ 5 AKADEMİK DENETİM FİLTRESİ:
             const curExObj = activeWorkoutSession && Array.isArray(activeWorkoutSession.exercises)
                 ? activeWorkoutSession.exercises.find(e => e.id === exId)
                 : null;
-            const restSecs = (curExObj && curExObj.customRest)
+            const restSecs = (curExObj && curExObj.customRest !== undefined && curExObj.customRest !== null)
                 ? curExObj.customRest
                 : (activeWorkoutSession && activeWorkoutSession.scheme ? (activeWorkoutSession.scheme.rest || 45) : 45);
-            resetTimer(restSecs);
-            startTimer();
-            playAlertSound();
-            if (navigator.vibrate) navigator.vibrate([120, 80, 120]);
+            if (restSecs > 0) {
+                resetTimer(restSecs);
+                startTimer();
+                playAlertSound();
+                if (navigator.vibrate) navigator.vibrate([120, 80, 120]);
+            } else {
+                resetTimer(0);
+            }
 
             // Ekran kilidini canlı tut
             requestWakeLock();
@@ -17169,14 +17362,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 if (isDone) {
                     cellBg = '#F0FDF4';
                     cellBorder = '1px solid #86EFAC';
-                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#B6F059; background:#DCFCE7; border:1px solid #86EFAC; border-radius:6px; padding:2px 7px;">${data.earnedSets.toFixed(1)} Set</span>`;
+                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#15803D; background:#DCFCE7; border:1px solid #86EFAC; border-radius:6px; padding:2px 7px;">${data.earnedSets.toFixed(1)} Set</span>`;
                     const exList = Array.from(data.doneExs).map(escapeHTML).join(', ');
-                    const planList = data.plannedExs.size > 0 ? `<div style="font-size:11px; color:#E5B85B; margin-top:3px; font-weight:700;">+ ${Array.from(data.plannedExs).map(escapeHTML).join(', ')} (Planda)</div>` : '';
+                    const planList = data.plannedExs.size > 0 ? `<div style="font-size:11px; color:#B45309; margin-top:3px; font-weight:700;">+ ${Array.from(data.plannedExs).map(escapeHTML).join(', ')} (Planda)</div>` : '';
                     contentHTML = `<div style="font-size:11.5px; color:#1E293B; margin-top:5px; line-height:1.35;"><strong>${exList}</strong>${planList}</div>`;
                 } else if (isPlanned) {
                     cellBg = '#FFFBEB';
                     cellBorder = '1px solid #FCD34D';
-                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#E5B85B; background:#FEF3C7; border:1px solid #FCD34D; border-radius:6px; padding:2px 7px;">Planda (${data.plannedCount} Hrk)</span>`;
+                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#B45309; background:#FEF3C7; border:1px solid #FCD34D; border-radius:6px; padding:2px 7px;">Planda (${data.plannedCount} Hrk)</span>`;
                     const planList = Array.from(data.plannedExs).map(escapeHTML).join(', ');
                     contentHTML = `<div style="font-size:11.5px; color:#92400E; margin-top:5px; line-height:1.35; font-weight:600;">${planList}</div>`;
                 } else {
@@ -17185,7 +17378,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#B91C1C; background:#FEE2E2; border:1px solid #FCA5A5; border-radius:6px; padding:2px 7px;">0 Set (Boşta)</span>`;
                     contentHTML = `
                         <div style="margin-top:6px;">
-                            <button class="btn btn-outline" style="font-size:11px; padding:6px 8px; border-radius:6px; color:#E5B85B; border-color:#B6F059; width:100%; text-align:center; font-weight:800; background:#121821;" onclick="openQuickAddToDayModal('${col.recId}')" title="Bu başı çalıştırmak için ${col.recName} ekle">
+                            <button class="btn btn-outline" style="font-size:11px; padding:6px 8px; border-radius:6px; color:#DC2626; border-color:#FECACA; width:100%; text-align:center; font-weight:800; background:#FFFFFF;" onclick="openQuickAddToDayModal('${col.recId}')" title="Bu başı çalıştırmak için ${col.recName} ekle">
                                 + ${escapeHTML(col.recName)} Ekle
                             </button>
                         </div>
@@ -17195,7 +17388,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 return `
                     <div style="background:${cellBg}; border:${cellBorder}; border-radius:8px; padding:10px; display:flex; flex-direction:column; justify-content:space-between;">
                         <div>
-                            <div style="font-size:11.5px; font-weight:800; color:#F3F6FA; margin-bottom:5px; letter-spacing:0.2px;">${escapeHTML(col.label)}</div>
+                            <div style="font-size:11.5px; font-weight:800; color:#0F172A; margin-bottom:5px; letter-spacing:0.2px;">${escapeHTML(col.label)}</div>
                             <div>${statusBadge}</div>
                         </div>
                         ${contentHTML}
@@ -17204,12 +17397,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }).join('');
 
             return `
-                <div style="margin-top:12px; border:1px solid #222C3A; border-radius:12px; overflow:hidden; background:#0E131B;">
-                    <div style="background:#18202C; border-bottom:1px solid #222C3A; padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:11.5px; font-weight:900; letter-spacing:0.5px; color:#F3F6FA; text-transform:uppercase;">
+                <div style="margin-top:12px; border:1.5px solid #E2E8F0; border-radius:14px; overflow:hidden; background:#FFFFFF;">
+                    <div style="background:#F1F5F9; border-bottom:1.5px solid #E2E8F0; padding:10px 14px; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:11.5px; font-weight:900; letter-spacing:0.5px; color:#0F172A; text-transform:uppercase;">
                             ${escapeHTML(def.title)} — ANATOMİK ALT BÖLGE DAĞILIMI
                         </span>
-                        <span style="font-size:11px; color:var(--text-secondary); font-weight:600;">
+                        <span style="font-size:11px; color:#64748B; font-weight:700;">
                             Hangi Baş Çalıştı?
                         </span>
                     </div>
@@ -18419,7 +18612,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=229')
+                navigator.serviceWorker.register('./sw.js?v=231')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();

@@ -25,8 +25,8 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css?v=228">
     <style>
-        /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH (CANVA OBSIDIAN & LIME V201) */
-        html, body { background-color: #0B0F17; color: #F3F6FA; color-scheme: dark; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
+        /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH (CANVA MODERN ATHLETIC LIGHT V229) */
+        html, body { background-color: #F8FAFC; color: #0F172A; color-scheme: light; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
         button, input, select, textarea { font-family: inherit; }
     </style>
 </head>
@@ -35,7 +35,7 @@
     <!-- ==================== LOGIN SCREEN ==================== -->
     <div id="loginScreen">
         <div class="login-card">
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v229</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v231</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -72,7 +72,7 @@
                     <span class="canva-brand-monogram" aria-hidden="true" translate="no">Ç</span>
                     <div class="canva-brand-stack">
                         <span class="modern-brand-title" translate="no">Çelik Kodu</span>
-                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v229</span>
+                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v231</span>
                     </div>
                 </div>
                 <div class="modern-bar-actions">
@@ -138,6 +138,24 @@
             <!-- ==================== TAB 1: WORKOUT GENERATOR ==================== -->
             <div id="generatorTab" class="tab-content active">
 
+                <!-- ⚡ 20 DK ÇELİK AKIŞI HIZLI TEST KARTI -->
+                <div class="card" style="margin-bottom:16px; border:1.5px solid #FCD34D; background:#FFFFFF; padding:14px 18px; border-radius:18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; box-shadow:0 4px 16px rgba(245,158,11,0.08);">
+                    <div>
+                        <div style="font-size:11px; font-weight:900; color:#B45309; text-transform:uppercase; display:flex; align-items:center; gap:6px; letter-spacing:0.04em;">
+                            <span>⚡ YENİ KONSEPT</span> • KESİNTİSİZ AKIŞ (FLOW)
+                        </div>
+                        <div style="font-size:14px; font-weight:800; color:#0F172A; margin-top:3px;">
+                            ⚔️ 20 Dk Çelik Akışı (Dambıl Kompleksi)
+                        </div>
+                        <div style="font-size:12px; color:#64748B; margin-top:2px;">
+                            Ağırlığı bırakmadan 4 Tur (Swing ➔ Clean &amp; Squat ➔ Push Press ➔ Lunge ➔ Halo)
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-gold" style="font-weight:900; padding:10px 18px; font-size:12px; cursor:pointer;" onclick="loadCelikAkisiWorkout()">
+                        ▶️ ŞİMDİ DENE &amp; BAŞLAT
+                    </button>
+                </div>
+
                 <!-- UNIFIED AI PROGRAM ARCHITECT CARD (CANVA DESIGN DAHYNdwI6Eo) -->
                 <div class="ai-hybrid-hero-banner ai-unified-architect-card" id="aiHybridHeroBanner">
                     <div class="ai-prep-top-row">
@@ -158,215 +176,231 @@
                     <!-- COLLAPSIBLE INFO DRAWER -->
                     <div id="aiDoctrineHeroQuickTeaser" class="ai-hero-info-drawer" style="display:none;"></div>
 
-                    <div class="ai-unified-divider"></div>
-
                     <!-- STEP 1: PROGRAM KAPSAMI & BÖLÜNME (HAFTALIK VEYA TEK GÜN) -->
-                    <div class="gen-mobile-picker-bar" id="mobileSplitPickerBar" onclick="toggleGenSection('splitSection')">
-                        <div class="picker-label-wrap">
+                    <div class="gen-step-panel">
+                        <div class="gen-mobile-picker-bar" id="mobileSplitPickerBar" onclick="toggleGenSection('splitSection')">
+                            <div class="picker-label-wrap">
+                                <span class="gen-step-badge">1</span>
+                                <span class="picker-step-title">Kapsam &amp; Bölünme:</span>
+                                <span class="picker-selected-val" id="selectedSplitLabel">Haftalık • AI Otomatik Teşhis</span>
+                            </div>
+                            <span class="picker-arrow" id="splitPickerArrow">▼</span>
+                        </div>
+                        <div class="gen-step-title desktop-only-title">
                             <span class="gen-step-badge">1</span>
-                            <span class="picker-step-title">Kapsam &amp; Bölünme:</span>
-                            <span class="picker-selected-val" id="selectedSplitLabel">Haftalık • AI Otomatik Teşhis</span>
+                            <span>PROGRAM KAPSAMI &amp; BÖLÜNME</span>
                         </div>
-                        <span class="picker-arrow" id="splitPickerArrow">▼</span>
+                        <div class="gen-collapsible-section" id="splitSection">
+                            <!-- Kapsam Seçici (Haftalık Plan vs Tek Gün) -->
+                            <div class="ai-scope-toggle-bar" role="tablist" aria-label="Program Kapsamı">
+                                <button type="button" class="ai-scope-pill active" id="aiScopeBtnWeekly" onclick="setAiGeneratorScope('weekly')">
+                                    <svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1.5v2.5M11 1.5v2.5M2 6.5h12"/><rect x="4.5" y="8.8" width="1.5" height="1.5" rx="0.3"/><rect x="7.2" y="8.8" width="1.5" height="1.5" rx="0.3"/><rect x="10" y="8.8" width="1.5" height="1.5" rx="0.3"/></svg> Haftalık Plan
+                                </button>
+                                <button type="button" class="ai-scope-pill" id="aiScopeBtnSingle" onclick="setAiGeneratorScope('single')">
+                                    <svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 1.5L3 9h4.5L6.8 14.5L13 7H8.5L9 1.5Z"/></svg> Tek Gün
+                                </button>
+                            </div>
+
+                            <!-- 1A: Haftalık Şablon Seçici Grid (Varsayılan Açık) -->
+                            <div class="split-grid ai-weekly-split-grid" id="aiWeeklyTemplateGrid">
+                                <div class="split-card selected" data-wk-tpl="ai_auto" onclick="selectAiWeeklyTemplateCard('ai_auto')">
+                                    <span class="split-radio" aria-hidden="true"></span>
+                                    <div class="split-card-content">
+                                        <span class="split-name"><svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M8 1.5L9.6 6.4L14.5 8L9.6 9.6L8 14.5L6.4 9.6L1.5 8L6.4 6.4L8 1.5Z"/><path d="M13 2v2M12 3h2M3 12v2M2 13h2"/></svg> AI Otomatik Teşhis (Önerilen)</span>
+                                        <span class="split-sub-desc">Eksik kaslara göre en uygun 3 günlük kurgu</span>
+                                    </div>
+                                    <button type="button" class="split-info-btn" onclick=" toggleSplitMusclePopover(event, 'ai_auto')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
+                                </div>
+                                <div class="split-card" data-wk-tpl="upper_lower_full" onclick="selectAiWeeklyTemplateCard('upper_lower_full')">
+                                    <span class="split-radio" aria-hidden="true"></span>
+                                    <div class="split-card-content">
+                                        <span class="split-name">Üst • Alt • Tüm Vücut (3 Gün)</span>
+                                        <span class="split-sub-desc">Pazartesi • Çarşamba • Cuma dengeli hibrit</span>
+                                    </div>
+                                    <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'upper_lower_full')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
+                                </div>
+                                <div class="split-card" data-wk-tpl="ppl_3day" onclick="selectAiWeeklyTemplateCard('ppl_3day')">
+                                    <span class="split-radio" aria-hidden="true"></span>
+                                    <div class="split-card-content">
+                                        <span class="split-name">İtiş • Çekiş • Bacak — PPL (3 Gün)</span>
+                                        <span class="split-sub-desc">Bölgesel kas odaklanması (Push / Pull / Legs)</span>
+                                    </div>
+                                    <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'ppl_3day')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
+                                </div>
+                                <div class="split-card" data-wk-tpl="fullbody_3day" onclick="selectAiWeeklyTemplateCard('fullbody_3day')">
+                                    <span class="split-radio" aria-hidden="true"></span>
+                                    <div class="split-card-content">
+                                        <span class="split-name">3 Gün Tüm Vücut (A / B / C)</span>
+                                        <span class="split-sub-desc">Her seansta tüm vücut yüksek frekans</span>
+                                    </div>
+                                    <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'fullbody_3day')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
+                                </div>
+                                <div class="split-card" data-wk-tpl="flow_complex_3day" onclick="selectAiWeeklyTemplateCard('flow_complex_3day')">
+                                    <span class="split-radio" aria-hidden="true"></span>
+                                    <div class="split-card-content">
+                                        <span class="split-name">⚔️ 3 Gün Çelik Akışı (Kompleks &amp; Flow)</span>
+                                        <span class="split-sub-desc">Pzt • Çar • Cum multi-joint birleşik akış serisi</span>
+                                    </div>
+                                    <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'flow_complex_3day')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
+                                </div>
+                                <div class="split-card" data-wk-tpl="upper_lower_4day" onclick="selectAiWeeklyTemplateCard('upper_lower_4day')">
+                                    <span class="split-radio" aria-hidden="true"></span>
+                                    <div class="split-card-content">
+                                        <span class="split-name">4 Gün Üst / Alt Vücut</span>
+                                        <span class="split-sub-desc">Pzt • Sal • Per • Cum yüksek hacimli seri</span>
+                                    </div>
+                                    <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'upper_lower_4day')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
+                                </div>
+                            </div>
+
+                            <!-- 1B: Tek Günlük Bölge & İzole Kas Seçici (Tek Gün seçildiğinde açılır) -->
+                            <div class="split-grid is-hidden-grid" id="splitGrid" style="display:none;">
+                                <div class="split-card selected" data-split-key="full_body" onclick="toggleSplit('full_body')">
+                                    <span class="split-radio" aria-hidden="true"></span>
+                                    <div class="split-card-content">
+                                        <span class="split-name">Tüm Vücut</span>
+                                    </div>
+                                    <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'full_body')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
+                                </div>
+                                <div class="split-card" data-split-key="upper_push" onclick="toggleSplit('upper_push')">
+                                    <span class="split-radio" aria-hidden="true"></span>
+                                    <div class="split-card-content">
+                                        <span class="split-name">Üst İtiş</span>
+                                    </div>
+                                    <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'upper_push')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
+                                </div>
+                                <div class="split-card" data-split-key="upper_pull" onclick="toggleSplit('upper_pull')">
+                                    <span class="split-radio" aria-hidden="true"></span>
+                                    <div class="split-card-content">
+                                        <span class="split-name">Üst Çekiş</span>
+                                    </div>
+                                    <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'upper_pull')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
+                                </div>
+                                <div class="split-card" data-split-key="lower" onclick="toggleSplit('lower')">
+                                    <span class="split-radio" aria-hidden="true"></span>
+                                    <div class="split-card-content">
+                                        <span class="split-name">Alt Vücut</span>
+                                    </div>
+                                    <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'lower')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
+                                </div>
+                                <div class="split-card" data-split-key="flow_complex" onclick="toggleSplit('flow_complex')">
+                                    <span class="split-radio" aria-hidden="true"></span>
+                                    <div class="split-card-content">
+                                        <span class="split-name">⚔️ Çelik Akışı (Kompleks)</span>
+                                    </div>
+                                    <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'flow_complex')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
+                                </div>
+
+                                <!-- İzole Kas Seçimi (Masaüstünde 6'lı tek satır, Mobilde 3x2 eşit grid) -->
+                                <div class="iso-muscle-section" id="isoMuscleSection">
+                                    <div class="iso-muscle-grid" id="isoMuscleGrid">
+                                        <button type="button" class="iso-muscle-chip" data-iso-key="iso_chest" onclick="toggleIsolatedMuscle('iso_chest')">
+                                            <span class="iso-check">✓</span><span>Göğüs</span>
+                                        </button>
+                                        <button type="button" class="iso-muscle-chip" data-iso-key="iso_back" onclick="toggleIsolatedMuscle('iso_back')">
+                                            <span class="iso-check">✓</span><span>Sırt</span>
+                                        </button>
+                                        <button type="button" class="iso-muscle-chip" data-iso-key="iso_shoulders" onclick="toggleIsolatedMuscle('iso_shoulders')">
+                                            <span class="iso-check">✓</span><span>Omuz</span>
+                                        </button>
+                                        <button type="button" class="iso-muscle-chip" data-iso-key="iso_arms" onclick="toggleIsolatedMuscle('iso_arms')">
+                                            <span class="iso-check">✓</span><span>Kol</span>
+                                        </button>
+                                        <button type="button" class="iso-muscle-chip" data-iso-key="iso_legs" onclick="toggleIsolatedMuscle('iso_legs')">
+                                            <span class="iso-check">✓</span><span>Bacak</span>
+                                        </button>
+                                        <button type="button" class="iso-muscle-chip" data-iso-key="iso_core" onclick="toggleIsolatedMuscle('iso_core')">
+                                            <span class="iso-check">✓</span><span>Karın</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="gen-step-title desktop-only-title">
-                        <span class="gen-step-badge">1</span>
-                        <span>PROGRAM KAPSAMI &amp; BÖLÜNME</span>
-                    </div>
-                    <div class="gen-collapsible-section" id="splitSection">
-                        <!-- Kapsam Seçici (Haftalık Plan vs Tek Gün) -->
-                        <div class="ai-scope-toggle-bar" role="tablist" aria-label="Program Kapsamı">
-                            <button type="button" class="ai-scope-pill active" id="aiScopeBtnWeekly" onclick="setAiGeneratorScope('weekly')">
-                                <svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1.5v2.5M11 1.5v2.5M2 6.5h12"/><rect x="4.5" y="8.8" width="1.5" height="1.5" rx="0.3"/><rect x="7.2" y="8.8" width="1.5" height="1.5" rx="0.3"/><rect x="10" y="8.8" width="1.5" height="1.5" rx="0.3"/></svg> Haftalık Plan
-                            </button>
-                            <button type="button" class="ai-scope-pill" id="aiScopeBtnSingle" onclick="setAiGeneratorScope('single')">
-                                <svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 1.5L3 9h4.5L6.8 14.5L13 7H8.5L9 1.5Z"/></svg> Tek Gün
-                            </button>
-                        </div>
-
-                        <!-- 1A: Haftalık Şablon Seçici Grid (Varsayılan Açık) -->
-                        <div class="split-grid ai-weekly-split-grid" id="aiWeeklyTemplateGrid">
-                            <div class="split-card selected" data-wk-tpl="ai_auto" onclick="selectAiWeeklyTemplateCard('ai_auto')">
-                                <span class="split-radio" aria-hidden="true"></span>
-                                <div class="split-card-content">
-                                    <span class="split-name"><svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M8 1.5L9.6 6.4L14.5 8L9.6 9.6L8 14.5L6.4 9.6L1.5 8L6.4 6.4L8 1.5Z"/><path d="M13 2v2M12 3h2M3 12v2M2 13h2"/></svg> AI Otomatik Teşhis (Önerilen)</span>
-                                    <span class="split-sub-desc">Eksik kaslara göre en uygun 3 günlük kurgu</span>
-                                </div>
-                                <button type="button" class="split-info-btn" onclick=" toggleSplitMusclePopover(event, 'ai_auto')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
-                            </div>
-                            <div class="split-card" data-wk-tpl="upper_lower_full" onclick="selectAiWeeklyTemplateCard('upper_lower_full')">
-                                <span class="split-radio" aria-hidden="true"></span>
-                                <div class="split-card-content">
-                                    <span class="split-name">Üst • Alt • Tüm Vücut (3 Gün)</span>
-                                    <span class="split-sub-desc">Pazartesi • Çarşamba • Cuma dengeli hibrit</span>
-                                </div>
-                                <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'upper_lower_full')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
-                            </div>
-                            <div class="split-card" data-wk-tpl="ppl_3day" onclick="selectAiWeeklyTemplateCard('ppl_3day')">
-                                <span class="split-radio" aria-hidden="true"></span>
-                                <div class="split-card-content">
-                                    <span class="split-name">İtiş • Çekiş • Bacak — PPL (3 Gün)</span>
-                                    <span class="split-sub-desc">Bölgesel kas odaklanması (Push / Pull / Legs)</span>
-                                </div>
-                                <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'ppl_3day')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
-                            </div>
-                            <div class="split-card" data-wk-tpl="fullbody_3day" onclick="selectAiWeeklyTemplateCard('fullbody_3day')">
-                                <span class="split-radio" aria-hidden="true"></span>
-                                <div class="split-card-content">
-                                    <span class="split-name">3 Gün Tüm Vücut (A / B / C)</span>
-                                    <span class="split-sub-desc">Her seansta tüm vücut yüksek frekans</span>
-                                </div>
-                                <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'fullbody_3day')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
-                            </div>
-                            <div class="split-card" data-wk-tpl="upper_lower_4day" onclick="selectAiWeeklyTemplateCard('upper_lower_4day')">
-                                <span class="split-radio" aria-hidden="true"></span>
-                                <div class="split-card-content">
-                                    <span class="split-name">4 Gün Üst / Alt Vücut</span>
-                                    <span class="split-sub-desc">Pzt • Sal • Per • Cum yüksek hacimli seri</span>
-                                </div>
-                                <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'upper_lower_4day')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
-                            </div>
-                        </div>
-
-                        <!-- 1B: Tek Günlük Bölge & İzole Kas Seçici (Tek Gün seçildiğinde açılır) -->
-                        <div class="split-grid is-hidden-grid" id="splitGrid" style="display:none;">
-                            <div class="split-card selected" data-split-key="full_body" onclick="toggleSplit('full_body')">
-                                <span class="split-radio" aria-hidden="true"></span>
-                                <div class="split-card-content">
-                                    <span class="split-name">Tüm Vücut</span>
-                                </div>
-                                <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'full_body')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
-                            </div>
-                            <div class="split-card" data-split-key="upper_push" onclick="toggleSplit('upper_push')">
-                                <span class="split-radio" aria-hidden="true"></span>
-                                <div class="split-card-content">
-                                    <span class="split-name">Üst İtiş</span>
-                                </div>
-                                <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'upper_push')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
-                            </div>
-                            <div class="split-card" data-split-key="upper_pull" onclick="toggleSplit('upper_pull')">
-                                <span class="split-radio" aria-hidden="true"></span>
-                                <div class="split-card-content">
-                                    <span class="split-name">Üst Çekiş</span>
-                                </div>
-                                <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'upper_pull')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
-                            </div>
-                            <div class="split-card" data-split-key="lower" onclick="toggleSplit('lower')">
-                                <span class="split-radio" aria-hidden="true"></span>
-                                <div class="split-card-content">
-                                    <span class="split-name">Alt Vücut</span>
-                                </div>
-                                <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'lower')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
-                            </div>
-
-                            <!-- İzole Kas Seçimi (Masaüstünde 6'lı tek satır, Mobilde 3x2 eşit grid) -->
-                            <div class="iso-muscle-section" id="isoMuscleSection">
-                                <div class="iso-muscle-grid" id="isoMuscleGrid">
-                                    <button type="button" class="iso-muscle-chip" data-iso-key="iso_chest" onclick="toggleIsolatedMuscle('iso_chest')">
-                                        <span class="iso-check">✓</span><span>Göğüs</span>
-                                    </button>
-                                    <button type="button" class="iso-muscle-chip" data-iso-key="iso_back" onclick="toggleIsolatedMuscle('iso_back')">
-                                        <span class="iso-check">✓</span><span>Sırt</span>
-                                    </button>
-                                    <button type="button" class="iso-muscle-chip" data-iso-key="iso_shoulders" onclick="toggleIsolatedMuscle('iso_shoulders')">
-                                        <span class="iso-check">✓</span><span>Omuz</span>
-                                    </button>
-                                    <button type="button" class="iso-muscle-chip" data-iso-key="iso_arms" onclick="toggleIsolatedMuscle('iso_arms')">
-                                        <span class="iso-check">✓</span><span>Kol</span>
-                                    </button>
-                                    <button type="button" class="iso-muscle-chip" data-iso-key="iso_legs" onclick="toggleIsolatedMuscle('iso_legs')">
-                                        <span class="iso-check">✓</span><span>Bacak</span>
-                                    </button>
-                                    <button type="button" class="iso-muscle-chip" data-iso-key="iso_core" onclick="toggleIsolatedMuscle('iso_core')">
-                                        <span class="iso-check">✓</span><span>Karın</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="ai-unified-divider"></div>
 
                     <!-- STEP 2: AVAILABLE EQUIPMENT -->
-                    <div class="gen-mobile-picker-bar" id="mobileEquipPickerBar" onclick="toggleGenSection('equipSection')">
-                        <div class="picker-label-wrap">
+                    <div class="gen-step-panel">
+                        <div class="gen-mobile-picker-bar" id="mobileEquipPickerBar" onclick="toggleGenSection('equipSection')">
+                            <div class="picker-label-wrap">
+                                <span class="gen-step-badge">2</span>
+                                <span class="picker-step-title">Ekipmanlar:</span>
+                                <span class="picker-selected-val" id="selectedEquipLabel">Dambıl, KB, Vücut (3 Seçili)</span>
+                            </div>
+                            <span class="picker-arrow" id="equipPickerArrow">▼</span>
+                        </div>
+                        <div class="gen-step-title desktop-only-title">
                             <span class="gen-step-badge">2</span>
-                            <span class="picker-step-title">Ekipmanlar:</span>
-                            <span class="picker-selected-val" id="selectedEquipLabel">Dambıl, KB, Vücut (3 Seçili)</span>
+                            <span>EKİPMAN SEÇİMİ</span>
                         </div>
-                        <span class="picker-arrow" id="equipPickerArrow">▼</span>
-                    </div>
-                    <div class="gen-step-title desktop-only-title">
-                        <span class="gen-step-badge">2</span>
-                        <span>EKİPMAN SEÇİMİ</span>
-                    </div>
-                    <div class="gen-collapsible-section" id="equipSection">
-                        <div class="equip-chips-wrap" id="equipChipsWrap">
-                            <div class="equip-chip selected" onclick="toggleEquip('dumbbell')">
-                                <span class="equip-check-icon">✓</span><span>Dambıl</span>
-                            </div>
-                            <div class="equip-chip selected" onclick="toggleEquip('kettlebell')">
-                                <span class="equip-check-icon">✓</span><span>Kettlebell</span>
-                            </div>
-                            <div class="equip-chip" onclick="toggleEquip('barbell')">
-                                <span class="equip-check-icon">✓</span><span>Bar &amp; Plaka</span>
-                            </div>
-                            <div class="equip-chip" onclick="toggleEquip('machine')">
-                                <span class="equip-check-icon">✓</span><span>Makine</span>
-                            </div>
-                            <div class="equip-chip selected" onclick="toggleEquip('bodyweight')">
-                                <span class="equip-check-icon">✓</span><span>Vücut Ağırlığı</span>
+                        <div class="gen-collapsible-section" id="equipSection">
+                            <div class="equip-chips-wrap" id="equipChipsWrap">
+                                <div class="equip-chip selected" onclick="toggleEquip('dumbbell')">
+                                    <span class="equip-check-icon">✓</span><span>Dambıl</span>
+                                </div>
+                                <div class="equip-chip selected" onclick="toggleEquip('kettlebell')">
+                                    <span class="equip-check-icon">✓</span><span>Kettlebell</span>
+                                </div>
+                                <div class="equip-chip" onclick="toggleEquip('barbell')">
+                                    <span class="equip-check-icon">✓</span><span>Bar &amp; Plaka</span>
+                                </div>
+                                <div class="equip-chip" onclick="toggleEquip('machine')">
+                                    <span class="equip-check-icon">✓</span><span>Makine</span>
+                                </div>
+                                <div class="equip-chip selected" onclick="toggleEquip('bodyweight')">
+                                    <span class="equip-check-icon">✓</span><span>Vücut Ağırlığı</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    <div class="ai-unified-divider"></div>
 
                     <!-- STEP 3: WORKOUT PARAMETERS & AI NOTE -->
-                    <div class="gen-mobile-picker-bar" id="mobileParamPickerBar" onclick="toggleGenSection('paramSection')">
-                        <div class="picker-label-wrap">
+                    <div class="gen-step-panel">
+                        <div class="gen-mobile-picker-bar" id="mobileParamPickerBar" onclick="toggleGenSection('paramSection')">
+                            <div class="picker-label-wrap">
+                                <span class="gen-step-badge">3</span>
+                                <span class="picker-step-title">Yapı &amp; Süre:</span>
+                                <span class="picker-selected-val" id="selectedParamLabel">Süperset • Kas • 45 Dk</span>
+                            </div>
+                            <span class="picker-arrow" id="paramPickerArrow">▼</span>
+                        </div>
+                        <div class="gen-step-title desktop-only-title">
                             <span class="gen-step-badge">3</span>
-                            <span class="picker-step-title">Yapı &amp; Süre:</span>
-                            <span class="picker-selected-val" id="selectedParamLabel">Süperset • Kas • 45 Dk</span>
+                            <span>MODEL, HEDEF, SÜRE &amp; AI NOTU</span>
                         </div>
-                        <span class="picker-arrow" id="paramPickerArrow">▼</span>
-                    </div>
-                    <div class="gen-step-title desktop-only-title">
-                        <span class="gen-step-badge">3</span>
-                        <span>MODEL, HEDEF, SÜRE &amp; AI NOTU</span>
-                    </div>
-                    <div class="gen-collapsible-section" id="paramSection">
-                        <div class="param-grid">
-                            <div class="param-group">
-                                <label for="paramStyle">MODEL &amp; SÜPERSET DÜZEYİ</label>
-                                <select id="paramStyle" class="param-select" onchange="updateSelectedParamLabel()">
-                                    <option value="superset" selected>Bodybuilding &amp; Fonksiyonel (Orta Süperset)</option>
-                                    <option value="superset_light">Az Süperset (Düz + Son Blok Süperset)</option>
-                                    <option value="superset_intense">Yoğun Süperset (Tam İkili Blok)</option>
-                                    <option value="straight">Klasik Düz Set (Süpersetsiz)</option>
-                                    <option value="emom">EMOM / Kondisyon Döngüsü</option>
-                                </select>
+                        <div class="gen-collapsible-section" id="paramSection">
+                            <div class="param-grid">
+                                <div class="param-group">
+                                    <label for="paramStyle">MODEL &amp; SÜPERSET DÜZEYİ</label>
+                                    <select id="paramStyle" class="param-select" onchange="updateSelectedParamLabel()">
+                                        <option value="superset" selected>Bodybuilding &amp; Fonksiyonel (Orta Süperset)</option>
+                                        <option value="complex">⚔️ Birleşik Akış / Kompleks (20-25 Dk Flow)</option>
+                                        <option value="superset_light">Az Süperset (Düz + Son Blok Süperset)</option>
+                                        <option value="superset_intense">Yoğun Süperset (Tam İkili Blok)</option>
+                                        <option value="straight">Klasik Düz Set (Süpersetsiz)</option>
+                                        <option value="emom">EMOM / Kondisyon Döngüsü</option>
+                                    </select>
+                                </div>
+                                <div class="param-group">
+                                    <label for="paramGoal">HEDEF</label>
+                                    <select id="paramGoal" class="param-select" onchange="updateSelectedParamLabel()">
+                                        <option value="hypertrophy" selected>Kas &amp; Hacim</option>
+                                        <option value="strength">Kuvvet &amp; Güç</option>
+                                        <option value="endurance">Kondisyon &amp; Dayanıklılık</option>
+                                    </select>
+                                </div>
+                                <div class="param-group">
+                                    <label for="paramDuration">SÜRE</label>
+                                    <select id="paramDuration" class="param-select" onchange="updateSelectedParamLabel()">
+                                        <option value="30">30 dk (Hızlı seans)</option>
+                                        <option value="45" selected>45 dk (Tam seans)</option>
+                                        <option value="60">60 dk (Uzun seans)</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="param-group">
-                                <label for="paramGoal">HEDEF</label>
-                                <select id="paramGoal" class="param-select" onchange="updateSelectedParamLabel()">
-                                    <option value="hypertrophy" selected>Kas &amp; Hacim</option>
-                                    <option value="strength">Kuvvet &amp; Güç</option>
-                                    <option value="endurance">Kondisyon &amp; Dayanıklılık</option>
-                                </select>
+                            <div class="ai-unified-wish-row">
+                                <label for="aiUnifiedWishInput" class="ai-unified-wish-label"><svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2.5 3.5A1.5 1.5 0 0 1 4 2h8a1.5 1.5 0 0 1 1.5 1.5v6A1.5 1.5 0 0 1 12 11H6.5L3.8 13.5V11H4a1.5 1.5 0 0 1-1.5-1.5v-6Z"/><path d="M5.5 5.5h5M5.5 8h3.5"/></svg> AI ÖZEL NOTU / ODAK &amp; HASSASİYET (İSTEĞE BAĞLI)</label>
+                                <input type="text" id="aiUnifiedWishInput" class="ai-unified-wish-input" placeholder="Örn: Omuz ve sırt odaklı olsun, diz yormasın...">
                             </div>
-                            <div class="param-group">
-                                <label for="paramDuration">SÜRE</label>
-                                <select id="paramDuration" class="param-select" onchange="updateSelectedParamLabel()">
-                                    <option value="30">30 dk (Hızlı seans)</option>
-                                    <option value="45" selected>45 dk (Tam seans)</option>
-                                    <option value="60">60 dk (Uzun seans)</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="ai-unified-wish-row">
-                            <label for="aiUnifiedWishInput" class="ai-unified-wish-label"><svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2.5 3.5A1.5 1.5 0 0 1 4 2h8a1.5 1.5 0 0 1 1.5 1.5v6A1.5 1.5 0 0 1 12 11H6.5L3.8 13.5V11H4a1.5 1.5 0 0 1-1.5-1.5v-6Z"/><path d="M5.5 5.5h5M5.5 8h3.5"/></svg> AI ÖZEL NOTU / ODAK &amp; HASSASİYET (İSTEĞE BAĞLI)</label>
-                            <input type="text" id="aiUnifiedWishInput" class="ai-unified-wish-input" placeholder="Örn: Omuz ve sırt odaklı olsun, diz yormasın...">
                         </div>
                     </div>
 
@@ -377,6 +411,11 @@
                         </button>
                     </div>
                     <div class="ai-prep-hint" id="aiQuickPreviewHint">Onaylamadan takvime eklenmez</div>
+                    <div style="margin-top:12px; padding-top:12px; border-top:1px dashed rgba(245,158,11,0.3); text-align:center;">
+                        <button type="button" class="btn btn-outline" style="width:100%; padding:10px; font-size:12.5px; font-weight:800; border-color:var(--gold); color:var(--gold); background:rgba(245,158,11,0.08); border-radius:10px;" onclick="loadCelikAkisiWorkout()">
+                            ⚔️ 20 Dk Çelik Akışı (Dambıl Kompleksi) Başlat
+                        </button>
+                    </div>
                 </div>
 
                 <!-- GENERATED WORKOUT CONTAINER -->
@@ -679,22 +718,22 @@
                     <div id="libPaneExercises" style="display:block;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
                             <div>
-                                <h2 style="font-size:18px; font-weight:900; color:#F3F6FA; margin:0;">Egzersiz Kütüphanesi & Rehber</h2>
+                                <h2 style="font-size:18px; font-weight:900; color:#0F172A; margin:0;">Egzersiz Kütüphanesi & Rehber</h2>
                                 <div style="font-size:12.5px; color:var(--text-secondary); margin-top:2px;">
                                     Tüm hareketleri inceleyin, form ipuçlarına bakın veya doğrudan programınıza ekleyin.
                                 </div>
                             </div>
-                            <span id="libExCountBadge" class="auth-role-tag role-admin" style="font-size:12px; padding:4px 10px;">
+                            <span id="libExCountBadge" class="auth-role-tag role-admin" style="font-size:12px; padding:4px 10px; background:#F7FEE7; border:1px solid #84CC16; color:#166534;">
                                 89 Egzersiz
                             </span>
                         </div>
 
                         <!-- SEARCH & FILTERS -->
-                        <div class="lib-filter-panel" style="background:#0E131B; border:1px solid #222C3A; border-radius:14px; padding:12px; margin-bottom:16px;">
+                        <div class="lib-filter-panel" style="background:#FFFFFF; border:1.5px solid #E2E8F0; border-radius:16px; padding:14px; margin-bottom:16px; box-shadow:0 4px 16px rgba(15,23,42,0.04);">
                             <!-- Search bar -->
                             <div style="position:relative; margin-bottom:10px;">
                                 <input type="text" id="libExSearchInput" class="form-input" aria-label="Egzersiz, kas grubu veya ipucu ara" spellcheck="false" autocomplete="off"
-                                       style="width:100%; padding:10px 36px 10px 14px; font-size:13px; border-radius:10px; background:#121821; color:#F3F6FA; border:1px solid #263244;" 
+                                       style="width:100%; padding:10px 36px 10px 14px; font-size:13px; border-radius:10px; background:#F8FAFC; color:#0F172A; border:1.5px solid #CBD5E1;" 
                                        placeholder="Hareket, kas grubu veya ipucu ara (Örn: Bench, Kettlebell, Squat, Omuz)…" 
                                        oninput="renderLibraryExerciseCatalog()">
                                 <button id="libExClearSearchBtn" type="button" aria-label="Aramayı temizle" onclick="clearLibExSearch()" style="display:none; position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-secondary); font-size:18px; cursor:pointer;">&times;</button>
@@ -749,7 +788,7 @@
             <div id="historyTab" class="tab-content">
                 <div class="generator-card">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                        <h2 style="font-size:16px; font-weight:800; color:#F3F6FA;">Antrenman Geçmişi</h2>
+                        <h2 style="font-size:16px; font-weight:800; color:#0F172A;">Antrenman Geçmişi</h2>
                         <div style="display:flex; gap:6px;">
                             <button class="btn btn-outline" style="font-size:12px; padding:6px 12px; display:flex; align-items:center; gap:6px;" onclick="exportCSV()" title="CSV Olarak Dışa Aktar">
                                 <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--cyan);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line></svg>
@@ -795,7 +834,7 @@
                     <!-- HEADER & ACTION BUTTONS -->
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
                         <div>
-                            <h2 style="font-size:18px; font-weight:900; color:#F3F6FA;">Gelişim, Kas Yükü & Vücut Analizi</h2>
+                            <h2 style="font-size:18px; font-weight:900; color:#0F172A;">Gelişim, Kas Yükü & Vücut Analizi</h2>
                             <p style="font-size:12.5px; color:var(--text-secondary); margin-top:2px;">Biyomekanik kas tonajı, akıllı tartı kompozisyonu ve mezura ölçüleri takibi</p>
                         </div>
                         <div style="display:flex; gap:6px; flex-wrap:wrap;">
@@ -835,7 +874,7 @@
                         <div style="display:flex; align-items:center; gap:12px;">
                             <span style="display:none;" id="profileCardAvatar"></span>
                             <div>
-                                <h2 style="font-size:18px; font-weight:800; color:#F3F6FA;" id="profileCardName">Ferit</h2>
+                                <h2 style="font-size:18px; font-weight:800; color:#0F172A;" id="profileCardName">Ferit</h2>
                                 <p style="font-size:12.5px; color:var(--text-secondary);" id="profileCardMeta">Kişisel Sporcu Profili & Hedef Kilolar</p>
                             </div>
                         </div>
@@ -2372,8 +2411,8 @@
     </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
-    <script src="js/exercises-db.js?v=228"></script>
-    <script src="js/app.js?v=228"></script>
+    <script src="js/exercises-db.js?v=231"></script>
+    <script src="js/app.js?v=231"></script>
     <script>
         function toggleHeaderPopupMenu(e) {
             if (e) e.stopPropagation();

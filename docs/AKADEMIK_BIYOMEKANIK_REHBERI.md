@@ -103,5 +103,32 @@ Seans süresini 45-50 dakika ile sınırlandırırken hipertrofiyi maksimize ede
 
 ---
 
+## 🏛️ 6. Akademik Birleşik Hareketler & Kompleks Akış Mimarisi (Javorek, McGill & Myers Ekolü)
+
+Birleşik hareketler (Hybrid / Complex Movements) rastgele iki egzersizi uç uca eklemek değil; **kinetik enerjinin bir eklemden diğerine kesintisiz devredilmesidir**.
+
+### A. 3 Temel Akademik İlke:
+1. **Tek Ağırlık Yasası (One-Weight Law - Javorek 1988):** Bir akışta seçilen ağırlık, akışın en zayıf eklemine (ör. omuz/kollara) zarar vermeyecek, ancak en büyük kas grubunu (bacak/kalça) metabolik olarak uyaracak dengede seçilir.
+2. **Kinetik Momentum Devri (Momentum Carry-Over - NSCA):** 1. hareketin bitiş pozisyonu, 2. hareketin doğal başlangıç kurulumu olmalıdır (Örn: Hang Clean kalkışı doğrudan Front Squat inişine akar).
+3. **Omurga Eksenel Darbe Koruması (McGill 2012):** Yorgunluk anında omurgaya binen kesme kuvvetini sıfırlamak için aşırı rotasyonel veya fleksiyonel yükler birleşik akışa sokulmaz.
+
+### B. Literatür Destekli Temel Çelik Kodu Birleşik Hareketleri:
+
+| Birleşik Hareket | Kinetik Hat & Literatür Dayanağı | Biyomekanik Mekanizma & Avantaj |
+| :--- | :--- | :--- |
+| **Dambıl Pullover to Halo** | **Thomas Myers (2014) & Dr. Stuart McGill (2007)**<br>*(Spiral & Yüzeysel Arka Fasyal Hat)* | Yerde torasik omurga açılması ve lat gerilimi (Pullover), göğüste toplanıp baş çevresinde omuz kapsülünü 360° açan Halo ile birleşir. Omuz sıkışmasını aktif çözer. |
+| **Dambıl Renegade Row to Push-Up** | **Dr. Stuart McGill (2015) & Weakley et al. (2017)**<br>*(Ön-Arka Fonksiyonel Çapraz Hat)* | Şınav pozisyonunda anti-rotasyonel çekiş (sağ/sol row) ardından pektoral itiş (şınav). Zıt kas dengesi (APS) ve derin karın zırhı kurar. |
+| **Dambıl Clean to Front Squat to Push Press** | **Istvan Javorek (1988, 2005) & NSCA Ekolü**<br>*(Üçlü Eklem Ekstansiyonu ➔ Çömelme ➔ İtiş)* | Dizden patlayıcı omuz alış, derin çömelme ve bacak momentumuyla baş üstü pres. Tüm vücut kinetik zincirinin en yüksek mekanik verimli bileşiğidir. |
+| **Dambıl RDL to High Pull** | **Dr. Brad Schoenfeld (2021) & Javorek (1988)**<br>*(Posterior Kalça Menteşesi ➔ Üst Sırt Çekiş)* | Hamstring RDL esnemesinden doğrulurken kalça kapanma torku doğrudan omuz/trapez çekişine aktarılır; bele sıfır eksenel yükle patlayıcılık sağlar. |
+| **Dambıl Seesaw Lunge** | **Mike Boyle (2016) & Weakley et al. (2017)**<br>*(Unilateral Dinamik Kalça Stabilitesi)* | Destek ayağı yerden kalkmadan öne lunge ardından geriye lunge. Gluteus medius ve kuadrisepsi eksantrik ve konsantrik olarak kesintisiz ateşler. |
+| **Dambıl Swing to Goblet Squat** | **Pavel Tsatsouline & Stuart McGill (2012)**<br>*(Hinge-Squat Balistik Akışı)* | Kalça itişiyle yükselen dambılın ivmesi kadehte göğse toplanarak duraksamadan derin squata aktarılır; arka ve ön zincir eşzamanlı uyarılır. |
+| **Dambıl Lunge to Curl to Overhead Press** | **Robbins et al. (2010) & Weakley (2017)**<br>*(Periferik Kalp Aksiyonu - PHA)* | Bacak çöküşü (Lunge), kalkışta konsantrik biceps curl ve baş üstü omuz presi. Kalp-damar pompasını uyarır ve seans içi kalori tüketimini zirveye çıkarır. |
+| **Dambıl Goril Row to Clean** | **Istvan Javorek (1988) & Dan John**<br>*(Menteşe, Çekiş & Omuz Alış Akışı)* | Yerde anti-rotasyonel gorilla row ardından patlayıcı kalça ekstansiyonuyla ağırlıkları omuza alma. Arka zincir ve kavrama gücünü inşa eder. |
+| **Dambıl Floor Press to Glute Bridge** | **Dr. Stuart McGill (2007) & Schoenfeld (2016)**<br>*(Pektoral İtiş & Glute Köprüsü)* | Kalça köprüsüyle glute ve hamstring izometrik kilitliyken dambıl pres. Omurgayı tamamen destekleyerek hem göğsü hem arka zinciri vurur. |
+| **Dambıl Geri Lunge to Diz Çekme & Pres** | **Mike Boyle (2016) & NSCA Ekolü**<br>*(Unilateral Atletizm & Psoas Patlayıcılığı)* | Geri lunge ardından tek bacak üzerinde doğrularak dizi göğse çekme ve karşı kolla pres. Sporcu dengesi, core zırhı ve kalça fleksör gücü sağlar. |
+| **Vücut Ağırlığı Inchworm to Şınav** | **Thomas Myers (2014) & Dr. Stuart McGill**<br>*(Fasyal Esneme & Göğüs Zırhı)* | Düz bacak esnemesiyle eller üzerinde ileri yürüme, derin şınav ve geri yürüyüş. Hamstring esnekliğini artırırken üst gövdeyi ısıtır ve güçlendirir. |
+
+---
+
 > [!NOTE]
 > Bu rehber yaşayan bir dokümandır. Yeni biyomekanik araştırmalar, kullanıcı geri bildirimleri ve antrenman günlüğü verileriyle yorumlanarak zenginleştirilebilir.
