@@ -9271,9 +9271,32 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 }
             }
 
-            if (dayTitle) dayTitle.innerText = titleLabel;
+            const completedOnDate = (activeSchedulingDateStr && typeof getCompletedWorkoutsForDate === 'function')
+                ? getCompletedWorkoutsForDate(new Date(activeSchedulingDateStr + 'T00:00:00'))
+                : [];
+            const hasCompletedSession = completedOnDate.length > 0;
+
+            if (dayTitle) {
+                dayTitle.innerText = hasCompletedSession
+                    ? (activeSchedulingDateStr ? `${titleLabel.replace('Planı', '')} - Tamamlanan Seans` : `${dayName} - Tamamlanan Seans`)
+                    : titleLabel;
+            }
             if (dayBadge) {
-                dayBadge.innerText = isToday ? 'BUGÜNÜN PROGRAMI' : (isTomorrow ? 'YARINKİ PROGRAM' : 'HAFTALIK PLAN');
+                if (hasCompletedSession) {
+                    dayBadge.innerText = '✅ SEANS TAMAMLANDI';
+                    dayBadge.style.background = '#10b981';
+                    dayBadge.style.color = '#000';
+                } else {
+                    dayBadge.innerText = isToday ? 'BUGÜNÜN PROGRAMI' : (isTomorrow ? 'YARINKİ PROGRAM' : 'HAFTALIK PLAN');
+                    dayBadge.style.background = '';
+                    dayBadge.style.color = '';
+                }
+            }
+            const subDesc = document.getElementById('schedModalDaySubDesc');
+            if (subDesc) {
+                subDesc.innerText = hasCompletedSession
+                    ? 'Bu tarihte başarıyla tamamlanan seansınızın hareketleri, setleri ve tonaj detayları aşağıda listelenmiştir.'
+                    : 'Bu güne atanan antrenmanın içeriğini inceleyin, düzenleyin veya farklı bir program atayın.';
             }
 
             let currentPlan;
@@ -9291,32 +9314,130 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             // 1. RENDER ASSIGNED WORKOUT DETAILED CONTENT SECTION
             if (assignedSection) {
-                const completedOnDate = (activeSchedulingDateStr && typeof getCompletedWorkoutsForDate === 'function')
-                    ? getCompletedWorkoutsForDate(new Date(activeSchedulingDateStr + 'T00:00:00'))
-                    : [];
-                let completedBannerHtml = '';
-                if (completedOnDate.length > 0) {
-                    const cLog = completedOnDate[0];
-                    const cVol = cLog.totalVolumeKg ? `${Math.round(cLog.totalVolumeKg).toLocaleString('tr-TR')} kg` : '';
-                    const cDur = cLog.durationFormatted || (cLog.duration ? `${cLog.duration} Dk` : '');
-                    completedBannerHtml = `
-                        <div style="background:rgba(16,185,129,0.12); border:1.5px solid #10b981; border-radius:10px; padding:12px; margin-bottom:12px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                                <div>
-                                    <span class="auth-role-tag" style="background:#10b981; color:#000; font-weight:900; font-size:9.5px;">✅ BU GÜN SEANS TAMAMLANDI</span>
-                                    <h3 style="font-size:14px; font-weight:800; color:#F3F6FA; margin:4px 0 2px;">${escapeHTML(cLog.program || cLog.title || 'Antrenman')}</h3>
-                                    <div style="font-size:11px; color:#a7f3d0;">
-                                        ${cDur ? `⏱️ ${cDur}` : ''} ${cVol ? ` • 🏋️ ${cVol}` : ''} ${cLog.totalSetsCompleted ? `• 🎯 ${cLog.totalSetsCompleted} Set` : ''}
+                // If there are completed workouts for this day, render the actual completed session details
+                let completedCardsHtml = '';
+                if (hasCompletedSession) {
+                    completedCardsHtml = completedOnDate.map(cLog => {
+                        const totalVol = cLog.totalVolumeKg ? `${Math.round(cLog.totalVolumeKg).toLocaleString('tr-TR')} kg` : 'Belirtilmedi';
+                        const setsReps = cLog.totalSetsCompleted ? `${cLog.totalSetsCompleted} Set • ${cLog.totalRepsCompleted || 0} Tk` : '-';
+                        const durStr = cLog.durationFormatted || (cLog.duration ? `${cLog.duration} Dk` : '-');
+                        const rpeLabel = cLog.rpe ? (cLog.rpe.split(' ')[0] + ' ' + (cLog.rpe.split(' ')[1] || '')) : 'RPE 8';
+
+                        const locType = cLog.locationType || (cLog.locationName === 'Ev' ? 'ev' : 'salon');
+                        const locName = cLog.locationName || (locType === 'ev' ? 'Ev' : 'Spor Salonu');
+                        const isEv = locType === 'ev';
+                        const isPark = locType === 'acik_hava';
+                        const locIcon = isEv ? '🏠' : (isPark ? '🌲' : '🏋️');
+
+                        const exercises = cLog.exercises || [];
+                        let exsHtml = '';
+                        if (exercises.length === 0) {
+                            exsHtml = `<div style="font-size:12px; color:var(--text-secondary); padding:8px 0; text-align:center;">Detaylı hareket kaydı bulunamadı.</div>`;
+                        } else {
+                            exsHtml = exercises.map(ex => {
+                                const exName = escapeHTML(ex.name || 'Egzersiz');
+                                const targetParam = encodeURIComponent(ex.id || ex.name || '');
+                                const setsList = ex.sets || [];
+                                return `
+                                    <div class="log-exercise-item" style="background:#0E131B; border:1px solid #222C3A; border-radius:8px; padding:10px 12px; margin-bottom:6px;">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:8px;">
+                                            <div style="min-width:0; flex:1;">
+                                                <strong style="color:#F3F6FA; font-size:13px; word-break:break-word;">${exName}</strong>
+                                                <div style="font-size:11px; color:var(--text-secondary); margin-top:1px;">
+                                                    ${escapeHTML(ex.muscle ? ex.muscle.split(',')[0] : '')}${ex.exerciseVolume ? ` • ${Math.round(ex.exerciseVolume).toLocaleString('tr-TR')} kg` : ''}
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn btn-outline" style="padding:4px 8px; font-size:11px; border-radius:6px; flex-shrink:0;" onclick="openExerciseDetailModal(decodeURIComponent('${targetParam}'))" title="Hareket Rehberi">
+                                                👁️ Rehber
+                                            </button>
+                                        </div>
+                                        <div class="log-sets-summary" style="display:flex; flex-wrap:wrap; gap:4px;">
+                                            ${setsList.map(st => st.completed ? `
+                                                <span class="log-set-pill completed" style="background:rgba(34, 197, 94, 0.15); border:1px solid rgba(34, 197, 94, 0.4); color:#B6F059; border-radius:4px; padding:3px 7px; font-size:11px; font-weight:700;">
+                                                    S${st.setNo}: <strong>${st.weight || 0}kg</strong> x ${st.reps || 0} ✓
+                                                </span>
+                                            ` : `
+                                                <span class="log-set-pill" style="opacity:0.4; border:1px dashed #ef4444; color:#fca5a5; border-radius:4px; padding:3px 7px; font-size:11px; text-decoration:line-through;">
+                                                    S${st.setNo}: Atlandı
+                                                </span>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('');
+                        }
+
+                        return `
+                            <div style="background:linear-gradient(135deg, rgba(16,185,129,0.12), rgba(15,23,42,0.85)); border:1.5px solid #10b981; border-radius:12px; padding:14px; box-shadow:0 0 25px rgba(16,185,129,0.15); margin-bottom:12px;">
+                                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:10px; border-bottom:1px solid rgba(16,185,129,0.25); padding-bottom:10px;">
+                                    <div>
+                                        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:4px;">
+                                            <span style="background:#10b981; color:#000; font-weight:900; font-size:9.5px; border-radius:4px; padding:2px 8px;">
+                                                ✅ BU TARİHTE TAMAMLANAN SEANS
+                                            </span>
+                                            <span style="font-size:11px; color:#a7f3d0; font-weight:700;">
+                                                📅 ${escapeHTML(cLog.dateFormatted || cLog.date)}
+                                            </span>
+                                            <span style="background:rgba(217, 119, 6, 0.15); border:1px solid rgba(217, 119, 6, 0.4); color:#fcd34d; border-radius:4px; padding:2px 7px; font-size:10.5px; font-weight:700;">
+                                                ${locIcon} ${escapeHTML(locName)}
+                                            </span>
+                                        </div>
+                                        <h3 style="font-size:16px; font-weight:900; color:#F3F6FA; margin:4px 0 2px; line-height:1.3;">
+                                            ${escapeHTML(cLog.program || 'Tamamlanan Antrenman')}
+                                        </h3>
+                                    </div>
+                                    <span class="ex-badge badge-equip" style="flex-shrink:0;">${escapeHTML(rpeLabel)}</span>
+                                </div>
+
+                                <!-- STATS ROW -->
+                                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; margin-bottom:12px; text-align:center;">
+                                    <div style="background:#0E131B; padding:8px 4px; border-radius:8px; border:1px solid #222C3A;">
+                                        <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">TOPLAM TONAJ</div>
+                                        <div style="font-size:13px; font-weight:900; color:var(--gold); margin-top:2px;">🏋️ ${totalVol}</div>
+                                    </div>
+                                    <div style="background:#0E131B; padding:8px 4px; border-radius:8px; border:1px solid #222C3A;">
+                                        <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">SET / TEKRAR</div>
+                                        <div style="font-size:13px; font-weight:900; color:#B6F059; margin-top:2px;">✅ ${setsReps}</div>
+                                    </div>
+                                    <div style="background:#0E131B; padding:8px 4px; border-radius:8px; border:1px solid #222C3A;">
+                                        <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">SEANS SÜRESİ</div>
+                                        <div style="font-size:13px; font-weight:900; color:var(--cyan); margin-top:2px;">⏱️ ${durStr}</div>
                                     </div>
                                 </div>
-                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:5px 10px; color:#a7f3d0; border-color:#10b981;" onclick="switchTab('historyTab'); closeScheduleDayModal();">
-                                    📋 Geçmişte Gör
-                                </button>
+
+                                <!-- MUSCLES WORKED CHIPS -->
+                                ${cLog.muscleGroups && cLog.muscleGroups.length > 0 ? `
+                                    <div style="margin: 0 0 10px; display:flex; flex-wrap:wrap; gap:4px;">
+                                        ${cLog.muscleGroups.map(m => `<span class="muscle-tag" style="font-size:10.5px; padding:2px 7px;">${escapeHTML(m)}</span>`).join('')}
+                                    </div>
+                                ` : ''}
+
+                                <!-- COMPLETED EXERCISES & SETS -->
+                                <div style="font-size:11.5px; font-weight:800; color:#a7f3d0; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">
+                                    🎯 Yapılan Egzersizler, Kilolar & Tekrarlar (${exercises.length} Hareket):
+                                </div>
+                                <div style="max-height: 280px; overflow-y: auto; padding-right: 4px; display:flex; flex-direction:column; gap:6px; margin-bottom:12px;">
+                                    ${exsHtml}
+                                </div>
+
+                                ${cLog.notes ? `<div class="log-notes-box" style="margin-bottom:10px;">📝 ${escapeHTML(cLog.notes)}</div>` : ''}
+
+                                <!-- ACTIONS BAR -->
+                                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top:1px solid rgba(16,185,129,0.25); padding-top:10px; flex-wrap:wrap;">
+                                    <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 12px; color:#a7f3d0; border-color:#10b981;" onclick="switchTab('historyTab'); closeScheduleDayModal();">
+                                        📋 Tüm Geçmiş Günlüğünde Gör
+                                    </button>
+                                    <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 10px; color:#F87171; border-color:rgba(239,68,68,0.4);" onclick="deleteLogFromScheduleModal('${cLog.id}')">
+                                        🗑️ Bu Seans Kaydını Sil
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    `;
+                        `;
+                    }).join('');
                 }
 
+                // Render Template Plan Card
+                let templatePlanHtml = '';
                 if (!currentPlan.rest) {
                     const details = workoutDetails || getWorkoutDetailsForPlan(currentPlan) || {};
                     const exercises = details.exercises || [];
@@ -9366,7 +9487,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         }).join('');
                     }
 
-                    assignedSection.innerHTML = completedBannerHtml + `
+                    templatePlanHtml = `
                         <div style="background:linear-gradient(135deg, rgba(245,158,11,0.12), rgba(0,0,0,0.45)); border:1.5px solid var(--gold); border-radius:12px; padding:14px; box-shadow:0 0 25px rgba(245,158,11,0.15);">
                             <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
                                 <div>
@@ -9413,7 +9534,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         </div>
                     `;
                 } else {
-                    assignedSection.innerHTML = completedBannerHtml + `
+                    templatePlanHtml = `
                         <div style="background:rgba(148,163,184,0.06); border:1px dashed var(--border); border-radius:10px; padding:14px; text-align:center;">
                             <div style="font-size:24px; margin-bottom:4px;">🧘</div>
                             <div style="font-size:14px; font-weight:800; color:#F3F6FA;">${dayName} Günü Dinlenme Olarak Ayarlı</div>
@@ -9425,6 +9546,31 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             </button>
                         </div>
                     `;
+                }
+
+                if (hasCompletedSession) {
+                    assignedSection.innerHTML = completedCardsHtml + `
+                        <div style="margin-top:14px; border:1px dashed #263244; border-radius:10px; padding:10px 12px; background:rgba(15,23,42,0.4);">
+                            <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleSchedModalTemplateAccordion()">
+                                <div>
+                                    <span style="font-size:12px; font-weight:800; color:var(--gold); display:block;">
+                                        📅 Bu Gün İçin Gelecek Şablon Planı
+                                    </span>
+                                    <span style="font-size:10.5px; color:#64748b;">
+                                        Haftalık rutin şablonunu ve atanan hareketleri inceleyin
+                                    </span>
+                                </div>
+                                <span id="schedModalTemplateAccordionArrow" style="font-size:12px; color:var(--gold); font-weight:800;">
+                                    ▼ Göster
+                                </span>
+                            </div>
+                            <div id="schedModalTemplateAccordionBody" style="display:none; margin-top:12px; border-top:1px solid #222C3A; padding-top:12px;">
+                                ${templatePlanHtml}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    assignedSection.innerHTML = templatePlanHtml;
                 }
             }
 
@@ -9592,8 +9738,31 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 });
             }
 
-            if (optionsList) optionsList.innerHTML = html;
+            if (optionsList) {
+                optionsList.innerHTML = html;
+                optionsList.style.display = hasCompletedSession ? 'none' : 'flex';
+            }
+            const timingSection = document.getElementById('schedDayTimingSection');
+            if (timingSection) {
+                timingSection.style.display = hasCompletedSession ? 'none' : 'block';
+            }
             modal.classList.add('active');
+        }
+
+        function toggleSchedModalTemplateAccordion() {
+            const body = document.getElementById('schedModalTemplateAccordionBody');
+            const arrow = document.getElementById('schedModalTemplateAccordionArrow');
+            if (!body) return;
+            const isHidden = body.style.display === 'none';
+            body.style.display = isHidden ? 'block' : 'none';
+            if (arrow) arrow.textContent = isHidden ? '▲ Gizle' : '▼ Göster';
+        }
+
+        function deleteLogFromScheduleModal(id) {
+            if (!confirm("Bu tamamlanan antrenman kaydını silmek istediğinize emin misiniz?")) return;
+            deleteLog(id);
+            if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
+            openScheduleDayModal(activeSchedulingDayIdx, activeSchedulingDateStr);
         }
 
         function closeScheduleDayModal() {
@@ -17329,7 +17498,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=225')
+                navigator.serviceWorker.register('./sw.js?v=226')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
