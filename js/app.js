@@ -1127,6 +1127,139 @@
         }
         window.selectAiWeeklyTemplateCard = selectAiWeeklyTemplateCard;
 
+        const SPLIT_MUSCLE_INFO_MAP = {
+            full_body: {
+                title: 'Tüm Vücut (Full Body)',
+                muscles: ['Göğüs', 'Sırt & Kanat', 'Omuz', 'Bacak & Kalça', 'Ön & Arka Kol', 'Karın & Core']
+            },
+            upper_push: {
+                title: 'Üst İtiş (Push)',
+                muscles: ['Göğüs (Üst • Orta • Alt)', 'Omuz (Ön & Yan Deltoid)', 'Triceps (Arka Kol)']
+            },
+            upper_pull: {
+                title: 'Üst Çekiş (Pull)',
+                muscles: ['Sırt & Kanat (Latissimus)', 'Orta Sırt & Trapez', 'Arka Omuz (Rear Deltoid)', 'Biceps (Ön Kol)']
+            },
+            lower: {
+                title: 'Alt Vücut & Bacak',
+                muscles: ['Ön Bacak (Quadriceps)', 'Arka Bacak (Hamstring)', 'Kalça (Gluteus)', 'Baldır (Calves)']
+            },
+            upper: {
+                title: 'Tüm Üst Vücut',
+                muscles: ['Göğüs', 'Sırt & Kanat', 'Omuz (Ön • Yan • Arka)', 'Biceps (Ön Kol)', 'Triceps (Arka Kol)']
+            },
+            core: {
+                title: 'Karın & Core',
+                muscles: ['Üst & Alt Karın', 'Yan Karın (Obliques)', 'Derin Merkez & Bel (Core)']
+            },
+            functional: {
+                title: 'Fonksiyonel & Kondisyon',
+                muscles: ['Tüm Vücut Kas Zinciri', 'Kalça & Arka Zincir', 'Omuz & Merkez Stabilizasyon']
+            },
+            ai_auto: {
+                title: 'AI Otomatik Teşhis',
+                muscles: ['Haftalık Eksik Kalan Kaslar', 'Göğüs • Sırt • Omuz • Kol', 'Bacak • Kalça • Core']
+            },
+            upper_lower_full: {
+                title: 'Üst • Alt • Tüm Vücut (3 Gün)',
+                muscles: ['1. Gün: Göğüs • Sırt • Omuz • Kol', '2. Gün: Bacak • Kalça • Core', '3. Gün: Tüm Vücut']
+            },
+            ppl_3day: {
+                title: 'İtiş • Çekiş • Bacak (PPL)',
+                muscles: ['1. Gün: Göğüs • Omuz • Arka Kol', '2. Gün: Sırt • Arka Omuz • Ön Kol', '3. Gün: Bacak • Kalça • Core']
+            },
+            fullbody_3day: {
+                title: '3 Gün Tüm Vücut (A / B / C)',
+                muscles: ['Her Gün: Göğüs • Sırt • Omuz', 'Her Gün: Bacak • Kalça • Kol • Core']
+            },
+            upper_lower_4day: {
+                title: '4 Gün Üst / Alt Vücut',
+                muscles: ['Pzt & Per: Göğüs • Sırt • Omuz • Kol', 'Sal & Cum: Bacak • Kalça • Core']
+            }
+        };
+
+        let activeSplitPopoverKey = null;
+
+        function closeSplitMusclePopover() {
+            const existing = document.getElementById('splitMusclePopover');
+            if (existing) existing.remove();
+            document.querySelectorAll('.split-info-btn.active').forEach(b => b.classList.remove('active'));
+            activeSplitPopoverKey = null;
+        }
+        window.closeSplitMusclePopover = closeSplitMusclePopover;
+
+        function toggleSplitMusclePopover(event, key) {
+            if (event) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
+            const info = SPLIT_MUSCLE_INFO_MAP[key];
+            if (!info) return;
+
+            if (activeSplitPopoverKey === key && document.getElementById('splitMusclePopover')) {
+                closeSplitMusclePopover();
+                return;
+            }
+
+            closeSplitMusclePopover();
+            activeSplitPopoverKey = key;
+
+            const btn = event && event.currentTarget ? event.currentTarget : null;
+            if (btn) btn.classList.add('active');
+
+            const pop = document.createElement('div');
+            pop.id = 'splitMusclePopover';
+            pop.className = 'split-muscle-popover';
+            pop.setAttribute('role', 'dialog');
+            pop.setAttribute('aria-label', info.title);
+            pop.onclick = (e) => e.stopPropagation();
+
+            const pillsHtml = info.muscles.map(m => `
+                <span class="split-pop-muscle-pill">
+                    <span class="cv-muscle-dot"></span>${escapeHTML(m)}
+                </span>
+            `).join('');
+
+            pop.innerHTML = `
+                <div class="split-pop-header">
+                    <span class="split-pop-title">${escapeHTML(info.title)}</span>
+                    <button type="button" class="split-pop-close" onclick="closeSplitMusclePopover()" aria-label="Kapat">✕</button>
+                </div>
+                <div class="split-pop-sub">HEDEF KAS GRUPLARI</div>
+                <div class="split-pop-pills">${pillsHtml}</div>
+            `;
+
+            document.body.appendChild(pop);
+
+            if (btn) {
+                const rect = btn.getBoundingClientRect();
+                const popRect = pop.getBoundingClientRect();
+                const vw = window.innerWidth;
+                const vh = window.innerHeight;
+
+                let top = rect.bottom + 8;
+                if (top + popRect.height > vh - 12) {
+                    top = Math.max(12, rect.top - popRect.height - 8);
+                }
+                let left = rect.right - popRect.width;
+                if (left < 12) left = 12;
+                if (left + popRect.width > vw - 12) left = vw - popRect.width - 12;
+
+                pop.style.top = `${Math.round(top)}px`;
+                pop.style.left = `${Math.round(left)}px`;
+            }
+        }
+        window.toggleSplitMusclePopover = toggleSplitMusclePopover;
+
+        document.addEventListener('click', (e) => {
+            if (activeSplitPopoverKey && !e.target.closest('#splitMusclePopover') && !e.target.closest('.split-info-btn')) {
+                closeSplitMusclePopover();
+            }
+        });
+        window.addEventListener('scroll', () => {
+            if (activeSplitPopoverKey) closeSplitMusclePopover();
+        }, { passive: true });
+
         function handleQuickAiGenerate(preferredTplKey = null) {
             const goalEl = document.getElementById('paramGoal');
             const goalVal = goalEl ? goalEl.value : 'hypertrophy';
@@ -17088,7 +17221,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=222')
+                navigator.serviceWorker.register('./sw.js?v=223')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
