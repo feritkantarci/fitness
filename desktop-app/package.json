@@ -1,6 +1,6 @@
 {
   "name": "fitlab",
-  "version": "1.0.0",
+  "version": "2.4.3",
   "description": "FitLAB - Akademik Spor Bilimi ve AI İstasyonu (Masaüstü)",
   "main": "main.js",
   "scripts": {

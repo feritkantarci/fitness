@@ -175,7 +175,13 @@
             db_gorilla_row_to_clean: { primary: 'Orta Sırt & Kalça Menteşesi', secondary: 'Lats, Trapez, Hamstrings', subKey: 'back_mid', allSubKeys: ['back_mid', 'legs_hamstrings', 'legs_glutes', 'shoulders_rear'], isLowerUpperComplex: true, isComplex: true },
             db_floor_press_to_bridge: { primary: 'Orta Göğüs & Kalça (Glute)', secondary: 'Triceps, Hamstrings, Lomber Core', subKey: 'chest_mid', allSubKeys: ['chest_mid', 'legs_glutes', 'triceps_long'], isLowerUpperComplex: true, isComplex: true },
             db_step_back_lunge_to_knee_drive: { primary: 'Ön Bacak & Ön Omuz', secondary: 'Gluteus Medius, Psoas, Rotasyonel Denge', subKey: 'shoulders_front', allSubKeys: ['legs_quad', 'shoulders_front', 'core_obliques'], isLowerUpperComplex: true, isComplex: true },
-            bw_inchworm_to_pushup: { primary: 'Hamstring Mobilite & Göğüs', secondary: 'Triceps, Ön Karın, Omuz Zırhı', subKey: 'chest_mid', allSubKeys: ['chest_mid', 'legs_hamstrings', 'core_front'], isLowerUpperComplex: true, isComplex: true }
+            bw_inchworm_to_pushup: { primary: 'Hamstring Mobilite & Göğüs', secondary: 'Triceps, Ön Karın, Omuz Zırhı', subKey: 'chest_mid', allSubKeys: ['chest_mid', 'legs_hamstrings', 'core_front'], isLowerUpperComplex: true, isComplex: true },
+            db_rotational_lunge_chop: { primary: 'Ön Bacak, Kalça & Oblikler', secondary: 'Ön Omuz, Hamstrings, Core', subKey: 'legs_quad', allSubKeys: ['legs_quad', 'legs_glutes', 'core_obliques', 'shoulders_front'], isLowerUpperComplex: true, isComplex: true },
+            db_rotational_gorilla_row: { primary: 'Kanat & Orta Sırt', secondary: 'Arka Omuz, Biceps, Core', subKey: 'back_lats', allSubKeys: ['back_lats', 'back_mid', 'shoulders_rear', 'core_obliques'], isComplex: false },
+            db_single_arm_rear_delt_row: { primary: 'Arka Omuz (Rear Delt)', secondary: 'Orta Sırt, Rhomboids, Trapez', subKey: 'shoulders_rear', allSubKeys: ['shoulders_rear', 'back_mid'], isComplex: false },
+            db_high_pull_cuban_rotation: { primary: 'Arka Omuz & Üst Trapez', secondary: 'Rotator Manşet, Orta Sırt, Core', subKey: 'shoulders_rear', allSubKeys: ['shoulders_rear', 'back_mid', 'core_front'], isLowerUpperComplex: true, isComplex: true },
+            db_dumbbell_shrug_burnout: { primary: 'Üst Trapez', secondary: 'Ön Kol, Boyun Zırhı', subKey: 'back_mid', allSubKeys: ['back_mid'], isComplex: false },
+            db_quadruped_external_rotation: { primary: 'Arka Omuz & Rotator Manşet', secondary: 'Core Stabilitesi, Rhomboids', subKey: 'shoulders_rear', allSubKeys: ['shoulders_rear', 'core_front'], isComplex: false }
         };
 
         const STUDIO_SUB_REGIONS = {
@@ -769,7 +775,13 @@
             'db_floor_press_to_bridge': { id: 'db_floor_press_to_bridge', name: "Dambıl Floor Press to Glute Bridge", clip: 'assets/opengym/clips/db_floor_press_to_bridge.mp4', still: 'assets/opengym/stills/db_floor_press_to_bridge.webp' },
             'db_step_back_lunge_to_knee_drive': { id: 'db_step_back_lunge_to_knee_drive', name: "Dambıl Step Back Lunge to Knee Drive Press", clip: 'assets/opengym/clips/db_step_back_lunge_to_knee_drive.mp4', still: 'assets/opengym/stills/db_step_back_lunge_to_knee_drive.webp' },
             'db_pullover_to_halo': { id: 'db_pullover_to_halo', name: "Dambıl Pullover to Halo", clip: 'assets/opengym/clips/db_pullover_to_halo.mp4', still: 'assets/opengym/stills/db_pullover_to_halo.webp' },
-            'db_seesaw_lunge': { id: 'db_seesaw_lunge', name: "Dambıl Seesaw Lunge", clip: 'assets/opengym/clips/db_seesaw_lunge.mp4', still: 'assets/opengym/stills/db_seesaw_lunge.webp' }
+            'db_seesaw_lunge': { id: 'db_seesaw_lunge', name: "Dambıl Seesaw Lunge", clip: 'assets/opengym/clips/db_seesaw_lunge.mp4', still: 'assets/opengym/stills/db_seesaw_lunge.webp' },
+            'db_rotational_lunge_chop': { id: 'db_rotational_lunge_chop', name: "Rotasyonel Lunge & Dambıl Savuruş", clip: 'assets/opengym/clips/db_rotational_lunge_chop.mp4', still: 'assets/opengym/stills/db_rotational_lunge_chop.webp' },
+            'db_rotational_gorilla_row': { id: 'db_rotational_gorilla_row', name: "Rotasyonel Gorilla Row", clip: 'assets/opengym/clips/db_rotational_gorilla_row.mp4', still: 'assets/opengym/stills/db_rotational_gorilla_row.webp' },
+            'db_single_arm_rear_delt_row': { id: 'db_single_arm_rear_delt_row', name: "Eğilerek Tek Kol Arka Omuz Çekişi (Parabolik Sweep)", clip: 'assets/opengym/clips/db_single_arm_rear_delt_row.mp4', still: 'assets/opengym/stills/db_single_arm_rear_delt_row.webp' },
+            'db_high_pull_cuban_rotation': { id: 'db_high_pull_cuban_rotation', name: "Eğilerek Row & High Pull + Cuban Rotasyon", clip: 'assets/opengym/clips/db_high_pull_cuban_rotation.mp4', still: 'assets/opengym/stills/db_high_pull_cuban_rotation.webp' },
+            'db_dumbbell_shrug_burnout': { id: 'db_dumbbell_shrug_burnout', name: "Dambıl Trapez Silkme (Burnout)", clip: 'assets/opengym/clips/db_dumbbell_shrug_burnout.mp4', still: 'assets/opengym/stills/db_dumbbell_shrug_burnout.webp' },
+            'db_quadruped_external_rotation': { id: 'db_quadruped_external_rotation', name: "Dört Ayak Pozisyonunda Yatay Arka Omuz Uçuşu", clip: 'assets/opengym/clips/db_quadruped_external_rotation.mp4', still: 'assets/opengym/stills/db_quadruped_external_rotation.webp' }
         };
 
         // ==================== KULLANICI ÖZEL HAVUZ & GİZLEME YASASI ====================
@@ -2219,6 +2231,12 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             db_floor_press_to_bridge: 'bridge_press_complex',
             db_step_back_lunge_to_knee_drive: 'lunge_knee_drive_complex',
             bw_inchworm_to_pushup: 'inchworm_pushup_complex',
+            db_rotational_lunge_chop: 'lunge_chop_rotational',
+            db_rotational_gorilla_row: 'gorilla_row_rotational',
+            db_single_arm_rear_delt_row: 'rear_delt_sweep_parabolic',
+            db_high_pull_cuban_rotation: 'row_high_pull_cuban',
+            db_dumbbell_shrug_burnout: 'shrug_burnout',
+            db_quadruped_external_rotation: 'quadruped_horizontal_fly',
             db_manmaker: 'fullbody_metcon_burpee',
             bw_burpee: 'fullbody_metcon_burpee'
         };
@@ -4048,7 +4066,13 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 'db_floor_press_to_bridge': { form: 'assets/exercises/db_floor_press_to_bridge.webp', anatomi: null },
                 'db_step_back_lunge_to_knee_drive': { form: 'assets/exercises/db_step_back_lunge_to_knee_drive.webp', anatomi: null },
                 'db_pullover_to_halo': { form: 'assets/exercises/db_pullover_to_halo.webp', anatomi: null },
-                'db_seesaw_lunge': { form: 'assets/exercises/db_seesaw_lunge.webp', anatomi: null }
+                'db_seesaw_lunge': { form: 'assets/exercises/db_seesaw_lunge.webp', anatomi: null },
+                'db_rotational_lunge_chop': { form: 'assets/exercises/db_rotational_lunge_chop.webp', anatomi: null },
+                'db_rotational_gorilla_row': { form: 'assets/exercises/db_rotational_gorilla_row.webp', anatomi: null },
+                'db_single_arm_rear_delt_row': { form: 'assets/exercises/db_single_arm_rear_delt_row.webp', anatomi: null },
+                'db_high_pull_cuban_rotation': { form: 'assets/exercises/db_high_pull_cuban_rotation.webp', anatomi: null },
+                'db_dumbbell_shrug_burnout': { form: 'assets/exercises/db_dumbbell_shrug_burnout.webp', anatomi: null },
+                'db_quadruped_external_rotation': { form: 'assets/exercises/db_quadruped_external_rotation.webp', anatomi: null }
             };
 
             // Egzersize ait gerçek fotoğraf kılavuzunu al
@@ -4099,14 +4123,14 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                             <button type="button" class="btn-diagram-tool btn-scroll-toggle" onclick="event.stopPropagation(); toggleDiagramScroll('wrap_form_${collapseId}')" title="Genişlet ve parmakla sağa-sola kaydırarak incele">
                                 <span class="tool-icon">↔️</span> <span class="tool-text">Kaydırarak Büyüt</span>
                             </button>
-                            <button type="button" class="btn-diagram-tool" onclick="event.stopPropagation(); openImageLightbox('${visualSrc}', '${visualTitle}')" title="Tam ekran mod">
+                            <button type="button" class="btn-diagram-tool" onclick="event.stopPropagation(); openImageLightbox(decodeURIComponent('${encodeURIComponent(visualSrc)}'), decodeURIComponent('${encodeURIComponent(visualTitle)}'))" title="Tam ekran mod">
                                 <span class="tool-icon">⛶</span> <span class="tool-text">Tam Ekran</span>
                             </button>
-                            <button type="button" class="btn-diagram-tool btn-report-bug" onclick="event.stopPropagation(); openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '${visualSrc}', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}')" title="Görsel veya hareket hatalıysa Firebase hata havuzuna bildir">
+                            <button type="button" class="btn-diagram-tool btn-report-bug" onclick="event.stopPropagation(); openExerciseBugReportModal(decodeURIComponent('${encodeURIComponent(ex.id)}'), decodeURIComponent('${encodeURIComponent(ex.name || '')}'), decodeURIComponent('${encodeURIComponent(visualSrc || '')}'), decodeURIComponent('${encodeURIComponent(ex.equipment || '')}'), decodeURIComponent('${encodeURIComponent(ex.muscle || '')}'))" title="Görsel veya hareket hatalıysa Firebase hata havuzuna bildir">
                                 <span class="tool-icon">⚠️</span> <span class="tool-text">Hata Bildir</span>
                             </button>
                         </div>
-                        <div class="pos-diagram-img-box" onclick="event.stopPropagation(); openImageLightbox('${visualSrc}', '${visualTitle}')">
+                        <div class="pos-diagram-img-box" onclick="event.stopPropagation(); openImageLightbox(decodeURIComponent('${encodeURIComponent(visualSrc)}'), decodeURIComponent('${encodeURIComponent(visualTitle)}'))">
                             <img src="${visualSrc}" alt="${visualTitle}" class="pos-diagram-img" loading="lazy">
                             <div class="pos-diagram-zoom-hint">🔍 Dokun: Büyüt</div>
                         </div>
@@ -4128,11 +4152,11 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                             <button type="button" class="btn-diagram-tool btn-scroll-toggle" onclick="event.stopPropagation(); toggleDiagramScroll('wrap_anatomi_${collapseId}')" title="Genişlet ve incele">
                                 <span class="tool-icon">↔️</span> <span class="tool-text">Kaydırarak Büyüt</span>
                             </button>
-                            <button type="button" class="btn-diagram-tool" onclick="event.stopPropagation(); openImageLightbox('${exactPhoto.anatomi}', '${escapeHTML(ex.name)} - Hedef Kas Anatomisi')" title="Tam ekran mod">
+                            <button type="button" class="btn-diagram-tool" onclick="event.stopPropagation(); openImageLightbox(decodeURIComponent('${encodeURIComponent(exactPhoto.anatomi)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - Hedef Kas Anatomisi')}'))" title="Tam ekran mod">
                                 <span class="tool-icon">⛶</span> <span class="tool-text">Tam Ekran</span>
                             </button>
                         </div>
-                        <div class="pos-diagram-img-box" onclick="event.stopPropagation(); openImageLightbox('${exactPhoto.anatomi}', '${escapeHTML(ex.name)} - Hedef Kas Anatomisi')">
+                        <div class="pos-diagram-img-box" onclick="event.stopPropagation(); openImageLightbox(decodeURIComponent('${encodeURIComponent(exactPhoto.anatomi)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - Hedef Kas Anatomisi')}'))">
                             <img src="${exactPhoto.anatomi}" alt="${escapeHTML(ex.name)} Hedef Kaslar" class="pos-diagram-img" loading="lazy">
                             <div class="pos-diagram-zoom-hint">🔍 Dokun: Büyüt</div>
                         </div>
@@ -4189,7 +4213,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                             <div class="guide-tab-panel active" id="panel_animasyon_${collapseId}">
                                 <div class="pos-diagram-wrap" id="wrap_anim_${collapseId}" style="position:relative; background:#000; border-radius:12px; overflow:hidden; border:1px solid rgba(56,189,248,0.3); padding:4px;">
                                     <div class="pos-diagram-toolbar">
-                                        <button type="button" class="btn-diagram-tool" onclick="event.stopPropagation(); openImageLightbox('${openGymMedia.clip}', '${escapeHTML(ex.name)} - Canlı Animasyon')" title="Tam ekran oynat">
+                                        <button type="button" class="btn-diagram-tool" onclick="event.stopPropagation(); openImageLightbox(decodeURIComponent('${encodeURIComponent(openGymMedia.clip)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - Canlı Animasyon')}'))" title="Tam ekran oynat">
                                             <span class="tool-icon">⛶</span> <span class="tool-text">Büyüt</span>
                                         </button>
                                         ${hasPhotoGuide ? `
@@ -4198,7 +4222,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                                             </button>
                                         ` : ''}
                                     </div>
-                                    <div style="cursor:pointer; display:flex; justify-content:center; align-items:center; min-height:200px; max-height:280px;" onclick="event.stopPropagation(); openImageLightbox('${openGymMedia.clip}', '${escapeHTML(ex.name)} - Canlı Animasyon')">
+                                    <div style="cursor:pointer; display:flex; justify-content:center; align-items:center; min-height:200px; max-height:280px;" onclick="event.stopPropagation(); openImageLightbox(decodeURIComponent('${encodeURIComponent(openGymMedia.clip)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - Canlı Animasyon')}'))">
                                         <video src="${openGymMedia.clip}" poster="${openGymMedia.still}" autoplay loop muted playsinline style="width:100%; max-height:260px; object-fit:contain; display:block;" onerror="this.style.display='none'; const st=document.getElementById('still_fallback_${collapseId}'); if(st) st.style.display='block';"></video>
                                         <img id="still_fallback_${collapseId}" src="${openGymMedia.still}" alt="${escapeHTML(ex.name)}" style="display:none; width:100%; max-height:260px; object-fit:contain;">
                                     </div>
@@ -11816,11 +11840,6 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         }
                     });
                 }
-                // Yerel test ortamında oturum kapalıysa otomatik usr_admin (Ferit Kantarcı) oturumu aç
-                if (!localStorage.getItem('celik_kodu_session')) {
-                    localStorage.setItem('celik_kodu_session', JSON.stringify({ userId: 'usr_admin', loginTime: Date.now() }));
-                    currentSession = { userId: 'usr_admin', loginTime: Date.now() };
-                }
                 if (didHydrate) {
                     updateCloudSyncBadge('synced', 'Yerel Test (Snapshot)');
                     syncAppViewState();
@@ -11843,10 +11862,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (!isFirebaseReady || !fbDb) return;
             try {
                 updateCloudSyncBadge('syncing', 'Kaydediliyor...');
-                // Güvenlik: Açık metin şifreleri ve API anahtarlarını buluta gönderme
+                // Güvenlik: Açık metin şifreleri, parola hash'leri, salt ve API anahtarlarını buluta gönderme
                 const sanitizedUsers = (users || []).map(u => {
                     const copy = { ...u };
                     delete copy.password;
+                    delete copy.passwordHash;
+                    delete copy.salt;
                     delete copy.geminiApiKey;
                     return copy;
                 });
@@ -12187,7 +12208,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         function recoverLostFridayWorkout(targetUid) {
             try {
                 const user = (typeof getActiveUser === 'function') ? getActiveUser() : null;
-                const uid = targetUid || (user ? user.id : 'usr_admin');
+                const uid = targetUid || (user ? user.id : null);
+                if (!uid) return;
                 const schedule = getWeeklySchedule(uid);
                 let fridayPlan = schedule[5];
 
@@ -12817,7 +12839,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         function getCalendarPreferences(uid) {
             const user = getActiveUser();
-            const targetUid = uid || (user ? user.id : 'usr_admin');
+            const targetUid = uid || (user ? user.id : 'guest');
             const key = `celik_kodu_calendar_prefs_${targetUid}`;
             try {
                 const raw = localStorage.getItem(key);
@@ -12833,7 +12855,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         function saveCalendarPreferences(newPrefs, uid) {
             const user = getActiveUser();
-            const targetUid = uid || (user ? user.id : 'usr_admin');
+            const targetUid = uid || (user ? user.id : 'guest');
             const key = `celik_kodu_calendar_prefs_${targetUid}`;
             const current = getCalendarPreferences(targetUid);
             const timeEl = document.getElementById('calPrefDefaultTime');
@@ -12848,7 +12870,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         function getGoogleCalendarToken(uid) {
             const user = getActiveUser();
-            const targetUid = uid || (user ? user.id : 'usr_admin');
+            const targetUid = uid || (user ? user.id : 'guest');
             try {
                 const raw = localStorage.getItem(`celik_kodu_gcal_token_${targetUid}`) || sessionStorage.getItem(`celik_kodu_gcal_token_${targetUid}`);
                 if (!raw) return null;
@@ -12862,7 +12884,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         function saveGoogleCalendarToken(token, expiresInSec = 3600, uid) {
             const user = getActiveUser();
-            const targetUid = uid || (user ? user.id : 'usr_admin');
+            const targetUid = uid || (user ? user.id : 'guest');
             const data = {
                 token: token,
                 savedAt: Date.now(),
@@ -12876,7 +12898,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         function clearGoogleCalendarToken(uid) {
             const user = getActiveUser();
-            const targetUid = uid || (user ? user.id : 'usr_admin');
+            const targetUid = uid || (user ? user.id : 'guest');
             try {
                 localStorage.removeItem(`celik_kodu_gcal_token_${targetUid}`);
                 sessionStorage.removeItem(`celik_kodu_gcal_token_${targetUid}`);
@@ -12890,13 +12912,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         function getStoredCalendarId(uid) {
             const user = getActiveUser();
-            const targetUid = uid || (user ? user.id : 'usr_admin');
+            const targetUid = uid || (user ? user.id : 'guest');
             return localStorage.getItem(`celik_kodu_gcal_calendar_id_${targetUid}`);
         }
 
         function saveStoredCalendarId(calId, uid) {
             const user = getActiveUser();
-            const targetUid = uid || (user ? user.id : 'usr_admin');
+            const targetUid = uid || (user ? user.id : 'guest');
             try {
                 localStorage.setItem(`celik_kodu_gcal_calendar_id_${targetUid}`, calId);
             } catch(e) {}
@@ -14390,6 +14412,17 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         }
 
         // ==================== AUTHENTICATION & MULTI-USER SYSTEM ====================
+        function generateSecureSalt() {
+            try {
+                if (window.crypto && window.crypto.getRandomValues) {
+                    const arr = new Uint8Array(16);
+                    window.crypto.getRandomValues(arr);
+                    return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+                }
+            } catch(e) {}
+            return Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+        }
+
         async function sha256Hex(message) {
             try {
                 if (window.crypto && window.crypto.subtle) {
@@ -14478,23 +14511,16 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         function getSession() {
             try {
                 const raw = localStorage.getItem('celik_kodu_session');
-                if (raw) return JSON.parse(raw);
-                if (localStorage.getItem('celik_kodu_logged_out') === 'true') return null;
-
-                // Preview ortamı ve ilk açılışta doğrudan ana uygulamayı aç
-                const users = getAuthUsers();
-                const defaultUser = (users && users.length) ? (users.find(u => u.username === 'ferit') || users[0]) : null;
-                if (defaultUser) {
-                    const session = {
-                        userId: defaultUser.id,
-                        username: defaultUser.username,
-                        role: defaultUser.role,
-                        name: defaultUser.name,
-                        loginAt: Date.now()
-                    };
-                    localStorage.setItem('celik_kodu_session', JSON.stringify(session));
-                    localStorage.setItem('celik_kodu_active_user_id', defaultUser.id);
-                    return session;
+                if (raw) {
+                    const session = JSON.parse(raw);
+                    // Güvenlik Doğrulaması: Yalnızca açıkça şifre ile giriş yapılmış (authVerified: true) oturumları tanı.
+                    // Önceki sürümlerden kalan sahte veya otomatik usr_admin oturumlarını anında temizle.
+                    if (session && session.userId && session.authVerified === true) {
+                        return session;
+                    }
+                    localStorage.removeItem('celik_kodu_session');
+                    localStorage.removeItem('celik_kodu_active_user_id');
+                    return null;
                 }
                 return null;
             } catch(e) {
@@ -14505,6 +14531,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         function setSession(session) {
             currentSession = session;
             if (session) {
+                session.authVerified = true;
                 localStorage.setItem('celik_kodu_session', JSON.stringify(session));
                 localStorage.setItem('celik_kodu_active_user_id', session.userId);
                 localStorage.removeItem('celik_kodu_logged_out');
@@ -14527,18 +14554,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 }
                 return session.userId;
             }
-            const fallback = localStorage.getItem('celik_kodu_active_user_id');
-            if (fallback === 'usr_ferit') {
-                localStorage.setItem('celik_kodu_active_user_id', 'usr_admin');
-                return 'usr_admin';
-            }
-            return fallback || 'usr_admin';
+            return null;
         }
 
         function getActiveUser() {
             const uid = getActiveUserId();
+            if (!uid) return null;
             const users = getAuthUsers();
-            return users.find(u => u.id === uid) || users[0];
+            return users.find(u => u.id === uid) || null;
         }
 
         function syncAppViewState() {
@@ -14549,32 +14572,33 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (!session) {
                 if (loginScreen) loginScreen.classList.add('active');
                 if (mainAppWrapper) mainAppWrapper.style.display = 'none';
-            } else {
-                if (loginScreen) loginScreen.classList.remove('active');
-                if (mainAppWrapper) mainAppWrapper.style.display = 'block';
-
-                const isAdmin = session.role === 'admin';
-
-                const btnAdmin = document.getElementById('btnAdminPanel');
-                if (btnAdmin) btnAdmin.style.display = isAdmin ? 'flex' : 'none';
-
-                const btnAdminPopup = document.getElementById('btnAdminPanelPopup');
-                if (btnAdminPopup) btnAdminPopup.style.display = isAdmin ? 'flex' : 'none';
-
-                const sheetAdmin = document.getElementById('sheetAdminBtn');
-                if (sheetAdmin) sheetAdmin.style.display = isAdmin ? 'flex' : 'none';
-
-                const profileTabAdminBtn = document.getElementById('profileTabAdminBtn');
-                if (profileTabAdminBtn) profileTabAdminBtn.style.display = isAdmin ? 'inline-block' : 'none';
-
-                const roleBadge = document.getElementById('headerUserRoleBadge');
-                if (roleBadge) {
-                    roleBadge.innerText = isAdmin ? 'YÖNETİCİ' : 'SPORCU';
-                    roleBadge.className = 'auth-role-tag ' + (isAdmin ? 'role-admin' : 'role-athlete');
-                }
-
-                applyActiveUserProfile();
+                return;
             }
+
+            if (loginScreen) loginScreen.classList.remove('active');
+            if (mainAppWrapper) mainAppWrapper.style.display = 'block';
+
+            const isAdmin = session.role === 'admin';
+
+            const btnAdmin = document.getElementById('btnAdminPanel');
+            if (btnAdmin) btnAdmin.style.display = isAdmin ? 'flex' : 'none';
+
+            const btnAdminPopup = document.getElementById('btnAdminPanelPopup');
+            if (btnAdminPopup) btnAdminPopup.style.display = isAdmin ? 'flex' : 'none';
+
+            const sheetAdmin = document.getElementById('sheetAdminBtn');
+            if (sheetAdmin) sheetAdmin.style.display = isAdmin ? 'flex' : 'none';
+
+            const profileTabAdminBtn = document.getElementById('profileTabAdminBtn');
+            if (profileTabAdminBtn) profileTabAdminBtn.style.display = isAdmin ? 'inline-block' : 'none';
+
+            const roleBadge = document.getElementById('headerUserRoleBadge');
+            if (roleBadge) {
+                roleBadge.innerText = isAdmin ? 'YÖNETİCİ' : 'SPORCU';
+                roleBadge.className = 'auth-role-tag ' + (isAdmin ? 'role-admin' : 'role-athlete');
+            }
+
+            applyActiveUserProfile();
         }
 
         async function handleAuthLogin(e) {
@@ -14606,7 +14630,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 // 2. Geriye dönük uyumluluk: Eski açık şifre eşleşirse hemen hash'e yükselt
                 if (u.password && u.password === pass) {
                     matched = u;
-                    const salt = Math.random().toString(36).substring(2, 10);
+                    const salt = generateSecureSalt();
                     u.salt = salt;
                     u.passwordHash = await sha256Hex(salt + pass);
                     delete u.password;
@@ -14621,12 +14645,30 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     userId: matched.id,
                     username: matched.username,
                     role: matched.role,
-                    name: matched.name
+                    name: matched.name,
+                    authVerified: true,
+                    loginAt: Date.now()
                 });
                 usernameInput.value = "";
                 passwordInput.value = "";
+
+                // Başarılı giriş sonrası kullanıcının antrenman motorunu ve görünümünü yükle
+                applyWednesdayHammerCurlPatch();
+                recoverLostFridayWorkout();
+                updateProfileGeminiStatusUI();
+                renderAiHybridHeroBanner();
+                updateSelectedSplitLabel();
+                renderSplitCards();
+                updateSelectedEquipLabel();
+                updateSelectedParamLabel();
+                const hasRestored = restoreActiveWorkoutStateFromStorage();
+                if (hasRestored) {
+                    switchTab('activeWorkoutTab');
+                } else {
+                    renderActiveWorkout();
+                }
             } else {
-                errorBox.innerText = "❌ Hatalı kullanıcı adı veya şifre! (Varsayılan: admin / 123)";
+                errorBox.innerText = "❌ Hatalı kullanıcı adı veya şifre!";
                 errorBox.style.display = 'block';
             }
         }
@@ -14635,6 +14677,66 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (confirm("Oturumu kapatmak istediğinize emin misiniz?")) {
                 setSession(null);
             }
+        }
+
+        async function handleUserChangePassword() {
+            const currentPassEl = document.getElementById('profileCurrentPassword');
+            const newPassEl = document.getElementById('profileNewPassword');
+            const currentPass = (currentPassEl ? currentPassEl.value : '').trim();
+            const newPass = (newPassEl ? newPassEl.value : '').trim();
+
+            if (!currentPass || !newPass) {
+                alert("Lütfen mevcut şifrenizi ve yeni şifrenizi girin.");
+                return;
+            }
+
+            if (newPass.length < 6) {
+                alert("Yeni şifre en az 6 karakter uzunluğunda olmalıdır!");
+                return;
+            }
+
+            const activeUid = getActiveUserId();
+            if (!activeUid) {
+                alert("Oturum bulunamadı. Lütfen tekrar giriş yapın.");
+                return;
+            }
+
+            const users = getAuthUsers();
+            const userIdx = users.findIndex(u => u.id === activeUid);
+            if (userIdx === -1) {
+                alert("Kullanıcı kaydı bulunamadı.");
+                return;
+            }
+
+            const user = users[userIdx];
+            let isCurrentCorrect = false;
+            if (user.passwordHash) {
+                const testHash = await sha256Hex((user.salt || '') + currentPass);
+                isCurrentCorrect = (testHash === user.passwordHash);
+            } else if (user.password) {
+                isCurrentCorrect = (user.password === currentPass);
+            }
+
+            if (!isCurrentCorrect) {
+                alert("❌ Mevcut şifreniz hatalı!");
+                return;
+            }
+
+            const newSalt = generateSecureSalt();
+            const newHash = await sha256Hex(newSalt + newPass);
+
+            user.salt = newSalt;
+            user.passwordHash = newHash;
+            delete user.password;
+
+            users[userIdx] = user;
+            saveAuthUsers(users);
+
+            if (currentPassEl) currentPassEl.value = '';
+            if (newPassEl) newPassEl.value = '';
+
+            playAlertSound();
+            alert("✅ Şifreniz başarıyla ve güvenle güncellendi!");
         }
 
         // ADMIN PANEL
@@ -14695,6 +14797,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         }
 
         async function handleCreateUser() {
+            const session = getSession();
+            if (!session || session.role !== 'admin') {
+                alert("Bu işlem için yönetici yetkisi gereklidir.");
+                return;
+            }
+
             const uname = (document.getElementById('newUsername').value || '').trim().toLowerCase();
             const pass = (document.getElementById('newPassword').value || '').trim();
             const dname = (document.getElementById('newDisplayName').value || '').trim();
@@ -14707,13 +14815,18 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 return;
             }
 
+            if (pass.length < 6) {
+                alert("Parola en az 6 karakter olmalıdır!");
+                return;
+            }
+
             const users = getAuthUsers();
             if (users.some(u => u.username.toLowerCase() === uname)) {
                 alert("Bu kullanıcı adı zaten kullanımda!");
                 return;
             }
 
-            const salt = Math.random().toString(36).substring(2, 10);
+            const salt = generateSecureSalt();
             const passHash = await sha256Hex(salt + pass);
 
             const newUser = {
@@ -14965,14 +15078,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             </div>
                             <div>
                                 ${!isSelf ? `
-                                    <button class="btn btn-outline" style="font-size:10px; padding:4px 10px; color:#ef4444; border-color:#ef4444;" onclick="adminDeleteUser('${u.id}')">
+                                    <button class="btn btn-outline" style="font-size:10px; padding:4px 10px; color:#ef4444; border-color:#ef4444;" onclick="adminDeleteUser(decodeURIComponent('${encodeURIComponent(u.id)}'))">
                                         🗑️ Sil
                                     </button>
                                 ` : '<span style="font-size:11px; color:var(--gold); font-weight:700;">Aktif</span>'}
                             </div>
                         </div>
                         <div style="font-size:11px; color:var(--text-secondary); display:flex; justify-content:space-between; border-top:1px solid #222C3A; padding-top:6px; margin-top:6px;">
-                            <span>Şifre: <code style="color:#F3F6FA; background:#0E131B; padding:2px 6px; border-radius:4px; font-family:monospace;">${escapeHTML(u.password)}</code></span>
+                            <span>Güvenlik: <span style="color:#10B981; font-weight:700;">🔒 Salted SHA-256</span></span>
                             <span>${logs.length} Seans • Seri: ${streak} Gün</span>
                         </div>
                     </div>
@@ -14985,6 +15098,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         }
 
         function adminDeleteUser(userId) {
+            const session = getSession();
+            if (!session || session.role !== 'admin') {
+                alert("Bu işlem için yönetici yetkisi gereklidir.");
+                return;
+            }
+
             const users = getAuthUsers();
             const target = users.find(u => u.id === userId);
             if (!target) return;
@@ -16330,20 +16449,39 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         }
 
         function exportAnalyticsCSV() {
-            const uid = getActiveUserId();
+            const uid = getActiveUserId() || 'anonim';
             const scaleLogs = getScaleLogs();
             const measLogs = getMeasurementsLogs();
 
             let csv = "\uFEFF=== TARTI VE VÜCUT KOMPOZİSYONU GEÇMİŞİ ===\r\n";
             csv += "Tarih,Kilo_Kg,Yag_Orani_Pct,Kas_Kutlesi_Kg,Sivi_Pct,Viseral_Yag,BMR_kcal,Notlar\r\n";
             scaleLogs.forEach(s => {
-                csv += `"${s.date}",${s.weight || ''},${s.bodyFat || ''},${s.muscleMass || ''},${s.waterPct || ''},${s.visceralFat || ''},${s.bmr || ''},"${(s.notes || '').replace(/"/g, '""')}"\r\n`;
+                csv += [
+                    sanitizeCsvCell(s.date),
+                    sanitizeCsvCell(s.weight || ''),
+                    sanitizeCsvCell(s.bodyFat || ''),
+                    sanitizeCsvCell(s.muscleMass || ''),
+                    sanitizeCsvCell(s.waterPct || ''),
+                    sanitizeCsvCell(s.visceralFat || ''),
+                    sanitizeCsvCell(s.bmr || ''),
+                    sanitizeCsvCell(s.notes || '')
+                ].join(',') + "\r\n";
             });
 
             csv += "\r\n=== MEZURA VÜCUT ÖLÇÜLERİ GEÇMİŞİ ===\r\n";
             csv += "Tarih,Bel_cm,Gogus_cm,Omuz_cm,Kol_cm,Bacak_cm,Kalca_cm,Boyun_cm,Notlar\r\n";
             measLogs.forEach(m => {
-                csv += `"${m.date}",${m.waist || ''},${m.chest || ''},${m.shoulder || ''},${m.arms || ''},${m.thigh || ''},${m.hips || ''},${m.neck || ''},"${(m.notes || '').replace(/"/g, '""')}"\r\n`;
+                csv += [
+                    sanitizeCsvCell(m.date),
+                    sanitizeCsvCell(m.waist || ''),
+                    sanitizeCsvCell(m.chest || ''),
+                    sanitizeCsvCell(m.shoulder || ''),
+                    sanitizeCsvCell(m.arms || ''),
+                    sanitizeCsvCell(m.thigh || ''),
+                    sanitizeCsvCell(m.hips || ''),
+                    sanitizeCsvCell(m.neck || ''),
+                    sanitizeCsvCell(m.notes || '')
+                ].join(',') + "\r\n";
             });
 
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -18552,7 +18690,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=243')
+                navigator.serviceWorker.register('./sw.js?v=244')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
@@ -18577,19 +18715,22 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             initFirebaseEngine();
             hydrateLocalSnapshotIfDev();
             syncAppViewState();
-            applyWednesdayHammerCurlPatch();
-            recoverLostFridayWorkout();
-            updateProfileGeminiStatusUI();
-            renderAiHybridHeroBanner();
-            updateSelectedSplitLabel();
-            renderSplitCards();
-            updateSelectedEquipLabel();
-            updateSelectedParamLabel();
-            const hasRestored = restoreActiveWorkoutStateFromStorage();
-            if (hasRestored) {
-                switchTab('activeWorkoutTab');
-            } else {
-                renderActiveWorkout();
+            const session = getSession();
+            if (session) {
+                applyWednesdayHammerCurlPatch();
+                recoverLostFridayWorkout();
+                updateProfileGeminiStatusUI();
+                renderAiHybridHeroBanner();
+                updateSelectedSplitLabel();
+                renderSplitCards();
+                updateSelectedEquipLabel();
+                updateSelectedParamLabel();
+                const hasRestored = restoreActiveWorkoutStateFromStorage();
+                if (hasRestored) {
+                    switchTab('activeWorkoutTab');
+                } else {
+                    renderActiveWorkout();
+                }
             }
         });
     
@@ -19358,9 +19499,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     <div style="background:#000; border-radius:12px; overflow:hidden; border:1.5px solid rgba(56,189,248,0.4); margin-bottom:12px; box-shadow:0 6px 24px rgba(0,0,0,0.6);">
                         <div style="background:#151C26; border-bottom:1px solid #222C3A; padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
                             <span style="font-size:11.5px; font-weight:900; color:var(--cyan); letter-spacing:0.5px;">⚡ OPENGYM CANLI HAREKET ANİMASYONU</span>
-                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 9px; border-radius:4px; color:var(--cyan); border-color:var(--cyan); font-weight:700;" onclick="openImageLightbox('${opengymEx.clip}', '${escapeHTML(ex.name)} - Canlı Animasyon')">⛶ Tam Ekran Oynat</button>
+                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 9px; border-radius:4px; color:var(--cyan); border-color:var(--cyan); font-weight:700;" onclick="openImageLightbox(decodeURIComponent('${encodeURIComponent(opengymEx.clip)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - Canlı Animasyon')}'))">⛶ Tam Ekran Oynat</button>
                         </div>
-                        <div style="text-align:center; padding:6px; cursor:pointer;" onclick="openImageLightbox('${opengymEx.clip}', '${escapeHTML(ex.name)} - Canlı Animasyon')" title="Tam ekran oynatmak için dokunun">
+                        <div style="text-align:center; padding:6px; cursor:pointer;" onclick="openImageLightbox(decodeURIComponent('${encodeURIComponent(opengymEx.clip)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - Canlı Animasyon')}'))" title="Tam ekran oynatmak için dokunun">
                             <video src="${opengymEx.clip}" poster="${opengymEx.still}" autoplay loop muted playsinline style="max-width:100%; max-height:46vh; object-fit:contain; display:block; margin:0 auto; border-radius:6px;"></video>
                             <div style="font-size:10.5px; color:var(--text-secondary); margin-top:6px; font-weight:600;">🔍 Dokunarak tam ekranda canlı döngüde izleyebilirsiniz</div>
                         </div>
@@ -19382,9 +19523,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     <div style="background:#000; border-radius:12px; overflow:hidden; border:1.5px solid rgba(245,158,11,0.4); margin-bottom:12px; box-shadow:0 6px 24px rgba(0,0,0,0.6);">
                         <div style="background:#151C26; border-bottom:1px solid #222C3A; padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
                             <span style="font-size:11.5px; font-weight:900; color:var(--gold); letter-spacing:0.5px;">${isSvgForm ? '📐 FORM VEKTÖR DİYAGRAMI' : '📸 GERÇEK FORM REHBERİ'}</span>
-                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 9px; border-radius:4px; color:var(--cyan); border-color:var(--cyan); font-weight:700;" onclick="openImageLightbox('${photoSrc}', '${escapeHTML(ex.name)} - ${isSvgForm ? 'Form Diyagramı' : 'Form Rehberi'}')">⛶ Tam Ekran Büyüt</button>
+                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 9px; border-radius:4px; color:var(--cyan); border-color:var(--cyan); font-weight:700;" onclick="openImageLightbox(decodeURIComponent('${encodeURIComponent(photoSrc)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - ' + (isSvgForm ? 'Form Diyagramı' : 'Form Rehberi'))}'))">⛶ Tam Ekran Büyüt</button>
                         </div>
-                        <div style="text-align:center; padding:6px; cursor:pointer;" onclick="openImageLightbox('${photoSrc}', '${escapeHTML(ex.name)} - ${isSvgForm ? 'Form Diyagramı' : 'Form Rehberi'}')" title="Büyütmek için dokunun">
+                        <div style="text-align:center; padding:6px; cursor:pointer;" onclick="openImageLightbox(decodeURIComponent('${encodeURIComponent(photoSrc)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - ' + (isSvgForm ? 'Form Diyagramı' : 'Form Rehberi'))}'))" title="Büyütmek için dokunun">
                             <img src="${photoSrc}" style="max-width:100%; max-height:46vh; object-fit:contain; display:block; margin:0 auto; border-radius:6px;" alt="${escapeHTML(ex.name)} Form">
                             <div style="font-size:10.5px; color:var(--text-secondary); margin-top:6px; font-weight:600;">🔍 Dokunarak tam ekran inceleyebilirsiniz</div>
                         </div>
@@ -19439,7 +19580,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const anatomyContainer = document.getElementById('exDetailTabContentAnatomy');
             if (photoGuide && photoGuide.anatomi) {
                 anatomyContainer.innerHTML = `
-                    <div style="text-align:center; background:#000; border-radius:8px; overflow:hidden; border:1px solid var(--border); min-height:160px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="openImageLightbox('${photoGuide.anatomi}', '${escapeHTML(ex.name)} - Anatomi')">
+                    <div style="text-align:center; background:#000; border-radius:8px; overflow:hidden; border:1px solid var(--border); min-height:160px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="openImageLightbox(decodeURIComponent('${encodeURIComponent(photoGuide.anatomi)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - Anatomi')}'))">
                         <img src="${photoGuide.anatomi}" style="max-width:100%; max-height:48vh; object-fit:contain; display:block; margin:0 auto;" alt="${escapeHTML(ex.name)} Anatomi">
                     </div>
                     <div style="background:#0E131B; border:1px solid var(--border); border-radius:8px; padding:12px; margin-top:10px;">

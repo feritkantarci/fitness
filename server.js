@@ -11,6 +11,14 @@ const HOST = '0.0.0.0';
 
 app.use(express.json());
 
+// Security Headers Middleware
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  next();
+});
+
 // API health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', app: 'Çelik Kodu' });

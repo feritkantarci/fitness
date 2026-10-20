@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <!-- Security: CSP & Permissions -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://apis.google.com https://accounts.google.com; connect-src 'self' https://firestore.googleapis.com https://generativelanguage.googleapis.com https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://raw.githubusercontent.com https://cdn.jsdelivr.net https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com data: blob:; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; media-src 'self' data: blob: https:; frame-src 'self' https://fitness-4f427.firebaseapp.com https://accounts.google.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://apis.google.com https://accounts.google.com; connect-src 'self' https://firestore.googleapis.com https://generativelanguage.googleapis.com https://fitness-4f427.firebaseio.com https://fitness-4f427-default-rtdb.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://raw.githubusercontent.com https://cdn.jsdelivr.net https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com data: blob:; img-src 'self' data: blob: https://lh3.googleusercontent.com https://www.gstatic.com https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; media-src 'self' data: blob:; frame-src 'self' https://fitness-4f427.firebaseapp.com https://accounts.google.com;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="theme-color" content="#0B0F17">
@@ -33,9 +33,9 @@
 <body>
 
     <!-- ==================== LOGIN SCREEN ==================== -->
-    <div id="loginScreen">
+    <div id="loginScreen" class="active">
         <div class="login-card">
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v243</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v244</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -55,9 +55,8 @@
                 <button type="submit" class="login-btn" id="loginSubmitBtn">GİRİŞ YAP</button>
             </form>
 
-            <div class="login-hint">
-                <strong>Varsayılan Yönetici:</strong> admin | <strong>Şifre:</strong> 123<br>
-                <em>(Yönetici panelinden yeni kullanıcılar ve sporcular açabilirsiniz).</em>
+            <div class="login-hint" style="color:var(--text-secondary); font-size:11.5px; margin-top:16px;">
+                🔒 Yetkili Girişi • Biyomekanik Performans Sistemi
             </div>
         </div>
     </div>
@@ -72,7 +71,7 @@
                     <span class="canva-brand-monogram" aria-hidden="true" translate="no">Ç</span>
                     <div class="canva-brand-stack">
                         <span class="modern-brand-title" translate="no">Çelik Kodu</span>
-                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v243</span>
+                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v244</span>
                     </div>
                 </div>
                 <div class="modern-bar-actions">
@@ -969,6 +968,30 @@
                     <button class="btn btn-gold" style="width:100%; padding:14px; font-weight:800; margin-top:12px;" onclick="saveCurrentProfile()">
                         💾 DEĞİŞİKLİKLERİ VE KİLOLARIMI KAYDET
                     </button>
+
+                    <!-- HESAP PAROLASI DEĞİŞTİRME -->
+                    <div style="background:rgba(15, 23, 42, 0.6); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:14px; margin-top:16px;">
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+                            <span style="font-size:18px;" aria-hidden="true">🔒</span>
+                            <div>
+                                <h4 style="font-size:13px; font-weight:800; color:#F3F6FA; margin:0;">Hesap Parolasını Değiştir</h4>
+                                <div style="font-size:11px; color:var(--text-secondary);">Salted SHA-256 kriptografik korumalı güvenli şifre</div>
+                            </div>
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label class="form-label" for="profileCurrentPassword" style="font-size:11px;">Mevcut Şifre</label>
+                                <input type="password" id="profileCurrentPassword" class="form-input" placeholder="••••••" autocomplete="current-password">
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label class="form-label" for="profileNewPassword" style="font-size:11px;">Yeni Şifre (Min 6 Karakter)</label>
+                                <input type="password" id="profileNewPassword" class="form-input" placeholder="••••••••" autocomplete="new-password">
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline" style="width:100%; margin-top:10px; font-size:11.5px; padding:8px; border-color:var(--gold); color:var(--gold); font-weight:800;" onclick="handleUserChangePassword()">
+                            🔐 ŞİFREYİ GÜNCELLE
+                        </button>
+                    </div>
 
                     <!-- GOOGLE GEMINI AI CONFIGURATION -->
                     <div style="background:rgba(192, 132, 252, 0.08); border:1px solid rgba(192, 132, 252, 0.3); border-radius:10px; padding:14px; margin-top:20px;">

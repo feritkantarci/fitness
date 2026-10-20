@@ -1,10 +1,11 @@
 /**
  * FitLAB BİYOMEKANİK EGZERSİZ ATLAŞI & KÜTÜPHANESİ
- * Single Source of Truth (SSOT): index.html EXERCISES_DB & exerciseGuideMap ile senkronize.
- * Toplam 96 Orijinal Egzersiz (Diyagram & Form Kılavuzları Dahil)
+ * Single Source of Truth (SSOT): js/exercises-db.js ile senkronize.
+ * Toplam 109 Orijinal Egzersiz (Diyagram, Form & Anatomi Kılavuzları Dahil)
  */
 const fs = require("fs");
 const path = require("path");
+const vm = require("vm");
 const academicEngine = require("./academic-engine");
 
 const STATIC_FALLBACK_CATALOG = [
@@ -121,13 +122,50 @@ const STATIC_FALLBACK_CATALOG = [
   },
   {
     "id": "db_overhead_press",
-    "name": "Dambıl Omuz Presi",
-    "rawKey": "dambıl omuz presi",
+    "name": "Oturarak Dambıl Omuz Presi (Seated)",
+    "rawKey": "oturarak dambıl omuz presi (seated)",
     "primary": "Omuz",
     "pFactor": 1,
     "sec": {
       "Triceps": 0.35,
       "Karın/Core": 0.2
+    },
+    "type": "HEAVY_COMPOUND",
+    "typeLabel": "Kuvvet Egzersizi",
+    "sfr": "HIGH",
+    "sfrLabel": "HIGH",
+    "lengthened": true,
+    "diagramImage": "assets/diagrams/seq_db_press.svg",
+    "formImage": "assets/guides/guide_db_overhead_press_form.jpg",
+    "anatomiImage": "assets/guides/guide_db_overhead_press_anatomi.jpg",
+    "cue": "Sehpa açısını 80-85° dik konuma getir, sırtını sehpaya yapıştır, dambılları kulak hizasından baş üstüne dikey kilitle.",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Ayaklar omuz genişliğinde. Dambıllar kulak hizasında, avuçlar karşıya bakar. Kalça ve karın kilitli.",
+        "phase": "1. Başlangıç (Omuz Hizası)"
+      },
+      {
+        "badge": "action",
+        "desc": "Nefes vererek dambılları kafanın iki yanından düz bir hatta baş üstüne doğru it. Beli asla geriye bükme.",
+        "phase": "2. Dikey İtiş"
+      },
+      {
+        "badge": "finish",
+        "desc": "Kollar baş üstünde kilitlenir, kulaklar kolların arasına gelir. Kontrollü biçimde kulak hizasına indir.",
+        "phase": "3. Baş Üstü Kilit"
+      }
+    ]
+  },
+  {
+    "id": "db_standing_overhead_press",
+    "name": "Ayakta Dambıl Omuz Presi (Standing)",
+    "rawKey": "ayakta dambıl omuz presi (standing)",
+    "primary": "Omuz",
+    "pFactor": 1,
+    "sec": {
+      "Triceps": 0.35,
+      "Karın/Core": 0.25
     },
     "type": "HEAVY_COMPOUND",
     "typeLabel": "Kuvvet Egzersizi",
@@ -383,8 +421,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_db_lunge.svg",
-    "formImage": "assets/guides/guide_db_bulgarian_squat_form.jpg",
-    "anatomiImage": "assets/guides/guide_db_bulgarian_squat_anatomi.jpg",
+    "formImage": "assets/exercises/db_bulgarian_squat.webp",
+    "anatomiImage": "",
     "cue": "Arka ayağın üstünü sehpa kenarına yerleştir, ön diz 90° olana kadar dik çök, ön topuktan patla.",
     "positions": [
       {
@@ -406,8 +444,8 @@ const STATIC_FALLBACK_CATALOG = [
   },
   {
     "id": "db_walking_lunge",
-    "name": "Walking Lunge",
-    "rawKey": "walking lunge",
+    "name": "Yürüyerek Lunge (Walking Lunge)",
+    "rawKey": "yürüyerek lunge (walking lunge)",
     "primary": "Ön Bacak",
     "pFactor": 1,
     "sec": {
@@ -420,8 +458,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_db_lunge.svg",
-    "formImage": "assets/guides/guide_db_walking_lunge_form.jpg",
-    "anatomiImage": "assets/guides/guide_db_walking_lunge_anatomi.jpg",
+    "formImage": "assets/exercises/db_walking_lunge.webp",
+    "anatomiImage": "",
     "cue": "Öne büyük adımlar at, arka diz yere 2 cm kalana kadar çök, ön topuktan kuvvet alarak diğer adıma geç.",
     "positions": [
       {
@@ -456,8 +494,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_db_lunge.svg",
-    "formImage": "assets/guides/guide_db_walking_lunge_form.jpg",
-    "anatomiImage": "assets/guides/guide_db_walking_lunge_anatomi.jpg",
+    "formImage": "assets/exercises/db_reverse_lunge.webp",
+    "anatomiImage": "",
     "cue": "Geriye adım atarak çök (diz tendonlarını korur), ön topuktan patlayıcı güçle başlangıç noktasına çekil.",
     "positions": [
       {
@@ -493,8 +531,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_db_rdl.svg",
-    "formImage": "assets/guides/guide_db_rdl_form.jpg",
-    "anatomiImage": "assets/guides/guide_db_rdl_anatomi.jpg",
+    "formImage": "assets/exercises/db_rdl.webp",
+    "anatomiImage": "",
     "cue": "Dizleri hafif kırık sabitle, kalçayı arkadaki duvara değdirir gibi geriye uzat, sırtı masa gibi düz tut.",
     "positions": [
       {
@@ -530,8 +568,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_db_single_leg_rdl.svg",
-    "formImage": "assets/guides/guide_db_single_leg_rdl_form.jpg",
-    "anatomiImage": "assets/guides/guide_db_single_leg_rdl_anatomi.jpg",
+    "formImage": "assets/exercises/db_single_leg_rdl.webp",
+    "anatomiImage": "",
     "cue": "Destek ayağının dizini hafif bük, serbest bacağı arkaya cetvel gibi uzatırken dambılı kaval kemiğine indir.",
     "positions": [
       {
@@ -567,8 +605,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_db_row.svg",
-    "formImage": "assets/guides/guide_db_saw_row_form.jpg",
-    "anatomiImage": "assets/guides/guide_db_saw_row_anatomi.jpg",
+    "formImage": "assets/exercises/db_saw_row.webp",
+    "anatomiImage": "",
     "cue": "Bir diz ve el sehpada, sırt masa gibi düz. Dambılı dikey değil, yay çizerek kalça cebine doğru çek.",
     "positions": [
       {
@@ -604,8 +642,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_incline_row.svg",
-    "formImage": "assets/guides/guide_db_chest_supported_row_form.jpg",
-    "anatomiImage": "assets/guides/guide_db_chest_supported_row_anatomi.jpg",
+    "formImage": "assets/exercises/db_chest_supported_row.webp",
+    "anatomiImage": "",
     "cue": "Göğsü 30-45° eğimli sehpaya yasla, belden hiç momentum almadan sadece kürek kemiklerini sıkarak çek.",
     "positions": [
       {
@@ -641,8 +679,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "MODERATE",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_renegade_row.svg",
-    "formImage": "assets/guides/guide_db_renegade_row_form.jpg",
-    "anatomiImage": "assets/guides/guide_db_renegade_row_anatomi.jpg",
+    "formImage": "assets/exercises/db_renegade_row.webp",
+    "anatomiImage": "",
     "cue": "Şınav pozisyonunda dambılları tut, ayakları geniş aç, kalçayı hiç sallamadan sırayla çekiş yap.",
     "positions": [
       {
@@ -678,8 +716,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "MODERATE",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_pullover.svg",
-    "formImage": "assets/guides/guide_db_pullover_form.jpg",
-    "anatomiImage": "assets/guides/guide_db_pullover_anatomi.jpg",
+    "formImage": "assets/exercises/db_pullover.webp",
+    "anatomiImage": "",
     "cue": "Sehpada sırtüstü uzan, dambılı iki elle başın arkasına dirsekleri kırmadan uzat, kanatlarla göğüs üstüne çek.",
     "positions": [
       {
@@ -712,8 +750,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_hammer_curl.svg",
-    "formImage": "assets/guides/guide_db_biceps_curl_form.jpg",
-    "anatomiImage": "assets/guides/guide_db_biceps_curl_anatomi.jpg",
+    "formImage": "assets/exercises/db_hammer_curl.webp",
+    "anatomiImage": "",
     "cue": "Avuç içleri birbirine baksın (nötr tutuş), dirsekleri kaburgalara sabitle, sadece ön kolu kaldır.",
     "positions": [
       {
@@ -746,8 +784,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_biceps_curl.svg",
-    "formImage": "assets/guides/guide_db_incline_curl_form.jpg",
-    "anatomiImage": "assets/guides/guide_db_incline_curl_anatomi.jpg",
+    "formImage": "assets/exercises/db_incline_curl.webp",
+    "anatomiImage": "",
     "cue": "Sehpayı 45-60° eğ, kollar arkada tamamen sarkıtılsın, omuzları oynatmadan biceps ile kıvır.",
     "positions": [
       {
@@ -769,8 +807,8 @@ const STATIC_FALLBACK_CATALOG = [
   },
   {
     "id": "db_farmers_walk",
-    "name": "Farmer's Walk",
-    "rawKey": "farmer's walk",
+    "name": "Çiftçi Yürüyüşü (Farmer's Walk / Carry)",
+    "rawKey": "çiftçi yürüyüşü (farmer's walk / carry)",
     "primary": "Karın/Core",
     "pFactor": 0.6,
     "sec": {
@@ -782,8 +820,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_farmers_walk.svg",
-    "formImage": "assets/guides/guide_db_farmers_walk_form.jpg",
-    "anatomiImage": "assets/guides/guide_db_farmers_walk_anatomi.jpg",
+    "formImage": "assets/exercises/db_farmers_walk.webp",
+    "anatomiImage": "",
     "cue": "Ağır dambılları kaldır, omuzları geriye kilitle, karın duvarını taş gibi sık ve küçük kontrollü adımlarla yürü.",
     "positions": [
       {
@@ -805,8 +843,8 @@ const STATIC_FALLBACK_CATALOG = [
   },
   {
     "id": "db_suitcase_carry",
-    "name": "Suitcase Carry",
-    "rawKey": "suitcase carry",
+    "name": "Tek El Çanta Taşıma (Suitcase Carry)",
+    "rawKey": "tek el çanta taşıma (suitcase carry)",
     "primary": "Karın/Core",
     "pFactor": 0.6,
     "sec": {},
@@ -816,8 +854,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_farmers_walk.svg",
-    "formImage": "assets/guides/guide_db_farmers_walk_form.jpg",
-    "anatomiImage": "assets/guides/guide_db_farmers_walk_anatomi.jpg",
+    "formImage": "assets/exercises/db_suitcase_carry.webp",
+    "anatomiImage": "",
     "cue": "Sadece tek elde ağır dambıl tut, ağırlığın seni yana bükmesine ASLA izin verme, dimdik yürü.",
     "positions": [
       {
@@ -850,8 +888,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_russian_twist.svg",
-    "formImage": "assets/guides/guide_db_russian_twist_form.jpg",
-    "anatomiImage": "assets/guides/guide_db_russian_twist_anatomi.jpg",
+    "formImage": "assets/exercises/db_russian_twist.webp",
+    "anatomiImage": "",
     "cue": "Yere otur, gövdeyi 45° yatır, ayakları kaldır. Dambılı sağ ve sol kalça yanına kontrollü döndür.",
     "positions": [
       {
@@ -888,8 +926,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "MODERATE",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_db_snatch.svg",
-    "formImage": "assets/guides/guide_db_snatch_form.jpg",
-    "anatomiImage": "assets/guides/guide_db_snatch_anatomi.jpg",
+    "formImage": "assets/exercises/db_snatch.webp",
+    "anatomiImage": "",
     "cue": "Dambılı bacak arasından patlayıcı kalça vuruşuyla tek hamlede baş üstüne kilitlenene kadar fırlat.",
     "positions": [
       {
@@ -925,8 +963,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_db_swing.svg",
-    "formImage": "assets/guides/guide_db_swing_form.jpg",
-    "anatomiImage": "assets/guides/guide_db_swing_anatomi.jpg",
+    "formImage": "assets/exercises/db_swing.webp",
+    "anatomiImage": "",
     "cue": "Dambılın ucundan iki elle tut, squat yapma! Kalçayı geriye menteşele ve kalça vuruşuyla göğüs hizasına fırlat.",
     "positions": [
       {
@@ -999,8 +1037,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "MODERATE",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_db_clean_squat.svg",
-    "formImage": "assets/guides/guide_kb_clean_form.jpg",
-    "anatomiImage": "assets/guides/guide_kb_clean_anatomi.jpg",
+    "formImage": "assets/exercises/kb_clean.webp",
+    "anatomiImage": "",
     "cue": "Gülleyi bacak arasından çek, dirseği gövdeye yapıştırarak ön kola çarpmadan yumuşakça göğse al.",
     "positions": [
       {
@@ -1074,8 +1112,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "MODERATE",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_db_snatch.svg",
-    "formImage": "assets/guides/guide_db_snatch_form.jpg",
-    "anatomiImage": "assets/guides/guide_db_snatch_anatomi.jpg",
+    "formImage": "assets/exercises/kb_half_snatch.webp",
+    "anatomiImage": "",
     "cue": "Gülleyi tek hamlede baş üstüne fırlatıp kilitle, indirirken önce göğse (rack) alıp sonra bacak arasına bırak.",
     "positions": [
       {
@@ -1111,8 +1149,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_db_squat.svg",
-    "formImage": "assets/guides/guide_db_goblet_squat_form.jpg",
-    "anatomiImage": "assets/guides/guide_db_goblet_squat_anatomi.jpg",
+    "formImage": "assets/exercises/kb_goblet_squat.webp",
+    "anatomiImage": "",
     "cue": "Gülleyi boynuzlarından göğse yapıştır, dirsekler dizlerin içine inene kadar derin çömel.",
     "positions": [
       {
@@ -1148,8 +1186,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "MODERATE",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_db_row.svg",
-    "formImage": "assets/guides/guide_kb_gorilla_row_form.jpg",
-    "anatomiImage": "assets/guides/guide_kb_gorilla_row_anatomi.jpg",
+    "formImage": "assets/exercises/kb_gorilla_row.webp",
+    "anatomiImage": "",
     "cue": "Goril gibi dizleri bükük ve eğik dur. Bir gülleyi yerde bastırırken diğerini kalçaya patlayıcı çek.",
     "positions": [
       {
@@ -1173,17 +1211,19 @@ const STATIC_FALLBACK_CATALOG = [
     "id": "kb_windmill",
     "name": "Kettlebell Windmill",
     "rawKey": "kettlebell windmill",
-    "primary": "Göğüs",
+    "primary": "Omuz",
     "pFactor": 1,
-    "sec": {},
+    "sec": {
+      "Triceps": 0.35
+    },
     "type": "HEAVY_COMPOUND",
     "typeLabel": "Kuvvet Egzersizi",
     "sfr": "HIGH",
     "sfrLabel": "HIGH",
-    "lengthened": false,
+    "lengthened": true,
     "diagramImage": "assets/diagrams/seq_windmill.svg",
-    "formImage": "assets/guides/guide_kb_windmill_form.jpg",
-    "anatomiImage": "assets/guides/guide_kb_windmill_anatomi.jpg",
+    "formImage": "assets/exercises/kb_windmill.webp",
+    "anatomiImage": "",
     "cue": "Gülleyi baş üstünde kilitli tut, gözlerini güllenden ayırmadan zıt ayak bileğine doğru gövdeyi döndürerek eğil.",
     "positions": [
       {
@@ -1219,8 +1259,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "MODERATE",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_windmill.svg",
-    "formImage": "assets/guides/guide_kb_windmill_form.jpg",
-    "anatomiImage": "assets/guides/guide_kb_windmill_anatomi.jpg",
+    "formImage": "assets/exercises/kb_turkish_getup.webp",
+    "anatomiImage": "",
     "cue": "Gözlerini tavandaki güllenden ayırma! Sırtüstünden ayağa kalkana kadar her eklem adımını sırayla kitle.",
     "positions": [
       {
@@ -1255,8 +1295,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_db_press.svg",
-    "formImage": "assets/guides/guide_kb_halo_form.jpg",
-    "anatomiImage": "assets/guides/guide_kb_halo_anatomi.jpg",
+    "formImage": "assets/exercises/kb_halo.webp",
+    "anatomiImage": "",
     "cue": "Gülleyi ters çevirip boynuzlardan tut, başını oynatmadan gülleyi başının etrafında haleler çizerek döndür.",
     "positions": [
       {
@@ -1293,8 +1333,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "LOW",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_thruster.svg",
-    "formImage": "assets/guides/guide_db_thruster_form.jpg",
-    "anatomiImage": "assets/guides/guide_db_thruster_anatomi.jpg",
+    "formImage": "assets/exercises/kb_thruster.webp",
+    "anatomiImage": "",
     "cue": "Derin squat yap, kalkışın patlayıcı momentumunu hiç kesmeden doğrudan baş üstü pres ile birleştir.",
     "positions": [
       {
@@ -1330,8 +1370,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_floor_press.svg",
-    "formImage": "assets/guides/guide_bb_bench_press_form.jpg",
-    "anatomiImage": "assets/guides/guide_bb_bench_press_anatomi.jpg",
+    "formImage": "assets/exercises/bb_bench_press.webp",
+    "anatomiImage": "",
     "cue": "Göz hizası barın altında, kürek kemiklerini sehpaya göm, barı alt göğse değdirip patlayıcı it.",
     "positions": [
       {
@@ -1367,8 +1407,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_floor_press.svg",
-    "formImage": "assets/guides/guide_db_incline_press_form.jpg",
-    "anatomiImage": "assets/guides/guide_db_incline_press_anatomi.jpg",
+    "formImage": "assets/exercises/bb_incline_bench.webp",
+    "anatomiImage": "",
     "cue": "30° açılı sehpada barı köprücük kemiğinin hemen altına indir, üst göğüs lifleriyle yukarı presle.",
     "positions": [
       {
@@ -1404,8 +1444,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_db_press.svg",
-    "formImage": "assets/guides/guide_db_overhead_press_form.jpg",
-    "anatomiImage": "assets/guides/guide_db_overhead_press_anatomi.jpg",
+    "formImage": "assets/exercises/bb_overhead_press.webp",
+    "anatomiImage": "",
     "cue": "Barı köprücük kemiğinde tut, başını hafif geriye çekip barı yukarı iterken başını barın altından öne sok.",
     "positions": [
       {
@@ -1441,8 +1481,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "MODERATE",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_db_squat.svg",
-    "formImage": "assets/guides/guide_bb_back_squat_form.jpg",
-    "anatomiImage": "assets/guides/guide_bb_back_squat_anatomi.jpg",
+    "formImage": "assets/exercises/bb_back_squat.webp",
+    "anatomiImage": "",
     "cue": "Barı üst trapezlere sağlam kilitle, dizleri dışa açarak kalçayı paralel altına indir, ayak tabanıyla yeri parçala.",
     "positions": [
       {
@@ -1478,8 +1518,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_db_clean_squat.svg",
-    "formImage": "assets/guides/guide_bb_back_squat_form.jpg",
-    "anatomiImage": "assets/guides/guide_bb_back_squat_anatomi.jpg",
+    "formImage": "assets/exercises/bb_front_squat.webp",
+    "anatomiImage": "",
     "cue": "Barı omuz önünde ön rack pozisyonunda tut, dirsekleri tavana doğru yüksek tutarak dimdik çömel.",
     "positions": [
       {
@@ -1516,8 +1556,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "LOW",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_db_rdl.svg",
-    "formImage": "assets/guides/guide_bb_deadlift_form.jpg",
-    "anatomiImage": "assets/guides/guide_bb_deadlift_anatomi.jpg",
+    "formImage": "assets/exercises/bb_deadlift.webp",
+    "anatomiImage": "",
     "cue": "Bar kaval kemiğine temas etsin, sırt masa gibi düz, yeri ayak tabanlarınla iterek kalçayı kilitle.",
     "positions": [
       {
@@ -1553,8 +1593,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_db_rdl.svg",
-    "formImage": "assets/guides/guide_db_rdl_form.jpg",
-    "anatomiImage": "assets/guides/guide_db_rdl_anatomi.jpg",
+    "formImage": "assets/exercises/bb_rdl.webp",
+    "anatomiImage": "",
     "cue": "Dizleri hafif kırık sabitle, barı kaval kemiği boyunca indirerek kalçayı arkaya menteşele.",
     "positions": [
       {
@@ -1589,8 +1629,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_db_rdl.svg",
-    "formImage": "assets/guides/guide_bb_hip_thrust_form.jpg",
-    "anatomiImage": "assets/guides/guide_bb_hip_thrust_anatomi.jpg",
+    "formImage": "assets/exercises/bb_hip_thrust.webp",
+    "anatomiImage": "",
     "cue": "Sırt sehpaya dayalı, süngerli bar kalça kıvrımında, topuklardan yeri iterek tepe noktada kalçayı taş gibi kilitle.",
     "positions": [
       {
@@ -1626,8 +1666,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "MODERATE",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_incline_row.svg",
-    "formImage": "assets/guides/guide_bb_pendlay_row_form.jpg",
-    "anatomiImage": "assets/guides/guide_bb_pendlay_row_anatomi.jpg",
+    "formImage": "assets/exercises/bb_bent_over_row.webp",
+    "anatomiImage": "",
     "cue": "Gövdeyi 45° öne eğ, omurgayı düz tut, barı göbek deliğine doğru kürek kemiklerini birbirine yapıştırarak çek.",
     "positions": [
       {
@@ -1663,8 +1703,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "MODERATE",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_incline_row.svg",
-    "formImage": "assets/guides/guide_bb_pendlay_row_form.jpg",
-    "anatomiImage": "assets/guides/guide_bb_pendlay_row_anatomi.jpg",
+    "formImage": "assets/exercises/bb_pendlay_row.webp",
+    "anatomiImage": "",
     "cue": "Gövde yere tam paralel (90°). Her tekrarda bar yerden sıfırdan başlar, patlayıcı alt göğse çekilip yere bırakılır.",
     "positions": [
       {
@@ -1697,8 +1737,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_biceps_curl.svg",
-    "formImage": "assets/guides/guide_db_biceps_curl_form.jpg",
-    "anatomiImage": "assets/guides/guide_db_biceps_curl_anatomi.jpg",
+    "formImage": "assets/exercises/bb_biceps_curl.webp",
+    "anatomiImage": "",
     "cue": "Dirsekleri gövdeye yapıştır, belden savurma yapmadan sadece ön kolları bükerek barı göğse doğru kıvır.",
     "positions": [
       {
@@ -1734,8 +1774,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_floor_press.svg",
-    "formImage": "assets/guides/guide_bb_bench_press_form.jpg",
-    "anatomiImage": "assets/guides/guide_bb_bench_press_anatomi.jpg",
+    "formImage": "assets/exercises/bb_close_grip_bench.webp",
+    "anatomiImage": "",
     "cue": "Elleri omuz genişliğinde dar tut, inişte dirsekleri gövdeye yapışık tutarak ağırlığı triceps ile presle.",
     "positions": [
       {
@@ -1771,8 +1811,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_incline_row.svg",
-    "formImage": "assets/guides/guide_mach_lat_pulldown_form.jpg",
-    "anatomiImage": "assets/guides/guide_mach_lat_pulldown_anatomi.jpg",
+    "formImage": "assets/exercises/mach_lat_pulldown.webp",
+    "anatomiImage": "",
     "cue": "Bacak pedine sıkıca otur, barı üst göğse doğru dirsekleri kaburgalara çekerek indir, arkaya aşırı yatma.",
     "positions": [
       {
@@ -1807,8 +1847,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_incline_row.svg",
-    "formImage": "assets/guides/guide_mach_cable_row_form.jpg",
-    "anatomiImage": "assets/guides/guide_mach_cable_row_anatomi.jpg",
+    "formImage": "assets/exercises/mach_cable_row.webp",
+    "anatomiImage": "",
     "cue": "Ayakları platforma bas, sırtı dik tut, tutacağı göbek deliğine doğru kürek kemiklerini birbirine yapıştırarak çek.",
     "positions": [
       {
@@ -1843,8 +1883,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_lateral_raise.svg",
-    "formImage": "assets/guides/guide_mach_face_pull_form.jpg",
-    "anatomiImage": "assets/guides/guide_mach_face_pull_anatomi.jpg",
+    "formImage": "assets/exercises/mach_face_pull.webp",
+    "anatomiImage": "",
     "cue": "Halatı göz hizasından tut, dirsekleri yüksekte dışa açarak halatın ortasını alnına doğru çek ve arka omuzu sık.",
     "positions": [
       {
@@ -1877,8 +1917,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_floor_press.svg",
-    "formImage": "assets/guides/guide_mach_pec_deck_form.jpg",
-    "anatomiImage": "assets/guides/guide_mach_pec_deck_anatomi.jpg",
+    "formImage": "assets/exercises/mach_cable_crossover.webp",
+    "anatomiImage": "",
     "cue": "Dirseklerde hafif sabit açı tut, kolları büyük bir ağaca sarılır gibi göğsün önünde birleştir.",
     "positions": [
       {
@@ -1911,8 +1951,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_floor_press.svg",
-    "formImage": "assets/guides/guide_mach_pec_deck_form.jpg",
-    "anatomiImage": "assets/guides/guide_mach_pec_deck_anatomi.jpg",
+    "formImage": "assets/exercises/mach_pec_deck.webp",
+    "anatomiImage": "",
     "cue": "Dirsekleri pedlere veya tutacaklara yerleştir, omuzları geride tutarak göğüs kaslarınla kolları önde kapat.",
     "positions": [
       {
@@ -1945,8 +1985,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_skull_crusher.svg",
-    "formImage": "assets/guides/guide_mach_triceps_pushdown_form.jpg",
-    "anatomiImage": "assets/guides/guide_mach_triceps_pushdown_anatomi.jpg",
+    "formImage": "assets/exercises/mach_triceps_pushdown.webp",
+    "anatomiImage": "",
     "cue": "Dirsekleri gövdeye yapıştır, halatı aşağı iterken dip noktada uçlarını yana doğru açarak triceps kaslarını kilitle.",
     "positions": [
       {
@@ -1979,8 +2019,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_biceps_curl.svg",
-    "formImage": "assets/guides/guide_db_biceps_curl_form.jpg",
-    "anatomiImage": "assets/guides/guide_db_biceps_curl_anatomi.jpg",
+    "formImage": "assets/exercises/mach_cable_biceps.webp",
+    "anatomiImage": "",
     "cue": "Düşük makarada düz barı tut, dirsekleri sabit tutarak kablonun sürekli geriliminde biceps kaslarını sık.",
     "positions": [
       {
@@ -2013,8 +2053,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_lateral_raise.svg",
-    "formImage": "assets/guides/guide_mach_cable_lateral_form.jpg",
-    "anatomiImage": "assets/guides/guide_mach_cable_lateral_anatomi.jpg",
+    "formImage": "assets/exercises/mach_cable_lateral.webp",
+    "anatomiImage": "",
     "cue": "Alt makaradan kabloyu gövdenin arkasından veya önünden tut, dirseği hafif bükük omuz hizasına kaldır.",
     "positions": [
       {
@@ -2049,8 +2089,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_db_squat.svg",
-    "formImage": "assets/guides/guide_mach_leg_press_form.jpg",
-    "anatomiImage": "assets/guides/guide_mach_leg_press_anatomi.jpg",
+    "formImage": "assets/exercises/mach_leg_press.webp",
+    "anatomiImage": "",
     "cue": "Bel boşluğunu arkadaki mindere tamamen yapıştır, dizleri 90° büküp platformu ayak tabanlarıyla güçlüce it (dizleri kilitleme).",
     "positions": [
       {
@@ -2083,8 +2123,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_leg_extension.svg",
-    "formImage": "assets/guides/guide_mach_leg_extension_form.jpg",
-    "anatomiImage": "assets/guides/guide_mach_leg_extension_anatomi.jpg",
+    "formImage": "assets/exercises/mach_leg_extension.webp",
+    "anatomiImage": "",
     "cue": "Diz eklemini makinenin dönme noktasıyla hizala, bacakları yukarı uzatıp tepe noktada kuadrisepsi taş gibi sık.",
     "positions": [
       {
@@ -2117,8 +2157,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_leg_curl.svg",
-    "formImage": "assets/guides/guide_mach_leg_curl_form.jpg",
-    "anatomiImage": "assets/guides/guide_mach_leg_curl_anatomi.jpg",
+    "formImage": "assets/exercises/mach_leg_curl.webp",
+    "anatomiImage": "",
     "cue": "Pedi aşil tendonunun hemen üzerine ayarla, topukları kalçaya doğru bükerek hamstring kaslarını sık.",
     "positions": [
       {
@@ -2151,8 +2191,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_calf_raise.svg",
-    "formImage": "assets/guides/guide_mach_calf_raise_form.jpg",
-    "anatomiImage": "assets/guides/guide_mach_calf_raise_anatomi.jpg",
+    "formImage": "assets/exercises/mach_calf_raise.webp",
+    "anatomiImage": "",
     "cue": "Topukları yerden maksimum yüksekliğe kaldırarak TAMAMEN AYAK PARMAK UÇLARINDA YÜKSEL. Tepe noktada baldır kaslarını (kalf) 2 saniye kilitli tut, topukları yere çarpmadan 3 saniyede kontrollü indir.",
     "positions": [
       {
@@ -2187,8 +2227,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_russian_twist.svg",
-    "formImage": "assets/guides/guide_mach_cable_woodchopper_form.jpg",
-    "anatomiImage": "assets/guides/guide_mach_cable_woodchopper_anatomi.jpg",
+    "formImage": "assets/exercises/mach_cable_woodchopper.webp",
+    "anatomiImage": "",
     "cue": "Yüksek makaradan tutacağı çift elle kavra, kolları düz tutarak gövde rotasyonuyla zıt diz yönüne çapraz çek.",
     "positions": [
       {
@@ -2225,8 +2265,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_pushup.svg",
-    "formImage": "assets/guides/guide_bw_pushup_form.jpg",
-    "anatomiImage": "assets/guides/guide_bw_pushup_anatomi.jpg",
+    "formImage": "assets/exercises/bw_pushup.webp",
+    "anatomiImage": "",
     "cue": "Gövde baştan topuğa cetvel gibi düz, dirsekler 45° açıyla geriye insin, göğüs yere 2 cm kalana kadar çök.",
     "positions": [
       {
@@ -2263,8 +2303,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_pushup.svg",
-    "formImage": "assets/guides/guide_bw_pushup_form.jpg",
-    "anatomiImage": "assets/guides/guide_bw_pushup_anatomi.jpg",
+    "formImage": "assets/exercises/bw_decline_pushup.webp",
+    "anatomiImage": "",
     "cue": "Ayakları sehpa veya kutu üzerine koy, vücut eğimini koruyarak üst göğüs odaklı şınav çek.",
     "positions": [
       {
@@ -2300,8 +2340,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_diamond_pushup.svg",
-    "formImage": "assets/guides/guide_bw_diamond_pushup_form.jpg",
-    "anatomiImage": "assets/guides/guide_bw_diamond_pushup_anatomi.jpg",
+    "formImage": "assets/exercises/bw_diamond_pushup.webp",
+    "anatomiImage": "",
     "cue": "Başparmak ve işaret parmaklarını göğüs altında elmas şeklinde birleştir, dirsekleri gövdeye yapışık tutarak it.",
     "positions": [
       {
@@ -2337,8 +2377,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "MODERATE",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_dips.svg",
-    "formImage": "assets/guides/guide_bw_dips_form.jpg",
-    "anatomiImage": "assets/guides/guide_bw_dips_anatomi.jpg",
+    "formImage": "assets/exercises/bw_dips.webp",
+    "anatomiImage": "",
     "cue": "Paralel barlarda gövdeyi 30° öne eğ, dirsekler 90° olana kadar kontrollü in ve tepeye kilitlen.",
     "positions": [
       {
@@ -2374,8 +2414,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_chinup.svg",
-    "formImage": "assets/guides/guide_bw_pullup_form.jpg",
-    "anatomiImage": "assets/guides/guide_bw_pullup_anatomi.jpg",
+    "formImage": "assets/exercises/bw_pullup.webp",
+    "anatomiImage": "",
     "cue": "Barı omuzdan geniş kavra, sallanmadan göğsü bara doğru yükselt, çene barı geçince kanatları sık.",
     "positions": [
       {
@@ -2410,8 +2450,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_chinup.svg",
-    "formImage": "assets/guides/guide_bw_chinup_form.jpg",
-    "anatomiImage": "assets/guides/guide_bw_chinup_anatomi.jpg",
+    "formImage": "assets/exercises/bw_chinup.webp",
+    "anatomiImage": "",
     "cue": "Avuç içleri yüzüne baksın (ters tutuş), dirsekleri önden çekerek çeneyi barın üstüne yükselt ve biceps ile sık.",
     "positions": [
       {
@@ -2447,8 +2487,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_incline_row.svg",
-    "formImage": "assets/guides/guide_bw_inverted_row_form.jpg",
-    "anatomiImage": "assets/guides/guide_bw_inverted_row_anatomi.jpg",
+    "formImage": "assets/exercises/bw_inverted_row.webp",
+    "anatomiImage": "",
     "cue": "Alçak barın altına gir, topuklar yerde, gövde cetvel gibi düz, göğsü bara değene kadar çek.",
     "positions": [
       {
@@ -2483,8 +2523,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_db_squat.svg",
-    "formImage": "assets/guides/guide_bw_air_squat_form.jpg",
-    "anatomiImage": "assets/guides/guide_bw_air_squat_anatomi.jpg",
+    "formImage": "assets/exercises/bw_air_squat.webp",
+    "anatomiImage": "",
     "cue": "Kolları önde dengede tut, topuklar yerden ayrılmadan kalçayı diz seviyesinin altına kadar derin indir.",
     "positions": [
       {
@@ -2519,8 +2559,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "MODERATE",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_db_squat.svg",
-    "formImage": "assets/guides/guide_bw_air_squat_form.jpg",
-    "anatomiImage": "assets/guides/guide_bw_air_squat_anatomi.jpg",
+    "formImage": "assets/exercises/bw_jump_squat.webp",
+    "anatomiImage": "",
     "cue": "Derin squat derinliğine in, tavana doğru patlayıcı sıçra ve parmak ucundan topuğa yumuşakça iniş yap.",
     "positions": [
       {
@@ -2555,8 +2595,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_db_rdl.svg",
-    "formImage": "assets/guides/guide_bw_glute_bridge_form.jpg",
-    "anatomiImage": "assets/guides/guide_bw_glute_bridge_anatomi.jpg",
+    "formImage": "assets/exercises/bw_glute_bridge.webp",
+    "anatomiImage": "",
     "cue": "Yerde sırtüstü yat, dizler 90° bükülü, topuklardan yeri iterek kalçayı omuz-diz hattında düz olana kadar kaldır.",
     "positions": [
       {
@@ -2591,8 +2631,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_leg_raise.svg",
-    "formImage": "assets/guides/guide_bw_hanging_knee_raise_form.jpg",
-    "anatomiImage": "assets/guides/guide_bw_hanging_knee_raise_anatomi.jpg",
+    "formImage": "assets/exercises/bw_hanging_knee_raise.webp",
+    "anatomiImage": "",
     "cue": "Barfiks barında asılıyken gövdeyi sallamadan dizleri göğse doğru çek, pelvisi yukarı yuvarlayarak alt karını sık.",
     "positions": [
       {
@@ -2625,8 +2665,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_plank_pull_through.svg",
-    "formImage": "assets/guides/guide_bw_hollow_body_form.jpg",
-    "anatomiImage": "assets/guides/guide_bw_hollow_body_anatomi.jpg",
+    "formImage": "assets/exercises/bw_hollow_body.webp",
+    "anatomiImage": "",
     "cue": "Sırtüstü yat, bel boşluğunu zemine sıfır boşlukla yapıştır, kolları ve bacakları hafif kaldırarak muz şeklinde kilitlen.",
     "positions": [
       {
@@ -2659,8 +2699,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_plank_pull_through.svg",
-    "formImage": "assets/guides/guide_bw_plank_form.jpg",
-    "anatomiImage": "assets/guides/guide_bw_plank_anatomi.jpg",
+    "formImage": "assets/exercises/bw_plank.webp",
+    "anatomiImage": "",
     "cue": "Dirsekler ve ayak parmak uçlarında vücudu cetvel gibi düz tut, karnı ve kalçayı taş gibi sıkarak beli koru.",
     "positions": [
       {
@@ -2693,8 +2733,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "N/A",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_escalera.svg",
-    "formImage": "assets/guides/guide_bw_burpee_form.jpg",
-    "anatomiImage": "assets/guides/guide_bw_burpee_anatomi.jpg",
+    "formImage": "assets/exercises/bw_burpee.webp",
+    "anatomiImage": "",
     "cue": "Hızla çömel, ayakları geriye atıp göğsü yere dokundur, ayakları geri çekip tavana doğru alkışla sıçra.",
     "positions": [
       {
@@ -2727,8 +2767,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "N/A",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_plank_pull_through.svg",
-    "formImage": "assets/guides/guide_bw_mountain_climber_form.jpg",
-    "anatomiImage": "assets/guides/guide_bw_mountain_climber_anatomi.jpg",
+    "formImage": "assets/exercises/bw_mountain_climber.webp",
+    "anatomiImage": "",
     "cue": "Yüksek şınav pozisyonunda kalçayı kaldırmadan dizleri sırayla koşar adım göğse çek.",
     "positions": [
       {
@@ -3019,25 +3059,35 @@ const STATIC_FALLBACK_CATALOG = [
     "sfr": "N/A",
     "sfrLabel": "N/A",
     "lengthened": false,
-    "diagramImage": "assets/diagrams/seq_escalera.svg",
+    "diagramImage": "assets/diagrams/seq_manmaker.svg",
     "formImage": "assets/guides/guide_db_manmaker_form.jpg",
     "anatomiImage": "assets/guides/guide_db_manmaker_anatomi.jpg",
-    "cue": "Şınav + Sağ/Sol Row + Ayakları çekip Squat Clean + Baş üstü Thruster zincirini tek akışta kesintisiz uygula.",
+    "cue": "1. Şınav ➔ 2. Sağ Row ➔ 3. Sol Row ➔ 4. Squat Clean ➔ 5. Baş Üstü Thruster zincirini omurga dikliğini bozmadan kesintisiz uygula.",
     "positions": [
       {
         "badge": "setup",
-        "desc": "Dambıllar elde yere şınav pozisyonuna in.",
-        "phase": "1. Şınav & Plank"
+        "desc": "Dambıllar yerde omuz genişliğinde şınav pozisyonu al. Dirsekleri 45° açıyla bükerek göğsü dambılların arasına indir ve patlayıcı güçle yeri it.",
+        "phase": "1. Tam Şınav (Push-Up)"
       },
       {
         "badge": "action",
-        "desc": "Şınav yap, ardından sağ ve sol kolla renegade row çekişi tamamla.",
-        "phase": "2. Şınav + Çift Row"
+        "desc": "Sol kolla zemini güçlüce iterken ve kalçayı hiç oynatmadan sağ dambılı kaburga hizasına çek. Kanat kasını 1 sn sık.",
+        "phase": "2. Sağ Kol Renegade Row"
+      },
+      {
+        "badge": "action",
+        "desc": "Sağ dambılı sessizce yere koy. Anti-rotasyonel dengeyi koruyarak sol dambılı aynı kontrolle sol kalça cebine doğru çek.",
+        "phase": "3. Sol Kol Renegade Row"
+      },
+      {
+        "badge": "action",
+        "desc": "Ayakları dambılların dışına çekip yere sağlam bas. Dambılları omuzlara alırken derin ön squat pozisyonuna çök.",
+        "phase": "4. Squat Clean (Ön Rack)"
       },
       {
         "badge": "finish",
-        "desc": "Ayakları dambılların yanına fırlatıp squat clean ile kalk ve baş üstü thruster ile bitir.",
-        "phase": "3. Squat Clean & Thruster"
+        "desc": "Squat tabanından bacakların kinetik gücüyle yukarı fırla, momentumu baş üstü dikey presle birleştirerek kollar, kalça ve dizleri tam kilitle.",
+        "phase": "5. Patlayıcı Thruster & Kilit"
       }
     ]
   },
@@ -3389,8 +3439,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_calf_raise.svg",
-    "formImage": "assets/guides/guide_mach_calf_raise_form.jpg",
-    "anatomiImage": "assets/guides/guide_mach_calf_raise_anatomi.jpg",
+    "formImage": "assets/exercises/db_standing_calf_raise.webp",
+    "anatomiImage": "",
     "cue": "Topukları yerden maksimum yüksekliğe kaldırarak TAMAMEN AYAK PARMAK UÇLARINDA YÜKSEL. Tepe noktada baldır kaslarını (kalf) 2 saniye kilitli tut, topukları yere çarpmadan 3 saniyede kontrollü indir.",
     "positions": [
       {
@@ -3423,8 +3473,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_leg_curl.svg",
-    "formImage": "assets/guides/guide_mach_leg_curl_form.jpg",
-    "anatomiImage": "assets/guides/guide_mach_leg_curl_anatomi.jpg",
+    "formImage": "assets/exercises/db_lying_leg_curl.webp",
+    "anatomiImage": "",
     "cue": "Düz sehpaya yüzüstü uzan, dambılı iki ayak tabanı arasına sıkıştır. Kalçayı mindere yapışık tutarak topukları kalçaya doğru bük, zirvede hamstringi 1.5 sn sık.",
     "positions": [
       {
@@ -3459,8 +3509,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_leg_extension.svg",
-    "formImage": "assets/guides/guide_mach_leg_extension_form.jpg",
-    "anatomiImage": "assets/guides/guide_mach_leg_extension_anatomi.jpg",
+    "formImage": "assets/exercises/bw_sissy_squat.webp",
+    "anatomiImage": "",
     "cue": "Parmak ucuna kalkıp dizleri öne iterken gövdeyi arkaya yatır. Düz bir çizgi halinde uylukları ger ve sadece quad gücüyle kendini doğrult.",
     "positions": [
       {
@@ -3479,108 +3529,1150 @@ const STATIC_FALLBACK_CATALOG = [
         "phase": "3. Quad İtişiyle Kilitlenme"
       }
     ]
+  },
+  {
+    "id": "db_pullover_to_halo",
+    "name": "Dambıl Pullover to Halo (Torasik & Omuz Akışı)",
+    "rawKey": "dambıl pullover to halo (torasik & omuz akışı)",
+    "primary": "Sırt",
+    "pFactor": 0.5,
+    "sec": {
+      "Göğüs": 0.5,
+      "Omuz": 0.4,
+      "Karın/Core": 0.3,
+      "Triceps": 0.25
+    },
+    "type": "MOBILITY_STABILITY",
+    "typeLabel": "Kuvvet Egzersizi",
+    "sfr": "HIGH",
+    "sfrLabel": "HIGH",
+    "lengthened": true,
+    "diagramImage": "assets/diagrams/seq_pullover.svg",
+    "formImage": "assets/exercises/db_pullover_to_halo.webp",
+    "anatomiImage": "",
+    "cue": "Mindere sırtüstü uzanıp pullover esnemesini yapın; dambılı göğse çekerken karından oturur konuma doğrulup baş çevresinde akıcı 360° halo ile çevirin.",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Mindere sırtüstü uzan, dizler bükülü, ayak tabanları yerde. Dambılı iki elle tutarak baş arkasına uzatıp kanatları derin esnet.",
+        "phase": "1. Sırtüstü Pullover Esnemesi"
+      },
+      {
+        "badge": "action",
+        "desc": "Dambılı göğse doğru çekerken karın kaslarını sıkarak ayak tabanlarını yerden kaldırmadan oturur konuma doğrul.",
+        "phase": "2. Sit-Up ile Doğrulma"
+      },
+      {
+        "badge": "finish",
+        "desc": "Dik oturuşta dambılı başın etrafında yatay 360° dairesel yörüngede (halo) çevirip göğse getir ve kontrollüce geriye yat.",
+        "phase": "3. 360° Halo & Geri Yatış"
+      }
+    ]
+  },
+  {
+    "id": "db_seesaw_lunge",
+    "name": "Dambıl Seesaw Lunge (Dinamik İleri-Geri Lunge)",
+    "rawKey": "dambıl seesaw lunge (dinamik i̇leri-geri lunge)",
+    "primary": "Ön Bacak",
+    "pFactor": 1,
+    "sec": {
+      "Glute": 0.6,
+      "Arka Bacak": 0.35,
+      "Karın/Core": 0.2
+    },
+    "type": "HEAVY_COMPOUND",
+    "typeLabel": "Kuvvet Egzersizi",
+    "sfr": "HIGH",
+    "sfrLabel": "HIGH",
+    "lengthened": true,
+    "diagramImage": "assets/diagrams/seq_db_lunge.svg",
+    "formImage": "assets/exercises/db_seesaw_lunge.webp",
+    "anatomiImage": "",
+    "cue": "Öne lunge ile 90° çöküşten dönerken ayağı orta hatta yere basmadan sarkaç gibi kesintisiz geriye lunge fazına aktarın.",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Dambıllar iki yanda dik duruş. Tek bacakla öne kontrollü ve geniş bir adım at.",
+        "phase": "1. İleri Lunge Fazı"
+      },
+      {
+        "badge": "action",
+        "desc": "Ön topuktan patlayarak geri it, ancak orta çizgide ayağı yere basmadan doğrudan geriye lungea uzat.",
+        "phase": "2. Sarkaç (Seesaw) Geçişi"
+      },
+      {
+        "badge": "finish",
+        "desc": "Geriye lungeda arka diz yere 2 cm kala dengelen ve ön topuktan patlayıcı şekilde başlangıca dön.",
+        "phase": "3. Geri Lunge & Kilit"
+      }
+    ]
+  },
+  {
+    "id": "db_clean_squat_press",
+    "name": "Dambıl Clean to Front Squat to Push Press",
+    "rawKey": "dambıl clean to front squat to push press",
+    "primary": "Ön Bacak",
+    "pFactor": 0.8,
+    "sec": {
+      "Omuz": 0.8,
+      "Glute": 0.5,
+      "Triceps": 0.35,
+      "Sırt": 0.35
+    },
+    "type": "HEAVY_COMPOUND",
+    "typeLabel": "Kuvvet Egzersizi",
+    "sfr": "HIGH",
+    "sfrLabel": "HIGH",
+    "lengthened": true,
+    "diagramImage": "assets/diagrams/seq_db_clean_squat.svg",
+    "formImage": "assets/exercises/db_clean_squat_press.webp",
+    "anatomiImage": "",
+    "cue": "Dambılları kalça menteşesiyle omuzlara al, derin ön squata in ve kalkışın kinetik momentumunu dikey baş üstü prese aktar.",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Dambıllar diz hizasında, kalça menteşelenmiş. Patlayıcı kalça itişiyle dambılları omuz başlarına (front rack) çek.",
+        "phase": "1. Hang Clean Fazı"
+      },
+      {
+        "badge": "action",
+        "desc": "Dambıllar omuzdayken omurgayı dik tutarak kalçayı topukların arasına derin front squata indir.",
+        "phase": "2. Derin Front Squat"
+      },
+      {
+        "badge": "finish",
+        "desc": "Squat kalkış hızını hiç kesmeden bacak gücünü kollarla birleştir ve dambılları baş üstüne kilitle.",
+        "phase": "3. Patlayıcı Push Press Kilit"
+      }
+    ]
+  },
+  {
+    "id": "db_rdl_to_high_pull",
+    "name": "Dambıl RDL to High Pull (Arka Zincir & Üst Çekiş)",
+    "rawKey": "dambıl rdl to high pull (arka zincir & üst çekiş)",
+    "primary": "Arka Bacak",
+    "pFactor": 1,
+    "sec": {
+      "Glute": 0.5,
+      "Sırt": 0.3
+    },
+    "type": "HEAVY_COMPOUND",
+    "typeLabel": "Kuvvet Egzersizi",
+    "sfr": "HIGH",
+    "sfrLabel": "HIGH",
+    "lengthened": true,
+    "diagramImage": "assets/diagrams/seq_db_rdl.svg",
+    "formImage": "assets/exercises/db_rdl_to_high_pull.webp",
+    "anatomiImage": "",
+    "cue": "RDL ile gerilen arka bacakları patlayıcı kalça sürüşüyle fırlatırken dambılları göğüs hizasına dirsekler yüksekte çekin.",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Ayaklar kalça genişliğinde. Kalçayı arkaya menteşele, dambıllar bacaklara yapışık kaval kemiğine insin.",
+        "phase": "1. RDL Menteşesi"
+      },
+      {
+        "badge": "action",
+        "desc": "Arka bacaklardaki gerilimle kalçayı patlayıcı öne sür ve ayak bileklerinden yükselerek momentum üret.",
+        "phase": "2. Patlayıcı Kalça Sürüşü"
+      },
+      {
+        "badge": "finish",
+        "desc": "Momentumu kullanarak dirsekleri kulak yönünde dışa ve yukarı çek, dambılları göğüs hizasında kilitle.",
+        "phase": "3. Dirsek Yüksek High Pull"
+      }
+    ]
+  },
+  {
+    "id": "db_swing_to_goblet_squat",
+    "name": "Dambıl Swing to Goblet Squat (Hinge-Squat Akışı)",
+    "rawKey": "dambıl swing to goblet squat (hinge-squat akışı)",
+    "primary": "Glute",
+    "pFactor": 0.6,
+    "sec": {
+      "Arka Bacak": 0.4,
+      "Karın/Core": 0.25
+    },
+    "type": "BALLISTIC_POWER",
+    "typeLabel": "Kuvvet Egzersizi",
+    "sfr": "HIGH",
+    "sfrLabel": "HIGH",
+    "lengthened": true,
+    "diagramImage": "assets/diagrams/seq_db_swing.svg",
+    "formImage": "assets/exercises/db_swing_to_goblet_squat.webp",
+    "anatomiImage": "",
+    "cue": "Kalça itişiyle yükselen dambılı göğüste dikey yakalayıp momentumunu hiç kesmeden derin çömelmeye aktarın.",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Dambılı iki elle tabanından tut. Kalçayı geriye menteşele ve patlayıcı kalça vuruşuyla dambılı göğüs hizasına fırlat.",
+        "phase": "1. Patlayıcı Hinge Swing"
+      },
+      {
+        "badge": "action",
+        "desc": "Dambıl göğüs hizasında hafiflediğinde iki elle kadehi sar ve dirsekleri göğse topla.",
+        "phase": "2. Göğüste Yakalama (Catch)"
+      },
+      {
+        "badge": "finish",
+        "desc": "Yakalama anındaki ivmeyle duraksamadan kalçayı topukların arasına derin çömelmeye indir ve patlayıcı doğrul.",
+        "phase": "3. Derin Goblet Squat & Kilit"
+      }
+    ]
+  },
+  {
+    "id": "db_lunge_to_curl_press",
+    "name": "Dambıl Lunge to Biceps Curl to Overhead Press",
+    "rawKey": "dambıl lunge to biceps curl to overhead press",
+    "primary": "Ön Bacak",
+    "pFactor": 0.8,
+    "sec": {
+      "Glute": 0.5,
+      "Omuz": 0.7,
+      "Biceps": 0.6,
+      "Triceps": 0.3
+    },
+    "type": "HEAVY_COMPOUND",
+    "typeLabel": "Kuvvet Egzersizi",
+    "sfr": "HIGH",
+    "sfrLabel": "HIGH",
+    "lengthened": true,
+    "diagramImage": "assets/diagrams/seq_db_lunge.svg",
+    "formImage": "assets/exercises/db_lunge_to_curl_press.webp",
+    "anatomiImage": "",
+    "cue": "Lunge ile derin çöküşten doğrulurken bacak momentumuyla eşzamanlı dambılları biceps curl ile omuzlara ve duraksamadan baş üstüne presleyin.",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Dambıllar iki yanda dik duruş. Tek bacakla öne kontrollü lunge adım atarak 90° çök.",
+        "phase": "1. Derin Lunge Çöküşü"
+      },
+      {
+        "badge": "action",
+        "desc": "Ön topuktan doğrularak kalkarken eşzamanlı çekiç tutuşla dambılları omuz başlarına (curl) çek.",
+        "phase": "2. Biceps Curl ile Doğrulma"
+      },
+      {
+        "badge": "finish",
+        "desc": "Kalkışın son ivmesini kullanarak duraksamadan dambılları baş üstüne presle ve tepe noktasında kilitle.",
+        "phase": "3. Baş Üstü Omuz Presi"
+      }
+    ]
+  },
+  {
+    "id": "db_gorilla_row_to_clean",
+    "name": "Dambıl Goril Row to Clean (Menteşe & Çekiş Akışı)",
+    "rawKey": "dambıl goril row to clean (menteşe & çekiş akışı)",
+    "primary": "Sırt",
+    "pFactor": 1,
+    "sec": {
+      "Biceps": 0.4
+    },
+    "type": "HEAVY_COMPOUND",
+    "typeLabel": "Kuvvet Egzersizi",
+    "sfr": "HIGH",
+    "sfrLabel": "HIGH",
+    "lengthened": true,
+    "diagramImage": "assets/diagrams/seq_db_row.svg",
+    "formImage": "assets/exercises/db_gorilla_row_to_clean.webp",
+    "anatomiImage": "",
+    "cue": "Yerde derin menteşede çift dambıl gorilla row ardından patlayıcı kalça ekstansiyonuyla ağırlıkları omuza alın (clean).",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Geniş bacak tabanı, gövde 45° öne eğik, dambıllar yerde. Sırayla sağ ve sol dambılla göğse patlayıcı gorilla row çek.",
+        "phase": "1. Çift Yönlü Goril Row"
+      },
+      {
+        "badge": "action",
+        "desc": "Row bitiminde iki dambılı tut, omurgayı nötralize et ve kalçayı arkaya derin menteşele.",
+        "phase": "2. Menteşe Kurulumu"
+      },
+      {
+        "badge": "finish",
+        "desc": "Patlayıcı kalça itişiyle bacak gücünü kollarla birleştirip dambılları omuz başlarına yumuşakça kondur.",
+        "phase": "3. Patlayıcı Hang Clean Kilit"
+      }
+    ]
+  },
+  {
+    "id": "db_floor_press_to_bridge",
+    "name": "Dambıl Floor Press to Glute Bridge (Göğüs & Kalça Köprüsü)",
+    "rawKey": "dambıl floor press to glute bridge (göğüs & kalça köprüsü)",
+    "primary": "Göğüs",
+    "pFactor": 0.85,
+    "sec": {
+      "Triceps": 0.45,
+      "Omuz": 0.25
+    },
+    "type": "HEAVY_COMPOUND",
+    "typeLabel": "Kuvvet Egzersizi",
+    "sfr": "MODERATE",
+    "sfrLabel": "MODERATE",
+    "lengthened": false,
+    "diagramImage": "assets/diagrams/seq_floor_press.svg",
+    "formImage": "assets/exercises/db_floor_press_to_bridge.webp",
+    "anatomiImage": "",
+    "cue": "Yerde sırtüstü glute bridge ile kalçayı tavana sıkıştırırken iki dambılı göğüsten tavana presleyin.",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Yere sırtüstü uzan, dizler bükülü, dambıllar göğüs hizasında, dirsekler yerde 45° açıda.",
+        "phase": "1. Zemin Kurulumu"
+      },
+      {
+        "badge": "action",
+        "desc": "Topukları yere gömerek kalçayı tavana kaldırıp glute köprüsünü kitle; gövde düz bir rampa oluştursun.",
+        "phase": "2. Kalça Köprüsü Kitleme"
+      },
+      {
+        "badge": "finish",
+        "desc": "Köprü pozisyonunu hiç bozmadan dambılları göğüs kaslarını sıkarak tavana presle ve kontrollü zemine indir.",
+        "phase": "3. Göğüs Presi & Kilit"
+      }
+    ]
+  },
+  {
+    "id": "db_step_back_lunge_to_knee_drive",
+    "name": "Dambıl Geri Lunge to Diz Çekme & Tek Kol Omuz Pres",
+    "rawKey": "dambıl geri lunge to diz çekme & tek kol omuz pres",
+    "primary": "Omuz",
+    "pFactor": 1,
+    "sec": {
+      "Triceps": 0.35
+    },
+    "type": "HEAVY_COMPOUND",
+    "typeLabel": "Kuvvet Egzersizi",
+    "sfr": "HIGH",
+    "sfrLabel": "HIGH",
+    "lengthened": true,
+    "diagramImage": "assets/diagrams/seq_db_lunge.svg",
+    "formImage": "assets/exercises/db_step_back_lunge_to_knee_drive.webp",
+    "anatomiImage": "",
+    "cue": "Geriye lunge çöküşünden tek bacak üzerinde doğrularak yükselirken diğer dizi göğse çekin ve karşı kolla dambılı presleyin.",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Dambıl omuzda tek taraflı (ipsilateral/contralateral). Zıt bacakla geriye kontrollü lunge adım atıp çök.",
+        "phase": "1. Geri Lunge Çöküşü"
+      },
+      {
+        "badge": "action",
+        "desc": "Ön topuktan patlayıcı fırlayarak ayağa kalkarken arka dizi 90° göğüs hizasına (high knee) fırla.",
+        "phase": "2. Patlayıcı Diz Sürüşü"
+      },
+      {
+        "badge": "finish",
+        "desc": "Tek ayak üzerinde dengede kalırken omuzdaki dambılı tavana presle, 1 sn kitle ve kontrollü başlangıca dön.",
+        "phase": "3. Tek Kol Pres & Denge"
+      }
+    ]
+  },
+  {
+    "id": "bw_inchworm_to_pushup",
+    "name": "Vücut Ağırlığı Inchworm to Şınav (Mobilite & İtiş Akışı)",
+    "rawKey": "vücut ağırlığı inchworm to şınav (mobilite & i̇tiş akışı)",
+    "primary": "Göğüs",
+    "pFactor": 0.65,
+    "sec": {
+      "Omuz": 0.25,
+      "Triceps": 0.25,
+      "Karın/Core": 0.2
+    },
+    "type": "BODYWEIGHT_STRENGTH",
+    "typeLabel": "Kuvvet Egzersizi",
+    "sfr": "HIGH",
+    "sfrLabel": "HIGH",
+    "lengthened": false,
+    "diagramImage": "assets/diagrams/seq_pushup.svg",
+    "formImage": "assets/exercises/bw_inchworm_to_pushup.webp",
+    "anatomiImage": "",
+    "cue": "Ayakta düz bacak esnemesiyle eller üzerinde şınav pozisyonuna yürüyün, derin şınav çekip ellerle geri yürüyerek doğrulun.",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Ayakta dik dur. Dizleri kırmadan kalçadan eğilip avuçları yere koy; arka bacakları derin esnet.",
+        "phase": "1. Düz Bacak Zemin Teması"
+      },
+      {
+        "badge": "action",
+        "desc": "Eller üzerinde adım adım öne yürüyerek gövdeyi düz bir şınav ve plank tahtası pozisyonuna al.",
+        "phase": "2. İleri Yürüyüş (Inchworm)"
+      },
+      {
+        "badge": "finish",
+        "desc": "Derin ve kontrollü bir göğüs şınavı çek, ardından ellerle ayaklara doğru geri yürüyerek patlayıcı ayağa kalk.",
+        "phase": "3. Şınav & Geri Yürüyüş"
+      }
+    ]
+  },
+  {
+    "id": "mach_straight_arm_pulldown",
+    "name": "Kablo Düz Kol Çekiş (Straight-Arm Pulldown)",
+    "rawKey": "kablo düz kol çekiş (straight-arm pulldown)",
+    "primary": "Sırt",
+    "pFactor": 1,
+    "sec": {
+      "Triceps": 0.25,
+      "Karın/Core": 0.2
+    },
+    "type": "ISOLATION",
+    "typeLabel": "Kuvvet Egzersizi",
+    "sfr": "HIGH",
+    "sfrLabel": "HIGH",
+    "lengthened": true,
+    "diagramImage": "assets/diagrams/seq_pullover.svg",
+    "formImage": "assets/exercises/mach_straight_arm_pulldown.webp",
+    "anatomiImage": "",
+    "cue": "Dirsekleri hafif bükülü ve sabit tut; kolları bükmeden kalça hizasına doğru yay çizerek çek, tepe noktada alt kanat liflerini sık.",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Kablo makarasını en üst seviyeye al, düz veya halat barı kavra. Gövdeyi kalçadan hafifçe (15-20°) öne eğ, kollar baş hizasında ileri uzansın.",
+        "phase": "1. Kablo Kurulumu & Duruş"
+      },
+      {
+        "badge": "action",
+        "desc": "Dirsek açısını hiç bozmadan (hafif kırık ve kilitli), sırt kaslarını sıkarak barı uyluk/kalça hizasına doğru geniş bir yay çizerek bastır.",
+        "phase": "2. Yay Çizerek Bastırma"
+      },
+      {
+        "badge": "finish",
+        "desc": "Alt kanat liflerini kalça yanında 1-2 saniye taş gibi sıkıştır. Ağırlığı kontrollü ve gerilimi hissettirerek baş hizasına geri bırak.",
+        "phase": "3. Alt Kanat Zirve Kilidi"
+      }
+    ]
+  },
+  {
+    "id": "bw_hyperextension",
+    "name": "45° Hiperekstansiyon (Back Extension)",
+    "rawKey": "45° hiperekstansiyon (back extension)",
+    "primary": "Arka Bacak",
+    "pFactor": 0.85,
+    "sec": {
+      "Glute": 0.85,
+      "Sırt": 0.6
+    },
+    "type": "HEAVY_COMPOUND",
+    "typeLabel": "Kuvvet Egzersizi",
+    "sfr": "HIGH",
+    "sfrLabel": "HIGH",
+    "lengthened": true,
+    "diagramImage": "assets/diagrams/seq_db_rdl.svg",
+    "formImage": "assets/exercises/bw_hyperextension.webp",
+    "anatomiImage": "",
+    "cue": "Pedi kalça kıvrımının hemen altına sabitle; beli yuvarlamadan kalçadan öne eğil, omurga nötr ve düz bir hatta olana kadar doğrul.",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "45° sehpa pedini kalça kemiğinin hemen altına ayarla (kalçanın serbestçe bükülmesini sağla). Topukları arkaya kilitle, elleri göğüste çapraz tut.",
+        "phase": "1. 45° Sehpa Ayarı"
+      },
+      {
+        "badge": "action",
+        "desc": "Omurgayı bükmeden, hareketi tamamen kalça ekleminden menteşeleyerek (hip hinge) üst gövdeyi yavaşça öne doğru sarkıt.",
+        "phase": "2. Kalça Menteşesi ile İniş"
+      },
+      {
+        "badge": "finish",
+        "desc": "Kalça ve alt sırt kaslarını (erector spinae) sıkarak gövdeyi bacaklarla düz bir hat oluşturana kadar kaldır. Beli geriye aşırı bükme.",
+        "phase": "3. Nötr Omurga Doğrulması"
+      }
+    ]
   }
 ];
 
-// 95 Onaylı OpenGym 3D Canlı Animasyon Kataloğu
 const OPENGYM_GLOBAL_CATALOG = {
-  "db_bench_press": { id: "0289", name: "Dambıl Bench Press", clip: "assets/opengym/clips/0289.mp4", still: "assets/opengym/stills/0289.webp" },
-  "db_incline_press": { id: "0314", name: "Incline Dambıl Press", clip: "assets/opengym/clips/0314.mp4", still: "assets/opengym/stills/0314.webp" },
-  "db_floor_press": { id: "3668", name: "Dambıl Floor Press", clip: "assets/opengym/clips/3668.mp4", still: "assets/opengym/stills/3668.webp" },
-  "db_overhead_press": { id: "0405", name: "Oturarak Dambıl Omuz Presi (Seated)", clip: "assets/opengym/clips/0405.mp4", still: "assets/opengym/stills/0405.webp" },
-  "db_standing_overhead_press": { id: "0426", name: "Ayakta Dambıl Omuz Presi (Standing)", clip: "assets/opengym/clips/0426.mp4", still: "assets/opengym/stills/0426.webp" },
-  "db_arnold_press": { id: "2137", name: "Arnold Press", clip: "assets/opengym/clips/2137.mp4", still: "assets/opengym/stills/2137.webp" },
-  "db_lateral_raise": { id: "0334", name: "Dambıl Lateral Raise", clip: "assets/opengym/clips/0334.mp4", still: "assets/opengym/stills/0334.webp" },
-  "db_triceps_overhead": { id: "2188", name: "Dambıl Başüstü Triceps", clip: "assets/opengym/clips/2188.mp4", still: "assets/opengym/stills/2188.webp" },
-  "db_skullcrusher": { id: "2589", name: "Dambıl Skullcrusher", clip: "assets/opengym/clips/2589.mp4", still: "assets/opengym/stills/2589.webp" },
-  "db_goblet_squat": { id: "4816", name: "Dambıl Goblet Squat", clip: "assets/opengym/clips/4816.mp4", still: "assets/opengym/stills/4816.webp" },
-  "db_front_squat": { id: "1760", name: "Çift Dambıl Ön Squat (Front Squat)", clip: "assets/opengym/clips/1760.mp4", still: "assets/opengym/stills/1760.webp" },
-  "db_bulgarian_squat": { id: "7590", name: "Bulgar Split Squat", clip: "assets/opengym/clips/7590.mp4", still: "assets/opengym/stills/7590.webp" },
-  "db_walking_lunge": { id: "4295", name: "Walking Lunge", clip: "assets/opengym/clips/4295.mp4", still: "assets/opengym/stills/4295.webp" },
-  "db_reverse_lunge": { id: "0381", name: "Reverse Lunge", clip: "assets/opengym/clips/0381.mp4", still: "assets/opengym/stills/0381.webp" },
-  "db_rdl": { id: "1459", name: "Dambıl RDL", clip: "assets/opengym/clips/1459.mp4", still: "assets/opengym/stills/1459.webp" },
-  "db_single_leg_rdl": { id: "1757", name: "Tek Bacak RDL", clip: "assets/opengym/clips/1757.mp4", still: "assets/opengym/stills/1757.webp" },
-  "db_saw_row": { id: "0292", name: "Dambıl Saw Row", clip: "assets/opengym/clips/0292.mp4", still: "assets/opengym/stills/0292.webp" },
-  "db_chest_supported_row": { id: "0293", name: "Göğüs Destekli Dambıl Row", clip: "assets/opengym/clips/0293.mp4", still: "assets/opengym/stills/0293.webp" },
-  "db_renegade_row": { id: "2980", name: "Renegade Row", clip: "assets/opengym/clips/2980.mp4", still: "assets/opengym/stills/2980.webp" },
-  "db_pullover": { id: "0375", name: "Dambıl Pullover", clip: "assets/opengym/clips/0375.mp4", still: "assets/opengym/stills/0375.webp" },
-  "db_hammer_curl": { id: "0313", name: "Dambıl Hammer Curl", clip: "assets/opengym/clips/0313.mp4", still: "assets/opengym/stills/0313.webp" },
-  "db_incline_curl": { id: "0317", name: "Incline Dambıl Curl", clip: "assets/opengym/clips/0317.mp4", still: "assets/opengym/stills/0317.webp" },
-  "db_farmers_walk": { id: "2917", name: "Dambıl Çiftçi Yürüyüşü (Farmer's Walk)", clip: "assets/opengym/clips/2917.mp4", still: "assets/opengym/stills/2917.webp" },
-  "db_suitcase_carry": { id: "4133", name: "Suitcase Carry", clip: "assets/opengym/clips/4133.mp4", still: "assets/opengym/stills/4133.webp" },
-  "db_russian_twist": { id: "3449", name: "Dambıl Russian Twist", clip: "assets/opengym/clips/3449.mp4", still: "assets/opengym/stills/3449.webp" },
-  "db_snatch": { id: "3888", name: "Dambıl Snatch", clip: "assets/opengym/clips/3888.mp4", still: "assets/opengym/stills/3888.webp" },
-  "db_swing": { id: "0549", name: "Dambıl Swing", clip: "assets/opengym/clips/0549.mp4", still: "assets/opengym/stills/0549.webp" },
-  "kb_swing": { id: "0549", name: "Kettlebell Swing", clip: "assets/opengym/clips/0549.mp4", still: "assets/opengym/stills/0549.webp" },
-  "kb_clean": { id: "4543", name: "Kettlebell Clean", clip: "assets/opengym/clips/4543.mp4", still: "assets/opengym/stills/4543.webp" },
-  "kb_press": { id: "0538", name: "Kettlebell Press", clip: "assets/opengym/clips/0538.mp4", still: "assets/opengym/stills/0538.webp" },
-  "kb_half_snatch": { id: "0529", name: "Kettlebell Half Snatch", clip: "assets/opengym/clips/0529.mp4", still: "assets/opengym/stills/0529.webp" },
-  "kb_goblet_squat": { id: "2993", name: "Kettlebell Goblet Squat", clip: "assets/opengym/clips/2993.mp4", still: "assets/opengym/stills/2993.webp" },
-  "kb_gorilla_row": { id: "0522", name: "Kettlebell Gorilla Row", clip: "assets/opengym/clips/0522.mp4", still: "assets/opengym/stills/0522.webp" },
-  "kb_windmill": { id: "0554", name: "Kettlebell Windmill", clip: "assets/opengym/clips/0554.mp4", still: "assets/opengym/stills/0554.webp" },
-  "kb_turkish_getup": { id: "4057", name: "Kettlebell Turkish Get-Up", clip: "assets/opengym/clips/4057.mp4", still: "assets/opengym/stills/4057.webp" },
-  "kb_halo": { id: "6077", name: "Kettlebell Halo", clip: "assets/opengym/clips/6077.mp4", still: "assets/opengym/stills/6077.webp" },
-  "kb_thruster": { id: "0538", name: "Kettlebell Thruster", clip: "assets/opengym/clips/0538.mp4", still: "assets/opengym/stills/0538.webp" },
-  "bb_bench_press": { id: "0025", name: "Barbell Bench Press", clip: "assets/opengym/clips/0025.mp4", still: "assets/opengym/stills/0025.webp" },
-  "bb_incline_bench": { id: "0047", name: "Incline Barbell Bench Press", clip: "assets/opengym/clips/0047.mp4", still: "assets/opengym/stills/0047.webp" },
-  "bb_overhead_press": { id: "0091", name: "Overhead Press (Askeri Pres)", clip: "assets/opengym/clips/0091.mp4", still: "assets/opengym/stills/0091.webp" },
-  "bb_back_squat": { id: "3593", name: "Barbell Back Squat", clip: "assets/opengym/clips/3593.mp4", still: "assets/opengym/stills/3593.webp" },
-  "bb_front_squat": { id: "0042", name: "Barbell Front Squat", clip: "assets/opengym/clips/0042.mp4", still: "assets/opengym/stills/0042.webp" },
-  "bb_deadlift": { id: "1543", name: "Geleneksel Deadlift (Conventional)", clip: "assets/opengym/clips/1543.mp4", still: "assets/opengym/stills/1543.webp" },
-  "bb_rdl": { id: "0085", name: "Barbell RDL", clip: "assets/opengym/clips/0085.mp4", still: "assets/opengym/stills/0085.webp" },
-  "bb_hip_thrust": { id: "0044", name: "Barbell Hip Thrust", clip: "assets/opengym/clips/0044.mp4", still: "assets/opengym/stills/0044.webp" },
-  "bb_bent_over_row": { id: "0027", name: "Bent-Over Barbell Row", clip: "assets/opengym/clips/0027.mp4", still: "assets/opengym/stills/0027.webp" },
-  "bb_pendlay_row": { id: "3017", name: "Pendlay Row", clip: "assets/opengym/clips/3017.mp4", still: "assets/opengym/stills/3017.webp" },
-  "bb_biceps_curl": { id: "0031", name: "Barbell Biceps Curl", clip: "assets/opengym/clips/0031.mp4", still: "assets/opengym/stills/0031.webp" },
-  "bb_close_grip_bench": { id: "0030", name: "Close Grip Bench Press", clip: "assets/opengym/clips/0030.mp4", still: "assets/opengym/stills/0030.webp" },
-  "mach_lat_pulldown": { id: "0150", name: "Lat Pulldown", clip: "assets/opengym/clips/0150.mp4", still: "assets/opengym/stills/0150.webp" },
-  "mach_cable_row": { id: "0861", name: "Seated Cable Row", clip: "assets/opengym/clips/0861.mp4", still: "assets/opengym/stills/0861.webp" },
-  "mach_face_pull": { id: "5656", name: "Kablo Face Pull", clip: "assets/opengym/clips/5656.mp4", still: "assets/opengym/stills/5656.webp" },
-  "mach_cable_crossover": { id: "8141", name: "Cable Crossover", clip: "assets/opengym/clips/8141.mp4", still: "assets/opengym/stills/8141.webp" },
-  "mach_pec_deck": { id: "1030", name: "Pec Deck Fly", clip: "assets/opengym/clips/1030.mp4", still: "assets/opengym/stills/1030.webp" },
-  "mach_triceps_pushdown": { id: "0241", name: "Kablo Triceps Pushdown", clip: "assets/opengym/clips/0241.mp4", still: "assets/opengym/stills/0241.webp" },
-  "mach_cable_biceps": { id: "1607", name: "Kablo Biceps Curl", clip: "assets/opengym/clips/1607.mp4", still: "assets/opengym/stills/1607.webp" },
-  "mach_cable_lateral": { id: "0178", name: "Kablo Lateral Raise", clip: "assets/opengym/clips/0178.mp4", still: "assets/opengym/stills/0178.webp" },
-  "mach_leg_press": { id: "0599", name: "Leg Press", clip: "assets/opengym/clips/0599.mp4", still: "assets/opengym/stills/0599.webp" },
-  "mach_leg_extension": { id: "0585", name: "Leg Extension", clip: "assets/opengym/clips/0585.mp4", still: "assets/opengym/stills/0585.webp" },
-  "mach_leg_curl": { id: "3195", name: "Lying Leg Curl", clip: "assets/opengym/clips/3195.mp4", still: "assets/opengym/stills/3195.webp" },
-  "mach_calf_raise": { id: "3018", name: "Standing Calf Raise", clip: "assets/opengym/clips/3018.mp4", still: "assets/opengym/stills/3018.webp" },
-  "mach_cable_woodchopper": { id: "11251", name: "Cable Woodchopper", clip: "assets/opengym/clips/11251.mp4", still: "assets/opengym/stills/11251.webp" },
-  "bw_pushup": { id: "0662", name: "Klasik Şınav (Push-Up)", clip: "assets/opengym/clips/0662.mp4", still: "assets/opengym/stills/0662.webp" },
-  "bw_decline_pushup": { id: "0662", name: "Decline Push-Up", clip: "assets/opengym/clips/0662.mp4", still: "assets/opengym/stills/0662.webp" },
-  "bw_diamond_pushup": { id: "0283", name: "Elmas Şınav (Diamond Push-Up)", clip: "assets/opengym/clips/0283.mp4", still: "assets/opengym/stills/0283.webp" },
-  "bw_dips": { id: "1399", name: "Parallel Bar Dips", clip: "assets/opengym/clips/1399.mp4", still: "assets/opengym/stills/1399.webp" },
-  "bw_pullup": { id: "0652", name: "Barfiks (Pull-Up)", clip: "assets/opengym/clips/0652.mp4", still: "assets/opengym/stills/0652.webp" },
-  "bw_chinup": { id: "0670", name: "Ters Tutuş Barfiks (Chin-Up)", clip: "assets/opengym/clips/0670.mp4", still: "assets/opengym/stills/0670.webp" },
-  "bw_inverted_row": { id: "0498", name: "Inverted Row", clip: "assets/opengym/clips/0498.mp4", still: "assets/opengym/stills/0498.webp" },
-  "bw_air_squat": { id: "3948", name: "Vücut Ağırlığı Squat", clip: "assets/opengym/clips/3948.mp4", still: "assets/opengym/stills/3948.webp" },
-  "bw_jump_squat": { id: "3222", name: "Zıplayan Squat (Jump Squat)", clip: "assets/opengym/clips/3222.mp4", still: "assets/opengym/stills/3222.webp" },
-  "bw_glute_bridge": { id: "3013", name: "Glute Bridge", clip: "assets/opengym/clips/3013.mp4", still: "assets/opengym/stills/3013.webp" },
-  "bw_hanging_knee_raise": { id: "9819", name: "Asılarak Diz Çekme", clip: "assets/opengym/clips/9819.mp4", still: "assets/opengym/stills/9819.webp" },
-  "bw_hollow_body": { id: "1246", name: "Hollow Body Hold", clip: "assets/opengym/clips/1246.mp4", still: "assets/opengym/stills/1246.webp" },
-  "bw_burpee": { id: "1160", name: "Burpee", clip: "assets/opengym/clips/1160.mp4", still: "assets/opengym/stills/1160.webp" },
-  "bw_mountain_climber": { id: "0630", name: "Dağ Tırmanışı (Mountain Climber)", clip: "assets/opengym/clips/0630.mp4", still: "assets/opengym/stills/0630.webp" },
-  "kneeling_plate_front_raise": { id: "0310", name: "Dizüstü Ön Omuz Kaldırma", clip: "assets/opengym/clips/0310.mp4", still: "assets/opengym/stills/0310.webp" },
-  "half_kneeling_plate_chop": { id: "4572", name: "Half-Kneeling Rotational Chop", clip: "assets/opengym/clips/4572.mp4", still: "assets/opengym/stills/4572.webp" },
-  "db_thruster": { id: "2968", name: "Dambıl Thruster", clip: "assets/opengym/clips/2968.mp4", still: "assets/opengym/stills/2968.webp" },
-  "db_push_press": { id: "0426", name: "Dambıl Push Press", clip: "assets/opengym/clips/0426.mp4", still: "assets/opengym/stills/0426.webp" },
-  "db_renegade_pushup": { id: "4736", name: "Renegade Row + Push-Up", clip: "assets/opengym/clips/4736.mp4", still: "assets/opengym/stills/4736.webp" },
-  "bear_crawl_pull_through": { id: "3360", name: "Bear Crawl Dumbbell Pull-Through", clip: "assets/opengym/clips/3360.mp4", still: "assets/opengym/stills/3360.webp" },
-  "db_clean_and_press": { id: "3400", name: "Tek Kol Dambıl Clean & Press", clip: "assets/opengym/clips/3400.mp4", still: "assets/opengym/stills/3400.webp" },
-  "db_manmaker": { id: "3886", name: "Dambıl Manmaker", clip: "assets/opengym/clips/3886.mp4", still: "assets/opengym/stills/3886.webp" },
-  "waiters_carry": { id: "9697", name: "Tek Kol Waiter's Walk", clip: "assets/opengym/clips/9697.mp4", still: "assets/opengym/stills/9697.webp" },
-  "cross_body_carry": { id: "2911", name: "Cross-Body Carry", clip: "assets/opengym/clips/2911.mp4", still: "assets/opengym/stills/2911.webp" },
-  "lunge_with_twist": { id: "5069", name: "Dambıl Lunge Rotasyonu", clip: "assets/opengym/clips/5069.mp4", still: "assets/opengym/stills/5069.webp" },
-  "step_up_press": { id: "4185", name: "Box Step-Up + Press", clip: "assets/opengym/clips/4185.mp4", still: "assets/opengym/stills/4185.webp" },
-  "bb_thruster": { id: "1540", name: "Barbell Thruster", clip: "assets/opengym/clips/1540.mp4", still: "assets/opengym/stills/1540.webp" },
-  "bb_hang_power_clean": { id: "5704", name: "Barbell Hang Power Clean", clip: "assets/opengym/clips/5704.mp4", still: "assets/opengym/stills/5704.webp" },
-  "bb_push_press": { id: "1540", name: "Barbell Push Press", clip: "assets/opengym/clips/1540.mp4", still: "assets/opengym/stills/1540.webp" },
-  "bb_zercher_squat": { id: "5670", name: "Zercher Squat", clip: "assets/opengym/clips/5670.mp4", still: "assets/opengym/stills/5670.webp" },
-  "bb_landmine_squat_press": { id: "1540", name: "Landmine Squat to Press", clip: "assets/opengym/clips/1540.mp4", still: "assets/opengym/stills/1540.webp" },
-  "db_standing_calf_raise": { id: "0417", name: "Ayakta Dambıl Calf Raise", clip: "assets/opengym/clips/0417.mp4", still: "assets/opengym/stills/0417.webp" },
-  "db_lying_leg_curl": { id: "6161", name: "Dambıl ile Yatarak Bacak Bükme", clip: "assets/opengym/clips/6161.mp4", still: "assets/opengym/stills/6161.webp" },
-  "mach_straight_arm_pulldown": { id: "0150", name: "Kablo Düz Kol Çekiş", clip: "assets/opengym/clips/0150.mp4", still: "assets/opengym/stills/0150.webp" },
-  "bw_hyperextension": { id: "0085", name: "45° Hiperekstansiyon", clip: "assets/opengym/clips/0085.mp4", still: "assets/opengym/stills/0085.webp" }
+  "db_bench_press": {
+    "id": "0289",
+    "name": "Dambıl Bench Press",
+    "clip": "assets/opengym/clips/0289.mp4",
+    "still": "assets/opengym/stills/0289.webp"
+  },
+  "db_incline_press": {
+    "id": "0314",
+    "name": "Incline Dambıl Press",
+    "clip": "assets/opengym/clips/0314.mp4",
+    "still": "assets/opengym/stills/0314.webp"
+  },
+  "db_floor_press": {
+    "id": "3668",
+    "name": "Dambıl Floor Press",
+    "clip": "assets/opengym/clips/3668.mp4",
+    "still": "assets/opengym/stills/3668.webp"
+  },
+  "db_overhead_press": {
+    "id": "0405",
+    "name": "Oturarak Dambıl Omuz Presi (Seated)",
+    "clip": "assets/opengym/clips/0405.mp4",
+    "still": "assets/opengym/stills/0405.webp"
+  },
+  "db_standing_overhead_press": {
+    "id": "0426",
+    "name": "Ayakta Dambıl Omuz Presi (Standing)",
+    "clip": "assets/opengym/clips/0426.mp4",
+    "still": "assets/opengym/stills/0426.webp"
+  },
+  "db_arnold_press": {
+    "id": "2137",
+    "name": "Arnold Press",
+    "clip": "assets/opengym/clips/2137.mp4",
+    "still": "assets/opengym/stills/2137.webp"
+  },
+  "db_lateral_raise": {
+    "id": "0334",
+    "name": "Dambıl Lateral Raise",
+    "clip": "assets/opengym/clips/0334.mp4",
+    "still": "assets/opengym/stills/0334.webp"
+  },
+  "db_triceps_overhead": {
+    "id": "2188",
+    "name": "Dambıl Başüstü Triceps",
+    "clip": "assets/opengym/clips/2188.mp4",
+    "still": "assets/opengym/stills/2188.webp"
+  },
+  "db_skullcrusher": {
+    "id": "2589",
+    "name": "Dambıl Skullcrusher",
+    "clip": "assets/opengym/clips/2589.mp4",
+    "still": "assets/opengym/stills/2589.webp"
+  },
+  "db_goblet_squat": {
+    "id": "4816",
+    "name": "Dambıl Goblet Squat",
+    "clip": "assets/opengym/clips/4816.mp4",
+    "still": "assets/opengym/stills/4816.webp"
+  },
+  "db_front_squat": {
+    "id": "1760",
+    "name": "Çift Dambıl Ön Squat (Front Squat)",
+    "clip": "assets/opengym/clips/1760.mp4",
+    "still": "assets/opengym/stills/1760.webp"
+  },
+  "db_bulgarian_squat": {
+    "id": "7590",
+    "name": "Bulgar Split Squat",
+    "clip": "assets/opengym/clips/7590.mp4",
+    "still": "assets/opengym/stills/7590.webp"
+  },
+  "db_walking_lunge": {
+    "id": "4295",
+    "name": "Walking Lunge",
+    "clip": "assets/opengym/clips/4295.mp4",
+    "still": "assets/opengym/stills/4295.webp"
+  },
+  "db_reverse_lunge": {
+    "id": "0381",
+    "name": "Reverse Lunge",
+    "clip": "assets/opengym/clips/0381.mp4",
+    "still": "assets/opengym/stills/0381.webp"
+  },
+  "db_rdl": {
+    "id": "1459",
+    "name": "Dambıl RDL",
+    "clip": "assets/opengym/clips/1459.mp4",
+    "still": "assets/opengym/stills/1459.webp"
+  },
+  "db_single_leg_rdl": {
+    "id": "1757",
+    "name": "Tek Bacak RDL",
+    "clip": "assets/opengym/clips/1757.mp4",
+    "still": "assets/opengym/stills/1757.webp"
+  },
+  "db_saw_row": {
+    "id": "0292",
+    "name": "Dambıl Saw Row",
+    "clip": "assets/opengym/clips/0292.mp4",
+    "still": "assets/opengym/stills/0292.webp"
+  },
+  "db_chest_supported_row": {
+    "id": "0293",
+    "name": "Göğüs Destekli Dambıl Row",
+    "clip": "assets/opengym/clips/0293.mp4",
+    "still": "assets/opengym/stills/0293.webp"
+  },
+  "db_renegade_row": {
+    "id": "2980",
+    "name": "Renegade Row",
+    "clip": "assets/opengym/clips/2980.mp4",
+    "still": "assets/opengym/stills/2980.webp"
+  },
+  "db_pullover": {
+    "id": "0375",
+    "name": "Dambıl Pullover",
+    "clip": "assets/opengym/clips/0375.mp4",
+    "still": "assets/opengym/stills/0375.webp"
+  },
+  "db_hammer_curl": {
+    "id": "0313",
+    "name": "Dambıl Hammer Curl",
+    "clip": "assets/opengym/clips/0313.mp4",
+    "still": "assets/opengym/stills/0313.webp"
+  },
+  "db_incline_curl": {
+    "id": "0317",
+    "name": "Incline Dambıl Curl",
+    "clip": "assets/opengym/clips/0317.mp4",
+    "still": "assets/opengym/stills/0317.webp"
+  },
+  "db_farmers_walk": {
+    "id": "2917",
+    "name": "Dambıl Çiftçi Yürüyüşü (Farmer's Walk)",
+    "clip": "assets/opengym/clips/2917.mp4",
+    "still": "assets/opengym/stills/2917.webp"
+  },
+  "db_suitcase_carry": {
+    "id": "4133",
+    "name": "Suitcase Carry",
+    "clip": "assets/opengym/clips/4133.mp4",
+    "still": "assets/opengym/stills/4133.webp"
+  },
+  "db_russian_twist": {
+    "id": "3449",
+    "name": "Dambıl Russian Twist",
+    "clip": "assets/opengym/clips/3449.mp4",
+    "still": "assets/opengym/stills/3449.webp"
+  },
+  "db_snatch": {
+    "id": "3888",
+    "name": "Dambıl Snatch",
+    "clip": "assets/opengym/clips/3888.mp4",
+    "still": "assets/opengym/stills/3888.webp"
+  },
+  "db_swing": {
+    "id": "0549",
+    "name": "Dambıl Swing",
+    "clip": "assets/opengym/clips/0549.mp4",
+    "still": "assets/opengym/stills/0549.webp"
+  },
+  "kb_swing": {
+    "id": "0549",
+    "name": "Kettlebell Swing",
+    "clip": "assets/opengym/clips/0549.mp4",
+    "still": "assets/opengym/stills/0549.webp"
+  },
+  "kb_clean": {
+    "id": "4543",
+    "name": "Kettlebell Clean",
+    "clip": "assets/opengym/clips/4543.mp4",
+    "still": "assets/opengym/stills/4543.webp"
+  },
+  "kb_press": {
+    "id": "0538",
+    "name": "Kettlebell Press",
+    "clip": "assets/opengym/clips/0538.mp4",
+    "still": "assets/opengym/stills/0538.webp"
+  },
+  "kb_half_snatch": {
+    "id": "0529",
+    "name": "Kettlebell Half Snatch",
+    "clip": "assets/opengym/clips/0529.mp4",
+    "still": "assets/opengym/stills/0529.webp"
+  },
+  "kb_goblet_squat": {
+    "id": "2993",
+    "name": "Kettlebell Goblet Squat",
+    "clip": "assets/opengym/clips/2993.mp4",
+    "still": "assets/opengym/stills/2993.webp"
+  },
+  "kb_gorilla_row": {
+    "id": "0522",
+    "name": "Kettlebell Gorilla Row",
+    "clip": "assets/opengym/clips/0522.mp4",
+    "still": "assets/opengym/stills/0522.webp"
+  },
+  "kb_windmill": {
+    "id": "0554",
+    "name": "Kettlebell Windmill",
+    "clip": "assets/opengym/clips/0554.mp4",
+    "still": "assets/opengym/stills/0554.webp"
+  },
+  "kb_turkish_getup": {
+    "id": "4057",
+    "name": "Kettlebell Turkish Get-Up",
+    "clip": "assets/opengym/clips/4057.mp4",
+    "still": "assets/opengym/stills/4057.webp"
+  },
+  "kb_halo": {
+    "id": "6077",
+    "name": "Kettlebell Halo",
+    "clip": "assets/opengym/clips/6077.mp4",
+    "still": "assets/opengym/stills/6077.webp"
+  },
+  "kb_thruster": {
+    "id": "0538",
+    "name": "Kettlebell Thruster",
+    "clip": "assets/opengym/clips/0538.mp4",
+    "still": "assets/opengym/stills/0538.webp"
+  },
+  "bb_bench_press": {
+    "id": "0025",
+    "name": "Barbell Bench Press",
+    "clip": "assets/opengym/clips/0025.mp4",
+    "still": "assets/opengym/stills/0025.webp"
+  },
+  "bb_incline_bench": {
+    "id": "0047",
+    "name": "Incline Barbell Bench Press",
+    "clip": "assets/opengym/clips/0047.mp4",
+    "still": "assets/opengym/stills/0047.webp"
+  },
+  "bb_overhead_press": {
+    "id": "0091",
+    "name": "Overhead Press (Askeri Pres)",
+    "clip": "assets/opengym/clips/0091.mp4",
+    "still": "assets/opengym/stills/0091.webp"
+  },
+  "bb_back_squat": {
+    "id": "3593",
+    "name": "Barbell Back Squat",
+    "clip": "assets/opengym/clips/3593.mp4",
+    "still": "assets/opengym/stills/3593.webp"
+  },
+  "bb_front_squat": {
+    "id": "0042",
+    "name": "Barbell Front Squat",
+    "clip": "assets/opengym/clips/0042.mp4",
+    "still": "assets/opengym/stills/0042.webp"
+  },
+  "bb_deadlift": {
+    "id": "1543",
+    "name": "Geleneksel Deadlift (Conventional)",
+    "clip": "assets/opengym/clips/1543.mp4",
+    "still": "assets/opengym/stills/1543.webp"
+  },
+  "bb_rdl": {
+    "id": "0085",
+    "name": "Barbell RDL",
+    "clip": "assets/opengym/clips/0085.mp4",
+    "still": "assets/opengym/stills/0085.webp"
+  },
+  "bb_hip_thrust": {
+    "id": "0044",
+    "name": "Barbell Hip Thrust",
+    "clip": "assets/opengym/clips/0044.mp4",
+    "still": "assets/opengym/stills/0044.webp"
+  },
+  "bb_bent_over_row": {
+    "id": "0027",
+    "name": "Bent-Over Barbell Row",
+    "clip": "assets/opengym/clips/0027.mp4",
+    "still": "assets/opengym/stills/0027.webp"
+  },
+  "bb_pendlay_row": {
+    "id": "3017",
+    "name": "Pendlay Row",
+    "clip": "assets/opengym/clips/3017.mp4",
+    "still": "assets/opengym/stills/3017.webp"
+  },
+  "bb_biceps_curl": {
+    "id": "0031",
+    "name": "Barbell Biceps Curl",
+    "clip": "assets/opengym/clips/0031.mp4",
+    "still": "assets/opengym/stills/0031.webp"
+  },
+  "bb_close_grip_bench": {
+    "id": "0030",
+    "name": "Close Grip Bench Press",
+    "clip": "assets/opengym/clips/0030.mp4",
+    "still": "assets/opengym/stills/0030.webp"
+  },
+  "mach_lat_pulldown": {
+    "id": "0150",
+    "name": "Lat Pulldown",
+    "clip": "assets/opengym/clips/0150.mp4",
+    "still": "assets/opengym/stills/0150.webp"
+  },
+  "mach_cable_row": {
+    "id": "0861",
+    "name": "Seated Cable Row",
+    "clip": "assets/opengym/clips/0861.mp4",
+    "still": "assets/opengym/stills/0861.webp"
+  },
+  "mach_face_pull": {
+    "id": "5656",
+    "name": "Kablo Face Pull",
+    "clip": "assets/opengym/clips/5656.mp4",
+    "still": "assets/opengym/stills/5656.webp"
+  },
+  "mach_cable_crossover": {
+    "id": "8141",
+    "name": "Cable Crossover",
+    "clip": "assets/opengym/clips/8141.mp4",
+    "still": "assets/opengym/stills/8141.webp"
+  },
+  "mach_pec_deck": {
+    "id": "1030",
+    "name": "Pec Deck Fly",
+    "clip": "assets/opengym/clips/1030.mp4",
+    "still": "assets/opengym/stills/1030.webp"
+  },
+  "mach_triceps_pushdown": {
+    "id": "0241",
+    "name": "Kablo Triceps Pushdown",
+    "clip": "assets/opengym/clips/0241.mp4",
+    "still": "assets/opengym/stills/0241.webp"
+  },
+  "mach_cable_biceps": {
+    "id": "1607",
+    "name": "Kablo Biceps Curl",
+    "clip": "assets/opengym/clips/1607.mp4",
+    "still": "assets/opengym/stills/1607.webp"
+  },
+  "mach_cable_lateral": {
+    "id": "0178",
+    "name": "Kablo Lateral Raise",
+    "clip": "assets/opengym/clips/0178.mp4",
+    "still": "assets/opengym/stills/0178.webp"
+  },
+  "mach_leg_press": {
+    "id": "0599",
+    "name": "Leg Press",
+    "clip": "assets/opengym/clips/0599.mp4",
+    "still": "assets/opengym/stills/0599.webp"
+  },
+  "mach_leg_extension": {
+    "id": "0585",
+    "name": "Leg Extension",
+    "clip": "assets/opengym/clips/0585.mp4",
+    "still": "assets/opengym/stills/0585.webp"
+  },
+  "mach_leg_curl": {
+    "id": "3195",
+    "name": "Lying Leg Curl",
+    "clip": "assets/opengym/clips/3195.mp4",
+    "still": "assets/opengym/stills/3195.webp"
+  },
+  "mach_calf_raise": {
+    "id": "3018",
+    "name": "Standing Calf Raise",
+    "clip": "assets/opengym/clips/3018.mp4",
+    "still": "assets/opengym/stills/3018.webp"
+  },
+  "mach_cable_woodchopper": {
+    "id": "11251",
+    "name": "Cable Woodchopper",
+    "clip": "assets/opengym/clips/11251.mp4",
+    "still": "assets/opengym/stills/11251.webp"
+  },
+  "bw_pushup": {
+    "id": "0662",
+    "name": "Klasik Şınav (Push-Up)",
+    "clip": "assets/opengym/clips/0662.mp4",
+    "still": "assets/opengym/stills/0662.webp"
+  },
+  "bw_decline_pushup": {
+    "id": "0662",
+    "name": "Decline Push-Up",
+    "clip": "assets/opengym/clips/0662.mp4",
+    "still": "assets/opengym/stills/0662.webp"
+  },
+  "bw_diamond_pushup": {
+    "id": "0283",
+    "name": "Elmas Şınav (Diamond Push-Up)",
+    "clip": "assets/opengym/clips/0283.mp4",
+    "still": "assets/opengym/stills/0283.webp"
+  },
+  "bw_dips": {
+    "id": "1399",
+    "name": "Parallel Bar Dips",
+    "clip": "assets/opengym/clips/1399.mp4",
+    "still": "assets/opengym/stills/1399.webp"
+  },
+  "bw_pullup": {
+    "id": "0652",
+    "name": "Barfiks (Pull-Up)",
+    "clip": "assets/opengym/clips/0652.mp4",
+    "still": "assets/opengym/stills/0652.webp"
+  },
+  "bw_chinup": {
+    "id": "0670",
+    "name": "Ters Tutuş Barfiks (Chin-Up)",
+    "clip": "assets/opengym/clips/0670.mp4",
+    "still": "assets/opengym/stills/0670.webp"
+  },
+  "bw_inverted_row": {
+    "id": "0498",
+    "name": "Inverted Row",
+    "clip": "assets/opengym/clips/0498.mp4",
+    "still": "assets/opengym/stills/0498.webp"
+  },
+  "bw_air_squat": {
+    "id": "3948",
+    "name": "Vücut Ağırlığı Squat",
+    "clip": "assets/opengym/clips/3948.mp4",
+    "still": "assets/opengym/stills/3948.webp"
+  },
+  "bw_jump_squat": {
+    "id": "3222",
+    "name": "Zıplayan Squat (Jump Squat)",
+    "clip": "assets/opengym/clips/3222.mp4",
+    "still": "assets/opengym/stills/3222.webp"
+  },
+  "bw_glute_bridge": {
+    "id": "3013",
+    "name": "Glute Bridge",
+    "clip": "assets/opengym/clips/3013.mp4",
+    "still": "assets/opengym/stills/3013.webp"
+  },
+  "bw_hanging_knee_raise": {
+    "id": "9819",
+    "name": "Asılarak Diz Çekme",
+    "clip": "assets/opengym/clips/9819.mp4",
+    "still": "assets/opengym/stills/9819.webp"
+  },
+  "bw_hollow_body": {
+    "id": "1246",
+    "name": "Hollow Body Hold",
+    "clip": "assets/opengym/clips/1246.mp4",
+    "still": "assets/opengym/stills/1246.webp"
+  },
+  "bw_burpee": {
+    "id": "1160",
+    "name": "Burpee",
+    "clip": "assets/opengym/clips/1160.mp4",
+    "still": "assets/opengym/stills/1160.webp"
+  },
+  "bw_mountain_climber": {
+    "id": "0630",
+    "name": "Dağ Tırmanışı (Mountain Climber)",
+    "clip": "assets/opengym/clips/0630.mp4",
+    "still": "assets/opengym/stills/0630.webp"
+  },
+  "kneeling_plate_front_raise": {
+    "id": "0310",
+    "name": "Dizüstü Ön Omuz Kaldırma",
+    "clip": "assets/opengym/clips/0310.mp4",
+    "still": "assets/opengym/stills/0310.webp"
+  },
+  "half_kneeling_plate_chop": {
+    "id": "4572",
+    "name": "Half-Kneeling Rotational Chop",
+    "clip": "assets/opengym/clips/4572.mp4",
+    "still": "assets/opengym/stills/4572.webp"
+  },
+  "db_thruster": {
+    "id": "2968",
+    "name": "Dambıl Thruster",
+    "clip": "assets/opengym/clips/2968.mp4",
+    "still": "assets/opengym/stills/2968.webp"
+  },
+  "db_push_press": {
+    "id": "0426",
+    "name": "Dambıl Push Press",
+    "clip": "assets/opengym/clips/0426.mp4",
+    "still": "assets/opengym/stills/0426.webp"
+  },
+  "db_renegade_pushup": {
+    "id": "4736",
+    "name": "Renegade Row + Push-Up",
+    "clip": "assets/opengym/clips/4736.mp4",
+    "still": "assets/opengym/stills/4736.webp"
+  },
+  "bear_crawl_pull_through": {
+    "id": "3360",
+    "name": "Bear Crawl Dumbbell Pull-Through",
+    "clip": "assets/opengym/clips/3360.mp4",
+    "still": "assets/opengym/stills/3360.webp"
+  },
+  "db_clean_and_press": {
+    "id": "3400",
+    "name": "Tek Kol Dambıl Clean & Press",
+    "clip": "assets/opengym/clips/3400.mp4",
+    "still": "assets/opengym/stills/3400.webp"
+  },
+  "db_manmaker": {
+    "id": "3886",
+    "name": "Dambıl Manmaker",
+    "clip": "assets/opengym/clips/3886.mp4",
+    "still": "assets/opengym/stills/3886.webp"
+  },
+  "waiters_carry": {
+    "id": "9697",
+    "name": "Tek Kol Waiter's Walk",
+    "clip": "assets/opengym/clips/9697.mp4",
+    "still": "assets/opengym/stills/9697.webp"
+  },
+  "cross_body_carry": {
+    "id": "2911",
+    "name": "Cross-Body Carry",
+    "clip": "assets/opengym/clips/2911.mp4",
+    "still": "assets/opengym/stills/2911.webp"
+  },
+  "lunge_with_twist": {
+    "id": "5069",
+    "name": "Dambıl Lunge Rotasyonu",
+    "clip": "assets/opengym/clips/5069.mp4",
+    "still": "assets/opengym/stills/5069.webp"
+  },
+  "step_up_press": {
+    "id": "4185",
+    "name": "Box Step-Up + Press",
+    "clip": "assets/opengym/clips/4185.mp4",
+    "still": "assets/opengym/stills/4185.webp"
+  },
+  "bb_thruster": {
+    "id": "1540",
+    "name": "Barbell Thruster",
+    "clip": "assets/opengym/clips/1540.mp4",
+    "still": "assets/opengym/stills/1540.webp"
+  },
+  "bb_hang_power_clean": {
+    "id": "5704",
+    "name": "Barbell Hang Power Clean",
+    "clip": "assets/opengym/clips/5704.mp4",
+    "still": "assets/opengym/stills/5704.webp"
+  },
+  "bb_push_press": {
+    "id": "1540",
+    "name": "Barbell Push Press",
+    "clip": "assets/opengym/clips/1540.mp4",
+    "still": "assets/opengym/stills/1540.webp"
+  },
+  "bb_zercher_squat": {
+    "id": "5670",
+    "name": "Zercher Squat",
+    "clip": "assets/opengym/clips/5670.mp4",
+    "still": "assets/opengym/stills/5670.webp"
+  },
+  "bb_landmine_squat_press": {
+    "id": "1540",
+    "name": "Landmine Squat to Press",
+    "clip": "assets/opengym/clips/1540.mp4",
+    "still": "assets/opengym/stills/1540.webp"
+  },
+  "db_standing_calf_raise": {
+    "id": "0417",
+    "name": "Ayakta Dambıl Calf Raise",
+    "clip": "assets/opengym/clips/0417.mp4",
+    "still": "assets/opengym/stills/0417.webp"
+  },
+  "db_lying_leg_curl": {
+    "id": "6161",
+    "name": "Dambıl ile Yatarak Bacak Bükme",
+    "clip": "assets/opengym/clips/6161.mp4",
+    "still": "assets/opengym/stills/6161.webp"
+  },
+  "mach_straight_arm_pulldown": {
+    "id": "0150",
+    "name": "Kablo Düz Kol Çekiş",
+    "clip": "assets/opengym/clips/0150.mp4",
+    "still": "assets/opengym/stills/0150.webp"
+  },
+  "bw_hyperextension": {
+    "id": "0085",
+    "name": "45° Hiperekstansiyon",
+    "clip": "assets/opengym/clips/0085.mp4",
+    "still": "assets/opengym/stills/0085.webp"
+  },
+  "bw_plank": {
+    "id": "0463",
+    "name": "Front Plank",
+    "clip": "assets/opengym/clips/0463.mp4",
+    "still": "assets/opengym/stills/0463.webp"
+  },
+  "bw_sissy_squat": {
+    "id": "4723",
+    "name": "Bodyweight Standing Sissy Squat",
+    "clip": "assets/opengym/clips/4723.mp4",
+    "still": "assets/opengym/stills/4723.webp"
+  },
+  "db_pullover_to_halo": {
+    "id": "db_pullover_to_halo",
+    "name": "Dambıl Pullover to Halo",
+    "clip": "assets/opengym/clips/db_pullover_to_halo.mp4",
+    "still": "assets/opengym/stills/db_pullover_to_halo.webp"
+  },
+  "db_seesaw_lunge": {
+    "id": "db_seesaw_lunge",
+    "name": "Dambıl Seesaw Lunge",
+    "clip": "assets/opengym/clips/db_seesaw_lunge.mp4",
+    "still": "assets/opengym/stills/db_seesaw_lunge.webp"
+  },
+  "db_clean_squat_press": {
+    "id": "db_clean_squat_press",
+    "name": "Dambıl Clean to Front Squat to Push Press",
+    "clip": "assets/opengym/clips/db_clean_squat_press.mp4",
+    "still": "assets/opengym/stills/db_clean_squat_press.webp"
+  },
+  "db_rdl_to_high_pull": {
+    "id": "db_rdl_to_high_pull",
+    "name": "Dambıl RDL to High Pull",
+    "clip": "assets/opengym/clips/db_rdl_to_high_pull.mp4",
+    "still": "assets/opengym/stills/db_rdl_to_high_pull.webp"
+  },
+  "db_swing_to_goblet_squat": {
+    "id": "db_swing_to_goblet_squat",
+    "name": "Dambıl Swing to Goblet Squat",
+    "clip": "assets/opengym/clips/db_swing_to_goblet_squat.mp4",
+    "still": "assets/opengym/stills/db_swing_to_goblet_squat.webp"
+  },
+  "db_lunge_to_curl_press": {
+    "id": "db_lunge_to_curl_press",
+    "name": "Dambıl Lunge to Biceps Curl to Overhead Press",
+    "clip": "assets/opengym/clips/db_lunge_to_curl_press.mp4",
+    "still": "assets/opengym/stills/db_lunge_to_curl_press.webp"
+  },
+  "db_gorilla_row_to_clean": {
+    "id": "db_gorilla_row_to_clean",
+    "name": "Dambıl Gorilla Row to Clean",
+    "clip": "assets/opengym/clips/db_gorilla_row_to_clean.mp4",
+    "still": "assets/opengym/stills/db_gorilla_row_to_clean.webp"
+  },
+  "db_floor_press_to_bridge": {
+    "id": "db_floor_press_to_bridge",
+    "name": "Dambıl Floor Press to Glute Bridge",
+    "clip": "assets/opengym/clips/db_floor_press_to_bridge.mp4",
+    "still": "assets/opengym/stills/db_floor_press_to_bridge.webp"
+  },
+  "db_step_back_lunge_to_knee_drive": {
+    "id": "db_step_back_lunge_to_knee_drive",
+    "name": "Dambıl Step Back Lunge to High Knee Drive",
+    "clip": "assets/opengym/clips/db_step_back_lunge_to_knee_drive.mp4",
+    "still": "assets/opengym/stills/db_step_back_lunge_to_knee_drive.webp"
+  },
+  "bw_inchworm_to_pushup": {
+    "id": "bw_inchworm_to_pushup",
+    "name": "Inchworm to Push-Up",
+    "clip": "assets/opengym/clips/bw_inchworm_to_pushup.mp4",
+    "still": "assets/opengym/stills/bw_inchworm_to_pushup.webp"
+  },
+  "db_rotational_lunge_chop": {
+    "id": "db_rotational_lunge_chop",
+    "name": "Rotasyonel Lunge & Dambıl Savuruş",
+    "clip": "assets/opengym/clips/db_rotational_lunge_chop.mp4",
+    "still": "assets/opengym/stills/db_rotational_lunge_chop.webp"
+  },
+  "db_rotational_gorilla_row": {
+    "id": "db_rotational_gorilla_row",
+    "name": "Rotasyonel Gorilla Row",
+    "clip": "assets/opengym/clips/db_rotational_gorilla_row.mp4",
+    "still": "assets/opengym/stills/db_rotational_gorilla_row.webp"
+  },
+  "db_single_arm_rear_delt_row": {
+    "id": "db_single_arm_rear_delt_row",
+    "name": "Eğilerek Tek Kol Arka Omuz Çekişi (Parabolik Sweep)",
+    "clip": "assets/opengym/clips/db_single_arm_rear_delt_row.mp4",
+    "still": "assets/opengym/stills/db_single_arm_rear_delt_row.webp"
+  },
+  "db_high_pull_cuban_rotation": {
+    "id": "db_high_pull_cuban_rotation",
+    "name": "Eğilerek Row & High Pull + Cuban Rotasyon",
+    "clip": "assets/opengym/clips/db_high_pull_cuban_rotation.mp4",
+    "still": "assets/opengym/stills/db_high_pull_cuban_rotation.webp"
+  },
+  "db_dumbbell_shrug_burnout": {
+    "id": "db_dumbbell_shrug_burnout",
+    "name": "Dambıl Trapez Silkme (Burnout)",
+    "clip": "assets/opengym/clips/db_dumbbell_shrug_burnout.mp4",
+    "still": "assets/opengym/stills/db_dumbbell_shrug_burnout.webp"
+  },
+  "db_quadruped_external_rotation": {
+    "id": "db_quadruped_external_rotation",
+    "name": "Dört Ayak Pozisyonunda Yatay Arka Omuz Uçuşu",
+    "clip": "assets/opengym/clips/db_quadruped_external_rotation.mp4",
+    "still": "assets/opengym/stills/db_quadruped_external_rotation.webp"
+  }
 };
 
 function enrichExerciseWithOpengym(ex) {
@@ -3600,55 +4692,64 @@ function enrichExerciseWithOpengym(ex) {
 }
 
 function getFullCatalog() {
-    let rawCatalog = STATIC_FALLBACK_CATALOG;
+    let rawCatalog = null;
     try {
         const candidatePaths = [
-            path.join(__dirname, "../../../index.html"),
-            path.join(process.cwd(), "index.html")
+            path.join(__dirname, "../../../js/exercises-db.js"),
+            path.join(process.cwd(), "js/exercises-db.js"),
+            path.join(process.cwd(), "../js/exercises-db.js"),
+            path.join(process.resourcesPath || "", "js/exercises-db.js")
         ];
-        let html = null;
         for (const p of candidatePaths) {
             if (fs.existsSync(p)) {
-                html = fs.readFileSync(p, "utf8");
-                break;
-            }
-        }
-        if (html) {
-            const dbMatch = html.match(/const EXERCISES_DB = (\[[\s\S]*?\]);/m);
-            const egmMatch = html.match(/const exerciseGuideMap = ({[\s\S]*?^        };)/m);
-            if (dbMatch && egmMatch) {
-                let exerciseGuideMap = {};
-                eval("exerciseGuideMap = " + egmMatch[1].replace(/;$/, ""));
-                let EXERCISES_DB = [];
-                eval("EXERCISES_DB = " + dbMatch[1]);
+                try {
+                    const jsContent = fs.readFileSync(p, "utf8");
+                    const sandbox = { window: {} };
+                    vm.createContext(sandbox);
+                    vm.runInContext(jsContent, sandbox);
 
-                rawCatalog = EXERCISES_DB.map(ex => {
-                    const guide = exerciseGuideMap[ex.id] || {};
-                    const biomech = academicEngine.resolveExerciseBiomechanics(ex.name);
-                    return {
-                        id: ex.id,
-                        name: ex.name,
-                        rawKey: ex.name.toLowerCase(),
-                        primary: biomech.primary || (ex.category === "conditioning" ? "Kondisyon / Kardiyo" : "Tüm Vücut"),
-                        pFactor: biomech.pFactor,
-                        sec: biomech.sec || {},
-                        type: biomech.type || "HEAVY_COMPOUND",
-                        typeLabel: (biomech.type === "CONDITIONING") ? "Metabolik Kondisyon & Kardiyo" : "Kuvvet Egzersizi",
-                        sfr: biomech.sfr || "HIGH",
-                        sfrLabel: biomech.sfr || "Standart",
-                        lengthened: !!biomech.lengthened,
-                        diagramImage: ex.diagram || "",
-                        formImage: guide.form || "",
-                        anatomiImage: guide.anatomi || "",
-                        cue: ex.cue || "",
-                        positions: ex.positions || []
-                    };
-                });
+                    if (sandbox.window && Array.isArray(sandbox.window.EXERCISES_DB) && sandbox.window.EXERCISES_DB.length > 0) {
+                        const EXERCISES_DB = sandbox.window.EXERCISES_DB;
+                        const exerciseGuideMap = sandbox.window.exerciseGuideMap || {};
+                        const guideLibrary = sandbox.window.guideLibrary || {};
+
+                        rawCatalog = EXERCISES_DB.map(ex => {
+                            const guide = exerciseGuideMap[ex.id] || guideLibrary[ex.id] || {};
+                            const biomech = academicEngine.resolveExerciseBiomechanics(ex.name || ex.id, ex.muscle, ex.category);
+                            return {
+                                id: ex.id,
+                                name: ex.name,
+                                rawKey: (ex.name || "").toLowerCase(),
+                                primary: biomech.primary || (ex.category === "conditioning" ? "Kondisyon / Kardiyo" : "Tüm Vücut"),
+                                pFactor: biomech.pFactor,
+                                sec: biomech.sec || {},
+                                type: biomech.type || "HEAVY_COMPOUND",
+                                typeLabel: (biomech.type === "CONDITIONING") ? "Metabolik Kondisyon & Kardiyo" : "Kuvvet Egzersizi",
+                                sfr: biomech.sfr || "HIGH",
+                                sfrLabel: biomech.sfr || "Standart",
+                                lengthened: !!biomech.lengthened,
+                                diagramImage: ex.diagram || "",
+                                formImage: guide.form || "",
+                                anatomiImage: guide.anatomi || "",
+                                cue: ex.cue || "",
+                                positions: ex.positions || []
+                            };
+                        });
+                        break;
+                    }
+                } catch(e) {
+                    console.warn("[exercise-catalog] candidate read/eval failed:", p, e);
+                }
             }
         }
     } catch (e) {
         // Fallback to static catalog
     }
+
+    if (!rawCatalog || rawCatalog.length === 0) {
+        rawCatalog = STATIC_FALLBACK_CATALOG;
+    }
+
     return rawCatalog.map(enrichExerciseWithOpengym);
 }
 
