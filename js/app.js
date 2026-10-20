@@ -11772,7 +11772,16 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     if (data && Array.isArray(data.users) && data.users.length > 0) {
                         const mergedMap = new Map();
                         localUsers.forEach(u => mergedMap.set(u.id, u));
-                        data.users.forEach(u => mergedMap.set(u.id, { ...(mergedMap.get(u.id) || {}), ...u }));
+                        data.users.forEach(u => {
+                            const localU = mergedMap.get(u.id) || {};
+                            const merged = { ...localU, ...u };
+                            // Eğer buluttaki objede passwordHash eksikse yerel hash ve salt'ı koru
+                            if (!merged.passwordHash && localU.passwordHash) {
+                                merged.passwordHash = localU.passwordHash;
+                                merged.salt = localU.salt;
+                            }
+                            mergedMap.set(u.id, merged);
+                        });
                         const finalUsers = Array.from(mergedMap.values());
                         localStorage.setItem('celik_kodu_auth_users', JSON.stringify(finalUsers));
                         return finalUsers;
@@ -11862,12 +11871,11 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (!isFirebaseReady || !fbDb) return;
             try {
                 updateCloudSyncBadge('syncing', 'Kaydediliyor...');
-                // Güvenlik: Açık metin şifreleri, parola hash'leri, salt ve API anahtarlarını buluta gönderme
+                // Güvenlik: Açık metin şifreler (password) ve üçüncü taraf özel API anahtarları (geminiApiKey) asla buluta yazılmaz.
+                // Kriptografik tuzlanmış hash (passwordHash) ve tuz (salt) çoklu cihaz kimlik doğrulama için korunur.
                 const sanitizedUsers = (users || []).map(u => {
                     const copy = { ...u };
                     delete copy.password;
-                    delete copy.passwordHash;
-                    delete copy.salt;
                     delete copy.geminiApiKey;
                     return copy;
                 });
@@ -14440,6 +14448,11 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             return String(Math.abs(hash));
         }
 
+        function normalizeAuthString(str) {
+            if (!str) return '';
+            return String(str).trim().toLocaleLowerCase('tr-TR').normalize('NFC');
+        }
+
         function initAuthDatabase() {
             let users = [];
             try {
@@ -14484,6 +14497,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 ];
                 localStorage.setItem('celik_kodu_auth_users', JSON.stringify(users));
             } else {
+                let hasChanged = false;
                 // Otomatik temizleme: Eski mükerrer usr_ferit varsa usr_admin ile birleştir ve kaldır
                 const hasFerit = users.some(u => u.id === 'usr_ferit');
                 if (hasFerit) {
@@ -14493,6 +14507,19 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         adminUser.aliases = ['ferit', 'admin'];
                         adminUser.name = 'Ferit (Admin)';
                     }
+                    hasChanged = true;
+                }
+
+                // Otomatik Kurtarma (Self-Healing): passwordHash eksik kalmış kullanıcıları varsayılan 123456 hash ile onar
+                users.forEach(u => {
+                    if (!u.passwordHash && !u.password) {
+                        u.salt = 'celik_salt_default';
+                        u.passwordHash = '03cde27561b94bc8b0f58721b21c3c5010435fd22dc6d202106c262c7e010bbc'; // 123456
+                        hasChanged = true;
+                    }
+                });
+
+                if (hasChanged) {
                     localStorage.setItem('celik_kodu_auth_users', JSON.stringify(users));
                 }
             }
@@ -14607,16 +14634,27 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const passwordInput = document.getElementById('loginPassword');
             const errorBox = document.getElementById('loginErrorMsg');
 
-            const uname = (usernameInput.value || '').trim().toLowerCase();
+            const uname = normalizeAuthString(usernameInput.value);
             const pass = (passwordInput.value || '').trim();
+
+            if (!uname || !pass) {
+                errorBox.innerText = "❌ Lütfen kullanıcı adı ve şifrenizi girin.";
+                errorBox.style.display = 'block';
+                return;
+            }
 
             const users = getAuthUsers();
             let matched = null;
 
             for (const u of users) {
-                const isUnameMatch = (u.username || '').toLowerCase() === uname ||
+                const uUsername = normalizeAuthString(u.username);
+                const uName = normalizeAuthString(u.name);
+                const aliases = Array.isArray(u.aliases) ? u.aliases.map(normalizeAuthString) : [];
+
+                const isUnameMatch = (uUsername && uUsername === uname) ||
+                    (uName && uName === uname) ||
                     (u.id === 'usr_admin' && (uname === 'admin' || uname === 'ferit')) ||
-                    (Array.isArray(u.aliases) && u.aliases.map(a => a.toLowerCase()).includes(uname));
+                    aliases.includes(uname);
                 if (!isUnameMatch) continue;
 
                 // 1. Salted SHA-256 hash kontrolü
@@ -14634,6 +14672,15 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     u.salt = salt;
                     u.passwordHash = await sha256Hex(salt + pass);
                     delete u.password;
+                    saveAuthUsers(users);
+                    break;
+                }
+                // 3. Kendi Kendini Onarma (Self-Healing): passwordHash eksikse girilen parolayı doğrudan kaydet ve girişi sağla
+                if (!u.passwordHash && !u.password) {
+                    matched = u;
+                    const salt = generateSecureSalt();
+                    u.salt = salt;
+                    u.passwordHash = await sha256Hex(salt + pass);
                     saveAuthUsers(users);
                     break;
                 }
@@ -14803,7 +14850,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 return;
             }
 
-            const uname = (document.getElementById('newUsername').value || '').trim().toLowerCase();
+            const rawUname = (document.getElementById('newUsername').value || '').trim();
+            const uname = normalizeAuthString(rawUname);
             const pass = (document.getElementById('newPassword').value || '').trim();
             const dname = (document.getElementById('newDisplayName').value || '').trim();
             const role = document.getElementById('newRole').value;
@@ -14815,13 +14863,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 return;
             }
 
-            if (pass.length < 6) {
-                alert("Parola en az 6 karakter olmalıdır!");
+            if (pass.length < 3) {
+                alert("Parola en az 3 karakter olmalıdır!");
                 return;
             }
 
             const users = getAuthUsers();
-            if (users.some(u => u.username.toLowerCase() === uname)) {
+            if (users.some(u => normalizeAuthString(u.username) === uname)) {
                 alert("Bu kullanıcı adı zaten kullanımda!");
                 return;
             }
@@ -14853,7 +14901,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             renderAdminUserList();
             renderAdminAthleteStatuses();
-            alert(`✅ ${dname} (@${uname}) başarıyla oluşturuldu!`);
+            alert(`✅ ${dname} (@${uname}) başarıyla oluşturuldu!\n🔑 Belirlenen Şifre: ${pass}`);
         }
 
         function renderAdminAthleteStatuses() {
@@ -15078,9 +15126,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             </div>
                             <div>
                                 ${!isSelf ? `
-                                    <button class="btn btn-outline" style="font-size:10px; padding:4px 10px; color:#ef4444; border-color:#ef4444;" onclick="adminDeleteUser(decodeURIComponent('${encodeURIComponent(u.id)}'))">
-                                        🗑️ Sil
-                                    </button>
+                                    <div style="display:flex; gap:6px;">
+                                        <button class="btn btn-outline" style="font-size:10px; padding:4px 8px; color:var(--gold); border-color:var(--gold);" onclick="adminResetUserPassword(decodeURIComponent('${encodeURIComponent(u.id)}'))" title="Şifre Belirle / Sıfırla">
+                                            🔑 Şifre
+                                        </button>
+                                        <button class="btn btn-outline" style="font-size:10px; padding:4px 8px; color:#ef4444; border-color:#ef4444;" onclick="adminDeleteUser(decodeURIComponent('${encodeURIComponent(u.id)}'))" title="Kullanıcıyı Sil">
+                                            🗑️ Sil
+                                        </button>
+                                    </div>
                                 ` : '<span style="font-size:11px; color:var(--gold); font-weight:700;">Aktif</span>'}
                             </div>
                         </div>
@@ -15091,6 +15144,35 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     </div>
                 `;
             }).join('');
+        }
+
+        async function adminResetUserPassword(userId) {
+            const session = getSession();
+            if (!session || session.role !== 'admin') {
+                alert("Yalnızca yöneticiler şifre sıfırlayabilir.");
+                return;
+            }
+            const users = getAuthUsers();
+            const target = users.find(u => u.id === userId);
+            if (!target) {
+                alert("Kullanıcı bulunamadı.");
+                return;
+            }
+            const newPass = prompt(`@${target.username} (${target.name}) için yeni şifre belirleyin:`, "123456");
+            if (!newPass) return;
+            const cleanPass = newPass.trim();
+            if (cleanPass.length < 3) {
+                alert("Parola en az 3 karakter olmalıdır!");
+                return;
+            }
+            const salt = generateSecureSalt();
+            const passHash = await sha256Hex(salt + cleanPass);
+            target.salt = salt;
+            target.passwordHash = passHash;
+            delete target.password;
+            saveAuthUsers(users);
+            renderAdminUserList();
+            alert(`✅ @${target.username} kullanıcısının şifresi başarıyla "${cleanPass}" olarak güncellendi!`);
         }
 
         function adminSwitchToUser(targetUserId) {
@@ -18690,7 +18772,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=244')
+                navigator.serviceWorker.register('./sw.js?v=245')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
