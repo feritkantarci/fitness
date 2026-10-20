@@ -35,7 +35,7 @@
     <!-- ==================== LOGIN SCREEN ==================== -->
     <div id="loginScreen" class="active">
         <div class="login-card">
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v245</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v246</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -71,7 +71,7 @@
                     <span class="canva-brand-monogram" aria-hidden="true" translate="no">Ç</span>
                     <div class="canva-brand-stack">
                         <span class="modern-brand-title" translate="no">Çelik Kodu</span>
-                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v245</span>
+                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v246</span>
                     </div>
                 </div>
                 <div class="modern-bar-actions">
@@ -137,24 +137,6 @@
             <!-- ==================== TAB 1: WORKOUT GENERATOR ==================== -->
             <div id="generatorTab" class="tab-content active">
 
-                <!-- ⚡ 20 DK ÇELİK AKIŞI HIZLI TEST KARTI -->
-                <div class="card" style="margin-bottom:16px; border:1.5px solid #FCD34D; background:#FFFFFF; padding:14px 18px; border-radius:18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; box-shadow:0 4px 16px rgba(245,158,11,0.08);">
-                    <div>
-                        <div style="font-size:11px; font-weight:900; color:#B45309; text-transform:uppercase; display:flex; align-items:center; gap:6px; letter-spacing:0.04em;">
-                            <span>⚡ YENİ KONSEPT</span> • KESİNTİSİZ AKIŞ (FLOW)
-                        </div>
-                        <div style="font-size:14px; font-weight:800; color:#0F172A; margin-top:3px;">
-                            ⚔️ 20 Dk Çelik Akışı (Dambıl Kompleksi)
-                        </div>
-                        <div style="font-size:12px; color:#64748B; margin-top:2px;">
-                            Ağırlığı bırakmadan 4 Tur (Swing ➔ Clean &amp; Squat ➔ Push Press ➔ Lunge ➔ Halo)
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-gold" style="font-weight:900; padding:10px 18px; font-size:12px; cursor:pointer;" onclick="loadCelikAkisiWorkout()">
-                        ▶️ ŞİMDİ DENE &amp; BAŞLAT
-                    </button>
-                </div>
-
                 <!-- UNIFIED AI PROGRAM ARCHITECT CARD (CANVA DESIGN DAHYNdwI6Eo) -->
                 <div class="ai-hybrid-hero-banner ai-unified-architect-card" id="aiHybridHeroBanner">
                     <div class="ai-prep-top-row">
@@ -162,18 +144,6 @@
                     </div>
                     <h2 class="ai-prep-title">Programını AI ile oluştur</h2>
                     <p class="ai-prep-subtitle">Kapsamı, ekipmanını ve antrenman ayrıntılarını seç; hareket seçimini, eksik kas telafisini ve bilimsel süperset kurgusunu AI senin için hazırlasın.</p>
-
-                    <div class="ai-recommended-box">
-                        <div class="ai-rec-label"><svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M8 1.5L9.6 6.4L14.5 8L9.6 9.6L8 14.5L6.4 9.6L1.5 8L6.4 6.4L8 1.5Z"/><path d="M13 2v2M12 3h2M3 12v2M2 13h2"/></svg> SENİN İÇİN ÖNERİLEN</div>
-                        <div class="ai-rec-main-title" id="aiDoctrineCurrentBadge">Bodybuilding &amp; Fonksiyonel • Tüm Vücut</div>
-                        <div id="aiDoctrineHeroQuickStats" class="ai-rec-pills-row">
-                            <span class="ai-rec-pill">Haftalık 3 Gün</span>
-                            <span class="ai-rec-pill">Kas ve fonksiyonel gelişim</span>
-                        </div>
-                    </div>
-
-                    <!-- COLLAPSIBLE INFO DRAWER -->
-                    <div id="aiDoctrineHeroQuickTeaser" class="ai-hero-info-drawer" style="display:none;"></div>
 
                     <!-- STEP 1: PROGRAM KAPSAMI & BÖLÜNME (HAFTALIK VEYA TEK GÜN) -->
                     <div class="gen-step-panel">
@@ -190,7 +160,7 @@
                             <span>PROGRAM KAPSAMI &amp; BÖLÜNME</span>
                         </div>
                         <div class="gen-collapsible-section" id="splitSection">
-                            <!-- Kapsam Seçici (Haftalık Plan vs Tek Gün) -->
+                            <!-- Kapsam Seçici (Haftalık Plan vs Tek Gün vs Çelik Akışı) -->
                             <div class="ai-scope-toggle-bar" role="tablist" aria-label="Program Kapsamı">
                                 <button type="button" class="ai-scope-pill active" id="aiScopeBtnWeekly" onclick="setAiGeneratorScope('weekly')">
                                     <svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1.5v2.5M11 1.5v2.5M2 6.5h12"/><rect x="4.5" y="8.8" width="1.5" height="1.5" rx="0.3"/><rect x="7.2" y="8.8" width="1.5" height="1.5" rx="0.3"/><rect x="10" y="8.8" width="1.5" height="1.5" rx="0.3"/></svg> Haftalık Plan
@@ -198,6 +168,23 @@
                                 <button type="button" class="ai-scope-pill" id="aiScopeBtnSingle" onclick="setAiGeneratorScope('single')">
                                     <svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 1.5L3 9h4.5L6.8 14.5L13 7H8.5L9 1.5Z"/></svg> Tek Gün
                                 </button>
+                                <button type="button" class="ai-scope-pill" id="aiScopeBtnFlow" onclick="setAiGeneratorScope('flow_complex')">
+                                    <svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 1.5L3 9h4.5L6.8 14.5L13 7H8.5L9 1.5Z"/></svg> ⚡ Çelik Akışı (Yeni Konsept)
+                                </button>
+                            </div>
+
+                            <!-- 1C: Çelik Akışı Konsept Kartı (Yalnızca Çelik Akışı Seçildiğinde Açılır) -->
+                            <div id="flowConceptSection" style="display:none; margin-top:10px; margin-bottom:12px; background:linear-gradient(135deg, rgba(245,158,11,0.09) 0%, rgba(15,23,42,0.6) 100%); border:1.5px solid rgba(245,158,11,0.4); border-radius:14px; padding:14px 16px;">
+                                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                                    <span style="font-size:11px; font-weight:900; color:#F59E0B; letter-spacing:0.05em; text-transform:uppercase;">⚡ KESİNTİSİZ AKIŞ • 4 TUR DAMBIL KOMPLEKSİ</span>
+                                    <span style="font-size:11px; font-weight:800; background:rgba(245,158,11,0.18); color:#FCD34D; padding:2px 8px; border-radius:8px;">⏱️ 20 Dk</span>
+                                </div>
+                                <div style="font-size:13.5px; font-weight:800; color:#F8FAFC; margin-bottom:5px;">
+                                    ⚔️ 5 Bileşik İstasyon (Hinge ➔ Squat ➔ Press ➔ Lunge ➔ Halo)
+                                </div>
+                                <div style="font-size:12px; color:#94A3B8; line-height:1.45;">
+                                    Dambıllar 4 tur boyunca yere bırakılmaz. İstasyonlar arasında dinlenme yoktur, tur sonlarında 90 sn toparlanma verilir.
+                                </div>
                             </div>
 
                             <!-- 1A: Haftalık Şablon Seçici Grid (Varsayılan Açık) -->
@@ -390,11 +377,15 @@
                                 <div class="param-group">
                                     <label for="paramDuration">SÜRE</label>
                                     <select id="paramDuration" class="param-select" onchange="updateSelectedParamLabel()">
+                                        <option value="20">20 dk (Çelik Akışı / Hızlı)</option>
                                         <option value="30">30 dk (Hızlı seans)</option>
                                         <option value="45" selected>45 dk (Tam seans)</option>
                                         <option value="60">60 dk (Uzun seans)</option>
                                     </select>
                                 </div>
+                            </div>
+                            <div id="flowParamNotice" style="display:none; font-size:11.5px; font-weight:700; color:#B45309; background:#FEF3C7; border:1px solid #FCD34D; border-radius:10px; padding:8px 12px; margin-top:10px;">
+                                🔒 Çelik Akışı parametreleri 20 Dk kesintisiz dambıl kompleksine göre kilitlendi.
                             </div>
                             <div class="ai-unified-wish-row">
                                 <label for="aiUnifiedWishInput" class="ai-unified-wish-label"><svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2.5 3.5A1.5 1.5 0 0 1 4 2h8a1.5 1.5 0 0 1 1.5 1.5v6A1.5 1.5 0 0 1 12 11H6.5L3.8 13.5V11H4a1.5 1.5 0 0 1-1.5-1.5v-6Z"/><path d="M5.5 5.5h5M5.5 8h3.5"/></svg> AI ÖZEL NOTU / ODAK &amp; HASSASİYET (İSTEĞE BAĞLI)</label>
@@ -410,11 +401,6 @@
                         </button>
                     </div>
                     <div class="ai-prep-hint" id="aiQuickPreviewHint">Onaylamadan takvime eklenmez</div>
-                    <div style="margin-top:12px; padding-top:12px; border-top:1px dashed rgba(245,158,11,0.3); text-align:center;">
-                        <button type="button" class="btn btn-outline" style="width:100%; padding:10px; font-size:12.5px; font-weight:800; border-color:var(--gold); color:var(--gold); background:rgba(245,158,11,0.08); border-radius:10px;" onclick="loadCelikAkisiWorkout()">
-                            ⚔️ 20 Dk Çelik Akışı (Dambıl Kompleksi) Başlat
-                        </button>
-                    </div>
                 </div>
 
                 <!-- GENERATED WORKOUT CONTAINER -->
@@ -675,11 +661,12 @@
                             <!-- Populated dynamically by renderCalendarScreen() -->
                         </div>
 
-                        <!-- QUICK TEMPLATE BAR -->
-                        <div class="planner-template-bar" style="margin-top:12px;">
+                        <!-- QUICK TEMPLATE & RESET BAR -->
+                        <div class="planner-template-bar" style="margin-top:12px; display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
                             <span class="planner-template-lbl">Hızlı Şablon:</span>
                             <button type="button" class="planner-template-btn" onclick="resetWeeklyScheduleTemplate('standard_3day')" title="Standart 3 Günlük Çelik Şablonu">3 Gün</button>
                             <button type="button" class="planner-template-btn" onclick="resetWeeklyScheduleTemplate('split_4day')" title="4 Günlük Bölünmüş Şablon">4 Gün</button>
+                            <button type="button" class="planner-template-btn" style="color:#ef4444; border-color:rgba(239,68,68,0.35); font-weight:800;" onclick="purgeAllUnrequestedSchedules()" title="Tüm haftayı temizle ve dinlenmeye al">🧹 Takvimi Sıfırla (Boşalt)</button>
                         </div>
                     </div>
                 </div>
@@ -1187,6 +1174,41 @@
             <div id="quickAddModalBody" style="margin-top: 14px;">
                 <!-- Populated dynamically -->
             </div>
+        </div>
+    </div>
+
+    <!-- ==================== UNIFIED WORKOUT ASSIGNMENT MODAL (ANTRENMANI TAKVİME / GÜNE ATA) ==================== -->
+    <div id="assignWorkoutCalendarModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 520px; max-height: 92vh; overflow-y: auto;">
+            <div class="modal-header">
+                <div>
+                    <span class="auth-role-tag role-admin" style="font-size:10px; background:rgba(245,158,11,0.2); color:var(--gold);">📅 TAKVİM MİMARI</span>
+                    <h3 class="modal-title" style="font-size:16px; margin-top:4px;">Antrenmanı Takvime Ata</h3>
+                </div>
+                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeAssignWorkoutCalendarModal()">✕</button>
+            </div>
+
+            <!-- WORKOUT INFO CARD -->
+            <div id="assignModalWorkoutInfo" style="margin-top: 10px; margin-bottom: 12px;"></div>
+
+            <!-- WEEK SELECTOR TABS (Bu Hafta / Gelecek Hafta) -->
+            <div style="display:flex; gap:6px; margin-bottom:12px; background:#0E131B; padding:4px; border-radius:10px; border:1px solid #222C3A;">
+                <button type="button" id="assignModalWeekCurrentBtn" class="btn" style="flex:1; font-size:12px; padding:8px 10px; font-weight:800; border-radius:7px; background:var(--gold); color:#000;" onclick="switchAssignModalWeek('current')">
+                    📅 Bu Hafta
+                </button>
+                <button type="button" id="assignModalWeekNextBtn" class="btn btn-outline" style="flex:1; font-size:12px; padding:8px 10px; font-weight:800; border-radius:7px; border:none; color:var(--text-secondary);" onclick="switchAssignModalWeek('next')">
+                    🚀 Gelecek Hafta
+                </button>
+            </div>
+
+            <!-- QUICK ONE-CLICK ACTION: BUGÜNE ATA (SADECE BU HAFTA İÇİN) -->
+            <div id="assignModalQuickTodayBox" style="margin-bottom: 12px;"></div>
+
+            <!-- 7-DAY CALENDAR GRID -->
+            <div style="font-size:11px; font-weight:900; color:var(--gold); text-transform:uppercase; margin-bottom:8px; letter-spacing:0.5px;">
+                🗓️ VEYA BİR GÜN SEÇİN
+            </div>
+            <div id="assignModalDaysGrid" style="display:flex; flex-direction:column; gap:6px; margin-bottom:12px;"></div>
         </div>
     </div>
 

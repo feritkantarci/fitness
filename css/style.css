@@ -7476,6 +7476,22 @@
             box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08) !important;
         }
 
+        .ai-scope-pill#aiScopeBtnFlow.active {
+            background: #FEF3C7 !important;
+            color: #92400E !important;
+            border-color: #FCD34D !important;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15) !important;
+        }
+
+        /* Flow Concept Locked / Passive State */
+        .is-flow-locked {
+            opacity: 0.55 !important;
+            pointer-events: none !important;
+            user-select: none !important;
+            filter: grayscale(0.2) !important;
+            cursor: not-allowed !important;
+        }
+
         /* Split Cards (Weekly & Single) */
         .split-card {
             display: flex !important;

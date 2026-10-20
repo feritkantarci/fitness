@@ -390,6 +390,10 @@
         function updateSelectedSplitLabel() {
             const el = document.getElementById('selectedSplitLabel');
             if (!el) return;
+            if (window.aiGeneratorScope === 'flow_complex') {
+                el.innerText = '⚡ Çelik Akışı (20 Dk Dambıl Kompleksi)';
+                return;
+            }
             if (window.aiGeneratorScope === 'weekly') {
                 const tplMap = {
                     ai_auto: 'Haftalık • AI Otomatik Teşhis',
@@ -1193,28 +1197,84 @@
         }
 
         function setAiGeneratorScope(scope) {
-            window.aiGeneratorScope = (scope === 'single') ? 'single' : 'weekly';
+            window.aiGeneratorScope = (scope === 'single') ? 'single' : (scope === 'flow_complex' ? 'flow_complex' : 'weekly');
             const btnW = document.getElementById('aiScopeBtnWeekly');
             const btnS = document.getElementById('aiScopeBtnSingle');
+            const btnF = document.getElementById('aiScopeBtnFlow');
             const gridW = document.getElementById('aiWeeklyTemplateGrid');
             const gridS = document.getElementById('splitGrid');
+            const flowSec = document.getElementById('flowConceptSection');
+            const flowNotice = document.getElementById('flowParamNotice');
+            const equipWrap = document.getElementById('equipChipsWrap');
+            const paramGrid = document.querySelector('#paramSection .param-grid');
             const ctaBtn = document.getElementById('btnUnifiedAiGenerate');
+            const hintEl = document.getElementById('aiQuickPreviewHint');
+            const lblSplit = document.getElementById('selectedSplitLabel');
 
             if (btnW) btnW.classList.toggle('active', window.aiGeneratorScope === 'weekly');
             if (btnS) btnS.classList.toggle('active', window.aiGeneratorScope === 'single');
-            if (gridW) { gridW.style.display = (window.aiGeneratorScope === 'weekly') ? '' : 'none'; gridW.classList.toggle('is-hidden-grid', window.aiGeneratorScope !== 'weekly'); }
-            if (gridS) { gridS.style.display = (window.aiGeneratorScope === 'single') ? '' : 'none'; gridS.classList.toggle('is-hidden-grid', window.aiGeneratorScope !== 'single'); }
+            if (btnF) btnF.classList.toggle('active', window.aiGeneratorScope === 'flow_complex');
 
-            if (window.aiGeneratorScope === 'weekly') {
-                const lblEl = document.getElementById('selectedSplitLabel');
-                if (lblEl) {
-                    lblEl.innerText = AI_WEEKLY_TPL_LABELS[window.selectedAiWeeklyTemplate] || 'Haftalık • AI Otomatik Teşhis';
-                }
-                if (ctaBtn) ctaBtn.innerHTML = `${CANVA_ICONS.bolt} Programı Oluştur`;
+            if (gridW) {
+                gridW.style.display = (window.aiGeneratorScope === 'weekly') ? '' : 'none';
+                gridW.classList.toggle('is-hidden-grid', window.aiGeneratorScope !== 'weekly');
+            }
+            if (gridS) {
+                gridS.style.display = (window.aiGeneratorScope === 'single') ? '' : 'none';
+                gridS.classList.toggle('is-hidden-grid', window.aiGeneratorScope !== 'single');
+            }
+            if (flowSec) {
+                flowSec.style.display = (window.aiGeneratorScope === 'flow_complex') ? 'block' : 'none';
+            }
+
+            if (window.aiGeneratorScope === 'flow_complex') {
+                if (lblSplit) lblSplit.innerText = '⚡ Çelik Akışı (20 Dk Dambıl Kompleksi)';
+
+                // Diğer seçenekleri pasifleştir:
+                if (equipWrap) equipWrap.classList.add('is-flow-locked');
+                if (paramGrid) paramGrid.classList.add('is-flow-locked');
+                if (flowNotice) flowNotice.style.display = 'block';
+
+                // Ekipmanı dambıla sabitle
+                selectedEquipments = ['dumbbell'];
+                if (typeof renderEquipChips === 'function') renderEquipChips();
+                const equipLbl = document.getElementById('selectedEquipLabel');
+                if (equipLbl) equipLbl.innerText = '🏋️ Dambıl (Çelik Akışı için Sabit)';
+
+                // Parametreleri komplekse sabitle
+                const styleEl = document.getElementById('paramStyle');
+                const goalEl = document.getElementById('paramGoal');
+                const durEl = document.getElementById('paramDuration');
+                if (styleEl) styleEl.value = 'complex';
+                if (goalEl) goalEl.value = 'endurance';
+                if (durEl) durEl.value = '20';
+                const paramLbl = document.getElementById('selectedParamLabel');
+                if (paramLbl) paramLbl.innerText = '⚡ Birleşik Akış • 🛡️ Kondisyon • ⏱️ 20 Dk';
+
+                if (ctaBtn) ctaBtn.innerHTML = `${CANVA_ICONS.bolt} ⚡ Çelik Akışını Oluştur`;
+                if (hintEl) hintEl.textContent = '20 Dk kesintisiz akış taslağı hazırlanır • Onaylamadan takvime eklenmez';
             } else {
-                if (typeof renderSplitCards === 'function') renderSplitCards();
-                if (typeof updateSelectedSplitLabel === 'function') updateSelectedSplitLabel();
-                if (ctaBtn) ctaBtn.innerHTML = `${CANVA_ICONS.bolt} Antrenmanı Oluştur`;
+                // Pasifliği kaldır
+                if (equipWrap) equipWrap.classList.remove('is-flow-locked');
+                if (paramGrid) paramGrid.classList.remove('is-flow-locked');
+                if (flowNotice) flowNotice.style.display = 'none';
+
+                if (typeof renderEquipChips === 'function') renderEquipChips();
+                if (typeof updateSelectedEquipLabel === 'function') updateSelectedEquipLabel();
+                if (typeof updateSelectedParamLabel === 'function') updateSelectedParamLabel();
+
+                if (window.aiGeneratorScope === 'weekly') {
+                    if (lblSplit) {
+                        lblSplit.innerText = AI_WEEKLY_TPL_LABELS[window.selectedAiWeeklyTemplate] || 'Haftalık • AI Otomatik Teşhis';
+                    }
+                    if (ctaBtn) ctaBtn.innerHTML = `${CANVA_ICONS.bolt} Programı Oluştur`;
+                    if (hintEl) hintEl.textContent = 'Onaylamadan takvime eklenmez';
+                } else {
+                    if (typeof renderSplitCards === 'function') renderSplitCards();
+                    if (typeof updateSelectedSplitLabel === 'function') updateSelectedSplitLabel();
+                    if (ctaBtn) ctaBtn.innerHTML = `${CANVA_ICONS.bolt} Antrenmanı Oluştur`;
+                    if (hintEl) hintEl.textContent = 'Onaylamadan takvime eklenmez';
+                }
             }
         }
         window.setAiGeneratorScope = setAiGeneratorScope;
@@ -1377,7 +1437,7 @@
             if (activeSplitPopoverKey) closeSplitMusclePopover();
         }, { passive: true });
 
-        function handleQuickAiGenerate(preferredTplKey = null) {
+        async function handleQuickAiGenerate(preferredTplKey = null) {
             const goalEl = document.getElementById('paramGoal');
             const goalVal = goalEl ? goalEl.value : 'hypertrophy';
             const telemetry = getAiDoctrineTelemetry();
@@ -1393,7 +1453,44 @@
             }
 
             const unifiedWishEl = document.getElementById('aiUnifiedWishInput');
-            const userWish = unifiedWishEl ? unifiedWishEl.value.trim() : '';
+            const modalWishEl = document.getElementById('aiModalUserWishInput');
+            const userWish = (unifiedWishEl && unifiedWishEl.value.trim())
+                ? unifiedWishEl.value.trim()
+                : (modalWishEl ? modalWishEl.value.trim() : '');
+
+            // 🤖 Gemini Yapay Zeka İstek Analizi: Kullanıcı özel bir not girdiyse Gemini API ile anında analiz et
+            const btnEl = document.getElementById('btnUnifiedAiGenerate');
+            const originalBtnHtml = btnEl ? btnEl.innerHTML : '';
+            const hintEl = document.getElementById('aiQuickPreviewHint');
+
+            if (userWish && typeof parseUserWishWithGemini === 'function') {
+                if (btnEl) {
+                    btnEl.disabled = true;
+                    btnEl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:8px;">${CANVA_ICONS.sparkle || '✨'} Gemini AI İsteğinizi İnceliyor...</span>`;
+                }
+                if (hintEl) {
+                    hintEl.textContent = '⏳ Gemini AI kısıtlamalarınızı ve odak tercihlerinizi inceliyor...';
+                    hintEl.style.color = '#38BDF8';
+                }
+
+                try {
+                    await parseUserWishWithGemini(userWish);
+                } catch (e) {
+                    console.warn("Gemini analizi hatası, yerel kurallar devreye girdi:", e);
+                } finally {
+                    if (btnEl) {
+                        btnEl.disabled = false;
+                        btnEl.innerHTML = originalBtnHtml;
+                    }
+                }
+            }
+
+            // ⚡ Eğer Çelik Akışı (Yeni Konsept) seçiliyse doğrudan kompleks akışını taslak olarak hazırla
+            if (window.aiGeneratorScope === 'flow_complex') {
+                window.pendingAiWeeklyPlan = null;
+                loadCelikAkisiWorkout(false);
+                return;
+            }
 
             const isComplexRequested = /birleşik|kompleks|akış|flow|chain|zincir|hibrit|kombinasyon/.test(userWish.toLocaleLowerCase('tr-TR')) ||
                                        selectedSplit === 'flow_complex' ||
@@ -1414,7 +1511,6 @@
             if (window.aiGeneratorScope === 'single' && !preferredTplKey) {
                 window.pendingAiWeeklyPlan = null;
                 handleGenerateWorkout(currentSelectedDoctrine, userWish);
-                const hintEl = document.getElementById('aiQuickPreviewHint');
                 if (hintEl) {
                     hintEl.textContent = '✅ Günlük antrenman hazırlandı';
                     hintEl.style.color = '#9BE15D';
@@ -1436,7 +1532,6 @@
             }
 
             applyAiWeeklySchedule(targetTplKey);
-            const hintEl = document.getElementById('aiQuickPreviewHint');
             if (hintEl) {
                 hintEl.textContent = '✅ Haftalık program hazırlandı';
                 hintEl.style.color = '#9BE15D';
@@ -1444,11 +1539,18 @@
         }
         window.handleQuickAiGenerate = handleQuickAiGenerate;
 
-        function switchQuickAiToSingleDay() {
+        async function switchQuickAiToSingleDay() {
             setAiGeneratorScope('single');
             window.pendingAiWeeklyPlan = null;
             const unifiedWishEl = document.getElementById('aiUnifiedWishInput');
-            const userWish = unifiedWishEl ? unifiedWishEl.value.trim() : '';
+            const modalWishEl = document.getElementById('aiModalUserWishInput');
+            const userWish = (unifiedWishEl && unifiedWishEl.value.trim())
+                ? unifiedWishEl.value.trim()
+                : (modalWishEl ? modalWishEl.value.trim() : '');
+
+            if (userWish && !window.lastGeminiWishAnalysis && typeof parseUserWishWithGemini === 'function') {
+                await parseUserWishWithGemini(userWish);
+            }
             handleGenerateWorkout(currentSelectedDoctrine, userWish);
             const outEl = document.getElementById('generatedWorkoutOutput');
             if (outEl) {
@@ -1792,6 +1894,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 templateKey: chosenTplKey,
                 templateName: tpl.name,
                 userWish,
+                aiAnalysis: window.lastGeminiWishAnalysis || null,
                 targetWeek: wkStatus.recommendedTargetWeek,
                 wkStatus,
                 days: generatedDaysList,
@@ -1965,8 +2068,14 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             `;
 
             const wishNoticeHtml = plan.userWish ? `
-                <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(250,204,21,0.12); border:1px solid rgba(250,204,21,0.38); color:#FDE047; font-size:11.5px; font-weight:800; padding:4px 11px; border-radius:999px; margin-top:6px;">
-                    ${CANVA_ICONS.sparkle} Odak: "${escapeHTML(plan.userWish)}"
+                <div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;">
+                    <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(250,204,21,0.12); border:1px solid rgba(250,204,21,0.38); color:#FDE047; font-size:11.5px; font-weight:800; padding:4px 11px; border-radius:999px; width:fit-content;">
+                        ${CANVA_ICONS.sparkle} İsteğiniz: "${escapeHTML(plan.userWish)}"
+                    </div>
+                    ${(plan.aiAnalysis && plan.aiAnalysis.summary) ? `
+                    <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(168,85,247,0.12); border:1px solid rgba(168,85,247,0.35); color:#c084fc; font-size:11.5px; font-weight:600; padding:5px 12px; border-radius:8px; line-height:1.4;">
+                        <span>🤖 <strong>Gemini AI Biyomekanik Uyarlaması:</strong> ${escapeHTML(plan.aiAnalysis.summary)}</span>
+                    </div>` : ''}
                 </div>
             ` : '';
 
@@ -2030,11 +2139,102 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             const plan = window.pendingAiWeeklyPlan;
             if (!plan || !plan.days || !plan.days[dayIndexInList]) return;
             currentGeneratedWorkout = plan.days[dayIndexInList].workout;
+            window.expandedGeneratedExIndex = null;
             renderGeneratedWorkout();
         }
         window.inspectDayFromPendingWeeklyPlan = inspectDayFromPendingWeeklyPlan;
 
-        function confirmPendingAiWeeklyPlan(mode = 'next') {
+        async function auditAndRestructureConsecutiveDaysWithAI(currentSched, consecutivePairs) {
+            if (!Array.isArray(consecutivePairs) || consecutivePairs.length === 0) return;
+
+            for (const pair of consecutivePairs) {
+                const itemA = currentSched[pair.d1];
+                const itemB = currentSched[pair.d2];
+                if (!itemA || !itemB || itemA.rest || itemB.rest) continue;
+
+                const wA = itemA.customWorkout;
+                const wB = itemB.customWorkout;
+                if (!wA || !wB || !Array.isArray(wA.exercises) || !Array.isArray(wB.exercises)) continue;
+
+                const dayNameA = DAY_NAMES_TR[pair.d1] || '1. Gün';
+                const dayNameB = DAY_NAMES_TR[pair.d2] || '2. Gün';
+
+                // Kas ve omurga yükü çakışmasını kontrol et
+                const musclesA = wA.exercises.map(e => `${e.category || ''} ${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR'));
+                const musclesB = wB.exercises.map(e => `${e.category || ''} ${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR'));
+
+                const hasUpperOverlap = musclesA.some(m => /göğüs|omuz|triceps|push/.test(m)) && musclesB.some(m => /göğüs|omuz|triceps|push/.test(m));
+                const hasLowerOverlap = musclesA.some(m => /bacak|quad|squat|lunge/.test(m)) && musclesB.some(m => /bacak|quad|squat|lunge/.test(m));
+                const hasSpineOverlap = musclesA.some(m => /deadlift|rdl|barbell row|good morning/.test(m)) && musclesB.some(m => /deadlift|rdl|barbell row|squat/.test(m));
+
+                if (!hasUpperOverlap && !hasLowerOverlap && !hasSpineOverlap) {
+                    continue; // Zaten çakışma yok (zıt kas grupları)
+                }
+
+                try {
+                    const prompt = `Kullanıcı takviminde ARD ARDA 2 GÜN antrenman yapacak:
+1. GÜN (${dayNameA}): ${wA.title}
+Hareketler: ${wA.exercises.map(e => e.name + ' (' + e.muscle + ')').join(', ')}
+
+2. GÜN (${dayNameB}): ${wB.title}
+Hareketler: ${wB.exercises.map(e => e.name + ' (' + e.muscle + ')').join(', ')}
+
+BİYOMEKANİK KURALLAR (Schumann 2022 & Dr. Stuart McGill):
+1. Ard arda gelen günlerde AYNI KAS GRUBUNA (örn. iki gün üst üste göğüs/itiş veya iki gün üst üste bacak/squat) ağır yük binemez (en az 48 saat toparlanma zorunludur).
+2. İki gün üst üste omurgaya ağır eksenel/makaslama yükü (Squat, Deadlift, Barbell Row) bindirilemez.
+3. 2. Günün hareketleri 1. Gün ile zıt veya tamamlayıcı olmalıdır (örn: 1. Gün Üst Vücut İtiş ise 2. Gün Alt Vücut veya Çekiş olmalı).
+
+GÖREV:
+2. Gün (${dayNameB}) programında 1. Gün (${dayNameA}) ile çakışan hareketleri tespit et ve 2. Gün için antagonist (zıt) ikame hareketler öner.
+
+Aşağıdaki JSON şemasında çıktı ver:
+\`\`\`json
+{
+  "hasConflict": true,
+  "explanation": "Ardışık günlerde kas çakışmasını önlemek için 2. gün zıt kas grubuyla dengelendi.",
+  "suggestedReplacements": [
+    { "from": "Mevcut Hareket", "to": "Önerilen Zıt Hareket", "reason": "İtiş yerine çekişe geçildi" }
+  ]
+}
+\`\`\``;
+
+                    const sysPrompt = "Sen Çelik Kodu platformunun Baş Biyomekanik Uzmanı Yapay Zekasısın. Ard arda antrenman günlerinde kas çakışmasını sıfırlayarak sadece JSON çıktısı verirsin.";
+
+                    if (typeof callGeminiAPI === 'function') {
+                        const aiResp = await callGeminiAPI(prompt, sysPrompt, '', 1000);
+                        if (aiResp) {
+                            const jsonMatch = aiResp.match(/```(?:json)?\s*([\s\S]*?)\s*```/) || aiResp.match(/\{[\s\S]*\}/);
+                            if (jsonMatch) {
+                                const parsed = JSON.parse(jsonMatch[1] || jsonMatch[0]);
+                                if (parsed && Array.isArray(parsed.suggestedReplacements)) {
+                                    parsed.suggestedReplacements.forEach(rep => {
+                                        const fromLow = String(rep.from || '').toLocaleLowerCase('tr-TR');
+                                        const exIdx = wB.exercises.findIndex(e => (e.name || '').toLocaleLowerCase('tr-TR').includes(fromLow));
+                                        if (exIdx > -1) {
+                                            const toLow = String(rep.to || '').toLocaleLowerCase('tr-TR');
+                                            const matchNew = (typeof EXERCISES_DB !== 'undefined' ? EXERCISES_DB : []).find(e =>
+                                                (e.name || '').toLocaleLowerCase('tr-TR').includes(toLow) || toLow.includes((e.name || '').toLocaleLowerCase('tr-TR'))
+                                            );
+                                            if (matchNew) {
+                                                wB.exercises[exIdx] = Object.assign({}, matchNew, { isAiConsecutiveBalanced: true });
+                                            }
+                                        }
+                                    });
+                                    wB.consecutiveNote = parsed.explanation || 'AI: Ardışık gün çakışması önlendi.';
+                                    itemB.desc += ` • ⚡ ${wB.consecutiveNote}`;
+                                }
+                            }
+                        }
+                    }
+                } catch (err) {
+                    console.warn("Ard arda gün AI optimizasyon hatası:", err);
+                    wB.consecutiveNote = `${dayNameA} ile ${dayNameB} ard arda olduğu için kas toparlanma dengesi uygulandı.`;
+                }
+            }
+        }
+        window.auditAndRestructureConsecutiveDaysWithAI = auditAndRestructureConsecutiveDaysWithAI;
+
+        async function confirmPendingAiWeeklyPlan(mode = 'next') {
             const plan = window.pendingAiWeeklyPlan;
             if (!plan || !plan.draftSchedule) {
                 if (typeof showToast === 'function') showToast("⚠️ Onaylanacak haftalık taslak bulunamadı.");
@@ -2053,28 +2253,116 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     showToast(`✅ "${plan.templateName}" Gelecek Hafta takvimine işlendi! Bu haftaki tamamlanan antrenmanlarınız korundu.`);
                 }
             } else {
-                // 'current_safe': Bu haftada tamamlanmış günlere veya geçmiş günlere dokunmadan sadece kalan günleri güncelle
+                // 'current_safe': Haftanın kalan günlerine esnek ve eşit aralıklı dağıtım (Hiçbir antrenman ezilmez!)
                 const wkStatus = getWeeklyTrainingStatus();
                 const currentSched = getWeeklySchedule(uid);
-                const todayIdx = new Date().getDay();
-                const isoOrder = (d) => (d === 0 ? 7 : d);
-                const todayIso = isoOrder(todayIdx);
+                const todayDate = new Date();
+                const todayIdx = todayDate.getDay();
+                const todayYMD = typeof formatDateYMD === 'function' ? formatDateYMD(todayDate) : '';
+                const isoMap = (d) => (d === 0 ? 7 : d);
+                const todayIso = isoMap(todayIdx);
 
-                for (let d = 0; d <= 6; d++) {
-                    const isAlreadyCompleted = wkStatus.completedDays.includes(d);
-                    const isPastDay = isoOrder(d) < todayIso;
-                    if (isAlreadyCompleted || isPastDay) {
-                        continue; // Geçmiş veya antrenmanı yapılmış günleri koru!
+                const templateWorkouts = (plan.days || []).map(d => d.workout).filter(Boolean);
+                const workoutCount = templateWorkouts.length;
+
+                // Haftanın bugünden itibaren kalan ve henüz tamamlanmamış günlerini bul (ISO sırasıyla)
+                const availableDays = [];
+                for (let iso = todayIso; iso <= 7; iso++) {
+                    const realDay = (iso === 7) ? 0 : iso;
+                    if (!wkStatus.completedDays.includes(realDay)) {
+                        availableDays.push(realDay);
                     }
-                    currentSched[d] = JSON.parse(JSON.stringify(plan.draftSchedule[d]));
                 }
+
+                if (availableDays.length === 0) {
+                    if (typeof showToast === 'function') showToast("⚠️ Bu hafta için uygun gün kalmadı; Gelecek Haftaya ekleyebilirsiniz.");
+                    return;
+                }
+
+                // Kalan günlere antrenmanları en dengeli (maksimum dinlenme aralıklı) şekilde dağıt
+                const assignedDays = [];
+                if (workoutCount === 1) {
+                    assignedDays.push(availableDays[0]);
+                } else if (workoutCount === 3 && availableDays.length >= 5) {
+                    // Örn: Çarşamba (3), Cuma (5), Pazar (0)
+                    assignedDays.push(availableDays[0], availableDays[2], availableDays[4]);
+                } else if (workoutCount === 3 && availableDays.length === 4) {
+                    // Örn: Perşembe (4), Cumartesi (6), Pazar (0)
+                    assignedDays.push(availableDays[0], availableDays[2], availableDays[3]);
+                } else {
+                    const step = (availableDays.length - 1) / Math.max(1, workoutCount - 1);
+                    for (let i = 0; i < workoutCount; i++) {
+                        const idx = Math.min(Math.round(i * step), availableDays.length - 1);
+                        if (!assignedDays.includes(availableDays[idx])) {
+                            assignedDays.push(availableDays[idx]);
+                        }
+                    }
+                }
+
+                // Önce kalan günleri temizle (dinlenmeye çek), sadece geçmiş veya tamamlanmış günleri koru
+                availableDays.forEach(d => {
+                    currentSched[d] = {
+                        id: 'rest',
+                        title: '🧘 Dinlenme & Aktif Toparlanma',
+                        type: 'rest',
+                        desc: 'Hafif yürüyüş, mobilite veya tam istirahat',
+                        rest: true
+                    };
+                });
+
+                // Antrenmanları seçilen günlere ata
+                templateWorkouts.forEach((wk, i) => {
+                    const targetDay = assignedDays[i];
+                    if (targetDay !== undefined) {
+                        const wkClone = JSON.parse(JSON.stringify(wk));
+                        wkClone.id = 'ai_dyn_' + targetDay + '_' + Date.now() + '_' + i;
+                        const cleanSub = wkClone.title ? wkClone.title.replace(/^⚔️\s*(Pzt|Sal|Çar|Per|Cum|Cmt|Paz):\s*/i, '') : 'Antrenman';
+                        wkClone.title = `⚔️ ${DAY_NAMES_TR[targetDay]}: ${cleanSub}`;
+                        currentSched[targetDay] = {
+                            id: wkClone.id,
+                            title: wkClone.title,
+                            type: 'custom_generated',
+                            desc: `${wkClone.exercises ? wkClone.exercises.length : 0} Hareket • ${wkClone.duration || 45} Dk`,
+                            rest: false,
+                            customWorkout: wkClone,
+                            exercises: wkClone.exercises
+                        };
+                    }
+                });
+
+                // ARD ARDA GÜN KONTROLÜ & AI YENİDEN DÜZENLEME:
+                const sortedAssigned = assignedDays.slice().sort((a, b) => isoMap(a) - isoMap(b));
+                const consecutivePairs = [];
+                for (let i = 0; i < sortedAssigned.length - 1; i++) {
+                    const d1 = sortedAssigned[i];
+                    const d2 = sortedAssigned[i + 1];
+                    if (isoMap(d2) === isoMap(d1) + 1) {
+                        consecutivePairs.push({ d1, d2 });
+                    }
+                }
+
+                let hasConsecutiveFix = false;
+                if (consecutivePairs.length > 0) {
+                    hasConsecutiveFix = true;
+                    await auditAndRestructureConsecutiveDaysWithAI(currentSched, consecutivePairs);
+                }
+
                 saveWeeklySchedule(currentSched, uid);
+                if (currentSched[todayIdx] && todayYMD && typeof saveDateScheduleOverride === 'function') {
+                    saveDateScheduleOverride(todayYMD, currentSched[todayIdx], uid);
+                }
+
                 activePlannerWeek = 'current';
                 switchTab('activeWorkoutTab');
                 renderActiveWorkout();
                 if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
+
                 if (typeof showToast === 'function') {
-                    showToast(`✅ Program bu haftanın kalan günlerine uygulandı (tamamlanan günleriniz korundu).`);
+                    if (hasConsecutiveFix) {
+                        showToast(`⚡ 3 antrenman haftaya dağıtıldı (${assignedDays.map(d => DAY_NAMES_TR[d]).join(' • ')}). Ard arda gelen günler için AI kas çakışmasını önleyen antagonist düzenleme uyguladı!`);
+                    } else {
+                        showToast(`✅ 3 antrenmanın tamamı haftaya (${assignedDays.map(d => DAY_NAMES_TR[d]).join(' • ')}) eşit aralıklarla yerleştirildi! Hiçbir antrenman ezilmedi.`);
+                    }
                 }
             }
         }
@@ -2763,9 +3051,269 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
         }
         window.getRecentAndScheduledMuscleContext = getRecentAndScheduledMuscleContext;
 
+        async function parseUserWishWithGemini(userWish) {
+            if (!userWish || !userWish.trim()) return null;
+
+            const trimmed = userWish.trim();
+            if (window._cachedGeminiWishAnalysis && window._cachedGeminiWishText === trimmed) {
+                return window._cachedGeminiWishAnalysis;
+            }
+
+            const prompt = `Sen profesyonel bir fitness ve biyomekanik uzmanı yapay zekasın.
+Kullanıcının antrenman oluştururken girdiği özel istek ve kısıtlama notunu analiz et.
+
+KULLANICI NOTU:
+"${trimmed}"
+
+GÖREVLER:
+1. Kullanıcının KESİNLİKLE İSTEMEDİĞİ, yapamadığı, ağrı/sakatlık veya salon uygunsuzluğu (alan darlığı, yürüyüş koridoru olmaması vb.) nedeniyle PROGRAMDAN ÇIKARILMASI GEREKEN egzersiz isimlerini (excludedExerciseNames) ve anahtar kelimelerini (excludedKeywords) çıkar. Hem Türkçe hem İngilizce eşanlamlılarını (ör. pullup, chinup, barfiks, farmer walk, walking lunge, carry vb.) dahil et.
+2. Kullanıcının özellikle ODAKLANMAK istediği kas gruplarını (focusMuscles: 'göğüs', 'omuz', 'bacak', 'kol', 'sırt', 'core') tespit et. (DİKKAT: Kullanıcı bir hareketi veya kası İSTEMİYORSA, onu asla focusMuscles listesine EKLEME!).
+3. Kullanıcıya hitaben 1-2 cümlelik net, zeki ve profesyonel bir antrenör özeti (summary) yaz.
+
+Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
+\`\`\`json
+{
+  "excludedExerciseNames": ["Barfiks", "Pull-Up", "Chin-Up", "Farmer's Walk", "Walking Lunge"],
+  "excludedKeywords": ["barfiks", "pullup", "chinup", "farmer", "walk", "carry", "yürüyüş"],
+  "focusMuscles": [],
+  "summary": "Barfiks varyasyonları ve yürüyüş mesafesi gerektiren Farmer's Walk türevleri programdan tamamen çıkarıldı."
+}
+\`\`\``;
+
+            const sysPrompt = "Sen Çelik Kodu fitness platformunun Baş Biyomekanik Mimarı Yapay Zekasısın. Kullanıcı isteklerini derinlemesine anlayıp katı kısıtlamaları belirleyerek sadece JSON döndürürsün.";
+
+            try {
+                if (typeof callGeminiAPI !== 'function') return null;
+                const responseText = await callGeminiAPI(prompt, sysPrompt, '', 1000);
+                if (!responseText) return null;
+
+                let parsed = null;
+                const jsonMatch = responseText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+                if (jsonMatch) {
+                    parsed = JSON.parse(jsonMatch[1]);
+                } else {
+                    const rawMatch = responseText.match(/\{[\s\S]*\}/);
+                    if (rawMatch) parsed = JSON.parse(rawMatch[0]);
+                }
+
+                if (parsed && typeof parsed === 'object') {
+                    const result = {
+                        excludedExerciseNames: Array.isArray(parsed.excludedExerciseNames) ? parsed.excludedExerciseNames : [],
+                        excludedKeywords: Array.isArray(parsed.excludedKeywords) ? parsed.excludedKeywords.map(k => String(k).toLocaleLowerCase('tr-TR').trim()).filter(Boolean) : [],
+                        focusMuscles: Array.isArray(parsed.focusMuscles) ? parsed.focusMuscles.map(m => String(m).toLocaleLowerCase('tr-TR').trim()).filter(Boolean) : [],
+                        summary: parsed.summary || 'Özel istekleriniz yapay zeka tarafından analiz edilerek programa yansıtıldı.'
+                    };
+                    window._cachedGeminiWishText = trimmed;
+                    window._cachedGeminiWishAnalysis = result;
+                    window.lastGeminiWishAnalysis = result;
+                    return result;
+                }
+            } catch (err) {
+                console.warn('Gemini istek analizi çağrısında hata oluştu, yerel kurallara geçiliyor:', err);
+            }
+            return null;
+        }
+        window.parseUserWishWithGemini = parseUserWishWithGemini;
+
+        function parseUserWishConstraints(wishText, catalog = null, aiAnalysis = null) {
+            if (!wishText || !wishText.trim()) {
+                return { excludedIds: new Set(), excludedKeywords: [], focusMuscles: [], appliedFilters: [] };
+            }
+
+            const trimmed = wishText.trim();
+            const activeAi = aiAnalysis || (window.lastGeminiWishAnalysis && window._cachedGeminiWishText === trimmed ? window.lastGeminiWishAnalysis : null);
+
+            const raw = trimmed.toLocaleLowerCase('tr-TR');
+            const excludedIds = new Set();
+            const excludedKeywords = [];
+            const focusMuscles = [];
+            const appliedFilters = [];
+            const db = Array.isArray(catalog) && catalog.length > 0 ? catalog : (typeof EXERCISES_DB !== 'undefined' ? EXERCISES_DB : []);
+
+            // 0. Doğrudan Gemini AI Analizini Entegre Et
+            if (activeAi) {
+                if (Array.isArray(activeAi.excludedKeywords)) {
+                    activeAi.excludedKeywords.forEach(kw => {
+                        const cleanKw = String(kw).toLocaleLowerCase('tr-TR').trim();
+                        if (cleanKw && cleanKw.length >= 2) excludedKeywords.push(cleanKw);
+                    });
+                }
+                if (Array.isArray(activeAi.focusMuscles)) {
+                    activeAi.focusMuscles.forEach(m => {
+                        const cleanM = String(m).toLocaleLowerCase('tr-TR').trim();
+                        if (cleanM && !excludedKeywords.includes(cleanM)) focusMuscles.push(cleanM);
+                    });
+                }
+                if (activeAi.summary) {
+                    appliedFilters.push(`🤖 AI: ${activeAi.summary}`);
+                }
+                if (Array.isArray(activeAi.excludedExerciseNames)) {
+                    activeAi.excludedExerciseNames.forEach(exName => {
+                        const targetNameLow = String(exName).toLocaleLowerCase('tr-TR').trim();
+                        if (!targetNameLow || targetNameLow.length < 3) return;
+                        db.forEach(ex => {
+                            const exNameLow = (ex.name || '').toLocaleLowerCase('tr-TR');
+                            const exIdLow = (ex.id || '').toLocaleLowerCase('tr-TR');
+                            if (exNameLow.includes(targetNameLow) || targetNameLow.includes(exNameLow) || exIdLow.includes(targetNameLow.replace(/\s+/g, '_'))) {
+                                excludedIds.add(ex.id);
+                                appliedFilters.push(`"${ex.name}" elendi (AI)`);
+                            }
+                        });
+                    });
+                }
+            }
+
+            // 1. Negasyon ve Kısıtlama Kalıpları (Yerel Kural Tabanlı Güvenlik Katmanı)
+            const negationRegex = /(istemiyorum|yapamıyorum|yapamam|olmasın|önerme|koyma|çıkar|kaldır|sevmiyorum|uygun değil|yasak|ağrıtıyor|zorluyor|çekemiyorum|yapmıyorum|hariç|dışında|yok)/i;
+            const painRegex = /(ağrı|sakat|fıtık|hassas|incin|problem|menisküs|zorla)/i;
+            const spatialRegex = /(dar|alan yok|yer yok|salon uygun değil|küçük salon|yürüyüş|yürüme|yürümeli|yer dar|yürümeye yer yok|koridor yok)/i;
+
+            const clauses = raw.split(/[,.;\n]|\s+ve\s+|\s+veya\s+|\s+ama\s+|\s+fakat\s+|\s+ayrıca\s+/).map(c => c.trim()).filter(Boolean);
+
+            clauses.forEach(clause => {
+                const isNegated = negationRegex.test(clause);
+                const hasPain = painRegex.test(clause);
+                const hasSpatial = spatialRegex.test(clause);
+
+                // Mekan / Salon Kısıtlaması (Farmer's Walk, Walking Lunge, Carry)
+                if (hasSpatial || (isNegated && /farmer|yürüyüş|yürüme|carry|taşıma/.test(clause))) {
+                    excludedKeywords.push('farmer', 'farmers_walk', 'walking_lunge', 'carry', 'suitcase_carry', 'yürüyüş', 'yürüme');
+                    excludedIds.add('db_farmers_walk');
+                    excludedIds.add('db_walking_lunge');
+                    excludedIds.add('db_suitcase_carry');
+                    appliedFilters.push("Yürüyüş/mesafe hareketleri (Farmer's Walk vb.) elendi");
+                }
+
+                // Hareket Bazlı Negasyon / Yapamama Kontrolleri
+                if (isNegated || hasPain) {
+                    if (/deadlift|rdl|romanian/.test(clause)) {
+                        excludedKeywords.push('deadlift', 'rdl');
+                        excludedIds.add('bb_deadlift');
+                        excludedIds.add('db_rdl');
+                        excludedIds.add('db_romanian_deadlift');
+                        appliedFilters.push("Deadlift varyasyonları elendi");
+                    }
+                    if (/farmer|çiftçi/.test(clause)) {
+                        excludedKeywords.push('farmer', 'carry');
+                        excludedIds.add('db_farmers_walk');
+                        appliedFilters.push("Farmer's Walk elendi");
+                    }
+                    if (/burpee/.test(clause)) {
+                        excludedKeywords.push('burpee');
+                        excludedIds.add('bw_burpee');
+                        appliedFilters.push("Burpee elendi");
+                    }
+                    if (/şınav|pushup|push up|push-up/.test(clause)) {
+                        excludedKeywords.push('pushup', 'push_up', 'şınav');
+                        excludedIds.add('bw_pushup');
+                        appliedFilters.push("Şınav varyasyonları elendi");
+                    }
+                    if (/barfiks|pullup|pull up|chinup|chin up/.test(clause)) {
+                        excludedKeywords.push('pullup', 'chinup', 'barfiks');
+                        excludedIds.add('bw_pullup');
+                        excludedIds.add('bw_chinup');
+                        excludedIds.add('bw_inverted_row');
+                        appliedFilters.push("Barfiks varyasyonları elendi");
+                    }
+                    if (/overhead|omuz pres|ohp|askeri pres/.test(clause)) {
+                        excludedKeywords.push('overhead', 'standing_overhead', 'push_press');
+                        excludedIds.add('db_overhead_press');
+                        excludedIds.add('db_standing_overhead_press');
+                        appliedFilters.push("Baş üstü omuz presleri elendi");
+                    }
+                    if (/lunge|adım/.test(clause)) {
+                        excludedKeywords.push('lunge');
+                        excludedIds.add('db_walking_lunge');
+                        appliedFilters.push("Lunge varyasyonları elendi");
+                    }
+                    if (/squat|çömelme/.test(clause)) {
+                        excludedKeywords.push('squat');
+                        appliedFilters.push("Squat varyasyonları elendi");
+                    }
+                    if (/dips|dip\b/.test(clause)) {
+                        excludedKeywords.push('dips');
+                        excludedIds.add('bw_dips');
+                        appliedFilters.push("Dips elendi");
+                    }
+                    if (/swing/.test(clause)) {
+                        excludedKeywords.push('swing');
+                        excludedIds.add('db_swing');
+                        excludedIds.add('kb_swing');
+                        appliedFilters.push("Swing elendi");
+                    }
+                    if (/row|kürek/.test(clause) && /barbell/.test(clause)) {
+                        excludedKeywords.push('bb_bent_over_row', 'bb_pendlay_row');
+                        excludedIds.add('bb_bent_over_row');
+                        excludedIds.add('bb_pendlay_row');
+                        appliedFilters.push("Barbell Bent-Over Row elendi");
+                    }
+
+                    // Bölgesel ağrı ve sakatlık kuralları
+                    if (/bel|omurga|fıtık/.test(clause)) {
+                        excludedKeywords.push('deadlift', 'swing', 'snatch', 'good morning', 'bent over', 'clean');
+                        appliedFilters.push("Omurga makaslama yükü olan hareketler elendi");
+                    }
+                    if (/diz|menisküs/.test(clause)) {
+                        excludedKeywords.push('jump', 'sıçra', 'pistol', 'thruster', 'burpee');
+                        appliedFilters.push("Dize patlayıcı yük bindiren hareketler elendi");
+                    }
+                    if (/omuz/.test(clause) && hasPain) {
+                        excludedKeywords.push('overhead', 'snatch', 'push press', 'thruster', 'upright row');
+                        appliedFilters.push("Omuz sıkışması yaratabilecek dikey presler elendi");
+                    }
+
+                    // Veritabanındaki özel egzersiz isimlerini dinamik tarama
+                    db.forEach(ex => {
+                        const nameLow = (ex.name || '').toLocaleLowerCase('tr-TR');
+                        const idClean = (ex.id || '').replace(/^(db|bb|bw|kb|mach)_/, '').replace(/_/g, ' ');
+                        if (nameLow.length > 5 && clause.includes(nameLow)) {
+                            excludedIds.add(ex.id);
+                            excludedKeywords.push(ex.id);
+                            appliedFilters.push(`"${ex.name}" elendi`);
+                        } else if (idClean.length > 5 && clause.includes(idClean)) {
+                            excludedIds.add(ex.id);
+                            excludedKeywords.push(idClean);
+                            appliedFilters.push(`"${ex.name}" elendi`);
+                        }
+                    });
+                }
+            });
+
+            // 2. Dışlanan anahtar kelimelerle eşleşen tüm egzersizleri veritabanından excludedIds içine dahil et
+            if (excludedKeywords.length > 0) {
+                db.forEach(ex => {
+                    const nameLow = (ex.name || '').toLocaleLowerCase('tr-TR');
+                    const idLow = (ex.id || '').toLocaleLowerCase('tr-TR');
+                    const famLow = String(typeof getExerciseMovementFamily === 'function' ? getExerciseMovementFamily(ex) : '').toLocaleLowerCase('tr-TR');
+                    if (excludedKeywords.some(kw => kw.length >= 3 && (nameLow.includes(kw) || idLow.includes(kw) || famLow.includes(kw)))) {
+                        excludedIds.add(ex.id);
+                    }
+                });
+            }
+
+            // 3. Pozitif Odak Kas Grupları (Kullanıcı istemiyorum dediyse asla ekleme)
+            const isExcludedOrNegated = (term) => excludedKeywords.includes(term) || new RegExp(`${term}.*(istemiyorum|ağrı|yapamıyorum|olmasın|önerme)`).test(raw);
+            if (!focusMuscles.includes('sırt') && /sırt|kanat|çekiş/.test(raw) && !isExcludedOrNegated('sırt')) focusMuscles.push('sırt');
+            if (!focusMuscles.includes('kol') && /kol|biceps|triceps|pazu/.test(raw) && !isExcludedOrNegated('kol')) focusMuscles.push('kol');
+            if (!focusMuscles.includes('göğüs') && /göğüs|chest/.test(raw) && !isExcludedOrNegated('göğüs')) focusMuscles.push('göğüs');
+            if (!focusMuscles.includes('omuz') && /omuz|deltoid/.test(raw) && !isExcludedOrNegated('omuz')) focusMuscles.push('omuz');
+            if (!focusMuscles.includes('bacak') && /bacak|kalça|quad|glute/.test(raw) && !isExcludedOrNegated('bacak')) focusMuscles.push('bacak');
+            if (!focusMuscles.includes('core') && /karın|core|abs/.test(raw) && !isExcludedOrNegated('core')) focusMuscles.push('core');
+
+            return {
+                excludedIds,
+                excludedKeywords: [...new Set(excludedKeywords)],
+                focusMuscles: [...new Set(focusMuscles)],
+                appliedFilters: [...new Set(appliedFilters)]
+            };
+        }
+        window.parseUserWishConstraints = parseUserWishConstraints;
+
         function handleGenerateWorkout(doctrineOverride = null, customWish = '', weeklyContext = null) {
             const activeDoctrineKey = doctrineOverride || currentSelectedDoctrine || 'bb_hybrid';
             const activeDoc = AI_DOCTRINES[activeDoctrineKey] || AI_DOCTRINES.bb_hybrid;
+
+            const wishParsed = parseUserWishConstraints(customWish, (typeof EXERCISES_DB !== 'undefined' ? EXERCISES_DB : null), window.lastGeminiWishAnalysis);
 
             const styleEl = document.getElementById('paramStyle');
             const goalEl = document.getElementById('paramGoal');
@@ -2800,6 +3348,15 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 if (!ex || isExerciseExcludedByUser(ex.id)) return false;
                 if (!selectedEquipments.includes(ex.equipment)) return false;
                 if (usedIds.includes(ex.id)) return false;
+
+                // Kullanıcı Özel Notu / Kısıtlama Filtresi (Kullanıcı yapamıyorum/istemiyorum dediyse ASLA seçme)
+                if (wishParsed.excludedIds.has(ex.id)) return false;
+                const exNameLow = (ex.name || '').toLocaleLowerCase('tr-TR');
+                const exIdLow = (ex.id || '').toLocaleLowerCase('tr-TR');
+                const famLow = String(getExerciseMovementFamily(ex) || '').toLocaleLowerCase('tr-TR');
+                if (wishParsed.excludedKeywords.some(kw => kw.length >= 2 && (exNameLow.includes(kw) || exIdLow.includes(kw) || famLow.includes(kw)))) {
+                    return false;
+                }
 
                 const fam = getExerciseMovementFamily(ex);
                 if (fam && usedFamilies.has(fam)) return false;
@@ -3282,16 +3839,23 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 const isLowerCompatibleSplit = ['full_body', 'lower', 'functional'].includes(currentSplitPrimary);
 
                 const focusMatchers = [
-                    { key: 'back', allow: isUpperCompatibleSplit, targetMin: currentSplitPrimary === 'upper' ? 3 : 2, regex: /sırt|kanat|row|çekiş|lat|barfiks/, testEx: e => getEffectiveExerciseCategory(e) === 'pull' || /sırt|kanat|lat|rhomboid|row|pull/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
-                    { key: 'arms', allow: isUpperCompatibleSplit, targetMin: currentSplitPrimary === 'upper' ? 2 : 2, regex: /kol|biceps|triceps|pazu|arka kol/, testEx: e => /biceps|triceps|kol|curl|extension|pushdown|kickback|hammer|skullcrusher/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
-                    { key: 'rear_delt', allow: isUpperCompatibleSplit, targetMin: 1, regex: /arka omuz|rear delt|face pull/, testEx: e => /arka omuz|rear|face pull|reverse fly|band pull/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
-                    { key: 'shoulders', allow: isUpperCompatibleSplit, targetMin: 2, regex: /omuz|deltoid|trapez/, testEx: e => /omuz|deltoid|press|lateral|shrug|trapez/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
-                    { key: 'chest', allow: isUpperCompatibleSplit, targetMin: 2, regex: /göğüs|chest|pectoral|şınav|bench/, testEx: e => /göğüs|pectoral|bench|fly|şınav|push-up|floor press/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
-                    { key: 'legs', allow: isLowerCompatibleSplit, targetMin: currentSplitPrimary === 'lower' ? 4 : 2, regex: /bacak|kalça|glute|squat|hamstring|quad/, testEx: e => getEffectiveExerciseCategory(e) === 'legs_quad' || getEffectiveExerciseCategory(e) === 'legs_hinge' },
-                    { key: 'core', allow: true, targetMin: 2, regex: /karın|core|abs|plank/, testEx: e => getEffectiveExerciseCategory(e) === 'core' }
+                    { key: 'back', allow: isUpperCompatibleSplit, targetMin: currentSplitPrimary === 'upper' ? 3 : 2, regex: /(?:^|\s)(?:sırt|kanat|kürek|çekiş|lat|latissimus)(?:$|\s|[.,])/i, testEx: e => getEffectiveExerciseCategory(e) === 'pull' || /sırt|kanat|lat|rhomboid|row|pull/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
+                    { key: 'arms', allow: isUpperCompatibleSplit, targetMin: currentSplitPrimary === 'upper' ? 2 : 2, regex: /(?:^|\s)(?:kol|biceps|triceps|pazu|arka kol)(?:$|\s|[.,])/i, testEx: e => /biceps|triceps|kol|curl|extension|pushdown|kickback|hammer|skullcrusher/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
+                    { key: 'rear_delt', allow: isUpperCompatibleSplit, targetMin: 1, regex: /arka omuz|rear delt|face pull/i, testEx: e => /arka omuz|rear|face pull|reverse fly|band pull/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
+                    { key: 'shoulders', allow: isUpperCompatibleSplit, targetMin: 2, regex: /(?:^|\s)(?:omuz|deltoid|trapez)(?:$|\s|[.,])/i, testEx: e => /omuz|deltoid|press|lateral|shrug|trapez/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
+                    { key: 'chest', allow: isUpperCompatibleSplit, targetMin: 2, regex: /(?:^|\s)(?:göğüs|chest|pectoral)(?:$|\s|[.,])/i, testEx: e => /göğüs|pectoral|bench|fly|push-up|floor press/.test(`${e.muscle || ''} ${e.name || ''}`.toLocaleLowerCase('tr-TR')) },
+                    { key: 'legs', allow: isLowerCompatibleSplit, targetMin: currentSplitPrimary === 'lower' ? 4 : 2, regex: /(?:^|\s)(?:bacak|kalça|glute|hamstring|quad)(?:$|\s|[.,])/i, testEx: e => getEffectiveExerciseCategory(e) === 'legs_quad' || getEffectiveExerciseCategory(e) === 'legs_hinge' },
+                    { key: 'core', allow: true, targetMin: 2, regex: /(?:^|\s)(?:karın|core|abs)(?:$|\s|[.,])/i, testEx: e => getEffectiveExerciseCategory(e) === 'core' }
                 ];
 
-                const activeFocusMatchers = focusMatchers.filter(fm => fm.allow && fm.regex.test(wishLower));
+                const activeFocusMatchers = focusMatchers.filter(fm => {
+                    if (!fm.allow) return false;
+                    // Eğer bu kas grubu veya anahtar kelime kısıtlanmışsa asla odak yapma
+                    if (wishParsed.excludedKeywords.some(kw => kw.length >= 3 && (fm.key.includes(kw) || kw.includes(fm.key)))) return false;
+                    const isAiFocus = Array.isArray(wishParsed.focusMuscles) && wishParsed.focusMuscles.some(m => fm.key.includes(m) || m.includes(fm.key));
+                    const isRegexFocus = fm.regex.test(wishLower);
+                    return isAiFocus || isRegexFocus;
+                });
                 const isAnyFocusMatch = (ex) => activeFocusMatchers.some(fm => fm.testEx(ex));
 
                 activeFocusMatchers.forEach(fm => {
@@ -3380,22 +3944,34 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 { name: "Kedi - Deve & Kuş Köpeği (Omurga Aktivasyonu)", dur: "60 sn", cue: "Nefes alarak beli çukurlaştır, nefes vererek sırtı kabart." }
             ];
 
-            // KATMAN 3: FINISHER ÇAKIŞMA KORUMASI (Ana antrenmanda seçilen hareket veya ailesi Finisher olamaz!)
+            // KATMAN 3: FINISHER ÇAKIŞMA VE KISITLAMA KORUMASI (Ana antrenmanda seçilen hareket veya kullanıcının istemediği hareketler Finisher olamaz!)
             const finisherCandidates = [
                 { exId: "db_swing", family: "ballistic_hip_hinge", name: "3 Dk Tabata Balistik Bitiş", desc: "20 sn Maksimum Tempolu Swing / Snatch + 10 sn Dinlenme (4 Tur)" },
                 { exId: "db_farmers_walk", family: "loaded_carry", name: "Çiftçi Yürüyüşü (Farmer's Walk / Carry Burnout)", desc: "Mümkün olan en ağır dambıllarla 3 tur 40 metre kesintisiz yürüyüş." },
                 { exId: "bw_burpee", family: "fullbody_metcon_burpee", name: "3 Dk EMOM Kondisyon Zırhı (Burpee / Mountain Climber)", desc: "Her dakika başında 10 Burpee veya 30 sn Mountain Climber, kalan sürede aktif dinlenme." },
                 { exId: "bw_plank", family: "core_anterior_plank", name: "2 Dk İzometrik Core & Hollow Hold Burnout", desc: "40 sn RKC Plank + 20 sn Dinlenme × 2 Tur maksimum karın duvarı sıkışı." }
             ];
-            const deconflictedFinishers = finisherCandidates.filter(f =>
-                !usedIds.includes(f.exId) && !usedFamilies.has(f.family)
-            );
+            const fallbackRecoveryFinisher = {
+                exId: "bw_breathing",
+                family: "recovery",
+                name: "2 Dk Diyafram Nefesi & Toparlanma Burnout",
+                desc: "Sırtüstü uzanıp 4 sn nefes al, 4 sn tut, 6 sn ver; parasempatik toparlanmayı tetikle."
+            };
+
+            const deconflictedFinishers = finisherCandidates.filter(f => {
+                if (usedIds.includes(f.exId) || usedFamilies.has(f.family)) return false;
+                if (wishParsed.excludedIds.has(f.exId)) return false;
+                const fNameLow = (f.name || '').toLocaleLowerCase('tr-TR');
+                const fIdLow = (f.exId || '').toLocaleLowerCase('tr-TR');
+                if (wishParsed.excludedKeywords.some(kw => fNameLow.includes(kw) || fIdLow.includes(kw))) return false;
+                return true;
+            });
             const weeklyFreshFinishers = deconflictedFinishers.filter(f => !weeklyUsedFinishers.has(f.exId));
             const selectedFinisher = pickRandom(
                 weeklyFreshFinishers.length > 0
                     ? weeklyFreshFinishers
-                    : (deconflictedFinishers.length > 0 ? deconflictedFinishers : finisherCandidates)
-            );
+                    : (deconflictedFinishers.length > 0 ? deconflictedFinishers : [fallbackRecoveryFinisher])
+            ) || fallbackRecoveryFinisher;
             if (selectedFinisher && selectedFinisher.exId) {
                 weeklyUsedFinishers.add(selectedFinisher.exId);
             }
@@ -3450,6 +4026,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 doctrineShort: activeDoc.shortTag,
                 doctrineBadgeColor: activeDoc.badgeColor,
                 customWish: customWish || '',
+                wishAppliedFilters: wishParsed.appliedFilters,
                 style,
                 goal,
                 duration,
@@ -3465,9 +4042,22 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(currentGeneratedWorkout));
             } catch(e) {}
 
+            window.expandedGeneratedExIndex = null;
             renderGeneratedWorkout();
             playAlertSound();
         }
+
+        window.expandedGeneratedExIndex = null;
+        function toggleGeneratedExDetail(exIdx) {
+            const idx = Number(exIdx);
+            if (window.expandedGeneratedExIndex === idx) {
+                window.expandedGeneratedExIndex = null;
+            } else {
+                window.expandedGeneratedExIndex = idx;
+            }
+            renderGeneratedWorkout();
+        }
+        window.toggleGeneratedExDetail = toggleGeneratedExDetail;
 
         function renderGeneratedWorkout() {
             const w = currentGeneratedWorkout;
@@ -3487,20 +4077,65 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 : assignAcademicBlockStructure(w.exercises || [], w.style || 'superset', w.scheme);
             w.exercises = structuredList;
 
+            const equipLabels = {
+                dumbbell: 'Dambıl',
+                kettlebell: 'Kettlebell',
+                barbell: 'Barbell',
+                machine: 'Makine/Kablo',
+                bodyweight: 'Vücut Ağ.'
+            };
+
             let blocksHtml = '';
             structuredList.forEach((ex, idx) => {
                 const label = ex.blockLabel || String(idx + 1);
                 const exScheme = Object.assign({}, w.scheme, {
                     rest: ex.customRest || (w.scheme ? w.scheme.rest : 60)
                 });
+                const anatomy = typeof getExerciseAnatomy === 'function' ? getExerciseAnatomy(ex) : { primary: ex.muscle || '' };
+                const shortMuscle = String(anatomy.primary || ex.muscle || '').split('(')[0].trim();
+                const targetW = ex.weightKey && weights[ex.weightKey] ? weights[ex.weightKey] : null;
+                const isExpanded = window.expandedGeneratedExIndex === idx;
+
                 if (ex.blockHeader) {
                     const isSupersetHdr = ex.blockType === 'superset';
                     const hdrStyle = isSupersetHdr
-                        ? 'border-left:3px solid #f59e0b; background:rgba(245,158,11,0.08); color:#fbbf24; padding:6px 10px; border-radius:6px;'
-                        : 'border-left:3px solid #38bdf8; background:rgba(56,189,248,0.08); color:#38bdf8; padding:6px 10px; border-radius:6px;';
-                    blocksHtml += `<div class="block-header" style="${hdrStyle}">${escapeHTML(ex.blockHeader)}</div>`;
+                        ? 'border-left:3px solid #f59e0b; background:rgba(245,158,11,0.06); color:#b45309; padding:8px 14px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; border-top:1px solid #E2E8F0; border-bottom:1px solid #E2E8F0;'
+                        : 'border-left:3px solid #0284c7; background:rgba(2,132,199,0.06); color:#0369a1; padding:8px 14px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; border-top:1px solid #E2E8F0; border-bottom:1px solid #E2E8F0;';
+                    blocksHtml += `<div style="${hdrStyle}">${isSupersetHdr ? '⚡' : '🛡️'} ${escapeHTML(ex.blockHeader)}</div>`;
                 }
-                blocksHtml += renderSingleExerciseCard(ex, label, exScheme, weights, 'generated');
+
+                const pillStateCls = ex.isWishFocus ? 'pill-focus' : (ex.synergyBadge ? 'pill-synergy' : '');
+                const dotStateCls = ex.isWishFocus ? 'dot-gold' : (ex.synergyBadge ? 'dot-cyan' : '');
+
+                const detailCardHtml = isExpanded
+                    ? `<div class="wk-ex-detail-drawer" onclick="event.stopPropagation();">${renderSingleExerciseCard(ex, String(label), exScheme, weights, 'generated')}</div>`
+                    : '';
+
+                blocksHtml += `
+                    <div class="wk-ex-item-wrap ${isExpanded ? 'is-expanded' : ''}">
+                        <div class="wk-ex-row wk-ex-row-clickable ${isExpanded ? 'active' : ''}" onclick="toggleGeneratedExDetail(${idx})" title="Detaylı hareket kartını ${isExpanded ? 'kapatmak' : 'açmak'} için dokunun">
+                            <div><span class="wk-ex-code">${escapeHTML(String(label))}</span></div>
+                            <div class="wk-ex-name" style="flex-direction:column; align-items:flex-start; gap:2px;">
+                                <div style="display:flex; align-items:center; gap:6px; width:100%; min-width:0;">
+                                    <span class="wk-ex-name-text" style="font-weight:700; font-size:13.5px; color:#0F172A;">${escapeHTML(ex.name)}</span>
+                                    <span class="wk-ex-expand-hint" aria-hidden="true">${isExpanded ? '▴' : '▾'}</span>
+                                </div>
+                                <div style="font-size:11px; color:#64748B; display:flex; gap:8px;">
+                                    <span>🎯 ${exScheme.sets}×${exScheme.reps}</span>
+                                    <span>⏱️ ${exScheme.rest}s</span>
+                                    ${targetW ? `<span style="color:#D97706; font-weight:700;">🏋️ ${targetW} kg</span>` : ''}
+                                </div>
+                            </div>
+                            <div class="wk-col-muscle" style="display:flex; align-items:center; gap:6px;">
+                                <span class="wk-ex-muscle-pill ${pillStateCls}">
+                                    <span class="cv-muscle-dot ${dotStateCls}"></span>${CANVA_ICONS.crosshair}<span>${escapeHTML(shortMuscle)}</span>
+                                </span>
+                                <span class="ex-badge badge-equip" style="font-size:10px; padding:2px 6px; border-radius:4px; font-weight:700;">${escapeHTML(equipLabels[ex.equipment] || ex.equipment || '')}</span>
+                            </div>
+                        </div>
+                        ${detailCardHtml}
+                    </div>
+                `;
             });
 
             const styleBadgeLabels = {
@@ -3525,6 +4160,11 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             const wishBadge = w.customWish ? `
                 <div style="font-size:11.5px; color:#CBD5E1; background:#151C26; padding:4px 8px; border-radius:6px; margin-top:4px; display:inline-block;">
                     🎯 <strong>Özel İstek/Not:</strong> "${escapeHTML(w.customWish)}"
+                </div>
+            ` : '';
+            const filterBadge = (w.wishAppliedFilters && w.wishAppliedFilters.length > 0) ? `
+                <div style="font-size:11px; color:#991B1B; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-left:3px solid #EF4444; padding:5px 9px; border-radius:6px; margin-top:5px; display:block;">
+                    🚫 <strong>AI Kısıtlama Filtresi:</strong> ${w.wishAppliedFilters.map(escapeHTML).join(' • ')}
                 </div>
             ` : '';
 
@@ -3556,6 +4196,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                             <div class="badge-brand">HAZIRLANAN ANTRENMAN</div>
                             <h2 class="workout-main-title">${escapeHTML(w.title)}</h2>
                             ${wishBadge}
+                            ${filterBadge}
                         </div>
                         <div class="workout-meta-badges">
                             <span class="meta-pill">⏱️ ${w.duration} Dk</span>
@@ -3607,33 +4248,47 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     <div id="aiAcademicAuditContainer" style="display:none; margin:14px 0 16px 0;"></div>
 
                     <!-- WARMUP SECTION -->
-                    <div class="block-header" style="margin-top:24px;">🧘 Dinamik Isınma & Mobilite (5 Dakika)</div>
-                    <div style="background:#0E131B; border-radius:10px; padding:10px 14px;">
+                    <div class="block-header" style="margin-top:20px;">🧘 Dinamik Isınma & Mobilite (5 Dakika)</div>
+                    <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:10px 14px;">
                         ${w.warmups.map(wm => `
-                            <div style="font-size:12.5px; margin-bottom:6px;">
-                                <strong style="color:#F3F6FA;">${escapeHTML(wm.name)}</strong> (${wm.dur}): 
-                                <span style="color:var(--text-secondary);">${escapeHTML(wm.cue)}</span>
+                            <div style="font-size:12px; margin-bottom:5px; color:#334155;">
+                                <strong style="color:#0F172A;">${escapeHTML(wm.name)}</strong> (${wm.dur}): 
+                                <span style="color:#64748B;">${escapeHTML(wm.cue)}</span>
                             </div>
                         `).join('')}
                     </div>
 
-                    <!-- MAIN EXERCISES -->
-                    ${blocksHtml}
+                    <!-- MAIN EXERCISES LIST -->
+                    <div class="block-header" style="margin-top:22px; display:flex; justify-content:space-between; align-items:center;">
+                        <span>📋 Hareket Listesi (${structuredList.length} Egzersiz)</span>
+                        <span style="font-size:11px; font-weight:600; color:#64748B; text-transform:none;">(Detay / form için dokunun)</span>
+                    </div>
 
-                    <div style="text-align:center; margin:16px 0 24px;">
-                        <button class="btn btn-outline" style="border-style:dashed; border-color:var(--cyan); color:var(--cyan); font-size:12.5px; padding:10px 18px;" onclick="openAddExerciseModal('generated')">
-                            ➕ Hareket Ekle
+                    <div class="wk-day-card wk-single-active-card" style="border:1.5px solid #E2E8F0; border-radius:14px; overflow:hidden; background:#FFFFFF; margin-top:8px;">
+                        <div class="wk-ex-table">
+                            <div class="wk-ex-row wk-th">
+                                <div>KOD</div>
+                                <div>HAREKET & SET / TEKRAR</div>
+                                <div class="wk-col-muscle" style="text-align:right;">BÖLGE & EKİPMAN</div>
+                            </div>
+                            ${blocksHtml}
+                        </div>
+                    </div>
+
+                    <div style="text-align:center; margin:14px 0 20px;">
+                        <button class="btn btn-outline" style="border-style:dashed; border-color:#0284C7; color:#0284C7; font-size:12px; padding:8px 16px; border-radius:8px; font-weight:700;" onclick="openAddExerciseModal('generated')">
+                            ➕ Listeye Hareket Ekle
                         </button>
                     </div>
 
                     <!-- FINISHER -->
                     <div class="block-header">🔥 Balistik Bitiş / Finisher</div>
-                    <div style="background:rgba(225, 29, 72, 0.1); border-left:4px solid var(--red-alert); border-radius:8px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                    <div style="background:rgba(225, 29, 72, 0.05); border:1px solid rgba(225, 29, 72, 0.2); border-left:4px solid var(--red-alert); border-radius:10px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
                         <div style="flex:1; min-width:200px;">
-                            <strong style="color:#F3F6FA; font-size:13px;">${escapeHTML(w.finisher.name)}</strong>
-                            <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">${escapeHTML(w.finisher.desc)}</div>
+                            <strong style="color:#0F172A; font-size:13px;">${escapeHTML(w.finisher.name)}</strong>
+                            <div style="font-size:12px; color:#64748B; margin-top:2px;">${escapeHTML(w.finisher.desc)}</div>
                         </div>
-                        <button type="button" class="btn btn-outline" style="padding:6px 10px; font-size:11px; border-color:rgba(244,63,94,0.45); color:#FDA4AF; white-space:nowrap;" onclick="openExerciseDetailModal(decodeURIComponent('${encodeURIComponent(w.finisher.exId || (w.finisher.name && w.finisher.name.toLowerCase().includes('tabata') ? 'db_swing' : 'db_farmers_walk'))}'))">📸 Form Rehberi</button>
+                        <button type="button" class="btn btn-outline" style="padding:6px 10px; font-size:11px; border-color:rgba(244,63,94,0.45); color:#E11D48; white-space:nowrap; font-weight:700;" onclick="openExerciseDetailModal(decodeURIComponent('${encodeURIComponent(w.finisher.exId || (w.finisher.name && w.finisher.name.toLowerCase().includes('tabata') ? 'db_swing' : 'db_farmers_walk'))}'))">📸 Form Rehberi</button>
                     </div>
                 </div>
             `;
@@ -4622,11 +5277,14 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                             .map(m => m.name.replace(/^models\//, ''));
                         
                         // Flash modellerini en öne al (hız ve zengin token desteği için)
+                        const flash38 = supported.filter(m => m.includes('3.8-flash'));
+                        const flash37 = supported.filter(m => m.includes('3.7-flash'));
+                        const flash35 = supported.filter(m => m.includes('3.5-flash'));
                         const flash25 = supported.filter(m => m.includes('2.5-flash'));
                         const flash20 = supported.filter(m => m.includes('2.0-flash'));
-                        const otherFlash = supported.filter(m => m.includes('flash') && !m.includes('2.5-flash') && !m.includes('2.0-flash'));
+                        const otherFlash = supported.filter(m => m.includes('flash') && !m.includes('3.8-flash') && !m.includes('3.7-flash') && !m.includes('3.5-flash') && !m.includes('2.5-flash') && !m.includes('2.0-flash'));
                         const otherModels = supported.filter(m => !m.includes('flash'));
-                        const ordered = [...flash25, ...flash20, ...otherFlash, ...otherModels];
+                        const ordered = [...flash38, ...flash37, ...flash35, ...otherFlash, ...flash25, ...flash20, ...otherModels];
 
                         ordered.forEach(m => {
                             if (!candidateModels.includes(m)) candidateModels.push(m);
@@ -4639,14 +5297,14 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
             // Keşif başarısız olduysa veya modeller listelenemediyse denenmesi gereken güncel modeller
             const fallbackModels = [
+                'gemini-3.8-flash',
+                'gemini-3.7-flash',
+                'gemini-3.5-flash',
+                'gemini-flash-latest',
                 'gemini-2.5-flash',
                 'gemini-2.0-flash',
                 'gemini-2.0-flash-lite',
-                'gemini-1.5-flash-latest',
-                'gemini-1.5-flash-8b',
-                'gemini-1.5-flash',
-                'gemini-2.5-pro',
-                'gemini-1.5-pro'
+                'gemini-1.5-flash'
             ];
             fallbackModels.forEach(m => {
                 if (!candidateModels.includes(m)) candidateModels.push(m);
@@ -5047,6 +5705,7 @@ ${exListSummary}
 
 BİTİŞ (FINISHER):
 ${workout.finisher ? `${workout.finisher.name} (${workout.finisher.desc})` : 'Yok'}
+${workout.customWish ? `KULLANICI ÖZEL NOTU / KISITLAMALARI: "${workout.customWish}" (Bu kısıtlamalara aykırı hareket asla önerilmemelidir)\n` : ''}
 
 Lütfen 5 akademik filtreye göre denetle ve tam olarak istenen formatta nihai hakem raporunu sun.`;
 
@@ -5068,19 +5727,67 @@ DEĞİŞMEZ 5 AKADEMİK DENETİM FİLTRESİ:
 5. FORM BÜTÜNLÜĞÜ VE KİNEMATİK DİZİLİM:
    - Sıralama: Ağır Bileşikler -> İkincil Bileşikler / Süpersetler -> İzoleler -> Balistik Finisher.
 
+KESİN HAKEM ONAY VE TOLERANS KURALLARI:
+- Programda yukarıdaki 5 filtreyi doğrudan ihlal eden somut bir sakatlık riski (örn. çift ağır omurga fleksiyonu/Deadlift+Barbell Row veya aynı kasa çift bileşik süperset) YOKSA, KESİNLİKLE 'ONAYLANDI ✅' VER.
+- Ufak kişisel tercihler, alternatif hareket nüansları veya keyfi stil farklılıkları için ASLA 'DÜZELTME ÖNERİLDİ' DEME.
+- Puan 85 ve üzerindeyse karar KESİNLİKLE 'ONAYLANDI ✅' olmalı, düzenleme tavsiyesine "Antrenman akışı ve süperset eşleşmeleri akademik protokollere tam uyumludur." yazılmalı ve "actions": [] bırakılmalıdır.
+- Kullanıcıyı sonsuz bir düzeltme döngüsüne sokma; temel biyomekanik güvenliği sağlayan programı onayla ve sporcuyu motive et.
+
 ÇIKTI FORMATIN (Lütfen tam olarak bu başlıkları kullan, net, vurucu ve Türkçe yaz):
 🎯 **AKADEMİK UYGUNLUK PUANI:** [XX / 100]
 ⚖️ **HAKEM KARARI:** [ONAYLANDI ✅ / DÜZELTME ÖNERİLDİ ⚠️]
 🔬 **BİYOMEKANİK DEĞERLENDİRME:** (McGill omurga yükü, Schumann nöral ayrıştırma ve Weakley APS açısından 2-3 cümlelik bilimsel inceleme)
 🔄 **DÜZENLEME & İKAME TAVSİYESİ:** (Eğer bir kusur varsa hangi hareketin nasıl değişmesi veya yer değiştirmesi gerektiğini belirt. Kusur yoksa "Antrenman akışı ve süperset eşleşmeleri akademik protokollere tam uyumludur." de.)
-💡 **SEANS İÇİN ALTIN KOÇ NOTU:** (Sporcuya bu seans için 1 cümlelik kritik teknik/form uyarısı)`;
+💡 **SEANS İÇİN ALTIN KOÇ NOTU:** (Sporcuya bu seans için 1 cümlelik kritik teknik/form uyarısı)
+
+Eğer 'DÜZELTME ÖNERİLDİ' ise ve hareket değişikliği veya yer değişimi öneriyorsan, raporunun EN SONUNA şu formatta tek bir JSON bloğu ekle (kullanıcı tek tıkla butona basıp uygulayabilsin):
+\`\`\`json
+{
+  "actions": [
+    { "type": "replace", "fromId": "mevcut_hareket_id_veya_adi", "toId": "onerilen_hareket_id_veya_adi", "reason": "Kısa gerekçe" }
+  ]
+}
+\`\`\`
+Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
 
             try {
                 if (typeof callGeminiAPI !== 'function') {
                     throw new Error("callGeminiAPI fonksiyonu bulunamadı.");
                 }
                 const reply = await callGeminiAPI(prompt, academicSystemPrompt);
-                const formattedHtml = typeof formatAiCoachMarkdown === 'function' ? formatAiCoachMarkdown(reply) : escapeHTML(reply).replace(/\n/g, '<br>');
+
+                let aiSuggestedActions = [];
+                const jsonMatch = reply.match(/```json\s*([\s\S]*?)\s*```/);
+                if (jsonMatch) {
+                    try {
+                        const parsed = JSON.parse(jsonMatch[1]);
+                        if (parsed && Array.isArray(parsed.actions)) {
+                            aiSuggestedActions = parsed.actions;
+                        }
+                    } catch (e) {
+                        console.warn("AI JSON parse hatası:", e);
+                    }
+                }
+
+                window.lastAiAuditActions = {
+                    scope,
+                    actions: aiSuggestedActions,
+                    targetDayIdx: (scope === 'weekly_preview' ? (Number(window.activeWeeklyPreviewDayIdx) || 0) : null)
+                };
+
+                const cleanReply = reply.replace(/```json[\s\S]*?```/g, '').trim();
+                const formattedHtml = typeof formatAiCoachMarkdown === 'function' ? formatAiCoachMarkdown(cleanReply) : escapeHTML(cleanReply).replace(/\n/g, '<br>');
+
+                const applyActionBtnHtml = aiSuggestedActions.length > 0 ? `
+                    <div style="margin-top:14px; padding-top:12px; border-top:1px solid rgba(168,85,247,0.3); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                        <div style="font-size:12px; color:#c084fc; font-weight:700;">
+                            ⚡ AI Baş Hakemi ${aiSuggestedActions.length} adet biyomekanik düzeltme önerdi.
+                        </div>
+                        <button type="button" class="btn btn-gold" style="padding:9px 18px; font-size:12.5px; font-weight:900; background:linear-gradient(135deg, #F59E0B, #D97706); border:none; color:#FFFFFF; border-radius:8px; box-shadow:0 4px 14px rgba(245,158,11,0.35); cursor:pointer;" onclick="applyAcademicAiCorrections()">
+                            ⚡ Önerilen Düzeltmeleri Tek Tıkla Uygula
+                        </button>
+                    </div>
+                ` : '';
 
                 container.innerHTML = `
                     <div style="background:linear-gradient(135deg, rgba(168,85,247,0.12), rgba(56,189,248,0.08)); border:1.5px solid #a855f7; border-radius:12px; padding:14px 16px; box-shadow:0 8px 24px rgba(0,0,0,0.35);">
@@ -5097,6 +5804,7 @@ DEĞİŞMEZ 5 AKADEMİK DENETİM FİLTRESİ:
                         <div style="font-size:12.5px; color:#F1F5F9; line-height:1.6;">
                             ${formattedHtml}
                         </div>
+                        ${applyActionBtnHtml}
                     </div>
                 `;
             } catch (err) {
@@ -5121,6 +5829,133 @@ DEĞİŞMEZ 5 AKADEMİK DENETİM FİLTRESİ:
             }
         }
         window.validateWorkoutWithAcademicAI = validateWorkoutWithAcademicAI;
+
+        function applyAcademicAiCorrections() {
+            const auditData = window.lastAiAuditActions;
+            if (!auditData || !Array.isArray(auditData.actions) || auditData.actions.length === 0) {
+                if (typeof showToast === 'function') showToast("⚠️ Uygulanacak geçerli bir düzeltme bulunamadı.");
+                return;
+            }
+
+            let workout = null;
+            if (auditData.scope === 'weekly_preview') {
+                const plan = window.pendingAiWeeklyPlan;
+                const actIdx = Number(auditData.targetDayIdx !== null ? auditData.targetDayIdx : window.activeWeeklyPreviewDayIdx) || 0;
+                if (plan && plan.days && plan.days[actIdx]) {
+                    workout = plan.days[actIdx].workout;
+                }
+            } else {
+                workout = currentGeneratedWorkout;
+            }
+
+            if (!workout || !Array.isArray(workout.exercises)) {
+                if (typeof showToast === 'function') showToast("⚠️ Hedef antrenman bulunamadı.");
+                return;
+            }
+
+            let appliedCount = 0;
+            const appliedMessages = [];
+
+            auditData.actions.forEach(action => {
+                if (action.type === 'replace') {
+                    const fromTerm = action.fromId || action.fromName;
+                    const toTerm = action.toId || action.toName;
+                    if (!fromTerm || !toTerm) return;
+
+                    let exIdx = workout.exercises.findIndex(e =>
+                        e.id === fromTerm ||
+                        (e.name && e.name.toLowerCase() === String(fromTerm).toLowerCase()) ||
+                        (e.name && e.name.toLowerCase().includes(String(fromTerm).toLowerCase()))
+                    );
+
+                    if (exIdx === -1 && typeof findBestExerciseMatch === 'function') {
+                        const matchedFrom = findBestExerciseMatch(fromTerm, workout.exercises);
+                        if (matchedFrom) {
+                            exIdx = workout.exercises.findIndex(e => e.id === matchedFrom.id);
+                        }
+                    }
+
+                    if (exIdx !== -1) {
+                        const replacement = findBestExerciseMatch(toTerm);
+                        if (replacement) {
+                            const oldName = workout.exercises[exIdx].name;
+                            const prevBlockLabel = workout.exercises[exIdx].blockLabel;
+                            const prevBlockType = workout.exercises[exIdx].blockType;
+                            workout.exercises[exIdx] = Object.assign({}, replacement, {
+                                blockLabel: prevBlockLabel,
+                                blockType: prevBlockType
+                            });
+                            appliedMessages.push(`"${oldName}" ➔ "${replacement.name}"`);
+                            appliedCount++;
+                        }
+                    }
+                } else if (action.type === 'reorder' && Array.isArray(action.orderIds)) {
+                    const reordered = [];
+                    const remaining = [...workout.exercises];
+                    action.orderIds.forEach(idTerm => {
+                        const foundIdx = remaining.findIndex(e => e.id === idTerm || (e.name && e.name.toLowerCase().includes(String(idTerm).toLowerCase())));
+                        if (foundIdx !== -1) {
+                            reordered.push(remaining.splice(foundIdx, 1)[0]);
+                        }
+                    });
+                    workout.exercises = reordered.concat(remaining);
+                    appliedCount++;
+                    appliedMessages.push('Egzersiz sıralaması optimize edildi');
+                }
+            });
+
+            if (appliedCount > 0) {
+                workout.exercises = assignAcademicBlockStructure(workout.exercises, workout.style || 'superset', workout.scheme);
+                window.lastAiAuditActions = null;
+
+                if (auditData.scope === 'weekly_preview') {
+                    const plan = window.pendingAiWeeklyPlan;
+                    const actIdx = Number(auditData.targetDayIdx !== null ? auditData.targetDayIdx : window.activeWeeklyPreviewDayIdx) || 0;
+                    if (plan && plan.days && plan.days[actIdx]) {
+                        plan.days[actIdx].workout = workout;
+                        if (plan.draftSchedule && plan.draftSchedule[actIdx]) {
+                            plan.draftSchedule[actIdx].customWorkout = workout;
+                            plan.draftSchedule[actIdx].exercises = workout.exercises;
+                        }
+                    }
+                    if (typeof renderPendingWeeklyPlanPreview === 'function') renderPendingWeeklyPlanPreview();
+                } else {
+                    currentGeneratedWorkout = workout;
+                    window.currentGeneratedWorkout = workout;
+                    try {
+                        localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(workout));
+                    } catch(e) {}
+                    window.expandedGeneratedExIndex = null;
+                    if (typeof renderGeneratedWorkout === 'function') renderGeneratedWorkout();
+                }
+
+                const containerId = auditData.scope === 'weekly_preview' ? 'aiAcademicWeeklyAuditContainer' : 'aiAcademicAuditContainer';
+                const container = document.getElementById(containerId);
+                if (container) {
+                    container.innerHTML = `
+                        <div style="background:rgba(34,197,94,0.12); border:1.5px solid #22c55e; border-radius:12px; padding:14px 16px; margin-bottom:10px;">
+                            <div style="display:flex; align-items:center; gap:8px; color:#4ade80;">
+                                <span style="font-size:18px;">✅</span>
+                                <strong style="font-size:13px;">AI Biyomekanik Düzeltmeleri Programa Uygulandı!</strong>
+                            </div>
+                            <div style="font-size:12px; color:#CBD5E1; margin-top:6px; line-height:1.5;">
+                                ${appliedMessages.map(m => `<div>• ${escapeHTML(m)}</div>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (typeof showToast === 'function') {
+                    showToast(`✅ ${appliedCount} AI düzeltmesi programa uygulandı!`);
+                }
+                if (typeof playAlertSound === 'function') playAlertSound();
+            } else {
+                if (typeof showToast === 'function') {
+                    showToast("ℹ️ Eşleşen bir düzeltme bulunamadı veya program zaten güncel.");
+                }
+            }
+        }
+        window.applyAcademicAiCorrections = applyAcademicAiCorrections;
 
         function openScheduleExerciseAlternativeModal(dayIdx, currentExId, exIdx) {
             let currentEx = EXERCISES_DB.find(e => e.id === currentExId);
@@ -6357,6 +7192,7 @@ DEĞİŞMEZ 5 AKADEMİK DENETİM FİLTRESİ:
                     window.expandedWeeklyExIndex = null;
                     renderPendingWeeklyPlanPreview();
                 } else {
+                    window.expandedGeneratedExIndex = null;
                     renderGeneratedWorkout();
                 }
             }
@@ -6408,6 +7244,7 @@ DEĞİŞMEZ 5 AKADEMİK DENETİM FİLTRESİ:
                 } else if (scope === 'weekly_preview' && window.pendingAiWeeklyPlan) {
                     renderPendingWeeklyPlanPreview();
                 } else {
+                    window.expandedGeneratedExIndex = null;
                     renderGeneratedWorkout();
                 }
                 playAlertSound();
@@ -7257,7 +8094,7 @@ DEĞİŞMEZ 5 AKADEMİK DENETİM FİLTRESİ:
             requestWakeLock();
         }
 
-        function loadCelikAkisiWorkout() {
+        function loadCelikAkisiWorkout(autoStart = true) {
             const flowWorkout = {
                 id: 'celik_akisi_20dk',
                 title: '⚔️ 20 Dk Çelik Akışı (Dambıl Kompleksi)',
@@ -7282,9 +8119,24 @@ DEĞİŞMEZ 5 AKADEMİK DENETİM FİLTRESİ:
                 createdAt: Date.now()
             };
             currentGeneratedWorkout = flowWorkout;
-            startActiveWorkoutFromGenerated();
-            switchTab('activeWorkoutTab');
-            if (typeof showToast === 'function') showToast("⚡ 20 Dk Çelik Akışı (Dambıl Kompleksi) Başlatıldı!");
+            if (autoStart) {
+                startActiveWorkoutFromGenerated();
+                switchTab('activeWorkoutTab');
+                if (typeof showToast === 'function') showToast("⚡ 20 Dk Çelik Akışı (Dambıl Kompleksi) Başlatıldı!");
+            } else {
+                window.expandedGeneratedExIndex = null;
+                renderGeneratedWorkout();
+                const hintEl = document.getElementById('aiQuickPreviewHint');
+                if (hintEl) {
+                    hintEl.textContent = '✅ 20 Dk Çelik Akışı hazırlandı • İnceleyip başlatabilir veya takvime ekleyebilirsiniz';
+                    hintEl.style.color = '#9BE15D';
+                }
+                const outEl = document.getElementById('generatedWorkoutOutput');
+                if (outEl) {
+                    outEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                if (typeof showToast === 'function') showToast("⚡ 20 Dk Çelik Akışı oluşturuldu!");
+            }
         }
         window.loadCelikAkisiWorkout = loadCelikAkisiWorkout;
 
@@ -7427,10 +8279,14 @@ DEĞİŞMEZ 5 AKADEMİK DENETİM FİLTRESİ:
                     try {
                         const user = getActiveUser();
 
-                        const todayIdx = new Date().getDay();
+                        const todayDate = new Date();
+                        const todayIdx = todayDate.getDay();
+                        const todayYMD = typeof formatDateYMD === 'function' ? formatDateYMD(todayDate) : '';
                         const isNextWeek = activePlannerWeek === 'next';
                         const schedule = isNextWeek ? getNextWeeklySchedule(user.id) : getWeeklySchedule(user.id);
-                        const todayPlan = schedule[todayIdx] || { id: 'rest', rest: true, title: 'Dinlenme & Aktif Toparlanma' };
+                        const todayPlan = (!isNextWeek && typeof getPlanForDate === 'function')
+                            ? getPlanForDate(todayDate)
+                            : (schedule[todayIdx] || { id: 'rest', rest: true, title: 'Dinlenme & Aktif Toparlanma' });
 
                         let aiProgData = null;
                         try {
@@ -7479,10 +8335,10 @@ DEĞİŞMEZ 5 AKADEMİK DENETİM FİLTRESİ:
                                     </div>
                                     <h2 class="today-workout-title">${escapeHTML(todayPlan.title)}</h2>
                                     <div class="today-workout-actions">
-                                        <button class="btn btn-gold" style="padding:9px 18px; font-size:12.5px; font-weight:900;" onclick="startScheduledWorkoutForDay(${todayIdx})">
+                                        <button class="btn btn-gold" style="padding:9px 18px; font-size:12.5px; font-weight:900;" onclick="startScheduledWorkoutForDay(${todayIdx}, '${todayYMD}')">
                                             ▶️ SEANSI BAŞLAT
                                         </button>
-                                        <button class="btn btn-outline" style="padding:9px 14px; font-size:12px; font-weight:700; border-color:#263244; color:#CBD5E1;" onclick="openScheduleDayModal(${todayIdx})">
+                                        <button class="btn btn-outline" style="padding:9px 14px; font-size:12px; font-weight:700; border-color:#263244; color:#CBD5E1;" onclick="openScheduleDayModal(${todayIdx}, '${todayYMD}')">
                                             👁️ İncele & Düzenle
                                         </button>
                                     </div>
@@ -7495,10 +8351,8 @@ DEĞİŞMEZ 5 AKADEMİK DENETİM FİLTRESİ:
                                         <span style="font-size:16px;">🧘</span>
                                         <span class="today-rest-title">Bugün (${DAY_NAMES_TR[todayIdx]}) Dinlenme Olarak Ayarlı</span>
                                     </div>
-                                    <div style="display:flex; align-items:center; gap:8px;">
-                                        <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:6px 14px; font-weight:900;" onclick="openScheduleDayModal(${todayIdx})">
-                                            ⚡ Bugün Çalış (Antrenman Seç)
-                                        </button>
+                                    <div style="font-size:12px; color:var(--text-secondary); font-weight:600;">
+                                        🌱 Toparlanma &amp; İyileşme Günü
                                     </div>
                                 </div>
                             `;
@@ -9487,13 +10341,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         function getDefaultWeeklySchedule() {
             return {
-                1: { id: 'la_forja_day1', title: '⚔️ Gün 1: Omuz & Bacak Ön Zırhı', type: 'official', desc: 'Press + Squat • Şınav + Front Squat • Core', rest: false },
-                2: { id: 'rest', title: '🧘 Dinlenme & Aktif Toparlanma', type: 'rest', desc: 'Hafif yürüyüş, esneme veya tam istirahat', rest: true },
-                3: { id: 'la_forja_day2', title: '⚔️ Gün 2: Sırt Çekiş & Balistik Güç', type: 'official', desc: 'Saw Row + RDL • Swing + Pullup • Çanta Taşıma', rest: false },
-                4: { id: 'rest', title: '🧘 Dinlenme & Mobilite', type: 'rest', desc: 'Eklem mobilizasyonu, masaj rulosu', rest: true },
-                5: { id: 'la_forja_day3', title: '⚔️ Gün 3: Kompleks & Merdiven', type: 'official', desc: 'Snatch + Lunge • Row + Squat • Burpee Finisher', rest: false },
-                6: { id: 'rest', title: '🧘 Serbest Kardiyo / Core', type: 'rest', desc: '30 dk tempolu yürüyüş, bisiklet veya karın', rest: true },
-                0: { id: 'rest', title: '🧘 Tam Dinlenme & Zihinsel Hazırlık', type: 'rest', desc: 'Yeni haftaya kasları ve sinir sistemini dinlendirme', rest: true }
+                1: { id: 'rest', title: '🧘 Dinlenme', type: 'rest', desc: 'Dinlenme & Toparlanma', rest: true },
+                2: { id: 'rest', title: '🧘 Dinlenme', type: 'rest', desc: 'Dinlenme & Toparlanma', rest: true },
+                3: { id: 'rest', title: '🧘 Dinlenme', type: 'rest', desc: 'Dinlenme & Toparlanma', rest: true },
+                4: { id: 'rest', title: '🧘 Dinlenme', type: 'rest', desc: 'Dinlenme & Toparlanma', rest: true },
+                5: { id: 'rest', title: '🧘 Dinlenme', type: 'rest', desc: 'Dinlenme & Toparlanma', rest: true },
+                6: { id: 'rest', title: '🧘 Dinlenme', type: 'rest', desc: 'Dinlenme & Toparlanma', rest: true },
+                0: { id: 'rest', title: '🧘 Dinlenme', type: 'rest', desc: 'Dinlenme & Toparlanma', rest: true }
             };
         }
 
@@ -9524,61 +10378,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const user = getActiveUser();
             const uid = targetUid || (user ? user.id : 'default');
             const key = `celik_kodu_next_weekly_schedule_${uid}`;
-            let existing = null;
             try {
                 const raw = localStorage.getItem(key);
-                if (raw) existing = JSON.parse(raw);
+                if (raw) return JSON.parse(raw);
             } catch(e) {}
-
-            // Eski ayrıştırma hatası veya slot çakışması tespiti:
-            let shouldReconvert = !existing;
-            if (existing) {
-                const day1 = existing[1];
-                const day3 = existing[3];
-                const day5 = existing[5];
-                // 1) Tek güne yığılma (eski v103 bug'ı)
-                if (day1 && Array.isArray(day1.exercises) && day1.exercises.length > 8 && day3 && day3.rest && day5 && day5.rest) {
-                    shouldReconvert = true;
-                }
-                // 2) AI verisi 3 günlük olduğu halde schedule'da 3'ten az çalışma günü kalması (slot çakışması bug'ı)
-                try {
-                    const aiRaw = localStorage.getItem(`celik_kodu_ai_program_${uid}`);
-                    if (aiRaw) {
-                        const aiData = JSON.parse(aiRaw);
-                        const expectedDayCount = (aiData.structuredDays && aiData.structuredDays.length > 1) ? aiData.structuredDays.length : 3;
-                        const activeWorkoutDaysCount = [1, 2, 3, 4, 5, 6, 0].filter(s => existing[s] && !existing[s].rest).length;
-                        if (activeWorkoutDaysCount < expectedDayCount) {
-                            shouldReconvert = true;
-                        }
-                    }
-                } catch(e) {}
-            }
-
-            if (shouldReconvert) {
-                try {
-                    const aiRaw = localStorage.getItem(`celik_kodu_ai_program_${uid}`);
-                    if (aiRaw) {
-                        const aiData = JSON.parse(aiRaw);
-                        let days = Array.isArray(aiData.structuredDays) && aiData.structuredDays.length > 1 ? aiData.structuredDays : null;
-                        if (!days) {
-                            days = parseMarkdownProgramClient(aiData.programText);
-                        }
-                        if (Array.isArray(days) && days.length > 0) {
-                            const converted = convertParsedDaysToWeeklySchedule(days);
-                            saveNextWeeklySchedule(converted, uid);
-                            return converted;
-                        }
-                    }
-                } catch(e) {}
-            }
-
-            if (existing && !shouldReconvert) return existing;
-
-            // Varsayılan: Mevcut haftanın temiz bir kopyasını aç
-            const current = getWeeklySchedule(uid);
-            const clone = JSON.parse(JSON.stringify(current));
-            saveNextWeeklySchedule(clone, uid);
-            return clone;
+            const def = getDefaultWeeklySchedule();
+            saveNextWeeklySchedule(def, uid);
+            return def;
         }
 
         function saveNextWeeklySchedule(schedule, targetUid) {
@@ -10061,11 +10867,19 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 };
                 saveWeeklySchedule(schedule);
 
+                const todayDate = new Date();
+                const todayYMD = typeof formatDateYMD === 'function' ? formatDateYMD(todayDate) : '';
+                if (todayYMD && typeof saveDateScheduleOverride === 'function') {
+                    saveDateScheduleOverride(todayYMD, schedule[todayIdx], uid);
+                }
+                activePlannerWeek = 'current';
+
                 aiData.applied = true;
                 aiData.dismissed = true;
                 localStorage.setItem(`celik_kodu_ai_program_${uid}`, JSON.stringify(aiData));
 
                 renderActiveWorkout();
+                if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
                 playAlertSound();
                 showToast(`🔥 "${workoutObj.title}" bugüne (${todayName}) başarıyla atandı! Hemen seansı başlatabilirsiniz.`);
             } catch(e) {
@@ -10331,14 +11145,26 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             return null;
         }
 
-        function startScheduledWorkoutForDay(dayIdx) {
+        function startScheduledWorkoutForDay(dayIdx, targetDateStr = null) {
             const user = getActiveUser();
             const uid = user ? user.id : 'default';
-            const isNextWeek = activePlannerWeek === 'next';
-            const schedule = isNextWeek ? getNextWeeklySchedule(uid) : getWeeklySchedule(uid);
-            const plan = schedule ? schedule[dayIdx] : null;
+            const todayDate = new Date();
+            const todayIdx = todayDate.getDay();
+            const todayYMD = typeof formatDateYMD === 'function' ? formatDateYMD(todayDate) : '';
+            const effectiveDateStr = targetDateStr || (dayIdx === todayIdx ? todayYMD : null);
+
+            let plan = null;
+            if (effectiveDateStr && activePlannerWeek !== 'next' && typeof getPlanForDate === 'function') {
+                plan = getPlanForDate(new Date(effectiveDateStr + 'T00:00:00'));
+            }
+            if (!plan) {
+                const isNextWeek = activePlannerWeek === 'next';
+                const schedule = isNextWeek ? getNextWeeklySchedule(uid) : getWeeklySchedule(uid);
+                plan = schedule ? schedule[dayIdx] : null;
+            }
+
             if (!plan || plan.rest) {
-                openScheduleDayModal(dayIdx);
+                openScheduleDayModal(dayIdx, effectiveDateStr);
                 return;
             }
 
@@ -10572,7 +11398,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 <div style="font-size:20px; margin-bottom:6px;">⚠️</div>
                                 Bu programın hareket detayları henüz yapılandırılmamış.
                                 <div style="margin-top:8px;">
-                                    <button type="button" class="btn btn-gold" style="font-size:11px; padding:6px 14px; font-weight:800;" onclick="editProgramForDay(${dayIdx})">
+                                    <button type="button" class="btn btn-gold" style="font-size:11px; padding:6px 14px; font-weight:800;" onclick="editProgramForDay(${dayIdx}, decodeURIComponent('${encodeURIComponent(activeSchedulingDateStr || '')}'))">
                                         ➕ Hemen Hareket Ekle / Düzenle
                                     </button>
                                 </div>
@@ -10620,7 +11446,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                         ⏱️ ${duration} Dk • 🎯 ${exercises.length} Hareket (${schemeStr}) • ⏳ ${restSec}s Dinlenme
                                     </div>
                                 </div>
-                                <button class="btn btn-gold" style="padding:8px 14px; font-size:12px; font-weight:800; flex-shrink:0;" onclick="startScheduledWorkoutForDay(${dayIdx})">
+                                <button class="btn btn-gold" style="padding:8px 14px; font-size:12px; font-weight:800; flex-shrink:0;" onclick="startScheduledWorkoutForDay(${dayIdx}, decodeURIComponent('${encodeURIComponent(activeSchedulingDateStr || '')}'))">
                                     ▶️ Başlat
                                 </button>
                             </div>
@@ -10635,7 +11461,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             ` : ''}
 
                             <div style="display:flex; gap:8px; margin:8px 0 10px; flex-wrap:wrap;">
-                                <button type="button" class="btn btn-gold" style="flex:1; min-width:160px; font-size:12px; padding:9px 12px; font-weight:900;" onclick="editProgramForDay(${dayIdx})">
+                                <button type="button" class="btn btn-gold" style="flex:1; min-width:160px; font-size:12px; padding:9px 12px; font-weight:900;" onclick="editProgramForDay(${dayIdx}, decodeURIComponent('${encodeURIComponent(activeSchedulingDateStr || '')}'))">
                                     ✏️ Düzenle / Düzelt
                                 </button>
                                 <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:8px 12px; color:var(--cyan); border-color:var(--cyan);" onclick="toggleSchedModalExerciseList()">
@@ -10654,15 +11480,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     `;
                 } else {
                     templatePlanHtml = `
-                        <div style="background:rgba(148,163,184,0.06); border:1px dashed var(--border); border-radius:10px; padding:14px; text-align:center;">
-                            <div style="font-size:24px; margin-bottom:4px;">🧘</div>
+                        <div style="background:rgba(148,163,184,0.06); border:1px dashed var(--border); border-radius:10px; padding:18px; text-align:center;">
+                            <div style="font-size:26px; margin-bottom:4px;">🧘</div>
                             <div style="font-size:14px; font-weight:800; color:#F3F6FA;">${dayName} Günü Dinlenme Olarak Ayarlı</div>
-                            <div style="font-size:11.5px; color:var(--text-secondary); margin:4px 0 12px;">
-                                Bu güne bir antrenman atamak için aşağıdaki programlardan birine dokunabilir veya yeni bir program tasarlayabilirsiniz.
+                            <div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">
+                                Bu gün vücudun toparlanması ve kas onarımı için ayrılmıştır.
                             </div>
-                            <button type="button" class="btn btn-gold" style="font-size:12px; padding:8px 16px; font-weight:900;" onclick="startNewStudioProgramForDay(${dayIdx})">
-                                ➕ ${dayName} İçin Yeni Antrenman Tasarla
-                            </button>
                         </div>
                     `;
                 }
@@ -10752,9 +11575,6 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     <div style="font-size:11.5px; font-weight:900; color:var(--gold); text-transform:uppercase;">
                         🔄 Farklı Bir Programla Değiştir
                     </div>
-                    <button type="button" class="btn btn-outline" style="font-size:10.5px; padding:3px 8px; color:var(--cyan); border-color:var(--cyan);" onclick="startNewStudioProgramForDay(${dayIdx})">
-                        ➕ Yeni Tasarla
-                    </button>
                 </div>
                 ${coachDirectiveHtml}
                 <div style="font-size:10.5px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:4px;">
@@ -10900,9 +11720,16 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             btn.innerText = isHidden ? '👁️ Egzersizleri Gizle ▲' : '👁️ Egzersizleri Göster ▼';
         }
 
-        function editProgramForDay(dayIdx) {
-            const schedule = activePlannerWeek === 'next' ? getNextWeeklySchedule() : getWeeklySchedule();
-            const plan = schedule[dayIdx];
+        function editProgramForDay(dayIdx, targetDateStr = null) {
+            const dateStr = targetDateStr || activeSchedulingDateStr || null;
+            let plan = null;
+            if (dateStr && typeof getPlanForDate === 'function') {
+                plan = getPlanForDate(new Date(dateStr + 'T00:00:00'));
+            }
+            if (!plan || plan.rest) {
+                const schedule = activePlannerWeek === 'next' ? getNextWeeklySchedule() : getWeeklySchedule();
+                plan = schedule[dayIdx];
+            }
             if (!plan || plan.rest) return;
 
             const details = getWorkoutDetailsForPlan(plan);
@@ -10923,6 +11750,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     weight: ''
                 })).filter(item => Boolean(item.exId)),
                 editingDayIdx: dayIdx,
+                editingDateStr: dateStr,
                 editingProgramId: details.id || plan.id,
                 isEditingExisting: true
             };
@@ -10948,12 +11776,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }, 100);
         }
 
-        function startNewStudioProgramForDay(dayIdx) {
+        function startNewStudioProgramForDay(dayIdx, targetDateStr = null) {
+            const dateStr = targetDateStr || activeSchedulingDateStr || null;
             customRoutineState = {
                 title: `${DAY_NAMES_TR[dayIdx]} Özel Antrenmanım`,
                 rest: 60,
                 exercises: [],
                 editingDayIdx: dayIdx,
+                editingDateStr: dateStr,
                 editingProgramId: null,
                 isEditingExisting: true
             };
@@ -11022,8 +11852,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 isCustom: true
             };
 
-            const schedule = activePlannerWeek === 'next' ? getNextWeeklySchedule() : getWeeklySchedule();
-            schedule[dayIdx] = {
+            const planObj = {
                 id: progId,
                 title: title,
                 type: 'custom_saved',
@@ -11032,10 +11861,22 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 customWorkout: updatedWorkout,
                 exercises: exercisesList
             };
+
+            const schedule = activePlannerWeek === 'next' ? getNextWeeklySchedule() : getWeeklySchedule();
+            schedule[dayIdx] = planObj;
             if (activePlannerWeek === 'next') {
                 saveNextWeeklySchedule(schedule);
             } else {
                 saveWeeklySchedule(schedule);
+            }
+
+            // Keep dateScheduleOverride in sync
+            const todayDate = new Date();
+            const todayIdx = todayDate.getDay();
+            const todayYMD = typeof formatDateYMD === 'function' ? formatDateYMD(todayDate) : '';
+            const targetDateStr = customRoutineState.editingDateStr || (dayIdx === todayIdx ? todayYMD : null);
+            if (targetDateStr && typeof saveDateScheduleOverride === 'function') {
+                saveDateScheduleOverride(targetDateStr, planObj);
             }
 
             // Also update or add to custom programs in library
@@ -11067,10 +11908,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             cancelStudioEditingSilent();
 
             renderActiveWorkout();
+            if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
             renderLibrary();
             playAlertSound();
             showToast(`✅ "${title}" ${DAY_NAMES_TR[dayIdx]} gününe kaydedildi!`);
-            alert(`✅ "${title}" programı güncellendi ve ${DAY_NAMES_TR[dayIdx]} gününe başarıyla kaydedildi!\n\n(${exercisesList.length} Hareket)`);
         }
 
         function updateStudioEditingBanner(dayIdx, title) {
@@ -11186,20 +12027,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 return;
             }
 
-            const todayIdx = new Date().getDay();
-            const tomorrowIdx = (todayIdx + 1) % 7;
             const title = (document.getElementById('customWorkoutTitleInput')?.value || '').trim() || "Özel Çelik Programım";
             const rest = parseInt(document.getElementById('customWorkoutRestSelect')?.value) || 60;
-
-            const dayPrompt = `"${title}" programını haftanın hangi gününe atamak istiyorsunuz?\n\n1: Pazartesi\n2: Salı\n3: Çarşamba\n4: Perşembe\n5: Cuma\n6: Cumartesi\n0: Pazar\n\n(Yarın ${DAY_NAMES_TR[tomorrowIdx]} için "${tomorrowIdx}" yazabilirsiniz):`;
-            const choice = prompt(dayPrompt, tomorrowIdx.toString());
-            if (choice === null) return;
-            const targetDay = parseInt(choice.trim(), 10);
-            if (isNaN(targetDay) || targetDay < 0 || targetDay > 6) {
-                alert("Geçersiz gün seçildi. Lütfen 0 ile 6 arasında bir sayı girin.");
-                return;
-            }
-
             const exercisesList = customRoutineState.exercises.map(item => {
                 const ex = EXERCISES_DB.find(e => e.id === item.exId);
                 return ex ? Object.assign({}, ex, { targetSets: item.sets, targetReps: item.reps }) : null;
@@ -11224,31 +12053,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 isCustom: true
             };
 
-            const schedule = getWeeklySchedule();
-            schedule[targetDay] = {
-                id: progId,
-                title: title,
-                type: 'custom_generated',
-                desc: `${exercisesList.length} Hareket • ${workoutObj.duration} Dk`,
-                rest: false,
-                customWorkout: workoutObj
-            };
-            saveWeeklySchedule(schedule);
-
-            // Also save to library
-            const user = getActiveUser();
-            const key = `celik_kodu_custom_programs_${user.id}`;
-            let saved = [];
-            try { saved = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
-            const exIdx = saved.findIndex(p => p.id === progId);
-            if (exIdx !== -1) saved[exIdx] = workoutObj;
-            else saved.unshift(workoutObj);
-            localStorage.setItem(key, JSON.stringify(saved));
-
-            renderActiveWorkout();
-            renderLibrary();
-            playAlertSound();
-            alert(`✅ "${title}" programı ${DAY_NAMES_TR[targetDay]} gününe başarıyla atandı ve kütüphanenize kaydedildi!`);
+            openAssignWorkoutCalendarModal(workoutObj);
         }
 
         // ==================== WORKOUT PREVIEW MODAL LOGIC ====================
@@ -11473,6 +12278,245 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
         }
 
+        // ==================== UNIFIED WORKOUT ASSIGNMENT TO CALENDAR ENGINE ====================
+        let pendingWorkoutToAssign = null;
+        let assignModalTargetWeek = 'current';
+
+        function openAssignWorkoutCalendarModal(workoutObj, preferredWeek = 'current') {
+            if (!workoutObj) {
+                if (typeof showToast === 'function') showToast("⚠️ Atanacak antrenman bulunamadı.");
+                return;
+            }
+            pendingWorkoutToAssign = workoutObj;
+            assignModalTargetWeek = preferredWeek === 'next' ? 'next' : 'current';
+            renderAssignWorkoutCalendarModal();
+            const modal = document.getElementById('assignWorkoutCalendarModal');
+            if (modal) modal.classList.add('active');
+        }
+        window.openAssignWorkoutCalendarModal = openAssignWorkoutCalendarModal;
+
+        function closeAssignWorkoutCalendarModal() {
+            const modal = document.getElementById('assignWorkoutCalendarModal');
+            if (modal) modal.classList.remove('active');
+            pendingWorkoutToAssign = null;
+        }
+        window.closeAssignWorkoutCalendarModal = closeAssignWorkoutCalendarModal;
+
+        function switchAssignModalWeek(week) {
+            assignModalTargetWeek = week === 'next' ? 'next' : 'current';
+            renderAssignWorkoutCalendarModal();
+        }
+        window.switchAssignModalWeek = switchAssignModalWeek;
+
+        function renderAssignWorkoutCalendarModal() {
+            const workout = pendingWorkoutToAssign;
+            if (!workout) return;
+
+            const infoEl = document.getElementById('assignModalWorkoutInfo');
+            const todayBox = document.getElementById('assignModalQuickTodayBox');
+            const gridEl = document.getElementById('assignModalDaysGrid');
+            const currBtn = document.getElementById('assignModalWeekCurrentBtn');
+            const nextBtn = document.getElementById('assignModalWeekNextBtn');
+
+            const isNext = assignModalTargetWeek === 'next';
+            if (currBtn) {
+                currBtn.style.background = isNext ? 'transparent' : 'var(--gold)';
+                currBtn.style.color = isNext ? 'var(--text-secondary)' : '#000';
+                currBtn.style.borderColor = isNext ? 'transparent' : 'var(--gold)';
+            }
+            if (nextBtn) {
+                nextBtn.style.background = isNext ? 'var(--gold)' : 'transparent';
+                nextBtn.style.color = isNext ? '#000' : 'var(--text-secondary)';
+                nextBtn.style.borderColor = isNext ? 'var(--gold)' : 'transparent';
+            }
+
+            const details = (workout.exercises && Array.isArray(workout.exercises)) 
+                ? workout 
+                : ((typeof getWorkoutDetailsForPlan === 'function' ? getWorkoutDetailsForPlan(workout) : null) || workout);
+            const exCount = (details.exercises || []).length;
+            const duration = details.duration || Math.round(exCount * 7) || 45;
+            const titleStr = details.title || workout.title || 'Antrenman Programı';
+
+            if (infoEl) {
+                infoEl.innerHTML = `
+                    <div style="background:rgba(245,158,11,0.1); border:1.5px solid var(--gold); border-radius:10px; padding:12px 14px;">
+                        <span style="font-size:9.5px; font-weight:900; color:var(--gold); text-transform:uppercase; letter-spacing:0.5px;">ATANACAK PROGRAM</span>
+                        <h4 style="font-size:15px; font-weight:900; color:#F3F6FA; margin:4px 0 2px;">${escapeHTML(titleStr)}</h4>
+                        <div style="font-size:11px; color:var(--text-secondary);">
+                            ⏱️ ${duration} Dk • 🎯 ${exCount} Hareket • ⏳ ${(details.scheme && details.scheme.rest) || details.rest || 60}s Dinlenme
+                        </div>
+                    </div>
+                `;
+            }
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const todayIdx = today.getDay();
+            const todayYMD = typeof formatDateYMD === 'function' ? formatDateYMD(today) : '';
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+            const tomorrowIdx = tomorrow.getDay();
+            const tomorrowYMD = typeof formatDateYMD === 'function' ? formatDateYMD(tomorrow) : '';
+
+            // Compute Monday of target week
+            const diffToMonday = todayIdx === 0 ? -6 : 1 - todayIdx;
+            const baseMonday = new Date(today);
+            baseMonday.setDate(today.getDate() + diffToMonday);
+            if (isNext) {
+                baseMonday.setDate(baseMonday.getDate() + 7);
+            }
+
+            if (todayBox) {
+                if (!isNext) {
+                    todayBox.innerHTML = `
+                        <button type="button" class="btn btn-gold" style="width:100%; font-size:13px; font-weight:900; padding:12px; display:flex; justify-content:center; align-items:center; gap:8px; box-shadow:0 0 18px rgba(245,158,11,0.35); border-radius:8px;" onclick="executeAssignWorkoutToDay(${todayIdx}, '${todayYMD}', 'current')">
+                            <span>⚡</span> HEMEN BUGÜNE ATA & BAŞLAT (${DAY_NAMES_TR[todayIdx].toUpperCase()})
+                        </button>
+                    `;
+                } else {
+                    todayBox.innerHTML = `
+                        <button type="button" class="btn btn-gold" style="width:100%; font-size:12.5px; font-weight:900; padding:11px; display:flex; justify-content:center; align-items:center; gap:8px; box-shadow:0 0 15px rgba(245,158,11,0.25); border-radius:8px;" onclick="executeAssignWorkoutToDay(1, null, 'next')">
+                            <span>🚀</span> GELECEK HAFTA PAZARTESİYE ATA
+                        </button>
+                    `;
+                }
+            }
+
+            if (gridEl) {
+                const user = getActiveUser();
+                const uid = user ? user.id : 'default';
+                const nextSched = isNext ? getNextWeeklySchedule(uid) : null;
+                const dayOrder = [1, 2, 3, 4, 5, 6, 0]; // Mon through Sun
+
+                gridEl.innerHTML = dayOrder.map(dIdx => {
+                    const dayDate = new Date(baseMonday);
+                    dayDate.setDate(baseMonday.getDate() + (dIdx === 0 ? 6 : dIdx - 1));
+                    const dYMD = typeof formatDateYMD === 'function' ? formatDateYMD(dayDate) : '';
+                    const isCardToday = !isNext && dYMD === todayYMD;
+                    const isCardTomorrow = !isNext && dYMD === tomorrowYMD;
+
+                    const dayName = DAY_NAMES_TR[dIdx];
+                    const dateFormatted = `${dayDate.getDate()} ${CAL_MONTH_NAMES_TR[dayDate.getMonth()]}`;
+
+                    let plan;
+                    if (isNext) {
+                        plan = (nextSched && nextSched[dIdx]) ? nextSched[dIdx] : { rest: true };
+                    } else {
+                        plan = (typeof getPlanForDate === 'function') ? getPlanForDate(dayDate) : { rest: true };
+                    }
+
+                    const isRest = plan.rest || plan.type === 'rest';
+                    const currentTitle = isRest ? 'Dinlenme & Toparlanma' : (plan.title || 'Mevcut Antrenman');
+
+                    let badgeHtml = '';
+                    if (isCardToday) {
+                        badgeHtml = `<span style="font-size:9.5px; font-weight:900; background:var(--gold); color:#000; padding:2px 6px; border-radius:4px;">BUGÜN</span>`;
+                    } else if (isCardTomorrow) {
+                        badgeHtml = `<span style="font-size:9.5px; font-weight:800; background:rgba(56,189,248,0.2); color:var(--cyan); border:1px solid rgba(56,189,248,0.4); padding:2px 6px; border-radius:4px;">YARIN</span>`;
+                    }
+
+                    return `
+                        <div style="background:#0E131B; border:1px solid ${isCardToday ? 'var(--gold)' : 'var(--border)'}; border-radius:8px; padding:9px 12px; display:flex; justify-content:space-between; align-items:center; gap:8px; cursor:pointer; transition:all 0.15s ease;" onclick="executeAssignWorkoutToDay(${dIdx}, '${dYMD}', '${isNext ? 'next' : 'current'}')">
+                            <div style="min-width:0; flex:1;">
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <strong style="font-size:13px; color:${isCardToday ? 'var(--gold)' : '#F3F6FA'};">${dayName}</strong>
+                                    <span style="font-size:11px; color:var(--text-secondary);">${dateFormatted}</span>
+                                    ${badgeHtml}
+                                </div>
+                                <div style="font-size:11px; color:${isRest ? 'var(--text-secondary)' : '#CBD5E1'}; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                    ${isRest ? '🧘 Dinlenme' : `⚔️ ${escapeHTML(currentTitle)}`}
+                                </div>
+                            </div>
+                            <button type="button" class="btn ${isCardToday ? 'btn-gold' : 'btn-outline'}" style="font-size:11px; padding:6px 12px; font-weight:800; flex-shrink:0;" onclick="event.stopPropagation(); executeAssignWorkoutToDay(${dIdx}, '${dYMD}', '${isNext ? 'next' : 'current'}')">
+                                ${isCardToday ? '⚡ Bugüne Ata' : '➕ Seç & Ata'}
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+        window.renderAssignWorkoutCalendarModal = renderAssignWorkoutCalendarModal;
+
+        function executeAssignWorkoutToDay(dayIdx, dateStr = null, targetWeek = 'current') {
+            if (!pendingWorkoutToAssign) return;
+            const workout = pendingWorkoutToAssign;
+            const user = getActiveUser();
+            const uid = user ? user.id : 'default';
+            const dayName = DAY_NAMES_TR[dayIdx] || '';
+            const todayDate = new Date();
+            const todayIdx = todayDate.getDay();
+            const todayYMD = typeof formatDateYMD === 'function' ? formatDateYMD(todayDate) : '';
+            const isAssigningToToday = (targetWeek === 'current' && (dayIdx === todayIdx || dateStr === todayYMD));
+
+            const details = (workout.exercises && Array.isArray(workout.exercises)) 
+                ? workout 
+                : ((typeof getWorkoutDetailsForPlan === 'function' ? getWorkoutDetailsForPlan(workout) : null) || workout);
+            const exercisesList = details.exercises || [];
+            const cleanTitle = details.title || workout.title || `${dayName} Antrenmanı`;
+
+            const planObj = {
+                id: workout.id || ('assigned_' + dayIdx + '_' + Date.now()),
+                title: cleanTitle,
+                type: workout.type || (workout.isCustom ? 'custom_saved' : 'custom_generated'),
+                desc: `${exercisesList.length} Hareket • ${details.duration || 45} Dk`,
+                rest: false,
+                customWorkout: JSON.parse(JSON.stringify(details)),
+                exercises: exercisesList
+            };
+
+            if (targetWeek === 'next') {
+                const nextSched = getNextWeeklySchedule(uid);
+                nextSched[dayIdx] = planObj;
+                saveNextWeeklySchedule(nextSched, uid);
+                activePlannerWeek = 'next';
+            } else {
+                const sched = getWeeklySchedule(uid);
+                sched[dayIdx] = planObj;
+                saveWeeklySchedule(sched, uid);
+                activePlannerWeek = 'current';
+
+                const targetDateYMD = dateStr || (dayIdx === todayIdx ? todayYMD : null);
+                if (targetDateYMD && typeof saveDateScheduleOverride === 'function') {
+                    saveDateScheduleOverride(targetDateYMD, planObj, uid);
+                }
+            }
+
+            if (workout.isCustom || workout.type === 'custom' || workout.type === 'custom_saved' || workout.type === 'custom_generated') {
+                try {
+                    const key = `celik_kodu_custom_programs_${uid}`;
+                    let saved = JSON.parse(localStorage.getItem(key) || '[]');
+                    const exIdx = saved.findIndex(p => p.id === planObj.id);
+                    if (exIdx !== -1) saved[exIdx] = planObj.customWorkout;
+                    else saved.unshift(planObj.customWorkout);
+                    localStorage.setItem(key, JSON.stringify(saved));
+                } catch(e) {}
+            }
+
+            if (isAssigningToToday) {
+                currentGeneratedWorkout = planObj.customWorkout;
+                try {
+                    localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(planObj.customWorkout));
+                } catch(e) {}
+            }
+
+            closeAssignWorkoutCalendarModal();
+
+            if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
+            if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
+            if (typeof renderLibrary === 'function') renderLibrary();
+            if (typeof playAlertSound === 'function') playAlertSound();
+
+            switchTab('activeWorkoutTab');
+
+            const targetLabel = isAssigningToToday
+                ? `BUGÜNE (${dayName})`
+                : (targetWeek === 'next' ? `Gelecek Hafta ${dayName}` : dayName);
+            if (typeof showToast === 'function') {
+                showToast(`🔥 "${cleanTitle}" başarıyla ${targetLabel} gününe atandı!`);
+            }
+        }
+        window.executeAssignWorkoutToDay = executeAssignWorkoutToDay;
+
         function promptAssignGeneratedToAnyDay() {
             let workoutToAssign = currentGeneratedWorkout;
             if (!workoutToAssign) {
@@ -11482,38 +12526,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 } catch(e) {}
             }
             if (!workoutToAssign) {
-                alert("Önce bir program oluşturmanız gerekmektedir.");
+                if (typeof showToast === 'function') showToast("⚠️ Önce bir program oluşturmanız gerekmektedir.");
                 return;
             }
-
-            const todayIdx = new Date().getDay();
-            const tomorrowIdx = (todayIdx + 1) % 7;
-            const title = workoutToAssign.title || 'Sihirbaz Antrenmanı';
-            const dayPrompt = `"${title}" programını haftanın hangi gününe atamak istiyorsunuz?\n\n1: Pazartesi\n2: Salı\n3: Çarşamba\n4: Perşembe\n5: Cuma\n6: Cumartesi\n0: Pazar\n\n(Yarın ${DAY_NAMES_TR[tomorrowIdx]} için "${tomorrowIdx}" yazabilirsiniz):`;
-            const choice = prompt(dayPrompt, tomorrowIdx.toString());
-            if (choice === null) return;
-            const targetDay = parseInt(choice.trim(), 10);
-            if (isNaN(targetDay) || targetDay < 0 || targetDay > 6) {
-                alert("Geçersiz gün seçildi. Lütfen 0 ile 6 arasında bir sayı girin.");
-                return;
-            }
-
-            const schedule = getWeeklySchedule();
-            schedule[targetDay] = {
-                id: workoutToAssign.id || ('gen_' + Date.now()),
-                title: title,
-                type: 'custom_generated',
-                desc: `${workoutToAssign.exercises.length} Hareket • ${workoutToAssign.duration} Dk`,
-                rest: false,
-                customWorkout: JSON.parse(JSON.stringify(workoutToAssign))
-            };
-            saveWeeklySchedule(schedule);
-            try {
-                localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(workoutToAssign));
-            } catch(e) {}
-            renderActiveWorkout();
-            playAlertSound();
-            alert(`✅ "${title}" programı ${DAY_NAMES_TR[targetDay]} gününe başarıyla atandı!`);
+            openAssignWorkoutCalendarModal(workoutToAssign);
         }
 
         function setDayAsRest() {
@@ -11574,53 +12590,28 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     if (raw) workoutToSchedule = JSON.parse(raw);
                 } catch(e) {}
             }
-            if (!workoutToSchedule) return;
+            if (!workoutToSchedule) {
+                if (typeof showToast === 'function') showToast("⚠️ Atanacak hazır program bulunamadı.");
+                return;
+            }
 
-            const todayIdx = new Date().getDay();
-            const tomorrowIdx = (todayIdx + 1) % 7;
-            const schedule = getWeeklySchedule();
-            schedule[tomorrowIdx] = {
-                id: workoutToSchedule.id || ('gen_' + Date.now()),
-                title: workoutToSchedule.title || 'Özel Sihirbaz Antrenmanı',
-                type: 'custom_generated',
-                desc: `${workoutToSchedule.exercises.length} Hareket • ${workoutToSchedule.duration} Dk`,
-                rest: false,
-                customWorkout: JSON.parse(JSON.stringify(workoutToSchedule))
-            };
-            saveWeeklySchedule(schedule);
-            try {
-                localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(workoutToSchedule));
-            } catch(e) {}
-            switchTab('activeWorkoutTab');
-            playAlertSound();
-            alert(`✅ Antrenman yarın (${DAY_NAMES_TR[tomorrowIdx]}) için hazırlandı!\n\nYarın akşam salona girdiğinizde hiçbir seçim yapmadan doğrudan "Antrenmanı Başlat" butonuna dokunarak başlayabilirsiniz.`);
+            const todayDate = new Date();
+            const tomorrow = new Date(todayDate);
+            tomorrow.setDate(todayDate.getDate() + 1);
+            const tomorrowIdx = tomorrow.getDay();
+            const tomorrowYMD = typeof formatDateYMD === 'function' ? formatDateYMD(tomorrow) : '';
+
+            pendingWorkoutToAssign = workoutToSchedule;
+            executeAssignWorkoutToDay(tomorrowIdx, tomorrowYMD, 'current');
         }
 
         function promptAssignToDay(id, title, type, desc) {
-            const todayIdx = new Date().getDay();
-            const tomorrowIdx = (todayIdx + 1) % 7;
-            const dayPrompt = `"${title}" programını haftanın hangi gününe planlamak istiyorsunuz?\n\n1: Pazartesi\n2: Salı\n3: Çarşamba\n4: Perşembe\n5: Cuma\n6: Cumartesi\n0: Pazar\n\n(Yarın ${DAY_NAMES_TR[tomorrowIdx]} için "${tomorrowIdx}" yazabilirsiniz):`;
-            const choice = prompt(dayPrompt, tomorrowIdx.toString());
-            if (choice === null) return;
-            const targetDay = parseInt(choice.trim(), 10);
-            if (isNaN(targetDay) || targetDay < 0 || targetDay > 6) {
-                alert("Geçersiz gün seçildi. Lütfen 0 ile 6 arasında bir sayı girin.");
-                return;
-            }
-            const schedule = getWeeklySchedule();
-            const details = getWorkoutDetailsForPlan({ id: id, type: type, title: title });
-            schedule[targetDay] = {
-                id: id,
-                title: title,
-                type: type || 'custom_saved',
-                desc: desc || '',
-                rest: false,
-                customWorkout: details ? JSON.parse(JSON.stringify(details)) : null
-            };
-            saveWeeklySchedule(schedule);
-            playAlertSound();
-            alert(`✅ "${title}" programı ${DAY_NAMES_TR[targetDay]} gününe başarıyla planlandı!\n\n${DAY_NAMES_TR[targetDay]} günü salona gittiğinizde tek dokunuşla başlatabileceksiniz.`);
-            renderActiveWorkout();
+            const details = (typeof getWorkoutDetailsForPlan === 'function')
+                ? getWorkoutDetailsForPlan({ id: id, type: type, title: title })
+                : null;
+            const workoutObj = details || { id: id, title: title, type: type, desc: desc };
+            if (!workoutObj.title) workoutObj.title = title;
+            openAssignWorkoutCalendarModal(workoutObj);
         }
 
         // ==================== FIREBASE FIRESTORE CLOUD ENGINE ====================
@@ -12214,338 +13205,65 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         // ==================== CUMA GÜNÜ & ÖZEL PROGRAM KURTARMA MOTORU ====================
         function recoverLostFridayWorkout(targetUid) {
-            try {
-                const user = (typeof getActiveUser === 'function') ? getActiveUser() : null;
-                const uid = targetUid || (user ? user.id : null);
-                if (!uid) return;
-                const schedule = getWeeklySchedule(uid);
-                let fridayPlan = schedule[5];
-
-                const fridayDetails = (typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(fridayPlan) : null;
-                const curExCount = (fridayDetails && Array.isArray(fridayDetails.exercises)) 
-                    ? fridayDetails.exercises.length 
-                    : (fridayPlan && Array.isArray(fridayPlan.exercises) ? fridayPlan.exercises.length : 0);
-
-                let candidates = [];
-
-                // 1. celik_kodu_custom_programs_* anahtarlarını tara
-                for (let i = 0; i < localStorage.length; i++) {
-                    const k = localStorage.key(i);
-                    if (k && k.startsWith('celik_kodu_custom_programs')) {
-                        try {
-                            const list = JSON.parse(localStorage.getItem(k) || '[]');
-                            if (Array.isArray(list)) {
-                                list.forEach(p => {
-                                    if (p && Array.isArray(p.exercises) && p.exercises.length >= 4) {
-                                        candidates.push(p);
-                                    }
-                                });
-                            }
-                        } catch(e) {}
-                    }
-                }
-
-                // 2. Kullanıcı nesnesindeki savedWorkouts listesini tara
-                if (user && Array.isArray(user.savedWorkouts)) {
-                    user.savedWorkouts.forEach(p => {
-                        if (p && Array.isArray(p.exercises) && p.exercises.length >= 4) {
-                            candidates.push(p);
-                        }
-                    });
-                }
-
-                // 3. Haftalık takvim yedeklerini tara
-                try {
-                    const backupRaw = localStorage.getItem(`celik_kodu_weekly_schedule_backup_${uid}`);
-                    if (backupRaw) {
-                        const bSched = JSON.parse(backupRaw);
-                        if (bSched && bSched[5]) {
-                            const bWork = bSched[5].customWorkout || bSched[5];
-                            if (bWork && Array.isArray(bWork.exercises) && bWork.exercises.length >= 4) {
-                                candidates.push(bWork);
-                            }
-                        }
-                    }
-                } catch(e) {}
-
-                // 4. Tarih bazlı override kayıtlarını da aday olarak tara
-                try {
-                    const overrides = getDateScheduleOverrides(uid);
-                    if (overrides && typeof overrides === 'object') {
-                        Object.keys(overrides).forEach(dStr => {
-                            const dObj = new Date(dStr + 'T00:00:00');
-                            if (dObj.getDay() === 5 && overrides[dStr]) {
-                                const oWork = overrides[dStr].customWorkout || overrides[dStr];
-                                if (oWork && Array.isArray(oWork.exercises) && oWork.exercises.length >= 6) {
-                                    candidates.push(oWork);
-                                }
-                            }
-                        });
-                    }
-                } catch(e) {}
-
-                // Cuma ile en ilişkili olanı öne al
-                candidates.sort((a, b) => {
-                    const aIsFriday = (a.id && a.id.includes('custom_day_5')) || 
-                                      (a.title && (a.title.toLowerCase().includes('cuma') || a.title.toLowerCase().includes('gün 3')));
-                    const bIsFriday = (b.id && b.id.includes('custom_day_5')) || 
-                                      (b.title && (b.title.toLowerCase().includes('cuma') || b.title.toLowerCase().includes('gün 3')));
-                    if (aIsFriday && !bIsFriday) return -1;
-                    if (!aIsFriday && bIsFriday) return 1;
-
-                    // 7 hareket tam eşleşmesine öncelik ver
-                    if (a.exercises.length === 7 && b.exercises.length !== 7) return -1;
-                    if (a.exercises.length !== 7 && b.exercises.length === 7) return 1;
-
-                    // Daha çok hareketli olan
-                    if (b.exercises.length !== a.exercises.length) return b.exercises.length - a.exercises.length;
-
-                    // En güncel olan
-                    return (b.updatedAt || 0) - (a.updatedAt || 0);
-                });
-
-                let recovered = false;
-                if (candidates.length > 0) {
-                    const best = candidates[0];
-                    if (best && (best.exercises.length > curExCount || (fridayPlan && fridayPlan.id?.startsWith('fitlab_day_') && best.exercises.length >= 6))) {
-                        schedule[5] = {
-                            id: best.id || ('custom_day_5_' + Date.now()),
-                            title: best.title || '⚔️ Cuma: Özel Zırh Programım',
-                            type: 'custom_saved',
-                            desc: `${best.exercises.length} Hareket • ${best.duration || Math.round(best.exercises.length * 7)} Dk`,
-                            rest: false,
-                            customWorkout: best,
-                            exercises: best.exercises,
-                            isCustom: true
-                        };
-                        saveWeeklySchedule(schedule, uid);
-                        fridayPlan = schedule[5];
-                        recovered = true;
-                        console.log(`[Cuma Program Kurtarma] ${best.exercises.length} hareketli özel program başarıyla geri yüklendi:`, best.title);
-                    }
-                }
-
-                // 5. KRİTİK: Tarih bazlı override (celik_kodu_date_schedule_*) içinde Cuma gününü 5 harekete düşüren eski kayıt varsa temizle!
-                try {
-                    const finalFridayDetails = (typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(fridayPlan) : fridayPlan;
-                    const finalExCount = (finalFridayDetails && Array.isArray(finalFridayDetails.exercises)) ? finalFridayDetails.exercises.length : 0;
-                    const overrides = getDateScheduleOverrides(uid);
-                    let overridesCleaned = false;
-                    if (overrides && typeof overrides === 'object') {
-                        Object.keys(overrides).forEach(dStr => {
-                            const dObj = new Date(dStr + 'T00:00:00');
-                            if (dObj.getDay() === 5) {
-                                const ovPlan = overrides[dStr];
-                                const ovDetails = (typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(ovPlan) : ovPlan;
-                                const ovExCount = (ovDetails && Array.isArray(ovDetails.exercises)) ? ovDetails.exercises.length : 0;
-                                if (ovExCount < finalExCount || (ovPlan && ovPlan.id && ovPlan.id.startsWith('fitlab_'))) {
-                                    delete overrides[dStr];
-                                    overridesCleaned = true;
-                                }
-                            }
-                        });
-                        if (overridesCleaned) {
-                            localStorage.setItem(`celik_kodu_date_schedule_${uid}`, JSON.stringify(overrides));
-                        }
-                    }
-                } catch(e) {}
-
-                if (recovered) {
-                    if (typeof renderActiveWorkout === 'function') {
-                        renderActiveWorkout();
-                    }
-                    return schedule[5];
-                }
-            } catch(e) {
-                console.warn("recoverLostFridayWorkout hatası:", e);
-            }
+            // Kullanıcı onayı olmaksızın otomatik takvime program ekleme devre dışı bırakıldı.
             return null;
         }
 
         function processIncomingCoachDirective(uid, data) {
             try {
                 if (!data) return;
-
-                // Idempotency: Zaten işlenmiş aynı sentAt zamanlı direktifleri tekrar çalıştırma
-                const appliedKey = `celik_kodu_applied_coach_directive_${uid}`;
-                const lastAppliedSentAt = localStorage.getItem(appliedKey);
-                if (data.sentAt && lastAppliedSentAt === data.sentAt && !data.forceReload) {
-                    return;
-                }
-
-                if (!data.parsedWorkout && data.fullReport) {
+                // Sadece direktif taslağını kaydet, asla kullanıcının takvimini otomatik ezme!
+                if (!data.parsedWorkout && data.fullReport && typeof parseDirectiveWorkout === 'function') {
                     data.parsedWorkout = parseDirectiveWorkout(data.fullReport, data.title);
                 }
-
                 localStorage.setItem(`celik_kodu_coach_directive_${uid}`, JSON.stringify(data));
-                if (data.sentAt) {
-                    localStorage.setItem(appliedKey, data.sentAt);
-                }
-
-                let hasCalendarChange = false;
-
-                // 1. TEK GÜN VEYA TARİH GÜNCELLEMESİ (FitLAB Takvim Modalı)
-                if (data.calendarUpdate) {
-                    const cu = data.calendarUpdate;
-                    const plan = cu.plan || {};
-                    const isRest = !!(plan.isRest || plan.rest || plan.type === 'rest');
-                    const exercisesList = (plan.exercises || []).map(ex => {
-                        if (typeof ex === 'string') return { name: ex, sets: 3, reps: '8-12' };
-                        return ex;
-                    });
-
-                    const mappedPlan = {
-                        id: plan.id || ('fitlab_' + (cu.dateStr || 'day_' + cu.dayIndex)),
-                        title: plan.title || (isRest ? 'Dinlenme' : 'FitLAB Programı'),
-                        time: plan.time || '18:30',
-                        duration: plan.duration || (isRest ? 30 : 60),
-                        rest: isRest,
-                        type: isRest ? 'rest' : 'custom_saved',
-                        desc: isRest ? 'Aktif Dinlenme & Mobilite' : `${exercisesList.length} Hareket • ${plan.duration || 60} Dk`,
-                        exercises: exercisesList,
-                        customWorkout: isRest ? null : {
-                            id: 'fitlab_workout_' + Date.now(),
-                            title: plan.title,
-                            duration: plan.duration || 60,
-                            exercises: exercisesList
-                        }
-                    };
-
-                    if (typeof cu.dayIndex === 'number' && cu.dayIndex >= 0 && cu.dayIndex <= 6) {
-                        const sched = getWeeklySchedule(uid);
-                        sched[cu.dayIndex] = mappedPlan;
-                        saveWeeklySchedule(sched, uid);
-                        hasCalendarChange = true;
-                    }
-
-                    if (cu.dateStr) {
-                        saveDateScheduleOverride(cu.dateStr, mappedPlan, uid);
-                        hasCalendarChange = true;
-                    }
-
-                    if (typeof showToast === 'function') {
-                        showToast(`📅 FitLAB: "${mappedPlan.title}" takviminize işlendi!`);
-                    }
-                }
-
-                // 2. TÜM HAFTALIK PLAN GÜNCELLEMESİ (FitLAB Haftalık Şablonu)
-                if (data.schedule) {
-                    const sched = getWeeklySchedule(uid);
-                    try {
-                        localStorage.setItem(`celik_kodu_weekly_schedule_backup_${uid}`, JSON.stringify(sched));
-                    } catch(e) {}
-
-                    const applyDaySchedule = (d, dIdx) => {
-                        if (!d || dIdx < 0 || dIdx > 6) return;
-                        const existingPlan = sched[dIdx];
-                        const existingDetails = (typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(existingPlan) : null;
-                        const existingExCount = (existingDetails && Array.isArray(existingDetails.exercises)) ? existingDetails.exercises.length : (existingPlan && Array.isArray(existingPlan.exercises) ? existingPlan.exercises.length : 0);
-                        const incomingExCount = Array.isArray(d.exercises) ? d.exercises.length : 0;
-
-                        // GÜVENLİK KALKANI: Kullanıcı bu güne özel program tanımladıysa veya kullanıcının hareket sayısı gelen şablondan fazlaysa EZME!
-                        if (existingPlan && (existingPlan.type === 'custom_saved' || existingPlan.isCustom || (existingPlan.id && existingPlan.id.startsWith('custom_day_'))) && existingExCount > incomingExCount) {
-                            console.log(`[CoachDirective] Gün ${dIdx} kullanıcının özel programı (${existingExCount} hareket) korundu, bulut şablonu (${incomingExCount} hareket) ile EZİLMEDİ.`);
-                            return;
-                        }
-
-                        const isRest = !!(d.isRest || d.rest || d.type === 'rest');
-                        const exList = (d.exercises || []).map(e => typeof e === 'string' ? { name: e, sets: 3, reps: '8-12' } : e);
-                        sched[dIdx] = {
-                            id: 'fitlab_day_' + dIdx,
-                            title: d.title || (isRest ? 'Dinlenme' : 'Antrenman'),
-                            time: d.time || '18:30',
-                            duration: d.duration || (isRest ? 30 : 60),
-                            rest: isRest,
-                            type: isRest ? 'rest' : 'custom_saved',
-                            desc: isRest ? 'Aktif Dinlenme & Mobilite' : `${exList.length} Hareket • ${d.duration || 60} Dk`,
-                            exercises: exList,
-                            customWorkout: isRest ? null : {
-                                id: 'fitlab_workout_' + dIdx + '_' + Date.now(),
-                                title: d.title,
-                                duration: d.duration || 60,
-                                exercises: exList
-                            }
-                        };
-                        hasCalendarChange = true;
-                    };
-
-                    if (Array.isArray(data.schedule)) {
-                        data.schedule.forEach((d, idx) => {
-                            const dIdx = typeof d.dayIndex === 'number' ? d.dayIndex : idx;
-                            applyDaySchedule(d, dIdx);
-                        });
-                    } else if (typeof data.schedule === 'object') {
-                        Object.keys(data.schedule).forEach(k => {
-                            const d = data.schedule[k];
-                            const dIdx = parseInt(k, 10);
-                            applyDaySchedule(d, dIdx);
-                        });
-                    }
-                    if (hasCalendarChange) {
-                        saveWeeklySchedule(sched, uid);
-                    }
-                }
-
-                // 3. TARİH BAZLI OVERRIDE LİSTESİ
-                if (data.dateOverrides && typeof data.dateOverrides === 'object') {
-                    Object.keys(data.dateOverrides).forEach(dateStr => {
-                        const d = data.dateOverrides[dateStr];
-                        if (!d) return;
-                        const isRest = !!(d.isRest || d.rest || d.type === 'rest');
-                        const exList = (d.exercises || []).map(e => typeof e === 'string' ? { name: e, sets: 3, reps: '8-12' } : e);
-                        saveDateScheduleOverride(dateStr, {
-                            id: 'fitlab_' + dateStr,
-                            title: d.title || (isRest ? 'Dinlenme' : 'Antrenman'),
-                            time: d.time || '18:30',
-                            duration: d.duration || (isRest ? 30 : 60),
-                            rest: isRest,
-                            type: isRest ? 'rest' : 'custom_saved',
-                            desc: isRest ? 'Aktif Dinlenme & Mobilite' : `${exList.length} Hareket • ${d.duration || 60} Dk`,
-                            exercises: exList,
-                            customWorkout: isRest ? null : {
-                                id: 'fitlab_workout_' + dateStr,
-                                title: d.title,
-                                duration: d.duration || 60,
-                                exercises: exList
-                            }
-                        }, uid);
-                        hasCalendarChange = true;
-                    });
-                }
-
-                // 4. MASAÜSTÜNDEN 'BUGÜNE ATA' DİREKTİFİ
-                if (data.assignToToday && data.parsedWorkout) {
-                    const todayIdx = new Date().getDay();
-                    const schedule = getWeeklySchedule(uid);
-                    schedule[todayIdx] = {
-                        id: data.parsedWorkout.id || ('directive_' + Date.now()),
-                        title: data.parsedWorkout.title || 'FitLAB Özel Seansı',
-                        type: 'custom_saved',
-                        desc: `${data.parsedWorkout.exercises.length} Hareket • ${data.parsedWorkout.duration || 45} Dk`,
-                        rest: false,
-                        customWorkout: data.parsedWorkout,
-                        exercises: data.parsedWorkout.exercises
-                    };
-                    saveWeeklySchedule(schedule, uid);
-                    hasCalendarChange = true;
-                    if (typeof showToast === 'function') {
-                        showToast(`🔥 FitLAB: "${data.parsedWorkout.title}" bugünkü (${DAY_NAMES_TR[todayIdx]}) programınıza atandı!`);
-                    }
-                }
-
-                if (hasCalendarChange && typeof renderCalendarScreen === 'function') {
-                    renderCalendarScreen();
-                }
                 if (typeof renderActiveWorkout === 'function') {
                     renderActiveWorkout();
-                }
-                if (hasCalendarChange && typeof isGoogleCalendarConnected === 'function' && isGoogleCalendarConnected(uid)) {
-                    performFullCalendarSync().catch(e => console.warn("Google Calendar otomatik senkronizasyon:", e));
                 }
             } catch(e) {
                 console.warn("processIncomingCoachDirective hatası:", e);
             }
         }
+
+        // ==================== TAKVİMİ TAMAMEN SIFIRLAMA & İZİNSİZ ATAMALARI TEMİZLEME ====================
+        function purgeAllUnrequestedSchedules(targetUid) {
+            try {
+                const user = (typeof getActiveUser === 'function') ? getActiveUser() : null;
+                const uid = targetUid || (user ? user.id : 'default');
+                const emptySched = getDefaultWeeklySchedule();
+
+                saveWeeklySchedule(emptySched, uid);
+                saveNextWeeklySchedule(emptySched, uid);
+
+                localStorage.removeItem(`celik_kodu_date_schedule_${uid}`);
+                localStorage.removeItem(`celik_kodu_date_overrides_${uid}`);
+                localStorage.removeItem(`celik_kodu_coach_directive_${uid}`);
+                localStorage.removeItem(`celik_kodu_ai_program_${uid}`);
+                localStorage.removeItem(`celik_kodu_applied_coach_directive_${uid}`);
+                localStorage.removeItem(`celik_kodu_pending_ai_weekly_${uid}`);
+
+                // Tüm kullanıcıların yerel hafızasındaki otomatik atanmış programları da temizle
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    if (k && (k.startsWith('celik_kodu_weekly_schedule_') || k.startsWith('celik_kodu_next_weekly_schedule_'))) {
+                        localStorage.setItem(k, JSON.stringify(emptySched));
+                    }
+                    if (k && (k.startsWith('celik_kodu_date_schedule_') || k.startsWith('celik_kodu_date_overrides_'))) {
+                        localStorage.removeItem(k);
+                    }
+                    if (k && (k.startsWith('celik_kodu_coach_directive_') || k.startsWith('celik_kodu_ai_program_'))) {
+                        localStorage.removeItem(k);
+                    }
+                }
+
+                if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
+                if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
+                if (typeof showToast === 'function') showToast("🧹 Takvim tamamen sıfırlandı. Tüm günler dinlenmeye alındı.");
+            } catch(e) {
+                console.warn("purgeAllUnrequestedSchedules hatası:", e);
+            }
+        }
+        window.purgeAllUnrequestedSchedules = purgeAllUnrequestedSchedules;
 
         function assignDirectiveWorkoutToToday(uid) {
             try {
@@ -12617,7 +13335,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         }
 
         function copyDayProgramToToday(sourceDayIdx) {
-            const todayIdx = new Date().getDay();
+            const todayDate = new Date();
+            const todayIdx = todayDate.getDay();
+            const todayYMD = typeof formatDateYMD === 'function' ? formatDateYMD(todayDate) : '';
             if (sourceDayIdx === todayIdx) {
                 showToast("ℹ️ Bu program zaten bugünün programı.");
                 closeScheduleDayModal();
@@ -12634,8 +13354,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             schedule[todayIdx].rest = false;
             saveWeeklySchedule(schedule);
 
+            if (todayYMD && typeof saveDateScheduleOverride === 'function') {
+                saveDateScheduleOverride(todayYMD, schedule[todayIdx]);
+            }
+
+            activePlannerWeek = 'current';
             closeScheduleDayModal();
             renderActiveWorkout();
+            if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
             playAlertSound();
             showToast(`🔥 ${DAY_NAMES_TR[sourceDayIdx]} programı bugüne (${DAY_NAMES_TR[todayIdx]}) kopyalandı!`);
         }
@@ -12653,22 +13379,11 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 return;
             }
 
-            const todayIdx = new Date().getDay();
-            const todayName = DAY_NAMES_TR[todayIdx];
-            const schedule = getWeeklySchedule();
-            schedule[todayIdx] = {
-                id: workout.id || ('gen_today_' + Date.now()),
-                title: workout.title || 'Bugünün Özel Programı',
-                type: 'custom_generated',
-                desc: `${workout.exercises.length} Hareket • ${workout.duration || 45} Dk`,
-                rest: false,
-                customWorkout: JSON.parse(JSON.stringify(workout)),
-                exercises: workout.exercises
-            };
-            saveWeeklySchedule(schedule);
-            renderActiveWorkout();
-            playAlertSound();
-            showToast(`🔥 "${workout.title}" bugüne (${todayName}) başarıyla atandı!`);
+            const todayDate = new Date();
+            const todayIdx = todayDate.getDay();
+            const todayYMD = typeof formatDateYMD === 'function' ? formatDateYMD(todayDate) : '';
+            pendingWorkoutToAssign = workout;
+            executeAssignWorkoutToDay(todayIdx, todayYMD, 'current');
         }
 
         let aiProgramLiveUnsub = null;
@@ -14277,27 +14992,24 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 </button>
                             ` : `
                                 <button type="button" class="btn btn-outline" style="width:100%; font-size:11px; padding:6px 4px; font-weight:700; color:var(--gold); border-color:rgba(245,158,11,0.4); text-align:center;" onclick="event.stopPropagation(); openScheduleDayModal(${dayIdx}, '${dayYMD}')">
-                                    ✏️ Düzenle / Ata
+                                    👁️ İncele
                                 </button>
                             `}
                         </div>
                     `;
                 } else {
                     bodyContent = `
-                        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:10px 0;">
+                        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:14px 0;">
                             <span style="font-size:24px; margin-bottom:4px;">🧘</span>
                             <div style="font-size:11.5px; font-weight:700; color:var(--text-secondary);">Dinlenme & Toparlanma</div>
-                        </div>
-                        <div style="margin-top:8px;">
-                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 4px; width:100%; border-color:#263244; color:#CBD5E1; text-align:center;" onclick="event.stopPropagation(); openScheduleDayModal(${dayIdx}, '${dayYMD}')">
-                                ➕ Program Ata
-                            </button>
                         </div>
                     `;
                 }
 
+                const cardClickAttr = (isRest && !hasCompleted) ? 'style="cursor:default;"' : `onclick="openScheduleDayModal(${dayIdx}, '${dayYMD}')"`;
+
                 html += `
-                    <div class="cal-week-card ${isToday ? 'is-today' : ''} ${hasCompleted ? 'is-completed' : (isRest ? 'is-rest' : '')}" onclick="openScheduleDayModal(${dayIdx}, '${dayYMD}')">
+                    <div class="cal-week-card ${isToday ? 'is-today' : ''} ${hasCompleted ? 'is-completed' : (isRest ? 'is-rest' : '')}" ${cardClickAttr}>
                         <div class="cal-week-card-header">
                             <div class="cal-week-card-top-row">
                                 <span class="cal-week-card-day">${DAY_NAMES_TR[dayIdx]}</span>
@@ -14701,7 +15413,6 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
                 // Başarılı giriş sonrası kullanıcının antrenman motorunu ve görünümünü yükle
                 applyWednesdayHammerCurlPatch();
-                recoverLostFridayWorkout();
                 updateProfileGeminiStatusUI();
                 renderAiHybridHeroBanner();
                 updateSelectedSplitLabel();
@@ -18772,7 +19483,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=245')
+                navigator.serviceWorker.register('./sw.js?v=246')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
@@ -18799,8 +19510,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             syncAppViewState();
             const session = getSession();
             if (session) {
+                // Kullanıcı talebi: Takvimi sıfırla ve izinsiz otomatik program atamalarını temizle
+                if (!localStorage.getItem('celik_kodu_calendar_zeroed_v4')) {
+                    purgeAllUnrequestedSchedules();
+                    localStorage.setItem('celik_kodu_calendar_zeroed_v4', 'true');
+                }
                 applyWednesdayHammerCurlPatch();
-                recoverLostFridayWorkout();
                 updateProfileGeminiStatusUI();
                 renderAiHybridHeroBanner();
                 updateSelectedSplitLabel();
