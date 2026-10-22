@@ -182,7 +182,14 @@
             db_high_pull_cuban_rotation: { primary: 'Arka Omuz & Üst Trapez', secondary: 'Rotator Manşet, Orta Sırt, Core', subKey: 'shoulders_rear', allSubKeys: ['shoulders_rear', 'back_mid', 'core_front'], isLowerUpperComplex: true, isComplex: true },
             db_dumbbell_shrug_burnout: { primary: 'Üst Trapez', secondary: 'Ön Kol, Boyun Zırhı', subKey: 'back_mid', allSubKeys: ['back_mid'], isComplex: false },
             db_quadruped_external_rotation: { primary: 'Arka Omuz & Rotator Manşet', secondary: 'Core Stabilitesi, Rhomboids', subKey: 'shoulders_rear', allSubKeys: ['shoulders_rear', 'core_front'], isComplex: false },
-            bw_jumping_jack: { primary: 'Yan Omuz & Kalf (Baldır)', secondary: 'Core, Ön Bacak, Aerobik Kondisyon', subKey: 'shoulders_side', allSubKeys: ['shoulders_side', 'legs_calves', 'legs_quad', 'core_front'], isComplex: false }
+            bw_jumping_jack: { primary: 'Yan Omuz & Kalf (Baldır)', secondary: 'Core, Ön Bacak, Aerobik Kondisyon', subKey: 'shoulders_side', allSubKeys: ['shoulders_side', 'legs_calves', 'legs_quad', 'core_front'], isComplex: false },
+            bw_high_knees: { primary: 'Kalça Fleksörü & Ön Bacak', secondary: 'Alt Karın, Kalf, Kardiyo', subKey: 'legs_quad', allSubKeys: ['legs_quad', 'core_front', 'legs_calves'], isComplex: false },
+            bw_jump_rope: { primary: 'Kalf (Baldır) & Ayak Bileği', secondary: 'Ön Kol, Omuz Stabilitesi, Ritim', subKey: 'legs_calves', allSubKeys: ['legs_calves', 'shoulders_side', 'core_front'], isComplex: false },
+            bw_butt_kicks: { primary: 'Arka Bacak (Hamstring) & Kalf', secondary: 'Kalça, Dinamik Koşu Mekaniği', subKey: 'legs_ham', allSubKeys: ['legs_ham', 'legs_calves'], isComplex: false },
+            bw_skater_jumps: { primary: 'Yan Kalça (Gluteus Medius) & Ön Bacak', secondary: 'Kalf, Core Denge, Yanal Güç', subKey: 'legs_glute', allSubKeys: ['legs_glute', 'legs_quad', 'legs_calves', 'core_obliques'], isComplex: false },
+            bw_plank_jacks: { primary: 'Ön & Yan Karın (Core Zırhı)', secondary: 'Omuz Stabilitesi, Kalça Abduktörleri', subKey: 'core_front', allSubKeys: ['core_front', 'core_obliques', 'shoulders_front'], isComplex: false },
+            bw_squat_thrust: { primary: 'Ön Bacak, Kalça & Core', secondary: 'Omuz, Göğüs, Metabolik Kondisyon', subKey: 'legs_quad', allSubKeys: ['legs_quad', 'legs_glute', 'core_front', 'shoulders_front'], isComplex: false },
+            bw_lateral_shuffle: { primary: 'Ön Bacak & Yan Kalça Çevikliği', secondary: 'İç Bacak, Kalf, Yanal Kondisyon', subKey: 'legs_quad', allSubKeys: ['legs_quad', 'legs_glute', 'legs_calves'], isComplex: false }
         };
 
         const STUDIO_SUB_REGIONS = {
@@ -786,7 +793,15 @@
             'db_single_arm_rear_delt_row': { id: 'db_single_arm_rear_delt_row', name: "Eğilerek Tek Kol Arka Omuz Çekişi (Parabolik Sweep)", clip: 'assets/opengym/clips/db_single_arm_rear_delt_row.mp4', still: 'assets/opengym/stills/db_single_arm_rear_delt_row.webp' },
             'db_high_pull_cuban_rotation': { id: 'db_high_pull_cuban_rotation', name: "Eğilerek Row & High Pull + Cuban Rotasyon", clip: 'assets/opengym/clips/db_high_pull_cuban_rotation.mp4', still: 'assets/opengym/stills/db_high_pull_cuban_rotation.webp' },
             'db_dumbbell_shrug_burnout': { id: 'db_dumbbell_shrug_burnout', name: "Dambıl Trapez Silkme (Burnout)", clip: 'assets/opengym/clips/db_dumbbell_shrug_burnout.mp4', still: 'assets/opengym/stills/db_dumbbell_shrug_burnout.webp' },
-            'db_quadruped_external_rotation': { id: 'db_quadruped_external_rotation', name: "Dört Ayak Pozisyonunda Yatay Arka Omuz Uçuşu", clip: 'assets/opengym/clips/db_quadruped_external_rotation.mp4', still: 'assets/opengym/stills/db_quadruped_external_rotation.webp' }
+            'db_quadruped_external_rotation': { id: 'db_quadruped_external_rotation', name: "Dört Ayak Pozisyonunda Yatay Arka Omuz Uçuşu", clip: 'assets/opengym/clips/db_quadruped_external_rotation.mp4', still: 'assets/opengym/stills/db_quadruped_external_rotation.webp' },
+            'bw_jumping_jack': { id: 'bw_jumping_jack', name: "Jumping Jack", clip: 'assets/opengym/clips/bw_jumping_jack.mp4', still: 'assets/opengym/stills/bw_jumping_jack.webp' },
+            'bw_high_knees': { id: '3556', name: "High Knees (Dize Çekerek Koşu)", clip: 'assets/opengym/clips/bw_high_knees.mp4', still: 'assets/opengym/stills/bw_high_knees.webp' },
+            'bw_jump_rope': { id: '3676', name: "İp Atlama (Gölge İp / Jump Rope)", clip: 'assets/opengym/clips/bw_jump_rope.mp4', still: 'assets/opengym/stills/bw_jump_rope.webp' },
+            'bw_butt_kicks': { id: '3037', name: "Topuk Kalçaya Koşu (Butt Kicks)", clip: 'assets/opengym/clips/bw_butt_kicks.mp4', still: 'assets/opengym/stills/bw_butt_kicks.webp' },
+            'bw_skater_jumps': { id: '3361', name: "Skater Jumps (Paten Sıçraması)", clip: 'assets/opengym/clips/bw_skater_jumps.mp4', still: 'assets/opengym/stills/bw_skater_jumps.webp' },
+            'bw_plank_jacks': { id: '1478', name: "Plank Jacks (Plank Bacak Aç-Kapa)", clip: 'assets/opengym/clips/bw_plank_jacks.mp4', still: 'assets/opengym/stills/bw_plank_jacks.webp' },
+            'bw_squat_thrust': { id: '3705', name: "Squat Thrust (Yarım Burpee)", clip: 'assets/opengym/clips/bw_squat_thrust.mp4', still: 'assets/opengym/stills/bw_squat_thrust.webp' },
+            'bw_lateral_shuffle': { id: '4241', name: "Lateral Shuffle (Yanal Hızlı Adımlama)", clip: 'assets/opengym/clips/bw_lateral_shuffle.mp4', still: 'assets/opengym/stills/bw_lateral_shuffle.webp' }
         };
 
         // ==================== KULLANICI ÖZEL HAVUZ & GİZLEME YASASI ====================
@@ -2527,7 +2542,15 @@ Aşağıdaki JSON şemasında çıktı ver:
             db_dumbbell_shrug_burnout: 'shrug_burnout',
             db_quadruped_external_rotation: 'quadruped_horizontal_fly',
             db_manmaker: 'fullbody_metcon_burpee',
-            bw_burpee: 'fullbody_metcon_burpee'
+            bw_burpee: 'fullbody_metcon_burpee',
+            bw_squat_thrust: 'fullbody_metcon_burpee',
+            bw_jumping_jack: 'cardio_plyo_rebound',
+            bw_jump_rope: 'cardio_plyo_rebound',
+            bw_high_knees: 'cardio_running_drill',
+            bw_butt_kicks: 'cardio_running_drill',
+            bw_skater_jumps: 'cardio_lateral_agility',
+            bw_lateral_shuffle: 'cardio_lateral_agility',
+            bw_plank_jacks: 'core_dynamic_climber'
         };
 
         function getExerciseMovementFamily(ex) {
@@ -4729,7 +4752,14 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 'db_high_pull_cuban_rotation': { form: 'assets/exercises/db_high_pull_cuban_rotation.webp', anatomi: null },
                 'db_dumbbell_shrug_burnout': { form: 'assets/exercises/db_dumbbell_shrug_burnout.webp', anatomi: null },
                 'db_quadruped_external_rotation': { form: 'assets/exercises/db_quadruped_external_rotation.webp', anatomi: null },
-                'bw_jumping_jack': { form: 'assets/exercises/bw_jumping_jack.gif', anatomi: null }
+                'bw_jumping_jack': { form: 'assets/exercises/bw_jumping_jack.gif', anatomi: null },
+                'bw_high_knees': { form: 'assets/exercises/bw_high_knees.webp', anatomi: null },
+                'bw_jump_rope': { form: 'assets/exercises/bw_jump_rope.webp', anatomi: null },
+                'bw_butt_kicks': { form: 'assets/exercises/bw_butt_kicks.webp', anatomi: null },
+                'bw_skater_jumps': { form: 'assets/exercises/bw_skater_jumps.webp', anatomi: null },
+                'bw_plank_jacks': { form: 'assets/exercises/bw_plank_jacks.webp', anatomi: null },
+                'bw_squat_thrust': { form: 'assets/exercises/bw_squat_thrust.webp', anatomi: null },
+                'bw_lateral_shuffle': { form: 'assets/exercises/bw_lateral_shuffle.webp', anatomi: null }
             };
 
             // Egzersize ait gerçek fotoğraf kılavuzunu al
@@ -8610,6 +8640,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                                                     </button>
                                                 </div>
                                             </div>
+                                            ${renderInterSetSlotHtml(ex.id, st, sIdx, sets.length)}
                                         `;
                                     }).join('')}
                                 </div>
@@ -8822,6 +8853,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                                                         </button>
                                                     </div>
                                                 </div>
+                                                ${renderInterSetSlotHtml(ex.id, st, sIdx, sets.length)}
                                             `;
                                         }).join('')}
                                     </div>
@@ -8998,6 +9030,335 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                 renderActiveWorkout();
             }
         }
+
+        // ==================== SET ARASI İLAVE HAREKET (INTER-SET EXTRA) ENGINE ====================
+        let activeInterSetContext = {
+            exId: null,
+            setIdx: 0,
+            selectedExercise: null,
+            metricType: 'time',
+            value: 45
+        };
+
+        const INTER_SET_QUICK_PRESETS = [
+            { id: 'bw_jumping_jack', name: 'Jumping Jack', icon: '⚡', muscle: 'Kondisyon, Tüm Vücut', category: 'conditioning', equipment: 'bodyweight', defaultType: 'time', defaultVal: 45 },
+            { id: 'bw_plank', name: 'Plank', icon: '🛡️', muscle: 'Core, Karın', category: 'core', equipment: 'bodyweight', defaultType: 'time', defaultVal: 45 },
+            { id: 'bw_mountain_climber', name: 'Mountain Climber', icon: '⛰️', muscle: 'Core, Kondisyon', category: 'conditioning', equipment: 'bodyweight', defaultType: 'time', defaultVal: 40 },
+            { id: 'bw_pushup', name: 'Şınav (Push-Up)', icon: '💪', muscle: 'Göğüs, Triceps, Ön Omuz', category: 'push', equipment: 'bodyweight', defaultType: 'reps', defaultVal: 15 },
+            { id: 'bw_crunch', name: 'Mekik / Crunch', icon: '🔥', muscle: 'Karın, Core', category: 'core', equipment: 'bodyweight', defaultType: 'reps', defaultVal: 20 },
+            { id: 'bw_burpee', name: 'Burpee', icon: '🚀', muscle: 'Tüm Vücut, Kondisyon', category: 'conditioning', equipment: 'bodyweight', defaultType: 'reps', defaultVal: 10 },
+            { id: 'db_swing', name: 'Kettlebell / Dambıl Swing', icon: '🔔', muscle: 'Kalça, Arka Bacak, Kondisyon', category: 'legs_hinge', equipment: 'kettlebell', defaultType: 'reps', defaultVal: 15 },
+            { id: 'bw_hollow_hold', name: 'Hollow Body Hold', icon: '🧱', muscle: 'Core, Alt Karın', category: 'core', equipment: 'bodyweight', defaultType: 'time', defaultVal: 30 }
+        ];
+
+        function renderInterSetSlotHtml(exId, st, sIdx, totalSets) {
+            if (sIdx >= totalSets - 1) return '';
+            const safeExId = encodeURIComponent(exId);
+            const item = st && st.interSet ? st.interSet : null;
+            if (!item) {
+                return `
+                    <div class="hevy-interset-slot">
+                        <button type="button"
+                                class="btn-interset-plus"
+                                onclick="openInterSetModal(decodeURIComponent('${safeExId}'), ${sIdx})"
+                                title="Set ${sIdx + 1} - Set ${sIdx + 2} arasına ilave hareket ekle (Jumping Jack, Plank vb.)"
+                                aria-label="Set ${sIdx + 1} ile ${sIdx + 2} arasına ilave hareket ekle">
+                            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="6" y1="2.5" x2="6" y2="9.5"></line><line x1="2.5" y1="6" x2="9.5" y2="6"></line></svg>
+                        </button>
+                    </div>
+                `;
+            }
+            const isDone = !!item.completed;
+            const metricLbl = item.metricType === 'time' ? `${item.value} sn` : `${item.value} tk`;
+            return `
+                <div class="hevy-interset-row ${isDone ? 'done' : ''}">
+                    <div class="hevy-interset-info" onclick="openInterSetModal(decodeURIComponent('${safeExId}'), ${sIdx})" title="Set arası hareketi düzenlemek için dokunun">
+                        <span class="hevy-interset-tag">⚡ Set ${sIdx + 1}-${sIdx + 2} Arası</span>
+                        <span class="hevy-interset-name">${escapeHTML(item.name)}</span>
+                        <span class="hevy-interset-metric">${escapeHTML(metricLbl)}</span>
+                    </div>
+                    <div class="hevy-interset-actions">
+                        <button type="button"
+                                class="btn-interset-del"
+                                onclick="removeInterSetExercise(decodeURIComponent('${safeExId}'), ${sIdx})"
+                                title="Set arası hareketi kaldır">✕</button>
+                        <button type="button"
+                                class="btn-interset-check ${isDone ? 'checked' : ''}"
+                                onclick="toggleInterSetCheck(decodeURIComponent('${safeExId}'), ${sIdx})"
+                                title="${isDone ? 'Tamamlandı (Geri almak için dokunun)' : 'Set arası hareketi tamamla'}">
+                            ${isDone ? '✓' : '○'}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openInterSetModal(exId, setIdx) {
+            const sets = activeWorkoutSetsData[exId] || [];
+            const st = sets[setIdx];
+            if (!st) return;
+
+            const existing = st.interSet || null;
+            const defaultPreset = INTER_SET_QUICK_PRESETS[0];
+
+            activeInterSetContext = {
+                exId: exId,
+                setIdx: setIdx,
+                selectedExercise: existing ? {
+                    id: existing.id,
+                    name: existing.name,
+                    muscle: existing.muscle || 'Kondisyon, Tüm Vücut',
+                    category: existing.category || 'conditioning',
+                    equipment: existing.equipment || 'bodyweight'
+                } : {
+                    id: defaultPreset.id,
+                    name: defaultPreset.name,
+                    muscle: defaultPreset.muscle,
+                    category: defaultPreset.category,
+                    equipment: defaultPreset.equipment
+                },
+                metricType: existing ? existing.metricType : defaultPreset.defaultType,
+                value: existing ? existing.value : defaultPreset.defaultVal
+            };
+
+            const titleEl = document.getElementById('interSetModalTitle');
+            if (titleEl) {
+                titleEl.textContent = `⚡ Set ${setIdx + 1} – Set ${setIdx + 2} Arası İlave Hareket`;
+            }
+            const btnSingle = document.getElementById('btnSaveSingleInterSet');
+            if (btnSingle) {
+                btnSingle.textContent = `➕ Sadece Set ${setIdx + 1}–${setIdx + 2} Arasına Ekle`;
+            }
+
+            const searchInput = document.getElementById('interSetSearchInput');
+            if (searchInput) searchInput.value = '';
+            const searchRes = document.getElementById('interSetSearchResults');
+            if (searchRes) {
+                searchRes.style.display = 'none';
+                searchRes.innerHTML = '';
+            }
+
+            renderInterSetModalContent();
+            const modal = document.getElementById('interSetModal');
+            if (modal) modal.classList.add('active');
+        }
+
+        function closeInterSetModal() {
+            const modal = document.getElementById('interSetModal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        function renderInterSetModalContent() {
+            const chipsContainer = document.getElementById('interSetQuickChips');
+            const selId = activeInterSetContext.selectedExercise ? activeInterSetContext.selectedExercise.id : '';
+            if (chipsContainer) {
+                chipsContainer.innerHTML = INTER_SET_QUICK_PRESETS.map((p, idx) => {
+                    const isSel = p.id === selId || (activeInterSetContext.selectedExercise && activeInterSetContext.selectedExercise.name === p.name);
+                    return `
+                        <button type="button"
+                                class="interset-quick-chip ${isSel ? 'selected' : ''}"
+                                onclick="selectInterSetQuickPreset(${idx})">
+                            <div style="font-size:12.5px; font-weight:800; color:#0F172A;">${p.icon} ${escapeHTML(p.name)}</div>
+                            <div style="font-size:10.5px; color:#475569; margin-top:2px;">${escapeHTML(p.muscle)} • ${p.defaultVal} ${p.defaultType === 'time' ? 'sn' : 'tk'}</div>
+                        </button>
+                    `;
+                }).join('');
+            }
+
+            const selNameEl = document.getElementById('interSetSelectedName');
+            if (selNameEl && activeInterSetContext.selectedExercise) {
+                selNameEl.textContent = activeInterSetContext.selectedExercise.name;
+            }
+
+            const isTime = activeInterSetContext.metricType === 'time';
+            const btnTime = document.getElementById('btnInterSetTypeTime');
+            const btnReps = document.getElementById('btnInterSetTypeReps');
+            if (btnTime) btnTime.classList.toggle('active', isTime);
+            if (btnReps) btnReps.classList.toggle('active', !isTime);
+
+            const lblEl = document.getElementById('interSetValInputLabel');
+            if (lblEl) lblEl.textContent = isTime ? 'Hedef Süre (Saniye):' : 'Hedef Tekrar Sayısı:';
+
+            const valInput = document.getElementById('interSetCustomValInput');
+            if (valInput) valInput.value = activeInterSetContext.value;
+
+            const quickVals = isTime ? [20, 30, 45, 60, 90] : [10, 15, 20, 25, 30, 50];
+            const quickRow = document.getElementById('interSetQuickValuesRow');
+            if (quickRow) {
+                quickRow.innerHTML = quickVals.map(v => `
+                    <button type="button"
+                            class="interset-metric-pill ${Number(activeInterSetContext.value) === v ? 'active' : ''}"
+                            onclick="setInterSetMetricValue(${v})">
+                        ${v} ${isTime ? 'sn' : 'tk'}
+                    </button>
+                `).join('');
+            }
+        }
+
+        function selectInterSetQuickPreset(presetIdx) {
+            const p = INTER_SET_QUICK_PRESETS[presetIdx];
+            if (!p) return;
+            const dbEx = (typeof EXERCISES_DB !== 'undefined') ? EXERCISES_DB.find(e => e.id === p.id) : null;
+            activeInterSetContext.selectedExercise = {
+                id: p.id,
+                name: dbEx ? dbEx.name : p.name,
+                muscle: dbEx && dbEx.muscle ? dbEx.muscle : p.muscle,
+                category: dbEx && dbEx.category ? dbEx.category : p.category,
+                equipment: dbEx && dbEx.equipment ? dbEx.equipment : p.equipment
+            };
+            activeInterSetContext.metricType = p.defaultType;
+            activeInterSetContext.value = p.defaultVal;
+            renderInterSetModalContent();
+        }
+
+        function filterInterSetPoolSearch() {
+            const input = document.getElementById('interSetSearchInput');
+            const resBox = document.getElementById('interSetSearchResults');
+            if (!input || !resBox) return;
+            const q = input.value.trim().toLocaleLowerCase('tr-TR');
+            if (!q) {
+                resBox.style.display = 'none';
+                resBox.innerHTML = '';
+                return;
+            }
+            const pool = (typeof getActiveExercisePool === 'function')
+                ? getActiveExercisePool()
+                : (typeof EXERCISES_DB !== 'undefined' ? EXERCISES_DB : []);
+            const matches = pool.filter(e => {
+                const hay = `${e.name || ''} ${e.muscle || ''} ${e.category || ''}`.toLocaleLowerCase('tr-TR');
+                return hay.includes(q);
+            }).slice(0, 15);
+
+            resBox.style.display = 'block';
+            if (matches.length === 0) {
+                resBox.innerHTML = `<div style="font-size:11.5px; color:#64748B; padding:6px;">Eşleşen hareket bulunamadı; özel isim olarak "${escapeHTML(input.value.trim())}" ekleyebilirsiniz: <button type="button" class="btn btn-outline" style="padding:3px 8px; font-size:11px; margin-left:6px;" onclick="selectCustomNamedInterSetExercise()">Seç</button></div>`;
+                return;
+            }
+            resBox.innerHTML = matches.map(e => {
+                const safeId = encodeURIComponent(e.id);
+                return `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 8px; border-bottom:1px solid #E2E8F0; cursor:pointer;"
+                         onclick="selectInterSetPoolExercise(decodeURIComponent('${safeId}'))">
+                        <div>
+                            <div style="font-size:12px; font-weight:800; color:#0F172A;">${escapeHTML(e.name)}</div>
+                            <div style="font-size:10.5px; color:#475569;">${escapeHTML(e.muscle || '')}</div>
+                        </div>
+                        <span style="font-size:11px; font-weight:800; color:#0284C7;">Seç ➔</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function selectCustomNamedInterSetExercise() {
+            const input = document.getElementById('interSetSearchInput');
+            const rawName = input ? input.value.trim() : '';
+            if (!rawName) return;
+            activeInterSetContext.selectedExercise = {
+                id: 'custom_interset_' + rawName.toLocaleLowerCase('tr-TR').replace(/[^a-z0-9ğüşıöç]/g, '_'),
+                name: rawName,
+                muscle: 'Kondisyon, Tüm Vücut',
+                category: 'conditioning',
+                equipment: 'bodyweight'
+            };
+            const resBox = document.getElementById('interSetSearchResults');
+            if (resBox) resBox.style.display = 'none';
+            renderInterSetModalContent();
+        }
+
+        function selectInterSetPoolExercise(exId) {
+            const dbEx = (typeof EXERCISES_DB !== 'undefined') ? EXERCISES_DB.find(e => e.id === exId) : null;
+            if (!dbEx) return;
+            const isTime = isExerciseTimeBased(dbEx);
+            activeInterSetContext.selectedExercise = {
+                id: dbEx.id,
+                name: dbEx.name,
+                muscle: dbEx.muscle || 'Kondisyon, Tüm Vücut',
+                category: dbEx.category || 'conditioning',
+                equipment: dbEx.equipment || 'bodyweight'
+            };
+            activeInterSetContext.metricType = isTime ? 'time' : 'reps';
+            activeInterSetContext.value = isTime ? 45 : 15;
+            const resBox = document.getElementById('interSetSearchResults');
+            if (resBox) resBox.style.display = 'none';
+            renderInterSetModalContent();
+        }
+
+        function setInterSetMetricType(type) {
+            activeInterSetContext.metricType = (type === 'reps') ? 'reps' : 'time';
+            activeInterSetContext.value = activeInterSetContext.metricType === 'time' ? 45 : 15;
+            renderInterSetModalContent();
+        }
+
+        function setInterSetMetricValue(val) {
+            const num = parseInt(val, 10);
+            if (!isNaN(num) && num > 0) {
+                activeInterSetContext.value = num;
+                renderInterSetModalContent();
+            }
+        }
+
+        function onInterSetCustomValueInput(val) {
+            const num = parseInt(val, 10);
+            if (!isNaN(num) && num > 0) {
+                activeInterSetContext.value = num;
+            }
+        }
+
+        function saveInterSetExercise(applyToAllGaps) {
+            const { exId, setIdx, selectedExercise, metricType, value } = activeInterSetContext;
+            if (!exId || !selectedExercise) return;
+            const sets = activeWorkoutSetsData[exId] || [];
+            if (sets.length < 2) return;
+
+            const payload = {
+                id: selectedExercise.id,
+                name: selectedExercise.name,
+                muscle: selectedExercise.muscle || 'Kondisyon, Tüm Vücut',
+                category: selectedExercise.category || 'conditioning',
+                equipment: selectedExercise.equipment || 'bodyweight',
+                metricType: metricType === 'reps' ? 'reps' : 'time',
+                value: Math.max(1, parseInt(value, 10) || 30),
+                completed: false
+            };
+
+            if (applyToAllGaps) {
+                for (let i = 0; i < sets.length - 1; i++) {
+                    const prevDone = sets[i].interSet ? !!sets[i].interSet.completed : (i === setIdx);
+                    sets[i].interSet = Object.assign({}, payload, { completed: prevDone });
+                }
+            } else if (sets[setIdx]) {
+                sets[setIdx].interSet = Object.assign({}, payload, { completed: true });
+            }
+
+            closeInterSetModal();
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+            if (typeof showToast === 'function') {
+                showToast(applyToAllGaps
+                    ? `⚡ "${payload.name}" tüm set aralarına eklendi!`
+                    : `⚡ "${payload.name}" Set ${setIdx + 1}-${setIdx + 2} arasına eklendi!`);
+            }
+        }
+
+        function toggleInterSetCheck(exId, setIdx) {
+            const sets = activeWorkoutSetsData[exId] || [];
+            if (!sets[setIdx] || !sets[setIdx].interSet) return;
+            sets[setIdx].interSet.completed = !sets[setIdx].interSet.completed;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+            if (sets[setIdx].interSet.completed && typeof playAlertSound === 'function') {
+                playAlertSound();
+            }
+        }
+
+        function removeInterSetExercise(exId, setIdx) {
+            const sets = activeWorkoutSetsData[exId] || [];
+            if (!sets[setIdx] || !sets[setIdx].interSet) return;
+            delete sets[setIdx].interSet;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+        }
+
 
         // REST TIMER LOGIC & ENHANCEMENTS
         function setTimerSecs(secs) {
@@ -9429,13 +9790,28 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                         totalVolume += setVol;
                         exVol += setVol;
                     }
+                    if (st.interSet && st.interSet.completed) {
+                        const isExtraTime = st.interSet.metricType === 'time';
+                        const extraVal = parseInt(st.interSet.value, 10) || 0;
+                        const extraVol = calculateExerciseSetVolume({ id: st.interSet.id, equipment: st.interSet.equipment || 'bodyweight' }, 0, extraVal);
+                        totalCompletedSets++;
+                        exCompletedSets++;
+                        if (isExtraTime) {
+                            totalIsometricSecs += extraVal;
+                        } else {
+                            totalReps += extraVal;
+                        }
+                        totalVolume += extraVol;
+                        exVol += extraVol;
+                    }
                     return {
                         setNo: st.setNo,
                         weight: w,
                         reps: r,
                         isBodyweight: isBw,
                         isTimeBased: isTime,
-                        completed: st.completed
+                        completed: st.completed,
+                        interSet: st.interSet || null
                     };
                 });
 
@@ -9510,15 +9886,23 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                                         </span>
                                     </div>
                                     <div style="display:flex; flex-wrap:wrap; gap:4px;">
-                                        ${ex.sets.map(st => st.completed ? `
-                                            <span style="background:rgba(34, 197, 94, 0.12); border:1px solid rgba(34, 197, 94, 0.4); color:#15803D; border-radius:4px; padding:2px 6px; font-size:10.5px; font-weight:700;">
-                                                Set ${st.setNo}: <strong>${formatSetWeightDisplay(ex.isBodyweight, st.weight)}</strong> × ${formatSetMetricDisplay(ex.isTimeBased, st.reps)} ✓
-                                            </span>
-                                        ` : `
-                                            <span style="background:rgba(239, 68, 68, 0.08); border:1px dashed rgba(239, 68, 68, 0.3); color:#DC2626; opacity:0.65; border-radius:4px; padding:2px 6px; font-size:10.5px; font-weight:600; text-decoration:line-through;" title="Bitir butonuna basılmadı">
-                                                Set ${st.setNo}: Atlandı
-                                            </span>
-                                        `).join('')}
+                                        ${ex.sets.map(st => {
+                                            const mainSetBadge = st.completed ? `
+                                                <span style="background:rgba(34, 197, 94, 0.12); border:1px solid rgba(34, 197, 94, 0.4); color:#15803D; border-radius:4px; padding:2px 6px; font-size:10.5px; font-weight:700;">
+                                                    Set ${st.setNo}: <strong>${formatSetWeightDisplay(ex.isBodyweight, st.weight)}</strong> × ${formatSetMetricDisplay(ex.isTimeBased, st.reps)} ✓
+                                                </span>
+                                            ` : `
+                                                <span style="background:rgba(239, 68, 68, 0.08); border:1px dashed rgba(239, 68, 68, 0.3); color:#DC2626; opacity:0.65; border-radius:4px; padding:2px 6px; font-size:10.5px; font-weight:600; text-decoration:line-through;" title="Bitir butonuna basılmadı">
+                                                    Set ${st.setNo}: Atlandı
+                                                </span>
+                                            `;
+                                            const interBadge = (st.interSet && st.interSet.completed) ? `
+                                                <span style="background:rgba(2, 132, 199, 0.12); border:1px solid rgba(2, 132, 199, 0.4); color:#0369A1; border-radius:4px; padding:2px 6px; font-size:10.5px; font-weight:800;">
+                                                    ⚡ Set ${st.setNo}-${st.setNo + 1} Arası: ${escapeHTML(st.interSet.name)} × ${st.interSet.value} ${st.interSet.metricType === 'time' ? 'sn' : 'tk'} ✓
+                                                </span>
+                                            ` : '';
+                                            return mainSetBadge + interBadge;
+                                        }).join('')}
                                     </div>
                                 </div>
                             `).join('')}
@@ -9563,6 +9947,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
             let totalCompletedReps = 0;
             let totalIsometricSeconds = 0;
             const allMuscles = [];
+            const interSetAggMap = {};
 
             const detailedExercises = activeWorkoutSession.exercises.map(ex => {
                 const isBw = isExerciseBodyweight(ex);
@@ -9583,6 +9968,46 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                         }
                         totalVolume += setVol;
                     }
+
+                    if (st.interSet && st.interSet.completed) {
+                        const extra = st.interSet;
+                        const isExtraTime = extra.metricType === 'time';
+                        const extraVal = parseInt(extra.value, 10) || 0;
+                        const extraVol = calculateExerciseSetVolume({ id: extra.id, equipment: extra.equipment || 'bodyweight' }, 0, extraVal);
+                        totalCompletedSets++;
+                        if (isExtraTime) {
+                            totalIsometricSeconds += extraVal;
+                        } else {
+                            totalCompletedReps += extraVal;
+                        }
+                        totalVolume += extraVol;
+
+                        const key = extra.id || extra.name;
+                        if (!interSetAggMap[key]) {
+                            interSetAggMap[key] = {
+                                id: extra.id || key,
+                                name: `${extra.name} (Set Arası)`,
+                                equipment: extra.equipment || 'bodyweight',
+                                category: extra.category || 'conditioning',
+                                muscle: extra.muscle || 'Kondisyon, Tüm Vücut',
+                                cue: 'Set arası aktif dinlenme / ilave hareket.',
+                                isBodyweight: (extra.equipment || 'bodyweight') === 'bodyweight',
+                                isTimeBased: isExtraTime,
+                                isInterSetExtra: true,
+                                sets: []
+                            };
+                        }
+                        interSetAggMap[key].sets.push({
+                            setNo: interSetAggMap[key].sets.length + 1,
+                            weight: 0,
+                            reps: extraVal,
+                            isBodyweight: (extra.equipment || 'bodyweight') === 'bodyweight',
+                            isTimeBased: isExtraTime,
+                            completed: true,
+                            volume: Math.round(extraVol)
+                        });
+                    }
+
                     return {
                         setNo: st.setNo,
                         weight: isDone ? w : 0,
@@ -9590,7 +10015,8 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                         isBodyweight: isBw,
                         isTimeBased: isTime,
                         completed: isDone,
-                        volume: isDone ? Math.round(setVol) : 0
+                        volume: isDone ? Math.round(setVol) : 0,
+                        interSet: st.interSet || null
                     };
                 });
 
@@ -9625,6 +10051,35 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                     maxReps: maxReps,
                     exerciseVolume: Math.round(exVolume)
                 };
+            });
+
+            Object.values(interSetAggMap).forEach(extraEx => {
+                if (extraEx.muscle) {
+                    extraEx.muscle.split(',').forEach(m => {
+                        const trimmed = m.trim();
+                        if (trimmed && !allMuscles.includes(trimmed)) {
+                            allMuscles.push(trimmed);
+                        }
+                    });
+                }
+                const maxReps = extraEx.sets.length > 0 ? Math.max(0, ...extraEx.sets.map(st => st.reps)) : 0;
+                const exVolume = extraEx.sets.reduce((sum, st) => sum + st.volume, 0);
+                detailedExercises.push({
+                    id: extraEx.id,
+                    name: extraEx.name,
+                    equipment: extraEx.equipment,
+                    category: extraEx.category,
+                    muscle: extraEx.muscle,
+                    cue: extraEx.cue,
+                    isBodyweight: extraEx.isBodyweight,
+                    isTimeBased: extraEx.isTimeBased,
+                    isInterSetExtra: true,
+                    sets: extraEx.sets,
+                    completedSetsCount: extraEx.sets.length,
+                    maxWeight: 0,
+                    maxReps: maxReps,
+                    exerciseVolume: Math.round(exVolume)
+                });
             });
 
             const newLog = {
@@ -9766,7 +10221,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             bw_chinup: "barfiks chin up chinup",
             bw_plank: "plank karin",
             bw_burpee: "burpee kondisyon",
-            bw_jumping_jack: "jumping jack yildiz sicrama ziplama kardiyo kondisyon isinma"
+            bw_jumping_jack: "jumping jack yildiz sicrama ziplama kardiyo kondisyon isinma",
+            bw_high_knees: "high knees dize cekerek kosu diz cekme kardiyo isinma",
+            bw_jump_rope: "jump rope ip atlama golge ip sicrama kalf kardiyo",
+            bw_butt_kicks: "butt kicks topuk kalcaya kosu hamstring isinma kardiyo",
+            bw_skater_jumps: "skater jumps paten sicramasi yanal sicrama",
+            bw_plank_jacks: "plank jacks plank bacak ac kapa karin kardiyo",
+            bw_squat_thrust: "squat thrust yarim burpee kondisyon",
+            bw_lateral_shuffle: "lateral shuffle yanal kayma hizli adimlama ceviklik"
         };
 
         function matchesExerciseSearch(ex, rawQuery) {
@@ -12758,18 +13220,38 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (!isFirebaseReady || !fbDb) return;
             try {
                 const docRef = fbDb.collection('app_system').doc('users');
-                const doc = await docRef.get();
+                let doc;
+                try {
+                    doc = await docRef.get({ source: 'server' });
+                } catch (srvErr) {
+                    doc = await docRef.get();
+                }
                 const localUsers = getAuthUsers();
 
                 if (doc.exists) {
                     const data = doc.data();
                     if (data && Array.isArray(data.users) && data.users.length > 0) {
+                        const cloudIds = new Set(data.users.map(cu => cu.id));
+                        const cloudUnames = new Set(data.users.map(cu => normalizeAuthString(cu.username)).filter(Boolean));
                         const mergedMap = new Map();
-                        localUsers.forEach(u => mergedMap.set(u.id, u));
+
+                        // Yerelde olup bulutta aynı kullanıcı adıyla çakışmayanları koru
+                        localUsers.forEach(u => {
+                            const normU = normalizeAuthString(u.username);
+                            if (!cloudIds.has(u.id) && normU && cloudUnames.has(normU)) {
+                                return; // Buluttaki resmi hesap mükerrer yerel kaydı ezer
+                            }
+                            mergedMap.set(u.id, u);
+                        });
+
                         data.users.forEach(u => {
                             const localU = mergedMap.get(u.id) || {};
                             const isLocalNewer = (localU.updatedAt || 0) > (u.updatedAt || 0);
                             const merged = isLocalNewer ? { ...u, ...localU } : { ...localU, ...u };
+                            // Bulutta onaylanmış (status !== 'pending') bir hesap varsa yerel pending durumunu ez
+                            if (u.status !== 'pending' && merged.status === 'pending') {
+                                merged.status = u.status || 'approved';
+                            }
                             // Eğer buluttaki objede passwordHash eksikse yerel hash ve salt'ı koru
                             if (!merged.passwordHash && localU.passwordHash) {
                                 merged.passwordHash = localU.passwordHash;
@@ -12873,6 +13355,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     const copy = { ...u };
                     delete copy.password;
                     delete copy.geminiApiKey;
+                    Object.keys(copy).forEach(k => {
+                        if (copy[k] === undefined) delete copy[k];
+                    });
                     return copy;
                 });
                 await fbDb.collection('app_system').doc('users').set({
@@ -16030,7 +16515,6 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const newUser = {
                 id: 'usr_' + Date.now(),
                 username: uname,
-                email: rawEmail || undefined,
                 passwordHash: passHash,
                 salt: salt,
                 role: role,
@@ -16041,8 +16525,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 level: level,
                 gender: gender,
                 weights: { press: '12', squat: '18', row: '16', rdl: '18', swing: '14', lunge: '12' },
-                createdAt: Date.now()
+                createdAt: Date.now(),
+                updatedAt: Date.now()
             };
+            if (rawEmail) newUser.email = rawEmail;
 
             users.push(newUser);
             saveAuthUsers(users);
@@ -16102,9 +16588,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         let lastApprovalMessageCache = '';
 
         function buildApprovalEmailPayload(user) {
-            const appUrl = (window.location.origin && window.location.origin !== 'null')
+            const appUrl = (window.location.origin && window.location.origin !== 'null' && !IS_LOCAL_DEV)
                 ? (window.location.origin + window.location.pathname)
-                : 'https://feritkantarci.github.io/celik-kodu/';
+                : 'https://fitness.kantarci.io/';
             const subject = '✅ Çelik Kodu | Hesabınız Onaylandı - Giriş Yapabilirsiniz';
             const body = [
                 `Merhaba ${user.name},`,
@@ -17178,6 +17664,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             currentAnalyticsSubView = view;
             const subBtns = [
                 { id: 'btnSubAnalyticsMuscle', view: 'muscle' },
+                { id: 'btnSubAnalyticsMobility', view: 'mobility' },
                 { id: 'btnSubAnalyticsScale', view: 'scale' },
                 { id: 'btnSubAnalyticsCombined', view: 'combined' }
             ];
@@ -18075,6 +18562,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             // Highlight subview tab buttons
             const subBtns = [
                 { id: 'btnSubAnalyticsMuscle', view: 'muscle' },
+                { id: 'btnSubAnalyticsMobility', view: 'mobility' },
                 { id: 'btnSubAnalyticsScale', view: 'scale' },
                 { id: 'btnSubAnalyticsCombined', view: 'combined' }
             ];
@@ -18088,6 +18576,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             if (currentAnalyticsSubView === 'muscle') {
                 renderMuscleAnalytics(container);
+            } else if (currentAnalyticsSubView === 'mobility') {
+                renderMobilityAnalytics(container);
             } else if (currentAnalyticsSubView === 'combined') {
                 renderCombinedCoachReport(container);
             } else {
@@ -19493,6 +19983,15 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 weeklySufficiencyHTML = `<div style="padding:14px; background:#FEE2E2; border:1px solid #FCA5A5; border-radius:10px; color:#B91C1C; font-size:12px; margin-bottom:14px;">Kas Haritası yüklenirken bir sorun oluştu: ${escapeHTML(err.message)}</div>`;
             }
 
+            let mobilityBridgeHTML = '';
+            try {
+                if (typeof renderCompactMobilityBridgeCard === 'function') {
+                    mobilityBridgeHTML = renderCompactMobilityBridgeCard();
+                }
+            } catch (err) {
+                console.error("Mobility bridge card error:", err);
+            }
+
             const timeFilterHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:14px; background:#0E131B; padding:10px 14px; border-radius:10px; border:1px solid var(--border);">
                     <div>
@@ -19509,7 +20008,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             `;
 
             if (filteredLogs.length === 0) {
-                container.innerHTML = weeklySufficiencyHTML + timeFilterHTML + `
+                container.innerHTML = weeklySufficiencyHTML + mobilityBridgeHTML + timeFilterHTML + `
                     <div style="background:var(--bg-surface); padding:24px; text-align:center; border:1px solid var(--border); border-radius:10px; color:var(--text-secondary); font-size:13px;">
                         Bu zaman aralığında kayıtlı antrenman seansı bulunamadı. Antrenmanlarınızı kaydettikçe uzun vadeli kümülatif tonaj ve geçmiş yük dağılımı burada listelenir.
                     </div>
@@ -19643,7 +20142,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 </div>
             `;
 
-            container.innerHTML = weeklySufficiencyHTML + timeFilterHTML + academicInfoBanner + `
+            container.innerHTML = weeklySufficiencyHTML + mobilityBridgeHTML + timeFilterHTML + academicInfoBanner + `
                 <!-- KPI STATS -->
                 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-bottom:16px;">
                     <div class="analytics-kpi-card">
@@ -19736,6 +20235,1319 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 ` : ''}
             `;
         }
+
+        // ==================== AKADEMİK MOBİLİTE İNDEKSİ & KİNEMATİK ANALİZ MOTORU (YAKLAŞIM 2) ====================
+        // Bilimsel Referanslar:
+        // 1. Alizadeh et al. (2023 - Sports Medicine Meta-Analysis): Direnç antrenmanında uç-açıklık (Lengthened / End-Range) yüklenmesinin sarcomerogenesis ve ROM etkisi.
+        // 2. Gray Cook & Mike Boyle (Joint-by-Joint Approach): 4 Ana Mobil Eklem Merkezi (Omuz Kapsülü, Torasik Omurga, Kalça Kapsülü, Ayak Bileği Dorsifleksiyonu).
+        // 3. Gary Gray (3D Multi-Planar Kinematics): Sagittal (1B), Frontal (2B) ve Transvers/Rotasyonel (3B) uzaysal hareket düzlemleri.
+        // 4. Klinik Öz-Değerlendirme (FMS / Active ROM Benchmark): 4 Temel Vücut Hareketlilik Testi (Seviye 1-4) ve Neden-Sonuç korelasyonu.
+
+        const WEEKLY_MOBILITY_JOINT_CONFIG = [
+            {
+                id: 'shoulder_cap',
+                name: '🛡️ Omuz Açıklığı',
+                shortName: 'Omuz',
+                optimalMin: 6,
+                optimalMax: 12,
+                title: 'OMUZ AÇIKLIĞI',
+                columns: [
+                    { key: 'overhead_lock', label: 'KOLU BAŞÜSTÜNE TAM KALDIRMA', recId: 'db_overhead_press', recName: 'Dambıl Omuz Presi', keywords: ['omuz pres', 'overhead', 'arnold', 'push press', 'thruster', 'snatch', 'waiter', 'kettlebell press'] },
+                    { key: 'capsular_rot', label: 'OMUZ DÖNDÜRME & KÜREK HAREKETİ', recId: 'kb_halo', recName: 'Kettlebell Halo', keywords: ['halo', 'windmill', 'get-up', 'getup', 'cuban', 'external rotation', 'face pull'] },
+                    { key: 'lat_pec_stretch', label: 'GÖĞÜS & KANAT ESNETME', recId: 'db_pullover', recName: 'Dambıl Pullover', keywords: ['pullover', 'barfiks', 'pull-up', 'pullup', 'chin-up', 'chinup', 'dips', 'incline', 'başüstü triceps'] }
+                ]
+            },
+            {
+                id: 'thoracic_spine',
+                name: '🧬 Üst Sırt & Duruş',
+                shortName: 'Üst Sırt',
+                optimalMin: 4,
+                optimalMax: 10,
+                title: 'ÜST SIRT & DİK DURUŞ',
+                columns: [
+                    { key: 't_rotation', label: 'GÖVDEYİ SAĞA-SOLA DÖNDÜRME', recId: 'kb_windmill', recName: 'Kettlebell Windmill', keywords: ['windmill', 'get-up', 'getup', 'rotational', 'rotasyon', 'twist', 'woodchopper', 'oduncu', 'chop', 'halo'] },
+                    { key: 't_extension', label: 'DİK DURUŞ & GÖĞÜS AÇMA', recId: 'db_goblet_squat', recName: 'Dambıl Goblet Squat', keywords: ['front squat', 'ön squat', 'goblet', 'zercher', 'pullover', 'thruster', 'inchworm', 'hyperextension'] },
+                    { key: 'scap_glide', label: 'KAMBURLUK ÖNLEYİCİ ÇEKİŞ', recId: 'db_saw_row', recName: 'Dambıl Saw Row', keywords: ['saw row', 'göğüs destekli row', 'gorilla', 'renegade', 'face pull', 'yatay barfiks', 'inverted row', 'barbell row'] }
+                ]
+            },
+            {
+                id: 'hip_capsule',
+                name: '⚙️ Kalça & Kasık Açıklığı',
+                shortName: 'Kalça',
+                optimalMin: 8,
+                optimalMax: 14,
+                title: 'KALÇA & KASIK AÇIKLIĞI',
+                columns: [
+                    { key: 'posterior_hinge', label: 'ARKA BACAK & KALÇA ESNETME', recId: 'db_rdl', recName: 'Dambıl RDL', keywords: ['rdl', 'deadlift', 'swing', 'windmill', 'snatch', 'clean', 'good morning'] },
+                    { key: 'deep_flexion', label: 'DERİN ÇÖMELME (TAM SQUAT)', recId: 'db_goblet_squat', recName: 'Dambıl Goblet Squat', keywords: ['goblet', 'back squat', 'front squat', 'ön squat', 'zercher', 'thruster', 'air squat', 'clean squat'] },
+                    { key: 'psoas_split', label: 'ÖN KALÇA / KASIK AÇMA & DENGE', recId: 'db_bulgarian_squat', recName: 'Bulgar Split Squat', keywords: ['bulgar', 'split squat', 'lunge', 'step-up', 'step up', 'tek bacak', 'single leg', 'get-up', 'getup', 'seesaw'] }
+                ]
+            },
+            {
+                id: 'ankle_dorsi',
+                name: '🦶 Ayak Bileği Esnekliği',
+                shortName: 'Ayak Bileği',
+                optimalMin: 4,
+                optimalMax: 10,
+                title: 'AYAK BİLEĞİ ESNEKLİĞİ',
+                columns: [
+                    { key: 'loaded_dorsi', label: 'ÇÖMELİRKEN BİLEK ESNEMESİ', recId: 'db_goblet_squat', recName: 'Dambıl Goblet Squat', keywords: ['goblet', 'front squat', 'ön squat', 'back squat', 'zercher', 'thruster', 'sissy', 'air squat'] },
+                    { key: 'split_step', label: 'ADIM ATMA & HAMLE ESNEKLİĞİ', recId: 'db_walking_lunge', recName: 'Yürüyerek Lunge', keywords: ['lunge', 'bulgar', 'split squat', 'step-up', 'step up', 'seesaw', 'mountain climber'] },
+                    { key: 'single_prop', label: 'TEK AYAK DENGE & YAYLANMA', recId: 'db_single_leg_rdl', recName: 'Tek Bacak RDL', keywords: ['tek bacak rdl', 'single leg', 'calf', 'kalf', 'skater', 'jump', 'ip atlama', 'farmers', 'suitcase'] }
+                ]
+            }
+        ];
+
+        const MOBILITY_PHYSICAL_TESTS_DEF = [
+            {
+                id: 'overhead_wall',
+                title: '1. Omuz & Üst Sırt Açıklığı Testi (Duvar Testi)',
+                jointIds: ['shoulder_cap', 'thoracic_spine'],
+                jointLabel: 'Omuz + Üst Sırt Duruşu',
+                protocol: 'Sırtını, kalçanı ve belini duvara tam yapıştır. Dirsekleri kırmadan kollarını baş üstünde duvara değdirmeye çalış.',
+                recId: 'db_pullover',
+                recName: 'Dambıl Pullover',
+                levels: [
+                    { level: 1, short: 'Seviye 1 (Kilitli)', desc: 'Kollarım duvara değmiyor veya değmesi için belim duvardan tamamen ayrılıyor.' },
+                    { level: 2, short: 'Seviye 2 (Zorlanıyor)', desc: 'Zorlanarak değiyor ancak omuzlarımda gerginlik var ve belim hafif açılıyor.' },
+                    { level: 3, short: 'Seviye 3 (Rahat / İyi)', desc: 'Belim duvara tam yapışıkken başparmaklarım duvara rahatça değiyor.' },
+                    { level: 4, short: 'Seviye 4 (Tam Açık)', desc: 'Hiç zorlanmadan kollarım ve bileklerim duvara tam yapışıyor.' }
+                ]
+            },
+            {
+                id: 'deep_squat',
+                title: '2. Derin Çömelme Testi (Kalça & Bilek)',
+                jointIds: ['hip_capsule', 'ankle_dorsi'],
+                jointLabel: 'Kalça + Ayak Bileği Esnekliği',
+                protocol: 'Ayaklar omuz genişliğinde, ağırlıksız en dip noktaya kadar çömel ve 30 saniye bekle.',
+                recId: 'db_goblet_squat',
+                recName: 'Dambıl Goblet Squat',
+                levels: [
+                    { level: 1, short: 'Seviye 1 (Kilitli)', desc: 'Çömelirken topuklarım yerden kalkıyor veya tam aşağı inemiyorum.' },
+                    { level: 2, short: 'Seviye 2 (Zorlanıyor)', desc: 'Topuklar yerde aşağı iniyorum ama dengede kalmak için gövdem çok öne yatıyor.' },
+                    { level: 3, short: 'Seviye 3 (Rahat / İyi)', desc: 'Topuklar tam yerde ve sırtım dik şekilde derin çömelebiliyorum.' },
+                    { level: 4, short: 'Seviye 4 (Tam Açık)', desc: 'En dip çömelme noktasında 30 saniye hiç yorulmadan dinlenir gibi oturabiliyorum.' }
+                ]
+            },
+            {
+                id: 'toe_touch',
+                title: '3. Arka Bacak Esnekliği Testi (Öne Eğilme)',
+                jointIds: ['hip_capsule'],
+                jointLabel: 'Arka Bacak & Bel Esnekliği',
+                protocol: 'Ayaklar yan yana, dizleri hiç bükmeden öne doğru eğilerek ellerini yere uzat.',
+                recId: 'db_rdl',
+                recName: 'Dambıl RDL',
+                levels: [
+                    { level: 1, short: 'Seviye 1 (Kilitli)', desc: 'Parmak uçlarım diz altı / kaval kemiği ortasında kalıyor, arka bacak çok gergin.' },
+                    { level: 2, short: 'Seviye 2 (Zorlanıyor)', desc: 'Parmak uçlarım ayak bileğime veya ayakkabı üstüne kadar iniyor.' },
+                    { level: 3, short: 'Seviye 3 (Rahat / İyi)', desc: 'Dizlerim dümdüzken parmak uçlarım yere rahatça değiyor.' },
+                    { level: 4, short: 'Seviye 4 (Tam Açık)', desc: 'Dizlerim bükülmeden yumruklarım veya avuç içlerim yere tam değiyor.' }
+                ]
+            },
+            {
+                id: 'hip_90_90',
+                title: '4. Kalça & Bel Dönüş Testi (Yerde Oturuş)',
+                jointIds: ['hip_capsule', 'thoracic_spine'],
+                jointLabel: 'Kalça + Gövde Dönüş Rahatlığı',
+                protocol: 'Yerde her iki diz 90° bükülü otur. Ellerini yere koymadan bacaklarını diğer yöne çevir.',
+                recId: 'kb_windmill',
+                recName: 'Kettlebell Windmill',
+                levels: [
+                    { level: 1, short: 'Seviye 1 (Kilitli)', desc: 'Bu pozisyonda otururken ellerimle arkadan destek almadan dik duramıyorum.' },
+                    { level: 2, short: 'Seviye 2 (Zorlanıyor)', desc: 'Dik oturabiliyorum ama bacakları diğer tarafa çevirirken ellerimi yere koymam şart.' },
+                    { level: 3, short: 'Seviye 3 (Rahat / İyi)', desc: 'Ellerimi yere değdirmeden bacaklarımı sağdan sola kontrollü çevirebiliyorum.' },
+                    { level: 4, short: 'Seviye 4 (Tam Açık)', desc: 'Gövdem dimdikken el desteği olmadan iki yöne de çok rahat geçiş yapabiliyorum.' }
+                ]
+            }
+        ];
+
+        let currentSelectedMobilityJoint = 'shoulder_cap';
+        let currentMobilitySource = 'week_projected';
+        let currentMobilityWeekOffset = 0;
+
+        function resolveExerciseMobilitySpec(name = '', rawMuscle = '', category = '') {
+            const cleanName = String(name).trim().toLowerCase();
+            const text = `${cleanName} ${String(rawMuscle).toLowerCase()} ${String(category).toLowerCase()}`;
+
+            // 1. SAF İZOLE / TEK EKLEM HAREKETLER (Alizadeh 2023: Çoklu eklem kapsül mobilitesine 0.0 Set verir)
+            if (
+                text.includes('biceps curl') ||
+                text.includes('barbell curl') ||
+                text.includes('hammer curl') ||
+                text.includes('incline dambıl curl') ||
+                text.includes('incline curl') ||
+                text.includes('kablo biceps') ||
+                text.includes('triceps pushdown') ||
+                text.includes('pushdown') ||
+                text.includes('skullcrusher') ||
+                text.includes('lateral raise') ||
+                text.includes('leg extension') ||
+                text.includes('leg curl') ||
+                text.includes('pec deck') ||
+                text.includes('crossover') ||
+                text.includes('cable fly') ||
+                text.includes('shrug') ||
+                text.includes('plank') ||
+                text.includes('hollow body')
+            ) {
+                return {
+                    isIsolation: true,
+                    plane: 'sagittal',
+                    joints: {}
+                };
+            }
+
+            // İSTİSNA İZOLELER (Uç Açıklıkta Tek Eklem Esnetenler)
+            if (text.includes('başüstü triceps') || text.includes('overhead triceps')) {
+                return {
+                    isIsolation: false,
+                    plane: 'sagittal',
+                    joints: { shoulder_cap: 0.45 },
+                    slots: { shoulder_cap: 'lat_pec_stretch' }
+                };
+            }
+            if (text.includes('calf') || text.includes('kalf')) {
+                return {
+                    isIsolation: false,
+                    plane: 'sagittal',
+                    joints: { ankle_dorsi: 0.45 },
+                    slots: { ankle_dorsi: 'single_prop' }
+                };
+            }
+            if (text.includes('sissy squat')) {
+                return {
+                    isIsolation: false,
+                    plane: 'sagittal',
+                    joints: { ankle_dorsi: 0.85, hip_capsule: 0.35 },
+                    slots: { ankle_dorsi: 'loaded_dorsi', hip_capsule: 'psoas_split' }
+                };
+            }
+
+            // 2. 3 BOYUTLU (TRANSVERS / ROTASYONEL) & ELİT MOBİLİTE AKIŞLARI
+            if (text.includes('turkish get-up') || text.includes('getup') || text.includes('get-up')) {
+                return {
+                    isIsolation: false,
+                    plane: 'transverse',
+                    joints: { shoulder_cap: 1.0, thoracic_spine: 1.0, hip_capsule: 1.0, ankle_dorsi: 0.5 },
+                    slots: { shoulder_cap: 'capsular_rot', thoracic_spine: 't_rotation', hip_capsule: 'psoas_split', ankle_dorsi: 'split_step' }
+                };
+            }
+            if (text.includes('windmill')) {
+                return {
+                    isIsolation: false,
+                    plane: 'transverse',
+                    joints: { shoulder_cap: 1.0, thoracic_spine: 1.0, hip_capsule: 1.0 },
+                    slots: { shoulder_cap: 'capsular_rot', thoracic_spine: 't_rotation', hip_capsule: 'posterior_hinge' }
+                };
+            }
+            if (text.includes('pullover to halo') || (text.includes('pullover') && text.includes('halo'))) {
+                return {
+                    isIsolation: false,
+                    plane: 'transverse',
+                    joints: { shoulder_cap: 1.0, thoracic_spine: 0.9 },
+                    slots: { shoulder_cap: 'lat_pec_stretch', thoracic_spine: 't_rotation' }
+                };
+            }
+            if (text.includes('halo')) {
+                return {
+                    isIsolation: false,
+                    plane: 'transverse',
+                    joints: { shoulder_cap: 1.0, thoracic_spine: 0.7 },
+                    slots: { shoulder_cap: 'capsular_rot', thoracic_spine: 't_rotation' }
+                };
+            }
+            if (text.includes('rotational lunge') || text.includes('lunge + gövde rotasyonu') || text.includes('lunge with twist') || (text.includes('lunge') && text.includes('rotasyon'))) {
+                return {
+                    isIsolation: false,
+                    plane: 'transverse',
+                    joints: { thoracic_spine: 1.0, hip_capsule: 1.0, ankle_dorsi: 0.8 },
+                    slots: { thoracic_spine: 't_rotation', hip_capsule: 'psoas_split', ankle_dorsi: 'split_step' }
+                };
+            }
+            if (text.includes('rotational gorilla') || (text.includes('gorilla') && text.includes('rotasyon'))) {
+                return {
+                    isIsolation: false,
+                    plane: 'transverse',
+                    joints: { thoracic_spine: 1.0, hip_capsule: 0.7, shoulder_cap: 0.4 },
+                    slots: { thoracic_spine: 't_rotation', hip_capsule: 'posterior_hinge', shoulder_cap: 'capsular_rot' }
+                };
+            }
+            if (text.includes('cuban') || text.includes('external rotation')) {
+                return {
+                    isIsolation: false,
+                    plane: 'transverse',
+                    joints: { shoulder_cap: 1.0, thoracic_spine: 0.6 },
+                    slots: { shoulder_cap: 'capsular_rot', thoracic_spine: 't_rotation' }
+                };
+            }
+            if (text.includes('woodchopper') || text.includes('oduncu') || text.includes('plate chop')) {
+                return {
+                    isIsolation: false,
+                    plane: 'transverse',
+                    joints: { thoracic_spine: 0.9, hip_capsule: 0.5, shoulder_cap: 0.4 },
+                    slots: { thoracic_spine: 't_rotation', hip_capsule: 'psoas_split', shoulder_cap: 'overhead_lock' }
+                };
+            }
+            if (text.includes('russian twist')) {
+                return {
+                    isIsolation: false,
+                    plane: 'transverse',
+                    joints: { thoracic_spine: 0.6 },
+                    slots: { thoracic_spine: 't_rotation' }
+                };
+            }
+            if (text.includes('renegade')) {
+                return {
+                    isIsolation: false,
+                    plane: 'transverse',
+                    joints: { thoracic_spine: 0.6, shoulder_cap: 0.4 },
+                    slots: { thoracic_spine: 'scap_glide', shoulder_cap: 'capsular_rot' }
+                };
+            }
+
+            // 3. 2 BOYUTLU (FRONTAL / ASİMETRİK PELVİK & TEK TARAFLI DENGE) HAREKETLER
+            if (text.includes('bulgar') || text.includes('split squat')) {
+                return {
+                    isIsolation: false,
+                    plane: 'frontal',
+                    joints: { hip_capsule: 1.0, ankle_dorsi: 0.85 },
+                    slots: { hip_capsule: 'psoas_split', ankle_dorsi: 'split_step' }
+                };
+            }
+            if (text.includes('tek bacak rdl') || text.includes('single leg rdl')) {
+                return {
+                    isIsolation: false,
+                    plane: 'frontal',
+                    joints: { hip_capsule: 1.0, ankle_dorsi: 0.75 },
+                    slots: { hip_capsule: 'posterior_hinge', ankle_dorsi: 'single_prop' }
+                };
+            }
+            if (text.includes('lunge') || text.includes('step-up') || text.includes('step up')) {
+                const hasPress = text.includes('press') || text.includes('pres');
+                return {
+                    isIsolation: false,
+                    plane: 'frontal',
+                    joints: {
+                        hip_capsule: 0.95,
+                        ankle_dorsi: 0.80,
+                        ...(hasPress ? { shoulder_cap: 0.85 } : {})
+                    },
+                    slots: {
+                        hip_capsule: 'psoas_split',
+                        ankle_dorsi: 'split_step',
+                        ...(hasPress ? { shoulder_cap: 'overhead_lock' } : {})
+                    }
+                };
+            }
+            if (text.includes('suitcase') || text.includes('waiter') || text.includes('garson') || text.includes('cross-body') || text.includes('çapraz taşıma')) {
+                const isOverhead = text.includes('waiter') || text.includes('garson') || text.includes('cross');
+                return {
+                    isIsolation: false,
+                    plane: 'frontal',
+                    joints: {
+                        ...(isOverhead ? { shoulder_cap: 0.85, thoracic_spine: 0.5 } : { thoracic_spine: 0.4 }),
+                        ankle_dorsi: 0.35
+                    },
+                    slots: {
+                        shoulder_cap: 'overhead_lock',
+                        thoracic_spine: 't_extension',
+                        ankle_dorsi: 'single_prop'
+                    }
+                };
+            }
+            if (text.includes('skater') || text.includes('lateral shuffle')) {
+                return {
+                    isIsolation: false,
+                    plane: 'frontal',
+                    joints: { hip_capsule: 0.6, ankle_dorsi: 0.7 },
+                    slots: { hip_capsule: 'psoas_split', ankle_dorsi: 'single_prop' }
+                };
+            }
+
+            // 4. TAM AÇIKLIKLI (FULL ROM / LENGTHENED) BİLEŞİK HAREKETLER (SAGİTTAL 1B)
+            if (text.includes('pullover')) {
+                return {
+                    isIsolation: false,
+                    plane: 'sagittal',
+                    joints: { shoulder_cap: 1.0, thoracic_spine: 0.75 },
+                    slots: { shoulder_cap: 'lat_pec_stretch', thoracic_spine: 't_extension' }
+                };
+            }
+            if (text.includes('thruster') || text.includes('clean_squat_press') || (text.includes('squat') && text.includes('press') && !text.includes('leg press'))) {
+                return {
+                    isIsolation: false,
+                    plane: 'sagittal',
+                    joints: { shoulder_cap: 0.95, thoracic_spine: 0.7, hip_capsule: 1.0, ankle_dorsi: 0.9 },
+                    slots: { shoulder_cap: 'overhead_lock', thoracic_spine: 't_extension', hip_capsule: 'deep_flexion', ankle_dorsi: 'loaded_dorsi' }
+                };
+            }
+            if (text.includes('snatch')) {
+                return {
+                    isIsolation: false,
+                    plane: 'sagittal',
+                    joints: { shoulder_cap: 1.0, thoracic_spine: 0.6, hip_capsule: 0.85 },
+                    slots: { shoulder_cap: 'overhead_lock', thoracic_spine: 't_extension', hip_capsule: 'posterior_hinge' }
+                };
+            }
+            if (text.includes('goblet squat') || text.includes('front squat') || text.includes('ön squat') || text.includes('zercher')) {
+                return {
+                    isIsolation: false,
+                    plane: 'sagittal',
+                    joints: { hip_capsule: 1.0, ankle_dorsi: 1.0, thoracic_spine: 0.65 },
+                    slots: { hip_capsule: 'deep_flexion', ankle_dorsi: 'loaded_dorsi', thoracic_spine: 't_extension' }
+                };
+            }
+            if (text.includes('back squat') || text.includes('air squat') || text.includes('jump squat')) {
+                return {
+                    isIsolation: false,
+                    plane: 'sagittal',
+                    joints: { hip_capsule: 0.95, ankle_dorsi: 0.85, shoulder_cap: 0.3 },
+                    slots: { hip_capsule: 'deep_flexion', ankle_dorsi: 'loaded_dorsi', shoulder_cap: 'capsular_rot' }
+                };
+            }
+            if (text.includes('leg press')) {
+                return {
+                    isIsolation: false,
+                    plane: 'sagittal',
+                    joints: { hip_capsule: 0.55, ankle_dorsi: 0.40 },
+                    slots: { hip_capsule: 'deep_flexion', ankle_dorsi: 'loaded_dorsi' }
+                };
+            }
+            if (text.includes('rdl') || text.includes('romanian')) {
+                return {
+                    isIsolation: false,
+                    plane: 'sagittal',
+                    joints: { hip_capsule: 1.0, thoracic_spine: 0.35 },
+                    slots: { hip_capsule: 'posterior_hinge', thoracic_spine: 't_extension' }
+                };
+            }
+            if (text.includes('deadlift') || text.includes('swing') || text.includes('clean')) {
+                return {
+                    isIsolation: false,
+                    plane: 'sagittal',
+                    joints: { hip_capsule: 0.85, thoracic_spine: 0.35 },
+                    slots: { hip_capsule: 'posterior_hinge', thoracic_spine: 't_extension' }
+                };
+            }
+            if (text.includes('hip thrust') || text.includes('glute bridge') || text.includes('bridge')) {
+                return {
+                    isIsolation: false,
+                    plane: 'sagittal',
+                    joints: { hip_capsule: 0.65 },
+                    slots: { hip_capsule: 'psoas_split' }
+                };
+            }
+            if (text.includes('omuz pres') || text.includes('overhead press') || text.includes('arnold') || text.includes('kettlebell press') || text.includes('push press')) {
+                return {
+                    isIsolation: false,
+                    plane: 'sagittal',
+                    joints: { shoulder_cap: 1.0, thoracic_spine: 0.45 },
+                    slots: { shoulder_cap: 'overhead_lock', thoracic_spine: 't_extension' }
+                };
+            }
+            if (text.includes('barfiks') || text.includes('pull-up') || text.includes('pullup') || text.includes('chin-up') || text.includes('chinup') || text.includes('lat pulldown')) {
+                const isFreeHang = !text.includes('pulldown');
+                return {
+                    isIsolation: false,
+                    plane: 'sagittal',
+                    joints: { shoulder_cap: isFreeHang ? 0.95 : 0.70, thoracic_spine: 0.45 },
+                    slots: { shoulder_cap: 'lat_pec_stretch', thoracic_spine: 'scap_glide' }
+                };
+            }
+            if (text.includes('face pull')) {
+                return {
+                    isIsolation: false,
+                    plane: 'sagittal',
+                    joints: { shoulder_cap: 0.85, thoracic_spine: 0.65 },
+                    slots: { shoulder_cap: 'capsular_rot', thoracic_spine: 'scap_glide' }
+                };
+            }
+            if (text.includes('saw row') || text.includes('gorilla row')) {
+                return {
+                    isIsolation: false,
+                    plane: 'frontal',
+                    joints: { thoracic_spine: 0.75, shoulder_cap: 0.45, hip_capsule: text.includes('gorilla') ? 0.5 : 0 },
+                    slots: { thoracic_spine: 'scap_glide', shoulder_cap: 'lat_pec_stretch', hip_capsule: 'posterior_hinge' }
+                };
+            }
+            if (text.includes('row') || text.includes('yatay barfiks')) {
+                return {
+                    isIsolation: false,
+                    plane: 'sagittal',
+                    joints: { thoracic_spine: 0.65, shoulder_cap: 0.35 },
+                    slots: { thoracic_spine: 'scap_glide', shoulder_cap: 'capsular_rot' }
+                };
+            }
+            if (text.includes('dips')) {
+                return {
+                    isIsolation: false,
+                    plane: 'sagittal',
+                    joints: { shoulder_cap: 0.85 },
+                    slots: { shoulder_cap: 'lat_pec_stretch' }
+                };
+            }
+            if (text.includes('incline') && text.includes('press')) {
+                return {
+                    isIsolation: false,
+                    plane: 'sagittal',
+                    joints: { shoulder_cap: 0.55 },
+                    slots: { shoulder_cap: 'lat_pec_stretch' }
+                };
+            }
+            if (text.includes('bench') || text.includes('floor press') || text.includes('şınav') || text.includes('push-up') || text.includes('pushup')) {
+                const isInchworm = text.includes('inchworm');
+                return {
+                    isIsolation: false,
+                    plane: 'sagittal',
+                    joints: isInchworm
+                        ? { shoulder_cap: 0.7, thoracic_spine: 0.6, hip_capsule: 0.85 }
+                        : { shoulder_cap: 0.35 },
+                    slots: { shoulder_cap: 'lat_pec_stretch', thoracic_spine: 't_extension', hip_capsule: 'posterior_hinge' }
+                };
+            }
+            if (text.includes('farmer') || text.includes('carry')) {
+                return {
+                    isIsolation: false,
+                    plane: 'sagittal',
+                    joints: { thoracic_spine: 0.4, ankle_dorsi: 0.35 },
+                    slots: { thoracic_spine: 'scap_glide', ankle_dorsi: 'single_prop' }
+                };
+            }
+
+            // Varsayılan genel bileşik hareket
+            return {
+                isIsolation: false,
+                plane: 'sagittal',
+                joints: { hip_capsule: 0.4, shoulder_cap: 0.3 },
+                slots: { hip_capsule: 'deep_flexion', shoulder_cap: 'overhead_lock' }
+            };
+        }
+
+        function calculateWeeklyMobilitySufficiency(sourceMode = 'week_projected', weekOffset = 0) {
+            const bounds = getWeeklyMuscleBounds(weekOffset);
+            const allLogs = (typeof getWorkoutLogs === 'function') ? getWorkoutLogs() : [];
+            const weekLogs = allLogs.filter(l => {
+                const dt = new Date(l.date);
+                return dt >= bounds.monday && dt <= bounds.sunday;
+            });
+
+            const loggedDays = new Set(weekLogs.map(l => new Date(l.date).getDay()));
+            const todayDay = (new Date()).getDay();
+            const getIsoDay = (d) => d === 0 ? 7 : d;
+            const todayIso = getIsoDay(todayDay);
+            const schedule = (typeof getWeeklySchedule === 'function') ? getWeeklySchedule() : {};
+
+            const jointMap = {};
+            WEEKLY_MOBILITY_JOINT_CONFIG.forEach(j => {
+                const slotMap = {};
+                j.columns.forEach(col => {
+                    slotMap[col.key] = {
+                        col,
+                        earnedSets: 0,
+                        plannedCount: 0,
+                        doneExs: new Set(),
+                        plannedExs: new Set()
+                    };
+                });
+                jointMap[j.id] = {
+                    ...j,
+                    doneSets: 0,
+                    planSets: 0,
+                    scheduledTotalSets: 0,
+                    doneExercises: new Set(),
+                    plannedExercises: new Map(),
+                    contributions: [],
+                    slotMap
+                };
+            });
+
+            const planes = {
+                sagittal: { label: '⬆️ İleri-Geri & Yukarı-Aşağı (Klasik Hareketler)', sets: 0, exs: new Set(), color: '#38bdf8', targetPct: 65, recId: 'db_goblet_squat', recName: 'Dambıl Goblet Squat' },
+                frontal: { label: '↔️ Tek Bacak / Tek Kol Denge & Yan Hareketler', sets: 0, exs: new Set(), color: '#10b981', targetPct: 20, recId: 'db_bulgarian_squat', recName: 'Bulgar Split Squat' },
+                transverse: { label: '🔄 Gövde & Omuz Döndürme (Rotasyon)', sets: 0, exs: new Set(), color: '#f59e0b', targetPct: 15, recId: 'kb_windmill', recName: 'Kettlebell Windmill' }
+            };
+
+            let functionalSets = 0;
+            let isolationSets = 0;
+
+            const resolveSlotForJoint = (jointId, exName, explicitSlot) => {
+                const jDef = jointMap[jointId];
+                if (!jDef) return null;
+                if (explicitSlot && jDef.slotMap[explicitSlot]) return explicitSlot;
+                const lower = String(exName || '').toLowerCase();
+                for (const col of jDef.columns) {
+                    for (const kw of col.keywords) {
+                        if (lower.includes(kw.toLowerCase())) return col.key;
+                    }
+                }
+                return jDef.columns[0].key;
+            };
+
+            // 1. Tamamlanan Antrenman Loglarını İşle
+            weekLogs.forEach(log => {
+                if (!log.exercises || !Array.isArray(log.exercises)) return;
+                const dateStr = log.dateFormatted || formatDateTr(log.date);
+                const sessionTitle = log.title || log.workoutName || 'Antrenman Seansı';
+
+                log.exercises.forEach(ex => {
+                    const cSets = Number(ex.completedSetsCount) || (Array.isArray(ex.sets) ? ex.sets.filter(s => s.completed || parseInt(s.reps, 10) > 0).length : 0) || Number(ex.targetSets) || Number(ex.sets) || 0;
+                    if (cSets <= 0) return;
+
+                    const mSpec = resolveExerciseMobilitySpec(ex.name, ex.muscle, ex.category);
+                    if (mSpec.isIsolation) {
+                        isolationSets += cSets;
+                    } else {
+                        functionalSets += cSets;
+                    }
+
+                    if (sourceMode !== 'schedule_full') {
+                        const pKey = mSpec.plane || 'sagittal';
+                        if (planes[pKey]) {
+                            planes[pKey].sets += cSets;
+                            planes[pKey].exs.add(ex.name);
+                        }
+                    }
+
+                    Object.entries(mSpec.joints || {}).forEach(([jId, factor]) => {
+                        if (!jointMap[jId] || factor <= 0) return;
+                        const earned = cSets * factor;
+                        jointMap[jId].doneSets += earned;
+                        jointMap[jId].doneExercises.add(ex.name);
+
+                        const sKey = resolveSlotForJoint(jId, ex.name, mSpec.slots ? mSpec.slots[jId] : null);
+                        if (sKey && jointMap[jId].slotMap[sKey]) {
+                            jointMap[jId].slotMap[sKey].earnedSets += earned;
+                            jointMap[jId].slotMap[sKey].doneExs.add(ex.name);
+                        }
+
+                        jointMap[jId].contributions.push({
+                            date: dateStr,
+                            sessionTitle,
+                            exercise: ex.name,
+                            rawSets: cSets,
+                            factor,
+                            earnedSets: Math.round(earned * 10) / 10,
+                            plane: mSpec.plane === 'transverse' ? 'Döndürme (Rotasyon)' : (mSpec.plane === 'frontal' ? 'Tek Taraflı / Denge' : 'Klasik Dikey/Yatay')
+                        });
+                    });
+                });
+            });
+
+            // 2. Planlanan Haftalık Programı İşle
+            const dayKeys = [1, 2, 3, 4, 5, 6, 0];
+            dayKeys.forEach(dKey => {
+                const plan = schedule[dKey];
+                if (!plan || plan.rest) return;
+
+                const planIso = getIsoDay(dKey);
+                const isCompleted = loggedDays.has(dKey);
+                const isRemaining = bounds.isCurrentWeek ? (!isCompleted && planIso >= todayIso) : (!bounds.isCurrentWeek && weekOffset > 0);
+
+                const details = (typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(plan) : null;
+                if (!details || !Array.isArray(details.exercises)) return;
+
+                details.exercises.forEach(ex => {
+                    const pSets = Number(ex.targetSets || ex.sets) || (details.scheme && Number(details.scheme.sets)) || 3;
+                    const mSpec = resolveExerciseMobilitySpec(ex.name, ex.muscle, ex.category);
+
+                    if ((isRemaining && sourceMode === 'week_projected') || sourceMode === 'schedule_full') {
+                        const pKey = mSpec.plane || 'sagittal';
+                        if (planes[pKey]) {
+                            planes[pKey].sets += pSets;
+                            planes[pKey].exs.add(ex.name);
+                        }
+                        if (sourceMode === 'schedule_full') {
+                            if (mSpec.isIsolation) isolationSets += pSets;
+                            else functionalSets += pSets;
+                        }
+                    }
+
+                    Object.entries(mSpec.joints || {}).forEach(([jId, factor]) => {
+                        if (!jointMap[jId] || factor <= 0) return;
+                        const plannedAdd = pSets * factor;
+                        jointMap[jId].scheduledTotalSets += plannedAdd;
+
+                        if (isRemaining || sourceMode === 'schedule_full') {
+                            jointMap[jId].planSets += plannedAdd;
+                            jointMap[jId].plannedExercises.set(`${ex.name}_${dKey}`, {
+                                name: ex.name,
+                                sets: plannedAdd
+                            });
+                            const sKey = resolveSlotForJoint(jId, ex.name, mSpec.slots ? mSpec.slots[jId] : null);
+                            if (sKey && jointMap[jId].slotMap[sKey]) {
+                                jointMap[jId].slotMap[sKey].plannedCount += 1;
+                                jointMap[jId].slotMap[sKey].plannedExs.add(ex.name);
+                            }
+                        }
+                    });
+                });
+            });
+
+            const summary = {
+                optimalCount: 0,
+                insufficientCount: 0,
+                unworkedCount: 0,
+                totalEndRangeSets: 0
+            };
+
+            const joints = WEEKLY_MOBILITY_JOINT_CONFIG.map(cfg => {
+                const data = jointMap[cfg.id];
+                const effectiveDone = Math.round(data.doneSets * 10) / 10;
+                const effectivePlan = Math.round(data.planSets * 10) / 10;
+                const effectiveProjected = Math.round((effectiveDone + effectivePlan) * 10) / 10;
+                const effectiveScheduledTotal = Math.round(data.scheduledTotalSets * 10) / 10;
+
+                let evalVolume = effectiveProjected;
+                if (sourceMode === 'week_done') evalVolume = effectiveDone;
+                if (sourceMode === 'schedule_full') evalVolume = effectiveScheduledTotal;
+
+                summary.totalEndRangeSets += evalVolume;
+
+                let status = 'unworked';
+                let statusLabel = '0 Set — Kilitli Kaldı';
+                if (evalVolume >= cfg.optimalMin) {
+                    status = 'optimal';
+                    statusLabel = `İyi Açıldı (${evalVolume.toFixed(1)} Set)`;
+                    summary.optimalCount++;
+                } else if (evalVolume > 0) {
+                    status = 'insufficient';
+                    statusLabel = `Az Çalıştı (${evalVolume.toFixed(1)} / Hedef ${cfg.optimalMin} Set)`;
+                    summary.insufficientCount++;
+                } else {
+                    summary.unworkedCount++;
+                }
+
+                return {
+                    ...cfg,
+                    effectiveDone: evalVolume,
+                    rawDoneSets: effectiveDone,
+                    rawPlanSets: effectivePlan,
+                    status,
+                    statusLabel,
+                    contributions: data.contributions,
+                    slotMap: data.slotMap
+                };
+            });
+
+            summary.totalEndRangeSets = Math.round(summary.totalEndRangeSets * 10) / 10;
+            const totalPlaneSets = planes.sagittal.sets + planes.frontal.sets + planes.transverse.sets;
+            const totalAllSets = functionalSets + isolationSets;
+            const functionalPct = totalAllSets > 0 ? Math.round((functionalSets / totalAllSets) * 100) : 0;
+
+            return {
+                bounds,
+                sourceMode,
+                weekOffset,
+                totalDoneSessions: weekLogs.length,
+                joints,
+                summary,
+                planes,
+                totalPlaneSets,
+                functionalSets,
+                isolationSets,
+                functionalPct
+            };
+        }
+
+        function calculateMobilityHistoricalEvolution(weeksCount = 6) {
+            const history = [];
+            for (let offset = -(weeksCount - 1); offset <= 0; offset++) {
+                const res = calculateWeeklyMobilitySufficiency('week_done', offset);
+                const multiPlanarSets = res.planes.frontal.sets + res.planes.transverse.sets;
+                const multiPlanarPct = res.totalPlaneSets > 0 ? Math.round((multiPlanarSets / res.totalPlaneSets) * 100) : 0;
+                const shortLabel = res.bounds.label.split(' - ')[0];
+                history.push({
+                    offset,
+                    label: offset === 0 ? 'Bu Hft' : shortLabel,
+                    fullLabel: res.bounds.label,
+                    endRangeSets: res.summary.totalEndRangeSets,
+                    functionalPct: res.functionalPct,
+                    multiPlanarPct,
+                    sessions: res.totalDoneSessions
+                });
+            }
+            return history;
+        }
+
+        // ----- FİZİKSEL ROM TESTLERİ (FMS / KLİNİK ÖZ-DEĞERLENDİRME) STORAGE -----
+        function getMobilityPhysicalTestsData() {
+            const uid = (typeof getActiveUserId === 'function') ? getActiveUserId() : 'default';
+            try {
+                const raw = localStorage.getItem(`celik_kodu_mobility_tests_${uid}`);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && Array.isArray(parsed.history)) return parsed;
+                }
+            } catch (e) {}
+            return { history: [] };
+        }
+
+        function saveMobilityPhysicalTestLevel(testId, levelNum) {
+            const validIds = ['overhead_wall', 'deep_squat', 'toe_touch', 'hip_90_90'];
+            const lvl = parseInt(levelNum, 10);
+            if (!validIds.includes(testId) || isNaN(lvl) || lvl < 1 || lvl > 4) return;
+
+            const uid = (typeof getActiveUserId === 'function') ? getActiveUserId() : 'default';
+            const data = getMobilityPhysicalTestsData();
+            const todayIso = new Date().toISOString().split('T')[0];
+
+            const latestEntry = data.history.length > 0 ? data.history[0] : null;
+            const currentLevels = latestEntry && latestEntry.levels ? { ...latestEntry.levels } : {};
+            currentLevels[testId] = lvl;
+
+            if (latestEntry && latestEntry.date === todayIso) {
+                latestEntry.levels = currentLevels;
+                latestEntry.timestamp = Date.now();
+            } else {
+                data.history.unshift({
+                    date: todayIso,
+                    timestamp: Date.now(),
+                    levels: currentLevels
+                });
+            }
+
+            try {
+                localStorage.setItem(`celik_kodu_mobility_tests_${uid}`, JSON.stringify(data));
+            } catch (e) {}
+
+            renderAnalytics();
+        }
+
+        function selectMobilityJoint(jointId) {
+            currentSelectedMobilityJoint = jointId;
+            renderAnalytics();
+        }
+
+        function setMobilitySource(mode) {
+            currentMobilitySource = mode;
+            renderAnalytics();
+        }
+
+        function setMobilityWeekOffset(offset) {
+            currentMobilityWeekOffset = offset;
+            renderAnalytics();
+        }
+
+        function toggleMobilityJointLineage(jointId) {
+            const elBox = document.getElementById(`mob_lineage_box_${jointId}`);
+            const elBtn = document.getElementById(`mob_lineage_btn_${jointId}`);
+            if (!elBox) return;
+            const isHidden = elBox.style.display === 'none';
+            elBox.style.display = isHidden ? 'block' : 'none';
+            if (elBtn) {
+                const count = elBox.dataset.count || 0;
+                elBtn.innerHTML = isHidden
+                    ? `<span>Hangi Seans & Hareketten Geldi? (${count} Kayıt)</span><span style="color:#B45309; font-size:11.5px; font-weight:800;">Kapat ▲</span>`
+                    : `<span>Hangi Seans & Hareketten Geldi? (${count} Kayıt)</span><span style="color:#B45309; font-size:11.5px; font-weight:800;">Detay ▼</span>`;
+            }
+        }
+
+        function togglePhysicalTestGuide(testId) {
+            const elBox = document.getElementById(`fms_test_box_${testId}`);
+            const elLabel = document.getElementById(`fms_test_lbl_${testId}`);
+            if (!elBox) return;
+            const isHidden = elBox.style.display === 'none';
+            elBox.style.display = isHidden ? 'block' : 'none';
+            if (elLabel) {
+                elLabel.textContent = isHidden ? 'Gizle ▲' : 'Seviye Seç / Güncelle ▼';
+            }
+        }
+
+        function renderMobilityJointSubregionGrid(j) {
+            const columnsHTML = j.columns.map(col => {
+                const slot = j.slotMap[col.key] || { earnedSets: 0, plannedCount: 0, doneExs: new Set(), plannedExs: new Set() };
+                const isDone = slot.earnedSets > 0;
+                const isPlanned = !isDone && slot.plannedExs.size > 0;
+
+                let statusBadge = '';
+                let contentHTML = '';
+                let cellBg = '#FEF2F2';
+                let cellBorder = '1px solid #FECACA';
+
+                if (isDone) {
+                    cellBg = '#F0FDF4';
+                    cellBorder = '1px solid #86EFAC';
+                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#15803D; background:#DCFCE7; border:1px solid #86EFAC; border-radius:6px; padding:2px 7px;">✅ ${slot.earnedSets.toFixed(1)} Set</span>`;
+                    const exList = Array.from(slot.doneExs).map(escapeHTML).join(', ');
+                    const planList = slot.plannedExs.size > 0 ? `<div style="font-size:11px; color:#B45309; margin-top:3px; font-weight:700;">+ ${Array.from(slot.plannedExs).map(escapeHTML).join(', ')} (Planda)</div>` : '';
+                    contentHTML = `<div style="font-size:11.5px; color:#1E293B; margin-top:5px; line-height:1.35;"><strong>${exList}</strong>${planList}</div>`;
+                } else if (isPlanned) {
+                    cellBg = '#FFFBEB';
+                    cellBorder = '1px solid #FCD34D';
+                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#B45309; background:#FEF3C7; border:1px solid #FCD34D; border-radius:6px; padding:2px 7px;">🟡 Planda (${slot.plannedCount} Hrk)</span>`;
+                    const planList = Array.from(slot.plannedExs).map(escapeHTML).join(', ');
+                    contentHTML = `<div style="font-size:11.5px; color:#92400E; margin-top:5px; line-height:1.35; font-weight:600;">${planList}</div>`;
+                } else {
+                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#B91C1C; background:#FEE2E2; border:1px solid #FCA5A5; border-radius:6px; padding:2px 7px;">⚠️ 0 Set (Boşta!)</span>`;
+                    contentHTML = `
+                        <div style="margin-top:6px;">
+                            <button class="btn btn-outline" style="font-size:11px; padding:6px 8px; border-radius:6px; color:#DC2626; border-color:#FECACA; width:100%; text-align:center; font-weight:800; background:#FFFFFF;" onclick="openQuickAddToDayModal('${col.recId}')" title="Bu eklem yönünü açmak için ${escapeHTML(col.recName)} ekle">
+                                ➕ ${escapeHTML(col.recName)} Ekle
+                            </button>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div style="background:${cellBg}; border:${cellBorder}; border-radius:8px; padding:10px; display:flex; flex-direction:column; justify-content:space-between;">
+                        <div>
+                            <div style="font-size:11.5px; font-weight:800; color:#0F172A; margin-bottom:5px; letter-spacing:0.2px;">${escapeHTML(col.label)}</div>
+                            <div>${statusBadge}</div>
+                        </div>
+                        ${contentHTML}
+                    </div>
+                `;
+            }).join('');
+
+            return `
+                <div style="margin-top:12px; border:1.5px solid #E2E8F0; border-radius:14px; overflow:hidden; background:#FFFFFF;">
+                    <div style="background:#F1F5F9; border-bottom:1.5px solid #E2E8F0; padding:10px 14px; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:11.5px; font-weight:900; letter-spacing:0.5px; color:#0F172A; text-transform:uppercase;">
+                            📐 ${escapeHTML(j.title)} — ANATOMİK ALT BÖLGE DAĞILIMI
+                        </span>
+                        <span style="font-size:11px; color:#64748B; font-weight:700;">
+                            Hangi Yön Açıldı?
+                        </span>
+                    </div>
+                    <div style="padding:10px; display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:8px;">
+                        ${columnsHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCompactMobilityBridgeCard() {
+            const mob = calculateWeeklyMobilitySufficiency(currentWeeklyMuscleSource, currentWeeklyMuscleWeekOffset);
+            const testData = getMobilityPhysicalTestsData();
+            const latestLevels = (testData.history && testData.history.length > 0 && testData.history[0].levels) ? testData.history[0].levels : {};
+            const recordedVals = Object.values(latestLevels).filter(v => Number(v) > 0);
+            const avgPhysicalLvl = recordedVals.length > 0
+                ? (recordedVals.reduce((a, b) => a + Number(b), 0) / recordedVals.length).toFixed(1)
+                : null;
+
+            const multiPlanarPct = mob.totalPlaneSets > 0
+                ? Math.round(((mob.planes.frontal.sets + mob.planes.transverse.sets) / mob.totalPlaneSets) * 100)
+                : 0;
+
+            return `
+                <div class="anatomy-hero-wrapper" style="padding:14px 16px; margin-bottom:16px; align-items:stretch;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+                        <div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <h3 style="font-size:15.5px; font-weight:900; color:#0F172A; margin:0;">🤸 Vücut Hareketliliği & 4 Ana Eklem Durumu</h3>
+                                <span style="font-size:11px; font-weight:800; background:#ECFDF5; color:#15803D; border:1px solid #86EFAC; padding:2px 8px; border-radius:99px;">
+                                    ${mob.summary.totalEndRangeSets.toFixed(1)} Esnetici Set
+                                </span>
+                            </div>
+                            <div style="font-size:11.5px; color:#475569; margin-top:2px;">
+                                %${mob.functionalPct} Eklem Açan Hareket • %${multiPlanarPct} Çok Yönlü / Dönüşlü Hareket
+                                ${avgPhysicalLvl ? ` • Fiziksel Test Ortalaman: <strong>Seviye ${avgPhysicalLvl}/4.0</strong>` : ''}
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-gold" style="font-size:12px; padding:7px 14px; font-weight:800; border-radius:10px;" onclick="switchAnalyticsSubView('mobility')">
+                            Hareketlilik & Vücut Testlerini Aç ➔
+                        </button>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:8px;">
+                        ${mob.joints.map(j => {
+                            const isOpt = j.status === 'optimal';
+                            const isIns = j.status === 'insufficient';
+                            const bg = isOpt ? '#F0FDF4' : (isIns ? '#FFFBEB' : '#FEF2F2');
+                            const brd = isOpt ? '#86EFAC' : (isIns ? '#FCD34D' : '#FECACA');
+                            const clr = isOpt ? '#15803D' : (isIns ? '#B45309' : '#B91C1C');
+                            return `
+                                <div style="background:${bg}; border:1px solid ${brd}; border-radius:10px; padding:8px 10px; cursor:pointer;" onclick="currentSelectedMobilityJoint='${j.id}'; switchAnalyticsSubView('mobility');">
+                                    <div style="font-size:12px; font-weight:900; color:#0F172A;">${escapeHTML(j.name)}</div>
+                                    <div style="font-size:11px; font-weight:800; color:${clr}; margin-top:3px;">
+                                        ${j.effectiveDone.toFixed(1)} / ${j.optimalMin} Set (${isOpt ? 'İyi Açıldı' : (isIns ? 'Az Çalıştı' : 'Kilitli Kaldı')})
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderMobilityAnalytics(container) {
+            const mob = calculateWeeklyMobilitySufficiency(currentMobilitySource, currentMobilityWeekOffset);
+            const { bounds, sourceMode, weekOffset, joints, summary, planes, totalPlaneSets, functionalSets, isolationSets, functionalPct } = mob;
+
+            let activeJoint = joints.find(j => j.id === currentSelectedMobilityJoint);
+            if (!activeJoint) {
+                activeJoint = joints.find(j => j.status === 'unworked')
+                    || joints.find(j => j.status === 'insufficient')
+                    || joints[0];
+                currentSelectedMobilityJoint = activeJoint ? activeJoint.id : 'shoulder_cap';
+            }
+
+            // 1. Odaklanılan Eklem Kartı
+            let focusJointHTML = '';
+            if (activeJoint) {
+                const j = activeJoint;
+                const pct = Math.min(100, Math.round((j.effectiveDone / j.optimalMin) * 100));
+                const barColor = j.status === 'optimal' ? '#10b981' : (j.status === 'insufficient' ? '#f59e0b' : '#ef4444');
+                const badgeStyle = j.status === 'optimal'
+                    ? 'background:#DCFCE7; border:1px solid #86EFAC; color:#15803D;'
+                    : (j.status === 'insufficient' ? 'background:#FEF3C7; border:1px solid #FCD34D; color:#B45309;' : 'background:#FEE2E2; border:1px solid #FCA5A5; color:#B91C1C;');
+
+                const subregionGridHTML = renderMobilityJointSubregionGrid(j);
+                const recCol = j.columns[0];
+
+                focusJointHTML = `
+                    <div class="anatomy-focus-card" style="width:100%; margin-top:12px; padding:14px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                            <h4 style="font-size:16px; font-weight:900; color:#0F172A; margin:0;">${escapeHTML(j.name)}</h4>
+                            <span style="${badgeStyle} font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">
+                                ${escapeHTML(j.statusLabel)}
+                            </span>
+                        </div>
+
+                        <div style="margin-top:10px;">
+                            <div style="display:flex; justify-content:space-between; font-size:11.5px; color:#475569; margin-bottom:4px; font-weight:700;">
+                                <span>Haftalık Açılma Hedefi: %${pct}</span>
+                                <span>${j.effectiveDone.toFixed(1)} / Hedef: ${j.optimalMin}-${j.optimalMax} Set</span>
+                            </div>
+                            <div style="height:7px; background:#E2E8F0; border-radius:4px; overflow:hidden;">
+                                <div style="height:100%; width:${pct}%; background:${barColor}; border-radius:4px; transition:width 0.3s ease;"></div>
+                            </div>
+                        </div>
+
+                        ${subregionGridHTML}
+
+                        ${j.status !== 'optimal' ? `
+                            <div style="margin-top:12px;">
+                                <button class="btn btn-gold" style="width:100%; padding:10px 14px; font-size:12.5px; font-weight:800; border-radius:8px;" onclick="openQuickAddToDayModal('${recCol.recId}')">
+                                    ➕ ${escapeHTML(recCol.recName)} Ekle (${escapeHTML(j.shortName)} Bölgesini Açmak İçin)
+                                </button>
+                            </div>
+                        ` : `
+                            <div style="margin-top:10px; font-size:12px; color:#15803D; font-weight:700;">
+                                ✅ Bu bölge bu hafta yeterince esnetildi ve tam açıklıkta çalıştırıldı.
+                            </div>
+                        `}
+
+                        <!-- Varsayılan Kapalı (Collapsible) Lineage Akordiyonu (GEMINI.md Kural 5) -->
+                        <div style="margin-top:10px; padding-top:8px; border-top:1px solid #E2E8F0;">
+                            <button id="mob_lineage_btn_${j.id}" class="btn btn-outline" style="width:100%; font-size:12px; padding:8px 12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border-color:#CBD5E1; cursor:pointer;" onclick="toggleMobilityJointLineage('${j.id}')">
+                                <span>Hangi Seans & Hareketten Geldi? (${(j.contributions || []).length} Kayıt)</span>
+                                <span style="color:#B45309; font-size:11.5px; font-weight:800;">Detay ▼</span>
+                            </button>
+
+                            <div id="mob_lineage_box_${j.id}" data-count="${(j.contributions || []).length}" style="display:none; margin-top:8px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:10px;">
+                                ${(j.contributions && j.contributions.length > 0) ? `
+                                    <div style="display:flex; flex-direction:column; gap:6px;">
+                                        ${j.contributions.map(c => `
+                                            <div style="display:flex; justify-content:space-between; align-items:center; background:#FFFFFF; border:1px solid #E2E8F0; border-radius:6px; padding:6px 10px; font-size:12px;">
+                                                <div>
+                                                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                                                        <strong style="color:#0F172A;">${escapeHTML(c.exercise)}</strong>
+                                                        <span style="font-size:10.5px; padding:2px 6px; border-radius:4px; font-weight:700; background:#E0F2FE; color:#0369A1;">
+                                                            ${escapeHTML(c.plane)} (${c.factor}x Etki)
+                                                        </span>
+                                                    </div>
+                                                    <div style="font-size:11px; color:#64748B; margin-top:2px;">
+                                                        ${escapeHTML(c.date)} • ${escapeHTML(c.sessionTitle)}
+                                                    </div>
+                                                </div>
+                                                <div style="text-align:right;">
+                                                    <div style="font-size:12.5px; font-weight:900; color:#15803D;">+${c.earnedSets.toFixed(1)} Set</div>
+                                                    <div style="font-size:10.5px; color:#64748B;">${c.rawSets} Set Yapıldı</div>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                ` : `
+                                    <div style="font-size:12px; color:#64748B; text-align:center; padding:8px;">
+                                        Bu hafta bu eklemi açan bir antrenman kaydı bulunmuyor.
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 2. Son 6 Haftalık Mobilite Evrimi (Tarihsel Trend)
+            const evo = calculateMobilityHistoricalEvolution(6);
+            const maxEvoSets = Math.max(20, ...evo.map(e => e.endRangeSets));
+            const activeWeeks = evo.filter(e => e.endRangeSets > 0);
+            const firstActiveWeek = activeWeeks.length > 0 ? activeWeeks[0] : evo[0];
+            const currentWeekEvo = evo[evo.length - 1];
+            const deltaEvoSets = (currentWeekEvo.endRangeSets - firstActiveWeek.endRangeSets).toFixed(1);
+
+            // 3. Son 30 Günlük Eklem Uç-Açıklık Dozu (Neden-Sonuç Korelasyonu İçin)
+            const allLogs = (typeof getWorkoutLogs === 'function') ? getWorkoutLogs() : [];
+            const cutoff30 = new Date(Date.now() - (30 * 24 * 60 * 60 * 1000));
+            const logs30 = allLogs.filter(l => new Date(l.date) >= cutoff30);
+            const jointDose30 = { shoulder_cap: 0, thoracic_spine: 0, hip_capsule: 0, ankle_dorsi: 0 };
+            logs30.forEach(log => {
+                (log.exercises || []).forEach(ex => {
+                    const cSets = Number(ex.completedSetsCount) || (Array.isArray(ex.sets) ? ex.sets.filter(s => s.completed || parseInt(s.reps, 10) > 0).length : 0) || 0;
+                    if (cSets <= 0) return;
+                    const mSpec = resolveExerciseMobilitySpec(ex.name, ex.muscle, ex.category);
+                    Object.entries(mSpec.joints || {}).forEach(([jId, factor]) => {
+                        if (jointDose30[jId] !== undefined) jointDose30[jId] += (cSets * factor);
+                    });
+                });
+            });
+
+            // 4. Klinik Fiziksel Vücut Testleri (FMS / ROM Benchmark)
+            const testData = getMobilityPhysicalTestsData();
+            const latestTestEntry = testData.history.length > 0 ? testData.history[0] : null;
+            const earliestTestEntry = testData.history.length > 0 ? testData.history[testData.history.length - 1] : null;
+
+            const physicalTestsHTML = MOBILITY_PHYSICAL_TESTS_DEF.map(t => {
+                const curLvl = latestTestEntry && latestTestEntry.levels && latestTestEntry.levels[t.id] ? Number(latestTestEntry.levels[t.id]) : null;
+                const initLvl = earliestTestEntry && earliestTestEntry.levels && earliestTestEntry.levels[t.id] ? Number(earliestTestEntry.levels[t.id]) : null;
+                const deltaLvl = (curLvl !== null && initLvl !== null) ? (curLvl - initLvl) : 0;
+
+                const dose30 = t.jointIds.reduce((sum, jId) => sum + (jointDose30[jId] || 0), 0);
+                const curLvlObj = curLvl ? t.levels.find(l => l.level === curLvl) : null;
+
+                let statusBadge = `<span style="font-size:11px; font-weight:800; background:#F1F5F9; color:#475569; border:1px solid #CBD5E1; padding:3px 8px; border-radius:6px;">Henüz Seçilmedi</span>`;
+                if (curLvlObj) {
+                    const clr = curLvl >= 3 ? '#15803D' : (curLvl === 2 ? '#B45309' : '#B91C1C');
+                    const bg = curLvl >= 3 ? '#DCFCE7' : (curLvl === 2 ? '#FEF3C7' : '#FEE2E2');
+                    const brd = curLvl >= 3 ? '#86EFAC' : (curLvl === 2 ? '#FCD34D' : '#FCA5A5');
+                    const deltaStr = deltaLvl > 0 ? ` 📈 (+${deltaLvl} Seviye Açıldı!)` : (initLvl && initLvl !== curLvl ? ` (${initLvl}➔${curLvl})` : '');
+                    statusBadge = `<span style="font-size:11px; font-weight:800; background:${bg}; color:${clr}; border:1px solid ${brd}; padding:3px 8px; border-radius:6px;">${escapeHTML(curLvlObj.short)}${deltaStr}</span>`;
+                }
+
+                return `
+                    <div style="background:#FFFFFF; border:1.5px solid #E2E8F0; border-radius:14px; padding:12px 14px; display:flex; flex-direction:column; justify-content:space-between;">
+                        <div>
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; flex-wrap:wrap;">
+                                <div>
+                                    <h4 style="font-size:13.5px; font-weight:900; color:#0F172A; margin:0;">${escapeHTML(t.title)}</h4>
+                                    <div style="font-size:11px; color:#64748B; font-weight:700; margin-top:2px;">Bölge: ${escapeHTML(t.jointLabel)}</div>
+                                </div>
+                                ${statusBadge}
+                            </div>
+
+                            <!-- Neden-Sonuç Korelasyon Kutusu -->
+                            <div style="margin-top:8px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:7px 10px; font-size:11.5px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+                                <span style="color:#475569;">💪 <strong>Son 30 Günde Bu Bölgeyi Açan Antrenman:</strong> <strong style="color:#0F172A;">${dose30.toFixed(1)} Set</strong></span>
+                                ${initLvl ? `<span style="color:#15803D; font-weight:800;">Başlangıç: Sv.${initLvl} ➔ Şimdi: Sv.${curLvl}</span>` : `<span style="color:#B45309; font-weight:700;">Aşağıdan durumunu seç</span>`}
+                            </div>
+
+                            ${curLvlObj ? `
+                                <div style="font-size:11.5px; color:#334155; margin-top:6px; line-height:1.4;">
+                                    <strong>Şu Anki Durumun:</strong> ${escapeHTML(curLvlObj.desc)}
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <!-- Varsayılan Kapalı Seviye Güncelleme Akordiyonu (GEMINI.md Kural 5) -->
+                        <div style="margin-top:10px; padding-top:8px; border-top:1px solid #E2E8F0;">
+                            <button type="button" class="btn btn-outline" style="width:100%; font-size:11.5px; padding:6px 10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; background:#F8FAFC;" onclick="togglePhysicalTestGuide('${t.id}')">
+                                <span>🎯 Kendini Test Et & Durumunu İşaretle</span>
+                                <span id="fms_test_lbl_${t.id}" style="color:#0369A1; font-weight:800;">Seviye Seç / Güncelle ▼</span>
+                            </button>
+
+                            <div id="fms_test_box_${t.id}" style="display:none; margin-top:8px; background:#F8FAFC; border:1px solid #CBD5E1; border-radius:10px; padding:10px;">
+                                <div style="font-size:11.5px; color:#0F172A; margin-bottom:8px; line-height:1.4; background:#FFFFFF; padding:8px; border-radius:6px; border-left:3px solid #84CC16;">
+                                    <strong>Nasıl Denenir:</strong> ${escapeHTML(t.protocol)}
+                                </div>
+                                <div style="display:flex; flex-direction:column; gap:6px;">
+                                    ${t.levels.map(lvl => {
+                                        const isSelected = curLvl === lvl.level;
+                                        return `
+                                            <button type="button" class="btn btn-outline" style="text-align:left; padding:8px 10px; border-radius:8px; font-size:11.5px; display:flex; justify-content:space-between; align-items:center; gap:8px; ${isSelected ? 'background:#ECFDF5 !important; border-color:#16A34A !important; color:#0F172A !important; font-weight:800;' : 'background:#FFFFFF;'}" onclick="saveMobilityPhysicalTestLevel('${t.id}', ${lvl.level})">
+                                                <div>
+                                                    <strong style="color:${isSelected ? '#15803D' : '#0F172A'};">${escapeHTML(lvl.short)}:</strong>
+                                                    <span style="color:#475569; font-weight:500;"> ${escapeHTML(lvl.desc)}</span>
+                                                </div>
+                                                <span style="flex-shrink:0; font-weight:900; color:${isSelected ? '#15803D' : '#64748B'};">${isSelected ? '✓ Seçili' : 'Seç'}</span>
+                                            </button>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                <!-- BÖLÜM 1: 4 ANA EKLEM HAREKETLİLİK HARİTASI -->
+                <div class="anatomy-hero-wrapper" style="align-items:stretch;">
+                    <div class="anatomy-top-bar">
+                        <div>
+                            <h3 style="font-size:17px; font-weight:900; color:#0F172A; margin:0;">🤸 Haftalık Eklem Hareketliliği & Esneklik Takibi</h3>
+                            <div style="font-size:12px; color:#475569; margin-top:3px;">
+                                Antrenmanda yaptığın hareketlerin 4 ana eklem bölgesini (Omuz, Üst Sırt, Kalça, Ayak Bileği) ne kadar açtığını gösterir
+                            </div>
+                        </div>
+
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <button class="btn btn-outline" style="padding:4px 8px; font-size:12px; border-radius:6px;" onclick="setMobilityWeekOffset(${weekOffset - 1})" title="Önceki Hafta">&lsaquo;</button>
+                            <span style="font-size:12px; font-weight:800; color:#0F172A; padding:4px 10px; background:#F8FAFC; border-radius:6px; border:1px solid #CBD5E1;">
+                                ${escapeHTML(bounds.label)}
+                            </span>
+                            <button class="btn btn-outline" style="padding:4px 8px; font-size:12px; border-radius:6px;" onclick="setMobilityWeekOffset(${weekOffset + 1})" title="Sonraki Hafta">&rsaquo;</button>
+                            ${weekOffset !== 0 ? `<button class="btn btn-outline" style="padding:4px 8px; font-size:11px; border-radius:6px; color:#0369A1; border-color:#0369A1;" onclick="setMobilityWeekOffset(0)">Bu Hafta</button>` : ''}
+                        </div>
+                    </div>
+
+                    <!-- Kaynak Seçici -->
+                    <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
+                        <button class="btn btn-outline" style="font-size:12px; padding:5px 12px; border-radius:14px; ${sourceMode === 'week_projected' ? 'background:#84CC16 !important; color:#0A0E17 !important; border-color:#65A30D !important; font-weight:800;' : ''}" onclick="setMobilitySource('week_projected')">
+                            Bu Hafta: Yapılan + Plan
+                        </button>
+                        <button class="btn btn-outline" style="font-size:12px; padding:5px 12px; border-radius:14px; ${sourceMode === 'week_done' ? 'background:#84CC16 !important; color:#0A0E17 !important; border-color:#65A30D !important; font-weight:800;' : ''}" onclick="setMobilitySource('week_done')">
+                            Sadece Yapılanlar (${mob.totalDoneSessions} Seans)
+                        </button>
+                        <button class="btn btn-outline" style="font-size:12px; padding:5px 12px; border-radius:14px; ${sourceMode === 'schedule_full' ? 'background:#84CC16 !important; color:#0A0E17 !important; border-color:#65A30D !important; font-weight:800;' : ''}" onclick="setMobilitySource('schedule_full')">
+                            Şablon
+                        </button>
+                    </div>
+
+                    <!-- 3 Durum Rozeti -->
+                    <div class="anatomy-legend" style="margin:12px auto;">
+                        <div class="anatomy-legend-item optimal">
+                            <div class="badge-dot"></div>
+                            <span class="badge-val">${summary.optimalCount}</span>
+                            <span class="badge-label">İyi Açılan Bölge</span>
+                        </div>
+                        <div class="anatomy-legend-item insufficient">
+                            <div class="badge-dot"></div>
+                            <span class="badge-val">${summary.insufficientCount}</span>
+                            <span class="badge-label">Az Çalışan</span>
+                        </div>
+                        <div class="anatomy-legend-item unworked">
+                            <div class="badge-dot"></div>
+                            <span class="badge-val">${summary.unworkedCount}</span>
+                            <span class="badge-label">Kilitli Kalan (0 Set)</span>
+                        </div>
+                    </div>
+
+                    <!-- 4 Mobil Eklem Seçici Kartlar -->
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:8px; width:100%;">
+                        ${joints.map(j => {
+                            const isSel = j.id === currentSelectedMobilityJoint;
+                            const dotColor = j.status === 'optimal' ? '#16A34A' : (j.status === 'insufficient' ? '#F59E0B' : '#EF4444');
+                            const cardBg = isSel ? '#F0FDF4' : '#F8FAFC';
+                            const cardBrd = isSel ? '2px solid #65A30D' : '1.5px solid #E2E8F0';
+                            return `
+                                <button type="button" style="background:${cardBg}; border:${cardBrd}; border-radius:12px; padding:10px 12px; text-align:left; cursor:pointer; transition:all 0.2s;" onclick="selectMobilityJoint('${j.id}')">
+                                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                                        <span style="font-size:13px; font-weight:900; color:#0F172A;">${escapeHTML(j.name)}</span>
+                                        <span style="width:9px; height:9px; border-radius:50%; background:${dotColor}; display:inline-block;"></span>
+                                    </div>
+                                    <div style="font-size:11.5px; color:#475569; font-weight:700; margin-top:4px;">
+                                        ${j.effectiveDone.toFixed(1)} / Hedef ${j.optimalMin}-${j.optimalMax} Set
+                                    </div>
+                                </button>
+                            `;
+                        }).join('')}
+                    </div>
+
+                    <!-- Seçili Eklem Detay & 2 Katmanlı Alt Bölge Tablosu -->
+                    ${focusJointHTML}
+                </div>
+
+                <!-- BÖLÜM 2: HAREKET YÖNÜ ÇEŞİTLİLİĞİ & HAREKET KALİTESİ -->
+                <div class="anatomy-hero-wrapper" style="align-items:stretch;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+                        <div>
+                            <h3 style="font-size:16px; font-weight:900; color:#0F172A; margin:0;">🧭 Hareket Yönü Çeşitliliği (Vücudunu Kaç Yönde Çalıştırdın?)</h3>
+                            <div style="font-size:12px; color:#475569; margin-top:2px;">
+                                Sadece ileri-geri hareket yapmak vücudu kilitler; denge ve dönüş hareketleriyle eklemlerini her yönde aç
+                            </div>
+                        </div>
+                        <span style="font-size:11.5px; font-weight:800; background:#F1F5F9; color:#0F172A; padding:4px 10px; border-radius:8px; border:1px solid #CBD5E1;">
+                            ⚡ %${functionalPct} Eklem Açan (${functionalSets} Set) • %${100 - functionalPct} Sabit Tek Kas (${isolationSets} Set)
+                        </span>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:10px;">
+                        ${Object.entries(planes).map(([pKey, pObj]) => {
+                            const pct = totalPlaneSets > 0 ? Math.round((pObj.sets / totalPlaneSets) * 100) : 0;
+                            const isZero = pObj.sets === 0;
+                            const exNames = Array.from(pObj.exs).slice(0, 4).map(escapeHTML).join(', ');
+                            return `
+                                <div style="background:${isZero ? '#FEF2F2' : '#F8FAFC'}; border:1.5px solid ${isZero ? '#FECACA' : '#E2E8F0'}; border-radius:12px; padding:12px; display:flex; flex-direction:column; justify-content:space-between;">
+                                    <div>
+                                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; font-weight:900; color:#0F172A;">
+                                            <span>${escapeHTML(pObj.label)}</span>
+                                            <span style="color:${isZero ? '#DC2626' : pObj.color};">${pObj.sets} Set (%${pct})</span>
+                                        </div>
+                                        <div style="height:6px; background:#E2E8F0; border-radius:3px; overflow:hidden; margin-top:6px;">
+                                            <div style="height:100%; width:${Math.min(100, pct)}%; background:${isZero ? '#EF4444' : pObj.color};"></div>
+                                        </div>
+                                        <div style="font-size:11px; color:#475569; margin-top:6px; line-height:1.35;">
+                                            ${isZero
+                                                ? `<strong style="color:#B91C1C;">⚠️ Bu yönde hiç hareket yapmadın!</strong> Vücudun bu açıda tutuk kalabilir.`
+                                                : `<strong>Yaptığın Hareketler:</strong> ${exNames || 'Tamamlandı'}`
+                                            }
+                                        </div>
+                                    </div>
+                                    ${isZero ? `
+                                        <button type="button" class="btn btn-outline" style="margin-top:8px; width:100%; font-size:11px; padding:6px 8px; border-color:#FECACA; color:#DC2626; font-weight:800; background:#FFFFFF;" onclick="openQuickAddToDayModal('${pObj.recId}')">
+                                            ➕ ${escapeHTML(pObj.recName)} Ekle
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+
+                <!-- BÖLÜM 3: HAFTALIK HAREKETLİLİK GELİŞİMİ (SON 6 HAFTA) -->
+                <div class="anatomy-hero-wrapper" style="align-items:stretch;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+                        <div>
+                            <h3 style="font-size:16px; font-weight:900; color:#0F172A; margin:0;">📈 Haftalık Hareketlilik Gelişimi (Son 6 Hafta)</h3>
+                            <div style="font-size:12px; color:#475569; margin-top:2px;">
+                                Haftadan haftaya eklemlerini açan hareketleri ne kadar artırdığını gösterir
+                            </div>
+                        </div>
+                        <span style="font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:8px; ${parseFloat(deltaEvoSets) >= 0 ? 'background:#DCFCE7; color:#15803D; border:1px solid #86EFAC;' : 'background:#FEF3C7; color:#B45309; border:1px solid #FCD34D;'}">
+                            ${parseFloat(deltaEvoSets) >= 0 ? `+${deltaEvoSets}` : deltaEvoSets} Set Değişim
+                        </span>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:8px; align-items:end; height:120px; padding:12px 10px 4px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px;">
+                        ${evo.map(w => {
+                            const hPct = Math.max(8, Math.round((w.endRangeSets / maxEvoSets) * 100));
+                            const isCurrent = w.offset === 0;
+                            const barBg = w.endRangeSets >= 22 ? '#16A34A' : (w.endRangeSets > 0 ? '#84CC16' : '#CBD5E1');
+                            return `
+                                <div style="display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%;" title="${escapeHTML(w.fullLabel)}: ${w.endRangeSets.toFixed(1)} Esnetici Set (%${w.functionalPct} Hareketli)">
+                                    <div style="font-size:10.5px; font-weight:800; color:#0F172A; margin-bottom:4px;">${w.endRangeSets.toFixed(0)} Set</div>
+                                    <div style="width:100%; max-width:38px; height:${hPct}%; background:${barBg}; border-radius:6px 6px 2px 2px; border:${isCurrent ? '2px solid #0F172A' : 'none'}; transition:height 0.3s;"></div>
+                                    <div style="font-size:10px; font-weight:${isCurrent ? '900' : '700'}; color:${isCurrent ? '#0F172A' : '#64748B'}; margin-top:5px; white-space:nowrap;">${escapeHTML(w.label)}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+
+                <!-- BÖLÜM 4: VÜCUDUM NE KADAR AÇILDI? (4 BASİT FİZİKSEL TEST) -->
+                <div class="anatomy-hero-wrapper" style="align-items:stretch;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+                        <div>
+                            <h3 style="font-size:16.5px; font-weight:900; color:#0F172A; margin:0;">🩺 Vücudum Ne Kadar Açıldı? (4 Basit Kendi Kendine Test)</h3>
+                            <div style="font-size:12px; color:#475569; margin-top:2px;">
+                                Antrenmanda yaptığın esnetici hareketlerin, gerçek hayattaki tutukluğunu ne kadar açtığını buradan takip et
+                            </div>
+                        </div>
+                        ${testData.history.length > 0 ? `
+                            <span style="font-size:11px; font-weight:800; color:#0369A1; background:#E0F2FE; border:1px solid #BAE6FD; padding:4px 10px; border-radius:8px;">
+                                📅 ${testData.history.length} Kayıt (Son: ${escapeHTML(testData.history[0].date)})
+                            </span>
+                        ` : ''}
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:10px;">
+                        ${physicalTestsHTML}
+                    </div>
+                </div>
+            `;
+        }
+
 
         function renderScaleAnalytics(container) {
             const unified = getUnifiedBodyLogs();
@@ -20156,6 +21968,286 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             renderScaleAnalytics(container);
         }
 
+        function toggleCoachReportAccordion(boxId, btnId, labelOpen, labelClose) {
+            const box = document.getElementById(boxId);
+            const btn = document.getElementById(btnId);
+            if (!box) return;
+            const isHidden = box.style.display === 'none';
+            box.style.display = isHidden ? 'grid' : 'none';
+            if (btn) {
+                btn.innerHTML = isHidden ? labelClose : labelOpen;
+            }
+        }
+
+        function analyzeIntraSessionFatigueAndDropOff(workoutLogs) {
+            const logs = Array.isArray(workoutLogs) ? workoutLogs : [];
+            const latestByEx = new Map();
+
+            // workoutLogs is newest-first; capture the most recent multi-set session for each exercise
+            logs.forEach(log => {
+                if (!log || !Array.isArray(log.exercises)) return;
+                log.exercises.forEach(ex => {
+                    if (!ex || ex.isInterSetExtra) return;
+                    const key = ex.id || ex.name;
+                    if (!key || latestByEx.has(key)) return;
+
+                    const completedSets = Array.isArray(ex.sets)
+                        ? ex.sets.filter(st => st && st.completed && (st.reps > 0 || st.weight > 0))
+                        : [];
+                    if (completedSets.length < 2) return;
+
+                    const firstSet = completedSets[0];
+                    const lastSet = completedSets[completedSets.length - 1];
+                    const firstReps = Number(firstSet.reps) || 0;
+                    const lastReps = Number(lastSet.reps) || 0;
+                    const firstWeight = Number(firstSet.weight) || 0;
+                    const lastWeight = Number(lastSet.weight) || 0;
+
+                    const repDelta = lastReps - firstReps;
+                    const weightDelta = Math.round((lastWeight - firstWeight) * 10) / 10;
+                    const repDropPct = firstReps > 0 ? Math.round(((firstReps - lastReps) / firstReps) * 100) : 0;
+
+                    // Calculate overall endurance retention across all sets vs set 1
+                    const avgReps = completedSets.reduce((s, st) => s + (Number(st.reps) || 0), 0) / completedSets.length;
+                    const retentionPct = firstReps > 0 ? Math.min(100, Math.round((avgReps / firstReps) * 100)) : 100;
+
+                    const unitLabel = ex.isTimeBased ? 'sn' : 'tekrar';
+                    const setChainText = completedSets.map((st, idx) => {
+                        const wStr = (!ex.isBodyweight && st.weight > 0) ? `${st.weight}kg × ` : '';
+                        return `${idx + 1}. Set: <strong>${wStr}${st.reps} ${unitLabel}</strong>`;
+                    }).join(' <span style="color:#94A3B8;">➔</span> ');
+
+                    let category = 'normal_fatigue';
+                    let badgeText = '';
+                    let badgeStyle = '';
+                    let reasonText = '';
+                    let adviceText = '';
+                    let sortPriority = 2;
+
+                    if (weightDelta < 0 && repDelta < 0) {
+                        category = 'early_drop';
+                        sortPriority = 1;
+                        badgeText = `⚡ Güç & Kilo Düşüşü (${weightDelta} kg / ${repDelta} ${unitLabel})`;
+                        badgeStyle = 'background:#FEF2F2; color:#DC2626; border:1px solid #FECACA;';
+                        reasonText = `1. sette <strong>${firstWeight} kg ile ${firstReps} ${unitLabel}</strong> başladıktan sonra yorgunluk nedeniyle hem ağırlığı hem tekrar sayısını düşürmek zorunda kalmışsın.`;
+                        adviceText = `Başlangıç kilosunu çok sınırda seçmiş olabilirsin. Gelecek antrenmanda 1. sete doğrudan <strong>${lastWeight} kg</strong> ile başla ve tüm setlerde aynı tekrarı korumaya odaklan.`;
+                    } else if (repDelta <= -3 || repDropPct >= 22) {
+                        category = 'early_drop';
+                        sortPriority = 1;
+                        badgeText = `⚡ Hızlı Güç Düşüşü (${repDelta} ${unitLabel})`;
+                        badgeStyle = 'background:#FEF2F2; color:#DC2626; border:1px solid #FECACA;';
+                        reasonText = `1. sette <strong>${firstReps} ${unitLabel}</strong> çıkarıp son sette <strong>${lastReps} ${unitLabel}</strong> seviyesine düşmüşsün (%${repDropPct} güç kaybı). İlk sette kasını tamamen tüketiyor veya set arası çok kısa dinleniyor olabilirsin.`;
+                        adviceText = `Bir sonraki seansta 1. sette kendini sonuna kadar zorlama (<strong>${Math.max(1, firstReps - 1)} ${unitLabel}</strong> yapıp cepte 1-2 tekrar bırak) ve set arası dinlenmeni <strong>+30 saniye</strong> uzat.`;
+                    } else if (repDelta === -1 || repDelta === -2) {
+                        category = 'normal_fatigue';
+                        sortPriority = 2;
+                        badgeText = `🔋 Doğal Kas Yorgunluğu (${repDelta} ${unitLabel})`;
+                        badgeStyle = 'background:#F0F9FF; color:#0284C7; border:1px solid #BAE6FD;';
+                        reasonText = `1. sette <strong>${firstReps} ${unitLabel}</strong> yapıp sonraki sette <strong>${lastReps} ${unitLabel}</strong> yapman çok doğal ve sağlıklı! Bu durum, seçtiğin ağırlığın kasını gerçekten zorladığını ve tam gelişim bölgesinde çalıştığını gösterir.`;
+                        adviceText = `Kilonu hiç değiştirme! Aynı ağırlıkla devam et; ne zaman ki tüm setlerde düşmeden <strong>${firstReps} ${unitLabel}</strong> çıkarırsan, o gün bir üst kiloya geçme vaktin gelmiştir.`;
+                    } else {
+                        category = 'rock_solid';
+                        sortPriority = 3;
+                        const gainLabel = weightDelta > 0
+                            ? `+${weightDelta} kg Artış`
+                            : (repDelta > 0 ? `+${repDelta} ${unitLabel} Artış` : 'Sıfır Kayıp');
+                        badgeText = `🛡️ Tam Dayanıklılık (${gainLabel})`;
+                        badgeStyle = 'background:#DCFCE7; color:#15803D; border:1px solid #86EFAC;';
+                        reasonText = `İlk setten son sete kadar gücün hiç düşmedi (${firstReps} ➔ ${lastReps} ${unitLabel}). Kasların ve kondisyonun bu ağırlığa tamamen hakim olmuş durumda.`;
+                        adviceText = `Bu seviye artık senin için rahatlamış. Bir sonraki antrenmanda ağırlığı <strong>+1 ile +2.5 kg</strong> artırabilir veya her sete <strong>+1-2 ${unitLabel}</strong> ekleyebilirsin.`;
+                    }
+
+                    latestByEx.set(key, {
+                        key,
+                        name: ex.name,
+                        dateFormatted: log.dateFormatted || log.date || '',
+                        setsCount: completedSets.length,
+                        firstReps,
+                        lastReps,
+                        firstWeight,
+                        lastWeight,
+                        repDelta,
+                        weightDelta,
+                        retentionPct,
+                        unitLabel,
+                        setChainText,
+                        category,
+                        badgeText,
+                        badgeStyle,
+                        reasonText,
+                        adviceText,
+                        sortPriority
+                    });
+                });
+            });
+
+            const items = Array.from(latestByEx.values()).sort((a, b) => a.sortPriority - b.sortPriority);
+            const avgRetention = items.length > 0
+                ? Math.round(items.reduce((s, it) => s + it.retentionPct, 0) / items.length)
+                : 100;
+
+            return {
+                items,
+                avgRetention,
+                earlyDropCount: items.filter(i => i.category === 'early_drop').length,
+                normalFatigueCount: items.filter(i => i.category === 'normal_fatigue').length,
+                rockSolidCount: items.filter(i => i.category === 'rock_solid').length
+            };
+        }
+
+        function analyzeExerciseProgressionHistory(workoutLogs) {
+            const logs = Array.isArray(workoutLogs) ? workoutLogs : [];
+            // Reverse to process oldest -> newest
+            const chronological = [...logs].reverse();
+            const historyMap = new Map();
+
+            chronological.forEach(log => {
+                if (!log || !Array.isArray(log.exercises)) return;
+                log.exercises.forEach(ex => {
+                    if (!ex || ex.isInterSetExtra) return;
+                    const completedSets = Array.isArray(ex.sets)
+                        ? ex.sets.filter(st => st && st.completed && (st.reps > 0 || st.weight > 0))
+                        : [];
+                    if (completedSets.length === 0 && (!ex.completedSetsCount || ex.completedSetsCount === 0)) return;
+
+                    const key = ex.id || ex.name;
+                    if (!key) return;
+
+                    const maxWeight = completedSets.length > 0
+                        ? Math.max(0, ...completedSets.map(st => Number(st.weight) || 0))
+                        : (Number(ex.maxWeight) || 0);
+                    const maxReps = completedSets.length > 0
+                        ? Math.max(0, ...completedSets.map(st => Number(st.reps) || 0))
+                        : (Number(ex.maxReps) || 0);
+                    const totalReps = completedSets.length > 0
+                        ? completedSets.reduce((s, st) => s + (Number(st.reps) || 0), 0)
+                        : maxReps;
+                    const avgReps = completedSets.length > 0
+                        ? Math.round((totalReps / completedSets.length) * 10) / 10
+                        : maxReps;
+                    const volume = Number(ex.exerciseVolume) || 0;
+
+                    if (!historyMap.has(key)) {
+                        historyMap.set(key, {
+                            key,
+                            id: ex.id || '',
+                            name: ex.name,
+                            isBodyweight: Boolean(ex.isBodyweight),
+                            isTimeBased: Boolean(ex.isTimeBased),
+                            entries: []
+                        });
+                    }
+
+                    historyMap.get(key).entries.push({
+                        date: log.date || '',
+                        dateFormatted: log.dateFormatted || log.date || '',
+                        setsCount: completedSets.length || ex.completedSetsCount || 1,
+                        maxWeight,
+                        maxReps,
+                        totalReps,
+                        avgReps,
+                        volume
+                    });
+                });
+            });
+
+            const results = [];
+            historyMap.forEach(item => {
+                const entries = item.entries;
+                const count = entries.length;
+                const first = entries[0];
+                const latest = entries[count - 1];
+                const unit = item.isTimeBased ? 'sn' : 'tekrar';
+
+                const formatPerf = (snap) => {
+                    if (!item.isBodyweight && snap.maxWeight > 0) {
+                        return `${snap.maxWeight} kg × ${snap.maxReps} ${unit}`;
+                    }
+                    return `${snap.maxReps} ${unit} (${snap.setsCount} set, toplam ${snap.totalReps} ${unit})`;
+                };
+
+                let status = 'baseline';
+                let badgeText = '🌱 İlk Kayıt Alındı';
+                let badgeStyle = 'background:#F1F5F9; color:#334155; border:1px solid #CBD5E1;';
+                let changeHeadline = 'Başlangıç seviyen kaydedildi';
+                let coachNote = `Bir sonraki antrenmanda <strong>${ (!item.isBodyweight && latest.maxWeight > 0) ? `${latest.maxWeight} kg ile ${latest.maxReps + 1} ${unit}` : `${latest.maxReps + 1} ${unit}` }</strong> hedefleyerek ilk gelişim adımını at!`;
+                let sortOrder = 3;
+
+                if (count >= 2) {
+                    const weightDiff = Math.round((latest.maxWeight - first.maxWeight) * 10) / 10;
+                    const maxRepsDiff = latest.maxReps - first.maxReps;
+                    const totalRepsDiff = latest.totalReps - first.totalReps;
+                    const volDiffPct = first.volume > 0 ? Math.round(((latest.volume - first.volume) / first.volume) * 100) : 0;
+
+                    if (weightDiff > 0) {
+                        status = 'progressed';
+                        sortOrder = 1;
+                        badgeText = `🚀 +${weightDiff} kg Güç Artışı`;
+                        badgeStyle = 'background:#DCFCE7; color:#15803D; border:1px solid #86EFAC;';
+                        changeHeadline = `Ağırlık ${first.maxWeight} kg'dan ${latest.maxWeight} kg'a yükseldi!`;
+                        coachNote = `Harika ilerleme! Bu yeni kiloda (${latest.maxWeight} kg) tüm setlerde 10-12 ${unit} sayısına rahatça ulaşana kadar kilonu koru.`;
+                    } else if (weightDiff === 0 && (maxRepsDiff > 0 || totalRepsDiff >= 2)) {
+                        status = 'progressed';
+                        sortOrder = 1;
+                        const gainStr = maxRepsDiff > 0 ? `+${maxRepsDiff} ${unit}` : `Toplam +${totalRepsDiff} ${unit}`;
+                        badgeText = `🚀 ${gainStr} Gelişim`;
+                        badgeStyle = 'background:#DCFCE7; color:#15803D; border:1px solid #86EFAC;';
+                        changeHeadline = maxRepsDiff > 0
+                            ? `En iyi setin ${first.maxReps} ${unit} ➔ ${latest.maxReps} ${unit} seviyesine çıktı!`
+                            : `Set içi toplam kapasiten ${first.totalReps} ➔ ${latest.totalReps} ${unit} oldu!`;
+                        coachNote = `Kas dayanıklılığın ve gücün artıyor. Tüm setlerde 12 ${unit} barajını geçtiğinde ağırlığı +1 ile +2.5 kg artırabilirsin.`;
+                    } else if (volDiffPct >= 8) {
+                        status = 'progressed';
+                        sortOrder = 1;
+                        badgeText = `🚀 +%${volDiffPct} Kapasite Artışı`;
+                        badgeStyle = 'background:#DCFCE7; color:#15803D; border:1px solid #86EFAC;';
+                        changeHeadline = `Toplam çalışma hacmin %${volDiffPct} büyüdü!`;
+                        coachNote = `Hareket üzerindeki kontrolün ve iş kapasiten net biçimde yukarı gidiyor.`;
+                    } else if (weightDiff === 0 && maxRepsDiff === 0 && totalRepsDiff === 0) {
+                        status = 'plateau';
+                        sortOrder = 2;
+                        badgeText = `⏸️ ${count} Seanstır Sabit`;
+                        badgeStyle = 'background:#FEF3C7; color:#B45309; border:1px solid #FCD34D;';
+                        changeHeadline = `${count} antrenmandır aynı kilo ve tekrar sayısındasın`;
+                        coachNote = `Bu takılmayı (platoyu) kırmak için gelecek antrenmanda sadece <strong>1. sette +1 ${unit} fazla (${latest.maxReps + 1} ${unit})</strong> yapmayı dene!`;
+                    } else {
+                        status = 'dip';
+                        sortOrder = 2;
+                        badgeText = `🔄 Yorgunluk Dalgalanması`;
+                        badgeStyle = 'background:#FFF7ED; color:#C2410C; border:1px solid #FDBA74;';
+                        changeHeadline = `İlk kayda göre hafif düşüş var (${formatPerf(first)} ➔ ${formatPerf(latest)})`;
+                        coachNote = `Muhtemelen yorgun bir güne veya hareketin antrenman sonuna kalmasına denk geldi. Gelecek seansta ilk kaydın olan <strong>${formatPerf(first)}</strong> seviyesini yakalamayı hedefle.`;
+                    }
+                }
+
+                results.push({
+                    key: item.key,
+                    id: item.id,
+                    name: item.name,
+                    sessionsCount: count,
+                    firstPerfText: formatPerf(first),
+                    latestPerfText: formatPerf(latest),
+                    firstDate: first.dateFormatted,
+                    latestDate: latest.dateFormatted,
+                    status,
+                    badgeText,
+                    badgeStyle,
+                    changeHeadline,
+                    coachNote,
+                    sortOrder
+                });
+            });
+
+            results.sort((a, b) => a.sortOrder - b.sortOrder || b.sessionsCount - a.sessionsCount);
+
+            return {
+                items: results,
+                progressedCount: results.filter(r => r.status === 'progressed').length,
+                plateauCount: results.filter(r => r.status === 'plateau' || r.status === 'dip').length,
+                baselineCount: results.filter(r => r.status === 'baseline').length
+            };
+        }
+
         function renderCombinedCoachReport(container) {
             const workoutLogs = getWorkoutLogs();
             const scaleLogs = getScaleLogs();
@@ -20176,60 +22268,349 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const earliestMeas = hasMeas ? measLogs[measLogs.length - 1] : null;
             const deltaWaist = (hasMeas && measLogs.length > 1 && latestMeas.waist && earliestMeas.waist) ? (latestMeas.waist - earliestMeas.waist).toFixed(1) : null;
 
-            container.innerHTML = `
-                <div style="background:linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(56, 189, 248, 0.05)); border:1px solid rgba(245, 158, 11, 0.3); border-radius:14px; padding:18px; margin-bottom:16px;">
-                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
-                        <span style="font-size:26px;">🧠</span>
+            // 1. Analyze set-to-set fatigue & power drop-off
+            const fatigueData = analyzeIntraSessionFatigueAndDropOff(workoutLogs);
+            // 2. Analyze cross-session exercise progression
+            const progData = analyzeExerciseProgressionHistory(workoutLogs);
+            // 3. Weekly muscle & mobility data for actionable blind spots
+            let muscleReport = null;
+            let mobilityReport = null;
+            try {
+                if (typeof calculateWeeklyMuscleSufficiency === 'function') {
+                    muscleReport = calculateWeeklyMuscleSufficiency('combined', 0);
+                }
+            } catch (e) { console.error(e); }
+            try {
+                if (typeof calculateWeeklyMobilitySufficiency === 'function') {
+                    mobilityReport = calculateWeeklyMobilitySufficiency('combined', 0);
+                }
+            } catch (e) { console.error(e); }
+
+            // Build dynamic, everyday-Turkish coach summary bullets
+            const summaryBullets = [];
+            if (workoutLogs.length === 0) {
+                summaryBullets.push(`📌 <strong>Başlangıç Adımı:</strong> Henüz tamamlanmış bir antrenman kaydın yok. İlk antrenmanını bitirdiğinde hangi harekette güçlendiğin ve setler arasında gücünün nasıl değiştiği burada otomatik analiz edilecek.`);
+            } else {
+                if (progData.progressedCount > 0) {
+                    summaryBullets.push(`🚀 <strong>Güç Gelişimin:</strong> Kayıtlı ${progData.items.length} hareketinin <strong>${progData.progressedCount} tanesinde</strong> başladığın güne göre ağırlık veya tekrar sayını artırdın.${progData.plateauCount > 0 ? ` <strong>${progData.plateauCount} harekette</strong> ise aynı seviyede takılma var; aşağıdaki listede bunları nasıl aşacağını yazdım.` : ''}`);
+                } else if (progData.plateauCount > 0) {
+                    summaryBullets.push(`⏸️ <strong>Güç Gelişimin:</strong> Hareketlerinde son antrenmanlarda aynı kilo ve tekrar sayılarında kalmışsın. Gelişimi tekrar başlatmak için bir sonraki antrenmanda sadece ilk setlere <strong>+1 tekrar</strong> eklemeye odaklanacağız.`);
+                } else {
+                    summaryBullets.push(`🌱 <strong>Güç Gelişimin:</strong> Hareketlerinin ilk başlangıç kayıtları alındı (${workoutLogs.length} antrenman / ${totalSets} set). Aynı hareketleri 2. kez yaptığında ne kadar güçlendiğini karşılaştırmalı göreceksin.`);
+                }
+
+                if (fatigueData.items.length > 0) {
+                    if (fatigueData.earlyDropCount > 0) {
+                        summaryBullets.push(`🔋 <strong>Set İçi Dayanıklılığın (%${fatigueData.avgRetention}):</strong> Bazı hareketlerde 1. sette yüksek tekrarla başlayıp (örn. 12 tekrar) sonraki setlerde 9-10 tekrara düşüyorsun (<strong>${fatigueData.earlyDropCount} harekette hızlı düşüş</strong>, <strong>${fatigueData.normalFatigueCount} harekette doğal yorgunluk</strong>). Aşağıda hareket bazında nedenini ve çözümünü inceleyebilirsin.`);
+                    } else {
+                        summaryBullets.push(`🔋 <strong>Set İçi Dayanıklılığın (%${fatigueData.avgRetention}):</strong> Setler arasında gücünü çok iyi koruyorsun! 1-2 tekrarlık ufak düşüşler kasın doğru ağırlıkta çalıştığını gösterir.`);
+                    }
+                }
+            }
+
+            if (deltaWaist !== null && parseFloat(deltaWaist) < 0) {
+                summaryBullets.push(`📏 <strong>Vücut Değişimin:</strong> Bel çevren <strong>${Math.abs(deltaWaist)} cm inceldi</strong>${deltaWeight !== null && parseFloat(deltaWeight) >= 0 ? ` (tartıda kilon sabit/artmış olsa bile belin incelmesi yağ yakıp kas kazandığının en net kanıtıdır!)` : ''}.`);
+            } else if (deltaWeight !== null) {
+                summaryBullets.push(`⚖️ <strong>Tartı & Ölçü Takibin:</strong> İlk kaydından bu yana kilon <strong>${parseFloat(deltaWeight) > 0 ? '+' : ''}${deltaWeight} kg</strong> değişti. Gerçek yağ yakımını görmek için haftada bir bel ölçümü eklemeyi unutma.`);
+            }
+
+            // Prepare fatigue cards (first 4 visible, rest in collapsible accordion per GEMINI.md Rule 5)
+            const renderFatigueCard = (item) => `
+                <div style="background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
                         <div>
-                            <h3 style="font-size:16px; font-weight:900; color:#0F172A;">Bütünleşik Koç Değerlendirmesi & Biyomekanik Karne</h3>
-                            <p style="font-size:11.5px; color:var(--text-secondary);">Antrenman hacmi, kilo dalgalanması ve bel ölçümü korelasyonu</p>
+                            <div style="font-size:14px; font-weight:900; color:#0F172A;">${escapeHTML(item.name)}</div>
+                            <div style="font-size:11px; color:#64748B;">Son Kayıt: ${escapeHTML(item.dateFormatted)} • ${item.setsCount} Set</div>
+                        </div>
+                        <span style="font-size:11px; font-weight:800; padding:4px 10px; border-radius:999px; ${item.badgeStyle}">
+                            ${escapeHTML(item.badgeText)}
+                        </span>
+                    </div>
+
+                    <div style="background:#FFFFFF; border:1px solid #CBD5E1; border-radius:8px; padding:8px 12px; font-size:12px; color:#0F172A; line-height:1.5;">
+                        <span style="font-size:10.5px; font-weight:800; color:#64748B; text-transform:uppercase; display:block; margin-bottom:2px;">Setler Arası Tekrar Akışı:</span>
+                        ${item.setChainText}
+                    </div>
+
+                    <div style="font-size:12px; color:#334155; line-height:1.5;">
+                        <strong>🧐 Neden Oldu?</strong> ${item.reasonText}
+                    </div>
+                    <div style="font-size:12px; color:#0F172A; background:#FEFCE8; border:1px solid #FEF08A; border-radius:8px; padding:8px 10px; line-height:1.45;">
+                        <strong>💡 Koç Tavsiyesi:</strong> ${item.adviceText}
+                    </div>
+                </div>
+            `;
+
+            const visibleFatigue = fatigueData.items.slice(0, 4);
+            const hiddenFatigue = fatigueData.items.slice(4);
+
+            // Prepare progression cards (first 4 visible, rest in collapsible accordion per GEMINI.md Rule 5)
+            const renderProgressionCard = (item) => `
+                <div style="background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
+                        <div>
+                            <div style="font-size:14px; font-weight:900; color:#0F172A;">${escapeHTML(item.name)}</div>
+                            <div style="font-size:11px; color:#64748B;">Toplam ${item.sessionsCount} Antrenman Kaydı</div>
+                        </div>
+                        <span style="font-size:11px; font-weight:800; padding:4px 10px; border-radius:999px; ${item.badgeStyle}">
+                            ${escapeHTML(item.badgeText)}
+                        </span>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:8px; background:#FFFFFF; border:1px solid #CBD5E1; border-radius:8px; padding:8px 12px;">
+                        <div>
+                            <div style="font-size:10px; font-weight:800; color:#64748B;">İLK BAŞLANGIÇ</div>
+                            <div style="font-size:12px; font-weight:800; color:#475569; margin-top:2px;">${escapeHTML(item.firstPerfText)}</div>
+                        </div>
+                        <div style="font-size:16px; font-weight:900; color:#84CC16;">➔</div>
+                        <div style="text-align:right;">
+                            <div style="font-size:10px; font-weight:800; color:#15803D;">SON DURUMUN</div>
+                            <div style="font-size:12.5px; font-weight:900; color:#0F172A; margin-top:2px;">${escapeHTML(item.latestPerfText)}</div>
                         </div>
                     </div>
 
-                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-bottom:14px;">
-                        <div style="background:#0E131B; padding:10px; border-radius:8px; text-align:center;">
-                            <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">TOPLAM KALDIRILAN</div>
-                            <div style="font-size:17px; font-weight:900; color:var(--gold); margin-top:2px;">${Math.round(totalVolume).toLocaleString('tr-TR')} kg</div>
-                            <div style="font-size:10px; color:var(--text-secondary);">${workoutLogs.length} Seans / ${totalSets} Set</div>
-                        </div>
+                    <div style="font-size:12px; color:#334155; line-height:1.45;">
+                        <strong>📊 Durum:</strong> ${escapeHTML(item.changeHeadline)}. ${item.coachNote}
+                    </div>
+                </div>
+            `;
 
-                        <div style="background:#0E131B; padding:10px; border-radius:8px; text-align:center;">
-                            <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">KİLO & YAĞ DEĞİŞİMİ</div>
-                            <div style="font-size:17px; font-weight:900; color:var(--cyan); margin-top:2px;">
-                                ${deltaWeight !== null ? `${parseFloat(deltaWeight) > 0 ? '+' : ''}${deltaWeight} kg` : (latestScale ? `${latestScale.weight} kg` : '-')}
+            const visibleProg = progData.items.slice(0, 4);
+            const hiddenProg = progData.items.slice(4);
+
+            // Build 3 Concrete Weekly Coach Tasks
+            const tasksHTML = [];
+
+            // Task 1: Missing Muscle Group
+            if (muscleReport && Array.isArray(muscleReport.muscles)) {
+                const missingMuscle = muscleReport.muscles.find(m => m.effectiveTotal === 0) || muscleReport.muscles.find(m => m.status === 'insufficient');
+                if (missingMuscle) {
+                    const recEx = (typeof getRecommendedExercisesForMuscle === 'function')
+                        ? (getRecommendedExercisesForMuscle(missingMuscle.id, 1)[0] || null)
+                        : null;
+                    tasksHTML.push(`
+                        <div style="background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:12px; padding:14px; display:flex; flex-direction:column; justify-content:space-between; gap:10px;">
+                            <div>
+                                <div style="font-size:11px; font-weight:800; color:#DC2626; text-transform:uppercase;">1. Eksik Kas Görevi</div>
+                                <div style="font-size:14px; font-weight:900; color:#0F172A; margin-top:3px;">${escapeHTML(missingMuscle.icon || '💪')} ${escapeHTML(missingMuscle.name)} Bölgesini Tamamla</div>
+                                <div style="font-size:12px; color:#475569; margin-top:4px; line-height:1.45;">
+                                    Bu hafta <strong>${escapeHTML(missingMuscle.name)}</strong> kasın ${missingMuscle.effectiveTotal === 0 ? 'hiç çalışmadı (0 set)' : `sadece ${missingMuscle.effectiveTotal} sette kaldı`}. Dengeli gelişim için haftaya 3 set ekle.
+                                </div>
                             </div>
-                            <div style="font-size:10px; color:var(--text-secondary);">
-                                ${deltaFat !== null ? `Yağ: ${parseFloat(deltaFat) > 0 ? '+' : ''}${deltaFat}%` : (latestScale?.bodyFat ? `Yağ: %${latestScale.bodyFat}` : 'Tartı Takibi')}
+                            ${recEx ? `
+                                <button type="button" class="btn btn-outline" style="width:100%; font-size:11.5px; padding:8px 10px; font-weight:800; background:#FFFFFF; border-color:#CBD5E1; color:#0F172A;" onclick="openQuickAddToDayModal('${recEx.id}')">
+                                    ➕ ${escapeHTML(recEx.name)} Gününe Ekle
+                                </button>
+                            ` : ''}
+                        </div>
+                    `);
+                }
+            }
+
+            // Task 2: Stiff / Unworked Mobility Joint
+            if (mobilityReport && Array.isArray(mobilityReport.joints)) {
+                const stiffJoint = mobilityReport.joints.find(j => j.totalEffective === 0) || mobilityReport.joints.find(j => j.pct < 60);
+                if (stiffJoint && stiffJoint.subRegions && stiffJoint.subRegions[0]) {
+                    const targetSub = stiffJoint.subRegions.find(s => s.doneSets === 0) || stiffJoint.subRegions[0];
+                    tasksHTML.push(`
+                        <div style="background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:12px; padding:14px; display:flex; flex-direction:column; justify-content:space-between; gap:10px;">
+                            <div>
+                                <div style="font-size:11px; font-weight:800; color:#0284C7; text-transform:uppercase;">2. Hareketlilik (Esneklik) Görevi</div>
+                                <div style="font-size:14px; font-weight:900; color:#0F172A; margin-top:3px;">${escapeHTML(stiffJoint.title)} Açıklığını Artır</div>
+                                <div style="font-size:12px; color:#475569; margin-top:4px; line-height:1.45;">
+                                    Vücudunun tutuk kalmaması ve sakatlık yaşamamak için <strong>${escapeHTML(targetSub.label)}</strong> yönünü açan 1 hareket ekle.
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline" style="width:100%; font-size:11.5px; padding:8px 10px; font-weight:800; background:#FFFFFF; border-color:#CBD5E1; color:#0F172A;" onclick="openQuickAddToDayModal('${targetSub.recId}')">
+                                ➕ ${escapeHTML(targetSub.recName)} Gününe Ekle
+                            </button>
+                        </div>
+                    `);
+                }
+            }
+
+            // Task 3: Next Workout Rep/Weight Goal
+            const focusFatigue = fatigueData.items[0] || null;
+            const focusProg = progData.items.find(i => i.status === 'plateau') || progData.items[0] || null;
+            if (focusFatigue && focusFatigue.category === 'early_drop') {
+                tasksHTML.push(`
+                    <div style="background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:12px; padding:14px; display:flex; flex-direction:column; justify-content:space-between; gap:10px;">
+                        <div>
+                            <div style="font-size:11px; font-weight:800; color:#B45309; text-transform:uppercase;">3. Set Dayanıklılığı Hedefi</div>
+                            <div style="font-size:14px; font-weight:900; color:#0F172A; margin-top:3px;">${escapeHTML(focusFatigue.name)} Setlerini Dengele</div>
+                            <div style="font-size:12px; color:#475569; margin-top:4px; line-height:1.45;">
+                                Son seansta <strong>${focusFatigue.firstReps} ${focusFatigue.unitLabel}</strong> ile başlayıp <strong>${focusFatigue.lastReps} ${focusFatigue.unitLabel}</strong> seviyesine düştün. Gelecek seansta 1. sette <strong>${Math.max(1, focusFatigue.firstReps - 1)} ${focusFatigue.unitLabel}</strong> yapıp tüm setlerde aynı sayıyı koru!
                             </div>
                         </div>
-
-                        <div style="background:#0E131B; padding:10px; border-radius:8px; text-align:center;">
-                            <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">BEL İNCELMESİ</div>
-                            <div style="font-size:17px; font-weight:900; color:var(--green-success); margin-top:2px;">
-                                ${deltaWaist !== null ? `${parseFloat(deltaWaist) > 0 ? '+' : ''}${deltaWaist} cm` : (latestMeas ? `${latestMeas.waist} cm` : '-')}
+                        <div style="font-size:11.5px; font-weight:800; color:#15803D; background:#DCFCE7; padding:7px 10px; border-radius:8px; text-align:center;">
+                            🎯 Hedef: Tüm Setlerde Sabit Tekrar & +30 sn Dinlenme
+                        </div>
+                    </div>
+                `);
+            } else if (focusProg) {
+                tasksHTML.push(`
+                    <div style="background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:12px; padding:14px; display:flex; flex-direction:column; justify-content:space-between; gap:10px;">
+                        <div>
+                            <div style="font-size:11px; font-weight:800; color:#15803D; text-transform:uppercase;">3. Güç Artışı Hedefi</div>
+                            <div style="font-size:14px; font-weight:900; color:#0F172A; margin-top:3px;">${escapeHTML(focusProg.name)} Hareketinde +1 Tekrar</div>
+                            <div style="font-size:12px; color:#475569; margin-top:4px; line-height:1.45;">
+                                Son durumun: <strong>${escapeHTML(focusProg.latestPerfText)}</strong>. Bir sonraki antrenmanda sadece ilk sette +1 tekrar fazla çıkararak kendi rekorunu yenile!
                             </div>
-                            <div style="font-size:10px; color:var(--text-secondary);">Viseral Yağ Göstergesi</div>
+                        </div>
+                        <div style="font-size:11.5px; font-weight:800; color:#15803D; background:#DCFCE7; padding:7px 10px; border-radius:8px; text-align:center;">
+                            🎯 Hedef: İlk Sette Kendi Rekorunu +1 Tekrar Geç
+                        </div>
+                    </div>
+                `);
+            }
+
+            container.innerHTML = `
+                <!-- BÖLÜM 1: TEK BAKIŞTA GENEL DURUMUN & KOÇUN ÖZETİ -->
+                <div class="anatomy-hero-wrapper" style="align-items:stretch;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="font-size:28px;">🧠</span>
+                            <div>
+                                <h3 style="font-size:17px; font-weight:900; color:#0F172A; margin:0;">Akıllı Koç Raporu & Gelişim Karnesi</h3>
+                                <p style="font-size:12px; color:#475569; margin:2px 0 0 0;">
+                                    Hareketlerde ne kadar güçlendiğin, setler arası güç düşüşlerin ve vücudunun verdiği tepkiler
+                                </p>
+                            </div>
                         </div>
                     </div>
 
-                    <div style="background:#0E131B; border-radius:10px; padding:14px; border-left:4px solid var(--gold);">
-                        <h4 style="font-size:13px; font-weight:800; color:#0F172A; margin-bottom:6px;">📊 Bilimsel Değerlendirme & Gelecek Planı:</h4>
-                        <p style="font-size:12px; color:#475569; line-height:1.6; margin-bottom:8px;">
-                            ${totalVolume > 0 ? `
-                                Kaldırdığınız toplam <strong>${Math.round(totalVolume).toLocaleString('tr-TR')} kg</strong> mekanik tonaj, kas dokularında mikro-hasar ve protein sentezi uyarımı sağladı.
-                            ` : 'Henüz antrenman tonajınız kaydedilmedi.'}
-                            ${deltaWaist && parseFloat(deltaWaist) <= 0 ? `
-                                Bel çevrenizdeki <strong>${Math.abs(deltaWaist)} cm</strong> daralma, kas kütlenizi korurken derin viseral yağ depolarını başarıyla tükettiğinizi kanıtlıyor.
-                            ` : ''}
-                            ${deltaWeight && parseFloat(deltaWeight) <= 0 ? `
-                                Kilonuzdaki <strong>${Math.abs(deltaWeight)} kg</strong> düşüş, kontrollü bir kalori açığı ve yüksek nabızlı süpersetlerin sinerjisini yansıtıyor.
-                            ` : ''}
-                        </p>
-                        <div style="font-size:11.5px; color:#94a3b8; line-height:1.5;">
-                            🎯 <strong>Sıradaki Adım (Progressive Overload):</strong> Güç artışınızı sürdürmek için ana bileşik hareketlerde (Squat, Saw Row, Strict Press) tekrar sayılarınızı koruyarak ağırlığı 1-2 kg artırmayı hedefleyin. Dinlenme sürelerinde kronometreyi 60 saniyenin altında tutarak kardiyometabolik verimi zirvede tutun.
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap:10px; margin-bottom:14px;">
+                        <div style="background:#F8FAFC; border:1px solid #E2E8F0; padding:12px; border-radius:10px; text-align:center;">
+                            <div style="font-size:10.5px; color:#64748B; font-weight:800;">ANTRENMAN GEÇMİŞİ</div>
+                            <div style="font-size:18px; font-weight:900; color:#0F172A; margin-top:3px;">${workoutLogs.length} Antrenman</div>
+                            <div style="font-size:11px; color:#475569; margin-top:2px;">Toplam ${totalSets} Set • ${Math.round(totalVolume).toLocaleString('tr-TR')} kg</div>
+                        </div>
+
+                        <div style="background:#F8FAFC; border:1px solid #E2E8F0; padding:12px; border-radius:10px; text-align:center;">
+                            <div style="font-size:10.5px; color:#64748B; font-weight:800;">GÜÇLENEN HAREKETLER</div>
+                            <div style="font-size:18px; font-weight:900; color:#16A34A; margin-top:3px;">
+                                ${progData.progressedCount} / ${progData.items.length} Hareket
+                            </div>
+                            <div style="font-size:11px; color:#475569; margin-top:2px;">
+                                ${progData.plateauCount > 0 ? `${progData.plateauCount} harekette takılma var` : 'Kilo / tekrar artışı kayıtta'}
+                            </div>
+                        </div>
+
+                        <div style="background:#F8FAFC; border:1px solid #E2E8F0; padding:12px; border-radius:10px; text-align:center;">
+                            <div style="font-size:10.5px; color:#64748B; font-weight:800;">SET İÇİ DAYANIKLILIK</div>
+                            <div style="font-size:18px; font-weight:900; color:#0284C7; margin-top:3px;">%${fatigueData.avgRetention} Koruma</div>
+                            <div style="font-size:11px; color:#475569; margin-top:2px;">
+                                ${fatigueData.earlyDropCount > 0 ? `${fatigueData.earlyDropCount} harekette hızlı tekrar düşüşü` : 'Setler arası güç dengeli'}
+                            </div>
+                        </div>
+
+                        <div style="background:#F8FAFC; border:1px solid #E2E8F0; padding:12px; border-radius:10px; text-align:center;">
+                            <div style="font-size:10.5px; color:#64748B; font-weight:800;">KİLO & BEL DEĞİŞİMİ</div>
+                            <div style="font-size:18px; font-weight:900; color:#0F172A; margin-top:3px;">
+                                ${deltaWeight !== null ? `${parseFloat(deltaWeight) > 0 ? '+' : ''}${deltaWeight} kg` : (latestScale ? `${latestScale.weight} kg` : 'Kayıt Yok')}
+                            </div>
+                            <div style="font-size:11px; color:#475569; margin-top:2px;">
+                                ${deltaWaist !== null ? `Bel: ${parseFloat(deltaWaist) > 0 ? '+' : ''}${deltaWaist} cm` : (latestMeas?.waist ? `Bel: ${latestMeas.waist} cm` : 'Bel ölçüsü bekleniyor')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background:#F8FAFC; border:1px solid #CBD5E1; border-left:4px solid #84CC16; border-radius:10px; padding:14px;">
+                        <div style="font-size:13px; font-weight:900; color:#0F172A; margin-bottom:8px;">🗣️ Koçun Sana Özel Özeti:</div>
+                        <div style="display:flex; flex-direction:column; gap:6px; font-size:12.5px; color:#334155; line-height:1.55;">
+                            ${summaryBullets.map(b => `<div>${b}</div>`).join('')}
                         </div>
                     </div>
                 </div>
+
+                <!-- BÖLÜM 2: SETLER ARASI GÜÇ DÜŞÜŞÜ & DAYANIKLILIK ANALİZİ (12 TEKRAR -> 10 TEKRAR İRDELEMESİ) -->
+                <div class="anatomy-hero-wrapper" style="align-items:stretch;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+                        <div>
+                            <h3 style="font-size:16px; font-weight:900; color:#0F172A; margin:0;">🔋 Setler Arası Güç Düşüşü Analizi (1. Setten Son Sete Neler Oluyor?)</h3>
+                            <div style="font-size:12px; color:#475569; margin-top:3px;">
+                                Bir harekette 1. sette 12 tekrar yaparken sonraki setlerde 10 veya 8 tekrara düşmenin bilimsel ama sade açıklaması
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                            <span style="font-size:11px; font-weight:800; padding:4px 8px; border-radius:6px; background:#FEF2F2; color:#DC2626; border:1px solid #FECACA;">⚡ Hızlı Düşüş: ${fatigueData.earlyDropCount}</span>
+                            <span style="font-size:11px; font-weight:800; padding:4px 8px; border-radius:6px; background:#F0F9FF; color:#0284C7; border:1px solid #BAE6FD;">🔋 Doğal Yorgunluk: ${fatigueData.normalFatigueCount}</span>
+                            <span style="font-size:11px; font-weight:800; padding:4px 8px; border-radius:6px; background:#DCFCE7; color:#15803D; border:1px solid #86EFAC;">🛡️ Tam Güç: ${fatigueData.rockSolidCount}</span>
+                        </div>
+                    </div>
+
+                    <div style="background:#F0FDF4; border:1px solid #BBF7D0; border-radius:10px; padding:10px 12px; margin-bottom:12px; font-size:12px; color:#166534; line-height:1.5;">
+                        💡 <strong>Altın Kural:</strong> 1. sette <strong>12 tekrar</strong> yapıp 2. ve 3. sette <strong>10-11 tekrara</strong> düşmek (1-2 tekrar kaybı) <strong>en doğru ağırlıkta çalıştığını</strong> gösterir. Ancak tekrar sayın 12'den 8 ve altına çöküyorsa (3+ tekrar kaybı), ya ilk sette kendini tamamen tüketiyorsun ya da set arası dinlenmen kısa kalıyor demektir.
+                    </div>
+
+                    ${fatigueData.items.length === 0 ? `
+                        <div style="background:#F8FAFC; border:1px dashed #CBD5E1; border-radius:10px; padding:16px; text-align:center; font-size:12.5px; color:#475569;">
+                            Henüz en az 2 seti tamamlanmış bir hareket kaydın bulunmuyor. Antrenmanında bir hareketin 1., 2. ve 3. set tekrarlarını kaydettiğinde setler arası güç düşüşün burada tek tek incelenecek.
+                        </div>
+                    ` : `
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:10px;">
+                            ${visibleFatigue.map(renderFatigueCard).join('')}
+                        </div>
+                        ${hiddenFatigue.length > 0 ? `
+                            <div id="coachFatigueMoreBox" style="display:none; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:10px; margin-top:10px;">
+                                ${hiddenFatigue.map(renderFatigueCard).join('')}
+                            </div>
+                            <button id="coachFatigueMoreBtn" type="button" class="btn btn-outline" style="margin-top:10px; width:100%; font-size:12px; font-weight:800; padding:8px; background:#F8FAFC; color:#0F172A; border-color:#CBD5E1;" onclick="toggleCoachReportAccordion('coachFatigueMoreBox', 'coachFatigueMoreBtn', '▼ Diğer ${hiddenFatigue.length} Hareketin Set Analizini Göster', '▲ Diğer Hareketleri Gizle')">
+                                ▼ Diğer ${hiddenFatigue.length} Hareketin Set Analizini Göster
+                            </button>
+                        ` : ''}
+                    `}
+                </div>
+
+                <!-- BÖLÜM 3: HAREKETLERDE NE KADAR GELİŞİYORUM? (BAŞLANGIÇ ➔ BUGÜN) -->
+                <div class="anatomy-hero-wrapper" style="align-items:stretch;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+                        <div>
+                            <h3 style="font-size:16px; font-weight:900; color:#0F172A; margin:0;">📈 Hareketlerde Ne Kadar Gelişiyorsun? (İlk Kayıt ➔ Son Kayıt)</h3>
+                            <div style="font-size:12px; color:#475569; margin-top:3px;">
+                                Her harekete ilk başladığın gündeki ağırlık/tekrar ile son antrenmanındaki performansının net karşılaştırması
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                            <span style="font-size:11px; font-weight:800; padding:4px 8px; border-radius:6px; background:#DCFCE7; color:#15803D; border:1px solid #86EFAC;">🚀 Güçlenen: ${progData.progressedCount}</span>
+                            <span style="font-size:11px; font-weight:800; padding:4px 8px; border-radius:6px; background:#FEF3C7; color:#B45309; border:1px solid #FCD34D;">⏸️ Sabit / Takılan: ${progData.plateauCount}</span>
+                            <span style="font-size:11px; font-weight:800; padding:4px 8px; border-radius:6px; background:#F1F5F9; color:#334155; border:1px solid #CBD5E1;">🌱 Yeni Kayıt: ${progData.baselineCount}</span>
+                        </div>
+                    </div>
+
+                    ${progData.items.length === 0 ? `
+                        <div style="background:#F8FAFC; border:1px dashed #CBD5E1; border-radius:10px; padding:16px; text-align:center; font-size:12.5px; color:#475569;">
+                            Henüz kayıtlı hareket geçmişin yok. Antrenmanlarını tamamladıkça her harekette kaç kilodan kaç kiloya ve kaç tekrara çıktığın burada listelenecek.
+                        </div>
+                    ` : `
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:10px;">
+                            ${visibleProg.map(renderProgressionCard).join('')}
+                        </div>
+                        ${hiddenProg.length > 0 ? `
+                            <div id="coachProgMoreBox" style="display:none; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:10px; margin-top:10px;">
+                                ${hiddenProg.map(renderProgressionCard).join('')}
+                            </div>
+                            <button id="coachProgMoreBtn" type="button" class="btn btn-outline" style="margin-top:10px; width:100%; font-size:12px; font-weight:800; padding:8px; background:#F8FAFC; color:#0F172A; border-color:#CBD5E1;" onclick="toggleCoachReportAccordion('coachProgMoreBox', 'coachProgMoreBtn', '▼ Diğer ${hiddenProg.length} Hareketin Gelişim Karnesini Göster', '▲ Diğer Hareketleri Gizle')">
+                                ▼ Diğer ${hiddenProg.length} Hareketin Gelişim Karnesini Göster
+                            </button>
+                        ` : ''}
+                    `}
+                </div>
+
+                <!-- BÖLÜM 4: BU HAFTA İÇİN 3 NET KOÇ GÖREVİ -->
+                ${tasksHTML.length > 0 ? `
+                    <div class="anatomy-hero-wrapper" style="align-items:stretch;">
+                        <div style="margin-bottom:12px;">
+                            <h3 style="font-size:16px; font-weight:900; color:#0F172A; margin:0;">🎯 Bu Hafta İçin Sana Özel 3 Net Görev</h3>
+                            <div style="font-size:12px; color:#475569; margin-top:3px;">
+                                Eksik kalan kasını, tutuk kalan eklemini ve bir sonraki antrenmandaki tekrar hedefini tek tıkla tamamla
+                            </div>
+                        </div>
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:10px;">
+                            ${tasksHTML.join('')}
+                        </div>
+                    </div>
+                ` : ''}
             `;
         }
 
@@ -20262,7 +22643,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=248')
+                navigator.serviceWorker.register('./sw.js?v=249')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();

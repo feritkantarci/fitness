@@ -35,7 +35,7 @@
     <!-- ==================== LOGIN SCREEN ==================== -->
     <div id="loginScreen" class="active">
         <div class="login-card">
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v248</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v249</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -175,7 +175,7 @@
                     <span class="canva-brand-monogram" aria-hidden="true" translate="no">Ç</span>
                     <div class="canva-brand-stack">
                         <span class="modern-brand-title" translate="no">Çelik Kodu</span>
-                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v248</span>
+                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v249</span>
                     </div>
                 </div>
                 <div class="modern-bar-actions">
@@ -924,8 +924,8 @@
                     <!-- HEADER & ACTION BUTTONS -->
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
                         <div>
-                            <h2 style="font-size:18px; font-weight:900; color:#0F172A;">Gelişim, Kas Yükü & Vücut Analizi</h2>
-                            <p style="font-size:12.5px; color:var(--text-secondary); margin-top:2px;">Biyomekanik kas tonajı, akıllı tartı kompozisyonu ve mezura ölçüleri takibi</p>
+                            <h2 style="font-size:18px; font-weight:900; color:#0F172A;">Gelişim, Kas Yükü, Mobilite & Vücut Analizi</h2>
+                            <p style="font-size:12.5px; color:var(--text-secondary); margin-top:2px;">Biyomekanik kas tonajı, eklem hareket açıklığı (ROM), akıllı tartı ve mezura ölçüleri takibi</p>
                         </div>
                         <div style="display:flex; gap:6px; flex-wrap:wrap;">
                             <button class="btn btn-gold" style="font-size:12.5px; padding:8px 14px; font-weight:800;" onclick="openScaleModal()">
@@ -941,6 +941,9 @@
                     <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:6px; margin-bottom:16px;" class="hide-scrollbar">
                         <button class="btn btn-outline analytics-subtab-btn active" id="btnSubAnalyticsMuscle" style="font-size:12.5px; padding:6px 12px; border-radius:20px; white-space:nowrap;" onclick="switchAnalyticsSubView('muscle')">
                             Kas Yükü & Biyomekanik
+                        </button>
+                        <button class="btn btn-outline analytics-subtab-btn" id="btnSubAnalyticsMobility" style="font-size:12.5px; padding:6px 12px; border-radius:20px; white-space:nowrap;" onclick="switchAnalyticsSubView('mobility')">
+                            Hareketlilik (Mobilite)
                         </button>
                         <button class="btn btn-outline analytics-subtab-btn" id="btnSubAnalyticsScale" style="font-size:12.5px; padding:6px 12px; border-radius:20px; white-space:nowrap;" onclick="switchAnalyticsSubView('scale')">
                             Vücut Analizi & Ölçüler
@@ -2521,6 +2524,70 @@
                 <div style="font-size:12px; color:var(--text-secondary); margin-bottom:8px;">Veya kütüphaneden tek tek hareket seçmek için:</div>
                 <button type="button" class="btn btn-outline" style="border-color:var(--cyan); color:var(--cyan); font-weight:800; padding:10px 18px; font-size:12.5px;" onclick="closeAddFinisherModal(); openAddExerciseModal('active');">
                     🔍 Tüm Egzersiz Kütüphanesinden Seç
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SET ARASI İLAVE HAREKET (INTER-SET EXTRA) MODAL ==================== -->
+    <div id="interSetModal" class="modal-overlay" onclick="if(event.target===this) closeInterSetModal()">
+        <div class="modal-box" style="max-width: 540px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <div>
+                    <h3 class="modal-title" style="font-size:16px; margin:0;" id="interSetModalTitle">⚡ Set Arası İlave Hareket Ekle</h3>
+                    <p style="font-size:11.5px; color:var(--text-secondary); margin:2px 0 0;" id="interSetModalSubtitle">Dinlenme arasında aktif toparlanma, core veya kondisyon hareketi ekleyin.</p>
+                </div>
+                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeInterSetModal()">✕</button>
+            </div>
+
+            <!-- 1. POPÜLER SET ARASI HAREKETLER (HIZLI SEÇİM) -->
+            <div style="font-size:11.5px; font-weight:900; color:#0284C7; margin-bottom:7px; text-transform:uppercase; letter-spacing:0.5px;">
+                ⚡ Hızlı Popüler Seçim (Tek Dokunuş):
+            </div>
+            <div class="interset-chip-grid" id="interSetQuickChips">
+                <!-- Populated dynamically -->
+            </div>
+
+            <!-- 2. TÜM EGZERSİZ HAVUZUNDAN ARAMA -->
+            <div style="margin-bottom:12px;">
+                <label for="interSetSearchInput" style="font-size:11.5px; font-weight:800; color:#0F172A; display:block; margin-bottom:5px;">
+                    🔍 Tüm Egzersiz Havuzundan Ara & Seç:
+                </label>
+                <input type="text" id="interSetSearchInput" class="form-input" style="padding:9px 12px; font-size:12.5px;" placeholder="Hareket adı veya bölge yazın (Örn: Plank, Squat, Lunge, Şınav)..." oninput="filterInterSetPoolSearch()">
+                <div id="interSetSearchResults" style="max-height:155px; overflow-y:auto; margin-top:6px; display:none; border:1px solid #CBD5E1; border-radius:10px; padding:6px; background:#F8FAFC;">
+                </div>
+            </div>
+
+            <!-- 3. SEÇİLEN HAREKET & SÜRE / TEKRAR AYARI -->
+            <div style="background:#F8FAFC; border:1.5px solid #CBD5E1; border-radius:12px; padding:12px; margin-bottom:14px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:6px;">
+                    <div>
+                        <span style="font-size:11px; color:var(--text-secondary); font-weight:700;">Seçilen Hareket:</span>
+                        <div style="font-size:14px; font-weight:900; color:#0F172A;" id="interSetSelectedName">Jumping Jack</div>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button type="button" id="btnInterSetTypeTime" class="interset-metric-pill active" onclick="setInterSetMetricType('time')">⏱️ Süre (sn)</button>
+                        <button type="button" id="btnInterSetTypeReps" class="interset-metric-pill" onclick="setInterSetMetricType('reps')">🔢 Tekrar (tk)</button>
+                    </div>
+                </div>
+
+                <!-- Hızlı Değer Hapları -->
+                <div id="interSetQuickValuesRow" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+                </div>
+
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <label for="interSetCustomValInput" style="font-size:11.5px; font-weight:800; color:#475569;" id="interSetValInputLabel">Hedef Süre (Saniye):</label>
+                    <input type="number" id="interSetCustomValInput" class="form-input" style="width:95px; padding:6px 10px; font-weight:800; font-size:13px; text-align:center;" min="1" max="600" value="45" oninput="onInterSetCustomValueInput(this.value)">
+                </div>
+            </div>
+
+            <!-- 4. KAYDETME AKSİYONLARI -->
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <button type="button" class="btn btn-gold" style="width:100%; padding:11px; font-size:13px; font-weight:900;" id="btnSaveSingleInterSet" onclick="saveInterSetExercise(false)">
+                    ➕ Bu Set Arasına Ekle
+                </button>
+                <button type="button" class="btn btn-outline" style="width:100%; padding:10px; font-size:12.5px; font-weight:800; border-color:#0284C7; color:#0284C7;" onclick="saveInterSetExercise(true)">
+                    ⚡ Bu Hareketin Tüm Set Aralarına Uygula
                 </button>
             </div>
         </div>
