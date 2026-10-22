@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <!-- Security: CSP & Permissions -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://apis.google.com https://accounts.google.com; connect-src 'self' https://firestore.googleapis.com https://generativelanguage.googleapis.com https://fitness-4f427.firebaseio.com https://fitness-4f427-default-rtdb.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://raw.githubusercontent.com https://cdn.jsdelivr.net https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com data: blob:; img-src 'self' data: blob: https://lh3.googleusercontent.com https://www.gstatic.com https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; media-src 'self' data: blob:; frame-src 'self' https://fitness-4f427.firebaseapp.com https://accounts.google.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://apis.google.com https://accounts.google.com; connect-src 'self' https://firestore.googleapis.com https://generativelanguage.googleapis.com https://fitness-4f427.firebaseio.com https://fitness-4f427-default-rtdb.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://raw.githubusercontent.com https://cdn.jsdelivr.net https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com https://api.emailjs.com data: blob:; img-src 'self' data: blob: https://lh3.googleusercontent.com https://www.gstatic.com https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; media-src 'self' data: blob:; frame-src 'self' https://fitness-4f427.firebaseapp.com https://accounts.google.com;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="theme-color" content="#0B0F17">
@@ -23,7 +23,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=238">
+    <link rel="stylesheet" href="css/style.css?v=247">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH (CANVA MODERN ATHLETIC LIGHT V229) */
         html, body { background-color: #F8FAFC; color: #0F172A; color-scheme: light; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -35,28 +35,132 @@
     <!-- ==================== LOGIN SCREEN ==================== -->
     <div id="loginScreen" class="active">
         <div class="login-card">
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v246</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v247</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
-            <div id="loginErrorMsg" class="login-error" role="alert" aria-live="polite"></div>
+            <!-- GİRİŞ / KAYIT OL SEKME GEÇİŞİ (YÜKSEK KONTRAST AÇIK TEMA) -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; background:#F1F5F9; padding:5px; border-radius:12px; border:1.5px solid #CBD5E1; margin-bottom:16px;">
+                <button type="button" id="authTabBtnLogin" onclick="switchAuthScreenTab('login')" style="display:flex; align-items:center; justify-content:center; gap:6px; padding:10px 12px; border-radius:8px; border:1px solid #65A30D; font-size:13px; font-weight:800; cursor:pointer; background:linear-gradient(135deg, #84CC16 0%, #22C55E 100%); color:#0F172A; box-shadow:0 2px 8px rgba(34,197,94,0.25); transition:all 0.2s;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                    <span>Giriş Yap</span>
+                </button>
+                <button type="button" id="authTabBtnRegister" onclick="switchAuthScreenTab('register')" style="display:flex; align-items:center; justify-content:center; gap:6px; padding:10px 12px; border-radius:8px; border:1px solid transparent; font-size:13px; font-weight:800; cursor:pointer; background:transparent; color:#334155; transition:all 0.2s;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                    <span>Kayıt Ol</span>
+                </button>
+            </div>
 
+            <div id="loginErrorMsg" class="login-error" role="alert" aria-live="polite"></div>
+            <div id="loginSuccessMsg" style="display:none; background:#ECFDF5; border-left:4px solid #10B981; color:#065F46; font-weight:600; padding:10px 12px; border-radius:6px; font-size:12.5px; margin-bottom:16px; text-align:left; line-height:1.45;" role="status" aria-live="polite"></div>
+
+            <!-- GİRİŞ FORMU -->
             <form id="loginForm" onsubmit="handleAuthLogin(event)">
                 <div class="login-field">
-                    <label class="login-label" for="loginUsername">Kullanıcı Adı veya Ad Soyad</label>
-                    <input type="text" id="loginUsername" name="username" class="login-input" placeholder="Kullanıcı adı veya Ad Soyad…" required autocomplete="username" autocapitalize="none" spellcheck="false">
+                    <label class="login-label" for="loginUsername" style="color:#334155;">Kullanıcı Adı, E-Posta veya Ad Soyad</label>
+                    <input type="text" id="loginUsername" name="username" class="login-input" placeholder="Kullanıcı adı, E-posta veya Ad Soyad…" required autocomplete="username" autocapitalize="none" spellcheck="false">
                 </div>
 
-                <div class="login-field">
-                    <label class="login-label" for="loginPassword">Şifre</label>
+                <div class="login-field" style="margin-bottom:10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <label class="login-label" for="loginPassword" style="margin-bottom:0; color:#334155;">Şifre</label>
+                        <button type="button" onclick="switchAuthScreenTab('forgot')" style="background:none; border:none; color:#15803D; font-size:12px; font-weight:800; cursor:pointer; padding:0; text-decoration:underline;">
+                            Şifremi Unuttum?
+                        </button>
+                    </div>
                     <input type="password" id="loginPassword" name="password" class="login-input" placeholder="••••••" required autocomplete="current-password">
                 </div>
 
                 <button type="submit" class="login-btn" id="loginSubmitBtn">GİRİŞ YAP</button>
             </form>
 
+            <!-- ŞİFREMİ UNUTTUM / ŞİFRE YENİLEME FORMU -->
+            <form id="forgotPasswordForm" onsubmit="handleForgotPasswordSubmit(event)" style="display:none;">
+                <div style="font-size:12px; color:#14532D; font-weight:600; margin-bottom:12px; text-align:left; line-height:1.45; background:#F0FDF4; border:1.5px solid #86EFAC; padding:9px 11px; border-radius:8px;">
+                    Kayıtlı e-posta/kullanıcı adınızı ve ad soyadınızı doğrulayarak yeni şifrenizi hemen belirleyebilirsiniz.
+                </div>
+
+                <div class="login-field" style="margin-bottom:12px;">
+                    <label class="login-label" for="forgotIdentity" style="color:#334155;">Kayıtlı E-Posta veya Kullanıcı Adı *</label>
+                    <input type="text" id="forgotIdentity" class="login-input" placeholder="ornek@gmail.com veya kullanıcı adı" required autocapitalize="none" spellcheck="false">
+                </div>
+
+                <div class="login-field" style="margin-bottom:12px;">
+                    <label class="login-label" for="forgotFullName" style="color:#334155;">Kayıtlı Ad Soyad (Kimlik Doğrulama) *</label>
+                    <input type="text" id="forgotFullName" class="login-input" placeholder="Örn: Ahmet Yılmaz" required>
+                </div>
+
+                <div id="forgotOtpContainer" style="display:none; margin-bottom:12px; text-align:left;">
+                    <label class="login-label" for="forgotOtpCode" style="color:#0369A1;">E-Postanıza Gelen 6 Haneli Kod *</label>
+                    <input type="text" id="forgotOtpCode" class="login-input" placeholder="123456" maxlength="6" inputmode="numeric" style="letter-spacing:3px; font-weight:800; text-align:center;">
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; text-align:left;">
+                    <div>
+                        <label class="login-label" for="forgotNewPass" style="color:#334155;">Yeni Şifre *</label>
+                        <input type="password" id="forgotNewPass" class="login-input" placeholder="••••••" minlength="3" required autocomplete="new-password" style="padding:11px 12px; font-size:13px;">
+                    </div>
+                    <div>
+                        <label class="login-label" for="forgotNewPassConfirm" style="color:#334155;">Yeni Şifre (Tekrar) *</label>
+                        <input type="password" id="forgotNewPassConfirm" class="login-input" placeholder="••••••" minlength="3" required autocomplete="new-password" style="padding:11px 12px; font-size:13px;">
+                    </div>
+                </div>
+
+                <button type="submit" class="login-btn" id="forgotSubmitBtn">ŞİFREMİ YENİLE</button>
+                <button type="button" onclick="switchAuthScreenTab('login')" style="width:100%; margin-top:10px; padding:10px; background:#F8FAFC; border:1.5px solid #CBD5E1; border-radius:10px; color:#0F172A; font-size:12.5px; font-weight:800; cursor:pointer;">
+                    ← Giriş Ekranına Dön
+                </button>
+            </form>
+
+            <!-- KAYIT OL (ADMİN ONAYLI BAŞVURU) FORMU -->
+            <form id="registerForm" onsubmit="handleAuthRegister(event)" style="display:none;">
+                <div class="login-field" style="margin-bottom:12px;">
+                    <label class="login-label" for="regDisplayName" style="color:#334155;">Ad Soyad *</label>
+                    <input type="text" id="regDisplayName" class="login-input" placeholder="Örn: Ahmet Yılmaz" required autocomplete="name">
+                </div>
+
+                <div class="login-field" style="margin-bottom:12px;">
+                    <label class="login-label" for="regEmail" style="color:#334155;">E-Posta Adresi * (Onay Maili İçin)</label>
+                    <input type="email" id="regEmail" class="login-input" placeholder="ornek@gmail.com" required autocomplete="email" autocapitalize="none" spellcheck="false">
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; text-align:left;">
+                    <div>
+                        <label class="login-label" for="regUsername" style="color:#334155;">Kullanıcı Adı *</label>
+                        <input type="text" id="regUsername" class="login-input" placeholder="Örn: ahmet" required autocapitalize="none" spellcheck="false" style="padding:11px 12px; font-size:13px;">
+                    </div>
+                    <div>
+                        <label class="login-label" for="regPassword" style="color:#334155;">Şifre * (Min. 3 krk)</label>
+                        <input type="password" id="regPassword" class="login-input" placeholder="••••••" minlength="3" required autocomplete="new-password" style="padding:11px 12px; font-size:13px;">
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; text-align:left;">
+                    <div>
+                        <label class="login-label" for="regLevel" style="color:#334155;">Seviye</label>
+                        <select id="regLevel" class="login-input" style="padding:10px 12px; font-size:13px;">
+                            <option value="Başlangıç">Başlangıç</option>
+                            <option value="Orta Seviye" selected>Orta Seviye</option>
+                            <option value="İleri Seviye">İleri Seviye</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="login-label" for="regGender" style="color:#334155;">Cinsiyet</label>
+                        <select id="regGender" class="login-input" style="padding:10px 12px; font-size:13px;">
+                            <option value="Erkek" selected>Erkek</option>
+                            <option value="Kadın">Kadın</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="login-btn" id="registerSubmitBtn">KAYIT BAŞVURUSU GÖNDER</button>
+                <div style="font-size:11.5px; color:#475569; font-weight:600; margin-top:10px; line-height:1.4;">
+                    Başvurunuz yönetici onayına düşer. Onaylandığında e-posta adresinize bilgilendirme maili gönderilir.
+                </div>
+            </form>
+
             <div class="login-hint" style="color:var(--text-secondary); font-size:11.5px; margin-top:16px;">
-                🔒 Yetkili Girişi • Biyomekanik Performans Sistemi
+                🔒 Yetkili Girişi • Yönetici Onaylı Üyelik Sistemi
             </div>
         </div>
     </div>
@@ -71,7 +175,7 @@
                     <span class="canva-brand-monogram" aria-hidden="true" translate="no">Ç</span>
                     <div class="canva-brand-stack">
                         <span class="modern-brand-title" translate="no">Çelik Kodu</span>
-                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v246</span>
+                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v247</span>
                     </div>
                 </div>
                 <div class="modern-bar-actions">
@@ -174,12 +278,12 @@
                             </div>
 
                             <!-- 1C: Çelik Akışı Konsept Kartı (Yalnızca Çelik Akışı Seçildiğinde Açılır) -->
-                            <div id="flowConceptSection" style="display:none; margin-top:10px; margin-bottom:12px; background:linear-gradient(135deg, rgba(245,158,11,0.09) 0%, rgba(15,23,42,0.6) 100%); border:1.5px solid rgba(245,158,11,0.4); border-radius:14px; padding:14px 16px;">
+                            <div id="flowConceptSection" style="display:none; margin-top:10px; margin-bottom:12px; background:linear-gradient(135deg, rgba(245,158,11,0.14) 0%, #FFFBEB 100%); border:1.5px solid rgba(245,158,11,0.45); border-radius:14px; padding:14px 16px;">
                                 <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
                                     <span style="font-size:11px; font-weight:900; color:#F59E0B; letter-spacing:0.05em; text-transform:uppercase;">⚡ KESİNTİSİZ AKIŞ • 4 TUR DAMBIL KOMPLEKSİ</span>
-                                    <span style="font-size:11px; font-weight:800; background:rgba(245,158,11,0.18); color:#FCD34D; padding:2px 8px; border-radius:8px;">⏱️ 20 Dk</span>
+                                    <span style="font-size:11px; font-weight:800; background:rgba(245,158,11,0.2); color:#92400E; padding:2px 8px; border-radius:8px;">⏱️ 20 Dk</span>
                                 </div>
-                                <div style="font-size:13.5px; font-weight:800; color:#F8FAFC; margin-bottom:5px;">
+                                <div style="font-size:13.5px; font-weight:800; color:#0F172A; margin-bottom:5px;">
                                     ⚔️ 5 Bileşik İstasyon (Hinge ➔ Squat ➔ Press ➔ Lunge ➔ Halo)
                                 </div>
                                 <div style="font-size:12px; color:#94A3B8; line-height:1.45;">
@@ -506,7 +610,7 @@
                             <!-- TOP BAR: Title & Actions -->
                             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; border-bottom:1px solid var(--border); padding-bottom:12px;">
                                 <div>
-                                    <span style="font-size:14px; font-weight:800; color:#F3F6FA;" id="studioHeaderTitle">Özel Antrenman Taslağı</span>
+                                    <span style="font-size:14px; font-weight:800; color:#0F172A;" id="studioHeaderTitle">Özel Antrenman Taslağı</span>
                                     <p style="font-size:11px; color:var(--text-secondary); margin-top:2px;" id="studioHeaderSub">Bölge seçin, hareketleri ekleyin, dengeyi görün.</p>
                                 </div>
                                 <div style="display:flex; gap:6px; flex-wrap:wrap;">
@@ -519,7 +623,7 @@
                             <!-- SECTION 1: HEDEF BÖLGELER (Region Selectors) -->
                             <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:12px; margin-bottom:14px;">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                    <span style="font-size:12.5px; font-weight:800; color:#F3F6FA;">Hedef Bölgeler</span>
+                                    <span style="font-size:12.5px; font-weight:800; color:#0F172A;">Hedef Bölgeler</span>
                                     <div style="display:flex; gap:6px;">
                                         <button class="btn btn-outline" style="font-size:10px; padding:3px 8px;" onclick="selectPresetRegions('all')">Tüm Vücut</button>
                                         <button class="btn btn-outline" style="font-size:10px; padding:3px 8px;" onclick="selectPresetRegions('clear')">Temizle</button>
@@ -535,7 +639,7 @@
                             <!-- SECTION 2: BÖLGE DURUMU (Visual Progress: Seçildi / Kaldı) -->
                             <div id="studioRegionStatusBox" style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:12px; margin-bottom:14px;">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                    <span style="font-size:12.5px; font-weight:800; color:#F3F6FA;">Bölge Durumu</span>
+                                    <span style="font-size:12.5px; font-weight:800; color:#0F172A;">Bölge Durumu</span>
                                     <span id="studioRegionSummaryBadge" style="font-size:11px; font-weight:700;"></span>
                                 </div>
                                 <div id="studioRegionStatusGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:6px;">
@@ -573,7 +677,7 @@
                             <!-- SECTION 4: UYGUN HAREKETLER -->
                             <div>
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                    <div style="font-size:12.5px; font-weight:800; color:#F3F6FA;">
+                                    <div style="font-size:12.5px; font-weight:800; color:#0F172A;">
                                         Uygun Hareketler <span id="studioExTotalCount" style="color:var(--text-secondary); font-size:11px; font-weight:normal;"></span>
                                     </div>
                                     <label style="font-size:11px; color:var(--cyan); cursor:pointer; display:flex; align-items:center; gap:4px;">
@@ -647,7 +751,7 @@
                                 <button type="button" class="btn btn-gold cal-action-btn" onclick="openGoogleCalendarWeb()" title="Google Takvim uygulamasını aç">
                                     Google Takvim
                                 </button>
-                                <button type="button" class="btn btn-outline cal-action-btn" style="color:#F3F6FA;" onclick="downloadFullScheduleICS()" title="Tüm haftayı cihaz takvimine aktar (.ics)">
+                                <button type="button" class="btn btn-outline cal-action-btn" style="color:#0F172A;" onclick="downloadFullScheduleICS()" title="Tüm haftayı cihaz takvimine aktar (.ics)">
                                     Cihaza Aktar (.ics)
                                 </button>
                                 <button type="button" class="btn btn-outline cal-action-btn" style="padding:4px 8px;" onclick="openCalendarSyncModal()" title="Takvim Ayarları">
@@ -687,7 +791,7 @@
 
                     <!-- PANE 1: HAZIR VE KAYITLI PROGRAMLAR (HIDDEN) -->
                     <div id="libPanePrograms" style="display:none;">
-                        <h2 style="font-size:18px; font-weight:900; color:#F3F6FA; margin-bottom:12px;">Kayıtlı ve Hazır Programlar</h2>
+                        <h2 style="font-size:18px; font-weight:900; color:#0F172A; margin-bottom:12px;">Kayıtlı ve Hazır Programlar</h2>
                         
                         <h3 style="font-size:13px; font-weight:800; color:var(--gold); margin-bottom:10px;">Kişisel Kayıtlı Programlarım</h3>
                         <div id="savedProgramsList">
@@ -896,7 +1000,7 @@
                         <div class="theme-picker-grid" id="themePicker">
                             <div class="theme-pill" style="background:#f59e0b;" onclick="selectTheme('gold')">Altın Çelik</div>
                             <div class="theme-pill" style="background:#0284c7;" onclick="selectTheme('cyan')">Siber Mavi</div>
-                            <div class="theme-pill" style="background:#B6F059;" onclick="selectTheme('green')">Zümrüt Zırh</div>
+                            <div class="theme-pill" style="background:#16a34a;" onclick="selectTheme('green')">Zümrüt Zırh</div>
                             <div class="theme-pill" style="background:#e11d48;" onclick="selectTheme('red')">Lav Kırmızı</div>
                             <div class="theme-pill" style="background:#7c3aed;" onclick="selectTheme('purple')">Gladyatör Mor</div>
                         </div>
@@ -961,7 +1065,7 @@
                         <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
                             <span style="font-size:18px;" aria-hidden="true">🔒</span>
                             <div>
-                                <h4 style="font-size:13px; font-weight:800; color:#F3F6FA; margin:0;">Hesap Parolasını Değiştir</h4>
+                                <h4 style="font-size:13px; font-weight:800; color:#0F172A; margin:0;">Hesap Parolasını Değiştir</h4>
                                 <div style="font-size:11px; color:var(--text-secondary);">Salted SHA-256 kriptografik korumalı güvenli şifre</div>
                             </div>
                         </div>
@@ -986,7 +1090,7 @@
                             <div style="display:flex; align-items:center; gap:8px;">
                                 <span style="font-size:22px;" aria-hidden="true">🤖</span>
                                 <div>
-                                    <h4 style="font-size:13.5px; font-weight:800; color:#e9d5ff; margin:0;">Google Gemini AI Biyomekanik Motoru</h4>
+                                    <h4 style="font-size:13.5px; font-weight:800; color:#6B21A8; margin:0;">Google Gemini AI Biyomekanik Motoru</h4>
                                     <div style="font-size:11px; color:var(--text-secondary);">Antrenman ortasında akıllı alternatifler ve eklem koruyucu reçeteler</div>
                                 </div>
                             </div>
@@ -1030,8 +1134,17 @@
                     📊 Sporcu Çalışma Durumları
                 </button>
                 <button id="adminTabBtnManage" class="btn btn-outline" style="flex:1; font-size:12px; padding:9px 12px; font-weight:800; color:var(--text-secondary);" onclick="switchAdminModalTab('manage')">
-                    ⚙️ Sporcu Hesap Yönetimi
+                    ⚙️ Sporcu Hesap Yönetimi <span id="adminManagePendingBadge" style="display:none; background:#f59e0b; color:#090d16; font-size:10px; font-weight:900; padding:1px 6px; border-radius:99px; margin-left:4px;">0</span>
                 </button>
+            </div>
+
+            <!-- PENDING APPROVALS BANNER (ONAY BEKLEYEN KAYIT BAŞVURULARI) -->
+            <div id="adminPendingApprovalsSection" style="display:none; background:rgba(245, 158, 11, 0.1); border:1px solid rgba(245, 158, 11, 0.45); border-radius:12px; padding:12px 14px; margin-bottom:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <h3 style="font-size:13px; font-weight:800; color:var(--gold); margin:0;">⏳ Onay Bekleyen Kayıt Başvuruları</h3>
+                    <span id="adminPendingCountLabel" style="font-size:10.5px; font-weight:800; color:#fde68a;">0 Başvuru</span>
+                </div>
+                <div id="adminPendingApprovalsList" style="display:flex; flex-direction:column; gap:8px;"></div>
             </div>
 
             <!-- TAB 1: SPORCU ÇALIŞMA DURUMLARI (ÖZET PANELİ) -->
@@ -1041,7 +1154,7 @@
 
                 <!-- ATHLETES LIVE CARDS -->
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <h3 style="font-size:13px; font-weight:800; color:#F3F6FA; margin:0;">📋 Sporcuların Antrenman & Kilo Durumları</h3>
+                    <h3 style="font-size:13px; font-weight:800; color:#0F172A; margin:0;">📋 Sporcuların Antrenman & Kilo Durumları</h3>
                     <span style="font-size:10.5px; color:var(--text-secondary);">Hesap değiştirmeden canlı teftiş</span>
                 </div>
                 <div id="adminAthleteStatusContainer"></div>
@@ -1051,7 +1164,7 @@
             <div id="adminViewManage" style="display:none;">
                 <!-- ADD NEW USER SECTION -->
                 <div style="background:var(--bg-surface); border:1px solid var(--gold); border-radius:10px; padding:14px; margin-bottom:16px;">
-                    <h3 style="font-size:13px; font-weight:800; color:var(--gold); margin-bottom:10px;">➕ Yeni Sporcu Oluştur</h3>
+                    <h3 style="font-size:13px; font-weight:800; color:var(--gold); margin-bottom:10px;">➕ Yeni Sporcu Oluştur (Doğrudan Onaylı)</h3>
                     
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;" class="form-group">
                         <div>
@@ -1076,6 +1189,11 @@
                                 <option value="admin">Yönetici (Admin)</option>
                             </select>
                         </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">E-Posta Adresi (Opsiyonel)</label>
+                        <input type="email" id="newEmail" class="form-input" placeholder="ornek@gmail.com" autocapitalize="none">
                     </div>
 
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;" class="form-group">
@@ -1112,9 +1230,60 @@
                     </button>
                 </div>
 
+                <!-- COLLAPSIBLE EMAILJS / WEBHOOK AUTO-EMAIL SETTINGS -->
+                <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px 12px; margin-bottom:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleAdminEmailConfigAccordion()">
+                        <span style="font-size:12px; font-weight:800; color:#0F172A;">📧 Otomatik E-Posta Servisi Ayarları (EmailJS)</span>
+                        <span id="adminEmailConfigToggleLabel" style="font-size:11px; color:var(--cyan); font-weight:700;">▼ Göster</span>
+                    </div>
+                    <div id="adminEmailConfigBody" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed rgba(255,255,255,0.1); font-size:11.5px;">
+                        <p style="color:var(--text-secondary); margin:0 0 8px; line-height:1.4;">
+                            Onay verdiğinizde mailin arka planda <strong>hiçbir pencere açılmadan otomatik</strong> gitmesi için ücretsiz <a href="https://dashboard.emailjs.com" target="_blank" rel="noopener noreferrer" style="color:var(--cyan);">EmailJS</a> bilgilerinizi girebilirsiniz. Boş bırakırsanız onay anında hazır mail gönderim ekranı açılır.
+                        </p>
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-bottom:8px;">
+                            <input type="text" id="emailJsServiceId" class="form-input" placeholder="Service ID (service_...)" style="font-size:11px; padding:6px 8px;">
+                            <input type="text" id="emailJsTemplateId" class="form-input" placeholder="Template ID (template_...)" style="font-size:11px; padding:6px 8px;">
+                            <input type="text" id="emailJsPublicKey" class="form-input" placeholder="Public Key" style="font-size:11px; padding:6px 8px;">
+                        </div>
+                        <button type="button" class="btn btn-outline" style="width:100%; font-size:11px; padding:7px; border-color:var(--gold); color:var(--gold); font-weight:800;" onclick="saveAdminEmailJsConfig()">
+                            💾 Otomatik Mail Ayarlarını Kaydet
+                        </button>
+                    </div>
+                </div>
+
                 <!-- ATHLETES LIST -->
-                <h3 style="font-size:13px; font-weight:800; color:#F3F6FA; margin-bottom:10px;">📋 Kayıtlı Sporcu Hesapları</h3>
+                <h3 style="font-size:13px; font-weight:800; color:#0F172A; margin-bottom:10px;">📋 Kayıtlı Sporcu Hesapları</h3>
                 <div id="adminUserListContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== APPROVAL EMAIL DISPATCH MODAL ==================== -->
+    <div id="approvalEmailDispatchModal" class="modal-overlay" onclick="if(event.target === this) closeApprovalEmailModal()">
+        <div class="modal-box" style="max-width: 480px; width: 94%;">
+            <div class="modal-header">
+                <span class="modal-title" style="color:#10b981;">✅ Hesap Onaylandı & Onay Maili</span>
+                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeApprovalEmailModal()">✕</button>
+            </div>
+            <div style="font-size:12.5px; color:#0F172A; line-height:1.5; margin-bottom:12px;">
+                <strong id="approvalModalUserName" style="color:var(--gold);">Sporcu</strong> adlı kullanıcının hesabı aktif edildi ve buluta kaydedildi. Şimdi kullanıcıya onay e-postasını gönderin:
+            </div>
+            <div id="approvalModalAutoStatus" style="display:none; padding:8px 10px; border-radius:8px; font-size:11.5px; margin-bottom:10px;"></div>
+            <div style="background:#F8FAFC; border:1px solid #CBD5E1; border-radius:8px; padding:10px 12px; margin-bottom:14px; font-size:11.5px; color:var(--text-secondary);">
+                <div style="margin-bottom:4px;"><strong>Alıcı:</strong> <span id="approvalModalUserEmail" style="color:var(--cyan);"></span></div>
+                <div style="margin-bottom:6px;"><strong>Konu:</strong> <span id="approvalModalSubject" style="color:#0F172A;"></span></div>
+                <div id="approvalModalBodyPreview" style="white-space:pre-wrap; background:#F1F5F9; padding:8px; border-radius:6px; color:#334155; font-size:11px; max-height:130px; overflow-y:auto;"></div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <a id="approvalModalMailtoBtn" href="#" class="btn btn-gold" style="text-align:center; text-decoration:none; padding:11px; font-weight:800; font-size:12.5px; display:block;">
+                    📧 Varsayılan Mail Uygulaması İle Gönder
+                </a>
+                <a id="approvalModalGmailBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="text-align:center; text-decoration:none; padding:10px; font-weight:800; font-size:12px; border-color:var(--cyan); color:var(--cyan); display:block;">
+                    🌐 Gmail Web İle Tek Tıkla Gönder
+                </a>
+                <button type="button" class="btn btn-outline" style="padding:9px; font-size:11.5px;" onclick="copyApprovalMessageToClipboard()">
+                    📋 Onay Mesajını Kopyala
+                </button>
             </div>
         </div>
     </div>
@@ -1235,10 +1404,10 @@
             <!-- SEANS SAATİ & CANLI TAKVİM ENTEGRASYON KARTI -->
             <div id="schedDayTimingSection" style="background:#0E131B; border:1px solid rgba(255,255,255,0.12); border-radius:10px; padding:12px; margin-bottom:14px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <span style="font-size:12px; font-weight:800; color:#F3F6FA; display:flex; align-items:center; gap:6px;">
+                    <span style="font-size:12px; font-weight:800; color:#0F172A; display:flex; align-items:center; gap:6px;">
                         <span>🕒</span> Seans Saati & Takvim Durumu
                     </span>
-                    <span id="schedDaySyncStatusBadge" style="font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; background:rgba(255,255,255,0.06); color:#F3F6FA;">
+                    <span id="schedDaySyncStatusBadge" style="font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; background:#F1F5F9; color:#0F172A;">
                         Yerel Plan
                     </span>
                 </div>
@@ -1259,7 +1428,7 @@
                     <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 10px; color:var(--cyan); border-color:rgba(56,189,248,0.4);" onclick="openSingleDayDirectGoogleCalendar()" title="Google Takvimde Aç veya Ekle">
                         🔗 Takvimde Aç
                     </button>
-                    <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 10px; color:#F3F6FA;" onclick="downloadSingleDayICS()" title="Apple Takvim / iCal Olarak İndir">
+                    <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 10px; color:#0F172A;" onclick="downloadSingleDayICS()" title="Apple Takvim / iCal Olarak İndir">
                         📥 .ics
                     </button>
                 </div>
@@ -1272,7 +1441,7 @@
 
             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top:1px solid var(--border); padding-top:12px; flex-wrap:wrap;">
                 <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                    <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 12px; color:#fca5a5; border-color:rgba(239,68,68,0.3);" onclick="setDayAsRest()">
+                    <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 12px; color:#B91C1C; border-color:rgba(239,68,68,0.3);" onclick="setDayAsRest()">
                         🧘 Dinlenme Günü Yap
                     </button>
                     <button type="button" class="btn btn-danger-soft" style="font-size:12px; padding:8px 12px; font-weight:700;" onclick="cancelActiveWorkoutFromModal()">
@@ -1311,7 +1480,7 @@
             <!-- HIZLI AKSİYONLAR -->
             <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
                 <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px;">
-                    <div style="font-size:12.5px; font-weight:800; color:#F3F6FA; margin-bottom:4px;">🔄 İki Yönlü Canlı Eşitleme</div>
+                    <div style="font-size:12.5px; font-weight:800; color:#0F172A; margin-bottom:4px;">🔄 İki Yönlü Canlı Eşitleme</div>
                     <div style="font-size:11px; color:var(--text-secondary); margin-bottom:10px; line-height:1.5;">
                         • Google Takvim'deki "FitLab • Antrenmanlarım" takviminde taşıdığınız saat veya günleri FitLab'e çeker.<br>
                         • FitLab'deki yeni veya güncellenmiş antrenmanları Google Takvim'e yazar.
@@ -1328,12 +1497,12 @@
 
                 <!-- APPLE TAKVİM / iCAL / WEBCAL SEKMESİ -->
                 <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px;">
-                    <div style="font-size:12.5px; font-weight:800; color:#F3F6FA; margin-bottom:4px;">🍏 Apple Takvim / Mac & iPhone Desteği</div>
+                    <div style="font-size:12.5px; font-weight:800; color:#0F172A; margin-bottom:4px;">🍏 Apple Takvim / Mac & iPhone Desteği</div>
                     <div style="font-size:11px; color:var(--text-secondary); margin-bottom:10px; line-height:1.5;">
                         • <strong>Yöntem 1 (Önerilen):</strong> macOS ve iOS Sistem Ayarları > İnternet Hesapları'ndan Google hesabınızı açın; "FitLab • Antrenmanlarım" anında Apple Takvim uygulamanıza yansır.<br>
                         • <strong>Yöntem 2:</strong> Tüm haftalık programınızı anında Apple Takvim'e aktarmak için .ics dosyasını tek dokunuşla indirin.
                     </div>
-                    <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 12px; color:#F3F6FA;" onclick="downloadFullScheduleICS()">
+                    <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 12px; color:#0F172A;" onclick="downloadFullScheduleICS()">
                         📥 Tüm Haftalık Takvimi (.ics) İndir
                     </button>
                 </div>
@@ -1411,10 +1580,10 @@
                     <div style="flex:1; min-width:240px;">
                         <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
                             <span style="font-size:16px;">⚡</span>
-                            <span style="font-size:13.5px; font-weight:900; color:#F3F6FA;" id="gcalAutoSyncCardTitle">1 Kereye Mahsus Onay: Sıfır Tıklama & Tam Otomasyon</span>
+                            <span style="font-size:13.5px; font-weight:900; color:#0F172A;" id="gcalAutoSyncCardTitle">1 Kereye Mahsus Onay: Sıfır Tıklama & Tam Otomasyon</span>
                             <span class="auth-role-tag" id="gcalAutoSyncCardBadge" style="background:#10b981; color:#000; font-weight:900; font-size:9px;">CANLI API</span>
                         </div>
-                        <p style="font-size:11.5px; color:#a7f3d0; margin:0; line-height:1.5;" id="gcalAutoSyncCardDesc">
+                        <p style="font-size:11.5px; color:#065F46; margin:0; line-height:1.5;" id="gcalAutoSyncCardDesc">
                             Google hesabınızı <strong>1 kere bağlayın</strong>. Artık hiçbir dosya indirmekle veya butona basmakla uğraşmayın; FitLAB veya web üzerinden atanan tüm programlar Google Takviminize <strong>kendiliğinden otomatik yüklensin</strong>.
                         </p>
                     </div>
@@ -1429,12 +1598,12 @@
             <!-- YÖNTEM 1: TÜM HAFTAYI TEK SEFERDE AKTAR -->
             <div style="background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(15,23,42,0.8)); border: 1.5px solid var(--gold); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                    <div style="font-size:13.5px; font-weight:800; color:#F3F6FA; display:flex; align-items:center; gap:6px;">
+                    <div style="font-size:13.5px; font-weight:800; color:#0F172A; display:flex; align-items:center; gap:6px;">
                         <span>⚡ Yöntem 1: Tüm Haftayı Tek Seferde Aktar</span>
                         <span style="font-size:9.5px; background:var(--gold); color:#000; font-weight:900; padding:2px 6px; border-radius:4px;">ÖNERİLEN</span>
                     </div>
                 </div>
-                <div style="font-size:11.5px; color:#F3F6FA; line-height:1.5; margin-bottom:12px;">
+                <div style="font-size:11.5px; color:#0F172A; line-height:1.5; margin-bottom:12px;">
                     Haftadaki tüm antrenman seanslarını tek bir takvim dosyası (.ics) halinde indirir ve Google Takvim'in içe aktarma sayfasını açar.
                 </div>
                 
@@ -1442,7 +1611,7 @@
                     <button type="button" class="btn btn-gold" style="font-size:12px; padding:9px 16px; font-weight:900; box-shadow:0 0 15px rgba(245,158,11,0.3);" onclick="executeOneClickGoogleCalendarExport()">
                         🚀 Tek Tıkla İndir & Google Takvim'e Yükle
                     </button>
-                    <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 12px; color:#F3F6FA;" onclick="downloadFullScheduleICS()">
+                    <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 12px; color:#0F172A;" onclick="downloadFullScheduleICS()">
                         📥 Yalnızca Dosyayı İndir (.ics)
                     </button>
                 </div>
@@ -1457,7 +1626,7 @@
 
             <!-- YÖNTEM 2: GÜNLERİ TEK TEK GOOGLE TAKVİM'E EKLE -->
             <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
-                <div style="font-size:13px; font-weight:800; color:#F3F6FA; margin-bottom:4px;">
+                <div style="font-size:13px; font-weight:800; color:#0F172A; margin-bottom:4px;">
                     📅 Yöntem 2: Dosyasız — Günleri Tek Tıkla Google Takvim'e Ekle
                 </div>
                 <div style="font-size:11.5px; color:var(--text-secondary); margin-bottom:10px; line-height:1.4;">
@@ -1470,7 +1639,7 @@
 
             <!-- APPLE TAKVİM / MOBİL CİHAZ BİLGİSİ -->
             <div style="background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.25); border-radius: 10px; padding: 10px 14px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                <div style="font-size:11px; color:#a7f3d0; line-height:1.4;">
+                <div style="font-size:11px; color:#065F46; line-height:1.4;">
                     🍏 <strong>Mac veya iPhone mu kullanıyorsunuz?</strong> İndirilen <code>.ics</code> dosyasına çift dokunduğunuzda tüm hafta anında Apple Takvim uygulamanıza eklenir.
                 </div>
             </div>
@@ -1624,7 +1793,7 @@
                  ondragleave="this.classList.remove('dragover');" 
                  ondrop="handleScalePdfDrop(event)">
                 <div style="font-size:32px; margin-bottom:4px;">📊</div>
-                <div style="font-weight:900; font-size:14.5px; color:#F3F6FA;">Unique Health Raporu (PDF veya PNG) Yükleyin</div>
+                <div style="font-weight:900; font-size:14.5px; color:#0F172A;">Unique Health Raporu (PDF veya PNG) Yükleyin</div>
                 <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px; margin-bottom:12px;">
                     PDF dosyasını veya galerideki PNG/JPG görselini seçin, sürükleyin veya yapıştırın
                 </div>
@@ -1830,7 +1999,7 @@
             <div class="modal-header ai-architect-modal-header">
                 <div style="min-width:0; padding-right:8px;">
                     <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                        <span class="auth-role-tag" style="background:linear-gradient(135deg, rgba(168,85,247,0.35), rgba(245,158,11,0.25)); color:#e9d5ff; border:1px solid rgba(168,85,247,0.5); font-size:10px; font-weight:800; padding:2px 7px; border-radius:6px;">🧠 AKADEMİK AI MİMARI</span>
+                        <span class="auth-role-tag" style="background:linear-gradient(135deg, rgba(168,85,247,0.35), rgba(245,158,11,0.25)); color:#6B21A8; border:1px solid rgba(168,85,247,0.5); font-size:10px; font-weight:800; padding:2px 7px; border-radius:6px;">🧠 AKADEMİK AI MİMARI</span>
                         <span style="font-size:10.5px; color:var(--gold); font-weight:800;" id="aiModalVersionTag">Schumann (2022) Hibrit Model</span>
                     </div>
                     <span class="modal-title" style="font-size:16px; margin-top:3px; display:block; line-height:1.25;">Bodybuilding & Fonksiyonel Hibrit Doktrini</span>
@@ -1845,7 +2014,7 @@
                     <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleAiTelemetryAccordion()">
                         <div style="display:flex; align-items:center; gap:8px;">
                             <span style="font-size:13px;">📊</span>
-                            <strong style="font-size:12px; color:#F3F6FA;">Durum Telemetrisi</strong>
+                            <strong style="font-size:12px; color:#0F172A;">Durum Telemetrisi</strong>
                         </div>
                         <span id="aiTelemetryToggleLabel" style="font-size:11px; color:var(--cyan); font-weight:700;">▼ Göster</span>
                     </div>
@@ -1861,7 +2030,7 @@
                     <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; gap:8px;" onclick="toggleAiDiagnosticAccordion()">
                         <div style="display:flex; align-items:center; gap:8px; min-width:0;">
                             <span style="font-size:14px; flex-shrink:0;">🧠</span>
-                            <strong style="font-size:12px; color:#F3F6FA; line-height:1.35;" id="aiDiagnosticHeadline">AI Biyomekanik Teşhis Raporu</strong>
+                            <strong style="font-size:12px; color:#0F172A; line-height:1.35;" id="aiDiagnosticHeadline">AI Biyomekanik Teşhis Raporu</strong>
                         </div>
                         <span id="aiDiagnosticToggleLabel" style="font-size:11px; color:var(--cyan); font-weight:700; flex-shrink:0;">▼ Göster</span>
                     </div>
@@ -1874,7 +2043,7 @@
                                 <span>✨ Canlı Gemini Analizi</span>
                             </button>
                         </div>
-                        <div id="aiGeminiExtraReportContainer" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed rgba(168,85,247,0.3); font-size:12px; color:#F3F6FA; line-height:1.55;">
+                        <div id="aiGeminiExtraReportContainer" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed rgba(168,85,247,0.3); font-size:12px; color:#0F172A; line-height:1.55;">
                             <!-- Gemini live output will be streamed/rendered here -->
                         </div>
                     </div>
@@ -1882,14 +2051,14 @@
 
                 <!-- BÖLÜM 3: HİBRİT DOKTRİN SEÇİMİ -->
                 <div style="margin-bottom:10px;">
-                    <div style="font-size:12px; font-weight:800; color:#F3F6FA; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+                    <div style="font-size:12px; font-weight:800; color:#0F172A; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
                         <span>🎯</span> <span>Programın Temel Doktrinini Seç:</span>
                     </div>
                     <div class="doctrine-grid" id="doctrineSelectionGrid">
                         <!-- 1. Pure Bodybuilding -->
                         <div class="doctrine-card" id="docCard_bb_pure" onclick="selectAiDoctrine('bb_pure')" style="padding:9px 11px;">
                             <div style="display:flex; justify-content:space-between; align-items:center; gap:4px;">
-                                <strong style="color:#F3F6FA; font-size:12px;">🛡️ Saf BB</strong>
+                                <strong style="color:#0F172A; font-size:12px;">🛡️ Saf BB</strong>
                                 <span style="font-size:10.5px; color:var(--gold); font-weight:800;">%90 Kas</span>
                             </div>
                         </div>
@@ -1905,7 +2074,7 @@
                         <!-- 3. Balanced Hybrid (50/50) -->
                         <div class="doctrine-card" id="docCard_balanced_hybrid" onclick="selectAiDoctrine('balanced_hybrid')" style="padding:9px 11px;">
                             <div style="display:flex; justify-content:space-between; align-items:center; gap:4px;">
-                                <strong style="color:#F3F6FA; font-size:12px;">⚖️ Dengeli</strong>
+                                <strong style="color:#0F172A; font-size:12px;">⚖️ Dengeli</strong>
                                 <span style="font-size:10.5px; color:#38bdf8; font-weight:800;">%50/%50</span>
                             </div>
                         </div>
@@ -1913,7 +2082,7 @@
                         <!-- 4. Functional-Dominant Hybrid -->
                         <div class="doctrine-card" id="docCard_func_hybrid" onclick="selectAiDoctrine('func_hybrid')" style="padding:9px 11px;">
                             <div style="display:flex; justify-content:space-between; align-items:center; gap:4px;">
-                                <strong style="color:#F3F6FA; font-size:12px;">🔥 Fonk-Hibrit</strong>
+                                <strong style="color:#0F172A; font-size:12px;">🔥 Fonk-Hibrit</strong>
                                 <span style="font-size:10.5px; color:#f97316; font-weight:800;">%70 Fonk</span>
                             </div>
                         </div>
@@ -1921,7 +2090,7 @@
                         <!-- 5. Pure Functional -->
                         <div class="doctrine-card" id="docCard_func_pure" onclick="selectAiDoctrine('func_pure')" style="padding:9px 11px;">
                             <div style="display:flex; justify-content:space-between; align-items:center; gap:4px;">
-                                <strong style="color:#F3F6FA; font-size:12px;">🌪️ Saf Kondisyon & Fonksiyonel</strong>
+                                <strong style="color:#0F172A; font-size:12px;">🌪️ Saf Kondisyon & Fonksiyonel</strong>
                                 <span style="font-size:10.5px; color:#4ade80; font-weight:800;">%90 Fonk</span>
                             </div>
                         </div>
@@ -2051,7 +2220,7 @@
                     <div id="pickerCurrentExThumb" style="width:28px; height:28px; border-radius:5px; background:#000; overflow:hidden; flex-shrink:0; border:1px solid var(--border); display:flex; align-items:center; justify-content:center;">
                         🏋️
                     </div>
-                    <div id="pickerCurrentExName" style="font-size:13px; font-weight:800; color:#F3F6FA; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                    <div id="pickerCurrentExName" style="font-size:13px; font-weight:800; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                         -
                     </div>
                 </div>
@@ -2102,7 +2271,7 @@
                     <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
                         <span style="font-size:22px;">🤖</span>
                         <div>
-                            <div style="font-size:12.5px; font-weight:800; color:#e9d5ff;">Çelik Kodu Gemini AI Biyomekanik Koç</div>
+                            <div style="font-size:12.5px; font-weight:800; color:#6B21A8;">Çelik Kodu Gemini AI Biyomekanik Koç</div>
                             <div style="font-size:11px; color:var(--text-secondary);">Ekipman durumunuza, eklem ağrılarınıza ve hedefinize göre anında akıllı ikame üretin.</div>
                         </div>
                     </div>
@@ -2123,7 +2292,7 @@
                 <div id="geminiAiActiveBox" style="display:none;">
                     <div style="background:rgba(192, 132, 252, 0.06); border:1px solid rgba(192, 132, 252, 0.25); border-radius:8px; padding:8px 10px; margin-bottom:8px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                            <span style="font-size:11px; font-weight:800; color:#e9d5ff; display:flex; align-items:center; gap:5px;">
+                            <span style="font-size:11px; font-weight:800; color:#6B21A8; display:flex; align-items:center; gap:5px;">
                                 <span>🤖</span> <span>Biyomekanik Koça Durumunu Bildir:</span>
                             </span>
                             <span style="font-size:10px; color:var(--cyan); cursor:pointer; font-weight:700;" onclick="editGeminiApiKey()">⚙️ API Anahtarını Değiştir</span>
@@ -2191,7 +2360,7 @@
     <div id="exerciseBugReportModal" class="modal-overlay">
         <div class="modal-box" style="max-width: 520px;">
             <div class="modal-header">
-                <span class="modal-title" style="color:#fca5a5;">⚠️ Egzersiz Hata Bildirimi</span>
+                <span class="modal-title" style="color:#B91C1C;">⚠️ Egzersiz Hata Bildirimi</span>
                 <button type="button" class="modal-close" aria-label="Kapat" onclick="closeExerciseBugReportModal()">✕</button>
             </div>
 
@@ -2201,7 +2370,7 @@
                     <img id="bugReportImgPreview" src="" alt="Önizleme" style="max-width:100%; max-height:100%; object-fit:contain;">
                 </div>
                 <div>
-                    <div style="font-size:14.5px; font-weight:900; color:#F3F6FA;" id="bugReportExName">Egzersiz Adı</div>
+                    <div style="font-size:14.5px; font-weight:900; color:#0F172A;" id="bugReportExName">Egzersiz Adı</div>
                     <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;" id="bugReportExMeta">Ekipman • Kas</div>
                     <div style="font-size:10.5px; color:var(--gold); margin-top:2px;">Bulut: Firebase Firestore Havuzuna Aktarılacak</div>
                 </div>
@@ -2294,7 +2463,7 @@
 
             <div class="finisher-preset-card">
                 <div>
-                    <div style="font-size:13.5px; font-weight:800; color:#F3F6FA;">🛡️ Core & Karın Çelik Zırhı</div>
+                    <div style="font-size:13.5px; font-weight:800; color:#0F172A;">🛡️ Core & Karın Çelik Zırhı</div>
                     <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Plank + Hollow Body / Knee Raise</div>
                     <span class="finisher-badge">3 Set • 30-45s / 12 Tk</span>
                 </div>
@@ -2305,7 +2474,7 @@
 
             <div class="finisher-preset-card">
                 <div>
-                    <div style="font-size:13.5px; font-weight:800; color:#F3F6FA;">🦾 Kol Pump Süperset</div>
+                    <div style="font-size:13.5px; font-weight:800; color:#0F172A;">🦾 Kol Pump Süperset</div>
                     <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Dambıl Biceps Curl + Triceps Overhead</div>
                     <span class="finisher-badge">3 Set • 10-12 Tekrar</span>
                 </div>
@@ -2316,7 +2485,7 @@
 
             <div class="finisher-preset-card">
                 <div>
-                    <div style="font-size:13.5px; font-weight:800; color:#F3F6FA;">🦅 3D Omuz & Trapez Genişletme</div>
+                    <div style="font-size:13.5px; font-weight:800; color:#0F172A;">🦅 3D Omuz & Trapez Genişletme</div>
                     <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Lateral Raise + Face Pull / Halo</div>
                     <span class="finisher-badge">3 Set • 12-15 Tekrar</span>
                 </div>
@@ -2327,7 +2496,7 @@
 
             <div class="finisher-preset-card">
                 <div>
-                    <div style="font-size:13.5px; font-weight:800; color:#F3F6FA;">🧳 Kavrama & Trapez: Çift Ağırlık Taşıma</div>
+                    <div style="font-size:13.5px; font-weight:800; color:#0F172A;">🧳 Kavrama & Trapez: Çift Ağırlık Taşıma</div>
                     <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Dambıl / Kettlebell Farmer's Walk</div>
                     <span class="finisher-badge">3 Set • 45 Metre / Adım</span>
                 </div>
@@ -2338,7 +2507,7 @@
 
             <div class="finisher-preset-card">
                 <div>
-                    <div style="font-size:13.5px; font-weight:800; color:#F3F6FA;">🔥 Kalori & Patlayıcı Güç Finisher</div>
+                    <div style="font-size:13.5px; font-weight:800; color:#0F172A;">🔥 Kalori & Patlayıcı Güç Finisher</div>
                     <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Kettlebell / Dambıl Swing + Burpee</div>
                     <span class="finisher-badge">3 Set • 15 Swing + 8 Burpee</span>
                 </div>
@@ -2405,7 +2574,7 @@
         <div class="more-sheet-handle"></div>
         <div class="more-sheet-header">
             <div class="more-sheet-title">Menü & Ayarlar</div>
-            <button type="button" aria-label="Menüyü kapat" onclick="closeMoreSheet()" style="background:none; border:none; color:#F3F6FA; font-size:20px; font-weight:700; cursor:pointer;">&times;</button>
+            <button type="button" aria-label="Menüyü kapat" onclick="closeMoreSheet()" style="background:none; border:none; color:#0F172A; font-size:20px; font-weight:700; cursor:pointer;">&times;</button>
         </div>
         <div class="more-sheet-grid">
             <div class="more-sheet-btn" onclick="closeMoreSheet(); openExerciseLibraryTab();">
@@ -2457,7 +2626,7 @@
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
     <script src="js/exercises-db.js?v=242"></script>
-    <script src="js/app.js?v=242"></script>
+    <script src="js/app.js?v=247"></script>
     <script>
         function toggleHeaderPopupMenu(e) {
             if (e) e.stopPropagation();
@@ -2517,7 +2686,7 @@
                 </div>
                 <button type="button" onclick="document.getElementById('academicReportModal').style.display='none'" style="background:transparent; border:none; color:var(--text-secondary); font-size:20px; cursor:pointer; padding:4px 8px;">&times;</button>
             </div>
-            <div style="padding:18px 20px; overflow-y:auto; font-size:13px; line-height:1.65; color:#F3F6FA; white-space:pre-wrap; font-family:var(--font-sans);" id="academicReportModalContent">
+            <div style="padding:18px 20px; overflow-y:auto; font-size:13px; line-height:1.65; color:#0F172A; white-space:pre-wrap; font-family:var(--font-sans);" id="academicReportModalContent">
             </div>
             <div style="padding:14px 20px; border-top:1px solid var(--border, rgba(255,255,255,0.1)); display:flex; justify-content:flex-end;">
                 <button type="button" class="btn btn-gold" onclick="document.getElementById('academicReportModal').style.display='none'" style="padding:8px 18px; font-size:12.5px; font-weight:800;">
