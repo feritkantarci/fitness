@@ -15167,7 +15167,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         function normalizeAuthString(str) {
             if (!str) return '';
-            return String(str).trim().toLocaleLowerCase('tr-TR').normalize('NFC');
+            return String(str).trim().replace(/^@+/, '').toLocaleLowerCase('tr-TR').normalize('NFC');
         }
 
         function initAuthDatabase() {
@@ -15550,6 +15550,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             matchedUser.passwordHash = passHash;
             delete matchedUser.password;
             matchedUser.passwordUpdatedAt = Date.now();
+            matchedUser.updatedAt = Date.now();
 
             saveAuthUsers(users);
             pendingForgotOtpState = null;
@@ -15563,10 +15564,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             switchAuthScreenTab('login');
             const loginUnameEl = document.getElementById('loginUsername');
-            if (loginUnameEl) loginUnameEl.value = matchedUser.email || matchedUser.username;
+            if (loginUnameEl) loginUnameEl.value = matchedUser.username || matchedUser.email;
 
             if (successBox) {
-                successBox.innerText = `✅ Şifreniz başarıyla yenilendi! Yeni şifrenizle hemen giriş yapabilirsiniz.`;
+                successBox.innerText = `✅ Şifreniz başarıyla yenilendi! Kullanıcı adınız (@${matchedUser.username}) veya e-postanızla hemen giriş yapabilirsiniz.`;
                 successBox.style.display = 'block';
             }
         }
@@ -15592,8 +15593,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const level = levelEl ? levelEl.value : 'Orta Seviye';
             const gender = genderEl ? genderEl.value : 'Erkek';
 
-            if (!dname || !rawEmail || !pass) {
-                errorBox.innerText = "❌ Lütfen Ad Soyad, E-Posta ve Şifre alanlarını doldurun.";
+            if (!dname || !rawEmail || !rawUname || !pass) {
+                errorBox.innerText = "❌ Lütfen Ad Soyad, E-Posta, Kullanıcı Adı ve Şifre alanlarını doldurun.";
                 errorBox.style.display = 'block';
                 return;
             }
@@ -15616,9 +15617,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
 
             const users = getAuthUsers();
-            const derivedUname = rawUname
-                ? normalizeAuthString(rawUname)
-                : normalizeAuthString(rawEmail.split('@')[0]).replace(/[^a-z0-9_]/g, '') || ('sporcu_' + String(Date.now()).slice(-4));
+            const derivedUname = normalizeAuthString(rawUname);
 
             const existingByEmail = users.find(u => u.email && u.email.toLowerCase() === rawEmail);
             if (existingByEmail) {
@@ -15632,7 +15631,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
 
             const existingByUname = users.find(u => normalizeAuthString(u.username) === derivedUname);
-            const finalUname = existingByUname ? (derivedUname + '_' + String(Date.now()).slice(-3)) : derivedUname;
+            if (existingByUname) {
+                errorBox.innerText = `❌ "@${derivedUname}" kullanıcı adı zaten kullanımda! Lütfen farklı bir kullanıcı adı seçin.`;
+                errorBox.style.display = 'block';
+                return;
+            }
+            const finalUname = derivedUname;
 
             const salt = generateSecureSalt();
             const passHash = await sha256Hex(salt + pass);
@@ -15651,7 +15655,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 level: level,
                 gender: gender,
                 weights: { press: '12', squat: '18', row: '16', rdl: '18', swing: '14', lunge: '12' },
-                createdAt: Date.now()
+                createdAt: Date.now(),
+                updatedAt: Date.now()
             };
 
             users.push(newPendingUser);
@@ -15664,10 +15669,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             switchAuthScreenTab('login');
             const loginUnameEl = document.getElementById('loginUsername');
-            if (loginUnameEl) loginUnameEl.value = rawEmail;
+            if (loginUnameEl) loginUnameEl.value = finalUname;
 
             if (successBox) {
-                successBox.innerText = `✅ Kayıt başvurunuz alındı! Yönetici (Ferit) onayladıktan sonra (${rawEmail}) adresinize onay e-postası gönderilecek ve giriş yapabileceksiniz.`;
+                successBox.innerText = `✅ Kayıt başvurunuz alındı! Yönetici onayından sonra kullanıcı adınız (@${finalUname}) veya e-postanız (${rawEmail}) ile giriş yapabileceksiniz.`;
                 successBox.style.display = 'block';
             }
         }
@@ -16065,6 +16070,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             target.status = 'approved';
             target.approvedAt = Date.now();
+            target.updatedAt = Date.now();
             saveAuthUsers(users);
 
             renderPendingApprovalsBanner();
@@ -16603,6 +16609,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const oldUname = target.username;
             target.username = newUname;
             target.name = newName;
+            target.updatedAt = Date.now();
             if (newEmail) {
                 target.email = newEmail;
             } else {
@@ -16652,6 +16659,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             target.salt = salt;
             target.passwordHash = passHash;
             delete target.password;
+            target.updatedAt = Date.now();
             saveAuthUsers(users);
             renderAdminUserList();
             alert(`✅ @${target.username} kullanıcısının şifresi başarıyla "${cleanPass}" olarak güncellendi!`);
@@ -20254,7 +20262,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=247')
+                navigator.serviceWorker.register('./sw.js?v=248')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
