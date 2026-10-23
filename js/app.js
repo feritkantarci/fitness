@@ -2259,6 +2259,19 @@ Aşağıdaki JSON şemasında çıktı ver:
             const user = getActiveUser();
             const uid = user ? user.id : 'default';
 
+            // Onay öncesi her günün workout objesiyle draftSchedule referanslarını son kez senkronize et
+            if (Array.isArray(plan.days)) {
+                plan.days.forEach(dItem => {
+                    if (dItem && dItem.workout && plan.draftSchedule[dItem.dayIdx]) {
+                        const wObj = dItem.workout;
+                        plan.draftSchedule[dItem.dayIdx].customWorkout = wObj;
+                        plan.draftSchedule[dItem.dayIdx].exercises = wObj.exercises || [];
+                        plan.draftSchedule[dItem.dayIdx].desc = `${(wObj.exercises || []).length} Hareket • ${wObj.duration || 45} Dk`;
+                        plan.draftSchedule[dItem.dayIdx].updatedAt = Date.now();
+                    }
+                });
+            }
+
             if (mode === 'next') {
                 saveNextWeeklySchedule(JSON.parse(JSON.stringify(plan.draftSchedule)), uid);
                 activePlannerWeek = 'next';
@@ -2315,6 +2328,7 @@ Aşağıdaki JSON şemasında çıktı ver:
                     }
                 }
 
+                const nowTs = Date.now();
                 // Önce kalan günleri temizle (dinlenmeye çek), sadece geçmiş veya tamamlanmış günleri koru
                 availableDays.forEach(d => {
                     currentSched[d] = {
@@ -2322,7 +2336,8 @@ Aşağıdaki JSON şemasında çıktı ver:
                         title: '🧘 Dinlenme & Aktif Toparlanma',
                         type: 'rest',
                         desc: 'Hafif yürüyüş, mobilite veya tam istirahat',
-                        rest: true
+                        rest: true,
+                        updatedAt: nowTs
                     };
                 });
 
@@ -2331,7 +2346,8 @@ Aşağıdaki JSON şemasında çıktı ver:
                     const targetDay = assignedDays[i];
                     if (targetDay !== undefined) {
                         const wkClone = JSON.parse(JSON.stringify(wk));
-                        wkClone.id = 'ai_dyn_' + targetDay + '_' + Date.now() + '_' + i;
+                        wkClone.id = 'ai_dyn_' + targetDay + '_' + nowTs + '_' + i;
+                        wkClone.updatedAt = nowTs;
                         const cleanSub = wkClone.title ? wkClone.title.replace(/^⚔️\s*(Pzt|Sal|Çar|Per|Cum|Cmt|Paz):\s*/i, '') : 'Antrenman';
                         wkClone.title = `⚔️ ${DAY_NAMES_TR[targetDay]}: ${cleanSub}`;
                         currentSched[targetDay] = {
@@ -2341,7 +2357,8 @@ Aşağıdaki JSON şemasında çıktı ver:
                             desc: `${wkClone.exercises ? wkClone.exercises.length : 0} Hareket • ${wkClone.duration || 45} Dk`,
                             rest: false,
                             customWorkout: wkClone,
-                            exercises: wkClone.exercises
+                            exercises: wkClone.exercises,
+                            updatedAt: nowTs
                         };
                     }
                 });
@@ -2364,8 +2381,14 @@ Aşağıdaki JSON şemasında çıktı ver:
                 }
 
                 saveWeeklySchedule(currentSched, uid);
-                if (currentSched[todayIdx] && todayYMD && typeof saveDateScheduleOverride === 'function') {
-                    saveDateScheduleOverride(todayYMD, currentSched[todayIdx], uid);
+                if (typeof saveDateScheduleOverride === 'function') {
+                    availableDays.forEach(d => {
+                        const dDate = (typeof getDateForScheduleDay === 'function') ? getDateForScheduleDay(d, false) : null;
+                        const dYMD = (dDate && typeof formatDateYMD === 'function') ? formatDateYMD(dDate) : (d === todayIdx ? todayYMD : '');
+                        if (dYMD && currentSched[d]) {
+                            saveDateScheduleOverride(dYMD, currentSched[d], uid);
+                        }
+                    });
                 }
 
                 activePlannerWeek = 'current';
@@ -6036,12 +6059,13 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
 
         function openAlternativeModal(currentExId, scope = 'generated') {
             let currentEx = null;
-            if (scope === 'active' && activeWorkoutSession) {
+            if (scope === 'active' && activeWorkoutSession && Array.isArray(activeWorkoutSession.exercises)) {
                 currentEx = activeWorkoutSession.exercises.find(e => e.id === currentExId);
-            } else if ((scope === 'generated' || scope === 'weekly_preview') && currentGeneratedWorkout) {
+            } else if ((scope === 'generated' || scope === 'weekly_preview') && currentGeneratedWorkout && Array.isArray(currentGeneratedWorkout.exercises)) {
                 currentEx = currentGeneratedWorkout.exercises.find(e => e.id === currentExId);
-            } else {
-                currentEx = EXERCISES_DB.find(e => e.id === currentExId);
+            }
+            if (!currentEx) {
+                currentEx = EXERCISES_DB.find(e => e.id === currentExId) || (typeof findBestExerciseMatch === 'function' ? findBestExerciseMatch(currentExId) : null);
             }
             if (!currentEx) return;
 
@@ -6591,6 +6615,101 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
             box.style.display = isHidden ? 'block' : 'none';
         }
 
+        function syncWorkoutPersistenceAfterEdit(workout, scope = 'generated', oldExId = null, newEx = null) {
+            if (!workout || !Array.isArray(workout.exercises)) return;
+            const nowTs = Date.now();
+            workout.updatedAt = nowTs;
+            workout.exercises = assignAcademicBlockStructure(workout.exercises, workout.style || 'superset', workout.scheme);
+
+            // 1. Tek günlük oluşturulan antrenmanı localStorage'da da güncelle
+            if (workout === currentGeneratedWorkout) {
+                window.currentGeneratedWorkout = currentGeneratedWorkout;
+                try {
+                    localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(currentGeneratedWorkout));
+                } catch(e) {}
+            }
+
+            // 2. Haftalık AI program taslağındaki (pendingAiWeeklyPlan) hem days hem draftSchedule referanslarını senkronize et
+            if (window.pendingAiWeeklyPlan && Array.isArray(window.pendingAiWeeklyPlan.days)) {
+                window.pendingAiWeeklyPlan.days.forEach(dItem => {
+                    if (dItem && dItem.workout && (dItem.workout === workout || (workout.id && dItem.workout.id === workout.id))) {
+                        dItem.workout = workout;
+                        if (window.pendingAiWeeklyPlan.draftSchedule && window.pendingAiWeeklyPlan.draftSchedule[dItem.dayIdx]) {
+                            const slotObj = window.pendingAiWeeklyPlan.draftSchedule[dItem.dayIdx];
+                            slotObj.customWorkout = workout;
+                            slotObj.exercises = workout.exercises;
+                            slotObj.desc = `${workout.exercises.length} Hareket • ${workout.duration || 45} Dk`;
+                            slotObj.updatedAt = nowTs;
+                        }
+                    }
+                });
+            }
+
+            // 3. Canlı antrenman (active) ise set verilerini (activeWorkoutSetsData) ve bugünün takvim programını senkronize et
+            if (scope === 'active' && activeWorkoutSession) {
+                const user = typeof getActiveUser === 'function' ? getActiveUser() : null;
+                const userWeights = user ? (user.weights || {}) : {};
+                if (oldExId && newEx && oldExId !== newEx.id) {
+                    const prevSets = activeWorkoutSetsData[oldExId];
+                    const numSets = (Array.isArray(prevSets) && prevSets.length > 0)
+                        ? prevSets.length
+                        : ((newEx.targetSets || (activeWorkoutSession.scheme && activeWorkoutSession.scheme.sets)) || 3);
+                    let defaultReps = 10;
+                    const repsSpec = newEx.targetReps || (activeWorkoutSession.scheme && activeWorkoutSession.scheme.reps);
+                    if (repsSpec) {
+                        defaultReps = parseInt(String(repsSpec).split('-')[0].trim(), 10) || 10;
+                    }
+                    const defaultWeight = (newEx.weightKey && userWeights[newEx.weightKey]) ? (parseFloat(userWeights[newEx.weightKey]) || '') : '';
+                    activeWorkoutSetsData[newEx.id] = [];
+                    for (let s = 1; s <= numSets; s++) {
+                        activeWorkoutSetsData[newEx.id].push({
+                            setNo: s,
+                            weight: defaultWeight,
+                            reps: defaultReps,
+                            completed: false,
+                            completedAt: null
+                        });
+                    }
+                    delete activeWorkoutSetsData[oldExId];
+                } else if (!oldExId && newEx && !activeWorkoutSetsData[newEx.id]) {
+                    const numSets = (newEx.targetSets || (activeWorkoutSession.scheme && activeWorkoutSession.scheme.sets)) || 3;
+                    const defaultWeight = (newEx.weightKey && userWeights[newEx.weightKey]) ? (parseFloat(userWeights[newEx.weightKey]) || '') : '';
+                    activeWorkoutSetsData[newEx.id] = [];
+                    for (let s = 1; s <= numSets; s++) {
+                        activeWorkoutSetsData[newEx.id].push({
+                            setNo: s,
+                            weight: defaultWeight,
+                            reps: 10,
+                            completed: false,
+                            completedAt: null
+                        });
+                    }
+                } else if (oldExId && !newEx) {
+                    delete activeWorkoutSetsData[oldExId];
+                }
+
+                // Bugünün takvim programında da alternatif değişikliğini kalıcılaştır
+                try {
+                    const todayDate = new Date();
+                    const todayIdx = todayDate.getDay();
+                    const todayYMD = typeof formatDateYMD === 'function' ? formatDateYMD(todayDate) : '';
+                    const sched = typeof getWeeklySchedule === 'function' ? getWeeklySchedule() : null;
+                    if (sched && sched[todayIdx] && !sched[todayIdx].rest) {
+                        const clonedActive = JSON.parse(JSON.stringify(activeWorkoutSession));
+                        clonedActive.updatedAt = nowTs;
+                        sched[todayIdx].customWorkout = clonedActive;
+                        sched[todayIdx].exercises = clonedActive.exercises;
+                        sched[todayIdx].desc = `${clonedActive.exercises.length} Hareket • ${clonedActive.duration || 45} Dk`;
+                        sched[todayIdx].updatedAt = nowTs;
+                        saveWeeklySchedule(sched);
+                        if (todayYMD && typeof saveDateScheduleOverride === 'function') {
+                            saveDateScheduleOverride(todayYMD, sched[todayIdx]);
+                        }
+                    }
+                } catch(e) {}
+            }
+        }
+
         function selectExerciseFromPicker(newExId) {
             const newEx = EXERCISES_DB.find(e => e.id === newExId);
             if (!newEx) return;
@@ -6621,8 +6740,16 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
             // 2. DAY SCHEDULE MODAL SCOPE
             if (pickerContext.scope === 'day_schedule' && pickerContext.dayIdx !== null && pickerContext.dayIdx !== undefined) {
                 const dayIdx = pickerContext.dayIdx;
+                const preservedDateStr = activeSchedulingDateStr || (
+                    typeof getDateForScheduleDay === 'function' && typeof formatDateYMD === 'function'
+                        ? formatDateYMD(getDateForScheduleDay(dayIdx, activePlannerWeek === 'next'))
+                        : null
+                );
                 const schedule = activePlannerWeek === 'next' ? getNextWeeklySchedule() : getWeeklySchedule();
-                const plan = schedule[dayIdx];
+                let plan = (preservedDateStr && activePlannerWeek !== 'next' && typeof getPlanForDate === 'function')
+                    ? getPlanForDate(new Date(preservedDateStr + 'T00:00:00'))
+                    : schedule[dayIdx];
+                if (!plan || plan.rest) plan = schedule[dayIdx];
 
                 if (plan && !plan.rest) {
                     const details = getWorkoutDetailsForPlan(plan) || {};
@@ -6654,6 +6781,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
 
                     const cleanTitle = (details.title || plan.title || 'Özel Program').replace(/⚔️|Çelik Kodu/g, '').trim();
                     const progId = (plan.id && plan.id.startsWith('custom_')) ? plan.id : ('custom_day_' + dayIdx + '_' + Date.now());
+                    const nowTs = Date.now();
 
                     const updatedWorkout = {
                         id: progId,
@@ -6669,24 +6797,29 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                         ],
                         exercises: newExercises,
                         finisher: details.finisher || { name: "Balistik Bitiş", desc: "Maksimum tempolu seans." },
-                        updatedAt: Date.now(),
+                        updatedAt: nowTs,
                         isCustom: true
                     };
 
-                    // 1. Direct update on the weekly schedule
-                    schedule[dayIdx] = {
+                    // 1. Direct update on the weekly schedule & date override
+                    const updatedPlanObj = {
                         id: progId,
                         title: cleanTitle,
                         type: 'custom_saved',
                         desc: `${newExercises.length} Hareket • ${updatedWorkout.duration} Dk`,
                         rest: false,
                         customWorkout: updatedWorkout,
-                        exercises: newExercises
+                        exercises: newExercises,
+                        updatedAt: nowTs
                     };
+                    schedule[dayIdx] = updatedPlanObj;
                     if (activePlannerWeek === 'next') {
                         saveNextWeeklySchedule(schedule);
                     } else {
                         saveWeeklySchedule(schedule);
+                        if (preservedDateStr && typeof saveDateScheduleOverride === 'function') {
+                            saveDateScheduleOverride(preservedDateStr, updatedPlanObj);
+                        }
                     }
 
                     // 2. Also persist in custom programs library
@@ -6709,10 +6842,11 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
 
                     // 3. Update active day and calendar view
                     renderActiveWorkout();
+                    if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
                 }
 
                 closeExercisePickerModal();
-                openScheduleDayModal(dayIdx);
+                openScheduleDayModal(dayIdx, preservedDateStr);
                 showToast(`✅ "${newEx.name}" güncellendi ve kaydedildi!`);
                 playAlertSound();
                 return;
@@ -6725,15 +6859,24 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                 return;
             }
 
+            let oldReplacedId = null;
             if (pickerContext.mode === 'replace') {
                 const idx = workout.exercises.findIndex(e => e.id === pickerContext.targetExId);
                 if (idx !== -1) {
                     const oldEx = workout.exercises[idx];
+                    oldReplacedId = oldEx.id;
                     workout.exercises[idx] = {
                         ...newEx,
                         targetSets: oldEx.targetSets || 3,
                         targetReps: oldEx.targetReps || '8-12',
                         logs: oldEx.logs || []
+                    };
+                } else if (workout.finisher && (workout.finisher.exId === pickerContext.targetExId || (pickerContext.targetExId === 'db_farmers_walk' && workout.finisher.name && workout.finisher.name.toLowerCase().includes('farmer')))) {
+                    workout.finisher = {
+                        exId: newEx.id,
+                        family: typeof getExerciseMovementFamily === 'function' ? getExerciseMovementFamily(newEx) : 'custom_finisher',
+                        name: `${newEx.name} (Bitiş / Finisher)`,
+                        desc: newEx.cue || 'Maksimum tempolu bitiş seansı.'
                     };
                 }
             } else if (pickerContext.mode === 'add') {
@@ -6749,6 +6892,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                 }
             }
 
+            syncWorkoutPersistenceAfterEdit(workout, pickerContext.scope, oldReplacedId, newEx);
             closeExercisePickerModal();
 
             if (pickerContext.scope === 'active') {
@@ -6757,7 +6901,6 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 showToast(`✅ Aktif antrenmanda "${newEx.name}" alternatifi seçildi!`);
             } else if (pickerContext.scope === 'weekly_preview' && window.pendingAiWeeklyPlan) {
-                workout.exercises = assignAcademicBlockStructure(workout.exercises, workout.style || 'superset', workout.scheme);
                 renderPendingWeeklyPlanPreview();
                 showToast(`✅ "${newEx.name}" alternatifi seçildi!`);
             } else {
@@ -7217,10 +7360,11 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
             const ex = workout.exercises.find(e => e.id === exId);
             if (confirm(`"${ex ? ex.name : 'Bu egzersizi'}" antrenman programından kaldırmak istediğinize emin misiniz?`)) {
                 workout.exercises = workout.exercises.filter(e => e.id !== exId);
+                syncWorkoutPersistenceAfterEdit(workout, scope, exId, null);
                 if (scope === 'active') {
+                    saveActiveWorkoutStateToStorage();
                     renderActiveWorkout();
                 } else if (scope === 'weekly_preview' && window.pendingAiWeeklyPlan) {
-                    workout.exercises = assignAcademicBlockStructure(workout.exercises, workout.style || 'superset', workout.scheme);
                     window.expandedWeeklyExIndex = null;
                     renderPendingWeeklyPlanPreview();
                 } else {
@@ -7269,9 +7413,15 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
             }
 
             if (replacement) {
-                workout.exercises[exIndex] = Object.assign({}, replacement);
-                workout.exercises = assignAcademicBlockStructure(workout.exercises, workout.style || 'superset', workout.scheme);
+                const newExObj = Object.assign({}, replacement, {
+                    targetSets: currentEx.targetSets || 3,
+                    targetReps: currentEx.targetReps || '8-12',
+                    logs: currentEx.logs || []
+                });
+                workout.exercises[exIndex] = newExObj;
+                syncWorkoutPersistenceAfterEdit(workout, scope, currentExId, newExObj);
                 if (scope === 'active') {
+                    saveActiveWorkoutStateToStorage();
                     renderActiveWorkout();
                 } else if (scope === 'weekly_preview' && window.pendingAiWeeklyPlan) {
                     renderPendingWeeklyPlanPreview();
@@ -11134,13 +11284,17 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     const reps = rawEx.targetReps || rawEx.reps || '8-12';
                     const note = rawEx.note || rawEx.cue || '';
 
-                    if (matchedDb && (dayUsedIds.includes(matchedDb.id) || dayUsedFamilies.has(getExerciseMovementFamily(matchedDb)))) {
-                        // Aynı günde ikiz veya mükerrer hareket varsa aynı kategoriden farklı bir hareketle ikame et
+                    if (matchedDb && dayUsedIds.includes(matchedDb.id)) {
+                        // Aynı günde birebir aynı hareket ID'si tekrar ediyorsa aynı alt bölgeden farklı bir hareketle ikame et
+                        const targetSubKey = (typeof EXERCISE_ANATOMY_MAP !== 'undefined' && EXERCISE_ANATOMY_MAP[matchedDb.id])
+                            ? EXERCISE_ANATOMY_MAP[matchedDb.id].subKey
+                            : null;
                         const altPool = EXERCISES_DB.filter(e =>
                             !isExerciseExcludedByUser(e.id) &&
                             !dayUsedIds.includes(e.id) &&
                             !dayUsedFamilies.has(getExerciseMovementFamily(e)) &&
-                            e.category === matchedDb.category
+                            e.category === matchedDb.category &&
+                            (!targetSubKey || (typeof EXERCISE_ANATOMY_MAP !== 'undefined' && EXERCISE_ANATOMY_MAP[e.id] && EXERCISE_ANATOMY_MAP[e.id].subKey === targetSubKey))
                         );
                         if (altPool.length > 0) {
                             matchedDb = altPool[0];
@@ -11406,13 +11560,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 return clone;
             };
 
-            // 1. Directly attached custom workout object
-            if (plan.customWorkout && Array.isArray(plan.customWorkout.exercises) && plan.customWorkout.exercises.length > 0) {
+            // 1. Directly attached custom workout object (ignore legacy auto-synthesized ghost workouts)
+            if (plan.customWorkout && !plan.customWorkout.isSynthesized && Array.isArray(plan.customWorkout.exercises) && plan.customWorkout.exercises.length > 0) {
                 return normalizeWorkout(plan.customWorkout);
             }
 
             // 2. Direct exercises array on plan
-            if (Array.isArray(plan.exercises) && plan.exercises.length > 0) {
+            if (!plan.isSynthesized && Array.isArray(plan.exercises) && plan.exercises.length > 0) {
                 return normalizeWorkout(plan);
             }
 
@@ -11535,15 +11689,6 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (officialRoutines[planId]) {
                 return buildOfficial(officialRoutines[planId]);
             }
-            if (planTitle.includes('gün 1') || planTitle.includes('omuz')) {
-                return buildOfficial(officialRoutines.la_forja_day1);
-            }
-            if (planTitle.includes('gün 2') || planTitle.includes('sırt') || planTitle.includes('çekiş')) {
-                return buildOfficial(officialRoutines.la_forja_day2);
-            }
-            if (planTitle.includes('gün 3') || planTitle.includes('kompleks') || planTitle.includes('merdiven')) {
-                return buildOfficial(officialRoutines.la_forja_day3);
-            }
 
             // 8. If customRoutineState has exercises and matches
             if (typeof customRoutineState !== 'undefined' && Array.isArray(customRoutineState.exercises) && customRoutineState.exercises.length > 0) {
@@ -11561,50 +11706,6 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         isCustom: true
                     };
                 }
-            }
-
-            // 9. Intelligent Functional Synthesis Fallback
-            // If the user assigned a program to this day (not rest), construct a full balanced workout matching the title/desc
-            if (!plan.rest) {
-                let poolIds = [];
-                if (planTitle.includes('itiş') || planTitle.includes('push') || planTitle.includes('omuz') || planTitle.includes('göğüs')) {
-                    poolIds = ['db_overhead_press', 'bw_pushup', 'db_goblet_squat', 'mach_cable_lateral', 'bw_diamond_pushup', 'bw_hollow_body'];
-                } else if (planTitle.includes('çekiş') || planTitle.includes('pull') || planTitle.includes('sırt')) {
-                    poolIds = ['db_saw_row', 'db_rdl', 'db_swing', 'bw_pullup', 'db_farmers_walk', 'db_russian_twist'];
-                } else if (planTitle.includes('bacak') || planTitle.includes('alt') || planTitle.includes('lower') || planTitle.includes('squat')) {
-                    poolIds = ['db_goblet_squat', 'db_rdl', 'db_walking_lunge', 'bw_air_squat', 'bw_glute_bridge', 'bw_plank'];
-                } else if (planTitle.includes('core') || planTitle.includes('karın')) {
-                    poolIds = ['bw_plank', 'bw_hollow_body', 'db_russian_twist', 'bw_mountain_climber', 'bw_glute_bridge', 'db_farmers_walk'];
-                } else {
-                    poolIds = ['db_overhead_press', 'db_goblet_squat', 'db_saw_row', 'db_rdl', 'bw_pushup', 'bw_hollow_body'];
-                }
-
-                const synthesizedExercises = poolIds.map(id => EXERCISES_DB.find(e => e.id === id)).filter(Boolean);
-                const synthesizedWorkout = {
-                    id: planId || ('synth_' + Date.now()),
-                    title: plan.title || 'Çelik Kodu Fonksiyonel Program',
-                    split: 'custom',
-                    style: 'classic',
-                    duration: 45,
-                    scheme: { sets: 3, reps: '8 - 12', rest: 60 },
-                    exercises: synthesizedExercises,
-                    isSynthesized: true
-                };
-
-                // Cache onto plan so it is immediately remembered
-                plan.customWorkout = synthesizedWorkout;
-                try {
-                    const sched = getWeeklySchedule();
-                    for (let d = 0; d < 7; d++) {
-                        if (sched[d] && sched[d].id === plan.id) {
-                            sched[d].customWorkout = synthesizedWorkout;
-                            sched[d].desc = `${synthesizedExercises.length} Hareket • 45 Dk`;
-                        }
-                    }
-                    saveWeeklySchedule(sched);
-                } catch(e) {}
-
-                return synthesizedWorkout;
             }
 
             return null;
@@ -15270,7 +15371,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const overrides = getDateScheduleOverrides();
             if (overrides && overrides[dStr]) {
                 const ovPlan = overrides[dStr];
-                // Eğer ana haftalık planda daha fazla hareketli özel bir program varsa (örn. Cuma 7 hareket), eski 5 hareketli dateOverride kaydının onu ezmesine izin verme!
+                const baseTs = Number(basePlan.updatedAt || (basePlan.customWorkout && (basePlan.customWorkout.updatedAt || basePlan.customWorkout.createdAt)) || 0);
+                const ovTs = Number(ovPlan.updatedAt || (ovPlan.customWorkout && (ovPlan.customWorkout.updatedAt || ovPlan.customWorkout.createdAt)) || 0);
+                // Ana haftalık planda daha yeni bir güncelleme (örn: alternatif hareket seçimi) varsa eski dateOverride kaydının onu ezmesine izin verme!
+                if (baseTs > 0 && baseTs > ovTs) {
+                    saveDateScheduleOverride(dStr, basePlan);
+                    return basePlan;
+                }
                 if (!basePlan.rest && !ovPlan.rest && typeof getWorkoutDetailsForPlan === 'function') {
                     const baseDetails = getWorkoutDetailsForPlan(basePlan);
                     const ovDetails = getWorkoutDetailsForPlan(ovPlan);
@@ -18600,54 +18707,54 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             'kablo göğüs sıkıştırma (cable flyes / crossover)': { primary: 'Göğüs', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
             'pec deck kelebek': { primary: 'Göğüs', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
             'dips': { primary: 'Göğüs', pFactor: 0.85, sec: { 'Triceps': 0.40, 'Omuz': 0.30 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'MODERATE', lengthened: true },
-            'şınav (push-up)': { primary: 'Göğüs', pFactor: 0.65, sec: { 'Omuz': 0.25, 'Triceps': 0.25, 'Karın/Core': 0.20 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: false },
-            'klasik şınav (floor push-up)': { primary: 'Göğüs', pFactor: 0.65, sec: { 'Omuz': 0.25, 'Triceps': 0.25, 'Karın/Core': 0.20 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: false },
-            'şınav': { primary: 'Göğüs', pFactor: 0.65, sec: { 'Omuz': 0.25, 'Triceps': 0.25, 'Karın/Core': 0.20 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: false },
-            'decline şınav': { primary: 'Göğüs', pFactor: 0.75, sec: { 'Omuz': 0.35, 'Triceps': 0.25, 'Karın/Core': 0.25 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: false },
+            'şınav (push-up)': { primary: 'Göğüs', pFactor: 0.65, sec: { 'Omuz': 0.25, 'Triceps': 0.25 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: false },
+            'klasik şınav (floor push-up)': { primary: 'Göğüs', pFactor: 0.65, sec: { 'Omuz': 0.25, 'Triceps': 0.25 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: false },
+            'şınav': { primary: 'Göğüs', pFactor: 0.65, sec: { 'Omuz': 0.25, 'Triceps': 0.25 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: false },
+            'decline şınav': { primary: 'Göğüs', pFactor: 0.75, sec: { 'Omuz': 0.35, 'Triceps': 0.25 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: false },
             'dambıl pullover': { primary: 'Göğüs', pFactor: 0.50, sec: { 'Sırt': 0.50, 'Triceps': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: true },
 
             // 2. SIRT & ÇEKİŞ
             'barbell row': { primary: 'Sırt', pFactor: 1.0, sec: { 'Biceps': 0.40, 'Omuz': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: true },
             'pendlay row': { primary: 'Sırt', pFactor: 1.0, sec: { 'Biceps': 0.35, 'Omuz': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: false },
-            'dambıl saw row': { primary: 'Sırt', pFactor: 1.0, sec: { 'Biceps': 0.40, 'Karın/Core': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'dambıl saw row': { primary: 'Sırt', pFactor: 1.0, sec: { 'Biceps': 0.40 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
             'göğüs destekli row': { primary: 'Sırt', pFactor: 1.0, sec: { 'Biceps': 0.40, 'Omuz': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
-            'gorilla row': { primary: 'Sırt', pFactor: 1.0, sec: { 'Biceps': 0.40, 'Karın/Core': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: true },
+            'gorilla row': { primary: 'Sırt', pFactor: 1.0, sec: { 'Biceps': 0.40 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: true },
             'lat pulldown': { primary: 'Sırt', pFactor: 1.0, sec: { 'Biceps': 0.35, 'Omuz': 0.20 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
             'kablo row': { primary: 'Sırt', pFactor: 1.0, sec: { 'Biceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
-            'barfiks (pull-up)': { primary: 'Sırt', pFactor: 0.85, sec: { 'Biceps': 0.40, 'Karın/Core': 0.25 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: true },
-            'yatay barfiks': { primary: 'Sırt', pFactor: 0.70, sec: { 'Biceps': 0.35, 'Karın/Core': 0.20 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: true },
+            'barfiks (pull-up)': { primary: 'Sırt', pFactor: 0.85, sec: { 'Biceps': 0.40 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: true },
+            'yatay barfiks': { primary: 'Sırt', pFactor: 0.70, sec: { 'Biceps': 0.35 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: true },
             'chin-up (ters barfiks)': { primary: 'Biceps', pFactor: 0.85, sec: { 'Sırt': 0.65 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: true },
             'renegade row': { primary: 'Sırt', pFactor: 0.70, sec: { 'Karın/Core': 0.70, 'Biceps': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: false },
             'renegade row + şınav': { primary: 'Sırt', pFactor: 0.60, sec: { 'Göğüs': 0.50, 'Karın/Core': 0.60, 'Triceps': 0.25 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'MODERATE', lengthened: false },
 
             // 3. OMUZ
-            'barbell omuz presi': { primary: 'Omuz', pFactor: 1.0, sec: { 'Triceps': 0.35, 'Karın/Core': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
-            'dambıl omuz presi': { primary: 'Omuz', pFactor: 1.0, sec: { 'Triceps': 0.35, 'Karın/Core': 0.20 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
-            'kettlebell press': { primary: 'Omuz', pFactor: 1.0, sec: { 'Triceps': 0.35, 'Karın/Core': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
-            'kettlebell strict overhead press': { primary: 'Omuz', pFactor: 1.0, sec: { 'Triceps': 0.35, 'Karın/Core': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'barbell omuz presi': { primary: 'Omuz', pFactor: 1.0, sec: { 'Triceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'dambıl omuz presi': { primary: 'Omuz', pFactor: 1.0, sec: { 'Triceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'kettlebell press': { primary: 'Omuz', pFactor: 1.0, sec: { 'Triceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'kettlebell strict overhead press': { primary: 'Omuz', pFactor: 1.0, sec: { 'Triceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
             'arnold press': { primary: 'Omuz', pFactor: 1.0, sec: { 'Triceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
             'barbell push press': { primary: 'Omuz', pFactor: 0.80, sec: { 'Triceps': 0.30, 'Ön Bacak': 0.25 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
             'dambıl push press': { primary: 'Omuz', pFactor: 0.80, sec: { 'Triceps': 0.30, 'Ön Bacak': 0.25 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
             'dambıl lateral raise': { primary: 'Omuz', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: false },
             'kablo lateral raise': { primary: 'Omuz', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
             'face pull': { primary: 'Omuz', pFactor: 0.80, sec: { 'Sırt': 0.50 }, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
-            'diz üstü plaka ön omuz kaldırış': { primary: 'Omuz', pFactor: 0.80, sec: { 'Karın/Core': 0.30 }, type: 'ISOLATION', sfr: 'HIGH', lengthened: false },
-            'kettlebell halo': { primary: 'Omuz', pFactor: 0.40, sec: { 'Karın/Core': 0.40 }, type: 'MOBILITY_STABILITY', sfr: 'HIGH', lengthened: false },
-            'dambıl snatch': { primary: 'Omuz', pFactor: 0.50, sec: { 'Arka Bacak': 0.30, 'Glute': 0.30, 'Karın/Core': 0.30 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
-            'kettlebell snatch': { primary: 'Omuz', pFactor: 0.50, sec: { 'Arka Bacak': 0.30, 'Glute': 0.30, 'Karın/Core': 0.30 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
+            'diz üstü plaka ön omuz kaldırış': { primary: 'Omuz', pFactor: 0.80, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: false },
+            'kettlebell halo': { primary: 'Omuz', pFactor: 0.40, sec: {}, type: 'MOBILITY_STABILITY', sfr: 'HIGH', lengthened: false },
+            'dambıl snatch': { primary: 'Omuz', pFactor: 0.50, sec: { 'Arka Bacak': 0.30, 'Glute': 0.30 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
+            'kettlebell snatch': { primary: 'Omuz', pFactor: 0.50, sec: { 'Arka Bacak': 0.30, 'Glute': 0.30 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
             'dambıl clean & press': { primary: 'Omuz', pFactor: 0.70, sec: { 'Glute': 0.35, 'Arka Bacak': 0.30, 'Triceps': 0.25 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
             'step-up + omuz presi': { primary: 'Ön Bacak', pFactor: 0.70, sec: { 'Omuz': 0.60, 'Glute': 0.40 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: false },
 
             // 4. ÖN BACAK (QUAD DOMINANT)
-            'barbell back squat': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.50, 'Karın/Core': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: true },
-            'barbell front squat': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.40, 'Karın/Core': 0.40 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
-            'çift dambıl ön squat (front squat)': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.40, 'Karın/Core': 0.40 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
-            'barbell zercher squat': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.40, 'Karın/Core': 0.50, 'Biceps': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: true },
-            'dambıl goblet squat': { primary: 'Ön Bacak', pFactor: 0.90, sec: { 'Glute': 0.40, 'Karın/Core': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
-            'kettlebell goblet squat': { primary: 'Ön Bacak', pFactor: 0.90, sec: { 'Glute': 0.40, 'Karın/Core': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'barbell back squat': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.50 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: true },
+            'barbell front squat': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.40 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'çift dambıl ön squat (front squat)': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.40 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'barbell zercher squat': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.40, 'Biceps': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: true },
+            'dambıl goblet squat': { primary: 'Ön Bacak', pFactor: 0.90, sec: { 'Glute': 0.40 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'kettlebell goblet squat': { primary: 'Ön Bacak', pFactor: 0.90, sec: { 'Glute': 0.40 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
             '45° leg press': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
             'bulgar split squat': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.60 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
-            'walking lunge': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.50, 'Karın/Core': 0.25 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'walking lunge': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.50 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
             'reverse lunge': { primary: 'Ön Bacak', pFactor: 1.0, sec: { 'Glute': 0.50 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
             'leg extension': { primary: 'Ön Bacak', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: false },
             'air squat': { primary: 'Ön Bacak', pFactor: 0.30, sec: { 'Glute': 0.20 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: true },
@@ -18657,17 +18764,17 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             // 5. ARKA BACAK (HAMSTRINGS)
             'barbell rdl': { primary: 'Arka Bacak', pFactor: 1.0, sec: { 'Glute': 0.50, 'Sırt': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
             'dambıl rdl': { primary: 'Arka Bacak', pFactor: 1.0, sec: { 'Glute': 0.50, 'Sırt': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
-            'tek bacak rdl': { primary: 'Arka Bacak', pFactor: 1.0, sec: { 'Glute': 0.60, 'Karın/Core': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
-            'barbell deadlift': { primary: 'Arka Bacak', pFactor: 1.0, sec: { 'Glute': 0.65, 'Sırt': 0.50, 'Karın/Core': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'LOW', lengthened: true },
+            'tek bacak rdl': { primary: 'Arka Bacak', pFactor: 1.0, sec: { 'Glute': 0.60 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'barbell deadlift': { primary: 'Arka Bacak', pFactor: 1.0, sec: { 'Glute': 0.65, 'Sırt': 0.50 }, type: 'HEAVY_COMPOUND', sfr: 'LOW', lengthened: true },
             'leg curl': { primary: 'Arka Bacak', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
             'barbell hang power clean': { primary: 'Arka Bacak', pFactor: 0.50, sec: { 'Glute': 0.50, 'Omuz': 0.30, 'Sırt': 0.30 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
-            'kettlebell clean': { primary: 'Glute', pFactor: 0.50, sec: { 'Arka Bacak': 0.40, 'Karın/Core': 0.30 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
+            'kettlebell clean': { primary: 'Glute', pFactor: 0.50, sec: { 'Arka Bacak': 0.40 }, type: 'BALLISTIC_POWER', sfr: 'MODERATE', lengthened: false },
 
             // 6. KALÇA (GLUTES)
             'barbell hip thrust': { primary: 'Glute', pFactor: 1.0, sec: { 'Arka Bacak': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: false },
             'glute bridge': { primary: 'Glute', pFactor: 1.0, sec: { 'Arka Bacak': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: false },
-            'dambıl swing': { primary: 'Glute', pFactor: 0.60, sec: { 'Arka Bacak': 0.40, 'Karın/Core': 0.25 }, type: 'BALLISTIC_POWER', sfr: 'HIGH', lengthened: true },
-            'kettlebell swing': { primary: 'Glute', pFactor: 0.60, sec: { 'Arka Bacak': 0.40, 'Karın/Core': 0.25 }, type: 'BALLISTIC_POWER', sfr: 'HIGH', lengthened: true },
+            'dambıl swing': { primary: 'Glute', pFactor: 0.60, sec: { 'Arka Bacak': 0.40 }, type: 'BALLISTIC_POWER', sfr: 'HIGH', lengthened: true },
+            'kettlebell swing': { primary: 'Glute', pFactor: 0.60, sec: { 'Arka Bacak': 0.40 }, type: 'BALLISTIC_POWER', sfr: 'HIGH', lengthened: true },
 
             // 7. BICEPS
             'incline dambıl curl': { primary: 'Biceps', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
@@ -18680,7 +18787,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             'dambıl skullcrusher': { primary: 'Triceps', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
             'halat triceps pushdown': { primary: 'Triceps', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: false },
             'dar tutuş bench': { primary: 'Triceps', pFactor: 0.85, sec: { 'Göğüs': 0.50, 'Omuz': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
-            'elmas şınav': { primary: 'Triceps', pFactor: 0.70, sec: { 'Göğüs': 0.35, 'Karın/Core': 0.20 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: false },
+            'elmas şınav': { primary: 'Triceps', pFactor: 0.70, sec: { 'Göğüs': 0.35 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: false },
 
             // 9. KALF
             'calf raise': { primary: 'Kalf', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
@@ -18745,7 +18852,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             } else if (text.includes('şınav') || text.includes('push-up') || text.includes('pushup')) {
                 primary = 'Göğüs';
                 pFactor = 0.65;
-                sec = { 'Omuz': 0.25, 'Triceps': 0.25, 'Karın/Core': 0.20 };
+                sec = { 'Omuz': 0.25, 'Triceps': 0.25 };
                 type = 'BODYWEIGHT_STRENGTH';
             } else if (text.includes('row') || text.includes('lat') || text.includes('barfiks') || text.includes('pull-up') || text.includes('çekiş')) {
                 primary = 'Sırt';
@@ -18922,7 +19029,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 const sessionTitle = log.title || log.workoutName || 'Antrenman Seansı';
 
                 log.exercises.forEach(ex => {
-                    const cSets = Number(ex.completedSetsCount) || (Array.isArray(ex.sets) ? ex.sets.filter(s => s.completed || parseInt(s.reps, 10) > 0).length : 0) || Number(ex.targetSets) || Number(ex.sets) || 0;
+                    const cSets = (ex.completedSetsCount !== undefined && ex.completedSetsCount !== null)
+                        ? Number(ex.completedSetsCount)
+                        : (Array.isArray(ex.sets) ? ex.sets.filter(s => s && s.completed).length : (Number(ex.sets) || 0));
                     if (cSets <= 0) return;
 
                     const spec = resolveExerciseBiomechanics(ex.name, ex.muscle, ex.category);
@@ -18975,7 +19084,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const dayKeys = [1, 2, 3, 4, 5, 6, 0];
             let totalPlannedSessions = 0;
             dayKeys.forEach(dKey => {
-                const plan = schedule[dKey];
+                const offsetFromMon = dKey === 0 ? 6 : (dKey - 1);
+                const dayDate = new Date(bounds.monday);
+                dayDate.setDate(bounds.monday.getDate() + offsetFromMon);
+
+                const plan = (sourceMode !== 'schedule_full' && typeof getPlanForDate === 'function')
+                    ? getPlanForDate(dayDate)
+                    : schedule[dKey];
                 if (!plan || plan.rest) return;
 
                 const planIso = getIsoDay(dKey);
@@ -19046,8 +19161,15 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 const effectiveScheduledTotal = Math.round((data.scheduledTotalSets + data.scheduledSecondarySets) * 10) / 10;
 
                 let evalVolume = effectiveProjected;
-                if (sourceMode === 'week_done') evalVolume = effectiveDone;
-                if (sourceMode === 'schedule_full') evalVolume = effectiveScheduledTotal;
+                let evalDirectVolume = data.doneDirectSets + data.planDirectSets;
+                if (sourceMode === 'week_done') {
+                    evalVolume = effectiveDone;
+                    evalDirectVolume = data.doneDirectSets;
+                }
+                if (sourceMode === 'schedule_full') {
+                    evalVolume = effectiveScheduledTotal;
+                    evalDirectVolume = data.scheduledTotalSets;
+                }
 
                 if (effectiveDone > 0) summary.workedCount++;
 
@@ -19064,12 +19186,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     if (effectiveScheduledTotal > 0 && sourceMode === 'week_done') {
                         statusDesc = `Planda ${effectiveScheduledTotal.toFixed(1)} set var ancak henüz seans yapılmadı.`;
                     }
-                } else if (evalVolume < cfg.optimalMin) {
+                } else if (evalVolume < cfg.optimalMin || evalDirectVolume === 0) {
                     status = 'insufficient';
-                    statusBadge = '⚠️ Yetersiz Hacim';
+                    statusBadge = evalDirectVolume === 0 ? '⚠️ Doğrudan Hareket Yok (Sadece Destek)' : '⚠️ Yetersiz Hacim';
                     statusColor = '#f59e0b';
                     statusBg = 'rgba(245, 158, 11, 0.12)';
-                    statusDesc = `Minimum gelişim eşiğinin altında (${evalVolume.toFixed(1)}/${cfg.optimalMin} set).`;
+                    statusDesc = evalDirectVolume === 0
+                        ? `Bu kas grubu için doğrudan bir egzersiz yapılmadı/planlanmadı (yalnızca diğer hareketlerden ${evalVolume.toFixed(1)} set ikincil destek aldı).`
+                        : `Minimum gelişim eşiğinin altında (${evalVolume.toFixed(1)}/${cfg.optimalMin} set).`;
                     summary.insufficientCount++;
                     insufficientNames.push(cfg.name);
                 } else if (evalVolume <= cfg.optimalMax) {
@@ -19502,7 +19626,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
         };
 
-        function getExerciseCompartmentForMuscle(muscleId, exNameOrId) {
+        function getExerciseCompartmentForMuscle(muscleId, exNameOrId, allowFallback = true) {
             const def = MUSCLE_DIAGRAM_DEFS[muscleId];
             if (!def) return null;
 
@@ -19536,7 +19660,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 }
             }
 
-            return def.columns[0].key;
+            return allowFallback ? def.columns[0].key : null;
         }
 
         function renderMuscleCompartmentDiagram(m) {
@@ -19555,7 +19679,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             });
 
             (m.contributions || []).forEach(c => {
-                const cKey = getExerciseCompartmentForMuscle(m.id, c.exercise);
+                // Yalnızca doğrudan (Birincil) hareketler veya o kas grubunun alt başıyla açıkça eşleşen hareketler alt baş kutusunu aktif eder
+                const isPrimaryRole = (c.role === 'Birincil');
+                const cKey = getExerciseCompartmentForMuscle(m.id, c.exercise, isPrimaryRole);
                 if (cKey && compMap[cKey]) {
                     compMap[cKey].earnedSets += (Number(c.earnedSets) || 0);
                     compMap[cKey].doneExs.add(c.exercise);
@@ -19564,7 +19690,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             if ((!m.contributions || m.contributions.length === 0) && m.doneExercises && Array.isArray(m.doneExercises)) {
                 m.doneExercises.forEach(exName => {
-                    const cKey = getExerciseCompartmentForMuscle(m.id, exName);
+                    const cKey = getExerciseCompartmentForMuscle(m.id, exName, true);
                     if (cKey && compMap[cKey]) {
                         compMap[cKey].doneExs.add(exName);
                         if (compMap[cKey].earnedSets === 0) compMap[cKey].earnedSets = 1;
@@ -19573,7 +19699,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
 
             (m.plannedExercises || []).forEach(pe => {
-                const cKey = getExerciseCompartmentForMuscle(m.id, pe.name);
+                const cKey = getExerciseCompartmentForMuscle(m.id, pe.name, true);
                 if (cKey && compMap[cKey]) {
                     compMap[cKey].plannedCount += 1;
                     compMap[cKey].plannedExs.add(pe.name);
@@ -19651,7 +19777,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             muscles.forEach(m => { mMap[m.id] = m; });
 
             const getStyle = (id) => {
-                const m = mMap[id] || { status: 'unworked', effectiveDone: 0 };
+                const m = mMap[id] || { status: 'unworked', effectiveDone: 0, effectiveTotal: 0 };
+                const shownSets = (m.effectiveTotal !== undefined ? m.effectiveTotal : (m.effectiveDone || 0));
                 let fill = '#EF4444';
                 let stroke = '#DC2626';
                 let animClass = 'muscle-unworked-anim';
@@ -19673,7 +19800,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     stroke,
                     fillOpacity,
                     cls: `anatomy-muscle ${animClass} ${isSel ? 'active-selected' : ''}`,
-                    tooltip: `${m.name || id}: ${m.effectiveDone ? m.effectiveDone.toFixed(1) : 0} Set (${m.statusLabel || m.status})`
+                    tooltip: `${m.name || id}: ${shownSets ? shownSets.toFixed(1) : 0} Set (${m.statusBadge || m.status})`
                 };
             };
 
@@ -19749,13 +19876,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const chipsHTML = `
                 <div class="anatomy-chips-scroll">
                     ${analysis.muscles.map(m => {
+                        const shownSets = (m.effectiveTotal !== undefined ? m.effectiveTotal : m.effectiveDone);
                         let dotColor = (m.status === 'optimal' || m.status === 'high') ? '#16A34A' : (m.status === 'insufficient' ? '#F59E0B' : '#EF4444');
                         let isSelected = (m.id === activeId);
                         return `
-                            <button type="button" class="anatomy-chip ${isSelected ? 'selected' : ''}" onclick="selectAnatomyMuscle('${m.id}')" title="${escapeHTML(m.name)}: ${m.effectiveDone.toFixed(1)} Set (${m.statusLabel})">
+                            <button type="button" class="anatomy-chip ${isSelected ? 'selected' : ''}" onclick="selectAnatomyMuscle('${m.id}')" title="${escapeHTML(m.name)}: ${shownSets.toFixed(1)} Set (${m.statusBadge || ''})">
                                 <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${dotColor}; flex-shrink:0;"></span>
                                 <span class="chip-name">${escapeHTML(m.name)}</span>
-                                <span class="chip-sets">${m.effectiveDone.toFixed(0)}s</span>
+                                <span class="chip-sets">${shownSets.toFixed(0)}s</span>
                             </button>
                         `;
                     }).join('')}
@@ -19766,6 +19894,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             let focusCardHTML = '';
             if (activeMuscle) {
                 const m = activeMuscle;
+                const shownSets = (m.effectiveTotal !== undefined ? m.effectiveTotal : m.effectiveDone);
                 const def = MUSCLE_DIAGRAM_DEFS[m.id];
                 const recCol = def && def.columns && def.columns[0] ? def.columns[0] : null;
                 const recExId = recCol ? recCol.recId : 'db_bench_press';
@@ -19775,16 +19904,16 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 let statusClass = 'status-optimal';
                 if (m.status === 'optimal' || m.status === 'high') {
                     statusClass = 'status-optimal';
-                    statusBadge = `<span style="background:#DCFCE7; border:1px solid #86EFAC; color:#15803D; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">Yeterli / Optimal (${m.effectiveDone.toFixed(1)} Set)</span>`;
+                    statusBadge = `<span style="background:#DCFCE7; border:1px solid #86EFAC; color:#15803D; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">Yeterli / Optimal (${shownSets.toFixed(1)} Set)</span>`;
                 } else if (m.status === 'insufficient') {
                     statusClass = 'status-insufficient';
-                    statusBadge = `<span style="background:#FEF3C7; border:1px solid #FCD34D; color:#B45309; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">Düşük Hacim (${m.effectiveDone.toFixed(1)} / Hedef: ${m.optimalMin}-${m.optimalMax} Set)</span>`;
+                    statusBadge = `<span style="background:#FEF3C7; border:1px solid #FCD34D; color:#B45309; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">Düşük Hacim (${shownSets.toFixed(1)} / Hedef: ${m.optimalMin}-${m.optimalMax} Set)</span>`;
                 } else {
                     statusClass = 'status-unworked';
                     statusBadge = `<span style="background:#FEE2E2; border:1px solid #FCA5A5; color:#B91C1C; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">0 Set — Bu Hafta Atlandı</span>`;
                 }
 
-                const pct = Math.min(100, Math.round((m.effectiveDone / m.optimalMin) * 100));
+                const pct = Math.min(100, Math.round((shownSets / m.optimalMin) * 100));
                 let barColor = '#ef4444';
                 if (m.status === 'optimal' || m.status === 'high') barColor = '#10b981';
                 else if (m.status === 'insufficient') barColor = '#f59e0b';
@@ -19805,7 +19934,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 } else {
                     actionBtnHTML = `
                         <div style="margin-top:10px; font-size:12px; color:#15803D; font-weight:700; display:flex; align-items:center; gap:6px;">
-                            <span>Haftalık hipertrofi ve kuvvet eşiği sağlandı (${m.effectiveDone.toFixed(1)} Efektif Set).</span>
+                            <span>Haftalık hipertrofi ve kuvvet eşiği sağlandı (${shownSets.toFixed(1)} Efektif Set).</span>
                         </div>
                     `;
                 }
@@ -19824,7 +19953,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         <div style="margin-top:12px;">
                             <div style="display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-secondary); margin-bottom:4px; font-weight:600;">
                                 <span>Haftalık Tamamlanma: % ${pct}</span>
-                                <span>${m.effectiveDone.toFixed(1)} / ${m.optimalMin}-${m.optimalMax} Set</span>
+                                <span>${shownSets.toFixed(1)} / ${m.optimalMin}-${m.optimalMax} Set</span>
                             </div>
                             <div style="height:6px; background:#18202C; border-radius:3px; overflow:hidden;">
                                 <div style="height:100%; width:${pct}%; background:${barColor}; border-radius:3px; transition:width 0.3s ease;"></div>
@@ -20037,12 +20166,15 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 if (log.exercises && log.exercises.length > 0) {
                     log.exercises.forEach(ex => {
                         let exVol = ex.exerciseVolume || 0;
-                        const cSets = ex.completedSetsCount || (Array.isArray(ex.sets) ? ex.sets.filter(s => s.completed || parseInt(s.reps, 10) > 0).length : 0) || 0;
-                        
+                        const cSets = (ex.completedSetsCount !== undefined && ex.completedSetsCount !== null)
+                            ? Number(ex.completedSetsCount)
+                            : (Array.isArray(ex.sets) ? ex.sets.filter(s => s && s.completed).length : (Number(ex.sets) || 0));
+                        if (cSets <= 0) return;
+
                         // If exVol is 0 but sets were completed, calculate academic volume (BW / TUT equivalence)
                         if (exVol === 0 && Array.isArray(ex.sets)) {
                             ex.sets.forEach(st => {
-                                if (st.completed || parseInt(st.reps, 10) > 0) {
+                                if (st && st.completed) {
                                     exVol += calculateExerciseSetVolume(ex, st.weight, st.reps);
                                 }
                             });
@@ -20790,7 +20922,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 const sessionTitle = log.title || log.workoutName || 'Antrenman Seansı';
 
                 log.exercises.forEach(ex => {
-                    const cSets = Number(ex.completedSetsCount) || (Array.isArray(ex.sets) ? ex.sets.filter(s => s.completed || parseInt(s.reps, 10) > 0).length : 0) || Number(ex.targetSets) || Number(ex.sets) || 0;
+                    const cSets = (ex.completedSetsCount !== undefined && ex.completedSetsCount !== null)
+                        ? Number(ex.completedSetsCount)
+                        : (Array.isArray(ex.sets) ? ex.sets.filter(s => s && s.completed).length : (Number(ex.sets) || 0));
                     if (cSets <= 0) return;
 
                     const mSpec = resolveExerciseMobilitySpec(ex.name, ex.muscle, ex.category);
@@ -20836,7 +20970,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             // 2. Planlanan Haftalık Programı İşle
             const dayKeys = [1, 2, 3, 4, 5, 6, 0];
             dayKeys.forEach(dKey => {
-                const plan = schedule[dKey];
+                const offsetFromMon = dKey === 0 ? 6 : (dKey - 1);
+                const dayDate = new Date(bounds.monday);
+                dayDate.setDate(bounds.monday.getDate() + offsetFromMon);
+
+                const plan = (sourceMode !== 'schedule_full' && typeof getPlanForDate === 'function')
+                    ? getPlanForDate(dayDate)
+                    : schedule[dKey];
                 if (!plan || plan.rest) return;
 
                 const planIso = getIsoDay(dKey);
@@ -21284,7 +21424,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const jointDose30 = { shoulder_cap: 0, thoracic_spine: 0, hip_capsule: 0, ankle_dorsi: 0 };
             logs30.forEach(log => {
                 (log.exercises || []).forEach(ex => {
-                    const cSets = Number(ex.completedSetsCount) || (Array.isArray(ex.sets) ? ex.sets.filter(s => s.completed || parseInt(s.reps, 10) > 0).length : 0) || 0;
+                    const cSets = (ex.completedSetsCount !== undefined && ex.completedSetsCount !== null)
+                        ? Number(ex.completedSetsCount)
+                        : (Array.isArray(ex.sets) ? ex.sets.filter(s => s.completed === true || (s.completed === undefined && parseInt(s.reps, 10) > 0)).length : 0);
                     if (cSets <= 0) return;
                     const mSpec = resolveExerciseMobilitySpec(ex.name, ex.muscle, ex.category);
                     Object.entries(mSpec.joints || {}).forEach(([jId, factor]) => {
@@ -22643,7 +22785,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=249')
+                navigator.serviceWorker.register('./sw.js?v=250')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
@@ -23589,6 +23731,40 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     btnAlt.style.display = 'inline-block';
                     btnAlt.onclick = () => {
                         closeExerciseDetailModal();
+                        const schedModalOpen = document.getElementById('scheduleDayModal')?.classList.contains('active');
+                        if (schedModalOpen && activeSchedulingDayIdx !== null && activeSchedulingDayIdx !== undefined) {
+                            const sched = activePlannerWeek === 'next' ? getNextWeeklySchedule() : getWeeklySchedule();
+                            const dPlan = (activeSchedulingDateStr && activePlannerWeek !== 'next' && typeof getPlanForDate === 'function')
+                                ? getPlanForDate(new Date(activeSchedulingDateStr + 'T00:00:00'))
+                                : (sched && sched[activeSchedulingDayIdx]);
+                            const det = dPlan && typeof getWorkoutDetailsForPlan === 'function' ? getWorkoutDetailsForPlan(dPlan) : null;
+                            const foundIdx = (det && Array.isArray(det.exercises)) ? det.exercises.findIndex(item => (item.id || item.exId) === ex.id) : 0;
+                            openScheduleExerciseAlternativeModal(activeSchedulingDayIdx, ex.id, foundIdx >= 0 ? foundIdx : 0);
+                            return;
+                        }
+                        const isGenTabActive = document.getElementById('generatorTab')?.classList.contains('active');
+                        const isActTabActive = document.getElementById('activeWorkoutTab')?.classList.contains('active');
+                        if (isActTabActive && activeWorkoutSession && Array.isArray(activeWorkoutSession.exercises) && activeWorkoutSession.exercises.some(e => e.id === ex.id)) {
+                            openAlternativeModal(ex.id, 'active');
+                            return;
+                        }
+                        if (isGenTabActive && currentGeneratedWorkout) {
+                            const isWeeklyPreview = Boolean(window.pendingAiWeeklyPlan && document.querySelector('#generatedWorkoutOutput .wk-preview-shell'));
+                            openAlternativeModal(ex.id, isWeeklyPreview ? 'weekly_preview' : 'generated');
+                            return;
+                        }
+                        if (customRoutineState && Array.isArray(customRoutineState.exercises)) {
+                            const stuIdx = customRoutineState.exercises.findIndex(item => item.exId === ex.id);
+                            if (stuIdx !== -1) {
+                                openStudioExerciseAlternativeModal(stuIdx);
+                                return;
+                            }
+                        }
+                        if (currentGeneratedWorkout && Array.isArray(currentGeneratedWorkout.exercises) && currentGeneratedWorkout.exercises.some(e => e.id === ex.id)) {
+                            const isWeeklyPreview = Boolean(window.pendingAiWeeklyPlan && document.querySelector('#generatedWorkoutOutput .wk-preview-shell'));
+                            openAlternativeModal(ex.id, isWeeklyPreview ? 'weekly_preview' : 'generated');
+                            return;
+                        }
                         openAlternativeModal(ex.id, pickerContext.scope || 'studio');
                     };
                 }
