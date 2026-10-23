@@ -1946,19 +1946,32 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
         function toggleWeeklyPreviewExDetail(exIdx) {
             const idx = Number(exIdx);
+            const container = document.getElementById('generatedWorkoutOutput');
+            const oldRows = container ? container.querySelectorAll('.wk-ex-item-wrap') : null;
+            const anchorOffsetTop = (oldRows && oldRows[idx]) ? oldRows[idx].getBoundingClientRect().top : null;
             if (window.expandedWeeklyExIndex === idx) {
                 window.expandedWeeklyExIndex = null;
             } else {
                 window.expandedWeeklyExIndex = idx;
             }
-            renderPendingWeeklyPlanPreview();
+            renderPendingWeeklyPlanPreview({ preserveScroll: true });
+            if (anchorOffsetTop !== null && container) {
+                const newRows = container.querySelectorAll('.wk-ex-item-wrap');
+                if (newRows[idx]) {
+                    const delta = newRows[idx].getBoundingClientRect().top - anchorOffsetTop;
+                    if (Math.abs(delta) > 1) {
+                        window.scrollBy({ top: delta, left: 0, behavior: 'instant' });
+                    }
+                }
+            }
         }
         window.toggleWeeklyPreviewExDetail = toggleWeeklyPreviewExDetail;
 
-        function renderPendingWeeklyPlanPreview() {
+        function renderPendingWeeklyPlanPreview(options = {}) {
             const plan = window.pendingAiWeeklyPlan;
             const container = document.getElementById('generatedWorkoutOutput');
             if (!plan || !container || !Array.isArray(plan.days) || plan.days.length === 0) return;
+            const savedScrollY = window.scrollY;
 
             let activeIdx = Number(window.activeWeeklyPreviewDayIdx) || 0;
             if (activeIdx < 0 || activeIdx >= plan.days.length) {
@@ -2140,6 +2153,12 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     </div>
                 </div>
             `;
+
+            if (options && options.scrollToTop) {
+                if (container.scrollIntoView) container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else if (Math.abs(window.scrollY - savedScrollY) > 1) {
+                window.scrollTo({ top: savedScrollY, left: 0, behavior: 'instant' });
+            }
         }
         window.renderPendingWeeklyPlanPreview = renderPendingWeeklyPlanPreview;
 
@@ -4097,19 +4116,32 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
         window.expandedGeneratedExIndex = null;
         function toggleGeneratedExDetail(exIdx) {
             const idx = Number(exIdx);
+            const container = document.getElementById('generatedWorkoutOutput');
+            const oldRows = container ? container.querySelectorAll('.wk-ex-item-wrap') : null;
+            const anchorOffsetTop = (oldRows && oldRows[idx]) ? oldRows[idx].getBoundingClientRect().top : null;
             if (window.expandedGeneratedExIndex === idx) {
                 window.expandedGeneratedExIndex = null;
             } else {
                 window.expandedGeneratedExIndex = idx;
             }
-            renderGeneratedWorkout();
+            renderGeneratedWorkout({ preserveScroll: true });
+            if (anchorOffsetTop !== null && container) {
+                const newRows = container.querySelectorAll('.wk-ex-item-wrap');
+                if (newRows[idx]) {
+                    const delta = newRows[idx].getBoundingClientRect().top - anchorOffsetTop;
+                    if (Math.abs(delta) > 1) {
+                        window.scrollBy({ top: delta, left: 0, behavior: 'instant' });
+                    }
+                }
+            }
         }
         window.toggleGeneratedExDetail = toggleGeneratedExDetail;
 
-        function renderGeneratedWorkout() {
+        function renderGeneratedWorkout(options = {}) {
             const w = currentGeneratedWorkout;
             const container = document.getElementById('generatedWorkoutOutput');
             if (!w || !container) return;
+            const savedScrollY = window.scrollY;
 
             const user = getActiveUser();
             const weights = user ? (user.weights || {}) : {};
@@ -4340,7 +4372,11 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 </div>
             `;
 
-            if (container.scrollIntoView) container.scrollIntoView({ behavior: 'smooth' });
+            if (options && options.scrollToTop) {
+                if (container.scrollIntoView) container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else if (Math.abs(window.scrollY - savedScrollY) > 1) {
+                window.scrollTo({ top: savedScrollY, left: 0, behavior: 'instant' });
+            }
         }
 
         function assignGeneratedToNextWeekDay(targetDayIdx = 1) {
@@ -6171,6 +6207,8 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
             updateGeminiAiModalUI(currentEx);
 
             switchPickerTab(pickerContext.currentTab);
+            const listEl = document.getElementById('pickerExercisesContainer');
+            if (listEl) listEl.scrollTop = 0;
         }
 
         function closeExercisePickerModal() {
@@ -6897,14 +6935,19 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
 
             if (pickerContext.scope === 'active') {
                 saveActiveWorkoutStateToStorage();
+                const savedScrollY = window.scrollY;
                 renderActiveWorkout();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                if (pickerContext.mode === 'add' && activeWorkoutViewMode === 'focus') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else if (Math.abs(window.scrollY - savedScrollY) > 1) {
+                    window.scrollTo({ top: savedScrollY, left: 0, behavior: 'instant' });
+                }
                 showToast(`✅ Aktif antrenmanda "${newEx.name}" alternatifi seçildi!`);
             } else if (pickerContext.scope === 'weekly_preview' && window.pendingAiWeeklyPlan) {
-                renderPendingWeeklyPlanPreview();
+                renderPendingWeeklyPlanPreview({ preserveScroll: true });
                 showToast(`✅ "${newEx.name}" alternatifi seçildi!`);
             } else {
-                renderGeneratedWorkout();
+                renderGeneratedWorkout({ preserveScroll: true });
                 showToast(`✅ "${newEx.name}" alternatifi seçildi!`);
             }
             playAlertSound();
@@ -7363,13 +7406,17 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                 syncWorkoutPersistenceAfterEdit(workout, scope, exId, null);
                 if (scope === 'active') {
                     saveActiveWorkoutStateToStorage();
+                    const savedScrollY = window.scrollY;
                     renderActiveWorkout();
+                    if (Math.abs(window.scrollY - savedScrollY) > 1) {
+                        window.scrollTo({ top: savedScrollY, left: 0, behavior: 'instant' });
+                    }
                 } else if (scope === 'weekly_preview' && window.pendingAiWeeklyPlan) {
                     window.expandedWeeklyExIndex = null;
-                    renderPendingWeeklyPlanPreview();
+                    renderPendingWeeklyPlanPreview({ preserveScroll: true });
                 } else {
                     window.expandedGeneratedExIndex = null;
-                    renderGeneratedWorkout();
+                    renderGeneratedWorkout({ preserveScroll: true });
                 }
             }
         }
@@ -7422,12 +7469,15 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                 syncWorkoutPersistenceAfterEdit(workout, scope, currentExId, newExObj);
                 if (scope === 'active') {
                     saveActiveWorkoutStateToStorage();
+                    const savedScrollY = window.scrollY;
                     renderActiveWorkout();
+                    if (Math.abs(window.scrollY - savedScrollY) > 1) {
+                        window.scrollTo({ top: savedScrollY, left: 0, behavior: 'instant' });
+                    }
                 } else if (scope === 'weekly_preview' && window.pendingAiWeeklyPlan) {
-                    renderPendingWeeklyPlanPreview();
+                    renderPendingWeeklyPlanPreview({ preserveScroll: true });
                 } else {
-                    window.expandedGeneratedExIndex = null;
-                    renderGeneratedWorkout();
+                    renderGeneratedWorkout({ preserveScroll: true });
                 }
                 playAlertSound();
             } else {
@@ -22785,7 +22835,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=250')
+                navigator.serviceWorker.register('./sw.js?v=251')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
@@ -23022,6 +23072,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 updateStudioSaveActionsGroup();
             }
             if (!container) return;
+            const savedScrollY = window.scrollY;
 
             countBadge.innerText = `${customRoutineState.exercises.length} Hareket`;
 
@@ -23125,6 +23176,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
 
             container.innerHTML = html;
+            if (Math.abs(window.scrollY - savedScrollY) > 1) {
+                window.scrollTo({ top: savedScrollY, left: 0, behavior: 'instant' });
+            }
         }
 
         function renderStudioExerciseCatalog() {
@@ -23132,6 +23186,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const container = document.getElementById('studioExercisesCatalog');
             const totalCountEl = document.getElementById('studioExTotalCount');
             if (!container) return;
+            const savedCatalogScrollTop = container.scrollTop;
+            const savedScrollY = window.scrollY;
 
             const q = (document.getElementById('studioSearchInput')?.value || '').trim();
             const equip = document.getElementById('studioEquipFilter')?.value || 'all';
@@ -23207,6 +23263,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             });
 
             container.innerHTML = html;
+            container.scrollTop = savedCatalogScrollTop;
+            if (Math.abs(window.scrollY - savedScrollY) > 1) {
+                window.scrollTo({ top: savedScrollY, left: 0, behavior: 'instant' });
+            }
         }
 
         function addExerciseToCustomRoutine(exId) {
@@ -23778,7 +23838,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
 
             switchExDetailTab('form');
-            document.getElementById('exerciseDetailModal').classList.add('active');
+            const detailModal = document.getElementById('exerciseDetailModal');
+            if (detailModal) {
+                detailModal.classList.add('active');
+                const detailBox = detailModal.querySelector('.modal-box');
+                if (detailBox) detailBox.scrollTop = 0;
+            }
         }
 
         function closeExerciseDetailModal() {

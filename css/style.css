@@ -5248,6 +5248,8 @@
             justify-content: center;
             padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px)) 12px;
             box-sizing: border-box;
+            overflow: hidden;
+            overscroll-behavior: contain;
         }
         .modal-overlay.active {
             display: flex;
@@ -5271,6 +5273,7 @@
             max-height: 90vh;
             max-height: calc(100dvh - 24px - env(safe-area-inset-bottom, 0px));
             overflow-y: auto;
+            overscroll-behavior: contain;
             -webkit-overflow-scrolling: touch;
             box-sizing: border-box;
             box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px var(--gold-glow);
@@ -9249,6 +9252,206 @@
         .modal-overlay [style*="color: #cbd5e1"] {
             color: #475569 !important;
         }
+
+        /* ==================== SET ARASI İLAVE HAREKET (INTER-SET EXTRA) ==================== */
+        .hevy-interset-slot {
+            position: relative;
+            height: 0;
+            z-index: 6;
+            display: flex;
+            align-items: center;
+        }
+        .btn-interset-plus {
+            position: absolute;
+            left: 5px;
+            top: -9px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #E0F2FE;
+            border: 1.5px solid #38BDF8;
+            color: #0284C7;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 1px 4px rgba(2, 132, 199, 0.22);
+            transition: all 0.15s ease;
+            padding: 0;
+            margin: 0;
+            user-select: none;
+        }
+        .btn-interset-plus svg {
+            display: block;
+            width: 10px;
+            height: 10px;
+            flex-shrink: 0;
+        }
+        .btn-interset-plus:hover,
+        .btn-interset-plus:active {
+            border-color: #0284C7;
+            background: #BAE6FD;
+            color: #0369A1;
+            transform: scale(1.12);
+        }
+        .hevy-interset-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            padding: 2px 8px;
+            min-height: 22px;
+            background: linear-gradient(90deg, #15803D 0%, #16A34A 50%, #22C55E 100%);
+            border-top: 1px solid #15803D;
+            border-bottom: 1px solid #15803D;
+            color: #FFFFFF;
+            transition: all 0.15s ease;
+        }
+        .hevy-interset-row.done {
+            background: linear-gradient(90deg, #15803D 0%, #16A34A 50%, #22C55E 100%);
+            border-top-color: #15803D;
+            border-bottom-color: #15803D;
+            color: #FFFFFF;
+        }
+        .hevy-interset-row:not(.done) {
+            background: linear-gradient(90deg, #4D7C0F 0%, #65A30D 50%, #84CC16 100%);
+            border-top-color: #4D7C0F;
+            border-bottom-color: #4D7C0F;
+        }
+        .hevy-interset-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+            min-width: 0;
+            cursor: pointer;
+        }
+        .hevy-interset-tag {
+            font-size: 9.5px;
+            font-weight: 900;
+            color: #14532D;
+            background: #DCFCE7;
+            border: 1px solid #86EFAC;
+            padding: 1px 6px;
+            border-radius: 999px;
+            white-space: nowrap;
+            line-height: 1.15;
+            letter-spacing: 0.2px;
+        }
+        .hevy-interset-row.done .hevy-interset-tag {
+            color: #14532D;
+            background: #F0FDF4;
+            border-color: #BBF7D0;
+        }
+        .hevy-interset-name {
+            font-size: 11px;
+            font-weight: 800;
+            color: #FFFFFF;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.15;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .hevy-interset-metric {
+            font-size: 10px;
+            font-weight: 900;
+            color: #0F172A;
+            background: #FEF08A;
+            border: 1px solid #FDE047;
+            padding: 1px 6px;
+            border-radius: 4px;
+            white-space: nowrap;
+            line-height: 1.15;
+        }
+        .hevy-interset-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .btn-interset-del {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            background: rgba(15, 23, 42, 0.25);
+            color: #FFFFFF;
+            font-size: 9.5px;
+            font-weight: 900;
+            line-height: 1;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .btn-interset-check {
+            width: 22px;
+            height: 18px;
+            border-radius: 4px;
+            border: 1px solid #FFFFFF;
+            background: rgba(255, 255, 255, 0.2);
+            color: #FFFFFF;
+            font-size: 11px;
+            font-weight: 900;
+            line-height: 1;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-interset-check.checked {
+            background: #FFFFFF;
+            border-color: #FFFFFF;
+            color: #15803D;
+        }
+        .interset-chip-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+            gap: 7px;
+            margin-bottom: 12px;
+        }
+        .interset-quick-chip {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 8px 10px;
+            border-radius: 10px;
+            border: 1.5px solid #CBD5E1;
+            background: #F8FAFC;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.15s ease;
+        }
+        .interset-quick-chip:hover {
+            border-color: #0284C7;
+            background: #F0F9FF;
+        }
+        .interset-quick-chip.selected {
+            border-color: #65A30D;
+            background: #F7FEE7;
+            box-shadow: 0 0 0 2px rgba(132, 204, 22, 0.25);
+        }
+        .interset-metric-pill {
+            padding: 6px 11px;
+            border-radius: 8px;
+            border: 1.5px solid #CBD5E1;
+            background: #F8FAFC;
+            color: #0F172A;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .interset-metric-pill.active {
+            border-color: #65A30D;
+            background: #84CC16;
+            color: #0F172A;
+        }
+
 
 
 
