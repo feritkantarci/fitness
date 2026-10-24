@@ -35,7 +35,7 @@
     <!-- ==================== LOGIN SCREEN ==================== -->
     <div id="loginScreen" class="active">
         <div class="login-card">
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v251</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v260</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -175,7 +175,7 @@
                     <span class="canva-brand-monogram" aria-hidden="true" translate="no">Ç</span>
                     <div class="canva-brand-stack">
                         <span class="modern-brand-title" translate="no">Çelik Kodu</span>
-                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v251</span>
+                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v260</span>
                     </div>
                 </div>
                 <div class="modern-bar-actions">
@@ -296,48 +296,48 @@
                                 <div class="split-card selected" data-wk-tpl="ai_auto" onclick="selectAiWeeklyTemplateCard('ai_auto')">
                                     <span class="split-radio" aria-hidden="true"></span>
                                     <div class="split-card-content">
-                                        <span class="split-name"><svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M8 1.5L9.6 6.4L14.5 8L9.6 9.6L8 14.5L6.4 9.6L1.5 8L6.4 6.4L8 1.5Z"/><path d="M13 2v2M12 3h2M3 12v2M2 13h2"/></svg> AI Otomatik Teşhis (Önerilen)</span>
-                                        <span class="split-sub-desc">Eksik kaslara göre en uygun 3 günlük kurgu</span>
+                                        <span class="split-name"><svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M8 1.5L9.6 6.4L14.5 8L9.6 9.6L8 14.5L6.4 9.6L1.5 8L6.4 6.4L8 1.5Z"/><path d="M13 2v2M12 3h2M3 12v2M2 13h2"/></svg> AI Otomatik Teşhis</span>
+                                        <span class="split-sub-desc">Eksik kaslara göre 3 gün</span>
                                     </div>
                                     <button type="button" class="split-info-btn" onclick=" toggleSplitMusclePopover(event, 'ai_auto')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
                                 </div>
                                 <div class="split-card" data-wk-tpl="upper_lower_full" onclick="selectAiWeeklyTemplateCard('upper_lower_full')">
                                     <span class="split-radio" aria-hidden="true"></span>
                                     <div class="split-card-content">
-                                        <span class="split-name">Üst • Alt • Tüm Vücut (3 Gün)</span>
-                                        <span class="split-sub-desc">Pazartesi • Çarşamba • Cuma dengeli hibrit</span>
+                                        <span class="split-name">Üst • Alt • Tüm Vücut</span>
+                                        <span class="split-sub-desc">3 gün dengeli dağılım</span>
                                     </div>
                                     <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'upper_lower_full')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
                                 </div>
                                 <div class="split-card" data-wk-tpl="ppl_3day" onclick="selectAiWeeklyTemplateCard('ppl_3day')">
                                     <span class="split-radio" aria-hidden="true"></span>
                                     <div class="split-card-content">
-                                        <span class="split-name">İtiş • Çekiş • Bacak — PPL (3 Gün)</span>
-                                        <span class="split-sub-desc">Bölgesel kas odaklanması (Push / Pull / Legs)</span>
+                                        <span class="split-name">İtiş • Çekiş • Bacak</span>
+                                        <span class="split-sub-desc">3 gün bölgesel odak</span>
                                     </div>
                                     <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'ppl_3day')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
                                 </div>
                                 <div class="split-card" data-wk-tpl="fullbody_3day" onclick="selectAiWeeklyTemplateCard('fullbody_3day')">
                                     <span class="split-radio" aria-hidden="true"></span>
                                     <div class="split-card-content">
-                                        <span class="split-name">3 Gün Tüm Vücut (A / B / C)</span>
-                                        <span class="split-sub-desc">Her seansta tüm vücut yüksek frekans</span>
+                                        <span class="split-name">3 Gün Tüm Vücut</span>
+                                        <span class="split-sub-desc">Her gün farklı hareketler</span>
                                     </div>
                                     <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'fullbody_3day')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
                                 </div>
                                 <div class="split-card" data-wk-tpl="flow_complex_3day" onclick="selectAiWeeklyTemplateCard('flow_complex_3day')">
                                     <span class="split-radio" aria-hidden="true"></span>
                                     <div class="split-card-content">
-                                        <span class="split-name">⚔️ 3 Gün Çelik Akışı (Kompleks &amp; Flow)</span>
-                                        <span class="split-sub-desc">Pzt • Çar • Cum multi-joint birleşik akış serisi</span>
+                                        <span class="split-name">⚔️ 3 Gün Çelik Akışı</span>
+                                        <span class="split-sub-desc">Birleşik dambıl serisi</span>
                                     </div>
                                     <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'flow_complex_3day')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
                                 </div>
                                 <div class="split-card" data-wk-tpl="upper_lower_4day" onclick="selectAiWeeklyTemplateCard('upper_lower_4day')">
                                     <span class="split-radio" aria-hidden="true"></span>
                                     <div class="split-card-content">
-                                        <span class="split-name">4 Gün Üst / Alt Vücut</span>
-                                        <span class="split-sub-desc">Pzt • Sal • Per • Cum yüksek hacimli seri</span>
+                                        <span class="split-name">4 Gün Üst / Alt</span>
+                                        <span class="split-sub-desc">Yüksek hacimli 4 gün</span>
                                     </div>
                                     <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'upper_lower_4day')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
                                 </div>
@@ -462,12 +462,12 @@
                                 <div class="param-group">
                                     <label for="paramStyle">MODEL &amp; SÜPERSET DÜZEYİ</label>
                                     <select id="paramStyle" class="param-select" onchange="updateSelectedParamLabel()">
-                                        <option value="superset" selected>Bodybuilding &amp; Fonksiyonel (Orta Süperset)</option>
-                                        <option value="complex">⚔️ Birleşik Akış / Kompleks (20-25 Dk Flow)</option>
-                                        <option value="superset_light">Az Süperset (Düz + Son Blok Süperset)</option>
-                                        <option value="superset_intense">Yoğun Süperset (Tam İkili Blok)</option>
-                                        <option value="straight">Klasik Düz Set (Süpersetsiz)</option>
-                                        <option value="emom">EMOM / Kondisyon Döngüsü</option>
+                                        <option value="superset" selected>Orta Süperset (Dengeli)</option>
+                                        <option value="complex">⚔️ Birleşik Akış (Kompleks)</option>
+                                        <option value="superset_light">Az Süperset</option>
+                                        <option value="superset_intense">Yoğun Süperset</option>
+                                        <option value="straight">Klasik Düz Set</option>
+                                        <option value="emom">EMOM Döngüsü</option>
                                     </select>
                                 </div>
                                 <div class="param-group">
@@ -475,16 +475,16 @@
                                     <select id="paramGoal" class="param-select" onchange="updateSelectedParamLabel()">
                                         <option value="hypertrophy" selected>Kas &amp; Hacim</option>
                                         <option value="strength">Kuvvet &amp; Güç</option>
-                                        <option value="endurance">Kondisyon &amp; Dayanıklılık</option>
+                                        <option value="endurance">Kondisyon</option>
                                     </select>
                                 </div>
                                 <div class="param-group">
                                     <label for="paramDuration">SÜRE</label>
                                     <select id="paramDuration" class="param-select" onchange="updateSelectedParamLabel()">
-                                        <option value="20">20 dk (Çelik Akışı / Hızlı)</option>
-                                        <option value="30">30 dk (Hızlı seans)</option>
-                                        <option value="45" selected>45 dk (Tam seans)</option>
-                                        <option value="60">60 dk (Uzun seans)</option>
+                                        <option value="20">20 dk</option>
+                                        <option value="30">30 dk</option>
+                                        <option value="45" selected>45 dk</option>
+                                        <option value="60">60 dk</option>
                                     </select>
                                 </div>
                             </div>
@@ -924,8 +924,8 @@
                     <!-- HEADER & ACTION BUTTONS -->
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
                         <div>
-                            <h2 style="font-size:18px; font-weight:900; color:#0F172A;">Gelişim, Kas Yükü, Mobilite & Vücut Analizi</h2>
-                            <p style="font-size:12.5px; color:var(--text-secondary); margin-top:2px;">Biyomekanik kas tonajı, eklem hareket açıklığı (ROM), akıllı tartı ve mezura ölçüleri takibi</p>
+                            <h2 style="font-size:18px; font-weight:900; color:#0F172A;">Gelişim, Çalışan Kaslar, Esneklik & Vücut Analizi</h2>
+                            <p style="font-size:12.5px; color:var(--text-secondary); margin-top:2px;">Hangi kasın ne kadar çalıştığı, vücut esnekliği, tartı ve mezura ölçüleri takibi</p>
                         </div>
                         <div style="display:flex; gap:6px; flex-wrap:wrap;">
                             <button class="btn btn-gold" style="font-size:12.5px; padding:8px 14px; font-weight:800;" onclick="openScaleModal()">
@@ -940,10 +940,10 @@
                     <!-- SUB VIEW TOGGLES -->
                     <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:6px; margin-bottom:16px;" class="hide-scrollbar">
                         <button class="btn btn-outline analytics-subtab-btn active" id="btnSubAnalyticsMuscle" style="font-size:12.5px; padding:6px 12px; border-radius:20px; white-space:nowrap;" onclick="switchAnalyticsSubView('muscle')">
-                            Kas Yükü & Biyomekanik
+                            Çalışan Kaslar & Harita
                         </button>
                         <button class="btn btn-outline analytics-subtab-btn" id="btnSubAnalyticsMobility" style="font-size:12.5px; padding:6px 12px; border-radius:20px; white-space:nowrap;" onclick="switchAnalyticsSubView('mobility')">
-                            Hareketlilik (Mobilite)
+                            Esneklik & Hareketlilik
                         </button>
                         <button class="btn btn-outline analytics-subtab-btn" id="btnSubAnalyticsScale" style="font-size:12.5px; padding:6px 12px; border-radius:20px; white-space:nowrap;" onclick="switchAnalyticsSubView('scale')">
                             Vücut Analizi & Ölçüler
@@ -1064,7 +1064,7 @@
                     </button>
 
                     <!-- HESAP PAROLASI DEĞİŞTİRME -->
-                    <div style="background:rgba(15, 23, 42, 0.6); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:14px; margin-top:16px;">
+                    <div style="background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:12px; padding:14px; margin-top:16px;">
                         <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
                             <span style="font-size:18px;" aria-hidden="true">🔒</span>
                             <div>
@@ -1364,7 +1364,7 @@
             <div id="assignModalWorkoutInfo" style="margin-top: 10px; margin-bottom: 12px;"></div>
 
             <!-- WEEK SELECTOR TABS (Bu Hafta / Gelecek Hafta) -->
-            <div style="display:flex; gap:6px; margin-bottom:12px; background:#0E131B; padding:4px; border-radius:10px; border:1px solid #222C3A;">
+            <div style="display:flex; gap:6px; margin-bottom:12px; background:#F1F5F9; padding:4px; border-radius:10px; border:1.5px solid #E2E8F0;">
                 <button type="button" id="assignModalWeekCurrentBtn" class="btn" style="flex:1; font-size:12px; padding:8px 10px; font-weight:800; border-radius:7px; background:var(--gold); color:#000;" onclick="switchAssignModalWeek('current')">
                     📅 Bu Hafta
                 </button>
@@ -1396,7 +1396,7 @@
             </div>
 
             <p id="schedModalDaySubDesc" style="font-size:12px; color:var(--text-secondary); margin:0 0 14px 0; line-height:1.4;">
-                Bu güne atanan antrenmanın içeriğini inceleyin, düzenleyin veya farklı bir program atayın.
+                Bu güne atanan antrenmanın içeriğini inceleyin veya düzenleyin.
             </p>
 
             <!-- ASSIGNED WORKOUT DETAILED CONTENT SECTION -->
@@ -1405,41 +1405,36 @@
             </div>
 
             <!-- SEANS SAATİ & CANLI TAKVİM ENTEGRASYON KARTI -->
-            <div id="schedDayTimingSection" style="background:#0E131B; border:1px solid rgba(255,255,255,0.12); border-radius:10px; padding:12px; margin-bottom:14px;">
+            <div id="schedDayTimingSection" style="background:#FFFFFF; border:1.5px solid #E2E8F0; border-radius:14px; padding:14px; margin-bottom:14px; box-shadow:0 2px 8px rgba(15,23,42,0.04);">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <span style="font-size:12px; font-weight:800; color:#0F172A; display:flex; align-items:center; gap:6px;">
+                    <span style="font-size:12.5px; font-weight:800; color:#0F172A; display:flex; align-items:center; gap:6px;">
                         <span>🕒</span> Seans Saati & Takvim Durumu
                     </span>
-                    <span id="schedDaySyncStatusBadge" style="font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; background:#F1F5F9; color:#0F172A;">
+                    <span id="schedDaySyncStatusBadge" style="font-size:10.5px; font-weight:800; padding:3px 8px; border-radius:6px; background:#F1F5F9; color:#334155; border:1px solid #CBD5E1;">
                         Yerel Plan
                     </span>
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
                     <div>
-                        <label style="font-size:11px; color:#94a3b8; display:block; margin-bottom:4px;">Başlama Saati</label>
-                        <input type="time" id="schedDayTimeInput" class="input-base" style="width:100%; padding:6px 10px; font-size:13px; font-weight:800;" value="18:30" onchange="updateScheduledDayTime(this.value)">
+                        <label style="font-size:11px; font-weight:700; color:#475569; display:block; margin-bottom:4px;">Başlama Saati</label>
+                        <input type="time" id="schedDayTimeInput" class="input-base" style="width:100%; padding:7px 10px; font-size:13px; font-weight:800; background:#F8FAFC; color:#0F172A; border:1.5px solid #CBD5E1;" value="18:30" onchange="updateScheduledDayTime(this.value)">
                     </div>
                     <div>
-                        <label style="font-size:11px; color:#94a3b8; display:block; margin-bottom:4px;">Tahmini Süre (Dk)</label>
-                        <input type="number" id="schedDayDurationInput" class="input-base" style="width:100%; padding:6px 10px; font-size:13px; font-weight:800;" min="15" max="180" step="5" value="50" onchange="updateScheduledDayDuration(this.value)">
+                        <label style="font-size:11px; font-weight:700; color:#475569; display:block; margin-bottom:4px;">Tahmini Süre (Dk)</label>
+                        <input type="number" id="schedDayDurationInput" class="input-base" style="width:100%; padding:7px 10px; font-size:13px; font-weight:800; background:#F8FAFC; color:#0F172A; border:1.5px solid #CBD5E1;" min="15" max="180" step="5" value="50" onchange="updateScheduledDayDuration(this.value)">
                     </div>
                 </div>
                 <div style="display:flex; gap:6px; flex-wrap:wrap;">
                     <button type="button" id="btnSyncSingleDayGCal" class="btn btn-gold" style="font-size:11.5px; padding:7px 12px; font-weight:800; flex:1;" onclick="syncCurrentDayToCalendar()">
                         📅 Bu Günü Takvime İşle / Güncelle
                     </button>
-                    <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 10px; color:var(--cyan); border-color:rgba(56,189,248,0.4);" onclick="openSingleDayDirectGoogleCalendar()" title="Google Takvimde Aç veya Ekle">
+                    <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 10px; color:#0F172A; border-color:#CBD5E1; background:#F8FAFC;" onclick="openSingleDayDirectGoogleCalendar()" title="Google Takvimde Aç veya Ekle">
                         🔗 Takvimde Aç
                     </button>
-                    <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 10px; color:#0F172A;" onclick="downloadSingleDayICS()" title="Apple Takvim / iCal Olarak İndir">
+                    <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 10px; color:#0F172A; border-color:#CBD5E1; background:#F8FAFC;" onclick="downloadSingleDayICS()" title="Apple Takvim / iCal Olarak İndir">
                         📥 .ics
                     </button>
                 </div>
-            </div>
-
-            <!-- OPTIONS LIST FOR REPLACING / SELECTING -->
-            <div id="schedModalOptionsList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">
-                <!-- Populated dynamically -->
             </div>
 
             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top:1px solid var(--border); padding-top:12px; flex-wrap:wrap;">
@@ -1482,7 +1477,7 @@
 
             <!-- HIZLI AKSİYONLAR -->
             <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
-                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px;">
+                <div style="background:#FFFFFF; border:1.5px solid #E2E8F0; border-radius:12px; padding:12px; box-shadow:0 2px 8px rgba(15,23,42,0.04);">
                     <div style="font-size:12.5px; font-weight:800; color:#0F172A; margin-bottom:4px;">🔄 İki Yönlü Canlı Eşitleme</div>
                     <div style="font-size:11px; color:var(--text-secondary); margin-bottom:10px; line-height:1.5;">
                         • Google Takvim'deki "FitLab • Antrenmanlarım" takviminde taşıdığınız saat veya günleri FitLab'e çeker.<br>
@@ -1499,7 +1494,7 @@
                 </div>
 
                 <!-- APPLE TAKVİM / iCAL / WEBCAL SEKMESİ -->
-                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px;">
+                <div style="background:#FFFFFF; border:1.5px solid #E2E8F0; border-radius:12px; padding:12px; box-shadow:0 2px 8px rgba(15,23,42,0.04);">
                     <div style="font-size:12.5px; font-weight:800; color:#0F172A; margin-bottom:4px;">🍏 Apple Takvim / Mac & iPhone Desteği</div>
                     <div style="font-size:11px; color:var(--text-secondary); margin-bottom:10px; line-height:1.5;">
                         • <strong>Yöntem 1 (Önerilen):</strong> macOS ve iOS Sistem Ayarları > İnternet Hesapları'ndan Google hesabınızı açın; "FitLab • Antrenmanlarım" anında Apple Takvim uygulamanıza yansır.<br>
@@ -1511,15 +1506,15 @@
                 </div>
 
                 <!-- TERCİHLER VE GELİŞMİŞ AYARLAR -->
-                <div style="background:#0E131B; border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:12px;">
-                    <div style="font-size:12px; font-weight:800; color:var(--gold); margin-bottom:8px;">⚙️ Takvim Tercihleri</div>
+                <div style="background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:12px; padding:12px;">
+                    <div style="font-size:12px; font-weight:800; color:#B45309; margin-bottom:8px;">⚙️ Takvim Tercihleri</div>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
                         <div>
-                            <label style="font-size:10.5px; color:#94a3b8; display:block; margin-bottom:3px;">Varsayılan Seans Saati</label>
+                            <label style="font-size:10.5px; font-weight:700; color:#475569; display:block; margin-bottom:3px;">Varsayılan Seans Saati</label>
                             <input type="time" id="calPrefDefaultTime" class="input-base" style="width:100%; padding:5px 8px; font-size:12px;" value="18:30" onchange="saveCalendarPreferences()">
                         </div>
                         <div>
-                            <label style="font-size:10.5px; color:#94a3b8; display:block; margin-bottom:3px;">Bildirim Hatırlatıcısı</label>
+                            <label style="font-size:10.5px; font-weight:700; color:#475569; display:block; margin-bottom:3px;">Bildirim Hatırlatıcısı</label>
                             <select id="calPrefReminderMin" class="select-base" style="width:100%; padding:5px 8px; font-size:12px;" onchange="saveCalendarPreferences()">
                                 <option value="15">15 Dakika Önce</option>
                                 <option value="30" selected>30 Dakika Önce</option>
@@ -1530,20 +1525,20 @@
                     </div>
 
                     <!-- GELİŞMİŞ GOOGLE OAUTH CLIENT ID (OPSİYONEL) -->
-                    <details style="margin-top:8px; font-size:11px; color:#94a3b8;">
+                    <details style="margin-top:8px; font-size:11px; color:#475569;">
                         <summary style="cursor:pointer; color:var(--cyan); font-weight:700;">🔧 Özel OAuth İstemci / Manuel Token Girişi</summary>
                         <div style="margin-top:8px; display:flex; flex-direction:column; gap:6px;">
                             <div>
-                                <label style="font-size:10px; color:#94a3b8;">Google OAuth Client ID (Opsiyonel Canlı API):</label>
+                                <label style="font-size:10px; font-weight:700; color:#475569;">Google OAuth Client ID (Opsiyonel Canlı API):</label>
                                 <input type="text" id="calCustomClientId" class="input-base" style="width:100%; padding:5px 8px; font-size:11px;" placeholder="ör. xxx.apps.googleusercontent.com" onchange="saveCustomGoogleClientId(this.value)">
                             </div>
                             <div style="display:flex; gap:6px; margin-top:2px;">
-                                <button type="button" class="btn btn-outline" style="font-size:10.5px; padding:4px 10px; color:var(--gold); border-color:rgba(245,158,11,0.4);" onclick="connectGoogleCalendarPrompt()">
+                                <button type="button" class="btn btn-outline" style="font-size:10.5px; padding:4px 10px; color:#B45309; border-color:rgba(245,158,11,0.4);" onclick="connectGoogleCalendarPrompt()">
                                     ⚡ Client ID ile Canlı Bağlan
                                 </button>
                             </div>
                             <div style="margin-top:4px;">
-                                <label style="font-size:10px; color:#94a3b8;">OAuth Access Token (Manuel Yapıştırma):</label>
+                                <label style="font-size:10px; font-weight:700; color:#475569;">OAuth Access Token (Manuel Yapıştırma):</label>
                                 <div style="display:flex; gap:6px;">
                                     <input type="password" id="calCustomTokenInput" class="input-base" style="flex:1; padding:5px 8px; font-size:11px;" placeholder="ya29.a0...">
                                     <button type="button" class="btn btn-outline" style="font-size:10px; padding:4px 8px;" onclick="applyManualGoogleToken()">Uygula</button>
@@ -1578,7 +1573,7 @@
             </p>
 
             <!-- SIFIR TIKLAMA / TAM OTOMATİK CANLI GOOGLE SENKRONİZASYONU -->
-            <div id="gcalAutoSyncCard" style="background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(15,23,42,0.9)); border: 1.5px solid #10b981; border-radius: 12px; padding: 14px; margin-bottom: 16px; box-shadow: 0 0 20px rgba(16,185,129,0.15);">
+            <div id="gcalAutoSyncCard" style="background: linear-gradient(135deg, #ECFDF5, #F0FDF4); border: 1.5px solid #10B981; border-radius: 12px; padding: 14px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(16,185,129,0.12);">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
                     <div style="flex:1; min-width:240px;">
                         <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
@@ -1599,7 +1594,7 @@
             </div>
 
             <!-- YÖNTEM 1: TÜM HAFTAYI TEK SEFERDE AKTAR -->
-            <div style="background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(15,23,42,0.8)); border: 1.5px solid var(--gold); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
+            <div style="background: linear-gradient(135deg, #FFFBEB, #FFFFFF); border: 1.5px solid var(--gold); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                     <div style="font-size:13.5px; font-weight:800; color:#0F172A; display:flex; align-items:center; gap:6px;">
                         <span>⚡ Yöntem 1: Tüm Haftayı Tek Seferde Aktar</span>
@@ -1620,15 +1615,15 @@
                 </div>
 
                 <!-- 2 ADIMLI REHBER -->
-                <div style="background:#0E131B; border-radius:8px; padding:10px 12px; font-size:11px; color:#94a3b8; line-height:1.6;">
-                    <div style="color:var(--gold); font-weight:800; margin-bottom:4px;">📋 Nasıl Yapılır? (10 Saniyelik İşlem)</div>
+                <div style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:8px; padding:10px 12px; font-size:11px; color:#334155; line-height:1.6;">
+                    <div style="color:#B45309; font-weight:800; margin-bottom:4px;">📋 Nasıl Yapılır? (10 Saniyelik İşlem)</div>
                     <div>1. <strong>"Tek Tıkla İndir & Google Takvim'e Yükle"</strong> butonuna basın (takvim dosyanız iner ve Google Takvim İçe Aktar ekranı açılır).</div>
                     <div>2. Açılan Google Takvim ekranında <strong>"Bilgisayarınızdan bir dosya seçin"</strong>e tıklayıp indirilen <code>fitlab-takvim-....ics</code> dosyasını seçin ve <strong>"İçe Aktar"</strong>a basın. Tüm hafta takviminize işlenir!</div>
                 </div>
             </div>
 
             <!-- YÖNTEM 2: GÜNLERİ TEK TEK GOOGLE TAKVİM'E EKLE -->
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
+            <div style="background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 12px; padding: 14px; margin-bottom: 14px;">
                 <div style="font-size:13px; font-weight:800; color:#0F172A; margin-bottom:4px;">
                     📅 Yöntem 2: Dosyasız — Günleri Tek Tıkla Google Takvim'e Ekle
                 </div>
@@ -1816,7 +1811,7 @@
                     </button>
                 </div>
 
-                <div id="scaleManualPasteContainer" style="display:none; margin-top:12px; text-align:left; background:#0E131B; border:1px solid var(--border); border-radius:10px; padding:12px;">
+                <div id="scaleManualPasteContainer" style="display:none; margin-top:12px; text-align:left; background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:10px; padding:12px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                         <span style="font-size:11.5px; font-weight:800; color:var(--cyan);">📋 Rapor Metnini Yapıştırın</span>
                         <button type="button" onclick="toggleScalePasteBox(false)" style="background:none; border:none; color:var(--text-secondary); font-size:14px; cursor:pointer;">✕</button>
@@ -1898,22 +1893,22 @@
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;" class="form-group">
                     <div>
                         <label class="form-label">Omuz Çevresi (cm)</label>
-                        <input type="number" id="scaleShoulder" class="form-input" step="0.5" placeholder="Deltoid tepe (Örn: 122)">
+                        <input type="number" id="scaleShoulder" class="form-input" step="0.5" placeholder="Omuz çevresi (Örn: 122)">
                     </div>
                     <div>
                         <label class="form-label">Kol / Pazı (cm)</label>
-                        <input type="number" id="scaleArms" class="form-input" step="0.5" placeholder="Biceps tepe (Örn: 38)">
+                        <input type="number" id="scaleArms" class="form-input" step="0.5" placeholder="Pazı çevresi (Örn: 38)">
                     </div>
                 </div>
 
                 <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px;" class="form-group">
                     <div>
                         <label class="form-label">Bacak (cm)</label>
-                        <input type="number" id="scaleThigh" class="form-input" step="0.5" placeholder="Uyluk (Örn: 58)">
+                        <input type="number" id="scaleThigh" class="form-input" step="0.5" placeholder="Üst bacak (Örn: 58)">
                     </div>
                     <div>
                         <label class="form-label">Kalça (cm)</label>
-                        <input type="number" id="scaleHips" class="form-input" step="0.5" placeholder="Glute (Örn: 100)">
+                        <input type="number" id="scaleHips" class="form-input" step="0.5" placeholder="Kalça çevresi (Örn: 100)">
                     </div>
                     <div>
                         <label class="form-label">Boyun (cm)</label>
@@ -2013,7 +2008,7 @@
             <!-- KAYDIRILABİLİR ORTA GÖVDE (SCROLLABLE BODY) -->
             <div class="ai-architect-modal-body">
                 <!-- BÖLÜM 1: CANLI TELEMETRİ (VARSAYILAN GİZLENEBİLİR AKORDİYON) -->
-                <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:9px 12px; margin-bottom:8px;">
+                <div style="background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:10px; padding:9px 12px; margin-bottom:8px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleAiTelemetryAccordion()">
                         <div style="display:flex; align-items:center; gap:8px;">
                             <span style="font-size:13px;">📊</span>
@@ -2021,7 +2016,7 @@
                         </div>
                         <span id="aiTelemetryToggleLabel" style="font-size:11px; color:var(--cyan); font-weight:700;">▼ Göster</span>
                     </div>
-                    <div id="aiTelemetryAccordionBody" style="display:none; margin-top:8px; padding-top:8px; border-top:1px dashed rgba(255,255,255,0.08);">
+                    <div id="aiTelemetryAccordionBody" style="display:none; margin-top:8px; padding-top:8px; border-top:1px dashed #CBD5E1;">
                         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(110px, 1fr)); gap:6px;" id="aiTelemetryGrid">
                             <!-- Populated by JS -->
                         </div>
@@ -2029,24 +2024,24 @@
                 </div>
 
                 <!-- BÖLÜM 2: AI TEŞHİS VE BİYOMEKANİK RAPORU (VARSAYILAN GİZLENEBİLİR AKORDİYON) -->
-                <div style="background:linear-gradient(135deg, rgba(30,27,75,0.6), rgba(15,23,42,0.8)); border:1px solid rgba(168,85,247,0.35); border-radius:10px; padding:10px 12px; margin-bottom:10px;">
+                <div style="background:linear-gradient(135deg, #FAF5FF, #F3E8FF); border:1.5px solid #D8B4FE; border-radius:10px; padding:10px 12px; margin-bottom:10px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; gap:8px;" onclick="toggleAiDiagnosticAccordion()">
                         <div style="display:flex; align-items:center; gap:8px; min-width:0;">
                             <span style="font-size:14px; flex-shrink:0;">🧠</span>
                             <strong style="font-size:12px; color:#0F172A; line-height:1.35;" id="aiDiagnosticHeadline">AI Biyomekanik Teşhis Raporu</strong>
                         </div>
-                        <span id="aiDiagnosticToggleLabel" style="font-size:11px; color:var(--cyan); font-weight:700; flex-shrink:0;">▼ Göster</span>
+                        <span id="aiDiagnosticToggleLabel" style="font-size:11px; color:#6B21A8; font-weight:700; flex-shrink:0;">▼ Göster</span>
                     </div>
-                    <div id="aiDiagnosticAccordionBody" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed rgba(168,85,247,0.3);">
-                        <div id="aiDiagnosticContent" style="font-size:12px; color:var(--text-secondary); line-height:1.55; margin-bottom:8px;">
+                    <div id="aiDiagnosticAccordionBody" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed #D8B4FE;">
+                        <div id="aiDiagnosticContent" style="font-size:12px; color:#334155; line-height:1.55; margin-bottom:8px;">
                             <!-- Populated by JS -->
                         </div>
                         <div style="display:flex; justify-content:flex-end;">
-                            <button type="button" class="btn btn-outline" id="btnTriggerGeminiLiveReport" onclick="requestGeminiDeepHybridReport()" style="font-size:11px; padding:4px 10px; border-color:#c084fc; color:#c084fc; font-weight:800; display:flex; align-items:center; gap:5px;">
+                            <button type="button" class="btn btn-outline" id="btnTriggerGeminiLiveReport" onclick="requestGeminiDeepHybridReport()" style="font-size:11px; padding:4px 10px; border-color:#9333EA; color:#6B21A8; background:#FFFFFF; font-weight:800; display:flex; align-items:center; gap:5px;">
                                 <span>✨ Canlı Gemini Analizi</span>
                             </button>
                         </div>
-                        <div id="aiGeminiExtraReportContainer" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed rgba(168,85,247,0.3); font-size:12px; color:#0F172A; line-height:1.55;">
+                        <div id="aiGeminiExtraReportContainer" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed #D8B4FE; font-size:12px; color:#0F172A; line-height:1.55;">
                             <!-- Gemini live output will be streamed/rendered here -->
                         </div>
                     </div>
@@ -2101,7 +2096,7 @@
                 </div>
 
                 <!-- BÖLÜM 4: HIZLI PARAMETRE VE ÖZEL İSTEKLER -->
-                <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:10px 12px;">
+                <div style="background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:10px; padding:10px 12px;">
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; align-items:stretch;">
                         <div style="min-width:0;">
                             <label class="form-label" style="font-size:10.5px; margin-bottom:3px; display:block;">Günlük Bölge / Split</label>
@@ -2127,20 +2122,23 @@
                     <div style="margin-bottom:8px;">
                         <label class="form-label" style="font-size:10.5px; margin-bottom:3px; display:block;">Set & Süperset Yoğunluğu (Akademik Hibrit)</label>
                         <select id="aiModalStyleSelect" class="form-input" style="font-size:12px; padding:7px 9px; width:100%; box-sizing:border-box;">
-                            <option value="superset" selected>⚖️ Orta Süperset (Akademik Hibrit: 1 Düz + 1 Süperset)</option>
-                            <option value="superset_light">🌱 Az Süperset (Düz Set + Son 2 Hareket Süperset)</option>
-                            <option value="superset_intense">🔥 Yoğun Süperset (Tamamı İkili Süperset)</option>
-                            <option value="straight">🛡️ Klasik Düz Set (Tamamı Tekli Set)</option>
-                            <option value="emom">⏱️ EMOM / Kondisyon Döngüsü</option>
+                            <option value="superset" selected>⚖️ Orta Süperset</option>
+                            <option value="complex">⚔️ Birleşik Akış (Kompleks)</option>
+                            <option value="superset_light">🌱 Az Süperset</option>
+                            <option value="superset_intense">🔥 Yoğun Süperset</option>
+                            <option value="straight">🛡️ Klasik Düz Set</option>
+                            <option value="emom">⏱️ EMOM Döngüsü</option>
                         </select>
                     </div>
                     <div style="margin-bottom:8px;">
-                        <label class="form-label" style="font-size:10.5px; margin-bottom:3px; display:block; color:#38bdf8;">Haftalık Program Mimarisi (Haftalık Kurulum İçin)</label>
+                        <label class="form-label" style="font-size:10.5px; margin-bottom:3px; display:block; color:#38bdf8;">Haftalık Şablon</label>
                         <select id="aiModalWeeklyTemplateSelect" class="form-input" style="font-size:12px; padding:7px 9px; width:100%; box-sizing:border-box; border-color:rgba(56,189,248,0.35);">
-                            <option value="upper_lower_full" selected>📅 3 Gün (Akademik Optimum): Pzt Üst • Çar Alt & Bacak • Cum Tüm Vücut (2x Frekans)</option>
-                            <option value="ppl_3day">📅 3 Gün (Klasik PPL): Pzt İtiş • Çar Çekiş • Cum Alt Vücut & Bacak</option>
-                            <option value="full_body_abc">📅 3 Gün (Tüm Vücut A/B/C): Pzt • Çar • Cum (Her Gün Farklı Hareket & Açı)</option>
-                            <option value="upper_lower_4day">📅 4 Gün (Üst/Alt A-B): Pzt Üst A • Sal Alt A • Per Üst B • Cum Alt B</option>
+                            <option value="ai_auto">🤖 AI Otomatik Teşhis</option>
+                            <option value="upper_lower_full" selected>📅 3 Gün: Üst • Alt • Tüm Vücut</option>
+                            <option value="ppl_3day">📅 3 Gün: İtiş • Çekiş • Bacak</option>
+                            <option value="fullbody_3day">📅 3 Gün: Tüm Vücut (Farklı Hareketler)</option>
+                            <option value="flow_complex_3day">⚔️ 3 Gün: Çelik Akışı</option>
+                            <option value="upper_lower_4day">📅 4 Gün: Üst / Alt</option>
                         </select>
                     </div>
                     <div>
@@ -2213,7 +2211,10 @@
     <div id="exercisePickerModal" class="modal-overlay" onclick="if(event.target === this) closeExercisePickerModal()">
         <div class="modal-box" style="max-width: 640px; max-height: 92vh; display: flex; flex-direction: column;">
             <div class="modal-header" style="margin-bottom: 6px;">
-                <span class="modal-title" id="pickerModalTitle">🔄 Alternatif Egzersiz Seçici</span>
+                <div>
+                    <span class="modal-title" id="pickerModalTitle">🔄 Alternatif Egzersiz Seçici</span>
+                    <div id="pickerModalSubtitle" style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;"></div>
+                </div>
                 <button type="button" class="modal-close" aria-label="Kapat" onclick="closeExercisePickerModal()">✕</button>
             </div>
 
@@ -2233,9 +2234,9 @@
             </div>
 
             <!-- 4 SMART TABS -->
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 8px; background:#0E131B; padding: 4px; border-radius: 8px; border: 1px solid var(--border);">
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 8px; background:#F1F5F9; padding: 4px; border-radius: 8px; border: 1.5px solid #E2E8F0;">
                 <button type="button" class="btn btn-outline" id="pickerTabBtnSame" style="padding: 7px 2px; font-size: 10.5px; font-weight: 800; border-radius: 6px; border-color: transparent;" onclick="switchPickerTab('same_muscle')">
-                    🎯 Biyomekanik
+                    🎯 Aynı Bölge
                 </button>
                 <button type="button" class="btn btn-outline" id="pickerTabBtnAI" style="padding: 7px 2px; font-size: 10.5px; font-weight: 800; border-radius: 6px; border-color: transparent; color:#c084fc;" onclick="switchPickerTab('ai_coach')">
                     🤖 Gemini AI
@@ -2251,10 +2252,10 @@
             <!-- TAB 1: AYNI BİYOMEKANİK PATERN & KAS GRUBU -->
             <div id="pickerSubPanelSame" style="margin-bottom:6px;">
                 <div style="display:flex; gap:4px; flex-wrap:wrap; margin-bottom:6px;" id="pickerReasonPills">
-                    <button type="button" class="btn-quick-equip" id="pill_reason_all" onclick="setPickerReasonFilter('all')">⚡ Birebir Patern</button>
+                    <button type="button" class="btn-quick-equip" id="pill_reason_all" onclick="setPickerReasonFilter('all')">⚡ Aynı Hareket Tipi</button>
                     <button type="button" class="btn-quick-equip" id="pill_reason_no_equip" onclick="setPickerReasonFilter('no_equip')">🚫 Alet Yok / Dolu</button>
                     <button type="button" class="btn-quick-equip" id="pill_reason_joint" onclick="setPickerReasonFilter('joint')">🩹 Bel / Eklem Dostu</button>
-                    <button type="button" class="btn-quick-equip" id="pill_reason_easier" onclick="setPickerReasonFilter('easier')">📉 Daha Kolay (Form)</button>
+                    <button type="button" class="btn-quick-equip" id="pill_reason_easier" onclick="setPickerReasonFilter('easier')">📉 Daha Kolay</button>
                 </div>
 
                 <div style="display:flex; gap:4px; flex-wrap:wrap;" id="pickerSameEquipPills">
@@ -2692,8 +2693,8 @@
     </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
-    <script src="js/exercises-db.js?v=242"></script>
-    <script src="js/app.js?v=251"></script>
+    <script src="js/exercises-db.js?v=245"></script>
+    <script src="js/app.js?v=260"></script>
     <script>
         function toggleHeaderPopupMenu(e) {
             if (e) e.stopPropagation();
@@ -2742,20 +2743,20 @@
     </script>
 
     <!-- AKADEMİK SPOR BİLİMİ RAPOR MODALI -->
-    <div class="modal-overlay" id="academicReportModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(8px);">
-        <div style="background:var(--bg-card, #161c2b); border:1px solid var(--gold, #eab308); border-radius:16px; width:92%; max-width:640px; max-height:85vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 15px 40px rgba(0,0,0,0.7);">
-            <div style="padding:16px 20px; border-bottom:1px solid var(--border, rgba(255,255,255,0.1)); display:flex; justify-content:space-between; align-items:center;">
+    <div class="modal-overlay" id="academicReportModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.6); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(8px);">
+        <div style="background:#FFFFFF; border:1.5px solid #E2E8F0; border-radius:16px; width:92%; max-width:640px; max-height:85vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 20px 60px rgba(15,23,42,0.16);">
+            <div style="padding:16px 20px; border-bottom:1.5px solid #E2E8F0; display:flex; justify-content:space-between; align-items:center; background:#F8FAFC;">
                 <div style="display:flex; align-items:center; gap:10px;">
                     <div>
-                        <h3 style="font-size:15px; font-weight:900; color:var(--gold, #eab308); margin:0;">FitLAB Spor Bilimi ve Analiz Raporu</h3>
-                        <span style="font-size:12px; color:var(--text-secondary, #94a3b8);">FitLAB İstasyonu Tarafından Üretildi</span>
+                        <h3 style="font-size:15px; font-weight:900; color:#0F172A; margin:0;">FitLAB Spor Bilimi ve Analiz Raporu</h3>
+                        <span style="font-size:12px; color:#475569;">FitLAB İstasyonu Tarafından Üretildi</span>
                     </div>
                 </div>
-                <button type="button" onclick="document.getElementById('academicReportModal').style.display='none'" style="background:transparent; border:none; color:var(--text-secondary); font-size:20px; cursor:pointer; padding:4px 8px;">&times;</button>
+                <button type="button" onclick="document.getElementById('academicReportModal').style.display='none'" style="background:transparent; border:none; color:#475569; font-size:20px; cursor:pointer; padding:4px 8px;">&times;</button>
             </div>
             <div style="padding:18px 20px; overflow-y:auto; font-size:13px; line-height:1.65; color:#0F172A; white-space:pre-wrap; font-family:var(--font-sans);" id="academicReportModalContent">
             </div>
-            <div style="padding:14px 20px; border-top:1px solid var(--border, rgba(255,255,255,0.1)); display:flex; justify-content:flex-end;">
+            <div style="padding:14px 20px; border-top:1.5px solid #E2E8F0; background:#F8FAFC; display:flex; justify-content:flex-end;">
                 <button type="button" class="btn btn-gold" onclick="document.getElementById('academicReportModal').style.display='none'" style="padding:8px 18px; font-size:12.5px; font-weight:800;">
                     Anladım & Kapat
                 </button>

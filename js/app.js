@@ -35,162 +35,1494 @@
         };
 
         const MUSCLE_DEFS = {
-            chest: { name: "Göğüs", icon: "🛡️", desc: "Pectoralis Major / Minor", color: "#38bdf8" },
-            back: { name: "Sırt & Kanat", icon: "🏹", desc: "Latissimus, Rhomboid, Trapez", color: "#818cf8" },
-            shoulders: { name: "Omuz (Deltoid)", icon: "⚔️", desc: "Ön, Yan, Arka Deltoid", color: "#f59e0b" },
-            biceps: { name: "Biceps (Pazı)", icon: "💪", desc: "Biceps Brachii & Ön Kol", color: "#ec4899" },
-            triceps: { name: "Triceps (Arka Kol)", icon: "⚡", desc: "Triceps Brachii (3 Baş)", color: "#10b981" },
-            quads: { name: "Ön Bacak (Quad)", icon: "🦵", desc: "Quadriceps & Diz Ekstansiyonu", color: "#06b6d4" },
-            hamstrings: { name: "Arka Bacak (Hamstring)", icon: "🦿", desc: "Biceps Femoris & Kalça Menteşesi", color: "#f97316" },
-            glutes: { name: "Kalça (Glute)", icon: "🍑", desc: "Gluteus Maximus / Medius", color: "#a855f7" },
-            core: { name: "Karın & Core", icon: "🧱", desc: "Rectus Abdominis & Oblikler", color: "#eab308" },
-            calves_grip: { name: "Kalf & Kavrama", icon: "🦶", desc: "Gastrocnemius, Soleus & Bilek", color: "#94a3b8" }
+            chest: { name: "Göğüs", icon: "🛡️", desc: "Üst, Orta ve Alt Göğüs", color: "#38bdf8" },
+            back: { name: "Sırt & Kanat", icon: "🏹", desc: "Kanat, Orta ve Üst Sırt", color: "#818cf8" },
+            shoulders: { name: "Omuz", icon: "⚔️", desc: "Ön, Yan ve Arka Omuz", color: "#f59e0b" },
+            biceps: { name: "Ön Kol (Pazı)", icon: "💪", desc: "Pazı & Kol Çekiş Gücü", color: "#ec4899" },
+            triceps: { name: "Arka Kol", icon: "⚡", desc: "Arka Kol & Kol İtiş Gücü", color: "#10b981" },
+            quads: { name: "Ön Bacak", icon: "🦵", desc: "Ön Bacak & Çömelme Gücü", color: "#06b6d4" },
+            hamstrings: { name: "Arka Bacak", icon: "🦿", desc: "Arka Bacak & Eğilme Gücü", color: "#f97316" },
+            glutes: { name: "Kalça", icon: "🍑", desc: "Kalça & Denge Gücü", color: "#a855f7" },
+            core: { name: "Karın & Bel", icon: "🧱", desc: "Ön Karın, Yan Karın & Bel Çevresi", color: "#eab308" },
+            calves_grip: { name: "Baldır & Tutuş", icon: "🦶", desc: "Baldır, Ayak Bileği & El Tutuşu", color: "#94a3b8" }
         };
 
-        // ==================== BİYOMEKANİK HASSAS ANATOMİ HARİTASI (SSOT) ====================
+        // ==================== BÖLGESEL KAS HARİTASI (SSOT) ====================
         const EXERCISE_ANATOMY_MAP = {
-            // CHEST / GÖĞÜS
-            db_bench_press: { primary: 'Orta Göğüs', secondary: 'Ön Omuz, Triceps', subKey: 'chest_mid' },
-            db_incline_press: { primary: 'Üst Göğüs', secondary: 'Ön Omuz, Triceps', subKey: 'chest_upper' },
-            db_floor_press: { primary: 'Orta Göğüs', secondary: 'Triceps, Ön Omuz', subKey: 'chest_mid' },
-            bb_bench_press: { primary: 'Orta Göğüs', secondary: 'Ön Omuz, Triceps', subKey: 'chest_mid' },
-            bb_incline_bench: { primary: 'Üst Göğüs', secondary: 'Ön Omuz, Triceps', subKey: 'chest_upper' },
-            bb_close_grip_bench: { primary: 'Triceps (İtiş)', secondary: 'İç & Orta Göğüs, Ön Omuz', subKey: 'triceps_lateral' },
-            mach_cable_crossover: { primary: 'İç & Orta Göğüs', secondary: 'Ön Omuz', subKey: 'chest_mid' },
-            mach_pec_deck: { primary: 'Orta Göğüs (İzole)', secondary: 'Ön Omuz', subKey: 'chest_mid' },
-            bw_pushup: { primary: 'Orta Göğüs', secondary: 'Ön Omuz, Triceps, Core', subKey: 'chest_mid' },
-            bw_decline_pushup: { primary: 'Üst Göğüs', secondary: 'Ön Omuz, Triceps', subKey: 'chest_upper' },
-            bw_diamond_pushup: { primary: 'Triceps (İtiş)', secondary: 'İç Göğüs, Ön Omuz', subKey: 'triceps_lateral' },
-            bw_dips: { primary: 'Alt Göğüs', secondary: 'Triceps, Ön Omuz', subKey: 'chest_lower', allSubKeys: ['chest_lower', 'triceps_lateral'] },
-            db_renegade_pushup: { primary: 'Orta Göğüs & Sırt', secondary: 'Triceps, Yan Karın (Oblik)', subKey: 'chest_mid', allSubKeys: ['chest_mid', 'back_mid', 'core_obliques'] },
-
-            // SHOULDERS / OMUZ
-            db_overhead_press: { primary: 'Ön Omuz (Seated)', secondary: 'Triceps, Üst Göğüs, Core', subKey: 'shoulders_front' },
-            db_standing_overhead_press: { primary: 'Ön Omuz (Standing)', secondary: 'Triceps, Üst Göğüs, Core', subKey: 'shoulders_front' },
-            db_arnold_press: { primary: 'Tüm Omuz (Ön & Yan)', secondary: 'Triceps, Üst Göğüs', subKey: 'shoulders_front', allSubKeys: ['shoulders_front', 'shoulders_side'] },
-            db_lateral_raise: { primary: 'Yan Omuz', secondary: 'Üst Trapez', subKey: 'shoulders_side' },
-            mach_cable_lateral: { primary: 'Yan Omuz (İzole)', secondary: 'Üst Trapez', subKey: 'shoulders_side' },
-            mach_face_pull: { primary: 'Arka Omuz', secondary: 'Üst Sırt (Trapez/Rhomboid), Dış Rotatör', subKey: 'shoulders_rear' },
-            kneeling_plate_front_raise: { primary: 'Ön Omuz', secondary: 'Üst Göğüs, Core', subKey: 'shoulders_front' },
-            kb_press: { primary: 'Ön Omuz', secondary: 'Triceps, Core, Kalça', subKey: 'shoulders_front' },
-            bb_overhead_press: { primary: 'Ön Omuz', secondary: 'Triceps, Üst Göğüs, Core', subKey: 'shoulders_front' },
-            bb_push_press: { primary: 'Ön Omuz & Güç', secondary: 'Triceps, Ön Bacak, Core', subKey: 'shoulders_front' },
-            db_push_press: { primary: 'Ön Omuz & Güç', secondary: 'Triceps, Ön Bacak, Core', subKey: 'shoulders_front' },
-            kb_halo: { primary: 'Omuz Kapsülü (Mobilite)', secondary: 'Üst Sırt, Core', subKey: 'shoulders_rear' },
-            waiters_carry: { primary: 'Omuz Stabilitesi', secondary: 'Trapez, Derin Core', subKey: 'core_front', allSubKeys: ['core_front', 'shoulders_front'] },
-
-            // BACK / SIRT
-            db_saw_row: { primary: 'Kanat (Geniş Sırt)', secondary: 'Biceps, Arka Omuz, Rhomboid', subKey: 'back_lats' },
-            db_chest_supported_row: { primary: 'Orta Sırt (Kalınlık)', secondary: 'Rhomboid, Arka Omuz, Biceps', subKey: 'back_mid' },
-            db_renegade_row: { primary: 'Orta Sırt & Kanat', secondary: 'Derin Karın (Oblik), Arka Omuz', subKey: 'back_mid', allSubKeys: ['back_mid', 'core_obliques'] },
-            db_pullover: { primary: 'Kanat (Geniş Sırt)', secondary: 'Üst Göğüs, Triceps Uzun Baş, Serratus', subKey: 'back_lats' },
-            mach_lat_pulldown: { primary: 'Kanat (Geniş Sırt)', secondary: 'Biceps, Arka Omuz, Ön Kol', subKey: 'back_lats' },
-            mach_cable_row: { primary: 'Orta Sırt (Kalınlık)', secondary: 'Rhomboid, Kanat, Biceps', subKey: 'back_mid' },
-            bw_pullup: { primary: 'Kanat (Geniş Sırt)', secondary: 'Biceps, Arka Omuz, Core', subKey: 'back_lats' },
-            bw_chinup: { primary: 'Kanat & Biceps', secondary: 'Arka Omuz, Ön Kol', subKey: 'back_lats', allSubKeys: ['back_lats', 'biceps'] },
-            bw_inverted_row: { primary: 'Orta Sırt (Kalınlık)', secondary: 'Rhomboid, Biceps, Arka Omuz', subKey: 'back_mid' },
-            bb_bent_over_row: { primary: 'Orta Sırt (Kalınlık)', secondary: 'Kanat, Biceps, Alt Bel', subKey: 'back_mid' },
-            bb_pendlay_row: { primary: 'Orta Sırt (Patlayıcı)', secondary: 'Rhomboid, Kanat, Alt Bel', subKey: 'back_mid' },
-            kb_gorilla_row: { primary: 'Kanat & Orta Sırt', secondary: 'Biceps, Arka Omuz, Statik Bacak', subKey: 'back_mid', allSubKeys: ['back_mid', 'back_lats'] },
-            mach_straight_arm_pulldown: { primary: 'Alt Kanat (İzole Lats)', secondary: 'Triceps Uzun Baş, Core', subKey: 'back_lats' },
-            bw_hyperextension: { primary: 'Alt Sırt (Erector Spinae)', secondary: 'Büyük Kalça (Glute), Hamstring', subKey: 'back_mid', allSubKeys: ['back_mid', 'legs_hamstrings', 'legs_glutes'] },
-
-            // LEGS - QUADS / ÖN BACAK
-            db_goblet_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Büyük Kalça (Glute), Core', subKey: 'legs_quad' },
-            db_front_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Büyük Kalça, Üst Sırt, Core', subKey: 'legs_quad' },
-            db_bulgarian_squat: { primary: 'Ön Bacak & Kalça', secondary: 'Arka Bacak, Denge/Adduktor', subKey: 'legs_quad', allSubKeys: ['legs_quad', 'legs_glutes'] },
-            db_walking_lunge: { primary: 'Ön Bacak (Quad)', secondary: 'Kalça, Arka Bacak, Baldır', subKey: 'legs_quad', allSubKeys: ['legs_quad', 'legs_glutes'] },
-            db_reverse_lunge: { primary: 'Ön Bacak & Kalça', secondary: 'Arka Bacak, Diz Stabilitesi', subKey: 'legs_quad', allSubKeys: ['legs_quad', 'legs_glutes'] },
-            kb_goblet_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Kalça, Core, Ayak Bileği', subKey: 'legs_quad' },
-            bb_back_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Büyük Kalça, Alt Bel, Core', subKey: 'legs_quad' },
-            bb_front_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Büyük Kalça, Üst Sırt Dikliği', subKey: 'legs_quad' },
-            bb_zercher_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Kalça, Ön Karın Zırhı, Üst Sırt', subKey: 'legs_quad' },
-            mach_leg_press: { primary: 'Ön Bacak (Quad)', secondary: 'Büyük Kalça', subKey: 'legs_quad' },
-            mach_leg_extension: { primary: 'Ön Bacak (Quad İzole)', secondary: 'Gözyaşı Kası (VMO)', subKey: 'legs_quad' },
-            bw_air_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Kalça, Ayak Bileği Açıklığı', subKey: 'legs_quad' },
-            bw_jump_squat: { primary: 'Ön Bacak & Patlayıcı', secondary: 'Kalça, Baldır (Kalf)', subKey: 'legs_quad' },
-            lunge_with_twist: { primary: 'Ön Bacak & Kalça', secondary: 'Yan Karın (Oblik), Denge', subKey: 'legs_quad', allSubKeys: ['legs_quad', 'core_obliques'] },
-            step_up_press: { primary: 'Ön Bacak & Omuz', secondary: 'Kalça, Triceps, Denge', subKey: 'legs_quad', allSubKeys: ['legs_quad', 'shoulders_front'], isLowerUpperComplex: true },
-
-            // LEGS - HAMSTRINGS & GLUTES / ARKA BACAK & KALÇA
-            db_rdl: { primary: 'Arka Bacak (Hamstring)', secondary: 'Büyük Kalça (Glute), Alt Bel', subKey: 'legs_hamstrings' },
-            db_single_leg_rdl: { primary: 'Arka Bacak (Hamstring)', secondary: 'Kalça, Ayak Bileği Stabilitesi', subKey: 'legs_hamstrings' },
-            bb_rdl: { primary: 'Arka Bacak (Hamstring)', secondary: 'Büyük Kalça, Alt Bel', subKey: 'legs_hamstrings' },
-            mach_leg_curl: { primary: 'Arka Bacak (Hamstring İzole)', secondary: 'Baldır Üst Kısmı', subKey: 'legs_hamstrings' },
-            bb_deadlift: { primary: 'Tüm Arka Zincir (Hamstring & Kalça)', secondary: 'Alt Bel, Üst Sırt (Trapez), Ön Kol', subKey: 'legs_hamstrings' },
-            bb_hip_thrust: { primary: 'Büyük Kalça (Glute)', secondary: 'Arka Bacak, Core', subKey: 'legs_glutes' },
-            bw_glute_bridge: { primary: 'Büyük Kalça (Glute)', secondary: 'Arka Bacak, Pelvik Denge', subKey: 'legs_glutes' },
-            mach_calf_raise: { primary: 'Baldır (Kalf)', secondary: 'Aşil Tendonu, Ayak Tabanı', subKey: 'legs_calves' },
-            db_standing_calf_raise: { primary: 'Baldır (Kalf)', secondary: 'Aşil Tendonu, Ayak Tabanı', subKey: 'legs_calves' },
-            db_lying_leg_curl: { primary: 'Arka Bacak (Hamstrings)', secondary: 'Biceps Femoris Kısa Başı', subKey: 'legs_hamstrings' },
-            bw_sissy_squat: { primary: 'Ön Bacak (Quad)', secondary: 'Rectus Femoris, Diz Stabilitesi', subKey: 'legs_quad' },
-
-            // ARMS - TRICEPS & BICEPS / ARKA KOL & ÖN KOL
-            db_triceps_overhead: { primary: 'Triceps (Uzun Baş)', secondary: 'Triceps Yan Baş, Core', subKey: 'triceps_long' },
-            db_skullcrusher: { primary: 'Triceps (Orta/Uzun Baş)', secondary: 'Triceps Yan Baş', subKey: 'triceps_long' },
-            mach_triceps_pushdown: { primary: 'Triceps (Yan/Dış Baş)', secondary: 'Triceps Medial Baş, Ön Kol', subKey: 'triceps_lateral' },
-            db_biceps_curl: { primary: 'Biceps (Pazu)', secondary: 'Ön Kol (Brachioradialis)', subKey: 'biceps' },
-            db_hammer_curl: { primary: 'Biceps & Ön Kol (Brachialis)', secondary: 'Kavrama Gücü', subKey: 'biceps' },
-            db_incline_curl: { primary: 'Biceps (Uzun Baş / Tepe)', secondary: 'Ön Omuz Esnemesi', subKey: 'biceps' },
-            bb_biceps_curl: { primary: 'Biceps (Genel Kütle)', secondary: 'Ön Kol, Kavrama Gücü', subKey: 'biceps' },
-            mach_cable_biceps: { primary: 'Biceps (Sürekli Gerilim)', secondary: 'Ön Kol', subKey: 'biceps' },
-
-            // CORE & CARRIES / KARIN & TAŞIMALAR
-            db_suitcase_carry: { primary: 'Yan Karın (Oblik)', secondary: 'Kavrama Gücü, Omuz, Kalça', subKey: 'core_obliques' },
-            db_farmers_walk: { primary: 'Tüm Core & Kavrama', secondary: 'Üst Trapez, Ön Kol, Baldır', subKey: 'core_front' },
-            db_russian_twist: { primary: 'Yan Karın (Oblik)', secondary: 'Ön Karın, Kalça Fleksör', subKey: 'core_obliques' },
-            mach_cable_woodchopper: { primary: 'Yan Karın (Oblik Rotasyon)', secondary: 'Omuz, Kalça, Serratus', subKey: 'core_obliques' },
-            half_kneeling_plate_chop: { primary: 'Yan Karın (Oblik Rotasyon)', secondary: 'Omuz, Kalça Stabilitesi', subKey: 'core_obliques' },
-            bw_plank: { primary: 'Ön Karın (Core Zırhı)', secondary: 'Omuz, Kalça, Dört Başlı Kas', subKey: 'core_front' },
-            bw_hollow_body: { primary: 'Derin Karın Duvarı', secondary: 'Kalça Fleksör, Serratus', subKey: 'core_front' },
-            bw_hanging_knee_raise: { primary: 'Alt Karın & Core', secondary: 'Kavrama Gücü, Kalça Fleksör', subKey: 'core_front' },
-            bw_mountain_climber: { primary: 'Ön Karın & Nabız', secondary: 'Omuz, Kalça Fleksör', subKey: 'core_front' },
-            bear_crawl_pull_through: { primary: 'Derin Core (Rotasyon Direnci)', secondary: 'Omuz Zırhı, Kalça', subKey: 'core_obliques' },
-            cross_body_carry: { primary: 'Yan Karın & Omuz', secondary: 'Trapez, Denge', subKey: 'core_obliques' },
-
-            // BALLISTIC & FUNCTIONAL POWER / BALİSTİK & BİLEŞİK
-            db_swing: { primary: 'Büyük Kalça & Arka Bacak', secondary: 'Alt Bel, Core, Kavrama', subKey: 'legs_hamstrings', allSubKeys: ['legs_hamstrings', 'legs_glutes'] },
-            kb_swing: { primary: 'Büyük Kalça & Arka Bacak', secondary: 'Alt Bel, Core, Kavrama', subKey: 'legs_hamstrings', allSubKeys: ['legs_hamstrings', 'legs_glutes'] },
-            kb_clean: { primary: 'Kalça & Sırt Patlaması', secondary: 'Ön Kol, Omuz Rack, Core', subKey: 'back_mid', allSubKeys: ['legs_hamstrings', 'back_mid'] },
-            kb_half_snatch: { primary: 'Tüm Arka Zincir & Omuz', secondary: 'Kalça, Sırt, Nabız', subKey: 'shoulders_front', allSubKeys: ['legs_hamstrings', 'shoulders_front'], isLowerUpperComplex: true },
-            db_snatch: { primary: 'Tüm Arka Zincir & Omuz', secondary: 'Kalça, Sırt, Patlayıcı Güç', subKey: 'shoulders_front', allSubKeys: ['legs_hamstrings', 'shoulders_front'], isLowerUpperComplex: true },
-            kb_windmill: { primary: 'Yan Karın & Omuz Stabilitesi', secondary: 'Arka Bacak Esnekliği', subKey: 'core_obliques', allSubKeys: ['core_obliques', 'shoulders_front'] },
-            kb_turkish_getup: { primary: 'Tüm Vücut & Omuz Stabilitesi', secondary: 'Kalça, Core, Ön Bacak', subKey: 'shoulders_front', allSubKeys: ['shoulders_front', 'core_obliques', 'legs_quad'], isLowerUpperComplex: true },
-            db_thruster: { primary: 'Ön Bacak & Omuz', secondary: 'Triceps, Kalça, Core', subKey: 'shoulders_front', allSubKeys: ['legs_quad', 'shoulders_front'], isLowerUpperComplex: true },
-            kb_thruster: { primary: 'Ön Bacak & Omuz', secondary: 'Triceps, Kalça, Core', subKey: 'shoulders_front', allSubKeys: ['legs_quad', 'shoulders_front'], isLowerUpperComplex: true },
-            bb_thruster: { primary: 'Ön Bacak & Omuz', secondary: 'Triceps, Kalça, Core', subKey: 'shoulders_front', allSubKeys: ['legs_quad', 'shoulders_front'], isLowerUpperComplex: true },
-            db_clean_and_press: { primary: 'Kalça, Sırt & Omuz', secondary: 'Triceps, Arka Bacak', subKey: 'shoulders_front', allSubKeys: ['legs_hamstrings', 'back_mid', 'shoulders_front'], isLowerUpperComplex: true },
-            db_manmaker: { primary: 'Tüm Vücut Zırhı', secondary: 'Göğüs, Sırt, Omuz, Bacak, Core', subKey: 'core_front', allSubKeys: ['chest_mid', 'back_mid', 'legs_quad', 'shoulders_front', 'core_front'], isLowerUpperComplex: true, isFullBodyMetcon: true },
-            bb_hang_power_clean: { primary: 'Kalça & Üst Sırt (Trapez)', secondary: 'Arka Bacak, Ön Kol, Omuz', subKey: 'back_mid', allSubKeys: ['legs_hamstrings', 'back_mid'] },
-            bb_landmine_squat_press: { primary: 'Ön Bacak & Omuz', secondary: 'Üst Göğüs, Triceps, Kalça, Core', subKey: 'shoulders_front', allSubKeys: ['legs_quad', 'shoulders_front'], isLowerUpperComplex: true },
-            bw_burpee: { primary: 'Tüm Vücut Kondisyonu', secondary: 'Göğüs, Bacak, Core, Nabız', subKey: 'core_front', allSubKeys: ['chest_mid', 'legs_quad', 'core_front'], isLowerUpperComplex: true, isFullBodyMetcon: true },
-
-            // AKADEMİK BİRLEŞİK HAREKETLER & AKIŞ (Javorek, McGill, Boyle & Myers)
-            db_pullover_to_halo: { primary: 'Kanat & Omuz Mobilite', secondary: 'Üst Göğüs, Triceps Uzun Baş, Torasik Core', subKey: 'back_lats', allSubKeys: ['back_lats', 'shoulders_rear', 'core_front'], isComplex: true },
-            db_seesaw_lunge: { primary: 'Ön Bacak & Kalça (Dinamik)', secondary: 'Arka Bacak, Denge & Core Stabilitesi', subKey: 'legs_quad', allSubKeys: ['legs_quad', 'legs_glutes', 'legs_hamstrings'], isComplex: true },
-            db_clean_squat_press: { primary: 'Ön Bacak, Kalça & Omuz', secondary: 'Sırt, Triceps, Patlayıcı Güç', subKey: 'shoulders_front', allSubKeys: ['legs_hamstrings', 'legs_quad', 'shoulders_front', 'back_mid'], isLowerUpperComplex: true, isComplex: true },
-            db_rdl_to_high_pull: { primary: 'Arka Bacak & Üst Sırt (Trapez)', secondary: 'Büyük Kalça, Arka Omuz, Ön Kol', subKey: 'legs_hamstrings', allSubKeys: ['legs_hamstrings', 'legs_glutes', 'back_mid', 'shoulders_rear'], isLowerUpperComplex: true, isComplex: true },
-            db_swing_to_goblet_squat: { primary: 'Kalça, Arka Bacak & Ön Bacak', secondary: 'Core Zırhı, Kavrama, Metabolik Güç', subKey: 'legs_quad', allSubKeys: ['legs_hamstrings', 'legs_glutes', 'legs_quad', 'core_front'], isComplex: true },
-            db_lunge_to_curl_press: { primary: 'Ön Bacak, Kalça & Biceps', secondary: 'Ön Omuz, Denge, Core', subKey: 'legs_quad', allSubKeys: ['legs_quad', 'legs_glutes', 'biceps', 'shoulders_front'], isLowerUpperComplex: true, isComplex: true },
-            db_gorilla_row_to_clean: { primary: 'Orta Sırt & Kalça Menteşesi', secondary: 'Lats, Trapez, Hamstrings', subKey: 'back_mid', allSubKeys: ['back_mid', 'legs_hamstrings', 'legs_glutes', 'shoulders_rear'], isLowerUpperComplex: true, isComplex: true },
-            db_floor_press_to_bridge: { primary: 'Orta Göğüs & Kalça (Glute)', secondary: 'Triceps, Hamstrings, Lomber Core', subKey: 'chest_mid', allSubKeys: ['chest_mid', 'legs_glutes', 'triceps_long'], isLowerUpperComplex: true, isComplex: true },
-            db_step_back_lunge_to_knee_drive: { primary: 'Ön Bacak & Ön Omuz', secondary: 'Gluteus Medius, Psoas, Rotasyonel Denge', subKey: 'shoulders_front', allSubKeys: ['legs_quad', 'shoulders_front', 'core_obliques'], isLowerUpperComplex: true, isComplex: true },
-            bw_inchworm_to_pushup: { primary: 'Hamstring Mobilite & Göğüs', secondary: 'Triceps, Ön Karın, Omuz Zırhı', subKey: 'chest_mid', allSubKeys: ['chest_mid', 'legs_hamstrings', 'core_front'], isLowerUpperComplex: true, isComplex: true },
-            db_rotational_lunge_chop: { primary: 'Ön Bacak, Kalça & Oblikler', secondary: 'Ön Omuz, Hamstrings, Core', subKey: 'legs_quad', allSubKeys: ['legs_quad', 'legs_glutes', 'core_obliques', 'shoulders_front'], isLowerUpperComplex: true, isComplex: true },
-            db_rotational_gorilla_row: { primary: 'Kanat & Orta Sırt', secondary: 'Arka Omuz, Biceps, Core', subKey: 'back_lats', allSubKeys: ['back_lats', 'back_mid', 'shoulders_rear', 'core_obliques'], isComplex: false },
-            db_single_arm_rear_delt_row: { primary: 'Arka Omuz (Rear Delt)', secondary: 'Orta Sırt, Rhomboids, Trapez', subKey: 'shoulders_rear', allSubKeys: ['shoulders_rear', 'back_mid'], isComplex: false },
-            db_high_pull_cuban_rotation: { primary: 'Arka Omuz & Üst Trapez', secondary: 'Rotator Manşet, Orta Sırt, Core', subKey: 'shoulders_rear', allSubKeys: ['shoulders_rear', 'back_mid', 'core_front'], isLowerUpperComplex: true, isComplex: true },
-            db_dumbbell_shrug_burnout: { primary: 'Üst Trapez', secondary: 'Ön Kol, Boyun Zırhı', subKey: 'back_mid', allSubKeys: ['back_mid'], isComplex: false },
-            db_quadruped_external_rotation: { primary: 'Arka Omuz & Rotator Manşet', secondary: 'Core Stabilitesi, Rhomboids', subKey: 'shoulders_rear', allSubKeys: ['shoulders_rear', 'core_front'], isComplex: false },
-            bw_jumping_jack: { primary: 'Yan Omuz & Kalf (Baldır)', secondary: 'Core, Ön Bacak, Aerobik Kondisyon', subKey: 'shoulders_side', allSubKeys: ['shoulders_side', 'legs_calves', 'legs_quad', 'core_front'], isComplex: false },
-            bw_high_knees: { primary: 'Kalça Fleksörü & Ön Bacak', secondary: 'Alt Karın, Kalf, Kardiyo', subKey: 'legs_quad', allSubKeys: ['legs_quad', 'core_front', 'legs_calves'], isComplex: false },
-            bw_jump_rope: { primary: 'Kalf (Baldır) & Ayak Bileği', secondary: 'Ön Kol, Omuz Stabilitesi, Ritim', subKey: 'legs_calves', allSubKeys: ['legs_calves', 'shoulders_side', 'core_front'], isComplex: false },
-            bw_butt_kicks: { primary: 'Arka Bacak (Hamstring) & Kalf', secondary: 'Kalça, Dinamik Koşu Mekaniği', subKey: 'legs_ham', allSubKeys: ['legs_ham', 'legs_calves'], isComplex: false },
-            bw_skater_jumps: { primary: 'Yan Kalça (Gluteus Medius) & Ön Bacak', secondary: 'Kalf, Core Denge, Yanal Güç', subKey: 'legs_glute', allSubKeys: ['legs_glute', 'legs_quad', 'legs_calves', 'core_obliques'], isComplex: false },
-            bw_plank_jacks: { primary: 'Ön & Yan Karın (Core Zırhı)', secondary: 'Omuz Stabilitesi, Kalça Abduktörleri', subKey: 'core_front', allSubKeys: ['core_front', 'core_obliques', 'shoulders_front'], isComplex: false },
-            bw_squat_thrust: { primary: 'Ön Bacak, Kalça & Core', secondary: 'Omuz, Göğüs, Metabolik Kondisyon', subKey: 'legs_quad', allSubKeys: ['legs_quad', 'legs_glute', 'core_front', 'shoulders_front'], isComplex: false },
-            bw_lateral_shuffle: { primary: 'Ön Bacak & Yan Kalça Çevikliği', secondary: 'İç Bacak, Kalf, Yanal Kondisyon', subKey: 'legs_quad', allSubKeys: ['legs_quad', 'legs_glute', 'legs_calves'], isComplex: false }
-        };
+          "db_bench_press": {
+                    "primary": "Orta Göğüs",
+                    "secondary": "Ön Omuz, Triceps (Dış ve Alt Kısım), Yan Göğüs Kaburga Kasları",
+                    "subKey": "chest_mid",
+                    "proof": "Düz sehpada dirsekleri 45° açıyla indirip itmek, göğsün tam orta kısmını en geniş açıda gerip sıkıştırır; kolları düzleştirirken triceps ve ön omuz da yardıma girer.",
+                    "allSubKeys": [
+                              "chest_mid"
+                    ]
+          },
+          "db_incline_press": {
+                    "primary": "Üst Göğüs",
+                    "secondary": "Ön Omuz, Triceps (Dış ve Alt Kısım), Yan Göğüs Kaburga Kasları",
+                    "subKey": "chest_upper",
+                    "proof": "Sehpayı 30-45° yukarı kaldırmak itiş yönünü köprücük kemiğine taşır; böylece yük orta göğüsten doğrudan üst göğse ve ön omuza geçer.",
+                    "allSubKeys": [
+                              "chest_upper"
+                    ]
+          },
+          "db_floor_press": {
+                    "primary": "Orta Göğüs, Triceps (Dış ve Alt Kısım)",
+                    "secondary": "Ön Omuz",
+                    "subKey": "chest_mid",
+                    "proof": "Yerde yatarken dirseklerin zemine değmesi kolun fazla geriye gitmesini önler; dipten hız almadan yapılan itiş orta göğsü ve özellikle tricepsin kol kilitleme gücünü vurur.",
+                    "allSubKeys": [
+                              "chest_mid"
+                    ]
+          },
+          "bb_bench_press": {
+                    "primary": "Orta Göğüs",
+                    "secondary": "Triceps (Dış ve Alt Kısım), Ön Omuz, Üst Göğüs",
+                    "subKey": "chest_mid",
+                    "proof": "Düz sehpada iki eli sabit barla birleştirerek ağır itiş yapmak, orta göğse en yüksek ağırlığı yüklerken kolları kilitleyen tricepsi ve ön omzu güçlü çalıştırır.",
+                    "allSubKeys": [
+                              "chest_mid"
+                    ]
+          },
+          "bb_incline_bench": {
+                    "primary": "Üst Göğüs",
+                    "secondary": "Ön Omuz, Triceps (Dış ve Alt Kısım)",
+                    "subKey": "chest_upper",
+                    "proof": "Yukarı eğimli sehpada barı üst göğse indirip itmek, göğsün üst kısmını (köprücük kemiği altını) ve ön omuzları ana hedef yapar.",
+                    "allSubKeys": [
+                              "chest_upper"
+                    ]
+          },
+          "bb_close_grip_bench": {
+                    "primary": "Triceps Dış Kısım, Triceps Alt Kısım",
+                    "secondary": "İç ve Orta Göğüs, Ön Omuz, Triceps İç/Uzun Kısım",
+                    "subKey": "triceps_lateral",
+                    "proof": "Barı dar tutup dirsekleri gövdeye yakın indirip itmek, göğsün yükünü azaltır ve arka kolun dış ile alt kısmına çok yüksek itiş gücü bindirir.",
+                    "allSubKeys": [
+                              "triceps_lateral",
+                              "triceps_medial"
+                    ]
+          },
+          "mach_cable_crossover": {
+                    "primary": "Orta Göğüs, İç Göğüs",
+                    "secondary": "Ön Omuz, Biceps İç Kısım (Dirseği Sabit Tutmak İçin)",
+                    "subKey": "chest_mid",
+                    "proof": "Dirsekleri büküp açmadan kolları önde birbirine kavuşturmak (sarılmak gibi), tricepsi devre dışı bırakır ve doğrudan orta ile iç göğüs liflerini sıkıştırır.",
+                    "allSubKeys": [
+                              "chest_mid"
+                    ]
+          },
+          "mach_pec_deck": {
+                    "primary": "Orta Göğüs, İç Göğüs",
+                    "secondary": "Ön Omuz",
+                    "subKey": "chest_mid",
+                    "proof": "Makinede oturarak kolları önde birleştirmek, kol kaslarını yormadan sadece orta ve iç göğsü izole şekilde çalıştırır.",
+                    "allSubKeys": [
+                              "chest_mid"
+                    ]
+          },
+          "bw_pushup": {
+                    "primary": "Orta Göğüs",
+                    "secondary": "Triceps (Dış ve Alt Kısım), Ön Omuz, Yan Göğüs Kaburga Kasları, Ön ve Derin İç Karın (Core)",
+                    "subKey": "chest_mid",
+                    "proof": "Yerde vücudu düz bir tahta gibi tutarak kendini yukarı itmek orta göğsü ve tricepsi çalıştırırken, belin sarkmasını önlemek için karın (core) kaslarını sürekli sıkar.",
+                    "allSubKeys": [
+                              "chest_mid"
+                    ]
+          },
+          "bw_decline_pushup": {
+                    "primary": "Üst Göğüs",
+                    "secondary": "Ön Omuz, Triceps (Dış ve Alt Kısım), Ön ve Derin İç Karın (Core)",
+                    "subKey": "chest_upper",
+                    "proof": "Ayakları sehpaya koyup eller yerde şınav çekmek, vücut açısını yukarı eğimli (incline) prese çevirir ve yükü üst göğüs ile ön omuza bindirir.",
+                    "allSubKeys": [
+                              "chest_upper"
+                    ]
+          },
+          "bw_diamond_pushup": {
+                    "primary": "Triceps Dış Kısım, Triceps Alt Kısım",
+                    "secondary": "İç ve Orta Göğüs, Ön Omuz, Derin İç Karın (Core)",
+                    "subKey": "triceps_lateral",
+                    "proof": "Eller göğüs altında birbirine yakın (elmas şeklinde) şınav çekildiğinde dirsekler tamamen bükülüp açılır; arka kolu en sert çalıştıran vücut ağırlığı hareketidir.",
+                    "allSubKeys": [
+                              "triceps_lateral",
+                              "triceps_medial"
+                    ]
+          },
+          "bw_dips": {
+                    "primary": "Alt Göğüs, Triceps (Dış ve Alt Kısım)",
+                    "secondary": "Ön Omuz, Orta Göğüs, Alt Trapez (Omuzları Aşağıda Tutma)",
+                    "subKey": "chest_lower",
+                    "allSubKeys": [
+                              "chest_lower",
+                              "triceps_lateral",
+                              "triceps_medial"
+                    ],
+                    "proof": "Gövdeyi hafif öne eğerek paralel barda kendini yukarı itmek, göğsün alt çizgisini (alt göğüs) ve arka kolun dış/alt kısmını çok yoğun çalıştırır."
+          },
+          "db_renegade_pushup": {
+                    "primary": "Orta Göğüs, Orta Sırt & Kanatlar",
+                    "secondary": "Yan Karın & Derin İç Karın (Core), Triceps, Ön Omuz, Biceps (Çekiş Kısmı)",
+                    "subKey": "chest_mid",
+                    "allSubKeys": [
+                              "chest_mid",
+                              "back_mid",
+                              "core_obliques",
+                              "back_lats"
+                    ],
+                    "proof": "Şınav kısmında orta göğüs ve triceps iterken, tek kolla dambılı çektiğin kısımda kanat ve orta sırt çalışır; tek el üstünde dengede kalmak yan karın kaslarını ateşler."
+          },
+          "db_overhead_press": {
+                    "primary": "Ön Omuz, Yan Omuz",
+                    "secondary": "Triceps (Uzun ve Dış Kısım), Üst Göğüs, Üst Trapez",
+                    "subKey": "shoulders_front",
+                    "proof": "Sırtı sehpaya yaslayıp oturarak ağırlığı baş üstüne itmek, bacaklardan güç almayı engeller ve doğrudan ön ile yan omuzları çalıştırır.",
+                    "allSubKeys": [
+                              "shoulders_front",
+                              "shoulders_side"
+                    ]
+          },
+          "db_standing_overhead_press": {
+                    "primary": "Ön Omuz, Yan Omuz",
+                    "secondary": "Triceps, Ön ve Derin İç Karın (Core), Üst Trapez, Ana Kalça Kası (Duruş Kilidi)",
+                    "subKey": "shoulders_front",
+                    "proof": "Ayakta dambılları baş üstüne iterken ön ve yan omuz ana işi yapar; ağırlık tepedeyken sağa sola sallanmamak için tüm karın (core) ve kalça kasları kilitlenir.",
+                    "allSubKeys": [
+                              "shoulders_front",
+                              "shoulders_side"
+                    ]
+          },
+          "db_arnold_press": {
+                    "primary": "Ön Omuz, Yan Omuz",
+                    "secondary": "Triceps (Dış ve Alt Kısım), Üst Trapez, Arka Omuz (Dengeleyici)",
+                    "subKey": "shoulders_front",
+                    "allSubKeys": [
+                              "shoulders_front",
+                              "shoulders_side"
+                    ],
+                    "proof": "Avuç içleri sana bakarken başlayıp yukarı iterken dışa çevirmek, hareketin başında ön omzu, yukarı çıkarken ise yan omzu kesintisiz çalıştırır."
+          },
+          "db_lateral_raise": {
+                    "primary": "Yan Omuz",
+                    "secondary": "Ön Omuz, Üst Sırt & Boyun Kökü (Üst Trapez), Omuz İç Denge Kasları",
+                    "subKey": "shoulders_side",
+                    "proof": "Kolları yanlardan omuz hizasına doğru açmak, omuza genişlik veren yan omuz kasını doğrudan ve tek başına hedef alır.",
+                    "allSubKeys": [
+                              "shoulders_side"
+                    ]
+          },
+          "mach_cable_lateral": {
+                    "primary": "Yan Omuz",
+                    "secondary": "Omuz İç Denge Kasları, Ön Omuz, Üst Trapez",
+                    "subKey": "shoulders_side",
+                    "proof": "Dambılda kol aşağıdayken yük sıfırlanır ama kablo makarası hareketin en alt noktasından en üst noktasına kadar yan omuza sürekli yük bindirir.",
+                    "allSubKeys": [
+                              "shoulders_side"
+                    ]
+          },
+          "mach_face_pull": {
+                    "primary": "Arka Omuz, Omuz İç Denge Kasları",
+                    "secondary": "Orta Sırt & Kürek Kemiği Kasları, Orta ve Alt Trapez, Yan Omuz",
+                    "subKey": "shoulders_rear",
+                    "proof": "Halatı yüzüne doğru çekip elleri iki yana açmak, duruşu dikleştiren arka omuzları, kürek kemiği çevresini ve omuz eklemini koruyan iç denge kaslarını doğrudan çalıştırır.",
+                    "allSubKeys": [
+                              "shoulders_rear"
+                    ]
+          },
+          "kneeling_plate_front_raise": {
+                    "primary": "Ön Omuz",
+                    "secondary": "Üst Göğüs, Ön ve Derin İç Karın (Core), Yan Göğüs Kaburga Kasları",
+                    "subKey": "shoulders_front",
+                    "proof": "İki diz üstünde durmak belden hız almayı keser; plakayı önden yüz hizasına kaldırmak doğrudan ön omuz ve üst göğsü çalıştırır.",
+                    "allSubKeys": [
+                              "shoulders_front"
+                    ]
+          },
+          "kb_press": {
+                    "primary": "Ön Omuz, Yan Omuz",
+                    "secondary": "Triceps, Omuz İç Denge Kasları, Yan Karın (Tek Kol Denge), Kanat (Başlangıç Desteği)",
+                    "subKey": "shoulders_front",
+                    "proof": "Kettlebell'in topuzu elin dış kısmında durduğu için yukarı iterken omuzun iç denge kasları dambıla göre çok daha fazla çalışır; tek kolla yapılması yan karnı da devreye sokar.",
+                    "allSubKeys": [
+                              "shoulders_front",
+                              "shoulders_side"
+                    ]
+          },
+          "bb_overhead_press": {
+                    "primary": "Ön Omuz, Yan Omuz",
+                    "secondary": "Triceps, Üst Göğüs, Üst Trapez, Derin İç Karın & Alt Sırt (Core)",
+                    "subKey": "shoulders_front",
+                    "proof": "Ayakta düz barı baş üstüne ağır şekilde itmek ön ve yan omuzları büyütürken, barı dengede tutmak için karın, alt bel ve üst sırtı taş gibi sıkar.",
+                    "allSubKeys": [
+                              "shoulders_front",
+                              "shoulders_side"
+                    ]
+          },
+          "bb_push_press": {
+                    "primary": "Ön Omuz, Yan Omuz",
+                    "secondary": "Ön Bacak, Triceps, Ana Kalça Kası, Üst Trapez, Üst Kalf",
+                    "subKey": "shoulders_front",
+                    "proof": "Dizleri hafif büküp bacaklardan patlayıcı güç alarak barı baş üstüne fırlatmak, normalden daha ağır kilolarla ön/yan omuz ve tricepsi çalıştırmanı sağlar.",
+                    "allSubKeys": [
+                              "shoulders_front",
+                              "shoulders_side"
+                    ]
+          },
+          "db_push_press": {
+                    "primary": "Ön Omuz, Yan Omuz",
+                    "secondary": "Ön Bacak, Triceps, Ana Kalça Kası, Derin İç Karın (Core)",
+                    "subKey": "shoulders_front",
+                    "proof": "Bacak itişiyle hız kazandırıp dambılları baş üstüne kilitlemek; ön/yan omuz, triceps ve bacak itiş gücünü aynı anda çalıştırır.",
+                    "allSubKeys": [
+                              "shoulders_front",
+                              "shoulders_side"
+                    ]
+          },
+          "kb_halo": {
+                    "primary": "Arka ve Yan Omuz, Omuz İç Denge Kasları",
+                    "secondary": "Orta Sırt & Kürek Kemiği Kasları, Ön Kol & Kavrama Kasları, Derin İç Karın (Core)",
+                    "subKey": "shoulders_rear",
+                    "proof": "Ağırlığı başın etrafında tam tur döndürmek omuz eklemini her açıdan çalıştırır; özellikle arka/yan omuz, omuz iç denge kasları ve kürek kemiği çevresini açar.",
+                    "allSubKeys": [
+                              "shoulders_rear",
+                              "shoulders_side"
+                    ]
+          },
+          "waiters_carry": {
+                    "primary": "Omuz İç Denge Kasları, Ön ve Yan Omuz, Yan Karın & Bel Yanları (Core)",
+                    "secondary": "Triceps (Kol Kilidi), Üst ve Alt Trapez, Derin İç Karın",
+                    "subKey": "core_front",
+                    "allSubKeys": [
+                              "core_front",
+                              "shoulders_front",
+                              "shoulders_side",
+                              "shoulders_rear",
+                              "core_obliques"
+                    ],
+                    "proof": "Ağırlığı tek elle garson tepsisi gibi baş üstünde tutarak yürümek, omuz iç denge kaslarını ve gövdenin yana yatmasını önleyen yan karın kaslarını aralıksız çalıştırır."
+          },
+          "db_saw_row": {
+                    "primary": "Kanatlar (Sırt Genişliği)",
+                    "secondary": "Orta Sırt & Kürek Kemiği Kasları, Arka Omuz, Biceps & Ön Kol",
+                    "subKey": "back_lats",
+                    "proof": "Dirseği gövdeye yakın tutup dambılı göğse değil arka cebe doğru (testere gibi) çekmek, sırtı üçgenleştiren kanat kaslarını en alt ucuna kadar çalıştırır.",
+                    "allSubKeys": [
+                              "back_lats"
+                    ]
+          },
+          "db_chest_supported_row": {
+                    "primary": "Orta Sırt & Kürek Kemiği Kasları (Sırt Kalınlığı)",
+                    "secondary": "Kanatlar, Arka Omuz, Biceps & Ön Kol",
+                    "subKey": "back_mid",
+                    "proof": "Göğsü sehpaya dayamak belden hız almayı tamamen keser; kürek kemiklerini arkada birbirine sıkıştırarak çekmek orta sırt kalınlığını doğrudan vurur.",
+                    "allSubKeys": [
+                              "back_mid"
+                    ]
+          },
+          "db_renegade_row": {
+                    "primary": "Orta Sırt & Kanatlar, Yan Karın & Derin İç Karın (Core)",
+                    "secondary": "Arka Omuz, Biceps & Ön Kol, Orta Göğüs & Triceps (Yerdeki Destek Kolu)",
+                    "subKey": "back_mid",
+                    "allSubKeys": [
+                              "back_mid",
+                              "core_obliques",
+                              "back_lats",
+                              "core_deep",
+                              "core_front"
+                    ],
+                    "proof": "Şınav duruşunda tek kolla yerden dambıl çekerken gövdenin dönmemesi için kendini sıkmak, orta sırt/kanatlarla birlikte yan karın kaslarını çok sert çalıştırır."
+          },
+          "db_pullover": {
+                    "primary": "Kanatlar (Sırt Genişliği), Yan Göğüs & Kaburga Kasları",
+                    "secondary": "Orta ve Alt Göğüs, Triceps İç/Uzun Kısım",
+                    "subKey": "back_lats",
+                    "proof": "Sırtüstü yatarken kolları başın gerisinden yukarı çekmek, kanat kaslarını boydan boya esnetip çalıştırırken göğüs kafesini ve orta/alt göğsü de devreye sokar.",
+                    "allSubKeys": [
+                              "back_lats"
+                    ]
+          },
+          "mach_lat_pulldown": {
+                    "primary": "Kanatlar (Sırt Genişliği)",
+                    "secondary": "Biceps & Biceps Altı Dış Kol Kası, Orta Sırt & Kürek Kemiği Kasları, Arka Omuz, Ön Kol (Kavrama)",
+                    "subKey": "back_lats",
+                    "proof": "Yukarıdaki barı göğse doğru çekmek, sırta genişlik (V görünümü) veren kanat kaslarını doğrudan çalıştırır; çekiş sırasında biceps ve ön kollar yardımcı olur.",
+                    "allSubKeys": [
+                              "back_lats"
+                    ]
+          },
+          "mach_cable_row": {
+                    "primary": "Orta Sırt & Kürek Kemiği Kasları (Sırt Kalınlığı), Kanatlar",
+                    "secondary": "Arka Omuz, Biceps & Ön Kol, Alt Sırt (Dik Oturuşu Koruma)",
+                    "subKey": "back_mid",
+                    "proof": "Oturarak kabloyu karnına doğru çekerken omuzları geriye alıp kürek kemiklerini birbirine yaklaştırmak, orta sırt kalınlığını ve kanatları birlikte çalıştırır.",
+                    "allSubKeys": [
+                              "back_mid",
+                              "back_lats"
+                    ]
+          },
+          "bw_pullup": {
+                    "primary": "Kanatlar (Sırt Genişliği)",
+                    "secondary": "Biceps & Ön Kol Üst Kası, Orta Sırt & Kürek Kemiği Kasları, Arka Omuz, Ön ve Derin İç Karın (Core)",
+                    "subKey": "back_lats",
+                    "proof": "Avuç içleri karşıya bakacak şekilde geniş tutuşla barfiks çekmek, bicepsin yardımını azaltıp bütün yükü üst ve dış kanat kaslarına bindirir.",
+                    "allSubKeys": [
+                              "back_lats"
+                    ]
+          },
+          "bw_chinup": {
+                    "primary": "Kanatlar (Sırt Genişliği), Biceps (İç ve Dış Kısım)",
+                    "secondary": "Ön Kol & Kavrama Kasları, Orta Sırt & Kürek Kemiği Kasları, Arka Omuz, Ön Karın (Core)",
+                    "subKey": "back_lats",
+                    "allSubKeys": [
+                              "back_lats",
+                              "biceps",
+                              "biceps_short",
+                              "brachialis"
+                    ],
+                    "proof": "Avuç içleri sana bakacak şekilde omuz genişliğinde barfiks çekmek, hem kanat kaslarını tam boyda çalıştırır hem de bicepsleri en güçlü açısında kasar."
+          },
+          "bw_inverted_row": {
+                    "primary": "Orta Sırt & Kürek Kemiği Kasları (Sırt Kalınlığı), Kanatlar",
+                    "secondary": "Arka Omuz, Biceps & Ön Kol, Alt Sırt & Kalça (Vücudu Düz Tutma)",
+                    "subKey": "back_mid",
+                    "proof": "Alçak barın altına girip göğsü bara çekmek, bele hiç yük bindirmeden kürek kemiklerini birbirine kenetler ve orta sırt ile arka omzu çalıştırır.",
+                    "allSubKeys": [
+                              "back_mid",
+                              "back_lats"
+                    ]
+          },
+          "bb_bent_over_row": {
+                    "primary": "Orta Sırt & Kürek Kemiği Kasları, Kanatlar (Sırt Genişliği)",
+                    "secondary": "Alt Sırt & Bel Kasları, Arka Omuz, Biceps & Ön Kol, Arka Bacak (Duruş Desteği)",
+                    "subKey": "back_mid",
+                    "proof": "Kalçadan öne eğilerek ağır barı karna çekmek orta sırt ve kanatları büyütürken, eğik gövdeyi sabit tutmak için alt sırt ve bel kaslarını da güçlü çalıştırır.",
+                    "allSubKeys": [
+                              "back_mid",
+                              "back_lats"
+                    ]
+          },
+          "bb_pendlay_row": {
+                    "primary": "Orta Sırt & Kürek Kemiği Kasları, Kanatlar, Üst Sırt (Trapez)",
+                    "secondary": "Alt Sırt & Bel Kasları, Arka Omuz, Biceps & Ön Kol, Arka Bacak",
+                    "subKey": "back_mid",
+                    "proof": "Gövde yere paralelken her tekrarda yerdeki barı patlayıcı şekilde karnına çekmek, üst/orta sırt ve kanatlarda saf çekiş gücü üretir.",
+                    "allSubKeys": [
+                              "back_mid",
+                              "back_lats",
+                              "traps"
+                    ]
+          },
+          "kb_gorilla_row": {
+                    "primary": "Kanatlar (Sırt Genişliği), Orta Sırt & Kürek Kemiği Kasları",
+                    "secondary": "Alt Sırt & Bel Kasları, Yan Karın (Core), Biceps & Ön Kol, Kalça & Ön Bacak (Çömelme Duruşu)",
+                    "subKey": "back_mid",
+                    "allSubKeys": [
+                              "back_mid",
+                              "back_lats"
+                    ],
+                    "proof": "Geniş çömelme duruşunda yerdeki iki ağırlığı sırayla çekmek, kanat ve orta sırtı çalıştırırken gövdenin dönmesini önleyen yan karın ve bacakları da aktif tutar."
+          },
+          "mach_straight_arm_pulldown": {
+                    "primary": "Kanatlar (Özellikle Alt Kanat)",
+                    "secondary": "Triceps İç/Uzun Kısım, Arka Omuz, Ön ve Derin İç Karın (Core)",
+                    "subKey": "back_lats",
+                    "proof": "Dirsekleri hiç bükmeden düz kollarla barı yukarıdan bacaklarına indirmek, bicepsi tamamen devre dışı bırakır ve sadece kanat kaslarını (özellikle alt kanadı) çalıştırır.",
+                    "allSubKeys": [
+                              "back_lats"
+                    ]
+          },
+          "bw_hyperextension": {
+                    "primary": "Alt Sırt & Bel Kasları, Ana Kalça Kası",
+                    "secondary": "Arka Bacak (Üst/Uzun Kısım)",
+                    "subKey": "back_mid",
+                    "allSubKeys": [
+                              "back_mid",
+                              "legs_hamstrings",
+                              "legs_glutes",
+                              "legs_glutes_max"
+                    ],
+                    "proof": "Sehpada öne eğilip kalça ve bel gücüyle doğrulmak, omurgayı dik tutan alt sırt/bel kaslarını, ana kalça kasını ve arka bacakları doğrudan güçlendirir."
+          },
+          "db_goblet_squat": {
+                    "primary": "Ön Bacak (Dış, Orta ve Diz Üstü İç Kısım)",
+                    "secondary": "Ana Kalça Kası, Üst Sırt & Bel Kasları (Dik Duruş), Derin İç Karın (Core)",
+                    "subKey": "legs_quad",
+                    "proof": "Ağırlığı göğüs önünde tutmak sırtı dik tutmayı kolaylaştırır ve derin çömelme sağlar; böylece ön bacağın dış, orta ve diz üstü iç kısmı tam çalışır.",
+                    "allSubKeys": [
+                              "legs_quad",
+                              "legs_quad_inner",
+                              "legs_quad_outer"
+                    ]
+          },
+          "db_front_squat": {
+                    "primary": "Ön Bacak (Dış, Orta ve Diz Üstü İç Kısım)",
+                    "secondary": "Ana Kalça Kası, Üst Sırt & Bel Kasları, Derin İç Karın (Core)",
+                    "subKey": "legs_quad",
+                    "proof": "İki dambılı omuz önünde tutarak dik gövdeyle çömelmek, yükü kalçadan çok dizlere ve ön bacak kaslarına odaklar.",
+                    "allSubKeys": [
+                              "legs_quad",
+                              "legs_quad_inner",
+                              "legs_quad_outer"
+                    ]
+          },
+          "db_bulgarian_squat": {
+                    "primary": "Ön Bacak (Özellikle Diz Üstü İç Kısım ve Dış Kısım), Ana Kalça Kası",
+                    "secondary": "Yan Kalça (Tek Ayak Denge Kası), Arka Bacak, Kalf & Ayak Bileği Denge Kasları",
+                    "subKey": "legs_quad",
+                    "allSubKeys": [
+                              "legs_quad",
+                              "legs_glutes",
+                              "legs_quad_inner",
+                              "legs_quad_outer",
+                              "legs_glutes_max",
+                              "legs_glutes_med"
+                    ],
+                    "proof": "Arka ayağı sehpaya koyup tek bacakla derin çömelmek, öndeki bacağın diz üstü iç kısmını ve ana kalçayı vururken, devrilmemek için yan kalça denge kasını çok yoğun çalıştırır."
+          },
+          "db_walking_lunge": {
+                    "primary": "Ön Bacak (Dış ve Diz Üstü İç Kısım), Ana Kalça Kası",
+                    "secondary": "Yan Kalça (Denge Kası), Arka Bacak, Kalf, Ön Kol (Dambıl Tutuşu)",
+                    "subKey": "legs_quad",
+                    "allSubKeys": [
+                              "legs_quad",
+                              "legs_glutes",
+                              "legs_quad_inner",
+                              "legs_quad_outer",
+                              "legs_glutes_max",
+                              "legs_glutes_med"
+                    ],
+                    "proof": "İleri adım atıp çömelmek ve öndeki bacakla kendini yukarı-ileri çekmek, ön bacak ile ana ve yan kalça kaslarını her adımda güçlü çalıştırır."
+          },
+          "db_reverse_lunge": {
+                    "primary": "Ön Bacak (Diz Üstü İç ve Dış Kısım), Ana Kalça Kası",
+                    "secondary": "Yan Kalça (Denge Kası), Arka Bacak, Derin İç Karın (Core)",
+                    "subKey": "legs_quad",
+                    "allSubKeys": [
+                              "legs_quad",
+                              "legs_glutes",
+                              "legs_quad_inner",
+                              "legs_quad_outer",
+                              "legs_glutes_max",
+                              "legs_glutes_med"
+                    ],
+                    "proof": "Geriye doğru adım atmak dize binen baskıyı azaltır; öndeki bacağın ön kısmını ve ana kalça kasını diz dostu açıda çalıştırır."
+          },
+          "kb_goblet_squat": {
+                    "primary": "Ön Bacak (Dış, Orta ve Diz Üstü İç Kısım)",
+                    "secondary": "Ana Kalça Kası, İç Bacak Kasları, Üst Sırt & Derin İç Karın (Core)",
+                    "subKey": "legs_quad",
+                    "proof": "Kettlebell'i göğüs önünde tutarak en dibe kadar çömelmek, ön bacak kaslarını, ana kalçayı ve kasık/iç bacak kaslarını tam açıda çalıştırır.",
+                    "allSubKeys": [
+                              "legs_quad",
+                              "legs_quad_inner",
+                              "legs_quad_outer"
+                    ]
+          },
+          "bb_back_squat": {
+                    "primary": "Ön Bacak (Dış, Orta ve İç Kısım Tamamı), Ana Kalça Kası",
+                    "secondary": "İç Bacak Kasları, Alt Sırt & Bel Kasları, Derin İç Karın (Core), Arka Bacak",
+                    "subKey": "legs_quad",
+                    "proof": "Sırtta ağır barla çömelip kalkmak, tüm ön bacak kaslarını, ana kalçayı ve dip noktadan çıkarken iç bacak kaslarını en yüksek ağırlıkla çalıştırır.",
+                    "allSubKeys": [
+                              "legs_quad",
+                              "legs_quad_outer",
+                              "legs_glutes",
+                              "legs_glutes_max"
+                    ]
+          },
+          "bb_front_squat": {
+                    "primary": "Ön Bacak (Dış, Orta ve Diz Üstü İç Kısım)",
+                    "secondary": "Ana Kalça Kası, Üst ve Orta Sırt (Gövdeyi Dik Tutma), Derin İç Karın (Core)",
+                    "subKey": "legs_quad",
+                    "proof": "Barı ön omuzda taşımak gövdeyi dimdik tutmaya zorlar; bu da ön bacak kaslarını ve sırtın üst/orta kısmını normal squat'tan daha fazla çalıştırır.",
+                    "allSubKeys": [
+                              "legs_quad",
+                              "legs_quad_inner",
+                              "legs_quad_outer"
+                    ]
+          },
+          "bb_zercher_squat": {
+                    "primary": "Ön Bacak, Ana Kalça Kası, Üst Sırt & Derin İç Karın (Core)",
+                    "secondary": "Biceps & Ön Kol (Barı Kucaklama), İç Bacak Kasları",
+                    "subKey": "legs_quad",
+                    "proof": "Barı dirseklerin iç kısmında kucaklayarak çömelmek; ön bacak ve kalçanın yanı sıra gövdeyi öne yıkılmaktan koruyan üst sırt, karın (core) ve bicepsleri çok sert çalıştırır.",
+                    "allSubKeys": [
+                              "legs_quad",
+                              "traps",
+                              "back_mid",
+                              "core_deep",
+                              "core_front",
+                              "legs_quad_outer",
+                              "legs_glutes",
+                              "legs_glutes_max"
+                    ]
+          },
+          "mach_leg_press": {
+                    "primary": "Ön Bacak (Dış, Orta ve Diz Üstü İç Kısım)",
+                    "secondary": "Ana Kalça Kası, İç Bacak Kasları",
+                    "subKey": "legs_quad",
+                    "proof": "Sırt ve bel koltukta sabitken bacaklarla ağır platformu itmek, beli hiç yormadan tüm yükü ön bacak ve kalça kaslarına verir.",
+                    "allSubKeys": [
+                              "legs_quad",
+                              "legs_quad_inner",
+                              "legs_quad_outer"
+                    ]
+          },
+          "mach_leg_extension": {
+                    "primary": "Ön Bacak Orta Kısım, Ön Bacak Diz Üstü İç Kısım, Ön Bacak Dış Kısım",
+                    "secondary": "Ön Kaval Kemiği Kası (Ayak Bileğini Sabit Tutma)",
+                    "subKey": "legs_quad",
+                    "proof": "Oturarak sadece dizleri düzleştirmek, başka hiçbir kası karıştırmadan ön bacağın orta, dış ve diz üstü iç kısmını tek başına izole eder.",
+                    "allSubKeys": [
+                              "legs_quad",
+                              "legs_quad_mid",
+                              "legs_quad_inner",
+                              "legs_quad_outer"
+                    ]
+          },
+          "bw_air_squat": {
+                    "primary": "Ön Bacak (Dış ve İç Kısım), Ana Kalça Kası",
+                    "secondary": "İç Bacak Kasları, Alt Sırt & Karın (Core)",
+                    "subKey": "legs_quad",
+                    "proof": "Kendi vücut ağırlığınla tam çömelip kalkmak, ön bacak ve kalça kaslarını doğal hareket açıklığında çalıştırır.",
+                    "allSubKeys": [
+                              "legs_quad",
+                              "legs_quad_outer",
+                              "legs_glutes",
+                              "legs_glutes_max"
+                    ]
+          },
+          "bw_jump_squat": {
+                    "primary": "Ön Bacak, Ana Kalça Kası, Üst Kalf (Baldır)",
+                    "secondary": "Arka Bacak, Alt Kalf, Derin İç Karın (Yere İniş Dengesi)",
+                    "subKey": "legs_quad",
+                    "proof": "Çömelip yukarı doğru patlayıcı sıçramak; ön bacak, ana kalça ve parmak ucundan itiş yapan kalf (baldır) kaslarının patlayıcı liflerini ateşler.",
+                    "allSubKeys": [
+                              "legs_quad",
+                              "legs_quad_outer",
+                              "legs_glutes",
+                              "legs_glutes_max",
+                              "legs_calves"
+                    ]
+          },
+          "lunge_with_twist": {
+                    "primary": "Ön Bacak, Ana Kalça Kası, Yan Karın (Bel Yanları)",
+                    "secondary": "Yan Kalça (Denge Kası), Arka Bacak",
+                    "subKey": "legs_quad",
+                    "allSubKeys": [
+                              "legs_quad",
+                              "core_obliques",
+                              "legs_quad_inner",
+                              "legs_glutes",
+                              "legs_glutes_max",
+                              "legs_glutes_med"
+                    ],
+                    "proof": "Öne adım atıp çömelirken gövdeyi öndeki bacak yönüne çevirmek; alt vücutta ön bacak ve kalçayı, üst vücutta ise yan karın kaslarını çalıştırır."
+          },
+          "step_up_press": {
+                    "primary": "Ön Bacak, Ana ve Yan Kalça, Ön Omuz",
+                    "secondary": "Yan Omuz, Triceps, Derin İç Karın & Kalf (Tek Ayak Denge)",
+                    "subKey": "legs_quad",
+                    "allSubKeys": [
+                              "legs_quad",
+                              "shoulders_front",
+                              "legs_quad_inner",
+                              "legs_glutes",
+                              "legs_glutes_med"
+                    ],
+                    "isLowerUpperComplex": true,
+                    "proof": "Yüksek kutuya tek ayakla çıkarken ön bacak ve ana/yan kalça tüm vücudu yukarı kaldırır; tepede ağırlığı baş üstüne itmek ön ve yan omzu çalıştırır."
+          },
+          "db_rdl": {
+                    "primary": "Arka Bacak (Kalçadan Eğilen Üst/Uzun Kısım), Ana Kalça Kası",
+                    "secondary": "Alt Sırt & Bel Kasları, Ön Kol (Kavrama), Kanatlar & Orta Sırt (Dambılları Bacağa Yakın Tutma)",
+                    "subKey": "legs_hamstrings",
+                    "proof": "Dizleri çok az kırıp kalçayı geriye iterek öne eğilmek, arka bacağın üst/uzun kısmını sonuna kadar esnetir ve doğrulurken ana kalça kasıyla birlikte kasar.",
+                    "allSubKeys": [
+                              "legs_hamstrings",
+                              "triceps_long",
+                              "legs_ham_hinge",
+                              "legs_glutes",
+                              "legs_glutes_max"
+                    ]
+          },
+          "db_single_leg_rdl": {
+                    "primary": "Arka Bacak, Yan Kalça (Tek Ayak Denge Kası), Ana Kalça Kası",
+                    "secondary": "Alt Sırt & Bel Kasları, Yan Karın (Core), Ayak Bileği Denge Kasları",
+                    "subKey": "legs_hamstrings",
+                    "proof": "Tek ayak üzerinde öne eğilip kalkmak arka bacak ve ana kalçayı çalıştırırken, kalçanın yana devrilmesini önlemek için yan kalça ve ayak bileği denge kaslarını yoğun çalıştırır.",
+                    "allSubKeys": [
+                              "legs_hamstrings",
+                              "legs_ham_hinge",
+                              "legs_glutes",
+                              "legs_glutes_max",
+                              "legs_glutes_med"
+                    ]
+          },
+          "bb_rdl": {
+                    "primary": "Arka Bacak (Üst/Uzun Kısım), Ana Kalça Kası",
+                    "secondary": "Alt Sırt & Bel Kasları, Üst Sırt & Kanatlar (Barı Gövdeye Yakın Sabitleme), Ön Kol (Kavrama)",
+                    "subKey": "legs_hamstrings",
+                    "proof": "Ağır barı bacaklara sürterek kalçayı geriye itmek, arka bacak kaslarının tamamında ve ana kalça kasında en yüksek gerilimi üretir.",
+                    "allSubKeys": [
+                              "legs_hamstrings",
+                              "triceps_long",
+                              "legs_ham_hinge",
+                              "legs_glutes",
+                              "legs_glutes_max"
+                    ]
+          },
+          "mach_leg_curl": {
+                    "primary": "Arka Bacak (Diz Büken Alt ve Üst Kısım Tamamı)",
+                    "secondary": "Üst Kalf (Diz Bükme Yardımcı Kası)",
+                    "subKey": "legs_hamstrings",
+                    "proof": "Makinede sadece dizleri bükmek, eğilme hareketlerinde (RDL) tam çalışmayan arka bacağın diz üstü alt kısmını da doğrudan ve izole çalıştırır.",
+                    "allSubKeys": [
+                              "legs_hamstrings",
+                              "legs_ham_curl"
+                    ]
+          },
+          "bb_deadlift": {
+                    "primary": "Ana Kalça Kası, Arka Bacak, Alt Sırt & Bel Kasları",
+                    "secondary": "Ön Bacak (Yerden İlk Kalkış), Üst Sırt (Trapez) & Kanatlar, Ön Kol (Kavrama), Derin İç Karın (Core)",
+                    "subKey": "legs_hamstrings",
+                    "proof": "Yerdeki ağır barı ayağa kalkarak kaldırmak; yerden keserken ön bacağı, doğrulurken arka bacak ve ana kalçayı, omurgayı düz tutarken de alt/üst tüm sırtı çalıştırır.",
+                    "allSubKeys": [
+                              "legs_hamstrings",
+                              "back_mid",
+                              "legs_ham_hinge",
+                              "legs_glutes",
+                              "legs_glutes_max"
+                    ]
+          },
+          "bb_hip_thrust": {
+                    "primary": "Ana Kalça Kası (Kalça Hacim & İtiş Kası)",
+                    "secondary": "Yan Kalça, Arka Bacak, Ön Bacak & Ön Karın (Denge)",
+                    "subKey": "legs_glutes",
+                    "proof": "Sırt sehpada ve dizler bükülüyken barı kalçayla yukarı itmek, arka bacağın yük çalmasını engeller ve bütün gücü doğrudan ana kalça kasına verir.",
+                    "allSubKeys": [
+                              "legs_glutes",
+                              "legs_glutes_max"
+                    ]
+          },
+          "bw_glute_bridge": {
+                    "primary": "Ana Kalça Kası",
+                    "secondary": "Arka Bacak, Alt Sırt & Derin İç Karın (Core)",
+                    "subKey": "legs_glutes",
+                    "proof": "Sırtüstü yatarken dizler bükülü şekilde kalçayı yukarı kaldırıp sıkmak, bele yük bindirmeden doğrudan ana kalça kasını çalıştırır.",
+                    "allSubKeys": [
+                              "legs_glutes",
+                              "legs_glutes_max"
+                    ]
+          },
+          "mach_calf_raise": {
+                    "primary": "Üst Kalf (Görünür Baldır Kası), Alt Kalf (Derin Baldır Kası)",
+                    "secondary": "Ayak Bileği Denge Kasları",
+                    "subKey": "legs_calves",
+                    "proof": "Dizler düzken parmak ucunda yükselmek, baldırın hem dışarıdan görünen üst kısmını hem de altındaki derin baldır kasını tam boyda çalıştırır.",
+                    "allSubKeys": [
+                              "legs_calves"
+                    ]
+          },
+          "db_standing_calf_raise": {
+                    "primary": "Üst Kalf (Görünür Baldır Kası), Alt Kalf (Derin Baldır Kası)",
+                    "secondary": "Ayak Tabanı & Bilek Denge Kasları, Ön Kol (Dambıl Tutuşu)",
+                    "subKey": "legs_calves",
+                    "proof": "Elde dambılla ayakta parmak ucuna yükselip tepe noktada sıkıştırmak, üst ve alt kalf kaslarını doğrudan çalıştırır.",
+                    "allSubKeys": [
+                              "legs_calves"
+                    ]
+          },
+          "db_lying_leg_curl": {
+                    "primary": "Arka Bacak (Diz Büken Alt ve Üst Kısım)",
+                    "secondary": "Üst Kalf, İç Bacak, Ana Kalça Kası (Kalçayı Yere Bastırma)",
+                    "subKey": "legs_hamstrings",
+                    "proof": "Yüzüstü yatarken iki ayak arasındaki dambılı kalçaya doğru bükmek, arka bacağın diz büken alt/dış kısmını ve iç kısmını doğrudan çalıştırır.",
+                    "allSubKeys": [
+                              "legs_hamstrings",
+                              "legs_ham_curl"
+                    ]
+          },
+          "bw_sissy_squat": {
+                    "primary": "Ön Bacak Orta Kısım, Ön Bacak Diz Üstü İç Kısım",
+                    "secondary": "Ön ve Derin İç Karın (Core), Kalf (Parmak Ucu Denge)",
+                    "subKey": "legs_quad",
+                    "proof": "Kalçayı hiç kırmadan dizleri öne verip gövdeyi geriye yatırmak, ön bacağın kalçaya kadar uzanan tam orta kasını maksimum gererek çalıştırır.",
+                    "allSubKeys": [
+                              "legs_quad",
+                              "legs_quad_mid",
+                              "legs_quad_inner",
+                              "legs_quad_outer"
+                    ]
+          },
+          "db_triceps_overhead": {
+                    "primary": "Triceps İç / Uzun Kısım (Arka Kolun En Büyük Kısmı)",
+                    "secondary": "Triceps Dış ve Alt Kısım, Derin İç Karın (Beli Sabit Tutma)",
+                    "subKey": "triceps_long",
+                    "proof": "Arka kolun en büyük parçası olan iç/uzun kısım omuzdan başladığı için, ancak kol başın üstüne kaldırıldığında tam gerilir ve maksimum çalışır.",
+                    "allSubKeys": [
+                              "triceps_long"
+                    ]
+          },
+          "db_skullcrusher": {
+                    "primary": "Triceps İç / Uzun Kısım, Triceps Dış Kısım",
+                    "secondary": "Triceps Alt Kısım, Ön Kol Bilek Sabitleyicileri",
+                    "subKey": "triceps_long",
+                    "proof": "Sırtüstü yatarken dambılları alnına/baş gerisine indirip kaldırmak, arka kolun hem uzun iç kısmını hem de dış kısmını aynı anda yoğun çalıştırır.",
+                    "allSubKeys": [
+                              "triceps_long",
+                              "triceps_lateral"
+                    ]
+          },
+          "mach_triceps_pushdown": {
+                    "primary": "Triceps Dış Kısım, Triceps Alt Kısım",
+                    "secondary": "Triceps İç / Uzun Kısım, Ön Kol Kavrama Kasları",
+                    "subKey": "triceps_lateral",
+                    "proof": "Dirsekleri bel yanında sabit tutup halatı aşağı itmek ve en altta iki yana açmak, arka kolun dış (at nalı) kısmını ve alt kısmını tam sıkıştırır.",
+                    "allSubKeys": [
+                              "triceps_lateral",
+                              "triceps_medial"
+                    ]
+          },
+          "db_biceps_curl": {
+                    "primary": "Ön Kol (Pazı)",
+                    "secondary": "Bilek & El Tutuşu",
+                    "subKey": "biceps"
+          },
+          "db_hammer_curl": {
+                    "primary": "Biceps Altı Dış Kol Kası (Kol Kalınlaştırıcı), Ön Kol Üst Kası, Biceps Dış Kısım",
+                    "secondary": "Biceps İç Kısım, Bilek ve El Tutuş Kasları",
+                    "subKey": "biceps",
+                    "proof": "Avuç içleri birbirine bakacak şekilde (çekiç tutuşu) kaldırmak, yükü bicepsin altındaki kol kalınlaştırıcı kasa ve ön kolun üst kısmına kaydırır.",
+                    "allSubKeys": [
+                              "biceps",
+                              "biceps_long",
+                              "brachialis"
+                    ]
+          },
+          "db_incline_curl": {
+                    "primary": "Biceps Dış Kısım (Pazı Tepesi / Uzun Baş)",
+                    "secondary": "Biceps İç Kısım, Biceps Altı Dış Kol Kası, Ön Kol",
+                    "subKey": "biceps",
+                    "proof": "Eğimli sehpada otururken kolların gövdenin gerisinde kalması, pazının dış/tepe kısmını (uzun baş) hareketin en başında maksimum gerer ve tepe görünümünü büyütür.",
+                    "allSubKeys": [
+                              "biceps",
+                              "biceps_long",
+                              "biceps_short"
+                    ]
+          },
+          "bb_biceps_curl": {
+                    "primary": "Biceps İç Kısım (Dolgunluk), Biceps Dış Kısım (Tepe)",
+                    "secondary": "Biceps Altı Dış Kol Kası, Ön Kol & Bilek Kavrama Kasları",
+                    "subKey": "biceps",
+                    "proof": "Düz barla avuç içleri tam yukarı bakarak iki elle ağır kaldırmak, özellikle kolun ön/iç dolgunluğunu veren biceps iç ve dış kısmına en yüksek yükü bindirir.",
+                    "allSubKeys": [
+                              "biceps",
+                              "biceps_long",
+                              "biceps_short"
+                    ]
+          },
+          "mach_cable_biceps": {
+                    "primary": "Biceps İç Kısım, Biceps Dış Kısım",
+                    "secondary": "Biceps Altı Dış Kol Kası, Ön Kol & Bilek Kasları",
+                    "subKey": "biceps",
+                    "proof": "Kablo makarası hareketin en altında da en üstünde de yükü hiç boşaltmadığı için bicepsin iç ve dış kısmında kesintisiz yanma ve gerilim sağlar.",
+                    "allSubKeys": [
+                              "biceps",
+                              "biceps_long",
+                              "biceps_short"
+                    ]
+          },
+          "db_suitcase_carry": {
+                    "primary": "Yan Karın & Bel Yanları (Simit Bölgesi)",
+                    "secondary": "Yan Kalça (Yürürken Kalça Dengesi), Ön Kol & Bilek (Kavrama), Üst Trapez & Omuz",
+                    "subKey": "core_obliques",
+                    "proof": "Sadece tek elde ağır dambıl taşırken vücudun o tarafa yatmasını engellemek, ağırlığın tam tersi taraftaki yan karın ve bel yanı kaslarını çok güçlü çalıştırır.",
+                    "allSubKeys": [
+                              "core_obliques"
+                    ]
+          },
+          "db_farmers_walk": {
+                    "primary": "Derin İç Karın & Yan Karın (Core), Ön Kol & Bilek (Kavrama Gücü), Üst Sırt (Üst Trapez)",
+                    "secondary": "Yan Kalça (Yürüyüş Dengesi), Alt Sırt & Bel Kasları, Kalf (Baldır)",
+                    "subKey": "core_front",
+                    "proof": "İki elde ağır yükle dik yürümek; karnı içe tutan derin korse kasını, yan karınları, omuzları taşıyan üst trapezi ve el/bilek kavrama kaslarını aynı anda çalıştırır.",
+                    "allSubKeys": [
+                              "core_front",
+                              "traps",
+                              "back_mid",
+                              "brachialis",
+                              "biceps",
+                              "core_obliques",
+                              "core_deep"
+                    ]
+          },
+          "db_russian_twist": {
+                    "primary": "Yan Karın (Bel Yanları / Dönüş Kasları)",
+                    "secondary": "Ön Karın (Üst ve Alt Karın - Gövdeyi Tutma), Derin İç Karın, Ön Kalça Kası",
+                    "subKey": "core_obliques",
+                    "proof": "Yerde gövde hafif geriye yatıkken ağırlığı sağa sola döndürmek, belin yanlarındaki dönüş kaslarını (yan karın) doğrudan çalıştırır.",
+                    "allSubKeys": [
+                              "core_obliques"
+                    ]
+          },
+          "mach_cable_woodchopper": {
+                    "primary": "Yan Karın (Bel Yanları / Dönüş Kasları), Derin İç Karın (Core)",
+                    "secondary": "Ön ve Yan Omuz, Yan Kalça (Gövde Dönüş Desteği), Yan Göğüs Kasları",
+                    "subKey": "core_obliques",
+                    "proof": "Kabloyu odun keser gibi çapraz çekip gövdeyi döndürmek, sağ ve sol yan karın kaslarını ile derin iç karın kasını güçlü şekilde çalıştırır.",
+                    "allSubKeys": [
+                              "core_obliques",
+                              "core_deep",
+                              "core_front"
+                    ]
+          },
+          "half_kneeling_plate_chop": {
+                    "primary": "Yan Karın (Bel Yanları), Derin İç Karın (Core)",
+                    "secondary": "Yan ve Ana Kalça (Kalçayı Sabit Tutma), Ön Omuz",
+                    "subKey": "core_obliques",
+                    "proof": "Tek diz yerde durmak bacaklardan hız almayı engeller; plakayı çapraz savurup durdurmak sadece yan karın ve derin kor kaslarının gücüyle yapılır.",
+                    "allSubKeys": [
+                              "core_obliques",
+                              "core_deep",
+                              "core_front"
+                    ]
+          },
+          "bw_plank": {
+                    "primary": "Derin İç Karın (Korse Kası), Ön Karın (Üst ve Alt Karın)",
+                    "secondary": "Yan Karın, Omuz & Yan Göğüs Sabitleyicileri, Ana Kalça & Ön Bacak",
+                    "subKey": "core_front",
+                    "proof": "Dirsekler üzerinde vücudu düz tutarken belin çukurlaşmasına direnmek, karnı içe çeken derin korse kasını ve ön karın kaslarını baştan sona kilitler.",
+                    "allSubKeys": [
+                              "core_front",
+                              "core_deep"
+                    ]
+          },
+          "bw_hollow_body": {
+                    "primary": "Derin İç Karın (Korse Kası), Ön Karın (Üst ve Alt Karın Tamamı)",
+                    "secondary": "Yan Karın, Ön Kalça & Ön Bacak Orta Kısım (Bacakları Havada Tutma)",
+                    "subKey": "core_front",
+                    "proof": "Sırtüstü yatarken beli yere tam yapıştırıp kol ve bacakları yerden kesmek, ön karın (üst ve alt) ile derin iç karın kaslarını en zorlu açıda çalıştırır.",
+                    "allSubKeys": [
+                              "core_front",
+                              "core_deep"
+                    ]
+          },
+          "bw_hanging_knee_raise": {
+                    "primary": "Alt Karın (Ön Karın Alt Kısmı), Ön Kalça Kası (Bacak Kaldırıcı)",
+                    "secondary": "Üst Karın & Yan Karın, Ön Kol & Bilek (Barda Tutunma), Kanatlar (Omuzları Sabit Tutma)",
+                    "subKey": "core_front",
+                    "proof": "Barda asılıyken dizleri göğse doğru çekip kalçayı yukarı kıvırmak, özellikle göbek deliğinin altındaki alt karın kaslarını doğrudan çalıştırır.",
+                    "allSubKeys": [
+                              "core_front"
+                    ]
+          },
+          "bw_mountain_climber": {
+                    "primary": "Ön Karın (Üst ve Alt Karın), Derin İç Karın, Ön Kalça Kası",
+                    "secondary": "Ön Omuz & Triceps (Kolları Sabit Tutma), Yan Karın",
+                    "subKey": "core_front",
+                    "proof": "Şınav duruşunda gövdeyi bozmadan dizleri hızla karna çekmek, ön/alt karın ve ön kalça kaslarını çalıştırırken nabzı hızla yükseltir.",
+                    "allSubKeys": [
+                              "core_front",
+                              "core_deep"
+                    ]
+          },
+          "bear_crawl_pull_through": {
+                    "primary": "Derin İç Karın (Korse Kası), Yan Karın (Bel Yanları)",
+                    "secondary": "Ön Omuz (Destek Kolu), Ön Bacak (Dizleri Havada Tutma), Kanat (Çekiş Kolu)",
+                    "subKey": "core_obliques",
+                    "proof": "Dizler yerden 2-3 parmak havadayken tek elle ağırlığı alttan çekmek, gövdenin sağa sola devrilmesini önleyen derin iç karın ve yan karın kaslarını yoğun çalıştırır.",
+                    "allSubKeys": [
+                              "core_obliques",
+                              "core_deep",
+                              "core_front"
+                    ]
+          },
+          "cross_body_carry": {
+                    "primary": "Yan Karın & Bel Yanları (Core), Omuz İç Denge Kasları & Ön/Yan Omuz",
+                    "secondary": "Derin İç Karın, Üst Trapez, Ön Kol (Kavrama), Yan Kalça",
+                    "subKey": "core_obliques",
+                    "proof": "Bir dambılı baş üstünde, diğerini yanda tutarak yürümek; hem üstteki omuz denge kaslarını hem de çapraz yan karın ve bel kaslarını çalıştırır.",
+                    "allSubKeys": [
+                              "core_obliques",
+                              "shoulders_side",
+                              "shoulders_rear"
+                    ]
+          },
+          "db_swing": {
+                    "primary": "Ana Kalça Kası, Arka Bacak",
+                    "secondary": "Alt Sırt & Bel Kasları, Derin İç Karın & Ön Karın (Core), Ön Kol (Kavrama) & Kanatlar",
+                    "subKey": "legs_hamstrings",
+                    "allSubKeys": [
+                              "legs_hamstrings",
+                              "legs_glutes",
+                              "legs_ham_hinge",
+                              "legs_glutes_max"
+                    ],
+                    "proof": "Dambılı bacak arasından kalçayı ileri patlatarak savurmak, ana kalça kasını ve arka bacakları güçlü çalıştırırken en üst noktada karın ve beli kilitler."
+          },
+          "kb_swing": {
+                    "primary": "Ana Kalça Kası, Arka Bacak",
+                    "secondary": "Alt Sırt & Bel Kasları, Derin İç Karın & Ön Karın (Core), Kanatlar, Ön Kol (Kavrama)",
+                    "subKey": "legs_hamstrings",
+                    "allSubKeys": [
+                              "legs_hamstrings",
+                              "legs_glutes",
+                              "legs_ham_hinge",
+                              "legs_glutes_max"
+                    ],
+                    "proof": "Kettlebell'i kollarla değil kalçanın ileri patlamasıyla savurmak, ana kalça, arka bacak ve alt sırt zincirinin tamamını çalıştırır."
+          },
+          "kb_clean": {
+                    "primary": "Ana Kalça Kası, Arka Bacak, Orta ve Üst Sırt (Trapez & Kürek Kemiği)",
+                    "secondary": "Biceps & Ön Kol, Derin İç Karın & Yan Karın (Core), Kanatlar",
+                    "subKey": "back_mid",
+                    "allSubKeys": [
+                              "back_mid",
+                              "legs_hamstrings",
+                              "traps",
+                              "legs_ham_hinge",
+                              "legs_glutes",
+                              "legs_glutes_max"
+                    ],
+                    "proof": "Ağırlığı kalça gücüyle yerden hızlandırıp dirseği bükerek omuz önüne (göğüs hizasına) almak; kalça, arka bacak, orta/üst sırt ve bicepsleri birlikte çalıştırır."
+          },
+          "kb_half_snatch": {
+                    "primary": "Ana Kalça Kası, Arka Bacak, Ön ve Yan Omuz + Omuz İç Denge Kasları",
+                    "secondary": "Üst ve Orta Sırt, Alt Sırt & Bel Kasları, Yan ve Derin İç Karın (Core)",
+                    "subKey": "shoulders_front",
+                    "allSubKeys": [
+                              "shoulders_front",
+                              "legs_hamstrings",
+                              "shoulders_side",
+                              "shoulders_rear",
+                              "legs_ham_hinge",
+                              "legs_glutes",
+                              "legs_glutes_max"
+                    ],
+                    "isLowerUpperComplex": true,
+                    "proof": "Kettlebell'i bacak arasından tek hamlede baş üstüne fırlatıp kilitlemek; alt vücutta kalça ve arka bacağı, üstte ise sırt, omuz ve karın kaslarını çalıştırır."
+          },
+          "db_snatch": {
+                    "primary": "Ana Kalça Kası, Arka Bacak, Ön ve Yan Omuz",
+                    "secondary": "Ön Bacak, Üst Sırt (Trapez), Alt Sırt & Bel, Yan ve Derin İç Karın (Core)",
+                    "subKey": "shoulders_front",
+                    "allSubKeys": [
+                              "shoulders_front",
+                              "legs_hamstrings",
+                              "shoulders_side",
+                              "legs_ham_hinge",
+                              "legs_glutes",
+                              "legs_glutes_max"
+                    ],
+                    "isLowerUpperComplex": true,
+                    "proof": "Yerdeki dambılı bacak ve kalça patlamasıyla tek hamlede baş üstüne çekip kilitlemek; kalça, arka/ön bacak, üst sırt ve omuzları patlayıcı çalıştırır."
+          },
+          "kb_windmill": {
+                    "primary": "Yan Karın & Bel Yanları (Core), Omuz İç Denge Kasları & Omuz",
+                    "secondary": "Yan ve Ana Kalça, Arka Bacak (Esneterek Güçlendirme), Triceps (Kol Kilidi)",
+                    "subKey": "core_obliques",
+                    "allSubKeys": [
+                              "core_obliques",
+                              "shoulders_front",
+                              "shoulders_rear"
+                    ],
+                    "proof": "Ağırlık baş üstünde havadayken kalçayı yana itip yere doğru eğilmek, yan karın ve bel yanlarını çalıştırırken arka bacağı esnetir ve omzu dengede tutar."
+          },
+          "kb_turkish_getup": {
+                    "primary": "Omuz İç Denge Kasları & Ön/Yan Omuz, Tüm Karın Çevresi (Ön, Yan ve Derin İç Karın)",
+                    "secondary": "Ana ve Yan Kalça, Ön Bacak, Triceps (Yukarıdaki Kolu Sabit Tutma)",
+                    "subKey": "shoulders_front",
+                    "allSubKeys": [
+                              "shoulders_front",
+                              "core_obliques",
+                              "legs_quad",
+                              "shoulders_side",
+                              "shoulders_rear",
+                              "core_front",
+                              "core_deep"
+                    ],
+                    "isLowerUpperComplex": true,
+                    "proof": "Ağırlığı baş üstünde tutarak yerden adım adım ayağa kalkıp geri yatmak; omuz denge kaslarını, tüm karın/bel çevresini ve bacak/kalça kaslarını tek harekette birleştirir."
+          },
+          "db_thruster": {
+                    "primary": "Ön Bacak, Ana Kalça Kası, Ön ve Yan Omuz",
+                    "secondary": "Triceps, Derin İç Karın & Üst Sırt (Core)",
+                    "subKey": "shoulders_front",
+                    "allSubKeys": [
+                              "shoulders_front",
+                              "legs_quad",
+                              "shoulders_side",
+                              "legs_glutes",
+                              "legs_glutes_max"
+                    ],
+                    "isLowerUpperComplex": true,
+                    "proof": "Dambıllarla tam çömelip kalkarken kazandığın hızla ağırlığı kesintisiz baş üstüne itmek; ön bacak, kalça, ön/yan omuz ve tricepsi aynı anda çalıştırır."
+          },
+          "kb_thruster": {
+                    "primary": "Ön Bacak, Ana Kalça Kası, Ön ve Yan Omuz",
+                    "secondary": "Triceps, Derin İç Karın (Core), Üst Sırt",
+                    "subKey": "shoulders_front",
+                    "allSubKeys": [
+                              "shoulders_front",
+                              "legs_quad",
+                              "shoulders_side",
+                              "legs_glutes",
+                              "legs_glutes_max"
+                    ],
+                    "isLowerUpperComplex": true,
+                    "proof": "Kettlebell'lerle derin çömelip kalkarken baş üstüne pres yapmak; ön bacak, kalça ve omuz kaslarını yüksek nabızla çalıştırır."
+          },
+          "bb_thruster": {
+                    "primary": "Ön Bacak, Ana Kalça Kası, Ön ve Yan Omuz",
+                    "secondary": "Triceps, Üst ve Alt Sırt, Derin İç Karın (Core)",
+                    "subKey": "shoulders_front",
+                    "allSubKeys": [
+                              "shoulders_front",
+                              "legs_quad",
+                              "shoulders_side",
+                              "legs_glutes",
+                              "legs_glutes_max"
+                    ],
+                    "isLowerUpperComplex": true,
+                    "proof": "Omuzda barla tam çömelme (Front Squat) ve kalkarken baş üstü itiş; ön bacak, kalça, omuz ve tricepsi ağır yük altında birleştirir."
+          },
+          "db_clean_and_press": {
+                    "primary": "Ana Kalça Kası & Arka Bacak, Ön ve Yan Omuz",
+                    "secondary": "Üst ve Orta Sırt, Triceps, Biceps & Ön Kol, Derin İç Karın (Core)",
+                    "subKey": "shoulders_front",
+                    "allSubKeys": [
+                              "shoulders_front",
+                              "legs_hamstrings",
+                              "back_mid",
+                              "shoulders_side",
+                              "legs_ham_hinge",
+                              "legs_glutes",
+                              "legs_glutes_max"
+                    ],
+                    "isLowerUpperComplex": true,
+                    "proof": "İlk kısımda kalça ve sırt gücüyle omuza alınan dambıllar, ikinci kısımda omuz ve triceps gücüyle baş üstüne itilir."
+          },
+          "db_manmaker": {
+                    "primary": "Orta Göğüs, Kanatlar & Orta Sırt, Ön Bacak & Ana Kalça, Ön ve Yan Omuz",
+                    "secondary": "Triceps, Biceps, Yan ve Derin İç Karın (Core), Arka Bacak",
+                    "subKey": "core_front",
+                    "allSubKeys": [
+                              "core_front",
+                              "chest_mid",
+                              "back_mid",
+                              "legs_quad",
+                              "shoulders_front",
+                              "shoulders_side",
+                              "back_lats",
+                              "legs_glutes",
+                              "legs_glutes_max"
+                    ],
+                    "isLowerUpperComplex": true,
+                    "isFullBodyMetcon": true,
+                    "proof": "Şınav + sağ/sol sırt çekişi + çömelerek omuza alma + baş üstü pres birleşimi; göğüs, sırt, bacak, kalça, omuz ve karın kaslarının tamamını çalıştırır."
+          },
+          "bb_hang_power_clean": {
+                    "primary": "Ana Kalça Kası, Arka Bacak, Üst ve Orta Sırt (Trapez)",
+                    "secondary": "Ön Bacak (Yakalama Anı), Kalf (Baldır), Alt Sırt & Bel, Ön Kol & Biceps",
+                    "subKey": "back_mid",
+                    "allSubKeys": [
+                              "back_mid",
+                              "legs_hamstrings",
+                              "traps",
+                              "legs_ham_hinge",
+                              "legs_glutes",
+                              "legs_glutes_max"
+                    ],
+                    "proof": "Diz üstünden barı kalça patlaması ve omuz çekişiyle bir anda ön omuzlara almak; kalça, arka bacak ve üst sırt (trapez) kaslarında patlayıcı güç üretir."
+          },
+          "bb_landmine_squat_press": {
+                    "primary": "Ön Bacak, Ön Omuz, Üst Göğüs",
+                    "secondary": "Ana Kalça Kası, Triceps, Derin İç Karın (Core) & Yan Göğüs Kasları",
+                    "subKey": "shoulders_front",
+                    "allSubKeys": [
+                              "shoulders_front",
+                              "legs_quad",
+                              "chest_upper",
+                              "legs_quad_outer"
+                    ],
+                    "isLowerUpperComplex": true,
+                    "proof": "Barın ucunu göğüste tutup çömelmek ön bacak ve kalçayı, kalkarken ileri-yukarı doğru itmek ise ön omuz ve üst göğsü omuzları zorlamadan çalıştırır."
+          },
+          "bw_burpee": {
+                    "primary": "Ön Bacak & Ana Kalça Kası, Orta Göğüs & Ön Omuz",
+                    "secondary": "Triceps, Ön ve Derin İç Karın (Core), Ön Kalça Kası, Kalf (Baldır)",
+                    "subKey": "core_front",
+                    "allSubKeys": [
+                              "core_front",
+                              "chest_mid",
+                              "legs_quad",
+                              "shoulders_front",
+                              "legs_glutes",
+                              "legs_glutes_max"
+                    ],
+                    "isLowerUpperComplex": true,
+                    "isFullBodyMetcon": true,
+                    "proof": "Yere inip şınav çekmek göğüs, omuz ve tricepsi; ayakları karna çekip yukarı sıçramak ise karın, ön bacak, kalça ve kalfları çalıştırır."
+          },
+          "db_pullover_to_halo": {
+                    "primary": "Kanatlar (Sırt Genişliği), Arka ve Yan Omuz + Omuz İç Denge Kasları",
+                    "secondary": "Orta Göğüs & Yan Göğüs Kaburga Kasları, Triceps İç/Uzun Kısım, Derin İç Karın (Core)",
+                    "subKey": "back_lats",
+                    "allSubKeys": [
+                              "back_lats",
+                              "shoulders_rear",
+                              "core_front",
+                              "shoulders_side"
+                    ],
+                    "isComplex": true,
+                    "proof": "Yatarken ağırlığı baş gerisinden çekmek kanat ve göğüs kafesini çalıştırır; ardından baş etrafında döndürmek (Halo) arka/yan omuz ve omuz iç kaslarını açar."
+          },
+          "db_seesaw_lunge": {
+                    "primary": "Ön Bacak (Diz Üstü İç ve Dış Kısım), Ana ve Yan Kalça",
+                    "secondary": "Arka Bacak, Kalf & Ayak Bileği Denge Kasları, Derin İç Karın (Core)",
+                    "subKey": "legs_quad",
+                    "allSubKeys": [
+                              "legs_quad",
+                              "legs_glutes",
+                              "legs_hamstrings",
+                              "legs_quad_inner",
+                              "legs_quad_outer",
+                              "legs_glutes_med"
+                    ],
+                    "isComplex": true,
+                    "proof": "Bir ayak yerde sabitken diğer ayakla hiç durmadan bir ileri bir geri lunge yapmak, sabit kalan bacağın ön kısmını ve kalçasını aralıksız çalıştırır."
+          },
+          "db_clean_squat_press": {
+                    "primary": "Ön Bacak, Ön ve Yan Omuz, Ana Kalça Kası, Arka Bacak",
+                    "secondary": "Karın, Yan Karın & Alt Sırt/Bel (Core), Üst ve Orta Sırt (Trapez), Triceps (Arka Kol), Ön Kol & Kavrama Kasları, Üst ve Alt Kalf (Baldır)",
+                    "subKey": "shoulders_front",
+                    "allSubKeys": [
+                              "shoulders_front",
+                              "legs_hamstrings",
+                              "legs_quad",
+                              "back_mid",
+                              "shoulders_side",
+                              "legs_quad_outer",
+                              "legs_ham_hinge",
+                              "legs_glutes",
+                              "legs_glutes_max"
+                    ],
+                    "isLowerUpperComplex": true,
+                    "isComplex": true,
+                    "proof": "Clean aşamasında arka bacak ve kalça patlayıcı gücü üretir; Front Squat aşamasında ön bacak ve kalça çömelmeyi yönetir; Push Press aşamasında ise omuzlar ana itişi yaparken karın/bel, trapez, triceps, ön kol ve kalflar hareketi destekler."
+          },
+          "db_rdl_to_high_pull": {
+                    "primary": "Arka Bacak, Ana Kalça Kası, Üst ve Orta Sırt (Trapez), Yan ve Ön Omuz",
+                    "secondary": "Alt Sırt & Bel Kasları (Omurga Doğrultucu), Ön ve Yan Karın (Core), Ön Kol & Kavrama Kasları, Ön Bacak (Geçiş İtiş Desteği)",
+                    "subKey": "legs_hamstrings",
+                    "allSubKeys": [
+                              "legs_hamstrings",
+                              "legs_glutes",
+                              "back_mid",
+                              "shoulders_rear",
+                              "shoulders_front",
+                              "traps",
+                              "legs_ham_hinge",
+                              "legs_glutes_max"
+                    ],
+                    "isLowerUpperComplex": true,
+                    "isComplex": true,
+                    "proof": "RDL (öne eğilme) fazında arka bacak ve ana kalça kası yükü çekerken; High Pull (yukarı çekiş) fazında omuz silkme ile trapezler ve yan/ön omuzlar ağırlığı göğüs/çene hizasına ivmelendirir."
+          },
+          "db_swing_to_goblet_squat": {
+                    "primary": "Ana Kalça Kası, Arka Bacak, Ön Bacak",
+                    "secondary": "Alt Sırt & Bel Kasları, Ön ve Derin İç Karın (Core), Biceps & Ön Kol",
+                    "subKey": "legs_quad",
+                    "allSubKeys": [
+                              "legs_quad",
+                              "legs_hamstrings",
+                              "legs_glutes",
+                              "core_front",
+                              "legs_quad_outer",
+                              "legs_ham_hinge",
+                              "legs_glutes_max"
+                    ],
+                    "isComplex": true,
+                    "proof": "İlk savuruşta (Swing) kalça ve arka bacak çalışır; ağırlığı göğüste yakalayıp çömeldiğinde (Goblet Squat) ise ön bacak devreye girer."
+          },
+          "db_lunge_to_curl_press": {
+                    "primary": "Ön Bacak & Ana Kalça Kası, Biceps, Ön ve Yan Omuz",
+                    "secondary": "Yan Kalça (Denge), Triceps, Ön Kol, Derin İç Karın (Core)",
+                    "subKey": "legs_quad",
+                    "allSubKeys": [
+                              "legs_quad",
+                              "legs_glutes",
+                              "biceps",
+                              "shoulders_front",
+                              "shoulders_side",
+                              "biceps_short",
+                              "legs_quad_inner",
+                              "legs_glutes_max",
+                              "legs_glutes_med"
+                    ],
+                    "isLowerUpperComplex": true,
+                    "isComplex": true,
+                    "proof": "Adım alıp çömelirken ön bacak ve kalça, kalkarken dambılı büktüğünde biceps, baş üstüne ittiğinde ise ön/yan omuz ve triceps sırasıyla çalışır."
+          },
+          "db_gorilla_row_to_clean": {
+                    "primary": "Kanatlar (Sırt Genişliği), Üst Sırt & Kürek Kemiği (Trapez & Orta Sırt), Ana Kalça Kası",
+                    "secondary": "Biceps (Pazı), Arka Bacak & Alt Sırt/Bel (Eğik Duruş Dengesi), Ön Omuz (Omuzda Sabitleme), Ön ve Yan Karın (Core), Ön Kol & Kavrama Kasları",
+                    "subKey": "back_mid",
+                    "allSubKeys": [
+                              "back_mid",
+                              "legs_hamstrings",
+                              "legs_glutes",
+                              "shoulders_rear",
+                              "back_lats",
+                              "traps",
+                              "legs_glutes_max"
+                    ],
+                    "isLowerUpperComplex": true,
+                    "isComplex": true,
+                    "proof": "Row aşamasında kanatlar ve üst sırt/kürek kemikleri dambılı yerden çeker; Clean aşamasında ise kalça patlaması ve trapez silkmesiyle ağırlık omuz hizasına alınır."
+          },
+          "db_floor_press_to_bridge": {
+                    "primary": "Orta Göğüs, Ana Kalça Kası, Triceps (Dış ve Alt Kısım)",
+                    "secondary": "Ön Omuz, Arka Bacak, Alt Sırt & Derin İç Karın (Köprü Duruşu)",
+                    "subKey": "chest_mid",
+                    "allSubKeys": [
+                              "chest_mid",
+                              "legs_glutes",
+                              "triceps_long",
+                              "legs_glutes_max"
+                    ],
+                    "isLowerUpperComplex": true,
+                    "isComplex": true,
+                    "proof": "Kalçayı yukarı kaldırıp sıkarak (ana kalça) tutarken aynı anda dambılları yukarı preslemek (orta göğüs ve triceps) alt ve üst vücudu birlikte çalıştırır."
+          },
+          "db_step_back_lunge_to_knee_drive": {
+                    "primary": "Ön Bacak, Ana ve Yan Kalça, Ön Omuz, Ön Kalça Kası (Diz Çekme)",
+                    "secondary": "Yan Karın (Tek Kol Denge), Triceps, Kalf (Baldır)",
+                    "subKey": "shoulders_front",
+                    "allSubKeys": [
+                              "shoulders_front",
+                              "legs_quad",
+                              "core_obliques",
+                              "legs_quad_inner",
+                              "legs_glutes",
+                              "legs_glutes_med"
+                    ],
+                    "isLowerUpperComplex": true,
+                    "isComplex": true,
+                    "proof": "Geri lunge'dan tek ayak üzerinde yükselip arka dizi yukarı çekerken aynı anda tek kol omuz presi yapmak; ön bacak, kalça, ön kalça ve omzu birlikte çalıştırır."
+          },
+          "bw_inchworm_to_pushup": {
+                    "primary": "Orta Göğüs, Ön Omuz, Triceps (Arka Kol), Ön ve Derin İç Karın (Core)",
+                    "secondary": "Arka Bacak (Esnetme & Mobilite), Alt Sırt/Bel & Ana Kalça Kası, Üst Sırt, Kanatlar & Yan Göğüs Kasları (Kürek Kemiği Sabitleme)",
+                    "subKey": "chest_mid",
+                    "allSubKeys": [
+                              "chest_mid",
+                              "legs_hamstrings",
+                              "core_front",
+                              "shoulders_front",
+                              "core_deep"
+                    ],
+                    "isLowerUpperComplex": true,
+                    "isComplex": true,
+                    "proof": "Eller üzerinde yürürken ve şınav çekerken göğüs, ön omuz, triceps ve karın (core) ana işi üstlenir; başlangıç ve bitişteki eğilme/yürüme fazında arka bacaklar esner, bel/kalça ve üst sırt/kanatlar duruşu korur."
+          },
+          "db_rotational_lunge_chop": {
+                    "primary": "Ön Bacak & Ana Kalça Kası, Yan Karın (Bel Yanları)",
+                    "secondary": "Yan Kalça (Denge), Ön Omuz, Derin İç Karın (Core)",
+                    "subKey": "legs_quad",
+                    "allSubKeys": [
+                              "legs_quad",
+                              "legs_glutes",
+                              "core_obliques",
+                              "shoulders_front",
+                              "legs_quad_inner",
+                              "legs_glutes_max",
+                              "legs_glutes_med"
+                    ],
+                    "isLowerUpperComplex": true,
+                    "isComplex": true,
+                    "proof": "Lunge adımıyla çömelirken dambılı çapraz aşağı savurmak, bacak ve kalçayla birlikte bel yanlarındaki dönüş kaslarını (yan karın) güçlü çalıştırır."
+          },
+          "db_rotational_gorilla_row": {
+                    "primary": "Kanatlar (Sırt Genişliği), Orta Sırt & Kürek Kemiği Kasları",
+                    "secondary": "Yan Karın (Bel Yanları), Arka Omuz, Biceps & Ön Kol, Alt Sırt",
+                    "subKey": "back_lats",
+                    "allSubKeys": [
+                              "back_lats",
+                              "back_mid",
+                              "shoulders_rear",
+                              "core_obliques"
+                    ],
+                    "isComplex": false,
+                    "proof": "Eğik duruşta dambılı çekerken gövdeyi de hafifçe döndürmek, kanat ve orta sırt çekişine yan karın (oblik) ve arka omuz kaslarını dahil eder."
+          },
+          "db_single_arm_rear_delt_row": {
+                    "primary": "Arka Omuz",
+                    "secondary": "Orta Sırt & Kürek Kemiği Kasları, Omuz İç Denge Kasları, Biceps Altı Dış Kol Kası",
+                    "subKey": "shoulders_rear",
+                    "allSubKeys": [
+                              "shoulders_rear",
+                              "back_mid"
+                    ],
+                    "isComplex": false,
+                    "proof": "Öne eğilip dirseği vücuda yapıştırmak yerine yana doğru geniş açıyla çekmek, yükü kanatlardan alıp doğrudan arka omuza ve kürek kemiği çevresine verir."
+          },
+          "db_high_pull_cuban_rotation": {
+                    "primary": "Omuz İç Denge Kasları, Arka Omuz, Üst ve Orta Sırt (Trapez & Kürek Kemiği Kasları)",
+                    "secondary": "Kanatlar (Başlangıç Çekişi), Yan Omuz, Biceps & Ön Kol, Alt Sırt/Bel, Karın (Core), Arka Bacak & Kalça (Eğik Duruş Sabitleme)",
+                    "subKey": "shoulders_rear",
+                    "allSubKeys": [
+                              "shoulders_rear",
+                              "back_mid",
+                              "core_front",
+                              "traps"
+                    ],
+                    "isLowerUpperComplex": true,
+                    "isComplex": true,
+                    "proof": "Eğilerek yapılan yüksek çekiş ve kolları yukarı döndürme (Cuban rotasyon) hareketinde omuz iç denge kasları (rotator manşet), arka omuz, trapez ve kürek kemiği kasları ana yükü çeker; eğik duruşta bel, karın ve arka bacak/kalça vücudu sabit tutar."
+          },
+          "db_dumbbell_shrug_burnout": {
+                    "primary": "Üst Sırt & Boyun Kökü (Üst Trapez)",
+                    "secondary": "Orta Trapez, Ön Kol & El Bileği Kavrama Kasları",
+                    "subKey": "back_mid",
+                    "allSubKeys": [
+                              "back_mid",
+                              "traps"
+                    ],
+                    "isComplex": false,
+                    "proof": "Kolları bükmeden omuzları kulaklara doğru yukarı çekip sıkmak, doğrudan boyun iki yanındaki üst trapez kaslarını çalıştırır."
+          },
+          "db_quadruped_external_rotation": {
+                    "primary": "Arka Omuz, Omuz İç Denge Kasları",
+                    "secondary": "Orta Sırt & Kürek Kemiği Kasları, Derin İç Karın & Yan Karın (Core)",
+                    "subKey": "shoulders_rear",
+                    "allSubKeys": [
+                              "shoulders_rear",
+                              "core_front"
+                    ],
+                    "isComplex": false,
+                    "proof": "Dört ayak üzerinde tek kolu yana açıp döndürmek arka omuz ve omuz iç kaslarını çalıştırırken, üç uzuv üstünde düz kalmak karın ve kürek kemiği kaslarını dengeler."
+          },
+          "bw_jumping_jack": {
+                    "primary": "Üst ve Alt Kalf (Baldır), Yan Omuz, Yan Kalça & İç Bacak",
+                    "secondary": "Üst Trapez, Ön ve Derin İç Karın (Core)",
+                    "subKey": "shoulders_side",
+                    "allSubKeys": [
+                              "shoulders_side",
+                              "legs_calves",
+                              "legs_quad",
+                              "core_front",
+                              "legs_glutes",
+                              "legs_glutes_med"
+                    ],
+                    "isComplex": false,
+                    "proof": "Zıplayarak bacakları ve kolları açıp kapamak; parmak ucunda sıçrama ile kalfları, kolları yukarı kaldırma ile yan omuzları, bacak açma ile yan kalça ve iç bacağı çalıştırır."
+          },
+          "bw_high_knees": {
+                    "primary": "Alt Karın & Ön Kalça Kası, Ön Bacak Orta Kısım, Üst ve Alt Kalf (Baldır)",
+                    "secondary": "Yan Kalça (Tek Ayak Denge), Yan Karın (Core)",
+                    "subKey": "legs_quad",
+                    "allSubKeys": [
+                              "legs_quad",
+                              "core_front",
+                              "legs_calves",
+                              "legs_quad_mid"
+                    ],
+                    "isComplex": false,
+                    "proof": "Olduğun yerde dizleri hızla bel hizasına çekerek koşmak; bacağı yukarı çeken ön kalça ve alt karın kasları ile yerden sıçrayan kalfları çalıştırır."
+          },
+          "bw_jump_rope": {
+                    "primary": "Üst ve Alt Kalf (Baldır), Ayak Bileği Denge Kasları",
+                    "secondary": "Ön Kol & Bilek Kasları, Yan Omuz (Sabit Tutuş), Derin İç Karın (Core)",
+                    "subKey": "legs_calves",
+                    "allSubKeys": [
+                              "legs_calves",
+                              "shoulders_side",
+                              "core_front"
+                    ],
+                    "isComplex": false,
+                    "proof": "Parmak ucunda ritmik sıçramak doğrudan üst ve alt kalf (baldır) ile ayak bileği kaslarını, ip çevirme hareketi ise ön kol ve omuzları çalıştırır."
+          },
+          "bw_butt_kicks": {
+                    "primary": "Arka Bacak (Diz Büken Kısım), Üst ve Alt Kalf (Baldır)",
+                    "secondary": "Ana Kalça Kası, Derin İç Karın (Core)",
+                    "subKey": "legs_ham",
+                    "allSubKeys": [
+                              "legs_ham",
+                              "legs_calves",
+                              "legs_hamstrings",
+                              "legs_ham_curl"
+                    ],
+                    "isComplex": false,
+                    "proof": "Koşarken topukları hızla kalçaya vurmak dizleri büken arka bacak kaslarını, parmak ucunda yaylanmak ise kalf (baldır) kaslarını çalıştırır."
+          },
+          "bw_skater_jumps": {
+                    "primary": "Yan Kalça (Dış Kalça & Denge Kası), Ana Kalça Kası, Ön Bacak",
+                    "secondary": "Kalf & Ayak Bileği Denge Kasları, Yan Karın (Core), İç Bacak",
+                    "subKey": "legs_glute",
+                    "allSubKeys": [
+                              "legs_glute",
+                              "legs_quad",
+                              "legs_calves",
+                              "core_obliques",
+                              "legs_quad_outer",
+                              "legs_glutes",
+                              "legs_glutes_max",
+                              "legs_glutes_med"
+                    ],
+                    "isComplex": false,
+                    "proof": "Buz patencisi gibi sağa ve sola tek ayak üstüne sıçramak; yana itiş yapan yan kalça, ana kalça ve ön bacak kaslarını patlayıcı çalıştırır."
+          },
+          "bw_plank_jacks": {
+                    "primary": "Derin İç Karın & Ön Karın (Core), Yan Kalça & İç Bacak",
+                    "secondary": "Ön Omuz & Triceps (Kolları Sabit Tutma), Kalf (Baldır)",
+                    "subKey": "core_front",
+                    "allSubKeys": [
+                              "core_front",
+                              "core_obliques",
+                              "shoulders_front",
+                              "core_deep",
+                              "legs_glutes",
+                              "legs_glutes_med"
+                    ],
+                    "isComplex": false,
+                    "proof": "Şınav/Plank duruşunda beli düşürmeden ayakları zıplayarak açıp kapamak; ön/derin karın kaslarını, omuzları ve yan kalça/iç bacak kaslarını çalıştırır."
+          },
+          "bw_squat_thrust": {
+                    "primary": "Ön Bacak, Ana Kalça Kası, Ön ve Derin İç Karın (Core)",
+                    "secondary": "Ön Kalça Kası, Ön Omuz & Orta Göğüs, Triceps",
+                    "subKey": "legs_quad",
+                    "allSubKeys": [
+                              "legs_quad",
+                              "legs_glute",
+                              "core_front",
+                              "shoulders_front",
+                              "core_deep",
+                              "legs_quad_outer",
+                              "legs_glutes",
+                              "legs_glutes_max"
+                    ],
+                    "isComplex": false,
+                    "proof": "Çömelip elleri yere koyarak ayakları geriye fırlatmak ve tekrar toplayıp ayağa kalkmak; ön bacak, kalça ve karın (core) kaslarını birlikte çalıştırır."
+          },
+          "bw_lateral_shuffle": {
+                    "primary": "Yan Kalça, Ön Bacak (Dış ve İç Kısım), İç Bacak Kasları",
+                    "secondary": "Üst ve Alt Kalf (Baldır), Ana Kalça Kası, Derin İç Karın (Core)",
+                    "subKey": "legs_quad",
+                    "allSubKeys": [
+                              "legs_quad",
+                              "legs_glute",
+                              "legs_calves",
+                              "legs_quad_outer",
+                              "legs_glutes",
+                              "legs_glutes_med"
+                    ],
+                    "isComplex": false,
+                    "proof": "Dizler hafif bükülü alçak duruşta sağa sola hızlı adımlamak; sürekli bükülü kalan ön bacağı, yana itiş yapan yan kalçayı ve iç bacakları çalıştırır."
+          }
+};
 
         const STUDIO_SUB_REGIONS = {
             chest: [
@@ -208,27 +1540,27 @@
                 { key: 'back_mid', name: 'Orta Sırt (Kalınlık)' }
             ],
             quads: [
-                { key: 'legs_quad', name: 'Ön Bacak (Quad)' }
+                { key: 'legs_quad', name: 'Ön Bacak' }
             ],
             hamstrings: [
-                { key: 'legs_hamstrings', name: 'Arka Bacak (Hamstring)' }
+                { key: 'legs_hamstrings', name: 'Arka Bacak' }
             ],
             glutes: [
-                { key: 'legs_glutes', name: 'Büyük Kalça (Glute)' }
+                { key: 'legs_glutes', name: 'Kalça' }
             ],
             triceps: [
-                { key: 'triceps_long', name: 'Uzun Baş (Başüstü)' },
-                { key: 'triceps_lateral', name: 'Yan/Dış Baş (İtiş)' }
+                { key: 'triceps_long', name: 'Arka Kol (Uzun Kısım)' },
+                { key: 'triceps_lateral', name: 'Arka Kol (Dış Kısım)' }
             ],
             biceps: [
-                { key: 'biceps', name: 'Biceps & Ön Kol' }
+                { key: 'biceps', name: 'Pazı & Ön Kol' }
             ],
             core: [
                 { key: 'core_front', name: 'Ön Karın' },
-                { key: 'core_obliques', name: 'Yan Karın (Oblik)' }
+                { key: 'core_obliques', name: 'Yan Karın' }
             ],
             calves: [
-                { key: 'legs_calves', name: 'Baldır (Kalf)' }
+                { key: 'legs_calves', name: 'Baldır' }
             ]
         };
 
@@ -404,14 +1736,16 @@
             }
             if (window.aiGeneratorScope === 'weekly') {
                 const tplMap = {
-                    ai_auto: 'Haftalık • AI Otomatik Teşhis',
-                    upper_lower_full: 'Haftalık • Üst / Alt / Tüm Vücut (3 Gün)',
-                    ppl_3day: 'Haftalık • İtiş / Çekiş / Bacak (3 Gün)',
-                    fullbody_3day: 'Haftalık • 3 Gün Tüm Vücut (A/B/C)',
-                    upper_lower_4day: 'Haftalık • 4 Gün Üst / Alt Vücut',
-                    flow_complex_3day: 'Haftalık • 3 Gün Çelik Akışı (Kompleks)'
+                    ai_auto: 'AI Otomatik',
+                    auto: 'AI Otomatik',
+                    upper_lower_full: '3 Gün • Üst / Alt / Tüm Vücut',
+                    ppl_3day: '3 Gün • İtiş / Çekiş / Bacak',
+                    fullbody_3day: '3 Gün • Tüm Vücut',
+                    full_body_abc: '3 Gün • Tüm Vücut',
+                    upper_lower_4day: '4 Gün • Üst / Alt',
+                    flow_complex_3day: '3 Gün • Çelik Akışı'
                 };
-                el.innerText = tplMap[window.selectedAiWeeklyTemplate] || 'Haftalık • AI Otomatik Teşhis';
+                el.innerText = tplMap[window.selectedAiWeeklyTemplate] || 'AI Otomatik';
                 return;
             }
             if (!selectedSplits || selectedSplits.length === 0) {
@@ -946,6 +2280,10 @@
                 academicRatio: { bb: 0.10, func: 0.90 }
             }
         };
+        Object.defineProperties(AI_DOCTRINES, {
+            power_hypertrophy: { get() { return this.bb_pure; }, enumerable: false },
+            metcon_athletic: { get() { return this.func_pure; }, enumerable: false }
+        });
 
         function isExerciseFunctionalCategory(ex) {
             if (!ex) return false;
@@ -982,8 +2320,9 @@
 
             recentLogs.forEach(l => {
                 if (l.rpe) {
-                    const rVal = parseFloat(l.rpe);
-                    if (!isNaN(rVal)) {
+                    const rMatch = String(l.rpe).match(/(\d+(?:\.\d+)?)/);
+                    const rVal = rMatch ? parseFloat(rMatch[1]) : NaN;
+                    if (!isNaN(rVal) && rVal > 0) {
                         totalRpeSum += rVal;
                         rpeLogsCount++;
                     }
@@ -1056,6 +2395,11 @@
                 recommendedDoctrine = 'balanced_hybrid';
                 headline = 'Biyomekanik Teşhis: Dengeli Atletik Temel';
                 summary = `Antrenman geçmişin dengeli bir çizgide seyrediyor (%${Math.round(bbRatio * 100)} Hipertrofi / %${Math.round(funcRatio * 100)} Fonksiyonel). Hem estetik ve hacimli bir fizik, hem de çevik ve patlayıcı bir güç için **%50 Hipertrofi / %50 Fonksiyonel Dengeli Hibrit Atlet** doktrinini korumanı öneriyorum.`;
+            }
+
+            if (rpeLogsCount > 0 && parseFloat(avgRpe) >= 9.0) {
+                recommendedDoctrine = 'balanced_hybrid';
+                summary += ` <br><br><em>⚠️ Son antrenmanlarında ortalama zorlanma düzeyin (RPE ${avgRpe}) merkezi sinir sistemi sınırına yaklaşmış; eklem ve MSS toparlanması için dengeli hibrit yüklenme önerildi.</em>`;
             }
 
             if (currentWaist && currentWaist > 90) {
@@ -1194,11 +2538,14 @@
         window.selectedAiWeeklyTemplate = 'ai_auto';
 
         const AI_WEEKLY_TPL_LABELS = {
-            ai_auto: 'Haftalık • AI Otomatik Teşhis',
-            upper_lower_full: 'Haftalık • Üst / Alt / Tüm Vücut (3 Gün)',
-            ppl_3day: 'Haftalık • İtiş / Çekiş / Bacak (3 Gün)',
-            fullbody_3day: 'Haftalık • 3 Gün Tüm Vücut (A/B/C)',
-            upper_lower_4day: 'Haftalık • 4 Gün Üst / Alt Vücut'
+            ai_auto: 'AI Otomatik',
+            auto: 'AI Otomatik',
+            upper_lower_full: '3 Gün • Üst / Alt / Tüm Vücut',
+            ppl_3day: '3 Gün • İtiş / Çekiş / Bacak',
+            fullbody_3day: '3 Gün • Tüm Vücut',
+            full_body_abc: '3 Gün • Tüm Vücut',
+            upper_lower_4day: '4 Gün • Üst / Alt',
+            flow_complex_3day: '3 Gün • Çelik Akışı'
         };
 
         function resolveAutoWeeklyTemplateKey() {
@@ -1296,7 +2643,8 @@
         window.setAiGeneratorScope = setAiGeneratorScope;
 
         function selectAiWeeklyTemplateCard(tplKey) {
-            window.selectedAiWeeklyTemplate = tplKey || 'ai_auto';
+            const normalizedKey = (tplKey === 'full_body_abc') ? 'fullbody_3day' : (tplKey || 'ai_auto');
+            window.selectedAiWeeklyTemplate = normalizedKey;
             document.querySelectorAll('#aiWeeklyTemplateGrid .split-card').forEach(card => {
                 const key = card.getAttribute('data-wk-tpl');
                 card.classList.toggle('selected', key === window.selectedAiWeeklyTemplate);
@@ -1306,7 +2654,7 @@
                 lblEl.innerText = AI_WEEKLY_TPL_LABELS[window.selectedAiWeeklyTemplate] || 'Haftalık • AI Otomatik Teşhis';
             }
             const wkTplSelect = document.getElementById('aiModalWeeklyTemplateSelect');
-            if (wkTplSelect && AI_WEEKLY_TEMPLATES[window.selectedAiWeeklyTemplate]) {
+            if (wkTplSelect && (AI_WEEKLY_TEMPLATES[window.selectedAiWeeklyTemplate] || window.selectedAiWeeklyTemplate === 'ai_auto')) {
                 wkTplSelect.value = window.selectedAiWeeklyTemplate;
             }
         }
@@ -1362,6 +2710,10 @@
                 muscles: ['1. Gün: Göğüs • Omuz • Arka Kol', '2. Gün: Sırt • Arka Omuz • Ön Kol', '3. Gün: Bacak • Kalça • Core']
             },
             fullbody_3day: {
+                title: '3 Gün Tüm Vücut (A / B / C)',
+                muscles: ['Her Gün: Göğüs • Sırt • Omuz', 'Her Gün: Bacak • Kalça • Kol • Core']
+            },
+            full_body_abc: {
                 title: '3 Gün Tüm Vücut (A / B / C)',
                 muscles: ['Her Gün: Göğüs • Sırt • Omuz', 'Her Gün: Bacak • Kalça • Kol • Core']
             },
@@ -1458,10 +2810,10 @@
             const goalVal = goalEl ? goalEl.value : 'hypertrophy';
             const telemetry = getAiDoctrineTelemetry();
 
-            if (goalVal === 'strength' && AI_DOCTRINES.power_hypertrophy) {
-                currentSelectedDoctrine = 'power_hypertrophy';
-            } else if (goalVal === 'endurance' && AI_DOCTRINES.metcon_athletic) {
-                currentSelectedDoctrine = 'metcon_athletic';
+            if (goalVal === 'strength') {
+                currentSelectedDoctrine = 'bb_pure';
+            } else if (goalVal === 'endurance') {
+                currentSelectedDoctrine = 'func_hybrid';
             } else if (telemetry && telemetry.recommendedDoctrine && AI_DOCTRINES[telemetry.recommendedDoctrine]) {
                 currentSelectedDoctrine = telemetry.recommendedDoctrine;
             } else {
@@ -1770,47 +3122,51 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
         const AI_WEEKLY_TEMPLATES = {
             upper_lower_full: {
-                name: 'Üst • Alt • Tüm Vücut (2x Frekans)',
+                name: 'Üst • Alt • Tüm Vücut (3 Gün)',
                 days: [
-                    { dayIdx: 1, split: 'upper',     label: 'Pzt: Üst Vücut Hipertrofi & Zırh' },
-                    { dayIdx: 3, split: 'lower',     label: 'Çar: Alt Vücut, Bacak & Core' },
-                    { dayIdx: 5, split: 'full_body', label: 'Cum: Tüm Vücut Hibrit & Kondisyon' }
+                    { dayIdx: 1, split: 'upper',     label: 'Pzt: Üst Vücut' },
+                    { dayIdx: 3, split: 'lower',     label: 'Çar: Alt Vücut & Core' },
+                    { dayIdx: 5, split: 'full_body', label: 'Cum: Tüm Vücut' }
                 ]
             },
             ppl_3day: {
-                name: 'İtiş • Çekiş • Bacak (Klasik PPL)',
+                name: 'İtiş • Çekiş • Bacak (3 Gün)',
                 days: [
                     { dayIdx: 1, split: 'upper_push', label: 'Pzt: İtiş (Göğüs • Omuz • Triceps)' },
-                    { dayIdx: 3, split: 'upper_pull', label: 'Çar: Çekiş (Sırt • Arka Omuz • Biceps)' },
-                    { dayIdx: 5, split: 'lower',      label: 'Cum: Alt Vücut (Quad • Hamstring • Kalça)' }
+                    { dayIdx: 3, split: 'upper_pull', label: 'Çar: Çekiş (Sırt • Biceps)' },
+                    { dayIdx: 5, split: 'lower',      label: 'Cum: Alt Vücut & Bacak' }
                 ]
             },
-            full_body_abc: {
-                name: '3 Gün Tüm Vücut (A / B / C Rotasyonu)',
+            fullbody_3day: {
+                name: '3 Gün Tüm Vücut',
                 days: [
-                    { dayIdx: 1, split: 'full_body', label: 'Pzt: Tüm Vücut A (Temel Kuvvet Açıları)' },
-                    { dayIdx: 3, split: 'full_body', label: 'Çar: Tüm Vücut B (Farklı Açı & Hipertrofi)' },
-                    { dayIdx: 5, split: 'full_body', label: 'Cum: Tüm Vücut C (Atletik Hibrit & Kondisyon)' }
+                    { dayIdx: 1, split: 'full_body', label: 'Pzt: Tüm Vücut (1. Seans)' },
+                    { dayIdx: 3, split: 'full_body', label: 'Çar: Tüm Vücut (2. Seans)' },
+                    { dayIdx: 5, split: 'full_body', label: 'Cum: Tüm Vücut (3. Seans)' }
                 ]
             },
             upper_lower_4day: {
-                name: '4 Gün Üst / Alt (A-B Rotasyonu)',
+                name: '4 Gün Üst / Alt',
                 days: [
-                    { dayIdx: 1, split: 'upper', label: 'Pzt: Üst Vücut A (Yatay Odak & Kol)' },
-                    { dayIdx: 2, split: 'lower', label: 'Sal: Alt Vücut A (Diz Baskın & Core)' },
-                    { dayIdx: 4, split: 'upper', label: 'Per: Üst Vücut B (Dikey/Eğimli Odak & Kol)' },
-                    { dayIdx: 5, split: 'lower', label: 'Cum: Alt Vücut B (Kalça Baskın & Kondisyon)' }
+                    { dayIdx: 1, split: 'upper', label: 'Pzt: Üst Vücut (1. Seans)' },
+                    { dayIdx: 2, split: 'lower', label: 'Sal: Alt Vücut (1. Seans)' },
+                    { dayIdx: 4, split: 'upper', label: 'Per: Üst Vücut (2. Seans)' },
+                    { dayIdx: 5, split: 'lower', label: 'Cum: Alt Vücut (2. Seans)' }
                 ]
             },
             flow_complex_3day: {
-                name: '3 Gün Çelik Akışı (Flow Kompleks Serisi)',
+                name: '3 Gün Çelik Akışı',
                 days: [
-                    { dayIdx: 1, split: 'flow_complex', label: 'Pzt: Çelik Akışı A (Kuvvet & İtiş Akışı)' },
-                    { dayIdx: 3, split: 'flow_complex', label: 'Çar: Çelik Akışı B (Arka Zincir & Mobilite)' },
-                    { dayIdx: 5, split: 'flow_complex', label: 'Cum: Çelik Akışı C (Metabolik Tam Vücut)' }
+                    { dayIdx: 1, split: 'flow_complex', label: 'Pzt: Çelik Akışı (Kuvvet)' },
+                    { dayIdx: 3, split: 'flow_complex', label: 'Çar: Çelik Akışı (Arka Zincir)' },
+                    { dayIdx: 5, split: 'flow_complex', label: 'Cum: Çelik Akışı (Metabolik)' }
                 ]
             }
         };
+        Object.defineProperty(AI_WEEKLY_TEMPLATES, 'full_body_abc', {
+            get() { return this.fullbody_3day; },
+            enumerable: false
+        });
         window.AI_WEEKLY_TEMPLATES = AI_WEEKLY_TEMPLATES;
 
         function applyAiWeeklySchedule(overrideTplKey = null) {
@@ -1824,11 +3180,12 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
             let chosenDur = paramDurEl ? parseInt(paramDurEl.value, 10) : (durSelect ? parseInt(durSelect.value, 10) : 45);
             let chosenStyle = paramStyleEl ? paramStyleEl.value : (styleSelect ? styleSelect.value : 'superset');
-            const chosenTplKey = (overrideTplKey && AI_WEEKLY_TEMPLATES[overrideTplKey])
-                ? overrideTplKey
-                : ((window.selectedAiWeeklyTemplate && AI_WEEKLY_TEMPLATES[window.selectedAiWeeklyTemplate])
-                    ? window.selectedAiWeeklyTemplate
-                    : ((wkTplSelect && AI_WEEKLY_TEMPLATES[wkTplSelect.value]) ? wkTplSelect.value : 'upper_lower_full'));
+            const rawTplCandidate = overrideTplKey
+                || ((window.selectedAiWeeklyTemplate && window.selectedAiWeeklyTemplate !== 'ai_auto') ? window.selectedAiWeeklyTemplate : '')
+                || ((wkTplSelect && wkTplSelect.value && wkTplSelect.value !== 'ai_auto') ? wkTplSelect.value : '')
+                || resolveAutoWeeklyTemplateKey();
+            const normalizedTplKey = (rawTplCandidate === 'full_body_abc') ? 'fullbody_3day' : rawTplCandidate;
+            const chosenTplKey = AI_WEEKLY_TEMPLATES[normalizedTplKey] ? normalizedTplKey : 'upper_lower_full';
             if (chosenTplKey === 'flow_complex_3day') {
                 chosenStyle = 'complex';
                 if (paramStyleEl) paramStyleEl.value = 'complex';
@@ -1878,7 +3235,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             const generatedDaysList = [];
             weeklyDays.forEach((slot, idx) => {
                 selectSplit(slot.split);
-                const dayDoctrine = (chosenTplKey === 'flow_complex_3day' || slot.split === 'flow_complex') ? 'metcon_athletic' : currentSelectedDoctrine;
+                const dayDoctrine = (chosenTplKey === 'flow_complex_3day' || slot.split === 'flow_complex') ? 'func_pure' : currentSelectedDoctrine;
                 handleGenerateWorkout(dayDoctrine, userWish, weeklyContext);
                 if (currentGeneratedWorkout) {
                     const wClone = JSON.parse(JSON.stringify(currentGeneratedWorkout));
@@ -1971,6 +3328,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             const plan = window.pendingAiWeeklyPlan;
             const container = document.getElementById('generatedWorkoutOutput');
             if (!plan || !container || !Array.isArray(plan.days) || plan.days.length === 0) return;
+            window._editingPendingWeeklyDayIdx = null;
             const savedScrollY = window.scrollY;
 
             let activeIdx = Number(window.activeWeeklyPreviewDayIdx) || 0;
@@ -2173,7 +3531,14 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
         function inspectDayFromPendingWeeklyPlan(dayIndexInList) {
             const plan = window.pendingAiWeeklyPlan;
             if (!plan || !plan.days || !plan.days[dayIndexInList]) return;
-            currentGeneratedWorkout = plan.days[dayIndexInList].workout;
+            const activeIdx = Number(dayIndexInList) || 0;
+            window.activeWeeklyPreviewDayIdx = activeIdx;
+            window._editingPendingWeeklyDayIdx = activeIdx;
+            currentGeneratedWorkout = plan.days[activeIdx].workout;
+            window.currentGeneratedWorkout = currentGeneratedWorkout;
+            if (currentGeneratedWorkout && currentGeneratedWorkout.split) {
+                selectSplit(currentGeneratedWorkout.split);
+            }
             window.expandedGeneratedExIndex = null;
             renderGeneratedWorkout();
         }
@@ -3379,6 +4744,16 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             const activeDoctrineKey = doctrineOverride || currentSelectedDoctrine || 'bb_hybrid';
             const activeDoc = AI_DOCTRINES[activeDoctrineKey] || AI_DOCTRINES.bb_hybrid;
 
+            if (!customWish && !weeklyContext) {
+                const unifiedWishEl = document.getElementById('aiUnifiedWishInput');
+                const modalWishEl = document.getElementById('aiModalUserWishInput');
+                customWish = (unifiedWishEl && unifiedWishEl.value.trim())
+                    ? unifiedWishEl.value.trim()
+                    : ((modalWishEl && modalWishEl.value.trim())
+                        ? modalWishEl.value.trim()
+                        : ((currentGeneratedWorkout && currentGeneratedWorkout.customWish) || ''));
+            }
+
             const wishParsed = parseUserWishConstraints(customWish, (typeof EXERCISES_DB !== 'undefined' ? EXERCISES_DB : null), window.lastGeminiWishAnalysis);
 
             const styleEl = document.getElementById('paramStyle');
@@ -4018,9 +5393,9 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 { exId: "bw_plank", family: "core_anterior_plank", name: "2 Dk İzometrik Core & Hollow Hold Burnout", desc: "40 sn RKC Plank + 20 sn Dinlenme × 2 Tur maksimum karın duvarı sıkışı." }
             ];
             const fallbackRecoveryFinisher = {
-                exId: "bw_breathing",
+                exId: "bw_hollow_hold",
                 family: "recovery",
-                name: "2 Dk Diyafram Nefesi & Toparlanma Burnout",
+                name: "2 Dk Diyafram Nefesi & Core Toparlanma",
                 desc: "Sırtüstü uzanıp 4 sn nefes al, 4 sn tut, 6 sn ver; parasempatik toparlanmayı tetikle."
             };
 
@@ -4104,6 +5479,20 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             };
 
             window.currentGeneratedWorkout = currentGeneratedWorkout;
+            if (!weeklyContext && window.pendingAiWeeklyPlan && window._editingPendingWeeklyDayIdx !== null && window._editingPendingWeeklyDayIdx !== undefined) {
+                const editIdx = Number(window._editingPendingWeeklyDayIdx);
+                const dayEntry = window.pendingAiWeeklyPlan.days && window.pendingAiWeeklyPlan.days[editIdx];
+                if (dayEntry) {
+                    currentGeneratedWorkout.id = dayEntry.workout ? dayEntry.workout.id : ('ai_wk_' + dayEntry.dayIdx + '_' + Date.now());
+                    currentGeneratedWorkout.title = `⚔️ ${dayEntry.label} (${currentGeneratedWorkout.doctrineShort || 'AI Hibrit'})`;
+                    dayEntry.workout = currentGeneratedWorkout;
+                    if (window.pendingAiWeeklyPlan.draftSchedule && window.pendingAiWeeklyPlan.draftSchedule[dayEntry.dayIdx]) {
+                        window.pendingAiWeeklyPlan.draftSchedule[dayEntry.dayIdx].customWorkout = currentGeneratedWorkout;
+                        window.pendingAiWeeklyPlan.draftSchedule[dayEntry.dayIdx].exercises = currentGeneratedWorkout.exercises;
+                        window.pendingAiWeeklyPlan.draftSchedule[dayEntry.dayIdx].desc = `${currentGeneratedWorkout.exercises.length} Hareket • ${currentGeneratedWorkout.duration} Dk`;
+                    }
+                }
+            }
             try {
                 localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(currentGeneratedWorkout));
             } catch(e) {}
@@ -4218,11 +5607,14 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             });
 
             const styleBadgeLabels = {
-                superset: '⚖️ Orta Süperset (1 Düz + 1 Süperset Akademik Hibrit)',
-                superset_light: '🌱 Az Süperset (Düz Set + Son 2 Hareket Süperset)',
-                superset_intense: '🔥 Yoğun Süperset (Tamamı İkili Süperset)',
+                superset: '⚖️ Orta Süperset',
+                complex: '⚔️ Birleşik Akış',
+                superset_light: '🌱 Az Süperset',
+                superset_intense: '🔥 Yoğun Süperset',
+                superset_max: '🔥 Maksimum Süperset',
                 straight: '🛡️ Klasik Düz Set',
-                emom: '⏱️ EMOM Döngüsü'
+                classic: '🛡️ Klasik Düz Set',
+                emom: '⏱️ EMOM'
             };
             const styleBadgeText = styleBadgeLabels[w.style] || styleBadgeLabels.superset;
 
@@ -4237,7 +5629,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 </div>
             ` : '';
             const wishBadge = w.customWish ? `
-                <div style="font-size:11.5px; color:#475569; background:#151C26; padding:4px 8px; border-radius:6px; margin-top:4px; display:inline-block;">
+                <div style="font-size:11.5px; color:#475569; background:#F1F5F9; padding:4px 8px; border-radius:6px; margin-top:4px; display:inline-block;">
                     🎯 <strong>Özel İstek/Not:</strong> "${escapeHTML(w.customWish)}"
                 </div>
             ` : '';
@@ -4301,7 +5693,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                             <button class="btn-action-secondary" style="border-color:var(--cyan); color:var(--cyan); font-weight:800;" onclick="promptAssignGeneratedToAnyDay()">
                                 <span>${CANVA_ICONS.calendar} Gün Seç</span>
                             </button>
-                            <button class="btn-action-secondary" style="border-color:#263244;" onclick="assignGeneratedToToday()">
+                            <button class="btn-action-secondary" style="border-color:#CBD5E1;" onclick="assignGeneratedToToday()">
                                 <span>${CANVA_ICONS.bolt} Bugüne Ekle</span>
                             </button>
                         ` : `
@@ -4311,7 +5703,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                             <button class="btn-action-secondary" style="border-color:var(--cyan); color:var(--cyan); font-weight:800;" onclick="scheduleTomorrowFromGenerated()">
                                 <span>${CANVA_ICONS.calendar} Yarına Ekle</span>
                             </button>
-                            <button class="btn-action-secondary" style="border-color:#263244;" onclick="promptAssignGeneratedToAnyDay()">
+                            <button class="btn-action-secondary" style="border-color:#CBD5E1;" onclick="promptAssignGeneratedToAnyDay()">
                                 <span>${CANVA_ICONS.calendar} Gün Seç</span>
                             </button>
                         `}
@@ -4367,7 +5759,23 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                             <strong style="color:#0F172A; font-size:13px;">${escapeHTML(w.finisher.name)}</strong>
                             <div style="font-size:12px; color:#64748B; margin-top:2px;">${escapeHTML(w.finisher.desc)}</div>
                         </div>
-                        <button type="button" class="btn btn-outline" style="padding:6px 10px; font-size:11px; border-color:rgba(244,63,94,0.45); color:#E11D48; white-space:nowrap; font-weight:700;" onclick="openExerciseDetailModal(decodeURIComponent('${encodeURIComponent(w.finisher.exId || (w.finisher.name && w.finisher.name.toLowerCase().includes('tabata') ? 'db_swing' : 'db_farmers_walk'))}'))">📸 Form Rehberi</button>
+                        ${(() => {
+                            const fName = (w.finisher && w.finisher.name) ? w.finisher.name.toLowerCase() : '';
+                            const resolvedId = (w.finisher && w.finisher.exId && EXERCISES_DB.some(e => e.id === w.finisher.exId))
+                                ? w.finisher.exId
+                                : (fName.includes('tabata') || fName.includes('swing')
+                                    ? 'db_swing'
+                                    : (fName.includes('plank') || fName.includes('hollow') || fName.includes('core')
+                                        ? 'bw_plank'
+                                        : (fName.includes('burpee') || fName.includes('emom')
+                                            ? 'bw_burpee'
+                                            : (fName.includes('farmer') || fName.includes('yürüyüş') || fName.includes('taşıma') || fName.includes('carry')
+                                                ? 'db_farmers_walk'
+                                                : null))));
+                            return resolvedId
+                                ? `<button type="button" class="btn btn-outline" style="padding:6px 10px; font-size:11px; border-color:rgba(244,63,94,0.45); color:#E11D48; white-space:nowrap; font-weight:700;" onclick="openExerciseDetailModal(decodeURIComponent('${encodeURIComponent(resolvedId)}'))">📸 Form Rehberi</button>`
+                                : '';
+                        })()}
                     </div>
                 </div>
             `;
@@ -4843,7 +6251,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                         <span class="pos-info-arrow" id="arrow_${extraInfoId}">▼ Göster</span>
                     </button>
                     <div class="pos-extra-info-body" id="body_${extraInfoId}" style="display:none; margin-top:8px;">
-                        <div style="background:#0E131B; border:1px solid var(--border); border-radius:8px; padding:8px 10px; margin-bottom:8px;">
+                        <div style="background:#F8FAFC; border:1px solid var(--border); border-radius:8px; padding:8px 10px; margin-bottom:8px;">
                             <div style="font-size:10.5px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:5px;">🎯 Çalıştırılan Kas Grupları:</div>
                             <div style="display:flex; flex-wrap:wrap; gap:5px;">
                                 ${(ex.primaryMuscles || []).map(m => `<span style="background:rgba(245,158,11,0.2); color:var(--gold); border:1px solid rgba(245,158,11,0.4); padding:2px 7px; border-radius:10px; font-size:10.5px; font-weight:800;">${(typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m] ? STUDIO_REGION_MAP[m].icon + ' ' + STUDIO_REGION_MAP[m].name : m)} (Primer)</span>`).join('')}
@@ -4913,7 +6321,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 `;
             } else {
                 anatomiVisualHtml = `
-                    <div style="background:#0E131B; border-radius:8px; padding:16px; text-align:center; color:var(--text-secondary); font-size:12px;">
+                    <div style="background:#F8FAFC; border-radius:8px; padding:16px; text-align:center; color:var(--text-secondary); font-size:12px;">
                         🎯 <strong>Hedeflenen Kas Grubu:</strong> <span style="color:var(--gold); font-weight:800;">${escapeHTML(ex.muscle || '')}</span>
                     </div>
                 `;
@@ -5026,7 +6434,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                             <span class="ex-badge badge-muscle" style="color:var(--gold); font-weight:800;">${CANVA_ICONS.crosshair} ${escapeHTML(anatomy.primary)}</span>
                             ${anatomy.secondary ? `<span class="ex-badge" style="background:rgba(56,189,248,0.12); color:var(--cyan); border:1px solid rgba(56,189,248,0.3); font-size:10px; font-weight:700;">⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''}
                             ${targetW ? `<span class="badge-target-weight">${CANVA_ICONS.crosshair} Hedefin: ${targetW} kg</span>` : ''}
-                            <button type="button" class="btn-report-mini" onclick="event.stopPropagation(); openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}', 'Sihirbaz (Oluştur)')" title="Bu egzersiz veya görsel hatalıysa bildir">
+                            <button type="button" class="btn-report-mini" onclick="event.stopPropagation(); openExerciseBugReportModal(decodeURIComponent('${encodeURIComponent(ex.id)}'), decodeURIComponent('${encodeURIComponent(ex.name || '')}'), '', decodeURIComponent('${encodeURIComponent(ex.equipment || '')}'), decodeURIComponent('${encodeURIComponent(ex.muscle || '')}'), 'Sihirbaz (Oluştur)')" title="Bu egzersiz veya görsel hatalıysa bildir">
                                 ⚠️ Bildir
                             </button>
                         </div>
@@ -5485,7 +6893,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             if (resArea) {
                 resArea.style.display = 'block';
                 resArea.innerHTML = `
-                    <div style="text-align:center; padding:24px 14px; background:#0E131B; border-radius:8px; border:1px dashed #c084fc;">
+                    <div style="text-align:center; padding:24px 14px; background:#F8FAFC; border-radius:8px; border:1px dashed #c084fc;">
                         <div style="font-size:24px; animation:spin 1s linear infinite; display:inline-block; margin-bottom:8px;">🧠</div>
                         <div style="font-size:12.5px; font-weight:800; color:#6B21A8;">Gemini Biyomekanik Motoru Analiz Ediyor...</div>
                         <div style="font-size:11px; color:var(--text-secondary); margin-top:4px;">"${escapeHTML(currentEx.name)}" için en güvenli ve bilimsel ikameler hesaplanıyor.</div>
@@ -5689,21 +7097,21 @@ KURALLAR:
                             ${thumbImg ? `
                                 <div style="width:100%; height:115px; border-radius:6px; background:#000; overflow:hidden; border:1px solid rgba(192,132,252,0.25); margin-top:8px; display:flex; align-items:center; justify-content:center; position:relative; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')" title="Form rehberini incele">
                                     <img src="${thumbImg}" style="max-width:100%; max-height:100%; object-fit:contain;" alt="${escapeHTML(ex.name)}" loading="lazy">
-                                    <div style="position:absolute; bottom:4px; right:4px; background:#0E131B; backdrop-filter:blur(4px); border:1px solid #222C3A; border-radius:4px; padding:2px 6px; font-size:9.5px; color:#6B21A8; font-weight:700; display:flex; align-items:center; gap:3px;">
+                                    <div style="position:absolute; bottom:4px; right:4px; background:#F8FAFC; backdrop-filter:blur(4px); border:1px solid #E2E8F0; border-radius:4px; padding:2px 6px; font-size:9.5px; color:#6B21A8; font-weight:700; display:flex; align-items:center; gap:3px;">
                                         <span>🔍 Büyüt / İncele</span>
                                     </div>
                                 </div>
                             ` : ''}
 
                             <!-- FORM İPUCU -->
-                            ${ex.cue ? `<div style="font-size:10.5px; color:#6B21A8; margin-top:6px; background:#0E131B; padding:5px 8px; border-radius:4px; border:1px solid rgba(192,132,252,0.15); line-height:1.35;">💡 <strong>İpucu:</strong> ${escapeHTML(ex.cue)}</div>` : ''}
+                            ${ex.cue ? `<div style="font-size:10.5px; color:#6B21A8; margin-top:6px; background:#F8FAFC; padding:5px 8px; border-radius:4px; border:1px solid rgba(192,132,252,0.15); line-height:1.35;">💡 <strong>İpucu:</strong> ${escapeHTML(ex.cue)}</div>` : ''}
                         </div>
                     `;
                 }
             });
 
             resArea.innerHTML = `
-                <div style="background:#0E131B; border:1px solid rgba(192, 132, 252, 0.35); border-radius:10px; padding:10px 12px; margin-top:6px;">
+                <div style="background:#F8FAFC; border:1px solid rgba(192, 132, 252, 0.35); border-radius:10px; padding:10px 12px; margin-top:6px;">
                     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid rgba(192,132,252,0.2); padding-bottom:5px;">
                         <div style="display:flex; align-items:center; gap:6px;">
                             <span style="font-size:15px;">🤖</span>
@@ -6003,10 +7411,13 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                     const plan = window.pendingAiWeeklyPlan;
                     const actIdx = Number(auditData.targetDayIdx !== null ? auditData.targetDayIdx : window.activeWeeklyPreviewDayIdx) || 0;
                     if (plan && plan.days && plan.days[actIdx]) {
-                        plan.days[actIdx].workout = workout;
-                        if (plan.draftSchedule && plan.draftSchedule[actIdx]) {
-                            plan.draftSchedule[actIdx].customWorkout = workout;
-                            plan.draftSchedule[actIdx].exercises = workout.exercises;
+                        const dayEntry = plan.days[actIdx];
+                        dayEntry.workout = workout;
+                        const schedIdx = (dayEntry.dayIdx !== undefined && dayEntry.dayIdx !== null) ? dayEntry.dayIdx : actIdx;
+                        if (plan.draftSchedule && plan.draftSchedule[schedIdx]) {
+                            plan.draftSchedule[schedIdx].customWorkout = workout;
+                            plan.draftSchedule[schedIdx].exercises = workout.exercises;
+                            plan.draftSchedule[schedIdx].desc = `${workout.exercises.length} Hareket • ${workout.duration || 45} Dk`;
                         }
                     }
                     if (typeof renderPendingWeeklyPlanPreview === 'function') renderPendingWeeklyPlanPreview();
@@ -6023,6 +7434,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                 const containerId = auditData.scope === 'weekly_preview' ? 'aiAcademicWeeklyAuditContainer' : 'aiAcademicAuditContainer';
                 const container = document.getElementById(containerId);
                 if (container) {
+                    container.style.display = 'block';
                     container.innerHTML = `
                         <div style="background:rgba(34,197,94,0.12); border:1.5px solid #22c55e; border-radius:12px; padding:14px 16px; margin-bottom:10px;">
                             <div style="display:flex; align-items:center; gap:8px; color:#15803D;">
@@ -6157,7 +7569,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
 
             if (pickerContext.mode === 'replace' && currentEx) {
                 if (titleEl) titleEl.innerText = `🔄 Alternatif: ${currentEx.name}`;
-                if (subEl) subEl.innerHTML = '';
+                if (subEl) subEl.textContent = 'Aynı biyomekanik paternde veya farklı ekipmanla ikame seçin';
                 if (banner) banner.style.display = 'flex';
 
                 const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[currentEx.id]) || null;
@@ -6177,7 +7589,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                 }
             } else {
                 if (titleEl) titleEl.innerText = "➕ Egzersiz Ekle";
-                if (subEl) subEl.innerHTML = '';
+                if (subEl) subEl.textContent = 'Katalogdan veya kas grubuna göre programa yeni hareket ekleyin';
                 if (banner) banner.style.display = 'none';
             }
 
@@ -6525,7 +7937,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
 
             if (filtered.length === 0) {
                 container.innerHTML = `
-                    <div style="text-align:center; padding:32px 14px; background:#0E131B; border-radius:8px; border:1px dashed var(--border);">
+                    <div style="text-align:center; padding:32px 14px; background:#F8FAFC; border-radius:8px; border:1px dashed var(--border);">
                         <div style="font-size:20px; margin-bottom:6px;">🔍</div>
                         <div style="font-size:12.5px; font-weight:700; color:#0F172A;">Bu kriterlere uygun başka egzersiz bulunamadı</div>
                         <div style="font-size:11px; color:var(--text-secondary); margin:4px 0 12px;">Mevcut listenizde yer almayan alternatifler için farklı bir ekipman filtresi seçebilir veya tüm kataloğu inceleyebilirsiniz.</div>
@@ -6565,18 +7977,18 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                                 <button type="button" class="btn btn-outline" style="padding:4px 8px; font-size:11px; color:var(--cyan); border-color:rgba(56,189,248,0.5); font-weight:800; display:flex; align-items:center; gap:2px;" onclick="event.stopPropagation(); togglePickerExerciseForm('${ex.id}')" title="Formu Gör">
                                     👁️ Form
                                 </button>
-                                <button type="button" class="btn-report-mini" onclick="event.stopPropagation(); openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '${thumbImg}', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}', 'Alternatif Seçici')" title="Bu harekette hata bildir">⚠️</button>
+                                <button type="button" class="btn-report-mini" onclick="event.stopPropagation(); openExerciseBugReportModal(decodeURIComponent('${encodeURIComponent(ex.id)}'), decodeURIComponent('${encodeURIComponent(ex.name || '')}'), decodeURIComponent('${encodeURIComponent(thumbImg || '')}'), decodeURIComponent('${encodeURIComponent(ex.equipment || '')}'), decodeURIComponent('${encodeURIComponent(ex.muscle || '')}'), 'Alternatif Seçici')" title="Bu harekette hata bildir">⚠️</button>
                             </div>
                         </div>
 
                         ${ex.cue ? `
-                            <div style="font-size:11px; color:var(--text-secondary); line-height:1.3; background:#0E131B; border-radius:4px; padding:5px 8px; margin-top:6px;">
+                            <div style="font-size:11px; color:var(--text-secondary); line-height:1.3; background:#F8FAFC; border-radius:4px; padding:5px 8px; margin-top:6px;">
                                 💡 ${escapeHTML(ex.cue)}
                             </div>
                         ` : ''}
 
                         <!-- INLINE FORM EXPANDER -->
-                        <div id="picker_form_expand_${ex.id}" style="display:none; margin-top:8px; padding-top:8px; border-top:1px dashed #222C3A;">
+                        <div id="picker_form_expand_${ex.id}" style="display:none; margin-top:8px; padding-top:8px; border-top:1px dashed #E2E8F0;">
                             ${thumbImg ? `
                                 <div style="text-align:center; background:#000; border-radius:8px; overflow:hidden; border:1px solid var(--border); margin-bottom:6px; min-height:160px; display:flex; align-items:center; justify-content:center;">
                                     <img src="${thumbImg}" style="max-width:100%; max-height:42vh; object-fit:contain; display:block; margin:0 auto;" alt="${escapeHTML(ex.name)} Form">
@@ -6588,7 +8000,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                                 <div style="text-align:center; padding:16px; color:var(--text-secondary); font-size:11.5px;">Görsel form rehberi optimize ediliyor.</div>
                             `}
                             
-                            <div style="background:#0E131B; border:1px solid var(--border); border-radius:6px; padding:6px 8px; margin-bottom:6px;">
+                            <div style="background:#F8FAFC; border:1px solid var(--border); border-radius:6px; padding:6px 8px; margin-bottom:6px;">
                                 <div style="font-size:10px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:4px;">🎯 Hedef Kaslar:</div>
                                 <div style="display:flex; flex-wrap:wrap; gap:4px;">
                                     ${(ex.primaryMuscles || []).map(m => `<span style="background:rgba(245,158,11,0.2); color:var(--gold); border:1px solid rgba(245,158,11,0.4); padding:2px 6px; border-radius:8px; font-size:10px; font-weight:800;">${(typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m] ? STUDIO_REGION_MAP[m].icon + ' ' + STUDIO_REGION_MAP[m].name : m)} (Primer)</span>`).join('')}
@@ -6597,7 +8009,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                             </div>
 
                             ${(ex.positions && ex.positions.length > 0) ? `
-                                <div style="background:#0E131B; border-radius:6px; padding:6px 8px; margin-bottom:6px; font-size:11px; line-height:1.35;">
+                                <div style="background:#F8FAFC; border-radius:6px; padding:6px 8px; margin-bottom:6px; font-size:11px; line-height:1.35;">
                                     <div style="font-size:10px; font-weight:800; color:var(--cyan); text-transform:uppercase; margin-bottom:3px;">📋 Uygulama Adımları:</div>
                                     ${ex.positions.map(p => `<div><span style="color:var(--text-secondary); font-weight:700;">• ${escapeHTML(p.phase)}:</span> ${escapeHTML(p.desc)}</div>`).join('')}
                                 </div>
@@ -6631,7 +8043,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
             // If in tab 1 or 2, add the helpful "Diğer" shortcut banner at bottom
             if (tab === 'same_muscle' || tab === 'other_muscle') {
                 cardsHtml += `
-                    <div style="text-align:center; padding:12px; margin-top:8px; border-top:1px dashed var(--border); background:#0E131B; border-radius:8px;">
+                    <div style="text-align:center; padding:12px; margin-top:8px; border-top:1px dashed var(--border); background:#F8FAFC; border-radius:8px;">
                         <div style="font-size:11px; color:var(--text-secondary); margin-bottom:6px;">Aradığınız hareketi bulamadınız mı?</div>
                         <button type="button" class="btn btn-outline" style="color:var(--gold); border-color:var(--gold); font-size:11.5px; padding:5px 12px; font-weight:800;" onclick="switchPickerTab('catalog')">
                             ➕ Diğer (Genişletilmiş Tüm Kataloğu Aç) ➔
@@ -6726,22 +8138,43 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                     delete activeWorkoutSetsData[oldExId];
                 }
 
-                // Bugünün takvim programında da alternatif değişikliğini kalıcılaştır
+                // Yalnızca bu aktif antrenman gerçekten takvimdeki bir güne aitse o günün takvim programını güncelle
                 try {
                     const todayDate = new Date();
                     const todayIdx = todayDate.getDay();
                     const todayYMD = typeof formatDateYMD === 'function' ? formatDateYMD(todayDate) : '';
-                    const sched = typeof getWeeklySchedule === 'function' ? getWeeklySchedule() : null;
-                    if (sched && sched[todayIdx] && !sched[todayIdx].rest) {
+                    const isNextWk = Boolean(activeWorkoutSession.scheduledIsNextWeek);
+                    const sched = isNextWk
+                        ? (typeof getNextWeeklySchedule === 'function' ? getNextWeeklySchedule() : null)
+                        : (typeof getWeeklySchedule === 'function' ? getWeeklySchedule() : null);
+                    const candidateDayIdx = (activeWorkoutSession.scheduledDayIdx !== undefined && activeWorkoutSession.scheduledDayIdx !== null)
+                        ? activeWorkoutSession.scheduledDayIdx
+                        : todayIdx;
+                    const daySlot = sched && sched[candidateDayIdx];
+                    const isMatchingScheduledSession = Boolean(
+                        daySlot && !daySlot.rest && (
+                            activeWorkoutSession.scheduledDayIdx === candidateDayIdx ||
+                            (activeWorkoutSession.id && (
+                                daySlot.id === activeWorkoutSession.id ||
+                                (daySlot.customWorkout && daySlot.customWorkout.id === activeWorkoutSession.id)
+                            ))
+                        )
+                    );
+                    if (isMatchingScheduledSession) {
                         const clonedActive = JSON.parse(JSON.stringify(activeWorkoutSession));
                         clonedActive.updatedAt = nowTs;
-                        sched[todayIdx].customWorkout = clonedActive;
-                        sched[todayIdx].exercises = clonedActive.exercises;
-                        sched[todayIdx].desc = `${clonedActive.exercises.length} Hareket • ${clonedActive.duration || 45} Dk`;
-                        sched[todayIdx].updatedAt = nowTs;
-                        saveWeeklySchedule(sched);
-                        if (todayYMD && typeof saveDateScheduleOverride === 'function') {
-                            saveDateScheduleOverride(todayYMD, sched[todayIdx]);
+                        daySlot.customWorkout = clonedActive;
+                        daySlot.exercises = clonedActive.exercises;
+                        daySlot.desc = `${clonedActive.exercises.length} Hareket • ${clonedActive.duration || 45} Dk`;
+                        daySlot.updatedAt = nowTs;
+                        if (isNextWk && typeof saveNextWeeklySchedule === 'function') {
+                            saveNextWeeklySchedule(sched);
+                        } else if (typeof saveWeeklySchedule === 'function') {
+                            saveWeeklySchedule(sched);
+                        }
+                        const targetYMD = activeWorkoutSession.scheduledDateStr || (!isNextWk && candidateDayIdx === todayIdx ? todayYMD : '');
+                        if (targetYMD && typeof saveDateScheduleOverride === 'function') {
+                            saveDateScheduleOverride(targetYMD, daySlot);
                         }
                     }
                 } catch(e) {}
@@ -7005,12 +8438,14 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                     activeWorkoutSession.exercises.push(found);
                 }
 
-                const defaultWeight = found.weightKey && weights[found.weightKey] ? (parseFloat(weights[found.weightKey]) || '') : '';
-                activeWorkoutSetsData[found.id] = [
-                    { setNo: 1, weight: defaultWeight, reps: 12, completed: false, completedAt: null },
-                    { setNo: 2, weight: defaultWeight, reps: 12, completed: false, completedAt: null },
-                    { setNo: 3, weight: defaultWeight, reps: 12, completed: false, completedAt: null }
-                ];
+                if (!alreadyExists || !Array.isArray(activeWorkoutSetsData[found.id]) || activeWorkoutSetsData[found.id].length === 0) {
+                    const defaultWeight = found.weightKey && weights[found.weightKey] ? (parseFloat(weights[found.weightKey]) || '') : '';
+                    activeWorkoutSetsData[found.id] = [
+                        { setNo: 1, weight: defaultWeight, reps: 12, completed: false, completedAt: null },
+                        { setNo: 2, weight: defaultWeight, reps: 12, completed: false, completedAt: null },
+                        { setNo: 3, weight: defaultWeight, reps: 12, completed: false, completedAt: null }
+                    ];
+                }
             });
 
             closeAddFinisherModal();
@@ -7285,13 +8720,13 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                                         ${escapeHTML(r.categoryLabel || r.category)}
                                     </div>
                                 </div>
-                                <span style="font-size:10.5px; font-weight:800; padding:2px 7px; border-radius:4px; background:#151C26;">
+                                <span style="font-size:10.5px; font-weight:800; padding:2px 7px; border-radius:4px; background:#F1F5F9;">
                                     ${statusText}
                                 </span>
                             </div>
 
                             ${r.userNote ? `
-                                <div style="font-size:12px; color:#475569; margin-top:8px; background:#0E131B; padding:6px 10px; border-radius:6px; border-left:2px solid var(--cyan);">
+                                <div style="font-size:12px; color:#475569; margin-top:8px; background:#F8FAFC; padding:6px 10px; border-radius:6px; border-left:2px solid var(--cyan);">
                                     💬 <em>"${escapeHTML(r.userNote)}"</em>
                                 </div>
                             ` : ''}
@@ -8351,6 +9786,10 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                 createdAt: Date.now()
             };
             currentGeneratedWorkout = flowWorkout;
+            window.currentGeneratedWorkout = currentGeneratedWorkout;
+            try {
+                localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(currentGeneratedWorkout));
+            } catch (e) {}
             if (autoStart) {
                 startActiveWorkoutFromGenerated();
                 switchTab('activeWorkoutTab');
@@ -8549,7 +9988,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                                             <button class="btn btn-gold" style="padding:9px 16px; font-size:12px; font-weight:900; flex:1;" onclick="promoteNextWeekToCurrent('${user.id}')">
                                                 ⚡ BU PROGRAMI AKTİF HAFTAM YAP
                                             </button>
-                                            <button class="btn btn-outline" style="padding:9px 14px; font-size:12px; font-weight:700; border-color:#263244; color:#475569;" onclick="switchPlannerWeek('current')">
+                                            <button class="btn btn-outline" style="padding:9px 14px; font-size:12px; font-weight:700; border-color:#CBD5E1; color:#475569;" onclick="switchPlannerWeek('current')">
                                                 ⬅️ Bu Haftaya Dön
                                             </button>
                                         </div>
@@ -8570,7 +10009,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                                         <button class="btn btn-gold" style="padding:9px 18px; font-size:12.5px; font-weight:900;" onclick="startScheduledWorkoutForDay(${todayIdx}, '${todayYMD}')">
                                             ▶️ SEANSI BAŞLAT
                                         </button>
-                                        <button class="btn btn-outline" style="padding:9px 14px; font-size:12px; font-weight:700; border-color:#263244; color:#475569;" onclick="openScheduleDayModal(${todayIdx}, '${todayYMD}')">
+                                        <button class="btn btn-outline" style="padding:9px 14px; font-size:12px; font-weight:700; border-color:#CBD5E1; color:#475569;" onclick="openScheduleDayModal(${todayIdx}, '${todayYMD}')">
                                             👁️ İncele & Düzenle
                                         </button>
                                     </div>
@@ -8897,7 +10336,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                                     <button class="btn-hevy-action" onclick="openAddFinisherModal()">
                                         ➕ Finisher Ekle
                                     </button>
-                                    <button class="btn-hevy-action" onclick="openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}')">
+                                    <button class="btn-hevy-action" onclick="openExerciseBugReportModal(decodeURIComponent('${encodeURIComponent(ex.id)}'), decodeURIComponent('${encodeURIComponent(ex.name || '')}'), '', decodeURIComponent('${encodeURIComponent(ex.equipment || '')}'), decodeURIComponent('${encodeURIComponent(ex.muscle || '')}'))">
                                         ⚠️ Hata Bildir
                                     </button>
                                     <button class="btn-hevy-action danger" onclick="removeExerciseFromWorkout('${ex.id}', 'active')">
@@ -10034,8 +11473,8 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
             const summaryHint = document.getElementById('logWorkoutSummaryHint');
             if (summaryHint) {
                 summaryHint.innerHTML = `
-                    <div style="background:#0E131B; border: 1.5px solid var(--gold); border-radius: 10px; padding: 12px; margin-bottom: 14px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #222C3A; padding-bottom:8px;">
+                    <div style="background:#F8FAFC; border: 1.5px solid var(--gold); border-radius: 10px; padding: 12px; margin-bottom: 14px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #E2E8F0; padding-bottom:8px;">
                             <span style="font-size:11px; font-weight:800; color:var(--gold); text-transform:uppercase; letter-spacing:0.5px;">📋 Seans Özeti & Performans</span>
                             <span style="font-size:12px; font-weight:800; color:#0F172A;">⏱️ ${formatSecondsToHMS(elapsedSecs)}</span>
                         </div>
@@ -10075,7 +11514,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                         </div>
                         <div style="max-height: 220px; overflow-y: auto; padding-right: 4px; display:flex; flex-direction:column; gap:6px;">
                             ${exerciseSummaries.map(ex => `
-                                <div style="background:#0E131B; border-radius: 6px; padding: 8px 10px; border-left: 3px solid ${ex.completedCount > 0 ? 'var(--green-success)' : 'var(--border)'};">
+                                <div style="background:#F8FAFC; border-radius: 6px; padding: 8px 10px; border-left: 3px solid ${ex.completedCount > 0 ? 'var(--green-success)' : 'var(--border)'};">
                                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                                         <div>
                                             <strong style="color:#0F172A; font-size:12.5px;">${escapeHTML(ex.name)}</strong>
@@ -10523,7 +11962,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             if (filtered.length === 0) {
                 container.innerHTML = `
-                    <div style="grid-column: 1 / -1; text-align:center; padding:32px 16px; background:#0E131B; border-radius:12px; border:1px dashed var(--border);">
+                    <div style="grid-column: 1 / -1; text-align:center; padding:32px 16px; background:#F8FAFC; border-radius:12px; border:1px dashed var(--border);">
                         <div style="font-size:28px; margin-bottom:8px;">${showExcluded ? '✨' : '🔍'}</div>
                         <div style="font-size:13.5px; font-weight:800; color:#0F172A; margin-bottom:4px;">${showExcluded ? 'Kişisel Havuzunuzdan Gizlenmiş Egzersiz Yok' : 'Aramanıza Uygun Egzersiz Bulunamadı'}</div>
                         <div style="font-size:12px; color:var(--text-secondary); margin-bottom:12px;">${showExcluded ? 'Bir hareketi istemediğinizde "👁️‍🗨️ Gizle" butonuna basarak bu listeye alabilirsiniz.' : 'Filtreleri veya arama kelimesini değiştirerek tekrar deneyebilirsiniz.'}</div>
@@ -10566,12 +12005,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         </div>
 
                         ${ex.cue ? `
-                            <div style="font-size:11px; color:#475569; margin-top:8px; line-height:1.35; background:#0E131B; padding:6px 8px; border-radius:6px; border-left:2px solid var(--gold);">
+                            <div style="font-size:11px; color:#475569; margin-top:8px; line-height:1.35; background:#F8FAFC; padding:6px 8px; border-radius:6px; border-left:2px solid var(--gold);">
                                 💡 <em>${escapeHTML(ex.cue.length > 90 ? ex.cue.substring(0, 90) + '...' : ex.cue)}</em>
                             </div>
                         ` : ''}
 
-                        <div style="display:flex; gap:6px; margin-top:10px; padding-top:8px; border-top:1px solid #222C3A;">
+                        <div style="display:flex; gap:6px; margin-top:10px; padding-top:8px; border-top:1px solid #E2E8F0;">
                             <button type="button" class="btn btn-outline" style="flex:1; font-size:11px; padding:6px 8px;" onclick="openExerciseDetailModal('${ex.id}')">
                                 👁️ Detay
                             </button>
@@ -10615,7 +12054,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             let html = `
                 <div style="display:flex; flex-direction:column; gap:10px;">
                     <!-- SEÇENEK 1: HAFTALIK PROGRAMIMA / GÜNE PLANLA -->
-                    <div class="add-to-prog-card" onclick="closeAddToProgramOptionsModal(); openQuickAddToDayModal('${ex.id}');">
+                    <div class="add-to-prog-card" onclick="closeAddToProgramOptionsModal(); openQuickAddToDayModal(decodeURIComponent('${encodeURIComponent(ex.id)}'));">
                         <div style="font-size:24px; flex-shrink:0;">📅</div>
                         <div style="flex:1;">
                             <div style="font-size:13px; font-weight:800; color:#0F172A;">Haftalık Programıma Planla</div>
@@ -10624,6 +12063,36 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             </div>
                         </div>
                         <div style="font-size:12px; color:var(--gold); font-weight:800;">Güne Ata ➔</div>
+                    </div>
+
+                    <!-- SEÇENEK 2: PROGRAM ATÖLYESİ TASLAĞIMA EKLE -->
+                    <div class="add-to-prog-card" style="cursor:default;">
+                        <div style="font-size:24px; flex-shrink:0;">🛠️</div>
+                        <div style="flex:1;">
+                            <div style="font-size:13px; font-weight:800; color:#0F172A;">Program Atölyesi Taslağıma Ekle</div>
+                            <div style="font-size:11px; color:var(--text-secondary); margin-top:2px; margin-bottom:6px;">
+                                Özel program oluşturucudaki taslak listenize set ve tekrar hedefiyle ekleyin.
+                            </div>
+                            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                                <select id="addToStudioSetsSelect" class="form-input" style="width:74px; padding:4px 6px; font-size:11.5px;">
+                                    <option value="2">2 Set</option>
+                                    <option value="3" selected>3 Set</option>
+                                    <option value="4">4 Set</option>
+                                    <option value="5">5 Set</option>
+                                </select>
+                                <select id="addToStudioRepsSelect" class="form-input" style="width:88px; padding:4px 6px; font-size:11.5px;">
+                                    <option value="6-8">6-8 T.</option>
+                                    <option value="8-10">8-10 T.</option>
+                                    <option value="8-12" selected>8-12 T.</option>
+                                    <option value="10-12">10-12 T.</option>
+                                    <option value="12-15">12-15 T.</option>
+                                    <option value="Maks">Maks</option>
+                                </select>
+                                <button type="button" class="btn btn-gold" style="padding:5px 10px; font-size:11.5px; font-weight:800;" onclick="applyAddToStudioRoutine(decodeURIComponent('${encodeURIComponent(ex.id)}'))">
+                                    ➕ Taslağa Ekle
+                                </button>
+                            </div>
+                        </div>
                     </div>
             `;
 
@@ -10812,103 +12281,6 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (paneProg) paneProg.style.display = 'none';
             if (paneEx) paneEx.style.display = 'block';
             renderLibraryExerciseCatalog();
-            return;
-            const user = getActiveUser();
-            const key = `celik_kodu_custom_programs_${user.id}`;
-            let saved = [];
-            try {
-                const raw = localStorage.getItem(key);
-                if (raw) saved = JSON.parse(raw);
-            } catch(e) {}
-
-            const customContainer = document.getElementById('savedProgramsList');
-            if (saved.length === 0) {
-                customContainer.innerHTML = `
-                    <div style="background:var(--bg-surface); padding:16px; border-radius:10px; border:1px dashed var(--border); text-align:center; font-size:12px; color:var(--text-secondary);">
-                        Henüz kayıtlı özel bir programınız yok. Program Oluşturucu ile bir program üretip "Kütüphaneye Kaydet" butonuna basabilirsiniz!
-                    </div>
-                `;
-            } else {
-                customContainer.innerHTML = saved.map(p => `
-                    <div class="log-history-card">
-                        <div class="log-card-header">
-                            <div>
-                                <strong style="color:#0F172A; font-size:14px;">${escapeHTML(p.title)}</strong>
-                                <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
-                                    ${(p.exercises || []).length} Egzersiz • ${p.duration || Math.round((p.exercises || []).length * 7)} Dk • ${p.style === 'superset' ? 'Süperset' : 'Klasik'}
-                                </div>
-                            </div>
-                            <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-                                <button class="btn btn-outline" style="font-size:11px; padding:4px 8px; color:var(--cyan); border-color:var(--cyan);" onclick="previewWorkoutModal(decodeURIComponent('${encodeURIComponent(p.id)}'))">
-                                    👁️ İçerik
-                                </button>
-                                <button class="btn btn-outline" style="font-size:11px; padding:4px 8px; color:var(--gold); border-color:var(--gold);" onclick="editSavedProgram(decodeURIComponent('${encodeURIComponent(p.id)}'))">
-                                    ✏️ Düzenle
-                                </button>
-                                <button class="btn btn-outline" style="font-size:11px; padding:4px 8px; color:var(--cyan); border-color:var(--cyan);" onclick="promptAssignToDay(decodeURIComponent('${encodeURIComponent(p.id)}'), decodeURIComponent('${encodeURIComponent(p.title || '')}'), 'custom_saved', decodeURIComponent('${encodeURIComponent((p.exercises || []).length + ' Egzersiz')}'))">
-                                    📅 Güne Planla
-                                </button>
-                                <button class="btn btn-gold" style="font-size:11px; padding:4px 10px; font-weight:800;" onclick="loadSavedProgram(decodeURIComponent('${encodeURIComponent(p.id)}'))">
-                                    ▶ Başlat
-                                </button>
-                                <button class="btn-delete-log" onclick="deleteSavedProgram(decodeURIComponent('${encodeURIComponent(p.id)}'))" title="Sil">✕</button>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            // Render Official Classic Routines
-            const officialContainer = document.getElementById('officialProgramsList');
-            const officialRoutines = [
-                {
-                    id: 'la_forja_day1',
-                    title: '⚔️ Gün 1: Omuz & Bacak',
-                    desc: 'Omuz Presi + Goblet Squat (A1/A2), Clean Front Squat + Şınav (B1/B2), Halo + Core (C1/C2)',
-                    exercises: ['db_overhead_press', 'db_goblet_squat', 'db_front_squat', 'bw_pushup', 'kb_halo', 'bw_hollow_body'],
-                    style: 'superset',
-                    duration: 45
-                },
-                {
-                    id: 'la_forja_day2',
-                    title: '⚔️ Gün 2: Sırt Çekiş',
-                    desc: 'Ağır Testere Row + RDL (A1/A2), Patlayıcı Dambıl Swing + Barfiks (B1/B2), Çiftçi Yürüyüşü (C1)',
-                    exercises: ['db_saw_row', 'db_rdl', 'db_swing', 'bw_pullup', 'db_farmers_walk', 'db_russian_twist'],
-                    style: 'superset',
-                    duration: 45
-                },
-                {
-                    id: 'la_forja_day3',
-                    title: '⚔️ Gün 3: Kompleks & Merdiven',
-                    desc: 'Dambıl Snatch + Walking Lunge (A1/A2), 5-4-3-2 Merdiven Row-Clean-Squat, Burpee Finisher',
-                    exercises: ['db_snatch', 'db_walking_lunge', 'db_saw_row', 'db_front_squat', 'bw_burpee'],
-                    style: 'superset',
-                    duration: 50
-                }
-            ];
-
-            officialContainer.innerHTML = officialRoutines.map(r => `
-                <div class="log-history-card" style="border-color:rgba(234,179,8,0.25); background:linear-gradient(135deg, rgba(30,27,75,0.3), rgba(15,23,42,0.6)); border-radius:12px; padding:12px 14px; margin-bottom:10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:8px;">
-                        <strong style="color:#0F172A; font-size:12.5px; font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; min-width:0;">${escapeHTML(r.title)}</strong>
-                        <span style="font-size:10px; padding:2px 7px; background:rgba(56,189,248,0.15); color:var(--cyan); border:1px solid rgba(56,189,248,0.3); border-radius:6px; font-weight:700; white-space:nowrap; flex-shrink:0;">⏱️ ${r.duration} Dk</span>
-                    </div>
-                    <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.4; margin-bottom:10px;">
-                        ${escapeHTML(r.desc)}
-                    </div>
-                    <div style="display:flex; justify-content:flex-end; gap:6px; flex-wrap:wrap; align-items:center; border-top:1px solid #222C3A; padding-top:8px;">
-                        <button class="btn btn-outline" style="font-size:11px; padding:5px 10px; color:var(--cyan); border-color:rgba(56,189,248,0.4);" onclick="previewWorkoutModal('${r.id}')">
-                            👁️ İncele
-                        </button>
-                        <button class="btn btn-outline" style="font-size:11px; padding:5px 10px; color:var(--cyan); border-color:rgba(56,189,248,0.4);" onclick="promptAssignToDay('${r.id}', '${escapeHTML(r.title).replace(/'/g, "\\'")}', 'official', '${escapeHTML(r.desc).replace(/'/g, "\\'")}')">
-                            📅 Planla
-                        </button>
-                        <button class="btn btn-gold" style="font-size:11px; padding:5px 12px; font-weight:800;" onclick="loadOfficialRoutine('${r.id}')">
-                            ▶ Yükle
-                        </button>
-                    </div>
-                </div>
-            `).join('');
         }
 
         function loadSavedProgram(progId) {
@@ -11432,7 +12804,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 <h3 style="font-size:13.5px; font-weight:800; color:#0F172A; margin:0;">${escapeHTML(prog.title || 'Gelecek Hafta İçin AI Reçetesi Hazır')}</h3>
                                 <button type="button" onclick="dismissFitLabProgram('${uid}')" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size:14px; padding:2px 6px;" title="Bildirimi Kapat">✕</button>
                             </div>
-                            <p style="font-size:12px; color:#475569; line-height:1.5; margin:0 0 12px; background:#0E131B; padding:8px 10px; border-radius:8px; border:1px solid #222C3A;">
+                            <p style="font-size:12px; color:#475569; line-height:1.5; margin:0 0 12px; background:#F8FAFC; padding:8px 10px; border-radius:8px; border:1px solid #E2E8F0;">
                                 <strong>Koç Analizi:</strong> ${escapeHTML(shortSummary)}
                             </p>
                             <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -11787,6 +13159,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const details = getWorkoutDetailsForPlan(plan);
             if (details && Array.isArray(details.exercises) && details.exercises.length > 0) {
                 currentGeneratedWorkout = JSON.parse(JSON.stringify(details));
+                currentGeneratedWorkout.scheduledDayIdx = dayIdx;
+                currentGeneratedWorkout.scheduledIsNextWeek = Boolean(isNextWeek);
+                currentGeneratedWorkout.scheduledDateStr = effectiveDateStr || null;
                 startActiveWorkoutFromGenerated();
                 return;
             }
@@ -11796,7 +13171,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             } else if (plan.type === 'custom' || plan.type === 'custom_saved' || (plan.id && (plan.id.startsWith('saved_') || plan.type === 'custom'))) {
                 loadSavedProgram(plan.id);
             } else if (plan.type === 'custom_generated' && plan.customWorkout) {
-                currentGeneratedWorkout = plan.customWorkout;
+                currentGeneratedWorkout = JSON.parse(JSON.stringify(plan.customWorkout));
+                currentGeneratedWorkout.scheduledDayIdx = dayIdx;
+                currentGeneratedWorkout.scheduledIsNextWeek = Boolean(isNextWeek);
+                currentGeneratedWorkout.scheduledDateStr = effectiveDateStr || null;
                 startActiveWorkoutFromGenerated();
             } else {
                 loadOfficialRoutine('la_forja_day1');
@@ -11813,7 +13191,6 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const dayTitle = document.getElementById('schedModalDayTitle');
             const dayBadge = document.getElementById('schedModalDayBadge');
             const assignedSection = document.getElementById('schedAssignedWorkoutSection');
-            const optionsList = document.getElementById('schedModalOptionsList');
             if (!modal) return;
 
             const dayName = DAY_NAMES_TR[dayIdx];
@@ -11857,7 +13234,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (subDesc) {
                 subDesc.innerText = hasCompletedSession
                     ? 'Bu tarihte başarıyla tamamlanan seansınızın hareketleri, setleri ve tonaj detayları aşağıda listelenmiştir.'
-                    : 'Bu güne atanan antrenmanın içeriğini inceleyin, düzenleyin veya farklı bir program atayın.';
+                    : 'Bu güne atanan antrenmanın içeriğini inceleyin veya düzenleyin.';
             }
 
             let currentPlan;
@@ -11929,7 +13306,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         }
 
                         return `
-                            <div style="background:linear-gradient(135deg, rgba(16,185,129,0.12), rgba(15,23,42,0.85)); border:1.5px solid #10b981; border-radius:12px; padding:14px; box-shadow:0 0 25px rgba(16,185,129,0.15); margin-bottom:12px;">
+                            <div style="background:linear-gradient(135deg, #ECFDF5, #FFFFFF); border:1.5px solid #10B981; border-radius:14px; padding:14px; box-shadow:0 4px 14px rgba(16,185,129,0.12); margin-bottom:12px;">
                                 <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:10px; border-bottom:1px solid rgba(16,185,129,0.25); padding-bottom:10px;">
                                     <div>
                                         <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:4px;">
@@ -11952,17 +13329,17 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
                                 <!-- STATS ROW -->
                                 <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; margin-bottom:12px; text-align:center;">
-                                    <div style="background:#0E131B; padding:8px 4px; border-radius:8px; border:1px solid #222C3A;">
-                                        <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">TOPLAM TONAJ</div>
-                                        <div style="font-size:13px; font-weight:900; color:var(--gold); margin-top:2px;">🏋️ ${totalVol}</div>
+                                    <div style="background:#FFFFFF; padding:8px 4px; border-radius:8px; border:1px solid #E2E8F0;">
+                                        <div style="font-size:9.5px; color:#475569; font-weight:700;">TOPLAM TONAJ</div>
+                                        <div style="font-size:13px; font-weight:900; color:#B45309; margin-top:2px;">🏋️ ${totalVol}</div>
                                     </div>
-                                    <div style="background:#0E131B; padding:8px 4px; border-radius:8px; border:1px solid #222C3A;">
-                                        <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">SET / TEKRAR</div>
+                                    <div style="background:#FFFFFF; padding:8px 4px; border-radius:8px; border:1px solid #E2E8F0;">
+                                        <div style="font-size:9.5px; color:#475569; font-weight:700;">SET / TEKRAR</div>
                                         <div style="font-size:13px; font-weight:900; color:#15803D; margin-top:2px;">✅ ${setsReps}</div>
                                     </div>
-                                    <div style="background:#0E131B; padding:8px 4px; border-radius:8px; border:1px solid #222C3A;">
-                                        <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">SEANS SÜRESİ</div>
-                                        <div style="font-size:13px; font-weight:900; color:var(--cyan); margin-top:2px;">⏱️ ${durStr}</div>
+                                    <div style="background:#FFFFFF; padding:8px 4px; border-radius:8px; border:1px solid #E2E8F0;">
+                                        <div style="font-size:9.5px; color:#475569; font-weight:700;">SEANS SÜRESİ</div>
+                                        <div style="font-size:13px; font-weight:900; color:#0369A1; margin-top:2px;">⏱️ ${durStr}</div>
                                     </div>
                                 </div>
 
@@ -12010,7 +13387,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     let exercisesHtml = '';
                     if (exercises.length === 0) {
                         exercisesHtml = `
-                            <div style="text-align:center; padding:16px 12px; font-size:12px; color:var(--text-secondary); background:#0E131B; border-radius:8px;">
+                            <div style="text-align:center; padding:16px 12px; font-size:12px; color:#475569; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px;">
                                 <div style="font-size:20px; margin-bottom:6px;">⚠️</div>
                                 Bu programın hareket detayları henüz yapılandırılmamış.
                                 <div style="margin-top:8px;">
@@ -12032,9 +13409,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             const targetExParam = encodeURIComponent(effectiveId || displayName);
 
                             return `
-                                <div style="display:flex; justify-content:space-between; align-items:center; background:#0E131B; border:1px solid #222C3A; border-radius:8px; padding:10px 12px; gap:8px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; background:#FFFFFF; border:1.5px solid #E2E8F0; border-radius:10px; padding:10px 12px; gap:8px; box-shadow:0 1px 4px rgba(15,23,42,0.03);">
                                     <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:0;">
-                                        <span style="font-size:12.5px; font-weight:900; color:var(--gold); width:20px; flex-shrink:0;">${idx + 1}.</span>
+                                        <span style="font-size:12.5px; font-weight:900; color:#B45309; width:20px; flex-shrink:0;">${idx + 1}.</span>
                                         <div style="font-size:13.5px; font-weight:800; color:#0F172A; word-break:break-word; line-height:1.35; cursor:pointer;" onclick="openExerciseDetailModal(decodeURIComponent('${targetExParam}'))" title="Detayı İncele">
                                             ${exName}
                                         </div>
@@ -12049,7 +13426,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     }
 
                     templatePlanHtml = `
-                        <div style="background:linear-gradient(135deg, rgba(245,158,11,0.12), rgba(0,0,0,0.45)); border:1.5px solid var(--gold); border-radius:12px; padding:14px; box-shadow:0 0 25px rgba(245,158,11,0.15);">
+                        <div style="background:linear-gradient(135deg, #FFFBEB, #FFFFFF); border:1.5px solid var(--gold); border-radius:14px; padding:14px; box-shadow:0 4px 16px rgba(245,158,11,0.12);">
                             <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
                                 <div>
                                     <span class="auth-role-tag role-admin" style="font-size:9.5px; background:var(--gold); color:#000; font-weight:900;">
@@ -12069,10 +13446,19 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
                             <!-- ACTIONS: EDIT & VIEW TOGGLE -->
                             ${!isToday ? `
-                                <div style="margin-top:10px; margin-bottom:6px;">
-                                    <button type="button" class="btn btn-gold" style="width:100%; font-size:12px; padding:10px 14px; font-weight:900; box-shadow:0 0 15px rgba(245,158,11,0.3);" onclick="copyDayProgramToToday(${dayIdx})">
-                                        🔥 BU PROGRAMI BUGÜNE (${DAY_NAMES_TR[todayIdx].toUpperCase()}) KOPYALA & HEMEN ÇALIŞ
-                                    </button>
+                                <div style="margin-top:10px; margin-bottom:6px; display:flex; gap:6px; flex-wrap:wrap;">
+                                    ${(activeSchedulingDateStr && activeSchedulingDateStr < todayYMD && !hasCompletedSession) ? `
+                                        <button type="button" class="btn btn-gold" style="flex:1; min-width:180px; font-size:12px; padding:10px 12px; font-weight:900; box-shadow:0 0 15px rgba(245,158,11,0.3);" onclick="copyDayProgramToToday(${dayIdx}, decodeURIComponent('${encodeURIComponent(activeSchedulingDateStr || '')}'), true)">
+                                            📅 BUGÜNE (${DAY_NAMES_TR[todayIdx].toUpperCase()}) TAŞI (BAŞLATMADAN PLANLA)
+                                        </button>
+                                        <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:9px 12px; font-weight:800; color:#0F172A; border-color:rgba(245,158,11,0.5);" onclick="copyDayProgramToToday(${dayIdx}, decodeURIComponent('${encodeURIComponent(activeSchedulingDateStr || '')}'), false)" title="Eski günü bozmadan bugüne kopyala">
+                                            📋 Kopyala
+                                        </button>
+                                    ` : `
+                                        <button type="button" class="btn btn-gold" style="width:100%; font-size:12px; padding:10px 14px; font-weight:900; box-shadow:0 0 15px rgba(245,158,11,0.3);" onclick="copyDayProgramToToday(${dayIdx}, decodeURIComponent('${encodeURIComponent(activeSchedulingDateStr || '')}'), false)">
+                                            📅 BU PROGRAMI BUGÜNE (${DAY_NAMES_TR[todayIdx].toUpperCase()}) AL (BAŞLATMADAN PLANLA)
+                                        </button>
+                                    `}
                                 </div>
                             ` : ''}
 
@@ -12080,10 +13466,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 <button type="button" class="btn btn-gold" style="flex:1; min-width:160px; font-size:12px; padding:9px 12px; font-weight:900;" onclick="editProgramForDay(${dayIdx}, decodeURIComponent('${encodeURIComponent(activeSchedulingDateStr || '')}'))">
                                     ✏️ Düzenle / Düzelt
                                 </button>
-                                <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:8px 12px; color:var(--cyan); border-color:var(--cyan);" onclick="toggleSchedModalExerciseList()">
+                                <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:8px 12px; color:var(--cyan); border-color:var(--cyan); background:#FFFFFF;" onclick="toggleSchedModalExerciseList()">
                                     <span id="schedModalExListToggleBtn">👁️ Egzersizleri Gizle ▲</span>
                                 </button>
-                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:8px 10px; color:#DC2626; border-color:rgba(239,68,68,0.35);" onclick="setDayAsRest()" title="Bu günü dinlenme gününe çevir">
+                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:8px 10px; color:#DC2626; border-color:rgba(239,68,68,0.35); background:#FFFFFF;" onclick="setDayAsRest()" title="Bu günü dinlenme gününe çevir">
                                     🧘 Dinlenmeye Al
                                 </button>
                             </div>
@@ -12096,7 +13482,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     `;
                 } else {
                     templatePlanHtml = `
-                        <div style="background:rgba(148,163,184,0.06); border:1px dashed var(--border); border-radius:10px; padding:18px; text-align:center;">
+                        <div style="background:#F8FAFC; border:1.5px dashed #CBD5E1; border-radius:12px; padding:18px; text-align:center;">
                             <div style="font-size:26px; margin-bottom:4px;">🧘</div>
                             <div style="font-size:14px; font-weight:800; color:#0F172A;">${dayName} Günü Dinlenme Olarak Ayarlı</div>
                             <div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">
@@ -12108,21 +13494,21 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
                 if (hasCompletedSession) {
                     assignedSection.innerHTML = completedCardsHtml + `
-                        <div style="margin-top:14px; border:1px dashed #263244; border-radius:10px; padding:10px 12px; background:rgba(15,23,42,0.4);">
+                        <div style="margin-top:14px; border:1.5px dashed #CBD5E1; border-radius:12px; padding:10px 12px; background:#F8FAFC;">
                             <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleSchedModalTemplateAccordion()">
                                 <div>
-                                    <span style="font-size:12px; font-weight:800; color:var(--gold); display:block;">
+                                    <span style="font-size:12px; font-weight:800; color:#B45309; display:block;">
                                         📅 Bu Gün İçin Gelecek Şablon Planı
                                     </span>
-                                    <span style="font-size:10.5px; color:#64748b;">
+                                    <span style="font-size:10.5px; color:#475569;">
                                         Haftalık rutin şablonunu ve atanan hareketleri inceleyin
                                     </span>
                                 </div>
-                                <span id="schedModalTemplateAccordionArrow" style="font-size:12px; color:var(--gold); font-weight:800;">
+                                <span id="schedModalTemplateAccordionArrow" style="font-size:12px; color:#B45309; font-weight:800;">
                                     ▼ Göster
                                 </span>
                             </div>
-                            <div id="schedModalTemplateAccordionBody" style="display:none; margin-top:12px; border-top:1px solid #222C3A; padding-top:12px;">
+                            <div id="schedModalTemplateAccordionBody" style="display:none; margin-top:12px; border-top:1px solid #E2E8F0; padding-top:12px;">
                                 ${templatePlanHtml}
                             </div>
                         </div>
@@ -12132,171 +13518,6 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 }
             }
 
-            // 2. RENDER REPLACEMENT / ASSIGNMENT OPTIONS
-            const user = getActiveUser();
-            let customSaved = [];
-            try {
-                // Collect from all custom program storage keys
-                for (let i = 0; i < localStorage.length; i++) {
-                    const k = localStorage.key(i);
-                    if (k && k.startsWith('celik_kodu_custom_programs')) {
-                        const list = JSON.parse(localStorage.getItem(k) || '[]');
-                        if (Array.isArray(list)) {
-                            list.forEach(item => {
-                                if (item && item.id && !customSaved.some(x => x.id === item.id)) {
-                                    customSaved.push(item);
-                                }
-                            });
-                        }
-                    }
-                }
-            } catch(e) {}
-
-            // Check for FitLAB Coach Directive
-            let coachDir = null;
-            try {
-                const uid = getActiveUserId();
-                const rawDir = localStorage.getItem(`celik_kodu_coach_directive_${uid}`);
-                if (rawDir) coachDir = JSON.parse(rawDir);
-            } catch(e) {}
-
-            let coachDirectiveHtml = '';
-            if (coachDir) {
-                const dirWorkout = coachDir.parsedWorkout || (coachDir.fullReport ? parseDirectiveWorkout(coachDir.fullReport, coachDir.title) : null);
-                if (dirWorkout && Array.isArray(dirWorkout.exercises) && dirWorkout.exercises.length > 0) {
-                    const dirTitle = dirWorkout.title || coachDir.title || 'FitLAB Özel Seansı';
-                    const dirCount = dirWorkout.exercises.length;
-                    const dirDur = dirWorkout.duration || 45;
-                    coachDirectiveHtml = `
-                        <div style="font-size:10.5px; font-weight:900; color:var(--gold); text-transform:uppercase; margin:10px 0 4px; display:flex; align-items:center; gap:6px;">
-                            <span>🧠</span> FITLAB MASAÜSTÜ / KOÇ DİREKTİFİ
-                        </div>
-                        <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:8px; border:1.5px solid var(--gold); background:rgba(245,158,11,0.08);" onclick="assignDirectiveToActiveDay()">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <div>
-                                    <div style="font-size:13px; font-weight:800; color:#0F172A;">${escapeHTML(dirTitle)}</div>
-                                    <div style="font-size:11px; color:var(--gold); font-weight:700;">${dirCount} Hareket • ~${dirDur} Dk • Masaüstünden Aktarıldı</div>
-                                </div>
-                                <div style="display:flex; align-items:center; gap:6px;">
-                                    <span style="font-size:11px; color:var(--gold); font-weight:800;">Bu Güne Ata ➔</span>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-            }
-
-            let html = `
-                <div style="display:flex; justify-content:space-between; align-items:center; margin:16px 0 8px;">
-                    <div style="font-size:11.5px; font-weight:900; color:var(--gold); text-transform:uppercase;">
-                        🔄 Farklı Bir Programla Değiştir
-                    </div>
-                </div>
-                ${coachDirectiveHtml}
-                <div style="font-size:10.5px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:4px;">
-                    ⚔️ Çelik Kodu Klasik Serisi
-                </div>
-
-                <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:${currentPlan.id === 'la_forja_day1' ? 'var(--gold)' : 'var(--border)'};" onclick="assignRoutineToActiveDay('la_forja_day1', '⚔️ Gün 1: Omuz & Bacak Ön Zırhı', 'official', 'Press + Squat • Şınav + Front Squat • Core', true)">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <div style="font-size:13px; font-weight:800; color:#0F172A;">Gün 1: Omuz & Bacak Ön Zırhı</div>
-                            <div style="font-size:11px; color:var(--text-secondary);">Press + Squat • Şınav + Front Squat • Core</div>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:6px;">
-                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 6px; color:var(--cyan); border-color:var(--cyan);" onclick="event.stopPropagation(); previewWorkoutModal('la_forja_day1')">👁️ İncele</button>
-                            ${currentPlan.id === 'la_forja_day1' ? '<span class="auth-role-tag role-admin" style="font-size:10px;">SEÇİLİ</span>' : '<span style="font-size:11px; color:var(--gold); font-weight:700;">Seç ➔</span>'}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:${currentPlan.id === 'la_forja_day2' ? 'var(--gold)' : 'var(--border)'};" onclick="assignRoutineToActiveDay('la_forja_day2', '⚔️ Gün 2: Sırt Çekiş & Balistik Güç', 'official', 'Saw Row + RDL • Swing + Pullup • Çanta Taşıma', true)">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <div style="font-size:13px; font-weight:800; color:#0F172A;">Gün 2: Sırt Çekiş & Balistik Güç</div>
-                            <div style="font-size:11px; color:var(--text-secondary);">Saw Row + RDL • Swing + Pullup • Çanta Taşıma</div>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:6px;">
-                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 6px; color:var(--cyan); border-color:var(--cyan);" onclick="event.stopPropagation(); previewWorkoutModal('la_forja_day2')">👁️ İncele</button>
-                            ${currentPlan.id === 'la_forja_day2' ? '<span class="auth-role-tag role-admin" style="font-size:10px;">SEÇİLİ</span>' : '<span style="font-size:11px; color:var(--gold); font-weight:700;">Seç ➔</span>'}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:${currentPlan.id === 'la_forja_day3' ? 'var(--gold)' : 'var(--border)'};" onclick="assignRoutineToActiveDay('la_forja_day3', '⚔️ Gün 3: Kompleks & Merdiven', 'official', 'Snatch + Lunge • Row + Squat • Burpee Finisher', true)">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <div style="font-size:13px; font-weight:800; color:#0F172A;">Gün 3: Kompleks & Merdiven</div>
-                            <div style="font-size:11px; color:var(--text-secondary);">Snatch + Lunge • Row + Squat • Burpee Finisher</div>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:6px;">
-                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 6px; color:var(--cyan); border-color:var(--cyan);" onclick="event.stopPropagation(); previewWorkoutModal('la_forja_day3')">👁️ İncele</button>
-                            ${currentPlan.id === 'la_forja_day3' ? '<span class="auth-role-tag role-admin" style="font-size:10px;">SEÇİLİ</span>' : '<span style="font-size:11px; color:var(--gold); font-weight:700;">Seç ➔</span>'}
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            // Active or last generated workout
-            let displayGen = currentGeneratedWorkout;
-            if (!displayGen) {
-                try {
-                    const raw = localStorage.getItem('celik_kodu_last_generated_workout');
-                    if (raw) displayGen = JSON.parse(raw);
-                } catch(e) {}
-            }
-
-            if (displayGen && Array.isArray(displayGen.exercises) && displayGen.exercises.length > 0) {
-                html += `
-                    <div style="font-size:10.5px; font-weight:800; color:var(--cyan); text-transform:uppercase; margin:10px 0 4px;">
-                        ⚡ Son Oluşturulan Sihirbaz Programı
-                    </div>
-                    <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:var(--cyan);" onclick="assignGeneratedToActiveDay(true)">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <div>
-                                <div style="font-size:13px; font-weight:800; color:#0F172A;">${escapeHTML(displayGen.title)}</div>
-                                <div style="font-size:11px; color:var(--text-secondary);">${displayGen.exercises.length} Hareket • ${displayGen.duration} Dk</div>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:6px;">
-                                <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 6px; color:var(--cyan); border-color:var(--cyan);" onclick="event.stopPropagation(); previewWorkoutModal(displayGen)">👁️ İncele</button>
-                                <span style="font-size:11px; color:var(--cyan); font-weight:800;">Bu Güne Ata ➔</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            if (customSaved.length > 0) {
-                html += `
-                    <div style="font-size:10.5px; font-weight:800; color:var(--gold); text-transform:uppercase; margin:10px 0 4px;">
-                        ⭐ Kayıtlı Özel Programlarım
-                    </div>
-                `;
-                customSaved.forEach(p => {
-                    const isSelected = currentPlan.id === p.id;
-                    const exCount = (p.exercises || []).length;
-                    html += `
-                        <div class="log-history-card" style="padding:10px; cursor:pointer; margin-bottom:6px; border-color:${isSelected ? 'var(--gold)' : 'var(--border)'};" onclick="assignRoutineToActiveDay('${p.id}', '${escapeHTML(p.title)}', 'custom', '${exCount} Hareket Özel Program', true)">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <div>
-                                    <div style="font-size:13px; font-weight:800; color:#0F172A;">${escapeHTML(p.title)}</div>
-                                    <div style="font-size:11px; color:var(--text-secondary);">${exCount} Hareket • Özel Program</div>
-                                </div>
-                                <div style="display:flex; align-items:center; gap:6px;">
-                                    <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 6px; color:var(--cyan); border-color:var(--cyan);" onclick="event.stopPropagation(); previewWorkoutModal('${p.id}')">👁️ İncele</button>
-                                    <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 6px; color:var(--gold); border-color:var(--gold);" onclick="event.stopPropagation(); editSavedProgram('${p.id}')">✏️ Düzenle</button>
-                                    ${isSelected ? '<span class="auth-role-tag role-admin" style="font-size:10px;">SEÇİLİ</span>' : '<span style="font-size:11px; color:var(--gold); font-weight:700;">Seç ➔</span>'}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-            }
-
-            if (optionsList) {
-                optionsList.innerHTML = html;
-                optionsList.style.display = hasCompletedSession ? 'none' : 'flex';
-            }
             const timingSection = document.getElementById('schedDayTimingSection');
             if (timingSection) {
                 timingSection.style.display = hasCompletedSession ? 'none' : 'block';
@@ -12362,7 +13583,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 exercises: details.exercises.map(ex => ({
                     exId: ex.id || ex.exId,
                     sets: ex.targetSets || ex.sets || (details.scheme ? details.scheme.sets : 3),
-                    reps: ex.targetReps || ex.reps || (details.scheme ? details.scheme.reps : '8-12'),
+                    reps: String(ex.targetReps || ex.reps || (details.scheme ? details.scheme.reps : '8-12')).replace(/\s+/g, ''),
                     weight: ''
                 })).filter(item => Boolean(item.exId)),
                 editingDayIdx: dayIdx,
@@ -12700,12 +13921,23 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             if (titleEl) titleEl.innerText = workout.title || 'Program Detayı';
             if (metaEl) {
+                const previewStyleLabels = {
+                    superset: 'Süperset',
+                    superset_light: 'Az Süperset',
+                    superset_intense: 'Yoğun Süperset',
+                    superset_max: 'Maksimum Süperset',
+                    complex: 'Birleşik Akış (Kompleks)',
+                    emom: 'EMOM Döngüsü',
+                    straight: 'Klasik Düz Set',
+                    classic: 'Klasik'
+                };
+                const styleLabel = previewStyleLabels[workout.style] || 'Klasik';
                 metaEl.innerHTML = `
                     <div style="display:flex; gap:6px; flex-wrap:wrap;">
                         <span class="meta-pill" style="font-size:11px; padding:4px 8px;">⏱️ ${duration} Dakika</span>
                         <span class="meta-pill" style="font-size:11px; padding:4px 8px;">🎯 ${exercises.length} Hareket (${setsReps})</span>
                         <span class="meta-pill" style="font-size:11px; padding:4px 8px;">⏳ ${rest}s Dinlenme</span>
-                        <span class="meta-pill" style="font-size:11px; padding:4px 8px;">🏋️ ${workout.style === 'superset' ? 'Süperset' : 'Klasik'}</span>
+                        <span class="meta-pill" style="font-size:11px; padding:4px 8px;">🏋️ ${escapeHTML(styleLabel)}</span>
                     </div>
                 `;
             }
@@ -12719,9 +13951,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     const pNames = (ex.primaryMuscles || []).map(m => (TARGET_REGIONS[m] ? TARGET_REGIONS[m].name : m)).join(', ') || ex.muscle || '';
 
                     return `
-                        <div style="display:flex; justify-content:space-between; align-items:center; background:#0E131B; border:1px solid #222C3A; border-radius:8px; padding:8px 10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; background:#FFFFFF; border:1.5px solid #E2E8F0; border-radius:10px; padding:8px 10px;">
                             <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0;">
-                                <span style="font-size:12px; font-weight:900; color:var(--gold); width:18px;">${idx + 1}.</span>
+                                <span style="font-size:12px; font-weight:900; color:#B45309; width:18px;">${idx + 1}.</span>
                                 <div class="ex-thumb-wrap" style="width:42px; height:42px; border-radius:6px; flex-shrink:0;">
                                     ${thumb ? `<img src="${thumb}" class="ex-thumb-img" alt="${escapeHTML(ex.name)}">` : '🏋️'}
                                 </div>
@@ -12798,7 +14030,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 exercises: (prog.exercises || []).map(ex => ({
                     exId: ex.id || ex.exId,
                     sets: ex.targetSets || ex.sets || (prog.scheme ? prog.scheme.sets : 3),
-                    reps: ex.targetReps || ex.reps || (prog.scheme ? prog.scheme.reps : '8-12'),
+                    reps: String(ex.targetReps || ex.reps || (prog.scheme ? prog.scheme.reps : '8-12')).replace(/\s+/g, ''),
                     weight: ''
                 })).filter(item => Boolean(item.exId)),
                 editingDayIdx: null,
@@ -12829,7 +14061,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         function assignRoutineToActiveDay(id, title, type, desc, keepModalOpen = false) {
             if (activeSchedulingDayIdx === null) return;
             const targetDay = activeSchedulingDayIdx;
-            const schedule = getWeeklySchedule();
+            const isNext = (typeof activePlannerWeek !== 'undefined' && activePlannerWeek === 'next');
+            const schedule = isNext ? getNextWeeklySchedule() : getWeeklySchedule();
             const details = getWorkoutDetailsForPlan({ id: id, type: type, title: title });
             const planObj = {
                 id: id,
@@ -12840,7 +14073,11 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 customWorkout: details ? JSON.parse(JSON.stringify(details)) : null
             };
             schedule[targetDay] = planObj;
-            saveWeeklySchedule(schedule);
+            if (isNext) {
+                saveNextWeeklySchedule(schedule);
+            } else {
+                saveWeeklySchedule(schedule);
+            }
 
             if (activeSchedulingDateStr && typeof saveDateScheduleOverride === 'function') {
                 saveDateScheduleOverride(activeSchedulingDateStr, planObj);
@@ -12868,7 +14105,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
             if (!workoutToAssign) return;
 
-            const schedule = getWeeklySchedule();
+            const isNext = (typeof activePlannerWeek !== 'undefined' && activePlannerWeek === 'next');
+            const schedule = isNext ? getNextWeeklySchedule() : getWeeklySchedule();
             const planObj = {
                 id: workoutToAssign.id || ('gen_' + Date.now()),
                 title: workoutToAssign.title || 'Özel Sihirbaz Antrenmanı',
@@ -12878,7 +14116,11 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 customWorkout: JSON.parse(JSON.stringify(workoutToAssign))
             };
             schedule[targetDay] = planObj;
-            saveWeeklySchedule(schedule);
+            if (isNext) {
+                saveNextWeeklySchedule(schedule);
+            } else {
+                saveWeeklySchedule(schedule);
+            }
 
             if (activeSchedulingDateStr && typeof saveDateScheduleOverride === 'function') {
                 saveDateScheduleOverride(activeSchedulingDateStr, planObj);
@@ -13032,14 +14274,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     }
 
                     return `
-                        <div style="background:#0E131B; border:1px solid ${isCardToday ? 'var(--gold)' : 'var(--border)'}; border-radius:8px; padding:9px 12px; display:flex; justify-content:space-between; align-items:center; gap:8px; cursor:pointer; transition:all 0.15s ease;" onclick="executeAssignWorkoutToDay(${dIdx}, '${dYMD}', '${isNext ? 'next' : 'current'}')">
+                        <div style="background:#FFFFFF; border:1.5px solid ${isCardToday ? 'var(--gold)' : '#E2E8F0'}; border-radius:10px; padding:9px 12px; display:flex; justify-content:space-between; align-items:center; gap:8px; cursor:pointer; transition:all 0.15s ease;" onclick="executeAssignWorkoutToDay(${dIdx}, '${dYMD}', '${isNext ? 'next' : 'current'}')">
                             <div style="min-width:0; flex:1;">
                                 <div style="display:flex; align-items:center; gap:6px;">
-                                    <strong style="font-size:13px; color:${isCardToday ? 'var(--gold)' : '#F3F6FA'};">${dayName}</strong>
+                                    <strong style="font-size:13px; color:${isCardToday ? '#B45309' : '#0F172A'};">${dayName}</strong>
                                     <span style="font-size:11px; color:var(--text-secondary);">${dateFormatted}</span>
                                     ${badgeHtml}
                                 </div>
-                                <div style="font-size:11px; color:${isRest ? 'var(--text-secondary)' : '#CBD5E1'}; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                <div style="font-size:11px; color:${isRest ? '#64748B' : '#334155'}; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
                                     ${isRest ? '🧘 Dinlenme' : `⚔️ ${escapeHTML(currentTitle)}`}
                                 </div>
                             </div>
@@ -13975,28 +15217,54 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             } catch(e) {}
         }
 
-        function copyDayProgramToToday(sourceDayIdx) {
+        function copyDayProgramToToday(sourceDayIdx, sourceDateStr = null, clearSourceDate = false) {
             const todayDate = new Date();
             const todayIdx = todayDate.getDay();
             const todayYMD = typeof formatDateYMD === 'function' ? formatDateYMD(todayDate) : '';
-            if (sourceDayIdx === todayIdx) {
+            const cleanSourceDate = sourceDateStr ? String(sourceDateStr).trim() : '';
+
+            if ((cleanSourceDate && cleanSourceDate === todayYMD) || (!cleanSourceDate && sourceDayIdx === todayIdx)) {
                 showToast("ℹ️ Bu program zaten bugünün programı.");
                 closeScheduleDayModal();
                 return;
             }
             const schedule = getWeeklySchedule();
-            const sourcePlan = schedule[sourceDayIdx];
+            let sourcePlan = null;
+            if (cleanSourceDate && typeof getPlanForDate === 'function') {
+                sourcePlan = getPlanForDate(new Date(cleanSourceDate + 'T00:00:00'));
+            }
+            if (!sourcePlan) {
+                sourcePlan = schedule[sourceDayIdx];
+            }
             if (!sourcePlan || sourcePlan.rest) {
-                alert("Kopyalanacak gün bir dinlenme günü veya boş.");
+                alert("Taşınacak/kopyalanacak gün bir dinlenme günü veya boş.");
                 return;
             }
 
-            schedule[todayIdx] = JSON.parse(JSON.stringify(sourcePlan));
-            schedule[todayIdx].rest = false;
+            const clonedPlan = JSON.parse(JSON.stringify(sourcePlan));
+            clonedPlan.rest = false;
+            schedule[todayIdx] = clonedPlan;
+
+            if (clearSourceDate) {
+                const restPlan = {
+                    id: 'rest',
+                    title: '🧘 Dinlenme & Aktif Toparlanma',
+                    type: 'rest',
+                    desc: 'Bugüne taşındı • İstirahat',
+                    rest: true
+                };
+                if (cleanSourceDate && typeof saveDateScheduleOverride === 'function') {
+                    saveDateScheduleOverride(cleanSourceDate, restPlan);
+                }
+                if (sourceDayIdx !== todayIdx) {
+                    schedule[sourceDayIdx] = restPlan;
+                }
+            }
+
             saveWeeklySchedule(schedule);
 
             if (todayYMD && typeof saveDateScheduleOverride === 'function') {
-                saveDateScheduleOverride(todayYMD, schedule[todayIdx]);
+                saveDateScheduleOverride(todayYMD, clonedPlan);
             }
 
             activePlannerWeek = 'current';
@@ -14004,7 +15272,11 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             renderActiveWorkout();
             if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
             playAlertSound();
-            showToast(`🔥 ${DAY_NAMES_TR[sourceDayIdx]} programı bugüne (${DAY_NAMES_TR[todayIdx]}) kopyalandı!`);
+            if (clearSourceDate) {
+                showToast(`📅 ${DAY_NAMES_TR[sourceDayIdx]} antrenmanı bugüne (${DAY_NAMES_TR[todayIdx]}) taşındı (başlatılmadı, hazır bekliyor)!`);
+            } else {
+                showToast(`📋 ${DAY_NAMES_TR[sourceDayIdx]} antrenmanı bugüne (${DAY_NAMES_TR[todayIdx]}) kopyalandı!`);
+            }
         }
 
         function assignGeneratedToToday() {
@@ -14111,7 +15383,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 ${formattedText}
                             </div>
                             ${workout ? `
-                                <div style="margin-bottom:12px; background:#0E131B; border:1px solid rgba(245,158,11,0.3); border-radius:8px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                                <div style="margin-bottom:12px; background:#F8FAFC; border:1px solid rgba(245,158,11,0.3); border-radius:8px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                                     <div>
                                         <div style="font-size:13px; font-weight:900; color:#0F172A;">⚡ ${escapeHTML(workout.title)}</div>
                                         <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
@@ -14134,7 +15406,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                         🔬 Bilimsel Analiz Raporunu İncele
                                     </button>
                                 ` : '<div></div>'}
-                                <button type="button" onclick="dismissCoachStationDirective('${uid}')" style="background:transparent; border:1px solid #222C3A; border-radius:6px; color:var(--text-muted); cursor:pointer; font-size:11px; padding:5px 10px;" title="Direktifi Gizle">
+                                <button type="button" onclick="dismissCoachStationDirective('${uid}')" style="background:transparent; border:1px solid #E2E8F0; border-radius:6px; color:var(--text-muted); cursor:pointer; font-size:11px; padding:5px 10px;" title="Direktifi Gizle">
                                     ✕ Kapat
                                 </button>
                             </div>
@@ -14932,10 +16204,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         const mName = CAL_MONTH_NAMES_TR[dayDate.getMonth()].slice(0, 3);
 
                         itemsHtml += `
-                            <div style="display:flex; justify-content:space-between; align-items:center; background:#0E131B; border:1px solid #222C3A; border-radius:8px; padding:9px 12px; gap:8px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:8px; padding:9px 12px; gap:8px;">
                                 <div style="min-width:0; flex:1;">
                                     <div style="font-size:12.5px; font-weight:800; color:#0F172A;">
-                                        ⚔️ ${dName}, ${dNum} ${mName} • <span style="color:var(--gold);">${timeStr}</span>
+                                        ⚔️ ${dName}, ${dNum} ${mName} • <span style="color:#B45309;">${timeStr}</span>
                                     </div>
                                     <div style="font-size:11px; color:#475569; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                                         ${escapeHTML(cleanTitle)} • ${durMin} Dk
@@ -15171,16 +16443,19 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (badge) {
                 if (currentPlan.googleEventId) {
                     badge.innerHTML = '🟢 Google Takvimde Eşitlendi';
-                    badge.style.background = 'rgba(16, 185, 129, 0.15)';
+                    badge.style.background = '#DCFCE7';
                     badge.style.color = '#15803D';
+                    badge.style.borderColor = '#86EFAC';
                 } else if (isGoogleCalendarConnected()) {
                     badge.innerHTML = '🟡 Senkronizasyon Bekliyor';
-                    badge.style.background = 'rgba(245, 158, 11, 0.15)';
-                    badge.style.color = 'var(--gold)';
+                    badge.style.background = '#FEF3C7';
+                    badge.style.color = '#B45309';
+                    badge.style.borderColor = '#FDE68A';
                 } else {
                     badge.innerHTML = 'Yerel Plan';
-                    badge.style.background = 'rgba(255, 255, 255, 0.06)';
-                    badge.style.color = '#475569';
+                    badge.style.background = '#F1F5F9';
+                    badge.style.color = '#334155';
+                    badge.style.borderColor = '#CBD5E1';
                 }
             }
 
@@ -15251,7 +16526,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             if (connected) {
                 card.innerHTML = `
-                    <div style="background:linear-gradient(135deg, rgba(16,185,129,0.1), rgba(15,23,42,0.9)); border:1.5px solid #10b981; border-radius:10px; padding:12px;">
+                    <div style="background:linear-gradient(135deg, #ECFDF5, #F0FDF4); border:1.5px solid #10B981; border-radius:10px; padding:12px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <div style="display:flex; align-items:center; gap:8px;">
                                 <span style="font-size:22px;">🟢</span>
@@ -15636,6 +16911,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 </button>
                                 <button type="button" class="btn btn-outline" style="width:100%; font-size:10px; padding:4px; color:#475569; text-align:center;" onclick="event.stopPropagation(); openScheduleDayModal(${dayIdx}, '${dayYMD}')">
                                     ✏️ Düzenle
+                                </button>
+                            ` : isPast ? `
+                                <button type="button" class="btn btn-gold" style="width:100%; font-size:10.5px; padding:5px 4px; font-weight:800; text-align:center;" onclick="event.stopPropagation(); copyDayProgramToToday(${dayIdx}, '${dayYMD}', true)" title="Bu yapılmayan antrenmanı başlatmadan bugüne taşı">
+                                    📅 Bugüne Taşı
+                                </button>
+                                <button type="button" class="btn btn-outline" style="width:100%; font-size:10px; padding:4px; font-weight:700; color:#475569; text-align:center;" onclick="event.stopPropagation(); openScheduleDayModal(${dayIdx}, '${dayYMD}')">
+                                    👁️ İncele
                                 </button>
                             ` : `
                                 <button type="button" class="btn btn-outline" style="width:100%; font-size:11px; padding:6px 4px; font-weight:700; color:var(--gold); border-color:rgba(245,158,11,0.4); text-align:center;" onclick="event.stopPropagation(); openScheduleDayModal(${dayIdx}, '${dayYMD}')">
@@ -16543,7 +17825,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             listEl.innerHTML = pendingUsers.map(u => {
                 const reqDate = u.createdAt ? new Date(u.createdAt).toLocaleString('tr-TR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
                 return `
-                    <div style="background:#0E131B; border:1px solid rgba(245,158,11,0.35); border-radius:9px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <div style="background:#F8FAFC; border:1px solid rgba(245,158,11,0.35); border-radius:9px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
                         <div>
                             <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
                                 <strong style="color:#0F172A; font-size:13px;">${escapeHTML(u.name)}</strong>
@@ -16948,7 +18230,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 if (lastLog) {
                     const exList = lastLog.exercises || lastLog.detailedExercises || [];
                     lastLogDetailsHTML = `
-                        <div id="adminExDetails_${u.id}" style="display:none; margin-top:10px; padding:10px 12px; background:#0E131B; border-radius:8px; border:1px solid rgba(245,158,11,0.25);">
+                        <div id="adminExDetails_${u.id}" style="display:none; margin-top:10px; padding:10px 12px; background:#F8FAFC; border-radius:8px; border:1px solid rgba(245,158,11,0.25);">
                             <div style="font-size:11px; font-weight:800; color:var(--gold); margin-bottom:8px; text-transform:uppercase; display:flex; justify-content:space-between;">
                                 <span>📋 ${escapeHTML(lastLog.title)}</span>
                                 <span style="color:#0F172A;">${lastLog.dateFormatted || lastLog.date}</span>
@@ -16961,7 +18243,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                             ? sets.map((s, idx) => `Set ${idx+1}: <strong style="color:var(--gold);">${s.weight}kg</strong> x ${s.reps}`).join(' • ')
                                             : '<span style="color:var(--text-secondary);">Set kaydı yok</span>';
                                         return `
-                                            <div style="font-size:11px; padding:6px 8px; background:#151C26; border-radius:6px; border-left:3px solid var(--gold);">
+                                            <div style="font-size:11px; padding:6px 8px; background:#F1F5F9; border-radius:6px; border-left:3px solid var(--gold);">
                                                 <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
                                                     <strong style="color:#0F172A;">${escapeHTML(ex.name)}</strong>
                                                     ${ex.muscle ? `<span style="font-size:10px; color:var(--cyan);">[${escapeHTML(ex.muscle)}]</span>` : ''}
@@ -16977,7 +18259,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 }
 
                 return `
-                    <div style="background:var(--bg-surface); border:1px solid #222C3A; border-radius:12px; padding:14px; margin-bottom:12px; box-shadow:0 4px 15px rgba(0,0,0,0.3);">
+                    <div style="background:var(--bg-surface); border:1px solid #E2E8F0; border-radius:12px; padding:14px; margin-bottom:12px; box-shadow:0 4px 15px rgba(0,0,0,0.3);">
                         <!-- ATHLETE HEADER -->
                         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
                             <div style="display:flex; align-items:center; gap:10px;">
@@ -17005,22 +18287,22 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
                         <!-- 3-COL KPI STATS -->
                         <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-bottom:10px; text-align:center;">
-                            <div style="background:var(--bg-card); padding:8px 4px; border-radius:8px; border:1px solid #222C3A;">
+                            <div style="background:var(--bg-card); padding:8px 4px; border-radius:8px; border:1px solid #E2E8F0;">
                                 <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">TOPLAM SEANS</div>
                                 <div style="font-size:13px; font-weight:800; color:#0F172A; margin-top:2px;">🏋️ ${sessionCount} Seans</div>
                             </div>
-                            <div style="background:var(--bg-card); padding:8px 4px; border-radius:8px; border:1px solid #222C3A;">
+                            <div style="background:var(--bg-card); padding:8px 4px; border-radius:8px; border:1px solid #E2E8F0;">
                                 <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">SERİ DURUMU</div>
                                 <div style="font-size:13px; font-weight:800; color:var(--gold); margin-top:2px;">🔥 ${streak} Gün</div>
                             </div>
-                            <div style="background:var(--bg-card); padding:8px 4px; border-radius:8px; border:1px solid #222C3A;">
+                            <div style="background:var(--bg-card); padding:8px 4px; border-radius:8px; border:1px solid #E2E8F0;">
                                 <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">TOPLAM TONAJ</div>
                                 <div style="font-size:13px; font-weight:800; color:var(--cyan); margin-top:2px;">⚡ ${Math.round(userTonaj).toLocaleString('tr-TR')} kg</div>
                             </div>
                         </div>
 
                         <!-- LAST WORKOUT PREVIEW -->
-                        <div style="background:var(--bg-card); border-radius:8px; padding:10px 12px; border:1px solid #222C3A; font-size:11.5px; margin-bottom:10px;">
+                        <div style="background:var(--bg-card); border-radius:8px; padding:10px 12px; border:1px solid #E2E8F0; font-size:11.5px; margin-bottom:10px;">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                                 <span style="font-weight:700; color:var(--gold);">Son Antrenman Seansı:</span>
                                 <span style="color:var(--text-secondary); font-size:10.5px;">
@@ -17042,27 +18324,27 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             🎯 Sporcunun Hedef / Çalışma Kiloları:
                         </div>
                         <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:4px; text-align:center; font-size:10.5px; margin-bottom:10px;">
-                            <div style="background:#151C26; padding:4px 2px; border-radius:4px; border:1px solid #222C3A;">
+                            <div style="background:#F1F5F9; padding:4px 2px; border-radius:4px; border:1px solid #E2E8F0;">
                                 <div style="color:var(--text-secondary); font-size:9px;">Press</div>
                                 <strong style="color:var(--gold);">${w.press || '-'}k</strong>
                             </div>
-                            <div style="background:#151C26; padding:4px 2px; border-radius:4px; border:1px solid #222C3A;">
+                            <div style="background:#F1F5F9; padding:4px 2px; border-radius:4px; border:1px solid #E2E8F0;">
                                 <div style="color:var(--text-secondary); font-size:9px;">Squat</div>
                                 <strong style="color:var(--gold);">${w.squat || '-'}k</strong>
                             </div>
-                            <div style="background:#151C26; padding:4px 2px; border-radius:4px; border:1px solid #222C3A;">
+                            <div style="background:#F1F5F9; padding:4px 2px; border-radius:4px; border:1px solid #E2E8F0;">
                                 <div style="color:var(--text-secondary); font-size:9px;">Row</div>
                                 <strong style="color:var(--gold);">${w.row || '-'}k</strong>
                             </div>
-                            <div style="background:#151C26; padding:4px 2px; border-radius:4px; border:1px solid #222C3A;">
+                            <div style="background:#F1F5F9; padding:4px 2px; border-radius:4px; border:1px solid #E2E8F0;">
                                 <div style="color:var(--text-secondary); font-size:9px;">RDL</div>
                                 <strong style="color:var(--gold);">${w.rdl || '-'}k</strong>
                             </div>
-                            <div style="background:#151C26; padding:4px 2px; border-radius:4px; border:1px solid #222C3A;">
+                            <div style="background:#F1F5F9; padding:4px 2px; border-radius:4px; border:1px solid #E2E8F0;">
                                 <div style="color:var(--text-secondary); font-size:9px;">Swing</div>
                                 <strong style="color:var(--gold);">${w.swing || '-'}k</strong>
                             </div>
-                            <div style="background:#151C26; padding:4px 2px; border-radius:4px; border:1px solid #222C3A;">
+                            <div style="background:#F1F5F9; padding:4px 2px; border-radius:4px; border:1px solid #E2E8F0;">
                                 <div style="color:var(--text-secondary); font-size:9px;">Lunge</div>
                                 <strong style="color:var(--gold);">${w.lunge || '-'}k</strong>
                             </div>
@@ -17081,15 +18363,15 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             if (kpisEl) {
                 kpisEl.innerHTML = `
-                    <div style="background:var(--bg-surface); padding:8px 6px; border-radius:8px; border:1px solid #222C3A; text-align:center;">
+                    <div style="background:var(--bg-surface); padding:8px 6px; border-radius:8px; border:1px solid #E2E8F0; text-align:center;">
                         <div style="font-size:9px; color:var(--text-secondary); font-weight:700;">KAYITLI SPORCU</div>
                         <div style="font-size:14px; font-weight:900; color:var(--gold); margin-top:2px;">👥 ${users.length}</div>
                     </div>
-                    <div style="background:var(--bg-surface); padding:8px 6px; border-radius:8px; border:1px solid #222C3A; text-align:center;">
+                    <div style="background:var(--bg-surface); padding:8px 6px; border-radius:8px; border:1px solid #E2E8F0; text-align:center;">
                         <div style="font-size:9px; color:var(--text-secondary); font-weight:700;">TOPLAM SEANS</div>
                         <div style="font-size:14px; font-weight:900; color:var(--green-success); margin-top:2px;">✅ ${totalWorkoutsAll}</div>
                     </div>
-                    <div style="background:var(--bg-surface); padding:8px 6px; border-radius:8px; border:1px solid #222C3A; text-align:center;">
+                    <div style="background:var(--bg-surface); padding:8px 6px; border-radius:8px; border:1px solid #E2E8F0; text-align:center;">
                         <div style="font-size:9px; color:var(--text-secondary); font-weight:700;">TOPLAM TONAJ</div>
                         <div style="font-size:14px; font-weight:900; color:var(--cyan); margin-top:2px;">⚡ ${Math.round(totalTonajAll).toLocaleString('tr-TR')} kg</div>
                     </div>
@@ -17187,7 +18469,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             </div>
                         </div>
 
-                        <div style="font-size:11px; color:var(--text-secondary); display:flex; justify-content:space-between; border-top:1px solid #222C3A; padding-top:6px; margin-top:6px;">
+                        <div style="font-size:11px; color:var(--text-secondary); display:flex; justify-content:space-between; border-top:1px solid #E2E8F0; padding-top:6px; margin-top:6px;">
                             <span>Güvenlik: <span style="color:#10B981; font-weight:700;">🔒 Salted SHA-256</span></span>
                             <span>${logs.length} Seans • Seri: ${streak} Gün</span>
                         </div>
@@ -17551,7 +18833,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             const icon = isEv ? '🏠' : (isPark ? '🌲' : '🏋️');
                             const isActive = currentHistoryLocationFilter === loc;
                             return `
-                                <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; border-radius:20px; white-space:nowrap; ${isActive ? 'background:var(--gold); color:#000; font-weight:800;' : ''}" onclick="filterHistoryByLocation('${escapeHTML(loc)}')">
+                                <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; border-radius:20px; white-space:nowrap; ${isActive ? 'background:var(--gold); color:#000; font-weight:800;' : ''}" onclick="filterHistoryByLocation(decodeURIComponent('${encodeURIComponent(loc)}'))">
                                     ${icon} ${escapeHTML(loc)} (${locationCounts[loc]})
                                 </button>
                             `;
@@ -18776,6 +20058,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             'chin-up (ters barfiks)': { primary: 'Biceps', pFactor: 0.85, sec: { 'Sırt': 0.65 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: true },
             'renegade row': { primary: 'Sırt', pFactor: 0.70, sec: { 'Karın/Core': 0.70, 'Biceps': 0.30 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: false },
             'renegade row + şınav': { primary: 'Sırt', pFactor: 0.60, sec: { 'Göğüs': 0.50, 'Karın/Core': 0.60, 'Triceps': 0.25 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'MODERATE', lengthened: false },
+            'hiperekstansiyon': { primary: 'Sırt', pFactor: 0.85, sec: { 'Glute': 0.50, 'Arka Bacak': 0.40 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: true },
+            'back extension': { primary: 'Sırt', pFactor: 0.85, sec: { 'Glute': 0.50, 'Arka Bacak': 0.40 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: true },
+            'good morning': { primary: 'Arka Bacak', pFactor: 0.90, sec: { 'Sırt': 0.60, 'Glute': 0.50 }, type: 'HEAVY_COMPOUND', sfr: 'MODERATE', lengthened: true },
 
             // 3. OMUZ
             'barbell omuz presi': { primary: 'Omuz', pFactor: 1.0, sec: { 'Triceps': 0.35 }, type: 'HEAVY_COMPOUND', sfr: 'HIGH', lengthened: true },
@@ -18845,7 +20130,6 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             'dambıl kalf': { primary: 'Kalf', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
             'dambıl yatarak leg curl': { primary: 'Arka Bacak', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
             'sissy squat': { primary: 'Ön Bacak', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
-            'dambıl başüstü triceps': { primary: 'Triceps', pFactor: 1.0, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: true },
 
             // 10. KARIN & CORE
             'russian twist': { primary: 'Karın/Core', pFactor: 0.70, sec: {}, type: 'CORE', sfr: 'HIGH', lengthened: false },
@@ -18854,8 +20138,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             'plank': { primary: 'Karın/Core', pFactor: 0.50, sec: {}, type: 'CORE', sfr: 'HIGH', lengthened: false },
             'hollow body': { primary: 'Karın/Core', pFactor: 0.80, sec: {}, type: 'CORE', sfr: 'HIGH', lengthened: false },
             'barda dize çekme': { primary: 'Karın/Core', pFactor: 0.85, sec: { 'Sırt': 0.20 }, type: 'BODYWEIGHT_STRENGTH', sfr: 'HIGH', lengthened: true },
-            "farmer's walk": { primary: 'Karın/Core', pFactor: 0.60, sec: { 'Sırt': 0.35 }, type: 'LOADED_CARRY', sfr: 'HIGH', lengthened: false },
-            'suitcase carry': { primary: 'Karın/Core', pFactor: 0.60, sec: {}, type: 'LOADED_CARRY', sfr: 'HIGH', lengthened: false },
+            "farmer's walk": { primary: 'Karın/Core', pFactor: 0.60, sec: { 'Sırt': 0.35, 'Biceps': 0.30 }, type: 'LOADED_CARRY', sfr: 'HIGH', lengthened: false },
+            'suitcase carry': { primary: 'Karın/Core', pFactor: 0.60, sec: { 'Sırt': 0.30, 'Biceps': 0.25 }, type: 'LOADED_CARRY', sfr: 'HIGH', lengthened: false },
             'garson taşıması (waiter carry)': { primary: 'Karın/Core', pFactor: 0.60, sec: { 'Omuz': 0.40 }, type: 'LOADED_CARRY', sfr: 'HIGH', lengthened: false },
             'çapraz taşıma (cross-body carry)': { primary: 'Karın/Core', pFactor: 0.60, sec: { 'Omuz': 0.30 }, type: 'LOADED_CARRY', sfr: 'HIGH', lengthened: false },
             'ayı emeklemesi plaka çekişi': { primary: 'Karın/Core', pFactor: 0.70, sec: { 'Omuz': 0.35 }, type: 'CORE', sfr: 'MODERATE', lengthened: false },
@@ -18875,18 +20159,82 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             'ip atlama': { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false }
         };
 
+        function normSearchText(s) {
+            return String(s || '')
+                .replace(/İ/g, 'i')
+                .replace(/I/g, 'i')
+                .replace(/ı/g, 'i')
+                .toLowerCase()
+                .replace(/\u0307/g, '')
+                .replace(/ı/g, 'i')
+                .trim();
+        }
+
+        const ID_TO_ACADEMIC_NAME = {
+            chest: 'Göğüs',
+            back: 'Sırt',
+            shoulders: 'Omuz',
+            quads: 'Ön Bacak',
+            hamstrings: 'Arka Bacak',
+            glutes: 'Glute',
+            biceps: 'Biceps',
+            triceps: 'Triceps',
+            core: 'Karın/Core',
+            calves: 'Kalf'
+        };
+
         function resolveExerciseBiomechanics(name = '', rawMuscle = '', category = '') {
-            const cleanName = String(name).trim().toLowerCase();
-            if (ACADEMIC_EXERCISE_SPEC[cleanName]) {
-                return ACADEMIC_EXERCISE_SPEC[cleanName];
+            const cleanName = normSearchText(name);
+            const cleanBase = cleanName.split('(')[0].trim();
+
+            // 1. Önce EXERCISES_DB üzerinden tam eşleşmeyi kontrol et (kondisyon ve çoklu kas desteği)
+            const dbEx = (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB))
+                ? (EXERCISES_DB.find(e => normSearchText(e.id) === cleanName || normSearchText(e.name) === cleanName)
+                    || EXERCISES_DB.find(e => {
+                        const en = normSearchText(e.name);
+                        const eb = en.split('(')[0].trim();
+                        return cleanBase.length >= 4 && (en.includes(cleanBase) || (eb.length >= 4 && cleanName.includes(eb)));
+                    }))
+                : null;
+
+            if (dbEx && dbEx.category === 'conditioning') {
+                return { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false };
+            }
+
+            for (const [key, val] of Object.entries(ACADEMIC_EXERCISE_SPEC)) {
+                const nk = normSearchText(key);
+                if (cleanName === nk) return val;
             }
             for (const [key, val] of Object.entries(ACADEMIC_EXERCISE_SPEC)) {
-                if (cleanName.includes(key) || key.includes(cleanName)) {
+                const nk = normSearchText(key);
+                if (cleanName.includes(nk) || nk.includes(cleanName)) {
                     return val;
                 }
             }
-            const text = `${cleanName} ${String(rawMuscle).toLowerCase()} ${String(category).toLowerCase()}`;
-            if (text.includes('burpee') || text.includes('climber') || text.includes('cardio') || text.includes('kondisyon') || text.includes('jumping') || text.includes('manmaker')) {
+
+            if (dbEx && Array.isArray(dbEx.primaryMuscles) && dbEx.primaryMuscles.length > 0) {
+                const primName = ID_TO_ACADEMIC_NAME[dbEx.primaryMuscles[0]] || 'Göğüs';
+                const secObj = {};
+                dbEx.primaryMuscles.slice(1).forEach(mId => {
+                    const mName = ID_TO_ACADEMIC_NAME[mId];
+                    if (mName && mName !== primName) secObj[mName] = 0.65;
+                });
+                (dbEx.secondaryMuscles || []).forEach(mId => {
+                    const mName = ID_TO_ACADEMIC_NAME[mId];
+                    if (mName && mName !== primName && !secObj[mName]) secObj[mName] = 0.35;
+                });
+                return {
+                    primary: primName,
+                    pFactor: dbEx.primaryMuscles.length > 1 ? 0.85 : 1.0,
+                    sec: secObj,
+                    type: dbEx.equipment === 'bodyweight' ? 'BODYWEIGHT_STRENGTH' : 'HEAVY_COMPOUND',
+                    sfr: 'HIGH',
+                    lengthened: true
+                };
+            }
+
+            const text = normSearchText(`${name} ${rawMuscle} ${category}`);
+            if (text.includes('burpee') || text.includes('climber') || text.includes('cardio') || text.includes('kondisyon') || text.includes('jumping') || text.includes('manmaker') || text.includes('ip atlama') || text.includes('lateral shuffle') || text.includes('high knees') || text.includes('butt kicks') || text.includes('skater') || text.includes('plank jack')) {
                 return { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false };
             }
             let primary = 'Göğüs';
@@ -18899,20 +20247,24 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 primary = 'Göğüs';
                 sec = { 'Omuz': 0.35, 'Triceps': 0.35 };
                 lengthened = true;
-            } else if (text.includes('şınav') || text.includes('push-up') || text.includes('pushup')) {
+            } else if (text.includes('sinav') || text.includes('push-up') || text.includes('pushup')) {
                 primary = 'Göğüs';
                 pFactor = 0.65;
                 sec = { 'Omuz': 0.25, 'Triceps': 0.25 };
                 type = 'BODYWEIGHT_STRENGTH';
-            } else if (text.includes('row') || text.includes('lat') || text.includes('barfiks') || text.includes('pull-up') || text.includes('çekiş')) {
+            } else if (text.includes('arka omuz') || text.includes('rear delt') || text.includes('cuban')) {
+                primary = 'Omuz';
+                sec = { 'Sırt': 0.45, 'Biceps': 0.25 };
+                lengthened = true;
+            } else if (text.includes('row') || text.includes('pulldown') || text.includes('lats') || text.includes('kanat') || text.includes('barfiks') || text.includes('pull-up') || text.includes('cekis') || text.includes('sirt') || text.includes('trapez') || text.includes('shrug')) {
                 primary = 'Sırt';
                 sec = { 'Biceps': 0.40 };
                 lengthened = true;
-            } else if (text.includes('omuz') || text.includes('overhead') || text.includes('arnold') || text.includes('deltoid')) {
+            } else if (text.includes('omuz') || text.includes('overhead') || text.includes('arnold') || text.includes('deltoid') || text.includes('lateral raise')) {
                 primary = 'Omuz';
                 sec = { 'Triceps': 0.35 };
                 lengthened = true;
-            } else if (text.includes('squat') || text.includes('lunge') || text.includes('ön bacak') || text.includes('kuadriseps') || text.includes('quad')) {
+            } else if (text.includes('squat') || text.includes('lunge') || text.includes('on bacak') || text.includes('kuadriseps') || text.includes('quad')) {
                 primary = 'Ön Bacak';
                 sec = { 'Glute': 0.40 };
                 lengthened = true;
@@ -18920,7 +20272,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 primary = 'Arka Bacak';
                 sec = { 'Glute': 0.50 };
                 lengthened = true;
-            } else if (text.includes('swing') || text.includes('glute') || text.includes('kalça') || text.includes('hip thrust')) {
+            } else if (text.includes('swing') || text.includes('glute') || text.includes('kalca') || text.includes('hip thrust')) {
                 primary = 'Glute';
                 sec = { 'Arka Bacak': 0.40 };
                 pFactor = 0.60;
@@ -18932,12 +20284,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             } else if (text.includes('triceps') || text.includes('arka kol') || text.includes('pushdown')) {
                 primary = 'Triceps';
                 type = 'ISOLATION';
-                lengthened = text.includes('başüstü') || text.includes('overhead');
-            } else if (text.includes('kalf') || text.includes('calf') || text.includes('baldır')) {
+                lengthened = text.includes('basustu') || text.includes('overhead');
+            } else if (text.includes('kalf') || text.includes('calf') || text.includes('baldir')) {
                 primary = 'Kalf';
                 type = 'ISOLATION';
                 lengthened = true;
-            } else if (text.includes('core') || text.includes('karın') || text.includes('twist') || text.includes('carry')) {
+            } else if (text.includes('core') || text.includes('karin') || text.includes('twist') || text.includes('carry')) {
                 primary = 'Karın/Core';
                 pFactor = 0.60;
                 type = 'CORE';
@@ -18973,16 +20325,16 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         // ==================== WEEKLY MUSCLE BALANCE & SUFFICIENCY ENGINE ====================
         const WEEKLY_MUSCLE_CONFIG = [
-            { id: 'chest', name: 'Göğüs', icon: '', optimalMin: 8, optimalMax: 18, desc: 'Pectoralis Major & Minor' },
-            { id: 'back', name: 'Sırt & Kanat', icon: '', optimalMin: 8, optimalMax: 20, desc: 'Latissimus, Rhomboid, Trapez' },
-            { id: 'shoulders', name: 'Omuz', icon: '', optimalMin: 8, optimalMax: 18, desc: 'Ön, Yan, Arka Deltoid' },
-            { id: 'quads', name: 'Ön Bacak', icon: '', optimalMin: 8, optimalMax: 18, desc: 'Quadriceps (Squat/Lunge)' },
-            { id: 'hamstrings', name: 'Arka Bacak', icon: '', optimalMin: 6, optimalMax: 16, desc: 'Biceps Femoris (RDL/Hinge)' },
-            { id: 'glutes', name: 'Kalça', icon: '', optimalMin: 6, optimalMax: 16, desc: 'Gluteus Maximus / Medius' },
-            { id: 'biceps', name: 'Biceps (Pazı)', icon: '', optimalMin: 6, optimalMax: 16, desc: 'Biceps Brachii & Kol Çekiş' },
-            { id: 'triceps', name: 'Triceps (Arka Kol)', icon: '', optimalMin: 6, optimalMax: 16, desc: 'Triceps Brachii & Kol İtiş' },
-            { id: 'core', name: 'Karın & Core', icon: '', optimalMin: 6, optimalMax: 16, desc: 'Rectus Abdominis & Oblikler' },
-            { id: 'calves', name: 'Kalf & Alt Bacak', icon: '', optimalMin: 3, optimalMax: 12, desc: 'Gastrocnemius & Soleus' }
+            { id: 'chest', name: 'Göğüs', icon: '', optimalMin: 8, optimalMax: 18, desc: 'Üst, Orta ve Alt Göğüs' },
+            { id: 'back', name: 'Sırt & Kanat', icon: '', optimalMin: 8, optimalMax: 20, desc: 'Kanat, Orta ve Üst Sırt' },
+            { id: 'shoulders', name: 'Omuz', icon: '', optimalMin: 8, optimalMax: 18, desc: 'Ön, Yan ve Arka Omuz' },
+            { id: 'quads', name: 'Ön Bacak', icon: '', optimalMin: 8, optimalMax: 18, desc: 'Ön Bacak & Çömelme' },
+            { id: 'hamstrings', name: 'Arka Bacak', icon: '', optimalMin: 6, optimalMax: 16, desc: 'Arka Bacak & Eğilme' },
+            { id: 'glutes', name: 'Kalça', icon: '', optimalMin: 6, optimalMax: 16, desc: 'Kalça & Denge' },
+            { id: 'biceps', name: 'Ön Kol (Pazı)', icon: '', optimalMin: 6, optimalMax: 16, desc: 'Pazı & Kol Çekiş' },
+            { id: 'triceps', name: 'Arka Kol', icon: '', optimalMin: 6, optimalMax: 16, desc: 'Arka Kol & Kol İtiş' },
+            { id: 'core', name: 'Karın & Bel', icon: '', optimalMin: 6, optimalMax: 16, desc: 'Ön Karın, Yan Karın & Bel' },
+            { id: 'calves', name: 'Baldır & Alt Bacak', icon: '', optimalMin: 3, optimalMax: 12, desc: 'Baldır & Ayak Bileği' }
         ];
 
         let currentWeeklyMuscleFilter = 'all'; // 'all', 'optimal', 'insufficient', 'unworked'
@@ -19101,13 +20453,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             sessionTitle: sessionTitle,
                             exercise: ex.name,
                             rawSets: cSets,
-                            role: 'Birincil',
+                            role: 'Ana Hedef',
                             factor: spec.pFactor,
                             earnedSets: Math.round(directAdd * 10) / 10
                         });
                     }
 
-                    // İkincil / Sinerjist Kas Grupları
+                    // İkincil / Yardımcı Kas Grupları
                     if (spec.sec && typeof spec.sec === 'object') {
                         Object.entries(spec.sec).forEach(([secName, secFactor]) => {
                             const secId = ACADEMIC_MUSCLE_TO_ID[secName] || secName;
@@ -19120,7 +20472,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                     sessionTitle: sessionTitle,
                                     exercise: ex.name,
                                     rawSets: cSets,
-                                    role: 'Sinerjist / Destek',
+                                    role: 'Yardımcı Kas',
                                     factor: secFactor,
                                     earnedSets: Math.round(secAdd * 10) / 10
                                 });
@@ -19182,6 +20534,15 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 map[secId].scheduledSecondarySets += secPlan;
                                 if (isRemaining || sourceMode === 'schedule_full') {
                                     map[secId].planSecondarySets += secPlan;
+                                    if (!map[secId].plannedExercises.has(`${ex.name}_${dKey}`)) {
+                                        map[secId].plannedExercises.set(`${ex.name}_${dKey}`, {
+                                            name: ex.name,
+                                            dayIdx: dKey,
+                                            dayName: (typeof DAY_NAMES_TR !== 'undefined') ? DAY_NAMES_TR[dKey] : `Gün ${dKey}`,
+                                            sets: secPlan,
+                                            role: 'Yardımcı Kas'
+                                        });
+                                    }
                                 }
                             }
                         });
@@ -19238,28 +20599,28 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     }
                 } else if (evalVolume < cfg.optimalMin || evalDirectVolume === 0) {
                     status = 'insufficient';
-                    statusBadge = evalDirectVolume === 0 ? '⚠️ Doğrudan Hareket Yok (Sadece Destek)' : '⚠️ Yetersiz Hacim';
+                    statusBadge = evalDirectVolume === 0 ? '⚠️ Sadece Yardımcı Çalıştı' : '⚠️ Az Çalıştı';
                     statusColor = '#f59e0b';
                     statusBg = 'rgba(245, 158, 11, 0.12)';
                     statusDesc = evalDirectVolume === 0
-                        ? `Bu kas grubu için doğrudan bir egzersiz yapılmadı/planlanmadı (yalnızca diğer hareketlerden ${evalVolume.toFixed(1)} set ikincil destek aldı).`
-                        : `Minimum gelişim eşiğinin altında (${evalVolume.toFixed(1)}/${cfg.optimalMin} set).`;
+                        ? `Bu kas için doğrudan bir hareket yapılmadı (diğer hareketlerden ${evalVolume.toFixed(1)} set yardımcı etki aldı).`
+                        : `Haftalık hedefin altında kaldı (${evalVolume.toFixed(1)}/${cfg.optimalMin} set).`;
                     summary.insufficientCount++;
                     insufficientNames.push(cfg.name);
                 } else if (evalVolume <= cfg.optimalMax) {
                     status = 'optimal';
-                    statusBadge = '✅ Yeterli & Optimal';
+                    statusBadge = '✅ İdeal Seviye';
                     statusColor = '#10b981';
                     statusBg = 'rgba(16, 185, 129, 0.12)';
-                    statusDesc = `İdeal hipertrofi & adaptasyon aralığında (${evalVolume.toFixed(1)} set).`;
+                    statusDesc = `İdeal çalışma aralığında (${evalVolume.toFixed(1)} set).`;
                     summary.optimalCount++;
                     optimalNames.push(cfg.name);
                 } else {
                     status = 'high';
-                    statusBadge = '🔥 Yüksek Hacim';
+                    statusBadge = '🔥 Çok Yoğun Çalıştı';
                     statusColor = '#818cf8';
                     statusBg = 'rgba(129, 140, 248, 0.12)';
-                    statusDesc = `Yoğun aşırı yükleme (${evalVolume.toFixed(1)} set); toparlanmaya özen gösterin.`;
+                    statusDesc = `Çok yoğun çalıştı (${evalVolume.toFixed(1)} set); dinlenmeye özen gösterin.`;
                     summary.highCount++;
                     optimalNames.push(cfg.name);
                 }
@@ -19306,33 +20667,64 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         }
 
         let currentSelectedAnatomyMuscle = null;
+        let currentSelectedAnatomySubKey = null;
 
-        function selectAnatomyMuscle(muscleId) {
-            if (currentSelectedAnatomyMuscle === muscleId) {
-                currentSelectedAnatomyMuscle = null;
-            } else {
-                currentSelectedAnatomyMuscle = muscleId;
+        function selectAnatomyMuscle(muscleId, subColKey = null, ev = null) {
+            if (ev && typeof ev.stopPropagation === 'function') {
+                ev.stopPropagation();
             }
+            currentSelectedAnatomyMuscle = muscleId;
+            currentSelectedAnatomySubKey = subColKey || null;
             if (typeof renderAnalytics === 'function') {
                 renderAnalytics();
             }
             setTimeout(() => {
+                const subEl = subColKey ? document.getElementById(`anatomy_subcol_${muscleId}_${subColKey}`) : null;
                 const card = document.getElementById('anatomyFocusCard');
-                if (card && currentSelectedAnatomyMuscle) {
-                    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                const targetEl = subEl || card;
+                if (targetEl) {
+                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             }, 60);
         }
 
         function setWeeklyMuscleFilter(filter) {
-            currentWeeklyMuscleFilter = filter;
+            if (currentWeeklyMuscleFilter === filter) {
+                currentWeeklyMuscleFilter = 'all';
+            } else {
+                currentWeeklyMuscleFilter = filter;
+                // Otomatik olarak bu filtreye uyan ilk kas grubunu seç
+                try {
+                    const analysis = calculateWeeklyMuscleSufficiency(currentWeeklyMuscleSource, currentWeeklyMuscleWeekOffset);
+                    const matchMain = analysis.muscles.find(m => filter === 'optimal' ? (m.status === 'optimal' || m.status === 'high') : m.status === filter);
+                    if (matchMain) {
+                        currentSelectedAnatomyMuscle = matchMain.id;
+                        currentSelectedAnatomySubKey = null;
+                    }
+                } catch (_) {}
+            }
             if (typeof renderAnalytics === 'function') {
                 renderAnalytics();
+            }
+            if (currentWeeklyMuscleFilter !== 'all') {
+                setTimeout(() => {
+                    const box = document.getElementById('anatomyFilterResultsBox') || document.getElementById('anatomyFocusCard');
+                    if (box) {
+                        box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 60);
             }
         }
 
         function setWeeklyMuscleSource(mode) {
             currentWeeklyMuscleSource = mode;
+            if (currentWeeklyMuscleFilter && currentWeeklyMuscleFilter !== 'all') {
+                try {
+                    const analysis = calculateWeeklyMuscleSufficiency(currentWeeklyMuscleSource, currentWeeklyMuscleWeekOffset);
+                    const matchMain = analysis.muscles.find(m => currentWeeklyMuscleFilter === 'optimal' ? (m.status === 'optimal' || m.status === 'high') : m.status === currentWeeklyMuscleFilter);
+                    if (matchMain) currentSelectedAnatomyMuscle = matchMain.id;
+                } catch (_) {}
+            }
             if (typeof renderAnalytics === 'function') {
                 renderAnalytics();
             }
@@ -19340,6 +20732,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         function setWeeklyMuscleOffset(offset) {
             currentWeeklyMuscleWeekOffset = offset;
+            if (currentWeeklyMuscleFilter && currentWeeklyMuscleFilter !== 'all') {
+                try {
+                    const analysis = calculateWeeklyMuscleSufficiency(currentWeeklyMuscleSource, currentWeeklyMuscleWeekOffset);
+                    const matchMain = analysis.muscles.find(m => currentWeeklyMuscleFilter === 'optimal' ? (m.status === 'optimal' || m.status === 'high') : m.status === currentWeeklyMuscleFilter);
+                    if (matchMain) currentSelectedAnatomyMuscle = matchMain.id;
+                } catch (_) {}
+            }
             if (typeof renderAnalytics === 'function') {
                 renderAnalytics();
             }
@@ -19472,7 +20871,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 let buttonHtml = '';
 
                 if (isCompleted) {
-                    statusBadge = `<span style="font-size:10px; color:#10b981; font-weight:800; background:rgba(16,185,129,0.12); padding:2px 6px; border-radius:4px;">✅ Seans Tamamlandı</span>`;
+                    statusBadge = `<span style="font-size:10px; color:#15803D; font-weight:800; background:#DCFCE7; border:1px solid #86EFAC; padding:2px 6px; border-radius:4px;">✅ Seans Tamamlandı</span>`;
                     subtitleText = `${escapeHTML(planTitle)} • Tamamlanmış seans`;
                     buttonHtml = `
                         <div style="display:flex; align-items:center; gap:6px;">
@@ -19488,7 +20887,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         </div>
                     `;
                 } else if (isRest) {
-                    statusBadge = `<span style="font-size:10px; color:var(--cyan); font-weight:800; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.3); padding:2px 6px; border-radius:4px;">🧘 Dinlenme Günü (Boş)</span>`;
+                    statusBadge = `<span style="font-size:10px; color:#0369A1; font-weight:800; background:#E0F2FE; border:1px solid #7DD3FC; padding:2px 6px; border-radius:4px;">🧘 Dinlenme Günü (Boş)</span>`;
                     subtitleText = `⚡ Eklendiğinde bu güne yeni bir Özel Takviye Seansı açılır`;
                     buttonHtml = `
                         <div style="display:flex; align-items:center; gap:6px;">
@@ -19498,13 +20897,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 <option value="5">5 Set</option>
                                 <option value="2">2 Set</option>
                             </select>
-                            <button class="btn btn-outline" style="font-size:11px; padding:5px 12px; font-weight:800; border-radius:6px; color:var(--cyan); border-color:var(--cyan); background:rgba(56,189,248,0.08);" onclick="applyQuickAddExerciseToDay(${dKey}, '${ex.id}')" title="Bu dinlenme gününü takviye seansına dönüştür">
+                            <button class="btn btn-outline" style="font-size:11px; padding:5px 12px; font-weight:800; border-radius:6px; color:#0369A1; border-color:#38BDF8; background:#F0F9FF;" onclick="applyQuickAddExerciseToDay(${dKey}, '${ex.id}')" title="Bu dinlenme gününü takviye seansına dönüştür">
                                 ⚡ Yeni Seans Aç
                             </button>
                         </div>
                     `;
                 } else {
-                    statusBadge = `<span style="font-size:10px; color:var(--gold); font-weight:800; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.3); padding:2px 6px; border-radius:4px;">🏋️ Planlı Antrenman</span>`;
+                    statusBadge = `<span style="font-size:10px; color:#B45309; font-weight:800; background:#FEF3C7; border:1px solid #FCD34D; padding:2px 6px; border-radius:4px;">🏋️ Planlı Antrenman</span>`;
                     subtitleText = `${escapeHTML(planTitle)} • ${exCount} Hareket Mevcut (Sonuna eklenir)`;
                     buttonHtml = `
                         <div style="display:flex; align-items:center; gap:6px;">
@@ -19522,12 +20921,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 }
 
                 daysHTML += `
-                    <div style="background:#0E131B; border:1px solid ${isRest ? 'rgba(56,189,248,0.25)' : (isAvailable ? 'rgba(245,158,11,0.35)' : 'var(--border)')}; border-radius:10px; padding:10px 12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                    <div style="background:#F8FAFC; border:1px solid ${isRest ? '#BAE6FD' : (isAvailable ? '#FCD34D' : 'var(--border)')}; border-radius:10px; padding:10px 12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                         <div>
                             <div style="display:flex; align-items:center; gap:6px;">
                                 <strong style="font-size:13px; color:#0F172A;">${dayName}</strong>
                                 ${statusBadge}
-                                ${planIso === todayIso ? '<span style="font-size:9px; background:var(--gold); color:#000; font-weight:900; padding:1px 4px; border-radius:3px;">BUGÜN</span>' : ''}
+                                ${planIso === todayIso ? '<span style="font-size:9px; background:#0F172A; color:#FFFFFF; font-weight:900; padding:1px 5px; border-radius:3px;">BUGÜN</span>' : ''}
                             </div>
                             <div style="font-size:11px; color:var(--text-secondary); margin-top:3px;">
                                 ${subtitleText}
@@ -19540,11 +20939,11 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             });
 
             bodyEl.innerHTML = `
-                <div style="background:rgba(245,158,11,0.06); border:1px solid rgba(245,158,11,0.25); border-radius:10px; padding:12px; margin-bottom:14px;">
+                <div style="background:#FFFBEB; border:1px solid #FDE68A; border-radius:10px; padding:12px; margin-bottom:14px;">
                     <div style="font-size:12px; color:#B45309;">
                         <strong>Hedef Kas Grubu:</strong> ${escapeHTML(pNames)} • <strong>Ekipman:</strong> ${ex.equipment ? ex.equipment.toUpperCase() : 'SERBEST'}
                     </div>
-                    <div style="font-size:11px; color:#475569; margin-top:8px; line-height:1.45; background:#0E131B; padding:8px 10px; border-radius:6px;">
+                    <div style="font-size:11px; color:#334155; margin-top:8px; line-height:1.45; background:#FFFFFF; border:1px solid #E2E8F0; padding:8px 10px; border-radius:6px;">
                         💡 <strong>Nasıl Çalışır?</strong>
                         <br>• <strong>Antrenman olan gün:</strong> Hareketi mevcut seansın sonuna (${ex.name}) olarak ilave eder.
                         <br>• <strong>Dinlenme günü:</strong> O gün dinlenmeden çıkar ve bu hareketle başlayan yeni bir <em>"Takviye Seansı"</em>na dönüşür. (Dinlenmenizi korumak istiyorsanız antrenman olan günleri tercih edebilirsiniz.)
@@ -19597,125 +20996,208 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             shoulders: {
                 title: 'OMUZ',
                 columns: [
-                    { key: 'front', label: 'ÖN DELTOİT', subKeys: ['shoulders_front'], recId: 'db_overhead_press', recName: 'Omuz Presi', keywords: ['ön omuz', 'front delt', 'overhead', 'arnold', 'press', 'snatch'] },
-                    { key: 'side', label: 'YAN DELTOİT', subKeys: ['shoulders_side'], recId: 'db_lateral_raise', recName: 'Lateral Raise', keywords: ['yan omuz', 'side delt', 'lateral'] },
-                    { key: 'rear', label: 'ARKA DELTOİT', subKeys: ['shoulders_rear'], recId: 'mach_face_pull', recName: 'Face Pull', keywords: ['arka omuz', 'rear delt', 'face pull', 'halo'] }
+                    { key: 'front', label: 'ÖN OMUZ', subKeys: ['shoulders_front'], recId: 'db_overhead_press', recName: 'Dambıl Omuz Presi', keywords: ['ön omuz', 'front delt', 'overhead press', 'omuz pres', 'arnold', 'push press', 'front raise', 'snatch', 'clean'] },
+                    { key: 'side', label: 'YAN OMUZ', subKeys: ['shoulders_side'], recId: 'db_lateral_raise', recName: 'Yan Omuz Açış (Lateral Raise)', keywords: ['yan omuz', 'side delt', 'lateral raise', 'high pull', 'upright'] },
+                    { key: 'rear', label: 'ARKA OMUZ', subKeys: ['shoulders_rear'], recId: 'mach_face_pull', recName: 'Arka Omuz Çekiş (Face Pull)', keywords: ['arka omuz', 'rear delt', 'face pull', 'halo', 'cuban'] }
                 ]
             },
             back: {
-                title: 'SIRT',
+                title: 'SIRT & KANAT',
                 columns: [
-                    { key: 'lats', label: 'LATİSSİMUS (KANAT)', subKeys: ['back_lats'], recId: 'mach_lat_pulldown', recName: 'Lat Pulldown', keywords: ['kanat', 'lats', 'latissimus', 'pulldown', 'pullup', 'chinup', 'saw row', 'pullover', 'straight arm', 'düz kol'] },
-                    { key: 'mid', label: 'RHOMBOİD (ORTA SIRT)', subKeys: ['back_mid'], recId: 'db_chest_supported_row', recName: 'Göğüs Destekli Row', keywords: ['orta sırt', 'rhomboid', 'row', 'kürek', 'pendlay', 'renegade row', 'hiperekstansiyon', 'hyperextension', 'back extension'] },
-                    { key: 'traps', label: 'TRAPEZ (ÜST SIRT)', subKeys: ['traps'], recId: 'mach_face_pull', recName: 'Face Pull / Shrug', keywords: ['trapez', 'shrug', 'face pull', 'clean', 'farmers', 'halo', 'deadlift'] }
+                    { key: 'lats', label: 'KANATLAR (SIRT GENİŞLİĞİ)', subKeys: ['back_lats'], recId: 'mach_lat_pulldown', recName: 'Sırt Çekiş (Lat Pulldown)', keywords: ['kanat', 'lats', 'latissimus', 'pulldown', 'pullup', 'pull-up', 'barfiks', 'chinup', 'chin-up', 'saw row', 'pullover', 'straight arm', 'düz kol'] },
+                    { key: 'mid', label: 'ORTA SIRT & KÜREK KEMİĞİ', subKeys: ['back_mid'], recId: 'db_chest_supported_row', recName: 'Göğüs Destekli Sırt Çekiş', keywords: ['orta sırt', 'kürek kemiği', 'rhomboid', 'row', 'kürek', 'pendlay', 'renegade row'] },
+                    { key: 'traps', label: 'ÜST SIRT & BOYUN ÇEVRESİ', subKeys: ['traps'], recId: 'mach_face_pull', recName: 'Yüze Çekiş (Face Pull)', keywords: ['trapez', 'üst sırt', 'shrug', 'face pull', 'clean', 'farmers', 'halo', 'high pull'] },
+                    { key: 'lower', label: 'ALT SIRT & BEL (OMURGA DESTEK)', subKeys: ['back_lower', 'core_lower'], recId: 'bw_hyperextension', recName: 'Sırt Uzatma (Hiperekstansiyon)', keywords: ['alt sırt', 'bel kas', 'hiperekstansiyon', 'hyperextension', 'back extension', 'good morning', 'rdl', 'deadlift', 'swing', 'gorilla'] }
                 ]
             },
             chest: {
                 title: 'GÖĞÜS',
                 columns: [
-                    { key: 'upper', label: 'ÜST GÖĞÜS (CLAVICULAR)', subKeys: ['chest_upper'], recId: 'db_incline_press', recName: 'Incline Press', keywords: ['üst göğüs', 'incline', 'decline pushup', 'landmine'] },
-                    { key: 'mid', label: 'ORTA GÖĞÜS (STERNAL)', subKeys: ['chest_mid'], recId: 'db_bench_press', recName: 'Bench Press', keywords: ['orta göğüs', 'bench press', 'floor press', 'pushup', 'şınav', 'pec deck', 'crossover', 'renegade'] },
-                    { key: 'lower', label: 'ALT GÖĞÜS (COSTAL)', subKeys: ['chest_lower'], recId: 'bw_dips', recName: 'Dips', keywords: ['alt göğüs', 'dips', 'crossover alt'] }
+                    { key: 'upper', label: 'ÜST GÖĞÜS', subKeys: ['chest_upper'], recId: 'db_incline_press', recName: 'Eğimli Göğüs Presi (Incline)', keywords: ['üst göğüs', 'incline', 'decline pushup', 'decline şınav', 'landmine'] },
+                    { key: 'mid', label: 'ORTA GÖĞÜS', subKeys: ['chest_mid'], recId: 'db_bench_press', recName: 'Dambıl Göğüs Presi (Bench)', keywords: ['orta göğüs', 'bench press', 'floor press', 'pushup', 'push-up', 'şınav', 'pec deck', 'crossover', 'fly', 'renegade'] },
+                    { key: 'lower', label: 'ALT GÖĞÜS', subKeys: ['chest_lower'], recId: 'bw_dips', recName: 'Paralel Bar Dips', keywords: ['alt göğüs', 'dips', 'crossover alt', 'pullover'] }
                 ]
             },
             quads: {
-                title: 'ÖN BACAK (QUADRICEPS)',
+                title: 'ÖN BACAK',
                 columns: [
-                    { key: 'vastus_lat', label: 'VASTUS LATERALIS (DIŞ)', subKeys: ['legs_quad'], recId: 'bb_back_squat', recName: 'Squat', keywords: ['squat', 'leg press', 'front squat', 'goblet'] },
-                    { key: 'vastus_med', label: 'VASTUS MEDIALIS (GÖZYAŞI)', subKeys: ['legs_quad'], recId: 'db_bulgarian_squat', recName: 'Bulgarian Split Squat', keywords: ['bulgarian', 'lunge', 'step up', 'zercher'] },
-                    { key: 'rectus_fem', label: 'RECTUS FEMORIS (DÜZ)', subKeys: ['legs_quad'], recId: 'mach_leg_extension', recName: 'Leg Extension', keywords: ['leg extension', 'quad izole', 'jump'] }
+                    { key: 'vastus_lat', label: 'DIŞ ÖN BACAK', subKeys: ['legs_quad_outer'], recId: 'bb_back_squat', recName: 'Çömelme (Squat)', keywords: ['dış ön bacak', 'back squat', 'front squat', 'ön squat', 'goblet squat', 'zercher', 'air squat', 'leg press'] },
+                    { key: 'vastus_med', label: 'İÇ ÖN BACAK (DİZ ÜSTÜ)', subKeys: ['legs_quad_inner'], recId: 'db_bulgarian_squat', recName: 'Tek Ayak Çömelme (Bulgar Squat)', keywords: ['iç ön bacak', 'diz üstü', 'bulgar', 'bulgarian', 'lunge', 'step up', 'step-up', 'seesaw'] },
+                    { key: 'rectus_fem', label: 'ORTA ÖN BACAK', subKeys: ['legs_quad_mid'], recId: 'mach_leg_extension', recName: 'Ön Bacak Uzatma (Leg Extension)', keywords: ['orta ön bacak', 'leg extension', 'sissy', 'quad izole', 'jump', 'high knees'] }
                 ]
             },
             hamstrings: {
-                title: 'ARKA BACAK (POSTERIOR CHAIN)',
+                title: 'ARKA BACAK',
                 columns: [
-                    { key: 'biceps_fem', label: 'BICEPS FEMORIS (DIŞ)', subKeys: ['legs_hamstrings'], recId: 'mach_leg_curl', recName: 'Leg Curl', keywords: ['leg curl', 'curl', 'arka bacak'] },
-                    { key: 'semitend', label: 'SEMİTENDİNOSUS (İÇ)', subKeys: ['legs_hamstrings'], recId: 'db_rdl', recName: 'Romanian Deadlift (RDL)', keywords: ['rdl', 'romanian', 'deadlift'] },
-                    { key: 'hinge_chain', label: 'POSTERIOR HİNGE ZİNCİRİ', subKeys: ['legs_hamstrings'], recId: 'db_swing', recName: 'Kettlebell Swing', keywords: ['swing', 'single leg rdl', 'good morning', 'hiperekstansiyon', 'hyperextension'] }
+                    { key: 'biceps_fem', label: 'ARKA BACAK (DİZ BÜKME)', subKeys: ['legs_ham_curl'], recId: 'mach_leg_curl', recName: 'Arka Bacak Bükme (Leg Curl)', keywords: ['leg curl', 'diz bükme', 'diz büken', 'butt kicks'] },
+                    { key: 'semitend', label: 'ARKA BACAK (ÖNE EĞİLME)', subKeys: ['legs_ham_hinge'], recId: 'db_rdl', recName: 'Romen Deadlift (RDL)', keywords: ['öne eğilme', 'dambıl rdl', 'barbell rdl', 'rdl to', 'romanian', 'deadlift', 'inchworm'] },
+                    { key: 'hinge_chain', label: 'ARKA BACAK & BEL BAĞLANTISI', subKeys: ['legs_ham_chain'], recId: 'db_swing', recName: 'Kettlebell Savurma (Swing)', keywords: ['swing', 'single leg rdl', 'tek bacak rdl', 'good morning', 'hiperekstansiyon', 'hyperextension'] }
                 ]
             },
             glutes: {
-                title: 'KALÇA (GLUTEUS)',
+                title: 'KALÇA',
                 columns: [
-                    { key: 'maximus', label: 'GLUTEUS MAXIMUS (BÜYÜK)', subKeys: ['legs_glutes'], recId: 'bb_hip_thrust', recName: 'Hip Thrust', keywords: ['hip thrust', 'glute bridge', 'deadlift', 'squat'] },
-                    { key: 'medius', label: 'GLUTEUS MEDIUS (YAN/DENGE)', subKeys: ['legs_glutes'], recId: 'db_bulgarian_squat', recName: 'Bulgarian Split Squat', keywords: ['bulgarian', 'lunge', 'abduction', 'tek bacak', 'denge'] },
-                    { key: 'minimus', label: 'PELVİK & ROTATÖR STABİLİTE', subKeys: ['legs_glutes'], recId: 'db_single_leg_rdl', recName: 'Tek Bacak RDL', keywords: ['single leg', 'rotatör', 'pelvik'] }
+                    { key: 'maximus', label: 'ANA KALÇA KASI (GÜÇ & ŞEKİL)', subKeys: ['legs_glutes_max'], recId: 'bb_hip_thrust', recName: 'Kalça Kaldırma (Hip Thrust)', keywords: ['ana kalça', 'hip thrust', 'glute bridge', 'deadlift', 'back squat', 'goblet squat', 'swing'] },
+                    { key: 'medius', label: 'YAN KALÇA (TEK AYAK DENGE)', subKeys: ['legs_glutes_med'], recId: 'db_bulgarian_squat', recName: 'Tek Ayak Çömelme (Bulgar Squat)', keywords: ['yan kalça', 'bulgar', 'bulgarian', 'lunge', 'skater', 'lateral shuffle', 'step up', 'step-up'] },
+                    { key: 'minimus', label: 'DERİN KALÇA & BEL DENGESİ', subKeys: ['legs_glutes_min'], recId: 'db_single_leg_rdl', recName: 'Tek Bacak RDL', keywords: ['derin kalça', 'single leg rdl', 'tek bacak rdl', 'windmill', 'get-up'] }
                 ]
             },
             biceps: {
-                title: 'BICEPS & ÖN KOL',
+                title: 'ÖN KOL & PAZI',
                 columns: [
-                    { key: 'long_head', label: 'UZUN BAŞ (DIŞ/ZİRVE)', subKeys: ['biceps'], recId: 'db_incline_curl', recName: 'Incline Curl', keywords: ['incline curl', 'pazu tepe', 'uzun baş'] },
-                    { key: 'short_head', label: 'KISA BAŞ (İÇ KÜTLE)', subKeys: ['biceps'], recId: 'bb_biceps_curl', recName: 'Barbell / Biceps Curl', keywords: ['biceps curl', 'barbell curl', 'cable curl'] },
-                    { key: 'brachialis', label: 'BRACHIALIS & ÖN KOL', subKeys: ['biceps'], recId: 'db_hammer_curl', recName: 'Hammer Curl', keywords: ['hammer', 'chinup', 'ön kol', 'kavrama', 'brachialis'] }
+                    { key: 'long_head', label: 'PAZI DIŞ KISMI (TEPE)', subKeys: ['biceps_long'], recId: 'db_incline_curl', recName: 'Eğimli Sehpada Dambıl Curl', keywords: ['incline curl', 'biceps dış', 'pazı dış', 'tepe', 'uzun baş'] },
+                    { key: 'short_head', label: 'PAZI İÇ KISMI (DOLGUNLUK)', subKeys: ['biceps_short'], recId: 'bb_biceps_curl', recName: 'Bar / Dambıl Pazı Bükme (Curl)', keywords: ['biceps iç', 'pazı iç', 'dolgunluk', 'biceps curl', 'barbell curl', 'cable curl', 'concentration', 'preacher'] },
+                    { key: 'brachialis', label: 'ÖN KOL & BİLEK (TUTUŞ GÜCÜ)', subKeys: ['brachialis', 'forearms'], recId: 'db_hammer_curl', recName: 'Çekiç Tutuş Curl (Hammer Curl)', keywords: ['hammer', 'chinup', 'chin-up', 'ön kol', 'kavrama', 'biceps altı dış', 'brachialis', 'farmers', 'suitcase', 'carry'] }
                 ]
             },
             triceps: {
-                title: 'TRICEPS (ARKA KOL)',
+                title: 'ARKA KOL',
                 columns: [
-                    { key: 'long', label: 'UZUN BAŞ (BAŞÜSTÜ)', subKeys: ['triceps_long'], recId: 'db_triceps_overhead', recName: 'Overhead Triceps', keywords: ['overhead', 'skullcrusher', 'french', 'uzun baş'] },
-                    { key: 'lateral', label: 'YAN/DIŞ BAŞ (AT NALI)', subKeys: ['triceps_lateral'], recId: 'mach_triceps_pushdown', recName: 'Triceps Pushdown', keywords: ['pushdown', 'close grip', 'cable triceps'] },
-                    { key: 'medial', label: 'MEDİAL BAŞ (DİRSEK KİLİT)', subKeys: ['triceps_lateral'], recId: 'bw_diamond_pushup', recName: 'Diamond Pushup / Dips', keywords: ['dips', 'diamond', 'bench', 'itiş'] }
+                    { key: 'long', label: 'ARKA KOL İÇ / UZUN KISIM', subKeys: ['triceps_long'], recId: 'db_triceps_overhead', recName: 'Başüstü Arka Kol Uzatma', keywords: ['başüstü', 'overhead triceps', 'triceps overhead', 'skullcrusher', 'french', 'uzun kısım', 'uzun baş', 'pullover'] },
+                    { key: 'lateral', label: 'ARKA KOL DIŞ KISIM', subKeys: ['triceps_lateral'], recId: 'mach_triceps_pushdown', recName: 'Kablo ile Aşağı İtiş (Pushdown)', keywords: ['pushdown', 'dış kısım', 'close grip', 'dar tutuş', 'cable triceps', 'kickback'] },
+                    { key: 'medial', label: 'ARKA KOL ALT KISIM (İTİŞ GÜCÜ)', subKeys: ['triceps_medial'], recId: 'bw_diamond_pushup', recName: 'Elmas Şınav / Dips', keywords: ['alt kısım', 'dips', 'diamond', 'elmas', 'bench press', 'şınav', 'push-up', 'omuz pres', 'thruster'] }
                 ]
             },
             core: {
-                title: 'KARIN & MERKEZ (CORE)',
+                title: 'KARIN & BEL ÇEVRESİ',
                 columns: [
-                    { key: 'rectus', label: 'REKTUS ABDOMİNİS (ÖN DUVAR)', subKeys: ['core_front'], recId: 'bw_hanging_knee_raise', recName: 'Hanging Knee Raise', keywords: ['plank', 'hanging', 'hollow', 'crunch', 'mountain'] },
-                    { key: 'obliques', label: 'OBLİKLER (YAN KARIN/ROTASYON)', subKeys: ['core_obliques'], recId: 'db_russian_twist', recName: 'Russian Twist', keywords: ['twist', 'woodchopper', 'suitcase', 'oblik', 'renegade', 'chop'] },
-                    { key: 'transverse', label: 'TRANSVERSUS & DERİN ZIRH', subKeys: ['core_front'], recId: 'db_farmers_walk', recName: 'Farmers Walk', keywords: ['farmers', 'carry', 'bear crawl', 'stabilite', 'zırh'] }
+                    { key: 'rectus', label: 'ÖN KARIN (ÜST & ALT KARIN)', subKeys: ['core_front'], recId: 'bw_hanging_knee_raise', recName: 'Barda Dize Çekme', keywords: ['ön karın', 'üst karın', 'alt karın', 'hanging', 'knee raise', 'leg raise', 'hollow', 'crunch', 'mountain'] },
+                    { key: 'obliques', label: 'YAN KARIN (BEL YANLARI & DÖNÜŞ)', subKeys: ['core_obliques'], recId: 'db_russian_twist', recName: 'Sağa-Sola Dönüş (Russian Twist)', keywords: ['yan karın', 'twist', 'woodchopper', 'oduncu', 'suitcase', 'oblik', 'renegade', 'chop', 'windmill'] },
+                    { key: 'transverse', label: 'DERİN KARIN (GÖVDE & BEL KORUMA)', subKeys: ['core_deep'], recId: 'db_farmers_walk', recName: 'Ağırlıkla Yürüyüş (Farmers Walk)', keywords: ['derin iç karın', 'derin karın', 'plank', 'farmers', 'carry', 'bear crawl', 'stabilite', 'zırh', 'get-up'] }
                 ]
             },
             calves: {
-                title: 'BALDIR & KALF',
+                title: 'BALDIR & ALT BACAK',
                 columns: [
-                    { key: 'gastrocnemius', label: 'GASTROCNEMİUS (AYAKTA)', subKeys: ['legs_calves'], recId: 'mach_calf_raise', recName: 'Ayakta Calf Raise', keywords: ['standing calf', 'calf raise', 'zıplama', 'jump'] },
-                    { key: 'soleus', label: 'SOLEUS (OTURARAK)', subKeys: ['legs_calves'], recId: 'mach_calf_raise', recName: 'Oturarak Calf Raise', keywords: ['seated calf', 'baldır'] },
-                    { key: 'tibialis', label: 'TİBİALİS ANTERİOR (KAVAL)', subKeys: ['legs_calves'], recId: 'mach_calf_raise', recName: 'Kaval & Denge', keywords: ['ayak bileği', 'kaval', 'yürüme'] }
+                    { key: 'gastrocnemius', label: 'ÜST BALDIR (AYAKTA PARMAK UCU)', subKeys: ['calves_gastroc'], recId: 'mach_calf_raise', recName: 'Ayakta Baldır Kaldırma (Calf Raise)', keywords: ['üst baldır', 'standing calf', 'calf raise', 'ayakta kalf', 'zıplama', 'jump'] },
+                    { key: 'soleus', label: 'ALT BALDIR (OTURARAK)', subKeys: ['calves_soleus'], recId: 'db_standing_calf_raise', recName: 'Dambıl Baldır Kaldırma', keywords: ['alt baldır', 'seated calf', 'oturarak baldır'] },
+                    { key: 'tibialis', label: 'ÖN KAVAL KEMİĞİ & BİLEK', subKeys: ['calves_tibialis'], recId: 'bw_jump_rope', recName: 'İp Atlama (Jump Rope)', keywords: ['ön kaval', 'ayak bileği', 'ankling', 'kaval', 'ip atlama', 'jump rope'] }
                 ]
             }
         };
 
-        function getExerciseCompartmentForMuscle(muscleId, exNameOrId, allowFallback = true) {
+        function getExerciseCompartmentsForMuscle(muscleId, exNameOrId, allowFallback = true) {
             const def = MUSCLE_DIAGRAM_DEFS[muscleId];
-            if (!def) return null;
+            if (!def) return [];
+
+            const rawQ = normSearchText(exNameOrId);
+            const cleanQ = rawQ.split('(')[0].trim();
 
             const dbEx = (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB))
-                ? EXERCISES_DB.find(e => e.id === exNameOrId || (e.name && e.name.toLowerCase() === (exNameOrId || '').toLowerCase()))
+                ? (EXERCISES_DB.find(e => normSearchText(e.id) === rawQ || normSearchText(e.name) === rawQ)
+                    || EXERCISES_DB.find(e => {
+                        if (!e.name) return false;
+                        const eLower = normSearchText(e.name);
+                        const eBase = eLower.split('(')[0].trim();
+                        return (cleanQ.length >= 4 && (eLower.includes(cleanQ) || (eBase.length >= 4 && rawQ.includes(eBase))));
+                    }))
                 : null;
             const exId = dbEx ? dbEx.id : exNameOrId;
             const anat = (typeof EXERCISE_ANATOMY_MAP !== 'undefined') ? EXERCISE_ANATOMY_MAP[exId] : null;
 
-            const textToSearch = [
+            const nameAndPrimaryText = normSearchText([
                 exNameOrId || '',
                 dbEx ? dbEx.name : '',
-                anat ? anat.primary : '',
-                anat ? anat.secondary : '',
-                anat ? anat.subKey : ''
-            ].join(' ').toLowerCase();
+                dbEx ? (dbEx.primarySubMuscles || '') : '',
+                anat ? (anat.primary || '') : ''
+            ].join(' '));
 
-            if (anat && anat.subKey) {
-                for (const col of def.columns) {
-                    if (col.subKeys && col.subKeys.includes(anat.subKey)) {
-                        return col.key;
-                    }
-                }
-            }
+            const secondaryOnlyText = normSearchText([
+                dbEx ? (dbEx.secondarySubMuscles || '') : '',
+                anat ? (anat.secondary || '') : ''
+            ].join(' '));
+
+            const matched = new Set();
+
+            // 1. Önce spesifik subKey / allSubKeys eşleşmelerini kontrol et
+            const allKeys = new Set();
+            if (anat && anat.subKey) allKeys.add(anat.subKey);
+            if (anat && Array.isArray(anat.allSubKeys)) anat.allSubKeys.forEach(k => allKeys.add(k));
 
             for (const col of def.columns) {
+                if (col.subKeys && col.subKeys.some(sk => allKeys.has(sk))) {
+                    matched.add(col.key);
+                }
+            }
+
+            // 2. Hareket adı ve PRİMER kas metni üzerinden eşleşen alt bölmeleri ekle
+            for (const col of def.columns) {
                 for (const kw of col.keywords) {
-                    if (textToSearch.includes(kw.toLowerCase())) {
-                        return col.key;
+                    if (nameAndPrimaryText.includes(normSearchText(kw))) {
+                        matched.add(col.key);
+                        break;
                     }
                 }
             }
 
-            return allowFallback ? def.columns[0].key : null;
+            // 3. Eğer primer metinde bu kas grubu için hiçbir alt bölge eşleşmediyse (yardımcı kas rolündeyse) sekonder metne bak
+            if (matched.size === 0) {
+                for (const col of def.columns) {
+                    for (const kw of col.keywords) {
+                        if (secondaryOnlyText.includes(normSearchText(kw))) {
+                            matched.add(col.key);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            const fullText = `${nameAndPrimaryText} ${secondaryOnlyText}`;
+
+            // 4. Çok eklemli temel hareketlerde aynı kasın birden fazla alt bölgesini kapsama kuralları
+            if (muscleId === 'quads' && (nameAndPrimaryText.includes('squat') || nameAndPrimaryText.includes('comelme') || nameAndPrimaryText.includes('leg press') || nameAndPrimaryText.includes('lunge') || nameAndPrimaryText.includes('step'))) {
+                def.columns.forEach(c => matched.add(c.key));
+            } else if (muscleId === 'glutes' && (fullText.includes('squat') || fullText.includes('lunge') || fullText.includes('bulgar') || fullText.includes('deadlift') || fullText.includes('rdl') || fullText.includes('swing') || fullText.includes('thrust'))) {
+                matched.add('maximus');
+                if (fullText.includes('bulgar') || fullText.includes('lunge') || fullText.includes('tek bacak') || fullText.includes('single leg') || fullText.includes('step')) {
+                    matched.add('medius');
+                    matched.add('minimus');
+                }
+            } else if (muscleId === 'hamstrings' && (nameAndPrimaryText.includes('rdl') || nameAndPrimaryText.includes('deadlift') || nameAndPrimaryText.includes('swing') || nameAndPrimaryText.includes('good morning'))) {
+                matched.add('semitend');
+                matched.add('hinge_chain');
+                matched.add('biceps_fem');
+            } else if (muscleId === 'chest' && (nameAndPrimaryText.includes('bench press') || nameAndPrimaryText.includes('sinav') || nameAndPrimaryText.includes('push-up') || nameAndPrimaryText.includes('pushup') || nameAndPrimaryText.includes('dips'))) {
+                matched.add('mid');
+                if (nameAndPrimaryText.includes('incline') || nameAndPrimaryText.includes('ust gogus')) matched.add('upper');
+                if (nameAndPrimaryText.includes('dips') || nameAndPrimaryText.includes('alt gogus') || nameAndPrimaryText.includes('bench press')) matched.add('lower');
+            } else if (muscleId === 'back' && (nameAndPrimaryText.includes('row') || nameAndPrimaryText.includes('barfiks') || nameAndPrimaryText.includes('pull-up') || nameAndPrimaryText.includes('pulldown') || nameAndPrimaryText.includes('chin-up'))) {
+                matched.add('lats');
+                matched.add('mid');
+                if (fullText.includes('barbell row') || fullText.includes('pendlay') || fullText.includes('gorilla') || fullText.includes('renegade') || fullText.includes('alt sirt')) {
+                    matched.add('lower');
+                }
+            } else if (muscleId === 'triceps' && matched.size === 0 && (fullText.includes('press') || fullText.includes('pres') || fullText.includes('sinav') || fullText.includes('push-up') || fullText.includes('pushup') || fullText.includes('dips') || fullText.includes('thruster'))) {
+                matched.add('lateral');
+                matched.add('medial');
+            } else if (muscleId === 'biceps' && (nameAndPrimaryText.includes('barbell curl') || nameAndPrimaryText.includes('biceps curl') || nameAndPrimaryText.includes('cable curl') || nameAndPrimaryText.includes('chin-up') || nameAndPrimaryText.includes('chinup'))) {
+                matched.add('long_head');
+                matched.add('short_head');
+            } else if (muscleId === 'calves' && (nameAndPrimaryText.includes('calf raise') || nameAndPrimaryText.includes('kalf'))) {
+                matched.add('gastrocnemius');
+                matched.add('soleus');
+            } else if (muscleId === 'core' && (fullText.includes('plank') || fullText.includes('hollow') || fullText.includes('carry') || fullText.includes('farmer') || fullText.includes('get-up') || fullText.includes('renegade'))) {
+                matched.add('rectus');
+                matched.add('transverse');
+                if (fullText.includes('twist') || fullText.includes('chop') || fullText.includes('suitcase') || fullText.includes('renegade') || fullText.includes('get-up')) {
+                    matched.add('obliques');
+                }
+            }
+
+            if (matched.size === 0 && allowFallback) {
+                matched.add(def.columns[0].key);
+            }
+            return Array.from(matched);
         }
 
-        function renderMuscleCompartmentDiagram(m) {
+        function getExerciseCompartmentForMuscle(muscleId, exNameOrId, allowFallback = true) {
+            const list = getExerciseCompartmentsForMuscle(muscleId, exNameOrId, allowFallback);
+            return list.length > 0 ? list[0] : null;
+        }
+
+        function computeMuscleCompartmentMap(m) {
             const def = MUSCLE_DIAGRAM_DEFS[m.id];
-            if (!def) return '';
+            if (!def) return null;
 
             const compMap = {};
             def.columns.forEach(col => {
@@ -19728,38 +21210,69 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 };
             });
 
-            (m.contributions || []).forEach(c => {
-                // Yalnızca doğrudan (Birincil) hareketler veya o kas grubunun alt başıyla açıkça eşleşen hareketler alt baş kutusunu aktif eder
-                const isPrimaryRole = (c.role === 'Birincil');
-                const cKey = getExerciseCompartmentForMuscle(m.id, c.exercise, isPrimaryRole);
-                if (cKey && compMap[cKey]) {
-                    compMap[cKey].earnedSets += (Number(c.earnedSets) || 0);
-                    compMap[cKey].doneExs.add(c.exercise);
-                }
-            });
+            const mode = (typeof currentWeeklyMuscleSource !== 'undefined') ? currentWeeklyMuscleSource : 'week_projected';
+            const isTemplateMode = (mode === 'schedule_full');
+            const includeDone = !isTemplateMode;
+            const includePlan = (mode !== 'week_done');
 
-            if ((!m.contributions || m.contributions.length === 0) && m.doneExercises && Array.isArray(m.doneExercises)) {
-                m.doneExercises.forEach(exName => {
-                    const cKey = getExerciseCompartmentForMuscle(m.id, exName, true);
-                    if (cKey && compMap[cKey]) {
-                        compMap[cKey].doneExs.add(exName);
-                        if (compMap[cKey].earnedSets === 0) compMap[cKey].earnedSets = 1;
-                    }
+            if (includeDone) {
+                (m.contributions || []).forEach(c => {
+                    const cKeys = getExerciseCompartmentsForMuscle(m.id, c.exercise, true);
+                    cKeys.forEach(cKey => {
+                        if (compMap[cKey]) {
+                            compMap[cKey].earnedSets += (Number(c.earnedSets) || 0);
+                            compMap[cKey].doneExs.add(c.exercise);
+                        }
+                    });
+                });
+
+                if ((!m.contributions || m.contributions.length === 0) && m.doneExercises && Array.isArray(m.doneExercises)) {
+                    m.doneExercises.forEach(exName => {
+                        const cKeys = getExerciseCompartmentsForMuscle(m.id, exName, true);
+                        cKeys.forEach(cKey => {
+                            if (compMap[cKey]) {
+                                compMap[cKey].doneExs.add(exName);
+                                if (compMap[cKey].earnedSets === 0) compMap[cKey].earnedSets = 1;
+                            }
+                        });
+                    });
+                }
+            }
+
+            if (includePlan) {
+                (m.plannedExercises || []).forEach(pe => {
+                    const cKeys = getExerciseCompartmentsForMuscle(m.id, pe.name, true);
+                    cKeys.forEach(cKey => {
+                        if (compMap[cKey]) {
+                            if (isTemplateMode) {
+                                compMap[cKey].earnedSets += (Number(pe.sets) || 3);
+                                compMap[cKey].doneExs.add(pe.name);
+                            } else {
+                                compMap[cKey].plannedCount += 1;
+                                compMap[cKey].plannedExs.add(pe.name);
+                            }
+                        }
+                    });
                 });
             }
 
-            (m.plannedExercises || []).forEach(pe => {
-                const cKey = getExerciseCompartmentForMuscle(m.id, pe.name, true);
-                if (cKey && compMap[cKey]) {
-                    compMap[cKey].plannedCount += 1;
-                    compMap[cKey].plannedExs.add(pe.name);
-                }
-            });
+            return compMap;
+        }
 
-            const columnsHTML = def.columns.map(col => {
+        function renderMuscleCompartmentDiagram(m) {
+            const def = MUSCLE_DIAGRAM_DEFS[m.id];
+            if (!def) return '';
+            const compMap = computeMuscleCompartmentMap(m);
+            if (!compMap) return '';
+
+            const numBadges = ['①', '②', '③', '④'];
+            const headerNumText = def.columns.map((_, i) => numBadges[i] || (i + 1)).join(' ');
+
+            const columnsHTML = def.columns.map((col, idx) => {
                 const data = compMap[col.key];
                 const isDone = data.earnedSets > 0;
                 const isPlanned = !isDone && data.plannedExs.size > 0;
+                const numIcon = numBadges[idx] || (idx + 1);
 
                 let statusBadge = '';
                 let contentHTML = '';
@@ -19792,10 +21305,16 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     `;
                 }
 
+                const isSubFocused = (typeof currentSelectedAnatomySubKey !== 'undefined' && currentSelectedAnatomySubKey === col.key);
+                const focusRing = isSubFocused ? 'box-shadow: 0 0 0 2.5px #0F172A;' : '';
+
                 return `
-                    <div style="background:${cellBg}; border:${cellBorder}; border-radius:8px; padding:10px; display:flex; flex-direction:column; justify-content:space-between;">
+                    <div id="anatomy_subcol_${m.id}_${col.key}" style="background:${cellBg}; border:${cellBorder}; ${focusRing} border-radius:8px; padding:10px; display:flex; flex-direction:column; justify-content:space-between; transition:box-shadow 0.2s ease;">
                         <div>
-                            <div style="font-size:11.5px; font-weight:800; color:#0F172A; margin-bottom:5px; letter-spacing:0.2px;">${escapeHTML(col.label)}</div>
+                            <div style="font-size:11.5px; font-weight:900; color:#0F172A; margin-bottom:5px; letter-spacing:0.2px; display:flex; align-items:center; gap:5px;">
+                                <span style="display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; background:${isSubFocused ? '#2563EB' : '#0F172A'}; color:#FFFFFF; font-size:11px; font-weight:900; flex-shrink:0;">${idx + 1}</span>
+                                <span>${escapeHTML(col.label)}</span>
+                            </div>
                             <div>${statusBadge}</div>
                         </div>
                         ${contentHTML}
@@ -19807,10 +21326,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 <div style="margin-top:12px; border:1.5px solid #E2E8F0; border-radius:14px; overflow:hidden; background:#FFFFFF;">
                     <div style="background:#F1F5F9; border-bottom:1.5px solid #E2E8F0; padding:10px 14px; display:flex; justify-content:space-between; align-items:center;">
                         <span style="font-size:11.5px; font-weight:900; letter-spacing:0.5px; color:#0F172A; text-transform:uppercase;">
-                            ${escapeHTML(def.title)} — ANATOMİK ALT BÖLGE DAĞILIMI
+                            ${escapeHTML(def.title)} — HANGİ ALT BÖLGELER ÇALIŞTI?
                         </span>
-                        <span style="font-size:11px; color:#64748B; font-weight:700;">
-                            Hangi Baş Çalıştı?
+                        <span style="font-size:11px; color:#475569; font-weight:800;">
+                            Şekildeki ${headerNumText} Numaralı Alt Kaslar
                         </span>
                     </div>
                     <div style="padding:10px; display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:8px;">
@@ -19820,37 +21339,215 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             `;
         }
 
-        const ANATOMY_MUSCLE_PATHS = {"chest": "M 165.0 570.5 L 139.0 566.5 L 118.0 551.5 L 99.5 528.0 L 88.5 503.0 L 92.5 487.0 L 116.5 453.0 L 140.0 434.5 L 153.0 429.5 L 186.0 431.5 L 207.0 437.5 L 217.5 447.0 L 223.5 464.0 L 223.5 533.0 L 220.5 543.0 L 211.0 555.5 L 197.0 564.5 L 165.0 570.5 Z M 295.0 569.5 L 280.0 569.5 L 254.0 563.5 L 242.0 556.5 L 230.5 541.0 L 227.5 528.0 L 228.5 462.0 L 234.5 446.0 L 248.0 435.5 L 291.0 429.5 L 307.0 431.5 L 319.0 438.5 L 337.5 455.0 L 363.5 494.0 L 364.5 503.0 L 360.5 514.0 L 340.5 545.0 L 319.0 563.5 L 295.0 569.5 Z", "shoulders": "M 40.0 546.5 L 36.5 542.0 L 31.5 522.0 L 29.5 489.0 L 34.5 469.0 L 41.5 455.0 L 58.0 437.5 L 77.0 427.5 L 85.0 425.5 L 97.5 427.0 L 89.0 430.5 L 89.0 432.5 L 108.0 426.5 L 128.0 428.5 L 131.5 434.0 L 130.5 439.0 L 110.5 459.0 L 82.5 501.0 L 50.0 533.5 L 46.5 507.0 L 44.5 506.0 L 44.5 541.0 L 40.0 546.5 Z M 412.0 545.5 L 406.5 539.0 L 408.5 537.0 L 407.5 506.0 L 404.5 526.0 L 401.0 533.5 L 367.5 499.0 L 342.5 460.0 L 324.5 441.0 L 321.5 435.0 L 323.0 429.5 L 332.0 426.5 L 353.0 429.5 L 356.5 429.0 L 354.0 425.5 L 370.0 426.5 L 389.0 434.5 L 405.5 449.0 L 417.5 470.0 L 422.5 490.0 L 421.5 516.0 L 416.5 538.0 L 412.0 545.5 Z M 712.0 532.5 L 706.5 509.0 L 708.5 482.0 L 718.5 457.0 L 734.0 439.5 L 754.0 431.5 L 760.5 433.0 L 756.0 437.5 L 766.0 433.5 L 779.0 432.5 L 796.0 439.5 L 803.5 446.0 L 804.5 452.0 L 792.5 468.0 L 762.0 498.5 L 731.0 516.5 L 717.0 527.5 L 718.0 511.5 L 712.0 532.5 Z M 1090.0 531.5 L 1083.0 510.5 L 1085.0 526.5 L 1042.0 499.5 L 1028.0 487.5 L 1000.5 455.0 L 998.5 452.0 L 999.5 446.0 L 1015.0 436.5 L 1028.0 432.5 L 1045.0 435.5 L 1046.0 431.5 L 1051.0 431.5 L 1071.0 441.5 L 1086.5 462.0 L 1094.5 483.0 L 1096.5 502.0 L 1090.0 531.5 Z", "biceps": "M 410.0 657.5 L 401.0 655.5 L 384.5 641.0 L 372.5 620.0 L 362.5 589.0 L 359.5 570.0 L 360.5 546.0 L 366.5 526.0 L 375.0 519.5 L 384.0 521.5 L 399.5 532.0 L 405.5 540.0 L 404.5 542.0 L 409.5 546.0 L 412.0 558.5 L 418.5 554.0 L 416.5 543.0 L 420.0 538.5 L 425.5 547.0 L 431.5 566.0 L 432.5 600.0 L 435.5 618.0 L 431.5 620.0 L 430.0 633.5 L 427.5 627.0 L 426.5 603.0 L 421.0 585.5 L 423.5 599.0 L 423.5 631.0 L 419.5 646.0 L 410.0 657.5 Z M 38.0 653.5 L 29.5 630.0 L 28.5 603.0 L 38.5 563.0 L 44.5 549.0 L 50.5 543.0 L 51.5 536.0 L 67.0 523.5 L 75.0 522.5 L 74.5 529.0 L 77.0 531.5 L 85.0 529.5 L 88.5 538.0 L 91.5 557.0 L 88.5 588.0 L 75.5 626.0 L 64.5 643.0 L 53.0 650.5 L 38.0 653.5 Z M 22.0 634.5 L 19.5 621.0 L 14.0 626.5 L 12.5 622.0 L 18.5 605.0 L 17.5 579.0 L 19.5 566.0 L 23.5 552.0 L 32.0 535.5 L 36.5 543.0 L 34.5 554.0 L 37.5 557.0 L 37.5 563.0 L 25.5 608.0 L 25.5 632.0 L 22.0 634.5 Z", "core": "M 279.0 614.5 L 254.0 604.5 L 231.5 601.0 L 227.5 588.0 L 227.5 573.0 L 228.5 567.0 L 234.0 559.5 L 239.0 558.5 L 249.0 561.5 L 269.0 570.5 L 277.5 578.0 L 283.5 599.0 L 279.0 614.5 Z M 177.0 614.5 L 174.0 614.5 L 169.5 607.0 L 169.5 590.0 L 175.5 577.0 L 181.0 571.5 L 207.0 560.5 L 220.0 560.5 L 224.5 572.0 L 224.5 588.0 L 221.5 599.0 L 218.0 602.5 L 206.0 602.5 L 196.0 605.5 L 177.0 614.5 Z M 249.0 826.5 L 249.5 820.0 L 272.5 763.0 L 282.5 749.0 L 280.5 744.0 L 281.5 721.0 L 284.5 699.0 L 290.5 685.0 L 285.5 680.0 L 286.5 655.0 L 293.5 642.0 L 286.5 643.0 L 285.5 619.0 L 287.5 606.0 L 297.5 599.0 L 291.0 601.5 L 285.5 599.0 L 284.5 578.0 L 291.0 571.5 L 314.0 567.5 L 314.5 577.0 L 304.5 592.0 L 309.0 590.5 L 316.0 580.5 L 322.5 583.0 L 317.5 598.0 L 323.5 601.0 L 321.5 619.0 L 324.5 621.0 L 324.5 627.0 L 316.5 648.0 L 324.0 632.5 L 325.5 676.0 L 323.5 683.0 L 325.5 682.0 L 326.5 687.0 L 326.5 711.0 L 317.5 735.0 L 302.5 749.0 L 304.5 752.0 L 298.5 763.0 L 265.5 810.0 L 249.0 826.5 Z M 201.0 824.5 L 178.5 799.0 L 149.5 758.0 L 143.5 745.0 L 133.5 737.0 L 125.5 715.0 L 124.5 702.0 L 128.5 662.0 L 127.5 621.0 L 131.5 622.0 L 128.5 601.0 L 135.5 597.0 L 133.5 584.0 L 136.0 580.5 L 140.5 588.0 L 145.5 590.0 L 137.5 577.0 L 138.0 568.5 L 164.0 572.5 L 168.5 577.0 L 166.5 597.0 L 158.5 600.0 L 165.5 609.0 L 166.5 618.0 L 166.5 635.0 L 165.5 640.0 L 162.5 642.0 L 166.5 658.0 L 166.5 681.0 L 162.5 685.0 L 168.5 702.0 L 171.5 735.0 L 169.5 749.0 L 178.5 761.0 L 190.5 796.0 L 200.5 817.0 L 201.0 824.5 Z M 180.0 654.5 L 175.0 654.5 L 169.5 647.0 L 169.5 627.0 L 172.5 621.0 L 179.0 615.5 L 203.0 605.5 L 220.0 605.5 L 224.5 616.0 L 224.5 642.0 L 222.5 648.0 L 218.0 652.5 L 180.0 654.5 Z M 276.0 654.5 L 234.0 652.5 L 229.5 648.0 L 227.5 616.0 L 229.5 608.0 L 233.0 604.5 L 250.0 605.5 L 266.0 611.5 L 279.5 620.0 L 283.5 633.0 L 283.5 644.0 L 280.5 651.0 L 276.0 654.5 Z M 308.5 628.0 L 314.5 621.0 L 317.0 613.5 L 308.5 628.0 Z M 220.0 832.5 L 208.5 827.0 L 199.5 811.0 L 174.5 733.0 L 174.5 705.0 L 185.5 703.0 L 178.0 700.5 L 170.5 690.0 L 170.5 664.0 L 175.0 657.5 L 179.0 656.5 L 214.0 654.5 L 220.0 656.5 L 223.5 664.0 L 223.5 695.0 L 220.5 702.0 L 214.0 705.5 L 186.5 703.0 L 201.0 707.5 L 220.0 707.5 L 223.5 715.0 L 224.5 823.0 L 220.0 832.5 Z M 237.0 832.5 L 232.0 832.5 L 227.5 825.0 L 228.5 714.0 L 233.0 707.5 L 256.0 707.5 L 267.5 704.0 L 233.5 704.0 L 228.5 696.0 L 228.5 664.0 L 236.0 654.5 L 273.0 656.5 L 280.5 661.0 L 282.5 674.0 L 280.5 693.0 L 272.5 702.0 L 278.5 706.0 L 279.5 712.0 L 277.5 732.0 L 255.5 803.0 L 246.5 822.0 L 237.0 832.5 Z", "quads": "M 298.0 1083.5 L 291.0 1082.5 L 283.5 1075.0 L 275.5 1060.0 L 267.5 1037.0 L 265.5 1009.0 L 274.5 940.0 L 278.5 922.0 L 281.5 918.0 L 279.5 905.0 L 284.5 870.0 L 300.5 806.0 L 304.5 770.0 L 310.0 765.5 L 314.5 770.0 L 332.5 811.0 L 339.5 862.0 L 337.5 831.0 L 342.0 827.5 L 346.5 833.0 L 348.5 842.0 L 350.5 842.0 L 354.5 850.0 L 362.5 871.0 L 369.5 920.0 L 369.5 989.0 L 366.5 1012.0 L 361.5 1028.0 L 347.5 1050.0 L 344.5 1059.0 L 338.0 1060.5 L 328.5 1047.0 L 325.5 1014.0 L 339.5 956.0 L 340.5 938.0 L 329.5 988.0 L 323.5 1003.0 L 320.0 1004.5 L 310.5 990.0 L 289.5 932.0 L 283.5 923.0 L 313.5 1003.0 L 317.5 1024.0 L 314.5 1062.0 L 304.5 1078.0 L 298.0 1083.5 Z M 113.0 1060.5 L 106.5 1057.0 L 98.5 1044.0 L 88.5 1024.0 L 84.5 1008.0 L 82.5 994.0 L 83.5 909.0 L 88.5 877.0 L 94.5 857.0 L 111.0 826.5 L 115.5 829.0 L 115.5 842.0 L 122.5 805.0 L 135.5 775.0 L 141.0 767.5 L 145.0 767.5 L 148.5 772.0 L 153.5 817.0 L 167.5 876.0 L 169.0 859.5 L 175.5 861.0 L 179.5 872.0 L 190.5 944.0 L 191.5 986.0 L 188.0 987.5 L 184.5 980.0 L 172.0 893.5 L 171.5 909.0 L 168.5 919.0 L 140.5 993.0 L 133.0 1005.5 L 128.5 1005.0 L 122.5 990.0 L 112.5 942.0 L 115.5 973.0 L 125.5 1011.0 L 123.5 1046.0 L 118.5 1056.0 L 113.0 1060.5 Z M 261.0 993.5 L 260.5 940.0 L 270.5 874.0 L 273.5 860.0 L 277.0 855.5 L 281.5 865.0 L 281.5 878.0 L 265.5 989.0 L 264.0 991.5 L 262.0 989.5 L 261.0 993.5 Z M 159.0 1084.5 L 154.0 1083.5 L 146.5 1076.0 L 138.5 1062.0 L 134.5 1025.0 L 138.5 1004.0 L 169.5 922.0 L 172.0 920.5 L 184.5 993.0 L 185.5 1022.0 L 178.5 1054.0 L 173.5 1065.0 L 159.0 1084.5 Z M 343.0 1336.5 L 331.5 1335.0 L 330.5 1195.0 L 341.5 1138.0 L 352.0 1122.5 L 355.5 1143.0 L 357.0 1145.5 L 358.0 1142.5 L 361.5 1148.0 L 367.5 1169.0 L 372.5 1200.0 L 372.5 1222.0 L 368.5 1246.0 L 360.0 1263.5 L 361.5 1173.0 L 358.0 1149.5 L 357.5 1222.0 L 345.5 1334.0 L 343.0 1336.5 Z M 313.0 1198.5 L 296.0 1144.5 L 308.5 1171.0 L 313.0 1198.5 Z M 91.0 1265.5 L 82.5 1244.0 L 78.5 1205.0 L 84.5 1169.0 L 92.0 1146.5 L 91.0 1265.5 Z M 142.0 1184.5 L 144.5 1169.0 L 152.0 1154.5 L 142.0 1184.5 Z M 313.0 1237.5 L 314.0 1218.5 L 315.5 1228.0 L 313.0 1237.5 Z", "calves": "M 119.0 1337.5 L 114.0 1334.5 L 108.0 1335.5 L 106.5 1333.0 L 98.5 1282.0 L 93.5 1214.0 L 93.5 1168.0 L 100.0 1121.5 L 107.5 1127.0 L 119.5 1183.0 L 122.5 1188.0 L 119.0 1337.5 Z M 319.0 1356.5 L 317.5 1349.0 L 320.0 1338.5 L 321.5 1353.0 L 319.0 1356.5 Z M 352.0 1359.5 L 349.5 1352.0 L 351.0 1340.5 L 353.5 1353.0 L 352.0 1359.5 Z M 1005.0 1343.5 L 1000.0 1342.5 L 991.5 1331.0 L 983.5 1297.0 L 983.5 1285.0 L 994.5 1266.0 L 1001.0 1244.5 L 1007.5 1261.0 L 1020.5 1277.0 L 1016.5 1324.0 L 1013.5 1335.0 L 1005.0 1343.5 Z M 802.0 1342.5 L 797.0 1342.5 L 788.5 1333.0 L 779.5 1292.0 L 779.5 1278.0 L 792.5 1265.0 L 801.0 1247.5 L 805.5 1261.0 L 818.5 1285.0 L 811.5 1328.0 L 802.0 1342.5 Z", "back": "M 831.0 523.5 L 820.0 522.5 L 810.5 514.0 L 792.5 478.0 L 792.5 472.0 L 804.5 454.0 L 812.0 448.5 L 821.0 451.5 L 831.5 461.0 L 842.5 496.0 L 850.5 513.0 L 847.0 517.5 L 831.0 523.5 Z M 982.0 522.5 L 966.0 520.5 L 956.0 515.5 L 954.5 511.0 L 969.5 472.0 L 970.5 462.0 L 980.0 453.5 L 988.0 449.5 L 994.0 449.5 L 1012.5 474.0 L 996.5 509.0 L 988.0 519.5 L 982.0 522.5 Z M 846.0 694.5 L 840.5 691.0 L 839.5 687.0 L 822.5 667.0 L 800.5 633.0 L 786.5 605.0 L 774.5 572.0 L 765.5 536.0 L 763.5 523.0 L 765.5 508.0 L 762.5 502.0 L 786.0 481.5 L 796.5 493.0 L 802.5 507.0 L 813.5 523.0 L 810.0 527.5 L 831.0 526.5 L 852.0 520.5 L 857.5 524.0 L 878.5 559.0 L 892.5 591.0 L 893.5 607.0 L 889.5 620.0 L 856.5 682.0 L 846.0 694.5 Z M 960.0 693.5 L 957.0 693.5 L 950.5 687.0 L 914.5 620.0 L 910.5 606.0 L 911.5 587.0 L 927.5 553.0 L 949.0 521.5 L 955.0 520.5 L 976.0 526.5 L 993.0 526.5 L 990.5 522.0 L 999.5 510.0 L 1008.5 491.0 L 1016.0 483.5 L 1020.0 483.5 L 1040.5 502.0 L 1037.5 535.0 L 1031.5 562.0 L 1018.5 599.0 L 1002.5 632.0 L 984.5 662.0 L 960.0 693.5 Z M 898.0 600.5 L 891.5 579.0 L 882.5 560.0 L 848.5 502.0 L 838.5 476.0 L 832.5 452.0 L 818.5 420.0 L 824.5 403.0 L 869.5 367.0 L 879.5 350.0 L 884.0 335.5 L 900.5 341.0 L 899.0 430.5 L 895.5 425.0 L 895.0 409.5 L 892.5 417.0 L 894.5 433.0 L 898.5 440.0 L 900.5 462.0 L 898.0 600.5 Z M 906.0 599.5 L 903.5 461.0 L 905.5 442.0 L 911.5 432.0 L 909.5 429.0 L 911.5 417.0 L 910.0 414.5 L 908.5 425.0 L 905.0 430.5 L 903.5 342.0 L 919.0 337.5 L 931.5 364.0 L 945.0 377.5 L 965.0 389.5 L 980.5 404.0 L 985.5 414.0 L 985.5 422.0 L 972.5 449.0 L 971.5 459.0 L 956.5 499.0 L 922.5 556.0 L 911.5 580.0 L 906.0 599.5 Z", "triceps": "M 697.0 641.5 L 694.5 637.0 L 694.5 609.0 L 698.5 598.0 L 696.5 582.0 L 702.5 558.0 L 718.5 531.0 L 727.0 522.5 L 740.0 515.5 L 741.5 521.0 L 732.5 568.0 L 728.5 576.0 L 711.5 592.0 L 706.5 602.0 L 701.5 636.0 L 697.0 641.5 Z M 1103.0 641.5 L 1093.5 597.0 L 1072.5 575.0 L 1060.0 516.5 L 1066.0 517.5 L 1080.5 527.0 L 1090.5 538.0 L 1099.5 556.0 L 1103.5 570.0 L 1104.5 602.0 L 1107.5 610.0 L 1106.5 633.0 L 1102.5 635.0 L 1104.5 639.0 L 1103.0 641.5 Z M 1069.0 651.5 L 1059.5 641.0 L 1046.5 616.0 L 1036.5 584.0 L 1038.5 552.0 L 1045.5 526.0 L 1050.0 518.5 L 1062.5 547.0 L 1069.5 574.0 L 1064.5 604.0 L 1068.5 624.0 L 1069.0 651.5 Z M 733.0 652.5 L 731.5 644.0 L 733.5 624.0 L 738.5 606.0 L 735.5 569.0 L 752.0 520.5 L 756.5 527.0 L 764.5 557.0 L 765.5 584.0 L 763.5 592.0 L 752.5 610.0 L 747.5 629.0 L 733.0 652.5 Z M 1148.0 792.5 L 1114.5 690.0 L 1109.5 658.0 L 1110.0 647.5 L 1122.5 661.0 L 1111.5 642.0 L 1112.0 627.5 L 1117.5 631.0 L 1132.5 657.0 L 1131.5 660.0 L 1145.5 702.0 L 1148.5 722.0 L 1148.0 792.5 Z", "glutes": "M 795.0 918.5 L 782.5 896.0 L 775.5 861.0 L 776.5 839.0 L 789.5 779.0 L 801.5 758.0 L 818.0 742.5 L 831.0 737.5 L 851.0 738.5 L 865.0 747.5 L 879.5 764.0 L 894.5 790.0 L 898.5 809.0 L 898.5 835.0 L 895.5 851.0 L 888.5 866.0 L 881.0 873.5 L 857.0 885.5 L 843.0 888.5 L 821.0 888.5 L 802.0 878.5 L 808.0 885.5 L 820.5 891.0 L 805.5 902.0 L 795.0 918.5 Z M 1009.0 919.5 L 1000.5 905.0 L 985.5 892.0 L 1003.5 878.0 L 1007.0 867.5 L 1001.5 877.0 L 991.0 885.5 L 975.0 889.5 L 960.0 888.5 L 938.0 882.5 L 923.0 873.5 L 913.5 863.0 L 907.5 850.0 L 904.5 836.0 L 904.5 809.0 L 910.5 785.0 L 918.5 771.0 L 935.5 750.0 L 956.0 737.5 L 975.0 738.5 L 991.0 747.5 L 1007.5 768.0 L 1016.5 790.0 L 1016.5 800.0 L 1025.5 837.0 L 1026.5 872.0 L 1021.5 894.0 L 1009.0 919.5 Z", "hamstrings": "M 843.0 1118.5 L 830.5 1082.0 L 825.5 1041.0 L 825.5 1014.0 L 829.5 977.0 L 836.5 942.0 L 848.5 905.0 L 854.5 894.0 L 857.0 893.5 L 867.5 926.0 L 871.5 966.0 L 866.5 1008.0 L 857.5 1042.0 L 851.5 1095.0 L 846.5 1114.0 L 843.0 1118.5 Z M 961.0 1122.5 L 955.5 1115.0 L 950.5 1099.0 L 944.5 1042.0 L 932.5 985.0 L 933.5 945.0 L 938.5 919.0 L 947.0 893.5 L 953.5 903.0 L 965.5 935.0 L 974.5 980.0 L 977.5 1015.0 L 974.5 1070.0 L 962.5 1110.0 L 961.0 1122.5 Z M 783.0 1105.5 L 779.5 1105.0 L 779.5 1097.0 L 786.5 966.0 L 793.5 935.0 L 801.5 916.0 L 812.0 902.5 L 823.0 896.5 L 826.5 904.0 L 829.5 934.0 L 829.5 959.0 L 824.5 994.0 L 806.5 1058.0 L 783.0 1105.5 Z M 1019.0 1103.5 L 995.5 1058.0 L 978.5 995.0 L 973.5 955.0 L 973.5 924.0 L 975.5 905.0 L 979.0 897.5 L 991.0 902.5 L 1002.5 916.0 L 1009.5 934.0 L 1015.5 961.0 L 1019.5 1004.0 L 1021.5 1082.0 L 1019.0 1103.5 Z M 926.0 988.5 L 922.5 981.0 L 923.0 974.5 L 926.5 976.0 L 926.0 988.5 Z"};
+        const ANATOMY_MUSCLE_PATHS = {"chest":"M 165.0 570.5 L 139.0 566.5 L 118.0 551.5 L 99.5 528.0 L 88.5 503.0 L 92.5 487.0 L 116.5 453.0 L 140.0 434.5 L 153.0 429.5 L 186.0 431.5 L 207.0 437.5 L 217.5 447.0 L 223.5 464.0 L 223.5 533.0 L 220.5 543.0 L 211.0 555.5 L 197.0 564.5 L 165.0 570.5 Z M 295.0 569.5 L 280.0 569.5 L 254.0 563.5 L 242.0 556.5 L 230.5 541.0 L 227.5 528.0 L 228.5 462.0 L 234.5 446.0 L 248.0 435.5 L 291.0 429.5 L 307.0 431.5 L 319.0 438.5 L 337.5 455.0 L 363.5 494.0 L 364.5 503.0 L 360.5 514.0 L 340.5 545.0 L 319.0 563.5 L 295.0 569.5 Z","shoulders":"M 40.0 546.5 L 36.5 542.0 L 31.5 522.0 L 29.5 489.0 L 34.5 469.0 L 41.5 455.0 L 58.0 437.5 L 77.0 427.5 L 85.0 425.5 L 97.5 427.0 L 89.0 430.5 L 89.0 432.5 L 108.0 426.5 L 128.0 428.5 L 131.5 434.0 L 130.5 439.0 L 110.5 459.0 L 82.5 501.0 L 50.0 533.5 L 46.5 507.0 L 44.5 506.0 L 44.5 541.0 L 40.0 546.5 Z M 412.0 545.5 L 406.5 539.0 L 408.5 537.0 L 407.5 506.0 L 404.5 526.0 L 401.0 533.5 L 367.5 499.0 L 342.5 460.0 L 324.5 441.0 L 321.5 435.0 L 323.0 429.5 L 332.0 426.5 L 353.0 429.5 L 356.5 429.0 L 354.0 425.5 L 370.0 426.5 L 389.0 434.5 L 405.5 449.0 L 417.5 470.0 L 422.5 490.0 L 421.5 516.0 L 416.5 538.0 L 412.0 545.5 Z M 712.0 532.5 L 706.5 509.0 L 708.5 482.0 L 718.5 457.0 L 734.0 439.5 L 754.0 431.5 L 760.5 433.0 L 756.0 437.5 L 766.0 433.5 L 779.0 432.5 L 796.0 439.5 L 803.5 446.0 L 804.5 452.0 L 792.5 468.0 L 762.0 498.5 L 731.0 516.5 L 717.0 527.5 L 718.0 511.5 L 712.0 532.5 Z M 1090.0 531.5 L 1083.0 510.5 L 1085.0 526.5 L 1042.0 499.5 L 1028.0 487.5 L 1000.5 455.0 L 998.5 452.0 L 999.5 446.0 L 1015.0 436.5 L 1028.0 432.5 L 1045.0 435.5 L 1046.0 431.5 L 1051.0 431.5 L 1071.0 441.5 L 1086.5 462.0 L 1094.5 483.0 L 1096.5 502.0 L 1090.0 531.5 Z","biceps":"M 410.0 657.5 L 401.0 655.5 L 384.5 641.0 L 372.5 620.0 L 362.5 589.0 L 359.5 570.0 L 360.5 546.0 L 366.5 526.0 L 375.0 519.5 L 384.0 521.5 L 399.5 532.0 L 405.5 540.0 L 404.5 542.0 L 409.5 546.0 L 412.0 558.5 L 418.5 554.0 L 416.5 543.0 L 420.0 538.5 L 425.5 547.0 L 431.5 566.0 L 432.5 600.0 L 435.5 618.0 L 431.5 620.0 L 430.0 633.5 L 427.5 627.0 L 426.5 603.0 L 421.0 585.5 L 423.5 599.0 L 423.5 631.0 L 419.5 646.0 L 410.0 657.5 Z M 38.0 653.5 L 29.5 630.0 L 28.5 603.0 L 38.5 563.0 L 44.5 549.0 L 50.5 543.0 L 51.5 536.0 L 67.0 523.5 L 75.0 522.5 L 74.5 529.0 L 77.0 531.5 L 85.0 529.5 L 88.5 538.0 L 91.5 557.0 L 88.5 588.0 L 75.5 626.0 L 64.5 643.0 L 53.0 650.5 L 38.0 653.5 Z M 22.0 634.5 L 19.5 621.0 L 14.0 626.5 L 12.5 622.0 L 18.5 605.0 L 17.5 579.0 L 19.5 566.0 L 23.5 552.0 L 32.0 535.5 L 36.5 543.0 L 34.5 554.0 L 37.5 557.0 L 37.5 563.0 L 25.5 608.0 L 25.5 632.0 L 22.0 634.5 Z M 460.0 664.0 L 463.0 670.0 L 465.0 676.0 L 467.0 682.0 L 469.0 688.0 L 470.0 694.0 L 472.0 700.0 L 473.0 706.0 L 472.0 712.0 L 472.0 718.0 L 472.0 724.0 L 473.0 730.0 L 473.0 736.0 L 470.0 742.0 L 470.0 748.0 L 471.0 754.0 L 472.0 760.0 L 473.0 766.0 L 474.0 772.0 L 475.0 778.0 L 476.0 784.0 L 478.0 790.0 L 479.0 796.0 L 481.0 802.0 L 483.0 808.0 L 484.0 814.0 L 483.0 814.0 L 481.0 808.0 L 476.0 802.0 L 475.0 796.0 L 476.0 790.0 L 474.0 784.0 L 471.0 778.0 L 469.0 772.0 L 467.0 766.0 L 466.0 760.0 L 464.0 754.0 L 464.0 748.0 L 463.0 742.0 L 463.0 736.0 L 462.0 730.0 L 462.0 724.0 L 462.0 718.0 L 462.0 712.0 L 462.0 706.0 L 462.0 700.0 L 462.0 694.0 L 462.0 688.0 L 461.0 682.0 L 460.0 676.0 L 459.0 670.0 L 460.0 664.0 Z M 402.0 670.0 L 405.0 673.0 L 409.0 676.0 L 411.0 679.0 L 414.0 682.0 L 416.0 685.0 L 418.0 688.0 L 419.0 691.0 L 420.0 694.0 L 421.0 697.0 L 422.0 700.0 L 423.0 703.0 L 424.0 706.0 L 424.0 709.0 L 424.0 712.0 L 424.0 715.0 L 424.0 718.0 L 425.0 721.0 L 425.0 724.0 L 426.0 727.0 L 428.0 730.0 L 430.0 733.0 L 431.0 736.0 L 432.0 739.0 L 431.0 742.0 L 431.0 744.0 L 431.0 744.0 L 431.0 742.0 L 430.0 739.0 L 429.0 736.0 L 428.0 733.0 L 426.0 730.0 L 424.0 727.0 L 423.0 724.0 L 422.0 721.0 L 421.0 718.0 L 420.0 715.0 L 418.0 712.0 L 417.0 709.0 L 415.0 706.0 L 414.0 703.0 L 413.0 700.0 L 411.0 697.0 L 410.0 694.0 L 408.0 691.0 L 407.0 688.0 L 406.0 685.0 L 405.0 682.0 L 404.0 679.0 L 403.0 676.0 L 402.0 673.0 L 402.0 670.0 Z M 50.0 674.0 L 50.0 677.0 L 50.0 680.0 L 47.0 683.0 L 46.0 686.0 L 44.0 689.0 L 43.0 692.0 L 41.0 695.0 L 40.0 698.0 L 38.0 701.0 L 38.0 704.0 L 36.0 707.0 L 35.0 710.0 L 34.0 713.0 L 33.0 716.0 L 31.0 719.0 L 30.0 722.0 L 29.0 725.0 L 28.0 728.0 L 27.0 731.0 L 25.0 734.0 L 24.0 737.0 L 23.0 740.0 L 21.0 743.0 L 20.0 746.0 L 20.0 747.0 L 19.0 747.0 L 19.0 746.0 L 20.0 743.0 L 20.0 740.0 L 21.0 737.0 L 22.0 734.0 L 23.0 731.0 L 23.0 728.0 L 24.0 725.0 L 25.0 722.0 L 26.0 719.0 L 27.0 716.0 L 27.0 713.0 L 27.0 710.0 L 23.0 707.0 L 24.0 704.0 L 25.0 701.0 L 29.0 698.0 L 30.0 695.0 L 32.0 692.0 L 33.0 689.0 L 34.0 686.0 L 36.0 683.0 L 39.0 680.0 L 43.0 677.0 L 50.0 674.0 Z","core":"M 279.0 614.5 L 254.0 604.5 L 231.5 601.0 L 227.5 588.0 L 227.5 573.0 L 228.5 567.0 L 234.0 559.5 L 239.0 558.5 L 249.0 561.5 L 269.0 570.5 L 277.5 578.0 L 283.5 599.0 L 279.0 614.5 Z M 177.0 614.5 L 174.0 614.5 L 169.5 607.0 L 169.5 590.0 L 175.5 577.0 L 181.0 571.5 L 207.0 560.5 L 220.0 560.5 L 224.5 572.0 L 224.5 588.0 L 221.5 599.0 L 218.0 602.5 L 206.0 602.5 L 196.0 605.5 L 177.0 614.5 Z M 249.0 826.5 L 249.5 820.0 L 272.5 763.0 L 282.5 749.0 L 280.5 744.0 L 281.5 721.0 L 284.5 699.0 L 290.5 685.0 L 285.5 680.0 L 286.5 655.0 L 293.5 642.0 L 286.5 643.0 L 285.5 619.0 L 287.5 606.0 L 297.5 599.0 L 291.0 601.5 L 285.5 599.0 L 284.5 578.0 L 291.0 571.5 L 314.0 567.5 L 314.5 577.0 L 304.5 592.0 L 309.0 590.5 L 316.0 580.5 L 322.5 583.0 L 317.5 598.0 L 323.5 601.0 L 321.5 619.0 L 324.5 621.0 L 324.5 627.0 L 316.5 648.0 L 324.0 632.5 L 325.5 676.0 L 323.5 683.0 L 325.5 682.0 L 326.5 687.0 L 326.5 711.0 L 317.5 735.0 L 302.5 749.0 L 304.5 752.0 L 298.5 763.0 L 265.5 810.0 L 249.0 826.5 Z M 201.0 824.5 L 178.5 799.0 L 149.5 758.0 L 143.5 745.0 L 133.5 737.0 L 125.5 715.0 L 124.5 702.0 L 128.5 662.0 L 127.5 621.0 L 131.5 622.0 L 128.5 601.0 L 135.5 597.0 L 133.5 584.0 L 136.0 580.5 L 140.5 588.0 L 145.5 590.0 L 137.5 577.0 L 138.0 568.5 L 164.0 572.5 L 168.5 577.0 L 166.5 597.0 L 158.5 600.0 L 165.5 609.0 L 166.5 618.0 L 166.5 635.0 L 165.5 640.0 L 162.5 642.0 L 166.5 658.0 L 166.5 681.0 L 162.5 685.0 L 168.5 702.0 L 171.5 735.0 L 169.5 749.0 L 178.5 761.0 L 190.5 796.0 L 200.5 817.0 L 201.0 824.5 Z M 180.0 654.5 L 175.0 654.5 L 169.5 647.0 L 169.5 627.0 L 172.5 621.0 L 179.0 615.5 L 203.0 605.5 L 220.0 605.5 L 224.5 616.0 L 224.5 642.0 L 222.5 648.0 L 218.0 652.5 L 180.0 654.5 Z M 276.0 654.5 L 234.0 652.5 L 229.5 648.0 L 227.5 616.0 L 229.5 608.0 L 233.0 604.5 L 250.0 605.5 L 266.0 611.5 L 279.5 620.0 L 283.5 633.0 L 283.5 644.0 L 280.5 651.0 L 276.0 654.5 Z M 308.5 628.0 L 317.0 613.5 L 314.5 621.0 L 308.5 628.0 Z M 220.0 832.5 L 208.5 827.0 L 199.5 811.0 L 174.5 733.0 L 174.5 705.0 L 185.5 703.0 L 178.0 700.5 L 170.5 690.0 L 170.5 664.0 L 175.0 657.5 L 179.0 656.5 L 214.0 654.5 L 220.0 656.5 L 223.5 664.0 L 223.5 695.0 L 220.5 702.0 L 214.0 705.5 L 186.5 703.0 L 201.0 707.5 L 220.0 707.5 L 223.5 715.0 L 224.5 823.0 L 220.0 832.5 Z M 237.0 832.5 L 232.0 832.5 L 227.5 825.0 L 228.5 714.0 L 233.0 707.5 L 256.0 707.5 L 267.5 704.0 L 233.5 704.0 L 228.5 696.0 L 228.5 664.0 L 236.0 654.5 L 273.0 656.5 L 280.5 661.0 L 282.5 674.0 L 280.5 693.0 L 272.5 702.0 L 278.5 706.0 L 279.5 712.0 L 277.5 732.0 L 255.5 803.0 L 246.5 822.0 L 237.0 832.5 Z","quads":"M 298.0 1083.5 L 291.0 1082.5 L 283.5 1075.0 L 275.5 1060.0 L 267.5 1037.0 L 265.5 1009.0 L 274.5 940.0 L 278.5 922.0 L 281.5 918.0 L 279.5 905.0 L 284.5 870.0 L 300.5 806.0 L 304.5 770.0 L 310.0 765.5 L 314.5 770.0 L 332.5 811.0 L 339.5 862.0 L 337.5 831.0 L 342.0 827.5 L 346.5 833.0 L 348.5 842.0 L 350.5 842.0 L 354.5 850.0 L 362.5 871.0 L 369.5 920.0 L 369.5 989.0 L 366.5 1012.0 L 361.5 1028.0 L 347.5 1050.0 L 344.5 1059.0 L 338.0 1060.5 L 328.5 1047.0 L 325.5 1014.0 L 339.5 956.0 L 340.5 938.0 L 329.5 988.0 L 323.5 1003.0 L 320.0 1004.5 L 310.5 990.0 L 289.5 932.0 L 283.5 923.0 L 313.5 1003.0 L 317.5 1024.0 L 314.5 1062.0 L 304.5 1078.0 L 298.0 1083.5 Z M 113.0 1060.5 L 106.5 1057.0 L 98.5 1044.0 L 88.5 1024.0 L 84.5 1008.0 L 82.5 994.0 L 83.5 909.0 L 88.5 877.0 L 94.5 857.0 L 111.0 826.5 L 115.5 829.0 L 115.5 842.0 L 122.5 805.0 L 135.5 775.0 L 141.0 767.5 L 145.0 767.5 L 148.5 772.0 L 153.5 817.0 L 167.5 876.0 L 169.0 859.5 L 175.5 861.0 L 179.5 872.0 L 190.5 944.0 L 191.5 986.0 L 188.0 987.5 L 184.5 980.0 L 172.0 893.5 L 171.5 909.0 L 168.5 919.0 L 140.5 993.0 L 133.0 1005.5 L 128.5 1005.0 L 122.5 990.0 L 112.5 942.0 L 115.5 973.0 L 125.5 1011.0 L 123.5 1046.0 L 118.5 1056.0 L 113.0 1060.5 Z M 261.0 993.5 L 260.5 940.0 L 270.5 874.0 L 273.5 860.0 L 277.0 855.5 L 281.5 865.0 L 281.5 878.0 L 265.5 989.0 L 264.0 991.5 L 262.0 989.5 L 261.0 993.5 Z M 159.0 1084.5 L 154.0 1083.5 L 146.5 1076.0 L 138.5 1062.0 L 134.5 1025.0 L 138.5 1004.0 L 169.5 922.0 L 172.0 920.5 L 184.5 993.0 L 185.5 1022.0 L 178.5 1054.0 L 173.5 1065.0 L 159.0 1084.5 Z M 158.0 774.0 L 162.0 780.0 L 167.0 786.0 L 165.0 792.0 L 176.0 798.0 L 180.0 804.0 L 185.0 810.0 L 180.0 816.0 L 180.0 822.0 L 180.0 828.0 L 179.0 834.0 L 179.0 840.0 L 179.0 846.0 L 179.0 852.0 L 180.0 858.0 L 180.0 864.0 L 181.0 870.0 L 182.0 876.0 L 183.0 882.0 L 183.0 888.0 L 184.0 894.0 L 185.0 900.0 L 186.0 906.0 L 186.0 912.0 L 187.0 918.0 L 187.0 921.0 L 187.0 921.0 L 187.0 918.0 L 186.0 912.0 L 185.0 906.0 L 184.0 900.0 L 183.0 894.0 L 183.0 888.0 L 182.0 882.0 L 182.0 876.0 L 179.0 870.0 L 179.0 864.0 L 177.0 858.0 L 176.0 852.0 L 174.0 846.0 L 172.0 840.0 L 170.0 834.0 L 169.0 828.0 L 168.0 822.0 L 167.0 816.0 L 166.0 810.0 L 165.0 804.0 L 164.0 798.0 L 163.0 792.0 L 162.0 786.0 L 161.0 780.0 L 158.0 774.0 Z M 287.0 789.0 L 287.0 792.0 L 287.0 795.0 L 287.0 798.0 L 287.0 801.0 L 287.0 804.0 L 286.0 807.0 L 286.0 810.0 L 286.0 813.0 L 285.0 816.0 L 285.0 819.0 L 284.0 822.0 L 284.0 825.0 L 283.0 828.0 L 283.0 831.0 L 282.0 834.0 L 282.0 837.0 L 281.0 840.0 L 280.0 843.0 L 279.0 846.0 L 278.0 849.0 L 277.0 852.0 L 275.0 855.0 L 274.0 858.0 L 273.0 859.0 L 273.0 859.0 L 273.0 858.0 L 274.0 855.0 L 274.0 852.0 L 272.0 849.0 L 272.0 846.0 L 272.0 843.0 L 272.0 840.0 L 272.0 837.0 L 271.0 834.0 L 270.0 831.0 L 270.0 828.0 L 269.0 825.0 L 268.0 822.0 L 267.0 819.0 L 266.0 816.0 L 265.0 813.0 L 285.0 810.0 L 285.0 807.0 L 285.0 804.0 L 286.0 801.0 L 286.0 798.0 L 286.0 795.0 L 286.0 792.0 L 286.0 789.0 Z M 206.0 841.0 L 208.0 845.0 L 210.0 849.0 L 212.0 853.0 L 217.0 857.0 L 221.0 861.0 L 203.0 865.0 L 202.0 869.0 L 202.0 873.0 L 201.0 877.0 L 201.0 881.0 L 200.0 885.0 L 199.0 889.0 L 199.0 893.0 L 198.0 897.0 L 198.0 901.0 L 197.0 905.0 L 196.0 909.0 L 196.0 913.0 L 196.0 917.0 L 195.0 921.0 L 195.0 925.0 L 194.0 929.0 L 194.0 933.0 L 194.0 937.0 L 193.0 941.0 L 193.0 944.0 L 193.0 944.0 L 193.0 941.0 L 193.0 937.0 L 192.0 933.0 L 193.0 929.0 L 193.0 925.0 L 193.0 921.0 L 194.0 917.0 L 194.0 913.0 L 194.0 909.0 L 195.0 905.0 L 195.0 901.0 L 196.0 897.0 L 197.0 893.0 L 198.0 889.0 L 198.0 885.0 L 199.0 881.0 L 199.0 877.0 L 200.0 873.0 L 201.0 869.0 L 201.0 865.0 L 202.0 861.0 L 202.0 857.0 L 204.0 853.0 L 203.0 849.0 L 207.0 845.0 L 206.0 841.0 Z M 250.0 845.0 L 250.0 849.0 L 250.0 853.0 L 250.0 857.0 L 250.0 861.0 L 251.0 865.0 L 251.0 869.0 L 251.0 873.0 L 252.0 877.0 L 252.0 881.0 L 253.0 885.0 L 253.0 889.0 L 254.0 893.0 L 254.0 897.0 L 255.0 901.0 L 256.0 905.0 L 256.0 909.0 L 257.0 913.0 L 257.0 917.0 L 258.0 921.0 L 258.0 925.0 L 258.0 929.0 L 259.0 933.0 L 259.0 937.0 L 259.0 941.0 L 258.0 945.0 L 258.0 945.0 L 258.0 941.0 L 257.0 937.0 L 257.0 933.0 L 257.0 929.0 L 256.0 925.0 L 256.0 921.0 L 256.0 917.0 L 255.0 913.0 L 254.0 909.0 L 254.0 905.0 L 253.0 901.0 L 253.0 897.0 L 252.0 893.0 L 251.0 889.0 L 251.0 885.0 L 250.0 881.0 L 250.0 877.0 L 251.0 873.0 L 250.0 869.0 L 249.0 865.0 L 249.0 861.0 L 248.0 857.0 L 248.0 853.0 L 250.0 849.0 L 250.0 845.0 Z","calves":"M 119.0 1337.5 L 114.0 1334.5 L 108.0 1335.5 L 106.5 1333.0 L 98.5 1282.0 L 93.5 1214.0 L 93.5 1168.0 L 100.0 1121.5 L 107.5 1127.0 L 119.5 1183.0 L 122.5 1188.0 L 119.0 1337.5 Z M 319.0 1356.5 L 317.5 1349.0 L 320.0 1338.5 L 321.5 1353.0 L 319.0 1356.5 Z M 352.0 1359.5 L 349.5 1352.0 L 351.0 1340.5 L 353.5 1353.0 L 352.0 1359.5 Z M 1005.0 1343.5 L 1000.0 1342.5 L 991.5 1331.0 L 983.5 1297.0 L 983.5 1285.0 L 994.5 1266.0 L 1001.0 1244.5 L 1007.5 1261.0 L 1020.5 1277.0 L 1016.5 1324.0 L 1013.5 1335.0 L 1005.0 1343.5 Z M 802.0 1342.5 L 797.0 1342.5 L 788.5 1333.0 L 779.5 1292.0 L 779.5 1278.0 L 792.5 1265.0 L 801.0 1247.5 L 805.5 1261.0 L 818.5 1285.0 L 811.5 1328.0 L 802.0 1342.5 Z M 343.0 1336.5 L 331.5 1335.0 L 330.5 1195.0 L 341.5 1138.0 L 352.0 1122.5 L 355.5 1143.0 L 357.0 1145.5 L 358.0 1142.5 L 361.5 1148.0 L 367.5 1169.0 L 372.5 1200.0 L 372.5 1222.0 L 368.5 1246.0 L 360.0 1263.5 L 361.5 1173.0 L 358.0 1149.5 L 357.5 1222.0 L 345.5 1334.0 L 343.0 1336.5 Z M 313.0 1198.5 L 296.0 1144.5 L 308.5 1171.0 L 313.0 1198.5 Z M 91.0 1265.5 L 82.5 1244.0 L 78.5 1205.0 L 84.5 1169.0 L 92.0 1146.5 L 91.0 1265.5 Z M 796.0 1092.0 L 799.0 1099.0 L 800.0 1106.0 L 800.0 1113.0 L 801.0 1120.0 L 802.0 1127.0 L 802.0 1134.0 L 802.0 1141.0 L 802.0 1148.0 L 802.0 1155.0 L 802.0 1162.0 L 802.0 1169.0 L 802.0 1176.0 L 802.0 1183.0 L 802.0 1190.0 L 802.0 1197.0 L 801.0 1204.0 L 801.0 1211.0 L 801.0 1218.0 L 800.0 1225.0 L 799.0 1232.0 L 798.0 1239.0 L 796.0 1246.0 L 794.0 1253.0 L 790.0 1260.0 L 785.0 1267.0 L 777.0 1273.0 L 774.0 1273.0 L 768.0 1267.0 L 764.0 1260.0 L 762.0 1253.0 L 760.0 1246.0 L 759.0 1239.0 L 758.0 1232.0 L 757.0 1225.0 L 757.0 1218.0 L 757.0 1211.0 L 758.0 1204.0 L 759.0 1197.0 L 760.0 1190.0 L 761.0 1183.0 L 763.0 1176.0 L 765.0 1169.0 L 767.0 1162.0 L 769.0 1155.0 L 771.0 1148.0 L 773.0 1141.0 L 776.0 1134.0 L 778.0 1127.0 L 781.0 1120.0 L 783.0 1113.0 L 786.0 1106.0 L 790.0 1099.0 L 796.0 1092.0 Z M 1006.0 1092.0 L 1011.0 1099.0 L 1015.0 1106.0 L 1018.0 1113.0 L 1021.0 1120.0 L 1023.0 1127.0 L 1025.0 1134.0 L 1028.0 1141.0 L 1030.0 1148.0 L 1032.0 1155.0 L 1034.0 1162.0 L 1036.0 1169.0 L 1038.0 1176.0 L 1040.0 1183.0 L 1041.0 1190.0 L 1042.0 1197.0 L 1043.0 1204.0 L 1044.0 1211.0 L 1044.0 1218.0 L 1044.0 1225.0 L 1043.0 1232.0 L 1043.0 1239.0 L 1041.0 1246.0 L 1040.0 1253.0 L 1037.0 1260.0 L 1034.0 1267.0 L 1027.0 1273.0 L 1025.0 1273.0 L 1017.0 1267.0 L 1012.0 1260.0 L 1009.0 1253.0 L 1006.0 1246.0 L 1004.0 1239.0 L 1003.0 1232.0 L 1003.0 1225.0 L 1002.0 1218.0 L 1001.0 1211.0 L 1001.0 1204.0 L 1000.0 1197.0 L 1000.0 1190.0 L 1000.0 1183.0 L 999.0 1176.0 L 999.0 1169.0 L 999.0 1162.0 L 998.0 1155.0 L 999.0 1148.0 L 999.0 1141.0 L 999.0 1134.0 L 999.0 1127.0 L 1000.0 1120.0 L 1000.0 1113.0 L 1001.0 1106.0 L 1002.0 1099.0 L 1004.0 1092.0 Z M 827.0 1098.0 L 831.0 1105.0 L 833.0 1112.0 L 833.0 1119.0 L 834.0 1126.0 L 835.0 1133.0 L 836.0 1140.0 L 837.0 1147.0 L 838.0 1154.0 L 839.0 1161.0 L 840.0 1168.0 L 841.0 1175.0 L 842.0 1182.0 L 844.0 1189.0 L 845.0 1196.0 L 845.0 1203.0 L 846.0 1210.0 L 846.0 1217.0 L 846.0 1224.0 L 846.0 1231.0 L 844.0 1238.0 L 843.0 1245.0 L 841.0 1252.0 L 838.0 1259.0 L 835.0 1266.0 L 830.0 1273.0 L 825.0 1278.0 L 822.0 1278.0 L 817.0 1273.0 L 813.0 1266.0 L 809.0 1259.0 L 808.0 1252.0 L 806.0 1245.0 L 805.0 1238.0 L 805.0 1231.0 L 805.0 1224.0 L 805.0 1217.0 L 806.0 1210.0 L 806.0 1203.0 L 807.0 1196.0 L 807.0 1189.0 L 808.0 1182.0 L 808.0 1175.0 L 809.0 1168.0 L 809.0 1161.0 L 810.0 1154.0 L 811.0 1147.0 L 813.0 1140.0 L 814.0 1133.0 L 816.0 1126.0 L 818.0 1119.0 L 821.0 1112.0 L 823.0 1105.0 L 826.0 1098.0 Z M 975.0 1098.0 L 978.0 1105.0 L 981.0 1112.0 L 984.0 1119.0 L 985.0 1126.0 L 987.0 1133.0 L 988.0 1140.0 L 990.0 1147.0 L 991.0 1154.0 L 992.0 1161.0 L 993.0 1168.0 L 994.0 1175.0 L 994.0 1182.0 L 995.0 1189.0 L 995.0 1196.0 L 996.0 1203.0 L 996.0 1210.0 L 997.0 1217.0 L 997.0 1224.0 L 997.0 1231.0 L 997.0 1238.0 L 996.0 1245.0 L 994.0 1252.0 L 993.0 1259.0 L 990.0 1266.0 L 986.0 1273.0 L 980.0 1279.0 L 978.0 1279.0 L 972.0 1273.0 L 967.0 1266.0 L 964.0 1259.0 L 961.0 1252.0 L 959.0 1245.0 L 957.0 1238.0 L 957.0 1231.0 L 956.0 1224.0 L 956.0 1217.0 L 956.0 1210.0 L 957.0 1203.0 L 958.0 1196.0 L 959.0 1189.0 L 960.0 1182.0 L 961.0 1175.0 L 962.0 1168.0 L 963.0 1161.0 L 964.0 1154.0 L 966.0 1147.0 L 966.0 1140.0 L 967.0 1133.0 L 968.0 1126.0 L 969.0 1119.0 L 970.0 1112.0 L 970.0 1105.0 L 973.0 1098.0 Z M 110.0 1129.0 L 131.0 1132.0 L 127.0 1135.0 L 133.0 1138.0 L 132.0 1141.0 L 131.0 1144.0 L 131.0 1147.0 L 130.0 1150.0 L 130.0 1153.0 L 129.0 1156.0 L 127.0 1159.0 L 128.0 1162.0 L 127.0 1165.0 L 127.0 1168.0 L 126.0 1171.0 L 125.0 1174.0 L 125.0 1177.0 L 124.0 1180.0 L 124.0 1183.0 L 123.0 1186.0 L 123.0 1187.0 L 123.0 1187.0 L 123.0 1186.0 L 122.0 1183.0 L 124.0 1180.0 L 123.0 1177.0 L 124.0 1174.0 L 124.0 1171.0 L 125.0 1168.0 L 126.0 1165.0 L 126.0 1162.0 L 127.0 1159.0 L 127.0 1156.0 L 128.0 1153.0 L 115.0 1150.0 L 114.0 1147.0 L 113.0 1144.0 L 113.0 1141.0 L 113.0 1138.0 L 112.0 1135.0 L 111.0 1132.0 L 110.0 1129.0 Z M 312.0 1185.0 L 313.0 1188.0 L 313.0 1191.0 L 314.0 1194.0 L 314.0 1197.0 L 315.0 1200.0 L 316.0 1203.0 L 316.0 1206.0 L 317.0 1209.0 L 317.0 1212.0 L 318.0 1215.0 L 318.0 1218.0 L 319.0 1221.0 L 319.0 1224.0 L 320.0 1227.0 L 320.0 1230.0 L 318.0 1233.0 L 318.0 1235.0 L 318.0 1235.0 L 314.0 1233.0 L 314.0 1230.0 L 314.0 1227.0 L 315.0 1224.0 L 316.0 1221.0 L 315.0 1218.0 L 315.0 1215.0 L 315.0 1212.0 L 315.0 1209.0 L 314.0 1206.0 L 314.0 1203.0 L 313.0 1200.0 L 314.0 1197.0 L 313.0 1194.0 L 313.0 1191.0 L 312.0 1188.0 L 312.0 1185.0 Z","back":"M 831.0 523.5 L 820.0 522.5 L 810.5 514.0 L 792.5 478.0 L 792.5 472.0 L 804.5 454.0 L 812.0 448.5 L 821.0 451.5 L 831.5 461.0 L 842.5 496.0 L 850.5 513.0 L 847.0 517.5 L 831.0 523.5 Z M 982.0 522.5 L 966.0 520.5 L 956.0 515.5 L 954.5 511.0 L 969.5 472.0 L 970.5 462.0 L 980.0 453.5 L 988.0 449.5 L 994.0 449.5 L 1012.5 474.0 L 996.5 509.0 L 988.0 519.5 L 982.0 522.5 Z M 846.0 694.5 L 840.5 691.0 L 839.5 687.0 L 822.5 667.0 L 800.5 633.0 L 786.5 605.0 L 774.5 572.0 L 765.5 536.0 L 763.5 523.0 L 765.5 508.0 L 762.5 502.0 L 786.0 481.5 L 796.5 493.0 L 802.5 507.0 L 813.5 523.0 L 810.0 527.5 L 831.0 526.5 L 852.0 520.5 L 857.5 524.0 L 878.5 559.0 L 892.5 591.0 L 893.5 607.0 L 889.5 620.0 L 856.5 682.0 L 846.0 694.5 Z M 960.0 693.5 L 957.0 693.5 L 950.5 687.0 L 914.5 620.0 L 910.5 606.0 L 911.5 587.0 L 927.5 553.0 L 949.0 521.5 L 955.0 520.5 L 976.0 526.5 L 993.0 526.5 L 990.5 522.0 L 999.5 510.0 L 1008.5 491.0 L 1016.0 483.5 L 1020.0 483.5 L 1040.5 502.0 L 1037.5 535.0 L 1031.5 562.0 L 1018.5 599.0 L 1002.5 632.0 L 984.5 662.0 L 960.0 693.5 Z M 898.0 600.5 L 891.5 579.0 L 882.5 560.0 L 848.5 502.0 L 838.5 476.0 L 832.5 452.0 L 818.5 420.0 L 824.5 403.0 L 869.5 367.0 L 879.5 350.0 L 884.0 335.5 L 900.5 341.0 L 899.0 430.5 L 895.5 425.0 L 895.0 409.5 L 892.5 417.0 L 894.5 433.0 L 898.5 440.0 L 900.5 462.0 L 898.0 600.5 Z M 906.0 599.5 L 903.5 461.0 L 905.5 442.0 L 911.5 432.0 L 909.5 429.0 L 911.5 417.0 L 910.0 414.5 L 908.5 425.0 L 905.0 430.5 L 903.5 342.0 L 919.0 337.5 L 931.5 364.0 L 945.0 377.5 L 965.0 389.5 L 980.5 404.0 L 985.5 414.0 L 985.5 422.0 L 972.5 449.0 L 971.5 459.0 L 956.5 499.0 L 922.5 556.0 L 911.5 580.0 L 906.0 599.5 Z M 895.0 595.0 L 897.0 602.0 L 897.0 609.0 L 897.0 616.0 L 897.0 623.0 L 897.0 630.0 L 897.0 637.0 L 897.0 644.0 L 897.0 651.0 L 897.0 658.0 L 897.0 665.0 L 897.0 672.0 L 897.0 679.0 L 897.0 686.0 L 898.0 693.0 L 898.0 700.0 L 898.0 707.0 L 898.0 714.0 L 898.0 721.0 L 898.0 728.0 L 898.0 735.0 L 898.0 742.0 L 898.0 749.0 L 898.0 756.0 L 897.0 763.0 L 895.0 767.0 L 892.0 767.0 L 886.0 763.0 L 878.0 756.0 L 873.0 749.0 L 869.0 742.0 L 867.0 735.0 L 864.0 728.0 L 861.0 721.0 L 859.0 714.0 L 856.0 707.0 L 853.0 700.0 L 853.0 693.0 L 854.0 686.0 L 859.0 679.0 L 862.0 672.0 L 866.0 665.0 L 870.0 658.0 L 873.0 651.0 L 877.0 644.0 L 881.0 637.0 L 885.0 630.0 L 888.0 623.0 L 891.0 616.0 L 893.0 609.0 L 894.0 602.0 L 893.0 595.0 Z M 909.0 601.0 L 910.0 608.0 L 912.0 615.0 L 914.0 622.0 L 918.0 629.0 L 922.0 636.0 L 925.0 643.0 L 929.0 650.0 L 933.0 657.0 L 937.0 664.0 L 940.0 671.0 L 944.0 678.0 L 948.0 685.0 L 951.0 692.0 L 951.0 699.0 L 948.0 706.0 L 945.0 713.0 L 942.0 720.0 L 940.0 727.0 L 937.0 734.0 L 935.0 741.0 L 932.0 748.0 L 927.0 755.0 L 919.0 762.0 L 912.0 767.0 L 908.0 767.0 L 906.0 762.0 L 905.0 755.0 L 905.0 748.0 L 905.0 741.0 L 905.0 734.0 L 905.0 727.0 L 905.0 720.0 L 905.0 713.0 L 905.0 706.0 L 905.0 699.0 L 905.0 692.0 L 905.0 685.0 L 905.0 678.0 L 905.0 671.0 L 905.0 664.0 L 906.0 657.0 L 906.0 650.0 L 906.0 643.0 L 906.0 636.0 L 906.0 629.0 L 906.0 622.0 L 906.0 615.0 L 907.0 608.0 L 907.0 601.0 Z M 1019.0 603.0 L 1018.0 610.0 L 1015.0 617.0 L 1011.0 624.0 L 1007.0 631.0 L 1004.0 638.0 L 1002.0 645.0 L 1001.0 652.0 L 1000.0 659.0 L 999.0 666.0 L 1000.0 673.0 L 1000.0 680.0 L 1001.0 687.0 L 1001.0 694.0 L 1002.0 701.0 L 1002.0 708.0 L 1001.0 715.0 L 1000.0 722.0 L 999.0 729.0 L 1002.0 736.0 L 1004.0 743.0 L 1006.0 750.0 L 1008.0 757.0 L 1009.0 764.0 L 1010.0 768.0 L 1008.0 768.0 L 1006.0 764.0 L 1001.0 757.0 L 995.0 750.0 L 986.0 743.0 L 945.0 736.0 L 947.0 729.0 L 950.0 722.0 L 953.0 715.0 L 955.0 708.0 L 960.0 701.0 L 962.0 694.0 L 966.0 687.0 L 971.0 680.0 L 976.0 673.0 L 982.0 666.0 L 987.0 659.0 L 991.0 652.0 L 995.0 645.0 L 999.0 638.0 L 1003.0 631.0 L 1007.0 624.0 L 1010.0 617.0 L 1014.0 610.0 L 1017.0 603.0 Z M 787.0 608.0 L 790.0 615.0 L 794.0 622.0 L 797.0 629.0 L 801.0 636.0 L 805.0 643.0 L 810.0 650.0 L 815.0 657.0 L 819.0 664.0 L 824.0 671.0 L 830.0 678.0 L 836.0 685.0 L 841.0 692.0 L 842.0 699.0 L 848.0 706.0 L 850.0 713.0 L 852.0 720.0 L 855.0 727.0 L 857.0 734.0 L 819.0 741.0 L 810.0 748.0 L 803.0 755.0 L 797.0 762.0 L 795.0 767.0 L 793.0 767.0 L 793.0 762.0 L 795.0 755.0 L 797.0 748.0 L 799.0 741.0 L 801.0 734.0 L 802.0 727.0 L 801.0 720.0 L 800.0 713.0 L 800.0 706.0 L 800.0 699.0 L 800.0 692.0 L 801.0 685.0 L 801.0 678.0 L 802.0 671.0 L 802.0 664.0 L 801.0 657.0 L 800.0 650.0 L 799.0 643.0 L 797.0 636.0 L 793.0 629.0 L 790.0 622.0 L 787.0 615.0 L 785.0 608.0 Z","triceps":"M 697.0 641.5 L 694.5 637.0 L 694.5 609.0 L 698.5 598.0 L 696.5 582.0 L 702.5 558.0 L 718.5 531.0 L 727.0 522.5 L 740.0 515.5 L 741.5 521.0 L 732.5 568.0 L 728.5 576.0 L 711.5 592.0 L 706.5 602.0 L 701.5 636.0 L 697.0 641.5 Z M 1103.0 641.5 L 1093.5 597.0 L 1072.5 575.0 L 1060.0 516.5 L 1066.0 517.5 L 1080.5 527.0 L 1090.5 538.0 L 1099.5 556.0 L 1103.5 570.0 L 1104.5 602.0 L 1107.5 610.0 L 1106.5 633.0 L 1102.5 635.0 L 1104.5 639.0 L 1103.0 641.5 Z M 1069.0 651.5 L 1059.5 641.0 L 1046.5 616.0 L 1036.5 584.0 L 1038.5 552.0 L 1045.5 526.0 L 1050.0 518.5 L 1062.5 547.0 L 1069.5 574.0 L 1064.5 604.0 L 1068.5 624.0 L 1069.0 651.5 Z M 733.0 652.5 L 731.5 644.0 L 733.5 624.0 L 738.5 606.0 L 735.5 569.0 L 752.0 520.5 L 756.5 527.0 L 764.5 557.0 L 765.5 584.0 L 763.5 592.0 L 752.5 610.0 L 747.5 629.0 L 733.0 652.5 Z M 1148.0 792.5 L 1114.5 690.0 L 1109.5 658.0 L 1110.0 647.5 L 1122.5 661.0 L 1111.5 642.0 L 1112.0 627.5 L 1117.5 631.0 L 1132.5 657.0 L 1131.5 660.0 L 1145.5 702.0 L 1148.5 722.0 L 1148.0 792.5 Z M 690.0 628.0 L 690.0 636.0 L 686.0 644.0 L 682.0 652.0 L 688.0 660.0 L 690.0 668.0 L 689.0 676.0 L 685.0 684.0 L 685.0 692.0 L 683.0 700.0 L 681.0 708.0 L 678.0 716.0 L 675.0 724.0 L 673.0 732.0 L 670.0 740.0 L 666.0 748.0 L 664.0 756.0 L 662.0 764.0 L 659.0 772.0 L 656.0 780.0 L 654.0 788.0 L 652.0 796.0 L 650.0 804.0 L 647.0 812.0 L 675.0 820.0 L 674.0 822.0 L 643.0 822.0 L 642.0 820.0 L 644.0 812.0 L 646.0 804.0 L 648.0 796.0 L 649.0 788.0 L 650.0 780.0 L 650.0 772.0 L 653.0 764.0 L 653.0 756.0 L 653.0 748.0 L 654.0 740.0 L 654.0 732.0 L 655.0 724.0 L 655.0 716.0 L 656.0 708.0 L 658.0 700.0 L 659.0 692.0 L 662.0 684.0 L 665.0 676.0 L 668.0 668.0 L 671.0 660.0 L 674.0 652.0 L 679.0 644.0 L 684.0 636.0 L 690.0 628.0 Z","glutes":"M 795.0 918.5 L 782.5 896.0 L 775.5 861.0 L 776.5 839.0 L 789.5 779.0 L 801.5 758.0 L 818.0 742.5 L 831.0 737.5 L 851.0 738.5 L 865.0 747.5 L 879.5 764.0 L 894.5 790.0 L 898.5 809.0 L 898.5 835.0 L 895.5 851.0 L 888.5 866.0 L 881.0 873.5 L 857.0 885.5 L 843.0 888.5 L 821.0 888.5 L 802.0 878.5 L 808.0 885.5 L 820.5 891.0 L 805.5 902.0 L 795.0 918.5 Z M 1009.0 919.5 L 1000.5 905.0 L 985.5 892.0 L 1003.5 878.0 L 1007.0 867.5 L 1001.5 877.0 L 991.0 885.5 L 975.0 889.5 L 960.0 888.5 L 938.0 882.5 L 923.0 873.5 L 913.5 863.0 L 907.5 850.0 L 904.5 836.0 L 904.5 809.0 L 910.5 785.0 L 918.5 771.0 L 935.5 750.0 L 956.0 737.5 L 975.0 738.5 L 991.0 747.5 L 1007.5 768.0 L 1016.5 790.0 L 1016.5 800.0 L 1025.5 837.0 L 1026.5 872.0 L 1021.5 894.0 L 1009.0 919.5 Z","hamstrings":"M 843.0 1118.5 L 830.5 1082.0 L 825.5 1041.0 L 825.5 1014.0 L 829.5 977.0 L 836.5 942.0 L 848.5 905.0 L 854.5 894.0 L 857.0 893.5 L 867.5 926.0 L 871.5 966.0 L 866.5 1008.0 L 857.5 1042.0 L 851.5 1095.0 L 846.5 1114.0 L 843.0 1118.5 Z M 961.0 1122.5 L 955.5 1115.0 L 950.5 1099.0 L 944.5 1042.0 L 932.5 985.0 L 933.5 945.0 L 938.5 919.0 L 947.0 893.5 L 953.5 903.0 L 965.5 935.0 L 974.5 980.0 L 977.5 1015.0 L 974.5 1070.0 L 962.5 1110.0 L 961.0 1122.5 Z M 783.0 1105.5 L 779.5 1105.0 L 779.5 1097.0 L 786.5 966.0 L 793.5 935.0 L 801.5 916.0 L 812.0 902.5 L 823.0 896.5 L 826.5 904.0 L 829.5 934.0 L 829.5 959.0 L 824.5 994.0 L 806.5 1058.0 L 783.0 1105.5 Z M 1019.0 1103.5 L 995.5 1058.0 L 978.5 995.0 L 973.5 955.0 L 973.5 924.0 L 975.5 905.0 L 979.0 897.5 L 991.0 902.5 L 1002.5 916.0 L 1009.5 934.0 L 1015.5 961.0 L 1019.5 1004.0 L 1021.5 1082.0 L 1019.0 1103.5 Z M 926.0 988.5 L 922.5 981.0 L 923.0 974.5 L 926.5 976.0 L 926.0 988.5 Z"};
+
+        // Anatomik şekil üzerindeki her kas grubunun 3 alt bölgesinin (①, ②, ③) geometrik dilimleri, ayırıcı çizgileri ve rozet koordinatları
+        const ANATOMY_SUBREGION_SVG_GEOM = {
+            chest: {
+                // ① Üst Göğüs (upper), ② Orta Göğüs (mid), ③ Alt Göğüs (lower)
+                zones: {
+                    upper: '<rect x="80" y="425" width="295" height="50"/>',
+                    mid: '<rect x="80" y="475" width="295" height="53"/>',
+                    lower: '<rect x="80" y="528" width="295" height="48"/>'
+                },
+                dividers: 'M 90 475 Q 160 482 224 475 M 228 475 Q 292 482 362 475 M 95 528 Q 160 536 224 528 M 228 528 Q 292 536 357 528',
+                pins: [
+                    { key: 'upper', num: '1', label: 'Üst Göğüs', x: 165, y: 454 },
+                    { key: 'mid', num: '2', label: 'Orta Göğüs', x: 292, y: 502 },
+                    { key: 'lower', num: '3', label: 'Alt Göğüs', x: 168, y: 550 }
+                ]
+            },
+            shoulders: {
+                // ① Ön Omuz (front), ② Yan Omuz (side), ③ Arka Omuz (rear - arka vücut)
+                zones: {
+                    front: '<path d="M 64 420 L 135 420 L 135 552 L 52 552 Z M 318 420 L 388 420 L 400 552 L 318 552 Z"/>',
+                    side: '<path d="M 25 420 L 64 420 L 52 552 L 25 552 Z M 388 420 L 430 420 L 430 552 L 400 552 Z"/>',
+                    rear: '<rect x="700" y="425" width="405" height="115"/>'
+                },
+                dividers: 'M 64 426 L 52 545 M 388 426 L 400 545',
+                pins: [
+                    { key: 'front', num: '1', label: 'Ön Omuz', x: 92, y: 465 },
+                    { key: 'side', num: '2', label: 'Yan Omuz', x: 406, y: 492 },
+                    { key: 'rear', num: '3', label: 'Arka Omuz', x: 755, y: 476 }
+                ]
+            },
+            back: {
+                // ① Kanatlar (lats), ② Orta Sırt & Kürek (mid), ③ Üst Sırt & Trapez (traps), ④ Alt Sırt & Bel (lower)
+                zones: {
+                    lats: '<path d="M 846.0 694.5 L 840.5 691.0 L 839.5 687.0 L 822.5 667.0 L 800.5 633.0 L 786.5 605.0 L 774.5 572.0 L 765.5 536.0 L 763.5 523.0 L 765.5 508.0 L 762.5 502.0 L 786.0 481.5 L 796.5 493.0 L 802.5 507.0 L 813.5 523.0 L 810.0 527.5 L 831.0 526.5 L 852.0 520.5 L 857.5 524.0 L 878.5 559.0 L 892.5 591.0 L 893.5 607.0 L 889.5 620.0 L 856.5 682.0 L 846.0 694.5 Z M 960.0 693.5 L 957.0 693.5 L 950.5 687.0 L 914.5 620.0 L 910.5 606.0 L 911.5 587.0 L 927.5 553.0 L 949.0 521.5 L 955.0 520.5 L 976.0 526.5 L 993.0 526.5 L 990.5 522.0 L 999.5 510.0 L 1008.5 491.0 L 1016.0 483.5 L 1020.0 483.5 L 1040.5 502.0 L 1037.5 535.0 L 1031.5 562.0 L 1018.5 599.0 L 1002.5 632.0 L 984.5 662.0 L 960.0 693.5 Z"/>',
+                    mid: '<path d="M 831.0 523.5 L 820.0 522.5 L 810.5 514.0 L 792.5 478.0 L 792.5 472.0 L 804.5 454.0 L 812.0 448.5 L 821.0 451.5 L 831.5 461.0 L 842.5 496.0 L 850.5 513.0 L 847.0 517.5 L 831.0 523.5 Z M 982.0 522.5 L 966.0 520.5 L 956.0 515.5 L 954.5 511.0 L 969.5 472.0 L 970.5 462.0 L 980.0 453.5 L 988.0 449.5 L 994.0 449.5 L 1012.5 474.0 L 996.5 509.0 L 988.0 519.5 L 982.0 522.5 Z"/>',
+                    traps: '<path d="M 898.0 600.5 L 891.5 579.0 L 882.5 560.0 L 848.5 502.0 L 838.5 476.0 L 832.5 452.0 L 818.5 420.0 L 824.5 403.0 L 869.5 367.0 L 879.5 350.0 L 884.0 335.5 L 900.5 341.0 L 899.0 430.5 L 895.5 425.0 L 895.0 409.5 L 892.5 417.0 L 894.5 433.0 L 898.5 440.0 L 900.5 462.0 L 898.0 600.5 Z M 906.0 599.5 L 903.5 461.0 L 905.5 442.0 L 911.5 432.0 L 909.5 429.0 L 911.5 417.0 L 910.0 414.5 L 908.5 425.0 L 905.0 430.5 L 903.5 342.0 L 919.0 337.5 L 931.5 364.0 L 945.0 377.5 L 965.0 389.5 L 980.5 404.0 L 985.5 414.0 L 985.5 422.0 L 972.5 449.0 L 971.5 459.0 L 956.5 499.0 L 922.5 556.0 L 911.5 580.0 L 906.0 599.5 Z"/>',
+                    lower: '<path d="M 895.0 595.0 L 897.0 602.0 L 897.0 609.0 L 897.0 616.0 L 897.0 623.0 L 897.0 630.0 L 897.0 637.0 L 897.0 644.0 L 897.0 651.0 L 897.0 658.0 L 897.0 665.0 L 897.0 672.0 L 897.0 679.0 L 897.0 686.0 L 898.0 693.0 L 898.0 700.0 L 898.0 707.0 L 898.0 714.0 L 898.0 721.0 L 898.0 728.0 L 898.0 735.0 L 898.0 742.0 L 898.0 749.0 L 898.0 756.0 L 897.0 763.0 L 895.0 767.0 L 892.0 767.0 L 886.0 763.0 L 878.0 756.0 L 873.0 749.0 L 869.0 742.0 L 867.0 735.0 L 864.0 728.0 L 861.0 721.0 L 859.0 714.0 L 856.0 707.0 L 853.0 700.0 L 853.0 693.0 L 854.0 686.0 L 859.0 679.0 L 862.0 672.0 L 866.0 665.0 L 870.0 658.0 L 873.0 651.0 L 877.0 644.0 L 881.0 637.0 L 885.0 630.0 L 888.0 623.0 L 891.0 616.0 L 893.0 609.0 L 894.0 602.0 L 893.0 595.0 Z M 909.0 601.0 L 910.0 608.0 L 912.0 615.0 L 914.0 622.0 L 918.0 629.0 L 922.0 636.0 L 925.0 643.0 L 929.0 650.0 L 933.0 657.0 L 937.0 664.0 L 940.0 671.0 L 944.0 678.0 L 948.0 685.0 L 951.0 692.0 L 951.0 699.0 L 948.0 706.0 L 945.0 713.0 L 942.0 720.0 L 940.0 727.0 L 937.0 734.0 L 935.0 741.0 L 932.0 748.0 L 927.0 755.0 L 919.0 762.0 L 912.0 767.0 L 908.0 767.0 L 906.0 762.0 L 905.0 755.0 L 905.0 748.0 L 905.0 741.0 L 905.0 734.0 L 905.0 727.0 L 905.0 720.0 L 905.0 713.0 L 905.0 706.0 L 905.0 699.0 L 905.0 692.0 L 905.0 685.0 L 905.0 678.0 L 905.0 671.0 L 905.0 664.0 L 906.0 657.0 L 906.0 650.0 L 906.0 643.0 L 906.0 636.0 L 906.0 629.0 L 906.0 622.0 L 906.0 615.0 L 907.0 608.0 L 907.0 601.0 Z M 1019.0 603.0 L 1018.0 610.0 L 1015.0 617.0 L 1011.0 624.0 L 1007.0 631.0 L 1004.0 638.0 L 1002.0 645.0 L 1001.0 652.0 L 1000.0 659.0 L 999.0 666.0 L 1000.0 673.0 L 1000.0 680.0 L 1001.0 687.0 L 1001.0 694.0 L 1002.0 701.0 L 1002.0 708.0 L 1001.0 715.0 L 1000.0 722.0 L 999.0 729.0 L 1002.0 736.0 L 1004.0 743.0 L 1006.0 750.0 L 1008.0 757.0 L 1009.0 764.0 L 1010.0 768.0 L 1008.0 768.0 L 1006.0 764.0 L 1001.0 757.0 L 995.0 750.0 L 986.0 743.0 L 945.0 736.0 L 947.0 729.0 L 950.0 722.0 L 953.0 715.0 L 955.0 708.0 L 960.0 701.0 L 962.0 694.0 L 966.0 687.0 L 971.0 680.0 L 976.0 673.0 L 982.0 666.0 L 987.0 659.0 L 991.0 652.0 L 995.0 645.0 L 999.0 638.0 L 1003.0 631.0 L 1007.0 624.0 L 1010.0 617.0 L 1014.0 610.0 L 1017.0 603.0 Z M 787.0 608.0 L 790.0 615.0 L 794.0 622.0 L 797.0 629.0 L 801.0 636.0 L 805.0 643.0 L 810.0 650.0 L 815.0 657.0 L 819.0 664.0 L 824.0 671.0 L 830.0 678.0 L 836.0 685.0 L 841.0 692.0 L 842.0 699.0 L 848.0 706.0 L 850.0 713.0 L 852.0 720.0 L 855.0 727.0 L 857.0 734.0 L 819.0 741.0 L 810.0 748.0 L 803.0 755.0 L 797.0 762.0 L 795.0 767.0 L 793.0 767.0 L 793.0 762.0 L 795.0 755.0 L 797.0 748.0 L 799.0 741.0 L 801.0 734.0 L 802.0 727.0 L 801.0 720.0 L 800.0 713.0 L 800.0 706.0 L 800.0 699.0 L 800.0 692.0 L 801.0 685.0 L 801.0 678.0 L 802.0 671.0 L 802.0 664.0 L 801.0 657.0 L 800.0 650.0 L 799.0 643.0 L 797.0 636.0 L 793.0 629.0 L 790.0 622.0 L 787.0 615.0 L 785.0 608.0 Z"/>'
+                },
+                dividers: 'M 800 633 L 846 695 L 898 605 M 906 605 L 960 694 L 1003 632',
+                pins: [
+                    { key: 'lats', num: '1', label: 'Kanatlar', x: 828, y: 595 },
+                    { key: 'mid', num: '2', label: 'Orta Sırt', x: 982, y: 492 },
+                    { key: 'traps', num: '3', label: 'Üst Trapez', x: 872, y: 412 },
+                    { key: 'lower', num: '4', label: 'Alt Sırt & Bel', x: 876, y: 695 }
+                ]
+            },
+            biceps: {
+                // ① Pazı Dış (Tepe), ② Pazı İç (Dolgunluk), ③ Ön Kol & Dış Kol (Tutuş)
+                zones: {
+                    long_head: '<path d="M 28 515 L 60 515 L 60 612 L 28 612 Z M 396 515 L 440 515 L 440 612 L 396 612 Z"/>',
+                    short_head: '<path d="M 60 515 L 98 515 L 98 612 L 60 612 Z M 355 515 L 396 515 L 396 612 L 355 612 Z"/>',
+                    brachialis: '<path d="M 8 530 L 28 530 L 28 612 L 8 612 Z M 8 612 L 105 612 L 105 830 L 8 830 Z M 355 612 L 492 612 L 492 830 L 355 830 Z"/>'
+                },
+                dividers: 'M 60 524 L 60 612 M 396 524 L 396 612 M 28 612 L 90 612 M 362 612 L 434 612',
+                pins: [
+                    { key: 'long_head', num: '1', label: 'Pazı Dış (Tepe)', x: 414, y: 572 },
+                    { key: 'short_head', num: '2', label: 'Pazı İç', x: 74, y: 572 },
+                    { key: 'brachialis', num: '3', label: 'Ön Kol & Dış Kol', x: 46, y: 635 }
+                ]
+            },
+            triceps: {
+                // ① Arka Kol İç/Uzun Kısım (long), ② Arka Kol Dış Kısım (lateral), ③ Arka Kol Alt Kısım (medial)
+                zones: {
+                    long: '<path d="M 731 512 L 770 512 L 770 592 L 731 592 Z M 1032 512 L 1071 512 L 1071 592 L 1032 592 Z"/>',
+                    lateral: '<path d="M 690 512 L 731 512 L 731 592 L 690 592 Z M 1071 512 L 1112 512 L 1112 592 L 1071 592 Z"/>',
+                    medial: '<rect x="635" y="592" width="518" height="240"/>'
+                },
+                dividers: 'M 731 520 L 731 592 M 1071 520 L 1071 592 M 695 592 L 765 592 M 1036 592 L 1106 592',
+                pins: [
+                    { key: 'long', num: '1', label: 'Uzun Baş', x: 748, y: 560 },
+                    { key: 'lateral', num: '2', label: 'Dış Baş', x: 1088, y: 560 },
+                    { key: 'medial', num: '3', label: 'Alt Arka Kol', x: 1068, y: 622 }
+                ]
+            },
+            core: {
+                // ① Ön Karın (rectus), ② Yan Karın / Oblik (obliques), ③ Derin İç Karın & Alt Karın (transverse)
+                zones: {
+                    rectus: '<rect x="168" y="555" width="116" height="150"/>',
+                    obliques: '<path d="M 120 555 L 168 555 L 168 835 L 120 835 Z M 284 555 L 332 555 L 332 835 L 284 835 Z"/>',
+                    transverse: '<rect x="168" y="705" width="116" height="132"/>'
+                },
+                dividers: 'M 168 568 L 168 825 M 284 568 L 284 825 M 170 705 L 282 705',
+                pins: [
+                    { key: 'rectus', num: '1', label: 'Ön Karın', x: 200, y: 630 },
+                    { key: 'obliques', num: '2', label: 'Yan Karın', x: 304, y: 665 },
+                    { key: 'transverse', num: '3', label: 'Derin & Alt Karın', x: 254, y: 745 }
+                ]
+            },
+            quads: {
+                // ① Dış Ön Bacak (vastus_lat), ② İç Ön Bacak - Diz Üstü (vastus_med), ③ Orta Ön Bacak (rectus_fem)
+                zones: {
+                    vastus_lat: '<path d="M 78 760 L 124 760 L 124 920 L 78 920 Z M 78 920 L 134 920 L 134 1090 L 78 1090 Z M 326 760 L 375 760 L 375 920 L 326 920 Z M 318 920 L 375 920 L 375 1090 L 318 1090 Z"/>',
+                    rectus_fem: '<path d="M 124 760 L 168 760 L 168 920 L 124 920 Z M 280 760 L 326 760 L 326 920 L 280 920 Z"/>',
+                    vastus_med: '<path d="M 168 760 L 280 760 L 280 920 L 168 920 Z M 134 920 L 318 920 L 318 1090 L 134 1090 Z"/>'
+                },
+                dividers: 'M 124 772 L 124 920 L 134 1062 M 168 772 L 168 920 L 134 920 M 280 772 L 280 920 L 318 920 M 326 772 L 326 920 L 318 1062',
+                pins: [
+                    { key: 'vastus_lat', num: '1', label: 'Dış Ön Bacak', x: 102, y: 925 },
+                    { key: 'vastus_med', num: '2', label: 'İç Ön Bacak', x: 164, y: 1015 },
+                    { key: 'rectus_fem', num: '3', label: 'Orta Ön Bacak', x: 310, y: 895 }
+                ]
+            },
+            glutes: {
+                // ① Ana Kalça Kası (maximus), ② Yan Kalça - Üst Dış (medius), ③ Derin Kalça & Bel Dengesi (minimus)
+                zones: {
+                    medius: '<rect x="770" y="732" width="265" height="58"/>',
+                    minimus: '<rect x="862" y="790" width="80" height="72"/>',
+                    maximus: '<path d="M 770 790 L 862 790 L 862 862 L 942 862 L 942 790 L 1035 790 L 1035 925 L 770 925 Z"/>'
+                },
+                dividers: 'M 782 790 L 1020 790 M 862 790 L 862 862 L 942 862 L 942 790',
+                pins: [
+                    { key: 'maximus', num: '1', label: 'Ana Kalça', x: 825, y: 850 },
+                    { key: 'medius', num: '2', label: 'Yan Kalça', x: 965, y: 762 },
+                    { key: 'minimus', num: '3', label: 'Derin Kalça', x: 882, y: 826 }
+                ]
+            },
+            hamstrings: {
+                // ① Dış Arka Bacak - Diz Bükme (biceps_fem), ② İç Arka Bacak - Öne Eğilme (semitend), ③ Üst Arka Bacak & Kalça Bağlantısı (hinge_chain)
+                zones: {
+                    hinge_chain: '<rect x="772" y="888" width="258" height="67"/>',
+                    biceps_fem: '<path d="M 772 955 L 827 955 L 827 1130 L 772 1130 Z M 975 955 L 1030 955 L 1030 1130 L 975 1130 Z"/>',
+                    semitend: '<rect x="827" y="955" width="148" height="175"/>'
+                },
+                dividers: 'M 782 955 L 868 955 M 934 955 L 1018 955 M 827 955 L 827 1110 M 975 955 L 975 1110',
+                pins: [
+                    { key: 'biceps_fem', num: '1', label: 'Dış Arka Bacak', x: 804, y: 1020 },
+                    { key: 'semitend', num: '2', label: 'İç Arka Bacak', x: 954, y: 1020 },
+                    { key: 'hinge_chain', num: '3', label: 'Üst Bağlantı', x: 842, y: 928 }
+                ]
+            },
+            calves: {
+                // ① Üst Baldır - Ayakta (gastrocnemius), ② Alt Baldır - Oturarak (soleus), ③ Ön Kaval Kemiği & Bilek (tibialis)
+                zones: {
+                    gastrocnemius: '<rect x="745" y="1085" width="310" height="172"/>',
+                    soleus: '<rect x="745" y="1257" width="310" height="110"/>',
+                    tibialis: '<rect x="70" y="1115" width="315" height="252"/>'
+                },
+                dividers: 'M 762 1257 L 842 1257 M 960 1257 L 1040 1257 M 802 1098 L 802 1257 M 998 1098 L 998 1257',
+                pins: [
+                    { key: 'gastrocnemius', num: '1', label: 'Üst Baldır', x: 782, y: 1185 },
+                    { key: 'soleus', num: '2', label: 'Alt Baldır', x: 1002, y: 1295 },
+                    { key: 'tibialis', num: '3', label: 'Ön Kaval & Bilek', x: 108, y: 1225 }
+                ]
+            }
+        };
 
         function renderAnatomicalBodySVG(muscles, selectedId) {
             const mMap = {};
             muscles.forEach(m => { mMap[m.id] = m; });
 
-            const getStyle = (id) => {
+            const getParentStyle = (id) => {
                 const m = mMap[id] || { status: 'unworked', effectiveDone: 0, effectiveTotal: 0 };
                 const shownSets = (m.effectiveTotal !== undefined ? m.effectiveTotal : (m.effectiveDone || 0));
                 let fill = '#EF4444';
                 let stroke = '#DC2626';
                 let animClass = 'muscle-unworked-anim';
-                let fillOpacity = 0.88;
                 if (m.status === 'optimal' || m.status === 'high') {
                     fill = '#16A34A';
                     stroke = '#15803D';
                     animClass = '';
-                    fillOpacity = 0.88;
                 } else if (m.status === 'insufficient') {
                     fill = '#F59E0B';
                     stroke = '#D97706';
                     animClass = '';
-                    fillOpacity = 0.88;
                 }
                 const isSel = (selectedId === id);
                 return {
                     fill,
                     stroke,
-                    fillOpacity,
+                    animClass,
+                    isSel,
                     cls: `anatomy-muscle ${animClass} ${isSel ? 'active-selected' : ''}`,
                     tooltip: `${m.name || id}: ${shownSets ? shownSets.toFixed(1) : 0} Set (${m.statusBadge || m.status})`
+                };
+            };
+
+            const getSubStyle = (mId, colKey, colLabel, compData, parentStyle) => {
+                if (!compData) {
+                    return {
+                        fill: parentStyle.fill,
+                        stroke: parentStyle.stroke,
+                        tooltip: `${colLabel}: Veri Yok`
+                    };
+                }
+                const isDone = compData.earnedSets > 0;
+                const isPlanned = !isDone && compData.plannedExs && compData.plannedExs.size > 0;
+                if (isDone) {
+                    return {
+                        fill: '#16A34A',
+                        stroke: '#14532D',
+                        statusText: `${compData.earnedSets.toFixed(1)} Set (Çalıştı)`,
+                        tooltip: `${colLabel}: ${compData.earnedSets.toFixed(1)} Set (${Array.from(compData.doneExs).join(', ')})`
+                    };
+                }
+                if (isPlanned) {
+                    return {
+                        fill: '#F59E0B',
+                        stroke: '#B45309',
+                        statusText: `Planda (${compData.plannedCount} Hrk)`,
+                        tooltip: `${colLabel}: Planda (${Array.from(compData.plannedExs).join(', ')})`
+                    };
+                }
+                return {
+                    fill: '#EF4444',
+                    stroke: '#991B1B',
+                    statusText: '0 Set (Boşta)',
+                    tooltip: `${colLabel}: 0 Set (Boşta — Tıklayıp hareket ekleyebilirsin)`
                 };
             };
 
@@ -19859,21 +21556,76 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 'back', 'glutes', 'quads', 'hamstrings', 'calves'
             ];
 
-            const pathsHTML = muscleOrder.map(mId => {
-                const s = getStyle(mId);
+            let defsHTML = '';
+            let groupsHTML = '';
+            let selectedPinsHTML = '';
+
+            muscleOrder.forEach(mId => {
                 const d = ANATOMY_MUSCLE_PATHS[mId] || '';
-                if (!d) return '';
-                return `<path class="${s.cls}" data-muscle="${mId}" onclick="selectAnatomyMuscle('${mId}')" d="${d}" fill="${s.fill}" fill-opacity="${s.fillOpacity}" stroke="${s.stroke}" stroke-width="1.5"><title>${s.tooltip}</title></path>`;
-            }).join('\n');
+                if (!d) return;
+                const pStyle = getParentStyle(mId);
+                const mObj = mMap[mId] || { id: mId, name: mId };
+                const compMap = computeMuscleCompartmentMap(mObj);
+                const subGeom = ANATOMY_SUBREGION_SVG_GEOM[mId];
+                const def = MUSCLE_DIAGRAM_DEFS[mId];
+
+                defsHTML += `<clipPath id="clip_anat_${mId}"><path d="${d}"/></clipPath>\n`;
+
+                if (subGeom && def && compMap) {
+                    const zonesHTML = def.columns.map((col, idx) => {
+                        const zoneSvg = subGeom.zones[col.key] || '';
+                        if (!zoneSvg) return '';
+                        const subSt = getSubStyle(mId, col.key, col.label, compMap[col.key], pStyle);
+                        const withAttrs = zoneSvg.replace(/^<(\w+)/, `<$1 fill="${subSt.fill}" fill-opacity="0.88" style="cursor:pointer;" onclick="selectAnatomyMuscle('${mId}', '${col.key}', event)"`);
+                        return `<g><title>[${idx + 1}] ${escapeHTML(mObj.name || mId)} — ${escapeHTML(subSt.tooltip)}</title>${withAttrs}</g>`;
+                    }).join('\n');
+
+                    const outerStrokeWidth = pStyle.isSel ? '3.2' : '1.6';
+                    const outerStrokeColor = pStyle.isSel ? '#0F172A' : '#1E293B';
+                    const divStrokeWidth = pStyle.isSel ? '2.8' : '1.8';
+
+                    groupsHTML += `
+                        <g class="${pStyle.cls}" data-muscle="${mId}" onclick="selectAnatomyMuscle('${mId}', null, event)">
+                            <g clip-path="url(#clip_anat_${mId})">
+                                ${zonesHTML}
+                                <path d="${subGeom.dividers}" fill="none" stroke="#FFFFFF" stroke-width="${Number(divStrokeWidth) + 1.4}" stroke-linecap="round" opacity="0.85" pointer-events="none"/>
+                                <path d="${subGeom.dividers}" fill="none" stroke="#0F172A" stroke-width="${divStrokeWidth}" stroke-dasharray="${pStyle.isSel ? 'none' : '4,3'}" stroke-linecap="round" pointer-events="none"/>
+                            </g>
+                            <path d="${d}" fill="none" stroke="${outerStrokeColor}" stroke-width="${outerStrokeWidth}" pointer-events="none"/>
+                        </g>
+                    `;
+
+                    if (pStyle.isSel && Array.isArray(subGeom.pins)) {
+                        subGeom.pins.forEach(pin => {
+                            const cData = compMap[pin.key];
+                            const isDone = cData && cData.earnedSets > 0;
+                            const isPlan = cData && !isDone && cData.plannedExs && cData.plannedExs.size > 0;
+                            const badgeFill = isDone ? '#15803D' : (isPlan ? '#B45309' : '#B91C1C');
+                            selectedPinsHTML += `
+                                <g transform="translate(${pin.x}, ${pin.y})" style="cursor:pointer;" onclick="selectAnatomyMuscle('${mId}', '${pin.key}', event)">
+                                    <circle cx="0" cy="0" r="16" fill="#FFFFFF" stroke="${badgeFill}" stroke-width="3"/>
+                                    <circle cx="0" cy="0" r="12.5" fill="${badgeFill}"/>
+                                    <text x="0" y="5" text-anchor="middle" fill="#FFFFFF" font-family="'Plus Jakarta Sans', sans-serif" font-size="14" font-weight="900">${pin.num}</text>
+                                </g>
+                            `;
+                        });
+                    }
+                } else {
+                    groupsHTML += `<path class="${pStyle.cls}" data-muscle="${mId}" onclick="selectAnatomyMuscle('${mId}', null, event)" d="${d}" fill="${pStyle.fill}" fill-opacity="0.88" stroke="${pStyle.stroke}" stroke-width="1.5"><title>${pStyle.tooltip}</title></path>`;
+                }
+            });
 
             return `
             <svg class="anatomy-svg" viewBox="0 0 1150 1520" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    ${defsHTML}
+                </defs>
                 <!-- TITLES -->
                 <text x="226" y="30" text-anchor="middle" fill="#0F172A" font-family="'Plus Jakarta Sans', sans-serif" font-size="34" font-weight="900" letter-spacing="1.5">ÖN VÜCUT</text>
-                <text x="226" y="52" text-anchor="middle" fill="#64748B" font-family="'Plus Jakarta Sans', sans-serif" font-size="20" font-weight="800" letter-spacing="1">ANTERIOR</text>
+                <text x="226" y="52" text-anchor="middle" fill="#64748B" font-family="'Plus Jakarta Sans', sans-serif" font-size="20" font-weight="800" letter-spacing="1">ÖNDEN GÖRÜNÜM (ALT KAS AYRIMLI)</text>
                 
                 <text x="902" y="30" text-anchor="middle" fill="#0F172A" font-family="'Plus Jakarta Sans', sans-serif" font-size="34" font-weight="900" letter-spacing="1.5">ARKA VÜCUT</text>
-                <text x="902" y="52" text-anchor="middle" fill="#64748B" font-family="'Plus Jakarta Sans', sans-serif" font-size="20" font-weight="800" letter-spacing="1">POSTERIOR</text>
+                <text x="902" y="52" text-anchor="middle" fill="#64748B" font-family="'Plus Jakarta Sans', sans-serif" font-size="20" font-weight="800" letter-spacing="1">ARKADAN GÖRÜNÜM (ALT KAS AYRIMLI)</text>
                 
                 <!-- CENTER DIVIDER -->
                 <line x1="564" y1="20" x2="564" y2="1490" stroke="#CBD5E1" stroke-width="2.5" stroke-dasharray="8,8"/>
@@ -19881,8 +21633,11 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 <!-- REAL CANVA HIGH-RES ATHLETIC BASE FIGURE -->
                 <image href="./assets/diagrams/canva_anatomy_neutral.png" x="0" y="60" width="1150" height="1475" />
 
-                <!-- DYNAMICALLY TINTED MUSCLE OVERLAYS -->
-                ${pathsHTML}
+                <!-- DYNAMICALLY TINTED SUB-MUSCLE OVERLAYS & ANATOMICAL PARTITIONS -->
+                ${groupsHTML}
+
+                <!-- NUMBERED CALLOUT PINS FOR SELECTED MUSCLE SUB-REGIONS -->
+                ${selectedPinsHTML}
             </svg>
             `;
         }
@@ -19891,6 +21646,44 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const analysis = calculateWeeklyMuscleSufficiency(currentWeeklyMuscleSource, currentWeeklyMuscleWeekOffset);
             const { summary, bounds, sourceMode, weekOffset } = analysis;
             const optimalTotal = summary.optimalCount + summary.highCount;
+
+            let subWorkedCount = 0;
+            let subPlannedCount = 0;
+            let subUnworkedCount = 0;
+            const subWorkedList = [];
+            const subPlannedList = [];
+            const subUnworkedList = [];
+            analysis.muscles.forEach(m => {
+                const def = MUSCLE_DIAGRAM_DEFS[m.id];
+                const compMap = computeMuscleCompartmentMap(m);
+                if (!def || !compMap) return;
+                def.columns.forEach((col, idx) => {
+                    const cData = compMap[col.key];
+                    const isDone = cData && cData.earnedSets > 0;
+                    const isPlan = cData && !isDone && cData.plannedExs && cData.plannedExs.size > 0;
+                    const item = {
+                        muscleId: m.id,
+                        muscleName: m.name,
+                        colKey: col.key,
+                        colLabel: col.label,
+                        num: idx + 1,
+                        earnedSets: cData ? cData.earnedSets : 0,
+                        plannedCount: cData ? cData.plannedCount : 0,
+                        recId: col.recId,
+                        recName: col.recName
+                    };
+                    if (isDone) {
+                        subWorkedCount++;
+                        subWorkedList.push(item);
+                    } else if (isPlan) {
+                        subPlannedCount++;
+                        subPlannedList.push(item);
+                    } else {
+                        subUnworkedCount++;
+                        subUnworkedList.push(item);
+                    }
+                });
+            });
 
             // Resolve currently selected muscle for focus card
             let activeId = currentSelectedAnatomyMuscle;
@@ -19954,13 +21747,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 let statusClass = 'status-optimal';
                 if (m.status === 'optimal' || m.status === 'high') {
                     statusClass = 'status-optimal';
-                    statusBadge = `<span style="background:#DCFCE7; border:1px solid #86EFAC; color:#15803D; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">Yeterli / Optimal (${shownSets.toFixed(1)} Set)</span>`;
+                    statusBadge = `<span style="background:#DCFCE7; border:1px solid #86EFAC; color:#15803D; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">İdeal Seviye (${shownSets.toFixed(1)} Set)</span>`;
                 } else if (m.status === 'insufficient') {
                     statusClass = 'status-insufficient';
-                    statusBadge = `<span style="background:#FEF3C7; border:1px solid #FCD34D; color:#B45309; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">Düşük Hacim (${shownSets.toFixed(1)} / Hedef: ${m.optimalMin}-${m.optimalMax} Set)</span>`;
+                    statusBadge = `<span style="background:#FEF3C7; border:1px solid #FCD34D; color:#B45309; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">Az Çalıştı (${shownSets.toFixed(1)} / Hedef: ${m.optimalMin}-${m.optimalMax} Set)</span>`;
                 } else {
                     statusClass = 'status-unworked';
-                    statusBadge = `<span style="background:#FEE2E2; border:1px solid #FCA5A5; color:#B91C1C; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">0 Set — Bu Hafta Atlandı</span>`;
+                    statusBadge = `<span style="background:#FEE2E2; border:1px solid #FCA5A5; color:#B91C1C; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">0 Set — Henüz Çalışmadı</span>`;
                 }
 
                 const pct = Math.min(100, Math.round((shownSets / m.optimalMin) * 100));
@@ -19984,7 +21777,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 } else {
                     actionBtnHTML = `
                         <div style="margin-top:10px; font-size:12px; color:#15803D; font-weight:700; display:flex; align-items:center; gap:6px;">
-                            <span>Haftalık hipertrofi ve kuvvet eşiği sağlandı (${shownSets.toFixed(1)} Efektif Set).</span>
+                            <span>Bu bölge bu hafta yeterince çalıştı (${shownSets.toFixed(1)} Set).</span>
                         </div>
                     `;
                 }
@@ -20005,7 +21798,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 <span>Haftalık Tamamlanma: % ${pct}</span>
                                 <span>${shownSets.toFixed(1)} / ${m.optimalMin}-${m.optimalMax} Set</span>
                             </div>
-                            <div style="height:6px; background:#18202C; border-radius:3px; overflow:hidden;">
+                            <div style="height:6px; background:#E2E8F0; border-radius:3px; overflow:hidden;">
                                 <div style="height:100%; width:${pct}%; background:${barColor}; border-radius:3px; transition:width 0.3s ease;"></div>
                             </div>
                         </div>
@@ -20017,24 +21810,24 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         ${actionBtnHTML}
 
                         <!-- Collapsible Lineage Dropdown -->
-                        <div style="margin-top:10px; padding-top:8px; border-top:1px solid #222C3A;">
-                            <button id="lineage_btn_${m.id}" class="btn btn-outline" style="width:100%; font-size:12px; padding:8px 12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; background:#0E131B; border-color:#263244; cursor:pointer;" onclick="toggleMuscleLineage('${m.id}')">
+                        <div style="margin-top:10px; padding-top:8px; border-top:1px solid #E2E8F0;">
+                            <button id="lineage_btn_${m.id}" class="btn btn-outline" style="width:100%; font-size:12px; padding:8px 12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border-color:#CBD5E1; cursor:pointer;" onclick="toggleMuscleLineage('${m.id}')">
                                 <span>Hangi Seans & Hareketten Geldi? (${(m.contributions || []).length} Kayıt)</span>
                                 <span style="color:#B45309; font-size:11.5px; font-weight:800;">Detay</span>
                             </button>
 
-                            <div id="lineage_box_${m.id}" data-count="${(m.contributions || []).length}" style="display:none; margin-top:8px; background:#0E131B; border:1px solid #222C3A; border-radius:8px; padding:10px;">
+                            <div id="lineage_box_${m.id}" data-count="${(m.contributions || []).length}" style="display:none; margin-top:8px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:10px;">
                                 ${(m.contributions && m.contributions.length > 0) ? `
                                     <div style="display:flex; flex-direction:column; gap:6px;">
                                         <div style="font-size:11.5px; color:var(--text-secondary); margin-bottom:2px; font-weight:700;">
                                             Tamamlanan Seanslar & Puan Katkısı:
                                         </div>
                                         ${m.contributions.map(c => `
-                                            <div style="display:flex; justify-content:space-between; align-items:center; background:#151C26; border:1px solid #222C3A; border-radius:6px; padding:6px 10px; font-size:12px;">
+                                            <div style="display:flex; justify-content:space-between; align-items:center; background:#F1F5F9; border:1px solid #E2E8F0; border-radius:6px; padding:6px 10px; font-size:12px;">
                                                 <div>
                                                     <div style="display:flex; align-items:center; gap:6px;">
                                                         <strong style="color:#0F172A;">${escapeHTML(c.exercise)}</strong>
-                                                        <span style="font-size:10.5px; padding:2px 6px; border-radius:4px; font-weight:700; ${c.role === 'Birincil' ? 'background:#FEF3C7; color:#B45309;' : 'background:#E0F2FE; color:#0369A1;'}">
+                                                        <span style="font-size:10.5px; padding:2px 6px; border-radius:4px; font-weight:700; ${(c.role === 'Birincil' || c.role === 'Ana Hedef') ? 'background:#FEF3C7; color:#B45309;' : 'background:#E0F2FE; color:#0369A1;'}">
                                                             ${c.role} (${c.factor}x)
                                                         </span>
                                                     </div>
@@ -20067,17 +21860,17 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     <div class="anatomy-top-bar">
                         <div>
                             <div style="display:flex; align-items:center; gap:8px;">
-                                <h3 style="font-size:17px; font-weight:900; color:#0F172A; margin:0;">Haftalık Kas Yükü & Anatomik Harita</h3>
+                                <h3 style="font-size:17px; font-weight:900; color:#0F172A; margin:0;">Haftalık Çalışan Kaslar & Vücut Haritası</h3>
                             </div>
                             <div style="font-size:12px; color:var(--text-secondary); margin-top:3px;">
-                                Bu haftaki antrenmanların kas gruplarına etkisi • Kaslara dokunarak inceleyin
+                                Bu haftaki antrenmanların kaslarına etkisi • Kaslara dokunarak inceleyin
                             </div>
                         </div>
 
                         <!-- Mini Week Switcher -->
                         <div style="display:flex; align-items:center; gap:4px;">
                             <button class="btn btn-outline" style="padding:4px 8px; font-size:12px; border-radius:6px;" onclick="setWeeklyMuscleOffset(${weekOffset - 1})" title="Önceki Hafta">&lsaquo;</button>
-                            <span style="font-size:12px; font-weight:800; color:#0F172A; padding:4px 10px; background:#0E131B; border-radius:6px; border:1px solid var(--border);">
+                            <span style="font-size:12px; font-weight:800; color:#0F172A; padding:4px 10px; background:#F8FAFC; border-radius:6px; border:1px solid var(--border);">
                                 ${escapeHTML(bounds.label)}
                             </span>
                             <button class="btn btn-outline" style="padding:4px 8px; font-size:12px; border-radius:6px;" onclick="setWeeklyMuscleOffset(${weekOffset + 1})" title="Sonraki Hafta">&rsaquo;</button>
@@ -20090,20 +21883,20 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
                     <!-- 3 VISUAL STATUS COUNTERS (OPENGYM STYLE) -->
                     <div class="anatomy-legend">
-                        <div class="anatomy-legend-item optimal" onclick="setWeeklyMuscleFilter('optimal')">
+                        <div class="anatomy-legend-item optimal" style="cursor:pointer; ${currentWeeklyMuscleFilter === 'optimal' ? 'box-shadow: 0 0 0 2.5px #15803D; background:#DCFCE7;' : ''}" onclick="setWeeklyMuscleFilter('optimal')" title="Tıkla: İyi çalışan ana kas gruplarını ve alt kasları aşağıda listele">
                             <div class="badge-dot"></div>
                             <span class="badge-val">${optimalTotal}</span>
-                            <span class="badge-label">Yeterli / Optimal</span>
+                            <span class="badge-label">Ana Grup (${subWorkedCount} Alt Kas Çalıştı)</span>
                         </div>
-                        <div class="anatomy-legend-item insufficient" onclick="setWeeklyMuscleFilter('insufficient')">
+                        <div class="anatomy-legend-item insufficient" style="cursor:pointer; ${currentWeeklyMuscleFilter === 'insufficient' ? 'box-shadow: 0 0 0 2.5px #B45309; background:#FEF3C7;' : ''}" onclick="setWeeklyMuscleFilter('insufficient')" title="Tıkla: Az çalışan / planda olan ana kas gruplarını ve alt kasları aşağıda listele">
                             <div class="badge-dot"></div>
                             <span class="badge-val">${summary.insufficientCount}</span>
-                            <span class="badge-label">Düşük / Planda</span>
+                            <span class="badge-label">Az / Planda (${subPlannedCount} Alt Kas Planda)</span>
                         </div>
-                        <div class="anatomy-legend-item unworked" onclick="setWeeklyMuscleFilter('unworked')">
+                        <div class="anatomy-legend-item unworked" style="cursor:pointer; ${currentWeeklyMuscleFilter === 'unworked' ? 'box-shadow: 0 0 0 2.5px #B91C1C; background:#FEE2E2;' : ''}" onclick="setWeeklyMuscleFilter('unworked')" title="Tıkla: Hiç çalışmayan ana kas gruplarını ve 0 set kalan alt kasları aşağıda listele">
                             <div class="badge-dot"></div>
                             <span class="badge-val">${summary.unworkedCount}</span>
-                            <span class="badge-label">Boşta (0 Set)</span>
+                            <span class="badge-label">Çalışmayan (${subUnworkedCount} Alt Kas 0 Set)</span>
                         </div>
                     </div>
 
@@ -20114,6 +21907,67 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
                     <!-- QUICK SELECT CHIPS -->
                     ${chipsHTML}
+
+                    <!-- FILTERED MUSCLES & SUB-MUSCLES DRAWER -->
+                    ${(() => {
+                        if (!currentWeeklyMuscleFilter || currentWeeklyMuscleFilter === 'all') return '';
+                        const isOpt = currentWeeklyMuscleFilter === 'optimal';
+                        const isIns = currentWeeklyMuscleFilter === 'insufficient';
+                        const titleText = isOpt
+                            ? `İyi Çalışan Bölgeler (${optimalTotal} Ana Grup • ${subWorkedCount} Alt Kas)`
+                            : (isIns ? `Az Çalışan & Planda Olan Bölgeler (${summary.insufficientCount} Ana Grup • ${subPlannedCount} Alt Kas)` : `Çalışmayan (0 Set) Bölgeler (${summary.unworkedCount} Ana Grup • ${subUnworkedCount} Alt Kas)`);
+                        const borderCol = isOpt ? '#86EFAC' : (isIns ? '#FCD34D' : '#FCA5A5');
+                        const headerBg = isOpt ? '#DCFCE7' : (isIns ? '#FEF3C7' : '#FEE2E2');
+                        const headerColor = isOpt ? '#15803D' : (isIns ? '#B45309' : '#B91C1C');
+
+                        const mainMatches = analysis.muscles.filter(m => isOpt ? (m.status === 'optimal' || m.status === 'high') : m.status === currentWeeklyMuscleFilter);
+                        const subMatches = isOpt ? subWorkedList : (isIns ? subPlannedList : subUnworkedList);
+
+                        const mainHTML = mainMatches.length > 0
+                            ? mainMatches.map(m => {
+                                const s = (m.effectiveTotal !== undefined ? m.effectiveTotal : m.effectiveDone);
+                                return `<button type="button" class="btn btn-outline" style="font-size:12px; padding:6px 12px; border-radius:8px; background:#FFFFFF; color:#0F172A; border-color:${borderCol}; font-weight:800;" onclick="selectAnatomyMuscle('${m.id}')">${escapeHTML(m.name)} (${s.toFixed(1)} Set)</button>`;
+                            }).join('')
+                            : `<span style="font-size:12px; color:#475569;">Bu kategoride ana kas grubu yok.</span>`;
+
+                        const subHTML = subMatches.length > 0
+                            ? subMatches.map(it => {
+                                const meta = isOpt ? `${it.earnedSets.toFixed(1)} Set` : (isIns ? `Planda (${it.plannedCount} Hrk)` : `0 Set`);
+                                const quickAddBtn = (!isOpt && !isIns && it.recId)
+                                    ? `<button type="button" class="btn btn-outline" style="font-size:11px; padding:4px 8px; border-radius:6px; background:#FEF2F2; color:#B91C1C; border-color:#FECACA; font-weight:800;" onclick="openQuickAddToDayModal('${it.recId}')">+ ${escapeHTML(it.recName)} Ekle</button>`
+                                    : '';
+                                return `
+                                    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; padding:7px 10px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px;">
+                                        <button type="button" style="background:none; border:none; padding:0; text-align:left; cursor:pointer; color:#0F172A; font-size:12px; font-weight:800; display:flex; align-items:center; gap:6px;" onclick="selectAnatomyMuscle('${it.muscleId}', '${it.colKey}', event)">
+                                            <span style="display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; background:${headerColor}; color:#FFFFFF; font-size:11px; font-weight:900;">${it.num}</span>
+                                            <span><strong>${escapeHTML(it.muscleName)}</strong> &rarr; ${escapeHTML(it.colLabel)}</span>
+                                            <span style="font-size:11px; color:${headerColor}; font-weight:800;">(${meta})</span>
+                                        </button>
+                                        ${quickAddBtn}
+                                    </div>
+                                `;
+                            }).join('')
+                            : `<span style="font-size:12px; color:#475569;">Bu kategoride alt kas bölgesi yok.</span>`;
+
+                        return `
+                            <div id="anatomyFilterResultsBox" style="margin:12px 0; border:1.5px solid ${borderCol}; border-radius:12px; overflow:hidden; background:#FFFFFF;">
+                                <div style="background:${headerBg}; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid ${borderCol};">
+                                    <span style="font-size:12.5px; font-weight:900; color:${headerColor};">${titleText}</span>
+                                    <button type="button" class="btn btn-outline" style="font-size:11px; padding:3px 9px; border-radius:6px; background:#FFFFFF; color:#0F172A; border-color:${borderCol}; font-weight:800;" onclick="setWeeklyMuscleFilter('all')">Kapat ✕</button>
+                                </div>
+                                <div style="padding:12px; display:flex; flex-direction:column; gap:10px;">
+                                    <div>
+                                        <div style="font-size:11px; font-weight:800; color:#475569; margin-bottom:6px; text-transform:uppercase;">Ana Kas Grupları (${mainMatches.length}):</div>
+                                        <div style="display:flex; gap:6px; flex-wrap:wrap;">${mainHTML}</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size:11px; font-weight:800; color:#475569; margin-bottom:6px; text-transform:uppercase;">Şekildeki Alt Kas Bölgeleri (${subMatches.length}) — Tıklayıp İncele:</div>
+                                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:6px;">${subHTML}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    })()}
 
                     <!-- SELECTED MUSCLE FOCUS CARD -->
                     ${focusCardHTML}
@@ -20172,10 +22026,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
 
             const timeFilterHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:14px; background:#0E131B; padding:10px 14px; border-radius:10px; border:1px solid var(--border);">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:14px; background:#F8FAFC; padding:10px 14px; border-radius:10px; border:1px solid var(--border);">
                     <div>
-                        <span style="font-size:13px; font-weight:800; color:#0F172A; display:block;">Kümülatif Tonaj & Biyomekanik Geçmişi</span>
-                        <span style="font-size:11.5px; color:var(--text-secondary);">Geçmiş antrenman seanslarının kümülatif analizi</span>
+                        <span style="font-size:13px; font-weight:800; color:#0F172A; display:block;">Geçmiş Antrenmanlar & Toplam Ağırlık Özeti</span>
+                        <span style="font-size:11.5px; color:var(--text-secondary);">Yaptığın antrenmanların toplam ağırlık ve tekrar özeti</span>
                     </div>
                     <div style="display:flex; gap:6px; flex-wrap:wrap;">
                         <button class="btn btn-outline" style="font-size:12px; padding:5px 12px; border-radius:16px; ${days === 7 ? 'background:#84CC16 !important; color:#0A0E17 !important; border-color:#65A30D !important; font-weight:800;' : ''}" onclick="setAnalyticsPeriod(7)">Son 7 Gün</button>
@@ -20189,7 +22043,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (filteredLogs.length === 0) {
                 container.innerHTML = weeklySufficiencyHTML + mobilityBridgeHTML + timeFilterHTML + `
                     <div style="background:var(--bg-surface); padding:24px; text-align:center; border:1px solid var(--border); border-radius:10px; color:var(--text-secondary); font-size:13px;">
-                        Bu zaman aralığında kayıtlı antrenman seansı bulunamadı. Antrenmanlarınızı kaydettikçe uzun vadeli kümülatif tonaj ve geçmiş yük dağılımı burada listelenir.
+                        Bu zaman aralığında kayıtlı antrenman seansı bulunamadı. Antrenmanlarını kaydettikçe kaldırdığın toplam ağırlık ve bölge dağılımı burada listelenir.
                     </div>
                 `;
                 return;
@@ -20200,11 +22054,11 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             let totalReps = 0;
 
             const pillars = {
-                legs: { label: 'Bacak & Kalça (Alt Vücut)', icon: '', color: '#10b981', volume: 0, sets: 0 },
-                back: { label: 'Sırt & Çekiş (Posterior Zincir)', icon: '', color: '#38bdf8', volume: 0, sets: 0 },
-                chest: { label: 'Göğüs & İtiş (Anterior Zincir)', icon: '', color: '#f59e0b', volume: 0, sets: 0 },
-                arms: { label: 'Kollar (Biceps & Triceps)', icon: '', color: '#a855f7', volume: 0, sets: 0 },
-                core: { label: 'Karın & Core Zırhı', icon: '', color: '#f43f5e', volume: 0, sets: 0 }
+                legs: { label: 'Bacak & Kalça (Alt Vücut)', icon: '', color: '#10b981', textColor: '#15803D', volume: 0, sets: 0 },
+                back: { label: 'Sırt & Çekiş Hareketleri', icon: '', color: '#0284C7', textColor: '#0369A1', volume: 0, sets: 0 },
+                chest: { label: 'Göğüs, Omuz & İtiş Hareketleri', icon: '', color: '#D97706', textColor: '#B45309', volume: 0, sets: 0 },
+                arms: { label: 'Kollar (Ön Kol & Arka Kol)', icon: '', color: '#9333EA', textColor: '#6B21A8', volume: 0, sets: 0 },
+                core: { label: 'Karın & Bel Çevresi', icon: '', color: '#E11D48', textColor: '#BE123C', volume: 0, sets: 0 }
             };
 
             const prMap = {};
@@ -20212,6 +22066,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             filteredLogs.forEach(log => {
                 let logVol = (log.totalVolumeKg || 0);
                 let computedLogVol = 0;
+                let computedLogSets = 0;
+                let computedLogReps = 0;
 
                 if (log.exercises && log.exercises.length > 0) {
                     log.exercises.forEach(ex => {
@@ -20220,6 +22076,17 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             ? Number(ex.completedSetsCount)
                             : (Array.isArray(ex.sets) ? ex.sets.filter(s => s && s.completed).length : (Number(ex.sets) || 0));
                         if (cSets <= 0) return;
+
+                        computedLogSets += cSets;
+                        if (Array.isArray(ex.sets)) {
+                            ex.sets.forEach(st => {
+                                if (st && st.completed) {
+                                    computedLogReps += (Number(st.reps) || 0);
+                                }
+                            });
+                        } else if (ex.reps) {
+                            computedLogReps += cSets * (parseInt(ex.reps, 10) || 10);
+                        }
 
                         // If exVol is 0 but sets were completed, calculate academic volume (BW / TUT equivalence)
                         if (exVol === 0 && Array.isArray(ex.sets)) {
@@ -20233,6 +22100,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         if (cSets === 0 && exVol === 0) return;
 
                         const spec = resolveExerciseBiomechanics(ex.name, ex.muscle, ex.category);
+                        const normExName = normSearchText(ex.name || '');
+                        const isRearOrPullShoulder = /face pull|rear delt|arka omuz|ters fly|reverse fly|pull apart|halo|high pull|snatch|cuban/.test(normExName);
                         const shares = [];
                         if (spec.primary && spec.pFactor > 0) {
                             shares.push({ muscle: spec.primary, factor: spec.pFactor });
@@ -20252,6 +22121,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 let targetPillar = null;
                                 if (['quads', 'hamstrings', 'glutes', 'calves'].includes(mId)) targetPillar = pillars.legs;
                                 else if (mId === 'back') targetPillar = pillars.back;
+                                else if (mId === 'shoulders' && isRearOrPullShoulder) targetPillar = pillars.back;
                                 else if (['chest', 'shoulders'].includes(mId)) targetPillar = pillars.chest;
                                 else if (['biceps', 'triceps'].includes(mId)) targetPillar = pillars.arms;
                                 else if (mId === 'core') targetPillar = pillars.core;
@@ -20287,8 +22157,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     logVol = computedLogVol;
                 }
                 totalVolume += logVol;
-                totalSets += (log.totalSetsCompleted || 0);
-                totalReps += (log.totalRepsCompleted || 0);
+                totalSets += (log.totalSetsCompleted || computedLogSets || 0);
+                totalReps += (log.totalRepsCompleted || computedLogReps || 0);
             });
 
             const sessionsCount = filteredLogs.length;
@@ -20301,15 +22171,15 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const pushPullRatio = pushTotal > 0 ? (pullTotal / pushTotal).toFixed(2) : '1.00';
 
             let balanceBadge = '✅ Mükemmel Denge';
-            let balanceColor = '#10b981';
+            let balanceColor = '#15803D';
             let balanceDesc = 'İtiş ve çekiş hacminiz dengeli; omuz ve omurga sağlığınız korunuyor.';
             if (pushPullRatio < 0.85) {
                 balanceBadge = '⚠️ İtiş Hacmi Baskın';
-                balanceColor = '#f59e0b';
+                balanceColor = '#B45309';
                 balanceDesc = 'Göğüs ve omuz itiş tonajınız sırttan yüksek. Omuz sakatlığı riskini önlemek için sırt ve kürek hareketlerine ağırlık verin.';
             } else if (pushPullRatio > 1.35) {
                 balanceBadge = '⚠️ Çekiş Hacmi Baskın';
-                balanceColor = '#38bdf8';
+                balanceColor = '#0369A1';
                 balanceDesc = 'Sırt çekiş hacminiz itişten belirgin şekilde fazla. İtiş egzersizlerinizi artırabilirsiniz.';
             }
 
@@ -20317,9 +22187,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             const academicInfoBanner = `
                 <div style="background:rgba(56, 189, 248, 0.05); border:1px solid rgba(56, 189, 248, 0.25); border-radius:10px; padding:10px 14px; margin-bottom:14px; display:flex; align-items:center; gap:10px;">
-                    <span style="font-size:22px; flex-shrink:0;">🎓</span>
+                    <span style="font-size:22px; flex-shrink:0;">💡</span>
                     <div style="font-size:11.5px; color:#0369A1; line-height:1.4;">
-                        <strong>Akademik Biyomekanik & TUT Modeli:</strong> Vücut ağırlığı hareketleri (Şınav, Barfiks vb.) kaldırılan kaldıraç yüküyle (Ebben et al., 2011), izometrik tutuşlar (Plank, Hollow vb.) ise mekanik gerilim süresi (Oranchuk et al., 2019) formülüyle efektif tonaj ve hipertrofi havuzuna dahil edilir.
+                        <strong>Nasıl Hesaplanır?</strong> Şınav ve barfiks gibi kendi vücut ağırlığınla yaptığın hareketler ile Plank gibi süreli duruşlar da boşa gitmez; harcadığın efora göre toplam çalışma hesabına otomatik eklenir.
                     </div>
                 </div>
             `;
@@ -20328,7 +22198,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 <!-- KPI STATS -->
                 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-bottom:16px;">
                     <div class="analytics-kpi-card">
-                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">TOPLAM TONAJ</div>
+                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">TOPLAM KALDIRILAN YÜK</div>
                         <div style="font-size:18px; font-weight:900; color:var(--gold); margin-top:2px;">🏋️ ${Math.round(totalVolume).toLocaleString('tr-TR')} kg</div>
                         <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">${sessionsCount} Seans</div>
                     </div>
@@ -20340,7 +22210,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     <div class="analytics-kpi-card">
                         <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">SET & TEKRAR</div>
                         <div style="font-size:18px; font-weight:900; color:var(--green-success); margin-top:2px;">🎯 ${totalSets} / ${totalReps}</div>
-                        <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">Hacim</div>
+                        <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">Toplam İş</div>
                     </div>
                     <div class="analytics-kpi-card">
                         <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">İTİŞ / ÇEKİŞ ORANI</div>
@@ -20352,8 +22222,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 <!-- MUSCLE PILLARS VOLUME BARS -->
                 <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:16px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                        <h3 style="font-size:13.5px; font-weight:800; color:#0F172A;">🧬 Kas Grubu Tonaj & Hacim Dağılımı</h3>
-                        <span style="font-size:11px; color:var(--gold); font-weight:700;">Kümülatif Yük</span>
+                        <h3 style="font-size:13.5px; font-weight:800; color:#0F172A;">💪 Bölgelere Göre Kaldırılan Ağırlık Dağılımı</h3>
+                        <span style="font-size:11px; color:var(--gold); font-weight:700;">Toplam Ağırlık</span>
                     </div>
 
                     <div style="display:flex; flex-direction:column; gap:12px;">
@@ -20364,13 +22234,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 <div>
                                     <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:700;">
                                         <span style="color:#0F172A;">${p.icon} ${p.label}</span>
-                                        <span style="color:${p.color};">${Math.round(p.volume).toLocaleString('tr-TR')} kg <span style="color:var(--text-secondary); font-size:11px;">(%${pct})</span></span>
+                                        <span style="color:${p.textColor || p.color};">${Math.round(p.volume).toLocaleString('tr-TR')} kg <span style="color:var(--text-secondary); font-size:11px;">(%${pct})</span></span>
                                     </div>
                                     <div class="analytics-bar-bg">
                                         <div class="analytics-bar-fill" style="width:${Math.min(100, Math.max(4, pct))}%; background:${p.color};"></div>
                                     </div>
                                     <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-secondary); margin-top:2px;">
-                                        <span>Tamamlanan Efektif Set: ${(Math.round(p.sets * 10) / 10).toFixed(1)}</span>
+                                        <span>Toplam Çalışma Seti: ${(Math.round(p.sets * 10) / 10).toFixed(1)}</span>
                                         <span>Ortalama Yük: ${p.sets > 0 ? Math.round(p.volume / p.sets) : 0} kg/set</span>
                                     </div>
                                 </div>
@@ -20383,13 +22253,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 <div style="background:rgba(245, 158, 11, 0.04); border:1px solid rgba(245, 158, 11, 0.25); border-radius:12px; padding:14px; margin-bottom:16px;">
                     <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
                         <span style="font-size:18px;">🩺</span>
-                        <h3 style="font-size:13.5px; font-weight:800; color:#0F172A;">Biyomekanik Postür & Sakatlık Önleme Raporu</h3>
+                        <h3 style="font-size:13.5px; font-weight:800; color:#0F172A;">Duruş Dengesi & Sakatlık Önleme Özeti</h3>
                     </div>
                     <p style="font-size:12px; color:#475569; line-height:1.5; margin-bottom:8px;">
                         ${balanceDesc} Çekiş hacminiz: <strong>${Math.round(pullTotal).toLocaleString('tr-TR')} kg</strong>, İtiş hacminiz: <strong>${Math.round(pushTotal).toLocaleString('tr-TR')} kg</strong>.
                     </p>
-                    <div style="font-size:11.5px; color:var(--text-secondary); background:#0E131B; padding:8px 10px; border-radius:8px;">
-                        💡 <strong>Koç Tavsiyesi:</strong> Bacak ve arka zincir kasları metabolik motorunuzdur. Her seans öncesi kalça ve omuz mobilite protokolünü (CARs) eksiksiz uygulayarak eklem hareket açıklığınızı maksimize edin.
+                    <div style="font-size:11.5px; color:var(--text-secondary); background:#F8FAFC; padding:8px 10px; border-radius:8px;">
+                        💡 <strong>Koç Tavsiyesi:</strong> Bacak ve sırt kasları vücudun en çok enerji harcayan büyük kaslarıdır. Antrenmandan önce omuz ve kalçanı iyice ısıtarak sakatlık riskini en aza indir.
                     </div>
                 </div>
 
@@ -20402,7 +22272,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         </div>
                         <div style="display:flex; flex-direction:column; gap:6px;">
                             ${sortedPrs.map((pr, idx) => `
-                                <div style="display:flex; justify-content:space-between; align-items:center; background:#0E131B; padding:8px 10px; border-radius:8px; border-left:3px solid var(--gold);">
+                                <div style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; padding:8px 10px; border-radius:8px; border-left:3px solid var(--gold);">
                                     <div>
                                         <div style="font-size:12.5px; font-weight:800; color:#0F172A;">#${idx+1} ${escapeHTML(pr.name)}</div>
                                         <div style="font-size:10.5px; color:var(--text-secondary);">${escapeHTML(pr.muscle || '')} • ${escapeHTML(pr.date)}</div>
@@ -21293,7 +23163,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 <div style="margin-top:12px; border:1.5px solid #E2E8F0; border-radius:14px; overflow:hidden; background:#FFFFFF;">
                     <div style="background:#F1F5F9; border-bottom:1.5px solid #E2E8F0; padding:10px 14px; display:flex; justify-content:space-between; align-items:center;">
                         <span style="font-size:11.5px; font-weight:900; letter-spacing:0.5px; color:#0F172A; text-transform:uppercase;">
-                            📐 ${escapeHTML(j.title)} — ANATOMİK ALT BÖLGE DAĞILIMI
+                            📐 ${escapeHTML(j.title)} — HANGİ YÖNLER ÇALIŞTI?
                         </span>
                         <span style="font-size:11px; color:#64748B; font-weight:700;">
                             Hangi Yön Açıldı?
@@ -21931,25 +23801,25 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     </div>
 
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:8px; margin-bottom:10px;">
-                        <div style="background:#0E131B; padding:10px; border-radius:8px;">
+                        <div style="background:#F8FAFC; padding:10px; border-radius:8px;">
                             <div style="font-size:10.5px; color:var(--text-secondary);">TOPLAM SU</div>
                             <div style="font-size:16px; font-weight:900; color:var(--cyan); margin-top:2px;">${uh?.totalWater || (latestScale?.waterPct ? ((latestScale.weight * latestScale.waterPct) / 100).toFixed(1) : 47.8)} kg</div>
                             <div style="font-size:10px; color:var(--text-secondary);">Hücre İçi: ${uh?.intraWater || 29.8}kg / Dışı: ${uh?.extraWater || 18.0}kg</div>
                         </div>
 
-                        <div style="background:#0E131B; padding:10px; border-radius:8px;">
+                        <div style="background:#F8FAFC; padding:10px; border-radius:8px;">
                             <div style="font-size:10.5px; color:var(--text-secondary);">PROTEİN MİKTARI</div>
                             <div style="font-size:16px; font-weight:900; color:var(--gold); margin-top:2px;">${uh?.protein || 12.9} kg</div>
                             <div style="font-size:10px; color:#15803D;">Mükemmel (%16.6)</div>
                         </div>
 
-                        <div style="background:#0E131B; padding:10px; border-radius:8px;">
+                        <div style="background:#F8FAFC; padding:10px; border-radius:8px;">
                             <div style="font-size:10.5px; color:var(--text-secondary);">MİNERALLER</div>
                             <div style="font-size:16px; font-weight:900; color:#0F172A; margin-top:2px;">${uh?.minerals || 4.5} kg</div>
                             <div style="font-size:10px; color:#15803D;">Mükemmel Referans</div>
                         </div>
 
-                        <div style="background:#0E131B; padding:10px; border-radius:8px;">
+                        <div style="background:#F8FAFC; padding:10px; border-radius:8px;">
                             <div style="font-size:10.5px; color:var(--text-secondary);">KEMİK KÜTLESİ</div>
                             <div style="font-size:16px; font-weight:900; color:#0F172A; margin-top:2px;">${uh?.bone || 3.6} kg</div>
                             <div style="font-size:10px; color:var(--text-secondary);">Sağlam İskelet Yapısı</div>
@@ -22004,7 +23874,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
                     <div style="display:flex; flex-direction:column; gap:10px;">
                         ${unified.map((u, idx) => `
-                            <div style="background:#0E131B; padding:12px 14px; border-radius:10px; border-left:4px solid ${u.weight ? 'var(--gold)' : 'var(--cyan)'};">
+                            <div style="background:#F8FAFC; padding:12px 14px; border-radius:10px; border-left:4px solid ${u.weight ? 'var(--gold)' : 'var(--cyan)'};">
                                 <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
                                     <div>
                                         <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
@@ -22087,14 +23957,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         <div style="display:flex; align-items:center; gap:10px;">
                             <span style="font-size:26px;">🎯</span>
                             <div>
-                                <h3 style="font-size:15px; font-weight:900; color:#0F172A;">TARTI & BİYO-EMPEDANS ANALİZİNİZE ÖZEL REÇETE</h3>
+                                <h3 style="font-size:15px; font-weight:900; color:#0F172A;">TARTI & VÜCUT ANALİZİNE ÖZEL ANTRENMAN PLANI</h3>
                                 <div style="font-size:11.5px; color:#475569; margin-top:2px;">
-                                    <strong>${latest.muscleMass || 37.2} kg İskelet Kası</strong> Koruması • <strong>%${latest.bodyFat || 15.9} Yağ</strong> • <strong>Gövde Yağını (%140) Eritme Odaklı</strong> Rekompozisyon
+                                    <strong>${latest.muscleMass || 37.2} kg Kas Kütlesi</strong> Koruması • <strong>%${latest.bodyFat || 15.9} Yağ</strong> • <strong>Bel & Gövde Yağını Eritme Odaklı</strong> Program
                                 </div>
                             </div>
                         </div>
-                        <div style="margin-top:10px; font-size:11.5px; color:#475569; background:#0E131B; padding:10px 12px; border-radius:8px; border-left:3px solid var(--cyan); line-height:1.45;">
-                            💡 <strong>Biyomekanik Strateji:</strong> Bacak kas kütleniz (%115) normun üzerinde olduğundan kettlebell & squat bileşikleri ana metabolik kalori motoru olarak kurgulandı. Karın ve gövdedeki 6.3 kg yağı hedeflemek için seans sonuna anti-rotasyonel core zırhı (Farmer's Carry / Suitcase Carry) dahil edildi.
+                        <div style="margin-top:10px; font-size:11.5px; color:#475569; background:#F8FAFC; padding:10px 12px; border-radius:8px; border-left:3px solid var(--cyan); line-height:1.45;">
+                            💡 <strong>Neden Bu Program?</strong> Bacak kasların güçlü olduğu için squat ve kettlebell gibi yüksek kalori yakan hareketler merkeze alındı. Bel ve karın bölgesini sıkılaştırmak için antrenman sonuna ağırlıkla yürüyüş (Farmer's Walk / Suitcase Carry) eklendi.
                         </div>
                     </div>
                 `;
@@ -22469,12 +24339,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             let mobilityReport = null;
             try {
                 if (typeof calculateWeeklyMuscleSufficiency === 'function') {
-                    muscleReport = calculateWeeklyMuscleSufficiency('combined', 0);
+                    muscleReport = calculateWeeklyMuscleSufficiency('week_projected', 0);
                 }
             } catch (e) { console.error(e); }
             try {
                 if (typeof calculateWeeklyMobilitySufficiency === 'function') {
-                    mobilityReport = calculateWeeklyMobilitySufficiency('combined', 0);
+                    mobilityReport = calculateWeeklyMobilitySufficiency('week_projected', 0);
                 }
             } catch (e) { console.error(e); }
 
@@ -22577,8 +24447,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (muscleReport && Array.isArray(muscleReport.muscles)) {
                 const missingMuscle = muscleReport.muscles.find(m => m.effectiveTotal === 0) || muscleReport.muscles.find(m => m.status === 'insufficient');
                 if (missingMuscle) {
-                    const recEx = (typeof getRecommendedExercisesForMuscle === 'function')
-                        ? (getRecommendedExercisesForMuscle(missingMuscle.id, 1)[0] || null)
+                    const recEx = (typeof getRecommendationsForMuscle === 'function')
+                        ? (getRecommendationsForMuscle(missingMuscle.id, 1)[0] || null)
                         : null;
                     tasksHTML.push(`
                         <div style="background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:12px; padding:14px; display:flex; flex-direction:column; justify-content:space-between; gap:10px;">
@@ -22601,14 +24471,18 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             // Task 2: Stiff / Unworked Mobility Joint
             if (mobilityReport && Array.isArray(mobilityReport.joints)) {
-                const stiffJoint = mobilityReport.joints.find(j => j.totalEffective === 0) || mobilityReport.joints.find(j => j.pct < 60);
-                if (stiffJoint && stiffJoint.subRegions && stiffJoint.subRegions[0]) {
-                    const targetSub = stiffJoint.subRegions.find(s => s.doneSets === 0) || stiffJoint.subRegions[0];
+                const stiffJoint = mobilityReport.joints.find(j => j.effectiveDone === 0 && j.plannedSets === 0)
+                    || mobilityReport.joints.find(j => j.status !== 'optimal');
+                const jointCols = stiffJoint ? (stiffJoint.columns || stiffJoint.subRegions || []) : [];
+                if (stiffJoint && jointCols.length > 0) {
+                    const targetSub = jointCols.find(s => (s.doneSets || 0) === 0 && (s.planSets || 0) === 0)
+                        || jointCols.find(s => (s.doneSets || 0) === 0)
+                        || jointCols[0];
                     tasksHTML.push(`
                         <div style="background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:12px; padding:14px; display:flex; flex-direction:column; justify-content:space-between; gap:10px;">
                             <div>
                                 <div style="font-size:11px; font-weight:800; color:#0284C7; text-transform:uppercase;">2. Hareketlilik (Esneklik) Görevi</div>
-                                <div style="font-size:14px; font-weight:900; color:#0F172A; margin-top:3px;">${escapeHTML(stiffJoint.title)} Açıklığını Artır</div>
+                                <div style="font-size:14px; font-weight:900; color:#0F172A; margin-top:3px;">${escapeHTML(stiffJoint.name || stiffJoint.title || '')} Açıklığını Artır</div>
                                 <div style="font-size:12px; color:#475569; margin-top:4px; line-height:1.45;">
                                     Vücudunun tutuk kalmaması ve sakatlık yaşamamak için <strong>${escapeHTML(targetSub.label)}</strong> yönünü açan 1 hareket ekle.
                                 </div>
@@ -22835,7 +24709,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=251')
+                navigator.serviceWorker.register('./sw.js?v=260')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
@@ -22977,6 +24851,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     if (anatomy.subKey) {
                         coveredSubKeys.add(anatomy.subKey);
                     }
+                    if (Array.isArray(anatomy.allSubKeys)) {
+                        anatomy.allSubKeys.forEach(sk => coveredSubKeys.add(sk));
+                    }
                     const pList = ex.primaryMuscles || [];
                     const sList = ex.secondaryMuscles || [];
                     const sets = parseInt(item.sets) || 3;
@@ -23078,7 +24955,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             if (customRoutineState.exercises.length === 0) {
                 container.innerHTML = `
-                    <div style="text-align:center; padding:16px; color:var(--text-secondary); background:#0E131B; border-radius:6px; border:1px dashed var(--border);">
+                    <div style="text-align:center; padding:16px; color:var(--text-secondary); background:#F8FAFC; border-radius:6px; border:1px dashed var(--border);">
                         <div style="font-size:11.5px; color:#0F172A; font-weight:700;">Henüz hareket eklenmedi</div>
                         <div style="font-size:10.5px; margin-top:2px;">Aşağıdaki uygun hareketlerden <strong>[ ➕ Ekle ]</strong> butonuna basarak programınızı kurun.</div>
                     </div>
@@ -23124,18 +25001,19 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             </select>
 
                             <select class="form-input" style="padding:3px 5px; font-size:11px; width:72px;" onchange="updateCustomExerciseReps(${index}, this.value)">
-                                <option value="6-8" ${item.reps == '6-8' ? 'selected' : ''}>6-8 T.</option>
-                                <option value="8-10" ${item.reps == '8-10' ? 'selected' : ''}>8-10 T.</option>
-                                <option value="10-12" ${item.reps == '10-12' ? 'selected' : ''}>10-12 T.</option>
-                                <option value="12-15" ${item.reps == '12-15' ? 'selected' : ''}>12-15 T.</option>
-                                <option value="Maks" ${item.reps == 'Maks' ? 'selected' : ''}>Maks</option>
+                                ${(() => {
+                                    const normR = String(item.reps || '8-12').replace(/\s+/g, '');
+                                    const opts = ['5-6', '6-8', '8-10', '8-12', '10-12', '12-15', '15-20', 'Maks'];
+                                    const list = opts.includes(normR) ? opts : [normR, ...opts];
+                                    return list.map(opt => `<option value="${escapeHTML(opt)}" ${normR === opt ? 'selected' : ''}>${opt === 'Maks' ? 'Maks' : escapeHTML(opt) + ' T.'}</option>`).join('');
+                                })()}
                             </select>
 
                             <button type="button" class="btn btn-outline" style="padding:3px 5px; font-size:9px;" onclick="moveCustomRoutineExercise(${index}, -1)" ${index === 0 ? 'disabled' : ''}>▲</button>
                             <button type="button" class="btn btn-outline" style="padding:3px 5px; font-size:9px;" onclick="moveCustomRoutineExercise(${index}, 1)" ${index === customRoutineState.exercises.length - 1 ? 'disabled' : ''}>▼</button>
                             <button type="button" class="btn btn-outline" style="padding:3px 7px; font-size:10px; color:var(--cyan); border-color:rgba(56,189,248,0.4); font-weight:700;" onclick="openStudioExerciseAlternativeModal(${index})" title="Bu hareket için alternatif bul">🔄 Alternatif</button>
                             <button type="button" class="btn btn-outline" style="padding:3px 6px; font-size:10px;" onclick="openExerciseDetailModal('${ex.id}')" title="İncele">👁️</button>
-                            <button type="button" class="btn btn-outline" style="padding:3px 6px; font-size:10px; color:#DC2626; border-color:rgba(239,68,68,0.3);" onclick="event.stopPropagation(); openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '${thumbImg}', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}', 'Atölye Seçilenler')" title="Bu harekette hata bildir">⚠️</button>
+                            <button type="button" class="btn btn-outline" style="padding:3px 6px; font-size:10px; color:#DC2626; border-color:rgba(239,68,68,0.3);" onclick="event.stopPropagation(); openExerciseBugReportModal(decodeURIComponent('${encodeURIComponent(ex.id)}'), decodeURIComponent('${encodeURIComponent(ex.name || '')}'), decodeURIComponent('${encodeURIComponent(thumbImg || '')}'), decodeURIComponent('${encodeURIComponent(ex.equipment || '')}'), decodeURIComponent('${encodeURIComponent(ex.muscle || '')}'), 'Atölye Seçilenler')" title="Bu harekette hata bildir">⚠️</button>
                             <button type="button" class="btn btn-outline" style="padding:3px 6px; font-size:10px; color:#ef4444; border-color:rgba(239,68,68,0.4);" onclick="removeExerciseFromCustomRoutine(${index})" title="Çıkar">✕</button>
                         </div>
                     </div>
@@ -23148,7 +25026,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 const isProgEdit = Boolean(customRoutineState.editingProgramId);
 
                 html += `
-                    <div style="margin-top:12px; padding:10px 12px; background:#0E131B; border:1px solid rgba(245,158,11,0.3); border-radius:8px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; box-shadow:0 0 15px rgba(245,158,11,0.1);">
+                    <div style="margin-top:12px; padding:10px 12px; background:#F8FAFC; border:1px solid rgba(245,158,11,0.3); border-radius:8px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; box-shadow:0 0 15px rgba(245,158,11,0.1);">
                         ${isDayEdit ? `
                             <button type="button" class="btn btn-gold" style="flex:1; min-width:200px; font-size:12.5px; padding:10px 16px; font-weight:900; box-shadow:0 0 15px rgba(245,158,11,0.35);" onclick="saveEditingRoutineToDay()">
                                 💾 Değişiklikleri ${DAY_NAMES_TR[dayIdx]} Gününe Kaydet
@@ -23251,7 +25129,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             <button type="button" class="btn btn-outline" style="flex:1; font-size:10px; padding:4px 6px;" onclick="openExerciseDetailModal('${ex.id}')">
                                 👁️ İncele
                             </button>
-                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:4px 6px; color:#DC2626; border-color:rgba(239,68,68,0.3);" onclick="event.stopPropagation(); openExerciseBugReportModal('${ex.id}', '${escapeHTML(ex.name)}', '${thumbImg}', '${ex.equipment || ''}', '${escapeHTML(ex.muscle || '')}', 'Program Atölyesi')" title="Hata Bildir">
+                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:4px 6px; color:#DC2626; border-color:rgba(239,68,68,0.3);" onclick="event.stopPropagation(); openExerciseBugReportModal(decodeURIComponent('${encodeURIComponent(ex.id)}'), decodeURIComponent('${encodeURIComponent(ex.name || '')}'), decodeURIComponent('${encodeURIComponent(thumbImg || '')}'), decodeURIComponent('${encodeURIComponent(ex.equipment || '')}'), decodeURIComponent('${encodeURIComponent(ex.muscle || '')}'), 'Program Atölyesi')" title="Hata Bildir">
                                 ⚠️ Bildir
                             </button>
                             <button type="button" class="btn ${isAlreadyInRoutine ? 'btn-outline' : 'btn-gold'}" style="flex:1.3; font-size:10px; padding:4px 6px; font-weight:800;" onclick="addExerciseToCustomRoutine('${ex.id}')">
@@ -23407,17 +25285,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 saveWeeklySchedule(schedule);
             }
 
-            if (typeof cancelStudioEditingSilent === 'function') {
-                cancelStudioEditingSilent();
-            }
-
-            // Check for missing sub-regions for friendly coach advice:
+            // Check for missing sub-regions for friendly coach advice BEFORE clearing customRoutineState.exercises:
             const coveredSubKeys = new Set();
             customRoutineState.exercises.forEach(item => {
                 const ex = EXERCISES_DB.find(e => e.id === item.exId);
                 if (ex) {
                     const anatomy = getExerciseAnatomy(ex);
                     if (anatomy.subKey) coveredSubKeys.add(anatomy.subKey);
+                    if (Array.isArray(anatomy.allSubKeys)) anatomy.allSubKeys.forEach(sk => coveredSubKeys.add(sk));
                 }
             });
             let missingSubTips = [];
@@ -23430,6 +25305,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     }
                 });
             });
+
+            if (typeof cancelStudioEditingSilent === 'function') {
+                cancelStudioEditingSilent();
+            }
 
             showToast(`✅ "${title}" kaydedildi!`);
             let alertMsg = `✅ "${title}" kaydedildi! '📚 Programlar' sekmesinden veya Haftalık Plandan başlatabilirsiniz.`;
@@ -23655,21 +25534,21 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             let visualsHtml = '';
             if (opengymEx) {
                 visualsHtml = `
-                    <div style="background:#000; border-radius:12px; overflow:hidden; border:1.5px solid rgba(56,189,248,0.4); margin-bottom:12px; box-shadow:0 6px 24px rgba(0,0,0,0.6);">
-                        <div style="background:#151C26; border-bottom:1px solid #222C3A; padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-size:11.5px; font-weight:900; color:var(--cyan); letter-spacing:0.5px;">⚡ OPENGYM CANLI HAREKET ANİMASYONU</span>
-                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 9px; border-radius:4px; color:var(--cyan); border-color:var(--cyan); font-weight:700;" onclick="openImageLightbox(decodeURIComponent('${encodeURIComponent(opengymEx.clip)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - Canlı Animasyon')}'))">⛶ Tam Ekran Oynat</button>
+                    <div style="background:#FFFFFF; border-radius:12px; overflow:hidden; border:1.5px solid #BAE6FD; margin-bottom:12px; box-shadow:0 4px 14px rgba(15,23,42,0.06);">
+                        <div style="background:#F0F9FF; border-bottom:1px solid #BAE6FD; padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:11.5px; font-weight:900; color:#0369A1; letter-spacing:0.5px;">⚡ OPENGYM CANLI HAREKET ANİMASYONU</span>
+                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 9px; border-radius:4px; color:#0369A1; border-color:#38BDF8; background:#FFFFFF; font-weight:700;" onclick="openImageLightbox(decodeURIComponent('${encodeURIComponent(opengymEx.clip)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - Canlı Animasyon')}'))">⛶ Tam Ekran Oynat</button>
                         </div>
-                        <div style="text-align:center; padding:6px; cursor:pointer;" onclick="openImageLightbox(decodeURIComponent('${encodeURIComponent(opengymEx.clip)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - Canlı Animasyon')}'))" title="Tam ekran oynatmak için dokunun">
+                        <div style="text-align:center; padding:8px; cursor:pointer; background:#F8FAFC;" onclick="openImageLightbox(decodeURIComponent('${encodeURIComponent(opengymEx.clip)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - Canlı Animasyon')}'))" title="Tam ekran oynatmak için dokunun">
                             <video src="${opengymEx.clip}" poster="${opengymEx.still}" autoplay loop muted playsinline style="max-width:100%; max-height:46vh; object-fit:contain; display:block; margin:0 auto; border-radius:6px;"></video>
-                            <div style="font-size:10.5px; color:var(--text-secondary); margin-top:6px; font-weight:600;">🔍 Dokunarak tam ekranda canlı döngüde izleyebilirsiniz</div>
+                            <div style="font-size:10.5px; color:#475569; margin-top:6px; font-weight:600;">🔍 Dokunarak tam ekranda canlı döngüde izleyebilirsiniz</div>
                         </div>
                     </div>
                     ${photoSrc ? `
-                        <div style="margin-bottom:12px; border-radius:8px; border:1px solid #222C3A; background:#0E131B; overflow:hidden;">
-                            <div style="padding:6px 10px; background:#151C26; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="const el=document.getElementById('ex_detail_legacy_photo'); if(el) el.style.display=el.style.display==='none'?'block':'none';">
-                                <span style="font-size:11px; font-weight:700; color:var(--text-secondary);">${isSvgForm ? '📐 Vektörel Form Akışı' : '📸 Statik Fotoğraf & Form Kılavuzu'}</span>
-                                <span style="font-size:10px; color:var(--gold);">Gör ▼</span>
+                        <div style="margin-bottom:12px; border-radius:8px; border:1px solid #E2E8F0; background:#F8FAFC; overflow:hidden;">
+                            <div style="padding:6px 10px; background:#F1F5F9; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="const el=document.getElementById('ex_detail_legacy_photo'); if(el) el.style.display=el.style.display==='none'?'block':'none';">
+                                <span style="font-size:11px; font-weight:700; color:#334155;">${isSvgForm ? '📐 Vektörel Form Akışı' : '📸 Statik Fotoğraf & Form Kılavuzu'}</span>
+                                <span style="font-size:10px; color:#B45309; font-weight:800;">Gör ▼</span>
                             </div>
                             <div id="ex_detail_legacy_photo" style="display:none; padding:8px; text-align:center;">
                                 <img src="${photoSrc}" style="max-width:100%; max-height:38vh; object-fit:contain; border-radius:6px;" alt="${escapeHTML(ex.name)}">
@@ -23679,14 +25558,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 `;
             } else if (photoSrc) {
                 visualsHtml = `
-                    <div style="background:#000; border-radius:12px; overflow:hidden; border:1.5px solid rgba(245,158,11,0.4); margin-bottom:12px; box-shadow:0 6px 24px rgba(0,0,0,0.6);">
-                        <div style="background:#151C26; border-bottom:1px solid #222C3A; padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-size:11.5px; font-weight:900; color:var(--gold); letter-spacing:0.5px;">${isSvgForm ? '📐 FORM VEKTÖR DİYAGRAMI' : '📸 GERÇEK FORM REHBERİ'}</span>
-                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 9px; border-radius:4px; color:var(--cyan); border-color:var(--cyan); font-weight:700;" onclick="openImageLightbox(decodeURIComponent('${encodeURIComponent(photoSrc)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - ' + (isSvgForm ? 'Form Diyagramı' : 'Form Rehberi'))}'))">⛶ Tam Ekran Büyüt</button>
+                    <div style="background:#FFFFFF; border-radius:12px; overflow:hidden; border:1.5px solid #FDE68A; margin-bottom:12px; box-shadow:0 4px 14px rgba(15,23,42,0.06);">
+                        <div style="background:#FFFBEB; border-bottom:1px solid #FDE68A; padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:11.5px; font-weight:900; color:#B45309; letter-spacing:0.5px;">${isSvgForm ? '📐 FORM VEKTÖR DİYAGRAMI' : '📸 GERÇEK FORM REHBERİ'}</span>
+                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 9px; border-radius:4px; color:#0369A1; border-color:#38BDF8; background:#FFFFFF; font-weight:700;" onclick="openImageLightbox(decodeURIComponent('${encodeURIComponent(photoSrc)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - ' + (isSvgForm ? 'Form Diyagramı' : 'Form Rehberi'))}'))">⛶ Tam Ekran Büyüt</button>
                         </div>
-                        <div style="text-align:center; padding:6px; cursor:pointer;" onclick="openImageLightbox(decodeURIComponent('${encodeURIComponent(photoSrc)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - ' + (isSvgForm ? 'Form Diyagramı' : 'Form Rehberi'))}'))" title="Büyütmek için dokunun">
+                        <div style="text-align:center; padding:8px; cursor:pointer; background:#F8FAFC;" onclick="openImageLightbox(decodeURIComponent('${encodeURIComponent(photoSrc)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - ' + (isSvgForm ? 'Form Diyagramı' : 'Form Rehberi'))}'))" title="Büyütmek için dokunun">
                             <img src="${photoSrc}" style="max-width:100%; max-height:46vh; object-fit:contain; display:block; margin:0 auto; border-radius:6px;" alt="${escapeHTML(ex.name)} Form">
-                            <div style="font-size:10.5px; color:var(--text-secondary); margin-top:6px; font-weight:600;">🔍 Dokunarak tam ekran inceleyebilirsiniz</div>
+                            <div style="font-size:10.5px; color:#475569; margin-top:6px; font-weight:600;">🔍 Dokunarak tam ekran inceleyebilirsiniz</div>
                         </div>
                     </div>
                 `;
@@ -23695,8 +25574,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (visualsHtml) {
                 formContainer.innerHTML = `
                     ${visualsHtml}
-                    <div style="background:#0E131B; border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-bottom:10px;">
-                        <div style="font-size:11px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:6px;">🎯 Çalıştırılan Kas Grupları & Yük Dağılımı:</div>
+                    <div style="background:#F8FAFC; border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-bottom:10px;">
+                        <div style="font-size:11px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:6px;">🎯 Çalışan Alt Kas Grupları (Primer & Sekonder):</div>
+                        <div style="font-size:12px; line-height:1.5; margin-bottom:8px;">
+                            <div style="margin-bottom:4px;"><strong style="color:#15803D;">🎯 Primer (Ana) Kaslar:</strong> <span style="color:#0F172A; font-weight:700;">${escapeHTML(anatomy.primary || ex.muscle || '')}</span></div>
+                            ${anatomy.secondary ? `<div style="margin-bottom:4px;"><strong style="color:#0369A1;">⚡ Sekonder (Yardımcı) Kaslar:</strong> <span style="color:#334155; font-weight:600;">${escapeHTML(anatomy.secondary)}</span></div>` : ''}
+                            ${anatomy.proof ? `<div style="margin-top:6px; padding-top:6px; border-top:1px dashed var(--border); font-size:11.5px; color:#475569;"><strong>🔬 Neden Bu Kaslar?</strong> ${escapeHTML(anatomy.proof)}</div>` : ''}
+                        </div>
                         <div style="display:flex; flex-wrap:wrap; gap:6px;">
                             ${pMuscleLabels}
                             ${sMuscleLabels || '<span style="font-size:11px; color:var(--text-secondary);">İzole hareket (saf primer odak)</span>'}
@@ -23717,7 +25601,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 `;
             } else {
                 formContainer.innerHTML = `
-                    <div style="padding:24px 16px; text-align:center; background:#0E131B; border-radius:8px; border:1px dashed var(--border);">
+                    <div style="padding:24px 16px; text-align:center; background:#F8FAFC; border-radius:8px; border:1px dashed var(--border);">
                         <div style="font-size:24px; margin-bottom:6px;">🏋️</div>
                         <div style="font-weight:700; color:#0F172A; font-size:13.5px;">${escapeHTML(ex.name)}</div>
                         <div style="color:var(--text-secondary); font-size:11.5px; margin-top:4px;">Görsel form rehberi optimize ediliyor.</div>
@@ -23742,20 +25626,51 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     <div style="text-align:center; background:#000; border-radius:8px; overflow:hidden; border:1px solid var(--border); min-height:160px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="openImageLightbox(decodeURIComponent('${encodeURIComponent(photoGuide.anatomi)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - Anatomi')}'))">
                         <img src="${photoGuide.anatomi}" style="max-width:100%; max-height:48vh; object-fit:contain; display:block; margin:0 auto;" alt="${escapeHTML(ex.name)} Anatomi">
                     </div>
-                    <div style="background:#0E131B; border:1px solid var(--border); border-radius:8px; padding:12px; margin-top:10px;">
+                    <div style="background:#F8FAFC; border:1px solid var(--border); border-radius:8px; padding:12px; margin-top:10px;">
+                        <div style="font-size:12.5px; line-height:1.55; margin-bottom:10px;">
+                            <div style="margin-bottom:6px; padding:8px 10px; background:#F0FDF4; border:1px solid #86EFAC; border-radius:6px;">
+                                <strong style="color:#15803D;">🎯 Primer (Ana Hedef) Kaslar:</strong><br>
+                                <span style="color:#0F172A; font-weight:700;">${escapeHTML(anatomy.primary || ex.muscle || '')}</span>
+                            </div>
+                            ${anatomy.secondary ? `
+                            <div style="margin-bottom:6px; padding:8px 10px; background:#F0F9FF; border:1px solid #7DD3FC; border-radius:6px;">
+                                <strong style="color:#0369A1;">⚡ Sekonder (Yardımcı & Sabitleyici) Kaslar:</strong><br>
+                                <span style="color:#0F172A; font-weight:600;">${escapeHTML(anatomy.secondary)}</span>
+                            </div>` : ''}
+                            ${anatomy.proof ? `
+                            <div style="padding:8px 10px; background:#F8FAFC; border-left:3px solid #0369A1; border-radius:4px; font-size:12px; color:#334155;">
+                                <strong>🔬 Biyomekanik Açıklama:</strong> ${escapeHTML(anatomy.proof)}
+                            </div>` : ''}
+                        </div>
                         <div style="font-size:12px; font-weight:800; color:#0F172A; margin-bottom:6px;">🎯 1 Çalışma Setinin Kaslara Dağılımı:</div>
                         <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.6;">
-                            • <strong>Ana Kas Grubu:</strong> ${pMuscleLabels}<br>
-                            • <strong>Destekleyici (Sinerjist):</strong> ${sMuscleLabels || '<span style="color:var(--text-secondary);">Yok (Saf İzolasyon)</span>'}<br>
-                            • <strong>Mekanik Yapı:</strong> ${ex.mechanic === 'compound' ? '⚡ Çok Eklemli (Bileşik / Compound)' : '🎯 Tek Eklemli (İzolasyon)'}
+                            • <strong>Ana Çalışan Kas:</strong> ${pMuscleLabels}<br>
+                            • <strong>Yardımcı Kaslar:</strong> ${sMuscleLabels || '<span style="color:var(--text-secondary);">Yok (Sadece Tek Bölgeye Odaklanır)</span>'}<br>
+                            • <strong>Hareket Tipi:</strong> ${ex.mechanic === 'compound' ? '⚡ Birden Fazla Kası Çalıştıran (Genel Hareket)' : '🎯 Tek Bölgeye Odaklanan Hareket'}
                         </div>
                     </div>
                 `;
             } else {
                 anatomyContainer.innerHTML = `
-                    <div style="padding:20px; text-align:center; background:#0E131B; border-radius:8px;">
-                        <div style="font-size:13px; font-weight:800; color:#0F172A; margin-bottom:6px;">🧬 Hedef Kaslar:</div>
-                        <div style="display:flex; justify-content:center; gap:6px; flex-wrap:wrap; margin-top:6px;">
+                    <div style="padding:16px; background:#F8FAFC; border:1px solid var(--border); border-radius:8px; text-align:left;">
+                        <div style="font-size:13px; font-weight:800; color:#0F172A; margin-bottom:10px;">🧬 Çalışan Alt Kaslar & Biyomekanik Detay:</div>
+                        <div style="font-size:12.5px; line-height:1.55; margin-bottom:10px;">
+                            <div style="margin-bottom:6px; padding:8px 10px; background:#F0FDF4; border:1px solid #86EFAC; border-radius:6px;">
+                                <strong style="color:#15803D;">🎯 Primer (Ana Hedef) Kaslar:</strong><br>
+                                <span style="color:#0F172A; font-weight:700;">${escapeHTML(anatomy.primary || ex.muscle || '')}</span>
+                            </div>
+                            ${anatomy.secondary ? `
+                            <div style="margin-bottom:6px; padding:8px 10px; background:#F0F9FF; border:1px solid #7DD3FC; border-radius:6px;">
+                                <strong style="color:#0369A1;">⚡ Sekonder (Yardımcı & Sabitleyici) Kaslar:</strong><br>
+                                <span style="color:#0F172A; font-weight:600;">${escapeHTML(anatomy.secondary)}</span>
+                            </div>` : ''}
+                            ${anatomy.proof ? `
+                            <div style="padding:8px 10px; background:#F8FAFC; border-left:3px solid #0369A1; border-radius:4px; font-size:12px; color:#334155;">
+                                <strong>🔬 Biyomekanik Açıklama:</strong> ${escapeHTML(anatomy.proof)}
+                            </div>` : ''}
+                        </div>
+                        <div style="font-size:11.5px; font-weight:800; color:#475569; margin-bottom:6px;">📊 Haftalık Set Hesabına Katkısı:</div>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
                             ${pMuscleLabels}
                             ${sMuscleLabels}
                         </div>
