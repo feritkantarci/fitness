@@ -240,7 +240,15 @@ const EXERCISE_SPEC = {
     'db_dumbbell_shrug_burnout': { primary: 'Sırt', pFactor: 1.0, sec: { 'Ön Kol': 0.30 }, type: 'ISOLATION', sfr: 'HIGH', lengthened: false },
     'dört ayak pozisyonunda yatay arka omuz uçuşu': { primary: 'Omuz', pFactor: 1.0, sec: { 'Sırt': 0.40, 'Karın/Core': 0.30 }, type: 'MOBILITY_STABILITY', sfr: 'HIGH', lengthened: true },
     'dört ayak pozisyonunda omuz rotasyonu': { primary: 'Omuz', pFactor: 1.0, sec: { 'Sırt': 0.40, 'Karın/Core': 0.30 }, type: 'MOBILITY_STABILITY', sfr: 'HIGH', lengthened: true },
-    'db_quadruped_external_rotation': { primary: 'Omuz', pFactor: 1.0, sec: { 'Sırt': 0.40, 'Karın/Core': 0.30 }, type: 'MOBILITY_STABILITY', sfr: 'HIGH', lengthened: true }
+    'db_quadruped_external_rotation': { primary: 'Omuz', pFactor: 1.0, sec: { 'Sırt': 0.40, 'Karın/Core': 0.30 }, type: 'MOBILITY_STABILITY', sfr: 'HIGH', lengthened: true },
+    'bw_jumping_jack': { primary: 'Kondisyon', pFactor: 1.0, sec: { 'Bacak & Kalça': 0.50, 'Omuz': 0.40, 'Karın/Core': 0.30 }, type: 'METCON_EXPLOSIVE', sfr: 'HIGH', lengthened: false },
+    'bw_high_knees': { primary: 'Kondisyon', pFactor: 1.0, sec: { 'Bacak & Kalça': 0.65, 'Karın/Core': 0.50 }, type: 'METCON_EXPLOSIVE', sfr: 'HIGH', lengthened: false },
+    'bw_jump_rope': { primary: 'Kondisyon', pFactor: 1.0, sec: { 'Bacak & Kalça': 0.60, 'Ön Kol': 0.30, 'Karın/Core': 0.30 }, type: 'METCON_EXPLOSIVE', sfr: 'HIGH', lengthened: false },
+    'bw_butt_kicks': { primary: 'Kondisyon', pFactor: 1.0, sec: { 'Bacak & Kalça': 0.65 }, type: 'METCON_EXPLOSIVE', sfr: 'HIGH', lengthened: false },
+    'bw_skater_jumps': { primary: 'Bacak & Kalça', pFactor: 0.85, sec: { 'Kondisyon': 0.80, 'Karın/Core': 0.40 }, type: 'METCON_EXPLOSIVE', sfr: 'HIGH', lengthened: false },
+    'bw_plank_jacks': { primary: 'Karın/Core', pFactor: 0.90, sec: { 'Kondisyon': 0.75, 'Omuz': 0.45 }, type: 'METCON_EXPLOSIVE', sfr: 'HIGH', lengthened: false },
+    'bw_squat_thrust': { primary: 'Kondisyon', pFactor: 1.0, sec: { 'Bacak & Kalça': 0.70, 'Karın/Core': 0.55, 'Omuz': 0.40 }, type: 'METCON_EXPLOSIVE', sfr: 'HIGH', lengthened: false },
+    'bw_lateral_shuffle': { primary: 'Kondisyon', pFactor: 0.90, sec: { 'Bacak & Kalça': 0.75, 'Karın/Core': 0.35 }, type: 'METCON_EXPLOSIVE', sfr: 'HIGH', lengthened: false }
 };
 
 /**

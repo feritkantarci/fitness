@@ -1,0 +1,2383 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+  <title>Çelik Kodu — 123 Hareket Primer & Sekonder Alt Kas Onay Tablosu</title>
+  <style>
+    :root {
+      --bg-page: #F1F5F9;
+      --bg-card: #FFFFFF;
+      --text-main: #0F172A;
+      --text-sec: #334155;
+      --text-muted: #475569;
+      --border: #CBD5E1;
+      --border-strong: #94A3B8;
+      --green-bg: #DCFCE7;
+      --green-text: #15803D;
+      --green-border: #86EFAC;
+      --amber-bg: #FEF3C7;
+      --amber-text: #B45309;
+      --amber-border: #FCD34D;
+      --blue-bg: #E0F2FE;
+      --blue-text: #0369A1;
+      --blue-border: #7DD3FC;
+      --purple-bg: #F3E8FF;
+      --purple-text: #6B21A8;
+      --red-bg: #FEE2E2;
+      --red-text: #B91C1C;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.45;
+      padding-bottom: 60px;
+    }
+    .sticky-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #0F172A;
+      color: #FFFFFF;
+      padding: 14px 20px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.22);
+      border-bottom: 2px solid #334155;
+    }
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      max-width: 1680px;
+      margin: 0 auto;
+    }
+    .header-title h1 {
+      font-size: 18px;
+      font-weight: 800;
+      color: #FFFFFF;
+      letter-spacing: -0.2px;
+    }
+    .header-title p {
+      font-size: 12.5px;
+      color: #CBD5E1;
+      margin-top: 2px;
+    }
+    .kpi-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .kpi-pill {
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 800;
+      background: #1E293B;
+      color: #FFFFFF;
+      border: 1px solid #475569;
+    }
+    .kpi-pill.approved { background: #14532D; border-color: #22C55E; color: #FFFFFF; }
+    .kpi-pill.edited { background: #78350F; border-color: #F59E0B; color: #FFFFFF; }
+    .kpi-pill.pending { background: #1E293B; border-color: #94A3B8; color: #F8FAFC; }
+
+    .controls-bar {
+      max-width: 1680px;
+      margin: 10px auto 0;
+      padding-top: 10px;
+      border-top: 1px solid #334155;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .filter-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .ctrl-input, .ctrl-select {
+      padding: 7px 11px;
+      border-radius: 7px;
+      border: 1px solid #64748B;
+      background: #FFFFFF;
+      color: #0F172A;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .ctrl-input { min-width: 230px; }
+    .action-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      cursor: pointer;
+      border: none;
+      border-radius: 7px;
+      padding: 8px 13px;
+      font-size: 12.5px;
+      font-weight: 800;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-approve-all { background: #16A34A; color: #FFFFFF; }
+    .btn-approve-all:hover { background: #15803D; }
+    .btn-copy { background: #0284C7; color: #FFFFFF; }
+    .btn-copy:hover { background: #0369A1; }
+    .btn-download { background: #7E22CE; color: #FFFFFF; }
+    .btn-download:hover { background: #6B21A8; }
+    .btn-reset { background: #334155; color: #FFFFFF; border: 1px solid #64748B; }
+    .btn-reset:hover { background: #475569; }
+
+    .container {
+      max-width: 1680px;
+      margin: 18px auto;
+      padding: 0 16px;
+    }
+    .info-banner {
+      background: #FFFFFF;
+      border: 1.5px solid var(--blue-border);
+      border-left: 5px solid var(--blue-text);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+      font-size: 13px;
+      color: var(--text-main);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .table-wrap {
+      background: var(--bg-card);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1220px;
+    }
+    thead th {
+      background: #F8FAFC;
+      color: #0F172A;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      padding: 12px 12px;
+      text-align: left;
+      border-bottom: 2px solid var(--border-strong);
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.12s;
+    }
+    tbody tr:hover { background: #F8FAFC; }
+    tbody tr.row-approved { background: #F0FDF4; }
+    tbody tr.row-edited { background: #FFFBEB; }
+    td {
+      padding: 12px;
+      vertical-align: top;
+      font-size: 13px;
+    }
+    .col-ex { width: 19%; }
+    .col-proof { width: 22%; }
+    .col-prim { width: 19%; }
+    .col-sec { width: 19%; }
+    .col-review { width: 21%; background: rgba(241, 245, 249, 0.45); border-left: 1px solid var(--border); }
+
+    .ex-num {
+      display: inline-block;
+      background: #0F172A;
+      color: #FFFFFF;
+      font-weight: 800;
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 5px;
+      margin-bottom: 4px;
+    }
+    .ex-name {
+      font-size: 14px;
+      font-weight: 800;
+      color: #0F172A;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .badge-row {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-bottom: 7px;
+    }
+    .badge {
+      font-size: 10.5px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 5px;
+      display: inline-block;
+    }
+    .badge-group { background: var(--blue-bg); color: var(--blue-text); border: 1px solid var(--blue-border); }
+    .badge-eq { background: var(--purple-bg); color: var(--purple-text); }
+    .old-box {
+      background: #F1F5F9;
+      border: 1px dashed #94A3B8;
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .old-box strong { color: var(--text-sec); }
+
+    .proof-text {
+      font-size: 12.5px;
+      color: var(--text-sec);
+      background: #F8FAFC;
+      border-left: 3px solid #0369A1;
+      padding: 8px 10px;
+      border-radius: 4px;
+    }
+
+    .muscle-label {
+      font-size: 11px;
+      font-weight: 800;
+      margin-bottom: 4px;
+      display: block;
+    }
+    .muscle-label.prim { color: var(--green-text); }
+    .muscle-label.sec { color: var(--blue-text); }
+
+    .muscle-textarea {
+      width: 100%;
+      min-height: 76px;
+      padding: 8px 9px;
+      border-radius: 7px;
+      border: 1.5px solid var(--border-strong);
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #0F172A;
+      background: #FFFFFF;
+      resize: vertical;
+      line-height: 1.4;
+    }
+    .muscle-textarea.prim-input {
+      border-color: #22C55E;
+      background: #F0FDF4;
+    }
+    .muscle-textarea.sec-input {
+      border-color: #38BDF8;
+      background: #F0F9FF;
+    }
+    .muscle-textarea:focus, .note-textbox:focus {
+      outline: 2px solid #0F172A;
+      background: #FFFFFF;
+    }
+
+    .review-actions {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .btn-row-status {
+      flex: 1;
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 800;
+      cursor: pointer;
+      border: 1.5px solid var(--border-strong);
+      background: #FFFFFF;
+      color: #0F172A;
+      transition: all 0.12s;
+    }
+    .btn-row-status.active-approve {
+      background: #15803D;
+      color: #FFFFFF;
+      border-color: #14532D;
+    }
+    .btn-row-status.active-edit {
+      background: #B45309;
+      color: #FFFFFF;
+      border-color: #78350F;
+    }
+    .note-textbox {
+      width: 100%;
+      min-height: 62px;
+      padding: 7px 9px;
+      border-radius: 7px;
+      border: 1.5px solid var(--border-strong);
+      font-family: inherit;
+      font-size: 12.5px;
+      color: #0F172A;
+      background: #FFFFFF;
+      resize: vertical;
+    }
+    .status-tag {
+      display: inline-block;
+      margin-top: 5px;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+    .status-tag.st-approved { background: var(--green-bg); color: var(--green-text); }
+    .status-tag.st-edited { background: var(--amber-bg); color: var(--amber-text); }
+    .status-tag.st-pending { background: #E2E8F0; color: #334155; }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #0F172A;
+      color: #FFFFFF;
+      padding: 12px 18px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 800;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.28);
+      display: none;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="sticky-header">
+    <div class="header-top">
+      <div class="header-title">
+        <h1>🧬 Çelik Kodu — 123 Hareket Primer & Sekonder Alt Kas Doğrulama Tablosu</h1>
+        <p>Sen onaylamadan ana uygulamaya hiçbir değişiklik yüklenmez. Sağdaki kutulardan onaylayabilir veya doğrudan düzenleme/not yazabilirsin.</p>
+      </div>
+      <div class="kpi-bar">
+        <div class="kpi-pill" id="kpiTotal">Toplam: 123</div>
+        <div class="kpi-pill approved" id="kpiApproved">✅ Onaylanan: 0</div>
+        <div class="kpi-pill edited" id="kpiEdited">✏️ Düzenleme/Not: 0</div>
+        <div class="kpi-pill pending" id="kpiPending">⏳ Bekleyen: 123</div>
+      </div>
+    </div>
+
+    <div class="controls-bar">
+      <div class="filter-group">
+        <input type="text" id="searchInput" class="ctrl-input" placeholder="🔍 Hareket veya kas ara (ör. Üst Göğüs, Yan Karın, Alt Kanat)...">
+        <select id="groupFilter" class="ctrl-select">
+          <option value="ALL">Tüm Bölgeler (123)</option>
+        </select>
+        <select id="statusFilter" class="ctrl-select">
+          <option value="ALL">Tüm Durumlar</option>
+          <option value="pending">⏳ Bekleyenler</option>
+          <option value="approved">✅ Onaylananlar</option>
+          <option value="edited">✏️ Düzenleme / Not Olanlar</option>
+        </select>
+      </div>
+      <div class="action-group">
+        <button type="button" class="btn btn-approve-all" id="btnApproveVisible">✅ Görünenleri Onayla</button>
+        <button type="button" class="btn btn-copy" id="btnCopyReport">📋 Onay & Düzeltmeleri Kopyala</button>
+        <button type="button" class="btn btn-download" id="btnDownloadJson">💾 JSON İndir</button>
+        <button type="button" class="btn btn-reset" id="btnResetAll">↺ Sıfırla</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="info-banner">
+      <div>
+        <strong>💡 Nasıl Kullanılır?</strong>
+        1) <strong>Primer</strong> ve <strong>Sekonder</strong> alt kas kutularının içindeki metinleri istersen doğrudan değiştirebilirsin.
+        2) En sağdaki <strong>Onay / Düzenleme Textbox</strong> alanına notunu yazabilir veya <strong>"✅ Onayla"</strong> butonuna basabilirsin. Tüm yazdıkların tarayıcı hafızasına otomatik kaydedilir.
+      </div>
+      <div style="font-weight:800; color:#15803D;">🔒 Koda Yükleme: Kapalı (Onay Bekliyor)</div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-ex"># / Hareket & Mevcut Kayıt</th>
+            <th class="col-proof">🔬 Neden Bu Kas? (Açı / Tutuş / Biyomekanik)</th>
+            <th class="col-prim">🎯 Primer Alt Kaslar (Düzenlenebilir)</th>
+            <th class="col-sec">⚡ Sekonder Alt Kaslar (Düzenlenebilir)</th>
+            <th class="col-review">✅ Onay & Düzenleme Textbox</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <div class="toast" id="toastBox"></div>
+
+  <script>
+    const INITIAL_DATA = [
+  {
+    "idx": 1,
+    "id": "db_bench_press",
+    "name": "Dambıl Bench Press",
+    "equipment": "dumbbell",
+    "group": "Göğüs",
+    "oldDbMuscle": "Büyük Göğüs Kası, Ön Omuz & Triceps",
+    "oldMapPrimary": "Orta Göğüs",
+    "oldMapSecondary": "Ön Omuz, Arka Kol",
+    "proof": "Düz sehpada dirsekleri 45° açıyla indirip itmek, göğsün tam orta kısmını en geniş açıda gerip sıkıştırır; kolları düzleştirirken triceps ve ön omuz da yardıma girer.",
+    "primary": "Orta Göğüs",
+    "secondary": "Ön Omuz, Triceps (Dış ve Alt Kısım), Yan Göğüs Kaburga Kasları"
+  },
+  {
+    "idx": 2,
+    "id": "db_incline_press",
+    "name": "Incline Dambıl Press",
+    "equipment": "dumbbell",
+    "group": "Göğüs",
+    "oldDbMuscle": "Üst Göğüs & Ön Omuz",
+    "oldMapPrimary": "Üst Göğüs",
+    "oldMapSecondary": "Ön Omuz, Arka Kol",
+    "proof": "Sehpayı 30-45° yukarı kaldırmak itiş yönünü köprücük kemiğine taşır; böylece yük orta göğüsten doğrudan üst göğse ve ön omuza geçer.",
+    "primary": "Üst Göğüs",
+    "secondary": "Ön Omuz, Triceps (Dış ve Alt Kısım), Yan Göğüs Kaburga Kasları"
+  },
+  {
+    "idx": 3,
+    "id": "db_floor_press",
+    "name": "Dambıl Floor Press",
+    "equipment": "dumbbell",
+    "group": "Göğüs",
+    "oldDbMuscle": "Göğüs & Triceps Gücü",
+    "oldMapPrimary": "Orta Göğüs",
+    "oldMapSecondary": "Arka Kol, Ön Omuz",
+    "proof": "Yerde yatarken dirseklerin zemine değmesi kolun fazla geriye gitmesini önler; dipten hız almadan yapılan itiş orta göğsü ve özellikle tricepsin kol kilitleme gücünü vurur.",
+    "primary": "Orta Göğüs, Triceps (Dış ve Alt Kısım)",
+    "secondary": "Ön Omuz"
+  },
+  {
+    "idx": 4,
+    "id": "db_overhead_press",
+    "name": "Oturarak Dambıl Omuz Presi (Seated)",
+    "equipment": "dumbbell",
+    "group": "Omuz",
+    "oldDbMuscle": "Ön & Yan Omuz, Triceps, Karın Zırhı",
+    "oldMapPrimary": "Ön Omuz (Oturarak)",
+    "oldMapSecondary": "Arka Kol, Üst Göğüs, Karın",
+    "proof": "Sırtı sehpaya yaslayıp oturarak ağırlığı baş üstüne itmek, bacaklardan güç almayı engeller ve doğrudan ön ile yan omuzları çalıştırır.",
+    "primary": "Ön Omuz, Yan Omuz",
+    "secondary": "Triceps (Uzun ve Dış Kısım), Üst Göğüs, Üst Trapez"
+  },
+  {
+    "idx": 5,
+    "id": "db_standing_overhead_press",
+    "name": "Ayakta Dambıl Omuz Presi (Standing)",
+    "equipment": "dumbbell",
+    "group": "Omuz",
+    "oldDbMuscle": "Ön & Yan Omuz, Triceps, Karın Zırhı",
+    "oldMapPrimary": "Ön Omuz (Ayakta)",
+    "oldMapSecondary": "Arka Kol, Üst Göğüs, Karın",
+    "proof": "Ayakta dambılları baş üstüne iterken ön ve yan omuz ana işi yapar; ağırlık tepedeyken sağa sola sallanmamak için tüm karın (core) ve kalça kasları kilitlenir.",
+    "primary": "Ön Omuz, Yan Omuz",
+    "secondary": "Triceps, Ön ve Derin İç Karın (Core), Üst Trapez, Ana Kalça Kası (Duruş Kilidi)"
+  },
+  {
+    "idx": 6,
+    "id": "db_arnold_press",
+    "name": "Arnold Press",
+    "equipment": "dumbbell",
+    "group": "Omuz",
+    "oldDbMuscle": "Tüm Omuz Başları (Ön, Yan, Arka Deltoid)",
+    "oldMapPrimary": "Tüm Omuz (Ön & Yan)",
+    "oldMapSecondary": "Arka Kol, Üst Göğüs",
+    "proof": "Avuç içleri sana bakarken başlayıp yukarı iterken dışa çevirmek, hareketin başında ön omzu, yukarı çıkarken ise yan omzu kesintisiz çalıştırır.",
+    "primary": "Ön Omuz, Yan Omuz",
+    "secondary": "Triceps (Dış ve Alt Kısım), Üst Trapez, Arka Omuz (Dengeleyici)"
+  },
+  {
+    "idx": 7,
+    "id": "db_lateral_raise",
+    "name": "Dambıl Lateral Raise",
+    "equipment": "dumbbell",
+    "group": "Omuz",
+    "oldDbMuscle": "Yan Omuz (Lateral Deltoid)",
+    "oldMapPrimary": "Yan Omuz",
+    "oldMapSecondary": "Üst Sırt & Boyun",
+    "proof": "Kolları yanlardan omuz hizasına doğru açmak, omuza genişlik veren yan omuz kasını doğrudan ve tek başına hedef alır.",
+    "primary": "Yan Omuz",
+    "secondary": "Ön Omuz, Üst Sırt & Boyun Kökü (Üst Trapez), Omuz İç Denge Kasları"
+  },
+  {
+    "idx": 8,
+    "id": "db_triceps_overhead",
+    "name": "Dambıl Başüstü Triceps",
+    "equipment": "dumbbell",
+    "group": "Kol (Triceps)",
+    "oldDbMuscle": "Arka Kol (Triceps Uzun Baş)",
+    "oldMapPrimary": "Arka Kol (Başüstü)",
+    "oldMapSecondary": "Arka Kol Dış Kısım, Karın",
+    "proof": "Arka kolun en büyük parçası olan iç/uzun kısım omuzdan başladığı için, ancak kol başın üstüne kaldırıldığında tam gerilir ve maksimum çalışır.",
+    "primary": "Triceps İç / Uzun Kısım (Arka Kolun En Büyük Kısmı)",
+    "secondary": "Triceps Dış ve Alt Kısım, Derin İç Karın (Beli Sabit Tutma)"
+  },
+  {
+    "idx": 9,
+    "id": "db_skullcrusher",
+    "name": "Dambıl Skullcrusher",
+    "equipment": "dumbbell",
+    "group": "Kol (Triceps)",
+    "oldDbMuscle": "Arka Kol (Triceps)",
+    "oldMapPrimary": "Arka Kol (Uzun Kısım)",
+    "oldMapSecondary": "Arka Kol Dış Kısım",
+    "proof": "Sırtüstü yatarken dambılları alnına/baş gerisine indirip kaldırmak, arka kolun hem uzun iç kısmını hem de dış kısmını aynı anda yoğun çalıştırır.",
+    "primary": "Triceps İç / Uzun Kısım, Triceps Dış Kısım",
+    "secondary": "Triceps Alt Kısım, Ön Kol Bilek Sabitleyicileri"
+  },
+  {
+    "idx": 10,
+    "id": "db_goblet_squat",
+    "name": "Dambıl Goblet Squat",
+    "equipment": "dumbbell",
+    "group": "Ön Bacak",
+    "oldDbMuscle": "Ön Bacak (Kuadriseps), Kalça & Core",
+    "oldMapPrimary": "Ön Bacak",
+    "oldMapSecondary": "Kalça, Karın",
+    "proof": "Ağırlığı göğüs önünde tutmak sırtı dik tutmayı kolaylaştırır ve derin çömelme sağlar; böylece ön bacağın dış, orta ve diz üstü iç kısmı tam çalışır.",
+    "primary": "Ön Bacak (Dış, Orta ve Diz Üstü İç Kısım)",
+    "secondary": "Ana Kalça Kası, Üst Sırt & Bel Kasları (Dik Duruş), Derin İç Karın (Core)"
+  },
+  {
+    "idx": 11,
+    "id": "db_front_squat",
+    "name": "Çift Dambıl Ön Squat (Front Squat)",
+    "equipment": "dumbbell",
+    "group": "Ön Bacak",
+    "oldDbMuscle": "Ön Bacak & Omurga Dikliği",
+    "oldMapPrimary": "Ön Bacak",
+    "oldMapSecondary": "Kalça, Üst Sırt, Karın",
+    "proof": "İki dambılı omuz önünde tutarak dik gövdeyle çömelmek, yükü kalçadan çok dizlere ve ön bacak kaslarına odaklar.",
+    "primary": "Ön Bacak (Dış, Orta ve Diz Üstü İç Kısım)",
+    "secondary": "Ana Kalça Kası, Üst Sırt & Bel Kasları, Derin İç Karın (Core)"
+  },
+  {
+    "idx": 12,
+    "id": "db_bulgarian_squat",
+    "name": "Bulgar Split Squat",
+    "equipment": "dumbbell",
+    "group": "Ön Bacak & Kalça",
+    "oldDbMuscle": "Tek Bacak Gücü, Quad & Glute",
+    "oldMapPrimary": "Ön Bacak & Kalça",
+    "oldMapSecondary": "Arka Bacak, Tek Ayak Denge",
+    "proof": "Arka ayağı sehpaya koyup tek bacakla derin çömelmek, öndeki bacağın diz üstü iç kısmını ve ana kalçayı vururken, devrilmemek için yan kalça denge kasını çok yoğun çalıştırır.",
+    "primary": "Ön Bacak (Özellikle Diz Üstü İç Kısım ve Dış Kısım), Ana Kalça Kası",
+    "secondary": "Yan Kalça (Tek Ayak Denge Kası), Arka Bacak, Kalf & Ayak Bileği Denge Kasları"
+  },
+  {
+    "idx": 13,
+    "id": "db_walking_lunge",
+    "name": "Yürüyerek Lunge (Walking Lunge)",
+    "equipment": "dumbbell",
+    "group": "Ön Bacak & Kalça",
+    "oldDbMuscle": "Kuadriseps, Kalça & Dinamik Denge",
+    "oldMapPrimary": "Ön Bacak",
+    "oldMapSecondary": "Kalça, Arka Bacak, Baldır",
+    "proof": "İleri adım atıp çömelmek ve öndeki bacakla kendini yukarı-ileri çekmek, ön bacak ile ana ve yan kalça kaslarını her adımda güçlü çalıştırır.",
+    "primary": "Ön Bacak (Dış ve Diz Üstü İç Kısım), Ana Kalça Kası",
+    "secondary": "Yan Kalça (Denge Kası), Arka Bacak, Kalf, Ön Kol (Dambıl Tutuşu)"
+  },
+  {
+    "idx": 14,
+    "id": "db_reverse_lunge",
+    "name": "Reverse Lunge",
+    "equipment": "dumbbell",
+    "group": "Ön Bacak & Kalça",
+    "oldDbMuscle": "Ön Bacak, Kalça & Diz Sağlığı",
+    "oldMapPrimary": "Ön Bacak & Kalça",
+    "oldMapSecondary": "Arka Bacak, Diz Dengesi",
+    "proof": "Geriye doğru adım atmak dize binen baskıyı azaltır; öndeki bacağın ön kısmını ve ana kalça kasını diz dostu açıda çalıştırır.",
+    "primary": "Ön Bacak (Diz Üstü İç ve Dış Kısım), Ana Kalça Kası",
+    "secondary": "Yan Kalça (Denge Kası), Arka Bacak, Derin İç Karın (Core)"
+  },
+  {
+    "idx": 15,
+    "id": "db_rdl",
+    "name": "Dambıl RDL",
+    "equipment": "dumbbell",
+    "group": "Arka Bacak & Kalça",
+    "oldDbMuscle": "Arka Bacak (Hamstrings) & Glute",
+    "oldMapPrimary": "Arka Bacak",
+    "oldMapSecondary": "Kalça, Alt Bel",
+    "proof": "Dizleri çok az kırıp kalçayı geriye iterek öne eğilmek, arka bacağın üst/uzun kısmını sonuna kadar esnetir ve doğrulurken ana kalça kasıyla birlikte kasar.",
+    "primary": "Arka Bacak (Kalçadan Eğilen Üst/Uzun Kısım), Ana Kalça Kası",
+    "secondary": "Alt Sırt & Bel Kasları, Ön Kol (Kavrama), Kanatlar & Orta Sırt (Dambılları Bacağa Yakın Tutma)"
+  },
+  {
+    "idx": 16,
+    "id": "db_single_leg_rdl",
+    "name": "Tek Bacak RDL",
+    "equipment": "dumbbell",
+    "group": "Arka Bacak & Kalça",
+    "oldDbMuscle": "Arka Bacak, Kalça & Ayak Bileği Stabilitesi",
+    "oldMapPrimary": "Arka Bacak",
+    "oldMapSecondary": "Kalça, Ayak Bileği Dengesi",
+    "proof": "Tek ayak üzerinde öne eğilip kalkmak arka bacak ve ana kalçayı çalıştırırken, kalçanın yana devrilmesini önlemek için yan kalça ve ayak bileği denge kaslarını yoğun çalıştırır.",
+    "primary": "Arka Bacak, Yan Kalça (Tek Ayak Denge Kası), Ana Kalça Kası",
+    "secondary": "Alt Sırt & Bel Kasları, Yan Karın (Core), Ayak Bileği Denge Kasları"
+  },
+  {
+    "idx": 17,
+    "id": "db_saw_row",
+    "name": "Dambıl Saw Row",
+    "equipment": "dumbbell",
+    "group": "Sırt",
+    "oldDbMuscle": "Geniş Sırt (Lats), Rhomboid & Kol",
+    "oldMapPrimary": "Kanat (Geniş Sırt)",
+    "oldMapSecondary": "Ön Kol (Pazı), Arka Omuz, Orta Sırt",
+    "proof": "Dirseği gövdeye yakın tutup dambılı göğse değil arka cebe doğru (testere gibi) çekmek, sırtı üçgenleştiren kanat kaslarını en alt ucuna kadar çalıştırır.",
+    "primary": "Kanatlar (Sırt Genişliği)",
+    "secondary": "Orta Sırt & Kürek Kemiği Kasları, Arka Omuz, Biceps & Ön Kol"
+  },
+  {
+    "idx": 18,
+    "id": "db_chest_supported_row",
+    "name": "Göğüs Destekli Row",
+    "equipment": "dumbbell",
+    "group": "Sırt",
+    "oldDbMuscle": "Orta Sırt, Kanat & Rhomboid",
+    "oldMapPrimary": "Orta Sırt & Kürek Kemiği",
+    "oldMapSecondary": "Arka Omuz, Ön Kol (Pazı)",
+    "proof": "Göğsü sehpaya dayamak belden hız almayı tamamen keser; kürek kemiklerini arkada birbirine sıkıştırarak çekmek orta sırt kalınlığını doğrudan vurur.",
+    "primary": "Orta Sırt & Kürek Kemiği Kasları (Sırt Kalınlığı)",
+    "secondary": "Kanatlar, Arka Omuz, Biceps & Ön Kol"
+  },
+  {
+    "idx": 19,
+    "id": "db_renegade_row",
+    "name": "Renegade Row",
+    "equipment": "dumbbell",
+    "group": "Sırt & Core",
+    "oldDbMuscle": "Sırt & Anti-Rotasyonel Core",
+    "oldMapPrimary": "Orta Sırt & Kanat",
+    "oldMapSecondary": "Yan Karın, Arka Omuz",
+    "proof": "Şınav duruşunda tek kolla yerden dambıl çekerken gövdenin dönmemesi için kendini sıkmak, orta sırt/kanatlarla birlikte yan karın kaslarını çok sert çalıştırır.",
+    "primary": "Orta Sırt & Kanatlar, Yan Karın & Derin İç Karın (Core)",
+    "secondary": "Arka Omuz, Biceps & Ön Kol, Orta Göğüs & Triceps (Yerdeki Destek Kolu)"
+  },
+  {
+    "idx": 20,
+    "id": "db_pullover",
+    "name": "Dambıl Pullover",
+    "equipment": "dumbbell",
+    "group": "Sırt & Göğüs",
+    "oldDbMuscle": "Geniş Sırt & Göğüs & Serratus",
+    "oldMapPrimary": "Kanat (Geniş Sırt)",
+    "oldMapSecondary": "Üst Göğüs, Arka Kol, Göğüs Kafesi",
+    "proof": "Sırtüstü yatarken kolları başın gerisinden yukarı çekmek, kanat kaslarını boydan boya esnetip çalıştırırken göğüs kafesini ve orta/alt göğsü de devreye sokar.",
+    "primary": "Kanatlar (Sırt Genişliği), Yan Göğüs & Kaburga Kasları",
+    "secondary": "Orta ve Alt Göğüs, Triceps İç/Uzun Kısım"
+  },
+  {
+    "idx": 21,
+    "id": "db_hammer_curl",
+    "name": "Hammer Curl",
+    "equipment": "dumbbell",
+    "group": "Kol (Biceps & Ön Kol)",
+    "oldDbMuscle": "Biceps, Brachialis & Ön Kol",
+    "oldMapPrimary": "Pazı & Ön Kol",
+    "oldMapSecondary": "El Tutuş Gücü",
+    "proof": "Avuç içleri birbirine bakacak şekilde (çekiç tutuşu) kaldırmak, yükü bicepsin altındaki kol kalınlaştırıcı kasa ve ön kolun üst kısmına kaydırır.",
+    "primary": "Biceps Altı Dış Kol Kası (Kol Kalınlaştırıcı), Ön Kol Üst Kası, Biceps Dış Kısım",
+    "secondary": "Biceps İç Kısım, Bilek ve El Tutuş Kasları"
+  },
+  {
+    "idx": 22,
+    "id": "db_incline_curl",
+    "name": "Incline Dambıl Curl",
+    "equipment": "dumbbell",
+    "group": "Kol (Biceps)",
+    "oldDbMuscle": "Biceps Uzun Baş (Zirve Kası)",
+    "oldMapPrimary": "Pazı (Dış / Tepe Kısmı)",
+    "oldMapSecondary": "Ön Omuz Esnemesi",
+    "proof": "Eğimli sehpada otururken kolların gövdenin gerisinde kalması, pazının dış/tepe kısmını (uzun baş) hareketin en başında maksimum gerer ve tepe görünümünü büyütür.",
+    "primary": "Biceps Dış Kısım (Pazı Tepesi / Uzun Baş)",
+    "secondary": "Biceps İç Kısım, Biceps Altı Dış Kol Kası, Ön Kol"
+  },
+  {
+    "idx": 23,
+    "id": "db_farmers_walk",
+    "name": "Çiftçi Yürüyüşü (Farmer's Walk / Carry)",
+    "equipment": "dumbbell",
+    "group": "Karın (Core) & Tüm Vücut",
+    "oldDbMuscle": "Kavrama Gücü, Trapez & Tüm Core",
+    "oldMapPrimary": "Tüm Karın & El Tutuşu",
+    "oldMapSecondary": "Üst Sırt, Ön Kol, Baldır",
+    "proof": "İki elde ağır yükle dik yürümek; karnı içe tutan derin korse kasını, yan karınları, omuzları taşıyan üst trapezi ve el/bilek kavrama kaslarını aynı anda çalıştırır.",
+    "primary": "Derin İç Karın & Yan Karın (Core), Ön Kol & Bilek (Kavrama Gücü), Üst Sırt (Üst Trapez)",
+    "secondary": "Yan Kalça (Yürüyüş Dengesi), Alt Sırt & Bel Kasları, Kalf (Baldır)"
+  },
+  {
+    "idx": 24,
+    "id": "db_suitcase_carry",
+    "name": "Tek El Çanta Taşıma (Suitcase Carry)",
+    "equipment": "dumbbell",
+    "group": "Karın (Core)",
+    "oldDbMuscle": "Yan Karın (Obliques) & Anti-Lateral Fleksiyon",
+    "oldMapPrimary": "Yan Karın (Bel Yanları)",
+    "oldMapSecondary": "El Tutuş Gücü, Omuz, Kalça",
+    "proof": "Sadece tek elde ağır dambıl taşırken vücudun o tarafa yatmasını engellemek, ağırlığın tam tersi taraftaki yan karın ve bel yanı kaslarını çok güçlü çalıştırır.",
+    "primary": "Yan Karın & Bel Yanları (Simit Bölgesi)",
+    "secondary": "Yan Kalça (Yürürken Kalça Dengesi), Ön Kol & Bilek (Kavrama), Üst Trapez & Omuz"
+  },
+  {
+    "idx": 25,
+    "id": "db_russian_twist",
+    "name": "Russian Twist",
+    "equipment": "dumbbell",
+    "group": "Karın (Core)",
+    "oldDbMuscle": "Karın & Rotasyonel Yan Duvar",
+    "oldMapPrimary": "Yan Karın (Sağa-Sola Dönüş)",
+    "oldMapSecondary": "Ön Karın, Ön Kalça",
+    "proof": "Yerde gövde hafif geriye yatıkken ağırlığı sağa sola döndürmek, belin yanlarındaki dönüş kaslarını (yan karın) doğrudan çalıştırır.",
+    "primary": "Yan Karın (Bel Yanları / Dönüş Kasları)",
+    "secondary": "Ön Karın (Üst ve Alt Karın - Gövdeyi Tutma), Derin İç Karın, Ön Kalça Kası"
+  },
+  {
+    "idx": 26,
+    "id": "db_snatch",
+    "name": "Dambıl Snatch",
+    "equipment": "dumbbell",
+    "group": "Tüm Vücut",
+    "oldDbMuscle": "Tüm Arka Zincir, Omuz & Patlayıcı Güç",
+    "oldMapPrimary": "Arka Bacak, Kalça & Omuz",
+    "oldMapSecondary": "Sırt, Patlayıcı Güç",
+    "proof": "Yerdeki dambılı bacak ve kalça patlamasıyla tek hamlede baş üstüne çekip kilitlemek; kalça, arka/ön bacak, üst sırt ve omuzları patlayıcı çalıştırır.",
+    "primary": "Ana Kalça Kası, Arka Bacak, Ön ve Yan Omuz",
+    "secondary": "Ön Bacak, Üst Sırt (Trapez), Alt Sırt & Bel, Yan ve Derin İç Karın (Core)"
+  },
+  {
+    "idx": 27,
+    "id": "db_swing",
+    "name": "Dambıl Swing",
+    "equipment": "dumbbell",
+    "group": "Kalça & Arka Bacak",
+    "oldDbMuscle": "Büyük Kalça (Glute), Hamstring & Bel Zırhı",
+    "oldMapPrimary": "Kalça & Arka Bacak",
+    "oldMapSecondary": "Alt Bel, Karın, El Tutuşu",
+    "proof": "Dambılı bacak arasından kalçayı ileri patlatarak savurmak, ana kalça kasını ve arka bacakları güçlü çalıştırırken en üst noktada karın ve beli kilitler.",
+    "primary": "Ana Kalça Kası, Arka Bacak",
+    "secondary": "Alt Sırt & Bel Kasları, Derin İç Karın & Ön Karın (Core), Ön Kol (Kavrama) & Kanatlar"
+  },
+  {
+    "idx": 28,
+    "id": "kb_swing",
+    "name": "Kettlebell Swing",
+    "equipment": "kettlebell",
+    "group": "Kalça & Arka Bacak",
+    "oldDbMuscle": "Büyük Kalça (Gluteus), Hamstring & Core",
+    "oldMapPrimary": "Kalça & Arka Bacak",
+    "oldMapSecondary": "Alt Bel, Karın, El Tutuşu",
+    "proof": "Kettlebell'i kollarla değil kalçanın ileri patlamasıyla savurmak, ana kalça, arka bacak ve alt sırt zincirinin tamamını çalıştırır.",
+    "primary": "Ana Kalça Kası, Arka Bacak",
+    "secondary": "Alt Sırt & Bel Kasları, Derin İç Karın & Ön Karın (Core), Kanatlar, Ön Kol (Kavrama)"
+  },
+  {
+    "idx": 29,
+    "id": "kb_clean",
+    "name": "Kettlebell Clean",
+    "equipment": "kettlebell",
+    "group": "Kalça & Sırt",
+    "oldDbMuscle": "Kalça, Sırt & Rack Pozisyonu Gücü",
+    "oldMapPrimary": "Kalça & Sırt Gücü",
+    "oldMapSecondary": "Ön Kol, Omuz, Karın",
+    "proof": "Ağırlığı kalça gücüyle yerden hızlandırıp dirseği bükerek omuz önüne (göğüs hizasına) almak; kalça, arka bacak, orta/üst sırt ve bicepsleri birlikte çalıştırır.",
+    "primary": "Ana Kalça Kası, Arka Bacak, Orta ve Üst Sırt (Trapez & Kürek Kemiği)",
+    "secondary": "Biceps & Ön Kol, Derin İç Karın & Yan Karın (Core), Kanatlar"
+  },
+  {
+    "idx": 30,
+    "id": "kb_press",
+    "name": "Kettlebell Press",
+    "equipment": "kettlebell",
+    "group": "Omuz",
+    "oldDbMuscle": "Omuz, Triceps, Karın & Kalça Zırhı",
+    "oldMapPrimary": "Ön Omuz",
+    "oldMapSecondary": "Arka Kol, Karın, Kalça",
+    "proof": "Kettlebell'in topuzu elin dış kısmında durduğu için yukarı iterken omuzun iç denge kasları dambıla göre çok daha fazla çalışır; tek kolla yapılması yan karnı da devreye sokar.",
+    "primary": "Ön Omuz, Yan Omuz",
+    "secondary": "Triceps, Omuz İç Denge Kasları, Yan Karın (Tek Kol Denge), Kanat (Başlangıç Desteği)"
+  },
+  {
+    "idx": 31,
+    "id": "kb_half_snatch",
+    "name": "Kettlebell Snatch",
+    "equipment": "kettlebell",
+    "group": "Tüm Vücut",
+    "oldDbMuscle": "Tam Vücut Gücü, Omuz Stabilitesi & Nabız",
+    "oldMapPrimary": "Arka Bacak, Kalça & Omuz",
+    "oldMapSecondary": "Sırt, Kondisyon",
+    "proof": "Kettlebell'i bacak arasından tek hamlede baş üstüne fırlatıp kilitlemek; alt vücutta kalça ve arka bacağı, üstte ise sırt, omuz ve karın kaslarını çalıştırır.",
+    "primary": "Ana Kalça Kası, Arka Bacak, Ön ve Yan Omuz + Omuz İç Denge Kasları",
+    "secondary": "Üst ve Orta Sırt, Alt Sırt & Bel Kasları, Yan ve Derin İç Karın (Core)"
+  },
+  {
+    "idx": 32,
+    "id": "kb_goblet_squat",
+    "name": "Kettlebell Goblet Squat",
+    "equipment": "kettlebell",
+    "group": "Ön Bacak",
+    "oldDbMuscle": "Ön Bacak, Kalça & Kalça Açıklığı",
+    "oldMapPrimary": "Ön Bacak",
+    "oldMapSecondary": "Kalça, Karın, Ayak Bileği",
+    "proof": "Kettlebell'i göğüs önünde tutarak en dibe kadar çömelmek, ön bacak kaslarını, ana kalçayı ve kasık/iç bacak kaslarını tam açıda çalıştırır.",
+    "primary": "Ön Bacak (Dış, Orta ve Diz Üstü İç Kısım)",
+    "secondary": "Ana Kalça Kası, İç Bacak Kasları, Üst Sırt & Derin İç Karın (Core)"
+  },
+  {
+    "idx": 33,
+    "id": "kb_gorilla_row",
+    "name": "Gorilla Row",
+    "equipment": "kettlebell",
+    "group": "Sırt",
+    "oldDbMuscle": "Kanat, Orta Sırt & Statik Bacak Zırhı",
+    "oldMapPrimary": "Kanat & Orta Sırt",
+    "oldMapSecondary": "Ön Kol (Pazı), Arka Omuz, Bacak Duruşu",
+    "proof": "Geniş çömelme duruşunda yerdeki iki ağırlığı sırayla çekmek, kanat ve orta sırtı çalıştırırken gövdenin dönmesini önleyen yan karın ve bacakları da aktif tutar.",
+    "primary": "Kanatlar (Sırt Genişliği), Orta Sırt & Kürek Kemiği Kasları",
+    "secondary": "Alt Sırt & Bel Kasları, Yan Karın (Core), Biceps & Ön Kol, Kalça & Ön Bacak (Çömelme Duruşu)"
+  },
+  {
+    "idx": 34,
+    "id": "kb_windmill",
+    "name": "Kettlebell Windmill",
+    "equipment": "kettlebell",
+    "group": "Karın (Core) & Omuz",
+    "oldDbMuscle": "Omuz Stabilitesi, Yan Karın & Hamstring Mobilite",
+    "oldMapPrimary": "Yan Karın & Omuz Dengesi",
+    "oldMapSecondary": "Arka Bacak Esnekliği",
+    "proof": "Ağırlık baş üstünde havadayken kalçayı yana itip yere doğru eğilmek, yan karın ve bel yanlarını çalıştırırken arka bacağı esnetir ve omzu dengede tutar.",
+    "primary": "Yan Karın & Bel Yanları (Core), Omuz İç Denge Kasları & Omuz",
+    "secondary": "Yan ve Ana Kalça, Arka Bacak (Esneterek Güçlendirme), Triceps (Kol Kilidi)"
+  },
+  {
+    "idx": 35,
+    "id": "kb_turkish_getup",
+    "name": "Turkish Get-Up",
+    "equipment": "kettlebell",
+    "group": "Tüm Vücut & Core",
+    "oldDbMuscle": "Tam Vücut Zırhı & Eklem Sağlığı",
+    "oldMapPrimary": "Tüm Vücut & Omuz Dengesi",
+    "oldMapSecondary": "Kalça, Karın, Ön Bacak",
+    "proof": "Ağırlığı baş üstünde tutarak yerden adım adım ayağa kalkıp geri yatmak; omuz denge kaslarını, tüm karın/bel çevresini ve bacak/kalça kaslarını tek harekette birleştirir.",
+    "primary": "Omuz İç Denge Kasları & Ön/Yan Omuz, Tüm Karın Çevresi (Ön, Yan ve Derin İç Karın)",
+    "secondary": "Ana ve Yan Kalça, Ön Bacak, Triceps (Yukarıdaki Kolu Sabit Tutma)"
+  },
+  {
+    "idx": 36,
+    "id": "kb_halo",
+    "name": "Kettlebell Halo",
+    "equipment": "kettlebell",
+    "group": "Omuz",
+    "oldDbMuscle": "Omuz Kapsülü & Üst Gövde Mobilite",
+    "oldMapPrimary": "Omuz Açıklığı & Esneklik",
+    "oldMapSecondary": "Üst Sırt, Karın",
+    "proof": "Ağırlığı başın etrafında tam tur döndürmek omuz eklemini her açıdan çalıştırır; özellikle arka/yan omuz, omuz iç denge kasları ve kürek kemiği çevresini açar.",
+    "primary": "Arka ve Yan Omuz, Omuz İç Denge Kasları",
+    "secondary": "Orta Sırt & Kürek Kemiği Kasları, Ön Kol & Kavrama Kasları, Derin İç Karın (Core)"
+  },
+  {
+    "idx": 37,
+    "id": "kb_thruster",
+    "name": "Kettlebell Thruster",
+    "equipment": "kettlebell",
+    "group": "Ön Bacak & Omuz",
+    "oldDbMuscle": "Bacak & Omuz & Metabolik Ateş",
+    "oldMapPrimary": "Ön Bacak & Omuz",
+    "oldMapSecondary": "Arka Kol, Kalça, Karın",
+    "proof": "Kettlebell'lerle derin çömelip kalkarken baş üstüne pres yapmak; ön bacak, kalça ve omuz kaslarını yüksek nabızla çalıştırır.",
+    "primary": "Ön Bacak, Ana Kalça Kası, Ön ve Yan Omuz",
+    "secondary": "Triceps, Derin İç Karın (Core), Üst Sırt"
+  },
+  {
+    "idx": 38,
+    "id": "bb_bench_press",
+    "name": "Barbell Bench",
+    "equipment": "barbell",
+    "group": "Göğüs",
+    "oldDbMuscle": "Büyük Göğüs Kası, Ön Omuz & Triceps",
+    "oldMapPrimary": "Orta Göğüs",
+    "oldMapSecondary": "Ön Omuz, Arka Kol",
+    "proof": "Düz sehpada iki eli sabit barla birleştirerek ağır itiş yapmak, orta göğse en yüksek ağırlığı yüklerken kolları kilitleyen tricepsi ve ön omzu güçlü çalıştırır.",
+    "primary": "Orta Göğüs",
+    "secondary": "Triceps (Dış ve Alt Kısım), Ön Omuz, Üst Göğüs"
+  },
+  {
+    "idx": 39,
+    "id": "bb_incline_bench",
+    "name": "Incline Barbell Bench",
+    "equipment": "barbell",
+    "group": "Göğüs",
+    "oldDbMuscle": "Üst Göğüs & Omuz Önü",
+    "oldMapPrimary": "Üst Göğüs",
+    "oldMapSecondary": "Ön Omuz, Arka Kol",
+    "proof": "Yukarı eğimli sehpada barı üst göğse indirip itmek, göğsün üst kısmını (köprücük kemiği altını) ve ön omuzları ana hedef yapar.",
+    "primary": "Üst Göğüs",
+    "secondary": "Ön Omuz, Triceps (Dış ve Alt Kısım)"
+  },
+  {
+    "idx": 40,
+    "id": "bb_overhead_press",
+    "name": "Barbell Omuz Presi",
+    "equipment": "barbell",
+    "group": "Omuz",
+    "oldDbMuscle": "Tüm Omuz Kasları & Karın Zırhı",
+    "oldMapPrimary": "Ön Omuz",
+    "oldMapSecondary": "Arka Kol, Üst Göğüs, Karın",
+    "proof": "Ayakta düz barı baş üstüne ağır şekilde itmek ön ve yan omuzları büyütürken, barı dengede tutmak için karın, alt bel ve üst sırtı taş gibi sıkar.",
+    "primary": "Ön Omuz, Yan Omuz",
+    "secondary": "Triceps, Üst Göğüs, Üst Trapez, Derin İç Karın & Alt Sırt (Core)"
+  },
+  {
+    "idx": 41,
+    "id": "bb_back_squat",
+    "name": "Barbell Back Squat",
+    "equipment": "barbell",
+    "group": "Ön Bacak & Kalça",
+    "oldDbMuscle": "Dört Başlı Ön Bacak (Quad), Kalça & Bel",
+    "oldMapPrimary": "Ön Bacak",
+    "oldMapSecondary": "Kalça, Alt Bel, Karın",
+    "proof": "Sırtta ağır barla çömelip kalkmak, tüm ön bacak kaslarını, ana kalçayı ve dip noktadan çıkarken iç bacak kaslarını en yüksek ağırlıkla çalıştırır.",
+    "primary": "Ön Bacak (Dış, Orta ve İç Kısım Tamamı), Ana Kalça Kası",
+    "secondary": "İç Bacak Kasları, Alt Sırt & Bel Kasları, Derin İç Karın (Core), Arka Bacak"
+  },
+  {
+    "idx": 42,
+    "id": "bb_front_squat",
+    "name": "Barbell Front Squat",
+    "equipment": "barbell",
+    "group": "Ön Bacak",
+    "oldDbMuscle": "Ön Bacak & Omurga Dikliği",
+    "oldMapPrimary": "Ön Bacak",
+    "oldMapSecondary": "Kalça, Dik Duruş",
+    "proof": "Barı ön omuzda taşımak gövdeyi dimdik tutmaya zorlar; bu da ön bacak kaslarını ve sırtın üst/orta kısmını normal squat'tan daha fazla çalıştırır.",
+    "primary": "Ön Bacak (Dış, Orta ve Diz Üstü İç Kısım)",
+    "secondary": "Ana Kalça Kası, Üst ve Orta Sırt (Gövdeyi Dik Tutma), Derin İç Karın (Core)"
+  },
+  {
+    "idx": 43,
+    "id": "bb_deadlift",
+    "name": "Barbell Deadlift",
+    "equipment": "barbell",
+    "group": "Arka Bacak, Kalça & Sırt",
+    "oldDbMuscle": "Tüm Arka Zincir (Hamstring, Glute, Sırt, Trapez)",
+    "oldMapPrimary": "Arka Bacak, Kalça & Sırt",
+    "oldMapSecondary": "Alt Bel, Üst Sırt, El Tutuşu",
+    "proof": "Yerdeki ağır barı ayağa kalkarak kaldırmak; yerden keserken ön bacağı, doğrulurken arka bacak ve ana kalçayı, omurgayı düz tutarken de alt/üst tüm sırtı çalıştırır.",
+    "primary": "Ana Kalça Kası, Arka Bacak, Alt Sırt & Bel Kasları",
+    "secondary": "Ön Bacak (Yerden İlk Kalkış), Üst Sırt (Trapez) & Kanatlar, Ön Kol (Kavrama), Derin İç Karın (Core)"
+  },
+  {
+    "idx": 44,
+    "id": "bb_rdl",
+    "name": "Barbell RDL",
+    "equipment": "barbell",
+    "group": "Arka Bacak & Kalça",
+    "oldDbMuscle": "Arka Bacak (Hamstring) & Kalça",
+    "oldMapPrimary": "Arka Bacak",
+    "oldMapSecondary": "Kalça, Alt Bel",
+    "proof": "Ağır barı bacaklara sürterek kalçayı geriye itmek, arka bacak kaslarının tamamında ve ana kalça kasında en yüksek gerilimi üretir.",
+    "primary": "Arka Bacak (Üst/Uzun Kısım), Ana Kalça Kası",
+    "secondary": "Alt Sırt & Bel Kasları, Üst Sırt & Kanatlar (Barı Gövdeye Yakın Sabitleme), Ön Kol (Kavrama)"
+  },
+  {
+    "idx": 45,
+    "id": "bb_hip_thrust",
+    "name": "Barbell Hip Thrust",
+    "equipment": "barbell",
+    "group": "Kalça",
+    "oldDbMuscle": "Büyük Kalça Kası (Gluteus Maximus)",
+    "oldMapPrimary": "Kalça (Güç & Hacim)",
+    "oldMapSecondary": "Arka Bacak, Karın",
+    "proof": "Sırt sehpada ve dizler bükülüyken barı kalçayla yukarı itmek, arka bacağın yük çalmasını engeller ve bütün gücü doğrudan ana kalça kasına verir.",
+    "primary": "Ana Kalça Kası (Kalça Hacim & İtiş Kası)",
+    "secondary": "Yan Kalça, Arka Bacak, Ön Bacak & Ön Karın (Denge)"
+  },
+  {
+    "idx": 46,
+    "id": "bb_bent_over_row",
+    "name": "Barbell Row",
+    "equipment": "barbell",
+    "group": "Sırt",
+    "oldDbMuscle": "Geniş Sırt, Rhomboid & Orta Sırt",
+    "oldMapPrimary": "Orta Sırt (Kalınlık)",
+    "oldMapSecondary": "Kanat, Ön Kol (Pazı), Alt Bel",
+    "proof": "Kalçadan öne eğilerek ağır barı karna çekmek orta sırt ve kanatları büyütürken, eğik gövdeyi sabit tutmak için alt sırt ve bel kaslarını da güçlü çalıştırır.",
+    "primary": "Orta Sırt & Kürek Kemiği Kasları, Kanatlar (Sırt Genişliği)",
+    "secondary": "Alt Sırt & Bel Kasları, Arka Omuz, Biceps & Ön Kol, Arka Bacak (Duruş Desteği)"
+  },
+  {
+    "idx": 47,
+    "id": "bb_pendlay_row",
+    "name": "Pendlay Row",
+    "equipment": "barbell",
+    "group": "Sırt",
+    "oldDbMuscle": "Üst Sırt Gücü & Lats",
+    "oldMapPrimary": "Orta Sırt (Patlayıcı Güç)",
+    "oldMapSecondary": "Kürek Kemiği, Kanat, Alt Bel",
+    "proof": "Gövde yere paralelken her tekrarda yerdeki barı patlayıcı şekilde karnına çekmek, üst/orta sırt ve kanatlarda saf çekiş gücü üretir.",
+    "primary": "Orta Sırt & Kürek Kemiği Kasları, Kanatlar, Üst Sırt (Trapez)",
+    "secondary": "Alt Sırt & Bel Kasları, Arka Omuz, Biceps & Ön Kol, Arka Bacak"
+  },
+  {
+    "idx": 48,
+    "id": "bb_biceps_curl",
+    "name": "Barbell Curl",
+    "equipment": "barbell",
+    "group": "Kol (Biceps)",
+    "oldDbMuscle": "Ön Kol & Biceps",
+    "oldMapPrimary": "Pazı (Genel Dolgunluk)",
+    "oldMapSecondary": "Ön Kol, El Tutuş Gücü",
+    "proof": "Düz barla avuç içleri tam yukarı bakarak iki elle ağır kaldırmak, özellikle kolun ön/iç dolgunluğunu veren biceps iç ve dış kısmına en yüksek yükü bindirir.",
+    "primary": "Biceps İç Kısım (Dolgunluk), Biceps Dış Kısım (Tepe)",
+    "secondary": "Biceps Altı Dış Kol Kası, Ön Kol & Bilek Kavrama Kasları"
+  },
+  {
+    "idx": 49,
+    "id": "bb_close_grip_bench",
+    "name": "Dar Tutuş Bench",
+    "equipment": "barbell",
+    "group": "Kol (Triceps)",
+    "oldDbMuscle": "Arka Kol (Triceps) & İç Göğüs",
+    "oldMapPrimary": "Arka Kol (İtiş)",
+    "oldMapSecondary": "İç & Orta Göğüs, Ön Omuz",
+    "proof": "Barı dar tutup dirsekleri gövdeye yakın indirip itmek, göğsün yükünü azaltır ve arka kolun dış ile alt kısmına çok yüksek itiş gücü bindirir.",
+    "primary": "Triceps Dış Kısım, Triceps Alt Kısım",
+    "secondary": "İç ve Orta Göğüs, Ön Omuz, Triceps İç/Uzun Kısım"
+  },
+  {
+    "idx": 50,
+    "id": "mach_lat_pulldown",
+    "name": "Lat Pulldown",
+    "equipment": "machine",
+    "group": "Sırt",
+    "oldDbMuscle": "Geniş Sırt (Kanat / Latissimus)",
+    "oldMapPrimary": "Kanat (Geniş Sırt)",
+    "oldMapSecondary": "Ön Kol (Pazı), Arka Omuz, El Tutuşu",
+    "proof": "Yukarıdaki barı göğse doğru çekmek, sırta genişlik (V görünümü) veren kanat kaslarını doğrudan çalıştırır; çekiş sırasında biceps ve ön kollar yardımcı olur.",
+    "primary": "Kanatlar (Sırt Genişliği)",
+    "secondary": "Biceps & Biceps Altı Dış Kol Kası, Orta Sırt & Kürek Kemiği Kasları, Arka Omuz, Ön Kol (Kavrama)"
+  },
+  {
+    "idx": 51,
+    "id": "mach_cable_row",
+    "name": "Kablo Row",
+    "equipment": "machine",
+    "group": "Sırt",
+    "oldDbMuscle": "Orta Sırt, Kanat & Rhomboid",
+    "oldMapPrimary": "Orta Sırt (Kalınlık)",
+    "oldMapSecondary": "Kürek Kemiği, Kanat, Ön Kol (Pazı)",
+    "proof": "Oturarak kabloyu karnına doğru çekerken omuzları geriye alıp kürek kemiklerini birbirine yaklaştırmak, orta sırt kalınlığını ve kanatları birlikte çalıştırır.",
+    "primary": "Orta Sırt & Kürek Kemiği Kasları (Sırt Kalınlığı), Kanatlar",
+    "secondary": "Arka Omuz, Biceps & Ön Kol, Alt Sırt (Dik Oturuşu Koruma)"
+  },
+  {
+    "idx": 52,
+    "id": "mach_face_pull",
+    "name": "Face Pull",
+    "equipment": "machine",
+    "group": "Omuz",
+    "oldDbMuscle": "Arka Omuz, Dış Rotatörler & Postür",
+    "oldMapPrimary": "Arka Omuz",
+    "oldMapSecondary": "Üst & Orta Sırt, Omuz Dengesi",
+    "proof": "Halatı yüzüne doğru çekip elleri iki yana açmak, duruşu dikleştiren arka omuzları, kürek kemiği çevresini ve omuz eklemini koruyan iç denge kaslarını doğrudan çalıştırır.",
+    "primary": "Arka Omuz, Omuz İç Denge Kasları",
+    "secondary": "Orta Sırt & Kürek Kemiği Kasları, Orta ve Alt Trapez, Yan Omuz"
+  },
+  {
+    "idx": 53,
+    "id": "mach_cable_crossover",
+    "name": "Kablo Crossover",
+    "equipment": "machine",
+    "group": "Göğüs",
+    "oldDbMuscle": "Göğüs İzolasyonu & İç Göğüs",
+    "oldMapPrimary": "İç & Orta Göğüs",
+    "oldMapSecondary": "Ön Omuz",
+    "proof": "Dirsekleri büküp açmadan kolları önde birbirine kavuşturmak (sarılmak gibi), tricepsi devre dışı bırakır ve doğrudan orta ile iç göğüs liflerini sıkıştırır.",
+    "primary": "Orta Göğüs, İç Göğüs",
+    "secondary": "Ön Omuz, Biceps İç Kısım (Dirseği Sabit Tutmak İçin)"
+  },
+  {
+    "idx": 54,
+    "id": "mach_pec_deck",
+    "name": "Pec Deck Kelebek",
+    "equipment": "machine",
+    "group": "Göğüs",
+    "oldDbMuscle": "Göğüs Kası İzolasyonu",
+    "oldMapPrimary": "Orta Göğüs",
+    "oldMapSecondary": "Ön Omuz",
+    "proof": "Makinede oturarak kolları önde birleştirmek, kol kaslarını yormadan sadece orta ve iç göğsü izole şekilde çalıştırır.",
+    "primary": "Orta Göğüs, İç Göğüs",
+    "secondary": "Ön Omuz"
+  },
+  {
+    "idx": 55,
+    "id": "mach_triceps_pushdown",
+    "name": "Halat Triceps Pushdown",
+    "equipment": "machine",
+    "group": "Kol (Triceps)",
+    "oldDbMuscle": "Arka Kol (Triceps Yan & Dış Baş)",
+    "oldMapPrimary": "Arka Kol (Dış Kısım)",
+    "oldMapSecondary": "Arka Kol Alt Kısım, Ön Kol",
+    "proof": "Dirsekleri bel yanında sabit tutup halatı aşağı itmek ve en altta iki yana açmak, arka kolun dış (at nalı) kısmını ve alt kısmını tam sıkıştırır.",
+    "primary": "Triceps Dış Kısım, Triceps Alt Kısım",
+    "secondary": "Triceps İç / Uzun Kısım, Ön Kol Kavrama Kasları"
+  },
+  {
+    "idx": 56,
+    "id": "mach_cable_biceps",
+    "name": "Kablo Biceps Curl",
+    "equipment": "machine",
+    "group": "Kol (Biceps)",
+    "oldDbMuscle": "Ön Kol & Biceps Sürekli Gerilim",
+    "oldMapPrimary": "Pazı",
+    "oldMapSecondary": "Ön Kol",
+    "proof": "Kablo makarası hareketin en altında da en üstünde de yükü hiç boşaltmadığı için bicepsin iç ve dış kısmında kesintisiz yanma ve gerilim sağlar.",
+    "primary": "Biceps İç Kısım, Biceps Dış Kısım",
+    "secondary": "Biceps Altı Dış Kol Kası, Ön Kol & Bilek Kasları"
+  },
+  {
+    "idx": 57,
+    "id": "mach_cable_lateral",
+    "name": "Kablo Lateral Raise",
+    "equipment": "machine",
+    "group": "Omuz",
+    "oldDbMuscle": "Yan Omuz (İzole Gerilim)",
+    "oldMapPrimary": "Yan Omuz",
+    "oldMapSecondary": "Üst Sırt & Boyun",
+    "proof": "Dambılda kol aşağıdayken yük sıfırlanır ama kablo makarası hareketin en alt noktasından en üst noktasına kadar yan omuza sürekli yük bindirir.",
+    "primary": "Yan Omuz",
+    "secondary": "Omuz İç Denge Kasları, Ön Omuz, Üst Trapez"
+  },
+  {
+    "idx": 58,
+    "id": "mach_leg_press",
+    "name": "45° Leg Press",
+    "equipment": "machine",
+    "group": "Ön Bacak",
+    "oldDbMuscle": "Ön Bacak (Quad) & Kalça Gücü",
+    "oldMapPrimary": "Ön Bacak",
+    "oldMapSecondary": "Kalça",
+    "proof": "Sırt ve bel koltukta sabitken bacaklarla ağır platformu itmek, beli hiç yormadan tüm yükü ön bacak ve kalça kaslarına verir.",
+    "primary": "Ön Bacak (Dış, Orta ve Diz Üstü İç Kısım)",
+    "secondary": "Ana Kalça Kası, İç Bacak Kasları"
+  },
+  {
+    "idx": 59,
+    "id": "mach_leg_extension",
+    "name": "Leg Extension",
+    "equipment": "machine",
+    "group": "Ön Bacak",
+    "oldDbMuscle": "Ön Bacak Dört Başlı Kas (Quad İzolasyonu)",
+    "oldMapPrimary": "Ön Bacak (Tek Bölge)",
+    "oldMapSecondary": "Diz Üstü İç Bacak",
+    "proof": "Oturarak sadece dizleri düzleştirmek, başka hiçbir kası karıştırmadan ön bacağın orta, dış ve diz üstü iç kısmını tek başına izole eder.",
+    "primary": "Ön Bacak Orta Kısım, Ön Bacak Diz Üstü İç Kısım, Ön Bacak Dış Kısım",
+    "secondary": "Ön Kaval Kemiği Kası (Ayak Bileğini Sabit Tutma)"
+  },
+  {
+    "idx": 60,
+    "id": "mach_leg_curl",
+    "name": "Leg Curl",
+    "equipment": "machine",
+    "group": "Arka Bacak",
+    "oldDbMuscle": "Arka Bacak (Hamstrings İzolasyonu)",
+    "oldMapPrimary": "Arka Bacak (Diz Bükme)",
+    "oldMapSecondary": "Baldır Üst Kısmı",
+    "proof": "Makinede sadece dizleri bükmek, eğilme hareketlerinde (RDL) tam çalışmayan arka bacağın diz üstü alt kısmını da doğrudan ve izole çalıştırır.",
+    "primary": "Arka Bacak (Diz Büken Alt ve Üst Kısım Tamamı)",
+    "secondary": "Üst Kalf (Diz Bükme Yardımcı Kası)"
+  },
+  {
+    "idx": 61,
+    "id": "mach_calf_raise",
+    "name": "Calf Raise",
+    "equipment": "machine",
+    "group": "Baldır (Kalf)",
+    "oldDbMuscle": "Baldır Kasları (Gastrocnemius & Soleus)",
+    "oldMapPrimary": "Baldır",
+    "oldMapSecondary": "Ayak Bileği, Ayak Tabanı",
+    "proof": "Dizler düzken parmak ucunda yükselmek, baldırın hem dışarıdan görünen üst kısmını hem de altındaki derin baldır kasını tam boyda çalıştırır.",
+    "primary": "Üst Kalf (Görünür Baldır Kası), Alt Kalf (Derin Baldır Kası)",
+    "secondary": "Ayak Bileği Denge Kasları"
+  },
+  {
+    "idx": 62,
+    "id": "mach_cable_woodchopper",
+    "name": "Kablo Woodchopper",
+    "equipment": "machine",
+    "group": "Karın (Core)",
+    "oldDbMuscle": "Rotasyonel Yan Karın & Güç İletimi",
+    "oldMapPrimary": "Yan Karın (Gövde Dönüşü)",
+    "oldMapSecondary": "Omuz, Kalça, Yan Göğüs",
+    "proof": "Kabloyu odun keser gibi çapraz çekip gövdeyi döndürmek, sağ ve sol yan karın kaslarını ile derin iç karın kasını güçlü şekilde çalıştırır.",
+    "primary": "Yan Karın (Bel Yanları / Dönüş Kasları), Derin İç Karın (Core)",
+    "secondary": "Ön ve Yan Omuz, Yan Kalça (Gövde Dönüş Desteği), Yan Göğüs Kasları"
+  },
+  {
+    "idx": 63,
+    "id": "bw_pushup",
+    "name": "Şınav (Push-Up)",
+    "equipment": "bodyweight",
+    "group": "Göğüs",
+    "oldDbMuscle": "Göğüs, Ön Omuz, Triceps & Core",
+    "oldMapPrimary": "Orta Göğüs",
+    "oldMapSecondary": "Ön Omuz, Arka Kol, Karın",
+    "proof": "Yerde vücudu düz bir tahta gibi tutarak kendini yukarı itmek orta göğsü ve tricepsi çalıştırırken, belin sarkmasını önlemek için karın (core) kaslarını sürekli sıkar.",
+    "primary": "Orta Göğüs",
+    "secondary": "Triceps (Dış ve Alt Kısım), Ön Omuz, Yan Göğüs Kaburga Kasları, Ön ve Derin İç Karın (Core)"
+  },
+  {
+    "idx": 64,
+    "id": "bw_decline_pushup",
+    "name": "Decline Şınav",
+    "equipment": "bodyweight",
+    "group": "Göğüs",
+    "oldDbMuscle": "Üst Göğüs & Omuz",
+    "oldMapPrimary": "Üst Göğüs",
+    "oldMapSecondary": "Ön Omuz, Arka Kol",
+    "proof": "Ayakları sehpaya koyup eller yerde şınav çekmek, vücut açısını yukarı eğimli (incline) prese çevirir ve yükü üst göğüs ile ön omuza bindirir.",
+    "primary": "Üst Göğüs",
+    "secondary": "Ön Omuz, Triceps (Dış ve Alt Kısım), Ön ve Derin İç Karın (Core)"
+  },
+  {
+    "idx": 65,
+    "id": "bw_diamond_pushup",
+    "name": "Elmas Şınav",
+    "equipment": "bodyweight",
+    "group": "Kol (Triceps)",
+    "oldDbMuscle": "Arka Kol (Triceps) & İç Göğüs",
+    "oldMapPrimary": "Arka Kol (İtiş)",
+    "oldMapSecondary": "İç Göğüs, Ön Omuz",
+    "proof": "Eller göğüs altında birbirine yakın (elmas şeklinde) şınav çekildiğinde dirsekler tamamen bükülüp açılır; arka kolu en sert çalıştıran vücut ağırlığı hareketidir.",
+    "primary": "Triceps Dış Kısım, Triceps Alt Kısım",
+    "secondary": "İç ve Orta Göğüs, Ön Omuz, Derin İç Karın (Core)"
+  },
+  {
+    "idx": 66,
+    "id": "bw_dips",
+    "name": "Dips",
+    "equipment": "bodyweight",
+    "group": "Göğüs",
+    "oldDbMuscle": "Alt Göğüs & Yoğun Triceps",
+    "oldMapPrimary": "Alt Göğüs",
+    "oldMapSecondary": "Arka Kol, Ön Omuz",
+    "proof": "Gövdeyi hafif öne eğerek paralel barda kendini yukarı itmek, göğsün alt çizgisini (alt göğüs) ve arka kolun dış/alt kısmını çok yoğun çalıştırır.",
+    "primary": "Alt Göğüs, Triceps (Dış ve Alt Kısım)",
+    "secondary": "Ön Omuz, Orta Göğüs, Alt Trapez (Omuzları Aşağıda Tutma)"
+  },
+  {
+    "idx": 67,
+    "id": "bw_pullup",
+    "name": "Barfiks (Pull-Up)",
+    "equipment": "bodyweight",
+    "group": "Sırt",
+    "oldDbMuscle": "Geniş Sırt (Lats), Biceps & Üst Gövde Gücü",
+    "oldMapPrimary": "Kanat (Geniş Sırt)",
+    "oldMapSecondary": "Ön Kol (Pazı), Arka Omuz, Karın",
+    "proof": "Avuç içleri karşıya bakacak şekilde geniş tutuşla barfiks çekmek, bicepsin yardımını azaltıp bütün yükü üst ve dış kanat kaslarına bindirir.",
+    "primary": "Kanatlar (Sırt Genişliği)",
+    "secondary": "Biceps & Ön Kol Üst Kası, Orta Sırt & Kürek Kemiği Kasları, Arka Omuz, Ön ve Derin İç Karın (Core)"
+  },
+  {
+    "idx": 68,
+    "id": "bw_chinup",
+    "name": "Chin-Up (Ters Barfiks)",
+    "equipment": "bodyweight",
+    "group": "Sırt & Kol",
+    "oldDbMuscle": "Biceps & Alt Sırt Kanatları",
+    "oldMapPrimary": "Kanat & Ön Kol (Pazı)",
+    "oldMapSecondary": "Arka Omuz, Bilek",
+    "proof": "Avuç içleri sana bakacak şekilde omuz genişliğinde barfiks çekmek, hem kanat kaslarını tam boyda çalıştırır hem de bicepsleri en güçlü açısında kasar.",
+    "primary": "Kanatlar (Sırt Genişliği), Biceps (İç ve Dış Kısım)",
+    "secondary": "Ön Kol & Kavrama Kasları, Orta Sırt & Kürek Kemiği Kasları, Arka Omuz, Ön Karın (Core)"
+  },
+  {
+    "idx": 69,
+    "id": "bw_inverted_row",
+    "name": "Yatay Barfiks",
+    "equipment": "bodyweight",
+    "group": "Sırt",
+    "oldDbMuscle": "Orta Sırt & Kürek Kemikleri",
+    "oldMapPrimary": "Orta Sırt (Kalınlık)",
+    "oldMapSecondary": "Kürek Kemiği, Ön Kol (Pazı), Arka Omuz",
+    "proof": "Alçak barın altına girip göğsü bara çekmek, bele hiç yük bindirmeden kürek kemiklerini birbirine kenetler ve orta sırt ile arka omzu çalıştırır.",
+    "primary": "Orta Sırt & Kürek Kemiği Kasları (Sırt Kalınlığı), Kanatlar",
+    "secondary": "Arka Omuz, Biceps & Ön Kol, Alt Sırt & Kalça (Vücudu Düz Tutma)"
+  },
+  {
+    "idx": 70,
+    "id": "bw_air_squat",
+    "name": "Air Squat",
+    "equipment": "bodyweight",
+    "group": "Ön Bacak",
+    "oldDbMuscle": "Bacak, Kalça & Kalça Hareket Açıklığı",
+    "oldMapPrimary": "Ön Bacak",
+    "oldMapSecondary": "Kalça, Ayak Bileği Açıklığı",
+    "proof": "Kendi vücut ağırlığınla tam çömelip kalkmak, ön bacak ve kalça kaslarını doğal hareket açıklığında çalıştırır.",
+    "primary": "Ön Bacak (Dış ve İç Kısım), Ana Kalça Kası",
+    "secondary": "İç Bacak Kasları, Alt Sırt & Karın (Core)"
+  },
+  {
+    "idx": 71,
+    "id": "bw_jump_squat",
+    "name": "Jump Squat",
+    "equipment": "bodyweight",
+    "group": "Ön Bacak & Kalça",
+    "oldDbMuscle": "Patlayıcı Bacak Gücü & Kalp Nabzı",
+    "oldMapPrimary": "Ön Bacak & Patlayıcı Güç",
+    "oldMapSecondary": "Kalça, Baldır",
+    "proof": "Çömelip yukarı doğru patlayıcı sıçramak; ön bacak, ana kalça ve parmak ucundan itiş yapan kalf (baldır) kaslarının patlayıcı liflerini ateşler.",
+    "primary": "Ön Bacak, Ana Kalça Kası, Üst Kalf (Baldır)",
+    "secondary": "Arka Bacak, Alt Kalf, Derin İç Karın (Yere İniş Dengesi)"
+  },
+  {
+    "idx": 72,
+    "id": "bw_glute_bridge",
+    "name": "Glute Bridge",
+    "equipment": "bodyweight",
+    "group": "Kalça",
+    "oldDbMuscle": "Büyük Kalça (Glute) & Bel Sağlığı",
+    "oldMapPrimary": "Kalça",
+    "oldMapSecondary": "Arka Bacak, Bel Dengesi",
+    "proof": "Sırtüstü yatarken dizler bükülü şekilde kalçayı yukarı kaldırıp sıkmak, bele yük bindirmeden doğrudan ana kalça kasını çalıştırır.",
+    "primary": "Ana Kalça Kası",
+    "secondary": "Arka Bacak, Alt Sırt & Derin İç Karın (Core)"
+  },
+  {
+    "idx": 73,
+    "id": "bw_hanging_knee_raise",
+    "name": "Barda Dize Çekme",
+    "equipment": "bodyweight",
+    "group": "Karın (Core)",
+    "oldDbMuscle": "Alt Karın & Kavrama Gücü",
+    "oldMapPrimary": "Alt Karın & Gövde",
+    "oldMapSecondary": "El Tutuş Gücü, Ön Kalça",
+    "proof": "Barda asılıyken dizleri göğse doğru çekip kalçayı yukarı kıvırmak, özellikle göbek deliğinin altındaki alt karın kaslarını doğrudan çalıştırır.",
+    "primary": "Alt Karın (Ön Karın Alt Kısmı), Ön Kalça Kası (Bacak Kaldırıcı)",
+    "secondary": "Üst Karın & Yan Karın, Ön Kol & Bilek (Barda Tutunma), Kanatlar (Omuzları Sabit Tutma)"
+  },
+  {
+    "idx": 74,
+    "id": "bw_hollow_body",
+    "name": "Hollow Body",
+    "equipment": "bodyweight",
+    "group": "Karın (Core)",
+    "oldDbMuscle": "Derin Karın Duvarı (Transverse Abdominis)",
+    "oldMapPrimary": "Derin Karın",
+    "oldMapSecondary": "Ön Kalça, Yan Göğüs",
+    "proof": "Sırtüstü yatarken beli yere tam yapıştırıp kol ve bacakları yerden kesmek, ön karın (üst ve alt) ile derin iç karın kaslarını en zorlu açıda çalıştırır.",
+    "primary": "Derin İç Karın (Korse Kası), Ön Karın (Üst ve Alt Karın Tamamı)",
+    "secondary": "Yan Karın, Ön Kalça & Ön Bacak Orta Kısım (Bacakları Havada Tutma)"
+  },
+  {
+    "idx": 75,
+    "id": "bw_plank",
+    "name": "Plank",
+    "equipment": "bodyweight",
+    "group": "Karın (Core)",
+    "oldDbMuscle": "Tüm Karın, Omuz & Omurga Zırhı",
+    "oldMapPrimary": "Ön & Derin Karın",
+    "oldMapSecondary": "Omuz, Kalça, Ön Bacak",
+    "proof": "Dirsekler üzerinde vücudu düz tutarken belin çukurlaşmasına direnmek, karnı içe çeken derin korse kasını ve ön karın kaslarını baştan sona kilitler.",
+    "primary": "Derin İç Karın (Korse Kası), Ön Karın (Üst ve Alt Karın)",
+    "secondary": "Yan Karın, Omuz & Yan Göğüs Sabitleyicileri, Ana Kalça & Ön Bacak"
+  },
+  {
+    "idx": 76,
+    "id": "bw_burpee",
+    "name": "Burpee",
+    "equipment": "bodyweight",
+    "group": "Tüm Vücut & Kondisyon",
+    "oldDbMuscle": "Tüm Vücut & Maksimum Kalori Yakımı",
+    "oldMapPrimary": "Tüm Vücut Kondisyonu",
+    "oldMapSecondary": "Göğüs, Bacak, Karın, Nabız",
+    "proof": "Yere inip şınav çekmek göğüs, omuz ve tricepsi; ayakları karna çekip yukarı sıçramak ise karın, ön bacak, kalça ve kalfları çalıştırır.",
+    "primary": "Ön Bacak & Ana Kalça Kası, Orta Göğüs & Ön Omuz",
+    "secondary": "Triceps, Ön ve Derin İç Karın (Core), Ön Kalça Kası, Kalf (Baldır)"
+  },
+  {
+    "idx": 77,
+    "id": "bw_mountain_climber",
+    "name": "Mountain Climber",
+    "equipment": "bodyweight",
+    "group": "Karın (Core) & Kondisyon",
+    "oldDbMuscle": "Karın Nabzı & Omuz Dayanıklılığı",
+    "oldMapPrimary": "Ön Karın & Kondisyon",
+    "oldMapSecondary": "Omuz, Ön Kalça",
+    "proof": "Şınav duruşunda gövdeyi bozmadan dizleri hızla karna çekmek, ön/alt karın ve ön kalça kaslarını çalıştırırken nabzı hızla yükseltir.",
+    "primary": "Ön Karın (Üst ve Alt Karın), Derin İç Karın, Ön Kalça Kası",
+    "secondary": "Ön Omuz & Triceps (Kolları Sabit Tutma), Yan Karın"
+  },
+  {
+    "idx": 78,
+    "id": "kneeling_plate_front_raise",
+    "name": "Diz Üstü Plaka Ön Omuz Kaldırış",
+    "equipment": "dumbbell",
+    "group": "Omuz",
+    "oldDbMuscle": "Ön Omuz (Anterior Deltoid) & Karın Zırhı",
+    "oldMapPrimary": "Ön Omuz",
+    "oldMapSecondary": "Üst Göğüs, Karın",
+    "proof": "İki diz üstünde durmak belden hız almayı keser; plakayı önden yüz hizasına kaldırmak doğrudan ön omuz ve üst göğsü çalıştırır.",
+    "primary": "Ön Omuz",
+    "secondary": "Üst Göğüs, Ön ve Derin İç Karın (Core), Yan Göğüs Kaburga Kasları"
+  },
+  {
+    "idx": 79,
+    "id": "half_kneeling_plate_chop",
+    "name": "Yarım Diz Üstü Plaka Oduncu (Woodchopper)",
+    "equipment": "dumbbell",
+    "group": "Karın (Core)",
+    "oldDbMuscle": "Yan Karın (Oblikler), Rotasyonel Core & Omuz",
+    "oldMapPrimary": "Yan Karın (Gövde Dönüşü)",
+    "oldMapSecondary": "Omuz, Kalça Dengesi",
+    "proof": "Tek diz yerde durmak bacaklardan hız almayı engeller; plakayı çapraz savurup durdurmak sadece yan karın ve derin kor kaslarının gücüyle yapılır.",
+    "primary": "Yan Karın (Bel Yanları), Derin İç Karın (Core)",
+    "secondary": "Yan ve Ana Kalça (Kalçayı Sabit Tutma), Ön Omuz"
+  },
+  {
+    "idx": 80,
+    "id": "db_thruster",
+    "name": "Dambıl Thruster",
+    "equipment": "dumbbell",
+    "group": "Ön Bacak & Omuz",
+    "oldDbMuscle": "Ön Bacak (Quad), Omuz & Triceps",
+    "oldMapPrimary": "Ön Bacak & Omuz",
+    "oldMapSecondary": "Arka Kol, Kalça, Karın",
+    "proof": "Dambıllarla tam çömelip kalkarken kazandığın hızla ağırlığı kesintisiz baş üstüne itmek; ön bacak, kalça, ön/yan omuz ve tricepsi aynı anda çalıştırır.",
+    "primary": "Ön Bacak, Ana Kalça Kası, Ön ve Yan Omuz",
+    "secondary": "Triceps, Derin İç Karın & Üst Sırt (Core)"
+  },
+  {
+    "idx": 81,
+    "id": "db_push_press",
+    "name": "Dambıl Push Press",
+    "equipment": "dumbbell",
+    "group": "Omuz",
+    "oldDbMuscle": "Omuz, Triceps & Patlayıcı Bacak İtişi",
+    "oldMapPrimary": "Ön Omuz & Güç",
+    "oldMapSecondary": "Arka Kol, Ön Bacak, Karın",
+    "proof": "Bacak itişiyle hız kazandırıp dambılları baş üstüne kilitlemek; ön/yan omuz, triceps ve bacak itiş gücünü aynı anda çalıştırır.",
+    "primary": "Ön Omuz, Yan Omuz",
+    "secondary": "Ön Bacak, Triceps, Ana Kalça Kası, Derin İç Karın (Core)"
+  },
+  {
+    "idx": 82,
+    "id": "db_renegade_pushup",
+    "name": "Renegade Row + Şınav",
+    "equipment": "dumbbell",
+    "group": "Göğüs & Sırt",
+    "oldDbMuscle": "Göğüs, Sırt & Anti-Rotasyonel Core",
+    "oldMapPrimary": "Orta Göğüs & Sırt",
+    "oldMapSecondary": "Arka Kol, Yan Karın",
+    "proof": "Şınav kısmında orta göğüs ve triceps iterken, tek kolla dambılı çektiğin kısımda kanat ve orta sırt çalışır; tek el üstünde dengede kalmak yan karın kaslarını ateşler.",
+    "primary": "Orta Göğüs, Orta Sırt & Kanatlar",
+    "secondary": "Yan Karın & Derin İç Karın (Core), Triceps, Ön Omuz, Biceps (Çekiş Kısmı)"
+  },
+  {
+    "idx": 83,
+    "id": "bear_crawl_pull_through",
+    "name": "Ayı Emeklemesi Plaka Çekişi",
+    "equipment": "dumbbell",
+    "group": "Karın (Core)",
+    "oldDbMuscle": "Derin Core (Transverse Abdominis) & Omuz Zırhı",
+    "oldMapPrimary": "Derin Karın & Bel Koruma",
+    "oldMapSecondary": "Omuz Dengesi, Kalça",
+    "proof": "Dizler yerden 2-3 parmak havadayken tek elle ağırlığı alttan çekmek, gövdenin sağa sola devrilmesini önleyen derin iç karın ve yan karın kaslarını yoğun çalıştırır.",
+    "primary": "Derin İç Karın (Korse Kası), Yan Karın (Bel Yanları)",
+    "secondary": "Ön Omuz (Destek Kolu), Ön Bacak (Dizleri Havada Tutma), Kanat (Çekiş Kolu)"
+  },
+  {
+    "idx": 84,
+    "id": "db_clean_and_press",
+    "name": "Dambıl Clean & Press",
+    "equipment": "dumbbell",
+    "group": "Kalça, Sırt & Omuz",
+    "oldDbMuscle": "Arka Bacak, Kalça, Sırt & Omuz",
+    "oldMapPrimary": "Kalça, Sırt & Omuz",
+    "oldMapSecondary": "Arka Kol, Arka Bacak",
+    "proof": "İlk kısımda kalça ve sırt gücüyle omuza alınan dambıllar, ikinci kısımda omuz ve triceps gücüyle baş üstüne itilir.",
+    "primary": "Ana Kalça Kası & Arka Bacak, Ön ve Yan Omuz",
+    "secondary": "Üst ve Orta Sırt, Triceps, Biceps & Ön Kol, Derin İç Karın (Core)"
+  },
+  {
+    "idx": 85,
+    "id": "db_manmaker",
+    "name": "Dambıl Manmaker",
+    "equipment": "dumbbell",
+    "group": "Tüm Vücut",
+    "oldDbMuscle": "Tüm Vücut Fonksiyonel & Metabolik Zırh",
+    "oldMapPrimary": "Tüm Vücut",
+    "oldMapSecondary": "Göğüs, Sırt, Omuz, Bacak, Karın",
+    "proof": "Şınav + sağ/sol sırt çekişi + çömelerek omuza alma + baş üstü pres birleşimi; göğüs, sırt, bacak, kalça, omuz ve karın kaslarının tamamını çalıştırır.",
+    "primary": "Orta Göğüs, Kanatlar & Orta Sırt, Ön Bacak & Ana Kalça, Ön ve Yan Omuz",
+    "secondary": "Triceps, Biceps, Yan ve Derin İç Karın (Core), Arka Bacak"
+  },
+  {
+    "idx": 86,
+    "id": "waiters_carry",
+    "name": "Garson Taşıması (Waiter Carry)",
+    "equipment": "dumbbell",
+    "group": "Omuz & Core",
+    "oldDbMuscle": "Omuz Stabilitesi, Trapez & Derin Core",
+    "oldMapPrimary": "Omuz Dengesi",
+    "oldMapSecondary": "Üst Sırt, Derin Karın",
+    "proof": "Ağırlığı tek elle garson tepsisi gibi baş üstünde tutarak yürümek, omuz iç denge kaslarını ve gövdenin yana yatmasını önleyen yan karın kaslarını aralıksız çalıştırır.",
+    "primary": "Omuz İç Denge Kasları, Ön ve Yan Omuz, Yan Karın & Bel Yanları (Core)",
+    "secondary": "Triceps (Kol Kilidi), Üst ve Alt Trapez, Derin İç Karın"
+  },
+  {
+    "idx": 87,
+    "id": "cross_body_carry",
+    "name": "Çapraz Taşıma (Cross-Body Carry)",
+    "equipment": "dumbbell",
+    "group": "Karın (Core) & Omuz",
+    "oldDbMuscle": "Yan Karın (Oblik), Omuz & Anti-Lateral Denge",
+    "oldMapPrimary": "Yan Karın & Omuz",
+    "oldMapSecondary": "Üst Sırt, Denge",
+    "proof": "Bir dambılı baş üstünde, diğerini yanda tutarak yürümek; hem üstteki omuz denge kaslarını hem de çapraz yan karın ve bel kaslarını çalıştırır.",
+    "primary": "Yan Karın & Bel Yanları (Core), Omuz İç Denge Kasları & Ön/Yan Omuz",
+    "secondary": "Derin İç Karın, Üst Trapez, Ön Kol (Kavrama), Yan Kalça"
+  },
+  {
+    "idx": 88,
+    "id": "lunge_with_twist",
+    "name": "Lunge + Gövde Rotasyonu",
+    "equipment": "dumbbell",
+    "group": "Ön Bacak & Core",
+    "oldDbMuscle": "Ön Bacak, Kalça & Yan Karın (Oblik)",
+    "oldMapPrimary": "Ön Bacak & Kalça",
+    "oldMapSecondary": "Yan Karın, Denge",
+    "proof": "Öne adım atıp çömelirken gövdeyi öndeki bacak yönüne çevirmek; alt vücutta ön bacak ve kalçayı, üst vücutta ise yan karın kaslarını çalıştırır.",
+    "primary": "Ön Bacak, Ana Kalça Kası, Yan Karın (Bel Yanları)",
+    "secondary": "Yan Kalça (Denge Kası), Arka Bacak"
+  },
+  {
+    "idx": 89,
+    "id": "step_up_press",
+    "name": "Step-Up + Omuz Presi",
+    "equipment": "dumbbell",
+    "group": "Ön Bacak & Omuz",
+    "oldDbMuscle": "Tek Bacak Gücü (Quad/Glute) & Omuz",
+    "oldMapPrimary": "Ön Bacak & Omuz",
+    "oldMapSecondary": "Kalça, Arka Kol, Denge",
+    "proof": "Yüksek kutuya tek ayakla çıkarken ön bacak ve ana/yan kalça tüm vücudu yukarı kaldırır; tepede ağırlığı baş üstüne itmek ön ve yan omzu çalıştırır.",
+    "primary": "Ön Bacak, Ana ve Yan Kalça, Ön Omuz",
+    "secondary": "Yan Omuz, Triceps, Derin İç Karın & Kalf (Tek Ayak Denge)"
+  },
+  {
+    "idx": 90,
+    "id": "bb_thruster",
+    "name": "Barbell Thruster",
+    "equipment": "barbell",
+    "group": "Ön Bacak & Omuz",
+    "oldDbMuscle": "Ön Bacak (Quad), Kalça, Omuz & Core",
+    "oldMapPrimary": "Ön Bacak & Omuz",
+    "oldMapSecondary": "Arka Kol, Kalça, Karın",
+    "proof": "Omuzda barla tam çömelme (Front Squat) ve kalkarken baş üstü itiş; ön bacak, kalça, omuz ve tricepsi ağır yük altında birleştirir.",
+    "primary": "Ön Bacak, Ana Kalça Kası, Ön ve Yan Omuz",
+    "secondary": "Triceps, Üst ve Alt Sırt, Derin İç Karın (Core)"
+  },
+  {
+    "idx": 91,
+    "id": "bb_hang_power_clean",
+    "name": "Barbell Hang Power Clean",
+    "equipment": "barbell",
+    "group": "Kalça & Üst Sırt",
+    "oldDbMuscle": "Kalça, Arka Bacak, Trapez & Üst Sırt",
+    "oldMapPrimary": "Kalça & Üst Sırt",
+    "oldMapSecondary": "Arka Bacak, Ön Kol, Omuz",
+    "proof": "Diz üstünden barı kalça patlaması ve omuz çekişiyle bir anda ön omuzlara almak; kalça, arka bacak ve üst sırt (trapez) kaslarında patlayıcı güç üretir.",
+    "primary": "Ana Kalça Kası, Arka Bacak, Üst ve Orta Sırt (Trapez)",
+    "secondary": "Ön Bacak (Yakalama Anı), Kalf (Baldır), Alt Sırt & Bel, Ön Kol & Biceps"
+  },
+  {
+    "idx": 92,
+    "id": "bb_push_press",
+    "name": "Barbell Push Press",
+    "equipment": "barbell",
+    "group": "Omuz",
+    "oldDbMuscle": "Omuz (Deltoid), Triceps & Bacak İtişi",
+    "oldMapPrimary": "Ön Omuz & Güç",
+    "oldMapSecondary": "Arka Kol, Ön Bacak, Karın",
+    "proof": "Dizleri hafif büküp bacaklardan patlayıcı güç alarak barı baş üstüne fırlatmak, normalden daha ağır kilolarla ön/yan omuz ve tricepsi çalıştırmanı sağlar.",
+    "primary": "Ön Omuz, Yan Omuz",
+    "secondary": "Ön Bacak, Triceps, Ana Kalça Kası, Üst Trapez, Üst Kalf"
+  },
+  {
+    "idx": 93,
+    "id": "bb_zercher_squat",
+    "name": "Barbell Zercher Squat",
+    "equipment": "barbell",
+    "group": "Ön Bacak & Core",
+    "oldDbMuscle": "Ön Bacak (Quad), Glute, Karın Zırhı & Üst Sırt",
+    "oldMapPrimary": "Ön Bacak",
+    "oldMapSecondary": "Kalça, Karın, Üst Sırt",
+    "proof": "Barı dirseklerin iç kısmında kucaklayarak çömelmek; ön bacak ve kalçanın yanı sıra gövdeyi öne yıkılmaktan koruyan üst sırt, karın (core) ve bicepsleri çok sert çalıştırır.",
+    "primary": "Ön Bacak, Ana Kalça Kası, Üst Sırt & Derin İç Karın (Core)",
+    "secondary": "Biceps & Ön Kol (Barı Kucaklama), İç Bacak Kasları"
+  },
+  {
+    "idx": 94,
+    "id": "bb_landmine_squat_press",
+    "name": "Landmine Squat to Press",
+    "equipment": "barbell",
+    "group": "Ön Bacak, Omuz & Üst Göğüs",
+    "oldDbMuscle": "Ön Bacak, Omuz, Üst Göğüs & Core",
+    "oldMapPrimary": "Ön Bacak & Omuz",
+    "oldMapSecondary": "Üst Göğüs, Arka Kol, Kalça, Karın",
+    "proof": "Barın ucunu göğüste tutup çömelmek ön bacak ve kalçayı, kalkarken ileri-yukarı doğru itmek ise ön omuz ve üst göğsü omuzları zorlamadan çalıştırır.",
+    "primary": "Ön Bacak, Ön Omuz, Üst Göğüs",
+    "secondary": "Ana Kalça Kası, Triceps, Derin İç Karın (Core) & Yan Göğüs Kasları"
+  },
+  {
+    "idx": 95,
+    "id": "db_standing_calf_raise",
+    "name": "Dambıl Ayakta Kalf Yükseltme",
+    "equipment": "dumbbell",
+    "group": "Baldır (Kalf)",
+    "oldDbMuscle": "Baldır Kasları (Gastrocnemius & Soleus)",
+    "oldMapPrimary": "Baldır",
+    "oldMapSecondary": "Ayak Bileği, Ayak Tabanı",
+    "proof": "Elde dambılla ayakta parmak ucuna yükselip tepe noktada sıkıştırmak, üst ve alt kalf kaslarını doğrudan çalıştırır.",
+    "primary": "Üst Kalf (Görünür Baldır Kası), Alt Kalf (Derin Baldır Kası)",
+    "secondary": "Ayak Tabanı & Bilek Denge Kasları, Ön Kol (Dambıl Tutuşu)"
+  },
+  {
+    "idx": 96,
+    "id": "db_lying_leg_curl",
+    "name": "Dambıl Yatarak Leg Curl",
+    "equipment": "dumbbell",
+    "group": "Arka Bacak",
+    "oldDbMuscle": "Arka Bacak (Hamstrings — Biceps Femoris Kısa Başı)",
+    "oldMapPrimary": "Arka Bacak",
+    "oldMapSecondary": "Alt Arka Bacak",
+    "proof": "Yüzüstü yatarken iki ayak arasındaki dambılı kalçaya doğru bükmek, arka bacağın diz büken alt/dış kısmını ve iç kısmını doğrudan çalıştırır.",
+    "primary": "Arka Bacak (Diz Büken Alt ve Üst Kısım)",
+    "secondary": "Üst Kalf, İç Bacak, Ana Kalça Kası (Kalçayı Yere Bastırma)"
+  },
+  {
+    "idx": 97,
+    "id": "bw_sissy_squat",
+    "name": "Sissy Squat (Quad İzolasyonu)",
+    "equipment": "bodyweight",
+    "group": "Ön Bacak",
+    "oldDbMuscle": "Ön Bacak Düz Başı (Rectus Femoris & VMO)",
+    "oldMapPrimary": "Ön Bacak",
+    "oldMapSecondary": "Orta Ön Bacak, Diz Dengesi",
+    "proof": "Kalçayı hiç kırmadan dizleri öne verip gövdeyi geriye yatırmak, ön bacağın kalçaya kadar uzanan tam orta kasını maksimum gererek çalıştırır.",
+    "primary": "Ön Bacak Orta Kısım, Ön Bacak Diz Üstü İç Kısım",
+    "secondary": "Ön ve Derin İç Karın (Core), Kalf (Parmak Ucu Denge)"
+  },
+  {
+    "idx": 98,
+    "id": "db_pullover_to_halo",
+    "name": "Dambıl Pullover to Halo (Torasik & Omuz Akışı)",
+    "equipment": "dumbbell",
+    "group": "Sırt & Omuz",
+    "oldDbMuscle": "Geniş Sırt (Lats), Omuz Kapsülü & Torasik Mobilite",
+    "oldMapPrimary": "Kanat & Omuz Açıklığı",
+    "oldMapSecondary": "Üst Göğüs, Arka Kol, Üst Sırt",
+    "proof": "Yatarken ağırlığı baş gerisinden çekmek kanat ve göğüs kafesini çalıştırır; ardından baş etrafında döndürmek (Halo) arka/yan omuz ve omuz iç kaslarını açar.",
+    "primary": "Kanatlar (Sırt Genişliği), Arka ve Yan Omuz + Omuz İç Denge Kasları",
+    "secondary": "Orta Göğüs & Yan Göğüs Kaburga Kasları, Triceps İç/Uzun Kısım, Derin İç Karın (Core)"
+  },
+  {
+    "idx": 99,
+    "id": "db_seesaw_lunge",
+    "name": "Dambıl Seesaw Lunge (Dinamik İleri-Geri Lunge)",
+    "equipment": "dumbbell",
+    "group": "Ön Bacak & Kalça",
+    "oldDbMuscle": "Kuadriseps, Gluteus Medius, Hamstrings & Dinamik Denge",
+    "oldMapPrimary": "Ön Bacak & Kalça",
+    "oldMapSecondary": "Arka Bacak, Denge & Karın",
+    "proof": "Bir ayak yerde sabitken diğer ayakla hiç durmadan bir ileri bir geri lunge yapmak, sabit kalan bacağın ön kısmını ve kalçasını aralıksız çalıştırır.",
+    "primary": "Ön Bacak (Diz Üstü İç ve Dış Kısım), Ana ve Yan Kalça",
+    "secondary": "Arka Bacak, Kalf & Ayak Bileği Denge Kasları, Derin İç Karın (Core)"
+  },
+  {
+    "idx": 100,
+    "id": "db_clean_squat_press",
+    "name": "Dambıl Clean to Front Squat to Push Press",
+    "equipment": "dumbbell",
+    "group": "Tüm Vücut",
+    "oldDbMuscle": "Kalça, Ön Bacak, Ön Omuz & Patlayıcı İtiş",
+    "oldMapPrimary": "Ön Bacak, Kalça & Omuz",
+    "oldMapSecondary": "Sırt, Arka Kol, Patlayıcı Güç",
+    "proof": "Clean aşamasında arka bacak ve kalça patlayıcı gücü üretir; Front Squat aşamasında ön bacak ve kalça çömelmeyi yönetir; Push Press aşamasında ise omuzlar ana itişi yaparken karın/bel, trapez, triceps, ön kol ve kalflar hareketi destekler.",
+    "primary": "Ön Bacak, Ön ve Yan Omuz, Ana Kalça Kası, Arka Bacak",
+    "secondary": "Karın, Yan Karın & Alt Sırt/Bel (Core), Üst ve Orta Sırt (Trapez), Triceps (Arka Kol), Ön Kol & Kavrama Kasları, Üst ve Alt Kalf (Baldır)"
+  },
+  {
+    "idx": 101,
+    "id": "db_rdl_to_high_pull",
+    "name": "Dambıl RDL to High Pull (Arka Zincir & Üst Çekiş)",
+    "equipment": "dumbbell",
+    "group": "Arka Bacak, Kalça & Üst Sırt",
+    "oldDbMuscle": "Hamstrings, Gluteus, Üst Sırt & Trapezler",
+    "oldMapPrimary": "Arka Bacak & Üst Sırt",
+    "oldMapSecondary": "Kalça, Arka Omuz, Ön Kol",
+    "proof": "RDL (öne eğilme) fazında arka bacak ve ana kalça kası yükü çekerken; High Pull (yukarı çekiş) fazında omuz silkme ile trapezler ve yan/ön omuzlar ağırlığı göğüs/çene hizasına ivmelendirir.",
+    "primary": "Arka Bacak, Ana Kalça Kası, Üst ve Orta Sırt (Trapez), Yan ve Ön Omuz",
+    "secondary": "Alt Sırt & Bel Kasları (Omurga Doğrultucu), Ön ve Yan Karın (Core), Ön Kol & Kavrama Kasları, Ön Bacak (Geçiş İtiş Desteği)"
+  },
+  {
+    "idx": 102,
+    "id": "db_swing_to_goblet_squat",
+    "name": "Dambıl Swing to Goblet Squat (Hinge-Squat Akışı)",
+    "equipment": "dumbbell",
+    "group": "Kalça, Arka Bacak & Ön Bacak",
+    "oldDbMuscle": "Gluteus Maximus, Hamstring, Ön Bacak & Core",
+    "oldMapPrimary": "Kalça, Arka Bacak & Ön Bacak",
+    "oldMapSecondary": "Karın, El Tutuşu, Kondisyon",
+    "proof": "İlk savuruşta (Swing) kalça ve arka bacak çalışır; ağırlığı göğüste yakalayıp çömeldiğinde (Goblet Squat) ise ön bacak devreye girer.",
+    "primary": "Ana Kalça Kası, Arka Bacak, Ön Bacak",
+    "secondary": "Alt Sırt & Bel Kasları, Ön ve Derin İç Karın (Core), Biceps & Ön Kol"
+  },
+  {
+    "idx": 103,
+    "id": "db_lunge_to_curl_press",
+    "name": "Dambıl Lunge to Biceps Curl to Overhead Press",
+    "equipment": "dumbbell",
+    "group": "Ön Bacak, Biceps & Omuz",
+    "oldDbMuscle": "Kuadriseps, Kalça, Biceps, Ön Omuz & Denge",
+    "oldMapPrimary": "Ön Bacak, Kalça & Pazı",
+    "oldMapSecondary": "Ön Omuz, Denge, Karın",
+    "proof": "Adım alıp çömelirken ön bacak ve kalça, kalkarken dambılı büktüğünde biceps, baş üstüne ittiğinde ise ön/yan omuz ve triceps sırasıyla çalışır.",
+    "primary": "Ön Bacak & Ana Kalça Kası, Biceps, Ön ve Yan Omuz",
+    "secondary": "Yan Kalça (Denge), Triceps, Ön Kol, Derin İç Karın (Core)"
+  },
+  {
+    "idx": 104,
+    "id": "db_gorilla_row_to_clean",
+    "name": "Dambıl Goril Row to Clean (Menteşe & Çekiş Akışı)",
+    "equipment": "dumbbell",
+    "group": "Sırt & Kalça",
+    "oldDbMuscle": "Orta Sırt, Kanat (Lats), Kalça Menteşesi, Arka Bacak & Trapez",
+    "oldMapPrimary": "Orta Sırt & Kalça",
+    "oldMapSecondary": "Kanat, Üst Sırt, Arka Bacak",
+    "proof": "Row aşamasında kanatlar ve üst sırt/kürek kemikleri dambılı yerden çeker; Clean aşamasında ise kalça patlaması ve trapez silkmesiyle ağırlık omuz hizasına alınır.",
+    "primary": "Kanatlar (Sırt Genişliği), Üst Sırt & Kürek Kemiği (Trapez & Orta Sırt), Ana Kalça Kası",
+    "secondary": "Biceps (Pazı), Arka Bacak & Alt Sırt/Bel (Eğik Duruş Dengesi), Ön Omuz (Omuzda Sabitleme), Ön ve Yan Karın (Core), Ön Kol & Kavrama Kasları"
+  },
+  {
+    "idx": 105,
+    "id": "db_floor_press_to_bridge",
+    "name": "Dambıl Floor Press to Glute Bridge (Göğüs & Kalça Köprüsü)",
+    "equipment": "dumbbell",
+    "group": "Göğüs & Kalça",
+    "oldDbMuscle": "Orta Göğüs, Gluteus Maximus, Triceps & Lomber Stabilite",
+    "oldMapPrimary": "Orta Göğüs & Kalça",
+    "oldMapSecondary": "Arka Kol, Arka Bacak, Alt Bel",
+    "proof": "Kalçayı yukarı kaldırıp sıkarak (ana kalça) tutarken aynı anda dambılları yukarı preslemek (orta göğüs ve triceps) alt ve üst vücudu birlikte çalıştırır.",
+    "primary": "Orta Göğüs, Ana Kalça Kası, Triceps (Dış ve Alt Kısım)",
+    "secondary": "Ön Omuz, Arka Bacak, Alt Sırt & Derin İç Karın (Köprü Duruşu)"
+  },
+  {
+    "idx": 106,
+    "id": "db_step_back_lunge_to_knee_drive",
+    "name": "Dambıl Geri Lunge to Diz Çekme & Tek Kol Omuz Pres",
+    "equipment": "dumbbell",
+    "group": "Ön Bacak, Kalça & Omuz",
+    "oldDbMuscle": "Kuadriseps, Kalça, Ön Omuz & Psoas Atletik Güç",
+    "oldMapPrimary": "Ön Bacak & Ön Omuz",
+    "oldMapSecondary": "Yan Kalça, Ön Kalça, Denge",
+    "proof": "Geri lunge'dan tek ayak üzerinde yükselip arka dizi yukarı çekerken aynı anda tek kol omuz presi yapmak; ön bacak, kalça, ön kalça ve omzu birlikte çalıştırır.",
+    "primary": "Ön Bacak, Ana ve Yan Kalça, Ön Omuz, Ön Kalça Kası (Diz Çekme)",
+    "secondary": "Yan Karın (Tek Kol Denge), Triceps, Kalf (Baldır)"
+  },
+  {
+    "idx": 107,
+    "id": "bw_inchworm_to_pushup",
+    "name": "Vücut Ağırlığı Inchworm to Şınav (Mobilite & İtiş Akışı)",
+    "equipment": "bodyweight",
+    "group": "Göğüs, Core & Arka Bacak",
+    "oldDbMuscle": "Hamstring Mobilite, Göğüs, Triceps, Ön Karın & Omuz Zırhı",
+    "oldMapPrimary": "Arka Bacak Esnekliği & Göğüs",
+    "oldMapSecondary": "Arka Kol, Ön Karın, Omuz",
+    "proof": "Eller üzerinde yürürken ve şınav çekerken göğüs, ön omuz, triceps ve karın (core) ana işi üstlenir; başlangıç ve bitişteki eğilme/yürüme fazında arka bacaklar esner, bel/kalça ve üst sırt/kanatlar duruşu korur.",
+    "primary": "Orta Göğüs, Ön Omuz, Triceps (Arka Kol), Ön ve Derin İç Karın (Core)",
+    "secondary": "Arka Bacak (Esnetme & Mobilite), Alt Sırt/Bel & Ana Kalça Kası, Üst Sırt, Kanatlar & Yan Göğüs Kasları (Kürek Kemiği Sabitleme)"
+  },
+  {
+    "idx": 108,
+    "id": "mach_straight_arm_pulldown",
+    "name": "Kablo Düz Kol Çekiş (Straight-Arm Pulldown)",
+    "equipment": "machine",
+    "group": "Sırt",
+    "oldDbMuscle": "Geniş Sırt (Alt Kanat / Lats İzolasyonu)",
+    "oldMapPrimary": "Alt Kanat",
+    "oldMapSecondary": "Arka Kol, Karın",
+    "proof": "Dirsekleri hiç bükmeden düz kollarla barı yukarıdan bacaklarına indirmek, bicepsi tamamen devre dışı bırakır ve sadece kanat kaslarını (özellikle alt kanadı) çalıştırır.",
+    "primary": "Kanatlar (Özellikle Alt Kanat)",
+    "secondary": "Triceps İç/Uzun Kısım, Arka Omuz, Ön ve Derin İç Karın (Core)"
+  },
+  {
+    "idx": 109,
+    "id": "bw_hyperextension",
+    "name": "45° Hiperekstansiyon (Back Extension)",
+    "equipment": "bodyweight",
+    "group": "Sırt & Kalça",
+    "oldDbMuscle": "Alt Sırt (Erector Spinae), Kalça & Arka Bacak",
+    "oldMapPrimary": "Alt Sırt & Bel",
+    "oldMapSecondary": "Kalça, Arka Bacak",
+    "proof": "Sehpada öne eğilip kalça ve bel gücüyle doğrulmak, omurgayı dik tutan alt sırt/bel kaslarını, ana kalça kasını ve arka bacakları doğrudan güçlendirir.",
+    "primary": "Alt Sırt & Bel Kasları, Ana Kalça Kası",
+    "secondary": "Arka Bacak (Üst/Uzun Kısım)"
+  },
+  {
+    "idx": 110,
+    "id": "db_rotational_lunge_chop",
+    "name": "Rotasyonel Lunge & Dambıl Savuruş",
+    "equipment": "dumbbell",
+    "group": "Ön Bacak, Kalça & Yan Karın",
+    "oldDbMuscle": "Kuadriseps, Gluteus, Oblikler & Ön Omuz",
+    "oldMapPrimary": "Ön Bacak, Kalça & Yan Karın",
+    "oldMapSecondary": "Ön Omuz, Arka Bacak, Karın",
+    "proof": "Lunge adımıyla çömelirken dambılı çapraz aşağı savurmak, bacak ve kalçayla birlikte bel yanlarındaki dönüş kaslarını (yan karın) güçlü çalıştırır.",
+    "primary": "Ön Bacak & Ana Kalça Kası, Yan Karın (Bel Yanları)",
+    "secondary": "Yan Kalça (Denge), Ön Omuz, Derin İç Karın (Core)"
+  },
+  {
+    "idx": 111,
+    "id": "db_rotational_gorilla_row",
+    "name": "Rotasyonel Gorilla Row",
+    "equipment": "dumbbell",
+    "group": "Sırt & Core",
+    "oldDbMuscle": "Geniş Sırt (Lats), Rhomboid & Torasik Rotasyon",
+    "oldMapPrimary": "Kanat & Orta Sırt",
+    "oldMapSecondary": "Arka Omuz, Pazı, Karın",
+    "proof": "Eğik duruşta dambılı çekerken gövdeyi de hafifçe döndürmek, kanat ve orta sırt çekişine yan karın (oblik) ve arka omuz kaslarını dahil eder.",
+    "primary": "Kanatlar (Sırt Genişliği), Orta Sırt & Kürek Kemiği Kasları",
+    "secondary": "Yan Karın (Bel Yanları), Arka Omuz, Biceps & Ön Kol, Alt Sırt"
+  },
+  {
+    "idx": 112,
+    "id": "db_single_arm_rear_delt_row",
+    "name": "Eğilerek Tek Kol Arka Omuz Çekişi (Parabolik Sweep)",
+    "equipment": "dumbbell",
+    "group": "Omuz",
+    "oldDbMuscle": "Arka Omuz (Rear Deltoid) & Orta Sırt",
+    "oldMapPrimary": "Arka Omuz",
+    "oldMapSecondary": "Orta Sırt, Kürek Kemiği, Üst Sırt",
+    "proof": "Öne eğilip dirseği vücuda yapıştırmak yerine yana doğru geniş açıyla çekmek, yükü kanatlardan alıp doğrudan arka omuza ve kürek kemiği çevresine verir.",
+    "primary": "Arka Omuz",
+    "secondary": "Orta Sırt & Kürek Kemiği Kasları, Omuz İç Denge Kasları, Biceps Altı Dış Kol Kası"
+  },
+  {
+    "idx": 113,
+    "id": "db_high_pull_cuban_rotation",
+    "name": "Eğilerek Row & High Pull + Cuban Rotasyon",
+    "equipment": "dumbbell",
+    "group": "Omuz",
+    "oldDbMuscle": "Arka Omuz, Rotator Manşet, Üst Sırt & Trapez",
+    "oldMapPrimary": "Arka Omuz & Üst Sırt",
+    "oldMapSecondary": "İç Omuz Dengesi, Orta Sırt, Karın",
+    "proof": "Eğilerek yapılan yüksek çekiş ve kolları yukarı döndürme (Cuban rotasyon) hareketinde omuz iç denge kasları (rotator manşet), arka omuz, trapez ve kürek kemiği kasları ana yükü çeker; eğik duruşta bel, karın ve arka bacak/kalça vücudu sabit tutar.",
+    "primary": "Omuz İç Denge Kasları, Arka Omuz, Üst ve Orta Sırt (Trapez & Kürek Kemiği Kasları)",
+    "secondary": "Kanatlar (Başlangıç Çekişi), Yan Omuz, Biceps & Ön Kol, Alt Sırt/Bel, Karın (Core), Arka Bacak & Kalça (Eğik Duruş Sabitleme)"
+  },
+  {
+    "idx": 114,
+    "id": "db_dumbbell_shrug_burnout",
+    "name": "Dambıl Trapez Silkme (Burnout)",
+    "equipment": "dumbbell",
+    "group": "Sırt (Trapez)",
+    "oldDbMuscle": "Üst Trapez (Trapezius) & Boyun",
+    "oldMapPrimary": "Üst Sırt & Boyun",
+    "oldMapSecondary": "Ön Kol, El Tutuşu",
+    "proof": "Kolları bükmeden omuzları kulaklara doğru yukarı çekip sıkmak, doğrudan boyun iki yanındaki üst trapez kaslarını çalıştırır.",
+    "primary": "Üst Sırt & Boyun Kökü (Üst Trapez)",
+    "secondary": "Orta Trapez, Ön Kol & El Bileği Kavrama Kasları"
+  },
+  {
+    "idx": 115,
+    "id": "db_quadruped_external_rotation",
+    "name": "Dört Ayak Pozisyonunda Yatay Arka Omuz Uçuşu",
+    "equipment": "dumbbell",
+    "group": "Omuz",
+    "oldDbMuscle": "Arka Omuz (Rear Deltoid) & Infraspinatus",
+    "oldMapPrimary": "Arka Omuz & Omuz Dengesi",
+    "oldMapSecondary": "Karın Dengesi, Kürek Kemiği",
+    "proof": "Dört ayak üzerinde tek kolu yana açıp döndürmek arka omuz ve omuz iç kaslarını çalıştırırken, üç uzuv üstünde düz kalmak karın ve kürek kemiği kaslarını dengeler.",
+    "primary": "Arka Omuz, Omuz İç Denge Kasları",
+    "secondary": "Orta Sırt & Kürek Kemiği Kasları, Derin İç Karın & Yan Karın (Core)"
+  },
+  {
+    "idx": 116,
+    "id": "bw_jumping_jack",
+    "name": "Jumping Jack (Yıldız Sıçrama)",
+    "equipment": "bodyweight",
+    "group": "Kondisyon & Omuz/Kalf",
+    "oldDbMuscle": "Yan Omuz (Lateral Deltoid), Kalf & Aerobik Kondisyon",
+    "oldMapPrimary": "Yan Omuz & Baldır",
+    "oldMapSecondary": "Karın, Ön Bacak, Kondisyon",
+    "proof": "Zıplayarak bacakları ve kolları açıp kapamak; parmak ucunda sıçrama ile kalfları, kolları yukarı kaldırma ile yan omuzları, bacak açma ile yan kalça ve iç bacağı çalıştırır.",
+    "primary": "Üst ve Alt Kalf (Baldır), Yan Omuz, Yan Kalça & İç Bacak",
+    "secondary": "Üst Trapez, Ön ve Derin İç Karın (Core)"
+  },
+  {
+    "idx": 117,
+    "id": "bw_high_knees",
+    "name": "High Knees (Dize Çekerek Koşu)",
+    "equipment": "bodyweight",
+    "group": "Kondisyon & Alt Karın/Ön Bacak",
+    "oldDbMuscle": "Kalça Fleksörü, Alt Karın & Maksimum Nabız",
+    "oldMapPrimary": "Ön Kalça & Ön Bacak",
+    "oldMapSecondary": "Alt Karın, Baldır, Kardiyo",
+    "proof": "Olduğun yerde dizleri hızla bel hizasına çekerek koşmak; bacağı yukarı çeken ön kalça ve alt karın kasları ile yerden sıçrayan kalfları çalıştırır.",
+    "primary": "Alt Karın & Ön Kalça Kası, Ön Bacak Orta Kısım, Üst ve Alt Kalf (Baldır)",
+    "secondary": "Yan Kalça (Tek Ayak Denge), Yan Karın (Core)"
+  },
+  {
+    "idx": 118,
+    "id": "bw_jump_rope",
+    "name": "İp Atlama (Gölge İp / Jump Rope)",
+    "equipment": "bodyweight",
+    "group": "Kondisyon & Kalf",
+    "oldDbMuscle": "Kalf Reaktivitesi, Bilek Esnekliği & Ritim",
+    "oldMapPrimary": "Baldır & Ayak Bileği",
+    "oldMapSecondary": "Ön Kol, Omuz Dengesi, Ritim",
+    "proof": "Parmak ucunda ritmik sıçramak doğrudan üst ve alt kalf (baldır) ile ayak bileği kaslarını, ip çevirme hareketi ise ön kol ve omuzları çalıştırır.",
+    "primary": "Üst ve Alt Kalf (Baldır), Ayak Bileği Denge Kasları",
+    "secondary": "Ön Kol & Bilek Kasları, Yan Omuz (Sabit Tutuş), Derin İç Karın (Core)"
+  },
+  {
+    "idx": 119,
+    "id": "bw_butt_kicks",
+    "name": "Topuk Kalçaya Koşu (Butt Kicks)",
+    "equipment": "bodyweight",
+    "group": "Kondisyon & Arka Bacak/Kalf",
+    "oldDbMuscle": "Hamstring Dinamik Esnemesi & Aerobik Akış",
+    "oldMapPrimary": "Arka Bacak & Baldır",
+    "oldMapSecondary": "Kalça, Koşu Temposu",
+    "proof": "Koşarken topukları hızla kalçaya vurmak dizleri büken arka bacak kaslarını, parmak ucunda yaylanmak ise kalf (baldır) kaslarını çalıştırır.",
+    "primary": "Arka Bacak (Diz Büken Kısım), Üst ve Alt Kalf (Baldır)",
+    "secondary": "Ana Kalça Kası, Derin İç Karın (Core)"
+  },
+  {
+    "idx": 120,
+    "id": "bw_skater_jumps",
+    "name": "Skater Jumps (Paten Sıçraması)",
+    "equipment": "bodyweight",
+    "group": "Kondisyon & Yan Kalça/Ön Bacak",
+    "oldDbMuscle": "Yanal Kalça Patlayıcılığı & Dinamik Denge",
+    "oldMapPrimary": "Yan Kalça & Ön Bacak",
+    "oldMapSecondary": "Baldır, Karın Dengesi, Yan Sıçrama",
+    "proof": "Buz patencisi gibi sağa ve sola tek ayak üstüne sıçramak; yana itiş yapan yan kalça, ana kalça ve ön bacak kaslarını patlayıcı çalıştırır.",
+    "primary": "Yan Kalça (Dış Kalça & Denge Kası), Ana Kalça Kası, Ön Bacak",
+    "secondary": "Kalf & Ayak Bileği Denge Kasları, Yan Karın (Core), İç Bacak"
+  },
+  {
+    "idx": 121,
+    "id": "bw_plank_jacks",
+    "name": "Plank Jacks (Plank Bacak Aç-Kapa)",
+    "equipment": "bodyweight",
+    "group": "Karın (Core) & Kondisyon",
+    "oldDbMuscle": "Derin Kor Stabilizasyonu & Metabolik Dayanıklılık",
+    "oldMapPrimary": "Ön & Yan Karın",
+    "oldMapSecondary": "Omuz Dengesi, Dış Kalça",
+    "proof": "Şınav/Plank duruşunda beli düşürmeden ayakları zıplayarak açıp kapamak; ön/derin karın kaslarını, omuzları ve yan kalça/iç bacak kaslarını çalıştırır.",
+    "primary": "Derin İç Karın & Ön Karın (Core), Yan Kalça & İç Bacak",
+    "secondary": "Ön Omuz & Triceps (Kolları Sabit Tutma), Kalf (Baldır)"
+  },
+  {
+    "idx": 122,
+    "id": "bw_squat_thrust",
+    "name": "Squat Thrust (Yarım Burpee)",
+    "equipment": "bodyweight",
+    "group": "Ön Bacak, Kalça & Core",
+    "oldDbMuscle": "Eklem Dostu Yüksek Nabız & Kalça-Bacak İtişi",
+    "oldMapPrimary": "Ön Bacak, Kalça & Karın",
+    "oldMapSecondary": "Omuz, Göğüs, Kondisyon",
+    "proof": "Çömelip elleri yere koyarak ayakları geriye fırlatmak ve tekrar toplayıp ayağa kalkmak; ön bacak, kalça ve karın (core) kaslarını birlikte çalıştırır.",
+    "primary": "Ön Bacak, Ana Kalça Kası, Ön ve Derin İç Karın (Core)",
+    "secondary": "Ön Kalça Kası, Ön Omuz & Orta Göğüs, Triceps"
+  },
+  {
+    "idx": 123,
+    "id": "bw_lateral_shuffle",
+    "name": "Lateral Shuffle (Yanal Hızlı Adımlama)",
+    "equipment": "bodyweight",
+    "group": "Ön Bacak & Yan Kalça",
+    "oldDbMuscle": "İç/Dış Bacak Çevikliği & Yanal Kondisyon",
+    "oldMapPrimary": "Ön Bacak & Yan Kalça Çevikliği",
+    "oldMapSecondary": "İç Bacak, Baldır, Kondisyon",
+    "proof": "Dizler hafif bükülü alçak duruşta sağa sola hızlı adımlamak; sürekli bükülü kalan ön bacağı, yana itiş yapan yan kalçayı ve iç bacakları çalıştırır.",
+    "primary": "Yan Kalça, Ön Bacak (Dış ve İç Kısım), İç Bacak Kasları",
+    "secondary": "Üst ve Alt Kalf (Baldır), Ana Kalça Kası, Derin İç Karın (Core)"
+  }
+];
+    const STORAGE_KEY = 'celik_kodu_anatomy_review_v2';
+
+    let reviewState = {};
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) reviewState = JSON.parse(saved) || {};
+    } catch (e) {
+      reviewState = {};
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(reviewState));
+      } catch (e) {}
+      updateKPIs();
+    }
+
+    function getRowState(row) {
+      if (!reviewState[row.id]) {
+        reviewState[row.id] = {
+          status: 'pending', // 'pending' | 'approved' | 'edited'
+          primary: row.primary,
+          secondary: row.secondary,
+          note: ''
+        };
+      }
+      return reviewState[row.id];
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toastBox');
+      t.textContent = msg;
+      t.style.display = 'block';
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => { t.style.display = 'none'; }, 2800);
+    }
+
+    function populateGroups() {
+      const sel = document.getElementById('groupFilter');
+      const counts = {};
+      INITIAL_DATA.forEach(r => { counts[r.group] = (counts[r.group] || 0) + 1; });
+      Object.keys(counts).forEach(g => {
+        const opt = document.createElement('option');
+        opt.value = g;
+        opt.textContent = g + ' (' + counts[g] + ')';
+        sel.appendChild(opt);
+      });
+    }
+
+    function updateKPIs() {
+      let approved = 0, edited = 0, pending = 0;
+      INITIAL_DATA.forEach(r => {
+        const st = getRowState(r);
+        if (st.status === 'approved') approved++;
+        else if (st.status === 'edited') edited++;
+        else pending++;
+      });
+      document.getElementById('kpiTotal').textContent = 'Toplam: ' + INITIAL_DATA.length;
+      document.getElementById('kpiApproved').textContent = '✅ Onaylanan: ' + approved;
+      document.getElementById('kpiEdited').textContent = '✏️ Düzenleme/Not: ' + edited;
+      document.getElementById('kpiPending').textContent = '⏳ Bekleyen: ' + pending;
+    }
+
+    function getFilteredRows() {
+      const q = (document.getElementById('searchInput').value || '').trim().toLocaleLowerCase('tr-TR');
+      const grp = document.getElementById('groupFilter').value;
+      const stFilter = document.getElementById('statusFilter').value;
+
+      return INITIAL_DATA.filter(r => {
+        const st = getRowState(r);
+        if (grp !== 'ALL' && r.group !== grp) return false;
+        if (stFilter !== 'ALL' && st.status !== stFilter) return false;
+        if (q) {
+          const hay = [r.name, r.id, r.group, r.equipment, r.proof, st.primary, st.secondary, st.note, r.oldDbMuscle].join(' ').toLocaleLowerCase('tr-TR');
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      });
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('tableBody');
+      tbody.textContent = '';
+      const rows = getFilteredRows();
+
+      rows.forEach(r => {
+        const st = getRowState(r);
+        const tr = document.createElement('tr');
+        tr.dataset.id = r.id;
+        if (st.status === 'approved') tr.className = 'row-approved';
+        else if (st.status === 'edited') tr.className = 'row-edited';
+
+        // Col 1: Exercise Info
+        const tdEx = document.createElement('td');
+        tdEx.className = 'col-ex';
+        const numSpan = document.createElement('span');
+        numSpan.className = 'ex-num';
+        numSpan.textContent = '#' + r.idx + ' • ' + r.id;
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'ex-name';
+        nameSpan.textContent = r.name;
+
+        const badgeRow = document.createElement('div');
+        badgeRow.className = 'badge-row';
+        const bGrp = document.createElement('span');
+        bGrp.className = 'badge badge-group';
+        bGrp.textContent = r.group;
+        const bEq = document.createElement('span');
+        bEq.className = 'badge badge-eq';
+        bEq.textContent = (r.equipment || '').toUpperCase();
+        badgeRow.appendChild(bGrp);
+        badgeRow.appendChild(bEq);
+
+        const oldBox = document.createElement('div');
+        oldBox.className = 'old-box';
+        const oldTitle = document.createElement('strong');
+        oldTitle.textContent = 'Mevcut Sistemde Yazan: ';
+        oldBox.appendChild(oldTitle);
+        oldBox.appendChild(document.createTextNode(r.oldDbMuscle + ' / Ana: ' + r.oldMapPrimary));
+
+        tdEx.appendChild(numSpan);
+        tdEx.appendChild(nameSpan);
+        tdEx.appendChild(badgeRow);
+        tdEx.appendChild(oldBox);
+
+        // Col 2: Biomechanical Proof
+        const tdProof = document.createElement('td');
+        tdProof.className = 'col-proof';
+        const proofDiv = document.createElement('div');
+        proofDiv.className = 'proof-text';
+        proofDiv.textContent = r.proof;
+        tdProof.appendChild(proofDiv);
+
+        // Col 3: Primary Sub-Muscles (Editable)
+        const tdPrim = document.createElement('td');
+        tdPrim.className = 'col-prim';
+        const lblPrim = document.createElement('span');
+        lblPrim.className = 'muscle-label prim';
+        lblPrim.textContent = '🎯 PRİMER ALT KASLAR:';
+        const taPrim = document.createElement('textarea');
+        taPrim.className = 'muscle-textarea prim-input';
+        taPrim.value = st.primary;
+        taPrim.addEventListener('input', () => {
+          st.primary = taPrim.value;
+          if (st.primary.trim() !== r.primary.trim()) {
+            st.status = 'edited';
+          }
+          syncRowVisuals(tr, st, btnApprove, btnEdit, statusTag);
+          saveState();
+        });
+        tdPrim.appendChild(lblPrim);
+        tdPrim.appendChild(taPrim);
+
+        // Col 4: Secondary Sub-Muscles (Editable)
+        const tdSec = document.createElement('td');
+        tdSec.className = 'col-sec';
+        const lblSec = document.createElement('span');
+        lblSec.className = 'muscle-label sec';
+        lblSec.textContent = '⚡ SEKONDER ALT KASLAR:';
+        const taSec = document.createElement('textarea');
+        taSec.className = 'muscle-textarea sec-input';
+        taSec.value = st.secondary;
+        taSec.addEventListener('input', () => {
+          st.secondary = taSec.value;
+          if (st.secondary.trim() !== r.secondary.trim()) {
+            st.status = 'edited';
+          }
+          syncRowVisuals(tr, st, btnApprove, btnEdit, statusTag);
+          saveState();
+        });
+        tdSec.appendChild(lblSec);
+        tdSec.appendChild(taSec);
+
+        // Col 5: Rightmost Approval & Textbox
+        const tdRev = document.createElement('td');
+        tdRev.className = 'col-review';
+        const actDiv = document.createElement('div');
+        actDiv.className = 'review-actions';
+
+        const btnApprove = document.createElement('button');
+        btnApprove.type = 'button';
+        btnApprove.className = 'btn-row-status';
+        btnApprove.textContent = '✅ Onayla';
+
+        const btnEdit = document.createElement('button');
+        btnEdit.type = 'button';
+        btnEdit.className = 'btn-row-status';
+        btnEdit.textContent = '✏️ Düzeltme';
+
+        const noteBox = document.createElement('textarea');
+        noteBox.className = 'note-textbox';
+        noteBox.placeholder = 'Onay notu veya düzeltme talebini buraya yaz...';
+        noteBox.value = st.note || '';
+
+        const statusTag = document.createElement('span');
+        statusTag.className = 'status-tag';
+
+        btnApprove.addEventListener('click', () => {
+          st.status = (st.status === 'approved') ? 'pending' : 'approved';
+          syncRowVisuals(tr, st, btnApprove, btnEdit, statusTag);
+          saveState();
+        });
+
+        btnEdit.addEventListener('click', () => {
+          st.status = 'edited';
+          syncRowVisuals(tr, st, btnApprove, btnEdit, statusTag);
+          noteBox.focus();
+          saveState();
+        });
+
+        noteBox.addEventListener('input', () => {
+          st.note = noteBox.value;
+          if (st.note.trim().length > 0) {
+            st.status = 'edited';
+          } else if (st.primary.trim() === r.primary.trim() && st.secondary.trim() === r.secondary.trim() && st.status === 'edited') {
+            st.status = 'pending';
+          }
+          syncRowVisuals(tr, st, btnApprove, btnEdit, statusTag);
+          saveState();
+        });
+
+        syncRowVisuals(tr, st, btnApprove, btnEdit, statusTag);
+
+        actDiv.appendChild(btnApprove);
+        actDiv.appendChild(btnEdit);
+        tdRev.appendChild(actDiv);
+        tdRev.appendChild(noteBox);
+        tdRev.appendChild(statusTag);
+
+        tr.appendChild(tdEx);
+        tr.appendChild(tdProof);
+        tr.appendChild(tdPrim);
+        tr.appendChild(tdSec);
+        tr.appendChild(tdRev);
+        tbody.appendChild(tr);
+      });
+
+      updateKPIs();
+    }
+
+    function syncRowVisuals(tr, st, btnApprove, btnEdit, statusTag) {
+      tr.className = st.status === 'approved' ? 'row-approved' : (st.status === 'edited' ? 'row-edited' : '');
+      btnApprove.className = 'btn-row-status' + (st.status === 'approved' ? ' active-approve' : '');
+      btnEdit.className = 'btn-row-status' + (st.status === 'edited' ? ' active-edit' : '');
+      if (st.status === 'approved') {
+        statusTag.className = 'status-tag st-approved';
+        statusTag.textContent = 'Durum: ✅ Onaylandı';
+      } else if (st.status === 'edited') {
+        statusTag.className = 'status-tag st-edited';
+        statusTag.textContent = 'Durum: ✏️ Düzenleme / Not Var';
+      } else {
+        statusTag.className = 'status-tag st-pending';
+        statusTag.textContent = 'Durum: ⏳ İnceleme Bekliyor';
+      }
+    }
+
+    document.getElementById('searchInput').addEventListener('input', renderTable);
+    document.getElementById('groupFilter').addEventListener('change', renderTable);
+    document.getElementById('statusFilter').addEventListener('change', renderTable);
+
+    document.getElementById('btnApproveVisible').addEventListener('click', () => {
+      const visible = getFilteredRows();
+      visible.forEach(r => {
+        const st = getRowState(r);
+        if (st.status !== 'edited') st.status = 'approved';
+      });
+      saveState();
+      renderTable();
+      showToast('✅ Görünen ' + visible.length + ' hareket onaylandı!');
+    });
+
+    document.getElementById('btnCopyReport').addEventListener('click', () => {
+      const editedRows = [];
+      let approvedCount = 0;
+      INITIAL_DATA.forEach(r => {
+        const st = getRowState(r);
+        if (st.status === 'approved') approvedCount++;
+        const primChanged = st.primary.trim() !== r.primary.trim();
+        const secChanged = st.secondary.trim() !== r.secondary.trim();
+        const hasNote = (st.note || '').trim().length > 0;
+        if (st.status === 'edited' || primChanged || secChanged || hasNote) {
+          editedRows.push({
+            idx: r.idx,
+            id: r.id,
+            name: r.name,
+            primary: st.primary.trim(),
+            secondary: st.secondary.trim(),
+            note: (st.note || '').trim()
+          });
+        }
+      });
+
+      const report = {
+        summary: { total: INITIAL_DATA.length, approved: approvedCount, editedCount: editedRows.length },
+        edits: editedRows
+      };
+      const text = JSON.stringify(report, null, 2);
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('📋 Rapor panoya kopyalandı! Sohbete yapıştırabilirsin.');
+      }).catch(() => {
+        showToast('⚠️ Kopyalanamadı, JSON İndir butonunu kullanabilirsin.');
+      });
+    });
+
+    document.getElementById('btnDownloadJson').addEventListener('click', () => {
+      const payload = INITIAL_DATA.map(r => {
+        const st = getRowState(r);
+        return {
+          idx: r.idx,
+          id: r.id,
+          name: r.name,
+          status: st.status,
+          primary: st.primary.trim(),
+          secondary: st.secondary.trim(),
+          note: (st.note || '').trim()
+        };
+      });
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'celik-kodu-123-hareket-anatomi-onay.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('💾 JSON dosyası indirildi!');
+    });
+
+    document.getElementById('btnResetAll').addEventListener('click', () => {
+      if (!confirm('Tüm onay ve düzenleme notlarını varsayılan haline sıfırlamak istediğine emin misin?')) return;
+      reviewState = {};
+      localStorage.removeItem(STORAGE_KEY);
+      renderTable();
+      showToast('↺ Tablo sıfırlandı.');
+    });
+
+    
+    if (!localStorage.getItem("celik_kodu_mig_5_done")) {
+      const UPDATED_FIVE = {"db_clean_squat_press":{"proof":"Clean aşamasında arka bacak ve kalça patlayıcı gücü üretir; Front Squat aşamasında ön bacak ve kalça çömelmeyi yönetir; Push Press aşamasında ise omuzlar ana itişi yaparken karın/bel, trapez, triceps, ön kol ve kalflar hareketi destekler.","primary":"Ön Bacak, Ön ve Yan Omuz, Ana Kalça Kası, Arka Bacak","secondary":"Karın, Yan Karın & Alt Sırt/Bel (Core), Üst ve Orta Sırt (Trapez), Triceps (Arka Kol), Ön Kol & Kavrama Kasları, Üst ve Alt Kalf (Baldır)"},"db_rdl_to_high_pull":{"proof":"RDL (öne eğilme) fazında arka bacak ve ana kalça kası yükü çekerken; High Pull (yukarı çekiş) fazında omuz silkme ile trapezler ve yan/ön omuzlar ağırlığı göğüs/çene hizasına ivmelendirir.","primary":"Arka Bacak, Ana Kalça Kası, Üst ve Orta Sırt (Trapez), Yan ve Ön Omuz","secondary":"Alt Sırt & Bel Kasları (Omurga Doğrultucu), Ön ve Yan Karın (Core), Ön Kol & Kavrama Kasları, Ön Bacak (Geçiş İtiş Desteği)"},"db_gorilla_row_to_clean":{"proof":"Row aşamasında kanatlar ve üst sırt/kürek kemikleri dambılı yerden çeker; Clean aşamasında ise kalça patlaması ve trapez silkmesiyle ağırlık omuz hizasına alınır.","primary":"Kanatlar (Sırt Genişliği), Üst Sırt & Kürek Kemiği (Trapez & Orta Sırt), Ana Kalça Kası","secondary":"Biceps (Pazı), Arka Bacak & Alt Sırt/Bel (Eğik Duruş Dengesi), Ön Omuz (Omuzda Sabitleme), Ön ve Yan Karın (Core), Ön Kol & Kavrama Kasları"},"bw_inchworm_to_pushup":{"proof":"Eller üzerinde yürürken ve şınav çekerken göğüs, ön omuz, triceps ve karın (core) ana işi üstlenir; başlangıç ve bitişteki eğilme/yürüme fazında arka bacaklar esner, bel/kalça ve üst sırt/kanatlar duruşu korur.","primary":"Orta Göğüs, Ön Omuz, Triceps (Arka Kol), Ön ve Derin İç Karın (Core)","secondary":"Arka Bacak (Esnetme & Mobilite), Alt Sırt/Bel & Ana Kalça Kası, Üst Sırt, Kanatlar & Yan Göğüs Kasları (Kürek Kemiği Sabitleme)"},"db_high_pull_cuban_rotation":{"proof":"Eğilerek yapılan yüksek çekiş ve kolları yukarı döndürme (Cuban rotasyon) hareketinde omuz iç denge kasları (rotator manşet), arka omuz, trapez ve kürek kemiği kasları ana yükü çeker; eğik duruşta bel, karın ve arka bacak/kalça vücudu sabit tutar.","primary":"Omuz İç Denge Kasları, Arka Omuz, Üst ve Orta Sırt (Trapez & Kürek Kemiği Kasları)","secondary":"Kanatlar (Başlangıç Çekişi), Yan Omuz, Biceps & Ön Kol, Alt Sırt/Bel, Karın (Core), Arka Bacak & Kalça (Eğik Duruş Sabitleme)"}};
+      Object.keys(UPDATED_FIVE).forEach(id => {
+        reviewState[id] = {
+          status: "approved",
+          primary: UPDATED_FIVE[id].primary,
+          secondary: UPDATED_FIVE[id].secondary,
+          note: "✅ Düzeltme işlendi."
+        };
+      });
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(reviewState));
+        localStorage.setItem("celik_kodu_mig_5_done", "1");
+      } catch (e) {}
+    }
+
+    populateGroups();
+    renderTable();
+  </script>
+</body>
+</html>

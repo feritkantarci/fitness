@@ -88,3 +88,26 @@ function startRestTimer(durationSeconds, displayElement, onComplete) {
   timerInterval = setInterval(update, 250);
 }
 ```
+
+### C. Sıfır Ekran Sıçraması (Viewport-Anchored Re-render) Şablonu
+Liste içi akordiyon/görsel açılışlarında ve alternatif hareket değişimlerinde ekranın yukarı kaymasını önlemek için standart şablon:
+```javascript
+function toggleListItemDetail(idx, containerId, itemSelector, renderFn) {
+  const container = document.getElementById(containerId);
+  const oldRows = container ? container.querySelectorAll(itemSelector) : null;
+  const anchorTop = (oldRows && oldRows[idx]) ? oldRows[idx].getBoundingClientRect().top : null;
+
+  renderFn({ preserveScroll: true });
+
+  if (anchorTop !== null && container) {
+    const newRows = container.querySelectorAll(itemSelector);
+    if (newRows[idx]) {
+      const delta = newRows[idx].getBoundingClientRect().top - anchorTop;
+      if (Math.abs(delta) > 1) {
+        window.scrollBy({ top: delta, left: 0, behavior: 'instant' });
+      }
+    }
+  }
+}
+```
+

@@ -1,0 +1,58 @@
+{
+  "project": "Celik_Kodu_Visual_Pipeline",
+  "page_title": "Çelik Kodu — Egzersiz İnceleme Galerisi",
+  "header_title": "🏋️ Çelik Kodu — Egzersiz Biyomekanik İnceleme Galerisi",
+  "header_desc": "Yapay zeka ile üretilen 5 aşamalı durak akışlarını, WebP animasyonları ve MP4 kliplerini tek merkezden denetleyin.",
+  "badge_text": "Biyomekanik Staging & Kalite Kontrol",
+  "approved_exercises": [],
+  "movements": [
+    {
+      "id": "db_rotational_gorilla_row",
+      "relative_dir": "02_rotational_gorilla_row",
+      "name": "Rotasyonel Gorilla Row",
+      "category": "pull",
+      "mechanic": "compound",
+      "equipment": "dumbbell",
+      "primary_muscles": ["Geniş Sırt (Lats)", "Rhomboid", "Oblikler"],
+      "secondary_muscles": ["Biceps", "Arka Omuz", "Bel"],
+      "protocol": "3 Set x 20 Tekrar (10R / 10L) | RPE 8 | 60 sn Dinlenme",
+      "cue": "Geniş sumo menteşesinde bir dambılı yere bastırırken diğerini gövdeyi döndürerek kaburgaya patlayıcı çek.",
+      "changelog": [
+        "✅ Sumo tabanı ve 45° kalça menteşesi kilitlendi.",
+        "✅ Push-pull zemin desteği ve torasik rotasyon netleştirildi."
+      ],
+      "stages": [
+        {
+          "stage": 1,
+          "short_name": "1. Başlangıç",
+          "phase": "1. Başlangıç (Geniş Sumo Menteşesi)",
+          "desc": "Ayaklar geniş sumo duruşunda, kalça geride, omurga 45°. İki dambıl bacak arasında yerde, eller dambıllarda."
+        },
+        {
+          "stage": 2,
+          "short_name": "2. Geçiş 1-2",
+          "phase": "Ara Görsel 1-2 (Push-Pull Başlatma)",
+          "desc": "Sol el yerdeki dambılı aktif zemine iterken, sağ dirsek bükülerek yukarı çekiş ivmesi başlatılır."
+        },
+        {
+          "stage": 3,
+          "short_name": "3. Tepe / Zirve",
+          "phase": "2. Yapılış (İtiş-Çekiş & Torasik Dönüş)",
+          "desc": "Sol dambılı yere bastırırken sağ dirseği kaburga hizasını geçecek şekilde yukarı patlat, göğsü 25° sağa döndür."
+        },
+        {
+          "stage": 4,
+          "short_name": "4. Geçiş 2-3",
+          "phase": "Ara Görsel 2-3 (Eksantrik İniş)",
+          "desc": "Sağ kol gerilimi bırakmadan kontrollü olarak zemine doğru indirilir, gövde nötre döner."
+        },
+        {
+          "stage": 5,
+          "short_name": "5. Bitiş / Reset",
+          "phase": "3. Zemin Sıfırlaması & Değişim",
+          "desc": "Dambılı sessizce yere koy, push desteğini aktarıp beklemeden diğer kolla çekişe geç."
+        }
+      ]
+    }
+  ]
+}

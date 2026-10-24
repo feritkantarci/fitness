@@ -854,8 +854,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_farmers_walk.svg",
-    "formImage": "assets/exercises/db_suitcase_carry.webp",
-    "anatomiImage": "",
+    "formImage": "assets/guides/guide_db_suitcase_carry_form.jpg",
+    "anatomiImage": "assets/guides/guide_db_suitcase_carry_anatomi.jpg",
     "cue": "Sadece tek elde ağır dambıl tut, ağırlığın seni yana bükmesine ASLA izin verme, dimdik yürü.",
     "positions": [
       {
@@ -1629,8 +1629,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": false,
     "diagramImage": "assets/diagrams/seq_db_rdl.svg",
-    "formImage": "assets/exercises/bb_hip_thrust.webp",
-    "anatomiImage": "",
+    "formImage": "assets/guides/guide_bb_hip_thrust_form.jpg",
+    "anatomiImage": "assets/guides/guide_bb_hip_thrust_anatomi.jpg",
     "cue": "Sırt sehpaya dayalı, süngerli bar kalça kıvrımında, topuklardan yeri iterek tepe noktada kalçayı taş gibi kilitle.",
     "positions": [
       {
@@ -2089,8 +2089,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_db_squat.svg",
-    "formImage": "assets/exercises/mach_leg_press.webp",
-    "anatomiImage": "",
+    "formImage": "assets/guides/guide_mach_leg_press_form.jpg",
+    "anatomiImage": "assets/guides/guide_mach_leg_press_anatomi.jpg",
     "cue": "Bel boşluğunu arkadaki mindere tamamen yapıştır, dizleri 90° büküp platformu ayak tabanlarıyla güçlüce it (dizleri kilitleme).",
     "positions": [
       {
@@ -3509,8 +3509,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_leg_extension.svg",
-    "formImage": "assets/exercises/bw_sissy_squat.webp",
-    "anatomiImage": "",
+    "formImage": "assets/guides/guide_bw_sissy_squat_form.jpg",
+    "anatomiImage": "assets/guides/guide_bw_sissy_squat_anatomi.jpg",
     "cue": "Parmak ucuna kalkıp dizleri öne iterken gövdeyi arkaya yatır. Düz bir çizgi halinde uylukları ger ve sadece quad gücüyle kendini doğrult.",
     "positions": [
       {
@@ -3922,8 +3922,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_pullover.svg",
-    "formImage": "assets/exercises/mach_straight_arm_pulldown.webp",
-    "anatomiImage": "",
+    "formImage": "assets/guides/guide_mach_straight_arm_pulldown_form.jpg",
+    "anatomiImage": "assets/guides/guide_mach_straight_arm_pulldown_anatomi.jpg",
     "cue": "Dirsekleri hafif bükülü ve sabit tut; kolları bükmeden kalça hizasına doğru yay çizerek çek, tepe noktada alt kanat liflerini sık.",
     "positions": [
       {
@@ -3959,8 +3959,8 @@ const STATIC_FALLBACK_CATALOG = [
     "sfrLabel": "HIGH",
     "lengthened": true,
     "diagramImage": "assets/diagrams/seq_db_rdl.svg",
-    "formImage": "assets/exercises/bw_hyperextension.webp",
-    "anatomiImage": "",
+    "formImage": "assets/guides/guide_bw_hyperextension_form.jpg",
+    "anatomiImage": "assets/guides/guide_bw_hyperextension_anatomi.jpg",
     "cue": "Pedi kalça kıvrımının hemen altına sabitle; beli yuvarlamadan kalçadan öne eğil, omurga nötr ve düz bir hatta olana kadar doğrul.",
     "positions": [
       {
@@ -4121,12 +4121,6 @@ const OPENGYM_GLOBAL_CATALOG = {
     "clip": "assets/opengym/clips/2917.mp4",
     "still": "assets/opengym/stills/2917.webp"
   },
-  "db_suitcase_carry": {
-    "id": "4133",
-    "name": "Suitcase Carry",
-    "clip": "assets/opengym/clips/4133.mp4",
-    "still": "assets/opengym/stills/4133.webp"
-  },
   "db_russian_twist": {
     "id": "3449",
     "name": "Dambıl Russian Twist",
@@ -4247,12 +4241,6 @@ const OPENGYM_GLOBAL_CATALOG = {
     "clip": "assets/opengym/clips/0085.mp4",
     "still": "assets/opengym/stills/0085.webp"
   },
-  "bb_hip_thrust": {
-    "id": "0044",
-    "name": "Barbell Hip Thrust",
-    "clip": "assets/opengym/clips/0044.mp4",
-    "still": "assets/opengym/stills/0044.webp"
-  },
   "bb_bent_over_row": {
     "id": "0027",
     "name": "Bent-Over Barbell Row",
@@ -4324,12 +4312,6 @@ const OPENGYM_GLOBAL_CATALOG = {
     "name": "Kablo Lateral Raise",
     "clip": "assets/opengym/clips/0178.mp4",
     "still": "assets/opengym/stills/0178.webp"
-  },
-  "mach_leg_press": {
-    "id": "0599",
-    "name": "Leg Press",
-    "clip": "assets/opengym/clips/0599.mp4",
-    "still": "assets/opengym/stills/0599.webp"
   },
   "mach_leg_extension": {
     "id": "0585",
@@ -4553,18 +4535,6 @@ const OPENGYM_GLOBAL_CATALOG = {
     "clip": "assets/opengym/clips/6161.mp4",
     "still": "assets/opengym/stills/6161.webp"
   },
-  "mach_straight_arm_pulldown": {
-    "id": "0150",
-    "name": "Kablo Düz Kol Çekiş",
-    "clip": "assets/opengym/clips/0150.mp4",
-    "still": "assets/opengym/stills/0150.webp"
-  },
-  "bw_hyperextension": {
-    "id": "0085",
-    "name": "45° Hiperekstansiyon",
-    "clip": "assets/opengym/clips/0085.mp4",
-    "still": "assets/opengym/stills/0085.webp"
-  },
   "bw_plank": {
     "id": "0463",
     "name": "Front Plank",
@@ -4672,6 +4642,54 @@ const OPENGYM_GLOBAL_CATALOG = {
     "name": "Dört Ayak Pozisyonunda Yatay Arka Omuz Uçuşu",
     "clip": "assets/opengym/clips/db_quadruped_external_rotation.mp4",
     "still": "assets/opengym/stills/db_quadruped_external_rotation.webp"
+  },
+  "bw_jumping_jack": {
+    "id": "bw_jumping_jack",
+    "name": "Jumping Jack",
+    "clip": "assets/opengym/clips/bw_jumping_jack.mp4",
+    "still": "assets/opengym/stills/bw_jumping_jack.webp"
+  },
+  "bw_high_knees": {
+    "id": "bw_high_knees",
+    "name": "High Knees (Dize Çekerek Koşu)",
+    "clip": "assets/opengym/clips/bw_high_knees.mp4",
+    "still": "assets/opengym/stills/bw_high_knees.webp"
+  },
+  "bw_jump_rope": {
+    "id": "bw_jump_rope",
+    "name": "İp Atlama (Gölge İp / Jump Rope)",
+    "clip": "assets/opengym/clips/bw_jump_rope.mp4",
+    "still": "assets/opengym/stills/bw_jump_rope.webp"
+  },
+  "bw_butt_kicks": {
+    "id": "bw_butt_kicks",
+    "name": "Topuk Kalçaya Koşu (Butt Kicks)",
+    "clip": "assets/opengym/clips/bw_butt_kicks.mp4",
+    "still": "assets/opengym/stills/bw_butt_kicks.webp"
+  },
+  "bw_skater_jumps": {
+    "id": "bw_skater_jumps",
+    "name": "Skater Jumps (Paten Sıçraması)",
+    "clip": "assets/opengym/clips/bw_skater_jumps.mp4",
+    "still": "assets/opengym/stills/bw_skater_jumps.webp"
+  },
+  "bw_plank_jacks": {
+    "id": "bw_plank_jacks",
+    "name": "Plank Jacks (Plank Bacak Aç-Kapa)",
+    "clip": "assets/opengym/clips/bw_plank_jacks.mp4",
+    "still": "assets/opengym/stills/bw_plank_jacks.webp"
+  },
+  "bw_squat_thrust": {
+    "id": "bw_squat_thrust",
+    "name": "Squat Thrust (Yarım Burpee)",
+    "clip": "assets/opengym/clips/bw_squat_thrust.mp4",
+    "still": "assets/opengym/stills/bw_squat_thrust.webp"
+  },
+  "bw_lateral_shuffle": {
+    "id": "bw_lateral_shuffle",
+    "name": "Lateral Shuffle (Yanal Hızlı Adımlama)",
+    "clip": "assets/opengym/clips/bw_lateral_shuffle.mp4",
+    "still": "assets/opengym/stills/bw_lateral_shuffle.webp"
   }
 };
 
