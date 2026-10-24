@@ -3382,7 +3382,9 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             const user = typeof getActiveUser === 'function' ? getActiveUser() : null;
             const weights = user ? (user.weights || {}) : {};
 
-            const exRowsHtml = (activeW.exercises || []).map((ex, eIdx) => {
+            const structuredList = activeW.exercises || [];
+            const exRowsHtml = structuredList.map((ex, eIdx) => {
+                const pair = getSupersetPairInfo(structuredList, eIdx);
                 const anatomy = typeof getExerciseAnatomy === 'function' ? getExerciseAnatomy(ex) : { primary: ex.muscle || '' };
                 const shortMuscle = String(anatomy.primary || ex.muscle || '').split('(')[0].trim();
                 const lbl = ex.blockLabel || (eIdx + 1);
@@ -3400,7 +3402,8 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     : '';
 
                 return `
-                    <div class="wk-ex-item-wrap ${isExpanded ? 'is-expanded' : ''}">
+                    <div class="wk-ex-item-wrap ${pair ? 'superset-pair-item ' : ''}${isExpanded ? 'is-expanded' : ''}">
+                        ${pair ? `<span class="superset-partner-badge">🔗 Partner: ${ex.supersetRole === 1 ? pair.secondEx.blockLabel + ' ' + pair.secondEx.name + ' (0s Geçiş)' : pair.firstEx.blockLabel + ' ' + pair.firstEx.name + ' (Tur Sonu ' + pair.roundRest + 's)'}</span>` : ''}
                         <div class="wk-ex-row wk-ex-row-clickable ${isExpanded ? 'active' : ''}" onclick="toggleWeeklyPreviewExDetail(${eIdx})" title="Detaylı hareket kartını açmak için tıklayın">
                             <div><span class="wk-ex-code">${escapeHTML(String(lbl))}</span></div>
                             <div class="wk-ex-name">
@@ -3415,6 +3418,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                         </div>
                         ${detailCardHtml}
                     </div>
+                    ${pair && ex.supersetRole === 1 ? `<div class="superset-transition-banner">⚡ DİNLENMEDEN ${escapeHTML(pair.secondEx.blockLabel || 'A2')} (${escapeHTML(pair.secondEx.name)}) HAREKETİNE GEÇ ➔</div>` : ''}
                 `;
             }).join('');
 
@@ -4269,7 +4273,7 @@ Aşağıdaki JSON şemasında çıktı ver:
             const optimized = optimizeWorkoutExerciseOrderForSupersets(exercises, style);
             const total = optimized.length;
 
-            return optimized.map((rawEx, idx) => {
+            const structured = optimized.map((rawEx, idx) => {
                 const ex = Object.assign({}, rawEx);
                 if (style === 'superset') {
                     // ORTA / AKADEMİK HİBRİT (Schumann et al. 2022 & Weakley et al. 2017):
@@ -4416,7 +4420,44 @@ Aşağıdaki JSON şemasında çıktı ver:
                 }
                 return ex;
             });
+            // Explicit pair metadata keeps preview, focus navigation and rest timing in sync.
+            structured.forEach((ex, idx) => {
+                if (ex.blockType !== 'superset' || !/^[A-Z][12]$/.test(ex.blockLabel || '')) return;
+                const role = Number(ex.blockLabel.slice(-1));
+                const partnerIdx = idx + (role === 1 ? 1 : -1);
+                const partner = structured[partnerIdx];
+                if (!partner || partner.blockType !== 'superset' || !isSupersetPairValid(structured[Math.min(idx, partnerIdx)], structured[Math.max(idx, partnerIdx)])) return;
+                const groupId = ex.blockLabel.slice(0, -1);
+                const roundRest = (role === 1 && groupId === 'A' && style === 'superset') ? midRest : supersetRest;
+                ex.supersetGroupId = partner.supersetGroupId = groupId;
+                ex.supersetRole = role;
+                partner.supersetRole = 3 - role;
+                ex.supersetPartnerIdx = partnerIdx;
+                partner.supersetPartnerIdx = idx;
+                ex.supersetPartnerName = partner.name;
+                partner.supersetPartnerName = ex.name;
+                ex.transitionRest = partner.transitionRest = 0;
+                ex.roundRest = partner.roundRest = roundRest;
+                ex.customRest = role === 1 ? 0 : roundRest;
+                partner.customRest = partner.supersetRole === 1 ? 0 : roundRest;
+            });
+            return structured;
         }
+        function getSupersetPairInfo(exercises, exIndex) {
+            if (!Array.isArray(exercises)) return null;
+            const ex = exercises[exIndex];
+            if (!ex || ex.blockType !== 'superset') return null;
+            let firstIdx = ex.supersetRole === 1 ? exIndex : ex.supersetRole === 2 ? ex.supersetPartnerIdx : -1;
+            if (!Number.isInteger(firstIdx) || firstIdx < 0 || firstIdx >= exercises.length) {
+                firstIdx = ex.blockLabel && /1$/.test(ex.blockLabel) ? exIndex : exIndex - 1;
+            }
+            const firstEx = exercises[firstIdx];
+            const secondEx = exercises[firstIdx + 1];
+            if (!firstEx || !secondEx || firstEx.blockType !== 'superset' || secondEx.blockType !== 'superset') return null;
+            if (firstEx.supersetGroupId && secondEx.supersetGroupId && firstEx.supersetGroupId !== secondEx.supersetGroupId) return null;
+            return { firstEx, secondEx, firstIdx, secondIdx: firstIdx + 1, groupId: firstEx.supersetGroupId || (firstEx.blockLabel || 'A1').slice(0, -1), roundRest: secondEx.roundRest || secondEx.customRest || 60 };
+        }
+        window.getSupersetPairInfo = getSupersetPairInfo;
         window.isSpinalAxialLoadedExercise = isSpinalAxialLoadedExercise;
         window.isSupersetPairValid = isSupersetPairValid;
         window.getSupersetCompatibilityScore = getSupersetCompatibilityScore;
@@ -5537,7 +5578,8 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             const tomorrowName = DAY_NAMES_TR[tomorrowIdx] || 'Yarın';
 
             // Egzersizlerin blok etiketleri yoksa (eski kayıt) dinamik hesapla
-            const structuredList = (w.exercises && w.exercises.length > 0 && w.exercises[0].blockLabel)
+            const hasUnupgradedPair = (w.exercises || []).some(ex => ex.blockType === 'superset' && ex.supersetRole === undefined);
+            const structuredList = (w.exercises && w.exercises.length > 0 && w.exercises[0].blockLabel && !hasUnupgradedPair)
                 ? w.exercises
                 : assignAcademicBlockStructure(w.exercises || [], w.style || 'superset', w.scheme);
             w.exercises = structuredList;
@@ -5552,6 +5594,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
 
             let blocksHtml = '';
             structuredList.forEach((ex, idx) => {
+                const pair = getSupersetPairInfo(structuredList, idx);
                 const label = ex.blockLabel || String(idx + 1);
                 const exScheme = Object.assign({}, w.scheme, {
                     rest: ex.customRest || (w.scheme ? w.scheme.rest : 60)
@@ -5577,7 +5620,8 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                     : '';
 
                 blocksHtml += `
-                    <div class="wk-ex-item-wrap ${isExpanded ? 'is-expanded' : ''}">
+                    <div class="wk-ex-item-wrap ${pair ? 'superset-pair-item ' : ''}${isExpanded ? 'is-expanded' : ''}">
+                        ${pair ? `<span class="superset-partner-badge">🔗 Partner: ${ex.supersetRole === 1 ? pair.secondEx.blockLabel + ' ' + pair.secondEx.name + ' (0s Geçiş)' : pair.firstEx.blockLabel + ' ' + pair.firstEx.name + ' (Tur Sonu ' + pair.roundRest + 's)'}</span>` : ''}
                         <div class="wk-ex-row wk-ex-row-clickable ${isExpanded ? 'active' : ''}" onclick="toggleGeneratedExDetail(${idx})" title="Detaylı hareket kartını ${isExpanded ? 'kapatmak' : 'açmak'} için dokunun">
                             <div><span class="wk-ex-code">${escapeHTML(String(label))}</span></div>
                             <div class="wk-ex-name" style="flex-direction:column; align-items:flex-start; gap:2px;">
@@ -5600,6 +5644,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                         </div>
                         ${detailCardHtml}
                     </div>
+                    ${pair && ex.supersetRole === 1 ? `<div class="superset-transition-banner">⚡ DİNLENMEDEN ${escapeHTML(pair.secondEx.blockLabel || 'A2')} (${escapeHTML(pair.secondEx.name)}) HAREKETİNE GEÇ ➔</div>` : ''}
                 `;
             });
 
@@ -9117,7 +9162,12 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
 
         function goToPrevExercise() {
             if (!activeWorkoutSession || activeFocusExIndex <= 0) return;
-            activeFocusExIndex--;
+            const exercises = activeWorkoutSession.exercises;
+            const pair = getSupersetPairInfo(exercises, activeFocusExIndex);
+            activeFocusExIndex = pair ? pair.firstIdx - 1 : activeFocusExIndex - 1;
+            if (activeFocusExIndex < 0) activeFocusExIndex = 0;
+            const previousPair = getSupersetPairInfo(exercises, activeFocusExIndex);
+            if (previousPair) activeFocusExIndex = previousPair.firstIdx;
             activeFocusSetIndex = null;
             saveActiveWorkoutStateToStorage();
             renderActiveWorkout();
@@ -9126,7 +9176,12 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
 
         function goToNextExercise() {
             if (!activeWorkoutSession || activeFocusExIndex >= activeWorkoutSession.exercises.length - 1) return;
-            activeFocusExIndex++;
+            const exercises = activeWorkoutSession.exercises;
+            const pair = getSupersetPairInfo(exercises, activeFocusExIndex);
+            activeFocusExIndex = pair ? pair.secondIdx + 1 : activeFocusExIndex + 1;
+            if (activeFocusExIndex >= exercises.length) activeFocusExIndex = exercises.length - 1;
+            const nextPair = getSupersetPairInfo(exercises, activeFocusExIndex);
+            if (nextPair) activeFocusExIndex = nextPair.firstIdx;
             activeFocusSetIndex = null;
             saveActiveWorkoutStateToStorage();
             renderActiveWorkout();
@@ -9671,6 +9726,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
             }
             const [deferredEx] = activeWorkoutSession.exercises.splice(idx, 1);
             activeWorkoutSession.exercises.push(deferredEx);
+            activeWorkoutSession.exercises = assignAcademicBlockStructure(activeWorkoutSession.exercises, activeWorkoutSession.style || 'superset', activeWorkoutSession.scheme);
             if (activeFocusExIndex >= activeWorkoutSession.exercises.length) {
                 activeFocusExIndex = activeWorkoutSession.exercises.length - 1;
             }
@@ -9690,6 +9746,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
             const temp = activeWorkoutSession.exercises[idx];
             activeWorkoutSession.exercises[idx] = activeWorkoutSession.exercises[targetIdx];
             activeWorkoutSession.exercises[targetIdx] = temp;
+            activeWorkoutSession.exercises = assignAcademicBlockStructure(activeWorkoutSession.exercises, activeWorkoutSession.style || 'superset', activeWorkoutSession.scheme);
 
             if (activeWorkoutViewMode === 'focus') {
                 activeFocusExIndex = targetIdx;
@@ -10120,7 +10177,8 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                 return ex;
             });
 
-            if (s.exercises.length > 0 && !s.exercises[0].blockLabel && typeof assignAcademicBlockStructure === 'function') {
+            const hasUnupgradedSuperset = s.exercises.some(ex => ex.blockType === 'superset' && ex.supersetRole === undefined);
+            if (s.exercises.length > 0 && (!s.exercises[0].blockLabel || hasUnupgradedSuperset) && typeof assignAcademicBlockStructure === 'function') {
                 s.exercises = assignAcademicBlockStructure(s.exercises, s.style || 'superset', s.scheme);
             }
 
@@ -10171,36 +10229,280 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
             if (activeFocusExIndex >= s.exercises.length) activeFocusExIndex = s.exercises.length - 1;
 
             // ==================== MODE 1: CANLI ODAK MODU (FOCUS MODE - HEVY / STRONG STYLE) ====================
-            if (activeWorkoutViewMode === 'focus') {
-                const ex = s.exercises[activeFocusExIndex];
-                const isBw = isExerciseBodyweight(ex);
-                const isTime = isExerciseTimeBased(ex);
-                const sets = activeWorkoutSetsData[ex.id] || [];
+            const renderFocusSingleCardHtml = (cardEx, cardIdx, isPairCard = false, isPairTarget = false, pairObj = null) => {
+                const isBw = isExerciseBodyweight(cardEx);
+                const isTime = isExerciseTimeBased(cardEx);
+                const sets = activeWorkoutSetsData[cardEx.id] || [];
                 const firstIncompleteIdx = sets.findIndex(st => !st.completed);
                 const isAllSetsDone = sets.length > 0 && sets.every(st => st.completed);
-                const allWorkoutDone = s.exercises.every(e => (activeWorkoutSetsData[e.id] || []).every(st => st.completed));
-                const lastPerf = getLastExercisePerformance(ex.id) || getLastExercisePerformance(ex.name);
-                const isFormOpen = !!workoutFormGuideOpenState[ex.id];
-                const exRestSecs = ex.customRest || (s.scheme && s.scheme.rest) || 45;
-                const exBlockTag = ex.blockType === 'superset'
-                    ? `🔥 Süperset (${ex.blockLabel})`
-                    : `🎯 Düz Set (${ex.blockLabel || (activeFocusExIndex + 1)})`;
+                const lastPerf = getLastExercisePerformance(cardEx.id) || getLastExercisePerformance(cardEx.name);
+                const isFormOpen = !!workoutFormGuideOpenState[cardEx.id];
+                const exRestSecs = (cardEx.customRest !== undefined && cardEx.customRest !== null) ? cardEx.customRest : ((s.scheme && s.scheme.rest) || 45);
                 const targetMetricStr = isTime ? (String(s.scheme.reps).includes('sn') ? s.scheme.reps : `${s.scheme.reps || 30} sn`) : `${s.scheme.reps}`;
+                const restLabelStr = (pairObj && cardEx.supersetRole === 1)
+                    ? `⚡ 0s (Dinlenmeden ${escapeHTML(pairObj.secondEx.blockLabel || 'A2')}'ye Geç)`
+                    : `${exRestSecs}s (Tur Sonu)`;
+                const partnerBadgeHtml = pairObj
+                    ? `<span class="superset-partner-badge">🔗 Partner: ${cardEx.supersetRole === 1 ? escapeHTML((pairObj.secondEx.blockLabel || 'A2') + ' ' + pairObj.secondEx.name) + ' (0s Geçiş)' : escapeHTML((pairObj.firstEx.blockLabel || 'A1') + ' ' + pairObj.firstEx.name) + ' (Tur Sonu ' + pairObj.roundRest + 's)'}</span>`
+                    : '';
+
+                return `
+                    <div class="hevy-exercise-card ${isPairTarget ? 'is-pair-target' : ''}" data-exercise-id="${cardEx.id}">
+                        <div class="hevy-exercise-header">
+                            <div class="hevy-title-row">
+                                ${(typeof OPENGYM_GLOBAL_CATALOG !== 'undefined' && OPENGYM_GLOBAL_CATALOG[cardEx.id]) ? `
+                                    <div style="width:44px; height:44px; border-radius:8px; overflow:hidden; background:#000; border:1px solid rgba(56,189,248,0.35); flex:none; cursor:pointer;" onclick="toggleWorkoutFormGuide('${cardEx.id}')" title="Form rehberini aç/kapat">
+                                        <video src="${OPENGYM_GLOBAL_CATALOG[cardEx.id].clip}" autoplay loop muted playsinline style="width:100%; height:100%; object-fit:cover;"></video>
+                                    </div>
+                                ` : ''}
+                                <div style="flex:1; min-width:0;">
+                                    <h2 class="hevy-exercise-title" style="margin:0;"><span style="color:var(--gold); font-weight:900;">${escapeHTML(String(cardEx.blockLabel || (cardIdx + 1)))}.</span> ${escapeHTML(cardEx.name)}</h2>
+                                </div>
+                                <span class="hevy-equip-badge">${equipLabels[cardEx.equipment] || cardEx.equipment}</span>
+                            </div>
+                            <div class="hevy-meta-row">
+                                <span class="hevy-meta-item">🎯 Hedef: <strong>${sets.length} Set × ${targetMetricStr}</strong></span>
+                                <span class="hevy-meta-item">⏱️ Dinlenme: <strong>${pairObj ? restLabelStr : `${exRestSecs}s`}</strong></span>
+                                ${partnerBadgeHtml}
+                            </div>
+                        </div>
+
+                        <div class="hevy-form-collapsible">
+                            <button type="button" class="btn-hevy-form-toggle" onclick="toggleWorkoutFormGuide('${cardEx.id}')">
+                                <span>📖 Form & Biyomekanik Rehberi</span>
+                                <span id="formGuideArrow_${cardEx.id}" style="color:var(--gold); font-weight:800;">${isFormOpen ? '▲ Gizle' : '▼ Göster'}</span>
+                            </button>
+                            <div id="formGuideBody_${cardEx.id}" class="hevy-form-guide-body" style="display:${isFormOpen ? 'block' : 'none'};">
+                                ${renderExercisePositionsHtml(cardEx, `focus_${cardEx.id}`, false)}
+                            </div>
+                        </div>
+
+                        ${lastPerf ? `
+                            <div class="hevy-ghost-bar">
+                                <div class="hevy-ghost-info">
+                                    <span>📌 Önceki: <strong>${formatPerformancePill(cardEx, lastPerf.weight, lastPerf.reps)}</strong> <span style="font-size:10px; opacity:0.75;">(${lastPerf.dateFormatted})</span></span>
+                                </div>
+                                <button type="button" class="btn-hevy-ghost-apply" onclick="copyLastPerformanceToCurrent('${cardEx.id}', ${lastPerf.weight}, ${lastPerf.reps})" title="Tüm boş setlere uygula">
+                                    ⚡ Tümüne Yaz
+                                </button>
+                            </div>
+                        ` : ''}
+
+                        <div class="hevy-sets-card">
+                            <div class="hevy-sets-table">
+                                <div class="hevy-th-row">
+                                    <div class="hevy-th">SET</div>
+                                    <div class="hevy-th">ÖNCEKİ</div>
+                                    <div class="hevy-th">${isBw ? 'YÜK (BW)' : 'KG'}</div>
+                                    <div class="hevy-th">${isTime ? 'SÜRE (SN)' : 'TEKRAR'}</div>
+                                    <div class="hevy-th">✓</div>
+                                </div>
+
+                                ${sets.map((st, sIdx) => {
+                                    const isDone = st.completed;
+                                    const isTarget = !isDone && sIdx === firstIncompleteIdx && (!isPairCard || isPairTarget);
+                                    const prevText = lastPerf ? formatPerformancePill(cardEx, lastPerf.weight, lastPerf.reps) : '-';
+
+                                    return `
+                                        <div class="hevy-tr-row ${isDone ? 'done' : ''} ${isTarget ? 'active-target' : ''}" id="setRow_${cardEx.id}_${sIdx}">
+                                            <div class="hevy-td">
+                                                <span class="hevy-set-pill ${isDone ? 'done' : (isTarget ? 'target' : '')}">${st.setNo}</span>
+                                            </div>
+                                            <div class="hevy-td" 
+                                                 title="${lastPerf && !isDone ? 'Bu sete önceki veriyi aktarmak için dokunun' : ''}"
+                                                 ${lastPerf && !isDone ? `onclick="applyGhostToSet('${cardEx.id}', ${sIdx}, ${lastPerf.weight}, ${lastPerf.reps})"` : ''}>
+                                                <span class="hevy-prev-text ${lastPerf && !isDone ? 'clickable' : ''}">${prevText}</span>
+                                            </div>
+                                            <div class="hevy-td">
+                                                <button type="button" class="hevy-listbox-btn ${isBw ? 'bw-load-btn' : ''}" onclick="openListboxPicker('${cardEx.id}', ${sIdx}, 'weight')" title="${isBw ? 'Vücut ağırlığı veya ek yük seçin' : 'Kilo seçmek için dokunun'}">
+                                                    <span>${formatSetWeightDisplay(isBw, st.weight)}</span>
+                                                    <span class="listbox-btn-arrow">▾</span>
+                                                </button>
+                                            </div>
+                                            <div class="hevy-td">
+                                                <button type="button" class="hevy-listbox-btn ${isTime ? 'time-metric-btn' : ''}" onclick="openListboxPicker('${cardEx.id}', ${sIdx}, 'reps')" title="${isTime ? 'Süre (saniye) seçmek için dokunun' : 'Tekrar seçmek için dokunun'}">
+                                                    <span>${formatSetMetricDisplay(isTime, st.reps)}</span>
+                                                    <span class="listbox-btn-arrow">▾</span>
+                                                </button>
+                                            </div>
+                                            <div class="hevy-td">
+                                                <button type="button" 
+                                                        class="btn-hevy-check ${isDone ? 'checked' : (isTarget ? 'target' : '')}" 
+                                                        onclick="handleSetCheckClick('${cardEx.id}', ${sIdx})"
+                                                        title="${isDone ? 'Set Tamamlandı (Geri Almak İçin Dokunun)' : 'Seti Bitir'}">
+                                                    ${isDone ? '✓' : (isTarget ? '⚡' : '○')}
+                                                </button>
+                                            </div>
+                                        </div>
+                                        ${renderInterSetSlotHtml(cardEx.id, st, sIdx, sets.length)}
+                                    `;
+                                }).join('')}
+                            </div>
+
+                            <div class="hevy-table-footer">
+                                <button type="button" class="btn-hevy-add-set" onclick="addSetToExercise('${cardEx.id}')">
+                                    ➕ Set Ekle
+                                </button>
+                                ${sets.length > 1 ? `
+                                    <button type="button" class="btn-hevy-del-set" onclick="removeSetFromExercise('${cardEx.id}')" title="Son seti sil">
+                                        🗑️ Set Sil
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        ${(!isPairCard && isAllSetsDone) ? `
+                            <div class="hevy-exercise-done-banner">
+                                <div class="hevy-done-title">🎉 ${escapeHTML(cardEx.name)} Bitti!</div>
+                                <div class="hevy-done-sub">Tüm ${sets.length} set başarıyla tamamlandı.</div>
+                                ${cardIdx < s.exercises.length - 1 ? `
+                                    <button type="button" class="btn-hevy-next-cta" onclick="goToNextExercise()">
+                                        Sıradaki Egzersize Geç (${cardIdx + 2}/${s.exercises.length}) ➔
+                                    </button>
+                                ` : `
+                                    <button type="button" class="btn-hevy-finish-cta" onclick="openCompleteModal()">
+                                        🏁 Antrenmanı Tamamla & Günlüğe Kaydet
+                                    </button>
+                                `}
+                            </div>
+                        ` : ''}
+
+                        <div class="hevy-more-wrapper">
+                            <button type="button" class="btn-hevy-more-toggle" onclick="toggleExerciseMoreActions('${cardEx.id}')" id="btnMoreActions_${cardEx.id}">
+                                <span>⚙️ Diğer Seçenekler (Alternatif, Alet...)</span>
+                                <span class="more-toggle-icon">${activeWorkoutMoreDrawersState[cardEx.id] ? '▲ Kapat' : '•••'}</span>
+                            </button>
+                            <div class="hevy-more-drawer" id="moreActionsDrawer_${cardEx.id}" style="display:${activeWorkoutMoreDrawersState[cardEx.id] ? 'grid' : 'none'};">
+                                <button class="btn-hevy-action" onclick="openAlternativeModal('${cardEx.id}', 'active')">
+                                    📋 Alternatif Seç
+                                </button>
+                                <button class="btn-hevy-action" onclick="deferExerciseToEnd('${cardEx.id}')" style="color:#f59e0b;">
+                                    ⏳ Alet Dolu (Sona At)
+                                </button>
+                                <button class="btn-hevy-action" onclick="moveExerciseOrder('${cardEx.id}', -1)">
+                                    ⬆️ Sırayı Öne Al
+                                </button>
+                                <button class="btn-hevy-action" onclick="moveExerciseOrder('${cardEx.id}', 1)">
+                                    ⬇️ Sırayı Arkaya Al
+                                </button>
+                                <button class="btn-hevy-action" onclick="openAddFinisherModal()">
+                                    ➕ Finisher Ekle
+                                </button>
+                                <button class="btn-hevy-action" onclick="openExerciseBugReportModal(decodeURIComponent('${encodeURIComponent(cardEx.id)}'), decodeURIComponent('${encodeURIComponent(cardEx.name || '')}'), '', decodeURIComponent('${encodeURIComponent(cardEx.equipment || '')}'), decodeURIComponent('${encodeURIComponent(cardEx.muscle || '')}'))">
+                                    ⚠️ Hata Bildir
+                                </button>
+                                <button class="btn-hevy-action danger" onclick="removeExerciseFromWorkout('${cardEx.id}', 'active')">
+                                    🗑️ Hareketi Kaldır
+                                </button>
+                                <button class="btn-hevy-action danger" onclick="cancelActiveWorkout()">
+                                    🛑 İptal Et
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            };
+
+            if (activeWorkoutViewMode === 'focus') {
+                const ex = s.exercises[activeFocusExIndex];
+                const focusPair = getSupersetPairInfo(s.exercises, activeFocusExIndex);
+                const allWorkoutDone = s.exercises.every(e => (activeWorkoutSetsData[e.id] || []).every(st => st.completed));
+
+                let navCounterHtml = '';
+                let mainFocusBodyHtml = '';
+                const isFirstNavDisabled = focusPair ? (focusPair.firstIdx === 0) : (activeFocusExIndex === 0);
+                const isLastNavDisabled = focusPair ? (focusPair.secondIdx >= s.exercises.length - 1) : (activeFocusExIndex === s.exercises.length - 1);
+
+                if (focusPair) {
+                    const setsA = activeWorkoutSetsData[focusPair.firstEx.id] || [];
+                    const setsB = activeWorkoutSetsData[focusPair.secondEx.id] || [];
+                    const totalRounds = Math.max(setsA.length, setsB.length, 1);
+                    let activeRoundIdx = 0;
+                    let targetExId = null;
+                    for (let r = 0; r < totalRounds; r++) {
+                        const aDone = setsA[r] ? setsA[r].completed : true;
+                        const bDone = setsB[r] ? setsB[r].completed : true;
+                        if (!aDone) {
+                            activeRoundIdx = r;
+                            targetExId = focusPair.firstEx.id;
+                            break;
+                        }
+                        if (!bDone) {
+                            activeRoundIdx = r;
+                            targetExId = focusPair.secondEx.id;
+                            break;
+                        }
+                    }
+                    const isPairAllDone = !targetExId;
+                    const activeRoundNo = isPairAllDone ? totalRounds : (activeRoundIdx + 1);
+                    const lblA = focusPair.firstEx.blockLabel || 'A1';
+                    const lblB = focusPair.secondEx.blockLabel || 'A2';
+                    navCounterHtml = `🔥 SÜPERSET BLOK ${escapeHTML(focusPair.groupId)} (${escapeHTML(lblA)} + ${escapeHTML(lblB)}) • TUR ${activeRoundNo} / ${totalRounds}`;
+
+                    const stepBannerText = isPairAllDone
+                        ? `✅ Süperset Blok ${escapeHTML(focusPair.groupId)} (${totalRounds} Tur) Tamamlandı!`
+                        : (targetExId === focusPair.firstEx.id
+                            ? `⚡ Sıradaki Adım: Tur ${activeRoundNo} • ${escapeHTML(lblA)} (${escapeHTML(focusPair.firstEx.name)}) ➔ Dinlenmeden ${escapeHTML(lblB)}'ye geç`
+                            : `⚡ Sıradaki Adım: Tur ${activeRoundNo} • ${escapeHTML(lblB)} (${escapeHTML(focusPair.secondEx.name)}) ➔ Tur sonu ${focusPair.roundRest}s dinlenme`);
+
+                    const roundPillsHtml = Array.from({ length: totalRounds }, (_, rIdx) => {
+                        const aDone = setsA[rIdx] ? setsA[rIdx].completed : true;
+                        const bDone = setsB[rIdx] ? setsB[rIdx].completed : true;
+                        const rDone = aDone && bDone;
+                        const rCur = !isPairAllDone && rIdx === activeRoundIdx;
+                        return `<span style="padding:3px 8px; border-radius:6px; font-size:11px; font-weight:800; border:1px solid ${rDone ? '#86EFAC' : (rCur ? '#B45309' : '#CBD5E1')}; background:${rDone ? '#DCFCE7' : (rCur ? '#FEF3C7' : '#FFFFFF')}; color:${rDone ? '#166534' : (rCur ? '#92400E' : '#475569')};">Tur ${rIdx + 1}: ${aDone ? '✓' : lblA} ➔ ${bDone ? '✓' : lblB}</span>`;
+                    }).join('');
+
+                    mainFocusBodyHtml = `
+                        <div class="superset-round-tracker">
+                            <div style="margin-bottom:6px; color:#92400E; font-weight:900;">${stepBannerText}</div>
+                            <div style="display:flex; flex-wrap:wrap; gap:6px;">${roundPillsHtml}</div>
+                        </div>
+                        <div class="superset-pair-focus-shell">
+                            ${renderFocusSingleCardHtml(focusPair.firstEx, focusPair.firstIdx, true, targetExId === focusPair.firstEx.id, focusPair)}
+                            <div class="superset-focus-connector">
+                                ⚡ DİNLENMEDEN ${escapeHTML(lblB)} (${escapeHTML(focusPair.secondEx.name)}) HAREKETİNE GEÇ (0 sn) ➔
+                            </div>
+                            ${renderFocusSingleCardHtml(focusPair.secondEx, focusPair.secondIdx, true, targetExId === focusPair.secondEx.id, focusPair)}
+                            ${isPairAllDone ? `
+                                <div class="hevy-exercise-done-banner" style="margin-top:4px;">
+                                    <div class="hevy-done-title">🎉 Süperset Blok ${escapeHTML(focusPair.groupId)} Bitti!</div>
+                                    <div class="hevy-done-sub">Her iki hareketin tüm turları tamamlandı.</div>
+                                    ${!isLastNavDisabled ? `
+                                        <button type="button" class="btn-hevy-next-cta" onclick="goToNextExercise()">
+                                            Sıradaki Bloğa Geç ➔
+                                        </button>
+                                    ` : `
+                                        <button type="button" class="btn-hevy-finish-cta" onclick="openCompleteModal()">
+                                            🏁 Antrenmanı Tamamla & Günlüğe Kaydet
+                                        </button>
+                                    `}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    const exBlockTag = ex.blockType === 'superset'
+                        ? `🔥 Süperset (${ex.blockLabel})`
+                        : `🎯 Düz Set (${ex.blockLabel || (activeFocusExIndex + 1)})`;
+                    navCounterHtml = `EGZERSİZ ${activeFocusExIndex + 1} / ${s.exercises.length} • ${escapeHTML(exBlockTag)}`;
+                    mainFocusBodyHtml = renderFocusSingleCardHtml(ex, activeFocusExIndex, false, false, null);
+                }
 
                 container.innerHTML = `
                     <div class="hevy-workout-wrapper">
                         <!-- TOP EXERCISE NAVIGATION STEPPER -->
                         <div class="hevy-exercise-nav">
-                            <button type="button" class="hevy-nav-arrow" onclick="goToPrevExercise()" ${activeFocusExIndex === 0 ? 'disabled' : ''} title="Önceki Egzersiz">
+                            <button type="button" class="hevy-nav-arrow" onclick="goToPrevExercise()" ${isFirstNavDisabled ? 'disabled' : ''} title="Önceki Blok/Egzersiz">
                                 ◀
                             </button>
                             <div class="hevy-nav-center">
-                                <div class="hevy-nav-counter">EGZERSİZ ${activeFocusExIndex + 1} / ${s.exercises.length} • ${escapeHTML(exBlockTag)}</div>
+                                <div class="hevy-nav-counter">${navCounterHtml}</div>
                                 <div class="hevy-nav-pills">
                                     ${s.exercises.map((e, eIdx) => {
                                         const eSets = activeWorkoutSetsData[e.id] || [];
                                         const isDone = eSets.length > 0 && eSets.every(st => st.completed);
-                                        const isCur = eIdx === activeFocusExIndex;
+                                        const isCur = focusPair ? (eIdx === focusPair.firstIdx || eIdx === focusPair.secondIdx) : eIdx === activeFocusExIndex;
                                         const pillLbl = e.blockLabel || (eIdx + 1);
                                         return `
                                             <button type="button" 
@@ -10213,192 +10515,24 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                                     }).join('')}
                                 </div>
                             </div>
-                            <button type="button" class="hevy-nav-arrow" onclick="goToNextExercise()" ${activeFocusExIndex === s.exercises.length - 1 ? 'disabled' : ''} title="Sonraki Egzersiz">
+                            <button type="button" class="hevy-nav-arrow" onclick="goToNextExercise()" ${isLastNavDisabled ? 'disabled' : ''} title="Sonraki Blok/Egzersiz">
                                 ▶
                             </button>
                         </div>
 
-                        <!-- EXERCISE CARD -->
-                        <div class="hevy-exercise-card">
-                            <!-- HEADER -->
-                            <div class="hevy-exercise-header">
-                                <div class="hevy-title-row">
-                                    ${(typeof OPENGYM_GLOBAL_CATALOG !== 'undefined' && OPENGYM_GLOBAL_CATALOG[ex.id]) ? `
-        <div style="width:44px; height:44px; border-radius:8px; overflow:hidden; background:#000; border:1px solid rgba(56,189,248,0.35); flex:none; cursor:pointer;" onclick="toggleWorkoutFormGuide('${ex.id}')" title="Form rehberini aç/kapat">
-            <video src="${OPENGYM_GLOBAL_CATALOG[ex.id].clip}" autoplay loop muted playsinline style="width:100%; height:100%; object-fit:cover;"></video>
-        </div>
-    ` : ''}
-    <div style="flex:1; min-width:0;">
-        <h2 class="hevy-exercise-title" style="margin:0;"><span style="color:var(--gold); font-weight:900;">${escapeHTML(String(ex.blockLabel || (activeFocusExIndex + 1)))}.</span> ${escapeHTML(ex.name)}</h2>
-    </div>
-                                    <span class="hevy-equip-badge">${equipLabels[ex.equipment] || ex.equipment}</span>
-                                </div>
-                                <div class="hevy-meta-row">
-                                    <span class="hevy-meta-item">🎯 Hedef: <strong>${sets.length} Set × ${targetMetricStr}</strong></span>
-                                    <span class="hevy-meta-item">⏱️ Dinlenme: <strong>${exRestSecs}s</strong></span>
-                                </div>
-                            </div>
+                        ${mainFocusBodyHtml}
 
-                            <!-- COLLAPSIBLE FORM & BIOMECHANICS GUIDE -->
-                            <div class="hevy-form-collapsible">
-                                <button type="button" class="btn-hevy-form-toggle" onclick="toggleWorkoutFormGuide('${ex.id}')">
-                                    <span>📖 Form & Biyomekanik Rehberi</span>
-                                    <span id="formGuideArrow_${ex.id}" style="color:var(--gold); font-weight:800;">${isFormOpen ? '▲ Gizle' : '▼ Göster'}</span>
-                                </button>
-                                <div id="formGuideBody_${ex.id}" class="hevy-form-guide-body" style="display:${isFormOpen ? 'block' : 'none'};">
-                                    ${renderExercisePositionsHtml(ex, `focus_${ex.id}`, false)}
-                                </div>
-                            </div>
-
-                            <!-- GHOST PERFORMANCE REFERENCE -->
-                            ${lastPerf ? `
-                                <div class="hevy-ghost-bar">
-                                    <div class="hevy-ghost-info">
-                                        <span>📌 Önceki: <strong>${formatPerformancePill(ex, lastPerf.weight, lastPerf.reps)}</strong> <span style="font-size:10px; opacity:0.75;">(${lastPerf.dateFormatted})</span></span>
-                                    </div>
-                                    <button type="button" class="btn-hevy-ghost-apply" onclick="copyLastPerformanceToCurrent('${ex.id}', ${lastPerf.weight}, ${lastPerf.reps})" title="Tüm boş setlere uygula">
-                                        ⚡ Tümüne Yaz
-                                    </button>
-                                </div>
-                            ` : ''}
-
-                            <!-- HEVY / STRONG STYLE SETS TABLE -->
-                            <div class="hevy-sets-card">
-                                <div class="hevy-sets-table">
-                                    <div class="hevy-th-row">
-                                        <div class="hevy-th">SET</div>
-                                        <div class="hevy-th">ÖNCEKİ</div>
-                                        <div class="hevy-th">${isBw ? 'YÜK (BW)' : 'KG'}</div>
-                                        <div class="hevy-th">${isTime ? 'SÜRE (SN)' : 'TEKRAR'}</div>
-                                        <div class="hevy-th">✓</div>
-                                    </div>
-
-                                    ${sets.map((st, sIdx) => {
-                                        const isDone = st.completed;
-                                        const isTarget = !isDone && sIdx === firstIncompleteIdx;
-                                        const prevText = lastPerf ? formatPerformancePill(ex, lastPerf.weight, lastPerf.reps) : '-';
-
-                                        return `
-                                            <div class="hevy-tr-row ${isDone ? 'done' : ''} ${isTarget ? 'active-target' : ''}" id="setRow_${ex.id}_${sIdx}">
-                                                <!-- SET NO -->
-                                                <div class="hevy-td">
-                                                    <span class="hevy-set-pill ${isDone ? 'done' : (isTarget ? 'target' : '')}">${st.setNo}</span>
-                                                </div>
-
-                                                <!-- ÖNCEKİ SEANS / GHOST -->
-                                                <div class="hevy-td" 
-                                                     title="${lastPerf && !isDone ? 'Bu sete önceki veriyi aktarmak için dokunun' : ''}"
-                                                     ${lastPerf && !isDone ? `onclick="applyGhostToSet('${ex.id}', ${sIdx}, ${lastPerf.weight}, ${lastPerf.reps})"` : ''}>
-                                                    <span class="hevy-prev-text ${lastPerf && !isDone ? 'clickable' : ''}">${prevText}</span>
-                                                </div>
-
-                                                <!-- AĞIRLIK (KG / BW) - LISTBOX PICKER -->
-                                                <div class="hevy-td">
-                                                    <button type="button" class="hevy-listbox-btn ${isBw ? 'bw-load-btn' : ''}" onclick="openListboxPicker('${ex.id}', ${sIdx}, 'weight')" title="${isBw ? 'Vücut ağırlığı veya ek yük seçin' : 'Kilo seçmek için dokunun'}">
-                                                        <span>${formatSetWeightDisplay(isBw, st.weight)}</span>
-                                                        <span class="listbox-btn-arrow">▾</span>
-                                                    </button>
-                                                </div>
-
-                                                <!-- TEKRAR / SÜRE - LISTBOX PICKER -->
-                                                <div class="hevy-td">
-                                                    <button type="button" class="hevy-listbox-btn ${isTime ? 'time-metric-btn' : ''}" onclick="openListboxPicker('${ex.id}', ${sIdx}, 'reps')" title="${isTime ? 'Süre (saniye) seçmek için dokunun' : 'Tekrar seçmek için dokunun'}">
-                                                        <span>${formatSetMetricDisplay(isTime, st.reps)}</span>
-                                                        <span class="listbox-btn-arrow">▾</span>
-                                                    </button>
-                                                </div>
-
-                                                <!-- TİK BUTONU -->
-                                                <div class="hevy-td">
-                                                    <button type="button" 
-                                                            class="btn-hevy-check ${isDone ? 'checked' : (isTarget ? 'target' : '')}" 
-                                                            onclick="handleSetCheckClick('${ex.id}', ${sIdx})"
-                                                            title="${isDone ? 'Set Tamamlandı (Geri Almak İçin Dokunun)' : 'Seti Bitir ve Dinlenmeyi Başlat'}">
-                                                        ${isDone ? '✓' : (isTarget ? '⚡' : '○')}
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            ${renderInterSetSlotHtml(ex.id, st, sIdx, sets.length)}
-                                        `;
-                                    }).join('')}
-                                </div>
-
-                                <!-- SET EKLE / SİL -->
-                                <div class="hevy-table-footer">
-                                    <button type="button" class="btn-hevy-add-set" onclick="addSetToExercise('${ex.id}')">
-                                        ➕ Set Ekle
-                                    </button>
-                                    ${sets.length > 1 ? `
-                                        <button type="button" class="btn-hevy-del-set" onclick="removeSetFromExercise('${ex.id}')" title="Son seti sil">
-                                            🗑️ Set Sil
-                                        </button>
-                                    ` : ''}
-                                </div>
-                            </div>
-
-                            <!-- EXERCISE COMPLETION BANNER -->
-                            ${isAllSetsDone ? `
-                                <div class="hevy-exercise-done-banner">
-                                    <div class="hevy-done-title">🎉 ${escapeHTML(ex.name)} Bitti!</div>
-                                    <div class="hevy-done-sub">Tüm ${sets.length} set başarıyla tamamlandı.</div>
-                                    ${activeFocusExIndex < s.exercises.length - 1 ? `
-                                        <button type="button" class="btn-hevy-next-cta" onclick="goToNextExercise()">
-                                            Sıradaki Egzersize Geç (${activeFocusExIndex + 2}/${s.exercises.length}) ➔
-                                        </button>
-                                    ` : `
-                                        <button type="button" class="btn-hevy-finish-cta" onclick="openCompleteModal()">
-                                            🏁 Antrenmanı Tamamla & Günlüğe Kaydet
-                                        </button>
-                                    `}
-                                </div>
-                            ` : ''}
-
-                            <!-- MORE ACTIONS DRAWER -->
-                            <div class="hevy-more-wrapper">
-                                <button type="button" class="btn-hevy-more-toggle" onclick="toggleExerciseMoreActions('${ex.id}')" id="btnMoreActions_${ex.id}">
-                                    <span>⚙️ Diğer Seçenekler (Alternatif, Alet...)</span>
-                                    <span class="more-toggle-icon">${activeWorkoutMoreDrawersState[ex.id] ? '▲ Kapat' : '•••'}</span>
-                                </button>
-                                <div class="hevy-more-drawer" id="moreActionsDrawer_${ex.id}" style="display:${activeWorkoutMoreDrawersState[ex.id] ? 'grid' : 'none'};">
-                                    <button class="btn-hevy-action" onclick="openAlternativeModal('${ex.id}', 'active')">
-                                        📋 Alternatif Seç
-                                    </button>
-                                    <button class="btn-hevy-action" onclick="deferExerciseToEnd('${ex.id}')" style="color:#f59e0b;">
-                                        ⏳ Alet Dolu (Sona At)
-                                    </button>
-                                    <button class="btn-hevy-action" onclick="moveExerciseOrder('${ex.id}', -1)">
-                                        ⬆️ Sırayı Öne Al
-                                    </button>
-                                    <button class="btn-hevy-action" onclick="moveExerciseOrder('${ex.id}', 1)">
-                                        ⬇️ Sırayı Arkaya Al
-                                    </button>
-                                    <button class="btn-hevy-action" onclick="openAddFinisherModal()">
-                                        ➕ Finisher Ekle
-                                    </button>
-                                    <button class="btn-hevy-action" onclick="openExerciseBugReportModal(decodeURIComponent('${encodeURIComponent(ex.id)}'), decodeURIComponent('${encodeURIComponent(ex.name || '')}'), '', decodeURIComponent('${encodeURIComponent(ex.equipment || '')}'), decodeURIComponent('${encodeURIComponent(ex.muscle || '')}'))">
-                                        ⚠️ Hata Bildir
-                                    </button>
-                                    <button class="btn-hevy-action danger" onclick="removeExerciseFromWorkout('${ex.id}', 'active')">
-                                        🗑️ Hareketi Kaldır
-                                    </button>
-                                    <button class="btn-hevy-action danger" onclick="cancelActiveWorkout()">
-                                        🛑 İptal Et
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- NAVIGATION FOOTER -->
-                            <div class="hevy-footer-nav">
-                                <button type="button" class="btn-hevy-nav" onclick="goToPrevExercise()" ${activeFocusExIndex === 0 ? 'disabled' : ''}>
-                                    ◀ Önceki Hrk
-                                </button>
-                                <button type="button" class="btn-hevy-nav" style="border-color:var(--gold); color:var(--gold); font-weight:900;" onclick="openCompleteModal()">
-                                    🏁 Seansı Bitir
-                                </button>
-                                <button type="button" class="btn-hevy-nav" onclick="goToNextExercise()" ${activeFocusExIndex === s.exercises.length - 1 ? 'disabled' : ''}>
-                                    Sonraki Hrk ▶
-                                </button>
-                            </div>
+                        <!-- NAVIGATION FOOTER -->
+                        <div class="hevy-footer-nav">
+                            <button type="button" class="btn-hevy-nav" onclick="goToPrevExercise()" ${isFirstNavDisabled ? 'disabled' : ''}>
+                                ◀ Önceki Hrk
+                            </button>
+                            <button type="button" class="btn-hevy-nav" style="border-color:var(--gold); color:var(--gold); font-weight:900;" onclick="openCompleteModal()">
+                                🏁 Seansı Bitir
+                            </button>
+                            <button type="button" class="btn-hevy-nav" onclick="goToNextExercise()" ${isLastNavDisabled ? 'disabled' : ''}>
+                                Sonraki Hrk ▶
+                            </button>
                         </div>
 
                         ${allWorkoutDone ? `
@@ -10426,24 +10560,41 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
             container.innerHTML = `
                 <div class="hevy-workout-wrapper">
                     ${s.exercises.map((ex, idx) => {
+                        const pair = getSupersetPairInfo(s.exercises, idx);
                         const isBw = isExerciseBodyweight(ex);
                         const isTime = isExerciseTimeBased(ex);
                         const sets = activeWorkoutSetsData[ex.id] || [];
                         const firstIncompleteIdx = sets.findIndex(st => !st.completed);
-                        const isAllSetsDone = sets.length > 0 && sets.every(st => st.completed);
+                        let isPairTarget = false;
+                        if (pair) {
+                            const setsA = activeWorkoutSetsData[pair.firstEx.id] || [];
+                            const setsB = activeWorkoutSetsData[pair.secondEx.id] || [];
+                            const totalR = Math.max(setsA.length, setsB.length, 1);
+                            let pairTargetExId = null;
+                            for (let r = 0; r < totalR; r++) {
+                                const aDone = setsA[r] ? setsA[r].completed : true;
+                                const bDone = setsB[r] ? setsB[r].completed : true;
+                                if (!aDone) { pairTargetExId = pair.firstEx.id; break; }
+                                if (!bDone) { pairTargetExId = pair.secondEx.id; break; }
+                            }
+                            isPairTarget = (pairTargetExId === ex.id);
+                        }
                         const lastPerf = getLastExercisePerformance(ex.id) || getLastExercisePerformance(ex.name);
                         const isFormOpen = !!workoutFormGuideOpenState[ex.id];
-                        const exRestSecs = ex.customRest || (s.scheme && s.scheme.rest) || 45;
+                        const exRestSecs = (ex.customRest !== undefined && ex.customRest !== null) ? ex.customRest : ((s.scheme && s.scheme.rest) || 45);
                         const targetMetricStr = isTime ? (String(s.scheme.reps).includes('sn') ? s.scheme.reps : `${s.scheme.reps || 30} sn`) : `${s.scheme.reps}`;
                         const blockHdrHtml = ex.blockHeader ? `
                             <div class="block-header" style="${ex.blockType === 'superset' ? 'border-left:3px solid #f59e0b; background:rgba(245,158,11,0.08); color:#B45309;' : 'border-left:3px solid #38bdf8; background:rgba(56,189,248,0.08); color:#0369A1;'} padding:6px 10px; border-radius:6px; margin-bottom:8px;">
                                 ${escapeHTML(ex.blockHeader)}
                             </div>
                         ` : '';
+                        const partnerBadgeHtml = pair
+                            ? `<span class="superset-partner-badge">🔗 Partner: ${ex.supersetRole === 1 ? escapeHTML((pair.secondEx.blockLabel || 'A2') + ' ' + pair.secondEx.name) + ' (0s Geçiş)' : escapeHTML((pair.firstEx.blockLabel || 'A1') + ' ' + pair.firstEx.name) + ' (Tur Sonu ' + pair.roundRest + 's)'}</span>`
+                            : '';
 
                         return `
                             ${blockHdrHtml}
-                            <div class="hevy-exercise-card" data-exercise-id="${ex.id}">
+                            <div class="hevy-exercise-card ${pair ? 'superset-pair-item' : ''} ${isPairTarget ? 'is-pair-target' : ''}" data-exercise-id="${ex.id}">
                                 <div class="hevy-exercise-header">
                                     <div class="hevy-title-row">
                                         <div class="hevy-exercise-title">
@@ -10454,7 +10605,8 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                                     </div>
                                     <div class="hevy-meta-row">
                                         <span class="hevy-meta-item">🎯 <strong>${sets.length} Set × ${targetMetricStr}</strong></span>
-                                        <span class="hevy-meta-item">⏱️ Dinlenme: <strong>${exRestSecs}s</strong></span>
+                                        <span class="hevy-meta-item">⏱️ Dinlenme: <strong>${pair && ex.supersetRole === 1 ? '0s (Dinlenmesiz)' : `${exRestSecs}s`}</strong></span>
+                                        ${partnerBadgeHtml}
                                     </div>
                                 </div>
 
@@ -10491,7 +10643,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
 
                                         ${sets.map((st, sIdx) => {
                                             const isDone = st.completed;
-                                            const isTarget = !isDone && sIdx === firstIncompleteIdx;
+                                            const isTarget = !isDone && sIdx === firstIncompleteIdx && (!pair || isPairTarget);
                                             const prevText = lastPerf ? formatPerformancePill(ex, lastPerf.weight, lastPerf.reps) : '-';
 
                                             return `
@@ -10570,6 +10722,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                                     </div>
                                 </div>
                             </div>
+                            ${pair && ex.supersetRole === 1 ? `<div class="superset-focus-connector" style="margin:-4px 0 8px 0;">⚡ DİNLENMEDEN ${escapeHTML(pair.secondEx.blockLabel || 'A2')} (${escapeHTML(pair.secondEx.name)}) HAREKETİNE GEÇ (0 sn) ➔</div>` : ''}
                         `;
                     }).join('')}
 
@@ -10643,13 +10796,82 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                 }
             }
 
+            const curExObj = activeWorkoutSession && Array.isArray(activeWorkoutSession.exercises)
+                ? activeWorkoutSession.exercises.find(e => e.id === exId)
+                : null;
+            const curIdx = curExObj ? activeWorkoutSession.exercises.indexOf(curExObj) : -1;
+            const pair = curIdx >= 0 ? getSupersetPairInfo(activeWorkoutSession.exercises, curIdx) : null;
+
+            if (pair && curExObj.supersetRole === 1) {
+                const partnerSets = activeWorkoutSetsData[pair.secondEx.id] || [];
+                if (partnerSets[setIdx] && !partnerSets[setIdx].completed) {
+                    activeFocusExIndex = pair.secondIdx;
+                }
+            } else if (pair && curExObj.supersetRole === 2) {
+                const firstSets = activeWorkoutSetsData[pair.firstEx.id] || [];
+                const hasMoreFirstSets = firstSets.some(sItem => !sItem.completed);
+                if (hasMoreFirstSets) {
+                    activeFocusExIndex = pair.firstIdx;
+                }
+            }
+
             saveActiveWorkoutStateToStorage();
             renderActiveWorkout();
 
             // TRIGGER REST TIMER (Blok bazlı akademik dinlenme süresi varsa onu kullan)
-            const curExObj = activeWorkoutSession && Array.isArray(activeWorkoutSession.exercises)
-                ? activeWorkoutSession.exercises.find(e => e.id === exId)
-                : null;
+            if (pair && curExObj.supersetRole === 1) {
+                const partnerSets = activeWorkoutSetsData[pair.secondEx.id] || [];
+                const targetPartnerIdx = (partnerSets[setIdx] && !partnerSets[setIdx].completed)
+                    ? setIdx
+                    : partnerSets.findIndex(sItem => !sItem.completed);
+                if (targetPartnerIdx !== -1) {
+                    resetTimer(0);
+                    const lblA = pair.firstEx.blockLabel || 'A1';
+                    const lblB = pair.secondEx.blockLabel || 'A2';
+                    if (typeof showToast === 'function') showToast(`⚡ ${lblA} Set ${setIdx + 1} tamam! Dinlenmeden ${lblB} (${pair.secondEx.name}) Set ${targetPartnerIdx + 1}'e geçin!`);
+                    setTimeout(() => {
+                        const row = document.getElementById(`setRow_${pair.secondEx.id}_${targetPartnerIdx}`);
+                        if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 60);
+                    requestWakeLock();
+                    return;
+                }
+            }
+            if (pair && curExObj.supersetRole === 2) {
+                const roundRest = pair.roundRest || curExObj.roundRest || curExObj.customRest || 60;
+                const firstSets = activeWorkoutSetsData[pair.firstEx.id] || [];
+                const secondSets = activeWorkoutSetsData[pair.secondEx.id] || [];
+                let nextFirstIdx = firstSets.findIndex((sItem, idx) => idx > setIdx && !sItem.completed);
+                if (nextFirstIdx === -1) nextFirstIdx = firstSets.findIndex(sItem => !sItem.completed);
+                const nextSecondIdx = secondSets.findIndex(sItem => !sItem.completed);
+                const lblA = pair.firstEx.blockLabel || 'A1';
+
+                resetTimer(roundRest);
+                startTimer();
+                if (nextFirstIdx !== -1) {
+                    if (typeof showToast === 'function') showToast(`⏱️ Tur ${setIdx + 1} bitti (${roundRest}sn dinlenme) • Sıradaki: ${lblA} (${pair.firstEx.name}) Set ${nextFirstIdx + 1}`);
+                    setTimeout(() => {
+                        const nextRow = document.getElementById(`setRow_${pair.firstEx.id}_${nextFirstIdx}`);
+                        if (nextRow) nextRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 60);
+                } else if (nextSecondIdx !== -1) {
+                    if (typeof showToast === 'function') showToast(`⏱️ Tur ${setIdx + 1} bitti (${roundRest}sn dinlenme) • Sıradaki Set ${nextSecondIdx + 1}`);
+                    setTimeout(() => {
+                        const nextRow = document.getElementById(`setRow_${pair.secondEx.id}_${nextSecondIdx}`);
+                        if (nextRow) nextRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 60);
+                } else {
+                    if (typeof showToast === 'function') showToast(`🎉 Süperset Blok ${pair.groupId} tamamlandı! (${roundRest}sn dinlenme)`);
+                    setTimeout(() => {
+                        const doneBanner = document.querySelector('.hevy-exercise-done-banner');
+                        if (doneBanner) doneBanner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 60);
+                }
+                playAlertSound();
+                if (navigator.vibrate) navigator.vibrate([120, 80, 120]);
+                requestWakeLock();
+                return;
+            }
             const restSecs = (curExObj && curExObj.customRest !== undefined && curExObj.customRest !== null)
                 ? curExObj.customRest
                 : (activeWorkoutSession && activeWorkoutSession.scheme ? (activeWorkoutSession.scheme.rest || 45) : 45);
@@ -17120,12 +17342,53 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
                 }
             } catch(e) {}
-            let hash = 0;
-            for (let i = 0; i < message.length; i++) {
-                hash = ((hash << 5) - hash) + message.charCodeAt(i);
-                hash |= 0;
+            // Pure-JS SHA-256 fallback for HTTP LAN testing (http://192.168.x.x:8080 where crypto.subtle is unavailable)
+            const K = [
+                0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+                0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+                0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+                0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+                0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+                0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+                0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+                0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+            ];
+            const rotr = (n, x) => (x >>> n) | (x << (32 - n));
+            const bytes = Array.from(new TextEncoder().encode(message));
+            const bitLen = bytes.length * 8;
+            bytes.push(0x80);
+            while ((bytes.length % 64) !== 56) bytes.push(0);
+            const hi = Math.floor(bitLen / 0x100000000);
+            const lo = bitLen >>> 0;
+            for (let i = 3; i >= 0; i--) bytes.push((hi >>> (i * 8)) & 0xff);
+            for (let i = 3; i >= 0; i--) bytes.push((lo >>> (i * 8)) & 0xff);
+
+            let H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+            const W = new Array(64);
+            for (let i = 0; i < bytes.length; i += 64) {
+                for (let t = 0; t < 16; t++) {
+                    const j = i + t * 4;
+                    W[t] = ((bytes[j] << 24) | (bytes[j + 1] << 16) | (bytes[j + 2] << 8) | bytes[j + 3]) >>> 0;
+                }
+                for (let t = 16; t < 64; t++) {
+                    const s0 = rotr(7, W[t - 15]) ^ rotr(18, W[t - 15]) ^ (W[t - 15] >>> 3);
+                    const s1 = rotr(17, W[t - 2]) ^ rotr(19, W[t - 2]) ^ (W[t - 2] >>> 10);
+                    W[t] = (W[t - 16] + s0 + W[t - 7] + s1) >>> 0;
+                }
+                let [a, b, c, d, e, f, g, h] = H;
+                for (let t = 0; t < 64; t++) {
+                    const S1 = rotr(6, e) ^ rotr(11, e) ^ rotr(25, e);
+                    const ch = (e & f) ^ (~e & g);
+                    const temp1 = (h + S1 + ch + K[t] + W[t]) >>> 0;
+                    const S0 = rotr(2, a) ^ rotr(13, a) ^ rotr(22, a);
+                    const maj = (a & b) ^ (a & c) ^ (b & c);
+                    const temp2 = (S0 + maj) >>> 0;
+                    h = g; g = f; f = e; e = (d + temp1) >>> 0;
+                    d = c; c = b; b = a; a = (temp1 + temp2) >>> 0;
+                }
+                H = [(H[0] + a) >>> 0, (H[1] + b) >>> 0, (H[2] + c) >>> 0, (H[3] + d) >>> 0, (H[4] + e) >>> 0, (H[5] + f) >>> 0, (H[6] + g) >>> 0, (H[7] + h) >>> 0];
             }
-            return String(Math.abs(hash));
+            return H.map(v => v.toString(16).padStart(8, '0')).join('');
         }
 
         function normalizeAuthString(str) {
@@ -24748,7 +25011,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=263')
+                navigator.serviceWorker.register('./sw.js?v=264')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();

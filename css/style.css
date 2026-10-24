@@ -9456,6 +9456,12 @@
             color: #0F172A;
         }
 
-
-
-
+                .superset-pair-item { border-left: 4px solid #B45309 !important; background: #FFFBEB; }
+        .wk-ex-item-wrap.superset-pair-item { padding-top: 4px; }
+        .wk-ex-item-wrap .superset-partner-badge { margin: 4px 12px 0 12px; }
+        .superset-partner-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:6px; border:1px solid #F59E0B; background:#FEF3C7; color:#92400E; font-size:10.5px; font-weight:800; }
+        .superset-transition-banner { margin:0 10px 6px 18px; padding:6px 10px; border-left:3px solid #B45309; border-radius:0 6px 6px 0; background:#FEF3C7; color:#92400E; font-size:10.5px; font-weight:900; letter-spacing:0.3px; }
+        .superset-pair-focus-shell { display:flex; flex-direction:column; gap:10px; padding:10px; border:2px solid #D97706; border-radius:20px; background:#FFFBEB; box-shadow:0 6px 20px rgba(180,83,9,0.08); }
+        .superset-focus-connector { padding:8px 12px; text-align:center; border-radius:10px; border:1.5px dashed #D97706; background:#FEF3C7; color:#92400E; font-weight:900; font-size:12px; }
+        .superset-round-tracker { padding:10px 12px; border:1.5px solid #D97706; border-radius:12px; background:#FFFBEB; color:#0F172A; font-size:12px; font-weight:800; }
+        .superset-pair-focus-shell .hevy-exercise-card.is-pair-target { border:2px solid #D97706 !important; box-shadow:0 0 0 3px rgba(245,158,11,0.25) !important; }
