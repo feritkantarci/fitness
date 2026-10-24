@@ -1,6 +1,6 @@
 # 🛡️ ÇELİK KODU — 6 SEKME ŞEFİ & BEKÇİ KONTROL PANELİ (TAB_HEALTH)
 
-> **Son Otomatik Kontrol:** `2026-10-24 13:08:14` | **Toplam Hareket:** `269` | **Kırık Hareket Bağlantısı:** `0`
+> **Son Otomatik Kontrol:** `2026-10-24 13:27:15` | **Toplam Hareket:** `268` | **Kırık Hareket Bağlantısı:** `0`
 
 ---
 
@@ -37,3 +37,7 @@ Bir sekmede yaptığın işlem diğer sekmeyi şu 8 bağlantı üzerinden etkile
 ## 3. Otomatik Bekçi Raporu (Şu Anki Sonuç)
 - **Tavsiye Edilen Hareketler Sağlam mı?:** 51 tavsiye butonu kontrol edildi -> **✅ Hepsi sağlam (0 hata)**
 - **Sayfa Zıplama (Scroll) Koruması:** ✅ Tüm sekmelerde ekran sabitleme aktif
+- **Modal & Hareketli Görsel Denetimi (123 Ana Hareket):**
+  - `window.exerciseGuideMap` Global Erişim (`library-guard` / `generator-guard`): **✅ Açık**
+  - Diskte Eksik Olan MP4 Dosyası (`library-guard`): **✅ 0 Eksik**
+  - Animasyonu Olmayan (Sadece Sabit Fotoğraf Gösteren) Hareketler (**5 adet**): `db_suitcase_carry (Tek El Çanta Taşıma (Suitcase Carry))`, `bb_hip_thrust (Barbell Hip Thrust)`, `mach_leg_press (45° Leg Press)`, `mach_straight_arm_pulldown (Kablo Düz Kol Çekiş (Straight-Arm Pulldown))`, `bw_hyperextension (45° Hiperekstansiyon (Back Extension))`

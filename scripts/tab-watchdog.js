@@ -164,6 +164,25 @@ function checkRecIds(appText, dbText) {
   return { totalRecIds: recMatches.length, dbCount: dbIds.size, missing };
 }
 
+function auditExerciseMedia(appText, dbText) {
+  const exercises = (new Function(dbText + '; return EXERCISES_DB;'))();
+  const ogMatch = appText.match(/window\.OPENGYM_GLOBAL_CATALOG = (\{[\s\S]*?\n        \});/);
+  const opengym = ogMatch ? eval('(' + ogMatch[1] + ')') : {};
+  const isGuideGlobal = /window\.exerciseGuideMap\s*=/.test(appText);
+
+  const missingClipFiles = [];
+  const staticOnlyExercises = [];
+  for (const ex of exercises) {
+    const og = opengym[ex.id];
+    if (!og || !og.clip) {
+      staticOnlyExercises.push(`${ex.id} (${ex.name})`);
+    } else if (!fs.existsSync(path.join(ROOT, og.clip))) {
+      missingClipFiles.push(`${ex.id} -> ${og.clip}`);
+    }
+  }
+  return { totalExercises: exercises.length, isGuideGlobal, missingClipFiles, staticOnlyExercises };
+}
+
 function detectGitDiffImpact(fns) {
   try {
     const diffOut = execSync('git diff -U0 js/app.js', { cwd: ROOT, encoding: 'utf8' });
@@ -202,6 +221,7 @@ function run() {
   const htmlRanges = getDynamicTabRanges(htmlLines);
   const fns = extractFunctions(appLines);
   const recCheck = checkRecIds(appText, dbText);
+  const mediaAudit = auditExerciseMedia(appText, dbText);
   const diffImpact = detectGitDiffImpact(fns);
 
   const agentStats = {};
@@ -277,6 +297,10 @@ ${bridges.map(b => `| \`${b.key}\` | \`${b.writer}\` | ${b.readers.map(r => `\`$
 ## 3. Otomatik Bekçi Raporu (Şu Anki Sonuç)
 - **Tavsiye Edilen Hareketler Sağlam mı?:** ${recCheck.totalRecIds} tavsiye butonu kontrol edildi -> **${recCheck.missing.length === 0 ? '✅ Hepsi sağlam (0 hata)' : '❌ Bozuk olanlar: ' + recCheck.missing.join(', ')}**
 - **Sayfa Zıplama (Scroll) Koruması:** ${Object.values(agentStats).reduce((a, b) => a + b.scrollWarnings.length, 0) === 0 ? '✅ Tüm sekmelerde ekran sabitleme aktif' : '⚠️ İnceleme gereken satırlar: ' + Object.values(agentStats).flatMap(s => s.scrollWarnings).join(' | ')}
+- **Modal & Hareketli Görsel Denetimi (${mediaAudit.totalExercises} Ana Hareket):**
+  - \`window.exerciseGuideMap\` Global Erişim (\`library-guard\` / \`generator-guard\`): **${mediaAudit.isGuideGlobal ? '✅ Açık' : '❌ KAPALI (js/app.js:6086 yerel const içinde kilitli!)'}**
+  - Diskte Eksik Olan MP4 Dosyası (\`library-guard\`): **${mediaAudit.missingClipFiles.length === 0 ? '✅ 0 Eksik' : '❌ ' + mediaAudit.missingClipFiles.join(', ')}**
+  - Animasyonu Olmayan (Sadece Sabit Fotoğraf Gösteren) Hareketler (**${mediaAudit.staticOnlyExercises.length} adet**): ${mediaAudit.staticOnlyExercises.map(x => `\`${x}\``).join(', ')}
 `;
 
   if (process.argv.includes('--write-report')) {

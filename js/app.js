@@ -5390,7 +5390,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 { exId: "bw_plank", family: "core_anterior_plank", name: "2 Dk İzometrik Core & Hollow Hold Burnout", desc: "40 sn RKC Plank + 20 sn Dinlenme × 2 Tur maksimum karın duvarı sıkışı." }
             ];
             const fallbackRecoveryFinisher = {
-                exId: "bw_hollow_hold",
+                exId: "bw_hollow_body",
                 family: "recovery",
                 name: "2 Dk Diyafram Nefesi & Core Toparlanma",
                 desc: "Sırtüstü uzanıp 4 sn nefes al, 4 sn tut, 6 sn ver; parasempatik toparlanmayı tetikle."
@@ -5829,6 +5829,12 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 if (panelEl) {
                     if (p === tabName) {
                         panelEl.classList.add('active');
+                        panelEl.querySelectorAll('video').forEach(v => {
+                            v.muted = true;
+                            v.defaultMuted = true;
+                            v.playsInline = true;
+                            v.play().catch(() => {});
+                        });
                     } else {
                         panelEl.classList.remove('active');
                     }
@@ -5850,6 +5856,12 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             if (el.classList.contains('collapsed')) {
                 el.classList.remove('collapsed');
                 if (btn) btn.innerText = '📖 Formu Gizle ▲';
+                el.querySelectorAll('video').forEach(v => {
+                    v.muted = true;
+                    v.defaultMuted = true;
+                    v.playsInline = true;
+                    v.play().catch(() => {});
+                });
             } else {
                 el.classList.add('collapsed');
                 if (btn) btn.innerText = '📖 Formu Gör ▼';
@@ -5961,46 +5973,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             }
         });
 
-        function renderExercisePositionsHtml(exInput, uniquePrefix = '', defaultCollapsed = false) {
-            if (!exInput) return '';
-            const ex = (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB)) 
-                ? (EXERCISES_DB.find(e => e.id === exInput.id) || exInput)
-                : exInput;
-
-            if (!ex.positions || !Array.isArray(ex.positions) || ex.positions.length === 0) {
-                return '';
-            }
-
-            const isComplex = !!ex.isComplex;
-            const badgeType = isComplex ? 'pos-badge-complex' : 'pos-badge-standard';
-            const typeLabel = isComplex 
-                ? `🔥 Kompleks Hareket (${ex.positions.length} Aşama)` 
-                : `📐 3 Aşamalı Form Kılavuzu`;
-
-            const collapseId = `posGuide_${uniquePrefix}_${ex.id}`.replace(/[^a-zA-Z0-9_-]/g, '_');
-
-            const badgeStyles = {
-                setup: { bg: 'rgba(56, 189, 248, 0.15)', text: '#38bdf8', border: 'rgba(56, 189, 248, 0.35)', icon: '🟢' },
-                action: { bg: 'rgba(245, 158, 11, 0.15)', text: '#fbbf24', border: 'rgba(245, 158, 11, 0.35)', icon: '⚡' },
-                trans: { bg: 'rgba(236, 72, 153, 0.15)', text: '#f472b6', border: 'rgba(236, 72, 153, 0.35)', icon: '🔄' },
-                finish: { bg: 'rgba(16, 185, 129, 0.15)', text: '#34d399', border: 'rgba(16, 185, 129, 0.35)', icon: '🏁' }
-            };
-
-            const stepsHtml = ex.positions.map((p, idx) => {
-                const style = badgeStyles[p.badge] || badgeStyles.setup;
-                return `
-                    <div class="pos-step-card">
-                        <div class="pos-step-header" style="background:${style.bg}; border-color:${style.border}; color:${style.text};">
-                            <span>${style.icon} ${escapeHTML(p.phase)}</span>
-                        </div>
-                        <div class="pos-step-desc">
-                            ${escapeHTML(p.desc)}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            const guideLibrary = {
+        const guideLibrary = {
             db_thruster: { form: 'assets/guides/guide_db_thruster_form.jpg', anatomi: 'assets/guides/guide_db_thruster_anatomi.jpg' },
             db_push_press: { form: 'assets/guides/guide_db_push_press_form.jpg', anatomi: 'assets/guides/guide_db_push_press_anatomi.jpg' },
             db_renegade_pushup: { form: 'assets/guides/guide_db_renegade_pushup_form.jpg', anatomi: 'assets/guides/guide_db_renegade_pushup_anatomi.jpg' },
@@ -6237,6 +6210,47 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 'bw_squat_thrust': { form: 'assets/exercises/bw_squat_thrust.webp', anatomi: null },
                 'bw_lateral_shuffle': { form: 'assets/exercises/bw_lateral_shuffle.webp', anatomi: null }
             };
+        window.guideLibrary = guideLibrary;
+        window.exerciseGuideMap = exerciseGuideMap;
+
+        function renderExercisePositionsHtml(exInput, uniquePrefix = '', defaultCollapsed = false) {
+            if (!exInput) return '';
+            const ex = (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB)) 
+                ? (EXERCISES_DB.find(e => e.id === exInput.id) || exInput)
+                : exInput;
+
+            if (!ex.positions || !Array.isArray(ex.positions) || ex.positions.length === 0) {
+                return '';
+            }
+
+            const isComplex = !!ex.isComplex;
+            const badgeType = isComplex ? 'pos-badge-complex' : 'pos-badge-standard';
+            const typeLabel = isComplex 
+                ? `🔥 Kompleks Hareket (${ex.positions.length} Aşama)` 
+                : `📐 3 Aşamalı Form Kılavuzu`;
+
+            const collapseId = `posGuide_${uniquePrefix}_${ex.id}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+
+            const badgeStyles = {
+                setup: { bg: 'rgba(56, 189, 248, 0.15)', text: '#38bdf8', border: 'rgba(56, 189, 248, 0.35)', icon: '🟢' },
+                action: { bg: 'rgba(245, 158, 11, 0.15)', text: '#fbbf24', border: 'rgba(245, 158, 11, 0.35)', icon: '⚡' },
+                trans: { bg: 'rgba(236, 72, 153, 0.15)', text: '#f472b6', border: 'rgba(236, 72, 153, 0.35)', icon: '🔄' },
+                finish: { bg: 'rgba(16, 185, 129, 0.15)', text: '#34d399', border: 'rgba(16, 185, 129, 0.35)', icon: '🏁' }
+            };
+
+            const stepsHtml = ex.positions.map((p, idx) => {
+                const style = badgeStyles[p.badge] || badgeStyles.setup;
+                return `
+                    <div class="pos-step-card">
+                        <div class="pos-step-header" style="background:${style.bg}; border-color:${style.border}; color:${style.text};">
+                            <span>${style.icon} ${escapeHTML(p.phase)}</span>
+                        </div>
+                        <div class="pos-step-desc">
+                            ${escapeHTML(p.desc)}
+                        </div>
+                    </div>
+                `;
+            }).join('');
 
             // Egzersize ait gerçek fotoğraf kılavuzunu al
             const activeGuideMap = (typeof window !== 'undefined' && window.exerciseGuideMap) 
@@ -7998,7 +8012,15 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
 
                         <!-- INLINE FORM EXPANDER -->
                         <div id="picker_form_expand_${ex.id}" style="display:none; margin-top:8px; padding-top:8px; border-top:1px dashed #E2E8F0;">
-                            ${thumbImg ? `
+                            ${media.clip ? `
+                                <div style="text-align:center; background:#FFFFFF; border-radius:8px; overflow:hidden; border:1px solid #BAE6FD; margin-bottom:6px; min-height:160px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="event.stopPropagation(); openImageLightbox(decodeURIComponent('${encodeURIComponent(media.clip)}'), decodeURIComponent('${encodeURIComponent(ex.name || '')}'))">
+                                    <video src="${media.clip}" poster="${thumbImg}" autoplay loop muted playsinline style="max-width:100%; max-height:42vh; object-fit:contain; display:block; margin:0 auto;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';"></video>
+                                    <img src="${thumbImg}" style="display:none; max-width:100%; max-height:42vh; object-fit:contain; margin:0 auto;" alt="${escapeHTML(ex.name)} Form">
+                                </div>
+                                <div style="font-size:10.5px; color:var(--text-secondary); text-align:center; margin-bottom:6px;">
+                                    🎬 <em>Canlı Hareket Animasyonu • Tam ekran ve anatomi için butona dokunun.</em>
+                                </div>
+                            ` : (thumbImg ? `
                                 <div style="text-align:center; background:#000; border-radius:8px; overflow:hidden; border:1px solid var(--border); margin-bottom:6px; min-height:160px; display:flex; align-items:center; justify-content:center;">
                                     <img src="${thumbImg}" style="max-width:100%; max-height:42vh; object-fit:contain; display:block; margin:0 auto;" alt="${escapeHTML(ex.name)} Form">
                                 </div>
@@ -8007,7 +8029,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                                 </div>
                             ` : `
                                 <div style="text-align:center; padding:16px; color:var(--text-secondary); font-size:11.5px;">Görsel form rehberi optimize ediliyor.</div>
-                            `}
+                            `)}
                             
                             <div style="background:#F8FAFC; border:1px solid var(--border); border-radius:6px; padding:6px 8px; margin-bottom:6px;">
                                 <div style="font-size:10px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:4px;">🎯 Hedef Kaslar:</div>
@@ -8072,6 +8094,14 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
             }
             const isHidden = box.style.display === 'none' || !box.style.display;
             box.style.display = isHidden ? 'block' : 'none';
+            if (isHidden) {
+                box.querySelectorAll('video').forEach(v => {
+                    v.muted = true;
+                    v.defaultMuted = true;
+                    v.playsInline = true;
+                    v.play().catch(() => {});
+                });
+            }
         }
 
         function syncWorkoutPersistenceAfterEdit(workout, scope = 'generated', oldExId = null, newEx = null) {
@@ -10696,7 +10726,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
             { id: 'bw_crunch', name: 'Mekik / Crunch', icon: '🔥', muscle: 'Karın, Core', category: 'core', equipment: 'bodyweight', defaultType: 'reps', defaultVal: 20 },
             { id: 'bw_burpee', name: 'Burpee', icon: '🚀', muscle: 'Tüm Vücut, Kondisyon', category: 'conditioning', equipment: 'bodyweight', defaultType: 'reps', defaultVal: 10 },
             { id: 'db_swing', name: 'Kettlebell / Dambıl Swing', icon: '🔔', muscle: 'Kalça, Arka Bacak, Kondisyon', category: 'legs_hinge', equipment: 'kettlebell', defaultType: 'reps', defaultVal: 15 },
-            { id: 'bw_hollow_hold', name: 'Hollow Body Hold', icon: '🧱', muscle: 'Core, Alt Karın', category: 'core', equipment: 'bodyweight', defaultType: 'time', defaultVal: 30 }
+            { id: 'bw_hollow_body', name: 'Hollow Body Hold', icon: '🧱', muscle: 'Core, Alt Karın', category: 'core', equipment: 'bodyweight', defaultType: 'time', defaultVal: 30 }
         ];
 
         function renderInterSetSlotHtml(exId, st, sIdx, totalSets) {
@@ -24718,7 +24748,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=261')
+                navigator.serviceWorker.register('./sw.js?v=262')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
@@ -25767,6 +25797,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 detailModal.classList.add('active');
                 const detailBox = detailModal.querySelector('.modal-box');
                 if (detailBox) detailBox.scrollTop = 0;
+                detailModal.querySelectorAll('video').forEach(v => {
+                    v.muted = true;
+                    v.defaultMuted = true;
+                    v.playsInline = true;
+                    v.play().catch(() => {});
+                });
             }
         }
 
@@ -25779,7 +25815,16 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             document.getElementById('btnExDetailTabAnatomy').classList.toggle('active', tab === 'anatomy');
             document.getElementById('btnExDetailTabSteps').classList.toggle('active', tab === 'steps');
 
-            document.getElementById('exDetailTabContentForm').style.display = (tab === 'form') ? 'block' : 'none';
+            const formEl = document.getElementById('exDetailTabContentForm');
+            formEl.style.display = (tab === 'form') ? 'block' : 'none';
             document.getElementById('exDetailTabContentAnatomy').style.display = (tab === 'anatomy') ? 'block' : 'none';
             document.getElementById('exDetailTabContentSteps').style.display = (tab === 'steps') ? 'block' : 'none';
+            if (tab === 'form' && formEl) {
+                formEl.querySelectorAll('video').forEach(v => {
+                    v.muted = true;
+                    v.defaultMuted = true;
+                    v.playsInline = true;
+                    v.play().catch(() => {});
+                });
+            }
         }
