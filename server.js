@@ -7,7 +7,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const HOST = '0.0.0.0';
+const HOST = '::';
 
 app.use(express.json());
 
@@ -36,5 +36,5 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, HOST, () => {
-  console.log(`Server running at http://${HOST}:${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });
