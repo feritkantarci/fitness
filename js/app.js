@@ -2038,7 +2038,6 @@
             'db_hammer_curl': { id: '0313', name: "Dambıl Hammer Curl", clip: 'assets/opengym/clips/0313.mp4', still: 'assets/opengym/stills/0313.webp' },
             'db_incline_curl': { id: '0317', name: "Incline Dambıl Curl", clip: 'assets/opengym/clips/0317.mp4', still: 'assets/opengym/stills/0317.webp' },
             'db_farmers_walk': { id: '2917', name: "Dambıl Çiftçi Yürüyüşü (Farmer's Walk)", clip: 'assets/opengym/clips/2917.mp4', still: 'assets/opengym/stills/2917.webp' },
-            'db_suitcase_carry': { id: '4133', name: "Suitcase Carry", clip: 'assets/opengym/clips/4133.mp4', still: 'assets/opengym/stills/4133.webp' },
             'db_russian_twist': { id: '3449', name: "Dambıl Russian Twist", clip: 'assets/opengym/clips/3449.mp4', still: 'assets/opengym/stills/3449.webp' },
             'db_snatch': { id: '3888', name: "Dambıl Snatch", clip: 'assets/opengym/clips/3888.mp4', still: 'assets/opengym/stills/3888.webp' },
             'db_swing': { id: '0549', name: "Dambıl Swing", clip: 'assets/opengym/clips/0549.mp4', still: 'assets/opengym/stills/0549.webp' },
@@ -2059,7 +2058,6 @@
             'bb_front_squat': { id: '0042', name: "Barbell Front Squat", clip: 'assets/opengym/clips/0042.mp4', still: 'assets/opengym/stills/0042.webp' },
             'bb_deadlift': { id: '1543', name: "Geleneksel Deadlift (Conventional)", clip: 'assets/opengym/clips/1543.mp4', still: 'assets/opengym/stills/1543.webp' },
             'bb_rdl': { id: '0085', name: "Barbell RDL", clip: 'assets/opengym/clips/0085.mp4', still: 'assets/opengym/stills/0085.webp' },
-            'bb_hip_thrust': { id: '0044', name: "Barbell Hip Thrust", clip: 'assets/opengym/clips/0044.mp4', still: 'assets/opengym/stills/0044.webp' },
             'bb_bent_over_row': { id: '0027', name: "Bent-Over Barbell Row", clip: 'assets/opengym/clips/0027.mp4', still: 'assets/opengym/stills/0027.webp' },
             'bb_pendlay_row': { id: '3017', name: "Pendlay Row", clip: 'assets/opengym/clips/3017.mp4', still: 'assets/opengym/stills/3017.webp' },
             'bb_biceps_curl': { id: '0031', name: "Barbell Biceps Curl", clip: 'assets/opengym/clips/0031.mp4', still: 'assets/opengym/stills/0031.webp' },
@@ -2072,7 +2070,6 @@
             'mach_triceps_pushdown': { id: '0241', name: "Kablo Triceps Pushdown", clip: 'assets/opengym/clips/0241.mp4', still: 'assets/opengym/stills/0241.webp' },
             'mach_cable_biceps': { id: '1607', name: "Kablo Biceps Curl", clip: 'assets/opengym/clips/1607.mp4', still: 'assets/opengym/stills/1607.webp' },
             'mach_cable_lateral': { id: '0178', name: "Kablo Lateral Raise", clip: 'assets/opengym/clips/0178.mp4', still: 'assets/opengym/stills/0178.webp' },
-            'mach_leg_press': { id: '0599', name: "Leg Press", clip: 'assets/opengym/clips/0599.mp4', still: 'assets/opengym/stills/0599.webp' },
             'mach_leg_extension': { id: '0585', name: "Leg Extension", clip: 'assets/opengym/clips/0585.mp4', still: 'assets/opengym/stills/0585.webp' },
             'mach_leg_curl': { id: '3195', name: "Lying Leg Curl", clip: 'assets/opengym/clips/3195.mp4', still: 'assets/opengym/stills/3195.webp' },
             'mach_calf_raise': { id: '3018', name: "Standing Calf Raise", clip: 'assets/opengym/clips/3018.mp4', still: 'assets/opengym/stills/3018.webp' },
@@ -6046,6 +6043,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 swing: { form: 'assets/guides/guide_db_swing_form.jpg', anatomi: 'assets/guides/guide_db_swing_anatomi.jpg' },
                 plank: { form: 'assets/guides/guide_bw_plank_form.jpg', anatomi: 'assets/guides/guide_bw_plank_anatomi.jpg' },
                 farmers_walk: { form: 'assets/guides/guide_db_farmers_walk_form.jpg', anatomi: 'assets/guides/guide_db_farmers_walk_anatomi.jpg' },
+                suitcase_carry: { form: 'assets/guides/guide_db_suitcase_carry_form.jpg', anatomi: 'assets/guides/guide_db_suitcase_carry_anatomi.jpg' },
                 russian_twist: { form: 'assets/guides/guide_db_russian_twist_form.jpg', anatomi: 'assets/guides/guide_db_russian_twist_anatomi.jpg' },
                 hanging_knee_raise: { form: 'assets/guides/guide_bw_hanging_knee_raise_form.jpg', anatomi: 'assets/guides/guide_bw_hanging_knee_raise_anatomi.jpg' },
                 halo: { form: 'assets/guides/guide_kb_halo_form.jpg', anatomi: 'assets/guides/guide_kb_halo_anatomi.jpg' },
@@ -6080,6 +6078,9 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             bb_push_press: { form: 'assets/guides/guide_bb_push_press_form.png', anatomi: null },
             bb_zercher_squat: { form: 'assets/guides/guide_bb_zercher_squat_form.png', anatomi: null },
             bb_landmine_squat_press: { form: 'assets/guides/guide_bb_landmine_squat_press_form.png', anatomi: null },
+            sissy_squat: { form: 'assets/guides/guide_bw_sissy_squat_form.jpg', anatomi: 'assets/guides/guide_bw_sissy_squat_anatomi.jpg' },
+            straight_arm_pulldown: { form: 'assets/guides/guide_mach_straight_arm_pulldown_form.jpg', anatomi: 'assets/guides/guide_mach_straight_arm_pulldown_anatomi.jpg' },
+            hyperextension: { form: 'assets/guides/guide_bw_hyperextension_form.jpg', anatomi: 'assets/guides/guide_bw_hyperextension_anatomi.jpg' },
         };
 
             const exerciseGuideMap = {
@@ -6108,7 +6109,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 'mach_calf_raise': guideLibrary.calf_raise,
             'db_standing_calf_raise': guideLibrary.calf_raise,
             'db_lying_leg_curl': guideLibrary.leg_curl,
-            'bw_sissy_squat': guideLibrary.leg_extension,
+            'bw_sissy_squat': guideLibrary.sissy_squat,
 
                 // Lunges & Unilateral
                 'db_walking_lunge': guideLibrary.lunge,
@@ -6123,6 +6124,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 'mach_leg_curl': guideLibrary.leg_curl,
                 'bb_hip_thrust': guideLibrary.hip_thrust,
                 'bw_glute_bridge': guideLibrary.glute_bridge,
+                'bw_hyperextension': guideLibrary.hyperextension,
 
                 // Swings & Snatches
                 'db_swing': guideLibrary.swing,
@@ -6149,9 +6151,15 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
 
                 // Overhead Shoulder Push
                 'db_overhead_press': guideLibrary.overhead,
+                'db_standing_overhead_press': guideLibrary.overhead,
                 'db_arnold_press': guideLibrary.arnold_press,
                 'kb_press': guideLibrary.kb_press,
                 'bb_overhead_press': guideLibrary.overhead,
+                'bb_push_press': guideLibrary.bb_push_press,
+                'bb_thruster': guideLibrary.bb_thruster,
+                'bb_hang_power_clean': guideLibrary.bb_hang_power_clean,
+                'bb_zercher_squat': guideLibrary.bb_zercher_squat,
+                'bb_landmine_squat_press': guideLibrary.bb_landmine_squat_press,
                 'kb_thruster': guideLibrary.db_thruster,
                 'kb_halo': guideLibrary.halo,
 
@@ -6180,6 +6188,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 'bw_pullup': guideLibrary.pullup,
                 'bw_chinup': guideLibrary.chinup,
                 'mach_lat_pulldown': guideLibrary.lat_pulldown,
+                'mach_straight_arm_pulldown': guideLibrary.straight_arm_pulldown,
 
                 // Face Pull
                 'mach_face_pull': guideLibrary.face_pull,
@@ -6192,7 +6201,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
 
                 // Core, Carries & Rotations
                 'db_farmers_walk': guideLibrary.farmers_walk,
-                'db_suitcase_carry': guideLibrary.farmers_walk,
+                'db_suitcase_carry': guideLibrary.suitcase_carry,
                 'db_russian_twist': guideLibrary.russian_twist,
                 'mach_cable_woodchopper': guideLibrary.cable_woodchopper,
                 'bw_plank': guideLibrary.plank,
@@ -24709,7 +24718,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=260')
+                navigator.serviceWorker.register('./sw.js?v=261')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();

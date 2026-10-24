@@ -1,4 +1,4 @@
-const CACHE_NAME = 'celik-kodu-cache-v260';
+const CACHE_NAME = 'celik-kodu-cache-v261';
 const ASSETS = [
   './',
   './index.html',
@@ -203,7 +203,15 @@ const ASSETS = [
   './assets/exercises/bw_skater_jumps.webp',
   './assets/exercises/bw_plank_jacks.webp',
   './assets/exercises/bw_squat_thrust.webp',
-  './assets/exercises/bw_lateral_shuffle.webp'
+  './assets/exercises/bw_lateral_shuffle.webp',
+  './assets/guides/guide_db_suitcase_carry_form.jpg',
+  './assets/guides/guide_db_suitcase_carry_anatomi.jpg',
+  './assets/guides/guide_bw_sissy_squat_form.jpg',
+  './assets/guides/guide_bw_sissy_squat_anatomi.jpg',
+  './assets/guides/guide_mach_straight_arm_pulldown_form.jpg',
+  './assets/guides/guide_mach_straight_arm_pulldown_anatomi.jpg',
+  './assets/guides/guide_bw_hyperextension_form.jpg',
+  './assets/guides/guide_bw_hyperextension_anatomi.jpg'
 ];
 
 self.addEventListener('install', (event) => {

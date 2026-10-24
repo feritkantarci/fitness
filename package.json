@@ -8,7 +8,8 @@
     "dev": "node server.js",
     "start": "node server.js",
     "build": "echo 'Static build complete'",
-    "lint": "node -c server.js"
+    "lint": "node -c server.js",
+    "watchdog": "node scripts/tab-watchdog.js --write-report"
   },
   "dependencies": {
     "express": "^4.21.2"
