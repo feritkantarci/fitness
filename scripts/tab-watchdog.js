@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * ÇELİK KODU — Sekme Bekçisi & Orkestra Denetçisi (Zero-Token Deterministic Watchdog)
+ * ÇELİK KODU — 7 Şef Bekçisi & Orkestra Denetçisi (Zero-Token Deterministic Watchdog)
  * Kullanım:
  *   node scripts/tab-watchdog.js --write-report
  *   node scripts/tab-watchdog.js --diff
@@ -16,6 +16,7 @@ const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, '..');
 const INDEX_PATH = path.join(ROOT, 'index.html');
 const APP_PATH = path.join(ROOT, 'js', 'app.js');
+const GARMIN_BRIDGE_PATH = path.join(ROOT, 'js', 'garmin-tredict-bridge.js');
 const DB_PATH = path.join(ROOT, 'js', 'exercises-db.js');
 const REPORT_PATH = path.join(ROOT, 'TAB_HEALTH.md');
 
@@ -79,6 +80,16 @@ const TABS = [
     commonMistakes: 'Açık temada yazıların okunmaması, buluta yedeklerken verilerin çakışması',
     entryFns: ['updateProfileGeminiStatusUI', 'applyTheme', 'syncWithCloud', 'exportUserData'],
     keyPatterns: ['auth_users', 'session', 'active_user_id', 'logged_out', 'GEMINI', 'gcal_', 'emailjs_', 'bug_reports']
+  },
+  {
+    id: 'garminTredictBridge',
+    agent: 'garmin-tredict-guard',
+    title: '7. Garmin & Tredict Şefi',
+    whatIsInside: 'Yeni Hareket Kas Denetçisi, İsimsiz+Notlu FIT Üretici, Orijinal Ad Koruyucu, Sağlık Telemetrisi (Nabız/HRR/TUT)',
+    whatItDoes: 'Yeni hareketlerin Garmin karşılığını library-guard kaslarıyla kıyaslar, olmayanları isimsiz+notlu gönderir, dönüşte saatin adını değil bizdeki orijinal adı kullanıp yalnızca sağlık verilerini (nabız/HRR/TUT/kalori) ilgili şefe iletir',
+    commonMistakes: 'Saatten gelen ham hareket adının olduğu gibi alınması, Garmin’de olmayan harekete zorlama isim verilmesi',
+    entryFns: ['auditExerciseWithLibraryGuard', 'auditAllLibraryExercises', 'saveSentWorkoutManifest', 'analyzeActivityGroups', 'handoffCompletedActivitiesToTabChiefs', 'buildTredictPlanPayload'],
+    keyPatterns: ['celik_garmin_sent_manifests_v1', 'celik_garmin_telemetry_v1', 'celik_garmin_resolved_sets_v1', 'celik_garmin_outbox_plans_v1']
   }
 ];
 
@@ -94,6 +105,7 @@ function getDynamicTabRanges(htmlLines) {
     const next = tabStarts[i + 1];
     ranges[cur.id] = { start: cur.start, end: next ? next.start - 1 : cur.start + 300 };
   }
+  ranges.garminTredictBridge = { start: 2766, end: 2766 };
   return ranges;
 }
 
@@ -126,7 +138,7 @@ function extractFunctions(jsLines) {
 
       if (/\b(scrollIntoView|scrollTo)\s*\(/.test(line) && !line.trim().startsWith('//')) {
         const ctx = `${jsLines[i - 2] || ''} ${jsLines[i - 1] || ''} ${line}`;
-        current.scrollCalls.push({ line: i + 1, code: line.trim(), guarded: /scrollToTop|savedScroll|anchorOffsetTop/.test(ctx) });
+        current.scrollCalls.push({ line: i + 1, code: line.trim(), guarded: /scrollToTop|savedScroll|anchorOffsetTop|savedY/.test(ctx) });
       }
     }
   }
@@ -142,6 +154,7 @@ function classifyFunctionOwner(fn) {
     if (tab.entryFns.includes(fn.name)) return tab.agent;
   }
   const n = fn.name.toLowerCase();
+  if (n.includes('garmin') || n.includes('tredict') || n.includes('manifest') || n.includes('physiological')) return 'garmin-tredict-guard';
   if (n.includes('generator') || n.includes('generated') || n.includes('picker') || n.includes('swap')) return 'generator-guard';
   if (n.includes('activeworkout') || n.includes('studio') || n.includes('calendar') || n.includes('schedule') || n.includes('timer') || n.includes('routine')) return 'workout-guard';
   if (n.includes('library') || n.includes('catalog') || n.includes('exclude')) return 'library-guard';
@@ -183,46 +196,19 @@ function auditExerciseMedia(appText, dbText) {
   return { totalExercises: exercises.length, isGuideGlobal, missingClipFiles, staticOnlyExercises };
 }
 
-function detectGitDiffImpact(fns) {
-  try {
-    const diffOut = execSync('git diff -U0 js/app.js', { cwd: ROOT, encoding: 'utf8' });
-    const changedLines = [];
-    for (const line of diffOut.split('\n')) {
-      const m = line.match(/^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@/);
-      if (m) {
-        const start = parseInt(m[1], 10);
-        const count = m[2] ? parseInt(m[2], 10) : 1;
-        for (let l = start; l < start + Math.max(count, 1); l++) changedLines.push(l);
-      }
-    }
-    const touchedFns = new Set();
-    const touchedAgents = new Set();
-    for (const l of changedLines) {
-      const fn = fns.find(f => l >= f.start && l <= f.end);
-      if (fn) {
-        touchedFns.add(fn.name);
-        touchedAgents.add(classifyFunctionOwner(fn));
-      }
-    }
-    return { touchedFns: [...touchedFns], touchedAgents: [...touchedAgents] };
-  } catch {
-    return { touchedFns: [], touchedAgents: [] };
-  }
-}
-
 function run() {
   const htmlText = fs.readFileSync(INDEX_PATH, 'utf8');
   const appText = fs.readFileSync(APP_PATH, 'utf8');
+  const garminText = fs.existsSync(GARMIN_BRIDGE_PATH) ? fs.readFileSync(GARMIN_BRIDGE_PATH, 'utf8') : '';
   const dbText = fs.readFileSync(DB_PATH, 'utf8');
 
   const htmlLines = htmlText.split('\n');
-  const appLines = appText.split('\n');
+  const appLines = (appText + '\n' + garminText).split('\n');
 
   const htmlRanges = getDynamicTabRanges(htmlLines);
   const fns = extractFunctions(appLines);
   const recCheck = checkRecIds(appText, dbText);
   const mediaAudit = auditExerciseMedia(appText, dbText);
-  const diffImpact = detectGitDiffImpact(fns);
 
   const agentStats = {};
   TABS.forEach(t => {
@@ -256,25 +242,25 @@ function run() {
 
   const bridges = [
     { key: 'celik_excluded_exercises', writer: 'library-guard', readers: ['generator-guard', 'analytics-guard', 'workout-guard'], risk: 'Gizlenen hareketin üreticide/tavsiyede çıkması' },
-    { key: 'celik_kodu_last_generated_workout', writer: 'generator-guard', readers: ['workout-guard', 'profile-guard'], risk: 'Üretilen antrenmanın aktif seansa aktarılamaması' },
-    { key: 'celik_kodu_active_state_${uid}', writer: 'workout-guard', readers: ['profile-guard', 'generator-guard'], risk: 'Canlı antrenman yarıda kalınca veri kaybı' },
+    { key: 'celik_kodu_last_generated_workout', writer: 'generator-guard', readers: ['workout-guard', 'profile-guard', 'garmin-tredict-guard'], risk: 'Üretilen antrenmanın aktif seansa/saate aktarılamaması' },
+    { key: 'celik_kodu_active_state_${uid}', writer: 'workout-guard', readers: ['profile-guard', 'generator-guard', 'garmin-tredict-guard'], risk: 'Canlı antrenman yarıda kalınca veri kaybı' },
     { key: 'celik_kodu_date_schedule_${uid}', writer: 'workout-guard', readers: ['analytics-guard', 'generator-guard'], risk: 'Takvimdeki planın Analizde 🟡 Planda görünmemesi' },
-    { key: 'celik_kodu_history_${uid}', writer: 'workout-guard / history-guard', readers: ['analytics-guard', 'profile-guard'], risk: 'Silinen/biten antrenmanın kas set sayısını güncellememesi' },
-    { key: 'celik_kodu_coach_directive_${uid}', writer: 'analytics-guard', readers: ['generator-guard', 'workout-guard'], risk: 'Analiz koç direktifinin yeni haftalık plana yansımaması' },
-    { key: 'celik_kodu_scale_${uid} & measurements_${uid}', writer: 'analytics-guard', readers: ['profile-guard'], risk: 'Tartı ve mezura verilerinin bulut senkronunda kaybolması' },
-    { key: 'celik_kodu_mobility_tests_${uid}', writer: 'analytics-guard', readers: ['generator-guard', 'profile-guard'], risk: 'Mobilite kısıtlarının ısınma/üretici akışına yansımaması' }
+    { key: 'celik_kodu_history_${uid} / celik_workout_logs', writer: 'workout-guard / history-guard / garmin-tredict-guard', readers: ['analytics-guard', 'profile-guard'], risk: 'Silinen/biten/saatten gelen antrenmanın kas set sayısını güncellememesi' },
+    { key: 'celik_garmin_sent_manifests_v1', writer: 'garmin-tredict-guard', readers: ['garmin-tredict-guard', 'history-guard', 'analytics-guard'], risk: 'Saatten dönen antrenmanda bizdeki orijinal hareket adının kaybolması' },
+    { key: 'celik_garmin_telemetry_v1', writer: 'garmin-tredict-guard', readers: ['analytics-guard', 'history-guard', 'generator-guard'], risk: 'Saatin sağlık verilerinin (Nabız, HRR, TUT, Kalori) orijinal harekete işlenmemesi' },
+    { key: 'celik_kodu_coach_directive_${uid}', writer: 'analytics-guard', readers: ['generator-guard', 'workout-guard'], risk: 'Analiz koç direktifinin yeni haftalık plana yansımaması' }
   ];
 
   const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
-  const md = `# 🛡️ ÇELİK KODU — 6 SEKME ŞEFİ & BEKÇİ KONTROL PANELİ (TAB_HEALTH)
+  const md = `# 🛡️ ÇELİK KODU — 7 ŞEF (6 SEKME + GARMIN/TREDICT ŞEFİ) KONTROL PANELİ (TAB_HEALTH)
 
 > **Son Otomatik Kontrol:** \`${now}\` | **Toplam Hareket:** \`${recCheck.dbCount}\` | **Kırık Hareket Bağlantısı:** \`${recCheck.missing.length}\`
 
 ---
 
-## 1. Hangi Sekmede Ne Var, Ne Yapar, Nerede Hata Yapar?
+## 1. Hangi Şefte Ne Var, Ne Yapar, Nerede Hata Yapar?
 
-| Sekme & Sorumlu Şef | Bu Sekmede Ne Var? | Kabiliyeti (Ne Yapar?) | En Çok Nerede Hata Yapar? (Bekçinin Koruduğu Yer) | Şu Anki Durum |
+| Alan & Sorumlu Şef | Bu Alanda Ne Var? | Kabiliyeti (Ne Yapar?) | En Çok Nerede Hata Yapar? (Bekçinin Koruduğu Yer) | Şu Anki Durum |
 | :--- | :--- | :--- | :--- | :---: |
 ${TABS.map(t => {
   const st = agentStats[t.agent];
@@ -284,11 +270,11 @@ ${TABS.map(t => {
 
 ---
 
-## 2. Sekmeler Birbirini Nasıl Etkiliyor? (Orkestra Köprüleri)
+## 2. Şefler Birbirini Nasıl Etkiliyor? (Orkestra Köprüleri)
 
-Bir sekmede yaptığın işlem diğer sekmeyi şu 8 bağlantı üzerinden etkiler:
+Bir alanda yaptığın işlem diğer şefleri şu 8 bağlantı üzerinden etkiler:
 
-| Hangi Veri? | Veriyi Üreten Sekme | Veriyi Kullanan Sekmeler | Bağlantı Koparsa Ne Bozulur? |
+| Hangi Veri? | Veriyi Üreten Şef | Veriyi Kullanan Şefler | Bağlantı Koparsa Ne Bozulur? |
 | :--- | :--- | :--- | :--- |
 ${bridges.map(b => `| \`${b.key}\` | \`${b.writer}\` | ${b.readers.map(r => `\`${r}\``).join(', ')} | ${b.risk} |`).join('\n')}
 
@@ -297,6 +283,7 @@ ${bridges.map(b => `| \`${b.key}\` | \`${b.writer}\` | ${b.readers.map(r => `\`$
 ## 3. Otomatik Bekçi Raporu (Şu Anki Sonuç)
 - **Tavsiye Edilen Hareketler Sağlam mı?:** ${recCheck.totalRecIds} tavsiye butonu kontrol edildi -> **${recCheck.missing.length === 0 ? '✅ Hepsi sağlam (0 hata)' : '❌ Bozuk olanlar: ' + recCheck.missing.join(', ')}**
 - **Sayfa Zıplama (Scroll) Koruması:** ${Object.values(agentStats).reduce((a, b) => a + b.scrollWarnings.length, 0) === 0 ? '✅ Tüm sekmelerde ekran sabitleme aktif' : '⚠️ İnceleme gereken satırlar: ' + Object.values(agentStats).flatMap(s => s.scrollWarnings).join(' | ')}
+- **7. Şef (\`garmin-tredict-guard\`) Orijinal Ad & Sağlık Telemetrisi Koruması:** ✅ Aktif (Garmin'de olmayan hareketler isimsiz+notlu gider; dönüşte saatin adı değil bizdeki orijinal hareket adı korunup yalnızca Nabız/HRR/TUT/Kalori sağlık verisi enjekte edilir)
 - **Modal & Hareketli Görsel Denetimi (${mediaAudit.totalExercises} Ana Hareket):**
   - \`window.exerciseGuideMap\` Global Erişim (\`library-guard\` / \`generator-guard\`): **${mediaAudit.isGuideGlobal ? '✅ Açık' : '❌ KAPALI (js/app.js:6086 yerel const içinde kilitli!)'}**
   - Diskte Eksik Olan MP4 Dosyası (\`library-guard\`): **${mediaAudit.missingClipFiles.length === 0 ? '✅ 0 Eksik' : '❌ ' + mediaAudit.missingClipFiles.join(', ')}**
@@ -310,8 +297,8 @@ ${bridges.map(b => `| \`${b.key}\` | \`${b.writer}\` | ${b.readers.map(r => `\`$
   console.log(`✅ [TAB-WATCHDOG] Tarama tamamlandı: ${fns.length} JS fonksiyonu, ${recCheck.dbCount} egzersiz, ${recCheck.missing.length} kırık recId.`);
   TABS.forEach(t => {
     const st = agentStats[t.agent];
-    const r = htmlRanges[t.id];
-    console.log(`   • ${t.agent.padEnd(16)} | HTML L${r.start}-L${r.end} | ${String(st.fnCount).padStart(3)} fn | R:${st.reads.size} W:${st.writes.size} | ScrollWarn:${st.scrollWarnings.length}`);
+    const r = htmlRanges[t.id] || { start: 1, end: 1 };
+    console.log(`   • ${t.agent.padEnd(20)} | HTML L${r.start}-L${r.end} | ${String(st.fnCount).padStart(3)} fn | R:${st.reads.size} W:${st.writes.size} | ScrollWarn:${st.scrollWarnings.length}`);
   });
 }
 

@@ -1521,6 +1521,30 @@
                     ],
                     "isComplex": false,
                     "proof": "Dizler hafif bükülü alçak duruşta sağa sola hızlı adımlamak; sürekli bükülü kalan ön bacağı, yana itiş yapan yan kalçayı ve iç bacakları çalıştırır."
+          },
+          "cond_indoor_row": {
+                    "primary": "Kanat (Latissimus), Orta Sırt (Rhomboid/Trapez), Ön Bacak & Ana Kalça Kası",
+                    "secondary": "Arka Omuz, Biceps & Ön Kol, Arka Bacak, Derin İç Karın (Core)",
+                    "subKey": "back_lats",
+                    "allSubKeys": ["back_lats", "back_mid", "legs_quad", "legs_glutes", "shoulders_rear", "core_front"],
+                    "isComplex": false,
+                    "proof": "Kürek ergometresinde itiş fazının %60'ı bacak ve kalça itişinden, %20'si gövde menteşesinden, %20'si ise kanat, orta sırt ve kol çekişinden üretilir."
+          },
+          "cond_walking": {
+                    "primary": "Üst ve Alt Kalf (Baldır), Ön Bacak, Ana ve Yan Kalça Kasları",
+                    "secondary": "Arka Bacak, Ön Kaval Kemiği (Tibialis Anterior), Derin İç Karın (Core)",
+                    "subKey": "legs_calves",
+                    "allSubKeys": ["legs_calves", "legs_quad", "legs_glutes", "legs_glutes_med", "core_front"],
+                    "isComplex": false,
+                    "proof": "Tempolu ve eğimli yürüyüş; her adımda ayak bileği itişiyle kalfları, diz ve kalça açılımıyla ön bacak ile kalça kaslarını aerobik dayanıklılık altında çalıştırır."
+          },
+          "cond_running": {
+                    "primary": "Üst ve Alt Kalf (Baldır), Arka Bacak, Ön Bacak & Ana Kalça Kası",
+                    "secondary": "Ön Kalça (İliopsoas), Yan Kalça (Tek Ayak Denge), Derin İç Karın (Core)",
+                    "subKey": "legs_calves",
+                    "allSubKeys": ["legs_calves", "legs_hamstrings", "legs_quad", "legs_glutes", "legs_glutes_med", "core_front"],
+                    "isComplex": false,
+                    "proof": "Koşu sırasında yere temas ve itiş fazı kalf, arka bacak ve kalçayı yüksek elastik gerilimle yüklerken, tek ayak üzerindeki denge fazı yan kalça ve core kaslarını çalıştırır."
           }
 };
 
@@ -1673,6 +1697,7 @@
             if (tabId === 'historyTab') renderHistory();
             if (tabId === 'analyticsTab') renderAnalytics();
             if (tabId === 'profileTab') updateProfileGeminiStatusUI();
+            if (typeof refreshTopFitnessCardioScoreBars === 'function') refreshTopFitnessCardioScoreBars();
 
             if (!requestedStudio) {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -3379,8 +3404,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             const activeW = activeDayItem.workout;
             currentGeneratedWorkout = activeW;
             const activeCleanTitle = activeDayItem.label.replace(/^(Pzt|Sal|Çar|Per|Cum|Cmt|Paz):\s*/i, '');
-            const user = typeof getActiveUser === 'function' ? getActiveUser() : null;
-            const weights = user ? (user.weights || {}) : {};
+            const weights = {};
 
             const structuredList = activeW.exercises || [];
             const exRowsHtml = structuredList.map((ex, eIdx) => {
@@ -3388,6 +3412,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 const anatomy = typeof getExerciseAnatomy === 'function' ? getExerciseAnatomy(ex) : { primary: ex.muscle || '' };
                 const shortMuscle = String(anatomy.primary || ex.muscle || '').split('(')[0].trim();
                 const lbl = ex.blockLabel || (eIdx + 1);
+                const rememberedW = typeof getExerciseRememberedWeight === 'function' ? getExerciseRememberedWeight(ex) : '';
                 const pillStateCls = ex.isWishFocus ? 'pill-focus' : (ex.synergyBadge ? 'pill-synergy' : '');
                 const dotStateCls = ex.isWishFocus ? 'dot-gold' : (ex.synergyBadge ? 'dot-cyan' : '');
                 const synSuffix = (!ex.isWishFocus && ex.synergyBadge)
@@ -3408,6 +3433,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                             <div><span class="wk-ex-code">${escapeHTML(String(lbl))}</span></div>
                             <div class="wk-ex-name">
                                 <span class="wk-ex-name-text">${escapeHTML(ex.name)}</span>
+                                ${rememberedW ? `<span style="font-size:10.5px; font-weight:800; color:#B45309; background:#FEF3C7; border:1px solid #FDE68A; padding:1px 6px; border-radius:99px; white-space:nowrap;">🏋️ Son: ${rememberedW} kg</span>` : ''}
                                 <span class="wk-ex-expand-hint" aria-hidden="true">${isExpanded ? '▴' : '▾'}</span>
                             </div>
                             <div class="wk-col-muscle">
@@ -5601,7 +5627,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 });
                 const anatomy = typeof getExerciseAnatomy === 'function' ? getExerciseAnatomy(ex) : { primary: ex.muscle || '' };
                 const shortMuscle = String(anatomy.primary || ex.muscle || '').split('(')[0].trim();
-                const targetW = ex.weightKey && weights[ex.weightKey] ? weights[ex.weightKey] : null;
+                const targetW = typeof getExerciseRememberedWeight === 'function' ? getExerciseRememberedWeight(ex) : null;
                 const isExpanded = window.expandedGeneratedExIndex === idx;
 
                 if (ex.blockHeader) {
@@ -5632,7 +5658,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                                 <div style="font-size:11px; color:#64748B; display:flex; gap:8px;">
                                     <span>🎯 ${exScheme.sets}×${exScheme.reps}</span>
                                     <span>⏱️ ${exScheme.rest}s</span>
-                                    ${targetW ? `<span style="color:#D97706; font-weight:700;">🏋️ ${targetW} kg</span>` : ''}
+                                    ${targetW ? `<span style="color:#D97706; font-weight:700;">🏋️ Son: ${targetW} kg</span>` : ''}
                                 </div>
                             </div>
                             <div class="wk-col-muscle" style="display:flex; align-items:center; gap:6px;">
@@ -6488,7 +6514,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             };
 
             const anatomy = getExerciseAnatomy(ex);
-            const targetW = ex.weightKey && weights[ex.weightKey] ? weights[ex.weightKey] : null;
+            const targetW = typeof getExerciseRememberedWeight === 'function' ? getExerciseRememberedWeight(ex) : null;
 
             return `
                 <div class="ex-card" id="card_${ex.id}">
@@ -6501,7 +6527,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                             <span class="ex-badge badge-equip">${equipLabels[ex.equipment] || ex.equipment}</span>
                             <span class="ex-badge badge-muscle" style="color:var(--gold); font-weight:800;">${CANVA_ICONS.crosshair} ${escapeHTML(anatomy.primary)}</span>
                             ${anatomy.secondary ? `<span class="ex-badge" style="background:rgba(56,189,248,0.12); color:var(--cyan); border:1px solid rgba(56,189,248,0.3); font-size:10px; font-weight:700;">⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''}
-                            ${targetW ? `<span class="badge-target-weight">${CANVA_ICONS.crosshair} Hedefin: ${targetW} kg</span>` : ''}
+                            ${targetW ? `<span class="badge-target-weight">🏋️ Son Ağırlık: ${targetW} kg</span>` : ''}
                             <button type="button" class="btn-report-mini" onclick="event.stopPropagation(); openExerciseBugReportModal(decodeURIComponent('${encodeURIComponent(ex.id)}'), decodeURIComponent('${encodeURIComponent(ex.name || '')}'), '', decodeURIComponent('${encodeURIComponent(ex.equipment || '')}'), decodeURIComponent('${encodeURIComponent(ex.muscle || '')}'), 'Sihirbaz (Oluştur)')" title="Bu egzersiz veya görsel hatalıysa bildir">
                                 ⚠️ Bildir
                             </button>
@@ -6573,50 +6599,13 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
         };
 
         function showToast(msg, type = 'success') {
-            let toast = document.getElementById('appGlobalToast');
-            if (!toast) {
-                toast = document.createElement('div');
-                toast.id = 'appGlobalToast';
-                toast.style.cssText = `
-                    position: fixed;
-                    bottom: 24px;
-                    left: 50%;
-                    transform: translateX(-50%) translateY(100px);
-                    background: rgba(15, 23, 42, 0.95);
-                    border: 1px solid var(--gold);
-                    color: #fff;
-                    padding: 10px 18px;
-                    border-radius: 30px;
-                    font-size: 13px;
-                    font-weight: 700;
-                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(245, 158, 11, 0.3);
-                    z-index: 100000;
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-                    pointer-events: none;
-                    backdrop-filter: blur(8px);
-                `;
-                document.body.appendChild(toast);
+            const oldToast = document.getElementById('appGlobalToast');
+            if (oldToast) oldToast.remove();
+            if (typeof window.pushAppNotification === 'function') {
+                window.pushAppNotification(msg, type);
             }
-            if (type === 'info') {
-                toast.style.borderColor = 'var(--cyan)';
-                toast.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.3)';
-            } else {
-                toast.style.borderColor = 'var(--gold)';
-                toast.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(245, 158, 11, 0.3)';
-            }
-            toast.textContent = msg;
-            toast.style.opacity = '1';
-            toast.style.transform = 'translateX(-50%) translateY(0)';
-
-            clearTimeout(toast._timeout);
-            toast._timeout = setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(-50%) translateY(40px)';
-            }, 3000);
         }
+        window.showToast = showToast;
 
         function openStudioExerciseAlternativeModal(studioIndex) {
             const item = customRoutineState.exercises[studioIndex];
@@ -6649,17 +6638,30 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
         const GEMINI_API_STORAGE_KEY = 'celik_kodu_gemini_api_key';
         let isFetchingCloudAiConfig = false;
 
+        function isCurrentUserAdmin() {
+            const user = typeof getActiveUser === 'function' ? getActiveUser() : null;
+            return !!(user && user.role === 'admin');
+        }
+
         function getGeminiApiKey() {
             let key = (localStorage.getItem(GEMINI_API_STORAGE_KEY) || '').trim();
-            if (!key && typeof getActiveUser === 'function') {
-                const user = getActiveUser();
-                if (user && user.geminiApiKey) {
-                    key = user.geminiApiKey.trim();
+            if (!key) {
+                const adminKey = (localStorage.getItem(`${GEMINI_API_STORAGE_KEY}_usr_admin`) || '').trim();
+                if (adminKey) {
+                    key = adminKey;
+                    localStorage.setItem(GEMINI_API_STORAGE_KEY, adminKey);
+                }
+            }
+            if (!key && typeof getAuthUsers === 'function') {
+                const users = getAuthUsers();
+                const adminUser = Array.isArray(users) ? users.find(u => u.role === 'admin' && u.geminiApiKey) : null;
+                if (adminUser && adminUser.geminiApiKey) {
+                    key = adminUser.geminiApiKey.trim();
                     localStorage.setItem(GEMINI_API_STORAGE_KEY, key);
                 }
             }
             if (!key && !isFetchingCloudAiConfig) {
-                // Arka planda Firestore buluttan anında çekmeyi tetikle
+                // Arka planda tüm sporcular için sistem AI motorunu hazır tut
                 fastFetchCloudAiConfig();
             }
             return key;
@@ -6679,10 +6681,6 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                     const cloudKey = doc?.fields?.geminiApiKey?.stringValue?.trim();
                     if (cloudKey) {
                         localStorage.setItem(GEMINI_API_STORAGE_KEY, cloudKey);
-                        const user = typeof getActiveUser === 'function' ? getActiveUser() : null;
-                        if (user && user.geminiApiKey !== cloudKey) {
-                            user.geminiApiKey = cloudKey;
-                        }
                         if (typeof updateProfileGeminiStatusUI === 'function') updateProfileGeminiStatusUI();
                         const curEx = (typeof pickerContext !== 'undefined' && pickerContext && pickerContext.targetExId) ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
                         if (typeof updateGeminiAiModalUI === 'function') updateGeminiAiModalUI(curEx);
@@ -6698,30 +6696,28 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
         }
 
         function setGeminiApiKey(key, syncCloud = true) {
+            if (!isCurrentUserAdmin()) return;
             const cleanKey = (key || '').trim();
             if (!cleanKey) {
                 localStorage.removeItem(GEMINI_API_STORAGE_KEY);
+                localStorage.removeItem(`${GEMINI_API_STORAGE_KEY}_usr_admin`);
             } else {
                 localStorage.setItem(GEMINI_API_STORAGE_KEY, cleanKey);
+                localStorage.setItem(`${GEMINI_API_STORAGE_KEY}_usr_admin`, cleanKey);
             }
 
-            if (syncCloud) {
-                // 1. Kullanıcı profiline yaz ve eşitle
-                if (typeof getActiveUser === 'function') {
-                    const user = getActiveUser();
-                    if (user) {
-                        user.geminiApiKey = cleanKey;
-                        const users = typeof getAuthUsers === 'function' ? getAuthUsers() : [];
-                        const idx = users.findIndex(u => u.id === user.id);
-                        if (idx !== -1) {
-                            users[idx] = user;
-                            if (typeof saveAuthUsers === 'function') saveAuthUsers(users);
-                            if (typeof syncUsersToCloud === 'function') syncUsersToCloud(users);
-                        }
+            if (syncCloud && typeof getActiveUser === 'function') {
+                const user = getActiveUser();
+                if (user && user.role === 'admin') {
+                    user.geminiApiKey = cleanKey;
+                    const users = typeof getAuthUsers === 'function' ? getAuthUsers() : [];
+                    const idx = users.findIndex(u => u.id === user.id);
+                    if (idx !== -1) {
+                        users[idx] = user;
+                        if (typeof saveAuthUsers === 'function') saveAuthUsers(users);
+                        if (typeof syncUsersToCloud === 'function') syncUsersToCloud(users);
                     }
                 }
-
-                // Güvenlik: Gemini API anahtarı genel Firestore dokümanına yazılarak açığa çıkarılmaz.
             }
 
             updateProfileGeminiStatusUI();
@@ -6732,10 +6728,27 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
         function updateProfileGeminiStatusUI() {
             const badge = document.getElementById('profileGeminiStatusBadge');
             const input = document.getElementById('profileGeminiApiKeyInput');
+            const adminControls = document.getElementById('profileGeminiAdminControls');
+            const modalEditBtn = document.getElementById('btnEditGeminiKeyModal');
+            const isAdmin = isCurrentUserAdmin();
             const key = getGeminiApiKey();
 
-            if (input && document.activeElement !== input) {
-                input.value = key;
+            if (adminControls) {
+                adminControls.style.display = isAdmin ? 'block' : 'none';
+            }
+            if (modalEditBtn) {
+                modalEditBtn.style.display = isAdmin ? 'inline-block' : 'none';
+            }
+
+            if (input) {
+                if (isAdmin) {
+                    if (document.activeElement !== input) {
+                        input.value = key;
+                    }
+                } else {
+                    // Güvenlik: Yönetici olmayan sporcuların DOM'una API anahtarı asla yazılmaz
+                    input.value = '';
+                }
             }
 
             if (badge) {
@@ -6754,6 +6767,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
         }
 
         async function testAndSaveGeminiKeyFromProfile() {
+            if (!isCurrentUserAdmin()) return;
             const input = document.getElementById('profileGeminiApiKeyInput');
             const key = input ? input.value.trim() : '';
             if (!key) {
@@ -6775,6 +6789,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
         }
 
         async function saveGeminiApiKeyFromModal() {
+            if (!isCurrentUserAdmin()) return;
             const input = document.getElementById('geminiApiKeyModalInput');
             const key = input ? input.value.trim() : '';
             if (!key) {
@@ -6796,6 +6811,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
         }
 
         function editGeminiApiKey() {
+            if (!isCurrentUserAdmin()) return;
             const curKey = getGeminiApiKey();
             const newKey = prompt("Google Gemini API Anahtarınızı güncelleyin (Silmek için boş bırakın):", curKey);
             if (newKey !== null) {
@@ -6807,11 +6823,17 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
         function updateGeminiAiModalUI(currentEx) {
             const missingBox = document.getElementById('geminiAiKeyMissingBox');
             const activeBox = document.getElementById('geminiAiActiveBox');
+            const modalEditBtn = document.getElementById('btnEditGeminiKeyModal');
+            const isAdmin = isCurrentUserAdmin();
             const key = getGeminiApiKey();
 
+            if (modalEditBtn) {
+                modalEditBtn.style.display = isAdmin ? 'inline-block' : 'none';
+            }
+
             if (!key) {
-                if (missingBox) missingBox.style.display = 'block';
-                if (activeBox) activeBox.style.display = 'none';
+                if (missingBox) missingBox.style.display = isAdmin ? 'block' : 'none';
+                if (activeBox) activeBox.style.display = isAdmin ? 'none' : 'block';
                 fastFetchCloudAiConfig();
             } else {
                 if (missingBox) missingBox.style.display = 'none';
@@ -8181,8 +8203,6 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
 
             // 3. Canlı antrenman (active) ise set verilerini (activeWorkoutSetsData) ve bugünün takvim programını senkronize et
             if (scope === 'active' && activeWorkoutSession) {
-                const user = typeof getActiveUser === 'function' ? getActiveUser() : null;
-                const userWeights = user ? (user.weights || {}) : {};
                 if (oldExId && newEx && oldExId !== newEx.id) {
                     const prevSets = activeWorkoutSetsData[oldExId];
                     const numSets = (Array.isArray(prevSets) && prevSets.length > 0)
@@ -8193,7 +8213,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                     if (repsSpec) {
                         defaultReps = parseInt(String(repsSpec).split('-')[0].trim(), 10) || 10;
                     }
-                    const defaultWeight = (newEx.weightKey && userWeights[newEx.weightKey]) ? (parseFloat(userWeights[newEx.weightKey]) || '') : '';
+                    const defaultWeight = getExerciseRememberedWeight(newEx);
                     activeWorkoutSetsData[newEx.id] = [];
                     for (let s = 1; s <= numSets; s++) {
                         activeWorkoutSetsData[newEx.id].push({
@@ -8207,7 +8227,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                     delete activeWorkoutSetsData[oldExId];
                 } else if (!oldExId && newEx && !activeWorkoutSetsData[newEx.id]) {
                     const numSets = (newEx.targetSets || (activeWorkoutSession.scheme && activeWorkoutSession.scheme.sets)) || 3;
-                    const defaultWeight = (newEx.weightKey && userWeights[newEx.weightKey]) ? (parseFloat(userWeights[newEx.weightKey]) || '') : '';
+                    const defaultWeight = getExerciseRememberedWeight(newEx);
                     activeWorkoutSetsData[newEx.id] = [];
                     for (let s = 1; s <= numSets; s++) {
                         activeWorkoutSetsData[newEx.id].push({
@@ -8523,7 +8543,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                 }
 
                 if (!alreadyExists || !Array.isArray(activeWorkoutSetsData[found.id]) || activeWorkoutSetsData[found.id].length === 0) {
-                    const defaultWeight = found.weightKey && weights[found.weightKey] ? (parseFloat(weights[found.weightKey]) || '') : '';
+                    const defaultWeight = getExerciseRememberedWeight(found);
                     activeWorkoutSetsData[found.id] = [
                         { setNo: 1, weight: defaultWeight, reps: 12, completed: false, completedAt: null },
                         { setNo: 2, weight: defaultWeight, reps: 12, completed: false, completedAt: null },
@@ -9245,7 +9265,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
             if (ex.trackingType === 'time' || ex.trackingType === 'duration' || ex.isTimeBased === true) return true;
             const id = String(ex.id || '').toLowerCase();
             const name = String(ex.name || '').toLowerCase();
-            const timeKeywords = ['plank', 'hollow', 'carry', 'farmers_walk', 'suitcase_carry', 'waiter', 'cross_body', 'taşıma', 'yürüyüşü', 'dead hang', 'wall sit', 'l-sit'];
+            const timeKeywords = ['plank', 'hollow', 'carry', 'farmers_walk', 'suitcase_carry', 'waiter', 'cross_body', 'taşıma', 'yürüyüş', 'kürek', 'koşu', 'indoor_row', 'walking', 'running', 'dead hang', 'wall sit', 'l-sit'];
             return timeKeywords.some(kw => id.includes(kw) || name.includes(kw));
         }
 
@@ -9346,7 +9366,63 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
             return `${loadPart} × ${metricPart}`;
         }
 
+        function rememberExerciseWeight(exId, exName, weightVal) {
+            const parsedW = parseFloat(weightVal);
+            if (isNaN(parsedW) || parsedW <= 0) return;
+            const uid = typeof getActiveUserId === 'function' ? getActiveUserId() : 'default';
+            const storageKey = `celik_kodu_last_weights_${uid}`;
+            try {
+                const map = JSON.parse(localStorage.getItem(storageKey) || '{}') || {};
+                if (exId) map[exId] = parsedW;
+                if (exName) map[String(exName).trim().toLowerCase()] = parsedW;
+                localStorage.setItem(storageKey, JSON.stringify(map));
+
+                const user = typeof getActiveUser === 'function' ? getActiveUser() : null;
+                if (user) {
+                    user.lastExerciseWeights = Object.assign({}, user.lastExerciseWeights || {}, map);
+                }
+            } catch (e) {}
+        }
+
+        function getExerciseRememberedWeight(ex) {
+            if (!ex) return '';
+            const exObj = typeof ex === 'string'
+                ? ((typeof EXERCISES_DB !== 'undefined' && EXERCISES_DB.find(e => e.id === ex || e.name === ex)) || { id: ex, name: ex })
+                : ex;
+
+            // 1. Önce antrenman geçmişindeki son tamamlanan ağırlığa bak
+            const perf = (exObj.id && getLastExercisePerformance(exObj.id)) || (exObj.name && getLastExercisePerformance(exObj.name));
+            if (perf && perf.lastWeight !== '' && perf.lastWeight !== null && !isNaN(perf.lastWeight) && Number(perf.lastWeight) > 0) {
+                return Number(perf.lastWeight);
+            }
+            if (perf && perf.weight !== '' && perf.weight !== null && !isNaN(perf.weight) && Number(perf.weight) > 0) {
+                return Number(perf.weight);
+            }
+
+            // 2. Hafızadaki hızlı son ağırlık önbelleğine bak
+            const uid = typeof getActiveUserId === 'function' ? getActiveUserId() : 'default';
+            try {
+                const map = JSON.parse(localStorage.getItem(`celik_kodu_last_weights_${uid}`) || '{}') || {};
+                if (exObj.id && map[exObj.id] > 0) return Number(map[exObj.id]);
+                if (exObj.name) {
+                    const normName = String(exObj.name).trim().toLowerCase();
+                    if (map[normName] > 0) return Number(map[normName]);
+                }
+                const user = typeof getActiveUser === 'function' ? getActiveUser() : null;
+                if (user && user.lastExerciseWeights) {
+                    if (exObj.id && user.lastExerciseWeights[exObj.id] > 0) return Number(user.lastExerciseWeights[exObj.id]);
+                    if (exObj.name) {
+                        const normName = String(exObj.name).trim().toLowerCase();
+                        if (user.lastExerciseWeights[normName] > 0) return Number(user.lastExerciseWeights[normName]);
+                    }
+                }
+            } catch (e) {}
+
+            return '';
+        }
+
         function getLastExercisePerformance(exIdOrName) {
+            if (!exIdOrName) return null;
             const uid = getActiveUserId();
             let history = [];
             try {
@@ -9355,10 +9431,11 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
             } catch(e) {}
 
             for (const log of history) {
-                if (!log.detailedExercises || !Array.isArray(log.detailedExercises)) continue;
-                const found = log.detailedExercises.find(e => (e.id === exIdOrName || e.name === exIdOrName) && (e.completedSetsCount > 0 || (e.sets && e.sets.some(s => s.completed))));
-                if (found && found.sets) {
-                    const completedSets = found.sets.filter(s => s.completed);
+                const exList = log.detailedExercises || log.exercises;
+                if (!exList || !Array.isArray(exList)) continue;
+                const found = exList.find(e => (e.id === exIdOrName || e.name === exIdOrName) && (e.completedSetsCount > 0 || e.completedCount > 0 || (e.sets && e.sets.some(s => s.completed || (parseFloat(s.weight) || 0) > 0))));
+                if (found && Array.isArray(found.sets)) {
+                    const completedSets = found.sets.filter(s => s.completed || (parseFloat(s.weight) || 0) > 0);
                     if (completedSets.length > 0) {
                         const isTime = isExerciseTimeBased(found);
                         const isBw = isExerciseBodyweight(found);
@@ -9383,9 +9460,15 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                             }, completedSets[0]);
                         }
 
+                        const lastPositiveSet = [...completedSets].reverse().find(s => (parseFloat(s.weight) || 0) > 0) || completedSets[completedSets.length - 1];
+                        const lastWeightVal = (lastPositiveSet && lastPositiveSet.weight !== '' && lastPositiveSet.weight !== null && !isNaN(lastPositiveSet.weight))
+                            ? parseFloat(lastPositiveSet.weight)
+                            : (bestSet.weight !== '' && bestSet.weight !== null && !isNaN(bestSet.weight) ? parseFloat(bestSet.weight) : (isBw ? 0 : ''));
+
                         return {
-                            weight: bestSet.weight !== '' && bestSet.weight !== null && !isNaN(bestSet.weight) ? parseFloat(bestSet.weight) : (isBw ? 0 : ''),
-                            reps: bestSet.reps || (isTime ? 30 : 10),
+                            weight: lastWeightVal !== '' ? lastWeightVal : (bestSet.weight !== '' && bestSet.weight !== null && !isNaN(bestSet.weight) ? parseFloat(bestSet.weight) : (isBw ? 0 : '')),
+                            lastWeight: lastWeightVal,
+                            reps: (lastPositiveSet && lastPositiveSet.reps) ? lastPositiveSet.reps : (bestSet.reps || (isTime ? 30 : 10)),
                             isTimeBased: isTime,
                             isBodyweight: isBw,
                             dateFormatted: log.dateFormatted || log.date || 'Önceki seans'
@@ -9834,7 +9917,7 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                     const firstPart = String(repsSpec).split('-')[0].trim();
                     defaultReps = parseInt(firstPart) || 10;
                 }
-                const defaultWeight = ex.weightKey && userWeights[ex.weightKey] ? (parseFloat(userWeights[ex.weightKey]) || '') : '';
+                const defaultWeight = getExerciseRememberedWeight(ex);
 
                 activeWorkoutSetsData[ex.id] = [];
                 for (let s = 1; s <= numSets; s++) {
@@ -10191,7 +10274,8 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                     const numSets = (ex.targetSets || (s.scheme && s.scheme.sets)) || 3;
                     const repsSpec = ex.targetReps || (s.scheme && s.scheme.reps) || (isTime ? '30' : '10');
                     const defaultReps = parseInt(String(repsSpec).split('-')[0].trim()) || (isTime ? 30 : 10);
-                    const defaultWeight = isBw ? 0 : (ex.weightKey && weights[ex.weightKey] ? (parseFloat(weights[ex.weightKey]) || '') : '');
+                    const rememberedW = getExerciseRememberedWeight(ex);
+                    const defaultWeight = rememberedW !== '' ? rememberedW : (isBw ? 0 : '');
                     activeWorkoutSetsData[ex.id] = [];
                     for (let st = 1; st <= numSets; st++) {
                         activeWorkoutSetsData[ex.id].push({
@@ -10799,6 +10883,9 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
             const curExObj = activeWorkoutSession && Array.isArray(activeWorkoutSession.exercises)
                 ? activeWorkoutSession.exercises.find(e => e.id === exId)
                 : null;
+            if (st.weight !== '' && st.weight !== null && st.weight !== undefined && !isNaN(st.weight) && Number(st.weight) > 0) {
+                rememberExerciseWeight(exId, curExObj ? curExObj.name : '', st.weight);
+            }
             const curIdx = curExObj ? activeWorkoutSession.exercises.indexOf(curExObj) : -1;
             const pair = curIdx >= 0 ? getSupersetPairInfo(activeWorkoutSession.exercises, curIdx) : null;
 
@@ -10948,7 +11035,10 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
             { id: 'bw_crunch', name: 'Mekik / Crunch', icon: '🔥', muscle: 'Karın, Core', category: 'core', equipment: 'bodyweight', defaultType: 'reps', defaultVal: 20 },
             { id: 'bw_burpee', name: 'Burpee', icon: '🚀', muscle: 'Tüm Vücut, Kondisyon', category: 'conditioning', equipment: 'bodyweight', defaultType: 'reps', defaultVal: 10 },
             { id: 'db_swing', name: 'Kettlebell / Dambıl Swing', icon: '🔔', muscle: 'Kalça, Arka Bacak, Kondisyon', category: 'legs_hinge', equipment: 'kettlebell', defaultType: 'reps', defaultVal: 15 },
-            { id: 'bw_hollow_body', name: 'Hollow Body Hold', icon: '🧱', muscle: 'Core, Alt Karın', category: 'core', equipment: 'bodyweight', defaultType: 'time', defaultVal: 30 }
+            { id: 'bw_hollow_body', name: 'Hollow Body Hold', icon: '🧱', muscle: 'Core, Alt Karın', category: 'core', equipment: 'bodyweight', defaultType: 'time', defaultVal: 30 },
+            { id: 'cond_indoor_row', name: 'Kürek Çekme (Indoor Row)', icon: '🚣', muscle: 'Sırt, Bacak, Kondisyon', category: 'conditioning', equipment: 'machine', defaultType: 'time', defaultVal: 180 },
+            { id: 'cond_walking', name: 'Tempolu Yürüyüş (Walking)', icon: '🚶', muscle: 'Bacak, Kalça, Kondisyon', category: 'conditioning', equipment: 'bodyweight', defaultType: 'time', defaultVal: 300 },
+            { id: 'cond_running', name: 'Koşu / Koşu Bandı', icon: '🏃', muscle: 'Bacak, Kalf, Kondisyon', category: 'conditioning', equipment: 'bodyweight', defaultType: 'time', defaultVal: 300 }
         ];
 
         function renderInterSetSlotHtml(exId, st, sIdx, totalSets) {
@@ -11935,6 +12025,12 @@ Eğer düzeltme gerekmiyorsa JSON bloğu ekleme veya "actions": [] bırak.`;
                 const maxWeight = completedSets.length > 0 ? Math.max(0, ...completedSets.map(st => st.weight)) : 0;
                 const maxReps = completedSets.length > 0 ? Math.max(0, ...completedSets.map(st => st.reps)) : 0;
                 const exVolume = completedSets.reduce((sum, st) => sum + st.volume, 0);
+                if (completedSets.length > 0) {
+                    const lastPosSet = [...completedSets].reverse().find(st => Number(st.weight) > 0);
+                    if (lastPosSet) {
+                        rememberExerciseWeight(ex.id, ex.name, lastPosSet.weight);
+                    }
+                }
 
                 return {
                     id: ex.id,
@@ -12128,7 +12224,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             bw_skater_jumps: "skater jumps paten sicramasi yanal sicrama",
             bw_plank_jacks: "plank jacks plank bacak ac kapa karin kardiyo",
             bw_squat_thrust: "squat thrust yarim burpee kondisyon",
-            bw_lateral_shuffle: "lateral shuffle yanal kayma hizli adimlama ceviklik"
+            bw_lateral_shuffle: "lateral shuffle yanal kayma hizli adimlama ceviklik",
+            cond_indoor_row: "kurek cekme indoor row rowing ergometre kardiyo kondisyon isinma",
+            cond_walking: "yuruyus walking doga yuruyusu hiking kardiyo kondisyon",
+            cond_running: "kosu kosu bandi running treadmill jog sprint kardiyo kondisyon"
         };
 
         function matchesExerciseSearch(ex, rawQuery) {
@@ -12159,6 +12258,27 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             renderLibraryExerciseCatalog();
         }
 
+        let currentLibraryExerciseMode = 'fitness'; // 'fitness' | 'cardio'
+
+        function switchLibraryExerciseMode(mode) {
+            currentLibraryExerciseMode = mode === 'cardio' ? 'cardio' : 'fitness';
+            const fitBtn = document.getElementById('libModeFitnessBtn');
+            const carBtn = document.getElementById('libModeCardioBtn');
+            if (fitBtn) {
+                const isFit = currentLibraryExerciseMode === 'fitness';
+                fitBtn.style.background = isFit ? '#0F172A' : 'transparent';
+                fitBtn.style.color = isFit ? '#FFFFFF' : '#0F172A';
+                fitBtn.style.borderColor = isFit ? '#0F172A' : 'transparent';
+            }
+            if (carBtn) {
+                const isCar = currentLibraryExerciseMode === 'cardio';
+                carBtn.style.background = isCar ? '#0369A1' : 'transparent';
+                carBtn.style.color = isCar ? '#FFFFFF' : '#0F172A';
+                carBtn.style.borderColor = isCar ? '#0369A1' : 'transparent';
+            }
+            renderLibraryExerciseCatalog();
+        }
+
         function renderLibraryExerciseCatalog() {
             ensureBilingualExerciseNames();
             const container = document.getElementById('libExercisesCatalogGrid');
@@ -12184,6 +12304,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             const filtered = EXERCISES_DB.filter(ex => {
                 const isExcluded = excludedIds.includes(ex.id);
+                const isStandaloneCardio = /^cond_/.test(String(ex.id || ''));
+                if (currentLibraryExerciseMode === 'cardio') {
+                    if (!isStandaloneCardio) return false;
+                } else if (!q) {
+                    if (isStandaloneCardio) return false;
+                }
                 // Arama kutusu doluyken (q varsa) gizlenmiş egzersiz de aramayla eşleşiyorsa kullanıcıya gösterilsin (Gizli etiketiyle)
                 if (!q && (showExcluded ? !isExcluded : isExcluded)) return false;
 
@@ -12217,7 +12343,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 return true;
             });
 
-            const badgeText = `${filtered.length} Egzersiz ${showExcluded ? '(Gizlenenler)' : ''}`;
+            if (currentLibraryExerciseMode === 'cardio') {
+                filtered.sort((a, b) => (/^cond_/.test(b.id) ? 1 : 0) - (/^cond_/.test(a.id) ? 1 : 0));
+            }
+            const badgeText = `${filtered.length} ${currentLibraryExerciseMode === 'cardio' ? 'Kardiyo & Kondisyon' : 'Egzersiz'} ${showExcluded ? '(Gizlenenler)' : ''}`;
             if (countBadge) countBadge.innerText = badgeText;
             if (subCountBadge) subCountBadge.innerText = badgeText;
 
@@ -12299,6 +12428,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (!modal) return;
 
             const titleEl = document.getElementById('addToProgModalTitle');
+            if (/^cond_/.test(String(exId || ''))) { openQuickAddToDayModal(exId); return; }
             const subEl = document.getElementById('addToProgModalSubtitle');
             const dynamicBody = document.getElementById('addToProgModalBody');
 
@@ -12436,11 +12566,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             if (!activeWorkoutSetsData[ex.id]) {
                 activeWorkoutSetsData[ex.id] = [];
-                const user = getActiveUser();
-                const userWeights = user?.weights || {};
                 const isBw = isExerciseBodyweight(ex);
                 const isTime = isExerciseTimeBased(ex);
-                let defaultWeight = ex.weightKey && userWeights[ex.weightKey] ? (parseFloat(userWeights[ex.weightKey]) || '') : '';
+                let defaultWeight = getExerciseRememberedWeight(ex);
                 if (isBw && (defaultWeight === '' || defaultWeight === null || isNaN(defaultWeight))) {
                     defaultWeight = 0;
                 }
@@ -12504,11 +12632,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             activeFocusExIndex = 0;
             activeFocusSetIndex = null;
 
-            const user = getActiveUser();
-            const userWeights = user?.weights || {};
             const isBw = isExerciseBodyweight(ex);
             const isTime = isExerciseTimeBased(ex);
-            let defaultWeight = ex.weightKey && userWeights[ex.weightKey] ? (parseFloat(userWeights[ex.weightKey]) || '') : '';
+            let defaultWeight = getExerciseRememberedWeight(ex);
             if (isBw && (defaultWeight === '' || defaultWeight === null || isNaN(defaultWeight))) {
                 defaultWeight = 0;
             }
@@ -13777,6 +13903,32 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 } else {
                     assignedSection.innerHTML = templatePlanHtml;
                 }
+                if (currentPlan && Array.isArray(currentPlan.extraCardioSessions) && currentPlan.extraCardioSessions.length > 0) {
+                    const extraHtml = currentPlan.extraCardioSessions.map(c => `
+                        <div style="margin-top:10px; background:#F0F9FF; border:1.5px solid #0284C7; border-radius:12px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+                            <div>
+                                <span style="font-size:9.5px; font-weight:900; background:#0369A1; color:#FFFFFF; padding:2px 7px; border-radius:4px;">
+                                    🚣🏃 2. BAĞIMSIZ KARDİYO SEANSI • GARMIN fr945
+                                </span>
+                                <div style="font-size:14px; font-weight:900; color:#0F172A; margin-top:5px;">
+                                    ${escapeHTML(c.name || 'Kardiyo Seansı')} • <span style="color:#0369A1;">⏱️ ${Number(c.durationMin || 20)} Dk</span>
+                                </div>
+                                <div style="font-size:11px; color:#334155; margin-top:2px;">
+                                    Ana ağırlık programından bağımsız ayrı aktivite olarak planlandı.
+                                </div>
+                            </div>
+                            <div style="display:flex; gap:6px; align-items:center;">
+                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 10px; font-weight:800; color:#FFFFFF; background:#0369A1; border-color:#0284C7;" onclick="closeScheduleDayModal(); startQuickWorkoutWithExercise('${c.id}')">
+                                    ▶️ Başlat
+                                </button>
+                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 9px; font-weight:800; color:#B91C1C; border-color:#FCA5A5; background:#FFFFFF;" onclick="removeExtraCardioSessionFromDay(${dayIdx}, '${c.id}', decodeURIComponent('${encodeURIComponent(activeSchedulingDateStr || '')}'))" title="Bu kardiyo seansını kaldır">
+                                    ✕ Kaldır
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                    assignedSection.innerHTML += extraHtml;
+                }
             }
 
             const timingSection = document.getElementById('schedDayTimingSection');
@@ -14845,16 +14997,6 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             if (localKey !== cloudKey) {
                                 localStorage.setItem(GEMINI_API_STORAGE_KEY, cloudKey);
                             }
-                            const user = typeof getActiveUser === 'function' ? getActiveUser() : null;
-                            if (user && user.geminiApiKey !== cloudKey) {
-                                user.geminiApiKey = cloudKey;
-                                const users = typeof getAuthUsers === 'function' ? getAuthUsers() : [];
-                                const idx = users.findIndex(u => u.id === user.id);
-                                if (idx !== -1) {
-                                    users[idx] = user;
-                                    if (typeof saveAuthUsers === 'function') saveAuthUsers(users);
-                                }
-                            }
                             if (typeof updateProfileGeminiStatusUI === 'function') updateProfileGeminiStatusUI();
                             const curEx = (typeof pickerContext !== 'undefined' && pickerContext && pickerContext.targetExId) ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
                             if (typeof updateGeminiAiModalUI === 'function') updateGeminiAiModalUI(curEx);
@@ -14862,8 +15004,6 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         }
                     }
                 }
-
-                // Güvenlik: Yerel anahtar genel buluta yedeklenmez.
             } catch (err) {
                 console.warn("AI config buluttan eşitlenemedi:", err);
             }
@@ -17196,7 +17336,16 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     `;
                 }
 
-                const cardClickAttr = (isRest && !hasCompleted) ? 'style="cursor:default;"' : `onclick="openScheduleDayModal(${dayIdx}, '${dayYMD}')"`;
+                const hasExtraCardio = Array.isArray(plan.extraCardioSessions) && plan.extraCardioSessions.length > 0;
+                if (hasExtraCardio) {
+                    const extraPills = plan.extraCardioSessions.map(c => `
+                        <div style="margin-top:6px; background:#F0F9FF; border:1px solid #38BDF8; color:#0369A1; border-radius:6px; padding:4px 6px; font-size:10px; font-weight:800; line-height:1.25;">
+                            🚣 ${(c.name || 'Kardiyo').split('(')[0].trim()} • ${Number(c.durationMin || 20)} Dk
+                        </div>
+                    `).join('');
+                    bodyContent += extraPills;
+                }
+                const cardClickAttr = (isRest && !hasCompleted && !hasExtraCardio) ? 'style="cursor:default;"' : `onclick="openScheduleDayModal(${dayIdx}, '${dayYMD}')"`;
 
                 html += `
                     <div class="cal-week-card ${isToday ? 'is-today' : ''} ${hasCompleted ? 'is-completed' : (isRest ? 'is-rest' : '')}" ${cardClickAttr}>
@@ -17458,6 +17607,11 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     if (!u.passwordHash && !u.password) {
                         u.salt = 'celik_salt_default';
                         u.passwordHash = '03cde27561b94bc8b0f58721b21c3c5010435fd22dc6d202106c262c7e010bbc'; // 123456
+                        hasChanged = true;
+                    }
+                    // Güvenlik: Yönetici olmayan kullanıcılara buluttan sızmış eski paylaşımlı Gemini API anahtarını temizle
+                    if (u.role !== 'admin' && u.geminiApiKey && !u.geminiKeyOwnedByUser) {
+                        delete u.geminiApiKey;
                         hasChanged = true;
                     }
                 });
@@ -18005,6 +18159,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 renderSplitCards();
                 updateSelectedEquipLabel();
                 updateSelectedParamLabel();
+                refreshTopFitnessCardioScoreBars();
                 const hasRestored = restoreActiveWorkoutStateFromStorage();
                 if (hasRestored) {
                     switchTab('activeWorkoutTab');
@@ -18621,37 +18776,6 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             `}
                         </div>
 
-                        <!-- TARGET WEIGHTS -->
-                        <div style="font-size:10px; color:var(--text-secondary); font-weight:800; text-transform:uppercase; margin-bottom:4px; letter-spacing:0.5px;">
-                            🎯 Sporcunun Hedef / Çalışma Kiloları:
-                        </div>
-                        <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:4px; text-align:center; font-size:10.5px; margin-bottom:10px;">
-                            <div style="background:#F1F5F9; padding:4px 2px; border-radius:4px; border:1px solid #E2E8F0;">
-                                <div style="color:var(--text-secondary); font-size:9px;">Press</div>
-                                <strong style="color:var(--gold);">${w.press || '-'}k</strong>
-                            </div>
-                            <div style="background:#F1F5F9; padding:4px 2px; border-radius:4px; border:1px solid #E2E8F0;">
-                                <div style="color:var(--text-secondary); font-size:9px;">Squat</div>
-                                <strong style="color:var(--gold);">${w.squat || '-'}k</strong>
-                            </div>
-                            <div style="background:#F1F5F9; padding:4px 2px; border-radius:4px; border:1px solid #E2E8F0;">
-                                <div style="color:var(--text-secondary); font-size:9px;">Row</div>
-                                <strong style="color:var(--gold);">${w.row || '-'}k</strong>
-                            </div>
-                            <div style="background:#F1F5F9; padding:4px 2px; border-radius:4px; border:1px solid #E2E8F0;">
-                                <div style="color:var(--text-secondary); font-size:9px;">RDL</div>
-                                <strong style="color:var(--gold);">${w.rdl || '-'}k</strong>
-                            </div>
-                            <div style="background:#F1F5F9; padding:4px 2px; border-radius:4px; border:1px solid #E2E8F0;">
-                                <div style="color:var(--text-secondary); font-size:9px;">Swing</div>
-                                <strong style="color:var(--gold);">${w.swing || '-'}k</strong>
-                            </div>
-                            <div style="background:#F1F5F9; padding:4px 2px; border-radius:4px; border:1px solid #E2E8F0;">
-                                <div style="color:var(--text-secondary); font-size:9px;">Lunge</div>
-                                <strong style="color:var(--gold);">${w.lunge || '-'}k</strong>
-                            </div>
-                        </div>
-
                         <!-- TOGGLE LAST WORKOUT DETAILS BUTTON -->
                         ${lastLog ? `
                             <button class="btn btn-outline" style="width:100%; font-size:11px; padding:7px; border-color:rgba(245,158,11,0.4); color:var(--gold);" onclick="toggleAdminAthleteDetails('${u.id}')">
@@ -18942,6 +19066,17 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             applyTheme(themeKey);
         }
 
+        function toggleProfileCustomizationDrawer() {
+            const drawer = document.getElementById('profileCustomizationDrawer');
+            const arrow = document.getElementById('profileEditToggleArrow');
+            const btn = document.getElementById('profileEditToggleBtn');
+            if (!drawer) return;
+            const isOpen = drawer.style.display !== 'none';
+            drawer.style.display = isOpen ? 'none' : 'block';
+            if (arrow) arrow.textContent = isOpen ? '▼ Göster' : '▲ Gizle';
+            if (btn) btn.setAttribute('aria-expanded', String(!isOpen));
+        }
+
         function applyActiveUserProfile() {
             const user = getActiveUser();
             if (!user) return;
@@ -18958,7 +19093,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const cardName = document.getElementById('profileCardName');
             if (cardName) cardName.innerText = escapeHTML(user.name);
             const cardMeta = document.getElementById('profileCardMeta');
-            if (cardMeta) cardMeta.innerText = `${user.level} (${user.gender}) • Özel Kilo Programı`;
+            if (cardMeta) cardMeta.innerText = `${user.level} (${user.gender}) • Kişisel Sporcu Profili`;
 
             const nameInput = document.getElementById('editUserName');
             if (nameInput) nameInput.value = user.name || '';
@@ -18970,13 +19105,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             selectAvatar(user.avatar || '🥋');
             selectTheme(user.theme || 'gold');
 
-            const w = user.weights || {};
-            if (document.getElementById('w_press')) document.getElementById('w_press').value = w.press || '';
-            if (document.getElementById('w_squat')) document.getElementById('w_squat').value = w.squat || '';
-            if (document.getElementById('w_row')) document.getElementById('w_row').value = w.row || '';
-            if (document.getElementById('w_rdl')) document.getElementById('w_rdl').value = w.rdl || '';
-            if (document.getElementById('w_swing')) document.getElementById('w_swing').value = w.swing || '';
-            if (document.getElementById('w_lunge')) document.getElementById('w_lunge').value = w.lunge || '';
+            if (typeof updateProfileGeminiStatusUI === 'function') {
+                updateProfileGeminiStatusUI();
+            }
 
             renderHistory();
         }
@@ -18991,17 +19122,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             user.theme = selectedTheme;
             user.level = document.getElementById('editUserLevel').value;
             user.gender = document.getElementById('editUserGender').value;
-            user.weights = {
-                press: document.getElementById('w_press').value,
-                squat: document.getElementById('w_squat').value,
-                row: document.getElementById('w_row').value,
-                rdl: document.getElementById('w_rdl').value,
-                swing: document.getElementById('w_swing').value,
-                lunge: document.getElementById('w_lunge').value
-            };
 
             const geminiInput = document.getElementById('profileGeminiApiKeyInput');
-            if (geminiInput) {
+            if (geminiInput && user.role === 'admin') {
                 const gKey = geminiInput.value.trim();
                 setGeminiApiKey(gKey, true);
                 user.geminiApiKey = gKey;
@@ -19021,7 +19144,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             applyActiveUserProfile();
             playAlertSound();
-            alert("✅ Profiliniz ve çalışma kilolarınız başarıyla kaydedildi!");
+            alert("✅ Profil değişiklikleriniz başarıyla kaydedildi!");
         }
 
         // ==================== LOGS & STATS LOGIC ====================
@@ -19089,6 +19212,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         function renderHistory() {
             const allLogs = getWorkoutLogs();
+            if (typeof refreshTopFitnessCardioScoreBars === 'function') refreshTopFitnessCardioScoreBars();
             const container = document.getElementById('logHistoryContainer');
             if (!container) return;
 
@@ -19399,12 +19523,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         // ==================== ADVANCED ANALYTICS, SCALE & MEASUREMENTS ENGINE ====================
         let currentAnalyticsSubView = 'muscle';
         let currentAnalyticsPeriodDays = 30;
+        let currentScoreWeekOffset = 0; // 0 = Bu Hafta, -1 = Geçen Hafta
 
         function switchAnalyticsSubView(view) {
             if (view === 'measurements') view = 'scale';
             currentAnalyticsSubView = view;
             const subBtns = [
                 { id: 'btnSubAnalyticsMuscle', view: 'muscle' },
+                { id: 'btnSubAnalyticsScore', view: 'score' },
                 { id: 'btnSubAnalyticsMobility', view: 'mobility' },
                 { id: 'btnSubAnalyticsScale', view: 'scale' },
                 { id: 'btnSubAnalyticsCombined', view: 'combined' }
@@ -19418,6 +19544,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             });
             renderAnalytics();
         }
+
+        function openFitnessCardioScoreAnalytics() {
+            currentAnalyticsSubView = 'score';
+            switchTab('analyticsTab');
+        }
+        window.openFitnessCardioScoreAnalytics = openFitnessCardioScoreAnalytics;
 
         function setAnalyticsPeriod(days) {
             currentAnalyticsPeriodDays = parseInt(days) || 30;
@@ -20303,6 +20435,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             // Highlight subview tab buttons
             const subBtns = [
                 { id: 'btnSubAnalyticsMuscle', view: 'muscle' },
+                { id: 'btnSubAnalyticsScore', view: 'score' },
                 { id: 'btnSubAnalyticsMobility', view: 'mobility' },
                 { id: 'btnSubAnalyticsScale', view: 'scale' },
                 { id: 'btnSubAnalyticsCombined', view: 'combined' }
@@ -20315,8 +20448,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 }
             });
 
+            if (typeof refreshTopFitnessCardioScoreBars === 'function') {
+                refreshTopFitnessCardioScoreBars();
+            }
+
             if (currentAnalyticsSubView === 'muscle') {
                 renderMuscleAnalytics(container);
+            } else if (currentAnalyticsSubView === 'score') {
+                renderFitnessCardioScoreAnalytics(container);
             } else if (currentAnalyticsSubView === 'mobility') {
                 renderMobilityAnalytics(container);
             } else if (currentAnalyticsSubView === 'combined') {
@@ -20458,7 +20597,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             'mountain climber': { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false },
             'dambıl manmaker': { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false },
             'jumping jack': { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false },
-            'ip atlama': { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false }
+            'ip atlama': { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false },
+            'kürek çekme': { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false },
+            'tempolu yürüyüş': { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false },
+            'koşu': { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false }
         };
 
         function normSearchText(s) {
@@ -21049,7 +21191,74 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         // ==================== WORKOUT QUICK-ADD & COMPILE HELPERS ====================
         let activeQuickAddExId = null;
 
-        function addExerciseToDaySchedule(dayIdx, exId, targetSets = 3, targetReps = '8-12') {
+        function removeExtraCardioSessionFromDay(dayIdx, exId, targetDateStr = null) {
+            const schedule = getWeeklySchedule();
+            const plan = schedule[dayIdx];
+            if (plan && Array.isArray(plan.extraCardioSessions)) {
+                plan.extraCardioSessions = plan.extraCardioSessions.filter(c => c && c.id !== exId);
+                plan.updatedAt = Date.now();
+                schedule[dayIdx] = plan;
+                saveWeeklySchedule(schedule);
+            }
+            if (targetDateStr && typeof getDateScheduleOverrides === 'function' && typeof saveDateScheduleOverride === 'function') {
+                const ov = getDateScheduleOverrides();
+                if (ov && ov[targetDateStr] && Array.isArray(ov[targetDateStr].extraCardioSessions)) {
+                    ov[targetDateStr].extraCardioSessions = ov[targetDateStr].extraCardioSessions.filter(c => c && c.id !== exId);
+                    ov[targetDateStr].updatedAt = Date.now();
+                    saveDateScheduleOverride(targetDateStr, ov[targetDateStr]);
+                }
+            }
+            if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
+            if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
+            if (typeof activeSchedulingDayIdx !== 'undefined' && activeSchedulingDayIdx !== null && typeof openScheduleDayModal === 'function') {
+                openScheduleDayModal(dayIdx, targetDateStr);
+            }
+            if (typeof showToast === 'function') showToast('🗑️ Ek kardiyo seansı takvimden kaldırıldı.');
+        }
+
+        function addExerciseToDaySchedule(dayIdx, exId, targetSets = 3, targetReps = '8-12', cardioLimits = null) {
+            if (/^cond_/.test(String(exId || ''))) {
+                const ex = EXERCISES_DB.find(e => e.id === exId);
+                if (!ex) return false;
+                const schedule = getWeeklySchedule();
+                const plan = schedule[dayIdx] || { id: 'rest', title: '🧘 Dinlenme & Toparlanma', type: 'rest', rest: true };
+                const durMin = cardioLimits && cardioLimits.durationMin !== undefined
+                    ? Math.max(0, Number(cardioLimits.durationMin) || 0)
+                    : (parseInt(String(targetReps || '20').replace(/[^\d]/g, ''), 10) || 20);
+                const distMeters = cardioLimits && cardioLimits.distanceMeters !== undefined
+                    ? Math.max(0, Number(cardioLimits.distanceMeters) || 0)
+                    : 0;
+                const minHr = cardioLimits && cardioLimits.targetHeartrate !== undefined
+                    ? Math.max(0, Number(cardioLimits.targetHeartrate) || 0)
+                    : 0;
+                const summaryParts = [];
+                if (durMin > 0) summaryParts.push(`${durMin} dk`);
+                if (distMeters > 0) summaryParts.push(`${distMeters} m`);
+                if (minHr > 0) summaryParts.push(`≥${minHr} bpm`);
+                const repLabel = summaryParts.length > 0 ? summaryParts.join(' • ') : 'Serbest';
+                if (!Array.isArray(plan.extraCardioSessions)) plan.extraCardioSessions = [];
+                const existingIdx = plan.extraCardioSessions.findIndex(c => c && c.id === ex.id);
+                const sessionObj = {
+                    id: ex.id,
+                    name: ex.name,
+                    durationMin: durMin,
+                    distanceMeters: distMeters,
+                    targetHeartrate: minHr,
+                    strictGate: true,
+                    targetSets: 1,
+                    targetReps: repLabel,
+                    addedAt: Date.now()
+                };
+                if (existingIdx >= 0) {
+                    plan.extraCardioSessions[existingIdx] = sessionObj;
+                } else {
+                    plan.extraCardioSessions.push(sessionObj);
+                }
+                plan.updatedAt = Date.now();
+                schedule[dayIdx] = plan;
+                saveWeeklySchedule(schedule);
+                return true;
+            }
             const ex = EXERCISES_DB.find(e => e.id === exId);
             if (!ex) return false;
 
@@ -21132,6 +21341,55 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const modal = document.getElementById('quickAddToDayModal');
             const titleEl = document.getElementById('quickAddModalTitle');
             const bodyEl = document.getElementById('quickAddModalBody');
+            if (/^cond_/.test(String(ex.id || ''))) {
+                setTimeout(() => {
+                    if (!bodyEl) return;
+                    bodyEl.querySelectorAll('select[id^="quickAddSetsSelect_"]').forEach(sel => {
+                        sel.style.display = 'none';
+                    });
+                    bodyEl.querySelectorAll('button[onclick*="applyQuickAddExerciseToDay"]').forEach(btn => {
+                        btn.innerHTML = '🚣 2. Ayrı Seans Ekle';
+                        btn.style.background = '#0369A1';
+                        btn.style.color = '#FFFFFF';
+                        btn.style.borderColor = '#0284C7';
+                    });
+                    const infoBox = bodyEl.querySelector('div[style*="#FFFBEB"]');
+                    if (infoBox) {
+                        infoBox.style.background = '#F0F9FF';
+                        infoBox.style.borderColor = '#BAE6FD';
+                        infoBox.innerHTML = `
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
+                                <div style="font-size:12.5px; color:#0369A1; font-weight:800;">
+                                    🎯 Garmin fr945 Hedef & Alt Baraj Limitlerini Sen Belirle
+                                </div>
+                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:4px 9px; font-weight:800; color:#0369A1; border-color:#0284C7; background:#FFFFFF;" onclick="closeQuickAddToDayModal(); startQuickWorkoutWithExercise('${ex.id}');">
+                                    ⚡ Canlı Sayaç
+                                </button>
+                            </div>
+                            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; background:#FFFFFF; border:1px solid #BAE6FD; padding:10px; border-radius:8px;">
+                                <div>
+                                    <label style="display:block; font-size:10.5px; font-weight:800; color:#0F172A; margin-bottom:3px;">⏱️ Hedef Süre (Dk)</label>
+                                    <input id="cardioTargetMinInput" type="number" min="0" max="240" step="1" value="20" style="width:100%; padding:6px 8px; border:1.5px solid #94A3B8; border-radius:6px; font-size:12.5px; font-weight:800; color:#0F172A; background:#FFFFFF;">
+                                    <span style="font-size:9.5px; color:#475569;">0 = Serbest süre</span>
+                                </div>
+                                <div>
+                                    <label style="display:block; font-size:10.5px; font-weight:800; color:#0F172A; margin-bottom:3px;">📏 Hedef Mesafe (m)</label>
+                                    <input id="cardioTargetDistInput" type="number" min="0" max="50000" step="100" value="0" style="width:100%; padding:6px 8px; border:1.5px solid #94A3B8; border-radius:6px; font-size:12.5px; font-weight:800; color:#0F172A; background:#FFFFFF;">
+                                    <span style="font-size:9.5px; color:#475569;">0 = Mesafe hedefi yok</span>
+                                </div>
+                                <div>
+                                    <label style="display:block; font-size:10.5px; font-weight:800; color:#0F172A; margin-bottom:3px;">❤️ Hedef Nabız (bpm)</label>
+                                    <input id="cardioTargetHrInput" type="number" min="0" max="210" step="1" value="0" style="width:100%; padding:6px 8px; border:1.5px solid #94A3B8; border-radius:6px; font-size:12.5px; font-weight:800; color:#0F172A; background:#FFFFFF;">
+                                    <span style="font-size:9.5px; color:#475569;">0 = Nabız uyarısı yok</span>
+                                </div>
+                            </div>
+                            <div style="font-size:10.5px; color:#15803D; margin-top:8px; line-height:1.4; background:#F0FDF4; border:1px solid #86EFAC; padding:6px 9px; border-radius:6px; font-weight:700;">
+                                ✅ <strong>Ne Yaptıysan O Kaydedilir:</strong> Hedefin altında veya üstünde bitirsen de saatte yaptığın gerçek süre, mesafe ve nabız eksiksiz kayıt altına alınır.
+                            </div>
+                        `;
+                    }
+                }, 0);
+            }
             if (!modal || !bodyEl) return;
 
             const pNames = (ex.primaryMuscles || []).map(m => (TARGET_REGIONS[m] ? TARGET_REGIONS[m].name : m)).join(', ') || ex.muscle || '';
@@ -21275,13 +21533,42 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const plan = schedule[dayIdx];
             const wasRest = !plan || plan.rest;
 
-            const ok = addExerciseToDaySchedule(dayIdx, exId, targetSets, '8-12');
+            const isCardioDur = /^cond_/.test(String(exId || ''));
+            let cardioLimits = null;
+            if (isCardioDur) {
+                const minInput = document.getElementById('cardioTargetMinInput');
+                const distInput = document.getElementById('cardioTargetDistInput');
+                const hrInput = document.getElementById('cardioTargetHrInput');
+                cardioLimits = {
+                    durationMin: minInput ? Math.max(0, parseInt(minInput.value, 10) || 0) : 20,
+                    distanceMeters: distInput ? Math.max(0, parseInt(distInput.value, 10) || 0) : 0,
+                    targetHeartrate: hrInput ? Math.max(0, parseInt(hrInput.value, 10) || 0) : 0
+                };
+            }
+            const finalSets = isCardioDur ? 1 : targetSets;
+            const finalReps = isCardioDur
+                ? ([
+                    cardioLimits.durationMin > 0 ? `${cardioLimits.durationMin} dk` : '',
+                    cardioLimits.distanceMeters > 0 ? `${cardioLimits.distanceMeters} m` : '',
+                    cardioLimits.targetHeartrate > 0 ? `≥${cardioLimits.targetHeartrate} bpm` : ''
+                ].filter(Boolean).join(' • ') || 'Serbest')
+                : '8-12';
+            const unitSummary = isCardioDur ? finalReps : `${targetSets} set`;
+            const ok = addExerciseToDaySchedule(dayIdx, exId, finalSets, finalReps, cardioLimits);
+            if (ok && isCardioDur) {
+                closeQuickAddToDayModal();
+                showToast(`🚣 "${ex ? ex.name : 'Kardiyo'}" (${unitSummary}), ${DAY_NAMES_TR[dayIdx]} gününe 2. Bağımsız Kardiyo Seansı olarak eklendi (Mevcut güç programı korundu)!`);
+                if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
+                if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
+                if (typeof renderAnalytics === 'function') renderAnalytics();
+                return;
+            }
             if (ok) {
                 closeQuickAddToDayModal();
                 if (wasRest) {
-                    showToast(`⚡ ${DAY_NAMES_TR[dayIdx]} gününe yeni Takviye Antrenmanı açıldı ve "${ex ? ex.name : 'Egzersiz'}" (${targetSets} set) eklendi!`);
+                    showToast(`⚡ ${DAY_NAMES_TR[dayIdx]} gününe yeni Takviye Antrenmanı açıldı ve "${ex ? ex.name : 'Egzersiz'}" (${unitSummary}) eklendi!`);
                 } else {
-                    showToast(`✅ "${ex ? ex.name : 'Egzersiz'}", ${DAY_NAMES_TR[dayIdx]} antrenmanının sonuna ${targetSets} set olarak eklendi!`);
+                    showToast(`✅ "${ex ? ex.name : 'Egzersiz'}", ${DAY_NAMES_TR[dayIdx]} antrenmanının sonuna ${unitSummary} olarak eklendi!`);
                 }
                 if (typeof renderAnalytics === 'function') {
                     renderAnalytics();
@@ -22742,7 +23029,21 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 text.includes('cable fly') ||
                 text.includes('shrug') ||
                 text.includes('plank') ||
-                text.includes('hollow body')
+                text.includes('hollow body') ||
+                text.includes('kürek çekme') ||
+                text.includes('indoor row') ||
+                text.includes('ergometre') ||
+                text.includes('tempolu yürüyüş') ||
+                text.includes('doğa yürüyüşü') ||
+                text.includes('walking') ||
+                text.includes('koşu') ||
+                text.includes('running') ||
+                text.includes('treadmill') ||
+                text.includes('jumping jack') ||
+                text.includes('ip atlama') ||
+                text.includes('jump rope') ||
+                text.includes('high knees') ||
+                text.includes('butt kicks')
             ) {
                 return {
                     isIsolation: true,
@@ -24982,6 +25283,491 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             `;
         }
 
+        // ==================== HAFTALIK FİTNESS (KIRMIZI) & KARDİYO (MAVİ) PUAN MOTORU ====================
+        function toIsoDateKeyLocal(dt) {
+            const y = dt.getFullYear();
+            const m = String(dt.getMonth() + 1).padStart(2, '0');
+            const d = String(dt.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function calculateWeeklyFitnessAndCardioScores(weekOffset = 0) {
+            const bounds = getWeeklyMuscleBounds(weekOffset);
+            const allLogs = (typeof getWorkoutLogs === 'function') ? getWorkoutLogs() : [];
+            const weekLogs = allLogs.filter(l => {
+                if (!l || !l.date) return false;
+                const dt = new Date(l.date);
+                return dt >= bounds.monday && dt <= bounds.sunday;
+            });
+
+            // ─── 1. KIRMIZI BAR: HAFTALIK FİTNESS PUANI (100 PUAN) ───
+            // A) Kas Dengesi & MEV Hacim Eşikleri (45 Puan - Schoenfeld 2016 & Israetel RP)
+            const muscleDoneAnalysis = calculateWeeklyMuscleSufficiency('week_done', weekOffset);
+            const muscleProjAnalysis = calculateWeeklyMuscleSufficiency('week_projected', weekOffset);
+            let muscleScoreDone = 0;
+            let muscleScoreProjected = 0;
+            const muscleBreakdown = (muscleDoneAnalysis.muscles || []).map((m, idx) => {
+                const projM = (muscleProjAnalysis.muscles && muscleProjAnalysis.muscles[idx]) || m;
+                const doneRatio = Math.min(1, Math.max(0, (m.effectiveDone || 0) / Math.max(1, m.optimalMin || 6)));
+                const projRatio = Math.min(1, Math.max(0, (projM.effectiveTotal || 0) / Math.max(1, m.optimalMin || 6)));
+                const ptsDone = Math.round(doneRatio * 4.5 * 10) / 10;
+                const ptsProj = Math.round(projRatio * 4.5 * 10) / 10;
+                muscleScoreDone += doneRatio * 4.5;
+                muscleScoreProjected += projRatio * 4.5;
+                return {
+                    id: m.id,
+                    name: m.name,
+                    doneSets: m.effectiveDone || 0,
+                    projectedSets: projM.effectiveTotal || 0,
+                    targetSets: m.optimalMin || 6,
+                    ptsDone,
+                    ptsProj
+                };
+            });
+            muscleScoreDone = Math.min(45, Math.round(muscleScoreDone * 10) / 10);
+            muscleScoreProjected = Math.min(45, Math.round(muscleScoreProjected * 10) / 10);
+
+            // B) Efektif Set & Süreklilik (35 Puan - Schoenfeld 2021 Doz-Yanıt: Haftalık 40 set = 35p)
+            let totalStrengthSetsDone = 0;
+            let compoundSetsDone = 0;
+            let totalVolumeKgDone = 0;
+            const strengthSessionsList = [];
+
+            weekLogs.forEach(log => {
+                if (!Array.isArray(log.exercises)) return;
+                let sessionStrengthSets = 0;
+                log.exercises.forEach(ex => {
+                    const exId = String(ex.id || ex.exId || '');
+                    const spec = resolveExerciseBiomechanics(ex.name, ex.muscle, ex.category);
+                    const isCardioEx = /^cond_/.test(exId) || (spec && spec.type === 'CONDITIONING');
+                    if (isCardioEx) return;
+
+                    const cSets = (ex.completedSetsCount !== undefined && ex.completedSetsCount !== null)
+                        ? Number(ex.completedSetsCount)
+                        : (Array.isArray(ex.sets) ? ex.sets.filter(s => s && (s.completed || parseInt(s.reps, 10) > 0)).length : (Number(ex.completedSets || ex.sets) || 0));
+                    if (cSets <= 0) return;
+
+                    totalStrengthSetsDone += cSets;
+                    sessionStrengthSets += cSets;
+
+                    const dbEx = Array.isArray(EXERCISES_DB) ? EXERCISES_DB.find(x => x.id === exId || x.name === ex.name) : null;
+                    const isCompound = (dbEx && dbEx.mechanic === 'compound') || (spec && (spec.type === 'HEAVY_COMPOUND' || spec.type === 'BALLISTIC_POWER' || spec.type === 'BODYWEIGHT_STRENGTH'));
+                    if (isCompound) compoundSetsDone += cSets;
+                });
+                if (sessionStrengthSets > 0) {
+                    totalVolumeKgDone += Number(log.totalVolumeKg || 0);
+                    strengthSessionsList.push({
+                        date: log.dateFormatted || formatDateTr(log.date),
+                        title: log.title || log.program || 'Kuvvet Seansı',
+                        sets: sessionStrengthSets,
+                        volumeKg: Math.round(Number(log.totalVolumeKg || 0))
+                    });
+                }
+            });
+
+            const setVolumeScoreDone = Math.min(35, Math.round((totalStrengthSetsDone / 40) * 35 * 10) / 10);
+
+            // C) Kinetik Zincir & Bileşik Hareket Kalitesi (20 Puan - McGill 2015 & Javorek: %60+ bileşik hareket oranı = Tam puan)
+            const compoundRatio = totalStrengthSetsDone > 0 ? (compoundSetsDone / totalStrengthSetsDone) : 0;
+            const compoundFactor = totalStrengthSetsDone > 0 ? Math.min(1, compoundRatio / 0.60) : 0;
+            // En az 12 set yapılmadan kalite puanı kademeli ölçeklenir (tek 1 bileşik set yapıp 20p alınmasın)
+            const compoundGate = Math.min(1, totalStrengthSetsDone / 12);
+            const compoundScoreDone = Math.min(20, Math.round(compoundFactor * compoundGate * 20 * 10) / 10);
+
+            const fitnessScore = Math.min(100, Math.round(muscleScoreDone + setVolumeScoreDone + compoundScoreDone));
+
+            // ─── 2. MAVİ BAR: HAFTALIK KARDİYO PUANI (100 PUAN) ───
+            // A) Haftalık Adım Bazı — Her Gece 00:01 Senkronu (40 Puan - Paluch et al. 2022 Lancet: 56.000 adım = 8.000/gün)
+            const wellnessMap = (window.GarminTredictChief && typeof window.GarminTredictChief.getStoredWellnessStepsMap === 'function')
+                ? window.GarminTredictChief.getStoredWellnessStepsMap()
+                : {};
+            const todayIsoStr = toIsoDateKeyLocal(new Date());
+            const dayLabelsTr = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+            const dailyStepsList = [];
+            let weeklyStepsTotal = 0;
+
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(bounds.monday);
+                d.setDate(bounds.monday.getDate() + i);
+                const isoKey = toIsoDateKeyLocal(d);
+                // Her gece 00:01 kuralı: Bugünden önceki kesinleşmiş günler + varsa bugünün senkron verisi
+                const entry = wellnessMap[isoKey];
+                const stepsVal = entry && Number(entry.steps) > 0 ? Number(entry.steps) : 0;
+                const isLocked0001 = isoKey < todayIsoStr;
+                weeklyStepsTotal += stepsVal;
+                dailyStepsList.push({
+                    isoDate: isoKey,
+                    dayLabel: `${dayLabelsTr[i]} (${d.getDate()}/${d.getMonth() + 1})`,
+                    steps: stepsVal,
+                    floors: entry ? Number(entry.floorsClimbed || 0) : 0,
+                    restingHR: entry ? entry.restingHR : null,
+                    isLocked0001,
+                    isFuture: isoKey > todayIsoStr
+                });
+            }
+
+            const stepsTargetWeekly = 56000;
+            const stepsScore = Math.min(40, Math.round((weeklyStepsTotal / stepsTargetWeekly) * 40 * 10) / 10);
+
+            // B) Antrenmanlardaki Kardiyo Durumu & Nabız Çarpanı (45 Puan - WHO 2020 150 Eşdeğer Dk & Karvonen/TRIMP)
+            const cardioSessionsMap = new Map();
+            const activeCardioDaysSet = new Set();
+
+            // 1. Geçmiş kayıtlarındaki kardiyo/kondisyon hareketleri ve seansları
+            weekLogs.forEach(log => {
+                if (!log) return;
+                const logDateIso = toIsoDateKeyLocal(new Date(log.date));
+                const logHrAvg = Number(log.healthSummary?.heartrateAvg || 0);
+                const logHrMax = Number(log.healthSummary?.heartrateMax || 0);
+
+                if (Array.isArray(log.exercises)) {
+                    log.exercises.forEach(ex => {
+                        const exId = String(ex.id || ex.exId || '');
+                        const spec = resolveExerciseBiomechanics(ex.name, ex.muscle, ex.category);
+                        const isCardioEx = /^cond_/.test(exId) || (spec && (spec.type === 'CONDITIONING' || spec.type === 'BALLISTIC_POWER'));
+                        if (!isCardioEx) return;
+
+                        const cSets = (ex.completedSetsCount !== undefined && ex.completedSetsCount !== null)
+                            ? Number(ex.completedSetsCount)
+                            : (Array.isArray(ex.sets) ? ex.sets.filter(s => s && (s.completed || parseInt(s.reps, 10) > 0)).length : (Number(ex.completedSets || ex.sets) || 1));
+                        if (cSets <= 0) return;
+
+                        const tutSec = Number(ex.healthTelemetry?.timeUnderTensionSec || 0);
+                        let rawMin = 0;
+                        if (tutSec >= 60) {
+                            rawMin = Math.round(tutSec / 60);
+                        } else if (/^cond_/.test(exId)) {
+                            const repNum = parseInt(String(ex.reps || ex.targetReps || '15').replace(/[^\d]/g, ''), 10) || 15;
+                            rawMin = repNum >= 5 ? repNum : cSets * 8;
+                        } else {
+                            // Balistik/kondisyon hareketleri (KB Swing, Burpee, Sled vb.): Her set aktif + metabolik toparlanma etkisi ~2 dk
+                            rawMin = Math.max(2, cSets * 2);
+                        }
+
+                        const hrAvg = Number(ex.healthTelemetry?.avgHeartrate || logHrAvg || 128);
+                        const hrMax = Number(ex.healthTelemetry?.maxHeartrate || logHrMax || 148);
+                        const mult = hrAvg >= 145 ? 2.0 : (hrAvg >= 125 ? 1.5 : 1.0);
+                        const zoneLabel = hrAvg >= 145 ? 'Zone 4+ (2.0x)' : (hrAvg >= 125 ? 'Zone 3 (1.5x)' : 'Zone 1-2 (1.0x)');
+                        const eqMin = Math.round(rawMin * mult * 10) / 10;
+
+                        const key = `${log.garminActivityId || log.id}_${exId || ex.name}`;
+                        if (!cardioSessionsMap.has(key)) {
+                            cardioSessionsMap.set(key, {
+                                date: log.dateFormatted || formatDateTr(log.date),
+                                isoDate: logDateIso,
+                                name: ex.name || 'Kardiyo Egzersizi',
+                                rawMin,
+                                avgHr: hrAvg,
+                                maxHr: hrMax,
+                                multiplier: mult,
+                                zoneLabel,
+                                eqMin,
+                                distanceMeters: ex.healthTelemetry?.distanceMeters || null,
+                                cadenceSpm: ex.healthTelemetry?.cadenceSpm || null,
+                                powerWatts: ex.healthTelemetry?.powerWatts || null
+                            });
+                            activeCardioDaysSet.add(logDateIso);
+                        }
+                    });
+                }
+            });
+
+            // 2. Doğrudan Garmin/Tredict telemetrisindeki kardiyo aktiviteleri (henüz loglara düşmemişse)
+            try {
+                const rawGarminActs = JSON.parse(localStorage.getItem('celik_garmin_telemetry_v2') || '[]');
+                if (Array.isArray(rawGarminActs)) {
+                    rawGarminActs.forEach(act => {
+                        if (!act || !act.date) return;
+                        const dt = new Date(act.date);
+                        if (dt < bounds.monday || dt > bounds.sunday) return;
+                        const sub = String(act.subSportType || '').toLowerCase();
+                        const sp = String(act.sportType || '').toLowerCase();
+                        const isCardioAct = sub === 'indoor_rowing' || sub === 'rowing' || sub === 'walking' || sub === 'hiking' || sub === 'treadmill' || sp === 'running';
+                        if (!isCardioAct) return;
+                        const alreadyInMap = Array.from(cardioSessionsMap.keys()).some(k => k.startsWith(String(act.id) + '_'));
+                        if (alreadyInMap) return;
+
+                        const isoDate = toIsoDateKeyLocal(dt);
+                        const durSec = Number(act.summary?.duration || act.summary?.durationTotal || 900);
+                        const rawMin = Math.max(1, Math.round(durSec / 60));
+                        const hrAvg = Number(act.summary?.heartrate || 126);
+                        const hrMax = Number(act.summary?.heartrateMax || 148);
+                        const mult = hrAvg >= 145 ? 2.0 : (hrAvg >= 125 ? 1.5 : 1.0);
+                        const zoneLabel = hrAvg >= 145 ? 'Zone 4+ (2.0x)' : (hrAvg >= 125 ? 'Zone 3 (1.5x)' : 'Zone 1-2 (1.0x)');
+                        const eqMin = Math.round(rawMin * mult * 10) / 10;
+
+                        cardioSessionsMap.set(`${act.id}_garmin_cardio`, {
+                            date: formatDateTr(act.date),
+                            isoDate,
+                            name: act.title || 'Garmin Kardiyo Seansı',
+                            rawMin,
+                            avgHr: hrAvg,
+                            maxHr: hrMax,
+                            multiplier: mult,
+                            zoneLabel,
+                            eqMin,
+                            distanceMeters: act.summary?.distance ? Math.round(Number(act.summary.distance)) : null,
+                            cadenceSpm: act.summary?.cadence ? Math.round(Number(act.summary.cadence)) : null,
+                            powerWatts: act.summary?.power ? Math.round(Number(act.summary.power)) : null
+                        });
+                        activeCardioDaysSet.add(isoDate);
+                    });
+                }
+            } catch (_) {}
+
+            // 6000+ adım atılan günler de aktif kardiyovasküler toparlanma günü olarak frekansa katkı verir
+            dailyStepsList.forEach(d => {
+                if (d.steps >= 6000) activeCardioDaysSet.add(d.isoDate);
+            });
+
+            const cardioSessionsList = Array.from(cardioSessionsMap.values());
+            const totalRawCardioMin = cardioSessionsList.reduce((s, c) => s + c.rawMin, 0);
+            const totalEqCardioMin = Math.round(cardioSessionsList.reduce((s, c) => s + c.eqMin, 0) * 10) / 10;
+            const targetEqCardioMin = 150; // WHO & ACSM 2020 Haftalık 150 Eşdeğer Dakika
+            const cardioEffortScore = Math.min(45, Math.round((totalEqCardioMin / targetEqCardioMin) * 45 * 10) / 10);
+
+            // C) Aktif Gün Dağılımı (15 Puan - Haftanın en az 3 ayrı gününe yayma: Her gün 5p, max 15p)
+            const activeCardioDaysCount = activeCardioDaysSet.size;
+            const cardioFreqScore = Math.min(15, activeCardioDaysCount * 5);
+
+            const cardioScore = Math.min(100, Math.round(stepsScore + cardioEffortScore + cardioFreqScore));
+
+            return {
+                bounds,
+                weekOffset,
+                fitness: {
+                    totalScore: fitnessScore,
+                    muscleScoreDone,
+                    muscleScoreProjected,
+                    setVolumeScoreDone,
+                    compoundScoreDone,
+                    totalStrengthSetsDone,
+                    compoundSetsDone,
+                    compoundPct: totalStrengthSetsDone > 0 ? Math.round(compoundRatio * 100) : 0,
+                    totalVolumeKgDone: Math.round(totalVolumeKgDone),
+                    muscleBreakdown,
+                    strengthSessionsList
+                },
+                cardio: {
+                    totalScore: cardioScore,
+                    stepsScore,
+                    weeklyStepsTotal,
+                    stepsTargetWeekly,
+                    dailyAvgSteps: Math.round(weeklyStepsTotal / 7),
+                    dailyStepsList,
+                    cardioEffortScore,
+                    totalRawCardioMin,
+                    totalEqCardioMin,
+                    targetEqCardioMin,
+                    cardioSessionsList,
+                    cardioFreqScore,
+                    activeCardioDaysCount
+                }
+            };
+        }
+
+        function refreshTopFitnessCardioScoreBars() {
+            const fitValEl = document.getElementById('topFitnessScoreVal');
+            const fitFillEl = document.getElementById('topFitnessScoreFill');
+            const carValEl = document.getElementById('topCardioScoreVal');
+            const carFillEl = document.getElementById('topCardioScoreFill');
+            if (!fitValEl || !fitFillEl || !carValEl || !carFillEl) return;
+
+            try {
+                const data = calculateWeeklyFitnessAndCardioScores(0);
+                const fScore = data.fitness.totalScore;
+                const cScore = data.cardio.totalScore;
+                fitValEl.textContent = `${fScore} / 100`;
+                fitFillEl.style.width = `${Math.max(0, Math.min(100, fScore))}%`;
+                carValEl.textContent = `${cScore} / 100`;
+                carFillEl.style.width = `${Math.max(0, Math.min(100, cScore))}%`;
+            } catch (err) {
+                console.error('Score bar update err:', err);
+            }
+        }
+        window.refreshTopFitnessCardioScoreBars = refreshTopFitnessCardioScoreBars;
+
+        function setScoreAnalyticsWeekOffset(offset) {
+            currentScoreWeekOffset = Number(offset) || 0;
+            renderAnalytics();
+        }
+        window.setScoreAnalyticsWeekOffset = setScoreAnalyticsWeekOffset;
+
+        function renderFitnessCardioScoreAnalytics(container) {
+            if (!container) return;
+            const data = calculateWeeklyFitnessAndCardioScores(currentScoreWeekOffset);
+            const f = data.fitness;
+            const c = data.cardio;
+
+            const muscleRowsHtml = f.muscleBreakdown.map(m => {
+                const pct = Math.min(100, Math.round((m.doneSets / m.targetSets) * 100));
+                const badgeBg = pct >= 100 ? '#DCFCE7' : (pct > 0 ? '#FEF3C7' : '#FEE2E2');
+                const badgeCol = pct >= 100 ? '#15803D' : (pct > 0 ? '#B45309' : '#B91C1C');
+                return `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:7px 10px; background:#FFFFFF; border:1px solid #E2E8F0; border-radius:8px; font-size:12px;">
+                        <span style="font-weight:800; color:#0F172A;">${escapeHTML(m.name)}</span>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span class="tabular-nums" style="color:#475569; font-weight:700;">${m.doneSets} / ${m.targetSets} Set</span>
+                            <span class="tabular-nums" style="background:${badgeBg}; color:${badgeCol}; font-weight:900; padding:2px 7px; border-radius:6px; font-size:11px;">+${m.ptsDone}p</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const stepsRowsHtml = c.dailyStepsList.map(d => {
+                const pct = Math.min(100, Math.round((d.steps / 8000) * 100));
+                const statusBadge = d.isFuture
+                    ? `<span style="font-size:10.5px; font-weight:700; color:#64748B; background:#F1F5F9; padding:2px 7px; border-radius:6px;">Bekliyor</span>`
+                    : (d.isLocked0001
+                        ? `<span style="font-size:10.5px; font-weight:800; color:#0369A1; background:#E0F2FE; padding:2px 7px; border-radius:6px;">🕛 00:01 Kesinleşti</span>`
+                        : `<span style="font-size:10.5px; font-weight:800; color:#B45309; background:#FEF3C7; padding:2px 7px; border-radius:6px;">⏳ Bugün (00:01'de Kesinleşir)</span>`);
+                return `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:#FFFFFF; border:1px solid #E2E8F0; border-radius:8px; font-size:12px; gap:8px; flex-wrap:wrap;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-weight:800; color:#0F172A; min-width:82px;">${escapeHTML(d.dayLabel)}</span>
+                            ${statusBadge}
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            ${d.restingHR ? `<span style="font-size:11px; color:#475569; font-weight:700;">❤️ RHR ${d.restingHR}</span>` : ''}
+                            <span class="tabular-nums" style="font-weight:900; color:${d.steps >= 8000 ? '#15803D' : '#0F172A'};">${d.steps.toLocaleString('tr-TR')} / 8.000 adım (%${pct})</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const cardioExRowsHtml = c.cardioSessionsList.length > 0
+                ? c.cardioSessionsList.map(cs => {
+                    const extraMeta = [
+                        cs.distanceMeters ? `${(cs.distanceMeters / 1000).toFixed(2)} km` : '',
+                        cs.cadenceSpm ? `${cs.cadenceSpm} spm` : '',
+                        cs.powerWatts ? `${cs.powerWatts} W` : ''
+                    ].filter(Boolean).join(' • ');
+                    return `
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:#FFFFFF; border:1px solid #BAE6FD; border-radius:8px; font-size:12px; gap:8px; flex-wrap:wrap;">
+                            <div>
+                                <div style="font-weight:800; color:#0F172A;">🚣🏃 ${escapeHTML(cs.name)} <span style="font-size:11px; color:#475569; font-weight:600;">(${escapeHTML(cs.date)})</span></div>
+                                <div style="font-size:11px; color:#0369A1; font-weight:700; margin-top:2px;">
+                                    ❤️ Ort. ${cs.avgHr} bpm (Zirve ${cs.maxHr}) • ${escapeHTML(cs.zoneLabel)}${extraMeta ? ` • ${escapeHTML(extraMeta)}` : ''}
+                                </div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div class="tabular-nums" style="font-weight:900; color:#0369A1; font-size:12.5px;">${cs.rawMin} dk × ${cs.multiplier} = ${cs.eqMin} eşd. dk</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('')
+                : `<div style="padding:12px; background:#FFFFFF; border:1px dashed #CBD5E1; border-radius:8px; font-size:12px; color:#475569; text-align:center;">
+                    Bu hafta henüz tamamlanmış bir kardiyo/kondisyon seansı yok. Kürek, Koşu, Yürüyüş veya KB Swing yaptığında nabız çarpanıyla buraya işlenir.
+                   </div>`;
+
+            container.innerHTML = `
+                <!-- HAFTA SEÇİCİ & YENİLEME -->
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:14px; background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:12px; padding:10px 14px;">
+                    <div>
+                        <div style="font-size:14px; font-weight:900; color:#0F172A;">🎯 Haftalık Fitness & Kardiyo Puan Hesabı</div>
+                        <div style="font-size:11.5px; color:#475569; font-weight:700;">📅 ${escapeHTML(data.bounds.label)} • Akademik Biyomekanik & Garmin FR945 Protokolü</div>
+                    </div>
+                    <div style="display:flex; gap:6px; align-items:center;">
+                        <button type="button" class="btn btn-outline ${currentScoreWeekOffset === -1 ? 'active-filter-pill' : ''}" style="font-size:11.5px; padding:5px 10px; font-weight:800;" onclick="setScoreAnalyticsWeekOffset(-1)">◀ Geçen Hafta</button>
+                        <button type="button" class="btn btn-outline ${currentScoreWeekOffset === 0 ? 'active-filter-pill' : ''}" style="font-size:11.5px; padding:5px 10px; font-weight:800;" onclick="setScoreAnalyticsWeekOffset(0)">Bu Hafta</button>
+                        <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:5px 10px; font-weight:800; color:#0369A1; border-color:#0284C7;" onclick="if(window.syncGarminActivitiesFromTredict){window.syncGarminActivitiesFromTredict(); setTimeout(renderAnalytics, 700);}">🔄 Saatten Eşitle</button>
+                    </div>
+                </div>
+
+                <!-- İKİLİ BÜYÜK PUAN ÖZET KARTLARI -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(290px, 1fr)); gap:14px; margin-bottom:16px;">
+                    <!-- KIRMIZI FİTNESS KARTI -->
+                    <div style="background:#FEF2F2; border:2px solid #EF4444; border-radius:14px; padding:14px 16px; color:#0F172A;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <span style="font-size:13px; font-weight:900; color:#B91C1C; letter-spacing:0.02em;">🔴 HAFTALIK FİTNESS PUANI</span>
+                            <span class="tabular-nums" style="font-size:22px; font-weight:900; color:#991B1B;">${f.totalScore} <span style="font-size:13px; color:#B91C1C;">/ 100</span></span>
+                        </div>
+                        <div style="width:100%; height:10px; background:#FEE2E2; border:1px solid #FECACA; border-radius:999px; overflow:hidden; margin-bottom:12px;">
+                            <div style="height:100%; width:${f.totalScore}%; background:linear-gradient(90deg, #DC2626 0%, #EF4444 100%); border-radius:999px;"></div>
+                        </div>
+
+                        <div style="display:flex; flex-direction:column; gap:8px; font-size:12px;">
+                            <div style="background:#FFFFFF; border:1px solid #FECACA; border-radius:8px; padding:8px 10px;">
+                                <div style="display:flex; justify-content:space-between; font-weight:800; color:#0F172A;">
+                                    <span>1. 10 Kas Dengesi & MEV Eşikleri</span>
+                                    <span class="tabular-nums" style="color:#B91C1C;">${f.muscleScoreDone} / 45p</span>
+                                </div>
+                                <div style="font-size:11px; color:#475569; margin-top:2px;">Schoenfeld (2016) & Israetel RP: Her ana kas haftalık hedef setini doldurdukça 4.5p verir (Takvim sonu projeksiyon: ${f.muscleScoreProjected}/45p).</div>
+                            </div>
+                            <div style="background:#FFFFFF; border:1px solid #FECACA; border-radius:8px; padding:8px 10px;">
+                                <div style="display:flex; justify-content:space-between; font-weight:800; color:#0F172A;">
+                                    <span>2. Efektif Kuvvet Seti (${f.totalStrengthSetsDone} / 40 Set)</span>
+                                    <span class="tabular-nums" style="color:#B91C1C;">${f.setVolumeScoreDone} / 35p</span>
+                                </div>
+                                <div style="font-size:11px; color:#475569; margin-top:2px;">Schoenfeld (2021) Doz-Yanıt: Haftada 3 seans (~36-45 çalışma seti) optimal mekanik gerilim sağlar. Toplam Tonaj: ${f.totalVolumeKgDone.toLocaleString('tr-TR')} kg.</div>
+                            </div>
+                            <div style="background:#FFFFFF; border:1px solid #FECACA; border-radius:8px; padding:8px 10px;">
+                                <div style="display:flex; justify-content:space-between; font-weight:800; color:#0F172A;">
+                                    <span>3. Bileşik Hareket Kalitesi (%${f.compoundPct})</span>
+                                    <span class="tabular-nums" style="color:#B91C1C;">${f.compoundScoreDone} / 20p</span>
+                                </div>
+                                <div style="font-size:11px; color:#475569; margin-top:2px;">McGill (2015) & Javorek: Çok eklemli temel hareketlerin (Squat, Hinge, Press, Row) oranı %60+ olduğunda tam puan verir.</div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top:12px;">
+                            <div style="font-size:11.5px; font-weight:900; color:#991B1B; margin-bottom:6px;">📐 10 ANA KAS GRUBU PUAN DÖKÜMÜ:</div>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                                ${muscleRowsHtml}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MAVİ KARDİYO KARTI -->
+                    <div style="background:#F0F9FF; border:2px solid #0284C7; border-radius:14px; padding:14px 16px; color:#0F172A;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <span style="font-size:13px; font-weight:900; color:#0369A1; letter-spacing:0.02em;">🔵 HAFTALIK KARDİYO PUANI</span>
+                            <span class="tabular-nums" style="font-size:22px; font-weight:900; color:#075985;">${c.totalScore} <span style="font-size:13px; color:#0369A1;">/ 100</span></span>
+                        </div>
+                        <div style="width:100%; height:10px; background:#DBEAFE; border:1px solid #BFDBFE; border-radius:999px; overflow:hidden; margin-bottom:12px;">
+                            <div style="height:100%; width:${c.totalScore}%; background:linear-gradient(90deg, #0284C7 0%, #2563EB 100%); border-radius:999px;"></div>
+                        </div>
+
+                        <div style="display:flex; flex-direction:column; gap:8px; font-size:12px;">
+                            <div style="background:#FFFFFF; border:1px solid #BAE6FD; border-radius:8px; padding:8px 10px;">
+                                <div style="display:flex; justify-content:space-between; font-weight:800; color:#0F172A;">
+                                    <span>1. Haftalık Adım (${c.weeklyStepsTotal.toLocaleString('tr-TR')} / 56.000)</span>
+                                    <span class="tabular-nums" style="color:#0369A1;">${c.stepsScore} / 40p</span>
+                                </div>
+                                <div style="font-size:11px; color:#475569; margin-top:2px;">Paluch et al. (2022 - Lancet) & Schumann (2022): Günde 8.000 adım CNS yormadan aktif toparlanma sağlar. Her gece 00:01'de önceki günün verisi çekilir.</div>
+                            </div>
+                            <div style="background:#FFFFFF; border:1px solid #BAE6FD; border-radius:8px; padding:8px 10px;">
+                                <div style="display:flex; justify-content:space-between; font-weight:800; color:#0F172A;">
+                                    <span>2. Kardiyo Efor & Nabız Çarpanı (${c.totalEqCardioMin} / 150 dk)</span>
+                                    <span class="tabular-nums" style="color:#0369A1;">${c.cardioEffortScore} / 45p</span>
+                                </div>
+                                <div style="font-size:11px; color:#475569; margin-top:2px;">WHO (2020) & Karvonen TRIMP: &lt;125 bpm = 1.0x, 125-144 bpm (Zone 3) = 1.5x, 145+ bpm (Zone 4+) = 2.0x eşdeğer dakika.</div>
+                            </div>
+                            <div style="background:#FFFFFF; border:1px solid #BAE6FD; border-radius:8px; padding:8px 10px;">
+                                <div style="display:flex; justify-content:space-between; font-weight:800; color:#0F172A;">
+                                    <span>3. Aktif Gün Dağılımı (${c.activeCardioDaysCount} / 3 Gün)</span>
+                                    <span class="tabular-nums" style="color:#0369A1;">${c.cardioFreqScore} / 15p</span>
+                                </div>
+                                <div style="font-size:11px; color:#475569; margin-top:2px;">Kardiyo ve 6.000+ adım toparlanmasını tek güne yığmak yerine haftanın en az 3 ayrı gününe yayma ödülü (Her aktif gün 5p).</div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top:12px;">
+                            <div style="font-size:11.5px; font-weight:900; color:#075985; margin-bottom:6px;">🚣🏃 ANTRENMANLARDAKİ KARDİYO SEANSLARI (${c.totalRawCardioMin} Dk ➔ ${c.totalEqCardioMin} Eşd. Dk):</div>
+                            <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:12px;">
+                                ${cardioExRowsHtml}
+                            </div>
+
+                            <div style="font-size:11.5px; font-weight:900; color:#075985; margin-bottom:6px;">👟 GÜNLÜK ADIM TAKİBİ (HER GECE 00:01 GARMIN SENKRONU • ORT. ${c.dailyAvgSteps.toLocaleString('tr-TR')}/GÜN):</div>
+                            <div style="display:flex; flex-direction:column; gap:5px;">
+                                ${stepsRowsHtml}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
         // RESUME / VISIBILITY LISTENERS
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
@@ -25011,7 +25797,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=264')
+                navigator.serviceWorker.register('./sw.js?v=265')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
@@ -25050,6 +25836,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 renderSplitCards();
                 updateSelectedEquipLabel();
                 updateSelectedParamLabel();
+                refreshTopFitnessCardioScoreBars();
                 const hasRestored = restoreActiveWorkoutStateFromStorage();
                 if (hasRestored) {
                     switchTab('activeWorkoutTab');
@@ -25680,7 +26467,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         defaultReps = parsed;
                     }
                 }
-                let defaultWeight = ex.weightKey && userWeights[ex.weightKey] ? (parseFloat(userWeights[ex.weightKey]) || '') : '';
+                let defaultWeight = getExerciseRememberedWeight(ex);
                 if (isBw && (defaultWeight === '' || defaultWeight === null || isNaN(defaultWeight))) {
                     defaultWeight = 0;
                 }

@@ -8982,6 +8982,24 @@
             color: #DC2626 !important;
         }
 
+        .cal-week-card {
+            background: #FFFFFF !important;
+            border: 1.5px solid #E2E8F0 !important;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+        }
+        .cal-week-card:hover {
+            background: #F8FAFC !important;
+            border-color: #F59E0B !important;
+        }
+        .cal-week-card.is-today {
+            background: linear-gradient(180deg, #FFFBEB 0%, #FFFFFF 100%) !important;
+            border: 2px solid #D97706 !important;
+            box-shadow: 0 4px 16px rgba(217, 119, 6, 0.14) !important;
+        }
+        .cal-week-card-header {
+            border-bottom: 1px solid #E2E8F0 !important;
+        }
+
         /* 10. Modals, Sheets, Popovers & Auth Screen */
         #loginScreen {
             background: radial-gradient(circle at top center, #F0FDF4 0%, #F8FAFC 75%) !important;
@@ -9465,3 +9483,110 @@
         .superset-focus-connector { padding:8px 12px; text-align:center; border-radius:10px; border:1.5px dashed #D97706; background:#FEF3C7; color:#92400E; font-weight:900; font-size:12px; }
         .superset-round-tracker { padding:10px 12px; border:1.5px solid #D97706; border-radius:12px; background:#FFFBEB; color:#0F172A; font-size:12px; font-weight:800; }
         .superset-pair-focus-shell .hevy-exercise-card.is-pair-target { border:2px solid #D97706 !important; box-shadow:0 0 0 3px rgba(245,158,11,0.25) !important; }
+
+        /* ==================== HAFTALIK FİTNESS (KIRMIZI) & KARDİYO (MAVİ) ÜST PUAN BARLARI ==================== */
+        .modern-app-bar { margin-bottom: 8px !important; }
+        .top-fc-score-strip {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.96);
+            border: 1.5px solid #CBD5E1;
+            border-radius: 12px;
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            position: sticky;
+            top: 52px;
+            z-index: 95;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 3px 10px rgba(15, 23, 42, 0.05);
+            transition: border-color 0.15s ease, transform 0.12s ease;
+        }
+        .top-fc-score-strip:hover {
+            border-color: #94A3B8;
+        }
+        .top-fc-score-strip:active {
+            transform: scale(0.995);
+        }
+        .top-fc-bar-col {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+        }
+        .top-fc-bar-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            line-height: 1.1;
+        }
+        .top-fc-bar-label {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .fitness-col .top-fc-bar-label {
+            color: #B91C1C;
+        }
+        .cardio-col .top-fc-bar-label {
+            color: #0369A1;
+        }
+        .top-fc-bar-val {
+            font-size: 11.5px;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+        .fitness-col .top-fc-bar-val {
+            color: #991B1B;
+        }
+        .cardio-col .top-fc-bar-val {
+            color: #075985;
+        }
+        .top-fc-track {
+            width: 100%;
+            height: 8px;
+            border-radius: 999px;
+            overflow: hidden;
+            position: relative;
+        }
+        .fitness-track {
+            background: #FEE2E2;
+            border: 1px solid #FECACA;
+        }
+        .cardio-track {
+            background: #DBEAFE;
+            border: 1px solid #BFDBFE;
+        }
+        .top-fc-fill {
+            height: 100%;
+            border-radius: 999px;
+            transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .fitness-fill {
+            background: linear-gradient(90deg, #DC2626 0%, #EF4444 100%);
+        }
+        .cardio-fill {
+            background: linear-gradient(90deg, #0284C7 0%, #2563EB 100%);
+        }
+        @media (max-width: 600px) {
+            .top-fc-score-strip {
+                gap: 8px;
+                padding: 7px 10px;
+                margin-bottom: 10px;
+                top: 48px;
+            }
+            .top-fc-bar-label {
+                font-size: 10.5px;
+            }
+            .top-fc-bar-val {
+                font-size: 11px;
+            }
+            .top-fc-track {
+                height: 7px;
+            }
+        }

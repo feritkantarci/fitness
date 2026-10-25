@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <!-- Security: CSP & Permissions -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://apis.google.com https://accounts.google.com; connect-src 'self' https://firestore.googleapis.com https://generativelanguage.googleapis.com https://fitness-4f427.firebaseio.com https://fitness-4f427-default-rtdb.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://raw.githubusercontent.com https://cdn.jsdelivr.net https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com https://api.emailjs.com data: blob:; img-src 'self' data: blob: https://lh3.googleusercontent.com https://www.gstatic.com https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; media-src 'self' data: blob:; frame-src 'self' https://fitness-4f427.firebaseapp.com https://accounts.google.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://apis.google.com https://accounts.google.com; connect-src 'self' http://127.0.0.1:3847 https://firestore.googleapis.com https://generativelanguage.googleapis.com https://fitness-4f427.firebaseio.com https://fitness-4f427-default-rtdb.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://raw.githubusercontent.com https://cdn.jsdelivr.net https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com https://api.emailjs.com data: blob:; img-src 'self' data: blob: https://lh3.googleusercontent.com https://www.gstatic.com https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; media-src 'self' data: blob:; frame-src 'self' https://fitness-4f427.firebaseapp.com https://accounts.google.com;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="theme-color" content="#0B0F17">
@@ -23,7 +23,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=264">
+    <link rel="stylesheet" href="css/style.css?v=265">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH (CANVA MODERN ATHLETIC LIGHT V229) */
         html, body { background-color: #F8FAFC; color: #0F172A; color-scheme: light; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -35,7 +35,7 @@
     <!-- ==================== LOGIN SCREEN ==================== -->
     <div id="loginScreen" class="active">
         <div class="login-card">
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v264</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v265</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -175,7 +175,7 @@
                     <span class="canva-brand-monogram" aria-hidden="true" translate="no">Ç</span>
                     <div class="canva-brand-stack">
                         <span class="modern-brand-title" translate="no">Çelik Kodu</span>
-                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v264</span>
+                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v265</span>
                     </div>
                 </div>
                 <div class="modern-bar-actions">
@@ -184,10 +184,23 @@
                         <span class="modern-user-name" id="headerUserName">Sporcu</span>
                         <span class="auth-role-tag role-admin" id="headerUserRoleBadge">Yönetici</span>
                     </div>
+                    <button type="button" id="btnHeaderNotifications" class="btn-header-popup-toggle" onclick="toggleHeaderNotificationCenter(event)" title="Bildirim Merkezi" style="position:relative;padding:6px 10px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                        <span id="headerNotifBadge" style="display:none;position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#EF4444;color:#FFFFFF;font-size:10.5px;font-weight:800;line-height:18px;text-align:center;box-shadow:0 2px 6px rgba(239,68,68,0.45);">0</span>
+                    </button>
                     <button type="button" class="btn-header-popup-toggle" onclick="toggleHeaderPopupMenu(event)" title="Seçenekler ve Menü">
                         <span class="desktop-only-action">İşlemler</span>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </button>
+
+                    <!-- HEADER NOTIFICATION CENTER (SAĞ ÜST TOPLU BİLDİRİM MERKEZİ) -->
+                    <div id="headerNotificationCenter" class="header-popup-menu" style="display:none;width:360px;max-width:calc(100vw - 24px);max-height:440px;overflow-y:auto;padding:12px;background:#FFFFFF;color:#0F172A;border:1px solid #CBD5E1;border-radius:14px;box-shadow:0 14px 32px rgba(15,23,42,0.22);">
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid #E2E8F0;">
+                            <strong style="font-size:13.5px;color:#0F172A;">🔔 Bildirim Merkezi</strong>
+                            <button type="button" onclick="clearAllAppNotifications(event)" style="background:#F1F5F9;color:#475569;border:1px solid #CBD5E1;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;">Tümünü Temizle</button>
+                        </div>
+                        <div id="headerNotificationList" style="display:flex;flex-direction:column;gap:8px;"></div>
+                    </div>
 
                     <!-- HEADER POPUP MENU (PROFESYONEL GİZLENEBİLİR POPUP) -->
                     <div id="headerPopupMenu" class="header-popup-menu" style="display:none;">
@@ -212,6 +225,28 @@
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                             <span>Oturumu Kapat</span>
                         </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HAFTALIK FİTNESS (KIRMIZI) & KARDİYO (MAVİ) PUAN BARLARI (ÜST BARIN HEMEN ALTI - MOBİL & MASAÜSTÜ SABİT) -->
+            <div id="topFitnessCardioScoreStrip" class="top-fc-score-strip" onclick="openFitnessCardioScoreAnalytics()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openFitnessCardioScoreAnalytics();}" title="Detaylı Fitness & Kardiyo Puan Hesabını Gör">
+                <div class="top-fc-bar-col fitness-col">
+                    <div class="top-fc-bar-head">
+                        <span class="top-fc-bar-label">🔴 HAFTALIK FİTNESS</span>
+                        <span class="top-fc-bar-val tabular-nums" id="topFitnessScoreVal">0 / 100</span>
+                    </div>
+                    <div class="top-fc-track fitness-track">
+                        <div class="top-fc-fill fitness-fill" id="topFitnessScoreFill" style="width:0%;"></div>
+                    </div>
+                </div>
+                <div class="top-fc-bar-col cardio-col">
+                    <div class="top-fc-bar-head">
+                        <span class="top-fc-bar-label">🔵 HAFTALIK KARDİYO</span>
+                        <span class="top-fc-bar-val tabular-nums" id="topCardioScoreVal">0 / 100</span>
+                    </div>
+                    <div class="top-fc-track cardio-track">
+                        <div class="top-fc-fill cardio-fill" id="topCardioScoreFill" style="width:0%;"></div>
                     </div>
                 </div>
             </div>
@@ -818,6 +853,16 @@
                             </span>
                         </div>
 
+                        <!-- KÜTÜPHANE MOD SEKMELERİ: FITNESS vs KARDİYO & KONDİSYON -->
+                        <div style="display:flex; gap:8px; margin-bottom:14px; background:#F1F5F9; padding:5px; border-radius:12px; border:1px solid #CBD5E1;">
+                            <button type="button" id="libModeFitnessBtn" onclick="switchLibraryExerciseMode('fitness')" style="flex:1; padding:9px 12px; font-size:12.5px; font-weight:800; border-radius:9px; border:1.5px solid #0F172A; background:#0F172A; color:#FFFFFF; cursor:pointer; transition:all 0.15s;">
+                                🏋️ Fitness & Ağırlık Hareketleri
+                            </button>
+                            <button type="button" id="libModeCardioBtn" onclick="switchLibraryExerciseMode('cardio')" style="flex:1; padding:9px 12px; font-size:12.5px; font-weight:800; border-radius:9px; border:1.5px solid transparent; background:transparent; color:#0F172A; cursor:pointer; transition:all 0.15s;">
+                                🚣🏃 Kardiyo Seansları (Kürek • Koşu • Yürüyüş)
+                            </button>
+                        </div>
+
                         <!-- SEARCH & FILTERS -->
                         <div class="lib-filter-panel" style="background:#FFFFFF; border:1.5px solid #E2E8F0; border-radius:16px; padding:14px; margin-bottom:16px; box-shadow:0 4px 16px rgba(15,23,42,0.04);">
                             <!-- Search bar -->
@@ -942,6 +987,9 @@
                         <button class="btn btn-outline analytics-subtab-btn active" id="btnSubAnalyticsMuscle" style="font-size:12.5px; padding:6px 12px; border-radius:20px; white-space:nowrap;" onclick="switchAnalyticsSubView('muscle')">
                             Çalışan Kaslar & Harita
                         </button>
+                        <button class="btn btn-outline analytics-subtab-btn" id="btnSubAnalyticsScore" style="font-size:12.5px; padding:6px 12px; border-radius:20px; white-space:nowrap;" onclick="switchAnalyticsSubView('score')">
+                            🎯 Fitness & Kardiyo Puanı
+                        </button>
                         <button class="btn btn-outline analytics-subtab-btn" id="btnSubAnalyticsMobility" style="font-size:12.5px; padding:6px 12px; border-radius:20px; white-space:nowrap;" onclick="switchAnalyticsSubView('mobility')">
                             Esneklik & Hareketlilik
                         </button>
@@ -968,7 +1016,7 @@
                             <span style="display:none;" id="profileCardAvatar"></span>
                             <div>
                                 <h2 style="font-size:18px; font-weight:800; color:#0F172A;" id="profileCardName">Ferit</h2>
-                                <p style="font-size:12.5px; color:var(--text-secondary);" id="profileCardMeta">Kişisel Sporcu Profili & Hedef Kilolar</p>
+                                <p style="font-size:12.5px; color:var(--text-secondary);" id="profileCardMeta">Kişisel Sporcu Profili</p>
                             </div>
                         </div>
                         <button class="btn btn-outline" style="font-size:12px; padding:6px 12px; color:#F87171; border-color:rgba(239,68,68,0.4);" onclick="handleAuthLogout()">
@@ -976,92 +1024,73 @@
                         </button>
                     </div>
 
-                    <!-- CUSTOMIZATION FORM -->
-                    <div class="form-group">
-                        <label class="form-label" for="editUserName">Sporcu Adı</label>
-                        <input type="text" id="editUserName" name="athleteName" class="form-input" autocomplete="off">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Avatar Seç</label>
-                        <div class="avatar-picker-grid" id="avatarPicker">
-                            <div class="avatar-choice" onclick="selectAvatar('🥋')">🥋</div>
-                            <div class="avatar-choice" onclick="selectAvatar('🦁')">🦁</div>
-                            <div class="avatar-choice" onclick="selectAvatar('⚡')">⚡</div>
-                            <div class="avatar-choice" onclick="selectAvatar('🛡️')">🛡️</div>
-                            <div class="avatar-choice" onclick="selectAvatar('🦅')">🦅</div>
-                            <div class="avatar-choice" onclick="selectAvatar('🐺')">🐺</div>
-                            <div class="avatar-choice" onclick="selectAvatar('👑')">👑</div>
-                            <div class="avatar-choice" onclick="selectAvatar('🔥')">🔥</div>
-                            <div class="avatar-choice" onclick="selectAvatar('🏋️‍♂️')">🏋️‍♂️</div>
-                            <div class="avatar-choice" onclick="selectAvatar('🏋️‍♀️')">🏋️‍♀️</div>
+                    <!-- COLLAPSIBLE CUSTOMIZATION FORM (DEFAULT CLOSED) -->
+                    <button type="button" id="profileEditToggleBtn" onclick="toggleProfileCustomizationDrawer()" aria-expanded="false" style="width:100%; display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:12px; padding:12px 14px; cursor:pointer; text-align:left;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="font-size:18px;" aria-hidden="true">⚙️</span>
+                            <div>
+                                <div style="font-size:13px; font-weight:800; color:#0F172A;">Profil & Görünüm Ayarları</div>
+                                <div style="font-size:11px; color:#475569;">Sporcu adı, avatar, tema rengi ve seviye</div>
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Tema Rengi</label>
-                        <div class="theme-picker-grid" id="themePicker">
-                            <div class="theme-pill" style="background:#f59e0b;" onclick="selectTheme('gold')">Altın Çelik</div>
-                            <div class="theme-pill" style="background:#0284c7;" onclick="selectTheme('cyan')">Siber Mavi</div>
-                            <div class="theme-pill" style="background:#16a34a;" onclick="selectTheme('green')">Zümrüt Zırh</div>
-                            <div class="theme-pill" style="background:#e11d48;" onclick="selectTheme('red')">Lav Kırmızı</div>
-                            <div class="theme-pill" style="background:#7c3aed;" onclick="selectTheme('purple')">Gladyatör Mor</div>
-                        </div>
-                    </div>
-
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;" class="form-group">
-                        <div>
-                            <label class="form-label" for="editUserLevel">Seviye</label>
-                            <select id="editUserLevel" class="form-select">
-                                <option value="Başlangıç">Başlangıç (0-6 Ay)</option>
-                                <option value="Orta Seviye">Orta Seviye (6-18 Ay)</option>
-                                <option value="İleri Seviye">İleri Seviye (18+ Ay)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="form-label" for="editUserGender">Cinsiyet</label>
-                            <select id="editUserGender" class="form-select">
-                                <option value="Erkek">Erkek</option>
-                                <option value="Kadın">Kadın</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- CUSTOM WEIGHT BENCHMARKS -->
-                    <h3 style="font-size:14px; font-weight:800; color:var(--gold); margin:20px 0 8px;">⚖️ Kişisel Çalışma Ağırlıklarım (KG)</h3>
-                    <p style="font-size:11.5px; color:var(--text-secondary); margin-bottom:12px;">
-                        Buraya girdiğiniz kilolar, program oluşturulduğunda ilgili hareket kartlarının üzerine <strong>“🎯 Hedefin: X kg”</strong> olarak otomatik yansır.
-                    </p>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                        <div class="form-group">
-                            <label class="form-label" for="w_press">Omuz Presi (Çift Dambıl/Bar)</label>
-                            <input type="number" id="w_press" class="form-input" inputmode="decimal" placeholder="Örn: 16…">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="w_squat">Goblet / Back Squat</label>
-                            <input type="number" id="w_squat" class="form-input" inputmode="decimal" placeholder="Örn: 22…">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="w_row">Testere / Sırt Çekiş (Row)</label>
-                            <input type="number" id="w_row" class="form-input" inputmode="decimal" placeholder="Örn: 20…">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="w_rdl">Romanian Deadlift (RDL)</label>
-                            <input type="number" id="w_rdl" class="form-input" inputmode="decimal" placeholder="Örn: 24…">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="w_swing">Dambıl / Kettlebell Swing</label>
-                            <input type="number" id="w_swing" class="form-input" inputmode="decimal" placeholder="Örn: 18…">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="w_lunge">Lunge / Split Squat</label>
-                            <input type="number" id="w_lunge" class="form-input" inputmode="decimal" placeholder="Örn: 14…">
-                        </div>
-                    </div>
-
-                    <button class="btn btn-gold" style="width:100%; padding:14px; font-weight:800; margin-top:12px;" onclick="saveCurrentProfile()">
-                        💾 DEĞİŞİKLİKLERİ VE KİLOLARIMI KAYDET
+                        <span id="profileEditToggleArrow" style="font-size:11.5px; font-weight:800; color:#0369A1; background:#E0F2FE; padding:4px 10px; border-radius:99px;">▼ Göster</span>
                     </button>
+
+                    <div id="profileCustomizationDrawer" style="display:none; background:#FFFFFF; border:1.5px solid #E2E8F0; border-radius:12px; padding:14px; margin-top:10px;">
+                        <div class="form-group">
+                            <label class="form-label" for="editUserName">Sporcu Adı</label>
+                            <input type="text" id="editUserName" name="athleteName" class="form-input" autocomplete="off">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Avatar Seç</label>
+                            <div class="avatar-picker-grid" id="avatarPicker">
+                                <div class="avatar-choice" onclick="selectAvatar('🥋')">🥋</div>
+                                <div class="avatar-choice" onclick="selectAvatar('🦁')">🦁</div>
+                                <div class="avatar-choice" onclick="selectAvatar('⚡')">⚡</div>
+                                <div class="avatar-choice" onclick="selectAvatar('🛡️')">🛡️</div>
+                                <div class="avatar-choice" onclick="selectAvatar('🦅')">🦅</div>
+                                <div class="avatar-choice" onclick="selectAvatar('🐺')">🐺</div>
+                                <div class="avatar-choice" onclick="selectAvatar('👑')">👑</div>
+                                <div class="avatar-choice" onclick="selectAvatar('🔥')">🔥</div>
+                                <div class="avatar-choice" onclick="selectAvatar('🏋️‍♂️')">🏋️‍♂️</div>
+                                <div class="avatar-choice" onclick="selectAvatar('🏋️‍♀️')">🏋️‍♀️</div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Tema Rengi</label>
+                            <div class="theme-picker-grid" id="themePicker">
+                                <div class="theme-pill" style="background:#f59e0b;" onclick="selectTheme('gold')">Altın Çelik</div>
+                                <div class="theme-pill" style="background:#0284c7;" onclick="selectTheme('cyan')">Siber Mavi</div>
+                                <div class="theme-pill" style="background:#16a34a;" onclick="selectTheme('green')">Zümrüt Zırh</div>
+                                <div class="theme-pill" style="background:#e11d48;" onclick="selectTheme('red')">Lav Kırmızı</div>
+                                <div class="theme-pill" style="background:#7c3aed;" onclick="selectTheme('purple')">Gladyatör Mor</div>
+                            </div>
+                        </div>
+
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;" class="form-group">
+                            <div>
+                                <label class="form-label" for="editUserLevel">Seviye</label>
+                                <select id="editUserLevel" class="form-select">
+                                    <option value="Başlangıç">Başlangıç (0-6 Ay)</option>
+                                    <option value="Orta Seviye">Orta Seviye (6-18 Ay)</option>
+                                    <option value="İleri Seviye">İleri Seviye (18+ Ay)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label" for="editUserGender">Cinsiyet</label>
+                                <select id="editUserGender" class="form-select">
+                                    <option value="Erkek">Erkek</option>
+                                    <option value="Kadın">Kadın</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-gold" style="width:100%; padding:14px; font-weight:800; margin-top:8px;" onclick="saveCurrentProfile()">
+                            💾 PROFİL DEĞİŞİKLİKLERİNİ KAYDET
+                        </button>
+                    </div>
 
                     <!-- HESAP PAROLASI DEĞİŞTİRME -->
                     <div style="background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:12px; padding:14px; margin-top:16px;">
@@ -1088,8 +1117,8 @@
                     </div>
 
                     <!-- GOOGLE GEMINI AI CONFIGURATION -->
-                    <div style="background:rgba(192, 132, 252, 0.08); border:1px solid rgba(192, 132, 252, 0.3); border-radius:10px; padding:14px; margin-top:20px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <div id="profileGeminiConfigCard" style="background:rgba(192, 132, 252, 0.08); border:1px solid rgba(192, 132, 252, 0.3); border-radius:10px; padding:14px; margin-top:20px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
                             <div style="display:flex; align-items:center; gap:8px;">
                                 <span style="font-size:22px;" aria-hidden="true">🤖</span>
                                 <div>
@@ -1099,16 +1128,18 @@
                             </div>
                             <span id="profileGeminiStatusBadge" aria-live="polite" style="font-size:10px; font-weight:800; padding:3px 8px; border-radius:12px; background:rgba(255,255,255,0.1); color:var(--text-secondary);">Kontrol Ediliyor…</span>
                         </div>
-                        <div class="form-group" style="margin-bottom:8px;">
-                            <label class="form-label" for="profileGeminiApiKeyInput" style="font-size:11px;">Gemini API Anahtarı (Google AI Studio)</label>
-                            <div style="display:flex; gap:6px;">
-                                <input type="password" id="profileGeminiApiKeyInput" name="geminiApiKey" class="form-input" placeholder="AIzaSy… anahtarınızı girin" autocomplete="off" spellcheck="false">
-                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 12px; border-color:#c084fc; color:#c084fc; font-weight:800; white-space:nowrap;" onclick="testAndSaveGeminiKeyFromProfile()">⚡ Test Et & Kaydet</button>
+                        <div id="profileGeminiAdminControls" style="display:none; margin-top:10px;">
+                            <div class="form-group" style="margin-bottom:8px;">
+                                <label class="form-label" for="profileGeminiApiKeyInput" style="font-size:11px;">Gemini API Anahtarı (Yalnızca Yönetici)</label>
+                                <div style="display:flex; gap:6px;">
+                                    <input type="password" id="profileGeminiApiKeyInput" name="geminiApiKey" class="form-input" placeholder="AIzaSy… anahtarınızı girin" autocomplete="off" spellcheck="false">
+                                    <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 12px; border-color:#c084fc; color:#c084fc; font-weight:800; white-space:nowrap;" onclick="testAndSaveGeminiKeyFromProfile()">⚡ Test Et & Kaydet</button>
+                                </div>
                             </div>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; flex-wrap:wrap; gap:6px;">
-                            <span style="color:var(--text-secondary);">🔒 Anahtar sadece yerel cihazınızda (localStorage) saklanır.</span>
-                            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="color:var(--cyan); text-decoration:underline; font-weight:700;">🔗 Ücretsiz API Key Al (Google AI Studio) ➔</a>
+                            <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; flex-wrap:wrap; gap:6px;">
+                                <span style="color:var(--text-secondary);">🔒 Anahtar yalnızca yöneticiye görünür; sporcular arka planda sınırsız kullanır.</span>
+                                <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="color:var(--cyan); text-decoration:underline; font-weight:700;">🔗 Ücretsiz API Key Al (Google AI Studio) ➔</a>
+                            </div>
                         </div>
                     </div>
 
@@ -1441,9 +1472,6 @@
                 <div style="display:flex; gap:6px; flex-wrap:wrap;">
                     <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 12px; color:#B91C1C; border-color:rgba(239,68,68,0.3);" onclick="setDayAsRest()">
                         🧘 Dinlenme Günü Yap
-                    </button>
-                    <button type="button" class="btn btn-danger-soft" style="font-size:12px; padding:8px 12px; font-weight:700;" onclick="cancelActiveWorkoutFromModal()">
-                        🛑 Aktif Antrenmanı İptal Et
                     </button>
                 </div>
                 <div style="display:flex; gap:6px;">
@@ -2299,7 +2327,7 @@
                             <span style="font-size:11px; font-weight:800; color:#6B21A8; display:flex; align-items:center; gap:5px;">
                                 <span>🤖</span> <span>Biyomekanik Koça Durumunu Bildir:</span>
                             </span>
-                            <span style="font-size:10px; color:var(--cyan); cursor:pointer; font-weight:700;" onclick="editGeminiApiKey()">⚙️ API Anahtarını Değiştir</span>
+                            <span id="btnEditGeminiKeyModal" style="display:none; font-size:10px; color:var(--cyan); cursor:pointer; font-weight:700;" onclick="editGeminiApiKey()">⚙️ API Anahtarını Değiştir</span>
                         </div>
                         <!-- QUICK AI PROMPTS -->
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-bottom:8px;">
@@ -2694,10 +2722,129 @@
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
     <script src="js/exercises-db.js?v=245"></script>
-    <script src="js/app.js?v=264"></script>
+    <script src="js/app.js?v=265"></script>
     <script>
+        function getNotifStorageKey() {
+            const uid = localStorage.getItem('celik_kodu_active_user_id') || 'default';
+            return 'celik_kodu_notifications_' + uid;
+        }
+        function getStoredAppNotifications() {
+            try {
+                const raw = localStorage.getItem(getNotifStorageKey());
+                const parsed = raw ? JSON.parse(raw) : [];
+                return Array.isArray(parsed) ? parsed : [];
+            } catch {
+                return [];
+            }
+        }
+        function saveStoredAppNotifications(list) {
+            try {
+                localStorage.setItem(getNotifStorageKey(), JSON.stringify((list || []).slice(0, 50)));
+            } catch {}
+        }
+        function escNotifHtml(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+        function renderHeaderNotifications() {
+            const listEl = document.getElementById('headerNotificationList');
+            const badgeEl = document.getElementById('headerNotifBadge');
+            const items = getStoredAppNotifications();
+            const unreadCount = items.filter(x => !x.read).length;
+            if (badgeEl) {
+                if (unreadCount > 0) {
+                    badgeEl.style.display = 'inline-block';
+                    badgeEl.textContent = unreadCount > 99 ? '99+' : String(unreadCount);
+                } else {
+                    badgeEl.style.display = 'none';
+                }
+            }
+            if (!listEl) return;
+            if (items.length === 0) {
+                listEl.innerHTML = '<div style="padding:18px 10px;text-align:center;font-size:12.5px;color:#475569;">Henüz bildirim yok.</div>';
+                return;
+            }
+            listEl.innerHTML = items.map(item => {
+                const isGarmin = item.category === 'garmin' || /garmin|tredict|saat/i.test(item.text || '');
+                const badgeBg = isGarmin ? '#DCFCE7' : (item.type === 'warn' ? '#FEF3C7' : '#DBEAFE');
+                const badgeFg = isGarmin ? '#15803D' : (item.type === 'warn' ? '#B45309' : '#0369A1');
+                const badgeLabel = isGarmin ? '⌚ Garmin' : (item.type === 'warn' ? '⚠️ Uyarı' : '🔔 Bildirim');
+                return `
+                    <div style="background:${item.read ? '#F8FAFC' : '#EFF6FF'};border:1px solid ${item.read ? '#E2E8F0' : '#93C5FD'};border-radius:10px;padding:9px 11px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                        <div style="min-width:0;flex:1;">
+                            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                                <span style="background:${badgeBg};color:${badgeFg};padding:2px 6px;border-radius:5px;font-size:10.5px;font-weight:800;">${badgeLabel}</span>
+                                <span style="font-size:11px;color:#475569;font-weight:600;">${escNotifHtml(item.timeLabel || '')}</span>
+                            </div>
+                            <div style="font-size:12.5px;font-weight:700;color:#0F172A;line-height:1.4;word-break:break-word;">${escNotifHtml(item.text || '')}</div>
+                        </div>
+                        <button type="button" onclick="deleteAppNotificationItem(event, decodeURIComponent('${encodeURIComponent(item.id)}'))" style="background:transparent;border:none;color:#475569;font-size:14px;cursor:pointer;padding:2px 4px;line-height:1;" title="Sil">✕</button>
+                    </div>
+                `;
+            }).join('');
+        }
+        window.pushAppNotification = function(msg, type = 'success', category = '') {
+            if (!msg) return;
+            const now = new Date();
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            const ss = String(now.getSeconds()).padStart(2, '0');
+            const items = getStoredAppNotifications();
+            // Aynı mesaj 2 saniye içinde tekrar gelirse mükerrer ekleme yapma
+            if (items[0] && items[0].text === String(msg) && (Date.now() - Number(items[0].ts || 0) < 2000)) {
+                return;
+            }
+            const centerEl = document.getElementById('headerNotificationCenter');
+            const isOpen = centerEl && centerEl.style.display === 'block';
+            items.unshift({
+                id: 'n_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                ts: Date.now(),
+                timeLabel: `${hh}:${mm}:${ss}`,
+                text: String(msg),
+                type: type || 'success',
+                category: category || '',
+                read: Boolean(isOpen)
+            });
+            saveStoredAppNotifications(items);
+            renderHeaderNotifications();
+            const btn = document.getElementById('btnHeaderNotifications');
+            if (btn) {
+                btn.style.borderColor = '#22C55E';
+                setTimeout(() => { if (btn) btn.style.borderColor = ''; }, 1200);
+            }
+        };
+        function toggleHeaderNotificationCenter(e) {
+            if (e) e.stopPropagation();
+            closeHeaderPopupMenu();
+            const center = document.getElementById('headerNotificationCenter');
+            if (!center) return;
+            const willOpen = center.style.display !== 'block';
+            center.style.display = willOpen ? 'block' : 'none';
+            if (willOpen) {
+                const items = getStoredAppNotifications().map(x => ({ ...x, read: true }));
+                saveStoredAppNotifications(items);
+                renderHeaderNotifications();
+            }
+        }
+        function clearAllAppNotifications(e) {
+            if (e) e.stopPropagation();
+            saveStoredAppNotifications([]);
+            renderHeaderNotifications();
+        }
+        function deleteAppNotificationItem(e, id) {
+            if (e) e.stopPropagation();
+            const items = getStoredAppNotifications().filter(x => x.id !== id);
+            saveStoredAppNotifications(items);
+            renderHeaderNotifications();
+        }
         function toggleHeaderPopupMenu(e) {
             if (e) e.stopPropagation();
+            const center = document.getElementById('headerNotificationCenter');
+            if (center) center.style.display = 'none';
             const menu = document.getElementById('headerPopupMenu');
             if (menu) {
                 menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
@@ -2709,11 +2856,16 @@
         }
         document.addEventListener('click', (e) => {
             const menu = document.getElementById('headerPopupMenu');
-            const btn = document.querySelector('.btn-header-popup-toggle');
-            if (menu && menu.style.display === 'block' && !menu.contains(e.target) && btn && !btn.contains(e.target)) {
+            const center = document.getElementById('headerNotificationCenter');
+            const notifBtn = document.getElementById('btnHeaderNotifications');
+            if (menu && menu.style.display === 'block' && !menu.contains(e.target) && !e.target.closest('.btn-header-popup-toggle')) {
                 menu.style.display = 'none';
             }
+            if (center && center.style.display === 'block' && !center.contains(e.target) && (!notifBtn || !notifBtn.contains(e.target))) {
+                center.style.display = 'none';
+            }
         });
+        document.addEventListener('DOMContentLoaded', renderHeaderNotifications);
         function toggleAiDiagnosticAccordion() {
             const body = document.getElementById('aiDiagnosticAccordionBody');
             const label = document.getElementById('aiDiagnosticToggleLabel');
@@ -2763,5 +2915,6 @@
             </div>
         </div>
     </div>
+    <script src="js/garmin-tredict-bridge.js" defer></script>
 </body>
 </html>
