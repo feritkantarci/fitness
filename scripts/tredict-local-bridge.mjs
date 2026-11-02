@@ -354,16 +354,23 @@ async function deleteTredictStrengthTrainingsByDates(dates = [], deleteAllFuture
   return deletedIds;
 }
 
+function isAllowedOrigin(origin) {
+  if (!origin) return false;
+  return /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin) ||
+         /^https:\/\/([a-z0-9-]+\.)?kantarci\.io$/i.test(origin);
+}
+
 function sendJson(res, status, data, origin) {
-  const allowedOrigin = origin && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin)
-    ? origin
-    : '*';
-  res.writeHead(status, {
+  const headers = {
     'Content-Type': 'application/json; charset=utf-8',
-    'Access-Control-Allow-Origin': allowedOrigin,
     'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, X-Tredict-Token, X-Intervals-Token'
-  });
+  };
+  if (isAllowedOrigin(origin)) {
+    headers['Access-Control-Allow-Origin'] = origin;
+    headers['Vary'] = 'Origin';
+  }
+  res.writeHead(status, headers);
   res.end(JSON.stringify(data));
 }
 
@@ -393,7 +400,11 @@ function readJsonBody(req, maxBytes = 1024 * 1024) {
 }
 
 const server = http.createServer(async (req, res) => {
+  console.log(`[Bridge Req] ${req.method} ${req.url} (Origin: ${req.headers.origin || 'none'})`);
   const origin = req.headers.origin || '';
+  if (origin && !isAllowedOrigin(origin)) {
+    return sendJson(res, 403, { ok: false, error: 'Origin not allowed' }, origin);
+  }
   if (req.method === 'OPTIONS') {
     return sendJson(res, 200, { ok: true }, origin);
   }
@@ -403,29 +414,75 @@ const server = http.createServer(async (req, res) => {
   const intervalsToken = getIntervalsToken(req);
 
   try {
-    if (req.method === 'GET' && url.pathname === '/api/tredict/status') {
+    if (req.method === 'GET' && (url.pathname === '/' || url.pathname === '/api/tredict/status')) {
+      const acceptsHtml = (req.headers['accept'] || '').includes('text/html');
+      let statusData = { ok: false, connected: false, device: 'Garmin', reason: 'unconfigured' };
+
       if (intervalsToken) {
-        const athlete = await callIntervalsApi('/athlete/0', 'GET', null, intervalsToken);
-        return sendJson(res, 200, {
-          ok: true,
-          connected: true,
-          provider: 'intervals.icu',
-          athleteId: athlete.id,
-          athleteName: athlete.name,
-          restingHr: athlete.icu_resting_hr || null,
-          weight: athlete.icu_weight || null,
-          device: 'Garmin Forerunner 945 (Intervals.icu Otomatik Takvim)'
-        }, origin);
+        try {
+          const athlete = await callIntervalsApi('/athlete/0', 'GET', null, intervalsToken);
+          statusData = {
+            ok: true,
+            connected: true,
+            provider: 'intervals.icu',
+            athleteId: athlete.id,
+            athleteName: athlete.name,
+            restingHr: athlete.icu_resting_hr || null,
+            weight: athlete.icu_weight || null,
+            device: 'Garmin Forerunner 945 (Intervals.icu Otomatik Takvim)'
+          };
+        } catch (e) {
+          statusData = { ok: false, connected: false, error: String(e.message || e) };
+        }
+      } else if (tredictToken) {
+        try {
+          const body = await callTredictMcpTool('bodyvalues', {}, tredictToken);
+          statusData = {
+            ok: true,
+            connected: true,
+            provider: 'tredict',
+            device: 'Garmin Forerunner 945',
+            bodyvalues: body?.bodyvalues?.[0] || null
+          };
+        } catch (e) {
+          statusData = { ok: false, connected: false, error: String(e.message || e) };
+        }
+      } else {
+        statusData = { ok: false, connected: false, reason: 'missing_token' };
       }
-      if (!tredictToken) return sendJson(res, 200, { ok: false, connected: false, reason: 'missing_token' }, origin);
-      const body = await callTredictMcpTool('bodyvalues', {}, tredictToken);
-      return sendJson(res, 200, {
-        ok: true,
-        connected: true,
-        provider: 'tredict',
-        device: 'Garmin Forerunner 945',
-        bodyvalues: body?.bodyvalues?.[0] || null
-      }, origin);
+
+      if (url.pathname === '/' && acceptsHtml) {
+        res.writeHead(200, {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Access-Control-Allow-Origin': origin
+        });
+        const isOk = statusData.connected;
+        const html = `<!DOCTYPE html>
+<html lang="tr">
+<head><meta charset="utf-8"><title>Çelik Kodu — Garmin & Tredict Köprüsü</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0B1120; color: #F8FAFC; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+.card { background: #1E293B; border: 1px solid #334155; border-radius: 16px; padding: 28px 32px; max-width: 460px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; }
+.badge { display: inline-block; padding: 6px 14px; border-radius: 999px; font-weight: 800; font-size: 13px; margin-bottom: 16px; background: ${isOk ? '#DCFCE7' : '#FEF3C7'}; color: ${isOk ? '#15803D' : '#B45309'}; }
+h1 { font-size: 20px; margin: 0 0 10px; color: #FFFFFF; }
+p { font-size: 14px; color: #94A3B8; line-height: 1.5; margin: 0 0 20px; }
+.btn { display: inline-block; background: #0284C7; color: #FFFFFF; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="badge">${isOk ? '● KÖPRÜ CANLI & BAĞLI' : '○ BAĞLANTI BEKLENİYOR'}</div>
+  <h1>Çelik Kodu Köprü Servisi</h1>
+  <p>Cihaz: <strong>${statusData.device || 'Garmin Forerunner 945'}</strong><br>Sağlayıcı: <strong>${statusData.provider || 'Tredict'}</strong></p>
+  <p>Bu köprü arka planda Çelik Kodu ile Garmin saatinizi senkronize etmek için çalışır.</p>
+  <a class="btn" href="http://localhost:3000">Çelik Kodu Uygulamasına Git →</a>
+</div>
+</body>
+</html>`;
+        return res.end(html);
+      }
+
+      return sendJson(res, 200, statusData, origin);
     }
 
     // ─── INTERVALS.ICU DOĞRUDAN OTOMATİK TAKVİM SENKRONU (SIFIR ONAY ENGELİ -> ANINDA GARMIN SAAT) ───
@@ -578,7 +635,7 @@ const server = http.createServer(async (req, res) => {
         const wList = await callIntervalsApi(`/athlete/0/wellness?oldest=${oldest}&newest=${newest}`, 'GET', null, intervalsToken);
         const daily = (Array.isArray(wList) ? wList : []).map(w => ({
           date: String(w.id || ''),
-          steps: Number(w.steps || 0),
+          steps: w.steps != null ? Number(w.steps) : null,
           floorsClimbed: Number(w.floorsClimbed || 0),
           restingHR: w.restingHR ? Number(w.restingHR) : null,
           sleepScore: w.sleepScore ? Number(w.sleepScore) : null,

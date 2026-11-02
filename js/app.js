@@ -15060,10 +15060,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     }
                 } else {
                     if (localUsers.length > 0) {
-                        await docRef.set({
-                            users: localUsers,
-                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                        });
+                        await syncUsersToCloud(localUsers);
                     }
                 }
             } catch (err) {
@@ -15143,11 +15140,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (!isFirebaseReady || !fbDb) return;
             try {
                 updateCloudSyncBadge('syncing', 'Kaydediliyor...');
-                // Güvenlik: Açık metin şifreler (password) ve üçüncü taraf özel API anahtarları (geminiApiKey) asla buluta yazılmaz.
-                // Kriptografik tuzlanmış hash (passwordHash) ve tuz (salt) çoklu cihaz kimlik doğrulama için korunur.
+                // Güvenlik: Açık metin şifreler (password), passwordHash, salt ve üçüncü taraf özel API anahtarları (geminiApiKey) asla buluta yazılmaz.
+                // Kimlik doğrulama verileri istemci cihazda yerel (IndexedDB/localStorage) olarak izole edilir.
                 const sanitizedUsers = (users || []).map(u => {
                     const copy = { ...u };
                     delete copy.password;
+                    delete copy.passwordHash;
+                    delete copy.salt;
                     delete copy.geminiApiKey;
                     Object.keys(copy).forEach(k => {
                         if (copy[k] === undefined) delete copy[k];
@@ -25590,6 +25589,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         function setScoreAnalyticsWeekOffset(offset) {
             currentScoreWeekOffset = Number(offset) || 0;
             renderAnalytics();
+            if (window.GarminTredictChief && typeof window.GarminTredictChief.syncGarminWellnessStepsSilent === 'function') {
+                window.GarminTredictChief.syncGarminWellnessStepsSilent();
+            }
         }
         window.setScoreAnalyticsWeekOffset = setScoreAnalyticsWeekOffset;
 
@@ -25797,7 +25799,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=265')
+                navigator.serviceWorker.register('./sw.js?v=266')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();

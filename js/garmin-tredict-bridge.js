@@ -17,7 +17,7 @@
 (function () {
   'use strict';
 
-  const BRIDGE_URL = 'http://127.0.0.1:3847';
+  const BRIDGE_URL = '';
   const TELEMETRY_STORAGE_KEY = 'celik_garmin_telemetry_v2';
   const WELLNESS_STEPS_KEY = 'celik_garmin_wellness_steps_v1';
   const RESOLVED_SETS_KEY = 'celik_garmin_resolved_sets_v1';
@@ -36,7 +36,12 @@
     '2026-10-22': { date: '2026-10-22', steps: 3972, floorsClimbed: 3, restingHR: 55 },
     '2026-10-23': { date: '2026-10-23', steps: 4811, floorsClimbed: 4, restingHR: 53 },
     '2026-10-24': { date: '2026-10-24', steps: 4835, floorsClimbed: 3, restingHR: 53 },
-    '2026-10-25': { date: '2026-10-25', steps: 1908, floorsClimbed: 1, restingHR: 54 }
+    '2026-10-25': { date: '2026-10-25', steps: 1978, floorsClimbed: 1, restingHR: 54 },
+    '2026-10-26': { date: '2026-10-26', steps: 3778, floorsClimbed: 1, restingHR: 53, sleepScore: 90 },
+    '2026-10-27': { date: '2026-10-27', steps: 4745, floorsClimbed: 1, restingHR: 57 },
+    '2026-10-28': { date: '2026-10-28', steps: 9877, floorsClimbed: 14, restingHR: 52, sleepScore: 72 },
+    '2026-10-29': { date: '2026-10-29', steps: 10166, floorsClimbed: 15, restingHR: 53, sleepScore: 77 },
+    '2026-10-30': { date: '2026-10-30', steps: 49, floorsClimbed: 0, restingHR: 58 }
   };
 
   const MUSCLE_TO_GARMIN_MAP = {
@@ -175,8 +180,8 @@
       if (explicit === 'true') return true;
       if (explicit === 'false') return false;
     } catch {}
-    // Varsayılan: Yalnızca Ferit KANTARCI (usr_admin / admin) hesabında açık, diğer tüm kullanıcılarda kapalıdır!
-    if (u && (u.id === 'usr_admin' || u.role === 'admin' || /ferit/i.test(String(u.name || '')))) {
+    // Varsayılan: Ferit KANTARCI hesabı, admin veya yerel oturumda (default) açık
+    if (!u || u.id === 'usr_admin' || u.role === 'admin' || /ferit/i.test(String(u.name || ''))) {
       return true;
     }
     return false;
@@ -1655,6 +1660,12 @@
         localStorage.setItem(WELLNESS_STEPS_KEY, JSON.stringify(current));
         if (typeof window.refreshTopFitnessCardioScoreBars === 'function') {
           window.refreshTopFitnessCardioScoreBars();
+        }
+        if (typeof window.renderAnalytics === 'function') {
+          const tab = document.getElementById('analyticsTab');
+          if (tab && tab.classList.contains('active')) {
+            window.renderAnalytics();
+          }
         }
         return true;
       }
