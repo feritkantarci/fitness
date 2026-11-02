@@ -122,9 +122,17 @@ Kullanıcı "canlıya al / push et" dediğinde şu adımlar uygulanır:
 
 ---
 
-## 11. Kısa Metin & Göz Yormayan Mikro-Metin Yasası (Sohbet ve Arayüz)
+## 11. Kısa Metin, Göz Yormayan Mikro-Metin ve Kullanıcı Dili Yasası (Sohbet ve Arayüz)
+* **Sıfır Kod ve Teknik Terim Yasası (Kullanıcı Dili):**
+  - Kullanıcı kod yazmayı bilmediği için, açıkça sormadıkça sohbet yanıtlarında dosya adları, fonksiyon/değişken isimleri, kod parçacıkları veya teknik terimler ASLA kullanılmaz.
+  - Tüm açıklamalar bir kullanıcının tek bakışta anlayacağı günlük, sade ve net Türkçe ile yazılır.
 * **Uzun Cümle Yasağı:** Hem sohbet yanıtlarında hem uygulama arayüzünde (`index.html`, `js/app.js` içindeki kartlar, rozetler, `<select>` kutuları ve alt açıklamalar) göz yorgunluğu ve kalabalık yaratan uzun cümleler kullanılmaz.
 * **Mikro-Metin Standardı:** Başlıklar, rozetler ve seçenekler 2–5 kelimelik sade ifadelerle tutulur (örn. `"⚖️ Orta Süperset"`, `"3 Gün Tüm Vücut"`).
 * **Tek Satırlık Yanıtlar:** Sohbet cevaplarında her adım/madde tek satırda net olarak yazılır.
+* **ADHD Dostu Yalın Üretim, Tavsiye ve Pop-up Tasarım Yasası:**
+  - **Yalınlık & İşlevsellik Filtresi:** Yeni bir özellik, soru akışı veya tavsiye tasarlanırken yalnızca sonucu doğrudan değiştiren en az sayıda adım kullanılır; sistemin geçmiş veriden zaten bildiği bilgiler kullanıcıya tekrar sorulmaz.
+  - **Sıfır İkon Kalabalığı:** Seçenekli soru kutularında ve hızlı karar ekranlarında dikkat dağıtan emoji/ikonlar kullanılmaz; yalnızca net, 1–2 kelimelik yüksek kontrastlı butonlar kullanılır.
+  - **Ana Ekranı Kalabalıklaştırmayan Pop-up Akışı:** Kullanıcıdan işlem öncesi ek bilgi alınması gerektiğinde ana ekranda sürekli yer kaplayan sabit bloklar yerine, pencereye tam oturan, kaydırma gerektirmeyen ve varsayılanları seçili gelen yalın pop-up ekranı tercih edilir.
+
 
 

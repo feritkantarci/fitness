@@ -25,24 +25,8 @@
   const SENT_MANIFESTS_KEY = 'celik_garmin_sent_manifests_v1';
   const GARMIN_ENABLED_PREFIX = 'celik_garmin_enabled_';
 
-  const DEFAULT_GARMIN_WELLNESS_STEPS = {
-    '2026-10-15': { date: '2026-10-15', steps: 3857, floorsClimbed: 0, restingHR: 55 },
-    '2026-10-16': { date: '2026-10-16', steps: 5760, floorsClimbed: 7, restingHR: 58 },
-    '2026-10-17': { date: '2026-10-17', steps: 2716, floorsClimbed: 4, restingHR: 56 },
-    '2026-10-18': { date: '2026-10-18', steps: 2630, floorsClimbed: 2, restingHR: 54 },
-    '2026-10-19': { date: '2026-10-19', steps: 1001, floorsClimbed: 0, restingHR: 57 },
-    '2026-10-20': { date: '2026-10-20', steps: 3714, floorsClimbed: 0, restingHR: 51 },
-    '2026-10-21': { date: '2026-10-21', steps: 6723, floorsClimbed: 9, restingHR: 51 },
-    '2026-10-22': { date: '2026-10-22', steps: 3972, floorsClimbed: 3, restingHR: 55 },
-    '2026-10-23': { date: '2026-10-23', steps: 4811, floorsClimbed: 4, restingHR: 53 },
-    '2026-10-24': { date: '2026-10-24', steps: 4835, floorsClimbed: 3, restingHR: 53 },
-    '2026-10-25': { date: '2026-10-25', steps: 1978, floorsClimbed: 1, restingHR: 54 },
-    '2026-10-26': { date: '2026-10-26', steps: 3778, floorsClimbed: 1, restingHR: 53, sleepScore: 90 },
-    '2026-10-27': { date: '2026-10-27', steps: 4745, floorsClimbed: 1, restingHR: 57 },
-    '2026-10-28': { date: '2026-10-28', steps: 9877, floorsClimbed: 14, restingHR: 52, sleepScore: 72 },
-    '2026-10-29': { date: '2026-10-29', steps: 10166, floorsClimbed: 15, restingHR: 53, sleepScore: 77 },
-    '2026-10-30': { date: '2026-10-30', steps: 49, floorsClimbed: 0, restingHR: 58 }
-  };
+  // Kişisel sağlık verileri kaynak kodda sabit tutulmaz; yalnızca kullanıcının kendi yerel önbelleğinden okunur
+  const DEFAULT_GARMIN_WELLNESS_STEPS = {};
 
   const MUSCLE_TO_GARMIN_MAP = {
     chest: ['CHEST'],
@@ -172,24 +156,56 @@
     return null;
   }
 
+  function isPersonalGarminOwner(u) {
+    if (!u || !u.id) return false;
+    return u.id === 'usr_admin' || u.id === 'usr_ferit' || /ferit/i.test(String(u.name || ''));
+  }
+
+  function getScopedGarminKey(baseKey) {
+    const u = getCurrentUserObj();
+    const uid = (u && u.id) ? u.id : 'usr_admin';
+    return `${baseKey}_${uid}`;
+  }
+
+  function migrateLegacyGarminStorageToOwner() {
+    try {
+      const legacyKeys = [
+        TELEMETRY_STORAGE_KEY,
+        WELLNESS_STEPS_KEY,
+        RESOLVED_SETS_KEY,
+        OUTBOX_PLANS_KEY,
+        SENT_MANIFESTS_KEY
+      ];
+      legacyKeys.forEach(baseKey => {
+        const legacyVal = localStorage.getItem(baseKey);
+        if (legacyVal !== null) {
+          const ownerKey = `${baseKey}_usr_admin`;
+          if (!localStorage.getItem(ownerKey)) {
+            localStorage.setItem(ownerKey, legacyVal);
+          }
+          localStorage.removeItem(baseKey);
+        }
+      });
+      localStorage.removeItem('celik_workout_logs');
+    } catch {}
+  }
+
   function isGarminEnabledForCurrentUser() {
     const u = getCurrentUserObj();
-    const uid = u && u.id ? u.id : 'default';
+    if (!isPersonalGarminOwner(u)) return false;
+    const uid = u.id;
     try {
       const explicit = localStorage.getItem(GARMIN_ENABLED_PREFIX + uid);
       if (explicit === 'true') return true;
       if (explicit === 'false') return false;
     } catch {}
-    // Varsayılan: Ferit KANTARCI hesabı, admin veya yerel oturumda (default) açık
-    if (!u || u.id === 'usr_admin' || u.role === 'admin' || /ferit/i.test(String(u.name || ''))) {
-      return true;
-    }
-    return false;
+    return true;
   }
 
   window.toggleGarminIntegrationForUser = function (enableFlag) {
     const u = getCurrentUserObj();
-    const uid = u && u.id ? u.id : 'default';
+    if (!isPersonalGarminOwner(u)) return;
+    const uid = u.id;
     const nextVal = typeof enableFlag === 'boolean' ? enableFlag : !isGarminEnabledForCurrentUser();
     try {
       localStorage.setItem(GARMIN_ENABLED_PREFIX + uid, nextVal ? 'true' : 'false');
@@ -299,8 +315,9 @@
   }
 
   function getSentManifestsMap() {
+    if (!isGarminEnabledForCurrentUser()) return {};
     try {
-      const raw = localStorage.getItem(SENT_MANIFESTS_KEY);
+      const raw = localStorage.getItem(getScopedGarminKey(SENT_MANIFESTS_KEY));
       if (raw) {
         const parsed = JSON.parse(raw);
         if (parsed && typeof parsed === 'object') {
@@ -312,6 +329,7 @@
   }
 
   function saveSentWorkoutManifest(workoutTitle, exercisesList, activityOrDateKey) {
+    if (!isGarminEnabledForCurrentUser()) return null;
     const manifests = getSentManifestsMap();
     const key = activityOrDateKey || ('latest_' + String(workoutTitle || 'seans').toLowerCase().replace(/\s+/g, '_'));
     const plannedExercises = (exercisesList || []).map((item, idx) => {
@@ -342,7 +360,7 @@
     manifests[key] = manifestObj;
     manifests.__lastSent = manifestObj;
     try {
-      localStorage.setItem(SENT_MANIFESTS_KEY, JSON.stringify(manifests));
+      localStorage.setItem(getScopedGarminKey(SENT_MANIFESTS_KEY), JSON.stringify(manifests));
     } catch {}
     return manifestObj;
   }
@@ -364,13 +382,14 @@
   function getStoredActivities() {
     if (!isGarminEnabledForCurrentUser()) return [];
     try {
-      const raw = localStorage.getItem(TELEMETRY_STORAGE_KEY);
+      const key = getScopedGarminKey(TELEMETRY_STORAGE_KEY);
+      const raw = localStorage.getItem(key);
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
           const filtered = parsed.filter(a => a && !LEGACY_TEST_ACTIVITY_IDS.has(a.id));
           if (filtered.length !== parsed.length) {
-            localStorage.setItem(TELEMETRY_STORAGE_KEY, JSON.stringify(filtered));
+            localStorage.setItem(key, JSON.stringify(filtered));
           }
           return filtered;
         }
@@ -380,16 +399,18 @@
   }
 
   function getResolvedSetsMap() {
+    if (!isGarminEnabledForCurrentUser()) return {};
     try {
-      return JSON.parse(localStorage.getItem(RESOLVED_SETS_KEY) || '{}') || {};
+      return JSON.parse(localStorage.getItem(getScopedGarminKey(RESOLVED_SETS_KEY)) || '{}') || {};
     } catch {
       return {};
     }
   }
 
   function saveResolvedSetsMap(map) {
+    if (!isGarminEnabledForCurrentUser()) return;
     try {
-      localStorage.setItem(RESOLVED_SETS_KEY, JSON.stringify(map));
+      localStorage.setItem(getScopedGarminKey(RESOLVED_SETS_KEY), JSON.stringify(map));
     } catch {}
   }
 
@@ -571,8 +592,9 @@
     const activities = getStoredActivities();
     try {
       const uid = getActiveUserId();
+      if (!uid) return;
       const historyKey = `celik_kodu_history_${uid}`;
-      const rawLogs = JSON.parse(localStorage.getItem(historyKey) || localStorage.getItem('celik_workout_logs') || '[]');
+      const rawLogs = JSON.parse(localStorage.getItem(historyKey) || '[]');
       const logs = Array.isArray(rawLogs)
         ? rawLogs.filter(l => !l || !LEGACY_TEST_ACTIVITY_IDS.has(l.garminActivityId))
         : [];
@@ -668,7 +690,6 @@
 
       if (changed) {
         localStorage.setItem(historyKey, JSON.stringify(logs));
-        localStorage.setItem('celik_workout_logs', JSON.stringify(logs));
         if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
         if (typeof renderHistory === 'function') renderHistory();
       }
@@ -1090,9 +1111,10 @@
     }
 
     try {
-      const outbox = JSON.parse(localStorage.getItem(OUTBOX_PLANS_KEY) || '[]');
+      const outboxKey = getScopedGarminKey(OUTBOX_PLANS_KEY);
+      const outbox = JSON.parse(localStorage.getItem(outboxKey) || '[]');
       outbox.unshift({ createdAt: new Date().toISOString(), intervalsEvents: intervalsEvents || [], planPayload });
-      localStorage.setItem(OUTBOX_PLANS_KEY, JSON.stringify(outbox.slice(0, 10)));
+      localStorage.setItem(outboxKey, JSON.stringify(outbox.slice(0, 10)));
     } catch {}
   }
 
@@ -1304,7 +1326,7 @@
       const res = await fetch(`${BRIDGE_URL}/api/tredict/activities?days=30`);
       const data = await res.json();
       if (data && data.ok && Array.isArray(data.activities) && data.activities.length > 0) {
-        localStorage.setItem(TELEMETRY_STORAGE_KEY, JSON.stringify(data.activities));
+        localStorage.setItem(getScopedGarminKey(TELEMETRY_STORAGE_KEY), JSON.stringify(data.activities));
         syncedLive = true;
       }
     } catch {}
@@ -1591,6 +1613,12 @@
     if (!profileTab) return;
 
     let card = document.getElementById('garminProfileBridgeCard');
+    const u = getCurrentUserObj();
+    if (!isPersonalGarminOwner(u)) {
+      if (card) card.remove();
+      return;
+    }
+
     if (!card) {
       card = document.createElement('div');
       card.id = 'garminProfileBridgeCard';
@@ -1626,16 +1654,23 @@
 
   function getStoredWellnessStepsMap() {
     if (!isGarminEnabledForCurrentUser()) return {};
+    const map = { ...DEFAULT_GARMIN_WELLNESS_STEPS };
     try {
-      const raw = localStorage.getItem(WELLNESS_STEPS_KEY);
+      const raw = localStorage.getItem(getScopedGarminKey(WELLNESS_STEPS_KEY));
       if (raw) {
         const parsed = JSON.parse(raw);
         if (parsed && typeof parsed === 'object') {
-          return { ...DEFAULT_GARMIN_WELLNESS_STEPS, ...parsed };
+          Object.entries(parsed).forEach(([dt, val]) => {
+            if (val && typeof val === 'object') {
+              if (Number(val.steps) > 0 || !map[dt] || !map[dt].steps) {
+                map[dt] = { ...(map[dt] || {}), ...val };
+              }
+            }
+          });
         }
       }
     } catch {}
-    return { ...DEFAULT_GARMIN_WELLNESS_STEPS };
+    return map;
   }
 
   async function syncGarminWellnessStepsSilent() {
@@ -1657,7 +1692,7 @@
             };
           }
         });
-        localStorage.setItem(WELLNESS_STEPS_KEY, JSON.stringify(current));
+        localStorage.setItem(getScopedGarminKey(WELLNESS_STEPS_KEY), JSON.stringify(current));
         if (typeof window.refreshTopFitnessCardioScoreBars === 'function') {
           window.refreshTopFitnessCardioScoreBars();
         }
@@ -1686,6 +1721,7 @@
   }
 
   function refreshGarminPanelsForUserState() {
+    migrateLegacyGarminStorageToOwner();
     cleanupLegacyWatchButtons();
     handoffCompletedActivitiesToTabChiefs();
     renderHistoryGarminSyncPanel();
@@ -1702,6 +1738,7 @@
     auditExerciseWithLibraryGuard,
     auditAllLibraryExercises,
     saveSentWorkoutManifest,
+    getStoredActivities,
     analyzeActivityGroups,
     handoffCompletedActivitiesToTabChiefs,
     computePhysiologicalMetrics,
@@ -1712,6 +1749,7 @@
   };
 
   function initGarminTredictBridge() {
+    migrateLegacyGarminStorageToOwner();
     installCalendarAutoSyncHook();
     refreshGarminPanelsForUserState();
     setTimeout(syncActiveSchedulesOnBoot, 600);

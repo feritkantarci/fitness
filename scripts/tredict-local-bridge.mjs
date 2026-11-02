@@ -402,8 +402,11 @@ function readJsonBody(req, maxBytes = 1024 * 1024) {
 const server = http.createServer(async (req, res) => {
   console.log(`[Bridge Req] ${req.method} ${req.url} (Origin: ${req.headers.origin || 'none'})`);
   const origin = req.headers.origin || '';
-  if (origin && !isAllowedOrigin(origin)) {
-    return sendJson(res, 403, { ok: false, error: 'Origin not allowed' }, origin);
+  const host = req.headers.host || '';
+  const isLocalHost = /^(localhost|127\.0\.0\.1)(:\d+)?$/i.test(host);
+
+  if (!isLocalHost || (origin && !isAllowedOrigin(origin))) {
+    return sendJson(res, 403, { ok: false, error: 'Origin or Host not allowed' }, origin);
   }
   if (req.method === 'OPTIONS') {
     return sendJson(res, 200, { ok: true }, origin);

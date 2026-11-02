@@ -7,7 +7,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const HOST = '::';
+const HOST = process.env.HOST || '127.0.0.1';
 
 app.use(express.json());
 
@@ -19,7 +19,12 @@ app.use((req, res, next) => {
 
   const p = req.path.toLowerCase();
   if (p.startsWith('/.') || 
-      /\.(rules|sh|mjs|py|env|lock|md)$/i.test(p) ||
+      p === '/server.js' || 
+      p === '/package.json' || 
+      p === '/package-lock.json' ||
+      p === '/firestore.rules' ||
+      p.startsWith('/scripts') ||
+      /\.(rules|sh|mjs|py|env|lock|md|zip|tar|gz)$/i.test(p) ||
       p.includes('/node_modules') || 
       p.includes('/desktop-app') ||
       p.includes('/source_archive')) {
@@ -35,6 +40,18 @@ app.get('/api/health', (req, res) => {
 
 // Proxy /api/tredict requests directly to local bridge (Zero CORS, zero port issues)
 app.use('/api/tredict', async (req, res) => {
+  const ip = req.socket.remoteAddress || '';
+  const isLoopback = ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
+  if (!isLoopback) {
+    return res.status(403).json({ ok: false, error: 'Forbidden: Local requests only' });
+  }
+
+  const allowedPaths = new Set(['', '/', '/status', '/wellness', '/activities', '/push-workout', '/delete-dates', '/activity-update']);
+  const cleanPath = (req.path || '').replace(/\/+$/, '') || '/';
+  if (!allowedPaths.has(cleanPath)) {
+    return res.status(404).json({ ok: false, error: 'Endpoint not allowed' });
+  }
+
   try {
     const targetUrl = `http://127.0.0.1:3847/api/tredict${req.url}`;
     const opts = {
@@ -47,7 +64,12 @@ app.use('/api/tredict', async (req, res) => {
     }
     const response = await fetch(targetUrl, opts);
     res.status(response.status);
-    response.headers.forEach((val, key) => res.setHeader(key, val));
+    const skipHeaders = new Set(['transfer-encoding', 'content-length', 'connection', 'keep-alive', 'content-encoding']);
+    response.headers.forEach((val, key) => {
+      if (!skipHeaders.has(key.toLowerCase())) {
+        res.setHeader(key, val);
+      }
+    });
     const buf = await response.arrayBuffer();
     res.send(Buffer.from(buf));
   } catch (err) {

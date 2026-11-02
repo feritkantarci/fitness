@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <!-- Security: CSP & Permissions -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://apis.google.com https://accounts.google.com; connect-src 'self' http://127.0.0.1:3847 https://firestore.googleapis.com https://generativelanguage.googleapis.com https://fitness-4f427.firebaseio.com https://fitness-4f427-default-rtdb.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://raw.githubusercontent.com https://cdn.jsdelivr.net https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com https://api.emailjs.com data: blob:; img-src 'self' data: blob: https://lh3.googleusercontent.com https://www.gstatic.com https://fitness.kantarci.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; media-src 'self' data: blob:; frame-src 'self' https://fitness-4f427.firebaseapp.com https://accounts.google.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://apis.google.com https://accounts.google.com; connect-src 'self' http://127.0.0.1:3847 https://firestore.googleapis.com https://generativelanguage.googleapis.com https://fitness-4f427.firebaseio.com https://fitness-4f427-default-rtdb.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://raw.githubusercontent.com https://cdn.jsdelivr.net https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com https://api.emailjs.com data: blob:; img-src 'self' data: blob: https://lh3.googleusercontent.com https://www.gstatic.com https://fitness.kantarci.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; media-src 'self' data: blob:; frame-src 'self' https://fitness-4f427.firebaseapp.com https://accounts.google.com;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -36,7 +36,7 @@
     <!-- ==================== LOGIN SCREEN ==================== -->
     <div id="loginScreen" class="active">
         <div class="login-card">
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v266</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v267</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -176,7 +176,7 @@
                     <span class="canva-brand-monogram" aria-hidden="true" translate="no">Ç</span>
                     <div class="canva-brand-stack">
                         <span class="modern-brand-title" translate="no">Çelik Kodu</span>
-                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v266</span>
+                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v267</span>
                     </div>
                 </div>
                 <div class="modern-bar-actions">
@@ -283,10 +283,10 @@
                         <span class="ai-prep-pill"><span class="ai-pill-dot"></span>AI İLE HAZIRLA</span>
                     </div>
                     <h2 class="ai-prep-title">Programını AI ile oluştur</h2>
-                    <p class="ai-prep-subtitle">Kapsamı, ekipmanını ve antrenman ayrıntılarını seç; hareket seçimini, eksik kas telafisini ve bilimsel süperset kurgusunu AI senin için hazırlasın.</p>
+                    <p class="ai-prep-subtitle">Ekipmanını ve süreni kontrol et; kapsamı, geçmiş eksiklerini ve yorgun kas korumasını tek ekrandan seçerek programını hazırla.</p>
 
-                    <!-- STEP 1: PROGRAM KAPSAMI & BÖLÜNME (HAFTALIK VEYA TEK GÜN) -->
-                    <div class="gen-step-panel">
+                    <!-- STEP 1: PROGRAM KAPSAMI & BÖLÜNME (ANA EKRANDAN KALDIRILDI - POP-UP İÇİNDEN YÖNETİLİR) -->
+                    <div class="gen-step-panel" style="display:none;">
                         <div class="gen-mobile-picker-bar" id="mobileSplitPickerBar" onclick="toggleGenSection('splitSection')">
                             <div class="picker-label-wrap">
                                 <span class="gen-step-badge">1</span>
@@ -970,8 +970,8 @@
                     <!-- HEADER & ACTION BUTTONS -->
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
                         <div>
-                            <h2 style="font-size:18px; font-weight:900; color:#0F172A;">Gelişim, Çalışan Kaslar, Esneklik & Vücut Analizi</h2>
-                            <p style="font-size:12.5px; color:var(--text-secondary); margin-top:2px;">Hangi kasın ne kadar çalıştığı, vücut esnekliği, tartı ve mezura ölçüleri takibi</p>
+                            <h2 style="font-size:18px; font-weight:900; color:#0F172A;">Gelişim, Çalışan Kaslar & Vücut Analizi</h2>
+                            <p style="font-size:12.5px; color:var(--text-secondary); margin-top:2px;">Hangi kasın ne kadar çalıştığı, tartı ve mezura ölçüleri takibi</p>
                         </div>
                         <div style="display:flex; gap:6px; flex-wrap:wrap;">
                             <button class="btn btn-gold" style="font-size:12.5px; padding:8px 14px; font-weight:800;" onclick="openScaleModal()">
@@ -990,9 +990,6 @@
                         </button>
                         <button class="btn btn-outline analytics-subtab-btn" id="btnSubAnalyticsScore" style="font-size:12.5px; padding:6px 12px; border-radius:20px; white-space:nowrap;" onclick="switchAnalyticsSubView('score')">
                             🎯 Fitness & Kardiyo Puanı
-                        </button>
-                        <button class="btn btn-outline analytics-subtab-btn" id="btnSubAnalyticsMobility" style="font-size:12.5px; padding:6px 12px; border-radius:20px; white-space:nowrap;" onclick="switchAnalyticsSubView('mobility')">
-                            Esneklik & Hareketlilik
                         </button>
                         <button class="btn btn-outline analytics-subtab-btn" id="btnSubAnalyticsScale" style="font-size:12.5px; padding:6px 12px; border-radius:20px; white-space:nowrap;" onclick="switchAnalyticsSubView('scale')">
                             Vücut Analizi & Ölçüler
@@ -2162,8 +2159,8 @@
                     <div style="margin-bottom:8px;">
                         <label class="form-label" style="font-size:10.5px; margin-bottom:3px; display:block; color:#38bdf8;">Haftalık Şablon</label>
                         <select id="aiModalWeeklyTemplateSelect" class="form-input" style="font-size:12px; padding:7px 9px; width:100%; box-sizing:border-box; border-color:rgba(56,189,248,0.35);">
-                            <option value="ai_auto">🤖 AI Otomatik Teşhis</option>
-                            <option value="upper_lower_full" selected>📅 3 Gün: Üst • Alt • Tüm Vücut</option>
+                            <option value="ai_auto" selected>🤖 AI Otomatik Teşhis</option>
+                            <option value="upper_lower_full">📅 3 Gün: Üst • Alt • Tüm Vücut</option>
                             <option value="ppl_3day">📅 3 Gün: İtiş • Çekiş • Bacak</option>
                             <option value="fullbody_3day">📅 3 Gün: Tüm Vücut (Farklı Hareketler)</option>
                             <option value="flow_complex_3day">⚔️ 3 Gün: Çelik Akışı</option>
@@ -2191,6 +2188,59 @@
                     <span>📅 Haftalık Programı AI İle Kur (Günler Arası Tekrarsız A/B/C)</span>
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- ==================== QUICK PRE-CHECK POPUP MODAL (YALIN & İKONSUZ) ==================== -->
+    <div id="aiQuickPrecheckModal" class="modal-overlay" style="overscroll-behavior:contain;" onclick="if(event.target === this) closeQuickAiPrecheckModal()">
+        <div class="modal-box" style="max-width:440px; width:92%; padding:20px; border-radius:16px; background:#FFFFFF; border:1.5px solid #CBD5E1; box-shadow:0 18px 40px rgba(15,23,42,0.22); overscroll-behavior:contain;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid #E2E8F0;">
+                <span style="font-size:15px; font-weight:900; color:#0F172A; letter-spacing:0.2px;">Program Planlama Kontrolü</span>
+                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeQuickAiPrecheckModal()" style="font-size:15px; color:#475569;">✕</button>
+            </div>
+
+            <!-- SORU 1: BUGÜN İÇİN Mİ, HAFTALIK MI? -->
+            <div style="margin-bottom:16px;">
+                <div style="font-size:12.5px; font-weight:800; color:#0F172A; margin-bottom:8px;">Program Kapsamı</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;" id="aiPrecheckScopeGroup">
+                    <button type="button" data-val="single" onclick="selectQuickPrecheckScope('single')" style="padding:11px 10px; border-radius:10px; font-size:13px; font-weight:800; cursor:pointer; border:1.5px solid #0F172A; background:#0F172A; color:#FFFFFF;">Bugün İçin</button>
+                    <button type="button" data-val="weekly" onclick="selectQuickPrecheckScope('weekly')" style="padding:11px 10px; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; border:1.5px solid #CBD5E1; background:#F8FAFC; color:#0F172A;">Haftalık (Kalan Günler)</button>
+                </div>
+                <div id="aiPrecheckWeekProgressNote" style="display:none; margin-top:7px; padding:7px 10px; border-radius:8px; background:#F1F5F9; border-left:3px solid #0284C7; font-size:11.5px; font-weight:700; color:#334155; line-height:1.35;"></div>
+            </div>
+
+            <!-- SORU 2: YORGUN KAS GRUBU -->
+            <div style="margin-bottom:16px;">
+                <div style="font-size:12.5px; font-weight:800; color:#0F172A; margin-bottom:8px;">Yorgun Kas Grubu</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px;" id="aiPrecheckFatigueGroup">
+                    <button type="button" data-val="none" onclick="selectQuickPrecheckFatigue('none')" style="padding:10px 6px; border-radius:10px; font-size:12px; font-weight:800; cursor:pointer; border:1.5px solid #0F172A; background:#0F172A; color:#FFFFFF;">Yok</button>
+                    <button type="button" data-val="legs" onclick="selectQuickPrecheckFatigue('legs')" style="padding:10px 6px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; border:1.5px solid #CBD5E1; background:#F8FAFC; color:#0F172A;">Bacak</button>
+                    <button type="button" data-val="upper" onclick="selectQuickPrecheckFatigue('upper')" style="padding:10px 6px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; border:1.5px solid #CBD5E1; background:#F8FAFC; color:#0F172A;">Üst Vücut</button>
+                    <button type="button" data-val="back" onclick="selectQuickPrecheckFatigue('back')" style="padding:10px 6px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; border:1.5px solid #CBD5E1; background:#F8FAFC; color:#0F172A;">Sırt / Bel</button>
+                </div>
+            </div>
+
+            <!-- TARTI GÜNCELSE BİLGİ SATIRI -->
+            <div id="aiPrecheckScaleFreshNotice" style="display:none; margin-bottom:16px; padding:10px 12px; border-radius:10px; background:#F0FDF4; border:1px solid #86EFAC; font-size:12px; font-weight:700; color:#15803D;">
+                Tartı verisi güncel (son 30 gün), programa otomatik dahil edildi.
+            </div>
+
+            <!-- SORU 3: SADECE TARTI 30 GÜNDEN ESKİYSE AÇILIR -->
+            <div id="aiPrecheckScaleStaleRow" style="display:none; margin-bottom:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-size:12.5px; font-weight:800; color:#0F172A;">Son 1 Ay Vücut Yönü</span>
+                    <span id="aiPrecheckScaleStaleBadge" style="font-size:10.5px; font-weight:800; color:#B45309; background:#FEF3C7; border:1px solid #FCD34D; padding:2px 7px; border-radius:6px;">Tartı 30+ Gün Eski</span>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;" id="aiPrecheckScaleGroup">
+                    <button type="button" data-val="stable" onclick="selectQuickPrecheckScale('stable')" style="padding:10px 8px; border-radius:10px; font-size:12.5px; font-weight:800; cursor:pointer; border:1.5px solid #0F172A; background:#0F172A; color:#FFFFFF;">Sabit</button>
+                    <button type="button" data-val="gained" onclick="selectQuickPrecheckScale('gained')" style="padding:10px 8px; border-radius:10px; font-size:12.5px; font-weight:700; cursor:pointer; border:1.5px solid #CBD5E1; background:#F8FAFC; color:#0F172A;">Kilo Arttı</button>
+                    <button type="button" data-val="lost" onclick="selectQuickPrecheckScale('lost')" style="padding:10px 8px; border-radius:10px; font-size:12.5px; font-weight:700; cursor:pointer; border:1.5px solid #CBD5E1; background:#F8FAFC; color:#0F172A;">Kilo Düştü</button>
+                </div>
+            </div>
+
+            <button type="button" onclick="confirmQuickAiPrecheckAndGenerate()" style="width:100%; padding:13px 16px; border-radius:12px; border:none; background:#0F172A; color:#FFFFFF; font-size:13.5px; font-weight:900; cursor:pointer; letter-spacing:0.3px;">
+                Programı Hazırla
+            </button>
         </div>
     </div>
 
@@ -2723,7 +2773,7 @@
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
     <script src="js/exercises-db.js?v=245"></script>
-    <script src="js/app.js?v=265"></script>
+    <script src="js/app.js?v=267"></script>
     <script>
         function getNotifStorageKey() {
             const uid = localStorage.getItem('celik_kodu_active_user_id') || 'default';

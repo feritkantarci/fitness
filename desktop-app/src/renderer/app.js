@@ -1623,7 +1623,7 @@ function renderScaleHistoryTable(logs) {
             <td>${l.visceralFat || '-'}</td>
             <td>${l.bmr ? l.bmr + ' kcal' : '-'}</td>
             <td>
-                <button type="button" class="btn-table-delete" onclick="deleteScaleEntry('${l.id}')" title="Bu kaydı sil">🗑️</button>
+                <button type="button" class="btn-table-delete" onclick="deleteScaleEntry(decodeURIComponent('${encodeURIComponent(l.id)}'))" title="Bu kaydı sil">🗑️</button>
             </td>
         </tr>
     `).join('');
@@ -4652,9 +4652,11 @@ function openDesktopDayScheduleModal(dayIdx, dateStr = null) {
                         <div style="display: flex; flex-direction: column; gap: 8px;">
                             ${parsedDays.map((pDay, pIdx) => {
                                 const exNames = (pDay.exercises || []).map(e => e.name).slice(0, 3).join(', ');
-                                const exArrJson = JSON.stringify((pDay.exercises || []).map(e => e.name)).replace(/"/g, '&quot;');
+                                const encTitle = encodeURIComponent(pDay.dayTitle || '');
+                                const encExercises = encodeURIComponent(JSON.stringify((pDay.exercises || []).map(e => e.name)));
+                                const encTime = encodeURIComponent(currentPlan.time || '18:30');
                                 return `
-                                    <div class="calendar-day-card" style="padding: 10px 14px; cursor: pointer; border: 1px solid rgba(245,158,11,0.3); background: rgba(245,158,11,0.04); display: flex; justify-content: space-between; align-items: center;" onclick="assignDesktopRoutineToActiveDay('${escapeHTML(pDay.dayTitle)}', ${exArrJson}, 60, '${currentPlan.time || '18:30'}')">
+                                    <div class="calendar-day-card" style="padding: 10px 14px; cursor: pointer; border: 1px solid rgba(245,158,11,0.3); background: rgba(245,158,11,0.04); display: flex; justify-content: space-between; align-items: center;" onclick="assignDesktopRoutineToActiveDay(decodeURIComponent('${encTitle}'), JSON.parse(decodeURIComponent('${encExercises}')), 60, decodeURIComponent('${encTime}'))">
                                         <div>
                                             <div style="font-size: 13px; font-weight: 800; color: #fff;">${escapeHTML(pDay.dayTitle)}</div>
                                             <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">${(pDay.exercises || []).length} Hareket (${escapeHTML(exNames)}...)</div>

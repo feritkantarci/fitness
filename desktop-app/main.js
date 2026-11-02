@@ -146,34 +146,35 @@ app.whenReady().then(() => {
                 return target;
             };
 
+            // Güvenlik: Yalnızca izin verilen medya uzantılarına izin ver
+            const ALLOWED_ASSET_EXTS = new Set(['.png', '.jpg', '.jpeg', '.webp', '.svg', '.mp4', '.json', '.gif']);
+            const fileExt = path.extname(cleanPath).toLowerCase();
+            if (!ALLOWED_ASSET_EXTS.has(fileExt)) {
+                return new Response('Forbidden file type', { status: 403 });
+            }
+
             // 1. Paket içi kaynaklar (FitLAB.app/Contents/Resources/assets/...)
             if (app.isPackaged) {
-                const resPath = safeResolve(process.resourcesPath, cleanPath);
+                const resPath = safeResolve(path.join(process.resourcesPath, 'assets'), cleanPath.replace(/^assets\//, ''));
                 if (resPath && fs.existsSync(resPath)) {
                     return net.fetch(pathToFileURL(resPath).toString());
                 }
             }
 
-            // 2. Geliştirici/Yerel depo kökü (FITNESS/assets/...)
-            const rootPath = safeResolve(path.join(__dirname, '..'), cleanPath);
-            if (rootPath && fs.existsSync(rootPath)) {
-                return net.fetch(pathToFileURL(rootPath).toString());
+            // 2. Geliştirici/Yerel depo assets klasörü (FITNESS/assets/...)
+            const rootAssetsPath = safeResolve(path.join(__dirname, '..', 'assets'), cleanPath.replace(/^assets\//, ''));
+            if (rootAssetsPath && fs.existsSync(rootAssetsPath)) {
+                return net.fetch(pathToFileURL(rootAssetsPath).toString());
             }
 
-            // 3. desktop-app klasörü
-            const appPath = safeResolve(__dirname, cleanPath);
-            if (appPath && fs.existsSync(appPath)) {
-                return net.fetch(pathToFileURL(appPath).toString());
+            // 3. desktop-app/assets klasörü
+            const appAssetsPath = safeResolve(path.join(__dirname, 'assets'), cleanPath.replace(/^assets\//, ''));
+            if (appAssetsPath && fs.existsSync(appAssetsPath)) {
+                return net.fetch(pathToFileURL(appAssetsPath).toString());
             }
 
-            // 4. Renderer klasörü
-            const rendererPath = safeResolve(path.join(__dirname, 'src', 'renderer'), cleanPath);
-            if (rendererPath && fs.existsSync(rendererPath)) {
-                return net.fetch(pathToFileURL(rendererPath).toString());
-            }
-
-            // 5. Bulut / CDN Yedek Yolu (yalnızca izin verilen medya uzantıları)
-            if (/^[a-zA-Z0-9_\-\/\.]+\.(png|jpe?g|webp|svg|mp4|json)$/i.test(cleanPath)) {
+            // 4. Bulut / CDN Yedek Yolu (yalnızca izin verilen medya uzantıları)
+            if (/^[a-zA-Z0-9_\-\/\.]+\.(png|jpe?g|webp|svg|mp4|json|gif)$/i.test(cleanPath)) {
                 return net.fetch(`https://fitness.kantarci.io/${cleanPath}`);
             }
             return new Response('Asset not found', { status: 404 });
@@ -278,6 +279,10 @@ ipcMain.handle('calendar:exportAndOpenICS', async (event, icsContent) => {
 
 ipcMain.handle('calendar:openUrl', async (event, url) => {
     try {
+        const parsed = new URL(url);
+        if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+            throw new Error('Yalnızca http/https protokollerine izin verilir.');
+        }
         await shell.openExternal(url);
         return { success: true };
     } catch(err) {
