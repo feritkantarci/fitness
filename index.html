@@ -24,7 +24,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=265">
+    <link rel="stylesheet" href="css/style.css?v=268">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH (CANVA MODERN ATHLETIC LIGHT V229) */
         html, body { background-color: #F8FAFC; color: #0F172A; color-scheme: light; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -36,17 +36,32 @@
     <!-- ==================== LOGIN SCREEN ==================== -->
     <div id="loginScreen" class="active">
         <div class="login-card">
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v267</div>
+            <div style="display:flex;justify-content:center;margin-bottom:10px;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="52" height="52" fill="none" style="border-radius:14px;box-shadow:0 6px 18px rgba(15,23,42,0.18);">
+                    <rect width="64" height="64" rx="16" fill="#0F172A"/>
+                    <rect x="1" y="1" width="62" height="62" rx="15" stroke="#334155" stroke-width="1.5" stroke-opacity="0.6"/>
+                    <defs>
+                        <linearGradient id="stitchLoginFlame" x1="16" y1="12" x2="48" y2="52" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stop-color="#FF6B4A"/>
+                            <stop offset="100%" stop-color="#FF3D12"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M25 18C25 14.134 28.134 11 32 11C35.866 11 39 14.134 39 18V21H25V18Z" stroke="#94A3B8" stroke-width="3.5" stroke-linecap="round"/>
+                    <path d="M20 23H44L47 38C47 44.6274 41.6274 50 35 50H29C22.3726 50 17 44.6274 17 38L20 23Z" fill="url(#stitchLoginFlame)"/>
+                    <path d="M34 25L26 36H33L30 46L39 34H32L34 25Z" fill="#FFFFFF"/>
+                </svg>
+            </div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v268</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
-            <!-- GİRİŞ / KAYIT OL SEKME GEÇİŞİ (YÜKSEK KONTRAST AÇIK TEMA) -->
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; background:#F1F5F9; padding:5px; border-radius:12px; border:1.5px solid #CBD5E1; margin-bottom:16px;">
-                <button type="button" id="authTabBtnLogin" onclick="switchAuthScreenTab('login')" style="display:flex; align-items:center; justify-content:center; gap:6px; padding:10px 12px; border-radius:8px; border:1px solid #65A30D; font-size:13px; font-weight:800; cursor:pointer; background:linear-gradient(135deg, #84CC16 0%, #22C55E 100%); color:#0F172A; box-shadow:0 2px 8px rgba(34,197,94,0.25); transition:all 0.2s;">
+            <!-- GİRİŞ / KAYIT OL SEKME GEÇİŞİ (STITCH KINETIC SLATE) -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; background:#F1F5F9; padding:5px; border-radius:999px; border:1.5px solid #CBD5E1; margin-bottom:16px;">
+                <button type="button" id="authTabBtnLogin" onclick="switchAuthScreenTab('login')" style="display:flex; align-items:center; justify-content:center; gap:6px; padding:10px 12px; border-radius:999px; border:1px solid #B52603; font-size:13px; font-weight:800; cursor:pointer; background:linear-gradient(135deg, #FF5A36 0%, #E03410 100%); color:#FFFFFF; box-shadow:0 3px 10px rgba(255,90,54,0.28); transition:all 0.2s;">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
                     <span>Giriş Yap</span>
                 </button>
-                <button type="button" id="authTabBtnRegister" onclick="switchAuthScreenTab('register')" style="display:flex; align-items:center; justify-content:center; gap:6px; padding:10px 12px; border-radius:8px; border:1px solid transparent; font-size:13px; font-weight:800; cursor:pointer; background:transparent; color:#334155; transition:all 0.2s;">
+                <button type="button" id="authTabBtnRegister" onclick="switchAuthScreenTab('register')" style="display:flex; align-items:center; justify-content:center; gap:6px; padding:10px 12px; border-radius:999px; border:1px solid transparent; font-size:13px; font-weight:800; cursor:pointer; background:transparent; color:#334155; transition:all 0.2s;">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
                     <span>Kayıt Ol</span>
                 </button>
@@ -170,13 +185,30 @@
     <div id="mainAppWrapper" style="display:none;">
         <div class="app-container">
 
-            <!-- MODERN UNIFIED APP BAR -->
+            <!-- MODERN UNIFIED APP BAR (STITCH FUNCTIONAL KINETIC SLATE) -->
             <div class="modern-app-bar">
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
-                    <span class="canva-brand-monogram" aria-hidden="true" translate="no">Ç</span>
-                    <div class="canva-brand-stack">
-                        <span class="modern-brand-title" translate="no">Çelik Kodu</span>
-                        <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v267</span>
+                    <span class="canva-brand-monogram" aria-hidden="true" translate="no">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="36" height="36" fill="none" style="display:block;border-radius:10px;">
+                            <rect width="64" height="64" rx="16" fill="#0F172A"/>
+                            <rect x="1" y="1" width="62" height="62" rx="15" stroke="#334155" stroke-width="1.5" stroke-opacity="0.6"/>
+                            <defs>
+                                <linearGradient id="stitchBarFlame" x1="16" y1="12" x2="48" y2="52" gradientUnits="userSpaceOnUse">
+                                    <stop offset="0%" stop-color="#FF6B4A"/>
+                                    <stop offset="100%" stop-color="#FF3D12"/>
+                                </linearGradient>
+                            </defs>
+                            <path d="M25 18C25 14.134 28.134 11 32 11C35.866 11 39 14.134 39 18V21H25V18Z" stroke="#94A3B8" stroke-width="3.5" stroke-linecap="round"/>
+                            <path d="M20 23H44L47 38C47 44.6274 41.6274 50 35 50H29C22.3726 50 17 44.6274 17 38L20 23Z" fill="url(#stitchBarFlame)"/>
+                            <path d="M34 25L26 36H33L30 46L39 34H32L34 25Z" fill="#FFFFFF"/>
+                        </svg>
+                    </span>
+                    <div class="canva-brand-stack" style="display:flex;flex-direction:column;align-items:flex-start;gap:1px;">
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <span class="modern-brand-title" translate="no">Çelik Kodu</span>
+                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v268</span>
+                        </div>
+                        <span id="headerActiveTabLabel" style="font-size:10px;font-weight:800;letter-spacing:0.06em;color:#565E74;text-transform:uppercase;line-height:1;">ÜRETİCİ</span>
                     </div>
                 </div>
                 <div class="modern-bar-actions">
@@ -255,19 +287,19 @@
             <!-- NAVIGATION TABS (DESKTOP SEGMENTED BAR; HIDDEN ON MOBILE IN FAVOR OF THUMB-ZONE DOCK) -->
             <div class="tab-nav">
                 <button class="tab-btn active" onclick="switchTab('generatorTab')">
-                    <span>Program</span>
+                    <span>Üretici</span>
                 </button>
                 <button class="tab-btn" onclick="switchTab('activeWorkoutTab')" id="tabBtnActiveWorkout">
                     <span>Antrenman</span>
                 </button>
                 <button class="tab-btn" onclick="switchTab('libraryTab')">
-                    <span>Hareketler</span>
+                    <span>Kütüphane</span>
                 </button>
                 <button class="tab-btn" onclick="switchTab('historyTab')">
                     <span>Geçmiş</span>
                 </button>
                 <button class="tab-btn" onclick="switchTab('analyticsTab')">
-                    <span>Analiz & Tartı</span>
+                    <span>Analiz</span>
                 </button>
                 <button class="tab-btn" onclick="switchTab('profileTab')">
                     <span>Profil</span>
@@ -2673,39 +2705,45 @@
         </div>
     </div>
 
-    <!-- ==================== HIDEABLE BOTTOM NAVIGATION BAR (THUMB-ZONE FLOATING PILL) ==================== -->
+    <!-- ==================== STITCH 6-TAB BOTTOM NAVIGATION BAR ==================== -->
     <div class="bottom-nav-wrapper" id="bottomNavWrapper">
         <div class="bottom-pull-handle" onclick="toggleBottomBar()" title="Menüyü Gizle/Göster"></div>
         <div class="bottom-nav-bar">
             <div class="bottom-nav-item active" data-tab="generatorTab" onclick="switchTab('generatorTab')">
                 <span class="nav-icon" aria-hidden="true">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
                 </span>
-                <span>Program</span>
+                <span>Üretici</span>
             </div>
             <div class="bottom-nav-item" data-tab="activeWorkoutTab" onclick="switchTab('activeWorkoutTab')">
                 <span class="nav-icon" aria-hidden="true">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5 17.5 17.5"></path><path d="M3 10l7-7"></path><path d="M14 21l7-7"></path><path d="M2 6l4-4"></path><path d="M18 22l4-4"></path></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5 17.5 17.5"></path><path d="M3 10l7-7"></path><path d="M14 21l7-7"></path><path d="M2 6l4-4"></path><path d="M18 22l4-4"></path></svg>
                 </span>
                 <span>Antrenman</span>
             </div>
             <div class="bottom-nav-item" data-tab="libraryTab" onclick="switchTab('libraryTab')">
                 <span class="nav-icon" aria-hidden="true">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
                 </span>
-                <span>Hareketler</span>
+                <span>Kütüphane</span>
+            </div>
+            <div class="bottom-nav-item" data-tab="historyTab" onclick="switchTab('historyTab')">
+                <span class="nav-icon" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l4 2"></path></svg>
+                </span>
+                <span>Geçmiş</span>
             </div>
             <div class="bottom-nav-item" data-tab="analyticsTab" onclick="switchTab('analyticsTab')">
                 <span class="nav-icon" aria-hidden="true">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line><polyline points="4 11 9 6 14 10 20 3"></polyline></svg>
                 </span>
                 <span>Analiz</span>
             </div>
-            <div class="bottom-nav-item" onclick="openMoreSheet()">
+            <div class="bottom-nav-item" data-tab="profileTab" onclick="switchTab('profileTab')">
                 <span class="nav-icon" aria-hidden="true">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="18" x2="20" y2="18"></line></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="10" r="3"></circle><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"></path></svg>
                 </span>
-                <span>Menü</span>
+                <span>Profil</span>
             </div>
         </div>
     </div>
@@ -2773,7 +2811,7 @@
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
     <script src="js/exercises-db.js?v=245"></script>
-    <script src="js/app.js?v=267"></script>
+    <script src="js/app.js?v=268"></script>
     <script>
         function getNotifStorageKey() {
             const uid = localStorage.getItem('celik_kodu_active_user_id') || 'default';

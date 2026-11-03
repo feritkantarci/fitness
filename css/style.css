@@ -1,27 +1,35 @@
         :root {
-            /* Surface & Background Palette (Canva Modern Athletic Light-Elevated System) */
-            --bg-base: #F8FAFC;
+            /* Surface & Background Palette (Google Stitch — Functional Kinetic Slate) */
+            --bg-base: #F7F9FB;
             --bg-surface: #FFFFFF;
-            --bg-elevated: #F1F5F9;
+            --bg-elevated: #F2F4F6;
             --bg-card: #FFFFFF;
 
             /* Borders & Crisp Structural Boundaries */
             --border: #E2E8F0;
             --border-glass: #CBD5E1;
-            --border-hover: #84CC16;
+            --border-hover: #FF5A36;
 
-            /* Brand & Semantic Accents (Athletic Volt-Lime, Emerald & Amber) */
-            --gold: #F59E0B;
-            --gold-light: #FDE68A;
-            --gold-glow: rgba(245, 158, 11, 0.20);
+            /* Brand & Semantic Accents (Kinetic Flame Orange, Slate, Anatomical Status) */
+            --stitch-primary: #FF5A36;
+            --stitch-primary-deep: #B52603;
+            --stitch-primary-soft: #FFF1EE;
+            --stitch-slate: #191C1E;
+            --stitch-slate-muted: #565E74;
+            --muscle-active: #15803D;
+            --muscle-planned: #B45309;
+            --muscle-resting: #B91C1C;
+            --gold: #B52603;
+            --gold-light: #FF5A36;
+            --gold-glow: rgba(255, 90, 54, 0.20);
             --cyan: #0284C7;
             --cyan-glow: rgba(2, 132, 199, 0.18);
-            --green-success: #16A34A;
-            --green: #16A34A;
-            --red-alert: #EF4444;
-            --volt-lime: #84CC16;
-            --volt-lime-dark: #65A30D;
-            --volt-lime-bg: #F7FEE7;
+            --green-success: #15803D;
+            --green: #15803D;
+            --red-alert: #B91C1C;
+            --volt-lime: #FF5A36;
+            --volt-lime-dark: #B52603;
+            --volt-lime-bg: #FFF1EE;
 
             /* Text Hierarchy (High-Contrast Slate) */
             --text-primary: #0F172A;
@@ -9589,4 +9597,466 @@
             .top-fc-track {
                 height: 7px;
             }
+        }
+
+        /* =========================================================================
+           GOOGLE STITCH — FUNCTIONAL KINETIC SLATE DESIGN SYSTEM (UNIFIED V268)
+           Source: stitch_modern_fitness_design_system.zip (functional_kinetic_slate/DESIGN.md)
+           Palette: Surface #F7F9FB, Card #FFFFFF, Kinetic Orange #FF5A36 / #B52603,
+                    Dark Slate #191C1E / #0F172A, Muscle Status #15803D / #B45309 / #B91C1C
+           ========================================================================= */
+
+        /* 1. Clean Kinetic Slate Canvas & Typography */
+        html, body {
+            background-color: #F7F9FB !important;
+            background-image: none !important;
+            color: #191C1E !important;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+        }
+
+        /* 2. Stitch Top App Bar & Brand Identity */
+        .modern-app-bar {
+            background: rgba(247, 249, 251, 0.90) !important;
+            backdrop-filter: blur(18px) !important;
+            -webkit-backdrop-filter: blur(18px) !important;
+            border-bottom: 1px solid #E2E8F0 !important;
+            box-shadow: 0 1px 8px rgba(15, 23, 42, 0.04) !important;
+            padding: 10px 16px !important;
+        }
+
+        .canva-brand-monogram {
+            background: transparent !important;
+            border: none !important;
+            width: 36px !important;
+            height: 36px !important;
+            padding: 0 !important;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.14) !important;
+            border-radius: 10px !important;
+            overflow: hidden !important;
+        }
+
+        .modern-brand-title {
+            font-family: 'Outfit', sans-serif !important;
+            font-size: 18px !important;
+            font-weight: 700 !important;
+            color: #191C1E !important;
+            letter-spacing: -0.02em !important;
+            line-height: 1.1 !important;
+        }
+
+        .app-version-badge {
+            background: #ECEEF0 !important;
+            border: 1px solid #CBD5E1 !important;
+            color: #334155 !important;
+            font-size: 10px !important;
+            font-weight: 800 !important;
+            border-radius: 999px !important;
+            padding: 2px 7px !important;
+        }
+
+        .modern-user-badge {
+            background: #B52603 !important;
+            border: 1px solid #8C1900 !important;
+            color: #FFFFFF !important;
+            border-radius: 999px !important;
+            padding: 5px 12px !important;
+            box-shadow: 0 2px 8px rgba(181, 38, 3, 0.22) !important;
+        }
+
+        .modern-user-badge .modern-user-name {
+            color: #FFFFFF !important;
+            font-weight: 700 !important;
+            font-size: 12px !important;
+        }
+
+        .modern-user-badge .auth-role-tag {
+            background: rgba(255, 255, 255, 0.2) !important;
+            color: #FFFFFF !important;
+            border: none !important;
+        }
+
+        .btn-header-popup-toggle {
+            background: #FFFFFF !important;
+            border: 1px solid #E2E8F0 !important;
+            color: #565E74 !important;
+            border-radius: 999px !important;
+        }
+
+        .btn-header-popup-toggle:hover {
+            color: #191C1E !important;
+            border-color: #CBD5E1 !important;
+            background: #F2F4F6 !important;
+        }
+
+        /* 3. Stitch 6-Tab Bottom Navigation Bar & Desktop Segmented Bar */
+        .tab-nav {
+            background: #ECEEF0 !important;
+            border: 1px solid #E2E8F0 !important;
+            border-radius: 999px !important;
+            padding: 4px !important;
+        }
+
+        .tab-btn {
+            border-radius: 999px !important;
+            color: #565E74 !important;
+            font-weight: 700 !important;
+            font-size: 13px !important;
+        }
+
+        .tab-btn.active {
+            background: #191C1E !important;
+            border-color: #191C1E !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            box-shadow: 0 2px 8px rgba(25, 28, 30, 0.18) !important;
+        }
+
+        .bottom-nav-wrapper {
+            background: rgba(247, 249, 251, 0.94) !important;
+            backdrop-filter: blur(20px) !important;
+            -webkit-backdrop-filter: blur(20px) !important;
+            border-top: 1px solid #E2E8F0 !important;
+            box-shadow: 0 -2px 12px rgba(15, 23, 42, 0.04) !important;
+            padding: 4px 6px calc(6px + env(safe-area-inset-bottom, 4px)) 6px !important;
+        }
+
+        .bottom-nav-bar {
+            display: grid !important;
+            grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+            gap: 2px !important;
+            background: transparent !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            height: 56px !important;
+            padding: 0 !important;
+            max-width: 760px !important;
+            margin: 0 auto !important;
+        }
+
+        .bottom-nav-item {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 3px !important;
+            color: #565E74 !important;
+            background: transparent !important;
+            border-radius: 12px !important;
+            font-size: 10.5px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.01em !important;
+            padding: 4px 2px !important;
+            min-width: 0 !important;
+            transition: color 0.16s ease, background-color 0.16s ease !important;
+        }
+
+        .bottom-nav-item .nav-icon svg {
+            width: 20px !important;
+            height: 20px !important;
+            transition: transform 0.16s ease !important;
+        }
+
+        .bottom-nav-item:hover {
+            color: #191C1E !important;
+            background: rgba(15, 23, 42, 0.03) !important;
+        }
+
+        .bottom-nav-item.active {
+            background: rgba(255, 90, 54, 0.10) !important;
+            color: #D93814 !important;
+            font-weight: 800 !important;
+            box-shadow: none !important;
+        }
+
+        .bottom-nav-item.active .nav-icon svg {
+            stroke: #FF5A36 !important;
+            transform: translateY(-1px) !important;
+        }
+
+        /* 4. Universal Cards (16px Radius, 1px #E2E8F0 Border, Subtle Elevation) */
+        .generator-card,
+        .card,
+        .stat-metric-card,
+        .workout-header-card,
+        .exercise-visual-card,
+        .log-card,
+        .history-card,
+        .log-history-card,
+        .lib-ex-card,
+        .anatomy-hero-wrapper,
+        .anatomy-focus-card,
+        .radar-card-premium,
+        .station-card,
+        .hevy-exercise-card,
+        .wk-day-card,
+        .wk-single-active-card,
+        .gen-step-panel {
+            background: #FFFFFF !important;
+            border: 1px solid #E2E8F0 !important;
+            border-radius: 16px !important;
+            box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.04) !important;
+            color: #191C1E !important;
+        }
+
+        .ai-unified-architect-card,
+        .ai-hybrid-hero-banner {
+            background: #FFFFFF !important;
+            border: 1px solid #E2E8F0 !important;
+            border-radius: 20px !important;
+            box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05) !important;
+        }
+
+        .ai-prep-pill {
+            background: #FFF1EE !important;
+            border: 1px solid #FFDAD2 !important;
+            color: #B52603 !important;
+            border-radius: 999px !important;
+        }
+
+        .ai-pill-dot {
+            background: #FF5A36 !important;
+            box-shadow: 0 0 8px rgba(255, 90, 54, 0.75) !important;
+        }
+
+        .gen-step-badge,
+        .wk-day-num-pill {
+            background: #FF5A36 !important;
+            border-color: #B52603 !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 2px 6px rgba(255, 90, 54, 0.25) !important;
+        }
+
+        /* 5. Primary Pill Buttons (Kinetic Flame Orange #FF5A36 / #D93814 with White Text) */
+        .btn-gold,
+        .btn-generate-cta,
+        .btn-ai-unified-cta,
+        .login-btn,
+        .btn-primary,
+        .btn-dock-nav.next {
+            background: linear-gradient(135deg, #FF5A36 0%, #D93814 100%) !important;
+            border: 1px solid #B52603 !important;
+            color: #FFFFFF !important;
+            border-radius: 9999px !important;
+            font-weight: 800 !important;
+            box-shadow: 0 4px 14px rgba(255, 90, 54, 0.28) !important;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.12) !important;
+        }
+
+        .btn-gold:hover,
+        .btn-generate-cta:hover,
+        .btn-ai-unified-cta:hover,
+        .login-btn:hover,
+        .btn-primary:hover,
+        .btn-dock-nav.next:hover {
+            background: linear-gradient(135deg, #FF6B4A 0%, #E03410 100%) !important;
+            box-shadow: 0 6px 20px rgba(255, 90, 54, 0.38) !important;
+            color: #FFFFFF !important;
+            transform: translateY(-1px) !important;
+        }
+
+        .btn-outline {
+            background: #FFFFFF !important;
+            border: 1px solid #CBD5E1 !important;
+            color: #191C1E !important;
+            border-radius: 9999px !important;
+            font-weight: 700 !important;
+        }
+
+        .btn-outline:hover {
+            border-color: #FF5A36 !important;
+            color: #B52603 !important;
+            background: #FFF1EE !important;
+        }
+
+        /* 6. Selection Chips, Filters & Subtabs (Stitch Dark Slate & Kinetic Orange Pills) */
+        .analytics-subtab-btn,
+        .wk-day-tab-btn {
+            border-radius: 9999px !important;
+            background: #ECEEF0 !important;
+            border: 1px solid transparent !important;
+            color: #565E74 !important;
+            font-weight: 700 !important;
+        }
+
+        .analytics-subtab-btn.active,
+        .wk-day-tab-btn.active,
+        .btn-outline.active-filter-pill {
+            background: #191C1E !important;
+            border-color: #191C1E !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            box-shadow: 0 2px 8px rgba(25, 28, 30, 0.16) !important;
+        }
+
+        .equip-chip.selected,
+        .iso-muscle-chip.selected,
+        .iso-muscle-chip.active {
+            background: #FFF1EE !important;
+            border: 1.5px solid #FF5A36 !important;
+            color: #8C1900 !important;
+            font-weight: 800 !important;
+            box-shadow: 0 2px 8px rgba(255, 90, 54, 0.16) !important;
+        }
+
+        .equip-chip.selected .equip-check-icon,
+        .iso-muscle-chip.selected .iso-check,
+        .iso-muscle-chip.active .iso-check {
+            color: #B52603 !important;
+        }
+
+        .split-card.selected {
+            background: #FFF1EE !important;
+            border: 2px solid #FF5A36 !important;
+            box-shadow: 0 4px 14px rgba(255, 90, 54, 0.14) !important;
+        }
+
+        .split-card.selected .split-name,
+        .split-card.selected .split-card-title {
+            color: #8C1900 !important;
+        }
+
+        .split-card.selected .split-sub-desc {
+            color: #5B403A !important;
+        }
+
+        .split-card.selected .split-radio {
+            background: #FF5A36 !important;
+            border-color: #B52603 !important;
+        }
+
+        .split-card.selected .split-radio::after {
+            border-right-color: #FFFFFF !important;
+            border-bottom-color: #FFFFFF !important;
+        }
+
+        /* 7. Stitch Active Workout Dark Rest Timer HUD (antrenman_st_dyosu_zamanlay_c_2) */
+        .workout-sticky-hud {
+            background: radial-gradient(circle at 92% 15%, rgba(255, 90, 54, 0.22) 0%, transparent 52%), #22262A !important;
+            border: 1px solid #334155 !important;
+            border-radius: 20px !important;
+            box-shadow: 0 10px 24px -4px rgba(15, 23, 42, 0.22) !important;
+            color: #EFF1F3 !important;
+            padding: 14px 16px !important;
+        }
+
+        .workout-sticky-hud .hud-time-val,
+        .workout-sticky-hud .hud-rest-val {
+            font-family: 'Outfit', sans-serif !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            letter-spacing: -0.02em !important;
+        }
+
+        .workout-sticky-hud .btn-hud-tiny {
+            background: rgba(255, 255, 255, 0.10) !important;
+            border: 1px solid rgba(255, 255, 255, 0.16) !important;
+            color: #EFF1F3 !important;
+            border-radius: 9999px !important;
+            padding: 5px 11px !important;
+            font-weight: 700 !important;
+        }
+
+        .workout-sticky-hud #btnPlayPauseTimer {
+            background: #FF5A36 !important;
+            border-color: #FF5A36 !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            box-shadow: 0 2px 10px rgba(255, 90, 54, 0.38) !important;
+        }
+
+        .workout-sticky-hud .btn-view-toggle {
+            background: rgba(255, 255, 255, 0.08) !important;
+            border: 1px solid rgba(255, 255, 255, 0.14) !important;
+            color: #CBD5E1 !important;
+            border-radius: 9999px !important;
+        }
+
+        .workout-sticky-hud .btn-view-toggle.active {
+            background: #FF5A36 !important;
+            border-color: #FF5A36 !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 2px 8px rgba(255, 90, 54, 0.35) !important;
+        }
+
+        .workout-sticky-hud .wake-lock-pill {
+            background: rgba(255, 255, 255, 0.08) !important;
+            border: 1px solid rgba(255, 255, 255, 0.14) !important;
+            color: #EFF1F3 !important;
+            border-radius: 9999px !important;
+        }
+
+        .workout-sticky-hud .hud-progress-track {
+            background: rgba(255, 255, 255, 0.14) !important;
+            height: 7px !important;
+            border-radius: 9999px !important;
+        }
+
+        .workout-sticky-hud .hud-progress-fill {
+            background: linear-gradient(90deg, #FF5A36 0%, #FF8066 100%) !important;
+            border-radius: 9999px !important;
+        }
+
+        .workout-sticky-hud .hud-progress-info,
+        .workout-sticky-hud .hud-progress-detail {
+            color: #CBD5E1 !important;
+        }
+
+        /* 8. Stitch Active Set Row & Completed Set Row Styling */
+        .hevy-tr-row.active-target {
+            background: #FFF1EE !important;
+            border-left: 4px solid #FF5A36 !important;
+        }
+
+        .hevy-set-pill.target {
+            background: #FF5A36 !important;
+            border-color: #B52603 !important;
+            color: #FFFFFF !important;
+            border-radius: 9999px !important;
+        }
+
+        .hevy-tr-row.active-target .hevy-listbox-btn {
+            border-color: #FF5A36 !important;
+            background: #FFFFFF !important;
+        }
+
+        .btn-hevy-check.target {
+            background: #FFF1EE !important;
+            border: 2px solid #FF5A36 !important;
+            color: #B52603 !important;
+            border-radius: 9999px !important;
+        }
+
+        .hevy-set-pill.done,
+        .btn-hevy-check.checked {
+            background: #15803D !important;
+            border-color: #166534 !important;
+            color: #FFFFFF !important;
+            border-radius: 9999px !important;
+        }
+
+        /* 9. Stitch Anatomical Muscle Status Badges */
+        .wk-ex-muscle-pill,
+        .ex-chip-badge.muscle,
+        .muscle-tag {
+            background: #DCFCE7 !important;
+            border: 1px solid #BBF7D0 !important;
+            color: #15803D !important;
+            border-radius: 9999px !important;
+            font-weight: 700 !important;
+        }
+
+        .lib-ex-card:hover {
+            border-color: #FF5A36 !important;
+            box-shadow: 0 8px 24px rgba(255, 90, 54, 0.10) !important;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus,
+        .form-input:focus,
+        .form-select:focus,
+        .param-select:focus {
+            border-color: #FF5A36 !important;
+            box-shadow: 0 0 0 3px rgba(255, 90, 54, 0.16) !important;
         }
