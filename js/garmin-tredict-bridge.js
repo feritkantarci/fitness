@@ -1112,6 +1112,10 @@
     }
   }
 
+  let inFlightPushSig = '';
+  let pushQueueChain = Promise.resolve();
+  const storageWriteDebounceTimers = {};
+
   async function pushPayloadToGarminSilent(planPayload, intervalsEvents, dedupSig = '') {
     // Garmin kullanmayan kullanıcıda kesinlikle hiçbir ağ isteği veya kuyruk çalışmaz!
     if (!isGarminEnabledForCurrentUser()) return;
@@ -1120,34 +1124,62 @@
     if (!hasIntervals && !hasTredict) return;
 
     const sigKey = getScopedGarminKey(LAST_PUSHED_SIG_KEY);
-    const computedSig = dedupSig || JSON.stringify((planPayload && planPayload.planTrainings) || intervalsEvents || []);
+    const computedSig = dedupSig || JSON.stringify(
+      (planPayload && Array.isArray(planPayload.planTrainings))
+        ? planPayload.planTrainings.map(t => ({
+            d: t.calendarDate,
+            title: t.structuredWorkout && t.structuredWorkout.title,
+            steps: t.structuredWorkout && (t.structuredWorkout.steps || []).length
+          }))
+        : (intervalsEvents || [])
+    );
 
-    try {
-      const res = await fetchGarminBridge('/api/tredict/push-workout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ intervalsEvents: intervalsEvents || [], planPayload })
-      });
-      const data = await res.json();
-      if (data && data.ok) {
-        try {
-          localStorage.setItem(sigKey, computedSig);
-          localStorage.removeItem(getScopedGarminKey(OUTBOX_PLANS_KEY));
-        } catch {}
-        const count = Number(data.count) || (Array.isArray(planPayload?.planTrainings) ? planPayload.planTrainings.length : 1);
-        showGarminDirectCalendarSyncNotice(planPayload?.plan?.title || 'Çelik Kodu Seansı', count);
-        return;
-      }
-    } catch {
-      // Köprü kapalıysa sessizce yerel kuyruğa al, ASLA hata fırlatma
+    if (inFlightPushSig === computedSig || localStorage.getItem(sigKey) === computedSig) {
+      return;
     }
-
+    inFlightPushSig = computedSig;
     try {
-      const outboxKey = getScopedGarminKey(OUTBOX_PLANS_KEY);
-      const outbox = JSON.parse(localStorage.getItem(outboxKey) || '[]');
-      outbox.unshift({ createdAt: new Date().toISOString(), sig: computedSig, intervalsEvents: intervalsEvents || [], planPayload });
-      localStorage.setItem(outboxKey, JSON.stringify(outbox.slice(0, 10)));
+      localStorage.setItem(sigKey, computedSig);
     } catch {}
+
+    const runTask = async () => {
+      try {
+        const res = await fetchGarminBridge('/api/tredict/push-workout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ intervalsEvents: intervalsEvents || [], planPayload })
+        });
+        const data = await res.json();
+        if (data && data.ok) {
+          try {
+            localStorage.removeItem(getScopedGarminKey(OUTBOX_PLANS_KEY));
+          } catch {}
+          const firstItem = Array.isArray(data.workouts) ? data.workouts[0] : null;
+          if (!firstItem || !firstItem.skippedDuplicate) {
+            const count = Number(data.count) || (Array.isArray(planPayload?.planTrainings) ? planPayload.planTrainings.length : 1);
+            showGarminDirectCalendarSyncNotice(planPayload?.plan?.title || 'Çelik Kodu Seansı', count);
+          }
+          return;
+        }
+      } catch {
+        // Köprü kapalıysa sessizce yerel kuyruğa al, ASLA hata fırlatma
+      }
+
+      try {
+        if (localStorage.getItem(sigKey) === computedSig) {
+          localStorage.removeItem(sigKey);
+        }
+        const outboxKey = getScopedGarminKey(OUTBOX_PLANS_KEY);
+        const outbox = JSON.parse(localStorage.getItem(outboxKey) || '[]');
+        outbox.unshift({ createdAt: new Date().toISOString(), sig: computedSig, intervalsEvents: intervalsEvents || [], planPayload });
+        localStorage.setItem(outboxKey, JSON.stringify(outbox.slice(0, 10)));
+      } catch {} finally {
+        if (inFlightPushSig === computedSig) inFlightPushSig = '';
+      }
+    };
+
+    pushQueueChain = pushQueueChain.then(runTask, runTask);
+    return pushQueueChain;
   }
 
   function showGarminCalendarDeleteNotice(deletedCount) {
@@ -1344,9 +1376,11 @@
           key.startsWith('celik_kodu_weekly_schedule_') ||
           key.startsWith('celik_kodu_next_weekly_schedule_')
         ) {
-          setTimeout(() => handleCalendarStorageWrite(key, value, prevValue), 0);
+          if (storageWriteDebounceTimers[key]) clearTimeout(storageWriteDebounceTimers[key]);
+          storageWriteDebounceTimers[key] = setTimeout(() => handleCalendarStorageWrite(key, value, prevValue), 350);
         } else if (key === 'celik_kodu_last_generated_workout') {
-          setTimeout(() => handleGeneratedSingleDayWorkoutWrite(value), 0);
+          if (storageWriteDebounceTimers[key]) clearTimeout(storageWriteDebounceTimers[key]);
+          storageWriteDebounceTimers[key] = setTimeout(() => handleGeneratedSingleDayWorkoutWrite(value), 450);
         } else if (key === 'celik_kodu_active_user_id' || key === 'celik_kodu_session') {
           setTimeout(() => refreshGarminPanelsForUserState(), 0);
         }

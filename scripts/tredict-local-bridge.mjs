@@ -132,6 +132,15 @@ function formatLocalIsoDate(d = new Date()) {
   return `${y}-${m}-${day}`;
 }
 
+let calendarOpChain = Promise.resolve();
+const recentPushedSignatures = new Map();
+
+function enqueueCalendarOp(taskFn) {
+  const next = calendarOpChain.then(taskFn, taskFn);
+  calendarOpChain = next.catch(() => {});
+  return next;
+}
+
 function parsePlannedWorkoutListResponse(pwList) {
   if (Array.isArray(pwList?.plannedWorkouts)) return pwList.plannedWorkouts;
   const rawText = typeof pwList?.rawText === 'string' ? pwList.rawText : '';
@@ -145,12 +154,14 @@ function parsePlannedWorkoutListResponse(pwList) {
   const results = [];
   for (let i = 1; i < lines.length; i++) {
     const cols = lines[i].split(',');
-    const id = (cols[idxMap.id] || '').trim();
-    const date = (cols[idxMap.date] || '').trim();
-    const sportType = (cols[idxMap.sportType] || 'misc').trim();
-    const title = (cols[idxMap.title] || '').trim();
-    const notes = (cols[idxMap.notes] || '').trim();
-    const executedTrainingId = (cols[cols.length - 1] || '').trim();
+    const id = (cols[idxMap.id ?? 0] || '').trim();
+    const date = (cols[idxMap.date ?? 1] || '').trim();
+    const sportType = (cols[idxMap.sportType ?? 4] || 'misc').trim();
+    const title = (cols[idxMap.title ?? 5] || '').trim();
+    const notes = cols.slice(idxMap.notes ?? 6, cols.length - 1).join(',').trim();
+    const executedTrainingId = idxMap.executedTrainingId !== undefined
+      ? (cols[idxMap.executedTrainingId] || '').trim()
+      : '';
     if (!id || !date) continue;
     const textBlob = `${title} ${notes}`;
     let subSportType = 'strength_training';
@@ -175,124 +186,170 @@ function parsePlannedWorkoutListResponse(pwList) {
 }
 
 async function addTredictStrengthTrainingsToLiveCalendar(planTrainings, tredictToken) {
-  const validItems = (Array.isArray(planTrainings) ? planTrainings : []).filter(t => t && t.structuredWorkout);
-  if (!validItems.length) return [];
+  return enqueueCalendarOp(async () => {
+    const validItems = (Array.isArray(planTrainings) ? planTrainings : []).filter(t => t && t.structuredWorkout);
+    if (!validItems.length) return [];
 
-  const todayStr = formatLocalIsoDate(new Date());
-  const normalizedItems = validItems
-    .map((item) => {
+    const todayStr = formatLocalIsoDate(new Date());
+    const byDateAndType = new Map();
+    for (const item of validItems) {
       const calDate = (item.calendarDate && /^\d{4}-\d{2}-\d{2}$/.test(item.calendarDate))
         ? item.calendarDate
         : todayStr;
-      return {
+      if (calDate < todayStr) continue;
+      const subType = item.structuredWorkout?.subSportType || item.structuredWorkout?.sportType || 'strength_training';
+      byDateAndType.set(`${calDate}__${subType}`, {
         calendarDate: calDate,
         structuredWorkout: item.structuredWorkout
-      };
-    })
-    .filter(item => item.calendarDate >= todayStr);
-
-  if (!normalizedItems.length) return [];
-
-  // Aynı güne önceden eklenmiş planlı kuvvet antrenmanı varsa tekrarı önlemek için silme listesine ekle
-  let existingByDate = {};
-  try {
-    const startIso = todayStr + 'T00:00:00Z';
-    const endD = new Date(Date.now() + 21 * 86400000).toISOString().slice(0, 10) + 'T23:59:59Z';
-    const pwList = await callTredictMcpTool('planned-workout-list', { startDate: startIso, endDate: endD }, tredictToken);
-    const listArr = parsePlannedWorkoutListResponse(pwList);
-    for (const pw of listArr) {
-      if (pw && pw.id && pw.date && !pw.activityId) {
-        const dKey = String(pw.date).slice(0, 10);
-        const typeKey = `${dKey}__${pw.subSportType || pw.sportType || 'strength_training'}`;
-        if (!existingByDate[typeKey]) existingByDate[typeKey] = [];
-        existingByDate[typeKey].push(pw.id);
-      }
-    }
-  } catch {}
-
-  const createdWorkouts = [];
-
-  const pushSingleTraining = async (calDate, sw, deleteIds = [], retryStripExercise = '') => {
-    const workoutClone = JSON.parse(JSON.stringify(sw));
-    if (retryStripExercise) {
-      (workoutClone.steps || []).forEach(grp => {
-        (grp.steps || []).forEach(st => {
-          if (st.exerciseName === retryStripExercise) delete st.exerciseName;
-        });
       });
     }
+    const normalizedItems = Array.from(byDateAndType.values());
+    if (!normalizedItems.length) return [];
 
-    const uiRes = await callTredictMcpTool('calendar-change-ui', {
-      addTrainings: [{ calendarDate: calDate, title: workoutClone.title }],
-      deleteWorkoutIds: deleteIds.slice(0, 2)
-    }, tredictToken);
+    const payloadSig = JSON.stringify(normalizedItems.map(x => ({
+      d: x.calendarDate,
+      t: x.structuredWorkout?.title,
+      s: (x.structuredWorkout?.steps || []).length
+    })));
+    const lastTs = recentPushedSignatures.get(payloadSig) || 0;
+    if (Date.now() - lastTs < 20000) {
+      return normalizedItems.map(x => ({ skippedDuplicate: true, calendarDate: x.calendarDate }));
+    }
+    recentPushedSignatures.set(payloadSig, Date.now());
 
-    const sc = uiRes?.structuredContent;
-    if (!sc || !sc.decisionUrl || !Array.isArray(sc.changes) || !sc.changes.length) {
-      throw new Error(uiRes?.rawText || 'Tredict takvim onay jetonu alınamadı.');
+    // Aynı güne önceden eklenmiş planlı kuvvet antrenmanı varsa tekrarı önlemek için tamamını silme listesine ekle
+    let existingByDate = {};
+    try {
+      const startIso = todayStr + 'T00:00:00Z';
+      const endD = new Date(Date.now() + 21 * 86400000).toISOString().slice(0, 10) + 'T23:59:59Z';
+      const pwList = await callTredictMcpTool('planned-workout-list', { startDate: startIso, endDate: endD }, tredictToken);
+      const listArr = parsePlannedWorkoutListResponse(pwList);
+      for (const pw of listArr) {
+        if (pw && pw.id && pw.date && !pw.activityId) {
+          const dKey = String(pw.date).slice(0, 10);
+          const typeKey = `${dKey}__${pw.subSportType || pw.sportType || 'strength_training'}`;
+          if (!existingByDate[typeKey]) existingByDate[typeKey] = [];
+          existingByDate[typeKey].push(pw.id);
+        }
+      }
+    } catch {}
+
+    const createdWorkouts = [];
+
+    const pushSingleTraining = async (calDate, sw, deleteIds = [], retryStripExercise = '') => {
+      const workoutClone = JSON.parse(JSON.stringify(sw));
+      if (retryStripExercise) {
+        (workoutClone.steps || []).forEach(grp => {
+          (grp.steps || []).forEach(st => {
+            if (st.exerciseName === retryStripExercise) delete st.exerciseName;
+          });
+        });
+      }
+
+      // Eğer aynı günde 2'den fazla eski kopya varsa önce fazlaları temizle
+      if (deleteIds.length > 2) {
+        const extraIds = deleteIds.slice(2);
+        for (let i = 0; i < extraIds.length; i += 3) {
+          const batch = extraIds.slice(i, i + 3);
+          try {
+            const extraUi = await callTredictMcpTool('calendar-change-ui', {
+              addTrainings: [],
+              deleteWorkoutIds: batch
+            }, tredictToken);
+            const extraSc = extraUi?.structuredContent;
+            if (extraSc?.decisionUrl && Array.isArray(extraSc.changes)) {
+              for (const chg of extraSc.changes) {
+                if (chg.action === 'delete' && chg.requestToken && chg.workoutId) {
+                  const dec = await fetch(extraSc.decisionUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ requestToken: chg.requestToken, decision: 'confirm' })
+                  }).then(r => r.json());
+                  if (dec?.allowedToken) {
+                    await callTredictMcpTool('delete-calendar-training', {
+                      workoutId: chg.workoutId,
+                      allowedToken: dec.allowedToken
+                    }, tredictToken);
+                  }
+                }
+              }
+            }
+          } catch {}
+        }
+      }
+
+      const uiRes = await callTredictMcpTool('calendar-change-ui', {
+        addTrainings: [{ calendarDate: calDate, title: workoutClone.title }],
+        deleteWorkoutIds: deleteIds.slice(0, 2)
+      }, tredictToken);
+
+      const sc = uiRes?.structuredContent;
+      if (!sc || !sc.decisionUrl || !Array.isArray(sc.changes) || !sc.changes.length) {
+        throw new Error(uiRes?.rawText || 'Tredict takvim onay jetonu alınamadı.');
+      }
+
+      const tokens = [];
+      for (const chg of sc.changes) {
+        const decRes = await fetch(sc.decisionUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ requestToken: chg.requestToken, decision: 'confirm' })
+        }).then(r => r.json());
+        if (decRes && decRes.allowedToken) {
+          tokens.push({ action: chg.action, allowedToken: decRes.allowedToken, workoutId: chg.workoutId });
+        }
+      }
+
+      for (const tk of tokens) {
+        if (tk.action === 'delete' && tk.workoutId) {
+          try {
+            await callTredictMcpTool('delete-calendar-training', {
+              workoutId: tk.workoutId,
+              allowedToken: tk.allowedToken
+            }, tredictToken);
+          } catch {}
+        }
+      }
+
+      const addTokenObj = tokens.find(t => t.action === 'add');
+      if (!addTokenObj) throw new Error('Tredict takvim ekleme onay kodu üretilemedi.');
+
+      const now = new Date();
+      const nowMinutes = now.getHours() * 60 + now.getMinutes();
+      const defaultTime = workoutClone.subSportType === 'strength_training' ? 1080 : 1140;
+      const safePlanTime = calDate === todayStr
+        ? Math.min(1435, Math.max(defaultTime, nowMinutes + 15))
+        : defaultTime;
+
+      const addRes = await callTredictMcpTool('add-plan-training', {
+        calendarDate: calDate,
+        allowedToken: addTokenObj.allowedToken,
+        planTraining: {
+          time: safePlanTime,
+          structuredWorkout: workoutClone
+        }
+      }, tredictToken);
+
+      if (addRes?.isError && typeof addRes?.rawText === 'string') {
+        const badExMatch = addRes.rawText.match(/Unknown exerciseName '([^']+)'/);
+        if (badExMatch && !retryStripExercise) {
+          return await pushSingleTraining(calDate, workoutClone, [], badExMatch[1]);
+        }
+        throw new Error(addRes.rawText);
+      }
+
+      return addRes?.structuredContent || addRes;
+    };
+
+    for (const item of normalizedItems) {
+      const typeKey = `${item.calendarDate}__${item.structuredWorkout?.subSportType || item.structuredWorkout?.sportType || 'strength_training'}`;
+      const delIds = existingByDate[typeKey] || [];
+      const resItem = await pushSingleTraining(item.calendarDate, item.structuredWorkout, delIds);
+      createdWorkouts.push(resItem);
     }
 
-    const tokens = [];
-    for (const chg of sc.changes) {
-      const decRes = await fetch(sc.decisionUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ requestToken: chg.requestToken, decision: 'confirm' })
-      }).then(r => r.json());
-      if (decRes && decRes.allowedToken) {
-        tokens.push({ action: chg.action, allowedToken: decRes.allowedToken, workoutId: chg.workoutId });
-      }
-    }
-
-    for (const tk of tokens) {
-      if (tk.action === 'delete' && tk.workoutId) {
-        try {
-          await callTredictMcpTool('delete-calendar-training', {
-            workoutId: tk.workoutId,
-            allowedToken: tk.allowedToken
-          }, tredictToken);
-        } catch {}
-      }
-    }
-
-    const addTokenObj = tokens.find(t => t.action === 'add');
-    if (!addTokenObj) throw new Error('Tredict takvim ekleme onay kodu üretilemedi.');
-
-    const now = new Date();
-    const nowMinutes = now.getHours() * 60 + now.getMinutes();
-    const defaultTime = workoutClone.subSportType === 'strength_training' ? 1080 : 1140;
-    const safePlanTime = calDate === todayStr
-      ? Math.min(1435, Math.max(defaultTime, nowMinutes + 15))
-      : defaultTime;
-
-    const addRes = await callTredictMcpTool('add-plan-training', {
-      calendarDate: calDate,
-      allowedToken: addTokenObj.allowedToken,
-      planTraining: {
-        time: safePlanTime,
-        structuredWorkout: workoutClone
-      }
-    }, tredictToken);
-
-    if (addRes?.isError && typeof addRes?.rawText === 'string') {
-      const badExMatch = addRes.rawText.match(/Unknown exerciseName '([^']+)'/);
-      if (badExMatch && !retryStripExercise) {
-        return await pushSingleTraining(calDate, workoutClone, [], badExMatch[1]);
-      }
-      throw new Error(addRes.rawText);
-    }
-
-    return addRes?.structuredContent || addRes;
-  };
-
-  for (const item of normalizedItems) {
-    const typeKey = `${item.calendarDate}__${item.structuredWorkout?.subSportType || item.structuredWorkout?.sportType || 'strength_training'}`;
-    const delIds = existingByDate[typeKey] || [];
-    const resItem = await pushSingleTraining(item.calendarDate, item.structuredWorkout, delIds);
-    createdWorkouts.push(resItem);
-  }
-
-  return createdWorkouts;
+    return createdWorkouts;
+  });
 }
 
 async function deleteTredictStrengthTrainingsByDates(dates = [], deleteAllFuture = false, tredictToken = '', subSportTypes = []) {

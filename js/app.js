@@ -27244,7 +27244,7 @@ KURALLAR:
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=270')
+                navigator.serviceWorker.register('./sw.js?v=271')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
