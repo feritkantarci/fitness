@@ -24,7 +24,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=271">
+    <link rel="stylesheet" href="css/style.css?v=272">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH (CANVA MODERN ATHLETIC LIGHT V229) */
         html, body { background-color: #F8FAFC; color: #0F172A; color-scheme: light; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -51,7 +51,7 @@
                     <path d="M34 25L26 36H33L30 46L39 34H32L34 25Z" fill="#FFFFFF"/>
                 </svg>
             </div>
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v271</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v272</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -189,7 +189,7 @@
             <div class="modern-app-bar">
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="canva-brand-monogram" aria-hidden="true" translate="no">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="36" height="36" fill="none" style="display:block;border-radius:10px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="34" height="34" fill="none" style="display:block;border-radius:10px;">
                             <rect width="64" height="64" rx="16" fill="#0F172A"/>
                             <rect x="1" y="1" width="62" height="62" rx="15" stroke="#334155" stroke-width="1.5" stroke-opacity="0.6"/>
                             <defs>
@@ -203,27 +203,27 @@
                             <path d="M34 25L26 36H33L30 46L39 34H32L34 25Z" fill="#FFFFFF"/>
                         </svg>
                     </span>
-                    <div class="canva-brand-stack" style="display:flex;flex-direction:column;align-items:flex-start;gap:1px;">
-                        <div style="display:flex;align-items:center;gap:6px;">
-                            <span class="modern-brand-title" translate="no">Çelik Kodu</span>
-                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v271</span>
+                    <div class="canva-brand-stack">
+                        <span class="modern-brand-title" translate="no">Çelik Kodu</span>
+                        <div class="modern-brand-subrow">
+                            <span id="headerActiveTabLabel">ÜRETİCİ</span>
+                            <span class="modern-brand-subdot" aria-hidden="true">•</span>
+                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v272</span>
                         </div>
-                        <span id="headerActiveTabLabel" style="font-size:10px;font-weight:800;letter-spacing:0.06em;color:#565E74;text-transform:uppercase;line-height:1;">ÜRETİCİ</span>
                     </div>
                 </div>
                 <div class="modern-bar-actions">
                     <div class="modern-user-badge" onclick="if(window.innerWidth <= 768){ openMoreSheet(); } else { switchTab('profileTab'); }" title="Profil & Menü">
-                        <span class="modern-user-avatar" id="headerUserAvatar" style="display:none;"></span>
+                        <span class="modern-user-avatar" id="headerUserAvatar">F</span>
                         <span class="modern-user-name" id="headerUserName">Sporcu</span>
-                        <span class="auth-role-tag role-admin" id="headerUserRoleBadge">Yönetici</span>
+                        <span class="auth-role-tag role-admin" id="headerUserRoleBadge" style="display:none;">Yönetici</span>
                     </div>
-                    <button type="button" id="btnHeaderNotifications" class="btn-header-popup-toggle" onclick="toggleHeaderNotificationCenter(event)" title="Bildirim Merkezi" style="position:relative;padding:6px 10px;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                        <span id="headerNotifBadge" style="display:none;position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#EF4444;color:#FFFFFF;font-size:10.5px;font-weight:800;line-height:18px;text-align:center;box-shadow:0 2px 6px rgba(239,68,68,0.45);">0</span>
+                    <button type="button" id="btnHeaderNotifications" class="btn-header-popup-toggle btn-header-icon-circle" onclick="toggleHeaderNotificationCenter(event)" title="Bildirim Merkezi">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                        <span id="headerNotifBadge" style="display:none;position:absolute;top:-3px;right:-3px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:#EF4444;color:#FFFFFF;font-size:9.5px;font-weight:800;line-height:16px;text-align:center;box-shadow:0 2px 5px rgba(239,68,68,0.4);">0</span>
                     </button>
-                    <button type="button" class="btn-header-popup-toggle" onclick="toggleHeaderPopupMenu(event)" title="Seçenekler ve Menü">
-                        <span class="desktop-only-action">İşlemler</span>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    <button type="button" class="btn-header-popup-toggle btn-header-icon-circle" onclick="toggleHeaderPopupMenu(event)" title="Seçenekler ve Menü">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </button>
 
                     <!-- HEADER NOTIFICATION CENTER (SAĞ ÜST TOPLU BİLDİRİM MERKEZİ) -->
@@ -584,49 +584,41 @@
             <!-- ==================== TAB 2: ACTIVE WORKOUT ==================== -->
             <div id="activeWorkoutTab" class="tab-content">
 
-                <!-- 1. WORKOUT STICKY HUD (SADELEŞTİRİLMİŞ & KOMPAKT) -->
-                <div id="activeWorkoutHUD" class="workout-sticky-hud" style="display:none;">
-                    <div class="hud-main-bar">
-                        <!-- Sol: Toplam Süre -->
-                        <div class="hud-timer-col">
-                            <span class="hud-timer-icon" aria-hidden="true">⏱️</span>
-                            <div class="hud-time-val" id="workoutTotalTimerDisplay">00:00</div>
-                            <button type="button" class="btn-hud-tiny" id="btnToggleWorkoutPause" onclick="toggleWorkoutPause()" title="Duraklat / Sürdür" aria-label="Antrenman süresini duraklat veya sürdür">⏸️</button>
-                        </div>
-
-                        <!-- Orta: Dinlenme Sayacı (Rest Timer) -->
-                        <div class="hud-rest-col" id="hudRestBox">
-                            <span class="hud-rest-icon" aria-hidden="true">⏳</span>
-                            <div class="hud-rest-val" id="timerDisplay">00:45</div>
+                <!-- 1. WORKOUT STICKY HUD (STITCH SİYAH DİNLENME & ODAK SAYACI) -->
+                <div id="activeWorkoutHUD" class="workout-sticky-hud stitch-dark-hud" style="display:none;">
+                    <div class="stitch-hud-top-row">
+                        <div class="stitch-hud-status">
+                            <span class="stitch-hud-dot" aria-hidden="true">●</span>
+                            <span>DİNLENME SAYACI</span>
                             <span id="hudRestStatusBadge" style="display:none;">Hazır</span>
-                            <div class="hud-rest-btns">
-                                <button type="button" class="btn-hud-tiny" id="btnPlayPauseTimer" onclick="toggleTimer()" title="Başlat / Duraklat" aria-label="Dinlenme sayacını başlat veya duraklat">▶</button>
-                                <button type="button" class="btn-hud-tiny" onclick="adjustTimer(15)" title="15 saniye ekle" aria-label="Dinlenme süresine 15 saniye ekle">+15s</button>
-                                <button type="button" class="btn-hud-tiny btn-skip-rest" onclick="skipRestTimer()" title="Dinlenmeyi bitir" aria-label="Dinlenmeyi atla">⏩</button>
-                            </div>
                         </div>
-
-                        <!-- Sağ: Görünüm & Ekran Kilidi -->
-                        <div class="hud-meta-col">
+                        <div class="stitch-hud-meta-right">
+                            <span class="stitch-hud-total-lbl">Toplam: <strong id="workoutTotalTimerDisplay">00:00</strong></span>
+                            <button type="button" class="btn-hud-tiny" id="btnToggleWorkoutPause" onclick="toggleWorkoutPause()" title="Duraklat / Sürdür" aria-label="Antrenman süresini duraklat veya sürdür">⏸️</button>
                             <div class="hud-view-toggle-group">
-                                <button type="button" class="btn-view-toggle active" id="btnViewFocus" onclick="setActiveWorkoutViewMode('focus')" title="Tek hareket odak modu" aria-label="Tek hareket odak modu">🎯</button>
-                                <button type="button" class="btn-view-toggle" id="btnViewList" onclick="setActiveWorkoutViewMode('list')" title="Tüm hareketler listesi" aria-label="Tüm hareketler listesi">📋</button>
+                                <button type="button" class="btn-view-toggle active" id="btnViewFocus" onclick="setActiveWorkoutViewMode('focus')" title="Tek hareket odak modu" aria-label="Tek hareket odak modu">Odak</button>
+                                <button type="button" class="btn-view-toggle" id="btnViewList" onclick="setActiveWorkoutViewMode('list')" title="Tüm hareketler listesi" aria-label="Tüm hareketler listesi">Liste</button>
                             </div>
-                            <button type="button" id="wakeLockStatusBtn" class="wake-lock-pill" onclick="toggleWakeLockManual()" title="Ekranı açık tut" aria-label="Ekran kilidini açık tut">
-                                🟢
-                            </button>
+                            <button type="button" id="wakeLockStatusBtn" class="wake-lock-pill" onclick="toggleWakeLockManual()" title="Ekranı açık tut" aria-label="Ekran kilidini açık tut" style="display:none;">🟢</button>
                             <span id="btnCollapseHUD" style="display:none;"><span id="hudCollapseIcon"></span></span>
                         </div>
                     </div>
 
-                    <!-- İnce İlerleme Çubuğu Satırı -->
-                    <div class="hud-progress-row">
-                        <div class="hud-progress-track">
+                    <div class="stitch-hud-MainRest" id="hudRestBox">
+                        <div class="stitch-hud-time-row">
+                            <div class="stitch-hud-big-val" id="timerDisplay">00:45</div>
+                            <div class="stitch-hud-prog-meta">
+                                <span id="liveProgressText">Set: 0 / 0</span>
+                                <span id="liveProgressDetail" style="display:none;">Hazır</span>
+                            </div>
+                        </div>
+                        <div class="hud-progress-track stitch-hud-track">
                             <div class="hud-progress-fill" id="liveProgressBarFill" style="width:0%;"></div>
                         </div>
-                        <div class="hud-progress-info">
-                            <span id="liveProgressText">Set İlerlemesi: 0 / 0 (%0)</span>
-                            <span id="liveProgressDetail" class="hud-progress-detail">Hazır</span>
+                        <div class="stitch-hud-btn-grid">
+                            <button type="button" class="stitch-hud-btn-secondary" onclick="adjustTimer(15)" title="15 saniye ekle">+15 sn</button>
+                            <button type="button" class="stitch-hud-btn-primary" id="btnPlayPauseTimer" onclick="toggleTimer()" title="Başlat / Duraklat">▶ Başlat</button>
+                            <button type="button" class="stitch-hud-btn-secondary btn-skip-rest" onclick="skipRestTimer()" title="Dinlenmeyi bitir">⏭ Atla</button>
                         </div>
                     </div>
                 </div>
@@ -775,56 +767,22 @@
                 </div>
 
                 <!-- ==================== GÖMÜLÜ AKILLI ANTRENMAN TAKVİMİ (ANTRENMAN SEKMESİ İÇİNDE) ==================== -->
-                <div id="embeddedCalendarSection" style="margin-top:8px;">
-                    <div class="generator-card">
-                        <!-- TOP TOOLBAR -->
-                        <div class="calendar-screen-header">
-                            <div class="cal-header-title-box">
-                                <h2>
-                                    <span>ANTRENMAN TAKVİMİ</span>
-                                </h2>
-                                <p>
-                                    Haftalık ve aylık seans planlama, geçmiş tamamlanan antrenman kayıtları ve program yönetimi.
-                                </p>
-                            </div>
-                            <div class="calendar-screen-nav-bar">
-                                <div class="cal-view-pills">
-                                    <button type="button" class="cal-pill-btn active" id="calViewWeeklyBtn" onclick="setCalendarViewMode('weekly')">
-                                        Haftalık
-                                    </button>
-                                    <button type="button" class="cal-pill-btn" id="calViewMonthlyBtn" onclick="setCalendarViewMode('monthly')">
-                                        Aylık
-                                    </button>
+                <div id="embeddedCalendarSection" style="margin-top:4px;">
+                    <div class="generator-card stitch-calendar-shell">
+                        <!-- KOMPAKT TEK SATIR ÜST BAR -->
+                        <div class="stitch-cal-topbar">
+                            <div class="cal-period-title" id="calPeriodTitle"></div>
+                            <div class="stitch-cal-controls">
+                                <div class="stitch-cal-nav-arrows">
+                                    <button type="button" class="stitch-cal-arrow-btn" onclick="navigateCalendar(-1)" title="Önceki Dönem">&lsaquo;</button>
+                                    <button type="button" class="stitch-cal-today-btn" onclick="jumpCalendarToToday()">Bugün</button>
+                                    <button type="button" class="stitch-cal-arrow-btn" onclick="navigateCalendar(1)" title="Sonraki Dönem">&rsaquo;</button>
                                 </div>
-                                <div style="display:flex; align-items:center; gap:4px;">
-                                    <button type="button" class="btn btn-outline cal-nav-btn" onclick="navigateCalendar(-1)" title="Önceki Dönem">
-                                        &lsaquo;
-                                    </button>
-                                    <button type="button" class="btn btn-outline cal-nav-btn" style="font-weight:800; color:var(--gold); border-color:rgba(245,158,11,0.4);" onclick="jumpCalendarToToday()">
-                                        Bugün
-                                    </button>
-                                    <button type="button" class="btn btn-outline cal-nav-btn" onclick="navigateCalendar(1)" title="Sonraki Dönem">
-                                        &rsaquo;
-                                    </button>
+                                <div class="cal-view-pills stitch-cal-view-pills">
+                                    <button type="button" class="cal-pill-btn active" id="calViewWeeklyBtn" onclick="setCalendarViewMode('weekly')">Hafta</button>
+                                    <button type="button" class="cal-pill-btn" id="calViewMonthlyBtn" onclick="setCalendarViewMode('monthly')">Ay</button>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- PERIOD TITLE & DIRECT EXPORT BAR -->
-                        <div class="calendar-screen-period-bar">
-                            <div class="cal-period-title" id="calPeriodTitle">
-                                <!-- E.g. 5 - 11 Ekim 2026 -->
-                            </div>
-                            <div class="cal-actions-wrap">
-                                <button type="button" class="btn btn-gold cal-action-btn" onclick="openGoogleCalendarWeb()" title="Google Takvim uygulamasını aç">
-                                    Google Takvim
-                                </button>
-                                <button type="button" class="btn btn-outline cal-action-btn" style="color:#0F172A;" onclick="downloadFullScheduleICS()" title="Tüm haftayı cihaz takvimine aktar (.ics)">
-                                    Cihaza Aktar (.ics)
-                                </button>
-                                <button type="button" class="btn btn-outline cal-action-btn" style="padding:4px 8px;" onclick="openCalendarSyncModal()" title="Takvim Ayarları">
-                                    Ayarlar
-                                </button>
+                                <button type="button" class="wk-ex-i-btn" onclick="openCalendarToolsModal()" title="Takvim Araçları ve Şablonlar">i</button>
                             </div>
                         </div>
 
@@ -832,13 +790,33 @@
                         <div id="calendarMainContainer">
                             <!-- Populated dynamically by renderCalendarScreen() -->
                         </div>
+                    </div>
 
-                        <!-- QUICK TEMPLATE & RESET BAR -->
-                        <div class="planner-template-bar" style="margin-top:12px; display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
-                            <span class="planner-template-lbl">Hızlı Şablon:</span>
-                            <button type="button" class="planner-template-btn" onclick="resetWeeklyScheduleTemplate('standard_3day')" title="Standart 3 Günlük Çelik Şablonu">3 Gün</button>
-                            <button type="button" class="planner-template-btn" onclick="resetWeeklyScheduleTemplate('split_4day')" title="4 Günlük Bölünmüş Şablon">4 Gün</button>
-                            <button type="button" class="planner-template-btn" style="color:#ef4444; border-color:rgba(239,68,68,0.35); font-weight:800;" onclick="purgeAllUnrequestedSchedules()" title="Tüm haftayı temizle ve dinlenmeye al">🧹 Takvimi Sıfırla (Boşalt)</button>
+                    <!-- TAKVİM ARAÇLARI & ŞABLON "i" MODALI -->
+                    <div id="calendarToolsModalOverlay" class="wk-info-modal-overlay" style="display:none;" onclick="if(event.target===this) closeCalendarToolsModal()">
+                        <div class="wk-info-modal-box" onclick="event.stopPropagation()">
+                            <div class="wk-info-modal-header">
+                                <span style="font-size:14px;font-weight:800;color:#0F172A;">Takvim Araçları & Şablon</span>
+                                <button type="button" class="wk-info-modal-close" onclick="closeCalendarToolsModal()" aria-label="Kapat">✕</button>
+                            </div>
+                            <div class="wk-info-modal-body" style="display:flex;flex-direction:column;gap:14px;">
+                                <div>
+                                    <div style="font-size:11px;font-weight:800;color:#64748B;margin-bottom:6px;text-transform:uppercase;">DIŞA AKTAR & SENKRON</div>
+                                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
+                                        <button type="button" class="wk-chip-action" onclick="closeCalendarToolsModal(); openGoogleCalendarWeb()">Google Takvim</button>
+                                        <button type="button" class="wk-chip-action" onclick="closeCalendarToolsModal(); downloadFullScheduleICS()">Cihaza İndir</button>
+                                        <button type="button" class="wk-chip-action" onclick="closeCalendarToolsModal(); openCalendarSyncModal()">Ayarlar</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="font-size:11px;font-weight:800;color:#64748B;margin-bottom:6px;text-transform:uppercase;">HIZLI HAFTALIK ŞABLON</div>
+                                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
+                                        <button type="button" class="wk-chip-action" onclick="closeCalendarToolsModal(); resetWeeklyScheduleTemplate('standard_3day')">3 Gün Plan</button>
+                                        <button type="button" class="wk-chip-action" onclick="closeCalendarToolsModal(); resetWeeklyScheduleTemplate('split_4day')">4 Gün Plan</button>
+                                        <button type="button" class="wk-chip-action" style="color:#B91C1C;border-color:#FECACA;background:#FEF2F2;" onclick="closeCalendarToolsModal(); purgeAllUnrequestedSchedules()">Sıfırla</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2811,7 +2789,7 @@
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
     <script src="js/exercises-db.js?v=245"></script>
-    <script src="js/app.js?v=271"></script>
+    <script src="js/app.js?v=272"></script>
     <script>
         function getNotifStorageKey() {
             const uid = localStorage.getItem('celik_kodu_active_user_id') || 'default';
@@ -3004,6 +2982,6 @@
             </div>
         </div>
     </div>
-    <script src="js/garmin-tredict-bridge.js?v=271" defer></script>
+    <script src="js/garmin-tredict-bridge.js?v=272" defer></script>
 </body>
 </html>

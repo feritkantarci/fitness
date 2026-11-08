@@ -9616,76 +9616,173 @@
 
         /* 2. Stitch Top App Bar & Brand Identity */
         .modern-app-bar {
-            background: rgba(247, 249, 251, 0.90) !important;
+            background: rgba(247, 249, 251, 0.94) !important;
             backdrop-filter: blur(18px) !important;
             -webkit-backdrop-filter: blur(18px) !important;
             border-bottom: 1px solid #E2E8F0 !important;
-            box-shadow: 0 1px 8px rgba(15, 23, 42, 0.04) !important;
-            padding: 10px 16px !important;
+            box-shadow: 0 1px 6px rgba(15, 23, 42, 0.03) !important;
+            padding: 10px 14px !important;
+            gap: 10px !important;
+        }
+
+        .modern-brand {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 9px !important;
+            min-width: 0 !important;
         }
 
         .canva-brand-monogram {
             background: transparent !important;
             border: none !important;
-            width: 36px !important;
-            height: 36px !important;
+            width: 34px !important;
+            height: 34px !important;
             padding: 0 !important;
-            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.14) !important;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12) !important;
             border-radius: 10px !important;
             overflow: hidden !important;
+            flex-shrink: 0 !important;
+        }
+
+        .canva-brand-stack {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            justify-content: center !important;
+            gap: 2px !important;
+            min-width: 0 !important;
         }
 
         .modern-brand-title {
-            font-family: 'Outfit', sans-serif !important;
-            font-size: 18px !important;
-            font-weight: 700 !important;
-            color: #191C1E !important;
+            font-family: 'Plus Jakarta Sans', 'Outfit', sans-serif !important;
+            font-size: 16.5px !important;
+            font-weight: 800 !important;
+            color: #0F172A !important;
             letter-spacing: -0.02em !important;
-            line-height: 1.1 !important;
+            line-height: 1.15 !important;
+            white-space: nowrap !important;
         }
 
-        .app-version-badge {
-            background: #ECEEF0 !important;
-            border: 1px solid #CBD5E1 !important;
-            color: #334155 !important;
+        .modern-brand-subrow {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+            line-height: 1 !important;
+            white-space: nowrap !important;
+        }
+
+        #headerActiveTabLabel {
             font-size: 10px !important;
             font-weight: 800 !important;
-            border-radius: 999px !important;
-            padding: 2px 7px !important;
+            letter-spacing: 0.06em !important;
+            color: #64748B !important;
+            text-transform: uppercase !important;
+            line-height: 1 !important;
+        }
+
+        .modern-brand-subdot {
+            font-size: 9px !important;
+            color: #94A3B8 !important;
+            font-weight: 700 !important;
+            line-height: 1 !important;
+        }
+
+        .app-version-badge,
+        #appVersionBadge {
+            background: transparent !important;
+            border: none !important;
+            color: #94A3B8 !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            font-size: 10px !important;
+            font-weight: 700 !important;
+            border-radius: 0 !important;
+            padding: 0 !important;
+            letter-spacing: 0.02em !important;
+            box-shadow: none !important;
+            line-height: 1 !important;
+            cursor: pointer !important;
+        }
+
+        .modern-bar-actions {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            flex-shrink: 0 !important;
         }
 
         .modern-user-badge {
-            background: #B52603 !important;
-            border: 1px solid #8C1900 !important;
-            color: #FFFFFF !important;
-            border-radius: 999px !important;
-            padding: 5px 12px !important;
-            box-shadow: 0 2px 8px rgba(181, 38, 3, 0.22) !important;
-        }
-
-        .modern-user-badge .modern-user-name {
-            color: #FFFFFF !important;
-            font-weight: 700 !important;
-            font-size: 12px !important;
-        }
-
-        .modern-user-badge .auth-role-tag {
-            background: rgba(255, 255, 255, 0.2) !important;
-            color: #FFFFFF !important;
-            border: none !important;
-        }
-
-        .btn-header-popup-toggle {
+            height: 34px !important;
             background: #FFFFFF !important;
             border: 1px solid #E2E8F0 !important;
-            color: #565E74 !important;
+            color: #0F172A !important;
             border-radius: 999px !important;
+            padding: 3px 10px 3px 4px !important;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            white-space: nowrap !important;
         }
 
-        .btn-header-popup-toggle:hover {
-            color: #191C1E !important;
+        .modern-user-badge:hover {
+            background: #F8FAFC !important;
             border-color: #CBD5E1 !important;
-            background: #F2F4F6 !important;
+        }
+
+        .modern-user-avatar,
+        #headerUserAvatar {
+            width: 24px !important;
+            height: 24px !important;
+            border-radius: 50% !important;
+            background: #0F172A !important;
+            color: #FFFFFF !important;
+            font-size: 11px !important;
+            font-weight: 800 !important;
+            border: none !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            flex-shrink: 0 !important;
+            line-height: 1 !important;
+        }
+
+        .modern-user-badge .modern-user-name,
+        #headerUserName {
+            color: #0F172A !important;
+            font-weight: 700 !important;
+            font-size: 12.5px !important;
+            white-space: nowrap !important;
+            line-height: 1 !important;
+        }
+
+        #headerUserRoleBadge,
+        .modern-user-badge .auth-role-tag {
+            display: none !important;
+        }
+
+        .btn-header-popup-toggle,
+        .btn-header-icon-circle {
+            width: 34px !important;
+            height: 34px !important;
+            min-height: 34px !important;
+            padding: 0 !important;
+            background: #FFFFFF !important;
+            border: 1px solid #E2E8F0 !important;
+            color: #0F172A !important;
+            border-radius: 50% !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            position: relative !important;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+            flex-shrink: 0 !important;
+        }
+
+        .btn-header-popup-toggle:hover,
+        .btn-header-icon-circle:hover {
+            color: #0F172A !important;
+            border-color: #CBD5E1 !important;
+            background: #F8FAFC !important;
         }
 
         /* 3. Stitch 6-Tab Bottom Navigation Bar & Desktop Segmented Bar */
@@ -10060,3 +10157,1212 @@
             border-color: #FF5A36 !important;
             box-shadow: 0 0 0 3px rgba(255, 90, 54, 0.16) !important;
         }
+
+/* =========================================================================
+   ZAMAN ÇİZELGESİ (TIMELINE) & SADELEŞTİRİLMİŞ İSTASYON STİLLERİ
+   ========================================================================= */
+.timeline-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    position: relative;
+}
+
+.timeline-station-item {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 14px;
+    position: relative;
+}
+
+.timeline-station-item:last-child {
+    margin-bottom: 6px;
+}
+
+.timeline-station-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #0F172A;
+    color: #FFFFFF;
+    font-family: var(--font-display, 'Outfit', sans-serif);
+    font-size: 11px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+    flex-shrink: 0;
+}
+
+.timeline-station-line {
+    flex: 1;
+    width: 2px;
+    background: #E2E8F0;
+    margin: 4px 0;
+}
+
+.timeline-station-card {
+    flex: 1;
+    min-width: 0;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 12px 14px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.timeline-station-card:hover {
+    border-color: #CBD5E1;
+}
+
+.timeline-station-card.is-superset {
+    border-left: 3.5px solid #FF5A36 !important;
+}
+
+.wk-ex-row-clean {
+    cursor: pointer;
+    padding: 6px 0;
+    transition: background-color 0.15s ease;
+    border-radius: 6px;
+}
+
+.wk-ex-row-clean:hover {
+    background-color: rgba(15, 23, 42, 0.02);
+}
+
+.wk-ex-row-clean:active {
+    transform: scale(0.995);
+}
+
+.timeline-transition-divider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+}
+
+.timeline-transition-line {
+    flex: 1;
+    height: 1px;
+    border-top: 1px dashed #FF5A36;
+}
+
+.timeline-transition-badge {
+    font-size: 9.5px;
+    font-weight: 900;
+    color: #B52603;
+    background: #FFF1EE;
+    border: 1px solid #FFDAD2;
+    padding: 1.5px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.timeline-rest-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #565E74;
+    background: #F1F5F9;
+    border: 1px solid #E2E8F0;
+    padding: 2px 8px;
+    border-radius: 999px;
+}
+
+.wk-ex-detail-drawer {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed #E2E8F0;
+    animation: fadeInDrawer 0.18s ease-out;
+}
+
+@keyframes fadeInDrawer {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 480px) {
+    .timeline-station-item { gap: 8px; }
+    .timeline-station-num { width: 22px; height: 22px; font-size: 10px; }
+    .timeline-station-card { padding: 10px 12px; }
+}
+
+/* =========================================================================
+   KOMPAKT MOBİL AKSİYON ÇUBUĞU (ŞİMDİ BAŞLAT & TAKVİM PİLLERİ)
+   ========================================================================= */
+.wk-compact-action-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.wk-compact-primary-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.wk-btn-primary-compact {
+    flex: 1;
+    height: 38px;
+    background: #FF5A36;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(255, 90, 54, 0.22);
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.wk-btn-primary-compact:hover {
+    background: #E04826;
+}
+
+.wk-btn-primary-compact:active {
+    transform: scale(0.985);
+}
+
+.wk-btn-utility-compact {
+    height: 38px;
+    padding: 0 12px;
+    background: #F1F5F9;
+    color: #0F172A;
+    border: 1px solid #CBD5E1;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.wk-btn-utility-compact:hover {
+    background: #E2E8F0;
+    border-color: #94A3B8;
+}
+
+.wk-compact-secondary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.wk-chip-action {
+    height: 32px;
+    padding: 0 6px;
+    background: #F8FAFC;
+    color: #334155;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: all 0.15s ease;
+}
+
+.wk-chip-action:hover {
+    background: #F1F5F9;
+    border-color: #CBD5E1;
+    color: #0F172A;
+}
+
+.wk-chip-action.highlight-orange {
+    background: #FFF1EE;
+    border-color: #FFDAD2;
+    color: #B52603;
+    font-weight: 800;
+}
+
+.wk-chip-action.highlight-green {
+    background: #DCFCE7;
+    border-color: #BBF7D0;
+    color: #15803D;
+    font-weight: 800;
+}
+
+@media (max-width: 390px) {
+    .wk-compact-secondary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* =========================================================================
+   KOMPAKT "i" BİLGİ BUTONLARI & POP-UP MODAL (KOÇ ÖZETİ / DİNAMİK ISINMA)
+   ========================================================================= */
+.wk-info-triggers-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.wk-info-i-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 8px;
+    background: #F8FAFC;
+    color: #0F172A;
+    border: 1px solid #CBD5E1;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.wk-info-i-btn:hover {
+    background: #FFF1EE;
+    border-color: #FF5A36;
+    color: #B52603;
+}
+
+.wk-i-badge {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #0F172A;
+    color: #FFFFFF;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: italic;
+    font-size: 11.5px;
+    font-weight: 900;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.wk-info-i-btn:hover .wk-i-badge {
+    background: #FF5A36;
+}
+
+.wk-info-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    overscroll-behavior: contain;
+}
+
+.wk-info-modal-box {
+    width: 100%;
+    max-width: 460px;
+    max-height: 82vh;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.22);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    overscroll-behavior: contain;
+    animation: fadeInDrawer 0.16s ease-out;
+}
+
+.wk-info-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 16px;
+    background: #F8FAFC;
+    border-bottom: 1px solid #E2E8F0;
+}
+
+.wk-info-modal-close {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    color: #0F172A;
+    border: 1px solid #CBD5E1;
+    font-size: 14px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.wk-info-modal-close:hover {
+    background: #FEE2E2;
+    border-color: #EF4444;
+    color: #B91C1C;
+}
+
+.wk-info-modal-body {
+    padding: 14px 16px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+/* =========================================================================
+   HAREKET DETAY ÇEKMECESİ — TAŞMAYAN KOMPAKT EKİPMAN & KAS ROZETLERİ
+   ========================================================================= */
+.timeline-station-card .wk-ex-detail-drawer,
+.wk-ex-detail-drawer {
+    margin-top: 8px !important;
+    padding: 8px 0 2px 0 !important;
+    background: transparent !important;
+    border-top: 1px dashed #E2E8F0 !important;
+    border-bottom: none !important;
+}
+
+.wk-ex-detail-drawer .ex-card.wk-drawer-clean-card {
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+}
+
+.wk-ex-detail-drawer .pos-guide-wrapper {
+    margin-top: 6px !important;
+    border-radius: 10px !important;
+    border: 1px solid #E2E8F0 !important;
+    background: #F8FAFC !important;
+    overflow: hidden !important;
+}
+
+.wk-ex-detail-drawer .pos-guide-header {
+    padding: 6px 8px !important;
+    background: #F1F5F9 !important;
+    border-bottom: 1px solid #E2E8F0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+}
+
+.wk-ex-detail-drawer .pos-guide-content {
+    padding: 6px !important;
+    background: #FFFFFF !important;
+}
+
+.wk-ex-detail-drawer .guide-toggle-tabs {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(64px, 1fr)) !important;
+    gap: 4px !important;
+    padding: 4px !important;
+    background: #F1F5F9 !important;
+    border-radius: 8px !important;
+    margin-bottom: 6px !important;
+}
+
+.wk-ex-detail-drawer .guide-toggle-tabs .btn-guide-tab {
+    padding: 5px 4px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    border-radius: 6px !important;
+}
+
+.wk-ex-detail-drawer .pos-diagram-toolbar {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 6px !important;
+}
+
+.wk-ex-detail-drawer .pos-diagram-toolbar .btn-diagram-tool {
+    padding: 4px 10px !important;
+    font-size: 11px !important;
+    height: auto !important;
+    min-height: 28px !important;
+}
+
+.wk-drawer-pills-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+    max-width: 100%;
+}
+
+.wk-drawer-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.25;
+    max-width: 100%;
+    white-space: nowrap;
+}
+
+.wk-drawer-pill.equip {
+    background: #F1F5F9;
+    color: #0F172A;
+    border: 1px solid #CBD5E1;
+}
+
+.wk-drawer-pill.primary {
+    background: #FFF1EE;
+    color: #B52603;
+    border: 1px solid #FFDAD2;
+}
+
+.wk-drawer-pill.secondary {
+    background: #F0F9FF;
+    color: #0369A1;
+    border: 1px solid #BAE6FD;
+}
+
+/* ==================== STITCH ANTRENMAN SEKMESİ (YATAY HAFTA + BÜYÜK SET KARTI) ==================== */
+.stitch-calendar-shell {
+    padding: 12px !important;
+    background: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 18px !important;
+}
+
+.stitch-cal-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.stitch-cal-topbar .cal-period-title {
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    color: #0F172A !important;
+    white-space: nowrap !important;
+}
+
+.stitch-cal-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+.stitch-cal-nav-arrows {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.stitch-cal-arrow-btn,
+.stitch-cal-today-btn {
+    height: 28px;
+    padding: 0 8px;
+    border-radius: 8px;
+    border: 1px solid #E2E8F0;
+    background: #F8FAFC;
+    color: #0F172A;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stitch-cal-view-pills {
+    background: #F1F5F9 !important;
+    padding: 2px !important;
+    border-radius: 8px !important;
+    display: inline-flex !important;
+    gap: 2px !important;
+}
+
+.stitch-cal-view-pills .cal-pill-btn {
+    padding: 4px 8px !important;
+    font-size: 10.5px !important;
+    font-weight: 800 !important;
+    border-radius: 6px !important;
+}
+
+/* 7 Günlük Yatay Şerit */
+.stitch-day-strip {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px;
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 6px;
+    margin-bottom: 10px;
+}
+
+.stitch-day-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 6px 2px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.stitch-day-pill.is-today:not(.active) {
+    border-color: #FDBA74;
+    background: #FFF7ED;
+}
+
+.stitch-day-pill-lbl {
+    font-size: 9.5px;
+    font-weight: 800;
+    color: #64748B;
+    letter-spacing: 0.03em;
+}
+
+.stitch-day-pill-num {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #0F172A;
+    line-height: 1.1;
+}
+
+.stitch-day-pill-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    margin-top: 2px;
+}
+
+.stitch-day-pill-dot.done { background: #16A34A; }
+.stitch-day-pill-dot.planned { background: #FF5526; }
+.stitch-day-pill-dot.rest { background: #CBD5E1; }
+
+.stitch-day-pill.active {
+    background: #FF5526 !important;
+    border-color: #FF5526 !important;
+    box-shadow: 0 3px 8px rgba(255, 85, 38, 0.25);
+}
+
+.stitch-day-pill.active .stitch-day-pill-lbl,
+.stitch-day-pill.active .stitch-day-pill-num {
+    color: #FFFFFF !important;
+}
+
+.stitch-day-pill.active .stitch-day-pill-dot {
+    background: #FFFFFF !important;
+}
+
+/* Seçili Gün Odak Kartı */
+.stitch-selected-day-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 12px;
+}
+
+.stitch-selected-day-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.stitch-selected-day-date {
+    font-size: 11px;
+    font-weight: 800;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.stitch-day-status-pill {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.stitch-day-status-pill.today { background: #FFF7ED; color: #C2410C; border: 1px solid #FED7AA; }
+.stitch-day-status-pill.done { background: #DCFCE7; color: #15803D; border: 1px solid #86EFAC; }
+.stitch-day-status-pill.planned { background: #F0F9FF; color: #0369A1; border: 1px solid #BAE6FD; }
+.stitch-day-status-pill.missed { background: #FEF2F2; color: #B91C1C; border: 1px solid #FECACA; }
+.stitch-day-status-pill.rest { background: #F1F5F9; color: #475569; border: 1px solid #CBD5E1; }
+
+.stitch-sel-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.stitch-sel-workout-title {
+    font-size: 16.5px;
+    font-weight: 800;
+    color: #0F172A;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stitch-sel-count-badge {
+    font-size: 11px;
+    font-weight: 800;
+    color: #475569;
+    background: #F1F5F9;
+    padding: 3px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.stitch-sel-ex-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 12px;
+}
+
+.stitch-sel-ex-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 10px;
+    padding: 7px 10px;
+}
+
+.stitch-sel-ex-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #0F172A;
+    color: #FFFFFF;
+    font-size: 10px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.stitch-sel-ex-name {
+    flex: 1;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #0F172A;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stitch-sel-action-grid {
+    display: grid;
+    grid-template-columns: 1.7fr 1fr;
+    gap: 6px;
+}
+
+.stitch-sel-rest-box {
+    text-align: center;
+    padding: 14px 8px;
+}
+
+/* Siyah Stitch Canlı Dinlenme & Odak Sayacı */
+.stitch-dark-hud {
+    background: #181C22 !important;
+    border: 1px solid #262B33 !important;
+    border-radius: 18px !important;
+    padding: 13px 14px !important;
+    color: #FFFFFF !important;
+    margin-bottom: 12px !important;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.14) !important;
+}
+
+.stitch-hud-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.stitch-hud-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10.5px;
+    font-weight: 800;
+    color: #CBD5E1;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.stitch-hud-dot {
+    color: #FF5526;
+    font-size: 11px;
+}
+
+.stitch-hud-meta-right {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.stitch-hud-total-lbl {
+    font-size: 11px;
+    font-weight: 700;
+    color: #94A3B8;
+    white-space: nowrap;
+}
+
+.stitch-hud-total-lbl strong {
+    color: #FFFFFF;
+    font-weight: 800;
+}
+
+.stitch-dark-hud .hud-view-toggle-group {
+    background: #262B33 !important;
+    border-radius: 8px !important;
+    padding: 2px !important;
+    display: inline-flex !important;
+    gap: 2px !important;
+}
+
+.stitch-dark-hud .btn-view-toggle {
+    background: transparent !important;
+    color: #94A3B8 !important;
+    border: none !important;
+    border-radius: 6px !important;
+    padding: 3px 8px !important;
+    font-size: 10.5px !important;
+    font-weight: 800 !important;
+}
+
+.stitch-dark-hud .btn-view-toggle.active {
+    background: #FF5526 !important;
+    color: #FFFFFF !important;
+}
+
+.stitch-hud-time-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.stitch-hud-big-val {
+    font-size: 32px !important;
+    font-weight: 800 !important;
+    color: #FFFFFF !important;
+    letter-spacing: -0.03em !important;
+    line-height: 1 !important;
+}
+
+.stitch-hud-prog-meta {
+    font-size: 11px;
+    font-weight: 700;
+    color: #94A3B8;
+    white-space: nowrap;
+}
+
+.stitch-hud-track {
+    background: #262B33 !important;
+    height: 5px !important;
+    border-radius: 999px !important;
+    overflow: hidden !important;
+    margin-bottom: 10px !important;
+}
+
+.stitch-hud-btn-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.35fr 1fr;
+    gap: 8px;
+}
+
+.stitch-hud-btn-secondary {
+    background: #262B33 !important;
+    color: #FFFFFF !important;
+    border: 1px solid #333A45 !important;
+    border-radius: 999px !important;
+    padding: 8px 10px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+}
+
+.stitch-hud-btn-primary {
+    background: #FF5526 !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 999px !important;
+    padding: 8px 12px !important;
+    font-size: 12.5px !important;
+    font-weight: 800 !important;
+    cursor: pointer !important;
+}
+
+/* Stitch Aktif Egzersiz & Büyük Set Kartı */
+.stitch-focus-ex-card {
+    background: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 18px !important;
+    padding: 13px !important;
+    margin-bottom: 12px !important;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+}
+
+.stitch-focus-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.stitch-focus-head-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+}
+
+.stitch-focus-thumb {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #0F172A;
+    border: 1px solid #CBD5E1;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.stitch-focus-title-col {
+    min-width: 0;
+    flex: 1;
+}
+
+.stitch-focus-kicker {
+    font-size: 10px;
+    font-weight: 800;
+    color: #FF5526;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.stitch-focus-title {
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    color: #0F172A !important;
+    margin: 1px 0 0 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.stitch-focus-head-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+.stitch-form-icon-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #F1F5F9;
+    border: 1px solid #CBD5E1;
+    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+}
+
+.stitch-form-icon-btn.active {
+    background: #FFF7ED;
+    border-color: #FF5526;
+}
+
+.stitch-flush-form-drawer {
+    padding: 8px 0 !important;
+    margin: 0 0 10px 0 !important;
+    border: none !important;
+    border-top: 1px dashed #E2E8F0 !important;
+    border-bottom: 1px dashed #E2E8F0 !important;
+    background: transparent !important;
+}
+
+.stitch-sets-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stitch-set-done-row,
+.stitch-set-upcoming-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 9px 11px;
+}
+
+.stitch-set-done-left {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    cursor: pointer;
+    min-width: 0;
+    flex: 1;
+}
+
+.stitch-set-num-pill {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #E2E8F0;
+    color: #0F172A;
+    font-size: 11px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.stitch-set-num-pill.done {
+    background: #DCFCE7;
+    color: #15803D;
+}
+
+.stitch-set-done-text {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0F172A;
+    white-space: nowrap;
+}
+
+.stitch-set-upcoming-text {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #64748B;
+    white-space: nowrap;
+}
+
+.stitch-check-done-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #16A34A;
+    color: #FFFFFF;
+    border: none;
+    font-size: 12px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.stitch-check-upcoming-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    color: #64748B;
+    border: 1.5px solid #CBD5E1;
+    font-size: 12px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* Şu Anki Aktif Set Kutusu */
+.stitch-active-set-box {
+    background: #FFF7ED;
+    border: 1.5px solid #FDBA74;
+    border-radius: 14px;
+    padding: 11px;
+}
+
+.stitch-active-set-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.stitch-active-set-badge {
+    font-size: 11px;
+    font-weight: 800;
+    color: #C2410C;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.stitch-ghost-pill-btn {
+    background: #FFFFFF;
+    border: 1px solid #FED7AA;
+    color: #9A3412;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.stitch-stepper-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.stitch-stepper-box {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 7px 8px;
+    text-align: center;
+}
+
+.stitch-stepper-lbl {
+    font-size: 9.5px;
+    font-weight: 800;
+    color: #64748B;
+    margin-bottom: 4px;
+    letter-spacing: 0.03em;
+}
+
+.stitch-stepper-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 4px;
+}
+
+.stitch-step-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #F1F5F9;
+    border: 1px solid #E2E8F0;
+    color: #0F172A;
+    font-size: 15px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.stitch-step-val-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #0F172A;
+    font-size: 15.5px;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+    padding: 2px 0;
+}
+
+.stitch-complete-set-cta {
+    width: 100%;
+    background: #FF5526;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 11px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(255, 85, 38, 0.24);
+}
+
+.stitch-set-footer-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.stitch-set-mini-btn {
+    background: #F8FAFC;
+    border: 1px solid #CBD5E1;
+    color: #475569;
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.stitch-set-mini-btn.danger {
+    color: #B91C1C;
+    border-color: #FECACA;
+    background: #FEF2F2;
+}
