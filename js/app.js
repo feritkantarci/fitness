@@ -3723,6 +3723,11 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             };
 
             window.activeWeeklyPreviewDayIdx = 0;
+            try {
+                if (generatedDaysList[0] && generatedDaysList[0].workout) {
+                    localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(generatedDaysList[0].workout));
+                }
+            } catch (e) {}
             closeAiHybridArchitectModal();
             switchTab('generatorTab');
             renderPendingWeeklyPlanPreview();
@@ -27239,7 +27244,7 @@ KURALLAR:
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=269')
+                navigator.serviceWorker.register('./sw.js?v=270')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();

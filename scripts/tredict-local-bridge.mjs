@@ -364,11 +364,14 @@ function sendJson(res, status, data, origin) {
   const headers = {
     'Content-Type': 'application/json; charset=utf-8',
     'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, X-Tredict-Token, X-Intervals-Token'
+    'Access-Control-Allow-Headers': 'Content-Type, X-Tredict-Token, X-Intervals-Token, Access-Control-Request-Private-Network',
+    'Access-Control-Allow-Private-Network': 'true'
   };
   if (isAllowedOrigin(origin)) {
     headers['Access-Control-Allow-Origin'] = origin;
     headers['Vary'] = 'Origin';
+  } else if (!origin) {
+    headers['Access-Control-Allow-Origin'] = '*';
   }
   res.writeHead(status, headers);
   res.end(JSON.stringify(data));

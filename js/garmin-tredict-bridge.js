@@ -35,7 +35,16 @@
         if (proxyRes && proxyRes.ok) return proxyRes;
       } catch {}
     }
-    return fetch(`${DIRECT_BRIDGE_URL}${apiPath}`, options);
+    const directOpts = { ...options };
+    if (directOpts.method === 'POST' && directOpts.headers) {
+      // CORS simple request (preflight engelini aşmak için text/plain kullanılır; sunucu JSON olarak okur)
+      directOpts.headers = { 'Content-Type': 'text/plain;charset=UTF-8' };
+    }
+    try {
+      const res127 = await fetch(`${DIRECT_BRIDGE_URL}${apiPath}`, directOpts);
+      if (res127 && res127.ok) return res127;
+    } catch {}
+    return fetch(`http://localhost:3847${apiPath}`, directOpts);
   }
 
   // Kişisel sağlık verileri kaynak kodda sabit tutulmaz; yalnızca kullanıcının kendi yerel önbelleğinden okunur

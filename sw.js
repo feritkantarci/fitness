@@ -1,4 +1,4 @@
-const CACHE_NAME = 'celik-kodu-cache-v269';
+const CACHE_NAME = 'celik-kodu-cache-v270';
 const ASSETS = [
   './',
   './index.html',
@@ -237,8 +237,13 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Firebase Firestore, Google API ve OCR CDN çağrılarını doğrudan ağa yönlendir
-  if (event.request.url.includes('googleapis.com') ||
+  // POST istekleri, yerel Garmin/Tredict köprüsü, Firebase Firestore, Google API ve OCR CDN çağrılarını doğrudan ağa yönlendir
+  if (event.request.method !== 'GET' ||
+      event.request.url.includes('127.0.0.1') ||
+      event.request.url.includes('localhost') ||
+      event.request.url.includes(':3847') ||
+      event.request.url.includes('/api/') ||
+      event.request.url.includes('googleapis.com') ||
       event.request.url.includes('firebaseio.com') ||
       event.request.url.includes('identitytoolkit') ||
       event.request.url.includes('securetoken') ||
