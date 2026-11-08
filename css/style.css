@@ -10466,6 +10466,35 @@
     background: #FF5A36;
 }
 
+.wk-ex-i-btn {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    padding: 0;
+    border-radius: 50%;
+    background: #F1F5F9;
+    color: #0F172A;
+    border: 1px solid #CBD5E1;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: italic;
+    font-size: 13px;
+    font-weight: 900;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.wk-ex-i-btn:hover,
+.wk-ex-i-btn:active {
+    background: #0F172A;
+    color: #FFFFFF;
+    border-color: #0F172A;
+}
+
 .wk-info-modal-overlay {
     position: fixed;
     inset: 0;
@@ -11365,4 +11394,78 @@
     color: #B91C1C;
     border-color: #FECACA;
     background: #FEF2F2;
+}
+
+/* ==================== GÜN DÜZENLEME MODALI (SADE & TAŞMAYAN ŞERİT) ==================== */
+.stitch-sched-modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #E2E8F0;
+}
+
+.stitch-sched-day-kicker {
+    display: block;
+    font-size: 10px;
+    font-weight: 800;
+    color: #FF5526;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.stitch-sched-day-title {
+    font-size: 16.5px !important;
+    font-weight: 800 !important;
+    color: #0F172A !important;
+    margin: 2px 0 0 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.stitch-time-pill-btn {
+    height: 30px;
+    padding: 0 9px;
+    border-radius: 999px;
+    background: #F8FAFC;
+    border: 1px solid #CBD5E1;
+    color: #0F172A;
+    font-size: 11px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.stitch-sched-top-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.stitch-ex-swap-pill {
+    height: 24px;
+    padding: 0 8px;
+    border-radius: 6px;
+    background: #FFFFFF;
+    border: 1px solid #CBD5E1;
+    color: #0F172A;
+    font-size: 10.5px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.stitch-ex-swap-pill:hover {
+    background: #FFF7ED;
+    border-color: #FF5526;
+    color: #C2410C;
 }

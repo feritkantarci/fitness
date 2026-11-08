@@ -7303,9 +7303,17 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                                 💡 <strong>Altın Kural:</strong> ${escapeHTML(ex.cue)}
                             </div>
                         ` : ''}
-                        <div style="display:flex; justify-content:flex-end; margin-top:2px;">
-                            <button type="button" class="btn-report-mini" style="padding:4px 10px; font-size:11px; height:auto;" onclick="closeExerciseQuickInfoModal(); openExerciseBugReportModal(decodeURIComponent('${encodeURIComponent(ex.id)}'), decodeURIComponent('${encodeURIComponent(ex.name || '')}'), '', decodeURIComponent('${encodeURIComponent(ex.equipment || '')}'), decodeURIComponent('${encodeURIComponent(ex.muscle || '')}'), 'Sihirbaz (Oluştur)')">
-                                ⚠️ Hatalıysa Bildir
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-top:4px; flex-wrap:wrap;">
+                            <div style="display:flex; gap:6px;">
+                                <button type="button" class="wk-chip-action" style="padding:5px 10px; font-size:11px;" onclick="closeExerciseQuickInfoModal(); openExerciseDetailModal('${ex.id}')">
+                                    🎥 Tam Rehber
+                                </button>
+                                <button type="button" class="wk-chip-action" style="padding:5px 10px; font-size:11px; color:#64748B;" onclick="closeExerciseQuickInfoModal(); toggleExerciseExclusionAndRefresh('${ex.id}')">
+                                    ${(typeof isExerciseExcluded === 'function' && isExerciseExcluded(ex.id)) ? '🔄 Havuza Geri Al' : '👁️ Havuzdan Gizle'}
+                                </button>
+                            </div>
+                            <button type="button" class="btn-report-mini" style="padding:5px 10px; font-size:11px; height:auto;" onclick="closeExerciseQuickInfoModal(); openExerciseBugReportModal(decodeURIComponent('${encodeURIComponent(ex.id)}'), decodeURIComponent('${encodeURIComponent(ex.name || '')}'), '', decodeURIComponent('${encodeURIComponent(ex.equipment || '')}'), decodeURIComponent('${encodeURIComponent(ex.muscle || '')}'), 'Kütüphane')">
+                                ⚠️ Bildir
                             </button>
                         </div>
                     </div>
@@ -8400,7 +8408,11 @@ KESİN KURALLAR:
         }
         window.applyAcademicAiCorrections = applyAcademicAiCorrections;
 
-        function openScheduleExerciseAlternativeModal(dayIdx, currentExId, exIdx) {
+        function openScheduleExerciseAlternativeModal(dayIdx, currentExId, exIdx, dateStr = null) {
+            if (dateStr) {
+                activeSchedulingDateStr = dateStr;
+                activeSchedulingDayIdx = dayIdx;
+            }
             let currentEx = EXERCISES_DB.find(e => e.id === currentExId);
             if (!currentEx) {
                 currentEx = EXERCISES_DB.find(e => e.name && e.name.toLowerCase() === String(currentExId).toLowerCase());
@@ -8409,8 +8421,11 @@ KESİN KURALLAR:
                 currentEx = findBestExerciseMatch(currentExId);
             }
             if (!currentEx) {
+                const effDateStr = dateStr || activeSchedulingDateStr || null;
                 const sched = typeof activePlannerWeek !== 'undefined' && activePlannerWeek === 'next' ? getNextWeeklySchedule() : getWeeklySchedule();
-                const plan = sched && sched[dayIdx];
+                const plan = (effDateStr && typeof activePlannerWeek !== 'undefined' && activePlannerWeek !== 'next' && typeof getPlanForDate === 'function')
+                    ? getPlanForDate(new Date(effDateStr + 'T00:00:00'))
+                    : (sched && sched[dayIdx]);
                 if (plan) {
                     const det = typeof getWorkoutDetailsForPlan === 'function' ? getWorkoutDetailsForPlan(plan) : null;
                     if (det && Array.isArray(det.exercises) && det.exercises[exIdx]) {
@@ -8432,6 +8447,7 @@ KESİN KURALLAR:
                 scope: 'day_schedule',
                 studioIndex: null,
                 dayIdx: dayIdx,
+                dateStr: dateStr || activeSchedulingDateStr || null,
                 scheduleExIndex: exIdx,
                 currentTab: 'same_muscle',
                 sameEquipFilter: 'all',
@@ -8508,36 +8524,22 @@ KESİN KURALLAR:
             const muscleGrid = document.getElementById('pickerMuscleGrid');
 
             if (pickerContext.mode === 'replace' && currentEx) {
-                if (titleEl) titleEl.innerText = `🔄 Alternatif: ${currentEx.name}`;
-                if (subEl) subEl.textContent = 'Aynı biyomekanik paternde veya farklı ekipmanla ikame seçin';
-                if (banner) banner.style.display = 'flex';
-
-                const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[currentEx.id]) || null;
-                const thumbImg = (guide && guide.form) ? guide.form : (currentEx.diagram || '');
-                if (thumbEl) {
-                    thumbEl.innerHTML = thumbImg ? `<img src="${thumbImg}" style="width:100%; height:100%; object-fit:contain;" alt="${escapeHTML(currentEx.name)}">` : '🏋️';
-                }
+                if (titleEl) titleEl.innerText = currentEx.name;
+                if (subEl) subEl.style.display = 'none';
+                if (banner) banner.style.display = 'none';
                 if (nameEl) nameEl.innerText = currentEx.name;
-
-                const eqMeta = EQUIP_LABELS[currentEx.equipment] || { label: currentEx.equipment || '', icon: '🏋️' };
-                const anatomy = getExerciseAnatomy(currentEx);
-                if (badgesEl) {
-                    badgesEl.innerHTML = `
-                        <span class="ex-badge badge-equip">${eqMeta.icon} ${eqMeta.label}</span>
-                        <span class="ex-badge badge-muscle" style="color:var(--gold); font-weight:800;">${CANVA_ICONS.crosshair} ${escapeHTML(anatomy.primary)}</span>
-                    `;
-                }
+                if (badgesEl) badgesEl.innerHTML = '';
             } else {
-                if (titleEl) titleEl.innerText = "➕ Egzersiz Ekle";
-                if (subEl) subEl.textContent = 'Katalogdan veya kas grubuna göre programa yeni hareket ekleyin';
+                if (titleEl) titleEl.innerText = "Egzersiz Ekle";
+                if (subEl) subEl.style.display = 'none';
                 if (banner) banner.style.display = 'none';
             }
 
             // Render muscle selection grid for Tab 2
             if (muscleGrid) {
                 muscleGrid.innerHTML = PICKER_MUSCLE_GROUPS.map(m => `
-                    <button type="button" class="btn-quick-equip" id="pill_picker_m_${m.key}" onclick="setOtherMuscle('${m.key}')" style="display:flex; align-items:center; gap:4px; font-weight:700;">
-                        <span>${m.icon}</span> <span>${m.name}</span>
+                    <button type="button" class="btn-quick-equip" id="pill_picker_m_${m.key}" onclick="setOtherMuscle('${m.key}')" style="display:flex; align-items:center; gap:4px; font-weight:700; border-style:solid;">
+                        <span>${m.name}</span>
                     </button>
                 `).join('');
             }
@@ -8582,9 +8584,9 @@ KESİN KURALLAR:
             const panCatalog = document.getElementById('pickerSubPanelCatalog');
             const container = document.getElementById('pickerExercisesContainer');
 
-            const activeStyle = "padding:7px 2px; font-size:10.5px; font-weight:800; border-radius:6px; border-color:var(--gold); color:var(--gold); background:rgba(245, 158, 11, 0.15); box-shadow:0 0 10px rgba(245,158,11,0.2);";
-            const activeAIStyle = "padding:7px 2px; font-size:10.5px; font-weight:800; border-radius:6px; border-color:#7E22CE; color:#6B21A8; background:rgba(192, 132, 252, 0.2); box-shadow:0 0 10px rgba(192,132,252,0.3);";
-            const inactiveStyle = "padding:7px 2px; font-size:10.5px; font-weight:800; border-radius:6px; border-color:transparent; color:var(--text-secondary); background:transparent;";
+            const activeStyle = "padding:6px 4px; font-size:11px; font-weight:800; border-radius:7px; border-color:#0F172A; color:#FFFFFF; background:#0F172A; white-space:nowrap;";
+            const activeAIStyle = "padding:6px 4px; font-size:11px; font-weight:800; border-radius:7px; border-color:#7E22CE; color:#FFFFFF; background:#7E22CE; white-space:nowrap;";
+            const inactiveStyle = "padding:6px 4px; font-size:11px; font-weight:700; border-radius:7px; border-color:transparent; color:#475569; background:transparent; white-space:nowrap;";
 
             if (btnSame) btnSame.style.cssText = tab === 'same_muscle' ? activeStyle : inactiveStyle;
             if (btnAI) btnAI.style.cssText = tab === 'ai_coach' ? activeAIStyle : inactiveStyle;
@@ -8623,15 +8625,15 @@ KESİN KURALLAR:
                 const el = document.getElementById('pill_reason_' + r);
                 if (el) {
                     if (cur === r) {
-                        el.style.borderColor = 'var(--gold)';
-                        el.style.color = 'var(--gold)';
-                        el.style.background = 'rgba(245, 158, 11, 0.2)';
+                        el.style.borderColor = '#FF5A36';
+                        el.style.color = '#FF5A36';
+                        el.style.background = '#FFF7ED';
                         el.style.fontWeight = '800';
                     } else {
-                        el.style.borderColor = 'var(--border)';
-                        el.style.color = 'var(--text-secondary)';
-                        el.style.background = 'transparent';
-                        el.style.fontWeight = '500';
+                        el.style.borderColor = '#E2E8F0';
+                        el.style.color = '#475569';
+                        el.style.background = '#FFFFFF';
+                        el.style.fontWeight = '600';
                     }
                 }
             });
@@ -8649,15 +8651,17 @@ KESİN KURALLAR:
                 const el = document.getElementById('pill_seq_' + eq);
                 if (el) {
                     if (pickerContext.sameEquipFilter === eq) {
-                        el.style.borderColor = 'var(--cyan)';
-                        el.style.color = 'var(--cyan)';
-                        el.style.background = 'rgba(56, 189, 248, 0.18)';
+                        el.style.borderColor = '#FF5A36';
+                        el.style.color = '#C2410C';
+                        el.style.background = '#FFF7ED';
                         el.style.fontWeight = '800';
+                        el.style.borderStyle = 'solid';
                     } else {
-                        el.style.borderColor = 'var(--border)';
-                        el.style.color = 'var(--text-secondary)';
-                        el.style.background = 'transparent';
-                        el.style.fontWeight = '500';
+                        el.style.borderColor = '#E2E8F0';
+                        el.style.color = '#475569';
+                        el.style.background = '#FFFFFF';
+                        el.style.fontWeight = '700';
+                        el.style.borderStyle = 'solid';
                     }
                 }
             });
@@ -8893,108 +8897,55 @@ KESİN KURALLAR:
                 const media = getExerciseVisualMedia(ex.id, ex.category);
                 const thumbImg = media.still || '';
                 const eqMeta = EQUIP_LABELS[ex.equipment] || { label: ex.equipment || '', icon: '🏋️' };
-                const anatomy = getExerciseAnatomy(ex);
 
                 return `
-                    <div class="ex-card" style="margin-bottom:8px; padding:10px 12px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; transition:border-color 0.2s;" onmouseenter="this.style.borderColor='rgba(245,158,11,0.4)'" onmouseleave="this.style.borderColor='var(--border)'">
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
-                            <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1; cursor:pointer;" onclick="togglePickerExerciseForm('${ex.id}')">
-                                <div style="width:42px; height:42px; border-radius:6px; background:#000; overflow:hidden; flex-shrink:0; border:1px solid var(--border); display:flex; align-items:center; justify-content:center;">
+                    <div style="margin-bottom:6px; padding:8px 10px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                            <div style="display:flex; align-items:center; gap:9px; min-width:0; flex:1; cursor:pointer;" onclick="togglePickerExerciseForm('${ex.id}')">
+                                <div style="width:38px; height:38px; border-radius:8px; background:#FFFFFF; overflow:hidden; flex-shrink:0; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center;">
                                     ${thumbImg ? `<img src="${thumbImg}" style="width:100%; height:100%; object-fit:contain;" alt="${escapeHTML(ex.name)}">` : '🏋️'}
                                 </div>
                                 <div style="min-width:0; flex:1;">
-                                    <div style="font-size:13.5px; font-weight:800; color:#0F172A; line-height:1.2;">
+                                    <div style="font-size:13px; font-weight:800; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                                         ${escapeHTML(ex.name)}
                                     </div>
-                                    <div style="display:flex; gap:4px; flex-wrap:wrap; margin-top:3px;">
-                                        <span class="ex-badge badge-equip">${eqMeta.icon} ${eqMeta.label}</span>
-                                        <span class="ex-badge badge-muscle" style="color:var(--gold); font-weight:800;">${CANVA_ICONS.crosshair} ${escapeHTML(anatomy.primary)}</span>
-                                        ${anatomy.secondary ? `<span class="ex-badge" style="background:rgba(56,189,248,0.12); color:var(--cyan); border:1px solid rgba(56,189,248,0.3); font-size:10px; font-weight:700;">⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''}
+                                    <div style="font-size:10.5px; font-weight:700; color:#64748B; margin-top:1px;">
+                                        ${escapeHTML(eqMeta.label)}
                                     </div>
                                 </div>
                             </div>
-                            <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
-                                <button type="button" class="btn btn-outline" style="padding:4px 8px; font-size:11px; color:var(--cyan); border-color:rgba(56,189,248,0.5); font-weight:800; display:flex; align-items:center; gap:2px;" onclick="event.stopPropagation(); togglePickerExerciseForm('${ex.id}')" title="Formu Gör">
-                                    👁️ Form
+                            <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                                <button type="button" class="wk-ex-i-btn" onclick="event.stopPropagation(); openExerciseQuickInfoModal('${ex.id}')" title="Hareket Bilgisi">i</button>
+                                <button type="button" class="stitch-ex-swap-pill" style="background:#FF5A36; color:#FFFFFF; border-color:#FF5A36; padding:6px 12px; font-size:11.5px; font-weight:800;" onclick="event.stopPropagation(); selectExerciseFromPicker('${ex.id}')">
+                                    ${pickerContext.mode === 'replace' ? 'Seç' : 'Ekle'}
                                 </button>
-                                <button type="button" class="btn-report-mini" onclick="event.stopPropagation(); openExerciseBugReportModal(decodeURIComponent('${encodeURIComponent(ex.id)}'), decodeURIComponent('${encodeURIComponent(ex.name || '')}'), decodeURIComponent('${encodeURIComponent(thumbImg || '')}'), decodeURIComponent('${encodeURIComponent(ex.equipment || '')}'), decodeURIComponent('${encodeURIComponent(ex.muscle || '')}'), 'Alternatif Seçici')" title="Bu harekette hata bildir">⚠️</button>
                             </div>
                         </div>
 
-                        ${ex.cue ? `
-                            <div style="font-size:11px; color:var(--text-secondary); line-height:1.3; background:#F8FAFC; border-radius:4px; padding:5px 8px; margin-top:6px;">
-                                💡 ${escapeHTML(ex.cue)}
-                            </div>
-                        ` : ''}
-
-                        <!-- INLINE FORM EXPANDER -->
-                        <div id="picker_form_expand_${ex.id}" style="display:none; margin-top:8px; padding-top:8px; border-top:1px dashed #E2E8F0;">
+                        <!-- INLINE FORM EXPANDER (SADE GÖRSEL ÖNİZLEME) -->
+                        <div id="picker_form_expand_${ex.id}" style="display:none; margin-top:8px; padding-top:8px; border-top:1px solid #E2E8F0;">
                             ${media.clip ? `
-                                <div style="text-align:center; background:#FFFFFF; border-radius:8px; overflow:hidden; border:1px solid #BAE6FD; margin-bottom:6px; min-height:160px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="event.stopPropagation(); openImageLightbox(decodeURIComponent('${encodeURIComponent(media.clip)}'), decodeURIComponent('${encodeURIComponent(ex.name || '')}'))">
-                                    <video src="${media.clip}" poster="${thumbImg}" autoplay loop muted playsinline style="max-width:100%; max-height:42vh; object-fit:contain; display:block; margin:0 auto;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';"></video>
-                                    <img src="${thumbImg}" style="display:none; max-width:100%; max-height:42vh; object-fit:contain; margin:0 auto;" alt="${escapeHTML(ex.name)} Form">
-                                </div>
-                                <div style="font-size:10.5px; color:var(--text-secondary); text-align:center; margin-bottom:6px;">
-                                    🎬 <em>Canlı Hareket Animasyonu • Tam ekran ve anatomi için butona dokunun.</em>
+                                <div style="text-align:center; background:#FFFFFF; border-radius:8px; overflow:hidden; border:1px solid #E2E8F0; min-height:150px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="event.stopPropagation(); openImageLightbox(decodeURIComponent('${encodeURIComponent(media.clip)}'), decodeURIComponent('${encodeURIComponent(ex.name || '')}'))">
+                                    <video src="${media.clip}" poster="${thumbImg}" autoplay loop muted playsinline style="max-width:100%; max-height:36vh; object-fit:contain; display:block; margin:0 auto;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';"></video>
+                                    <img src="${thumbImg}" style="display:none; max-width:100%; max-height:36vh; object-fit:contain; margin:0 auto;" alt="${escapeHTML(ex.name)} Form">
                                 </div>
                             ` : (thumbImg ? `
-                                <div style="text-align:center; background:#000; border-radius:8px; overflow:hidden; border:1px solid var(--border); margin-bottom:6px; min-height:160px; display:flex; align-items:center; justify-content:center;">
-                                    <img src="${thumbImg}" style="max-width:100%; max-height:42vh; object-fit:contain; display:block; margin:0 auto;" alt="${escapeHTML(ex.name)} Form">
-                                </div>
-                                <div style="font-size:10.5px; color:var(--text-secondary); text-align:center; margin-bottom:6px;">
-                                    📸 <em>Gerçek İnsan Form Rehberi • Tam ekran ve anatomi için butona dokunun.</em>
+                                <div style="text-align:center; background:#FFFFFF; border-radius:8px; overflow:hidden; border:1px solid #E2E8F0; min-height:150px; display:flex; align-items:center; justify-content:center;">
+                                    <img src="${thumbImg}" style="max-width:100%; max-height:36vh; object-fit:contain; display:block; margin:0 auto;" alt="${escapeHTML(ex.name)} Form">
                                 </div>
                             ` : `
-                                <div style="text-align:center; padding:16px; color:var(--text-secondary); font-size:11.5px;">Görsel form rehberi optimize ediliyor.</div>
+                                <div style="text-align:center; padding:12px; color:#64748B; font-size:11.5px;">Görsel hazırlanıyor.</div>
                             `)}
-                            
-                            <div style="background:#F8FAFC; border:1px solid var(--border); border-radius:6px; padding:6px 8px; margin-bottom:6px;">
-                                <div style="font-size:10px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:4px;">🎯 Hedef Kaslar:</div>
-                                <div style="display:flex; flex-wrap:wrap; gap:4px;">
-                                    ${(ex.primaryMuscles || []).map(m => `<span style="background:rgba(245,158,11,0.2); color:var(--gold); border:1px solid rgba(245,158,11,0.4); padding:2px 6px; border-radius:8px; font-size:10px; font-weight:800;">${(typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m] ? STUDIO_REGION_MAP[m].icon + ' ' + STUDIO_REGION_MAP[m].name : m)} (Primer)</span>`).join('')}
-                                    ${(ex.secondaryMuscles || []).map(m => `<span style="background:rgba(56,189,248,0.15); color:var(--cyan); border:1px solid rgba(56,189,248,0.35); padding:2px 6px; border-radius:8px; font-size:10px; font-weight:700;">${(typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m] ? STUDIO_REGION_MAP[m].icon + ' ' + STUDIO_REGION_MAP[m].name : m)} (Sekonder)</span>`).join('')}
-                                </div>
-                            </div>
-
-                            ${(ex.positions && ex.positions.length > 0) ? `
-                                <div style="background:#F8FAFC; border-radius:6px; padding:6px 8px; margin-bottom:6px; font-size:11px; line-height:1.35;">
-                                    <div style="font-size:10px; font-weight:800; color:var(--cyan); text-transform:uppercase; margin-bottom:3px;">📋 Uygulama Adımları:</div>
-                                    ${ex.positions.map(p => `<div><span style="color:var(--text-secondary); font-weight:700;">• ${escapeHTML(p.phase)}:</span> ${escapeHTML(p.desc)}</div>`).join('')}
-                                </div>
-                            ` : ''}
-
-                            ${ex.cue ? `
-                                <div style="font-size:11px; color:#92400E; background:rgba(234,179,8,0.12); border-left:3px solid #eab308; padding:5px 8px; border-radius:4px; margin-bottom:6px; line-height:1.35;">
-                                    ⚠️ <strong>Form Uyarısı:</strong> ${escapeHTML(ex.cue)}
-                                </div>
-                            ` : ''}
-
-                            <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-top:4px;">
-                                <button type="button" class="btn btn-outline" style="font-size:10.5px; padding:4px 9px; color:var(--cyan); border-color:var(--cyan); font-weight:700;" onclick="event.stopPropagation(); openExerciseDetailModal('${ex.id}')">
-                                    🔍 Tam Ekran & Anatomi
-                                </button>
-                                <button type="button" class="btn btn-outline" style="font-size:10.5px; padding:4px 9px;" onclick="event.stopPropagation(); togglePickerExerciseForm('${ex.id}')">
-                                    ▲ Kapat
-                                </button>
-                            </div>
-                        </div>
-
-                        <div style="display:flex; justify-content:flex-end; margin-top:6px;">
-                            <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:5px 14px; font-weight:800; box-shadow:0 0 10px rgba(245,158,11,0.25);" onclick="selectExerciseFromPicker('${ex.id}')">
-                                ${pickerContext.mode === 'replace' ? '✓ Bununla Değiştir' : '➕ Programa Ekle'}
-                            </button>
                         </div>
                     </div>
                 `;
             }).join('');
 
-            // If in tab 1 or 2, add the helpful "Diğer" shortcut banner at bottom
             if (tab === 'same_muscle' || tab === 'other_muscle') {
                 cardsHtml += `
-                    <div style="text-align:center; padding:12px; margin-top:8px; border-top:1px dashed var(--border); background:#F8FAFC; border-radius:8px;">
-                        <div style="font-size:11px; color:var(--text-secondary); margin-bottom:6px;">Aradığınız hareketi bulamadınız mı?</div>
-                        <button type="button" class="btn btn-outline" style="color:var(--gold); border-color:var(--gold); font-size:11.5px; padding:5px 12px; font-weight:800;" onclick="switchPickerTab('catalog')">
-                            ➕ Diğer (Genişletilmiş Tüm Kataloğu Aç) ➔
+                    <div style="text-align:center; padding:8px; margin-top:4px;">
+                        <button type="button" class="wk-btn-utility-compact" style="width:100%;" onclick="switchPickerTab('catalog')">
+                            Tüm Kataloğu Aç
                         </button>
                     </div>
                 `;
@@ -9165,7 +9116,7 @@ KESİN KURALLAR:
             // 2. DAY SCHEDULE MODAL SCOPE
             if (pickerContext.scope === 'day_schedule' && pickerContext.dayIdx !== null && pickerContext.dayIdx !== undefined) {
                 const dayIdx = pickerContext.dayIdx;
-                const preservedDateStr = activeSchedulingDateStr || (
+                const preservedDateStr = pickerContext.dateStr || activeSchedulingDateStr || (
                     typeof getDateForScheduleDay === 'function' && typeof formatDateYMD === 'function'
                         ? formatDateYMD(getDateForScheduleDay(dayIdx, activePlannerWeek === 'next'))
                         : null
@@ -9270,8 +9221,11 @@ KESİN KURALLAR:
                     if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
                 }
 
+                const wasSchedModalOpen = document.getElementById('scheduleDayModal')?.classList.contains('active');
                 closeExercisePickerModal();
-                openScheduleDayModal(dayIdx, preservedDateStr);
+                if (wasSchedModalOpen) {
+                    openScheduleDayModal(dayIdx, preservedDateStr);
+                }
                 showToast(`✅ "${newEx.name}" güncellendi ve kaydedildi!`);
                 playAlertSound();
                 return;
@@ -13183,49 +13137,52 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 const isExcluded = excludedIds.includes(ex.id);
                 const media = getExerciseVisualMedia(ex.id, ex.category);
                 const thumbImg = media.still || '';
-                
-                const eqInfo = (typeof EQUIP_LABELS !== 'undefined' && EQUIP_LABELS[ex.equipment]) 
-                    ? `${EQUIP_LABELS[ex.equipment].icon} ${EQUIP_LABELS[ex.equipment].label}` 
+                const eqLabel = (typeof EQUIP_LABELS !== 'undefined' && EQUIP_LABELS[ex.equipment])
+                    ? EQUIP_LABELS[ex.equipment].label
                     : (ex.equipment || 'Serbest');
 
-                const anatomy = getExerciseAnatomy(ex);
-
                 html += `
-                    <div class="lib-ex-card" style="${isExcluded ? 'border-color:rgba(239,68,68,0.4); background:rgba(239,68,68,0.04);' : ''}">
-                        <div style="display:flex; gap:10px; align-items:flex-start;">
-                            <div class="ex-thumb-wrap" style="width:56px; height:56px; flex-shrink:0; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')" title="Form ve Detayı İncele">
-                                ${thumbImg ? `<img src="${thumbImg}" class="ex-thumb-img" alt="${escapeHTML(ex.name)}" loading="lazy">` : '🏋️'}
+                    <div style="padding:8px 10px; background:${isExcluded ? '#FEF2F2' : '#F8FAFC'}; border:1px solid ${isExcluded ? '#FECACA' : '#E2E8F0'}; border-radius:10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                            <div style="display:flex; align-items:center; gap:9px; min-width:0; flex:1; cursor:pointer;" onclick="toggleLibExerciseForm('${ex.id}')">
+                                <div style="width:40px; height:40px; border-radius:8px; background:#FFFFFF; overflow:hidden; flex-shrink:0; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center;">
+                                    ${thumbImg ? `<img src="${thumbImg}" style="width:100%; height:100%; object-fit:contain;" alt="${escapeHTML(ex.name)}" loading="lazy">` : '🏋️'}
+                                </div>
+                                <div style="min-width:0; flex:1;">
+                                    <div style="font-size:13px; font-weight:800; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                        ${escapeHTML(ex.name)}
+                                    </div>
+                                    <div style="font-size:10.5px; font-weight:700; color:${isExcluded ? '#B91C1C' : '#64748B'}; margin-top:1px;">
+                                        ${escapeHTML(eqLabel)}${isExcluded ? ' • Gizli' : ''}
+                                    </div>
+                                </div>
                             </div>
-                            <div style="flex:1; min-width:0;">
-                                <div style="font-size:13.5px; font-weight:800; color:#0F172A; line-height:1.25; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
-                                    ${escapeHTML(ex.name)}
-                                    ${isExcluded ? '<span style="background:rgba(239,68,68,0.25); color:#DC2626; font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px; margin-left:6px; vertical-align:middle;">Gizli</span>' : ''}
-                                </div>
-                                <div style="display:flex; gap:4px; flex-wrap:wrap; margin-top:5px;">
-                                    <span class="ex-chip-badge equip">${escapeHTML(eqInfo)}</span>
-                                    <span class="ex-chip-badge muscle" style="background:rgba(245, 158, 11, 0.15); border:1px solid rgba(245, 158, 11, 0.4); color:var(--gold); font-weight:800;">${CANVA_ICONS.crosshair} ${escapeHTML(anatomy.primary)}</span>
-                                    ${anatomy.secondary ? `<span class="ex-chip-badge" style="background:rgba(56, 189, 248, 0.1); border:1px solid rgba(56, 189, 248, 0.3); color:var(--cyan); font-weight:700;">⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''}
-                                    <span class="ex-chip-badge mechanic">${ex.mechanic === 'compound' ? '⚡ Bileşik' : '🎯 İzolasyon'}</span>
-                                </div>
+
+                            <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                                <button type="button" class="wk-ex-i-btn" onclick="event.stopPropagation(); openExerciseQuickInfoModal('${ex.id}')" title="Hareket Bilgisi">i</button>
+                                ${isExcluded ? `
+                                    <button type="button" class="stitch-ex-swap-pill" style="background:#15803D; color:#FFFFFF; border-color:#15803D; padding:6px 11px; font-size:11px; font-weight:800;" onclick="event.stopPropagation(); toggleExerciseExclusionAndRefresh('${ex.id}')">
+                                        Geri Al
+                                    </button>
+                                ` : `
+                                    <button type="button" class="stitch-ex-swap-pill" style="background:#FF5A36; color:#FFFFFF; border-color:#FF5A36; padding:6px 12px; font-size:11.5px; font-weight:800;" onclick="event.stopPropagation(); openAddToProgramOptions('${ex.id}')">
+                                        + Ekle
+                                    </button>
+                                `}
                             </div>
                         </div>
 
-                        ${ex.cue ? `
-                            <div style="font-size:11px; color:#475569; margin-top:8px; line-height:1.35; background:#F8FAFC; padding:6px 8px; border-radius:6px; border-left:2px solid var(--gold);">
-                                💡 <em>${escapeHTML(ex.cue.length > 90 ? ex.cue.substring(0, 90) + '...' : ex.cue)}</em>
-                            </div>
-                        ` : ''}
-
-                        <div style="display:flex; gap:6px; margin-top:10px; padding-top:8px; border-top:1px solid #E2E8F0;">
-                            <button type="button" class="btn btn-outline" style="flex:1; font-size:11px; padding:6px 8px;" onclick="openExerciseDetailModal('${ex.id}')">
-                                👁️ Detay
-                            </button>
-                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 8px; ${isExcluded ? 'color:#15803D; border-color:#10b981; background:rgba(16,185,129,0.12);' : 'color:#DC2626; border-color:rgba(239,68,68,0.35);'}" onclick="event.stopPropagation(); toggleExerciseExclusionAndRefresh('${ex.id}')" title="${isExcluded ? 'Aktif havuzunuza geri ekleyin' : 'Kişisel havuzunuzdan gizleyin'}">
-                                ${isExcluded ? '🔄 Geri Al' : '👁️ Gizle'}
-                            </button>
-                            <button type="button" class="btn btn-gold" style="flex:1.2; font-size:11px; padding:6px 8px; font-weight:800;" onclick="openAddToProgramOptions('${ex.id}')">
-                                ➕ Ekle
-                            </button>
+                        <div id="lib_form_expand_${ex.id}" style="display:none; margin-top:8px; padding-top:8px; border-top:1px solid #E2E8F0;">
+                            ${media.clip ? `
+                                <div style="text-align:center; background:#FFFFFF; border-radius:8px; overflow:hidden; border:1px solid #E2E8F0; min-height:150px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="event.stopPropagation(); openImageLightbox(decodeURIComponent('${encodeURIComponent(media.clip)}'), decodeURIComponent('${encodeURIComponent(ex.name || '')}'))">
+                                    <video src="${media.clip}" poster="${thumbImg}" autoplay loop muted playsinline style="max-width:100%; max-height:36vh; object-fit:contain; display:block; margin:0 auto;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';"></video>
+                                    <img src="${thumbImg}" style="display:none; max-width:100%; max-height:36vh; object-fit:contain; margin:0 auto;" alt="${escapeHTML(ex.name)} Form">
+                                </div>
+                            ` : (thumbImg ? `
+                                <div style="text-align:center; background:#FFFFFF; border-radius:8px; overflow:hidden; border:1px solid #E2E8F0; min-height:150px; display:flex; align-items:center; justify-content:center;">
+                                    <img src="${thumbImg}" style="max-width:100%; max-height:36vh; object-fit:contain; display:block; margin:0 auto;" alt="${escapeHTML(ex.name)} Form">
+                                </div>
+                            ` : '')}
                         </div>
                     </div>
                 `;
@@ -13233,6 +13190,25 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             container.innerHTML = html;
         }
+
+        function toggleLibExerciseForm(exId) {
+            const box = document.getElementById('lib_form_expand_' + exId);
+            if (!box) {
+                openExerciseDetailModal(exId);
+                return;
+            }
+            const isHidden = box.style.display === 'none' || !box.style.display;
+            box.style.display = isHidden ? 'block' : 'none';
+            if (isHidden) {
+                box.querySelectorAll('video').forEach(v => {
+                    v.muted = true;
+                    v.defaultMuted = true;
+                    v.playsInline = true;
+                    v.play().catch(() => {});
+                });
+            }
+        }
+        window.toggleLibExerciseForm = toggleLibExerciseForm;
 
         // ==================== ADD TO PROGRAM OPTIONS MODAL LOGIC ====================
         function openAddToProgramOptions(exId) {
@@ -13248,46 +13224,31 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const subEl = document.getElementById('addToProgModalSubtitle');
             const dynamicBody = document.getElementById('addToProgModalBody');
 
-            if (titleEl) titleEl.innerText = `➕ ${ex.name}`;
-            const anatomy = getExerciseAnatomy(ex);
-            const eqInfo = (typeof EQUIP_LABELS !== 'undefined' && EQUIP_LABELS[ex.equipment]) 
-                ? `${EQUIP_LABELS[ex.equipment].icon} ${EQUIP_LABELS[ex.equipment].label}` 
-                : (ex.equipment || 'Serbest');
-
-            if (subEl) subEl.innerHTML = `<strong style="color:var(--gold);">${CANVA_ICONS.crosshair} Ana:</strong> ${escapeHTML(anatomy.primary)}${anatomy.secondary ? ` • <strong style="color:var(--cyan);">⚡ Destek:</strong> ${escapeHTML(anatomy.secondary)}` : ''} • <strong>Ekipman:</strong> ${escapeHTML(eqInfo)}`;
+            if (titleEl) titleEl.innerText = ex.name;
+            if (subEl) subEl.style.display = 'none';
 
             const isWorkoutActive = Boolean(activeWorkoutSession && Array.isArray(activeWorkoutSession.exercises));
 
             let html = `
-                <div style="display:flex; flex-direction:column; gap:10px;">
-                    <!-- SEÇENEK 1: HAFTALIK PROGRAMIMA / GÜNE PLANLA -->
-                    <div class="add-to-prog-card" onclick="closeAddToProgramOptionsModal(); openQuickAddToDayModal(decodeURIComponent('${encodeURIComponent(ex.id)}'));">
-                        <div style="font-size:24px; flex-shrink:0;">📅</div>
-                        <div style="flex:1;">
-                            <div style="font-size:13px; font-weight:800; color:#0F172A;">Haftalık Programıma Planla</div>
-                            <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
-                                Pazartesi-Pazar günlerinden birine ilave hareket veya yeni takviye seansı olarak bağlayın.
-                            </div>
-                        </div>
-                        <div style="font-size:12px; color:var(--gold); font-weight:800;">Güne Ata ➔</div>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                    <div class="add-to-prog-card" style="padding:10px 12px;" onclick="closeAddToProgramOptionsModal(); openQuickAddToDayModal(decodeURIComponent('${encodeURIComponent(ex.id)}'));">
+                        <div style="font-size:20px; flex-shrink:0;">📅</div>
+                        <div style="flex:1; font-size:13px; font-weight:800; color:#0F172A;">Haftalık Güne Planla</div>
+                        <div style="font-size:12px; color:#FF5A36; font-weight:800;">Güne Ata ➔</div>
                     </div>
 
-                    <!-- SEÇENEK 2: PROGRAM ATÖLYESİ TASLAĞIMA EKLE -->
-                    <div class="add-to-prog-card" style="cursor:default;">
-                        <div style="font-size:24px; flex-shrink:0;">🛠️</div>
+                    <div class="add-to-prog-card" style="padding:10px 12px; cursor:default;">
+                        <div style="font-size:20px; flex-shrink:0;">🛠️</div>
                         <div style="flex:1;">
-                            <div style="font-size:13px; font-weight:800; color:#0F172A;">Program Atölyesi Taslağıma Ekle</div>
-                            <div style="font-size:11px; color:var(--text-secondary); margin-top:2px; margin-bottom:6px;">
-                                Özel program oluşturucudaki taslak listenize set ve tekrar hedefiyle ekleyin.
-                            </div>
+                            <div style="font-size:13px; font-weight:800; color:#0F172A; margin-bottom:6px;">Program Atölyesine Ekle</div>
                             <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                                <select id="addToStudioSetsSelect" class="form-input" style="width:74px; padding:4px 6px; font-size:11.5px;">
+                                <select id="addToStudioSetsSelect" class="form-input" style="width:74px; padding:5px 6px; font-size:11.5px;">
                                     <option value="2">2 Set</option>
                                     <option value="3" selected>3 Set</option>
                                     <option value="4">4 Set</option>
                                     <option value="5">5 Set</option>
                                 </select>
-                                <select id="addToStudioRepsSelect" class="form-input" style="width:88px; padding:4px 6px; font-size:11.5px;">
+                                <select id="addToStudioRepsSelect" class="form-input" style="width:88px; padding:5px 6px; font-size:11.5px;">
                                     <option value="6-8">6-8 T.</option>
                                     <option value="8-10">8-10 T.</option>
                                     <option value="8-12" selected>8-12 T.</option>
@@ -13295,8 +13256,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                     <option value="12-15">12-15 T.</option>
                                     <option value="Maks">Maks</option>
                                 </select>
-                                <button type="button" class="btn btn-gold" style="padding:5px 10px; font-size:11.5px; font-weight:800;" onclick="applyAddToStudioRoutine(decodeURIComponent('${encodeURIComponent(ex.id)}'))">
-                                    ➕ Taslağa Ekle
+                                <button type="button" class="stitch-ex-swap-pill" style="background:#FF5A36; color:#FFFFFF; border-color:#FF5A36; padding:6px 12px; font-size:11.5px; font-weight:800;" onclick="applyAddToStudioRoutine(decodeURIComponent('${encodeURIComponent(ex.id)}'))">
+                                    + Ekle
                                 </button>
                             </div>
                         </div>
@@ -13305,33 +13266,18 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             if (isWorkoutActive) {
                 html += `
-                    <!-- SEÇENEK 3: AKTİF CANLI ANTRENMANA EKLE -->
-                    <div class="add-to-prog-card active-workout-highlight" onclick="applyAddToActiveWorkout('${ex.id}')">
-                        <div style="font-size:24px; flex-shrink:0;">🏋️</div>
-                        <div style="flex:1;">
-                            <div style="display:flex; align-items:center; gap:6px;">
-                                <span style="font-size:13px; font-weight:800; color:var(--gold);">Şu Anki Aktif Antrenmana Ekle</span>
-                                <span style="font-size:9px; background:var(--green-success); color:#000; font-weight:900; padding:1px 5px; border-radius:3px;">CANLI</span>
-                            </div>
-                            <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
-                                Devam eden antrenmanınıza bu hareketi ilave egzersiz olarak sıraya alır.
-                            </div>
-                        </div>
-                        <div style="font-size:12px; color:var(--gold); font-weight:800;">Hemen Ekle ➔</div>
+                    <div class="add-to-prog-card active-workout-highlight" style="padding:10px 12px;" onclick="applyAddToActiveWorkout('${ex.id}')">
+                        <div style="font-size:20px; flex-shrink:0;">🏋️</div>
+                        <div style="flex:1; font-size:13px; font-weight:800; color:#0F172A;">Canlı Antrenmana Ekle</div>
+                        <div style="font-size:12px; color:#15803D; font-weight:800;">Ekle ➔</div>
                     </div>
                 `;
             } else {
                 html += `
-                    <!-- SEÇENEK 3 (BOŞTA): BU HAREKETLE HIZLI SEANS BAŞLAT -->
-                    <div class="add-to-prog-card" onclick="startQuickWorkoutWithExercise('${ex.id}')">
-                        <div style="font-size:24px; flex-shrink:0;">⚡</div>
-                        <div style="flex:1;">
-                            <div style="font-size:13px; font-weight:800; color:var(--cyan);">Bu Hareketle Hızlı Seans Başlat</div>
-                            <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
-                                Bu egzersizi başlangıç alarak hemen canlı bir serbest antrenman başlatın.
-                            </div>
-                        </div>
-                        <div style="font-size:12px; color:var(--cyan); font-weight:800;">Başlat ➔</div>
+                    <div class="add-to-prog-card" style="padding:10px 12px;" onclick="startQuickWorkoutWithExercise('${ex.id}')">
+                        <div style="font-size:20px; flex-shrink:0;">⚡</div>
+                        <div style="flex:1; font-size:13px; font-weight:800; color:#0F172A;">Hızlı Seans Başlat</div>
+                        <div style="font-size:12px; color:#0369A1; font-weight:800;">Başlat ➔</div>
                     </div>
                 `;
             }
@@ -14391,8 +14337,15 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         let activeSchedulingDateStr = null;
 
         function openScheduleDayModal(dayIdx, targetDateStr = null) {
+            if (!targetDateStr && typeof getWeekDaysMapForDateStr === 'function') {
+                const { map: fallbackMap } = getWeekDaysMapForDateStr(null, 0);
+                if (fallbackMap && fallbackMap[dayIdx]) {
+                    targetDateStr = fallbackMap[dayIdx].dateYMD;
+                }
+            }
             activeSchedulingDayIdx = dayIdx;
             activeSchedulingDateStr = targetDateStr || null;
+            window._schedModalMoveWeekOffset = 0;
             const modal = document.getElementById('scheduleDayModal');
             const dayTitle = document.getElementById('schedModalDayTitle');
             const dayBadge = document.getElementById('schedModalDayBadge');
@@ -14580,25 +14533,36 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     }).join('');
                 }
 
-                // Render Template Plan Card
+                // Render Template Plan Card (Sade & Nizami - Sıfır İç İçe Çerçeve)
                 let templatePlanHtml = '';
                 if (!currentPlan.rest) {
                     const details = workoutDetails || getWorkoutDetailsForPlan(currentPlan) || {};
                     const exercises = details.exercises || [];
-                    const restSec = (details.scheme && details.scheme.rest) || details.rest || 60;
-                    const duration = details.duration || Math.round(exercises.length * 7) || 45;
-                    const schemeStr = details.scheme ? `${details.scheme.sets} Set x ${details.scheme.reps}` : `${exercises.length} Hareket`;
-                    const titleStr = details.title || currentPlan.title || 'Atanmış Antrenman';
+                    const rawTitleStr = details.title || currentPlan.title || 'Atanmış Antrenman';
+                    const cleanTitleStr = String(rawTitleStr)
+                        .replace(/^⚔️\s*[^:]+:\s*/i, '')
+                        .replace(/^BB-Dominant Hibrit\s*•\s*/i, '')
+                        .replace(/\s*\([^)]*\)\s*/g, ' ')
+                        .replace(/\s+/g, ' ')
+                        .trim() || 'Antrenman Seansı';
+
+                    if (dayTitle && !hasCompletedSession) {
+                        dayTitle.innerText = cleanTitleStr;
+                    }
+                    if (dayBadge && !hasCompletedSession) {
+                        dayBadge.innerText = `${titleLabel.replace(' Planı', '').toUpperCase()} • ${exercises.length} HAREKET`;
+                    }
+                    const hdrTimeLbl = document.getElementById('schedHeaderTimeLabel');
+                    if (hdrTimeLbl) hdrTimeLbl.textContent = currentPlan.time || '18:30';
 
                     let exercisesHtml = '';
                     if (exercises.length === 0) {
                         exercisesHtml = `
-                            <div style="text-align:center; padding:16px 12px; font-size:12px; color:#475569; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px;">
-                                <div style="font-size:20px; margin-bottom:6px;">⚠️</div>
-                                Bu programın hareket detayları henüz yapılandırılmamış.
+                            <div style="text-align:center; padding:16px 12px; font-size:12px; color:#475569; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px;">
+                                Bu programda henüz hareket yok.
                                 <div style="margin-top:8px;">
-                                    <button type="button" class="btn btn-gold" style="font-size:11px; padding:6px 14px; font-weight:800;" onclick="editProgramForDay(${dayIdx}, decodeURIComponent('${encodeURIComponent(activeSchedulingDateStr || '')}'))">
-                                        ➕ Hemen Hareket Ekle / Düzenle
+                                    <button type="button" class="wk-btn-primary-compact" style="width:100%;" onclick="editProgramForDay(${dayIdx}, decodeURIComponent('${encodeURIComponent(activeSchedulingDateStr || '')}'))">
+                                        + Hareket Ekle
                                     </button>
                                 </div>
                             </div>
@@ -14613,89 +14577,56 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             const displayName = (ex.name && !ex.name.startsWith('ai_')) ? ex.name : (dbEx ? dbEx.name : (ex.name || 'Egzersiz'));
                             const exName = escapeHTML(displayName);
                             const targetExParam = encodeURIComponent(effectiveId || displayName);
-                            const aiRevBadgeHtml = (ex.isAiConsecutiveBalanced || ex.aiReplacedFrom)
-                                ? `<div style="margin-top:3px; display:inline-flex; align-items:center; gap:4px; background:#F3E8FF; border:1px solid #D8B4FE; color:#6B21A8; font-size:10.5px; font-weight:800; padding:2px 7px; border-radius:5px;">
-                                    ⚡ AI Revize${ex.aiReplacedFrom ? `: ${escapeHTML(ex.aiReplacedFrom)} yerine` : ''}${ex.aiRevisionNote ? ` (${escapeHTML(ex.aiRevisionNote)})` : ''}
-                                   </div>`
-                                : '';
+                            const numStr = String(idx + 1).padStart(2, '0');
 
                             return `
-                                <div style="display:flex; justify-content:space-between; align-items:center; background:#FFFFFF; border:1.5px solid ${ex.isAiConsecutiveBalanced ? '#C084FC' : '#E2E8F0'}; border-radius:10px; padding:10px 12px; gap:8px; box-shadow:0 1px 4px rgba(15,23,42,0.03);">
-                                    <div style="display:flex; align-items:flex-start; gap:8px; flex:1; min-width:0;">
-                                        <span style="font-size:12.5px; font-weight:900; color:#B45309; width:20px; flex-shrink:0; margin-top:1px;">${idx + 1}.</span>
-                                        <div style="min-width:0; flex:1;">
-                                            <div style="font-size:13.5px; font-weight:800; color:#0F172A; word-break:break-word; line-height:1.35; cursor:pointer;" onclick="openExerciseDetailModal(decodeURIComponent('${targetExParam}'))" title="Detayı İncele">
-                                                ${exName}
-                                            </div>
-                                            ${aiRevBadgeHtml}
-                                        </div>
-                                    </div>
-                                    <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
-                                        <button type="button" class="btn btn-outline" style="padding:5px 9px; font-size:11px; color:var(--cyan); border-color:rgba(56,189,248,0.4); font-weight:700; border-radius:6px;" onclick="openScheduleExerciseAlternativeModal(${dayIdx}, decodeURIComponent('${targetExParam}'), ${idx})" title="Bu hareket için alternatif bul">🔄 Alternatif</button>
-                                        <button type="button" class="btn btn-outline" style="padding:5px 9px; font-size:11px; border-radius:6px;" onclick="openExerciseDetailModal(decodeURIComponent('${targetExParam}'))" title="İncele">👁️</button>
-                                    </div>
+                                <div class="stitch-sel-ex-row" style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px; padding:8px 10px;">
+                                    <span class="stitch-sel-ex-num">${numStr}</span>
+                                    <span class="stitch-sel-ex-name" onclick="openExerciseQuickInfoModal(decodeURIComponent('${targetExParam}'))" style="cursor:pointer;">${exName}</span>
+                                    <button type="button" class="stitch-ex-swap-pill" onclick="openScheduleExerciseAlternativeModal(${dayIdx}, decodeURIComponent('${targetExParam}'), ${idx})" title="Alternatif Seç">Değiştir</button>
+                                    <button type="button" class="wk-ex-i-btn" onclick="openExerciseQuickInfoModal(decodeURIComponent('${targetExParam}'))" title="Hareket Bilgisi">i</button>
                                 </div>
                             `;
                         }).join('');
                     }
 
-                    const aiSummaryBoxHtml = typeof buildSchedModalAiSummaryHtml === 'function'
-                        ? buildSchedModalAiSummaryHtml(currentPlan, dayIdx)
-                        : '';
                     const moveDayPanelHtml = typeof buildSchedModalMoveDayPanelHtml === 'function'
                         ? buildSchedModalMoveDayPanelHtml(dayIdx, activeSchedulingDateStr)
                         : '';
 
                     templatePlanHtml = `
-                        <div style="background:linear-gradient(135deg, #FFFBEB, #FFFFFF); border:1.5px solid var(--gold); border-radius:14px; padding:14px; box-shadow:0 4px 16px rgba(245,158,11,0.12);">
-                            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
-                                <div>
-                                    <span class="auth-role-tag role-admin" style="font-size:9.5px; background:var(--gold); color:#000; font-weight:900;">
-                                        📌 ${dayName.toUpperCase()} GÜNÜNE ATANMIŞ PROGRAM
-                                    </span>
-                                    <h3 style="font-size:16px; font-weight:900; color:#0F172A; margin:6px 0 2px;">
-                                        ${escapeHTML(titleStr)}
-                                    </h3>
-                                    <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
-                                        ⏱️ ${duration} Dk • 🎯 ${exercises.length} Hareket (${schemeStr}) • ⏳ ${restSec}s Dinlenme
-                                    </div>
-                                </div>
-                                <button class="btn btn-gold" style="padding:8px 14px; font-size:12px; font-weight:800; flex-shrink:0;" onclick="startScheduledWorkoutForDay(${dayIdx}, decodeURIComponent('${encodeURIComponent(activeSchedulingDateStr || '')}'))">
-                                    ▶️ Başlat
+                        <div>
+                            <!-- 2'Lİ KOMPAKT YÖNETİM BAR -->
+                            <div class="stitch-sched-top-actions">
+                                <button type="button" class="wk-chip-action highlight-orange" id="btnToggleSchedMoveStrip" onclick="toggleSchedMoveDayDrawer()">
+                                    📅 Gün Değiştir
                                 </button>
-                            </div>
-
-                            ${aiSummaryBoxHtml}
-
-                            <div style="display:flex; gap:8px; margin:10px 0 8px; flex-wrap:wrap;">
-                                <button type="button" class="btn btn-gold" style="flex:1; min-width:160px; font-size:12px; padding:9px 12px; font-weight:900;" onclick="editProgramForDay(${dayIdx}, decodeURIComponent('${encodeURIComponent(activeSchedulingDateStr || '')}'))">
-                                    ✏️ Düzenle / Başka Güne Ata
-                                </button>
-                                <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:8px 12px; color:var(--cyan); border-color:var(--cyan); background:#FFFFFF;" onclick="toggleSchedModalExerciseList()">
-                                    <span id="schedModalExListToggleBtn">👁️ Egzersizleri Gizle ▲</span>
-                                </button>
-                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:8px 10px; color:#DC2626; border-color:rgba(239,68,68,0.35); background:#FFFFFF;" onclick="setDayAsRest()" title="Bu günü dinlenme gününe çevir">
+                                <button type="button" class="wk-chip-action" style="color:#B91C1C; border-color:#FECACA; background:#FEF2F2;" onclick="setDayAsRest()">
                                     🧘 Dinlenmeye Al
                                 </button>
                             </div>
 
-                            <!-- BAŞKA GÜNE ATA PANELİ (7 GÜN SEÇİCİ) -->
+                            <!-- SADE 7 GÜNLÜK TAŞIMA ŞERİDİ (VARSAYILAN KAPALI) -->
                             ${moveDayPanelHtml}
 
-                            <!-- EXERCISES LIST CONTAINER -->
-                            <div id="schedModalAssignedExList" style="display:flex; flex-direction:column; gap:6px; max-height:280px; overflow-y:auto; padding-right:4px;">
+                            <!-- HAREKET LİSTESİ -->
+                            <div id="schedModalAssignedExList" style="display:flex; flex-direction:column; gap:6px; max-height:320px; overflow-y:auto; margin:8px 0 12px 0;">
                                 ${exercisesHtml}
                             </div>
+
+                            <!-- ALT ANA BAŞLAT BUTONU -->
+                            <button type="button" class="wk-btn-primary-compact" style="width:100%;" onclick="closeScheduleDayModal(); startScheduledWorkoutForDay(${dayIdx}, decodeURIComponent('${encodeURIComponent(activeSchedulingDateStr || '')}'))">
+                                ▶️ Seansı Başlat
+                            </button>
                         </div>
                     `;
                 } else {
                     templatePlanHtml = `
-                        <div style="background:#F8FAFC; border:1.5px dashed #CBD5E1; border-radius:12px; padding:18px; text-align:center;">
-                            <div style="font-size:26px; margin-bottom:4px;">🧘</div>
-                            <div style="font-size:14px; font-weight:800; color:#0F172A;">${dayName} Günü Dinlenme Olarak Ayarlı</div>
-                            <div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">
-                                Bu gün vücudun toparlanması ve kas onarımı için ayrılmıştır.
-                            </div>
+                        <div style="background:#F8FAFC; border:1px dashed #CBD5E1; border-radius:12px; padding:18px; text-align:center;">
+                            <div style="font-size:14px; font-weight:800; color:#0F172A;">${dayName} Günü Dinlenme</div>
+                            <button type="button" class="wk-btn-primary-compact" style="margin-top:10px; width:100%;" onclick="editProgramForDay(${dayIdx}, decodeURIComponent('${encodeURIComponent(activeSchedulingDateStr || '')}'))">
+                                + Başka Günden Buraya Taşı
+                            </button>
                         </div>
                     `;
                 }
@@ -14734,9 +14665,6 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 <div style="font-size:14px; font-weight:900; color:#0F172A; margin-top:5px;">
                                     ${escapeHTML(c.name || 'Kardiyo Seansı')} • <span style="color:#0369A1;">⏱️ ${Number(c.durationMin || 20)} Dk</span>
                                 </div>
-                                <div style="font-size:11px; color:#334155; margin-top:2px;">
-                                    Ana ağırlık programından bağımsız ayrı aktivite olarak planlandı.
-                                </div>
                             </div>
                             <div style="display:flex; gap:6px; align-items:center;">
                                 <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 10px; font-weight:800; color:#FFFFFF; background:#0369A1; border-color:#0284C7;" onclick="closeScheduleDayModal(); startQuickWorkoutWithExercise('${c.id}')">
@@ -14754,9 +14682,21 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
             const timingSection = document.getElementById('schedDayTimingSection');
             if (timingSection) {
-                timingSection.style.display = hasCompletedSession ? 'none' : 'block';
+                timingSection.style.display = 'none';
             }
             modal.classList.add('active');
+        }
+
+        function toggleSchedTimingDrawer() {
+            const timingSection = document.getElementById('schedDayTimingSection');
+            if (!timingSection) return;
+            timingSection.style.display = timingSection.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function toggleSchedMoveDayDrawer() {
+            const moveBox = document.getElementById('schedModalMoveDayBox');
+            if (!moveBox) return;
+            moveBox.style.display = moveBox.style.display === 'none' ? 'block' : 'none';
         }
 
         function toggleSchedModalTemplateAccordion() {
@@ -14798,17 +14738,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
             const moveBox = document.getElementById('schedModalMoveDayBox');
             if (moveBox) {
-                const isHidden = moveBox.style.display === 'none';
-                moveBox.style.display = isHidden ? 'block' : 'none';
-                if (isHidden) {
-                    moveBox.style.borderColor = '#7E22CE';
-                    moveBox.style.boxShadow = '0 0 0 3px rgba(126,34,206,0.15)';
-                }
+                moveBox.style.display = moveBox.style.display === 'none' ? 'block' : 'none';
             }
         }
         window.editProgramForDay = editProgramForDay;
 
-        function getWeekDaysMapForDateStr(refDateStr = null) {
+        function getWeekDaysMapForDateStr(refDateStr = null, weekOffset = 0) {
             let baseDate = null;
             if (refDateStr && /^\d{4}-\d{2}-\d{2}$/.test(String(refDateStr).trim())) {
                 baseDate = new Date(String(refDateStr).trim() + 'T00:00:00');
@@ -14821,7 +14756,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const dow = baseDate.getDay();
             const diffToMon = (dow === 0 ? -6 : 1 - dow);
             const monday = new Date(baseDate);
-            monday.setDate(baseDate.getDate() + diffToMon);
+            monday.setDate(baseDate.getDate() + diffToMon + (Number(weekOffset || 0) * 7));
 
             const map = {};
             const ordered = [];
@@ -14852,20 +14787,20 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             return Boolean(plan && !plan.rest && plan.type !== 'rest');
         }
 
-        function buildSchedModalMoveDayPanelHtml(sourceDayIdx, currentDateStr = null) {
+        function buildSchedModalMoveDayPanelHtml(sourceDayIdx, currentDateStr = null, weekOffset = null) {
+            const effOffset = weekOffset !== null ? Number(weekOffset) : Number(window._schedModalMoveWeekOffset || 0);
             const isNext = (typeof activePlannerWeek !== 'undefined' && activePlannerWeek === 'next');
             const schedule = isNext ? getNextWeeklySchedule() : getWeeklySchedule();
-            const { ordered } = getWeekDaysMapForDateStr(currentDateStr);
-            const shortNames = { 1: 'Pzt', 2: 'Sal', 3: 'Çar', 4: 'Per', 5: 'Cum', 6: 'Cmt', 0: 'Paz' };
+            const { ordered } = getWeekDaysMapForDateStr(currentDateStr, effOffset);
+            const shortNames = { 1: 'PZT', 2: 'SAL', 3: 'ÇAR', 4: 'PER', 5: 'CUM', 6: 'CMT', 0: 'PAZ' };
 
-            const buttonsHtml = ordered.map((dItem, idx) => {
+            const buttonsHtml = ordered.map((dItem) => {
                 const dIdx = dItem.dayIdx;
-                const isCurrent = (dIdx === sourceDayIdx);
                 const dYMD = dItem.dateYMD || '';
+                const isCurrent = currentDateStr
+                    ? (dYMD === currentDateStr)
+                    : (effOffset === 0 && dIdx === sourceDayIdx);
                 const dateNum = dItem.dateObj.getDate();
-                const mShort = (typeof CAL_MONTH_NAMES_TR !== 'undefined' && CAL_MONTH_NAMES_TR[dItem.dateObj.getMonth()])
-                    ? CAL_MONTH_NAMES_TR[dItem.dateObj.getMonth()].slice(0, 3)
-                    : '';
 
                 const completedLogs = (!isNext && typeof getCompletedWorkoutsForDate === 'function')
                     ? getCompletedWorkoutsForDate(dItem.dateObj)
@@ -14876,66 +14811,50 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     : (schedule[dIdx] || { rest: true });
                 const isRest = Boolean(!plan || plan.rest || plan.type === 'rest');
 
-                // Check if moving to this day creates a consecutive pair with another active day (excluding sourceDayIdx unless swapped)
-                const prevItem = idx > 0 ? ordered[idx - 1] : null;
-                const nextItem = idx < 6 ? ordered[idx + 1] : null;
-                const prevActive = prevItem && prevItem.dayIdx !== sourceDayIdx && isScheduleDayActiveOrCompleted(prevItem, isNext, schedule);
-                const nextActive = nextItem && nextItem.dayIdx !== sourceDayIdx && isScheduleDayActiveOrCompleted(nextItem, isNext, schedule);
-                const willBeConsecutive = !isCurrent && (prevActive || nextActive);
-
-                let statusLabel = 'Boş • Dinlenme';
-                let statusColor = '#15803D';
-                let bgStyle = '#FFFFFF';
-                let borderColor = '#CBD5E1';
-
-                if (isCurrent) {
-                    statusLabel = 'Mevcut Gün';
-                    statusColor = '#B45309';
-                    bgStyle = '#FEF3C7';
-                    borderColor = '#F59E0B';
-                } else if (hasCompleted) {
-                    statusLabel = 'Tamamlandı';
-                    statusColor = '#0369A1';
-                    bgStyle = '#F0F9FF';
-                    borderColor = '#BAE6FD';
-                } else if (!isRest) {
-                    statusLabel = 'Dolu • Takas';
-                    statusColor = '#B45309';
-                    bgStyle = '#FFFBEB';
-                    borderColor = '#FCD34D';
-                }
-
-                const consecutiveBadge = willBeConsecutive
-                    ? `<span style="display:inline-block; margin-top:3px; font-size:9px; font-weight:900; background:#F3E8FF; color:#6B21A8; border:1px solid #D8B4FE; border-radius:4px; padding:1px 4px;">⚡ Ardışık</span>`
-                    : '';
-
+                const dotClass = hasCompleted ? 'done' : (!isRest ? 'planned' : 'rest');
                 const clickAttr = isCurrent
-                    ? 'disabled style="opacity:0.85; cursor:default;'
-                    : `onclick="moveScheduledWorkoutToDay(${sourceDayIdx}, ${dIdx}, decodeURIComponent('${encodeURIComponent(currentDateStr || '')}'), '${dYMD}')" style="cursor:pointer;`;
+                    ? 'disabled'
+                    : `onclick="moveScheduledWorkoutToDay(${sourceDayIdx}, ${dIdx}, decodeURIComponent('${encodeURIComponent(currentDateStr || '')}'), '${dYMD}')"`;
 
                 return `
-                    <button type="button" ${clickAttr} background:${bgStyle}; border:1.5px solid ${borderColor}; border-radius:8px; padding:7px 4px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; transition:all 0.15s ease;">
-                        <span style="font-size:12px; font-weight:900; color:#0F172A;">${shortNames[dIdx]}</span>
-                        <span style="font-size:10px; font-weight:700; color:#475569;">${dateNum} ${mShort}</span>
-                        <span style="font-size:9.5px; font-weight:800; color:${statusColor}; margin-top:2px;">${statusLabel}</span>
-                        ${consecutiveBadge}
+                    <button type="button" class="stitch-day-pill ${isCurrent ? 'active' : ''}" ${clickAttr} title="${isCurrent ? 'Mevcut Gün' : (!isRest ? 'Dolu Gün (Takas Et)' : 'Boş Gün (Buraya Taşı)')}">
+                        <span class="stitch-day-pill-lbl">${shortNames[dIdx]}</span>
+                        <strong class="stitch-day-pill-num">${dateNum}</strong>
+                        <span class="stitch-day-pill-dot ${dotClass}"></span>
                     </button>
                 `;
             }).join('');
 
             return `
-                <div id="schedModalMoveDayBox" style="display:block; background:#F8FAFC; border:1.5px solid #CBD5E1; border-radius:10px; padding:10px 12px; margin-bottom:10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:8px; flex-wrap:wrap;">
-                        <span style="font-size:12px; font-weight:900; color:#0F172A;">📅 Başka Güne Ata (Günü Seçin)</span>
-                        <span style="font-size:10.5px; font-weight:700; color:#6B21A8;">⚡ Ardışık günlerde AI hareketleri dengeler</span>
+                <div id="schedModalMoveDayBox" style="display:none; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:8px; margin:8px 0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:7px;">
+                        <div style="display:inline-flex; background:#E2E8F0; padding:2px; border-radius:8px; gap:2px;">
+                            <button type="button" onclick="switchSchedMoveWeekOffset(0)" style="border:none; border-radius:6px; padding:4px 9px; font-size:10.5px; font-weight:800; cursor:pointer; background:${effOffset === 0 ? '#0F172A' : 'transparent'}; color:${effOffset === 0 ? '#FFFFFF' : '#334155'};">Bu Hafta</button>
+                            <button type="button" onclick="switchSchedMoveWeekOffset(1)" style="border:none; border-radius:6px; padding:4px 9px; font-size:10.5px; font-weight:800; cursor:pointer; background:${effOffset === 1 ? '#0F172A' : 'transparent'}; color:${effOffset === 1 ? '#FFFFFF' : '#334155'};">Gelecek Hafta</button>
+                        </div>
+                        <span style="font-size:10px; font-weight:800; color:#475569; white-space:nowrap;">🟠 Takas • ⚪ Taşı</span>
                     </div>
-                    <div style="display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); gap:5px;">
+                    <div class="stitch-day-strip" style="margin:0; padding:0; border:none; background:transparent;">
                         ${buttonsHtml}
                     </div>
                 </div>
             `;
         }
         window.buildSchedModalMoveDayPanelHtml = buildSchedModalMoveDayPanelHtml;
+
+        function switchSchedMoveWeekOffset(offset) {
+            window._schedModalMoveWeekOffset = Number(offset) || 0;
+            const box = document.getElementById('schedModalMoveDayBox');
+            if (!box || activeSchedulingDayIdx === null) return;
+            const temp = document.createElement('div');
+            temp.innerHTML = buildSchedModalMoveDayPanelHtml(activeSchedulingDayIdx, activeSchedulingDateStr, window._schedModalMoveWeekOffset);
+            const newBox = temp.firstElementChild;
+            if (newBox) {
+                newBox.style.display = 'block';
+                box.replaceWith(newBox);
+            }
+        }
+        window.switchSchedMoveWeekOffset = switchSchedMoveWeekOffset;
 
         function renderRevisionSummaryCardHtml(summaryObj, isGlobalBanner = false) {
             if (!summaryObj) return '';
@@ -15218,14 +15137,16 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     updatedAt: nowTs
                 });
 
-                schedule[targetDayIdx] = updatedPlanObj;
-                if (isNextWeek) {
-                    saveNextWeeklySchedule(schedule, uid);
-                } else {
-                    saveWeeklySchedule(schedule, uid);
-                    if (targetDateStr && typeof saveDateScheduleOverride === 'function') {
-                        saveDateScheduleOverride(targetDateStr, updatedPlanObj, uid);
+                if (!moveMeta || !moveMeta.isCrossWeekMove) {
+                    schedule[targetDayIdx] = updatedPlanObj;
+                    if (isNextWeek) {
+                        saveNextWeeklySchedule(schedule, uid);
+                    } else {
+                        saveWeeklySchedule(schedule, uid);
                     }
+                }
+                if (!isNextWeek && targetDateStr && typeof saveDateScheduleOverride === 'function') {
+                    saveDateScheduleOverride(targetDateStr, updatedPlanObj, uid);
                 }
 
                 try {
@@ -15355,10 +15276,12 @@ KURALLAR:
             const uid = user ? user.id : 'default';
             const isNext = (typeof activePlannerWeek !== 'undefined' && activePlannerWeek === 'next');
             const schedule = isNext ? getNextWeeklySchedule(uid) : getWeeklySchedule(uid);
-            const { map: weekMap, ordered } = getWeekDaysMapForDateStr(sourceDateStr || targetDateStr);
+            const { map: srcWeekMap, ordered: srcOrdered } = getWeekDaysMapForDateStr(sourceDateStr || targetDateStr, 0);
 
-            const srcDateYMD = sourceDateStr || (weekMap[sourceDayIdx] ? weekMap[sourceDayIdx].dateYMD : '');
-            const tgtDateYMD = targetDateStr || (weekMap[targetDayIdx] ? weekMap[targetDayIdx].dateYMD : '');
+            const srcDateYMD = sourceDateStr || (srcWeekMap[sourceDayIdx] ? srcWeekMap[sourceDayIdx].dateYMD : '');
+            const { map: tgtWeekMap, ordered } = getWeekDaysMapForDateStr(targetDateStr || srcDateYMD, 0);
+            const tgtDateYMD = targetDateStr || (tgtWeekMap[targetDayIdx] ? tgtWeekMap[targetDayIdx].dateYMD : '');
+            const isCrossWeekMove = Boolean(srcDateYMD && tgtDateYMD && srcOrdered[0]?.dateYMD !== ordered[0]?.dateYMD);
 
             let sourcePlan = (!isNext && srcDateYMD && typeof getPlanForDate === 'function')
                 ? getPlanForDate(new Date(srcDateYMD + 'T00:00:00'))
@@ -15419,7 +15342,9 @@ KURALLAR:
                     rest: true,
                     updatedAt: nowTs
                 };
-                schedule[sourceDayIdx] = restPlan;
+                if (!isCrossWeekMove) {
+                    schedule[sourceDayIdx] = restPlan;
+                }
                 if (!isNext && srcDateYMD && typeof saveDateScheduleOverride === 'function') {
                     saveDateScheduleOverride(srcDateYMD, restPlan, uid);
                 }
@@ -15449,20 +15374,29 @@ KURALLAR:
                     exercises: tgtExercises,
                     updatedAt: nowTs
                 };
-                schedule[sourceDayIdx] = swappedPlanObj;
+                if (!isCrossWeekMove) {
+                    schedule[sourceDayIdx] = swappedPlanObj;
+                }
                 if (!isNext && srcDateYMD && typeof saveDateScheduleOverride === 'function') {
                     saveDateScheduleOverride(srcDateYMD, swappedPlanObj, uid);
                 }
             }
 
-            schedule[targetDayIdx] = movedPlanObj;
-            if (isNext) {
-                saveNextWeeklySchedule(schedule, uid);
-            } else {
-                saveWeeklySchedule(schedule, uid);
-                if (tgtDateYMD && typeof saveDateScheduleOverride === 'function') {
-                    saveDateScheduleOverride(tgtDateYMD, movedPlanObj, uid);
+            if (!isCrossWeekMove) {
+                schedule[targetDayIdx] = movedPlanObj;
+                if (isNext) {
+                    saveNextWeeklySchedule(schedule, uid);
+                } else {
+                    saveWeeklySchedule(schedule, uid);
                 }
+            }
+            if (!isNext && tgtDateYMD && typeof saveDateScheduleOverride === 'function') {
+                saveDateScheduleOverride(tgtDateYMD, movedPlanObj, uid);
+            }
+
+            if (typeof calendarScreenState !== 'undefined' && tgtDateYMD) {
+                calendarScreenState.anchorDate = new Date(tgtDateYMD + 'T00:00:00');
+                calendarScreenState.selectedDayYMD = tgtDateYMD;
             }
 
             // Detect consecutive workout days around targetDayIdx
@@ -15498,7 +15432,7 @@ KURALLAR:
 
             const fromDayName = DAY_NAMES_TR[sourceDayIdx] || '';
             const toDayName = DAY_NAMES_TR[targetDayIdx] || '';
-            const moveLine = `${fromDayName} antrenmanı ${toDayName} gününe ${!isTargetRest ? 'takas edilerek ' : ''}taşındı.`;
+            const moveLine = `${fromDayName} antrenmanı ${isCrossWeekMove ? 'gelecek hafta ' : ''}${toDayName} gününe ${!isTargetRest ? 'takas edilerek ' : ''}taşındı.`;
 
             if (adjacentNeighbors.length === 0) {
                 const noConflictSummary = {
@@ -15514,13 +15448,13 @@ KURALLAR:
                     changes: []
                 };
                 movedPlanObj.aiMoveSummary = noConflictSummary;
-                schedule[targetDayIdx] = movedPlanObj;
-                if (isNext) saveNextWeeklySchedule(schedule, uid);
-                else {
-                    saveWeeklySchedule(schedule, uid);
-                    if (tgtDateYMD && typeof saveDateScheduleOverride === 'function') {
-                        saveDateScheduleOverride(tgtDateYMD, movedPlanObj, uid);
-                    }
+                if (!isCrossWeekMove) {
+                    schedule[targetDayIdx] = movedPlanObj;
+                    if (isNext) saveNextWeeklySchedule(schedule, uid);
+                    else saveWeeklySchedule(schedule, uid);
+                }
+                if (!isNext && tgtDateYMD && typeof saveDateScheduleOverride === 'function') {
+                    saveDateScheduleOverride(tgtDateYMD, movedPlanObj, uid);
                 }
                 window.lastScheduleMoveSummary = noConflictSummary;
                 renderActiveWorkout();
@@ -15538,7 +15472,7 @@ KURALLAR:
                 tgtDateYMD,
                 adjacentNeighbors,
                 isNext,
-                { fromDayIdx: sourceDayIdx, wasSwapped: !isTargetRest }
+                { fromDayIdx: sourceDayIdx, wasSwapped: !isTargetRest, isCrossWeekMove }
             );
 
             if (typeof playAlertSound === 'function') playAlertSound();
@@ -18634,7 +18568,7 @@ KURALLAR:
                     saveDateScheduleOverride(dStr, basePlan);
                     return basePlan;
                 }
-                if (!basePlan.rest && !ovPlan.rest && typeof getWorkoutDetailsForPlan === 'function') {
+                if (!ovTs && !basePlan.rest && !ovPlan.rest && typeof getWorkoutDetailsForPlan === 'function') {
                     const baseDetails = getWorkoutDetailsForPlan(basePlan);
                     const ovDetails = getWorkoutDetailsForPlan(ovPlan);
                     const baseExCount = (baseDetails && Array.isArray(baseDetails.exercises)) ? baseDetails.exercises.length : 0;
@@ -18937,10 +18871,12 @@ KURALLAR:
                                 ? (EXERCISES_DB.find(e => e.id === exItem) || { id: exItem, name: exItem })
                                 : exItem;
                             const numStr = String(idx + 1).padStart(2, '0');
+                            const targetExParam = encodeURIComponent(exObj.id || exObj.name || '');
                             return `
                                 <div class="stitch-sel-ex-row">
                                     <span class="stitch-sel-ex-num">${numStr}</span>
-                                    <span class="stitch-sel-ex-name">${escapeHTML(exObj.name || 'Hareket')}</span>
+                                    <span class="stitch-sel-ex-name" onclick="openScheduleExerciseAlternativeModal(${selDay.dayIdx}, decodeURIComponent('${targetExParam}'), ${idx}, '${selDay.dayYMD}')" style="cursor:pointer;">${escapeHTML(exObj.name || 'Hareket')}</span>
+                                    <button type="button" class="stitch-ex-swap-pill" onclick="event.stopPropagation(); openScheduleExerciseAlternativeModal(${selDay.dayIdx}, decodeURIComponent('${targetExParam}'), ${idx}, '${selDay.dayYMD}')" title="Başka Hareketle Değiştir">Değiştir</button>
                                     ${exObj.id ? `<button type="button" class="wk-ex-i-btn" onclick="event.stopPropagation(); openExerciseQuickInfoModal('${escapeHTML(String(exObj.id))}')" title="Hareket Bilgisi">i</button>` : ''}
                                 </div>
                             `;
@@ -27396,7 +27332,7 @@ KURALLAR:
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=272')
+                navigator.serviceWorker.register('./sw.js?v=273')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();

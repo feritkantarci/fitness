@@ -24,7 +24,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=272">
+    <link rel="stylesheet" href="css/style.css?v=273">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH (CANVA MODERN ATHLETIC LIGHT V229) */
         html, body { background-color: #F8FAFC; color: #0F172A; color-scheme: light; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -51,7 +51,7 @@
                     <path d="M34 25L26 36H33L30 46L39 34H32L34 25Z" fill="#FFFFFF"/>
                 </svg>
             </div>
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v272</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v273</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -208,7 +208,7 @@
                         <div class="modern-brand-subrow">
                             <span id="headerActiveTabLabel">ÜRETİCİ</span>
                             <span class="modern-brand-subdot" aria-hidden="true">•</span>
-                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v272</span>
+                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v273</span>
                         </div>
                     </div>
                 </div>
@@ -852,78 +852,67 @@
 
                     <!-- PANE 2: EGZERSİZ KÜTÜPHANESİ VE HAREKET REHBERİ -->
                     <div id="libPaneExercises" style="display:block;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
-                            <div>
-                                <h2 style="font-size:18px; font-weight:900; color:#0F172A; margin:0;">Egzersiz Kütüphanesi & Rehber</h2>
-                                <div style="font-size:12.5px; color:var(--text-secondary); margin-top:2px;">
-                                    Tüm hareketleri inceleyin, form ipuçlarına bakın veya doğrudan programınıza ekleyin.
-                                </div>
+                        <!-- ÜST BAŞLIK + FİTNESS/KARDİYO GEÇİŞİ (TEK SATIR) -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:8px;">
+                            <div style="display:flex; align-items:center; gap:7px; min-width:0;">
+                                <h2 style="font-size:16px; font-weight:900; color:#0F172A; margin:0; white-space:nowrap;">Kütüphane</h2>
+                                <span id="libExCountBadge" style="font-size:11px; font-weight:800; padding:3px 8px; border-radius:999px; background:#F1F5F9; border:1px solid #E2E8F0; color:#334155; white-space:nowrap;">
+                                    89 Egzersiz
+                                </span>
                             </div>
-                            <span id="libExCountBadge" class="auth-role-tag role-admin" style="font-size:12px; padding:4px 10px; background:#F7FEE7; border:1px solid #84CC16; color:#166534;">
-                                89 Egzersiz
-                            </span>
+
+                            <div style="display:inline-flex; background:#F1F5F9; padding:3px; border-radius:9px; border:1px solid #E2E8F0; gap:2px; flex-shrink:0;">
+                                <button type="button" id="libModeFitnessBtn" onclick="switchLibraryExerciseMode('fitness')" style="padding:5px 10px; font-size:11px; font-weight:800; border-radius:7px; border:none; background:#0F172A; color:#FFFFFF; cursor:pointer; white-space:nowrap;">
+                                    Fitness
+                                </button>
+                                <button type="button" id="libModeCardioBtn" onclick="switchLibraryExerciseMode('cardio')" style="padding:5px 10px; font-size:11px; font-weight:800; border-radius:7px; border:none; background:transparent; color:#475569; cursor:pointer; white-space:nowrap;">
+                                    Kardiyo
+                                </button>
+                            </div>
                         </div>
 
-                        <!-- KÜTÜPHANE MOD SEKMELERİ: FITNESS vs KARDİYO & KONDİSYON -->
-                        <div style="display:flex; gap:8px; margin-bottom:14px; background:#F1F5F9; padding:5px; border-radius:12px; border:1px solid #CBD5E1;">
-                            <button type="button" id="libModeFitnessBtn" onclick="switchLibraryExerciseMode('fitness')" style="flex:1; padding:9px 12px; font-size:12.5px; font-weight:800; border-radius:9px; border:1.5px solid #0F172A; background:#0F172A; color:#FFFFFF; cursor:pointer; transition:all 0.15s;">
-                                🏋️ Fitness & Ağırlık Hareketleri
-                            </button>
-                            <button type="button" id="libModeCardioBtn" onclick="switchLibraryExerciseMode('cardio')" style="flex:1; padding:9px 12px; font-size:12.5px; font-weight:800; border-radius:9px; border:1.5px solid transparent; background:transparent; color:#0F172A; cursor:pointer; transition:all 0.15s;">
-                                🚣🏃 Kardiyo Seansları (Kürek • Koşu • Yürüyüş)
-                            </button>
-                        </div>
-
-                        <!-- SEARCH & FILTERS -->
-                        <div class="lib-filter-panel" style="background:#FFFFFF; border:1.5px solid #E2E8F0; border-radius:16px; padding:14px; margin-bottom:16px; box-shadow:0 4px 16px rgba(15,23,42,0.04);">
-                            <!-- Search bar -->
-                            <div style="position:relative; margin-bottom:10px;">
-                                <input type="text" id="libExSearchInput" class="form-input" aria-label="Egzersiz, kas grubu veya ipucu ara" spellcheck="false" autocomplete="off"
-                                       style="width:100%; padding:10px 36px 10px 14px; font-size:13px; border-radius:10px; background:#F8FAFC; color:#0F172A; border:1.5px solid #CBD5E1;" 
-                                       placeholder="Hareket, kas grubu veya ipucu ara (Örn: Bench, Kettlebell, Squat, Omuz)…" 
+                        <!-- SADE ARAMA VE FİLTRE BAR (SIFIR İÇ İÇE ÇERÇEVE) -->
+                        <div style="margin-bottom:10px;">
+                            <div style="position:relative; margin-bottom:6px;">
+                                <input type="text" id="libExSearchInput" class="form-input" aria-label="Hareket veya kas ara" spellcheck="false" autocomplete="off"
+                                       style="width:100%; padding:9px 34px 9px 12px; font-size:12.5px; border-radius:10px; background:#F8FAFC; color:#0F172A; border:1px solid #CBD5E1;" 
+                                       placeholder="🔍 Hareket veya kas ara..." 
                                        oninput="renderLibraryExerciseCatalog()">
-                                <button id="libExClearSearchBtn" type="button" aria-label="Aramayı temizle" onclick="clearLibExSearch()" style="display:none; position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-secondary); font-size:18px; cursor:pointer;">&times;</button>
+                                <button id="libExClearSearchBtn" type="button" aria-label="Aramayı temizle" onclick="clearLibExSearch()" style="display:none; position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:#64748B; font-size:18px; cursor:pointer;">&times;</button>
                             </div>
 
-                            <!-- Filter Selectors -->
-                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-                                <div>
-                                    <label for="libExMuscleFilter" style="font-size:12px; font-weight:800; color:var(--text-secondary); display:block; margin-bottom:4px;">Kas Grubu</label>
-                                    <select id="libExMuscleFilter" class="form-input" style="padding:8px 10px; font-size:13px;" onchange="renderLibraryExerciseCatalog()">
-                                        <option value="all">Tüm Kas Grupları</option>
-                                        <option value="chest">Göğüs</option>
-                                        <option value="back">Sırt & Kanat</option>
-                                        <option value="shoulders">Omuz & Trapez</option>
-                                        <option value="legs">Bacak & Kalça</option>
-                                        <option value="core">Core & Karın</option>
-                                        <option value="arms">Kollar (Biceps / Triceps)</option>
-                                        <option value="conditioning">Fonksiyonel & Kondisyon</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="libExEquipFilter" style="font-size:12px; font-weight:800; color:var(--text-secondary); display:block; margin-bottom:4px;">Ekipman</label>
-                                    <select id="libExEquipFilter" class="form-input" style="padding:8px 10px; font-size:13px;" onchange="renderLibraryExerciseCatalog()">
-                                        <option value="all">Tüm Ekipmanlar</option>
-                                        <option value="dumbbell">Dambıl (Dumbbell)</option>
-                                        <option value="kettlebell">Kettlebell (Girya)</option>
-                                        <option value="barbell">Halter (Barbell)</option>
-                                        <option value="machine">Makine & Kablo</option>
-                                        <option value="bodyweight">Vücut Ağırlığı</option>
-                                    </select>
-                                </div>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+                                <select id="libExMuscleFilter" class="form-input" style="padding:7px 9px; font-size:12px; font-weight:700; border-radius:9px; background:#F8FAFC;" onchange="renderLibraryExerciseCatalog()">
+                                    <option value="all">Tüm Kaslar</option>
+                                    <option value="chest">Göğüs</option>
+                                    <option value="back">Sırt & Kanat</option>
+                                    <option value="shoulders">Omuz</option>
+                                    <option value="legs">Bacak & Kalça</option>
+                                    <option value="core">Karın & Core</option>
+                                    <option value="arms">Kollar</option>
+                                    <option value="conditioning">Kondisyon</option>
+                                </select>
+                                <select id="libExEquipFilter" class="form-input" style="padding:7px 9px; font-size:12px; font-weight:700; border-radius:9px; background:#F8FAFC;" onchange="renderLibraryExerciseCatalog()">
+                                    <option value="all">Tüm Ekipmanlar</option>
+                                    <option value="dumbbell">Dambıl</option>
+                                    <option value="kettlebell">Kettlebell</option>
+                                    <option value="barbell">Barbell</option>
+                                    <option value="machine">Makine</option>
+                                    <option value="bodyweight">Vücut Ağırlığı</option>
+                                </select>
                             </div>
 
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding:0 2px;">
-                                <div style="font-size:12px; font-weight:700; color:var(--text-secondary);" id="libExSubCountBadge">97 Egzersiz</div>
-                                <label style="font-size:12px; font-weight:700; color:#F87171; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; padding:0 2px;">
+                                <div style="font-size:11px; font-weight:700; color:#64748B;" id="libExSubCountBadge">97 Egzersiz</div>
+                                <label style="font-size:11px; font-weight:700; color:#B91C1C; cursor:pointer; display:inline-flex; align-items:center; gap:5px;">
                                     <input type="checkbox" id="chkLibShowExcluded" onchange="renderLibraryExerciseCatalog()" style="cursor:pointer; accent-color:#ef4444;">
-                                    <span>Gizlenenleri Göster (<span id="libExcludedCount">0</span>)</span>
+                                    <span>Gizlenenler (<span id="libExcludedCount">0</span>)</span>
                                 </label>
                             </div>
                         </div>
 
-                        <!-- EXERCISES GRID -->
-                        <div id="libExercisesCatalogGrid" class="lib-ex-grid">
+                        <!-- EXERCISES LIST -->
+                        <div id="libExercisesCatalogGrid" style="display:flex; flex-direction:column; gap:6px;">
                             <!-- Populated dynamically -->
                         </div>
                     </div>
@@ -1423,28 +1412,31 @@
         </div>
     </div>
 
-    <!-- ==================== WEEKLY SCHEDULE DAY MODAL ==================== -->
-    <div id="scheduleDayModal" class="modal-overlay">
-        <div class="modal-box" style="max-width: 560px; max-height: 92vh; overflow-y: auto;">
-            <div class="modal-header">
-                <div>
-                    <span class="auth-role-tag role-admin" id="schedModalDayBadge" style="font-size:10px;">HAFTALIK PLAN</span>
-                    <h3 class="modal-title" id="schedModalDayTitle" style="font-size:16px; margin-top:4px;">Günü Programla</h3>
+    <!-- ==================== WEEKLY SCHEDULE DAY MODAL (SADE & NİZAMİ) ==================== -->
+    <div id="scheduleDayModal" class="modal-overlay" onclick="if(event.target===this) closeScheduleDayModal()">
+        <div class="modal-box stitch-sched-modal-box" style="max-width: 440px; max-height: 88vh; overflow-y: auto; padding: 14px;">
+            <div class="stitch-sched-modal-head">
+                <div style="min-width:0; flex:1;">
+                    <span class="stitch-sched-day-kicker" id="schedModalDayBadge">BUGÜNÜN PROGRAMI</span>
+                    <h3 class="stitch-sched-day-title" id="schedModalDayTitle">Tüm Vücut Antrenmanı</h3>
                 </div>
-                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeScheduleDayModal()">✕</button>
+                <div style="display:inline-flex; align-items:center; gap:6px; flex-shrink:0;">
+                    <button type="button" class="stitch-time-pill-btn" onclick="toggleSchedTimingDrawer()" title="Saat ve Takvim Ayarı">
+                        🕒 <span id="schedHeaderTimeLabel">18:30</span>
+                    </button>
+                    <button type="button" class="wk-info-modal-close" aria-label="Kapat" onclick="closeScheduleDayModal()">✕</button>
+                </div>
             </div>
 
-            <p id="schedModalDaySubDesc" style="font-size:12px; color:var(--text-secondary); margin:0 0 14px 0; line-height:1.4;">
-                Bu güne atanan antrenmanın içeriğini inceleyin veya düzenleyin.
-            </p>
+            <p id="schedModalDaySubDesc" style="display:none;"></p>
 
             <!-- ASSIGNED WORKOUT DETAILED CONTENT SECTION -->
-            <div id="schedAssignedWorkoutSection" style="margin-bottom:14px;">
-                <!-- Populated dynamically: Shows assigned exercises, sets, reps, and direct edit button -->
+            <div id="schedAssignedWorkoutSection" style="margin-bottom:8px;">
+                <!-- Populated dynamically -->
             </div>
 
-            <!-- SEANS SAATİ & CANLI TAKVİM ENTEGRASYON KARTI -->
-            <div id="schedDayTimingSection" style="background:#FFFFFF; border:1.5px solid #E2E8F0; border-radius:14px; padding:14px; margin-bottom:14px; box-shadow:0 2px 8px rgba(15,23,42,0.04);">
+            <!-- SEANS SAATİ & CANLI TAKVİM ENTEGRASYON KARTI (SADECE 🕒 TIKLANINCA AÇILIR) -->
+            <div id="schedDayTimingSection" style="display:none; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:10px; margin-bottom:10px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                     <span style="font-size:12.5px; font-weight:800; color:#0F172A; display:flex; align-items:center; gap:6px;">
                         <span>🕒</span> Seans Saati & Takvim Durumu
@@ -1476,18 +1468,6 @@
                 </div>
             </div>
 
-            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top:1px solid var(--border); padding-top:12px; flex-wrap:wrap;">
-                <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                    <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 12px; color:#B91C1C; border-color:rgba(239,68,68,0.3);" onclick="setDayAsRest()">
-                        🧘 Dinlenme Günü Yap
-                    </button>
-                </div>
-                <div style="display:flex; gap:6px;">
-                    <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 14px;" onclick="closeScheduleDayModal()">
-                        Kapat
-                    </button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -2298,62 +2278,55 @@
 
     <!-- ==================== EXERCISE PICKER & ALTERNATIVE MODAL ==================== -->
     <div id="exercisePickerModal" class="modal-overlay" onclick="if(event.target === this) closeExercisePickerModal()">
-        <div class="modal-box" style="max-width: 640px; max-height: 92vh; display: flex; flex-direction: column;">
-            <div class="modal-header" style="margin-bottom: 6px;">
-                <div>
-                    <span class="modal-title" id="pickerModalTitle">🔄 Alternatif Egzersiz Seçici</span>
-                    <div id="pickerModalSubtitle" style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;"></div>
+        <div class="modal-box" style="max-width: 520px; max-height: 92vh; display: flex; flex-direction: column; padding: 14px;">
+            <div class="modal-header" style="margin-bottom: 10px; align-items: center;">
+                <div style="min-width:0; flex:1;">
+                    <span style="display:inline-block; font-size:9.5px; font-weight:900; letter-spacing:0.6px; text-transform:uppercase; color:#FF5A36; margin-bottom:2px;">HAREKET SEÇİCİ</span>
+                    <div class="modal-title" id="pickerModalTitle" style="font-size:16px; font-weight:900; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Alternatif Seç</div>
+                    <div id="pickerModalSubtitle" style="display:none;"></div>
                 </div>
-                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeExercisePickerModal()">✕</button>
+                <button type="button" class="wk-info-modal-close" aria-label="Kapat" onclick="closeExercisePickerModal()">✕</button>
             </div>
 
-            <!-- CURRENT EXERCISE CONTEXT BANNER -->
-            <div id="pickerCurrentExBanner" style="background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
-                <div style="display:flex; align-items:center; gap:8px; min-width:0;">
-                    <div id="pickerCurrentExThumb" style="width:28px; height:28px; border-radius:5px; background:#000; overflow:hidden; flex-shrink:0; border:1px solid var(--border); display:flex; align-items:center; justify-content:center;">
-                        🏋️
-                    </div>
-                    <div id="pickerCurrentExName" style="font-size:13px; font-weight:800; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                        -
-                    </div>
-                </div>
-                <div id="pickerCurrentExBadges" style="display:flex; gap:4px; flex-shrink:0; align-items:center;">
-                    <!-- badges injected dynamically -->
-                </div>
+            <!-- CURRENT EXERCISE CONTEXT BANNER (HIDDEN FOR ZERO CLUTTER) -->
+            <div id="pickerCurrentExBanner" style="display:none;">
+                <div id="pickerCurrentExThumb"></div>
+                <div id="pickerCurrentExName"></div>
+                <div id="pickerCurrentExBadges"></div>
             </div>
 
-            <!-- 4 SMART TABS -->
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 8px; background:#F1F5F9; padding: 4px; border-radius: 8px; border: 1.5px solid #E2E8F0;">
-                <button type="button" class="btn btn-outline" id="pickerTabBtnSame" style="padding: 7px 2px; font-size: 10.5px; font-weight: 800; border-radius: 6px; border-color: transparent;" onclick="switchPickerTab('same_muscle')">
-                    🎯 Aynı Bölge
+            <!-- 4 SMART TABS (SINGLE LINE) -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 8px; background:#F1F5F9; padding: 3px; border-radius: 10px; border: 1px solid #E2E8F0;">
+                <button type="button" class="btn btn-outline" id="pickerTabBtnSame" style="padding: 6px 4px; font-size: 11px; font-weight: 800; border-radius: 7px; border-color: transparent; white-space: nowrap;" onclick="switchPickerTab('same_muscle')">
+                    Aynı Bölge
                 </button>
-                <button type="button" class="btn btn-outline" id="pickerTabBtnAI" style="padding: 7px 2px; font-size: 10.5px; font-weight: 800; border-radius: 6px; border-color: transparent; color:#c084fc;" onclick="switchPickerTab('ai_coach')">
-                    🤖 Gemini AI
+                <button type="button" class="btn btn-outline" id="pickerTabBtnAI" style="padding: 6px 4px; font-size: 11px; font-weight: 800; border-radius: 7px; border-color: transparent; white-space: nowrap;" onclick="switchPickerTab('ai_coach')">
+                    AI Koç
                 </button>
-                <button type="button" class="btn btn-outline" id="pickerTabBtnOther" style="padding: 7px 2px; font-size: 10.5px; font-weight: 800; border-radius: 6px; border-color: transparent;" onclick="switchPickerTab('other_muscle')">
-                    🧬 Başka Kas
+                <button type="button" class="btn btn-outline" id="pickerTabBtnOther" style="padding: 6px 4px; font-size: 11px; font-weight: 800; border-radius: 7px; border-color: transparent; white-space: nowrap;" onclick="switchPickerTab('other_muscle')">
+                    Başka Kas
                 </button>
-                <button type="button" class="btn btn-outline" id="pickerTabBtnCatalog" style="padding: 7px 2px; font-size: 10.5px; font-weight: 800; border-radius: 6px; border-color: transparent;" onclick="switchPickerTab('catalog')">
-                    ➕ Katalog
+                <button type="button" class="btn btn-outline" id="pickerTabBtnCatalog" style="padding: 6px 4px; font-size: 11px; font-weight: 800; border-radius: 7px; border-color: transparent; white-space: nowrap;" onclick="switchPickerTab('catalog')">
+                    Katalog
                 </button>
             </div>
 
-            <!-- TAB 1: AYNI BİYOMEKANİK PATERN & KAS GRUBU -->
-            <div id="pickerSubPanelSame" style="margin-bottom:6px;">
-                <div style="display:flex; gap:4px; flex-wrap:wrap; margin-bottom:6px;" id="pickerReasonPills">
-                    <button type="button" class="btn-quick-equip" id="pill_reason_all" onclick="setPickerReasonFilter('all')">⚡ Aynı Hareket Tipi</button>
-                    <button type="button" class="btn-quick-equip" id="pill_reason_no_equip" onclick="setPickerReasonFilter('no_equip')">🚫 Alet Yok / Dolu</button>
-                    <button type="button" class="btn-quick-equip" id="pill_reason_joint" onclick="setPickerReasonFilter('joint')">🩹 Bel / Eklem Dostu</button>
-                    <button type="button" class="btn-quick-equip" id="pill_reason_easier" onclick="setPickerReasonFilter('easier')">📉 Daha Kolay</button>
+            <!-- TAB 1: EKİPMAN FİLTRESİ (TEK SATIR YATAY ŞERİT) -->
+            <div id="pickerSubPanelSame" style="margin-bottom:8px;">
+                <div style="display:none;" id="pickerReasonPills">
+                    <button type="button" id="pill_reason_all" onclick="setPickerReasonFilter('all')"></button>
+                    <button type="button" id="pill_reason_no_equip" onclick="setPickerReasonFilter('no_equip')"></button>
+                    <button type="button" id="pill_reason_joint" onclick="setPickerReasonFilter('joint')"></button>
+                    <button type="button" id="pill_reason_easier" onclick="setPickerReasonFilter('easier')"></button>
                 </div>
 
-                <div style="display:flex; gap:4px; flex-wrap:wrap;" id="pickerSameEquipPills">
-                    <button class="btn-quick-equip" id="pill_seq_all" onclick="setSameEquipFilter('all')">Tüm Ekipmanlar</button>
-                    <button class="btn-quick-equip" id="pill_seq_dumbbell" onclick="setSameEquipFilter('dumbbell')">🏋️ Dambıl</button>
-                    <button class="btn-quick-equip" id="pill_seq_kettlebell" onclick="setSameEquipFilter('kettlebell')">🔔 Kettlebell</button>
-                    <button class="btn-quick-equip" id="pill_seq_barbell" onclick="setSameEquipFilter('barbell')">⚡ Barbell</button>
-                    <button class="btn-quick-equip" id="pill_seq_machine" onclick="setSameEquipFilter('machine')">⚙️ Makine</button>
-                    <button class="btn-quick-equip" id="pill_seq_bodyweight" onclick="setSameEquipFilter('bodyweight')">🤸 Vücut Ağırlığı</button>
+                <div style="display:flex; gap:5px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none;" id="pickerSameEquipPills">
+                    <button class="btn-quick-equip" style="white-space:nowrap; border-style:solid;" id="pill_seq_all" onclick="setSameEquipFilter('all')">Tümü</button>
+                    <button class="btn-quick-equip" style="white-space:nowrap; border-style:solid;" id="pill_seq_dumbbell" onclick="setSameEquipFilter('dumbbell')">Dambıl</button>
+                    <button class="btn-quick-equip" style="white-space:nowrap; border-style:solid;" id="pill_seq_kettlebell" onclick="setSameEquipFilter('kettlebell')">Kettlebell</button>
+                    <button class="btn-quick-equip" style="white-space:nowrap; border-style:solid;" id="pill_seq_barbell" onclick="setSameEquipFilter('barbell')">Barbell</button>
+                    <button class="btn-quick-equip" style="white-space:nowrap; border-style:solid;" id="pill_seq_machine" onclick="setSameEquipFilter('machine')">Makine</button>
+                    <button class="btn-quick-equip" style="white-space:nowrap; border-style:solid;" id="pill_seq_bodyweight" onclick="setSameEquipFilter('bodyweight')">Vücut</button>
                 </div>
             </div>
 
@@ -2443,7 +2416,7 @@
             </div>
 
             <!-- EXERCISE LIST CONTAINER -->
-            <div style="flex:1; max-height: 48vh; overflow-y: auto; padding-right: 4px;" id="pickerExercisesContainer">
+            <div style="flex:1; max-height: 62vh; overflow-y: auto; padding-right: 2px;" id="pickerExercisesContainer">
                 <!-- Dynamically rendered list of exercises -->
             </div>
         </div>
@@ -2789,7 +2762,7 @@
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
     <script src="js/exercises-db.js?v=245"></script>
-    <script src="js/app.js?v=272"></script>
+    <script src="js/app.js?v=273"></script>
     <script>
         function getNotifStorageKey() {
             const uid = localStorage.getItem('celik_kodu_active_user_id') || 'default';
@@ -2982,6 +2955,6 @@
             </div>
         </div>
     </div>
-    <script src="js/garmin-tredict-bridge.js?v=272" defer></script>
+    <script src="js/garmin-tredict-bridge.js?v=273" defer></script>
 </body>
 </html>
