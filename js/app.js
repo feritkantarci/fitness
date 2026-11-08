@@ -9178,6 +9178,9 @@ KESİN KURALLAR:
                     };
 
                     // 1. Direct update on the weekly schedule & date override
+                    const existingCardio = (plan && Array.isArray(plan.extraCardioSessions))
+                        ? plan.extraCardioSessions
+                        : ((schedule[dayIdx] && Array.isArray(schedule[dayIdx].extraCardioSessions)) ? schedule[dayIdx].extraCardioSessions : []);
                     const updatedPlanObj = {
                         id: progId,
                         title: cleanTitle,
@@ -9186,6 +9189,7 @@ KESİN KURALLAR:
                         rest: false,
                         customWorkout: updatedWorkout,
                         exercises: newExercises,
+                        extraCardioSessions: existingCardio,
                         updatedAt: nowTs
                     };
                     schedule[dayIdx] = updatedPlanObj;
@@ -10676,9 +10680,26 @@ KESİN KURALLAR:
             }
         }
 
+        function confirmOverwriteActiveWorkoutIfNeeded(newTitle = 'Yeni Seans') {
+            if (!activeWorkoutSession || !Array.isArray(activeWorkoutSession.exercises) || activeWorkoutSession.exercises.length === 0) {
+                return true;
+            }
+            const currentTitle = activeWorkoutSession.title || 'Mevcut Seans';
+            if (currentTitle === newTitle) return true;
+            const ok = confirm(`⚠️ Şu anda devam eden "${currentTitle}" seansınız açık.\n\nOnu kapatıp "${newTitle}" seansını başlatmak istiyor musunuz?\n(Mevcut seansı kaydetmek için İptal'e basıp önce seansı bitirebilirsiniz.)`);
+            if (!ok) {
+                switchTab('activeWorkoutTab');
+                return false;
+            }
+            return true;
+        }
+
         function startActiveWorkoutFromGenerated() {
             if (!currentGeneratedWorkout) {
                 console.warn("startActiveWorkoutFromGenerated: currentGeneratedWorkout boş.");
+                return;
+            }
+            if (!confirmOverwriteActiveWorkoutIfNeeded(currentGeneratedWorkout.title || 'Fitness Seansı')) {
                 return;
             }
             activeWorkoutSession = JSON.parse(JSON.stringify(currentGeneratedWorkout));
@@ -13362,22 +13383,51 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const ex = EXERCISES_DB.find(e => e.id === exId);
             if (!ex) return;
 
+            const sessionTitle = `${ex.name} Odaklı Seans`;
+            if (!confirmOverwriteActiveWorkoutIfNeeded(sessionTitle)) {
+                return;
+            }
+
+            const isStandaloneCardio = /^cond_/.test(String(ex.id || ''));
+            let scheduledCardio = null;
+            if (isStandaloneCardio) {
+                try {
+                    const todayPlan = (typeof getPlanForDate === 'function') ? getPlanForDate(new Date()) : null;
+                    if (todayPlan && Array.isArray(todayPlan.extraCardioSessions)) {
+                        scheduledCardio = todayPlan.extraCardioSessions.find(c => c && c.id === ex.id) || null;
+                    }
+                } catch (_) {}
+            }
+
+            const cardioDurMin = scheduledCardio && Number(scheduledCardio.durationMin) > 0
+                ? Number(scheduledCardio.durationMin)
+                : 20;
+            const targetSetsCount = isStandaloneCardio ? 1 : 3;
+            const targetRepsLabel = isStandaloneCardio
+                ? (scheduledCardio && scheduledCardio.targetReps ? scheduledCardio.targetReps : `${cardioDurMin} dk`)
+                : '8-12';
+
             const sessionObj = {
                 id: 'quick_' + Date.now(),
-                title: `${ex.name} Odaklı Seans`,
+                title: sessionTitle,
                 split: 'custom',
                 splitName: ex.name,
                 style: 'classic',
-                goal: 'hypertrophy',
-                duration: 30,
-                scheme: { sets: 3, reps: '8-12', rest: 60 },
+                goal: isStandaloneCardio ? 'conditioning' : 'hypertrophy',
+                duration: isStandaloneCardio ? cardioDurMin : 30,
+                scheme: { sets: targetSetsCount, reps: targetRepsLabel, rest: 60 },
                 warmups: [
                     { name: "Eklemsel CARs (Dinamik Isınma)", dur: "90 sn", cue: "Eklem kapsüllerini uyar ve ısıt." }
                 ],
                 exercises: [{
                     ...ex,
-                    targetSets: 3,
-                    targetReps: '8-12',
+                    targetSets: targetSetsCount,
+                    targetReps: targetRepsLabel,
+                    cardioLimits: scheduledCardio ? {
+                        durationMin: Number(scheduledCardio.durationMin || 0),
+                        distanceMeters: Number(scheduledCardio.distanceMeters || 0),
+                        targetHeartrate: Number(scheduledCardio.targetHeartrate || 0)
+                    } : null,
                     logs: []
                 }],
                 finisher: { name: "Balistik Bitiş", desc: "Tempolu taşıma veya swing." },
@@ -13400,10 +13450,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (isBw && (defaultWeight === '' || defaultWeight === null || isNaN(defaultWeight))) {
                 defaultWeight = 0;
             }
-            const defaultReps = isTime ? 30 : 10;
+            const defaultReps = isStandaloneCardio ? cardioDurMin : (isTime ? 30 : 10);
 
             activeWorkoutSetsData[ex.id] = [];
-            for (let s = 1; s <= 3; s++) {
+            for (let s = 1; s <= targetSetsCount; s++) {
                 activeWorkoutSetsData[ex.id].push({
                     setNo: s,
                     weight: defaultWeight,
@@ -13550,11 +13600,49 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             return def;
         }
 
+        function mergeExtraCardioSessions(listA, listB) {
+            const map = new Map();
+            const addAll = (arr) => {
+                if (!Array.isArray(arr)) return;
+                arr.forEach(item => {
+                    if (!item || !item.id) return;
+                    const prev = map.get(item.id);
+                    if (!prev || Number(item.addedAt || 0) >= Number(prev.addedAt || 0)) {
+                        map.set(item.id, Object.assign({}, item));
+                    }
+                });
+            };
+            addAll(listA);
+            addAll(listB);
+            return Array.from(map.values());
+        }
+
         function saveWeeklySchedule(schedule, targetUid) {
             const user = getActiveUser();
             const uid = targetUid || (user ? user.id : 'default');
             const key = `celik_kodu_weekly_schedule_${uid}`;
             try {
+                let prevSchedule = null;
+                try {
+                    const rawPrev = localStorage.getItem(key);
+                    if (rawPrev) prevSchedule = JSON.parse(rawPrev);
+                } catch (_) {}
+                if (schedule && typeof schedule === 'object') {
+                    [0, 1, 2, 3, 4, 5, 6].forEach(d => {
+                        const slot = schedule[d];
+                        if (!slot || typeof slot !== 'object') return;
+                        if (slot._explicitCardioUpdate) {
+                            delete slot._explicitCardioUpdate;
+                            return;
+                        }
+                        const prevSlot = prevSchedule && prevSchedule[d];
+                        const prevCardio = (prevSlot && Array.isArray(prevSlot.extraCardioSessions)) ? prevSlot.extraCardioSessions : [];
+                        const currCardio = Array.isArray(slot.extraCardioSessions) ? slot.extraCardioSessions : [];
+                        if (prevCardio.length > 0 || currCardio.length > 0) {
+                            slot.extraCardioSessions = mergeExtraCardioSessions(prevCardio, currCardio);
+                        }
+                    });
+                }
                 localStorage.setItem(key, JSON.stringify(schedule));
             } catch(e) {}
         }
@@ -13578,6 +13666,27 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const uid = targetUid || (user ? user.id : 'default');
             const key = `celik_kodu_next_weekly_schedule_${uid}`;
             try {
+                let prevSchedule = null;
+                try {
+                    const rawPrev = localStorage.getItem(key);
+                    if (rawPrev) prevSchedule = JSON.parse(rawPrev);
+                } catch (_) {}
+                if (schedule && typeof schedule === 'object') {
+                    [0, 1, 2, 3, 4, 5, 6].forEach(d => {
+                        const slot = schedule[d];
+                        if (!slot || typeof slot !== 'object') return;
+                        if (slot._explicitCardioUpdate) {
+                            delete slot._explicitCardioUpdate;
+                            return;
+                        }
+                        const prevSlot = prevSchedule && prevSchedule[d];
+                        const prevCardio = (prevSlot && Array.isArray(prevSlot.extraCardioSessions)) ? prevSlot.extraCardioSessions : [];
+                        const currCardio = Array.isArray(slot.extraCardioSessions) ? slot.extraCardioSessions : [];
+                        if (prevCardio.length > 0 || currCardio.length > 0) {
+                            slot.extraCardioSessions = mergeExtraCardioSessions(prevCardio, currCardio);
+                        }
+                    });
+                }
                 localStorage.setItem(key, JSON.stringify(schedule));
             } catch(e) {}
         }
@@ -14631,7 +14740,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     `;
                 }
 
-                if (hasCompletedSession) {
+                const hasCompletedFitnessOnDate = completedOnDate.some(cLog => {
+                    const exs = Array.isArray(cLog && cLog.exercises) ? cLog.exercises : [];
+                    if (exs.length === 0) return true;
+                    return exs.some(ex => !/^cond_/.test(String(ex.id || ex.exId || '')));
+                });
+
+                if (hasCompletedSession && (hasCompletedFitnessOnDate || currentPlan.rest)) {
                     assignedSection.innerHTML = completedCardsHtml + `
                         <div style="margin-top:14px; border:1.5px dashed #CBD5E1; border-radius:12px; padding:10px 12px; background:#F8FAFC;">
                             <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleSchedModalTemplateAccordion()">
@@ -14650,6 +14765,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                             <div id="schedModalTemplateAccordionBody" style="display:none; margin-top:12px; border-top:1px solid #E2E8F0; padding-top:12px;">
                                 ${templatePlanHtml}
                             </div>
+                        </div>
+                    `;
+                } else if (hasCompletedSession) {
+                    assignedSection.innerHTML = completedCardsHtml + `
+                        <div style="margin-top:12px;">
+                            ${templatePlanHtml}
                         </div>
                     `;
                 } else {
@@ -18534,7 +18655,30 @@ KURALLAR:
             if (!plan || plan.id === 'default') {
                 delete overrides[dateStr];
             } else {
-                overrides[dateStr] = plan;
+                const cloned = Object.assign({}, plan);
+                if (cloned._explicitCardioUpdate) {
+                    delete cloned._explicitCardioUpdate;
+                } else {
+                    const prevOv = overrides[dateStr];
+                    const prevOvCardio = (prevOv && Array.isArray(prevOv.extraCardioSessions)) ? prevOv.extraCardioSessions : [];
+                    let schedCardio = [];
+                    try {
+                        if (/^\d{4}-\d{2}-\d{2}$/.test(String(dateStr))) {
+                            const dIdx = new Date(dateStr + 'T00:00:00').getDay();
+                            const sched = getWeeklySchedule(targetUid);
+                            if (sched && sched[dIdx] && Array.isArray(sched[dIdx].extraCardioSessions)) {
+                                schedCardio = sched[dIdx].extraCardioSessions;
+                            }
+                        }
+                    } catch (_) {}
+                    const currCardio = Array.isArray(cloned.extraCardioSessions) ? cloned.extraCardioSessions : [];
+                    const merged = mergeExtraCardioSessions(mergeExtraCardioSessions(prevOvCardio, schedCardio), currCardio);
+                    if (merged.length > 0) {
+                        cloned.extraCardioSessions = merged;
+                    }
+                }
+                if (!cloned.updatedAt) cloned.updatedAt = Date.now();
+                overrides[dateStr] = cloned;
             }
             try {
                 localStorage.setItem(`celik_kodu_date_schedule_${targetUid}`, JSON.stringify(overrides));
@@ -18561,10 +18705,12 @@ KURALLAR:
             const overrides = getDateScheduleOverrides();
             if (overrides && overrides[dStr]) {
                 const ovPlan = overrides[dStr];
+                const mergedCardio = mergeExtraCardioSessions(basePlan.extraCardioSessions, ovPlan.extraCardioSessions);
                 const baseTs = Number(basePlan.updatedAt || (basePlan.customWorkout && (basePlan.customWorkout.updatedAt || basePlan.customWorkout.createdAt)) || 0);
                 const ovTs = Number(ovPlan.updatedAt || (ovPlan.customWorkout && (ovPlan.customWorkout.updatedAt || ovPlan.customWorkout.createdAt)) || 0);
                 // Ana haftalık planda daha yeni bir güncelleme (örn: alternatif hareket seçimi) varsa eski dateOverride kaydının onu ezmesine izin verme!
                 if (baseTs > 0 && baseTs > ovTs) {
+                    if (mergedCardio.length > 0) basePlan.extraCardioSessions = mergedCardio;
                     saveDateScheduleOverride(dStr, basePlan);
                     return basePlan;
                 }
@@ -18574,10 +18720,12 @@ KURALLAR:
                     const baseExCount = (baseDetails && Array.isArray(baseDetails.exercises)) ? baseDetails.exercises.length : 0;
                     const ovExCount = (ovDetails && Array.isArray(ovDetails.exercises)) ? ovDetails.exercises.length : 0;
                     if (baseExCount > ovExCount) {
+                        if (mergedCardio.length > 0) basePlan.extraCardioSessions = mergedCardio;
                         saveDateScheduleOverride(dStr, null);
                         return basePlan;
                     }
                 }
+                if (mergedCardio.length > 0) ovPlan.extraCardioSessions = mergedCardio;
                 return ovPlan;
             }
             return basePlan;
@@ -18842,24 +18990,14 @@ KURALLAR:
                     .trim() || 'Antrenman Seansı';
             };
 
-            let focusBodyHtml = '';
-            if (selDay.hasCompleted) {
-                const log = selDay.completedLogs[0];
-                const logVol = log.totalVolumeKg ? `${Math.round(log.totalVolumeKg).toLocaleString('tr-TR')} kg` : '';
-                const logDur = log.durationFormatted || (log.duration ? `${log.duration} Dk` : '');
-                focusBodyHtml = `
-                    <div class="stitch-sel-title-row">
-                        <h3 class="stitch-sel-workout-title">${escapeHTML(cleanWorkoutTitle(log.program || log.title || 'Antrenman'))}</h3>
-                        ${log.totalSetsCompleted ? `<span class="stitch-sel-count-badge">${log.totalSetsCompleted} Set</span>` : ''}
-                    </div>
-                    <div class="stitch-sel-meta-line" style="color:#15803D;">
-                        ${logDur ? `${logDur}` : ''}${logVol ? ` • ${logVol} Toplam Hacim` : ''}
-                    </div>
-                    <div class="stitch-sel-actions-row" style="margin-top:10px;">
-                        <button type="button" class="wk-btn-utility-compact" style="width:100%;" onclick="openScheduleDayModal(${selDay.dayIdx}, '${selDay.dayYMD}')">Seans Özeti & Detay</button>
-                    </div>
-                `;
-            } else if (!selDay.isRest) {
+            const isStandaloneCardioLog = (logItem) => {
+                const exs = Array.isArray(logItem && logItem.exercises) ? logItem.exercises : [];
+                if (exs.length === 0) return false;
+                return exs.every(ex => /^cond_/.test(String(ex.id || ex.exId || '')));
+            };
+            const hasCompletedFitnessSession = selDay.completedLogs.some(l => !isStandaloneCardioLog(l));
+
+            const buildPendingFitnessPlanHtml = () => {
                 const planDetails = (typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(selDay.plan) : null;
                 const exList = (planDetails && Array.isArray(planDetails.exercises)) ? planDetails.exercises : [];
                 const exCount = exList.length;
@@ -18884,7 +19022,7 @@ KURALLAR:
                     </div>
                 ` : '';
 
-                focusBodyHtml = `
+                return `
                     <div class="stitch-sel-title-row">
                         <h3 class="stitch-sel-workout-title">${escapeHTML(cleanWorkoutTitle(selDay.plan.title || 'Planlı Antrenman'))}</h3>
                         ${exCount ? `<span class="stitch-sel-count-badge">${exCount} Hareket</span>` : ''}
@@ -18906,6 +19044,40 @@ KURALLAR:
                         </div>
                     ` : ''}
                 `;
+            };
+
+            let focusBodyHtml = '';
+            if (selDay.hasCompleted) {
+                const completedRowsHtml = selDay.completedLogs.map(log => {
+                    const logVol = log.totalVolumeKg ? `${Math.round(log.totalVolumeKg).toLocaleString('tr-TR')} kg` : '';
+                    const logDur = log.durationFormatted || (log.duration ? `${log.duration} Dk` : '');
+                    return `
+                        <div style="margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid #E2E8F0;">
+                            <div class="stitch-sel-title-row">
+                                <h3 class="stitch-sel-workout-title">${escapeHTML(cleanWorkoutTitle(log.program || log.title || 'Antrenman'))}</h3>
+                                ${log.totalSetsCompleted ? `<span class="stitch-sel-count-badge">${log.totalSetsCompleted} Set</span>` : ''}
+                            </div>
+                            <div class="stitch-sel-meta-line" style="color:#15803D;">
+                                ✓ Tamamlandı${logDur ? ` • ${logDur}` : ''}${logVol ? ` • ${logVol} Toplam Hacim` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                focusBodyHtml = `
+                    ${completedRowsHtml}
+                    <div class="stitch-sel-actions-row" style="margin-top:6px;">
+                        <button type="button" class="wk-btn-utility-compact" style="width:100%;" onclick="openScheduleDayModal(${selDay.dayIdx}, '${selDay.dayYMD}')">Seans Özeti & Detay</button>
+                    </div>
+                `;
+                if (!selDay.isRest && !hasCompletedFitnessSession) {
+                    focusBodyHtml += `
+                        <div style="margin-top:12px; padding-top:12px; border-top:1.5px dashed #CBD5E1;">
+                            ${buildPendingFitnessPlanHtml()}
+                        </div>
+                    `;
+                }
+            } else if (!selDay.isRest) {
+                focusBodyHtml = buildPendingFitnessPlanHtml();
             } else {
                 focusBodyHtml = `
                     <div class="stitch-sel-rest-box">
@@ -18918,11 +19090,24 @@ KURALLAR:
             }
 
             if (Array.isArray(selDay.plan.extraCardioSessions) && selDay.plan.extraCardioSessions.length > 0) {
-                focusBodyHtml += selDay.plan.extraCardioSessions.map(c => `
-                    <div style="margin-top:8px; background:#F0F9FF; border:1px solid #BAE6FD; color:#0369A1; border-radius:10px; padding:7px 10px; font-size:11.5px; font-weight:800;">
-                        ${escapeHTML((c.name || 'Kardiyo').split('(')[0].trim())} • ${Number(c.durationMin || 20)} Dk
-                    </div>
-                `).join('');
+                focusBodyHtml += selDay.plan.extraCardioSessions.map(c => {
+                    const isCardioDone = selDay.completedLogs.some(l => Array.isArray(l.exercises) && l.exercises.some(ex => (ex.id || ex.exId) === c.id));
+                    return `
+                        <div style="margin-top:8px; background:#F0F9FF; border:1px solid #BAE6FD; color:#0369A1; border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+                            <div style="font-size:12px; font-weight:800; color:#0F172A;">
+                                🚣 ${escapeHTML((c.name || 'Kardiyo').split('(')[0].trim())} • <span style="color:#0369A1;">${Number(c.durationMin || 20)} Dk</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                ${isCardioDone ? `
+                                    <span style="font-size:10.5px; font-weight:800; color:#15803D; background:#DCFCE7; border:1px solid #86EFAC; padding:3px 8px; border-radius:6px;">✓ Tamamlandı</span>
+                                ` : `
+                                    <button type="button" style="background:#0369A1; color:#FFFFFF; border:none; border-radius:6px; padding:5px 10px; font-size:11px; font-weight:800; cursor:pointer;" onclick="startQuickWorkoutWithExercise('${c.id}')">▶️ Başlat</button>
+                                `}
+                                <button type="button" style="background:#FFFFFF; color:#B91C1C; border:1px solid #FECACA; border-radius:6px; padding:4px 8px; font-size:11px; font-weight:800; cursor:pointer;" onclick="removeExtraCardioSessionFromDay(${selDay.dayIdx}, '${c.id}', '${selDay.dayYMD}')" title="Kardiyo seansını kaldır">✕</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
             }
 
             const dateStr = `${selDay.fullDayName}, ${selDay.dayDate.getDate()} ${CAL_MONTH_NAMES_TR[selDay.dayDate.getMonth()]}`;
@@ -22775,16 +22960,31 @@ KURALLAR:
             if (plan && Array.isArray(plan.extraCardioSessions)) {
                 plan.extraCardioSessions = plan.extraCardioSessions.filter(c => c && c.id !== exId);
                 plan.updatedAt = Date.now();
+                plan._explicitCardioUpdate = true;
                 schedule[dayIdx] = plan;
                 saveWeeklySchedule(schedule);
             }
-            if (targetDateStr && typeof getDateScheduleOverrides === 'function' && typeof saveDateScheduleOverride === 'function') {
+            if (typeof getDateScheduleOverrides === 'function' && typeof saveDateScheduleOverride === 'function') {
                 const ov = getDateScheduleOverrides();
-                if (ov && ov[targetDateStr] && Array.isArray(ov[targetDateStr].extraCardioSessions)) {
-                    ov[targetDateStr].extraCardioSessions = ov[targetDateStr].extraCardioSessions.filter(c => c && c.id !== exId);
-                    ov[targetDateStr].updatedAt = Date.now();
-                    saveDateScheduleOverride(targetDateStr, ov[targetDateStr]);
+                const dateKeysToUpdate = new Set();
+                if (targetDateStr) dateKeysToUpdate.add(targetDateStr);
+                if (ov && typeof ov === 'object') {
+                    Object.keys(ov).forEach(k => {
+                        try {
+                            if (/^\d{4}-\d{2}-\d{2}$/.test(k) && new Date(k + 'T00:00:00').getDay() === Number(dayIdx)) {
+                                dateKeysToUpdate.add(k);
+                            }
+                        } catch (_) {}
+                    });
                 }
+                dateKeysToUpdate.forEach(dKey => {
+                    if (ov && ov[dKey] && Array.isArray(ov[dKey].extraCardioSessions)) {
+                        ov[dKey].extraCardioSessions = ov[dKey].extraCardioSessions.filter(c => c && c.id !== exId);
+                        ov[dKey].updatedAt = Date.now();
+                        ov[dKey]._explicitCardioUpdate = true;
+                        saveDateScheduleOverride(dKey, ov[dKey]);
+                    }
+                });
             }
             if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
             if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
@@ -22816,6 +23016,7 @@ KURALLAR:
                 const repLabel = summaryParts.length > 0 ? summaryParts.join(' • ') : 'Serbest';
                 if (!Array.isArray(plan.extraCardioSessions)) plan.extraCardioSessions = [];
                 const existingIdx = plan.extraCardioSessions.findIndex(c => c && c.id === ex.id);
+                const nowTs = Date.now();
                 const sessionObj = {
                     id: ex.id,
                     name: ex.name,
@@ -22825,16 +23026,35 @@ KURALLAR:
                     strictGate: true,
                     targetSets: 1,
                     targetReps: repLabel,
-                    addedAt: Date.now()
+                    addedAt: nowTs
                 };
                 if (existingIdx >= 0) {
                     plan.extraCardioSessions[existingIdx] = sessionObj;
                 } else {
                     plan.extraCardioSessions.push(sessionObj);
                 }
-                plan.updatedAt = Date.now();
+                plan.updatedAt = nowTs;
+                plan._explicitCardioUpdate = true;
                 schedule[dayIdx] = plan;
                 saveWeeklySchedule(schedule);
+
+                if (typeof getWeekDaysMapForDateStr === 'function' && typeof getDateScheduleOverrides === 'function' && typeof saveDateScheduleOverride === 'function') {
+                    try {
+                        const { map } = getWeekDaysMapForDateStr(null, 0);
+                        const dYMD = map && map[dayIdx] ? map[dayIdx].dateYMD : null;
+                        const ov = getDateScheduleOverrides();
+                        if (dYMD && ov && ov[dYMD]) {
+                            const ovPlan = ov[dYMD];
+                            if (!Array.isArray(ovPlan.extraCardioSessions)) ovPlan.extraCardioSessions = [];
+                            const ovIdx = ovPlan.extraCardioSessions.findIndex(c => c && c.id === ex.id);
+                            if (ovIdx >= 0) ovPlan.extraCardioSessions[ovIdx] = sessionObj;
+                            else ovPlan.extraCardioSessions.push(sessionObj);
+                            ovPlan.updatedAt = nowTs;
+                            ovPlan._explicitCardioUpdate = true;
+                            saveDateScheduleOverride(dYMD, ovPlan);
+                        }
+                    } catch (_) {}
+                }
                 return true;
             }
             const ex = EXERCISES_DB.find(e => e.id === exId);
@@ -22842,6 +23062,7 @@ KURALLAR:
 
             const schedule = getWeeklySchedule();
             const plan = schedule[dayIdx] || { id: 'rest', title: 'Dinlenme', rest: true };
+            const preservedCardio = Array.isArray(plan.extraCardioSessions) ? plan.extraCardioSessions : [];
 
             const details = (typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(plan) : null;
             let existingExercises = (details && Array.isArray(details.exercises))
@@ -22866,6 +23087,7 @@ KURALLAR:
                 ? TARGET_REGIONS[ex.primaryMuscles[0]].name
                 : '';
             const title = plan.rest ? `${dayName} ${muscleName ? muscleName + ' ' : ''}Takviye Seansı` : (plan.title || `${dayName} Programı`);
+            const nowTs = Date.now();
 
             const customWorkout = {
                 id: progId,
@@ -22884,7 +23106,7 @@ KURALLAR:
                     return Object.assign({}, dbEx || {}, e);
                 }),
                 finisher: { name: "Balistik Bitiş", desc: "Tempolu taşıma veya swing." },
-                updatedAt: Date.now(),
+                updatedAt: nowTs,
                 isCustom: true
             };
 
@@ -22894,7 +23116,9 @@ KURALLAR:
                 type: 'custom_saved',
                 desc: `${existingExercises.length} Hareket • ${customWorkout.duration} Dk`,
                 rest: false,
-                customWorkout: customWorkout
+                customWorkout: customWorkout,
+                extraCardioSessions: preservedCardio,
+                updatedAt: nowTs
             };
 
             saveWeeklySchedule(schedule);
@@ -27225,7 +27449,7 @@ KURALLAR:
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=274')
+                navigator.serviceWorker.register('./sw.js?v=275')
                     .then(reg => {
                         console.log('SW scope:', reg.scope);
                         if (reg.update) reg.update();
