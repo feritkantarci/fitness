@@ -1620,8 +1620,92 @@
         // GLOBAL APP STATE
         let selectedSplits = ['full_body'];
         let selectedSplit = 'full_body';
-        let selectedEquipments = ['dumbbell', 'kettlebell', 'bodyweight'];
+        let selectedEquipments = ['dumbbell', 'bench', 'kettlebell', 'bodyweight'];
         let currentGeneratedWorkout = null;
+
+        const ALL_EQUIPMENT_KEYS = ['dumbbell', 'bench', 'kettlebell', 'barbell', 'pullup_bar', 'machine', 'bodyweight'];
+        const EQUIPMENT_DISPLAY_NAMES = {
+            dumbbell: 'Dambıl',
+            bench: 'Sehpa',
+            kettlebell: 'Kettlebell',
+            barbell: 'Bar & Plaka',
+            pullup_bar: 'Barfiks / Dips Barı',
+            machine: 'Makine / Kablo',
+            bodyweight: 'Vücut Ağırlığı'
+        };
+
+        const BENCH_REQUIRED_EX_IDS = new Set([
+            'db_bench_press',
+            'db_incline_press',
+            'db_overhead_press',
+            'db_skullcrusher',
+            'db_bulgarian_squat',
+            'db_saw_row',
+            'db_chest_supported_row',
+            'db_pullover',
+            'db_incline_curl',
+            'step_up_press',
+            'db_lying_leg_curl',
+            'bb_bench_press',
+            'bb_incline_bench',
+            'bb_hip_thrust',
+            'bb_close_grip_bench',
+            'bw_decline_pushup'
+        ]);
+
+        const PULLUP_BAR_REQUIRED_EX_IDS = new Set([
+            'bw_pullup',
+            'bw_chinup',
+            'bw_inverted_row',
+            'bw_hanging_knee_raise',
+            'bw_dips',
+            'bw_hyperextension'
+        ]);
+
+        const PLATE_OVERRIDE_EX_IDS = new Set([
+            'kneeling_plate_front_raise',
+            'half_kneeling_plate_chop',
+            'bear_crawl_pull_through',
+            'lunge_with_twist'
+        ]);
+
+        function getExerciseRequiredEquipments(ex) {
+            if (!ex) return [];
+            const id = String(ex.id || '');
+            const reqs = [];
+            if (PLATE_OVERRIDE_EX_IDS.has(id)) {
+                reqs.push('barbell');
+            } else if (ex.equipment) {
+                reqs.push(ex.equipment);
+            }
+            if (BENCH_REQUIRED_EX_IDS.has(id) && !reqs.includes('bench')) {
+                reqs.push('bench');
+            }
+            if (PULLUP_BAR_REQUIRED_EX_IDS.has(id) && !reqs.includes('pullup_bar')) {
+                reqs.push('pullup_bar');
+            }
+            return reqs;
+        }
+        window.getExerciseRequiredEquipments = getExerciseRequiredEquipments;
+
+        function getExerciseEquipmentLabels(ex) {
+            return getExerciseRequiredEquipments(ex).map(k => EQUIPMENT_DISPLAY_NAMES[k] || k);
+        }
+        window.getExerciseEquipmentLabels = getExerciseEquipmentLabels;
+
+        function formatExerciseEquipmentText(ex) {
+            return getExerciseEquipmentLabels(ex).join(' + ');
+        }
+        window.formatExerciseEquipmentText = formatExerciseEquipmentText;
+
+        function isExerciseEquipmentAvailable(ex, allowedList = selectedEquipments) {
+            if (!ex) return false;
+            const reqs = getExerciseRequiredEquipments(ex);
+            if (reqs.length === 0) return true;
+            const list = Array.isArray(allowedList) ? allowedList : selectedEquipments;
+            return reqs.every(r => list.includes(r));
+        }
+        window.isExerciseEquipmentAvailable = isExerciseEquipmentAvailable;
         let activeWorkoutSession = null;
         let activeWorkoutStartTime = null;
         let activeWorkoutIsPaused = false;
@@ -1809,14 +1893,16 @@
             if (!el) return;
             const names = {
                 dumbbell: 'Dambıl',
+                bench: 'Sehpa',
                 kettlebell: 'Kettlebell',
-                barbell: 'Barbell',
+                barbell: 'Bar & Plaka',
+                pullup_bar: 'Barfiks/Dips',
                 machine: 'Makine',
                 bodyweight: 'Vücut Ağ.'
             };
             const labels = selectedEquipments.map(e => names[e] || e);
-            if (labels.length === 5) {
-                el.innerText = '🏢 Tüm Ekipmanlar (5 Seçili)';
+            if (labels.length === ALL_EQUIPMENT_KEYS.length) {
+                el.innerText = '🏢 Tüm Ekipmanlar (' + labels.length + ' Seçili)';
             } else if (labels.length === 0) {
                 el.innerText = '⚠️ Seçilmedi';
             } else if (labels.length === 1) {
@@ -1978,20 +2064,26 @@
             }
             renderEquipChips();
             updateSelectedEquipLabel();
+            if (typeof renderStudioOwnedEquipChips === 'function') renderStudioOwnedEquipChips();
+            if (typeof renderCustomRoutine === 'function') renderCustomRoutine();
+            if (typeof renderStudioExerciseCatalog === 'function') renderStudioExerciseCatalog();
         }
 
         function setQuickEquip(type) {
             if (type === 'all') {
-                selectedEquipments = ['dumbbell', 'kettlebell', 'barbell', 'machine', 'bodyweight'];
+                selectedEquipments = [...ALL_EQUIPMENT_KEYS];
             } else if (type === 'db_only') {
                 selectedEquipments = ['dumbbell'];
             } else if (type === 'db_kb_bw') {
-                selectedEquipments = ['dumbbell', 'kettlebell', 'bodyweight'];
+                selectedEquipments = ['dumbbell', 'bench', 'kettlebell', 'bodyweight'];
             } else if (type === 'bw_only') {
                 selectedEquipments = ['bodyweight'];
             }
             renderEquipChips();
             updateSelectedEquipLabel();
+            if (typeof renderStudioOwnedEquipChips === 'function') renderStudioOwnedEquipChips();
+            if (typeof renderCustomRoutine === 'function') renderCustomRoutine();
+            if (typeof renderStudioExerciseCatalog === 'function') renderStudioExerciseCatalog();
         }
 
         function renderEquipChips() {
@@ -2350,7 +2442,7 @@
             return EXERCISES_DB.filter(ex => {
                 if (isExerciseExcludedByUser(ex.id)) return false;
                 if (excludeIds.includes(ex.id)) return false;
-                if (!selectedEquipments.includes(ex.equipment)) return false;
+                if (!isExerciseEquipmentAvailable(ex)) return false;
                 if (category === 'any') return true;
                 const effCat = getEffectiveExerciseCategory(ex);
                 if (Array.isArray(category)) return category.includes(effCat);
@@ -5624,7 +5716,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
 
             function isCandidateBiochemicallyCompatible(ex, allowLowerUpperComplexInSlot = false) {
                 if (!ex || isExerciseExcludedByUser(ex.id)) return false;
-                if (!selectedEquipments.includes(ex.equipment)) return false;
+                if (!isExerciseEquipmentAvailable(ex)) return false;
                 if (usedIds.includes(ex.id)) return false;
 
                 // Kullanıcı Özel Notu / Kısıtlama Filtresi (Kullanıcı yapamıyorum/istemiyorum dediyse ASLA seçme)
@@ -5808,7 +5900,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                         // İzole kas modunda ekipman havuzu dar olsa bile ikiz hareket ailesini (Örn: Barbell Row + Pendlay Row) ve çift eksenel omurga yükünü ASLA aynı seansa alma!
                         subKeyMatches = EXERCISES_DB.filter(ex =>
                             !isExerciseExcludedByUser(ex.id) &&
-                            selectedEquipments.includes(ex.equipment) &&
+                            isExerciseEquipmentAvailable(ex) &&
                             !usedIds.includes(ex.id) &&
                             !usedFamilies.has(getExerciseMovementFamily(ex)) &&
                             (matchesPrimaryFor(preferredSubKeys)(ex) || matchesAnyCoveredFor(preferredSubKeys)(ex))
@@ -7268,7 +7360,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 bodyweight: 'Vücut Ağırlığı'
             };
             const anatomy = getExerciseAnatomy(ex);
-            const equipText = equipLabels[ex.equipment] || ex.equipment || '';
+            const equipText = (typeof formatExerciseEquipmentText === 'function' ? formatExerciseEquipmentText(ex) : '') || equipLabels[ex.equipment] || ex.equipment || '';
             const primaryText = anatomy.primary || ex.muscle || '';
             const secondaryText = anatomy.secondary || '';
 
@@ -9798,7 +9890,7 @@ KESİN KURALLAR:
 
                 const fallback = EXERCISES_DB.filter(e =>
                     !isExerciseExcludedByUser(e.id) &&
-                    selectedEquipments.includes(e.equipment) &&
+                    isExerciseEquipmentAvailable(e) &&
                     !usedIds.includes(e.id) &&
                     !otherFamilies.has(getExerciseMovementFamily(e)) &&
                     (Array.isArray(relatedCat) ? relatedCat.includes(e.category) : e.category === relatedCat)
@@ -10936,6 +11028,15 @@ KESİN KURALLAR:
             if (sec) sec.scrollIntoView({ behavior: 'smooth' });
         }
 
+        function openManualBuilderInWorkout() {
+            switchTab('activeWorkoutTab');
+            toggleStudioAccordion(true);
+            setTimeout(() => {
+                const sec = document.getElementById('studioSectionInWorkout');
+                if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 80);
+        }
+
         function renderActiveWorkout() {
             const container = document.getElementById('activeWorkoutContainer');
             const liveTrackerBar = document.querySelector('.live-tracker-bar');
@@ -10948,7 +11049,12 @@ KESİN KURALLAR:
                 if (liveTrackerBar) liveTrackerBar.style.display = 'none';
                 if (hud) hud.style.display = 'none';
                 if (dock) dock.style.display = 'none';
-                if (studioSec) studioSec.style.display = 'none';
+                if (studioSec) {
+                    studioSec.style.display = 'block';
+                    if (typeof renderCustomRoutineEquipmentSummary === 'function') {
+                        renderCustomRoutineEquipmentSummary();
+                    }
+                }
                 if (calSec) calSec.style.display = 'block';
                 if (container) {
                     try {
@@ -13104,7 +13210,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 // Arama kutusu doluyken (q varsa) gizlenmiş egzersiz de aramayla eşleşiyorsa kullanıcıya gösterilsin (Gizli etiketiyle)
                 if (!q && (showExcluded ? !isExcluded : isExcluded)) return false;
 
-                if (equip !== 'all' && ex.equipment !== equip) return false;
+                if (equip !== 'all' && !(typeof getExerciseRequiredEquipments === 'function' ? getExerciseRequiredEquipments(ex).includes(equip) : ex.equipment === equip)) return false;
 
                 if (muscle !== 'all') {
                     const p = ex.primaryMuscles || [];
@@ -13158,9 +13264,11 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 const isExcluded = excludedIds.includes(ex.id);
                 const media = getExerciseVisualMedia(ex.id, ex.category);
                 const thumbImg = media.still || '';
-                const eqLabel = (typeof EQUIP_LABELS !== 'undefined' && EQUIP_LABELS[ex.equipment])
-                    ? EQUIP_LABELS[ex.equipment].label
-                    : (ex.equipment || 'Serbest');
+                const eqLabel = (typeof formatExerciseEquipmentText === 'function' && formatExerciseEquipmentText(ex))
+                    ? formatExerciseEquipmentText(ex)
+                    : ((typeof EQUIP_LABELS !== 'undefined' && EQUIP_LABELS[ex.equipment])
+                        ? EQUIP_LABELS[ex.equipment].label
+                        : (ex.equipment || 'Serbest'));
 
                 html += `
                     <div style="padding:8px 10px; background:${isExcluded ? '#FEF2F2' : '#F8FAFC'}; border:1px solid ${isExcluded ? '#FECACA' : '#E2E8F0'}; border-radius:10px;">
@@ -15927,6 +16035,20 @@ KURALLAR:
                     classic: 'Klasik'
                 };
                 const styleLabel = previewStyleLabels[workout.style] || 'Klasik';
+                const uniqueEquipLabels = [];
+                exercises.forEach(ex => {
+                    const dbEx = EXERCISES_DB.find(e => e.id === ex.id) || ex;
+                    const labels = typeof getExerciseEquipmentLabels === 'function' ? getExerciseEquipmentLabels(dbEx) : [];
+                    labels.forEach(lbl => {
+                        if (!uniqueEquipLabels.includes(lbl)) uniqueEquipLabels.push(lbl);
+                    });
+                });
+                const equipRowHtml = uniqueEquipLabels.length > 0 ? `
+                    <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap; margin-top:6px; padding:6px 10px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px;">
+                        <span style="font-size:10px; font-weight:800; color:#475569; text-transform:uppercase;">Kullanılan Aletler:</span>
+                        ${uniqueEquipLabels.map(lbl => `<span style="font-size:10.5px; font-weight:800; padding:2px 7px; border-radius:999px; background:#0F172A; color:#FFFFFF;">${escapeHTML(lbl)}</span>`).join('')}
+                    </div>
+                ` : '';
                 metaEl.innerHTML = `
                     <div style="display:flex; gap:6px; flex-wrap:wrap;">
                         <span class="meta-pill" style="font-size:11px; padding:4px 8px;">⏱️ ${duration} Dakika</span>
@@ -15934,6 +16056,7 @@ KURALLAR:
                         <span class="meta-pill" style="font-size:11px; padding:4px 8px;">⏳ ${rest}s Dinlenme</span>
                         <span class="meta-pill" style="font-size:11px; padding:4px 8px;">🏋️ ${escapeHTML(styleLabel)}</span>
                     </div>
+                    ${equipRowHtml}
                 `;
             }
 
@@ -15943,30 +16066,25 @@ KURALLAR:
                     const thumb = guide.form || ex.diagram || '';
                     const sets = ex.targetSets || (workout.scheme ? workout.scheme.sets : 3);
                     const reps = ex.targetReps || (workout.scheme ? workout.scheme.reps : '8-12');
-                    const pNames = (ex.primaryMuscles || []).map(m => (TARGET_REGIONS[m] ? TARGET_REGIONS[m].name : m)).join(', ') || ex.muscle || '';
 
                     return `
                         <div style="display:flex; justify-content:space-between; align-items:center; background:#FFFFFF; border:1.5px solid #E2E8F0; border-radius:10px; padding:8px 10px;">
                             <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0;">
                                 <span style="font-size:12px; font-weight:900; color:#B45309; width:18px;">${idx + 1}.</span>
-                                <div class="ex-thumb-wrap" style="width:42px; height:42px; border-radius:6px; flex-shrink:0;">
+                                <div class="ex-thumb-wrap" style="width:38px; height:38px; border-radius:6px; flex-shrink:0;">
                                     ${thumb ? `<img src="${thumb}" class="ex-thumb-img" alt="${escapeHTML(ex.name)}">` : '🏋️'}
                                 </div>
                                 <div style="min-width:0; flex:1;">
                                     <div style="font-size:13px; font-weight:800; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
                                         ${escapeHTML(ex.name)}
                                     </div>
-                                    <div style="font-size:11px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;">
-                                        <span style="color:var(--cyan); font-weight:600;">${escapeHTML(pNames)}</span>
-                                        ${ex.equipment ? ` • ${escapeHTML(ex.equipment)}` : ''}
-                                    </div>
                                 </div>
                             </div>
                             <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
-                                <span style="background:rgba(245,158,11,0.15); color:var(--gold); border:1px solid rgba(245,158,11,0.3); font-size:11px; font-weight:700; border-radius:4px; padding:3px 7px;">
+                                <span style="background:rgba(245,158,11,0.15); color:#B45309; border:1px solid rgba(245,158,11,0.3); font-size:11px; font-weight:800; border-radius:4px; padding:3px 7px;">
                                     ${sets} x ${reps}
                                 </span>
-                                <button type="button" class="btn btn-outline" style="padding:4px 8px; font-size:11px;" onclick="openExerciseDetailModal('${ex.id}')" title="İncele">👁️</button>
+                                <button type="button" class="wk-ex-i-btn" onclick="openExerciseQuickInfoModal('${ex.id}')" title="Bilgi">i</button>
                             </div>
                         </div>
                     `;
@@ -27447,25 +27565,29 @@ KURALLAR:
             window.location.href = window.location.origin + window.location.pathname + '?v=' + Date.now();
         }
 
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=275')
-                    .then(reg => {
-                        console.log('SW scope:', reg.scope);
-                        if (reg.update) reg.update();
-                    })
-                    .catch(err => console.log('SW err:', err));
-            });
+        try {
+            if ('serviceWorker' in navigator && navigator.serviceWorker) {
+                window.addEventListener('load', () => {
+                    try {
+                        navigator.serviceWorker.register('./sw.js?v=276')
+                            .then(reg => {
+                                console.log('SW scope:', reg.scope);
+                                if (reg.update) reg.update();
+                            })
+                            .catch(err => console.log('SW err:', err));
+                    } catch (e) {}
+                });
 
-            // Yeni SW devraldığında sayfayı yenileyerek güncel içeriği yükle
-            let refreshing = false;
-            navigator.serviceWorker.addEventListener('controllerchange', () => {
-                if (!refreshing) {
-                    refreshing = true;
-                    window.location.reload();
-                }
-            });
-        }
+                // Yeni SW devraldığında sayfayı yenileyerek güncel içeriği yükle
+                let refreshing = false;
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (!refreshing) {
+                        refreshing = true;
+                        window.location.reload();
+                    }
+                });
+            }
+        } catch (e) {}
 
         // INITIALIZE APPLICATION
         window.addEventListener('DOMContentLoaded', () => {
@@ -27501,7 +27623,7 @@ KURALLAR:
 
         // ==================== WORKOUT STUDIO & MUSCLE RADAR ENGINE ====================
 
-        const STUDIO_REGION_MAP = {
+        var STUDIO_REGION_MAP = {
             chest: { name: "Göğüs", icon: "🛡️" },
             back: { name: "Sırt", icon: "🏹" },
             shoulders: { name: "Omuz", icon: "⚔️" },
@@ -27514,191 +27636,176 @@ KURALLAR:
             calves: { name: "Kalf", icon: "🦶" }
         };
 
-        let selectedTargetMuscles = ['chest', 'triceps']; // Default sample split
+        var STUDIO_FILTER_TABS = [
+            { id: 'all', label: 'Tümü', muscles: [] },
+            { id: 'chest', label: 'Göğüs', muscles: ['chest'] },
+            { id: 'back', label: 'Sırt', muscles: ['back'] },
+            { id: 'shoulders', label: 'Omuz', muscles: ['shoulders'] },
+            { id: 'legs', label: 'Bacak', muscles: ['quads', 'hamstrings', 'glutes', 'calves'] },
+            { id: 'arms', label: 'Kol', muscles: ['biceps', 'triceps'] },
+            { id: 'core', label: 'Karın', muscles: ['core'] }
+        ];
+
+        var selectedTargetMuscles = [];
+        var activeStudioRegion = 'all';
 
         function initStudioTab() {
+            renderStudioOwnedEquipChips();
             renderStudioRegionChips();
             renderRegionStatus();
             renderCustomRoutine();
             renderStudioExerciseCatalog();
         }
 
+        function renderStudioOwnedEquipChips() {
+            const wrap = document.getElementById('studioOwnedEquipChips');
+            if (!wrap) return;
+
+            const eqOrder = ['dumbbell', 'bench', 'kettlebell', 'barbell', 'pullup_bar', 'machine', 'bodyweight'];
+            wrap.innerHTML = eqOrder.map(eqKey => {
+                const isSelected = selectedEquipments.includes(eqKey);
+                const label = (typeof EQUIPMENT_DISPLAY_NAMES !== 'undefined' && EQUIPMENT_DISPLAY_NAMES[eqKey]) || eqKey;
+                return `
+                    <button type="button"
+                            onclick="toggleEquip('${eqKey}')"
+                            style="border-radius:8px; padding:6px 10px; font-size:11.5px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:5px; transition:all 0.12s; ${isSelected ? 'background:#2563EB; border:1.5px solid #3B82F6; color:#FFFFFF;' : 'background:#F8FAFC; border:1.5px solid #CBD5E1; color:#64748B; text-decoration:line-through;'}">
+                        <span>${isSelected ? '✓' : '✕'}</span>
+                        <span>${escapeHTML(label)}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function renderCustomRoutineEquipmentSummary() {
+            const bar = document.getElementById('customRoutineEquipSummaryBar');
+            if (!bar) return;
+
+            const items = (customRoutineState && Array.isArray(customRoutineState.exercises)) ? customRoutineState.exercises : [];
+            if (items.length === 0) {
+                bar.innerHTML = `
+                    <span style="font-size:10.5px; font-weight:900; color:#475569; text-transform:uppercase; letter-spacing:0.4px;">KULLANILAN ALETLER:</span>
+                    <span style="font-size:11.5px; font-weight:700; color:#64748B;">Hareket eklendikçe otomatik listelenir</span>
+                `;
+                return;
+            }
+
+            const reqKeys = [];
+            let totalSets = 0;
+            items.forEach(item => {
+                totalSets += (parseInt(item.sets, 10) || 3);
+                const ex = EXERCISES_DB.find(e => e.id === item.exId);
+                if (!ex) return;
+                const exReqs = typeof getExerciseRequiredEquipments === 'function' ? getExerciseRequiredEquipments(ex) : [ex.equipment || 'dumbbell'];
+                exReqs.forEach(k => {
+                    if (!reqKeys.includes(k)) reqKeys.push(k);
+                });
+            });
+
+            const restSec = parseInt(document.getElementById('customWorkoutRestSelect')?.value, 10) || customRoutineState.rest || 60;
+            const estMinutes = Math.max(5, Math.round((totalSets * (40 + restSec)) / 60));
+
+            const badgesHtml = reqKeys.map(k => {
+                const label = (typeof EQUIPMENT_DISPLAY_NAMES !== 'undefined' && EQUIPMENT_DISPLAY_NAMES[k]) || k;
+                const isOwned = selectedEquipments.includes(k);
+                if (isOwned) {
+                    return `<span style="display:inline-flex; align-items:center; gap:4px; background:#0F172A; border:1px solid #334155; color:#FFFFFF; font-size:11px; font-weight:800; padding:3px 9px; border-radius:999px;">${escapeHTML(label)}</span>`;
+                }
+                return `<span style="display:inline-flex; align-items:center; gap:4px; background:#FEF2F2; border:1px solid #EF4444; color:#B91C1C; font-size:11px; font-weight:800; padding:3px 9px; border-radius:999px;" title="Elimdeki aletlerde seçili değil">${escapeHTML(label)} (Eksik)</span>`;
+            }).join('');
+
+            bar.innerHTML = `
+                <span style="font-size:10.5px; font-weight:900; color:#0F172A; text-transform:uppercase; letter-spacing:0.4px;">KULLANILAN ALETLER:</span>
+                <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap;">${badgesHtml}</div>
+                <span style="margin-left:auto; font-size:11px; font-weight:800; color:#475569;">${items.length} Hareket • ${totalSets} Set • ~${estMinutes} Dk</span>
+            `;
+        }
+
         function renderStudioRegionChips() {
             const container = document.getElementById('studioRegionChips');
             if (!container) return;
 
-            let html = '';
-            Object.keys(STUDIO_REGION_MAP).forEach(key => {
-                const reg = STUDIO_REGION_MAP[key];
-                const isSelected = selectedTargetMuscles.includes(key);
-
-                html += `
-                    <button class="btn ${isSelected ? 'btn-gold' : 'btn-outline'}" 
-                            style="font-size:11px; padding:5px 10px; border-radius:6px; font-weight:700;" 
-                            onclick="toggleTargetMuscle('${key}')">
-                        ${reg.icon} ${reg.name}
+            container.innerHTML = STUDIO_FILTER_TABS.map(tab => {
+                const isActive = activeStudioRegion === tab.id;
+                return `
+                    <button type="button"
+                            onclick="setStudioRegionTab('${tab.id}')"
+                            style="border-radius:7px; padding:5px 10px; font-size:11.5px; font-weight:800; cursor:pointer; transition:all 0.12s; ${isActive ? 'background:#0F172A; color:#FFFFFF; border:1.5px solid #0F172A;' : 'background:#FFFFFF; color:#334155; border:1.5px solid #CBD5E1;'}">
+                        ${escapeHTML(tab.label)}
                     </button>
                 `;
-            });
+            }).join('');
+        }
 
-            container.innerHTML = html;
+        function setStudioRegionTab(tabId) {
+            activeStudioRegion = tabId || 'all';
+            const found = STUDIO_FILTER_TABS.find(t => t.id === activeStudioRegion);
+            selectedTargetMuscles = found ? [...found.muscles] : [];
+            renderStudioRegionChips();
+            renderStudioExerciseCatalog();
         }
 
         function toggleTargetMuscle(key) {
-            const idx = selectedTargetMuscles.indexOf(key);
-            if (idx > -1) {
-                selectedTargetMuscles.splice(idx, 1);
-            } else {
-                selectedTargetMuscles.push(key);
-            }
-            renderStudioRegionChips();
-            renderRegionStatus();
-            renderStudioExerciseCatalog();
+            setStudioRegionTab(key);
         }
 
         function selectPresetRegions(preset) {
-            if (preset === 'all') {
-                selectedTargetMuscles = Object.keys(STUDIO_REGION_MAP);
-            } else if (preset === 'clear') {
-                selectedTargetMuscles = [];
-            }
-            renderStudioRegionChips();
-            renderRegionStatus();
-            renderStudioExerciseCatalog();
+            setStudioRegionTab(preset === 'all' ? 'all' : 'all');
         }
 
         function renderRegionStatus() {
             const grid = document.getElementById('studioRegionStatusGrid');
-            const summaryBadge = document.getElementById('studioRegionSummaryBadge');
             if (!grid) return;
+        }
 
-            if (selectedTargetMuscles.length === 0) {
-                grid.innerHTML = `<div style="grid-column:1/-1; font-size:11px; color:var(--text-secondary); text-align:center; padding:10px;">Henüz bölge seçilmedi. Yukarıdan çalışmak istediğiniz bölgelere tıklayın.</div>`;
-                if (summaryBadge) summaryBadge.innerHTML = '';
-                return;
-            }
-
-            // Tally exercises and sets for selected target muscles & collect covered subKeys
-            const regionStats = {};
-            const coveredSubKeys = new Set();
-            selectedTargetMuscles.forEach(m => {
-                regionStats[m] = { count: 0, sets: 0 };
-            });
-
-            customRoutineState.exercises.forEach(item => {
+        function removeIncompatibleFromCustomRoutine() {
+            if (!customRoutineState || !Array.isArray(customRoutineState.exercises)) return;
+            customRoutineState.exercises = customRoutineState.exercises.filter(item => {
                 const ex = EXERCISES_DB.find(e => e.id === item.exId);
-                if (ex) {
-                    const anatomy = getExerciseAnatomy(ex);
-                    if (anatomy.subKey) {
-                        coveredSubKeys.add(anatomy.subKey);
-                    }
-                    if (Array.isArray(anatomy.allSubKeys)) {
-                        anatomy.allSubKeys.forEach(sk => coveredSubKeys.add(sk));
-                    }
-                    const pList = ex.primaryMuscles || [];
-                    const sList = ex.secondaryMuscles || [];
-                    const sets = parseInt(item.sets) || 3;
-                    
-                    selectedTargetMuscles.forEach(m => {
-                        if (pList.includes(m) || sList.includes(m)) {
-                            regionStats[m].count += 1;
-                            regionStats[m].sets += sets;
-                        }
-                    });
-                }
+                return ex ? isExerciseEquipmentAvailable(ex) : false;
             });
-
-            let readyCount = 0;
-            let missingList = [];
-            let missingSubList = [];
-            let html = '';
-
-            selectedTargetMuscles.forEach(key => {
-                const reg = STUDIO_REGION_MAP[key] || { name: key, icon: '🎯' };
-                const stat = regionStats[key];
-                const isReady = stat.count > 0;
-                const subDefs = STUDIO_SUB_REGIONS[key] || [];
-
-                let subPillsHtml = '';
-                let hasUncoveredSub = false;
-
-                if (subDefs.length > 0) {
-                    subPillsHtml = `
-                        <div style="display:flex; flex-wrap:wrap; gap:3px; margin-top:4px;">
-                            ${subDefs.map(sub => {
-                                const isCovered = coveredSubKeys.has(sub.key);
-                                if (!isCovered && isReady) {
-                                    hasUncoveredSub = true;
-                                    missingSubList.push(`${reg.name}: ${sub.name}`);
-                                }
-                                return `
-                                    <span style="font-size:8.5px; font-weight:800; padding:1px 5px; border-radius:4px; ${isCovered ? 'background:rgba(16,185,129,0.25); color:#10b981; border:1px solid rgba(16,185,129,0.45);' : 'background:rgba(239,68,68,0.18); color:#DC2626; border:1px solid rgba(239,68,68,0.35);'}">
-                                        ${sub.name} ${isCovered ? '✅' : '⚠️'}
-                                    </span>
-                                `;
-                            }).join('')}
-                        </div>
-                    `;
-                }
-
-                if (isReady) {
-                    readyCount++;
-                    const cardBorder = hasUncoveredSub ? 'rgba(245, 158, 11, 0.6)' : '#10b981';
-                    const cardBg = hasUncoveredSub ? 'rgba(245, 158, 11, 0.08)' : 'rgba(16, 185, 129, 0.1)';
-                    html += `
-                        <div style="background:${cardBg}; border:1px solid ${cardBorder}; border-radius:6px; padding:6px 8px; display:flex; flex-direction:column; justify-content:space-between;">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <div style="font-size:11px; font-weight:800; color:#0F172A;">${reg.icon} ${reg.name}</div>
-                                <div style="font-size:9.5px; color:${hasUncoveredSub ? 'var(--gold)' : '#10b981'}; font-weight:700;">
-                                    ${hasUncoveredSub ? '⚠️ Kısmi' : '✅ Tam'} (${stat.count} Hrk • ${stat.sets} Set)
-                                </div>
-                            </div>
-                            ${subPillsHtml}
-                        </div>
-                    `;
-                } else {
-                    missingList.push(reg.name);
-                    html += `
-                        <div style="background:rgba(245, 158, 11, 0.06); border:1px dashed var(--gold); border-radius:6px; padding:6px 8px; display:flex; flex-direction:column; justify-content:space-between;">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <div style="font-size:11px; font-weight:800; color:#0F172A;">${reg.icon} ${reg.name}</div>
-                                <div style="font-size:9.5px; color:var(--gold); font-weight:700;">⏳ Kaldı (0 Hareket)</div>
-                            </div>
-                            ${subPillsHtml}
-                        </div>
-                    `;
-                }
-            });
-
-            grid.innerHTML = html;
-
-            if (summaryBadge) {
-                if (readyCount === selectedTargetMuscles.length && missingSubList.length === 0) {
-                    summaryBadge.innerHTML = `<span style="color:#10b981; font-weight:800;">🎉 Tüm açılar ve alt bölgeler eksiksiz!</span>`;
-                } else if (missingList.length > 0) {
-                    summaryBadge.innerHTML = `<span style="color:var(--gold);">${readyCount} / ${selectedTargetMuscles.length} bölge hazır • Eksik: ${missingList.join(', ')}</span>`;
-                } else {
-                    summaryBadge.innerHTML = `<span style="color:#DC2626; font-weight:700;">⚠️ Boşta Kalan Alt Bölgeler: ${missingSubList.slice(0, 3).join(', ')}${missingSubList.length > 3 ? '...' : ''}</span>`;
-                }
-            }
+            renderCustomRoutine();
+            renderStudioExerciseCatalog();
         }
 
         function renderCustomRoutine() {
             const container = document.getElementById('customWorkoutExercisesList');
             const countBadge = document.getElementById('customRoutineCountBadge');
+            const warnEl = document.getElementById('studioMissingEquipWarning');
             if (typeof updateStudioSaveActionsGroup === 'function') {
                 updateStudioSaveActionsGroup();
             }
+            renderCustomRoutineEquipmentSummary();
             if (!container) return;
             const savedScrollY = window.scrollY;
 
-            countBadge.innerText = `${customRoutineState.exercises.length} Hareket`;
+            if (countBadge) {
+                countBadge.innerText = `${customRoutineState.exercises.length} Hareket`;
+            }
+
+            if (warnEl) {
+                const incompatibleNames = [];
+                customRoutineState.exercises.forEach(item => {
+                    const ex = EXERCISES_DB.find(e => e.id === item.exId);
+                    if (ex && !isExerciseEquipmentAvailable(ex)) {
+                        incompatibleNames.push(ex.name);
+                    }
+                });
+                if (incompatibleNames.length > 0) {
+                    warnEl.style.display = 'flex';
+                    warnEl.innerHTML = `
+                        <span>⚠️ Programda seçili olmayan alet gerektiren <strong>${incompatibleNames.length} hareket</strong> var (${escapeHTML(incompatibleNames.join(', '))}).</span>
+                        <button type="button" onclick="removeIncompatibleFromCustomRoutine()" style="background:#DC2626; border:none; color:#FFFFFF; font-size:11px; font-weight:800; padding:5px 10px; border-radius:6px; cursor:pointer;">Uyumsuzları Çıkar</button>
+                    `;
+                } else {
+                    warnEl.style.display = 'none';
+                    warnEl.innerHTML = '';
+                }
+            }
 
             if (customRoutineState.exercises.length === 0) {
                 container.innerHTML = `
-                    <div style="text-align:center; padding:16px; color:var(--text-secondary); background:#F8FAFC; border-radius:6px; border:1px dashed var(--border);">
-                        <div style="font-size:11.5px; color:#0F172A; font-weight:700;">Henüz hareket eklenmedi</div>
-                        <div style="font-size:10.5px; margin-top:2px;">Aşağıdaki uygun hareketlerden <strong>[ ➕ Ekle ]</strong> butonuna basarak programınızı kurun.</div>
+                    <div style="text-align:center; padding:14px; color:#64748B; background:#F8FAFC; border-radius:8px; border:1px dashed #CBD5E1; font-size:12px; font-weight:700;">
+                        Henüz hareket eklenmedi. Aşağıdaki listeden <strong>+ Ekle</strong> ile seçin.
                     </div>
                 `;
                 return;
@@ -27709,39 +27816,30 @@ KURALLAR:
                 const ex = EXERCISES_DB.find(e => e.id === item.exId);
                 if (!ex) return;
 
-                const media = getExerciseVisualMedia(ex.id, ex.category);
-                const thumbImg = media.still || '';
-
-                const anatomy = getExerciseAnatomy(ex);
+                const isCompat = isExerciseEquipmentAvailable(ex);
+                const rowBorder = isCompat ? '#E2E8F0' : '#EF4444';
+                const rowBg = isCompat ? '#FFFFFF' : '#FEF2F2';
 
                 html += `
-                    <div class="custom-routine-item" style="padding:6px 10px;">
-                        <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:140px;">
-                            <span style="font-size:11px; font-weight:900; color:var(--gold);">${index + 1}.</span>
-                            <div class="ex-thumb-wrap" style="width:40px; height:40px;">
-                                ${thumbImg ? `<img src="${thumbImg}" class="ex-thumb-img" alt="${escapeHTML(ex.name)}">` : '🏋️'}
-                            </div>
-                            <div>
-                                <div style="font-size:12px; font-weight:800; color:#0F172A; line-height:1.2; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
-                                    ${escapeHTML(ex.name)}
-                                </div>
-                                <div style="font-size:10px; margin-top:2px;">
-                                    <span style="color:var(--gold); font-weight:800;">${CANVA_ICONS.crosshair} ${escapeHTML(anatomy.primary)}</span>
-                                    ${anatomy.secondary ? `<span style="color:var(--cyan); font-weight:600;"> • ⚡ ${escapeHTML(anatomy.secondary)}</span>` : ''}
-                                </div>
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; background:${rowBg}; border:1.5px solid ${rowBorder}; border-radius:9px; padding:7px 10px; flex-wrap:wrap;">
+                        <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:150px;">
+                            <span style="width:22px; height:22px; border-radius:6px; background:#F1F5F9; color:#0F172A; font-size:11px; font-weight:900; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                ${String(index + 1).padStart(2, '0')}
+                            </span>
+                            <div style="font-size:12.5px; font-weight:800; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;" onclick="openExerciseQuickInfoModal('${ex.id}')">
+                                ${escapeHTML(ex.name)}
                             </div>
                         </div>
 
-                        <!-- SETS & REPS -->
-                        <div style="display:flex; align-items:center; gap:4px;">
-                            <select class="form-input" style="padding:3px 5px; font-size:11px; width:64px;" onchange="updateCustomExerciseSets(${index}, this.value)">
+                        <div style="display:flex; align-items:center; gap:5px; flex-shrink:0;">
+                            <select class="form-input" style="padding:4px 6px; font-size:11.5px; font-weight:800; width:64px; height:30px;" onchange="updateCustomExerciseSets(${index}, this.value)">
                                 <option value="2" ${item.sets == 2 ? 'selected' : ''}>2 Set</option>
                                 <option value="3" ${item.sets == 3 ? 'selected' : ''}>3 Set</option>
                                 <option value="4" ${item.sets == 4 ? 'selected' : ''}>4 Set</option>
                                 <option value="5" ${item.sets == 5 ? 'selected' : ''}>5 Set</option>
                             </select>
 
-                            <select class="form-input" style="padding:3px 5px; font-size:11px; width:72px;" onchange="updateCustomExerciseReps(${index}, this.value)">
+                            <select class="form-input" style="padding:4px 6px; font-size:11.5px; font-weight:800; width:76px; height:30px;" onchange="updateCustomExerciseReps(${index}, this.value)">
                                 ${(() => {
                                     const normR = String(item.reps || '8-12').replace(/\s+/g, '');
                                     const opts = ['5-6', '6-8', '8-10', '8-12', '10-12', '12-15', '15-20', 'Maks'];
@@ -27750,49 +27848,12 @@ KURALLAR:
                                 })()}
                             </select>
 
-                            <button type="button" class="btn btn-outline" style="padding:3px 5px; font-size:9px;" onclick="moveCustomRoutineExercise(${index}, -1)" ${index === 0 ? 'disabled' : ''}>▲</button>
-                            <button type="button" class="btn btn-outline" style="padding:3px 5px; font-size:9px;" onclick="moveCustomRoutineExercise(${index}, 1)" ${index === customRoutineState.exercises.length - 1 ? 'disabled' : ''}>▼</button>
-                            <button type="button" class="btn btn-outline" style="padding:3px 7px; font-size:10px; color:var(--cyan); border-color:rgba(56,189,248,0.4); font-weight:700;" onclick="openStudioExerciseAlternativeModal(${index})" title="Bu hareket için alternatif bul">🔄 Alternatif</button>
-                            <button type="button" class="btn btn-outline" style="padding:3px 6px; font-size:10px;" onclick="openExerciseDetailModal('${ex.id}')" title="İncele">👁️</button>
-                            <button type="button" class="btn btn-outline" style="padding:3px 6px; font-size:10px; color:#DC2626; border-color:rgba(239,68,68,0.3);" onclick="event.stopPropagation(); openExerciseBugReportModal(decodeURIComponent('${encodeURIComponent(ex.id)}'), decodeURIComponent('${encodeURIComponent(ex.name || '')}'), decodeURIComponent('${encodeURIComponent(thumbImg || '')}'), decodeURIComponent('${encodeURIComponent(ex.equipment || '')}'), decodeURIComponent('${encodeURIComponent(ex.muscle || '')}'), 'Atölye Seçilenler')" title="Bu harekette hata bildir">⚠️</button>
-                            <button type="button" class="btn btn-outline" style="padding:3px 6px; font-size:10px; color:#ef4444; border-color:rgba(239,68,68,0.4);" onclick="removeExerciseFromCustomRoutine(${index})" title="Çıkar">✕</button>
+                            <button type="button" class="wk-ex-i-btn" onclick="openExerciseQuickInfoModal('${ex.id}')" title="Hareket Bilgisi">i</button>
+                            <button type="button" onclick="removeExerciseFromCustomRoutine(${index})" style="width:26px; height:26px; border-radius:6px; border:1px solid #FECACA; background:#FEF2F2; color:#DC2626; font-size:11px; font-weight:900; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;" title="Çıkar">✕</button>
                         </div>
                     </div>
                 `;
             });
-
-            if (customRoutineState.exercises.length > 0) {
-                const dayIdx = customRoutineState.editingDayIdx;
-                const isDayEdit = dayIdx !== null && dayIdx !== undefined;
-                const isProgEdit = Boolean(customRoutineState.editingProgramId);
-
-                html += `
-                    <div style="margin-top:12px; padding:10px 12px; background:#F8FAFC; border:1px solid rgba(245,158,11,0.3); border-radius:8px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; box-shadow:0 0 15px rgba(245,158,11,0.1);">
-                        ${isDayEdit ? `
-                            <button type="button" class="btn btn-gold" style="flex:1; min-width:200px; font-size:12.5px; padding:10px 16px; font-weight:900; box-shadow:0 0 15px rgba(245,158,11,0.35);" onclick="saveEditingRoutineToDay()">
-                                💾 Değişiklikleri ${DAY_NAMES_TR[dayIdx]} Gününe Kaydet
-                            </button>
-                            <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:10px 14px;" onclick="cancelStudioEditing(true)">
-                                Vazgeç
-                            </button>
-                        ` : (isProgEdit ? `
-                            <button type="button" class="btn btn-gold" style="flex:1; min-width:200px; font-size:12.5px; padding:10px 16px; font-weight:900; box-shadow:0 0 15px rgba(245,158,11,0.35);" onclick="saveCustomRoutineToLibrary()">
-                                💾 Değişiklikleri Kaydet
-                            </button>
-                            <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:10px 14px;" onclick="cancelStudioEditing(true)">
-                                Vazgeç
-                            </button>
-                        ` : `
-                            <button type="button" class="btn btn-gold" style="flex:1; min-width:160px; font-size:12px; padding:9px 14px; font-weight:900;" onclick="saveCustomRoutineToLibrary()">
-                                💾 Programı Kütüphaneye Kaydet
-                            </button>
-                            <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:9px 12px; color:var(--cyan); border-color:var(--cyan);" onclick="promptAssignStudioRoutineToDay()">
-                                📅 Güne Planla
-                            </button>
-                        `)}
-                    </div>
-                `;
-            }
 
             container.innerHTML = html;
             if (Math.abs(window.scrollY - savedScrollY) > 1) {
@@ -27802,6 +27863,7 @@ KURALLAR:
 
         function renderStudioExerciseCatalog() {
             ensureBilingualExerciseNames();
+            renderStudioOwnedEquipChips();
             const container = document.getElementById('studioExercisesCatalog');
             const totalCountEl = document.getElementById('studioExTotalCount');
             if (!container) return;
@@ -27809,19 +27871,17 @@ KURALLAR:
             const savedScrollY = window.scrollY;
 
             const q = (document.getElementById('studioSearchInput')?.value || '').trim();
-            const equip = document.getElementById('studioEquipFilter')?.value || 'all';
-            const showAll = document.getElementById('chkShowAllExercises')?.checked;
+            const activeTabObj = STUDIO_FILTER_TABS.find(t => t.id === activeStudioRegion) || STUDIO_FILTER_TABS[0];
+            const targetMuscles = activeTabObj.muscles || [];
 
             const filtered = EXERCISES_DB.filter(ex => {
-                // Gizlenen hareketleri stüdyo kataloğunda gösterme (açıkça aranmadıkça)
                 if (!q && isExerciseExcludedByUser(ex.id)) return false;
-                if (equip !== 'all' && ex.equipment !== equip) return false;
+                if (!isExerciseEquipmentAvailable(ex)) return false;
                 if (q && !matchesExerciseSearch(ex, q)) return false;
-                // Target Region Filtering
-                if (!showAll && selectedTargetMuscles.length > 0) {
+                if (targetMuscles.length > 0) {
                     const pList = ex.primaryMuscles || [];
                     const sList = ex.secondaryMuscles || [];
-                    const hits = pList.some(m => selectedTargetMuscles.includes(m)) || sList.some(m => selectedTargetMuscles.includes(m));
+                    const hits = pList.some(m => targetMuscles.includes(m)) || sList.some(m => targetMuscles.includes(m));
                     if (!hits) return false;
                 }
                 return true;
@@ -27833,8 +27893,8 @@ KURALLAR:
 
             if (filtered.length === 0) {
                 container.innerHTML = `
-                    <div style="grid-column: 1 / -1; text-align:center; padding:24px; color:var(--text-secondary);">
-                        Seçili bölgelere uygun egzersiz bulunamadı. "Tümünü Göster" kutucuğunu işaretleyebilirsiniz.
+                    <div style="grid-column: 1 / -1; text-align:center; padding:18px; color:#64748B; font-size:12px; font-weight:700;">
+                        Seçili alet ve bölgeye uygun hareket bulunamadı. Yukarıdan alet veya bölge seçimini genişletin.
                     </div>
                 `;
                 return;
@@ -27842,39 +27902,21 @@ KURALLAR:
 
             let html = '';
             filtered.forEach(ex => {
-                const media = getExerciseVisualMedia(ex.id, ex.category);
-                const thumbImg = media.still || '';
                 const isAlreadyInRoutine = customRoutineState.exercises.some(item => item.exId === ex.id);
 
-                const anatomy = getExerciseAnatomy(ex);
-
                 html += `
-                    <div class="studio-ex-card" style="padding:10px;">
-                        <div style="display:flex; gap:8px; align-items:flex-start; margin-bottom:8px;">
-                            <div class="ex-thumb-wrap" style="width:48px; height:48px; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
-                                ${thumbImg ? `<img src="${thumbImg}" class="ex-thumb-img" alt="${escapeHTML(ex.name)}" loading="lazy">` : '🏋️'}
-                            </div>
-                            <div style="flex:1;">
-                                <div style="font-size:12px; font-weight:800; color:#0F172A; line-height:1.2; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')">
-                                    ${escapeHTML(ex.name)}
-                                </div>
-                                <div style="font-size:10px; margin-top:3px; line-height:1.35;">
-                                    <span style="color:var(--gold); font-weight:800;">${CANVA_ICONS.crosshair} Ana: ${escapeHTML(anatomy.primary)}</span>
-                                    ${anatomy.secondary ? `<span style="color:var(--cyan); font-weight:600;"> • ⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''}
-                                </div>
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; background:#FFFFFF; border:1.5px solid ${isAlreadyInRoutine ? '#2563EB' : '#CBD5E1'}; border-radius:9px; padding:8px 10px;">
+                        <div style="min-width:0; flex:1;">
+                            <div style="font-size:12.5px; font-weight:800; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;" onclick="openExerciseQuickInfoModal('${ex.id}')">
+                                ${escapeHTML(ex.name)}
                             </div>
                         </div>
-
-                        <!-- ACTIONS -->
-                        <div style="display:flex; gap:6px; margin-top:auto;">
-                            <button type="button" class="btn btn-outline" style="flex:1; font-size:10px; padding:4px 6px;" onclick="openExerciseDetailModal('${ex.id}')">
-                                👁️ İncele
-                            </button>
-                            <button type="button" class="btn btn-outline" style="font-size:10px; padding:4px 6px; color:#DC2626; border-color:rgba(239,68,68,0.3);" onclick="event.stopPropagation(); openExerciseBugReportModal(decodeURIComponent('${encodeURIComponent(ex.id)}'), decodeURIComponent('${encodeURIComponent(ex.name || '')}'), decodeURIComponent('${encodeURIComponent(thumbImg || '')}'), decodeURIComponent('${encodeURIComponent(ex.equipment || '')}'), decodeURIComponent('${encodeURIComponent(ex.muscle || '')}'), 'Program Atölyesi')" title="Hata Bildir">
-                                ⚠️ Bildir
-                            </button>
-                            <button type="button" class="btn ${isAlreadyInRoutine ? 'btn-outline' : 'btn-gold'}" style="flex:1.3; font-size:10px; padding:4px 6px; font-weight:800;" onclick="addExerciseToCustomRoutine('${ex.id}')">
-                                ${isAlreadyInRoutine ? '➕ Tekrar Ekle' : '➕ Ekle'}
+                        <div style="display:flex; align-items:center; gap:5px; flex-shrink:0;">
+                            <button type="button" class="wk-ex-i-btn" onclick="openExerciseQuickInfoModal('${ex.id}')" title="Hareket Bilgisi">i</button>
+                            <button type="button"
+                                    onclick="addExerciseToCustomRoutine('${ex.id}')"
+                                    style="border:none; border-radius:7px; padding:6px 10px; font-size:11.5px; font-weight:800; cursor:pointer; white-space:nowrap; ${isAlreadyInRoutine ? 'background:#DCFCE7; color:#15803D; border:1px solid #86EFAC;' : 'background:#2563EB; color:#FFFFFF;'}">
+                                ${isAlreadyInRoutine ? '✓ Eklendi' : '+ Ekle'}
                             </button>
                         </div>
                     </div>
@@ -27892,12 +27934,17 @@ KURALLAR:
             const ex = EXERCISES_DB.find(e => e.id === exId);
             if (!ex) return;
 
-            customRoutineState.exercises.push({
-                exId: exId,
-                sets: 3,
-                reps: '8-12',
-                weight: ''
-            });
+            const existingIdx = customRoutineState.exercises.findIndex(item => item.exId === exId);
+            if (existingIdx !== -1) {
+                customRoutineState.exercises.splice(existingIdx, 1);
+            } else {
+                customRoutineState.exercises.push({
+                    exId: exId,
+                    sets: 3,
+                    reps: '8-12',
+                    weight: ''
+                });
+            }
 
             renderCustomRoutine();
             renderRegionStatus();
@@ -27923,6 +27970,7 @@ KURALLAR:
         function updateCustomExerciseSets(index, val) {
             if (customRoutineState.exercises[index]) {
                 customRoutineState.exercises[index].sets = parseInt(val) || 3;
+                renderCustomRoutineEquipmentSummary();
                 renderRegionStatus();
             }
         }
@@ -27935,6 +27983,7 @@ KURALLAR:
 
         function updateCustomRoutineRest(val) {
             customRoutineState.rest = parseInt(val) || 60;
+            renderCustomRoutineEquipmentSummary();
         }
 
         function resetCustomRoutine() {

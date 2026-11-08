@@ -24,7 +24,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=275">
+    <link rel="stylesheet" href="css/style.css?v=276">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH (CANVA MODERN ATHLETIC LIGHT V229) */
         html, body { background-color: #F8FAFC; color: #0F172A; color-scheme: light; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -51,7 +51,7 @@
                     <path d="M34 25L26 36H33L30 46L39 34H32L34 25Z" fill="#FFFFFF"/>
                 </svg>
             </div>
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v275</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v276</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -208,7 +208,7 @@
                         <div class="modern-brand-subrow">
                             <span id="headerActiveTabLabel">ÜRETİCİ</span>
                             <span class="modern-brand-subdot" aria-hidden="true">•</span>
-                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v275</span>
+                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v276</span>
                         </div>
                     </div>
                 </div>
@@ -495,11 +495,17 @@
                                 <div class="equip-chip selected" onclick="toggleEquip('dumbbell')">
                                     <span class="equip-check-icon">✓</span><span>Dambıl</span>
                                 </div>
+                                <div class="equip-chip selected" onclick="toggleEquip('bench')">
+                                    <span class="equip-check-icon">✓</span><span>Sehpa</span>
+                                </div>
                                 <div class="equip-chip selected" onclick="toggleEquip('kettlebell')">
                                     <span class="equip-check-icon">✓</span><span>Kettlebell</span>
                                 </div>
                                 <div class="equip-chip" onclick="toggleEquip('barbell')">
                                     <span class="equip-check-icon">✓</span><span>Bar &amp; Plaka</span>
+                                </div>
+                                <div class="equip-chip" onclick="toggleEquip('pullup_bar')">
+                                    <span class="equip-check-icon">✓</span><span>Barfiks / Dips Barı</span>
                                 </div>
                                 <div class="equip-chip" onclick="toggleEquip('machine')">
                                     <span class="equip-check-icon">✓</span><span>Makine</span>
@@ -566,10 +572,13 @@
                         </div>
                     </div>
 
-                    <!-- SINGLE UNIFIED AI GENERATE CTA -->
-                    <div class="ai-prep-actions-row ai-unified-cta-row">
-                        <button type="button" class="btn-ai-create-primary btn-ai-unified-cta" id="btnUnifiedAiGenerate" onclick="handleQuickAiGenerate()">
+                    <!-- SINGLE UNIFIED AI GENERATE CTA + MANUAL BUILDER TRIGGER -->
+                    <div class="ai-prep-actions-row ai-unified-cta-row" style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <button type="button" class="btn-ai-create-primary btn-ai-unified-cta" id="btnUnifiedAiGenerate" style="flex:1.4; min-width:180px;" onclick="handleQuickAiGenerate()">
                             <svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 1.5L3 9h4.5L6.8 14.5L13 7H8.5L9 1.5Z"/></svg> Programı Oluştur
+                        </button>
+                        <button type="button" class="btn btn-outline" style="flex:1; min-width:160px; font-size:13px; font-weight:800; padding:12px 14px; border-radius:12px; border:1.5px solid #CBD5E1; color:#0F172A; background:#FFFFFF;" onclick="openManualBuilderInWorkout()">
+                            🛠️ Manuel Oluştur
                         </button>
                     </div>
                     <div class="ai-prep-hint" id="aiQuickPreviewHint">Onaylamadan takvime eklenmez</div>
@@ -644,121 +653,107 @@
                     </button>
                 </div>
 
-                <!-- EMBEDDED PROGRAM ATÖLYESİ (KENDİ PROGRAMINI TASARLA) -->
-                <div id="studioSectionInWorkout" style="display:none; margin-top:16px;">
-                    <div class="generator-card" style="border-color: rgba(245, 158, 11, 0.35); padding:16px;">
+                <!-- EMBEDDED PROGRAM ATÖLYESİ (MANUEL PROGRAM OLUŞTURUCU) -->
+                <div id="studioSectionInWorkout" style="display:block; margin-top:12px; margin-bottom:12px;">
+                    <div class="generator-card" style="border:1.5px solid #E2E8F0; padding:14px 16px;">
                         
                         <!-- ACCORDION HEADER -->
-                        <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleStudioAccordion()">
-                            <div style="display:flex; align-items:center; gap:10px;">
-                                <span style="font-size:24px;">🎯</span>
-                                <div>
-                                    <h3 style="font-size:15px; font-weight:900; color:var(--gold); margin:0;">Program Atölyesi (Kendi Hareketlerini Seç)</h3>
-                                    <p style="font-size:11.5px; color:var(--text-secondary); margin:2px 0 0;">Bölge seçin, hareket ekleyin ve kendi antrenmanınızı başlatın.</p>
-                                </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; gap:10px;" onclick="toggleStudioAccordion()">
+                            <div style="min-width:0;">
+                                <h3 style="font-size:15px; font-weight:900; color:#0F172A; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Manuel Program Oluşturucu</h3>
+                                <p style="font-size:12px; color:#475569; margin:2px 0 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Programa ad verin, aletlerinizi seçin, kendi hareketlerinizi ekleyin</p>
                             </div>
-                            <button type="button" class="btn btn-outline" id="btnToggleStudioAccordion" style="font-size:11px; padding:5px 12px; font-weight:800; border-color:var(--gold); color:var(--gold); flex-shrink:0;">
+                            <button type="button" class="btn btn-outline" id="btnToggleStudioAccordion" style="font-size:12px; padding:6px 12px; font-weight:800; border-color:#CBD5E1; color:#0F172A; background:#F8FAFC; flex-shrink:0;">
                                 <span id="studioAccordionArrow">▼ Aç</span>
                             </button>
                         </div>
 
                         <!-- ACCORDION BODY -->
-                        <div id="studioAccordionBody" style="display:none; margin-top:16px; border-top:1px solid var(--border); padding-top:16px;">
-                            <!-- DYNAMIC EDITING DAY BANNER (Shown when editing a scheduled program) -->
+                        <div id="studioAccordionBody" style="display:none; margin-top:14px; border-top:1px solid #E2E8F0; padding-top:14px;">
+                            <!-- DYNAMIC EDITING DAY BANNER -->
                             <div id="studioEditingBannerContainer"></div>
 
-                            <!-- TOP BAR: Title & Actions -->
-                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; border-bottom:1px solid var(--border); padding-bottom:12px;">
-                                <div>
-                                    <span style="font-size:14px; font-weight:800; color:#0F172A;" id="studioHeaderTitle">Özel Antrenman Taslağı</span>
-                                    <p style="font-size:11px; color:var(--text-secondary); margin-top:2px;" id="studioHeaderSub">Bölge seçin, hareketleri ekleyin, dengeyi görün.</p>
-                                </div>
-                                <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                                    <button class="btn btn-outline" style="font-size:11px; padding:6px 10px; color:var(--cyan); border-color:var(--cyan);" onclick="promptAssignStudioRoutineToDay()">📅 Güne Planla</button>
-                                    <button class="btn btn-outline" style="font-size:11px; padding:6px 10px;" onclick="resetCustomRoutine()">🗑️ Sıfırla</button>
-                                    <button class="btn btn-gold" style="font-size:11px; padding:6px 14px; font-weight:800;" onclick="startActiveWorkoutFromCustom()">🏋️ Başlat</button>
-                                </div>
-                            </div>
-
-                            <!-- SECTION 1: HEDEF BÖLGELER (Region Selectors) -->
-                            <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:12px; margin-bottom:14px;">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                    <span style="font-size:12.5px; font-weight:800; color:#0F172A;">Hedef Bölgeler</span>
-                                    <div style="display:flex; gap:6px;">
-                                        <button class="btn btn-outline" style="font-size:10px; padding:3px 8px;" onclick="selectPresetRegions('all')">Tüm Vücut</button>
-                                        <button class="btn btn-outline" style="font-size:10px; padding:3px 8px;" onclick="selectPresetRegions('clear')">Temizle</button>
+                            <!-- 1. PROGRAM ADI, DİNLENME & KULLANILAN ALETLER ÖZETİ -->
+                            <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:12px 14px; margin-bottom:12px;">
+                                <div style="display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:end;">
+                                    <div>
+                                        <label for="customWorkoutTitleInput" style="display:block; font-size:11px; font-weight:800; color:#64748B; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">PROGRAM ADI</label>
+                                        <input type="text" id="customWorkoutTitleInput" class="form-input" style="font-weight:800; padding:8px 11px; font-size:14px; color:#0F172A; background:#FFFFFF;" placeholder="Program adını yazın..." value="Özel Programım" oninput="renderCustomRoutineEquipmentSummary()">
+                                    </div>
+                                    <div>
+                                        <label for="customWorkoutRestSelect" style="display:block; font-size:11px; font-weight:800; color:#64748B; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">DİNLENME</label>
+                                        <select id="customWorkoutRestSelect" class="form-input" style="width:105px; padding:8px 10px; font-size:13px; font-weight:700; color:#0F172A; background:#FFFFFF;" onchange="updateCustomRoutineRest(this.value)">
+                                            <option value="45">45 sn</option>
+                                            <option value="60" selected>60 sn</option>
+                                            <option value="90">90 sn</option>
+                                            <option value="120">120 sn</option>
+                                        </select>
                                     </div>
                                 </div>
 
-                                <!-- Multi-select Region Chips -->
-                                <div id="studioRegionChips" style="display:flex; flex-wrap:wrap; gap:6px;">
+                                <!-- KULLANILAN ALETLER ÖZET SATIRI -->
+                                <div id="customRoutineEquipSummaryBar" style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; margin-top:10px; padding-top:10px; border-top:1px solid #E2E8F0;">
                                     <!-- Populated dynamically -->
                                 </div>
                             </div>
 
-                            <!-- SECTION 2: BÖLGE DURUMU (Visual Progress: Seçildi / Kaldı) -->
-                            <div id="studioRegionStatusBox" style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:12px; margin-bottom:14px;">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                    <span style="font-size:12.5px; font-weight:800; color:#0F172A;">Bölge Durumu</span>
-                                    <span id="studioRegionSummaryBadge" style="font-size:11px; font-weight:700;"></span>
-                                </div>
-                                <div id="studioRegionStatusGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:6px;">
-                                    <!-- Populated dynamically -->
-                                </div>
-                            </div>
-
-                            <!-- SECTION 3: PROGRAM TASLAĞI -->
-                            <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:12px; margin-bottom:14px;">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                    <div style="display:flex; align-items:center; gap:6px;">
-                                        <span style="font-size:12.5px; font-weight:800; color:var(--gold);">Program Taslağı</span>
-                                        <span id="customRoutineCountBadge" class="auth-role-tag role-admin" style="font-size:10px;">0 Hareket</span>
+                            <!-- 2. PROGRAMDAKİ HAREKETLER -->
+                            <div style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:12px; padding:12px 14px; margin-bottom:12px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:8px;">
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <span style="font-size:13.5px; font-weight:900; color:#0F172A;">Programdaki Hareketler</span>
+                                        <span id="customRoutineCountBadge" style="font-size:11.5px; font-weight:800; padding:2px 9px; border-radius:999px; background:#F1F5F9; color:#0F172A; border:1px solid #CBD5E1;">0 Hareket</span>
                                     </div>
-                                    <div id="studioSaveActionsGroup" style="display:flex; gap:6px; flex-wrap:wrap;">
-                                        <button class="btn btn-outline" style="font-size:10.5px; padding:4px 8px;" onclick="saveCustomRoutineToLibrary()">💾 Kütüphaneye Kaydet</button>
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <div id="studioSaveActionsGroup" style="display:none;"></div>
+                                        <button type="button" onclick="resetCustomRoutine()" style="background:none; border:none; font-size:12px; font-weight:800; color:#64748B; cursor:pointer;">Temizle</button>
                                     </div>
                                 </div>
 
-                                <div style="display:grid; grid-template-columns: 1fr auto; gap:8px; margin-bottom:10px;">
-                                    <input type="text" id="customWorkoutTitleInput" class="form-input" style="font-weight:700; padding:8px 10px; font-size:12.5px;" placeholder="Program Adı (Örn: İtiş Zırhı)" value="Özel Çelik Programım">
-                                    <select id="customWorkoutRestSelect" class="form-input" style="width:115px; padding:8px; font-size:12px;" onchange="updateCustomRoutineRest(this.value)">
-                                        <option value="45">Dinlenme: 45s</option>
-                                        <option value="60" selected>Dinlenme: 60s</option>
-                                        <option value="90">Dinlenme: 90s</option>
-                                        <option value="120">Dinlenme: 120s</option>
-                                    </select>
-                                </div>
+                                <div id="studioMissingEquipWarning" style="display:none; margin-bottom:10px; padding:8px 10px; border-radius:8px; background:#FEF3C7; border:1px solid #F59E0B; color:#92400E; font-size:12px; font-weight:700; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;"></div>
 
                                 <div id="customWorkoutExercisesList" style="display:flex; flex-direction:column; gap:6px;">
                                     <!-- Populated dynamically -->
                                 </div>
+
+                                <!-- ALT AKSİYON BUTONLARI -->
+                                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid #E2E8F0;">
+                                    <button type="button" class="wk-btn-utility-compact" onclick="saveCustomRoutineToLibrary()">Kütüphaneye Kaydet</button>
+                                    <button type="button" class="wk-btn-utility-compact" onclick="promptAssignStudioRoutineToDay()">Güne Planla</button>
+                                    <button type="button" class="wk-btn-primary-compact" onclick="startActiveWorkoutFromCustom()">Seansı Başlat</button>
+                                </div>
                             </div>
 
-                            <!-- SECTION 4: UYGUN HAREKETLER -->
-                            <div>
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                    <div style="font-size:12.5px; font-weight:800; color:#0F172A;">
-                                        Uygun Hareketler <span id="studioExTotalCount" style="color:var(--text-secondary); font-size:11px; font-weight:normal;"></span>
+                            <!-- 3. HAREKET EKLE & ELİMDEKİ ALETLER FİLTRESİ -->
+                            <div style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:12px; padding:12px 14px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:8px; flex-wrap:wrap;">
+                                    <div>
+                                        <div style="font-size:13.5px; font-weight:900; color:#0F172A;">Hareket Ekle</div>
+                                        <div style="font-size:11.5px; color:#64748B;">Olmayan aletin işaretini kaldırın; o aleti isteyen hareketler elenir.</div>
                                     </div>
-                                    <label style="font-size:11px; color:var(--cyan); cursor:pointer; display:flex; align-items:center; gap:4px;">
-                                        <input type="checkbox" id="chkShowAllExercises" onchange="renderStudioExerciseCatalog()"> Tümünü Göster
-                                    </label>
+                                    <span id="studioExTotalCount" style="font-size:11.5px; font-weight:800; padding:3px 9px; border-radius:999px; background:#F1F5F9; color:#334155; border:1px solid #CBD5E1;"></span>
                                 </div>
 
-                                <!-- Compact Search & Equipment Filter -->
-                                <div style="display:flex; gap:6px; margin-bottom:10px;">
-                                    <input type="text" id="studioSearchInput" class="form-input" style="flex:1; padding:8px 10px; font-size:12px;" placeholder="🔍 Hareket ara..." oninput="renderStudioExerciseCatalog()">
-                                    <select id="studioEquipFilter" class="form-input" style="width:auto; padding:8px; font-size:12px;" onchange="renderStudioExerciseCatalog()">
-                                        <option value="all">Tüm Ekipmanlar</option>
-                                        <option value="dumbbell">Dambıl</option>
-                                        <option value="kettlebell">Kettlebell</option>
-                                        <option value="bodyweight">Vücut Ağırlığı</option>
-                                        <option value="barbell">Halter</option>
-                                        <option value="machine">Makine</option>
-                                    </select>
+                                <!-- ELİMDEKİ ALETLER (7 ALETLİ ORTAK SEÇİM) -->
+                                <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px; padding:10px 12px; margin-bottom:10px;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:8px; flex-wrap:wrap;">
+                                        <span style="font-size:11px; font-weight:800; color:#64748B; text-transform:uppercase; letter-spacing:0.5px;">ELİMDEKİ ALETLER (Tıklayıp Aç / Kapat)</span>
+                                        <button type="button" onclick="setQuickEquip('all')" style="background:none; border:none; font-size:11.5px; font-weight:800; color:#0369A1; cursor:pointer; text-decoration:underline;">Tümünü Aç</button>
+                                    </div>
+                                    <div id="studioOwnedEquipChips" style="display:flex; flex-wrap:wrap; gap:6px;">
+                                        <!-- Populated dynamically -->
+                                    </div>
                                 </div>
 
-                                <div id="studioExercisesCatalog" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:8px; max-height:600px; overflow-y:auto; padding-right:4px;">
+                                <!-- BÖLGE SEKMELERİ + ARAMA -->
+                                <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px;">
+                                    <div id="studioRegionChips" style="display:flex; flex-wrap:wrap; gap:5px;">
+                                        <!-- Populated dynamically -->
+                                    </div>
+                                    <input type="text" id="studioSearchInput" class="form-input" style="width:190px; flex:1; min-width:150px; padding:7px 10px; font-size:12.5px; background:#F8FAFC;" placeholder="Hareket ara..." oninput="renderStudioExerciseCatalog()">
+                                </div>
+
+                                <div id="studioExercisesCatalog" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(235px, 1fr)); gap:8px; max-height:380px; overflow-y:auto; padding-right:2px;">
                                     <!-- Populated dynamically -->
                                 </div>
                             </div>
@@ -895,9 +890,11 @@
                                 <select id="libExEquipFilter" class="form-input" style="padding:7px 9px; font-size:12px; font-weight:700; border-radius:9px; background:#F8FAFC;" onchange="renderLibraryExerciseCatalog()">
                                     <option value="all">Tüm Ekipmanlar</option>
                                     <option value="dumbbell">Dambıl</option>
+                                    <option value="bench">Sehpa</option>
                                     <option value="kettlebell">Kettlebell</option>
-                                    <option value="barbell">Barbell</option>
-                                    <option value="machine">Makine</option>
+                                    <option value="barbell">Bar &amp; Plaka</option>
+                                    <option value="pullup_bar">Barfiks / Dips Barı</option>
+                                    <option value="machine">Makine / Kablo</option>
                                     <option value="bodyweight">Vücut Ağırlığı</option>
                                 </select>
                             </div>
@@ -2759,7 +2756,7 @@
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
     <script src="js/exercises-db.js?v=245"></script>
-    <script src="js/app.js?v=275"></script>
+    <script src="js/app.js?v=276"></script>
     <script>
         function getNotifStorageKey() {
             const uid = localStorage.getItem('celik_kodu_active_user_id') || 'default';
@@ -2952,6 +2949,6 @@
             </div>
         </div>
     </div>
-    <script src="js/garmin-tredict-bridge.js?v=275" defer></script>
+    <script src="js/garmin-tredict-bridge.js?v=276" defer></script>
 </body>
 </html>
