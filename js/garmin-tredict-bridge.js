@@ -17,13 +17,26 @@
 (function () {
   'use strict';
 
-  const BRIDGE_URL = '';
+  const DIRECT_BRIDGE_URL = 'http://127.0.0.1:3847';
   const TELEMETRY_STORAGE_KEY = 'celik_garmin_telemetry_v2';
   const WELLNESS_STEPS_KEY = 'celik_garmin_wellness_steps_v1';
   const RESOLVED_SETS_KEY = 'celik_garmin_resolved_sets_v1';
   const OUTBOX_PLANS_KEY = 'celik_garmin_outbox_plans_v1';
   const SENT_MANIFESTS_KEY = 'celik_garmin_sent_manifests_v1';
+  const LAST_PUSHED_SIG_KEY = 'celik_garmin_last_pushed_sig_v1';
   const GARMIN_ENABLED_PREFIX = 'celik_garmin_enabled_';
+
+  async function fetchGarminBridge(apiPath, options = {}) {
+    const isLocalHost = typeof window !== 'undefined' &&
+      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    if (isLocalHost && window.location.port !== '3847') {
+      try {
+        const proxyRes = await fetch(apiPath, options);
+        if (proxyRes && proxyRes.ok) return proxyRes;
+      } catch {}
+    }
+    return fetch(`${DIRECT_BRIDGE_URL}${apiPath}`, options);
+  }
 
   // Kişisel sağlık verileri kaynak kodda sabit tutulmaz; yalnızca kullanıcının kendi yerel önbelleğinden okunur
   const DEFAULT_GARMIN_WELLNESS_STEPS = {};
@@ -161,10 +174,13 @@
     return u.id === 'usr_admin' || u.id === 'usr_ferit' || /ferit/i.test(String(u.name || ''));
   }
 
-  function getScopedGarminKey(baseKey) {
+  function getActiveUidSafe() {
     const u = getCurrentUserObj();
-    const uid = (u && u.id) ? u.id : 'usr_admin';
-    return `${baseKey}_${uid}`;
+    return (u && u.id) ? u.id : 'usr_admin';
+  }
+
+  function getScopedGarminKey(baseKey) {
+    return `${baseKey}_${getActiveUidSafe()}`;
   }
 
   function migrateLegacyGarminStorageToOwner() {
@@ -591,7 +607,7 @@
     if (!isGarminEnabledForCurrentUser() || typeof EXERCISES_DB === 'undefined') return;
     const activities = getStoredActivities();
     try {
-      const uid = getActiveUserId();
+      const uid = getActiveUidSafe();
       if (!uid) return;
       const historyKey = `celik_kodu_history_${uid}`;
       const rawLogs = JSON.parse(localStorage.getItem(historyKey) || '[]');
@@ -1087,21 +1103,28 @@
     }
   }
 
-  async function pushPayloadToGarminSilent(planPayload, intervalsEvents) {
+  async function pushPayloadToGarminSilent(planPayload, intervalsEvents, dedupSig = '') {
     // Garmin kullanmayan kullanıcıda kesinlikle hiçbir ağ isteği veya kuyruk çalışmaz!
     if (!isGarminEnabledForCurrentUser()) return;
     const hasIntervals = Array.isArray(intervalsEvents) && intervalsEvents.length > 0;
     const hasTredict = planPayload && Array.isArray(planPayload.planTrainings) && planPayload.planTrainings.length > 0;
     if (!hasIntervals && !hasTredict) return;
 
+    const sigKey = getScopedGarminKey(LAST_PUSHED_SIG_KEY);
+    const computedSig = dedupSig || JSON.stringify((planPayload && planPayload.planTrainings) || intervalsEvents || []);
+
     try {
-      const res = await fetch(`${BRIDGE_URL}/api/tredict/push-workout`, {
+      const res = await fetchGarminBridge('/api/tredict/push-workout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ intervalsEvents: intervalsEvents || [], planPayload })
       });
       const data = await res.json();
       if (data && data.ok) {
+        try {
+          localStorage.setItem(sigKey, computedSig);
+          localStorage.removeItem(getScopedGarminKey(OUTBOX_PLANS_KEY));
+        } catch {}
         const count = Number(data.count) || (Array.isArray(planPayload?.planTrainings) ? planPayload.planTrainings.length : 1);
         showGarminDirectCalendarSyncNotice(planPayload?.plan?.title || 'Çelik Kodu Seansı', count);
         return;
@@ -1113,7 +1136,7 @@
     try {
       const outboxKey = getScopedGarminKey(OUTBOX_PLANS_KEY);
       const outbox = JSON.parse(localStorage.getItem(outboxKey) || '[]');
-      outbox.unshift({ createdAt: new Date().toISOString(), intervalsEvents: intervalsEvents || [], planPayload });
+      outbox.unshift({ createdAt: new Date().toISOString(), sig: computedSig, intervalsEvents: intervalsEvents || [], planPayload });
       localStorage.setItem(outboxKey, JSON.stringify(outbox.slice(0, 10)));
     } catch {}
   }
@@ -1133,7 +1156,7 @@
   async function deleteDatesFromGarminSilent(dates = [], deleteAll = false, subSportTypes = []) {
     if (!isGarminEnabledForCurrentUser()) return;
     try {
-      const res = await fetch(`${BRIDGE_URL}/api/tredict/delete-dates`, {
+      const res = await fetchGarminBridge('/api/tredict/delete-dates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ dates, deleteAll, subSportTypes })
@@ -1266,6 +1289,29 @@
     } catch {}
   }
 
+  function handleGeneratedSingleDayWorkoutWrite(rawValue) {
+    if (!isGarminEnabledForCurrentUser() || !rawValue) return;
+    try {
+      const gen = JSON.parse(rawValue);
+      if (!gen || !Array.isArray(gen.exercises) || gen.exercises.length === 0) return;
+      if (window.pendingAiWeeklyPlan && window._editingPendingWeeklyDayIdx !== null && window._editingPendingWeeklyDayIdx !== undefined) {
+        return;
+      }
+      const todayStr = formatLocalIsoDate(new Date());
+      const createdDate = gen.createdAt ? formatLocalIsoDate(new Date(gen.createdAt)) : todayStr;
+      const updatedDate = gen.updatedAt ? formatLocalIsoDate(new Date(gen.updatedAt)) : createdDate;
+      if (createdDate !== todayStr && updatedDate !== todayStr) return;
+
+      const title = gen.title || `Çelik Kodu (${todayStr})`;
+      saveSentWorkoutManifest(title, gen.exercises, 'date_' + todayStr);
+      const payload = buildTredictPlanPayload(title, gen.exercises, null, todayStr);
+      const ev = buildIntervalsWorkoutEvent(todayStr, title, gen.exercises);
+      const sig = 'gen_' + todayStr + '_' + JSON.stringify(gen.exercises.map(e => `${e.id || e.name}:${e.sets}:${e.reps}:${e.weight || 0}`));
+      if (localStorage.getItem(getScopedGarminKey(LAST_PUSHED_SIG_KEY)) === sig) return;
+      pushPayloadToGarminSilent(payload, ev ? [ev] : [], sig);
+    } catch {}
+  }
+
   function installCalendarAutoSyncHook() {
     if (window.__garminCalendarStorageHooked) return;
     window.__garminCalendarStorageHooked = true;
@@ -1290,6 +1336,8 @@
           key.startsWith('celik_kodu_next_weekly_schedule_')
         ) {
           setTimeout(() => handleCalendarStorageWrite(key, value, prevValue), 0);
+        } else if (key === 'celik_kodu_last_generated_workout') {
+          setTimeout(() => handleGeneratedSingleDayWorkoutWrite(value), 0);
         } else if (key === 'celik_kodu_active_user_id' || key === 'celik_kodu_session') {
           setTimeout(() => refreshGarminPanelsForUserState(), 0);
         }
@@ -1323,7 +1371,7 @@
     const savedY = window.scrollY;
     let syncedLive = false;
     try {
-      const res = await fetch(`${BRIDGE_URL}/api/tredict/activities?days=30`);
+      const res = await fetchGarminBridge('/api/tredict/activities?days=30');
       const data = await res.json();
       if (data && data.ok && Array.isArray(data.activities) && data.activities.length > 0) {
         localStorage.setItem(getScopedGarminKey(TELEMETRY_STORAGE_KEY), JSON.stringify(data.activities));
@@ -1368,7 +1416,7 @@
       const grp = groups.find(g => g.groupId === groupId);
       if (grp) {
         try {
-          await fetch(`${BRIDGE_URL}/api/tredict/activity-update`, {
+          await fetchGarminBridge('/api/tredict/activity-update', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -1640,14 +1688,41 @@
   function syncActiveSchedulesOnBoot() {
     if (!isGarminEnabledForCurrentUser()) return;
     try {
-      const uid = getActiveUserId();
-      const dateRaw = localStorage.getItem(`celik_kodu_date_schedule_${uid}`);
-      if (dateRaw) {
-        handleCalendarStorageWrite(`celik_kodu_date_schedule_${uid}`, dateRaw);
+      const uid = getActiveUidSafe();
+      const outboxKey = getScopedGarminKey(OUTBOX_PLANS_KEY);
+      const outbox = JSON.parse(localStorage.getItem(outboxKey) || '[]');
+      if (Array.isArray(outbox) && outbox.length > 0 && outbox[0] && outbox[0].planPayload) {
+        pushPayloadToGarminSilent(outbox[0].planPayload, outbox[0].intervalsEvents || [], outbox[0].sig || '');
+        return;
       }
+
+      const todayStr = formatLocalIsoDate(new Date());
+      const dateRaw = localStorage.getItem(`celik_kodu_date_schedule_${uid}`);
+      let hasTodayInDateSchedule = false;
+      if (dateRaw) {
+        try {
+          const parsedDate = JSON.parse(dateRaw);
+          if (parsedDate && parsedDate[todayStr] && extractExercisesFromPlanEntry(parsedDate[todayStr]).length > 0) {
+            hasTodayInDateSchedule = true;
+          }
+        } catch {}
+        const sigDate = 'boot_date_' + todayStr + '_' + dateRaw.length;
+        if (localStorage.getItem(getScopedGarminKey(LAST_PUSHED_SIG_KEY)) !== sigDate) {
+          handleCalendarStorageWrite(`celik_kodu_date_schedule_${uid}`, dateRaw);
+        }
+      }
+
+      const lastGenRaw = localStorage.getItem('celik_kodu_last_generated_workout');
+      if (!hasTodayInDateSchedule && lastGenRaw) {
+        handleGeneratedSingleDayWorkoutWrite(lastGenRaw);
+      }
+
       const weekRaw = localStorage.getItem(`celik_kodu_weekly_schedule_${uid}`);
       if (weekRaw) {
-        handleCalendarStorageWrite(`celik_kodu_weekly_schedule_${uid}`, weekRaw);
+        const sigWeek = 'boot_week_' + todayStr + '_' + weekRaw.length;
+        if (localStorage.getItem(getScopedGarminKey(LAST_PUSHED_SIG_KEY)) !== sigWeek) {
+          handleCalendarStorageWrite(`celik_kodu_weekly_schedule_${uid}`, weekRaw);
+        }
       }
     } catch {}
   }
@@ -1676,7 +1751,7 @@
   async function syncGarminWellnessStepsSilent() {
     if (!isGarminEnabledForCurrentUser()) return false;
     try {
-      const res = await fetch(`${BRIDGE_URL}/api/tredict/wellness?days=21`);
+      const res = await fetchGarminBridge('/api/tredict/wellness?days=21');
       const data = await res.json();
       if (data && data.ok && Array.isArray(data.daily) && data.daily.length > 0) {
         const current = getStoredWellnessStepsMap();
