@@ -24,7 +24,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=273">
+    <link rel="stylesheet" href="css/style.css?v=274">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH (CANVA MODERN ATHLETIC LIGHT V229) */
         html, body { background-color: #F8FAFC; color: #0F172A; color-scheme: light; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -51,7 +51,7 @@
                     <path d="M34 25L26 36H33L30 46L39 34H32L34 25Z" fill="#FFFFFF"/>
                 </svg>
             </div>
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v273</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v274</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -208,7 +208,7 @@
                         <div class="modern-brand-subrow">
                             <span id="headerActiveTabLabel">ÜRETİCİ</span>
                             <span class="modern-brand-subdot" aria-hidden="true">•</span>
-                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v273</span>
+                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v274</span>
                         </div>
                     </div>
                 </div>
@@ -266,7 +266,7 @@
             <div id="topFitnessCardioScoreStrip" class="top-fc-score-strip" onclick="openFitnessCardioScoreAnalytics()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openFitnessCardioScoreAnalytics();}" title="Detaylı Fitness & Kardiyo Puan Hesabını Gör">
                 <div class="top-fc-bar-col fitness-col">
                     <div class="top-fc-bar-head">
-                        <span class="top-fc-bar-label">🔴 HAFTALIK FİTNESS</span>
+                        <span class="top-fc-bar-label">🔴 FİTNESS</span>
                         <span class="top-fc-bar-val tabular-nums" id="topFitnessScoreVal">0 / 100</span>
                     </div>
                     <div class="top-fc-track fitness-track">
@@ -275,7 +275,7 @@
                 </div>
                 <div class="top-fc-bar-col cardio-col">
                     <div class="top-fc-bar-head">
-                        <span class="top-fc-bar-label">🔵 HAFTALIK KARDİYO</span>
+                        <span class="top-fc-bar-label">🔵 KARDİYO</span>
                         <span class="top-fc-bar-val tabular-nums" id="topCardioScoreVal">0 / 100</span>
                     </div>
                     <div class="top-fc-track cardio-track">
@@ -965,36 +965,33 @@
 
             <!-- ==================== TAB 5: ADVANCED ANALYTICS, SCALE & MEASUREMENTS ==================== -->
             <div id="analyticsTab" class="tab-content">
-                <div class="generator-card">
+                <div class="generator-card" style="padding:14px;">
                     <!-- HEADER & ACTION BUTTONS -->
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
-                        <div>
-                            <h2 style="font-size:18px; font-weight:900; color:#0F172A;">Gelişim, Çalışan Kaslar & Vücut Analizi</h2>
-                            <p style="font-size:12.5px; color:var(--text-secondary); margin-top:2px;">Hangi kasın ne kadar çalıştığı, tartı ve mezura ölçüleri takibi</p>
-                        </div>
-                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                            <button class="btn btn-gold" style="font-size:12.5px; padding:8px 14px; font-weight:800;" onclick="openScaleModal()">
-                                + Vücut Analizi & Ölçüm Ekle
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:8px;">
+                        <h2 style="font-size:17px; font-weight:900; color:#0F172A; margin:0; white-space:nowrap;">Analiz</h2>
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <button class="btn btn-gold" style="font-size:12px; padding:6px 12px; font-weight:800; border-radius:8px; white-space:nowrap;" onclick="openScaleModal()">
+                                + Ölçüm
                             </button>
-                            <button class="btn btn-outline" style="font-size:12px; padding:7px 12px; font-weight:700;" onclick="exportAnalyticsCSV()" title="Tartı & Ölçüm Verilerini İndir">
-                                CSV İndir
+                            <button class="btn btn-outline" style="font-size:11.5px; padding:6px 10px; font-weight:700; border-radius:8px; white-space:nowrap;" onclick="exportAnalyticsCSV()" title="Verileri İndir">
+                                CSV
                             </button>
                         </div>
                     </div>
 
-                    <!-- SUB VIEW TOGGLES -->
-                    <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:6px; margin-bottom:16px;" class="hide-scrollbar">
-                        <button class="btn btn-outline analytics-subtab-btn active" id="btnSubAnalyticsMuscle" style="font-size:12.5px; padding:6px 12px; border-radius:20px; white-space:nowrap;" onclick="switchAnalyticsSubView('muscle')">
-                            Çalışan Kaslar & Harita
+                    <!-- SUB VIEW TOGGLES (4-COLUMN COMPACT BAR) -->
+                    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:5px; margin-bottom:12px; background:#F8FAFC; padding:4px; border-radius:10px; border:1px solid #E2E8F0;">
+                        <button class="btn btn-outline analytics-subtab-btn active" id="btnSubAnalyticsMuscle" style="font-size:11.5px; padding:7px 4px; border-radius:8px; white-space:nowrap; font-weight:800;" onclick="switchAnalyticsSubView('muscle')">
+                            Kas Haritası
                         </button>
-                        <button class="btn btn-outline analytics-subtab-btn" id="btnSubAnalyticsScore" style="font-size:12.5px; padding:6px 12px; border-radius:20px; white-space:nowrap;" onclick="switchAnalyticsSubView('score')">
-                            🎯 Fitness & Kardiyo Puanı
+                        <button class="btn btn-outline analytics-subtab-btn" id="btnSubAnalyticsScore" style="font-size:11.5px; padding:7px 4px; border-radius:8px; white-space:nowrap; font-weight:800;" onclick="switchAnalyticsSubView('score')">
+                            Puanlar
                         </button>
-                        <button class="btn btn-outline analytics-subtab-btn" id="btnSubAnalyticsScale" style="font-size:12.5px; padding:6px 12px; border-radius:20px; white-space:nowrap;" onclick="switchAnalyticsSubView('scale')">
-                            Vücut Analizi & Ölçüler
+                        <button class="btn btn-outline analytics-subtab-btn" id="btnSubAnalyticsScale" style="font-size:11.5px; padding:7px 4px; border-radius:8px; white-space:nowrap; font-weight:800;" onclick="switchAnalyticsSubView('scale')">
+                            Ölçüler
                         </button>
-                        <button class="btn btn-outline analytics-subtab-btn" id="btnSubAnalyticsCombined" style="font-size:12.5px; padding:6px 12px; border-radius:20px; white-space:nowrap;" onclick="switchAnalyticsSubView('combined')">
-                            Akıllı Koç Raporu
+                        <button class="btn btn-outline analytics-subtab-btn" id="btnSubAnalyticsCombined" style="font-size:11.5px; padding:7px 4px; border-radius:8px; white-space:nowrap; font-weight:800;" onclick="switchAnalyticsSubView('combined')">
+                            Koç Raporu
                         </button>
                     </div>
 
@@ -2762,7 +2759,7 @@
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
     <script src="js/exercises-db.js?v=245"></script>
-    <script src="js/app.js?v=273"></script>
+    <script src="js/app.js?v=274"></script>
     <script>
         function getNotifStorageKey() {
             const uid = localStorage.getItem('celik_kodu_active_user_id') || 'default';
@@ -2955,6 +2952,6 @@
             </div>
         </div>
     </div>
-    <script src="js/garmin-tredict-bridge.js?v=273" defer></script>
+    <script src="js/garmin-tredict-bridge.js?v=274" defer></script>
 </body>
 </html>
