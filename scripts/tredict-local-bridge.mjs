@@ -7,6 +7,7 @@ import dns from 'node:dns';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import { execFileSync } from 'node:child_process';
 
 dns.setDefaultResultOrder('ipv4first');
 net.setDefaultAutoSelectFamily(false);
@@ -795,6 +796,92 @@ process.on('unhandledRejection', err => {
   console.error('[Bridge UnhandledRejection]', err?.message || err);
 });
 
+let cachedGcloudToken = '';
+let cachedGcloudTokenExp = 0;
+
+function getGcloudAccessToken() {
+  const now = Date.now();
+  if (cachedGcloudToken && now < cachedGcloudTokenExp) return cachedGcloudToken;
+  try {
+    const gcloudBin = path.join(os.homedir(), 'google-cloud-sdk', 'bin', 'gcloud');
+    const out = execFileSync(gcloudBin, ['auth', 'print-access-token'], { encoding: 'utf8', timeout: 8000 }).trim();
+    if (out) {
+      cachedGcloudToken = out;
+      cachedGcloudTokenExp = now + 35 * 60 * 1000;
+      return cachedGcloudToken;
+    }
+  } catch (err) {
+    console.warn('[CloudRelay] gcloud token error:', err?.message || err);
+  }
+  return '';
+}
+
+let isPollingRelay = false;
+async function pollFirestoreCloudRelay() {
+  if (isPollingRelay) return;
+  isPollingRelay = true;
+  try {
+    const gToken = getGcloudAccessToken();
+    if (!gToken) return;
+    const listUrl = 'https://firestore.googleapis.com/v1/projects/fitness-4f427/databases/(default)/documents/exercise_bug_reports?pageSize=40';
+    const res = await fetch(listUrl, {
+      headers: { Authorization: `Bearer ${gToken}` }
+    });
+    if (res.status === 401) {
+      cachedGcloudToken = '';
+      cachedGcloudTokenExp = 0;
+      return;
+    }
+    if (!res.ok) return;
+    const data = await res.json();
+    const docs = Array.isArray(data?.documents) ? data.documents : [];
+    const relayDocs = docs.filter(d => d?.fields?.exerciseId?.stringValue === 'garmin_outbox_relay');
+    if (!relayDocs.length) return;
+
+    const tredictToken = getTredictToken();
+    const intervalsToken = getIntervalsToken();
+
+    for (const doc of relayDocs) {
+      const docName = doc.name;
+      const action = doc?.fields?.action?.stringValue || 'push-workout';
+      const payloadJson = doc?.fields?.payloadJson?.stringValue || '{}';
+      try {
+        const body = JSON.parse(payloadJson);
+        if (action === 'delete-dates') {
+          const dates = Array.isArray(body.dates) ? body.dates : [];
+          const deleteAll = Boolean(body.deleteAll);
+          const subSportTypes = Array.isArray(body.subSportTypes) ? body.subSportTypes : [];
+          if (tredictToken) {
+            const deleted = await deleteTredictStrengthTrainingsByDates(dates, deleteAll, tredictToken, subSportTypes);
+            console.log(`[CloudRelay] Deleted ${deleted.length} Garmin workouts for dates:`, dates);
+          }
+        } else {
+          const planPayload = body.planPayload;
+          if (tredictToken && planPayload && Array.isArray(planPayload.planTrainings) && planPayload.planTrainings.length > 0) {
+            const created = await addTredictStrengthTrainingsToLiveCalendar(planPayload.planTrainings, tredictToken);
+            console.log(`[CloudRelay] Pushed ${created.length} Garmin workouts to Tredict Live Calendar:`, created.map(c => `${c.calendarDate}:${c.title}`));
+          } else if (intervalsToken && Array.isArray(body.intervalsEvents) && body.intervalsEvents.length > 0) {
+            await callIntervalsApi('/athlete/0/events/bulk?upsert=true', 'POST', body.intervalsEvents, intervalsToken);
+            console.log(`[CloudRelay] Pushed ${body.intervalsEvents.length} workouts to Intervals.icu`);
+          }
+        }
+      } catch (e) {
+        console.error('[CloudRelay] Processing error:', e?.message || e);
+      }
+      try {
+        await fetch(`https://firestore.googleapis.com/v1/${docName}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${gToken}` }
+        });
+      } catch {}
+    }
+  } catch {} finally {
+    isPollingRelay = false;
+  }
+}
+
 server.listen(PORT, '127.0.0.1', () => {
-  console.log(`[Garmin/Intervals.icu/Tredict Local Bridge] Dinleniyor: http://127.0.0.1:${PORT}`);
+  console.log(`[Garmin/Intervals.icu/Tredict Local Bridge] Dinleniyor: http://127.0.0.1:${PORT} (Bulut Rölesi Aktif)`);
+  setTimeout(pollFirestoreCloudRelay, 1000);
+  setInterval(pollFirestoreCloudRelay, 3500);
 });

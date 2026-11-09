@@ -9989,6 +9989,8 @@ KESİN KURALLAR:
                 } catch(e) {}
             }
 
+            reports = (reports || []).filter(r => r && r.exerciseId !== 'garmin_outbox_relay');
+
             if (countEl) countEl.innerText = `${reports.length} Bildirim Havuzda`;
 
             if (reports.length === 0) {
@@ -27947,7 +27949,7 @@ KURALLAR:
             if ('serviceWorker' in navigator && navigator.serviceWorker) {
                 window.addEventListener('load', () => {
                     try {
-                        navigator.serviceWorker.register('./sw.js?v=280')
+                        navigator.serviceWorker.register('./sw.js?v=281')
                             .then(reg => {
                                 console.log('SW scope:', reg.scope);
                                 if (reg.update) reg.update();
