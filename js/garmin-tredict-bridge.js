@@ -237,7 +237,7 @@
 
   function getActiveUidSafe() {
     const u = getCurrentUserObj();
-    return (u && u.id) ? u.id : 'usr_admin';
+    return (u && u.id) ? u.id : '';
   }
 
   function getScopedGarminKey(baseKey) {
@@ -479,14 +479,88 @@
     manifests.__lastSent = manifestObj;
     try {
       localStorage.setItem(getScopedGarminKey(SENT_MANIFESTS_KEY), JSON.stringify(manifests));
+      if (typeof window.scheduleUserStateCloudSync === 'function') window.scheduleUserStateCloudSync();
     } catch {}
     return manifestObj;
   }
 
+  function buildManifestFromAppHistoryLog(appLog, localDatePrefix) {
+    if (!appLog || !Array.isArray(appLog.exercises) || appLog.exercises.length === 0) return null;
+    const plannedExercises = appLog.exercises.map((item, idx) => {
+      const audited = auditExerciseWithLibraryGuard(item.id || item.exerciseId || item.name || item);
+      const setsArr = Array.isArray(item.sets) ? item.sets.filter(s => s && s.completed !== false) : [];
+      const plannedSets = setsArr.length > 0
+        ? setsArr.length
+        : Math.max(1, Number(item.completedSetsCount || item.completedSets || item.sets || 3));
+      const plannedReps = setsArr.length > 0
+        ? Math.max(1, Math.round(setsArr.reduce((sum, s) => sum + parseSingleRepCount(s.reps, 10), 0) / setsArr.length))
+        : parseSingleRepCount(item.reps, 10);
+      const plannedWeight = setsArr.length > 0
+        ? Math.max(0, ...setsArr.map(s => Number(s.weight || 0)))
+        : Number(item.maxWeight || item.weight || item.targetWeight || 0);
+      return {
+        stepOrder: idx,
+        originalId: audited.originalId,
+        originalName: item.name || audited.originalName,
+        primaryMuscles: audited.primaryMuscles,
+        secondaryMuscles: audited.secondaryMuscles,
+        plannedSets,
+        plannedReps,
+        plannedWeight,
+        loggedSetsArray: setsArr,
+        isInterSetExtra: Boolean(item.isInterSetExtra),
+        fitCategory: audited.fitCategory,
+        fitName: audited.fitName,
+        fitNote: audited.fitNote,
+        matchType: audited.matchType
+      };
+    });
+    const locSuffix = appLog.locationName ? ` (${appLog.locationName})` : '';
+    const baseTitle = appLog.program || appLog.title || 'Çelik Kodu Güç Seansı';
+    return {
+      manifestId: 'manifest_applog_' + (appLog.id || localDatePrefix),
+      activityId: appLog.garminActivityId || ('date_' + localDatePrefix),
+      fromAppHistoryLogId: appLog.id,
+      title: baseTitle.includes(locSuffix) ? baseTitle : (baseTitle + locSuffix),
+      sentAt: appLog.date || localDatePrefix,
+      plannedExercises
+    };
+  }
+
   function findManifestForActivity(activity) {
+    const localDatePrefix = toLocalIsoDateString(activity.date);
+    const rounds = Array.isArray(activity.rounds) ? activity.rounds : [];
+    const hasStructuredNoteTags = rounds.some(r => /\[id:[a-z0-9_]+\]/i.test(String(r?.note || '')));
+
+    // YEDEK AKIŞ (Yalnızca program Garmin'e aktarılmadıysa ve saatte bağımsız/serbest kayıt açıldıysa):
+    // Kullanıcının aynı gün uygulama içinden adım adım kaydettiği telefon antrenmanını baz al.
+    if (!hasStructuredNoteTags && localDatePrefix) {
+      try {
+        const uid = getActiveUidSafe();
+        const historyRaw = localStorage.getItem(`celik_kodu_history_${uid}`);
+        if (historyRaw) {
+          const logs = JSON.parse(historyRaw);
+          if (Array.isArray(logs)) {
+            const appLog = logs.find(l =>
+              l &&
+              !String(l.id || '').startsWith('garmin_') &&
+              l.sourceChief !== 'garmin-tredict-guard' &&
+              (l.garminActivityId === activity.id || toLocalIsoDateString(l.date) === localDatePrefix) &&
+              Array.isArray(l.exercises) &&
+              l.exercises.length > 0
+            );
+            if (appLog) {
+              const appManifest = buildManifestFromAppHistoryLog(appLog, localDatePrefix);
+              if (appManifest) return appManifest;
+            }
+          }
+        }
+      } catch {}
+    }
+
+    // ANA AKIŞ (Program Garmin'e aktarıldıysa): Veriler doğrudan Garmin'e gönderilen programdan ve saatten akar!
     const manifests = getSentManifestsMap();
     if (activity.id && manifests[activity.id]) return manifests[activity.id];
-    const localDatePrefix = toLocalIsoDateString(activity.date);
     if (localDatePrefix && manifests['date_' + localDatePrefix]) return manifests['date_' + localDatePrefix];
     const rawDatePrefix = String(activity.date || '').slice(0, 10);
     if (rawDatePrefix && manifests['date_' + rawDatePrefix]) return manifests['date_' + rawDatePrefix];
@@ -580,14 +654,19 @@
       if (r.setType === 'rest') {
         lastRest = r;
       } else if (r.setType === 'active' || r.exerciseCategory || r.repetitions || r.weight) {
+        const durSec = Number(r.duration || 30);
+        const startMs = r.startTime ? new Date(r.startTime).getTime() : NaN;
         activeSets.push({
           roundIndex: idx,
+          startTime: r.startTime || null,
+          startTimeMs: Number.isFinite(startMs) ? startMs : null,
+          endTimeMs: Number.isFinite(startMs) ? (startMs + Math.round(durSec * 1000)) : null,
           exerciseCategory: r.exerciseCategory || 'total_body',
           exerciseName: r.exerciseName || undefined,
           note: r.note || '',
           repetitions: Number(r.repetitions || 10),
           weight: Number(r.weight || 0),
-          duration: Number(r.duration || 30),
+          duration: durSec,
           heartrate: Number(r.heartrate || activity.summary?.heartrate || 120),
           heartrateMax: Number(r.heartrateMax || activity.summary?.heartrateMax || 145),
           restDuration: lastRest ? Number(lastRest.duration || 60) : 60,
@@ -660,31 +739,161 @@
     }
 
     const rawGroups = [];
-    for (const s of activeSets) {
-      const isKnown = Boolean(s.exerciseName);
-      const groupKey = isKnown
-        ? `known:${s.exerciseCategory}:${s.exerciseName}`
-        : `undef:${s.exerciseCategory}:${s.weight}:${s.note || ''}`;
-      const prev = rawGroups[rawGroups.length - 1];
-      if (prev && prev.groupKey === groupKey) {
-        prev.sets.push(s);
-      } else {
+    const hasExplicitNoteTags = activeSets.some(s => /\[id:[a-z0-9_]+\]/i.test(String(s.note || '')));
+    const isCardioOnly = activeSets.length === 1 && Boolean(activeSets[0]?.isCardioSession);
+
+    if (plannedQueue.length > 0 && activeSets.length > 0 && !isCardioOnly && !hasExplicitNoteTags) {
+      // Kullanıcı aynı gün uygulamada antrenmanı adım adım kaydettiyse (veya saatten serbest modda nabız kaydı geldiyse),
+      // saatin bilek ivmeölçeriyle rastgele uydurduğu (curl, row, bench_press) bölünmeleri yok say ve setleri doğrudan
+      // bizim gerçek hareket sıramıza göre grupla!
+      const isFromAppLog = Boolean(manifest && manifest.fromAppHistoryLogId);
+      const totalPlannedSets = Math.max(1, plannedQueue.reduce((sum, p) => sum + Math.max(1, Number(p.plannedSets || 3)), 0));
+      let cursor = 0;
+      const usedWatchRoundIndices = new Set();
+      let lastMatchedWatchRoundIndex = -1;
+
+      plannedQueue.forEach((pStep, pIdx) => {
+        const targetCount = Math.max(1, Number(pStep.plannedSets || 3));
+        let sliceCount = targetCount;
+        if (isFromAppLog) {
+          if (pIdx === plannedQueue.length - 1) {
+            sliceCount = Math.max(1, activeSets.length - cursor);
+          } else {
+            sliceCount = Math.max(1, Math.round((targetCount / totalPlannedSets) * activeSets.length));
+          }
+        }
+        let watchSlice = activeSets.slice(cursor, cursor + sliceCount);
+        cursor += sliceCount;
+        if (watchSlice.length === 0) {
+          watchSlice = [activeSets[activeSets.length - 1]];
+        }
+
+        const loggedSets = Array.isArray(pStep.loggedSetsArray) && pStep.loggedSetsArray.length > 0
+          ? pStep.loggedSetsArray
+          : null;
+
+        // Hibrit Saat/Dakika + Toplu İşaretleme Korumalı (Bulk-Tap Guard) Eşleştirme:
+        // 1) Setin completedAt zaman damgası varsa ve komşu setle arasında >=15 sn fark varsa (toplu tık-tık-tık değilse),
+        //    saatteki ±35 sn penceresine düşen ve kronolojik sırayı bozmayan en yakın aktif seti bul.
+        // 2) Toplu işaretlendiyse (<15 sn) veya saat damgası yoksa doğrudan sıradaki watchSlice setini kullan.
+        const mergedSets = loggedSets
+          ? loggedSets.map((ls, sIdx) => {
+              let ws = watchSlice[Math.min(sIdx, watchSlice.length - 1)] || watchSlice[0];
+              let matchedBy = 'sequence';
+              const tapMs = Number(ls && ls.completedAt ? ls.completedAt : 0);
+              if (tapMs > 0) {
+                const prevTapMs = sIdx > 0 ? Number(loggedSets[sIdx - 1]?.completedAt || 0) : 0;
+                const nextTapMs = sIdx < loggedSets.length - 1 ? Number(loggedSets[sIdx + 1]?.completedAt || 0) : 0;
+                const isBulkTapped = (prevTapMs > 0 && Math.abs(tapMs - prevTapMs) < 15000) ||
+                                     (nextTapMs > 0 && Math.abs(nextTapMs - tapMs) < 15000);
+                if (!isBulkTapped) {
+                  let bestCandidate = null;
+                  let bestDeltaMs = Infinity;
+                  for (const cand of activeSets) {
+                    if (!cand.startTimeMs || usedWatchRoundIndices.has(cand.roundIndex) || cand.roundIndex <= lastMatchedWatchRoundIndex) continue;
+                    const refEndMs = cand.endTimeMs || (cand.startTimeMs + 30000);
+                    const delta = tapMs >= cand.startTimeMs && tapMs <= refEndMs
+                      ? 0
+                      : Math.min(Math.abs(tapMs - refEndMs), Math.abs(tapMs - cand.startTimeMs));
+                    if (delta <= 35000 && delta < bestDeltaMs) {
+                      bestDeltaMs = delta;
+                      bestCandidate = cand;
+                    }
+                  }
+                  if (bestCandidate) {
+                    ws = bestCandidate;
+                    usedWatchRoundIndices.add(bestCandidate.roundIndex);
+                    lastMatchedWatchRoundIndex = bestCandidate.roundIndex;
+                    matchedBy = 'timestamp';
+                  }
+                }
+              }
+              return {
+                roundIndex: ws.roundIndex,
+                startTime: ws.startTime || null,
+                completedAt: tapMs > 0 ? tapMs : null,
+                matchedBy,
+                exerciseCategory: pStep.fitCategory || ws.exerciseCategory,
+                exerciseName: pStep.fitName || ws.exerciseName,
+                note: pStep.fitNote || `[id:${pStep.originalId}]`,
+                repetitions: parseSingleRepCount(ls.reps, pStep.plannedReps || 10),
+                weight: Number(ls.weight ?? pStep.plannedWeight ?? 0),
+                duration: Number(ws.duration || 30),
+                heartrate: Number(ws.heartrate || activity.summary?.heartrate || 120),
+                heartrateMax: Number(ws.heartrateMax || activity.summary?.heartrateMax || 145),
+                restDuration: Number(ws.restDuration || 60),
+                hrRecovery: ws.hrRecovery !== undefined ? ws.hrRecovery : null
+              };
+            })
+          : watchSlice.map(ws => ({
+              ...ws,
+              repetitions: Number(ws.repetitions || pStep.plannedReps || 10),
+              weight: Number(ws.weight || pStep.plannedWeight || 0)
+            }));
+
         rawGroups.push({
-          groupKey,
-          isKnown,
-          rawCategory: s.exerciseCategory,
-          rawName: s.exerciseName,
-          rawNote: s.note || '',
-          weight: s.weight,
-          sets: [s]
+          groupKey: `planned:${pIdx}:${pStep.originalId}`,
+          isKnown: true,
+          forcedPlannedStep: pStep,
+          rawCategory: pStep.fitCategory || 'total_body',
+          rawName: pStep.fitName || undefined,
+          rawNote: pStep.fitNote || `[id:${pStep.originalId}]`,
+          weight: Number(pStep.plannedWeight || mergedSets[0]?.weight || 0),
+          sets: mergedSets
         });
+      });
+
+      // Uygulama kaydı değilse ve planlanan setlerden sonra saatte fazladan set açıldıysa onları plan dışı olarak ekle
+      if (!isFromAppLog && cursor < activeSets.length) {
+        const extraSets = activeSets.slice(cursor);
+        for (const s of extraSets) {
+          const isKnown = Boolean(s.exerciseName);
+          const groupKey = isKnown
+            ? `known:${s.exerciseCategory}:${s.exerciseName}`
+            : `undef:${s.exerciseCategory}:${s.weight}:${s.note || ''}`;
+          const prev = rawGroups[rawGroups.length - 1];
+          if (prev && !prev.forcedPlannedStep && prev.groupKey === groupKey) {
+            prev.sets.push(s);
+          } else {
+            rawGroups.push({
+              groupKey,
+              isKnown,
+              rawCategory: s.exerciseCategory,
+              rawName: s.exerciseName,
+              rawNote: s.note || '',
+              weight: s.weight,
+              sets: [s]
+            });
+          }
+        }
+      }
+    } else {
+      for (const s of activeSets) {
+        const isKnown = Boolean(s.exerciseName);
+        const groupKey = isKnown
+          ? `known:${s.exerciseCategory}:${s.exerciseName}`
+          : `undef:${s.exerciseCategory}:${s.weight}:${s.note || ''}`;
+        const prev = rawGroups[rawGroups.length - 1];
+        if (prev && prev.groupKey === groupKey) {
+          prev.sets.push(s);
+        } else {
+          rawGroups.push({
+            groupKey,
+            isKnown,
+            rawCategory: s.exerciseCategory,
+            rawName: s.exerciseName,
+            rawNote: s.note || '',
+            weight: s.weight,
+            sets: [s]
+          });
+        }
       }
     }
 
     return rawGroups.map((rg, idx) => {
       const groupId = `${activity.id}_g${idx}`;
       const resolvedExId = resolvedMap[groupId] || null;
-      const plannedStep = idx < plannedQueue.length ? plannedQueue[idx] : null;
+      const plannedStep = rg.forcedPlannedStep || (idx < plannedQueue.length ? plannedQueue[idx] : null);
 
       const noteIdMatch = String(rg.rawNote || '').match(/\[id:([a-z0-9_]+)\]/i);
       const noteExId = noteIdMatch ? noteIdMatch[1] : null;
@@ -696,8 +905,8 @@
         matchedEx = EXERCISES_DB.find(x => x.id === resolvedExId) || null;
         identitySource = 'user_resolved';
       } else if (plannedStep && typeof EXERCISES_DB !== 'undefined') {
-        matchedEx = EXERCISES_DB.find(x => x.id === plannedStep.originalId) || null;
-        identitySource = 'original_manifest';
+        matchedEx = EXERCISES_DB.find(x => x.id === plannedStep.originalId || x.name === plannedStep.originalName) || null;
+        identitySource = manifest && manifest.fromAppHistoryLogId ? 'app_logged_workout' : 'original_manifest';
       } else if (noteExId && typeof EXERCISES_DB !== 'undefined') {
         matchedEx = EXERCISES_DB.find(x => x.id === noteExId) || null;
         identitySource = 'original_note_tag';
@@ -718,11 +927,11 @@
         groupId,
         groupKey: rg.groupKey,
         isKnown: rg.isKnown,
-        isResolved: Boolean(matchedEx),
+        isResolved: Boolean(matchedEx || plannedStep),
         identitySource,
         matchedEx,
         originalId: matchedEx ? matchedEx.id : (plannedStep ? plannedStep.originalId : null),
-        originalName: matchedEx ? matchedEx.name : (plannedStep ? plannedStep.originalName : null),
+        originalName: (plannedStep && plannedStep.originalName) || (matchedEx ? matchedEx.name : null),
         primaryMuscles: matchedEx ? matchedEx.primaryMuscles : (plannedStep ? plannedStep.primaryMuscles : []),
         secondaryMuscles: matchedEx ? matchedEx.secondaryMuscles : (plannedStep ? plannedStep.secondaryMuscles : []),
         rawCategory: rg.rawCategory,
@@ -758,6 +967,8 @@
     return formatLocalIsoDate(d);
   }
 
+  const syncedActivityTitleUpdates = new Set();
+
   function handoffCompletedActivitiesToTabChiefs() {
     if (!isGarminEnabledForCurrentUser() || typeof EXERCISES_DB === 'undefined') return;
     const activities = getStoredActivities();
@@ -766,14 +977,34 @@
       if (!uid) return;
       const historyKey = `celik_kodu_history_${uid}`;
       const rawLogs = JSON.parse(localStorage.getItem(historyKey) || '[]');
-      const logs = Array.isArray(rawLogs)
+      let logs = Array.isArray(rawLogs)
         ? rawLogs.filter(l => !l || !LEGACY_TEST_ACTIVITY_IDS.has(l.garminActivityId))
         : [];
       let changed = logs.length !== rawLogs.length;
 
+      // Eski hatalı sayısal ex.sets formatını diziye dönüştür (Geçmiş ekranının çökmesini önler)
+      logs.forEach(l => {
+        if (!l || !Array.isArray(l.exercises)) return;
+        l.exercises.forEach(ex => {
+          if (ex && typeof ex.sets === 'number') {
+            const cnt = Math.max(1, ex.sets);
+            const rVal = Number(ex.reps || 10);
+            const wVal = Number(ex.weight || 0);
+            ex.sets = Array.from({ length: cnt }, (_, idx) => ({
+              setNo: idx + 1,
+              weight: wVal,
+              reps: rVal,
+              completed: true,
+              volume: wVal * rVal
+            }));
+            changed = true;
+          }
+        });
+      });
+
       activities.forEach(act => {
         const groups = analyzeActivityGroups(act);
-        const resolvedGroups = groups.filter(g => g.isResolved && g.matchedEx);
+        const resolvedGroups = groups.filter(g => g.isResolved && (g.matchedEx || g.originalName));
         if (!resolvedGroups.length) return;
 
         const logDate = toLocalIsoDateString(act.date);
@@ -782,12 +1013,98 @@
         const durFmt = durSec < 3600
           ? `${String(Math.floor(durSec / 60)).padStart(2, '0')}:${String(Math.round(durSec % 60)).padStart(2, '0')}`
           : `${Math.floor(durSec / 3600)}s ${Math.floor((durSec % 3600) / 60)}dk`;
+
+        const healthSummaryObj = {
+          heartrateAvg: act.summary?.heartrate || null,
+          heartrateMax: act.summary?.heartrateMax || null,
+          calories: act.summary?.calories || null,
+          durationSetsSec: act.summary?.durationSets || null,
+          durationRestSec: act.summary?.durationRest || null
+        };
+
+        // 1) Kullanıcı aynı gün uygulama içinden antrenmanını adım adım kaydettiyse:
+        //    Mükerrer "garmin_..." kaydı açma (varsa temizle); saatin yalnızca nabız/kalori/TUT sağlık verisini
+        //    doğrudan kullanıcının kendi uygulama kaydının içine birleştir!
+        const userAppLog = logs.find(l =>
+          l &&
+          !String(l.id || '').startsWith('garmin_') &&
+          l.sourceChief !== 'garmin-tredict-guard' &&
+          (l.garminActivityId === act.id || toLocalIsoDateString(l.date) === logDate)
+        );
+
+        if (userAppLog) {
+          const beforeLen = logs.length;
+          logs = logs.filter(l => !(l && (l.id === 'garmin_' + act.id || (String(l.id || '').startsWith('garmin_') && toLocalIsoDateString(l.date) === logDate))));
+          if (logs.length !== beforeLen) changed = true;
+
+          if (userAppLog.garminActivityId !== act.id) {
+            userAppLog.garminActivityId = act.id;
+            changed = true;
+          }
+          if (JSON.stringify(userAppLog.healthSummary) !== JSON.stringify(healthSummaryObj)) {
+            userAppLog.healthSummary = healthSummaryObj;
+            changed = true;
+          }
+          if (Array.isArray(userAppLog.exercises)) {
+            userAppLog.exercises.forEach((ex, exIdx) => {
+              const matchGrp = resolvedGroups[exIdx] || resolvedGroups.find(g => g.originalId === ex.id || g.originalName === ex.name);
+              if (matchGrp && matchGrp.healthTelemetry) {
+                if (JSON.stringify(ex.healthTelemetry) !== JSON.stringify(matchGrp.healthTelemetry)) {
+                  ex.healthTelemetry = matchGrp.healthTelemetry;
+                  changed = true;
+                }
+                if (Array.isArray(ex.sets) && Array.isArray(matchGrp.sets)) {
+                  ex.sets.forEach((stObj, sIdx) => {
+                    const mSet = matchGrp.sets[Math.min(sIdx, matchGrp.sets.length - 1)];
+                    if (mSet && stObj && typeof stObj === 'object') {
+                      if (stObj.heartrate !== mSet.heartrate || stObj.heartrateMax !== mSet.heartrateMax) {
+                        stObj.heartrate = mSet.heartrate;
+                        stObj.heartrateMax = mSet.heartrateMax;
+                        stObj.durationSec = Math.round(Number(mSet.duration || 0));
+                        stObj.watchStartTime = mSet.startTime || null;
+                        stObj.matchedBy = mSet.matchedBy || 'sequence';
+                        changed = true;
+                      }
+                    }
+                  });
+                }
+              }
+            });
+          }
+
+          // Saatte "Güç" olarak açılan serbest antrenmanın adını ve hareket özetini Tredict'e de geri işle
+          const realTitle = userAppLog.program || userAppLog.title || '';
+          if (realTitle && (!act.title || act.title === 'Güç' || act.title === 'Garmin Antrenmanı')) {
+            act.title = realTitle;
+            if (!syncedActivityTitleUpdates.has(act.id)) {
+              syncedActivityTitleUpdates.add(act.id);
+              const summaryLines = resolvedGroups.map(g => {
+                const nm = g.originalName || (g.matchedEx ? g.matchedEx.name : 'Hareket');
+                const avgR = Math.round(g.sets.reduce((s, x) => s + (x.repetitions || 10), 0) / g.sets.length);
+                return `• ${nm}: ${g.sets.length}×${avgR}${g.weight ? ` @ ${g.weight}kg` : ''} (❤️ ${g.healthTelemetry.avgHeartrate} bpm)`;
+              }).join('\n');
+              fetchGarminBridge('/api/tredict/activity-update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  id: act.id,
+                  title: realTitle,
+                  notes: `Çelik Kodu Uygulama Eşitlemesi:\n${summaryLines}`
+                })
+              }).catch(() => {});
+            }
+          }
+          return;
+        }
+
+        // 2) Uygulamada o gün kayıt yoksa (yalnızca saat kullanıldıysa) geçmiş kaydı oluştur
         const calcVol = resolvedGroups.reduce((sum, g) => {
           const repsSum = g.sets.reduce((s, x) => s + Number(x.repetitions || 0), 0);
           return sum + repsSum * Number(g.weight || 0);
         }, 0);
         const totalVolKg = Math.round((Number(act.summary?.volume) || calcVol || 0) * 10) / 10;
         const totalSetsCount = Number(act.summary?.exerciseSetCount) || resolvedGroups.reduce((s, g) => s + g.sets.length, 0);
+        const totalRepsCount = resolvedGroups.reduce((sum, g) => sum + g.sets.reduce((s, x) => s + Number(x.repetitions || 0), 0), 0);
 
         let existingLog = logs.find(l => l && (l.garminActivityId === act.id || l.id === 'garmin_' + act.id));
         if (!existingLog) {
@@ -804,13 +1121,8 @@
             durationSecs: durSec,
             totalVolumeKg: totalVolKg,
             totalSetsCompleted: totalSetsCount,
-            healthSummary: {
-              heartrateAvg: act.summary?.heartrate || null,
-              heartrateMax: act.summary?.heartrateMax || null,
-              calories: act.summary?.calories || null,
-              durationSetsSec: act.summary?.durationSets || null,
-              durationRestSec: act.summary?.durationRest || null
-            },
+            totalRepsCompleted: totalRepsCount,
+            healthSummary: healthSummaryObj,
             exercises: []
           };
           logs.unshift(existingLog);
@@ -832,27 +1144,45 @@
             existingLog.totalSetsCompleted = totalSetsCount;
             changed = true;
           }
+          existingLog.healthSummary = healthSummaryObj;
         }
 
         resolvedGroups.forEach(grp => {
           const avgReps = Math.round(grp.sets.reduce((s, x) => s + (x.repetitions || 10), 0) / grp.sets.length);
+          const wVal = Number(grp.weight || 0);
+          const setsArray = grp.sets.map((s, sIdx) => {
+            const rVal = Number(s.repetitions || avgReps || 10);
+            const swVal = Number(s.weight ?? wVal);
+            return {
+              setNo: sIdx + 1,
+              weight: swVal,
+              reps: rVal,
+              completed: true,
+              volume: swVal * rVal
+            };
+          });
+          const exId = grp.matchedEx ? grp.matchedEx.id : (grp.originalId || 'custom');
+          const exName = grp.originalName || (grp.matchedEx ? grp.matchedEx.name : 'Hareket');
           const existingEx = existingLog.exercises.find(e => e.groupId === grp.groupId);
           const exEntry = {
             groupId: grp.groupId,
-            id: grp.matchedEx.id,
-            name: grp.matchedEx.name,
-            primaryMuscles: grp.matchedEx.primaryMuscles || [],
-            secondaryMuscles: grp.matchedEx.secondaryMuscles || [],
-            sets: grp.sets.length,
+            id: exId,
+            name: exName,
+            primaryMuscles: grp.primaryMuscles || [],
+            secondaryMuscles: grp.secondaryMuscles || [],
+            sets: setsArray,
             reps: avgReps,
-            weight: grp.weight || 0,
-            completedSets: grp.sets.length,
+            weight: wVal,
+            completedSets: setsArray.length,
+            completedSetsCount: setsArray.length,
+            maxWeight: wVal,
+            exerciseVolume: setsArray.reduce((sum, st) => sum + Number(st.volume || 0), 0),
             healthTelemetry: grp.healthTelemetry
           };
           if (!existingEx) {
             existingLog.exercises.push(exEntry);
             changed = true;
-          } else if (existingEx.id !== exEntry.id || existingEx.name !== exEntry.name) {
+          } else if (existingEx.id !== exEntry.id || existingEx.name !== exEntry.name || !Array.isArray(existingEx.sets)) {
             Object.assign(existingEx, exEntry);
             changed = true;
           }
@@ -1700,6 +2030,10 @@
     const metrics = computePhysiologicalMetrics();
 
     const cardsHtml = activities.map(act => {
+      const manifest = findManifestForActivity(act);
+      const displayTitle = (manifest && manifest.title && (!act.title || act.title === 'Güç' || act.title === 'Garmin Antrenmanı'))
+        ? manifest.title
+        : act.title;
       const groups = analyzeActivityGroups(act);
       const unresolved = groups.filter(g => !g.isResolved);
       const resolved = groups.filter(g => g.isResolved);
@@ -1769,7 +2103,7 @@
       return `<div style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:10px;padding:12px 14px;margin-top:10px;color:#0F172A;">
         <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;">
           <div>
-            <strong style="font-size:14px;color:#0F172A;">⌚ ${escHtml(act.title)} <span style="font-size:11.5px;font-weight:700;color:#0369A1;">• Garmin fr945</span></strong>
+            <strong style="font-size:14px;color:#0F172A;">⌚ ${escHtml(displayTitle)} <span style="font-size:11.5px;font-weight:700;color:#0369A1;">• Garmin fr945</span></strong>
             <div style="font-size:12px;color:#475569;">📅 ${escHtml(dateStr)} • ❤️ Ort. ${avgHr} / Zirve ${maxHr} bpm • 🔥 ${cal} kcal • 🏋️ ${groups.reduce((n, g) => n + g.sets.length, 0)} Set/Blok</div>
           </div>
           <span style="background:${unresolved.length ? '#FEF3C7' : '#DCFCE7'};color:${unresolved.length ? '#B45309' : '#15803D'};padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;">

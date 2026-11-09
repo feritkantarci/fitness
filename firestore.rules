@@ -1,57 +1,170 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
+    // Varsayılan Red (Default Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
     // Doğrulama ve Rol Yardımcı Fonksiyonları
     function isAuthenticated() {
       return request.auth != null;
     }
-    
+
     function isOwner(uid) {
       return isAuthenticated() && request.auth.uid == uid;
     }
-    
+
     function isAdmin() {
       return isAuthenticated() && (
-        request.auth.token.admin == true || 
+        request.auth.token.admin == true ||
         request.auth.token.role == 'admin'
       );
     }
 
-    // Sporcu Antrenman Kayıtları: Yalnızca sporcu kendisi veya antrenör okuyup yazabilir
+    function isValidAthleteId(uid) {
+      return uid is string && uid.matches('^usr_[a-zA-Z0-9_]{1,40}$');
+    }
+
+    function isSealValidForCreate() {
+      return !('syncSeal' in request.resource.data)
+        || (
+          request.resource.data.syncSeal is string
+          && request.resource.data.syncSeal.size() >= 10
+          && request.resource.data.syncSeal.size() <= 120
+        );
+    }
+
+    function isSealValidForWrite() {
+      return !('syncSeal' in resource.data)
+        || !(resource.data.syncSeal is string)
+        || resource.data.syncSeal.size() == 0
+        || (
+          'syncSeal' in request.resource.data
+          && request.resource.data.syncSeal is string
+          && request.resource.data.syncSeal == resource.data.syncSeal
+        )
+        || isAdmin();
+    }
+
+    // Şema Doğrulayıcılar (Create & Update için ortak)
+    function isValidWorkoutLogPayload(data) {
+      return data.keys().hasOnly(['logs', 'updatedAt', 'clientUpdatedAt', 'lastUpdatedBy', 'syncSeal'])
+        && data.logs is list
+        && data.logs.size() <= 500;
+    }
+
+    function isValidMetricLogPayload(data) {
+      return data.keys().hasOnly(['logs', 'updatedAt', 'clientUpdatedAt', 'syncSeal'])
+        && data.logs is list
+        && data.logs.size() <= 500;
+    }
+
+    function isValidUserStatePayload(data) {
+      return data.keys().hasOnly([
+          'weeklySchedule',
+          'nextWeeklySchedule',
+          'dateSchedule',
+          'rememberedWeights',
+          'excludedExercises',
+          'selectedEquipments',
+          'customGyms',
+          'aiDoctrine',
+          'aiCoachSummary',
+          'lastGeneratedWorkout',
+          'activeWorkoutDraft',
+          'garminManifests',
+          'updatedAt',
+          'clientUpdatedAt',
+          'syncSeal'
+        ])
+        && !('password' in data)
+        && !('passwordHash' in data)
+        && !('salt' in data)
+        && !('geminiApiKey' in data);
+    }
+
+    function isValidUsersSystemPayload(data) {
+      return data.keys().hasOnly(['users', 'updatedAt'])
+        && data.users is list
+        && data.users.size() <= 100;
+    }
+
+    // Sporcu Antrenman Kayıtları
     match /workout_logs/{uid} {
-      allow read: if isOwner(uid) || isAdmin();
-      allow write: if isOwner(uid) || isAdmin();
+      allow read: if isValidAthleteId(uid) || isOwner(uid) || isAdmin();
+      allow create: if (isValidAthleteId(uid) || isOwner(uid) || isAdmin())
+        && isValidWorkoutLogPayload(request.resource.data)
+        && isSealValidForCreate();
+      allow update: if (isValidAthleteId(uid) || isOwner(uid) || isAdmin())
+        && isValidWorkoutLogPayload(request.resource.data)
+        && isSealValidForWrite();
+      allow delete: if isAdmin();
     }
 
-    // Vücut Kompozisyonu ve Tartı Geçmişi: Yalnızca sporcu ve antrenör
+    // Vücut Kompozisyonu ve Tartı Geçmişi
     match /scale_logs/{uid} {
-      allow read: if isOwner(uid) || isAdmin();
-      allow write: if isOwner(uid) || isAdmin();
+      allow read: if isValidAthleteId(uid) || isOwner(uid) || isAdmin();
+      allow create: if (isValidAthleteId(uid) || isOwner(uid) || isAdmin())
+        && isValidMetricLogPayload(request.resource.data)
+        && isSealValidForCreate();
+      allow update: if (isValidAthleteId(uid) || isOwner(uid) || isAdmin())
+        && isValidMetricLogPayload(request.resource.data)
+        && isSealValidForWrite();
+      allow delete: if isAdmin();
     }
 
-    // Koç Direktifleri: Sporcu okuyabilir, yalnızca yetkili koç yazabilir
+    // Mezura ve Vücut Ölçü Geçmişi
+    match /measurement_logs/{uid} {
+      allow read: if isValidAthleteId(uid) || isOwner(uid) || isAdmin();
+      allow create: if (isValidAthleteId(uid) || isOwner(uid) || isAdmin())
+        && isValidMetricLogPayload(request.resource.data)
+        && isSealValidForCreate();
+      allow update: if (isValidAthleteId(uid) || isOwner(uid) || isAdmin())
+        && isValidMetricLogPayload(request.resource.data)
+        && isSealValidForWrite();
+      allow delete: if isAdmin();
+    }
+
+    // Sporcu Plan, Ekipman, Ağırlık Hafızası ve AI Koç Durumu Senkronizasyonu
+    match /user_state/{uid} {
+      allow read: if isValidAthleteId(uid) || isOwner(uid) || isAdmin();
+      allow create: if (isValidAthleteId(uid) || isOwner(uid) || isAdmin())
+        && isValidUserStatePayload(request.resource.data)
+        && isSealValidForCreate();
+      allow update: if (isValidAthleteId(uid) || isOwner(uid) || isAdmin())
+        && isValidUserStatePayload(request.resource.data)
+        && isSealValidForWrite();
+      allow delete: if isAdmin();
+    }
+
+    // Koç Direktifleri
     match /coach_directives/{uid} {
-      allow read: if isOwner(uid) || isAdmin();
+      allow read: if isValidAthleteId(uid) || isOwner(uid) || isAdmin();
       allow write: if isAdmin();
     }
 
-    // Özel Akademik Programlar: Sporcu okuyabilir, yalnızca koç yazabilir
+    // Özel Akademik Programlar
     match /custom_programs/{uid} {
-      allow read: if isOwner(uid) || isAdmin();
+      allow read: if isValidAthleteId(uid) || isOwner(uid) || isAdmin();
       allow write: if isAdmin();
     }
 
-    // Egzersiz Hata Bildirim Havuzu: Sporcular hata raporu oluşturabilir, yalnızca koç/admin silebilir/düzenleyebilir
+    // Egzersiz Hata Bildirim Havuzu
     match /exercise_bug_reports/{docId} {
-      allow create: if request.resource.data.exerciseId is string;
-      allow read: if isAuthenticated() || isAdmin();
+      allow create: if request.resource.data.exerciseId is string
+        && request.resource.data.exerciseId.size() <= 120;
+      allow read: if docId is string && docId.size() <= 120;
       allow update, delete: if isAdmin();
     }
 
-    // Sistem Konfigürasyonu ve Kullanıcı Listesi: Yalnızca yöneticiler okuyup yazabilir
+    // Sistem Konfigürasyonu ve Kullanıcı Listesi
     match /app_system/{docId} {
-      allow read, write: if isAdmin();
+      allow read: if docId == 'users' || docId == 'ai_config' || isAdmin();
+      allow create, update: if (docId == 'users' && isValidUsersSystemPayload(request.resource.data))
+        || isAdmin();
+      allow delete: if isAdmin();
     }
   }
 }

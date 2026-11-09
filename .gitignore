@@ -33,3 +33,5 @@ ios-app/
 desktop-app/
 .agents/skills/best-skills/data/
 .garmin-tokens.json
+data/local-cloud-snapshot.json
+data/synced-workout-logs-*.json

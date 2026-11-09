@@ -767,20 +767,43 @@ p { font-size: 14px; color: #94A3B8; line-height: 1.5; margin: 0 0 20px; }
 
     if (req.method === 'POST' && url.pathname === '/api/tredict/activity-update') {
       const body = await readJsonBody(req);
-      if (!body.id) return sendJson(res, 400, { ok: false, error: 'Aktivite ID gerekli.' }, origin);
-      if (String(body.id).startsWith('i') && intervalsToken) {
-        const updated = await callIntervalsApi(`/activity/${body.id}`, 'PUT', {
+      const actId = body.id || body.activityId;
+      if (!actId) return sendJson(res, 400, { ok: false, error: 'Aktivite ID gerekli.' }, origin);
+      if (String(actId).startsWith('i') && intervalsToken) {
+        const updated = await callIntervalsApi(`/activity/${actId}`, 'PUT', {
           name: body.title,
           description: body.notes
         }, intervalsToken);
         return sendJson(res, 200, { ok: true, result: updated }, origin);
       }
       const updated = await callTredictMcpTool('activity-update', {
-        id: body.id,
+        id: actId,
+        activityId: actId,
         title: body.title,
         notes: body.notes
       }, tredictToken);
       return sendJson(res, 200, { ok: true, result: updated }, origin);
+    }
+
+    if (url.pathname === '/api/tredict/workout-logs') {
+      const uid = String(url.searchParams.get('uid') || 'usr_admin').replace(/[^a-zA-Z0-9_-]/g, '');
+      const storeFile = path.resolve(process.cwd(), 'data', `synced-workout-logs-${uid}.json`);
+      if (req.method === 'GET') {
+        let logs = [];
+        try {
+          if (fs.existsSync(storeFile)) {
+            const parsed = JSON.parse(fs.readFileSync(storeFile, 'utf8'));
+            logs = Array.isArray(parsed) ? parsed : (Array.isArray(parsed?.logs) ? parsed.logs : []);
+          }
+        } catch {}
+        return sendJson(res, 200, { ok: true, uid, logs }, origin);
+      }
+      if (req.method === 'POST') {
+        const body = await readJsonBody(req);
+        const incoming = Array.isArray(body.logs) ? body.logs : [];
+        const merged = mergeAndSaveLocalWorkoutLogs(uid, incoming);
+        return sendJson(res, 200, { ok: true, uid, count: merged.length }, origin);
+      }
     }
 
     return sendJson(res, 404, { ok: false, error: 'Uç nokta bulunamadı.' }, origin);
@@ -816,6 +839,27 @@ function getGcloudAccessToken() {
   return '';
 }
 
+function mergeAndSaveLocalWorkoutLogs(uid, incomingLogs) {
+  const safeUid = String(uid || 'usr_admin').replace(/[^a-zA-Z0-9_-]/g, '');
+  const storeFile = path.resolve(process.cwd(), 'data', `synced-workout-logs-${safeUid}.json`);
+  let existing = [];
+  try {
+    if (fs.existsSync(storeFile)) {
+      const parsed = JSON.parse(fs.readFileSync(storeFile, 'utf8'));
+      existing = Array.isArray(parsed) ? parsed : (Array.isArray(parsed?.logs) ? parsed.logs : []);
+    }
+  } catch {}
+  const map = new Map();
+  (Array.isArray(existing) ? existing : []).forEach(l => { if (l && l.id) map.set(l.id, l); });
+  (Array.isArray(incomingLogs) ? incomingLogs : []).forEach(l => { if (l && l.id) map.set(l.id, l); });
+  const merged = Array.from(map.values()).sort((a, b) => new Date(b.date || b.timestamp || 0) - new Date(a.date || a.timestamp || 0));
+  try {
+    fs.mkdirSync(path.dirname(storeFile), { recursive: true });
+    fs.writeFileSync(storeFile, JSON.stringify({ uid: safeUid, updatedAt: new Date().toISOString(), logs: merged }, null, 2), 'utf8');
+  } catch {}
+  return merged;
+}
+
 let isPollingRelay = false;
 async function pollFirestoreCloudRelay() {
   if (isPollingRelay) return;
@@ -835,7 +879,10 @@ async function pollFirestoreCloudRelay() {
     if (!res.ok) return;
     const data = await res.json();
     const docs = Array.isArray(data?.documents) ? data.documents : [];
-    const relayDocs = docs.filter(d => d?.fields?.exerciseId?.stringValue === 'garmin_outbox_relay');
+    const relayDocs = docs.filter(d => {
+      const exId = d?.fields?.exerciseId?.stringValue;
+      return exId === 'garmin_outbox_relay';
+    });
     if (!relayDocs.length) return;
 
     const tredictToken = getTredictToken();

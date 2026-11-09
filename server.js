@@ -46,7 +46,7 @@ app.use('/api/tredict', async (req, res) => {
     return res.status(403).json({ ok: false, error: 'Forbidden: Local requests only' });
   }
 
-  const allowedPaths = new Set(['', '/', '/status', '/wellness', '/activities', '/push-workout', '/delete-dates', '/activity-update']);
+  const allowedPaths = new Set(['', '/', '/status', '/wellness', '/activities', '/push-workout', '/delete-dates', '/activity-update', '/workout-logs']);
   const cleanPath = (req.path || '').replace(/\/+$/, '') || '/';
   if (!allowedPaths.has(cleanPath)) {
     return res.status(404).json({ ok: false, error: 'Endpoint not allowed' });

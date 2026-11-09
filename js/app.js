@@ -2338,28 +2338,45 @@
             } catch (e) {}
         }
 
+        function getExcludedExercisesStorageKey(targetUid) {
+            const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
+            return uid ? `celik_excluded_exercises_${uid}` : 'celik_excluded_exercises';
+        }
+
         function getUserExcludedExerciseIds() {
             try {
-                let arr = JSON.parse(localStorage.getItem('celik_excluded_exercises') || '[]');
+                const uid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
+                const scopedKey = getExcludedExercisesStorageKey(uid);
+                let raw = localStorage.getItem(scopedKey);
+                if (!raw && uid === 'usr_admin') {
+                    raw = localStorage.getItem('celik_excluded_exercises');
+                }
+                let arr = JSON.parse(raw || '[]');
                 if (!Array.isArray(arr)) arr = [];
-                if (!localStorage.getItem('celik_excl_seed_sissy_v1')) {
+                if (uid === 'usr_admin' && !localStorage.getItem('celik_excl_seed_sissy_v1')) {
                     if (!arr.includes('bw_sissy_squat')) {
                         arr.push('bw_sissy_squat');
-                        localStorage.setItem('celik_excluded_exercises', JSON.stringify(arr));
+                        localStorage.setItem(scopedKey, JSON.stringify(arr));
                     }
                     localStorage.setItem('celik_excl_seed_sissy_v1', '1');
                     purgeExcludedExerciseFromSavedPlans('bw_sissy_squat');
                 }
                 return arr;
             } catch(e) {
-                return ['bw_sissy_squat'];
+                return [];
             }
         }
         getUserExcludedExerciseIds();
 
         function setUserExcludedExerciseIds(arr) {
             try {
-                localStorage.setItem('celik_excluded_exercises', JSON.stringify(arr));
+                const uid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
+                const scopedKey = getExcludedExercisesStorageKey(uid);
+                localStorage.setItem(scopedKey, JSON.stringify(arr));
+                if (uid === 'usr_admin') {
+                    localStorage.setItem('celik_excluded_exercises', JSON.stringify(arr));
+                }
+                if (typeof window.scheduleUserStateCloudSync === 'function') window.scheduleUserStateCloudSync(uid);
             } catch(e) {}
         }
 
@@ -10586,6 +10603,7 @@ KESİN KURALLAR:
                 if (user) {
                     user.lastExerciseWeights = Object.assign({}, user.lastExerciseWeights || {}, map);
                 }
+                if (typeof window.scheduleUserStateCloudSync === 'function') window.scheduleUserStateCloudSync(uid);
             } catch (e) {}
         }
 
@@ -10638,7 +10656,7 @@ KESİN KURALLAR:
             for (const log of history) {
                 const exList = log.detailedExercises || log.exercises;
                 if (!exList || !Array.isArray(exList)) continue;
-                const found = exList.find(e => (e.id === exIdOrName || e.name === exIdOrName) && (e.completedSetsCount > 0 || e.completedCount > 0 || (e.sets && e.sets.some(s => s.completed || (parseFloat(s.weight) || 0) > 0))));
+                const found = exList.find(e => (e.id === exIdOrName || e.name === exIdOrName) && (e.completedSetsCount > 0 || e.completedCount > 0 || (Array.isArray(e.sets) && e.sets.some(s => s.completed || (parseFloat(s.weight) || 0) > 0))));
                 if (found && Array.isArray(found.sets)) {
                     const completedSets = found.sets.filter(s => s.completed || (parseFloat(s.weight) || 0) > 0);
                     if (completedSets.length > 0) {
@@ -11308,6 +11326,7 @@ KESİN KURALLAR:
             };
             try {
                 localStorage.setItem(`celik_kodu_active_state_${uid}`, JSON.stringify(state));
+                if (typeof window.scheduleUserStateCloudSync === 'function') window.scheduleUserStateCloudSync(uid);
             } catch(e) {}
         }
 
@@ -12205,6 +12224,7 @@ KESİN KURALLAR:
             const sets = activeWorkoutSetsData[exId];
             if (!sets || !sets[setIdx]) return;
             sets[setIdx].completed = !sets[setIdx].completed;
+            sets[setIdx].completedAt = sets[setIdx].completed ? Date.now() : null;
             saveActiveWorkoutStateToStorage();
             renderActiveWorkout();
         }
@@ -12540,10 +12560,11 @@ KESİN KURALLAR:
             if (applyToAllGaps) {
                 for (let i = 0; i < sets.length - 1; i++) {
                     const prevDone = sets[i].interSet ? !!sets[i].interSet.completed : (i === setIdx);
-                    sets[i].interSet = Object.assign({}, payload, { completed: prevDone });
+                    const prevAt = (sets[i].interSet && sets[i].interSet.completedAt) ? sets[i].interSet.completedAt : (prevDone ? Date.now() : null);
+                    sets[i].interSet = Object.assign({}, payload, { completed: prevDone, completedAt: prevAt });
                 }
             } else if (sets[setIdx]) {
-                sets[setIdx].interSet = Object.assign({}, payload, { completed: true });
+                sets[setIdx].interSet = Object.assign({}, payload, { completed: true, completedAt: Date.now() });
             }
 
             closeInterSetModal();
@@ -12560,6 +12581,7 @@ KESİN KURALLAR:
             const sets = activeWorkoutSetsData[exId] || [];
             if (!sets[setIdx] || !sets[setIdx].interSet) return;
             sets[setIdx].interSet.completed = !sets[setIdx].interSet.completed;
+            sets[setIdx].interSet.completedAt = sets[setIdx].interSet.completed ? Date.now() : null;
             saveActiveWorkoutStateToStorage();
             renderActiveWorkout();
             if (sets[setIdx].interSet.completed && typeof playAlertSound === 'function') {
@@ -12701,9 +12723,13 @@ KESİN KURALLAR:
 
         // ==================== COMPLETE & LOG WORKOUT ====================
         function getSavedGymsList() {
-            const defaultGyms = ["Rodium", "Sports & More", "Samandağ", "MACFit", "FitStop"];
+            const uid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
+            const defaultGyms = uid === 'usr_admin'
+                ? ["Rodium", "Sports & More", "Samandağ", "MACFit", "FitStop"]
+                : ["Spor Salonu", "MACFit"];
             try {
-                const stored = localStorage.getItem('celik_kodu_custom_gyms');
+                const scopedKey = uid ? `celik_kodu_custom_gyms_${uid}` : 'celik_kodu_custom_gyms';
+                const stored = localStorage.getItem(scopedKey) || (uid === 'usr_admin' ? localStorage.getItem('celik_kodu_custom_gyms') : null);
                 if (stored) {
                     const parsed = JSON.parse(stored);
                     if (Array.isArray(parsed)) {
@@ -12722,14 +12748,17 @@ KESİN KURALLAR:
             if (!gymName || typeof gymName !== 'string') return;
             const trimmed = gymName.trim();
             if (!trimmed) return;
-            const defaultGyms = ["Rodium", "Sports & More", "Samandağ", "MACFit", "FitStop"];
+            const uid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
+            const defaultGyms = getSavedGymsList();
             try {
+                const scopedKey = uid ? `celik_kodu_custom_gyms_${uid}` : 'celik_kodu_custom_gyms';
                 let stored = [];
-                const existing = localStorage.getItem('celik_kodu_custom_gyms');
+                const existing = localStorage.getItem(scopedKey);
                 if (existing) stored = JSON.parse(existing) || [];
                 if (!defaultGyms.includes(trimmed) && !stored.includes(trimmed)) {
                     stored.push(trimmed);
-                    localStorage.setItem('celik_kodu_custom_gyms', JSON.stringify(stored));
+                    localStorage.setItem(scopedKey, JSON.stringify(stored));
+                    if (typeof window.scheduleUserStateCloudSync === 'function') window.scheduleUserStateCloudSync(uid);
                 }
             } catch(e) {}
         }
@@ -13220,6 +13249,7 @@ KESİN KURALLAR:
                             isBodyweight: (extra.equipment || 'bodyweight') === 'bodyweight',
                             isTimeBased: isExtraTime,
                             completed: true,
+                            completedAt: extra.completedAt || st.completedAt || null,
                             volume: Math.round(extraVol)
                         });
                     }
@@ -13231,6 +13261,7 @@ KESİN KURALLAR:
                         isBodyweight: isBw,
                         isTimeBased: isTime,
                         completed: isDone,
+                        completedAt: isDone ? (st.completedAt || null) : null,
                         volume: isDone ? Math.round(setVol) : 0,
                         interSet: st.interSet || null
                     };
@@ -14132,6 +14163,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     });
                 }
                 localStorage.setItem(key, JSON.stringify(schedule));
+                if (typeof window.scheduleUserStateCloudSync === 'function') window.scheduleUserStateCloudSync(uid);
             } catch(e) {}
         }
 
@@ -14176,6 +14208,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     });
                 }
                 localStorage.setItem(key, JSON.stringify(schedule));
+                if (typeof window.scheduleUserStateCloudSync === 'function') window.scheduleUserStateCloudSync(uid);
             } catch(e) {}
         }
 
@@ -16997,6 +17030,58 @@ KURALLAR:
             });
         }
 
+        function getAthleteCloudSeal(targetUid) {
+            const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : 'usr_admin');
+            const sealKey = `celik_kodu_cloud_seal_${uid}`;
+            try {
+                const users = typeof getAuthUsers === 'function' ? getAuthUsers() : [];
+                const u = Array.isArray(users) ? users.find(x => x && x.id === uid) : null;
+                if (u && u.passwordHash && String(u.passwordHash).length >= 16) {
+                    const derived = 'seal_' + String(u.passwordHash).slice(0, 28);
+                    localStorage.setItem(sealKey, derived);
+                    return derived;
+                }
+                const saved = localStorage.getItem(sealKey);
+                if (saved && saved.length >= 12) return saved;
+            } catch {}
+            return 'seal_ck_v1_' + String(uid);
+        }
+
+        function markLocalUserStateModified(targetUid) {
+            const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
+            if (!uid) return;
+            try {
+                localStorage.setItem(`celik_kodu_state_updated_at_${uid}`, String(Date.now()));
+            } catch {}
+        }
+
+        async function flushPendingCloudOutbox() {
+            if (IS_LOCAL_DEV || !isFirebaseReady || !fbDb || !navigator.onLine) return;
+            const uid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
+            if (!uid) return;
+            try {
+                if (localStorage.getItem(`celik_kodu_pending_workout_sync_${uid}`) === '1') {
+                    const logs = getUserLogsById(uid);
+                    if (logs.length > 0) await syncWorkoutLogsToCloud(logs, uid);
+                }
+                if (localStorage.getItem(`celik_kodu_pending_state_sync_${uid}`) === '1') {
+                    await syncUserStateToCloud(uid);
+                }
+            } catch {}
+        }
+
+        if (typeof window !== 'undefined') {
+            window.addEventListener('online', () => {
+                flushPendingCloudOutbox();
+                syncAllFromCloud();
+            });
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible' && navigator.onLine) {
+                    flushPendingCloudOutbox();
+                }
+            });
+        }
+
         function initFirebaseEngine() {
             try {
                 if (typeof firebase === 'undefined') {
@@ -17009,6 +17094,14 @@ KURALLAR:
                     fbApp = firebase.initializeApp(FIREBASE_CONFIG);
                 } else {
                     fbApp = firebase.app();
+                }
+
+                if (typeof firebase.auth === 'function') {
+                    try {
+                        if (!firebase.auth().currentUser) {
+                            firebase.auth().signInAnonymously().catch(() => {});
+                        }
+                    } catch {}
                 }
 
                 fbDb = firebase.firestore();
@@ -17027,7 +17120,7 @@ KURALLAR:
                 console.log("🔥 Firebase Firestore başarıyla bağlandı!");
 
                 // İlk bulut veri senkronizasyonunu başlat
-                syncAllFromCloud();
+                flushPendingCloudOutbox().then(() => syncAllFromCloud());
 
             } catch (err) {
                 console.error("Firebase başlatma hatası:", err);
@@ -17053,6 +17146,7 @@ KURALLAR:
                     await syncUserWorkoutLogsFromCloud(uid);
                     await syncUserScaleLogsFromCloud(uid);
                     await syncUserMeasurementsFromCloud(uid);
+                    await syncUserStateFromCloud(uid);
                 }
 
                 updateCloudSyncBadge('synced', 'Bulut Aktif');
@@ -17244,63 +17338,109 @@ KURALLAR:
             }
         }
 
+        async function fetchWorkoutLogsFromLocalBridge(uid) {
+            if (uid !== 'usr_admin') return [];
+            const urls = IS_LOCAL_DEV
+                ? [`/api/tredict/workout-logs?uid=${encodeURIComponent(uid)}`, `http://127.0.0.1:3847/api/tredict/workout-logs?uid=${encodeURIComponent(uid)}`]
+                : [`http://127.0.0.1:3847/api/tredict/workout-logs?uid=${encodeURIComponent(uid)}`];
+            for (const u of urls) {
+                try {
+                    const r = await fetch(u);
+                    if (r && r.ok) {
+                        const d = await r.json();
+                        if (d && Array.isArray(d.logs) && d.logs.length > 0) return d.logs;
+                    }
+                } catch {}
+            }
+            return [];
+        }
+
         // ANTRENMAN GEÇMİŞİ BULUT EŞİTLEME
         async function syncUserWorkoutLogsFromCloud(uid) {
-            if (!isFirebaseReady || !fbDb || !uid) return;
+            if (!uid) return;
+            const localLogs = getUserLogsById(uid);
+
+            // Mükerrer yerel usr_ferit kayıtlarını da güvenle dahil et
+            if (uid === 'usr_admin') {
+                try {
+                    const feritRaw = localStorage.getItem('celik_kodu_history_usr_ferit');
+                    if (feritRaw) {
+                        const feritLocal = JSON.parse(feritRaw);
+                        if (Array.isArray(feritLocal)) {
+                            feritLocal.forEach(fl => {
+                                if (!localLogs.some(l => l.id === fl.id || (l.date === fl.date && l.totalSetsCompleted === fl.totalSetsCompleted))) {
+                                    localLogs.push(fl);
+                                }
+                            });
+                        }
+                    }
+                } catch(e) {}
+            }
+
+            let cloudLogs = [];
             try {
-                const docRef = fbDb.collection('workout_logs').doc(uid);
-                const doc = await docRef.get();
-                const localLogs = getUserLogsById(uid);
-
-                // Mükerrer yerel usr_ferit kayıtlarını da güvenle dahil et
-                if (uid === 'usr_admin') {
-                    try {
-                        const feritRaw = localStorage.getItem('celik_kodu_history_usr_ferit');
-                        if (feritRaw) {
-                            const feritLocal = JSON.parse(feritRaw);
-                            if (Array.isArray(feritLocal)) {
-                                feritLocal.forEach(fl => {
-                                    if (!localLogs.some(l => l.id === fl.id || (l.date === fl.date && l.totalSetsCompleted === fl.totalSetsCompleted))) {
-                                        localLogs.push(fl);
-                                    }
-                                });
-                            }
+                if (isFirebaseReady && fbDb) {
+                    const docRef = fbDb.collection('workout_logs').doc(uid);
+                    const doc = await docRef.get();
+                    if (doc.exists) {
+                        const data = doc.data();
+                        if (data && Array.isArray(data.logs)) {
+                            cloudLogs = data.logs;
                         }
-                    } catch(e) {}
-                }
-
-                if (doc.exists) {
-                    const data = doc.data();
-                    if (data && Array.isArray(data.logs)) {
-                        const logMap = new Map();
-                        localLogs.forEach(l => logMap.set(l.id, l));
-                        data.logs.forEach(l => logMap.set(l.id, l));
-                        const mergedLogs = Array.from(logMap.values());
-                        mergedLogs.sort((a, b) => new Date(b.date || b.timestamp) - new Date(a.date || a.timestamp));
-
-                        localStorage.setItem(`celik_kodu_history_${uid}`, JSON.stringify(mergedLogs));
-                        renderHistory();
-                        applyWednesdayHammerCurlPatch();
-
-                        if (!IS_LOCAL_DEV && mergedLogs.length > data.logs.length) {
-                            await docRef.set({
-                                logs: mergedLogs,
-                                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                            }, { merge: true });
-                        }
-                        return;
                     }
                 }
-
-                if (!IS_LOCAL_DEV && localLogs.length > 0) {
-                    await docRef.set({
-                        logs: localLogs,
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                }
-                applyWednesdayHammerCurlPatch();
             } catch (err) {
-                console.warn("Antrenmanlar buluttan çekilemedi:", err);
+                console.warn("Antrenmanlar buluttan doğrudan çekilemedi:", err);
+            }
+
+            const bridgeLogs = await fetchWorkoutLogsFromLocalBridge(uid);
+
+            const logMap = new Map();
+            const upsertLog = (l) => {
+                if (!l || !l.id) return;
+                const prev = logMap.get(l.id);
+                if (!prev) {
+                    logMap.set(l.id, l);
+                } else {
+                    logMap.set(l.id, Object.assign({}, prev, l, {
+                        garminActivityId: l.garminActivityId || prev.garminActivityId,
+                        healthSummary: l.healthSummary || prev.healthSummary,
+                        exercises: (Array.isArray(l.exercises) && l.exercises.some(e => e && e.healthTelemetry))
+                            ? l.exercises
+                            : (Array.isArray(prev.exercises) && prev.exercises.some(e => e && e.healthTelemetry) ? prev.exercises : l.exercises)
+                    }));
+                }
+            };
+            cloudLogs.forEach(upsertLog);
+            localLogs.forEach(upsertLog);
+            bridgeLogs.forEach(upsertLog);
+
+            // Aynı gün gerçek uygulama kaydı varsa mükerrer garmin_... kaydını temizle
+            const realDates = new Set();
+            for (const item of logMap.values()) {
+                if (item && !String(item.id || '').startsWith('garmin_') && item.date) {
+                    realDates.add(String(item.date).slice(0, 10));
+                }
+            }
+            for (const [k, item] of logMap.entries()) {
+                if (String(k).startsWith('garmin_') && item && item.date && realDates.has(String(item.date).slice(0, 10))) {
+                    logMap.delete(k);
+                }
+            }
+
+            if (logMap.size > 0) {
+                const mergedLogs = Array.from(logMap.values());
+                mergedLogs.sort((a, b) => new Date(b.date || b.timestamp) - new Date(a.date || a.timestamp));
+                localStorage.setItem(`celik_kodu_history_${uid}`, JSON.stringify(mergedLogs));
+                if (window.GarminTredictChief && typeof window.GarminTredictChief.handoffCompletedActivitiesToTabChiefs === 'function') {
+                    window.GarminTredictChief.handoffCompletedActivitiesToTabChiefs();
+                }
+                renderHistory();
+                applyWednesdayHammerCurlPatch();
+
+                if (!IS_LOCAL_DEV && (mergedLogs.length > cloudLogs.length || bridgeLogs.length > 0)) {
+                    syncWorkoutLogsToCloud(mergedLogs, uid);
+                }
             }
         }
 
@@ -17309,17 +17449,27 @@ KURALLAR:
                 updateCloudSyncBadge('synced', 'Yerel Test (İzole)');
                 return;
             }
-            if (!isFirebaseReady || !fbDb || !uid) return;
+            if (!uid) return;
             try {
                 updateCloudSyncBadge('syncing', 'Kaydediliyor...');
-                await fbDb.collection('workout_logs').doc(uid).set({
-                    logs: logs,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
-                updateCloudSyncBadge('synced', 'Bulut Aktif');
+                if (isFirebaseReady && fbDb && navigator.onLine !== false) {
+                    await fbDb.collection('workout_logs').doc(uid).set({
+                        logs: logs,
+                        clientUpdatedAt: Date.now(),
+                        syncSeal: getAthleteCloudSeal(uid),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                    localStorage.removeItem(`celik_kodu_pending_workout_sync_${uid}`);
+                    updateCloudSyncBadge('synced', 'Bulut Aktif');
+                } else {
+                    throw new Error('Firebase offline or unavailable');
+                }
             } catch (err) {
-                console.warn("Antrenmanlar buluta aktarılamadı (çevrimdışı kaydedildi):", err);
-                updateCloudSyncBadge('offline', 'Kayıt Yerelde');
+                try {
+                    localStorage.setItem(`celik_kodu_pending_workout_sync_${uid}`, '1');
+                } catch {}
+                console.warn("Antrenmanlar çevrimdışı kuyruğa alındı (internet gelince eşitlenecek):", err);
+                updateCloudSyncBadge('offline', 'Kuyrukta (İnternet Bekleniyor)');
             }
         }
 
@@ -17329,10 +17479,10 @@ KURALLAR:
                 let anyModified = false;
                 const targetDate = '2026-10-07';
 
-                // Tüm kullanıcı geçmiş kayıtlarını tara ve eşitle
+                // Yalnızca usr_admin geçmiş kaydını tara (diğer kullanıcıların geçmişine müdahale edilmez)
                 for (let i = 0; i < localStorage.length; i++) {
                     const key = localStorage.key(i);
-                    if (!key || !key.startsWith('celik_kodu_history_')) continue;
+                    if (key !== 'celik_kodu_history_usr_admin') continue;
 
                     const uid = key.replace('celik_kodu_history_', '');
                     let logs = [];
@@ -17340,6 +17490,18 @@ KURALLAR:
                     if (!Array.isArray(logs) || logs.length === 0) continue;
 
                     let fileModified = false;
+                    const nov9RecoveredLog = {"id":"log_1794246654598","date":"2026-11-09","dateFormatted":"9 Kas 2026 20:50","title":"Pazartesi: Tüm Vücut","program":"Pazartesi: Tüm Vücut","programName":"Pazartesi: Tüm Vücut","locationType":"salon","locationName":"Rodium","duration":59,"durationFormatted":"59:30","durationSecs":3570,"rpe":"RPE 8 (İdeal, cepte 2 tekrar kaldı)","notes":"","totalVolumeKg":5616.8,"totalSetsCompleted":27,"totalRepsCompleted":276,"totalIsometricSecsCompleted":20,"muscleGroups":["Kanatlar (Sırt Genişliği)","Orta Sırt & Kürek Kemiği Kasları","Arka Bacak (Kalçadan Eğilen Üst/Uzun Kısım)","Ana Kalça Kası","Orta Göğüs","Ön Bacak (Diz Üstü İç ve Dış Kısım)","Ana ve Yan Kalça","Ön Omuz","Yan Omuz","Ön Karın (Üst ve Alt Karın)","Derin İç Karın","Ön Kalça Kası","Triceps İç / Uzun Kısım","Triceps Dış Kısım","Ön Bacak & Ana Kalça Kası","Orta Göğüs & Ön Omuz","Derin İç Karın (Korse Kası)"],"exercises":[{"id":"db_rotational_gorilla_row","name":"Rotasyonel Gorilla Row","equipment":"dumbbell","category":"pull","muscle":"Kanatlar (Sırt Genişliği), Orta Sırt & Kürek Kemiği Kasları","cue":"Geniş sumo menteşesinde bir dambılı yere bastırırken diğerini gövdeyi döndürerek kaburgaya patlayıcı çek.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":10,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":120,"interSet":null,"heartrate":114,"heartrateMax":124,"durationSec":82,"watchStartTime":"2026-11-09T16:51:44.000Z","matchedBy":"sequence"},{"setNo":2,"weight":10,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":120,"interSet":null,"heartrate":122,"heartrateMax":131,"durationSec":25,"watchStartTime":"2026-11-09T16:53:17.000Z","matchedBy":"sequence"},{"setNo":3,"weight":10,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":120,"interSet":null,"heartrate":135,"heartrateMax":138,"durationSec":26,"watchStartTime":"2026-11-09T16:55:10.000Z","matchedBy":"sequence"}],"completedSetsCount":3,"maxWeight":10,"maxReps":12,"exerciseVolume":360,"healthTelemetry":{"avgHeartrate":119,"peakHeartrate":131,"totalTimeUnderTensionSec":118}},{"id":"db_rdl","name":"Dambıl RDL","equipment":"dumbbell","category":"legs_hinge","muscle":"Arka Bacak (Kalçadan Eğilen Üst/Uzun Kısım), Ana Kalça Kası","cue":"Dizleri hafif kırık sabitle, kalçayı arkadaki duvara değdirir gibi geriye uzat, sırtı masa gibi düz tut.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":15,"reps":15,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":225,"interSet":null,"heartrate":119,"heartrateMax":126,"durationSec":57,"watchStartTime":"2026-11-09T16:57:54.000Z","matchedBy":"sequence"},{"setNo":2,"weight":17.5,"reps":15,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":263,"interSet":null,"heartrate":122,"heartrateMax":137,"durationSec":81,"watchStartTime":"2026-11-09T16:59:05.000Z","matchedBy":"sequence"},{"setNo":3,"weight":20,"reps":15,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":300,"interSet":null,"heartrate":129,"heartrateMax":129,"durationSec":2,"watchStartTime":"2026-11-09T17:01:00.000Z","matchedBy":"sequence"}],"completedSetsCount":3,"maxWeight":20,"maxReps":15,"exerciseVolume":788,"healthTelemetry":{"avgHeartrate":131,"peakHeartrate":141,"totalTimeUnderTensionSec":252}},{"id":"db_bench_press","name":"Dambıl Bench Press","equipment":"dumbbell","category":"push","muscle":"Orta Göğüs","cue":"Dirsekleri gövdeye 45° açıda tut, dambılları yukarıda çarpmadan göğüs kaslarını sıkarak kilitle.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":35,"reps":9,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":315,"interSet":null,"heartrate":134,"heartrateMax":148,"durationSec":63,"watchStartTime":"2026-11-09T17:02:18.000Z","matchedBy":"sequence"},{"setNo":2,"weight":30,"reps":10,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":300,"interSet":null,"heartrate":142,"heartrateMax":144,"durationSec":66,"watchStartTime":"2026-11-09T17:03:32.000Z","matchedBy":"sequence"},{"setNo":3,"weight":30,"reps":10,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":300,"interSet":null,"heartrate":126,"heartrateMax":139,"durationSec":69,"watchStartTime":"2026-11-09T17:07:47.000Z","matchedBy":"sequence"}],"completedSetsCount":3,"maxWeight":35,"maxReps":10,"exerciseVolume":915,"healthTelemetry":{"avgHeartrate":121,"peakHeartrate":137,"totalTimeUnderTensionSec":152}},{"id":"db_seesaw_lunge","name":"Dambıl Seesaw Lunge (Dinamik İleri-Geri Lunge)","equipment":"dumbbell","category":"legs_quad","muscle":"Ön Bacak (Diz Üstü İç ve Dış Kısım), Ana ve Yan Kalça","cue":"Öne lunge ile 90° çöküşten dönerken ayağı orta hatta yere basmadan sarkaç gibi kesintisiz geriye lunge fazına aktarın.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":7.5,"reps":6,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":45,"interSet":null,"heartrate":132,"heartrateMax":144,"durationSec":43,"watchStartTime":"2026-11-09T17:09:28.000Z","matchedBy":"sequence"},{"setNo":2,"weight":7.5,"reps":6,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":45,"interSet":null,"heartrate":132,"heartrateMax":147,"durationSec":111,"watchStartTime":"2026-11-09T17:14:10.000Z","matchedBy":"sequence"},{"setNo":3,"weight":2.5,"reps":6,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":15,"interSet":null,"heartrate":138,"heartrateMax":138,"durationSec":1,"watchStartTime":"2026-11-09T17:22:19.000Z","matchedBy":"sequence"}],"completedSetsCount":3,"maxWeight":7.5,"maxReps":6,"exerciseVolume":105,"healthTelemetry":{"avgHeartrate":131,"peakHeartrate":138,"totalTimeUnderTensionSec":112}},{"id":"db_push_press","name":"Dambıl Push Press","equipment":"dumbbell","category":"push","muscle":"Ön Omuz, Yan Omuz","cue":"Dambıllar omuzdayken dizleri 20° hafifçe büküp yaylan, bacaklardan aldığın yaylanma gücüyle dambılları baş üstüne fırlat.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":7.5,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":90,"interSet":null,"heartrate":133,"heartrateMax":137,"durationSec":26,"watchStartTime":"2026-11-09T17:26:45.000Z","matchedBy":"sequence"},{"setNo":2,"weight":10,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":120,"interSet":{"id":"bw_burpee","name":"Burpee","muscle":"Ön Bacak & Ana Kalça Kası, Orta Göğüs & Ön Omuz","category":"conditioning","equipment":"bodyweight","metricType":"reps","value":10,"completed":true},"heartrate":131,"heartrateMax":131,"durationSec":2,"watchStartTime":"2026-11-09T17:27:31.000Z","matchedBy":"sequence"},{"setNo":3,"weight":12.5,"reps":10,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":125,"interSet":null,"heartrate":131,"heartrateMax":131,"durationSec":1,"watchStartTime":"2026-11-09T17:28:19.000Z","matchedBy":"sequence"}],"completedSetsCount":3,"maxWeight":12.5,"maxReps":12,"exerciseVolume":335,"healthTelemetry":{"avgHeartrate":140,"peakHeartrate":148,"totalTimeUnderTensionSec":141}},{"id":"bw_mountain_climber","name":"Mountain Climber","equipment":"bodyweight","category":"core","muscle":"Ön Karın (Üst ve Alt Karın), Derin İç Karın, Ön Kalça Kası","cue":"Yüksek şınav pozisyonunda kalçayı kaldırmadan dizleri sırayla koşar adım göğse çek.","isBodyweight":true,"isTimeBased":false,"sets":[{"setNo":1,"weight":0,"reps":15,"isBodyweight":true,"isTimeBased":false,"completed":true,"volume":675,"interSet":null,"heartrate":122,"heartrateMax":127,"durationSec":24,"watchStartTime":"2026-11-09T17:30:02.000Z","matchedBy":"sequence"},{"setNo":2,"weight":0,"reps":15,"isBodyweight":true,"isTimeBased":false,"completed":true,"volume":675,"interSet":null,"heartrate":128,"heartrateMax":135,"durationSec":44,"watchStartTime":"2026-11-09T17:30:57.000Z","matchedBy":"sequence"},{"setNo":3,"weight":0,"reps":15,"isBodyweight":true,"isTimeBased":false,"completed":true,"volume":675,"interSet":null,"heartrate":137,"heartrateMax":137,"durationSec":1,"watchStartTime":"2026-11-09T17:31:55.000Z","matchedBy":"sequence"}],"completedSetsCount":3,"maxWeight":0,"maxReps":15,"exerciseVolume":2025,"healthTelemetry":{"avgHeartrate":128,"peakHeartrate":142,"totalTimeUnderTensionSec":289}},{"id":"db_skullcrusher","name":"Dambıl Skullcrusher","equipment":"dumbbell","category":"push","muscle":"Triceps İç / Uzun Kısım, Triceps Dış Kısım","cue":"Düz sehpada dirsekleri omuz hizasında dikey sabitle, dambılları şakaklara indirip triceps ile uzat.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":7.5,"reps":8,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":60,"interSet":null,"heartrate":133,"heartrateMax":136,"durationSec":32,"watchStartTime":"2026-11-09T17:32:02.000Z","matchedBy":"sequence"},{"setNo":2,"weight":7.5,"reps":8,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":60,"interSet":{"id":"bw_plank","name":"Plank","muscle":"Derin İç Karın (Korse Kası), Ön Karın (Üst ve Alt Karın)","category":"core","equipment":"bodyweight","metricType":"time","value":20,"completed":true},"heartrate":121,"heartrateMax":135,"durationSec":37,"watchStartTime":"2026-11-09T17:34:20.000Z","matchedBy":"sequence"},{"setNo":3,"weight":7.5,"reps":6,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":45,"interSet":null,"heartrate":132,"heartrateMax":132,"durationSec":5,"watchStartTime":"2026-11-09T17:35:22.000Z","matchedBy":"sequence"}],"completedSetsCount":3,"maxWeight":7.5,"maxReps":8,"exerciseVolume":165,"healthTelemetry":{"avgHeartrate":131,"peakHeartrate":151,"totalTimeUnderTensionSec":393}},{"id":"db_lateral_raise","name":"Dambıl Lateral Raise","equipment":"dumbbell","category":"push","muscle":"Yan Omuz","cue":"Dirsekleri hafif kırık tut, kolları omuz hizasına kadar sürahi döker gibi kaldır.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":7.5,"reps":10,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":75,"interSet":null,"heartrate":130,"heartrateMax":133,"durationSec":37,"watchStartTime":"2026-11-09T17:35:36.000Z","matchedBy":"sequence"},{"setNo":2,"weight":7.5,"reps":10,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":75,"interSet":null,"heartrate":124,"heartrateMax":128,"durationSec":35,"watchStartTime":"2026-11-09T17:38:44.000Z","matchedBy":"sequence"},{"setNo":3,"weight":7.5,"reps":10,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":75,"interSet":null,"heartrate":118,"heartrateMax":122,"durationSec":34,"watchStartTime":"2026-11-09T17:41:01.000Z","matchedBy":"sequence"},{"setNo":4,"weight":5,"reps":7,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":35,"interSet":null,"heartrate":120,"heartrateMax":132,"durationSec":108,"watchStartTime":"2026-11-09T17:41:41.000Z","matchedBy":"sequence"}],"completedSetsCount":4,"maxWeight":7.5,"maxReps":10,"exerciseVolume":260,"healthTelemetry":{"avgHeartrate":131,"peakHeartrate":146,"totalTimeUnderTensionSec":670}},{"id":"bw_burpee","name":"Burpee (Set Arası)","equipment":"bodyweight","category":"conditioning","muscle":"Ön Bacak & Ana Kalça Kası, Orta Göğüs & Ön Omuz","cue":"Set arası aktif dinlenme / ilave hareket.","isBodyweight":true,"isTimeBased":false,"isInterSetExtra":true,"sets":[{"setNo":1,"weight":0,"reps":10,"isBodyweight":true,"isTimeBased":false,"completed":true,"volume":450,"heartrate":121,"heartrateMax":128,"durationSec":29,"watchStartTime":"2026-11-09T17:45:26.000Z","matchedBy":"sequence"}],"completedSetsCount":1,"maxWeight":0,"maxReps":10,"exerciseVolume":450,"healthTelemetry":{"avgHeartrate":136,"peakHeartrate":137,"totalTimeUnderTensionSec":20}},{"id":"bw_plank","name":"Plank (Set Arası)","equipment":"bodyweight","category":"core","muscle":"Derin İç Karın (Korse Kası), Ön Karın (Üst ve Alt Karın)","cue":"Set arası aktif dinlenme / ilave hareket.","isBodyweight":true,"isTimeBased":true,"isInterSetExtra":true,"sets":[{"setNo":1,"weight":0,"reps":20,"isBodyweight":true,"isTimeBased":true,"completed":true,"volume":214,"heartrate":116,"heartrateMax":134,"durationSec":41,"watchStartTime":"2026-11-09T17:47:22.000Z","matchedBy":"sequence"}],"completedSetsCount":1,"maxWeight":0,"maxReps":20,"exerciseVolume":214,"healthTelemetry":{"avgHeartrate":131,"peakHeartrate":131,"totalTimeUnderTensionSec":2}}],"timestamp":1794246654602,"garminActivityId":"sfWR98KCBGqhDxBKYXULr2","healthSummary":{"durationTotalSec":3581,"durationSetsSec":1142,"durationRestSec":2440,"calories":375,"heartrateAvg":127,"heartrateMax":151}};
+                    const nov9Idx = logs.findIndex(l => l && (l.id === 'log_1794246654598' || String(l.date || '').slice(0, 10) === '2026-11-09'));
+                    if (nov9Idx === -1) {
+                        logs.unshift(nov9RecoveredLog);
+                        logs.sort((a, b) => new Date(b.date || b.timestamp) - new Date(a.date || a.timestamp));
+                        fileModified = true;
+                        anyModified = true;
+                    } else if (!logs[nov9Idx].healthSummary || !logs[nov9Idx].garminActivityId) {
+                        logs[nov9Idx] = Object.assign({}, logs[nov9Idx], nov9RecoveredLog);
+                        fileModified = true;
+                        anyModified = true;
+                    }
                     logs.forEach(log => {
                         const logDate = String(log.date || '').split('T')[0];
                         const isWed = (logDate === targetDate) || 
@@ -17429,7 +17591,12 @@ KURALLAR:
                     }
                 }
                 if (!IS_LOCAL_DEV && localLogs.length > 0) {
-                    await docRef.set({ logs: localLogs, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+                    await docRef.set({
+                        logs: localLogs,
+                        clientUpdatedAt: Date.now(),
+                        syncSeal: getAthleteCloudSeal(uid),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
                 }
             } catch(e) {}
         }
@@ -17440,6 +17607,8 @@ KURALLAR:
             try {
                 await fbDb.collection('scale_logs').doc(uid).set({
                     logs: logs,
+                    clientUpdatedAt: Date.now(),
+                    syncSeal: getAthleteCloudSeal(uid),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 }, { merge: true });
             } catch(e) {}
@@ -17464,7 +17633,12 @@ KURALLAR:
                     }
                 }
                 if (!IS_LOCAL_DEV && localLogs.length > 0) {
-                    await docRef.set({ logs: localLogs, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+                    await docRef.set({
+                        logs: localLogs,
+                        clientUpdatedAt: Date.now(),
+                        syncSeal: getAthleteCloudSeal(uid),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
                 }
             } catch(e) {}
         }
@@ -17475,10 +17649,153 @@ KURALLAR:
             try {
                 await fbDb.collection('measurement_logs').doc(uid).set({
                     logs: logs,
+                    clientUpdatedAt: Date.now(),
+                    syncSeal: getAthleteCloudSeal(uid),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 }, { merge: true });
             } catch(e) {}
         }
+
+        // ==================== KULLANICI DURUMU (TAKVİM, AI KOÇ, AĞIRLIK HAFIZASI, GİZLİ HAREKETLER) BULUT SENKRONU ====================
+        let userStateSyncTimer = null;
+
+        function scheduleUserStateCloudSync(targetUid) {
+            const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
+            if (!uid) return;
+            markLocalUserStateModified(uid);
+            if (IS_LOCAL_DEV) return;
+            if (userStateSyncTimer) clearTimeout(userStateSyncTimer);
+            userStateSyncTimer = setTimeout(() => {
+                syncUserStateToCloud(uid);
+            }, 900);
+        }
+        window.scheduleUserStateCloudSync = scheduleUserStateCloudSync;
+
+        async function syncUserStateToCloud(targetUid) {
+            if (IS_LOCAL_DEV) return;
+            const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
+            if (!uid) return;
+            if (!isFirebaseReady || !fbDb || navigator.onLine === false) {
+                try { localStorage.setItem(`celik_kodu_pending_state_sync_${uid}`, '1'); } catch {}
+                return;
+            }
+            try {
+                const safeParse = (k, fallback) => {
+                    try {
+                        const r = localStorage.getItem(k);
+                        return r ? JSON.parse(r) : fallback;
+                    } catch { return fallback; }
+                };
+                const clientUpdatedAt = Number(localStorage.getItem(`celik_kodu_state_updated_at_${uid}`) || Date.now());
+                const payload = {
+                    weeklySchedule: safeParse(`celik_kodu_weekly_schedule_${uid}`, {}),
+                    nextWeeklySchedule: safeParse(`celik_kodu_next_weekly_schedule_${uid}`, {}),
+                    dateSchedule: safeParse(`celik_kodu_date_schedule_${uid}`, {}),
+                    rememberedWeights: safeParse(`celik_kodu_last_weights_${uid}`, {}),
+                    excludedExercises: safeParse(getExcludedExercisesStorageKey(uid), []),
+                    selectedEquipments: Array.isArray(selectedEquipments) ? selectedEquipments : [],
+                    customGyms: safeParse(`celik_kodu_custom_gyms_${uid}`, []),
+                    aiDoctrine: String(currentSelectedDoctrine || 'bb_hybrid'),
+                    aiCoachSummary: safeParse(`celik_kodu_ai_program_${uid}`, null),
+                    lastGeneratedWorkout: safeParse(`celik_kodu_last_generated_workout_${uid}`, null),
+                    activeWorkoutDraft: safeParse(`celik_kodu_active_state_${uid}`, null),
+                    garminManifests: uid === 'usr_admin' ? safeParse(`celik_kodu_garmin_sent_manifests_v1__${uid}`, {}) : {},
+                    clientUpdatedAt,
+                    syncSeal: getAthleteCloudSeal(uid),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                await fbDb.collection('user_state').doc(uid).set(payload, { merge: true });
+                localStorage.removeItem(`celik_kodu_pending_state_sync_${uid}`);
+            } catch (err) {
+                try { localStorage.setItem(`celik_kodu_pending_state_sync_${uid}`, '1'); } catch {}
+                console.warn("Kullanıcı durumu çevrimdışı kuyruğa alındı:", err);
+            }
+        }
+        window.syncUserStateToCloud = syncUserStateToCloud;
+
+        async function syncUserStateFromCloud(targetUid) {
+            const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
+            if (!isFirebaseReady || !fbDb || !uid) return;
+            try {
+                const docRef = fbDb.collection('user_state').doc(uid);
+                const doc = await docRef.get();
+                if (!doc.exists) {
+                    if (!IS_LOCAL_DEV) await syncUserStateToCloud(uid);
+                    return;
+                }
+                const data = doc.data() || {};
+                const cloudUpdatedAt = Number(data.clientUpdatedAt || 0);
+                const localUpdatedAt = Number(localStorage.getItem(`celik_kodu_state_updated_at_${uid}`) || 0);
+                const isCloudNewerOrEqual = cloudUpdatedAt >= localUpdatedAt;
+
+                if (data.weeklySchedule && typeof data.weeklySchedule === 'object' && Object.keys(data.weeklySchedule).length > 0) {
+                    const hasLocalSched = Boolean(localStorage.getItem(`celik_kodu_weekly_schedule_${uid}`));
+                    if (isCloudNewerOrEqual || !hasLocalSched) {
+                        localStorage.setItem(`celik_kodu_weekly_schedule_${uid}`, JSON.stringify(data.weeklySchedule));
+                    }
+                }
+                if (data.nextWeeklySchedule && typeof data.nextWeeklySchedule === 'object' && Object.keys(data.nextWeeklySchedule).length > 0) {
+                    const hasLocalNext = Boolean(localStorage.getItem(`celik_kodu_next_weekly_schedule_${uid}`));
+                    if (isCloudNewerOrEqual || !hasLocalNext) {
+                        localStorage.setItem(`celik_kodu_next_weekly_schedule_${uid}`, JSON.stringify(data.nextWeeklySchedule));
+                    }
+                }
+                if (data.dateSchedule && typeof data.dateSchedule === 'object') {
+                    const localDateSched = JSON.parse(localStorage.getItem(`celik_kodu_date_schedule_${uid}`) || '{}') || {};
+                    const mergedDateSched = Object.assign({}, data.dateSchedule, localDateSched);
+                    for (const [dt, entry] of Object.entries(data.dateSchedule)) {
+                        const locEntry = localDateSched[dt];
+                        if (!locEntry || (Number(entry?.updatedAt || cloudUpdatedAt) >= Number(locEntry?.updatedAt || localUpdatedAt))) {
+                            mergedDateSched[dt] = entry;
+                        }
+                    }
+                    localStorage.setItem(`celik_kodu_date_schedule_${uid}`, JSON.stringify(mergedDateSched));
+                }
+                if (data.rememberedWeights && typeof data.rememberedWeights === 'object') {
+                    const localW = JSON.parse(localStorage.getItem(`celik_kodu_last_weights_${uid}`) || '{}') || {};
+                    const mergedW = isCloudNewerOrEqual
+                        ? Object.assign({}, localW, data.rememberedWeights)
+                        : Object.assign({}, data.rememberedWeights, localW);
+                    localStorage.setItem(`celik_kodu_last_weights_${uid}`, JSON.stringify(mergedW));
+                }
+                if (Array.isArray(data.excludedExercises) && data.excludedExercises.length > 0) {
+                    const exKey = getExcludedExercisesStorageKey(uid);
+                    const localExcl = JSON.parse(localStorage.getItem(exKey) || '[]') || [];
+                    const mergedExcl = Array.from(new Set([...data.excludedExercises, ...localExcl]));
+                    localStorage.setItem(exKey, JSON.stringify(mergedExcl));
+                }
+                if (Array.isArray(data.customGyms) && data.customGyms.length > 0) {
+                    const gymKey = `celik_kodu_custom_gyms_${uid}`;
+                    const localGyms = JSON.parse(localStorage.getItem(gymKey) || '[]') || [];
+                    const mergedGyms = Array.from(new Set([...data.customGyms, ...localGyms]));
+                    localStorage.setItem(gymKey, JSON.stringify(mergedGyms));
+                }
+                if (data.aiCoachSummary && typeof data.aiCoachSummary === 'object' && isCloudNewerOrEqual) {
+                    localStorage.setItem(`celik_kodu_ai_program_${uid}`, JSON.stringify(data.aiCoachSummary));
+                }
+                if (data.lastGeneratedWorkout && typeof data.lastGeneratedWorkout === 'object' && (isCloudNewerOrEqual || !localStorage.getItem(`celik_kodu_last_generated_workout_${uid}`))) {
+                    localStorage.setItem(`celik_kodu_last_generated_workout_${uid}`, JSON.stringify(data.lastGeneratedWorkout));
+                }
+                if (data.activeWorkoutDraft && typeof data.activeWorkoutDraft === 'object' && !localStorage.getItem(`celik_kodu_active_state_${uid}`)) {
+                    localStorage.setItem(`celik_kodu_active_state_${uid}`, JSON.stringify(data.activeWorkoutDraft));
+                }
+                if (data.garminManifests && typeof data.garminManifests === 'object') {
+                    const mKey = `celik_kodu_garmin_sent_manifests_v1__${uid}`;
+                    const localM = JSON.parse(localStorage.getItem(mKey) || '{}') || {};
+                    localStorage.setItem(mKey, JSON.stringify(Object.assign({}, data.garminManifests, localM)));
+                }
+                if (cloudUpdatedAt > localUpdatedAt) {
+                    localStorage.setItem(`celik_kodu_state_updated_at_${uid}`, String(cloudUpdatedAt));
+                } else if (!IS_LOCAL_DEV && localUpdatedAt > cloudUpdatedAt) {
+                    await syncUserStateToCloud(uid);
+                }
+                if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
+                if (typeof renderAiHybridHeroBanner === 'function') renderAiHybridHeroBanner();
+            } catch (err) {
+                console.warn("Kullanıcı durumu buluttan çekilemedi:", err);
+            }
+        }
+        window.syncUserStateFromCloud = syncUserStateFromCloud;
 
         // ==================== AKADEMİK KOÇ İSTASYONU KÖPRÜSÜ ====================
         let coachDirectiveLiveUnsub = null;
@@ -19180,6 +19497,7 @@ KURALLAR:
             }
             try {
                 localStorage.setItem(`celik_kodu_date_schedule_${targetUid}`, JSON.stringify(overrides));
+                if (typeof window.scheduleUserStateCloudSync === 'function') window.scheduleUserStateCloudSync(targetUid);
             } catch(e) {}
         }
 
@@ -19858,7 +20176,36 @@ KURALLAR:
                     hasChanged = true;
                 }
 
-                // Otomatik Kurtarma (Self-Healing): passwordHash eksik kalmış kullanıcıları varsayılan 123456 hash ile onar
+                // Otomatik temizleme: Aynı kullanıcı adıyla (ör. sinan) mükerrer açılmış kayıt varsa en güncel olanı koru
+                const byUname = new Map();
+                const dedupedUsers = [];
+                users.forEach(u => {
+                    if (!u) return;
+                    const unameKey = normalizeAuthString(u.username || u.name || u.id);
+                    if (!unameKey) {
+                        dedupedUsers.push(u);
+                        return;
+                    }
+                    const prevIdx = byUname.get(unameKey);
+                    if (prevIdx === undefined) {
+                        byUname.set(unameKey, dedupedUsers.length);
+                        dedupedUsers.push(u);
+                    } else {
+                        const prev = dedupedUsers[prevIdx];
+                        const curTime = Number(u.updatedAt || u.createdAt || 0);
+                        const prevTime = Number(prev.updatedAt || prev.createdAt || 0);
+                        if (curTime >= prevTime) {
+                            dedupedUsers[prevIdx] = Object.assign({}, prev, u, {
+                                passwordHash: u.passwordHash || prev.passwordHash,
+                                salt: u.salt || prev.salt
+                            });
+                        }
+                        hasChanged = true;
+                    }
+                });
+                if (dedupedUsers.length !== users.length) {
+                    users = dedupedUsers;
+                }
                 users.forEach(u => {
                     if (!u.passwordHash && !u.password) {
                         u.salt = 'celik_salt_default';
@@ -19955,6 +20302,26 @@ KURALLAR:
                 return;
             }
 
+            // Mevcut açık oturumda kullanıcının şifresi hala varsayılan/zayıf ise veya yeni güvenlik standardından geçmemişse
+            // siteyi doğrudan açmak yerine güvenli şifre belirleme ekranına yönlendir
+            const users = getAuthUsers();
+            const activeUser = users.find(u => u.id === session.userId);
+            if (activeUser) {
+                const storedWeakCheck = isUserStoredCredentialWeak(activeUser);
+                if (storedWeakCheck.isWeak || !activeUser.passwordStrengthLevel) {
+                    localStorage.removeItem('celik_kodu_session');
+                    currentSession = null;
+                    if (loginScreen) loginScreen.classList.add('active');
+                    if (mainAppWrapper) mainAppWrapper.style.display = 'none';
+                    openForcePasswordUpgradeStep(
+                        activeUser,
+                        storedWeakCheck.reason || 'Güvenlik güncellemesi: Hesabınızı korumak için en az 8 karakterli (harf ve rakam içeren) yeni şifrenizi belirleyin.',
+                        ''
+                    );
+                    return;
+                }
+            }
+
             if (loginScreen) loginScreen.classList.remove('active');
             if (mainAppWrapper) mainAppWrapper.style.display = 'block';
 
@@ -19986,11 +20353,141 @@ KURALLAR:
         }
 
         let pendingForgotOtpState = null;
+        let pendingWeakPasswordUpgradeState = null;
+
+        const COMMON_WEAK_PASSWORDS_SET = new Set([
+            '123', '1234', '12345', '123456', '1234567', '12345678', '123456789', '1234567890',
+            '654321', '87654321', '987654321', '111111', '11111111', '000000', '00000000',
+            '22222222', '33333333', '44444444', '55555555', '66666666', '77777777', '88888888', '99999999',
+            'password', 'password1', 'password123', 'pass1234', 'qwerty', 'qwerty123', 'qwertyui',
+            'asdfgh', 'asdfghjk', 'asdf1234', 'zxcvbnm', 'admin', 'admin123', 'admin1234',
+            'celik', 'celik123', 'celikkodu', 'celikkodu123', 'sanane', 'sanane123', 'deneme', 'deneme123',
+            'fitness', 'fitness123', 'sporcu123', 'turkiye123', 'istanbul34'
+        ]);
+
+        function evaluatePasswordSecurity(password, userContext) {
+            const pwd = String(password || '').trim();
+            const lower = pwd.toLocaleLowerCase('tr-TR');
+            const asciiLower = lower
+                .replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ı/g, 'i')
+                .replace(/ö/g, 'o').replace(/ş/g, 's').replace(/ü/g, 'u');
+
+            const hasMinLength = pwd.length >= 8;
+            const hasLetter = /[a-zA-ZçğıöşüÇĞİÖŞÜ]/.test(pwd);
+            const hasNumber = /[0-9]/.test(pwd);
+            const hasLetterAndNumber = hasLetter && hasNumber;
+            const hasUpperAndLower = /[a-zçğıöşü]/.test(pwd) && /[A-ZÇĞİÖŞÜ]/.test(pwd);
+            const hasSymbol = /[^a-zA-Z0-9çğıöşüÇĞİÖŞÜ\s]/.test(pwd);
+
+            let isUnpredictable = pwd.length > 0;
+            let weakReason = '';
+
+            if (COMMON_WEAK_PASSWORDS_SET.has(lower) || COMMON_WEAK_PASSWORDS_SET.has(asciiLower)) {
+                isUnpredictable = false;
+                weakReason = 'Çok yaygın kullanılan kolay bir şifre seçtiniz.';
+            } else if (/^(.)\1{4,}$/.test(pwd)) {
+                isUnpredictable = false;
+                weakReason = 'Tekrarlayan aynı karakterlerden oluşan şifre kullanılamaz.';
+            } else if ('01234567890123456789'.includes(pwd) || '98765432109876543210'.includes(pwd) || 'abcdefghijklmnopqrstuvwxyz'.includes(asciiLower)) {
+                isUnpredictable = false;
+                weakReason = 'Ardışık sıralı harf veya rakam dizisi kullanılamaz.';
+            }
+
+            if (isUnpredictable && userContext) {
+                const tokens = [];
+                const uName = normalizeAuthString(userContext.username || '');
+                const fName = normalizeAuthString((userContext.name || '').split(/\s+/)[0] || '');
+                const emailLocal = String(userContext.email || '').split('@')[0].toLowerCase().trim();
+                if (uName.length >= 3) tokens.push(uName);
+                if (fName.length >= 3) tokens.push(fName);
+                if (emailLocal.length >= 3) tokens.push(emailLocal);
+
+                for (const tk of tokens) {
+                    if (lower === tk || asciiLower === tk) {
+                        isUnpredictable = false;
+                        weakReason = 'Şifreniz kullanıcı adınız veya isminizle aynı olamaz.';
+                        break;
+                    }
+                    const trivialMatches = [tk + '1', tk + '12', tk + '123', tk + '1234', tk + '12345', tk + '123456', tk + '111', tk + '000'];
+                    if (trivialMatches.includes(lower) || trivialMatches.includes(asciiLower)) {
+                        isUnpredictable = false;
+                        weakReason = 'İsminizin sonuna ardışık rakam (123 vb.) eklenmiş basit şifreler kullanılamaz.';
+                        break;
+                    }
+                }
+            }
+
+            const isValid = hasMinLength && hasLetterAndNumber && isUnpredictable;
+
+            let score = 0;
+            if (hasMinLength) score += 1;
+            if (pwd.length >= 10) score += 1;
+            if (hasLetterAndNumber) score += 1;
+            if (isUnpredictable && pwd.length >= 6) score += 1;
+            if (hasUpperAndLower || hasSymbol) score += 1;
+
+            let levelLabel = 'Zayıf';
+            if ( isValid ) {
+                levelLabel = score >= 5 ? 'Çok Güçlü' : (score >= 4 ? 'Güçlü' : 'Yeterli');
+            } else if (pwd.length >= 5) {
+                levelLabel = 'Geliştirilmeli';
+            }
+
+            let reason = 'Şifre güvenlik kriterlerini karşılıyor.';
+            if (!hasMinLength) {
+                reason = 'Şifreniz en az 8 karakter uzunluğunda olmalıdır.';
+            } else if (!hasLetterAndNumber) {
+                reason = 'Şifreniz en az 1 harf ve 1 rakam içermelidir.';
+            } else if (!isUnpredictable) {
+                reason = weakReason || 'Bu şifre çok kolay tahmin edilebilir düzeyde.';
+            }
+
+            return {
+                isValid,
+                hasMinLength,
+                hasLetterAndNumber,
+                isUnpredictable,
+                score,
+                levelLabel,
+                reason
+            };
+        }
+
+        function isUserStoredCredentialWeak(user, plainPasswordIfKnown) {
+            if (!user) return { isWeak: false, reason: '' };
+            const KNOWN_WEAK_HASHES = new Set([
+                'a924925a37aaa6c8e9f3d54b4f00a30b1d7445611efb0ee3641b3c959e13fea7', // 123
+                '03cde27561b94bc8b0f58721b21c3c5010435fd22dc6d202106c262c7e010bbc'  // 123456
+            ]);
+            if (user.mustChangePassword === true) {
+                return {
+                    isWeak: true,
+                    reason: 'Hesabınızda geçici şifre tanımlı. Devam etmek için kendinize özel güçlü bir şifre belirleyin.'
+                };
+            }
+            if (user.salt === 'celik_salt_default' || KNOWN_WEAK_HASHES.has(user.passwordHash)) {
+                return {
+                    isWeak: true,
+                    reason: 'Varsayılan başlangıç şifresi kullanıyorsunuz. Hesabınızı korumak için güçlü bir şifre oluşturun.'
+                };
+            }
+            if (typeof plainPasswordIfKnown === 'string' && plainPasswordIfKnown.length > 0) {
+                const evalRes = evaluatePasswordSecurity(plainPasswordIfKnown, user);
+                if (!evalRes.isValid) {
+                    return {
+                        isWeak: true,
+                        reason: `Mevcut şifreniz güvenlik standardının altında (${evalRes.reason})`
+                    };
+                }
+            }
+            return { isWeak: false, reason: '' };
+        }
 
         function switchAuthScreenTab(mode) {
             const loginForm = document.getElementById('loginForm');
             const regForm = document.getElementById('registerForm');
             const forgotForm = document.getElementById('forgotPasswordForm');
+            const forceUpgradeForm = document.getElementById('forcePasswordUpgradeForm');
             const btnLogin = document.getElementById('authTabBtnLogin');
             const btnReg = document.getElementById('authTabBtnRegister');
             const errBox = document.getElementById('loginErrorMsg');
@@ -19998,6 +20495,16 @@ KURALLAR:
 
             if (errBox) errBox.style.display = 'none';
             if (okBox && mode !== 'login') okBox.style.display = 'none';
+            if (forceUpgradeForm && mode !== 'force_upgrade') forceUpgradeForm.style.display = 'none';
+            if (mode !== 'force_upgrade') pendingWeakPasswordUpgradeState = null;
+
+            if (mode === 'force_upgrade') {
+                if (loginForm) loginForm.style.display = 'none';
+                if (regForm) regForm.style.display = 'none';
+                if (forgotForm) forgotForm.style.display = 'none';
+                if (forceUpgradeForm) forceUpgradeForm.style.display = 'block';
+                return;
+            }
 
             if (mode === 'register') {
                 if (loginForm) loginForm.style.display = 'none';
@@ -20055,6 +20562,190 @@ KURALLAR:
             }
         }
 
+        function openForcePasswordUpgradeStep(user, reasonText, oldPlainPassword) {
+            pendingWeakPasswordUpgradeState = {
+                userId: user.id,
+                oldPlainPassword: oldPlainPassword || ''
+            };
+            switchAuthScreenTab('force_upgrade');
+
+            const greetingEl = document.getElementById('forceUpgradeUserGreeting');
+            const reasonEl = document.getElementById('forceUpgradeReasonText');
+            const newPassEl = document.getElementById('forceUpgradeNewPass');
+            const confirmPassEl = document.getElementById('forceUpgradeConfirmPass');
+
+            if (greetingEl) greetingEl.textContent = `Merhaba ${user.name || user.username}, Güvenli Şifre Belirleyin`;
+            if (reasonEl) reasonEl.textContent = reasonText || 'Mevcut şifreniz kolay tahmin edilebilir düzeyde. Hesabınızı korumak için yeni bir şifre belirleyin.';
+            if (newPassEl) newPassEl.value = '';
+            if (confirmPassEl) confirmPassEl.value = '';
+            updateForceUpgradePasswordPreview();
+            if (newPassEl) setTimeout(() => newPassEl.focus(), 60);
+        }
+
+        function updateForceUpgradePasswordPreview() {
+            const newPassEl = document.getElementById('forceUpgradeNewPass');
+            const lenPill = document.getElementById('pwRuleLenPill');
+            const mixPill = document.getElementById('pwRuleMixPill');
+            const safePill = document.getElementById('pwRuleSafePill');
+            const strengthLabel = document.getElementById('forceUpgradeStrengthLabel');
+
+            const val = (newPassEl ? newPassEl.value : '').trim();
+            const users = getAuthUsers();
+            const targetUser = pendingWeakPasswordUpgradeState
+                ? users.find(u => u.id === pendingWeakPasswordUpgradeState.userId)
+                : null;
+            const res = evaluatePasswordSecurity(val, targetUser);
+            const isSameAsOld = Boolean(
+                val &&
+                pendingWeakPasswordUpgradeState &&
+                pendingWeakPasswordUpgradeState.oldPlainPassword &&
+                val === pendingWeakPasswordUpgradeState.oldPlainPassword
+            );
+            const safeOk = val.length > 0 && res.isUnpredictable && !isSameAsOld;
+
+            const stylePill = (el, active) => {
+                if (!el) return;
+                if (active) {
+                    el.style.background = '#DCFCE7';
+                    el.style.color = '#15803D';
+                    el.style.borderColor = '#86EFAC';
+                } else {
+                    el.style.background = '#F1F5F9';
+                    el.style.color = '#475569';
+                    el.style.borderColor = '#CBD5E1';
+                }
+            };
+
+            stylePill(lenPill, res.hasMinLength);
+            stylePill(mixPill, res.hasLetterAndNumber);
+            stylePill(safePill, safeOk);
+
+            if (strengthLabel) {
+                if (!val) {
+                    strengthLabel.textContent = 'Bekleniyor';
+                    strengthLabel.style.color = '#475569';
+                } else if (res.isValid && !isSameAsOld) {
+                    strengthLabel.textContent = `Güvenlik: ${res.levelLabel}`;
+                    strengthLabel.style.color = '#15803D';
+                } else {
+                    strengthLabel.textContent = isSameAsOld ? 'Eski şifreyle aynı olamaz' : 'Geliştirilmeli';
+                    strengthLabel.style.color = '#B45309';
+                }
+            }
+        }
+        window.updateForceUpgradePasswordPreview = updateForceUpgradePasswordPreview;
+
+        function cancelForcePasswordUpgrade() {
+            pendingWeakPasswordUpgradeState = null;
+            const passInput = document.getElementById('loginPassword');
+            if (passInput) passInput.value = '';
+            switchAuthScreenTab('login');
+        }
+        window.cancelForcePasswordUpgrade = cancelForcePasswordUpgrade;
+
+        function completeAuthenticatedLogin(matched) {
+            const usernameInput = document.getElementById('loginUsername');
+            const passwordInput = document.getElementById('loginPassword');
+            const errorBox = document.getElementById('loginErrorMsg');
+            if (errorBox) errorBox.style.display = 'none';
+
+            setSession({
+                userId: matched.id,
+                username: matched.username,
+                role: matched.role,
+                name: matched.name,
+                authVerified: true,
+                loginAt: Date.now()
+            });
+            if (usernameInput) usernameInput.value = '';
+            if (passwordInput) passwordInput.value = '';
+
+            applyWednesdayHammerCurlPatch();
+            updateProfileGeminiStatusUI();
+            renderAiHybridHeroBanner();
+            updateSelectedSplitLabel();
+            renderSplitCards();
+            updateSelectedEquipLabel();
+            updateSelectedParamLabel();
+            refreshTopFitnessCardioScoreBars();
+            const hasRestored = restoreActiveWorkoutStateFromStorage();
+            if (hasRestored) {
+                switchTab('activeWorkoutTab');
+            } else {
+                renderActiveWorkout();
+            }
+        }
+
+        async function handleForcePasswordUpgradeSubmit(e) {
+            e.preventDefault();
+            const newPassEl = document.getElementById('forceUpgradeNewPass');
+            const confirmPassEl = document.getElementById('forceUpgradeConfirmPass');
+            const errorBox = document.getElementById('loginErrorMsg');
+
+            if (errorBox) errorBox.style.display = 'none';
+
+            if (!pendingWeakPasswordUpgradeState || !pendingWeakPasswordUpgradeState.userId) {
+                switchAuthScreenTab('login');
+                return;
+            }
+
+            const newPass = (newPassEl ? newPassEl.value : '').trim();
+            const confirmPass = (confirmPassEl ? confirmPassEl.value : '').trim();
+
+            const users = getAuthUsers();
+            const userIdx = users.findIndex(u => u.id === pendingWeakPasswordUpgradeState.userId);
+            if (userIdx === -1) {
+                switchAuthScreenTab('login');
+                return;
+            }
+            const user = users[userIdx];
+
+            if (pendingWeakPasswordUpgradeState.oldPlainPassword && newPass === pendingWeakPasswordUpgradeState.oldPlainPassword) {
+                if (errorBox) {
+                    errorBox.innerText = '❌ Yeni şifreniz mevcut zayıf şifrenizle aynı olamaz!';
+                    errorBox.style.display = 'block';
+                }
+                return;
+            }
+
+            const evalRes = evaluatePasswordSecurity(newPass, user);
+            if (!evalRes.isValid) {
+                if (errorBox) {
+                    errorBox.innerText = `❌ ${evalRes.reason}`;
+                    errorBox.style.display = 'block';
+                }
+                return;
+            }
+
+            if (newPass !== confirmPass) {
+                if (errorBox) {
+                    errorBox.innerText = '❌ Girdiğiniz yeni şifreler birbiriyle eşleşmiyor!';
+                    errorBox.style.display = 'block';
+                }
+                return;
+            }
+
+            const newSalt = generateSecureSalt();
+            const newHash = await sha256Hex(newSalt + newPass);
+            user.salt = newSalt;
+            user.passwordHash = newHash;
+            delete user.password;
+            user.mustChangePassword = false;
+            user.passwordStrengthLevel = evalRes.levelLabel;
+            user.passwordUpdatedAt = Date.now();
+            user.updatedAt = Date.now();
+
+            users[userIdx] = user;
+            saveAuthUsers(users);
+
+            if (newPassEl) newPassEl.value = '';
+            if (confirmPassEl) confirmPassEl.value = '';
+            pendingWeakPasswordUpgradeState = null;
+            switchAuthScreenTab('login');
+            completeAuthenticatedLogin(user);
+        }
+        window.handleForcePasswordUpgradeSubmit = handleForcePasswordUpgradeSubmit;
+
         async function handleForgotPasswordSubmit(e) {
             e.preventDefault();
             const idEl = document.getElementById('forgotIdentity');
@@ -20083,8 +20774,9 @@ KURALLAR:
                 return;
             }
 
-            if (newPass.length < 3) {
-                errorBox.innerText = "❌ Yeni şifreniz en az 3 karakter olmalıdır.";
+            const prelimCheck = evaluatePasswordSecurity(newPass, { username: normIdentity, name: rawFullName });
+            if (!prelimCheck.isValid) {
+                errorBox.innerText = `❌ ${prelimCheck.reason}`;
                 errorBox.style.display = 'block';
                 return;
             }
@@ -20118,6 +20810,13 @@ KURALLAR:
 
             if (!matchedUser) {
                 errorBox.innerText = "❌ E-posta/kullanıcı adı ile kayıtlı Ad Soyad bilgisi eşleşmedi. Lütfen kayıtlı bilgilerinizi kontrol edin.";
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            const fullSecCheck = evaluatePasswordSecurity(newPass, matchedUser);
+            if (!fullSecCheck.isValid) {
+                errorBox.innerText = `❌ ${fullSecCheck.reason}`;
                 errorBox.style.display = 'block';
                 return;
             }
@@ -20185,6 +20884,8 @@ KURALLAR:
             matchedUser.salt = salt;
             matchedUser.passwordHash = passHash;
             delete matchedUser.password;
+            matchedUser.mustChangePassword = false;
+            matchedUser.passwordStrengthLevel = fullSecCheck.levelLabel;
             matchedUser.passwordUpdatedAt = Date.now();
             matchedUser.updatedAt = Date.now();
 
@@ -20203,7 +20904,7 @@ KURALLAR:
             if (loginUnameEl) loginUnameEl.value = matchedUser.username || matchedUser.email;
 
             if (successBox) {
-                successBox.innerText = `✅ Şifreniz başarıyla yenilendi! Kullanıcı adınız (@${matchedUser.username}) veya e-postanızla hemen giriş yapabilirsiniz.`;
+                successBox.innerText = `✅ Güçlü şifreniz kaydedildi! Kullanıcı adınız (@${matchedUser.username}) veya e-postanızla hemen giriş yapabilirsiniz.`;
                 successBox.style.display = 'block';
             }
         }
@@ -20241,8 +20942,9 @@ KURALLAR:
                 return;
             }
 
-            if (pass.length < 3) {
-                errorBox.innerText = "❌ Şifreniz en az 3 karakter olmalıdır.";
+            const secCheck = evaluatePasswordSecurity(pass, { username: rawUname, name: dname, email: rawEmail });
+            if (!secCheck.isValid) {
+                errorBox.innerText = `❌ ${secCheck.reason}`;
                 errorBox.style.display = 'block';
                 return;
             }
@@ -20283,6 +20985,8 @@ KURALLAR:
                 email: rawEmail,
                 passwordHash: passHash,
                 salt: salt,
+                passwordStrengthLevel: secCheck.levelLabel,
+                mustChangePassword: false,
                 role: 'athlete',
                 status: 'pending',
                 name: dname,
@@ -20371,15 +21075,6 @@ KURALLAR:
                     saveAuthUsers(users);
                     break;
                 }
-                // 3. Kendi Kendini Onarma (Self-Healing): passwordHash eksikse girilen parolayı doğrudan kaydet ve girişi sağla
-                if (!u.passwordHash && !u.password) {
-                    matched = u;
-                    const salt = generateSecureSalt();
-                    u.salt = salt;
-                    u.passwordHash = await sha256Hex(salt + pass);
-                    saveAuthUsers(users);
-                    break;
-                }
             }
 
             if (matched) {
@@ -20395,33 +21090,21 @@ KURALLAR:
                     return;
                 }
 
-                errorBox.style.display = 'none';
-                setSession({
-                    userId: matched.id,
-                    username: matched.username,
-                    role: matched.role,
-                    name: matched.name,
-                    authVerified: true,
-                    loginAt: Date.now()
-                });
-                usernameInput.value = "";
-                passwordInput.value = "";
-
-                // Başarılı giriş sonrası kullanıcının antrenman motorunu ve görünümünü yükle
-                applyWednesdayHammerCurlPatch();
-                updateProfileGeminiStatusUI();
-                renderAiHybridHeroBanner();
-                updateSelectedSplitLabel();
-                renderSplitCards();
-                updateSelectedEquipLabel();
-                updateSelectedParamLabel();
-                refreshTopFitnessCardioScoreBars();
-                const hasRestored = restoreActiveWorkoutStateFromStorage();
-                if (hasRestored) {
-                    switchTab('activeWorkoutTab');
-                } else {
-                    renderActiveWorkout();
+                // ZAYIF ŞİFRE DENETİMİ: Şifre basitse siteye almadan önce güvenli şifre oluşturma adımına yönlendir
+                const weakCheck = isUserStoredCredentialWeak(matched, pass);
+                if (weakCheck.isWeak) {
+                    errorBox.style.display = 'none';
+                    openForcePasswordUpgradeStep(matched, weakCheck.reason, pass);
+                    return;
                 }
+
+                if (!matched.passwordStrengthLevel) {
+                    const evalRes = evaluatePasswordSecurity(pass, matched);
+                    matched.passwordStrengthLevel = evalRes.levelLabel || 'Güçlü';
+                    saveAuthUsers(users);
+                }
+
+                completeAuthenticatedLogin(matched);
             } else {
                 errorBox.innerText = "❌ Hatalı e-posta/kullanıcı adı veya şifre!";
                 errorBox.style.display = 'block';
@@ -20442,11 +21125,6 @@ KURALLAR:
 
             if (!currentPass || !newPass) {
                 alert("Lütfen mevcut şifrenizi ve yeni şifrenizi girin.");
-                return;
-            }
-
-            if (newPass.length < 6) {
-                alert("Yeni şifre en az 6 karakter uzunluğunda olmalıdır!");
                 return;
             }
 
@@ -20477,12 +21155,27 @@ KURALLAR:
                 return;
             }
 
+            if (newPass === currentPass) {
+                alert("❌ Yeni şifreniz mevcut şifrenizle aynı olamaz!");
+                return;
+            }
+
+            const secCheck = evaluatePasswordSecurity(newPass, user);
+            if (!secCheck.isValid) {
+                alert(`❌ ${secCheck.reason}`);
+                return;
+            }
+
             const newSalt = generateSecureSalt();
             const newHash = await sha256Hex(newSalt + newPass);
 
             user.salt = newSalt;
             user.passwordHash = newHash;
             delete user.password;
+            user.mustChangePassword = false;
+            user.passwordStrengthLevel = secCheck.levelLabel;
+            user.passwordUpdatedAt = Date.now();
+            user.updatedAt = Date.now();
 
             users[userIdx] = user;
             saveAuthUsers(users);
@@ -20491,7 +21184,7 @@ KURALLAR:
             if (newPassEl) newPassEl.value = '';
 
             playAlertSound();
-            alert("✅ Şifreniz başarıyla ve güvenle güncellendi!");
+            alert("✅ Güçlü şifreniz başarıyla kaydedildi!");
         }
 
         // ADMIN PANEL
@@ -20663,12 +21356,15 @@ KURALLAR:
 
             const salt = generateSecureSalt();
             const passHash = await sha256Hex(salt + pass);
+            const secCheck = evaluatePasswordSecurity(pass, { username: uname, name: dname, email: rawEmail });
 
             const newUser = {
                 id: 'usr_' + Date.now(),
                 username: uname,
                 passwordHash: passHash,
                 salt: salt,
+                mustChangePassword: !secCheck.isValid,
+                passwordStrengthLevel: secCheck.levelLabel,
                 role: role,
                 status: 'approved',
                 name: dname,
@@ -21263,13 +21959,19 @@ KURALLAR:
             }
             const salt = generateSecureSalt();
             const passHash = await sha256Hex(salt + cleanPass);
+            const secCheck = evaluatePasswordSecurity(cleanPass, target);
             target.salt = salt;
             target.passwordHash = passHash;
+            target.mustChangePassword = !secCheck.isValid;
+            target.passwordStrengthLevel = secCheck.levelLabel;
             delete target.password;
             target.updatedAt = Date.now();
             saveAuthUsers(users);
             renderAdminUserList();
-            alert(`✅ @${target.username} kullanıcısının şifresi başarıyla "${cleanPass}" olarak güncellendi!`);
+            const noteMsg = secCheck.isValid
+                ? 'Güçlü şifre tanımlandı.'
+                : 'Geçici şifre tanımlandı; kullanıcı ilk girişte güvenli şifre oluşturmaya yönlendirilecek.';
+            alert(`✅ @${target.username} kullanıcısının şifresi "${cleanPass}" olarak güncellendi.\nℹ️ ${noteMsg}`);
         }
 
         function adminSwitchToUser(targetUserId) {
@@ -21349,11 +22051,11 @@ KURALLAR:
             if (headerName) headerName.innerText = escapeHTML(cleanShortName);
 
             const cardAvatar = document.getElementById('profileCardAvatar');
-            if (cardAvatar) cardAvatar.innerText = (user.name || 'K').charAt(0).toUpperCase();
+            if (cardAvatar) cardAvatar.innerText = cleanShortName.charAt(0).toUpperCase();
             const cardName = document.getElementById('profileCardName');
-            if (cardName) cardName.innerText = escapeHTML(user.name);
+            if (cardName) cardName.innerText = escapeHTML(cleanShortName);
             const cardMeta = document.getElementById('profileCardMeta');
-            if (cardMeta) cardMeta.innerText = `${user.level} (${user.gender}) • Kişisel Sporcu Profili`;
+            if (cardMeta) cardMeta.innerText = `${user.level || 'Orta Seviye'} • Sporcu Profili`;
 
             const nameInput = document.getElementById('editUserName');
             if (nameInput) nameInput.value = user.name || '';
@@ -21579,6 +22281,11 @@ KURALLAR:
                                     <span style="${locBadgeStyle} border-radius:4px; padding:2px 8px; font-size:11px; font-weight:700;">
                                         ${locIcon} ${escapeHTML(locName)}
                                     </span>
+                                    ${l.healthSummary && l.healthSummary.heartrateAvg ? `
+                                        <span style="background:#DCFCE7; border:1px solid #86EFAC; color:#15803D; border-radius:4px; padding:2px 8px; font-size:11px; font-weight:700;">
+                                            ⌚ ❤️ Ort. ${Number(l.healthSummary.heartrateAvg)} / Zirve ${Number(l.healthSummary.heartrateMax || l.healthSummary.heartrateAvg)} bpm${l.healthSummary.calories ? ` • 🔥 ${Number(l.healthSummary.calories)} kcal` : ''}
+                                        </span>
+                                    ` : ''}
                                 </div>
                                 <h3 style="font-size:15px; font-weight:800; color:#0F172A; line-height:1.3;">${escapeHTML(l.program)}</h3>
                             </div>
@@ -21604,12 +22311,28 @@ KURALLAR:
                             </div>
                         </div>
 
-                        <!-- MUSCLES WORKED -->
-                        ${l.muscleGroups && l.muscleGroups.length > 0 ? `
-                            <div style="margin: 6px 0 8px; display:flex; flex-wrap:wrap; gap:4px;">
-                                ${l.muscleGroups.map(m => `<span class="muscle-tag">${escapeHTML(m)}</span>`).join('')}
-                            </div>
-                        ` : ''}
+                        <!-- MUSCLES WORKED (Kısa Ana Kas Özeti) -->
+                        ${l.muscleGroups && l.muscleGroups.length > 0 ? (() => {
+                            const shortMuscles = [];
+                            l.muscleGroups.forEach(rawM => {
+                                const s = String(rawM || '').replace(/\s*\([^)]*\)/g, '').trim();
+                                let tag = s;
+                                if (/kanat|sırt|kürek|trapez/i.test(s)) tag = 'Sırt';
+                                else if (/göğüs/i.test(s)) tag = 'Göğüs';
+                                else if (/omuz/i.test(s)) tag = 'Omuz';
+                                else if (/ön bacak|arka bacak|bacak|kalf|baldır/i.test(s)) tag = 'Bacak';
+                                else if (/kalça/i.test(s)) tag = 'Kalça';
+                                else if (/triceps|arka kol/i.test(s)) tag = 'Triceps';
+                                else if (/biceps|ön kol|pazı/i.test(s)) tag = 'Biceps';
+                                else if (/karın|core|korse/i.test(s)) tag = 'Karın';
+                                if (tag && !shortMuscles.includes(tag)) shortMuscles.push(tag);
+                            });
+                            return shortMuscles.length > 0 ? `
+                                <div style="margin: 6px 0 8px; display:flex; flex-wrap:wrap; gap:4px;">
+                                    ${shortMuscles.slice(0, 7).map(m => `<span class="muscle-tag">${escapeHTML(m)}</span>`).join('')}
+                                </div>
+                            ` : '';
+                        })() : ''}
 
                         <!-- DETAILED EXERCISES & SETS -->
                         ${l.exercises && l.exercises.length > 0 ? `
@@ -21617,23 +22340,32 @@ KURALLAR:
                                 ${l.exercises.map(ex => {
                                     const isBw = isExerciseBodyweight(ex);
                                     const isTime = isExerciseTimeBased(ex);
+                                    const safeSetsArr = Array.isArray(ex.sets)
+                                        ? ex.sets
+                                        : Array.from({ length: Math.max(1, Number(ex.sets || ex.completedSets || 1)) }, (_, sIdx) => ({
+                                            setNo: sIdx + 1,
+                                            weight: Number(ex.weight || 0),
+                                            reps: Number(ex.reps || 10),
+                                            completed: true
+                                        }));
                                     let exVol = ex.exerciseVolume || 0;
-                                    if (exVol === 0 && Array.isArray(ex.sets)) {
-                                        ex.sets.forEach(st => {
+                                    if (exVol === 0 && safeSetsArr.length > 0) {
+                                        safeSetsArr.forEach(st => {
                                             if (st.completed || parseInt(st.reps, 10) > 0) {
                                                 exVol += calculateExerciseSetVolume(ex, st.weight, st.reps);
                                             }
                                         });
                                     }
-                                    const volText = exVol > 0 ? ` • ${Math.round(exVol).toLocaleString('tr-TR')} kg` : '';
+                                    const volText = exVol > 0 ? `${Math.round(exVol).toLocaleString('tr-TR')} kg` : '';
+                                    const cleanExTitle = String(ex.name || '').replace(/\s*\([^)]*\)/g, '').trim() || ex.name;
                                     return `
                                     <div class="log-exercise-item">
                                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                                            <strong class="log-ex-name" style="color:#0F172A; font-size:12.5px; font-weight:800;">${escapeHTML(ex.name)}</strong>
-                                            <span style="font-size:11px; color:#64748B; font-weight:600;">${escapeHTML(ex.muscle ? ex.muscle.split(',')[0] : '')}${volText}</span>
+                                            <strong class="log-ex-name" style="color:#0F172A; font-size:12.5px; font-weight:800;">${escapeHTML(cleanExTitle)}</strong>
+                                            <span style="font-size:11px; color:#64748B; font-weight:600;">${volText}</span>
                                         </div>
                                         <div class="log-sets-summary">
-                                            ${(ex.sets || []).map(st => st.completed ? `
+                                            ${safeSetsArr.map(st => st.completed ? `
                                                 <span class="log-set-pill completed">
                                                     S${st.setNo}: <strong>${formatSetWeightDisplay(isBw, st.weight)}</strong> × ${formatSetMetricDisplay(isTime, st.reps)} ✓
                                                 </span>
@@ -21749,7 +22481,7 @@ KURALLAR:
                 try {
                     const data = JSON.parse(evt.target.result);
                     if (data && typeof data === 'object' && Array.isArray(data.history)) {
-                        // Şema doğrulama ve veri temizliği
+                        // Şema doğrulama ve veri temizliği (mevcut geçmişle akıllı birleştirme)
                         const sanitizedHistory = data.history
                             .filter(item => item && typeof item === 'object')
                             .slice(0, 500)
@@ -21757,19 +22489,52 @@ KURALLAR:
                                 id: String(item.id || ('log_' + Date.now())).slice(0, 50),
                                 program: String(item.program || '').slice(0, 150),
                                 date: String(item.date || '').slice(0, 30),
-                                duration: String(item.duration || '').slice(0, 10),
+                                duration: Number.isFinite(Number(item.duration)) ? Number(item.duration) : String(item.duration || '').slice(0, 10),
                                 rpe: String(item.rpe || '').slice(0, 50),
                                 notes: String(item.notes || '').slice(0, 2000),
                                 locationName: String(item.locationName || '').slice(0, 50),
                                 locationType: String(item.locationType || '').slice(0, 30),
                                 exercises: Array.isArray(item.exercises) ? item.exercises.slice(0, 30) : [],
+                                muscleGroups: Array.isArray(item.muscleGroups) ? item.muscleGroups.slice(0, 20) : [],
+                                dateFormatted: item.dateFormatted ? String(item.dateFormatted).slice(0, 40) : undefined,
+                                durationFormatted: item.durationFormatted ? String(item.durationFormatted).slice(0, 20) : undefined,
+                                durationSecs: Number(item.durationSecs) || 0,
                                 totalVolumeKg: Number(item.totalVolumeKg) || 0,
                                 totalSetsCompleted: Number(item.totalSetsCompleted) || 0,
+                                totalRepsCompleted: Number(item.totalRepsCompleted) || 0,
+                                totalIsometricSecsCompleted: Number(item.totalIsometricSecsCompleted) || 0,
+                                garminActivityId: item.garminActivityId ? String(item.garminActivityId).slice(0, 60) : undefined,
+                                healthSummary: item.healthSummary && typeof item.healthSummary === 'object' ? item.healthSummary : undefined,
                                 timestamp: Number(item.timestamp) || Date.now()
                             }));
-                        setWorkoutLogs(sanitizedHistory);
+                        const existingLogs = getWorkoutLogs();
+                        const mergedById = new Map();
+                        existingLogs.forEach(item => {
+                            if (item && item.id) mergedById.set(String(item.id), item);
+                        });
+                        sanitizedHistory.forEach(item => {
+                            if (!item || !item.id) return;
+                            const prev = mergedById.get(String(item.id));
+                            mergedById.set(String(item.id), prev ? Object.assign({}, prev, item, {
+                                garminActivityId: item.garminActivityId || prev.garminActivityId,
+                                healthSummary: item.healthSummary || prev.healthSummary
+                            }) : item);
+                        });
+                        const mergedList = Array.from(mergedById.values()).sort((a, b) => {
+                            const da = String(a.date || '').slice(0, 10);
+                            const db = String(b.date || '').slice(0, 10);
+                            if (da !== db) return db.localeCompare(da);
+                            return (Number(b.timestamp) || 0) - (Number(a.timestamp) || 0);
+                        });
+                        setWorkoutLogs(mergedList);
+                        if (window.GarminTredictChief && typeof window.GarminTredictChief.handoffCompletedActivitiesToTabChiefs === 'function') {
+                            window.GarminTredictChief.handoffCompletedActivitiesToTabChiefs();
+                        }
+                        if (typeof window.syncGarminActivitiesFromTredict === 'function') {
+                            window.syncGarminActivitiesFromTredict();
+                        }
                         renderHistory();
-                        alert("✅ Antrenman geçmişi başarıyla ve güvenle yüklendi!");
+                        alert("✅ Antrenman geçmişi yüklendi ve Garmin saat verileriyle eşleştirildi!");
                     } else {
                         alert("❌ Hata: Geçersiz yedek dosyası şeması!");
                     }
@@ -27949,7 +28714,7 @@ KURALLAR:
             if ('serviceWorker' in navigator && navigator.serviceWorker) {
                 window.addEventListener('load', () => {
                     try {
-                        navigator.serviceWorker.register('./sw.js?v=281')
+                        navigator.serviceWorker.register('./sw.js?v=282')
                             .then(reg => {
                                 console.log('SW scope:', reg.scope);
                                 if (reg.update) reg.update();

@@ -1,18 +1,30 @@
 {
-  "name": "Çelik Kodu | Dambıl Fitness",
-  "short_name": "ÇelikKodu",
+  "name": "Çelik Kodu | Akıllı Antrenman Mimarı",
+  "short_name": "Çelik Kodu",
   "description": "Kişisel Dambıl Süperset Salon Kılavuzu & Antrenman Takip Portalı",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#090d16",
-  "theme_color": "#090d16",
+  "background_color": "#F8FAFC",
+  "theme_color": "#F8FAFC",
   "orientation": "portrait",
   "icons": [
+    {
+      "src": "assets/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
     {
       "src": "assets/diagrams/seq_db_press.svg",
       "sizes": "192x192 512x512",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }
