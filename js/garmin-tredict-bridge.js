@@ -353,6 +353,47 @@
     return { ...DEFAULT_SENT_MANIFESTS };
   }
 
+  function parseSingleRepCount(rawReps, fallback = 10) {
+    const s = String(rawReps ?? '').trim();
+    const rangeMatch = s.match(/(\d+)\s*[-–]\s*(\d+)/);
+    if (rangeMatch) {
+      const a = parseInt(rangeMatch[1], 10);
+      const b = parseInt(rangeMatch[2], 10);
+      if (a > 0 && b > 0) return Math.round((a + b) / 2);
+    }
+    const firstMatch = s.match(/\d+/);
+    if (firstMatch) {
+      const val = parseInt(firstMatch[0], 10);
+      if (val > 0 && val <= 200) return val;
+    }
+    return fallback;
+  }
+
+  function hydrateExercisesWithWorkoutScheme(workoutObj, rawList) {
+    const list = Array.isArray(rawList) ? rawList : [];
+    const scheme = (workoutObj && workoutObj.scheme)
+      || (workoutObj && workoutObj.customWorkout && workoutObj.customWorkout.scheme)
+      || {};
+    const baseSets = Number(scheme.sets || 3) || 3;
+    const baseReps = scheme.reps || '10';
+    const baseRest = Number(scheme.rest || 60) || 60;
+    return list.map(item => {
+      if (!item || typeof item !== 'object') return item;
+      const exObj = typeof EXERCISES_DB !== 'undefined'
+        ? EXERCISES_DB.find(x => x.id === (item.id || item.exerciseId) || x.name === item.name)
+        : null;
+      const rememberedWeight = (typeof window.getExerciseRememberedWeight === 'function' && (exObj || item))
+        ? Number(window.getExerciseRememberedWeight(exObj || item) || 0)
+        : 0;
+      return Object.assign({}, item, {
+        sets: item.sets || item.targetSets || baseSets,
+        reps: item.reps || item.targetReps || baseReps,
+        rest: item.rest || item.restSec || item.customRest || baseRest,
+        weight: item.weight || item.targetWeight || rememberedWeight || 0
+      });
+    });
+  }
+
   function saveSentWorkoutManifest(workoutTitle, exercisesList, activityOrDateKey) {
     if (!isGarminEnabledForCurrentUser()) return null;
     const manifests = getSentManifestsMap();
@@ -366,7 +407,7 @@
         primaryMuscles: audited.primaryMuscles,
         secondaryMuscles: audited.secondaryMuscles,
         plannedSets: Math.max(1, Number(item.sets || 3)),
-        plannedReps: parseInt(String(item.reps || '10').replace(/[^\d]/g, ''), 10) || 10,
+        plannedReps: parseSingleRepCount(item.reps, 10),
         plannedWeight: Number(item.weight || item.targetWeight || 12),
         fitCategory: audited.fitCategory,
         fitName: audited.fitName,
@@ -393,13 +434,45 @@
   function findManifestForActivity(activity) {
     const manifests = getSentManifestsMap();
     if (activity.id && manifests[activity.id]) return manifests[activity.id];
-    const datePrefix = String(activity.date || '').slice(0, 10);
-    if (datePrefix && manifests['date_' + datePrefix]) return manifests['date_' + datePrefix];
+    const localDatePrefix = toLocalIsoDateString(activity.date);
+    if (localDatePrefix && manifests['date_' + localDatePrefix]) return manifests['date_' + localDatePrefix];
+    const rawDatePrefix = String(activity.date || '').slice(0, 10);
+    if (rawDatePrefix && manifests['date_' + rawDatePrefix]) return manifests['date_' + rawDatePrefix];
     const normTitle = String(activity.title || '').toLowerCase().trim();
     for (const m of Object.values(manifests)) {
       if (m && m.title && String(m.title).toLowerCase().trim() === normTitle) {
         return m;
       }
+    }
+    // Takvimde o güne atanmış plan varsa oradan da manifest üret
+    if (localDatePrefix) {
+      try {
+        const uid = getActiveUidSafe();
+        const dateSchedRaw = localStorage.getItem(`celik_kodu_date_schedule_${uid}`);
+        if (dateSchedRaw) {
+          const dateSched = JSON.parse(dateSchedRaw);
+          if (dateSched && dateSched[localDatePrefix]) {
+            const exList = extractExercisesFromPlanEntry(dateSched[localDatePrefix]);
+            if (exList.length > 0) {
+              return saveSentWorkoutManifest(dateSched[localDatePrefix].title || activity.title, exList, 'date_' + localDatePrefix);
+            }
+          }
+        }
+        const dObj = new Date(localDatePrefix + 'T12:00:00');
+        if (!isNaN(dObj.getTime())) {
+          const dayIdx = String(dObj.getDay());
+          const weekRaw = localStorage.getItem(`celik_kodu_weekly_schedule_${uid}`);
+          if (weekRaw) {
+            const weekSched = JSON.parse(weekRaw);
+            if (weekSched && weekSched[dayIdx]) {
+              const exList = extractExercisesFromPlanEntry(weekSched[dayIdx]);
+              if (exList.length > 0) {
+                return saveSentWorkoutManifest(weekSched[dayIdx].title || activity.title, exList, 'date_' + localDatePrefix);
+              }
+            }
+          }
+        }
+      } catch {}
     }
     return null;
   }
@@ -509,6 +582,27 @@
           restDuration: Math.max(0, Number(activity.summary?.durationTotal || durSec) - durSec),
           hrRecovery: null,
           isCardioSession: true
+        });
+      } else if (plannedQueue.length > 0) {
+        // Özet aktivite döndüyse (henüz alt set kırılımı gelmediyse) o günün planlı hareketleriyle eşleştir
+        let rIdx = 0;
+        plannedQueue.forEach(pStep => {
+          const sCount = Math.max(1, Number(pStep.plannedSets || 3));
+          for (let i = 0; i < sCount; i++) {
+            activeSets.push({
+              roundIndex: rIdx++,
+              exerciseCategory: pStep.fitCategory || 'total_body',
+              exerciseName: pStep.fitName || undefined,
+              note: pStep.fitNote || `[id:${pStep.originalId}]`,
+              repetitions: Number(pStep.plannedReps || 10),
+              weight: Number(pStep.plannedWeight || 0),
+              duration: Math.max(20, Number(pStep.plannedReps || 10) * 3),
+              heartrate: Number(activity.summary?.heartrate || 122),
+              heartrateMax: Number(activity.summary?.heartrateMax || 148),
+              restDuration: 60,
+              hrRecovery: null
+            });
+          }
         });
       }
     }
@@ -715,8 +809,13 @@
 
       if (changed) {
         localStorage.setItem(historyKey, JSON.stringify(logs));
+        if (typeof window.syncWorkoutLogsToCloud === 'function') {
+          try { window.syncWorkoutLogsToCloud(logs, uid); } catch {}
+        }
         if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
         if (typeof renderHistory === 'function') renderHistory();
+        if (typeof renderAiHybridHeroBanner === 'function') renderAiHybridHeroBanner();
+        if (typeof window.refreshTopFitnessCardioScoreBars === 'function') window.refreshTopFitnessCardioScoreBars();
       }
     } catch {}
   }
@@ -814,7 +913,7 @@
 
       const setsCount = Math.max(1, Number(item.sets || item.targetSets || 3));
       const rawRepsStr = String(item.reps || item.targetReps || '10');
-      const repsVal = parseInt(rawRepsStr.replace(/[^\d]/g, ''), 10) || 10;
+      const repsVal = parseSingleRepCount(rawRepsStr, 10);
       const weightVal = Number(item.weight || item.targetWeight || 12);
       const restSec = Math.max(15, Number(item.rest || item.restSec || 60));
       const isTimeEx = Boolean((exObj && (exObj.isTimeBased || exObj.trackingType === 'time' || /^cond_/.test(exObj.id))) || /dk|sn|sec|min/i.test(rawRepsStr));
@@ -861,7 +960,7 @@
     const id = String(cItem.id || cItem.exerciseId || '');
     const durMin = cItem.durationMin !== undefined
       ? Math.max(0, Number(cItem.durationMin) || 0)
-      : (parseInt(String(cItem.targetReps || cItem.reps || '20').replace(/[^\d]/g, ''), 10) || 20);
+      : parseSingleRepCount(cItem.targetReps || cItem.reps || '20', 20);
     const distMeters = Math.max(0, Number(cItem.distanceMeters || 0));
     const minHr = cItem.targetHeartrate !== undefined
       ? Math.max(0, Number(cItem.targetHeartrate) || 0)
@@ -1000,14 +1099,16 @@
   // ─── OTOMATİK TAKVİM -> GARMIN SENKRONU (SIFIR EKSTRA BUTON, GARMIN KAPALIYSA SIFIR İSTEK) ───
   function extractExercisesFromPlanEntry(planEntry) {
     if (!planEntry || planEntry.rest) return [];
-    if (Array.isArray(planEntry.exercises) && planEntry.exercises.length > 0) return planEntry.exercises;
+    if (Array.isArray(planEntry.exercises) && planEntry.exercises.length > 0) {
+      return hydrateExercisesWithWorkoutScheme(planEntry, planEntry.exercises);
+    }
     if (planEntry.customWorkout && Array.isArray(planEntry.customWorkout.exercises) && planEntry.customWorkout.exercises.length > 0) {
-      return planEntry.customWorkout.exercises;
+      return hydrateExercisesWithWorkoutScheme(planEntry.customWorkout, planEntry.customWorkout.exercises);
     }
     try {
       if (typeof window.getWorkoutDetailsForPlan === 'function') {
         const det = window.getWorkoutDetailsForPlan(planEntry);
-        if (det && Array.isArray(det.exercises)) return det.exercises;
+        if (det && Array.isArray(det.exercises)) return hydrateExercisesWithWorkoutScheme(det, det.exercises);
       }
     } catch {}
     return [];
@@ -1075,7 +1176,7 @@
         : null;
       const exName = (exObj && exObj.name) || item.name || item.id || 'Hareket';
       const setsCount = Math.max(1, Number(item.sets || 3));
-      const repsVal = parseInt(String(item.reps || '10').replace(/[^\d]/g, ''), 10) || 10;
+      const repsVal = parseSingleRepCount(item.reps, 10);
       const weightVal = Number(item.weight || item.targetWeight || 12);
       const restSec = Math.max(15, Number(item.rest || item.restSec || 60));
       const activeSec = Math.max(25, repsVal * 4);
@@ -1129,7 +1230,10 @@
         ? planPayload.planTrainings.map(t => ({
             d: t.calendarDate,
             title: t.structuredWorkout && t.structuredWorkout.title,
-            steps: t.structuredWorkout && (t.structuredWorkout.steps || []).length
+            steps: t.structuredWorkout && (t.structuredWorkout.steps || []).map(grp => ({
+              r: grp.repetitions,
+              w: (grp.steps || []).map(st => `${st.exerciseName || ''}:${st.note || ''}:${st.exerciseRepetitions || st.duration || 0}:${st.exerciseWeight || 0}`)
+            }))
           }))
         : (intervalsEvents || [])
     );
@@ -1252,16 +1356,47 @@
         const activeDateKeys = Object.keys(parsed)
           .filter(dKey => dKey >= todayStr && extractExercisesFromPlanEntry(parsed[dKey]).length > 0)
           .sort();
-        const latestDateKey = activeDateKeys[activeDateKeys.length - 1];
-        if (!latestDateKey) return;
-        const entry = parsed[latestDateKey];
-        const exList = extractExercisesFromPlanEntry(entry);
-        if (!exList.length) return;
-        const title = entry.title || (entry.customWorkout && entry.customWorkout.title) || `Çelik Kodu (${latestDateKey})`;
-        saveSentWorkoutManifest(title, exList, 'date_' + latestDateKey);
-        const payload = buildTredictPlanPayload(title, exList, null, latestDateKey);
-        const ev = buildIntervalsWorkoutEvent(latestDateKey, title, exList);
-        pushPayloadToGarminSilent(payload, ev ? [ev] : []);
+        if (!activeDateKeys.length) return;
+        const hasPrevDateSnap = Object.keys(prevParsed).length > 0;
+        const changedDateKeys = activeDateKeys.filter(dKey => !hasPrevDateSnap || JSON.stringify(parsed[dKey]) !== JSON.stringify(prevParsed[dKey]));
+        const targetDateKeys = changedDateKeys.length > 0 ? changedDateKeys : [activeDateKeys.includes(todayStr) ? todayStr : activeDateKeys[activeDateKeys.length - 1]];
+
+        if (targetDateKeys.length === 1) {
+          const targetDateKey = targetDateKeys[0];
+          const entry = parsed[targetDateKey];
+          const exList = extractExercisesFromPlanEntry(entry);
+          if (!exList.length) return;
+          const title = entry.title || (entry.customWorkout && entry.customWorkout.title) || `Çelik Kodu (${targetDateKey})`;
+          saveSentWorkoutManifest(title, exList, 'date_' + targetDateKey);
+          const payload = buildTredictPlanPayload(title, exList, null, targetDateKey);
+          const ev = buildIntervalsWorkoutEvent(targetDateKey, title, exList);
+          pushPayloadToGarminSilent(payload, ev ? [ev] : []);
+          return;
+        }
+
+        const multiDays = [];
+        const intervalsEvents = [];
+        targetDateKeys.forEach((dKey, idx) => {
+          const entry = parsed[dKey];
+          const exList = extractExercisesFromPlanEntry(entry);
+          if (!exList.length) return;
+          const title = entry.title || (entry.customWorkout && entry.customWorkout.title) || `Çelik Kodu (${dKey})`;
+          saveSentWorkoutManifest(title, exList, 'date_' + dKey);
+          multiDays.push({
+            dayNumber: idx + 1,
+            calendarDate: dKey,
+            dateKey: 'date_' + dKey,
+            title,
+            exercises: exList,
+            extraCardioSessions: Array.isArray(entry.extraCardioSessions) ? entry.extraCardioSessions : [],
+            onlyCardioChanged: false
+          });
+          const ev = buildIntervalsWorkoutEvent(dKey, title, exList);
+          if (ev) intervalsEvents.push(ev);
+        });
+        if (!multiDays.length) return;
+        const payload = buildTredictPlanPayload('Çelik Kodu — Takvim Seansları', [], multiDays);
+        pushPayloadToGarminSilent(payload, intervalsEvents);
         return;
       }
 
@@ -1343,11 +1478,12 @@
       const updatedDate = gen.updatedAt ? formatLocalIsoDate(new Date(gen.updatedAt)) : createdDate;
       if (createdDate !== todayStr && updatedDate !== todayStr) return;
 
+      const hydratedExercises = hydrateExercisesWithWorkoutScheme(gen, gen.exercises);
       const title = gen.title || `Çelik Kodu (${todayStr})`;
-      saveSentWorkoutManifest(title, gen.exercises, 'date_' + todayStr);
-      const payload = buildTredictPlanPayload(title, gen.exercises, null, todayStr);
-      const ev = buildIntervalsWorkoutEvent(todayStr, title, gen.exercises);
-      const sig = 'gen_' + todayStr + '_' + JSON.stringify(gen.exercises.map(e => `${e.id || e.name}:${e.sets}:${e.reps}:${e.weight || 0}`));
+      saveSentWorkoutManifest(title, hydratedExercises, 'date_' + todayStr);
+      const payload = buildTredictPlanPayload(title, hydratedExercises, null, todayStr);
+      const ev = buildIntervalsWorkoutEvent(todayStr, title, hydratedExercises);
+      const sig = 'gen_' + todayStr + '_' + JSON.stringify(hydratedExercises.map(e => `${e.id || e.name}:${e.sets}:${parseSingleRepCount(e.reps, 10)}:${e.weight || 0}`));
       if (localStorage.getItem(getScopedGarminKey(LAST_PUSHED_SIG_KEY)) === sig) return;
       pushPayloadToGarminSilent(payload, ev ? [ev] : [], sig);
     } catch {}
@@ -1736,7 +1872,6 @@
       const outbox = JSON.parse(localStorage.getItem(outboxKey) || '[]');
       if (Array.isArray(outbox) && outbox.length > 0 && outbox[0] && outbox[0].planPayload) {
         pushPayloadToGarminSilent(outbox[0].planPayload, outbox[0].intervalsEvents || [], outbox[0].sig || '');
-        return;
       }
 
       const todayStr = formatLocalIsoDate(new Date());
@@ -1749,10 +1884,7 @@
             hasTodayInDateSchedule = true;
           }
         } catch {}
-        const sigDate = 'boot_date_' + todayStr + '_' + dateRaw.length;
-        if (localStorage.getItem(getScopedGarminKey(LAST_PUSHED_SIG_KEY)) !== sigDate) {
-          handleCalendarStorageWrite(`celik_kodu_date_schedule_${uid}`, dateRaw);
-        }
+        handleCalendarStorageWrite(`celik_kodu_date_schedule_${uid}`, dateRaw);
       }
 
       const lastGenRaw = localStorage.getItem('celik_kodu_last_generated_workout');
@@ -1762,10 +1894,7 @@
 
       const weekRaw = localStorage.getItem(`celik_kodu_weekly_schedule_${uid}`);
       if (weekRaw) {
-        const sigWeek = 'boot_week_' + todayStr + '_' + weekRaw.length;
-        if (localStorage.getItem(getScopedGarminKey(LAST_PUSHED_SIG_KEY)) !== sigWeek) {
-          handleCalendarStorageWrite(`celik_kodu_weekly_schedule_${uid}`, weekRaw);
-        }
+        handleCalendarStorageWrite(`celik_kodu_weekly_schedule_${uid}`, weekRaw);
       }
     } catch {}
   }
@@ -1866,13 +1995,51 @@
     buildIntervalsWorkoutEvent
   };
 
+  async function syncGarminActivitiesSilent() {
+    if (!isGarminEnabledForCurrentUser()) return false;
+    try {
+      const res = await fetchGarminBridge('/api/tredict/activities?days=30');
+      const data = await res.json();
+      if (data && data.ok && Array.isArray(data.activities) && data.activities.length > 0) {
+        localStorage.setItem(getScopedGarminKey(TELEMETRY_STORAGE_KEY), JSON.stringify(data.activities));
+        handoffCompletedActivitiesToTabChiefs();
+        renderHistoryGarminSyncPanel();
+        renderAnalyticsGarminCoachPanel();
+        return true;
+      }
+    } catch {}
+    return false;
+  }
+
   function initGarminTredictBridge() {
     migrateLegacyGarminStorageToOwner();
     installCalendarAutoSyncHook();
     refreshGarminPanelsForUserState();
     setTimeout(syncActiveSchedulesOnBoot, 600);
     setTimeout(syncGarminWellnessStepsSilent, 900);
+    setTimeout(syncGarminActivitiesSilent, 1200);
     scheduleMidnight0001StepSync();
+    window.addEventListener('focus', () => {
+      if (isGarminEnabledForCurrentUser()) {
+        syncActiveSchedulesOnBoot();
+        syncGarminActivitiesSilent();
+      }
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && isGarminEnabledForCurrentUser()) {
+        syncActiveSchedulesOnBoot();
+        syncGarminActivitiesSilent();
+      }
+    });
+    setInterval(() => {
+      if (!isGarminEnabledForCurrentUser()) return;
+      try {
+        const outbox = JSON.parse(localStorage.getItem(getScopedGarminKey(OUTBOX_PLANS_KEY)) || '[]');
+        if (Array.isArray(outbox) && outbox.length > 0) {
+          syncActiveSchedulesOnBoot();
+        }
+      } catch {}
+    }, 15000);
   }
 
   if (document.readyState === 'loading') {

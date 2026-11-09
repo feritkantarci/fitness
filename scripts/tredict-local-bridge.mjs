@@ -209,7 +209,10 @@ async function addTredictStrengthTrainingsToLiveCalendar(planTrainings, tredictT
     const payloadSig = JSON.stringify(normalizedItems.map(x => ({
       d: x.calendarDate,
       t: x.structuredWorkout?.title,
-      s: (x.structuredWorkout?.steps || []).length
+      s: (x.structuredWorkout?.steps || []).map(grp => ({
+        r: grp.repetitions,
+        w: (grp.steps || []).map(st => `${st.exerciseName || ''}:${st.note || ''}:${st.exerciseRepetitions || st.duration || 0}:${st.exerciseWeight || 0}`)
+      }))
     })));
     const lastTs = recentPushedSignatures.get(payloadSig) || 0;
     if (Date.now() - lastTs < 20000) {
