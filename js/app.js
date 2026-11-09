@@ -1747,7 +1747,14 @@
             }
 
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => {
+                if (c.id !== tabId) {
+                    c.querySelectorAll('video').forEach(v => {
+                        try { v.pause(); } catch(e) {}
+                    });
+                }
+                c.classList.remove('active');
+            });
 
             const targetBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes(tabId));
             if (targetBtn) targetBtn.classList.add('active');
@@ -9291,21 +9298,8 @@ KESİN KURALLAR:
                             </div>
                         </div>
 
-                        <!-- INLINE FORM EXPANDER (SADE GÖRSEL ÖNİZLEME) -->
-                        <div id="picker_form_expand_${ex.id}" style="display:none; margin-top:8px; padding-top:8px; border-top:1px solid #E2E8F0;">
-                            ${media.clip ? `
-                                <div style="text-align:center; background:#FFFFFF; border-radius:8px; overflow:hidden; border:1px solid #E2E8F0; min-height:150px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="event.stopPropagation(); openImageLightbox(decodeURIComponent('${encodeURIComponent(media.clip)}'), decodeURIComponent('${encodeURIComponent(ex.name || '')}'))">
-                                    <video src="${media.clip}" poster="${thumbImg}" autoplay loop muted playsinline style="max-width:100%; max-height:36vh; object-fit:contain; display:block; margin:0 auto;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';"></video>
-                                    <img src="${thumbImg}" style="display:none; max-width:100%; max-height:36vh; object-fit:contain; margin:0 auto;" alt="${escapeHTML(ex.name)} Form">
-                                </div>
-                            ` : (thumbImg ? `
-                                <div style="text-align:center; background:#FFFFFF; border-radius:8px; overflow:hidden; border:1px solid #E2E8F0; min-height:150px; display:flex; align-items:center; justify-content:center;">
-                                    <img src="${thumbImg}" style="max-width:100%; max-height:36vh; object-fit:contain; display:block; margin:0 auto;" alt="${escapeHTML(ex.name)} Form">
-                                </div>
-                            ` : `
-                                <div style="text-align:center; padding:12px; color:#64748B; font-size:11.5px;">Görsel hazırlanıyor.</div>
-                            `)}
-                        </div>
+                        <!-- INLINE FORM EXPANDER (SADE GÖRSEL ÖNİZLEME - LAZY VIDEO) -->
+                        <div id="picker_form_expand_${ex.id}" data-clip="${escapeHTML(media.clip || '')}" data-thumb="${escapeHTML(thumbImg)}" data-name="${escapeHTML(ex.name || '')}" style="display:none; margin-top:8px; padding-top:8px; border-top:1px solid #E2E8F0;"></div>
                     </div>
                 `;
             }).join('');
@@ -9330,14 +9324,41 @@ KESİN KURALLAR:
                 return;
             }
             const isHidden = box.style.display === 'none' || !box.style.display;
-            box.style.display = isHidden ? 'block' : 'none';
             if (isHidden) {
+                if (!box.hasChildNodes()) {
+                    const clipUrl = box.getAttribute('data-clip') || '';
+                    const thumbImg = box.getAttribute('data-thumb') || '';
+                    const exName = box.getAttribute('data-name') || '';
+                    if (clipUrl) {
+                        box.innerHTML = `
+                            <div style="text-align:center; background:#FFFFFF; border-radius:8px; overflow:hidden; border:1px solid #E2E8F0; min-height:150px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="event.stopPropagation(); openImageLightbox(decodeURIComponent('${encodeURIComponent(clipUrl)}'), decodeURIComponent('${encodeURIComponent(exName)}'))">
+                                <video src="${escapeHTML(clipUrl)}" poster="${escapeHTML(thumbImg)}" autoplay loop muted playsinline style="max-width:100%; max-height:36vh; object-fit:contain; display:block; margin:0 auto;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';"></video>
+                                <img src="${escapeHTML(thumbImg)}" style="display:none; max-width:100%; max-height:36vh; object-fit:contain; margin:0 auto;" alt="${escapeHTML(exName)} Form">
+                            </div>
+                        `;
+                    } else if (thumbImg) {
+                        box.innerHTML = `
+                            <div style="text-align:center; background:#FFFFFF; border-radius:8px; overflow:hidden; border:1px solid #E2E8F0; min-height:150px; display:flex; align-items:center; justify-content:center;">
+                                <img src="${escapeHTML(thumbImg)}" style="max-width:100%; max-height:36vh; object-fit:contain; display:block; margin:0 auto;" alt="${escapeHTML(exName)} Form">
+                            </div>
+                        `;
+                    } else {
+                        box.innerHTML = `<div style="text-align:center; padding:12px; color:#64748B; font-size:11.5px;">Görsel hazırlanıyor.</div>`;
+                    }
+                }
+                box.style.display = 'block';
                 box.querySelectorAll('video').forEach(v => {
                     v.muted = true;
                     v.defaultMuted = true;
                     v.playsInline = true;
                     v.play().catch(() => {});
                 });
+            } else {
+                box.querySelectorAll('video').forEach(v => {
+                    try { v.pause(); v.removeAttribute('src'); v.load(); } catch(e) {}
+                });
+                box.innerHTML = '';
+                box.style.display = 'none';
             }
         }
 
@@ -10663,11 +10684,35 @@ KESİN KURALLAR:
 
         let workoutFormGuideOpenState = {};
         function toggleWorkoutFormGuide(exId) {
-            workoutFormGuideOpenState[exId] = !workoutFormGuideOpenState[exId];
+            const isOpen = !workoutFormGuideOpenState[exId];
+            workoutFormGuideOpenState[exId] = isOpen;
             const body = document.getElementById(`formGuideBody_${exId}`);
             const arrow = document.getElementById(`formGuideArrow_${exId}`);
-            if (body) body.style.display = workoutFormGuideOpenState[exId] ? 'block' : 'none';
-            if (arrow) arrow.innerText = workoutFormGuideOpenState[exId] ? '▲ Gizle' : '▼ Göster';
+            if (body) {
+                if (isOpen) {
+                    if (!body.innerHTML.trim()) {
+                        const exObj = (activeWorkoutSession && Array.isArray(activeWorkoutSession.exercises) ? activeWorkoutSession.exercises.find(e => e.id === exId) : null)
+                            || (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB) ? EXERCISES_DB.find(e => e.id === exId) : null);
+                        if (exObj) {
+                            body.innerHTML = renderExercisePositionsHtml(exObj, `focus_${exId}`, false);
+                        }
+                    }
+                    body.style.display = 'block';
+                    body.querySelectorAll('video').forEach(v => {
+                        v.muted = true;
+                        v.defaultMuted = true;
+                        v.playsInline = true;
+                        v.play().catch(() => {});
+                    });
+                } else {
+                    body.querySelectorAll('video').forEach(v => {
+                        try { v.pause(); v.removeAttribute('src'); v.load(); } catch(e) {}
+                    });
+                    body.innerHTML = '';
+                    body.style.display = 'none';
+                }
+            }
+            if (arrow) arrow.innerText = isOpen ? '▲ Gizle' : '▼ Göster';
         }
 
         function applyGhostToSet(exId, setIdx, weight, reps) {
@@ -11518,7 +11563,7 @@ KESİN KURALLAR:
                             <div class="stitch-focus-head-left">
                                 ${(typeof OPENGYM_GLOBAL_CATALOG !== 'undefined' && OPENGYM_GLOBAL_CATALOG[cardEx.id]) ? `
                                     <div class="stitch-focus-thumb" onclick="toggleWorkoutFormGuide('${cardEx.id}')" title="Form rehberini aç/kapat">
-                                        <video src="${OPENGYM_GLOBAL_CATALOG[cardEx.id].clip}" autoplay loop muted playsinline style="width:100%; height:100%; object-fit:cover;"></video>
+                                        <img src="${OPENGYM_GLOBAL_CATALOG[cardEx.id].still}" width="40" height="40" loading="lazy" decoding="async" alt="${escapeHTML(cardEx.name)}" style="width:100%; height:100%; object-fit:cover;">
                                     </div>
                                 ` : ''}
                                 <div class="stitch-focus-title-col">
@@ -11533,7 +11578,7 @@ KESİN KURALLAR:
                         </div>
 
                         <div id="formGuideBody_${cardEx.id}" class="hevy-form-guide-body stitch-flush-form-drawer" style="display:${isFormOpen ? 'block' : 'none'};">
-                            ${renderExercisePositionsHtml(cardEx, `focus_${cardEx.id}`, false)}
+                            ${isFormOpen ? renderExercisePositionsHtml(cardEx, `focus_${cardEx.id}`, false) : ''}
                         </div>
 
                         <div class="stitch-sets-stack">
@@ -11879,7 +11924,7 @@ KESİN KURALLAR:
                                         <span id="formGuideArrow_${ex.id}" style="color:var(--gold); font-weight:800;">${isFormOpen ? '▲ Gizle' : '▼ Göster'}</span>
                                     </button>
                                     <div id="formGuideBody_${ex.id}" class="hevy-form-guide-body" style="display:${isFormOpen ? 'block' : 'none'};">
-                                        ${renderExercisePositionsHtml(ex, `active_${idx}`, false)}
+                                        ${isFormOpen ? renderExercisePositionsHtml(ex, `active_${idx}`, false) : ''}
                                     </div>
                                 </div>
 
@@ -27902,7 +27947,7 @@ KURALLAR:
             if ('serviceWorker' in navigator && navigator.serviceWorker) {
                 window.addEventListener('load', () => {
                     try {
-                        navigator.serviceWorker.register('./sw.js?v=278')
+                        navigator.serviceWorker.register('./sw.js?v=279')
                             .then(reg => {
                                 console.log('SW scope:', reg.scope);
                                 if (reg.update) reg.update();
