@@ -13377,13 +13377,16 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             db_walking_lunge: "Yürüyerek Lunge (Walking Lunge)"
         };
 
+        let _bilingualNamesPatched = false;
         function ensureBilingualExerciseNames() {
+            if (_bilingualNamesPatched) return;
             if (typeof EXERCISES_DB === 'undefined' || !Array.isArray(EXERCISES_DB)) return;
             EXERCISES_DB.forEach(ex => {
                 if (ex && EXERCISE_BILINGUAL_NAME_PATCHES[ex.id]) {
                     ex.name = EXERCISE_BILINGUAL_NAME_PATCHES[ex.id];
                 }
             });
+            _bilingualNamesPatched = true;
         }
 
         const EXERCISE_SEARCH_SYNONYMS = {
@@ -13409,14 +13412,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             cond_running: "kosu kosu bandi running treadmill jog sprint kardiyo kondisyon"
         };
 
-        function matchesExerciseSearch(ex, rawQuery) {
-            if (!rawQuery) return true;
-            const qNorm = normalizeSearchTextTR(rawQuery);
-            if (!qNorm) return true;
+        function getExerciseSearchHaystack(ex) {
+            if (!ex) return '';
+            if (typeof ex._cachedSearchHaystack === 'string') return ex._cachedSearchHaystack;
             const eqLabel = (typeof EQUIP_LABELS !== 'undefined' && EQUIP_LABELS[ex.equipment]?.label) || '';
             const syn = EXERCISE_SEARCH_SYNONYMS[ex.id] || '';
             const patchedName = EXERCISE_BILINGUAL_NAME_PATCHES[ex.id] || '';
-            const haystack = normalizeSearchTextTR(
+            ex._cachedSearchHaystack = normalizeSearchTextTR(
                 (ex.name || '') + ' ' +
                 patchedName + ' ' +
                 (ex.id || '') + ' ' +
@@ -13427,7 +13429,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 (ex.category || '') + ' ' +
                 syn
             );
-            const tokens = qNorm.split(' ').filter(Boolean);
+            return ex._cachedSearchHaystack;
+        }
+
+        function matchesExerciseSearch(ex, rawQuery, precomputedTokens = null) {
+            if (!rawQuery && !precomputedTokens) return true;
+            const tokens = precomputedTokens || normalizeSearchTextTR(rawQuery).split(' ').filter(Boolean);
+            if (tokens.length === 0) return true;
+            const haystack = getExerciseSearchHaystack(ex);
             return tokens.every(tok => haystack.includes(tok));
         }
 
@@ -13442,7 +13451,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         function switchLibraryExerciseMode(mode) {
             currentLibraryExerciseMode = mode === 'cardio' ? 'cardio' : 'fitness';
             const fitBtn = document.getElementById('libModeFitnessBtn');
-            const carBtn = document.getElementById('libModeCardioBtn');
+            const carBtn = document.getElementId('libModeCardioBtn');
             if (fitBtn) {
                 const isFit = currentLibraryExerciseMode === 'fitness';
                 fitBtn.style.background = isFit ? '#0F172A' : 'transparent';
@@ -13458,6 +13467,63 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             renderLibraryExerciseCatalog();
         }
 
+        function buildLibraryCatalogDOM(container, excludedIds) {
+            const excludedSet = new Set(excludedIds);
+            const orderedDb = [...EXERCISES_DB];
+            if (currentLibraryExerciseMode === 'cardio') {
+                orderedDb.sort((a, b) => (/^cond_/.test(b.id) ? 1 : 0) - (/^cond_/.test(a.id) ? 1 : 0));
+            }
+            let html = '';
+            orderedDb.forEach(ex => {
+                const isExcluded = excludedSet.has(ex.id);
+                const media = getExerciseVisualMedia(ex.id, ex.category);
+                const thumbImg = media.still || '';
+                const clipUrl = media.clip || '';
+                const eqLabel = (typeof formatExerciseEquipmentText === 'function' && formatExerciseEquipmentText(ex))
+                    ? formatExerciseEquipmentText(ex)
+                    : ((typeof EQUIP_LABELS !== 'undefined' && EQUIP_LABELS[ex.equipment])
+                        ? EQUIP_LABELS[ex.equipment].label
+                        : (ex.equipment || 'Serbest'));
+
+                html += `
+                    <div data-lib-ex-id="${ex.id}" style="padding:8px 10px; background:${isExcluded ? '#FEF2F2' : '#F8FAFC'}; border:1px solid ${isExcluded ? '#FECACA' : '#E2E8F0'}; border-radius:10px; content-visibility:auto; contain-intrinsic-size:0 58px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                            <div style="display:flex; align-items:center; gap:9px; min-width:0; flex:1; cursor:pointer;" onclick="toggleLibExerciseForm('${ex.id}')">
+                                <div style="width:40px; height:40px; border-radius:8px; background:#FFFFFF; overflow:hidden; flex-shrink:0; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center;">
+                                    ${thumbImg ? `<img src="${thumbImg}" width="40" height="40" decoding="async" style="width:100%; height:100%; object-fit:contain;" alt="${escapeHTML(ex.name)}" loading="lazy">` : '🏋️'}
+                                </div>
+                                <div style="min-width:0; flex:1;">
+                                    <div style="font-size:13px; font-weight:800; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                        ${escapeHTML(ex.name)}
+                                    </div>
+                                    <div style="font-size:10.5px; font-weight:700; color:${isExcluded ? '#B91C1C' : '#64748B'}; margin-top:1px;">
+                                        ${escapeHTML(eqLabel)}${isExcluded ? ' • Gizli' : ''}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                                <button type="button" class="wk-ex-i-btn" onclick="event.stopPropagation(); openExerciseQuickInfoModal('${ex.id}')" title="Hareket Bilgisi">i</button>
+                                ${isExcluded ? `
+                                    <button type="button" class="stitch-ex-swap-pill" style="background:#15803D; color:#FFFFFF; border-color:#15803D; padding:6px 11px; font-size:11px; font-weight:800;" onclick="event.stopPropagation(); toggleExerciseExclusionAndRefresh('${ex.id}')">
+                                        Geri Al
+                                    </button>
+                                ` : `
+                                    <button type="button" class="stitch-ex-swap-pill" style="background:#FF5A36; color:#FFFFFF; border-color:#FF5A36; padding:6px 12px; font-size:11.5px; font-weight:800;" onclick="event.stopPropagation(); openAddToProgramOptions('${ex.id}')">
+                                        + Ekle
+                                    </button>
+                                `}
+                            </div>
+                        </div>
+
+                        <div id="lib_form_expand_${ex.id}" data-clip="${escapeHTML(clipUrl)}" data-thumb="${escapeHTML(thumbImg)}" data-name="${escapeHTML(ex.name || '')}" style="display:none; margin-top:8px; padding-top:8px; border-top:1px solid #E2E8F0;"></div>
+                    </div>
+                `;
+            });
+            html += `<div id="libCatalogEmptyState" style="display:none; grid-column: 1 / -1; text-align:center; padding:32px 16px; background:#F8FAFC; border-radius:12px; border:1px dashed var(--border);"></div>`;
+            container.innerHTML = html;
+        }
+
         function renderLibraryExerciseCatalog() {
             ensureBilingualExerciseNames();
             const container = document.getElementById('libExercisesCatalogGrid');
@@ -13468,10 +13534,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (!container) return;
 
             const q = (document.getElementById('libExSearchInput')?.value || '').trim();
+            const qTokens = q ? normalizeSearchTextTR(q).split(' ').filter(Boolean) : null;
             const muscle = document.getElementById('libExMuscleFilter')?.value || 'all';
             const equip = document.getElementById('libExEquipFilter')?.value || 'all';
             const showExcluded = !!document.getElementById('chkLibShowExcluded')?.checked;
             const excludedIds = getUserExcludedExerciseIds();
+            const excludedSet = new Set(excludedIds);
 
             if (excludedCountEl) {
                 excludedCountEl.innerText = excludedIds.length;
@@ -13481,8 +13549,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 clearBtn.style.display = q ? 'block' : 'none';
             }
 
+            const cacheKey = `${currentLibraryExerciseMode}|${excludedIds.join(',')}`;
+            if (container._libCatalogCacheKey !== cacheKey || !container.querySelector('[data-lib-ex-id]')) {
+                buildLibraryCatalogDOM(container, excludedIds);
+                container._libCatalogCacheKey = cacheKey;
+            }
+
             const filtered = EXERCISES_DB.filter(ex => {
-                const isExcluded = excludedIds.includes(ex.id);
+                const isExcluded = excludedSet.has(ex.id);
                 const isStandaloneCardio = /^cond_/.test(String(ex.id || ''));
                 if (currentLibraryExerciseMode === 'cardio') {
                     if (!isStandaloneCardio) return false;
@@ -13517,89 +13591,41 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     }
                 }
 
-                if (q && !matchesExerciseSearch(ex, q)) return false;
+                if (qTokens && qTokens.length > 0 && !matchesExerciseSearch(ex, q, qTokens)) return false;
 
                 return true;
             });
 
-            if (currentLibraryExerciseMode === 'cardio') {
-                filtered.sort((a, b) => (/^cond_/.test(b.id) ? 1 : 0) - (/^cond_/.test(a.id) ? 1 : 0));
-            }
             const badgeText = `${filtered.length} ${currentLibraryExerciseMode === 'cardio' ? 'Kardiyo & Kondisyon' : 'Egzersiz'} ${showExcluded ? '(Gizlenenler)' : ''}`;
             if (countBadge) countBadge.innerText = badgeText;
             if (subCountBadge) subCountBadge.innerText = badgeText;
 
-            if (filtered.length === 0) {
-                container.innerHTML = `
-                    <div style="grid-column: 1 / -1; text-align:center; padding:32px 16px; background:#F8FAFC; border-radius:12px; border:1px dashed var(--border);">
+            const visibleIdSet = new Set(filtered.map(ex => ex.id));
+            const cards = container.children;
+            for (let i = 0; i < cards.length; i++) {
+                const card = cards[i];
+                const exId = card.getAttribute('data-lib-ex-id');
+                if (!exId) continue;
+                const isVis = visibleIdSet.has(exId);
+                if (card.style.display !== (isVis ? '' : 'none')) {
+                    card.style.display = isVis ? '' : 'none';
+                }
+            }
+
+            const emptyEl = document.getElementById('libCatalogEmptyState');
+            if (emptyEl) {
+                if (filtered.length === 0) {
+                    emptyEl.style.display = 'block';
+                    emptyEl.innerHTML = `
                         <div style="font-size:28px; margin-bottom:8px;">${showExcluded ? '✨' : '🔍'}</div>
                         <div style="font-size:13.5px; font-weight:800; color:#0F172A; margin-bottom:4px;">${showExcluded ? 'Kişisel Havuzunuzdan Gizlenmiş Egzersiz Yok' : 'Aramanıza Uygun Egzersiz Bulunamadı'}</div>
                         <div style="font-size:12px; color:var(--text-secondary); margin-bottom:12px;">${showExcluded ? 'Bir hareketi istemediğinizde "👁️‍🗨️ Gizle" butonuna basarak bu listeye alabilirsiniz.' : 'Filtreleri veya arama kelimesini değiştirerek tekrar deneyebilirsiniz.'}</div>
                         ${!showExcluded ? `<button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 12px;" onclick="document.getElementById('libExSearchInput').value=''; document.getElementById('libExMuscleFilter').value='all'; document.getElementById('libExEquipFilter').value='all'; renderLibraryExerciseCatalog();">Filtreleri Sıfırla</button>` : ''}
-                    </div>
-                `;
-                return;
+                    `;
+                } else {
+                    emptyEl.style.display = 'none';
+                }
             }
-
-            let html = '';
-            filtered.forEach(ex => {
-                const isExcluded = excludedIds.includes(ex.id);
-                const media = getExerciseVisualMedia(ex.id, ex.category);
-                const thumbImg = media.still || '';
-                const eqLabel = (typeof formatExerciseEquipmentText === 'function' && formatExerciseEquipmentText(ex))
-                    ? formatExerciseEquipmentText(ex)
-                    : ((typeof EQUIP_LABELS !== 'undefined' && EQUIP_LABELS[ex.equipment])
-                        ? EQUIP_LABELS[ex.equipment].label
-                        : (ex.equipment || 'Serbest'));
-
-                html += `
-                    <div style="padding:8px 10px; background:${isExcluded ? '#FEF2F2' : '#F8FAFC'}; border:1px solid ${isExcluded ? '#FECACA' : '#E2E8F0'}; border-radius:10px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                            <div style="display:flex; align-items:center; gap:9px; min-width:0; flex:1; cursor:pointer;" onclick="toggleLibExerciseForm('${ex.id}')">
-                                <div style="width:40px; height:40px; border-radius:8px; background:#FFFFFF; overflow:hidden; flex-shrink:0; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center;">
-                                    ${thumbImg ? `<img src="${thumbImg}" style="width:100%; height:100%; object-fit:contain;" alt="${escapeHTML(ex.name)}" loading="lazy">` : '🏋️'}
-                                </div>
-                                <div style="min-width:0; flex:1;">
-                                    <div style="font-size:13px; font-weight:800; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                                        ${escapeHTML(ex.name)}
-                                    </div>
-                                    <div style="font-size:10.5px; font-weight:700; color:${isExcluded ? '#B91C1C' : '#64748B'}; margin-top:1px;">
-                                        ${escapeHTML(eqLabel)}${isExcluded ? ' • Gizli' : ''}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
-                                <button type="button" class="wk-ex-i-btn" onclick="event.stopPropagation(); openExerciseQuickInfoModal('${ex.id}')" title="Hareket Bilgisi">i</button>
-                                ${isExcluded ? `
-                                    <button type="button" class="stitch-ex-swap-pill" style="background:#15803D; color:#FFFFFF; border-color:#15803D; padding:6px 11px; font-size:11px; font-weight:800;" onclick="event.stopPropagation(); toggleExerciseExclusionAndRefresh('${ex.id}')">
-                                        Geri Al
-                                    </button>
-                                ` : `
-                                    <button type="button" class="stitch-ex-swap-pill" style="background:#FF5A36; color:#FFFFFF; border-color:#FF5A36; padding:6px 12px; font-size:11.5px; font-weight:800;" onclick="event.stopPropagation(); openAddToProgramOptions('${ex.id}')">
-                                        + Ekle
-                                    </button>
-                                `}
-                            </div>
-                        </div>
-
-                        <div id="lib_form_expand_${ex.id}" style="display:none; margin-top:8px; padding-top:8px; border-top:1px solid #E2E8F0;">
-                            ${media.clip ? `
-                                <div style="text-align:center; background:#FFFFFF; border-radius:8px; overflow:hidden; border:1px solid #E2E8F0; min-height:150px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="event.stopPropagation(); openImageLightbox(decodeURIComponent('${encodeURIComponent(media.clip)}'), decodeURIComponent('${encodeURIComponent(ex.name || '')}'))">
-                                    <video src="${media.clip}" poster="${thumbImg}" autoplay loop muted playsinline style="max-width:100%; max-height:36vh; object-fit:contain; display:block; margin:0 auto;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';"></video>
-                                    <img src="${thumbImg}" style="display:none; max-width:100%; max-height:36vh; object-fit:contain; margin:0 auto;" alt="${escapeHTML(ex.name)} Form">
-                                </div>
-                            ` : (thumbImg ? `
-                                <div style="text-align:center; background:#FFFFFF; border-radius:8px; overflow:hidden; border:1px solid #E2E8F0; min-height:150px; display:flex; align-items:center; justify-content:center;">
-                                    <img src="${thumbImg}" style="max-width:100%; max-height:36vh; object-fit:contain; display:block; margin:0 auto;" alt="${escapeHTML(ex.name)} Form">
-                                </div>
-                            ` : '')}
-                        </div>
-                    </div>
-                `;
-            });
-
-            container.innerHTML = html;
         }
 
         function toggleLibExerciseForm(exId) {
@@ -13609,14 +13635,39 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 return;
             }
             const isHidden = box.style.display === 'none' || !box.style.display;
-            box.style.display = isHidden ? 'block' : 'none';
             if (isHidden) {
+                if (!box.hasChildNodes()) {
+                    const clipUrl = box.getAttribute('data-clip') || '';
+                    const thumbImg = box.getAttribute('data-thumb') || '';
+                    const exName = box.getAttribute('data-name') || '';
+                    if (clipUrl) {
+                        box.innerHTML = `
+                            <div style="text-align:center; background:#FFFFFF; border-radius:8px; overflow:hidden; border:1px solid #E2E8F0; min-height:150px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="event.stopPropagation(); openImageLightbox(decodeURIComponent('${encodeURIComponent(clipUrl)}'), decodeURIComponent('${encodeURIComponent(exName)}'))">
+                                <video src="${escapeHTML(clipUrl)}" poster="${escapeHTML(thumbImg)}" autoplay loop muted playsinline style="max-width:100%; max-height:36vh; object-fit:contain; display:block; margin:0 auto;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';"></video>
+                                <img src="${escapeHTML(thumbImg)}" style="display:none; max-width:100%; max-height:36vh; object-fit:contain; margin:0 auto;" alt="${escapeHTML(exName)} Form">
+                            </div>
+                        `;
+                    } else if (thumbImg) {
+                        box.innerHTML = `
+                            <div style="text-align:center; background:#FFFFFF; border-radius:8px; overflow:hidden; border:1px solid #E2E8F0; min-height:150px; display:flex; align-items:center; justify-content:center;">
+                                <img src="${escapeHTML(thumbImg)}" style="max-width:100%; max-height:36vh; object-fit:contain; display:block; margin:0 auto;" alt="${escapeHTML(exName)} Form">
+                            </div>
+                        `;
+                    }
+                }
+                box.style.display = 'block';
                 box.querySelectorAll('video').forEach(v => {
                     v.muted = true;
                     v.defaultMuted = true;
                     v.playsInline = true;
                     v.play().catch(() => {});
                 });
+            } else {
+                box.querySelectorAll('video').forEach(v => {
+                    try { v.pause(); v.removeAttribute('src'); v.load(); } catch(e) {}
+                });
+                box.innerHTML = '';
+                box.style.display = 'none';
             }
         }
         window.toggleLibExerciseForm = toggleLibExerciseForm;
@@ -27851,7 +27902,7 @@ KURALLAR:
             if ('serviceWorker' in navigator && navigator.serviceWorker) {
                 window.addEventListener('load', () => {
                     try {
-                        navigator.serviceWorker.register('./sw.js?v=277')
+                        navigator.serviceWorker.register('./sw.js?v=278')
                             .then(reg => {
                                 console.log('SW scope:', reg.scope);
                                 if (reg.update) reg.update();
