@@ -29,3 +29,7 @@ canva-export/
 canva_exports/
 .taste-skill/
 scratch/
+ios-app/
+desktop-app/
+.agents/skills/best-skills/data/
+.garmin-tokens.json
