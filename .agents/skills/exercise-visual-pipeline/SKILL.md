@@ -71,33 +71,45 @@ Jumping Jack ve benzeri pliometrik/kardiyo sıçrama egzersizlerinde uygulanan 6
 
 ## 🛠️ UÇTAN UCA UYGULAMA ADIMLARI
 
-### Adım 1: `image-generator` ile Anahtar Pozların Üretimi
-- Referans olarak her zaman `/Users/mrkantarci/Desktop/AI PROJELERI/FITNESS/assets/opengym/master_athlete_neutral.png` verilir.
-- İstem kuralları:
-  - `STRICT 0-DEGREE DIRECT FRONTAL VIEW ONLY` (3/4 yan açı kesinlikle yasak).
+### Adım 1: `image-generator` ile Anahtar Pozların Üretimi (Tek Paralel Dalga)
+- **Açı Seçimi:**
+  - Pliometrik / kardiyo sıçrama hareketleri (Jumping Jack vb.): `STRICT 0-DEGREE DIRECT FRONTAL VIEW` (`/Users/mrkantarci/Desktop/AI PROJELERI/FITNESS/assets/opengym/master_athlete_neutral.png` referanslı).
+  - Kalça menteşesi (hinge), çekiş (row) ve çok fazlı dambıl/kettlebell hareketleri (Row, RDL, High Pull, Cuban Rotasyon vb.): Sırt düzlüğünün ve menteşe açısının net okunması için **OpenGym standart 3/4 sağ-ön anatomik açı** (ilk üretilen master nötr duruş tüm pozlara referans verilerek karakter %100 kilitlenir).
+- **Ortak Stil Kuralları:**
   - `Soft greyscale pencil-shaded musculature striations (do NOT use thick black cartoon outlines)`.
-  - `Bright coral orange (#ea580c) highlights on active muscles`.
-  - `Keep the head at the exact same size and position (head_top = 87) as the reference image`.
+  - `Bright coral orange (#ea580c) highlights ONLY on active target muscles`.
+  - Saf `#FFFFFF` beyaz zemin, sıfır yazı/kutu/poster şeması.
+- **Tek Seferde Paralel Üretim (3–4 Dakika Hedefi):**
+  - Çok fazlı hareketlerde anahtar duruşlar tek tek sırayla beklenmez; tüm fazların anahtar pozları **tek bir paralel dalgada (single-wave batch)** aynı anda `image-generator` alt ajanlarına gönderilir.
 
-### Adım 2: Gövde Korelasyonu ve Kafa Hizası Kontrolü
-- Üretilen her anahtar pozun `master_athlete_neutral.png` ile gövde korelasyonu ölçülür (`corr >= 0.95` ve `head_top == 87`).
-- Uyumsuz veya kalın siyah dış hatlı kareler derhal elenir.
+### Adım 1B: Eklem Dönüşlerinde "Önce 3B Kılavuz, Sonra Tek Tur Dikiş Silme" (Guide-First Articulation)
+- Omuz/dirsek eksenli rotasyonlarda (örn. Cuban dış rotasyon) metinle *"kolları 45° döndür"* dendiğinde model dirsekleri yana açıp hatalı T-pose üretir; **metinle deneme-yanılma YASAKTIR**.
+- Doğru yöntem:
+  1. Mevcut tepe/başlangıç karesinden Python ile dirsek pivotu etrafında **3B perspektif kısaltmalı (`foreshortened`, min `0.76x` eksenel ölçek) kılavuz kare (`guide_pose.png`)** 2 saniyede oluşturulur.
+  2. Bu kılavuz kare `image-generator` aracına verilerek tüm vücut, açı ve dambıllar %100 sabit tutulup **yalnızca dirsek birleşim çizgisi tek turda pürüzsüzleştirilir**.
+
+### Adım 2: Ters Sarım (`Ping-Pong`) İniş Yasağı & Sabit Ölçek Kilidi (`fixed_scale`)
+- **Ters Ping-Pong Yasağı:** Birleşik hareketlerde (örn. Eğilerek Row + High Pull + Cuban) çıkış karelerini geriye sarmak inişte **sahte ikinci çekiş (reverse row)** hatası yaratır. İniş fazı için dik duruştan düz kollarla kalça menteşesine inen ayrı geçiş karesi kullanılır.
+- **Sabit Ölçek Kilidi (`fixed_scale`):** Öne eğilme (hinge) pozlarında bacak açıklığı (`foot_span`) üzerinden dinamik `extra_scale` hesaplamak boy titremesine yol açar. Tüm pozlarda `fixed_scale = 0.8000` (veya kardiyoda `0.7617`) sabit tutulur; yalnız `foot_xc -> 512.0` ve `y_max -> floor_y` hizalanır.
 
 ### Adım 3: Diz Yaylanması (`make_knee_dip`) ve 20 Kare Montajı
-- `scripts/build_exercise_gif.py` çalıştırılarak:
-  1. Arka plan `scipy.ndimage.label` ile saf beyaza (`#FFFFFF`) temizlenir ve yatay merkez `X=512.0` eksenine kilitlenir.
-  2. Zemin yaylanma kareleri (`make_knee_dip`) ayak tabanları sabit tutularak üretilir.
-  3. Tüm kareler kırpılmadan `SCALE = 0.7617` ile ölçeklenip `Y = 950` zemin çizgisi ve dinamik temas gölgesi üzerine `air_elev` irtifasıyla yerleştirilir.
-  4. `Image.blend` kullanılmadan (`steps = 0`) doğrudan GIF, WebP ve MP4 üretilir.
+- Derleyici betik çalıştırılarak:
+  1. Arka plan `scipy.ndimage.label` ile saf beyaza (`#FFFFFF`) temizlenir ve yatay ayak merkezi `X=512.0` eksenine kilitlenir.
+  2. Zemin çizgisi ve temas gölgesi üzerine sabit ölçekle yerleştirilir.
+  3. `Image.blend` kullanılmadan (`steps = 0`) ortak 256 renk paletiyle doğrudan çıktı üretilir.
 
-### Adım 4: Görsel Doğrulama Şeridi (`verify_20_pro_sheet.jpg`) Denetimi
-- Üretilen 20 karenin tamamı 5x4 tablo (`verify_20_pro_sheet.jpg`) olarak kaydedilir ve `read_file` ile bizzat incelenerek:
-  - Çift kol / hayaletlenme olmadığı,
-  - Kafa ve gövde boyutunun 20 kare boyunca değişmediği,
-  - Bitişik ayakla dikey sıçramanın ve havada açılma/kapanmanın net göründüğü teyit edilir.
+### Adım 4: Görsel Doğrulama Şeridi (`verify_final_20_sheet.jpg`) Denetimi
+- Üretilen 20 karenin tamamı 5x4 tablo olarak kaydedilir ve kullanıcıya sunulmadan önce `read_file` ile bizzat incelenerek:
+  - Çift kol / hayaletlenme veya eklem kesik izi olmadığı,
+  - Vücut ve ayak ölçeğinin 20 kare boyunca değişmediği,
+  - İniş fazında sahte ters hareket oluşmadığı teyit edilir.
 
 ---
 
-## 📦 TEKİL ÇIKTI VE TEMİZ DİZİN STANDARDI (SINGLE OUTPUT RULE)
-- **Gereksiz Format Çoklaması Yasaktır:** Aynı hareket için 3 farklı klasöre 4 ayrı dosya (`still.webp`, `animated.webp`, `.gif`, `.mp4`) üretilmez.
-- **Tek Hedef Dosya:** Egzersiz başına yalnızca **tek bir nihai animasyon dosyası** (`assets/exercises/{id}.gif` veya `assets/exercises/{id}.webp`) üretilir; ara/geçici kare dizinleri işlem sonunda otomatik silinir.
+## 🔗 UYGULAMA İÇİ TAM ENTEGRASYON KONTROL LİSTESİ ("HER YERDE GÜNCELLE")
+Kullanıcı yeni üretilen hareket görselini onaylayıp uygulamaya koymayı istediğinde şu 5 nokta tek adımda yerel olarak güncellenir:
+1. `assets/exercises/{id}.gif` + `assets/exercises/{id}.webp` (animasyonlu rehber dosyaları)
+2. `assets/opengym/clips/{id}.mp4` (`yuv420p` H.264 döngü videosu) + `assets/opengym/stills/{id}.webp` (`540x540` net kapak karesi)
+3. `js/exercises-db.js` (`diagram: "assets/exercises/{id}.gif"`) ve `js/app.js` (`exerciseGuideMap` + `OPENGYM_GLOBAL_CATALOG` üzerinde `?v=2` önbellek kırıcı; `openImageLightbox` içinde `/\.(mp4|webm)(?:[?#].*)?$/i` desteği)
+4. `sw.js` önbellek dizisi (`./assets/exercises/{id}.gif`) + yerel `ios-app/sync-web.sh` (`WebBundle` senkronu)
+5. `node --check` + `node scripts/tab-watchdog.js --write-report` doğrulaması (açık talimat olmadan `git push` yapılmaz).

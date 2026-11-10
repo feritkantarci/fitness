@@ -6389,7 +6389,7 @@
   {
     "category": "pull",
     "cue": "Eğilerek row yap, doğrulurken dirsekleri yüksek çekip scarecrow pozisyonundan bilekleri W şeklinde tavana çevir.",
-    "diagram": "assets/diagrams/seq_db_press.svg",
+    "diagram": "assets/exercises/db_high_pull_cuban_rotation.gif",
     "equipment": "dumbbell",
     "id": "db_high_pull_cuban_rotation",
     "isComplex": true,

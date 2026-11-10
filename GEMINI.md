@@ -97,7 +97,10 @@ Kullanıcı "canlıya al / push et" dediğinde şu adımlar uygulanır:
 ---
 
 ## 8. Görsel & Grafik Üretim Aracı Seçim Protokolü (Canva vs AI Görsel Üretici)
-* **Kullanıcı İradesine Saygı:** Görsel, afiş, antrenman şablonu, rozet veya illüstrasyon istendiğinde:
+* **Uygulama İçi Hareketli Egzersiz Görseli İstisnası (Sıfır Afiş / Sıfır Canva Sorusu):**
+  - Uygulamadaki herhangi bir egzersizin hareketli görseli (GIF / animasyon) incelenecek, yenilenecek veya sıfırdan üretilecekse **Canva (statik poster / 4 kutulu şema) ASLA önerilmez, kullanılmaz ve araç seçimi sorulmaz**.
+  - Doğrudan `exercise-visual-pipeline` protokolü devreye alınarak diğer egzersizlerle birebir aynı beyaz stüdyo zeminli ve turuncu aktif kas vurgulu hareketli görsel üretilir.
+* **Statik Tasarım Taleplerinde Kullanıcı İradesine Saygı:** Yalnızca statik afiş, sosyal medya görseli, antrenman şablonu, rozet veya kapak istendiğinde:
   - Kullanıcı özel olarak bir araç belirtmişse doğrudan o araç çalıştırılır.
   - Araç **belirtilmemişse**, varsayımla hareket edilmez; kullanıcıya şu seçeneklerle sorulur:
     1. **🎨 Canva MCP:** Şablon, düzenlenebilir tasarım, tipografi, sporcu kartları ve afişler.
