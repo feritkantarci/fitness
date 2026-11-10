@@ -32,8 +32,8 @@
       "chest"
     ],
     "secondaryMuscles": [
-      "triceps",
-      "shoulders"
+      "shoulders",
+      "triceps"
     ],
     "tags": [
       "full_body",
@@ -42,7 +42,7 @@
     ],
     "weightKey": "press",
     "primarySubMuscles": "Orta Göğüs",
-    "secondarySubMuscles": "Ön Omuz, Triceps (Dış ve Alt Kısım), Yan Göğüs Kaburga Kasları",
+    "secondarySubMuscles": "Ön Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş",
     "biomechanicalProof": "Düz sehpada dirsekleri 45° açıyla indirip itmek, göğsün tam orta kısmını en geniş açıda gerip sıkıştırır; kolları düzleştirirken triceps ve ön omuz da yardıma girer.",
     "fitCategory": "bench_press",
     "fitName": "dumbbell_bench_press",
@@ -96,7 +96,7 @@
     ],
     "weightKey": "press",
     "primarySubMuscles": "Üst Göğüs",
-    "secondarySubMuscles": "Ön Omuz, Triceps (Dış ve Alt Kısım), Yan Göğüs Kaburga Kasları",
+    "secondarySubMuscles": "Orta Göğüs, Ön Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş",
     "biomechanicalProof": "Sehpayı 30-45° yukarı kaldırmak itiş yönünü köprücük kemiğine taşır; böylece yük orta göğüsten doğrudan üst göğse ve ön omuza geçer.",
     "fitCategory": "bench_press",
     "fitName": "incline_dumbbell_bench_press",
@@ -118,7 +118,7 @@
     "id": "db_floor_press",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Orta Göğüs, Triceps (Dış ve Alt Kısım)",
+    "muscle": "Orta Göğüs, Arka Kol Dış Baş, Arka Kol Alt Baş",
     "name": "Dambıl Floor Press",
     "positions": [
       {
@@ -138,10 +138,11 @@
       }
     ],
     "primaryMuscles": [
-      "chest"
+      "chest",
+      "triceps"
     ],
     "secondaryMuscles": [
-      "triceps"
+      "shoulders"
     ],
     "tags": [
       "full_body",
@@ -149,7 +150,7 @@
       "upper"
     ],
     "weightKey": "press",
-    "primarySubMuscles": "Orta Göğüs, Triceps (Dış ve Alt Kısım)",
+    "primarySubMuscles": "Orta Göğüs, Arka Kol Dış Baş, Arka Kol Alt Baş",
     "secondarySubMuscles": "Ön Omuz",
     "biomechanicalProof": "Yerde yatarken dirseklerin zemine değmesi kolun fazla geriye gitmesini önler; dipten hız almadan yapılan itiş orta göğsü ve özellikle tricepsin kol kilitleme gücünü vurur.",
     "fitCategory": "bench_press",
@@ -172,23 +173,23 @@
     "id": "db_overhead_press",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ön Omuz, Yan Omuz",
+    "muscle": "Ön Omuz",
     "name": "Oturarak Dambıl Omuz Presi (Seated)",
     "positions": [
       {
         "badge": "setup",
-        "desc": "Ayaklar omuz genişliğinde. Dambıllar kulak hizasında, avuçlar karşıya bakar. Kalça ve karın kilitli.",
-        "phase": "1. Başlangıç (Omuz Hizası)"
+        "desc": "80-85° dik sehpaya otur, sırtını ve belini mindere tam yasla. Ayak tabanları yerde sabit, dambıllar kulak hizasında.",
+        "phase": "1. Dik Sehpa Kurulumu"
       },
       {
         "badge": "action",
-        "desc": "Nefes vererek dambılları kafanın iki yanından düz bir hatta baş üstüne doğru it. Beli asla geriye bükme.",
-        "phase": "2. Dikey İtiş"
+        "desc": "Sırtını sehpadan ayırmadan nefes vererek dambılları baş üstüne doğru dikey bir hatta güçlüce it.",
+        "phase": "2. Destekli Dikey İtiş"
       },
       {
         "badge": "finish",
-        "desc": "Kollar baş üstünde kilitlenir, kulaklar kolların arasına gelir. Kontrollü biçimde kulak hizasına indir.",
-        "phase": "3. Baş Üstü Kilit"
+        "desc": "Kollar baş üstünde kilitlenir. Dambılları birbirine çarpmadan kontrollü şekilde kulak hizasına indir.",
+        "phase": "3. Baş Üstü Kilit & Kontrol"
       }
     ],
     "primaryMuscles": [
@@ -196,7 +197,7 @@
     ],
     "secondaryMuscles": [
       "triceps",
-      "core"
+      "back"
     ],
     "tags": [
       "full_body",
@@ -204,9 +205,9 @@
       "upper"
     ],
     "weightKey": "press",
-    "primarySubMuscles": "Ön Omuz, Yan Omuz",
-    "secondarySubMuscles": "Triceps (Uzun ve Dış Kısım), Üst Göğüs, Üst Trapez",
-    "biomechanicalProof": "Sırtı sehpaya yaslayıp oturarak ağırlığı baş üstüne itmek, bacaklardan güç almayı engeller ve doğrudan ön ile yan omuzları çalıştırır.",
+    "primarySubMuscles": "Ön Omuz",
+    "secondarySubMuscles": "Yan Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş, Üst Sırt & Trapez",
+    "biomechanicalProof": "Sırtı 80-85° dik sehpaya yaslayıp ağırlığı baş üstüne itmek bacaklardan hız almayı keser; ön omuzu ana hedef yaparken yan omuz ve arka kolu yardımcı çalıştırır.",
     "fitCategory": "shoulder_press",
     "fitName": "seated_dumbbell_shoulder_press",
     "fitNote": "Oturarak",
@@ -228,7 +229,7 @@
     "id": "db_standing_overhead_press",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ön Omuz, Yan Omuz",
+    "muscle": "Ön Omuz",
     "name": "Ayakta Dambıl Omuz Presi (Standing)",
     "positions": [
       {
@@ -252,6 +253,7 @@
     ],
     "secondaryMuscles": [
       "triceps",
+      "back",
       "core"
     ],
     "tags": [
@@ -260,8 +262,8 @@
       "upper"
     ],
     "weightKey": "press",
-    "primarySubMuscles": "Ön Omuz, Yan Omuz",
-    "secondarySubMuscles": "Triceps, Ön ve Derin İç Karın (Core), Üst Trapez, Ana Kalça Kası (Duruş Kilidi)",
+    "primarySubMuscles": "Ön Omuz",
+    "secondarySubMuscles": "Yan Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş, Üst Sırt & Trapez, Derin İç Karın",
     "biomechanicalProof": "Ayakta dambılları baş üstüne iterken ön ve yan omuz ana işi yapar; ağırlık tepedeyken sağa sola sallanmamak için tüm karın (core) ve kalça kasları kilitlenir.",
     "fitCategory": "shoulder_press",
     "fitName": "overhead_dumbbell_press",
@@ -307,7 +309,8 @@
       "shoulders"
     ],
     "secondaryMuscles": [
-      "triceps"
+      "triceps",
+      "back"
     ],
     "tags": [
       "upper_push",
@@ -315,7 +318,7 @@
     ],
     "weightKey": "press",
     "primarySubMuscles": "Ön Omuz, Yan Omuz",
-    "secondarySubMuscles": "Triceps (Dış ve Alt Kısım), Üst Trapez, Arka Omuz (Dengeleyici)",
+    "secondarySubMuscles": "Arka Kol Dış Baş, Arka Kol Alt Baş, Üst Sırt & Trapez",
     "biomechanicalProof": "Avuç içleri sana bakarken başlayıp yukarı iterken dışa çevirmek, hareketin başında ön omzu, yukarı çıkarken ise yan omzu kesintisiz çalıştırır.",
     "fitCategory": "shoulder_press",
     "fitName": "arnold_press",
@@ -360,14 +363,16 @@
     "primaryMuscles": [
       "shoulders"
     ],
-    "secondaryMuscles": [],
+    "secondaryMuscles": [
+      "back"
+    ],
     "tags": [
       "upper_push",
       "upper"
     ],
     "weightKey": "press",
     "primarySubMuscles": "Yan Omuz",
-    "secondarySubMuscles": "Ön Omuz, Üst Sırt & Boyun Kökü (Üst Trapez), Omuz İç Denge Kasları",
+    "secondarySubMuscles": "Üst Sırt & Trapez",
     "biomechanicalProof": "Kolları yanlardan omuz hizasına doğru açmak, omuza genişlik veren yan omuz kasını doğrudan ve tek başına hedef alır.",
     "fitCategory": "lateral_raise",
     "fitName": "dumbbell_lateral_raise",
@@ -388,7 +393,7 @@
     "id": "db_triceps_overhead",
     "isComplex": false,
     "mechanic": "isolation",
-    "muscle": "Triceps İç / Uzun Kısım (Arka Kolun En Büyük Kısmı)",
+    "muscle": "Arka Kol Uzun Baş",
     "name": "Dambıl Başüstü Triceps",
     "positions": [
       {
@@ -410,16 +415,14 @@
     "primaryMuscles": [
       "triceps"
     ],
-    "secondaryMuscles": [
-      "shoulders"
-    ],
+    "secondaryMuscles": [],
     "tags": [
       "upper_push",
       "upper"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Triceps İç / Uzun Kısım (Arka Kolun En Büyük Kısmı)",
-    "secondarySubMuscles": "Triceps Dış ve Alt Kısım, Derin İç Karın (Beli Sabit Tutma)",
+    "primarySubMuscles": "Arka Kol Uzun Baş",
+    "secondarySubMuscles": "Arka Kol Dış Baş, Arka Kol Alt Baş",
     "biomechanicalProof": "Arka kolun en büyük parçası olan iç/uzun kısım omuzdan başladığı için, ancak kol başın üstüne kaldırıldığında tam gerilir ve maksimum çalışır.",
     "fitCategory": "triceps_extension",
     "fitName": "overhead_dumbbell_triceps_extension",
@@ -438,7 +441,7 @@
     "id": "db_skullcrusher",
     "isComplex": false,
     "mechanic": "isolation",
-    "muscle": "Triceps İç / Uzun Kısım, Triceps Dış Kısım",
+    "muscle": "Arka Kol Uzun Baş, Arka Kol Dış Baş",
     "name": "Dambıl Skullcrusher",
     "positions": [
       {
@@ -466,8 +469,8 @@
       "upper"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Triceps İç / Uzun Kısım, Triceps Dış Kısım",
-    "secondarySubMuscles": "Triceps Alt Kısım, Ön Kol Bilek Sabitleyicileri",
+    "primarySubMuscles": "Arka Kol Uzun Baş, Arka Kol Dış Baş",
+    "secondarySubMuscles": "Arka Kol Alt Baş",
     "biomechanicalProof": "Sırtüstü yatarken dambılları alnına/baş gerisine indirip kaldırmak, arka kolun hem uzun iç kısmını hem de dış kısmını aynı anda yoğun çalıştırır.",
     "fitCategory": "triceps_extension",
     "fitName": "dumbbell_lying_triceps_extension",
@@ -486,7 +489,7 @@
     "id": "db_goblet_squat",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ön Bacak (Dış, Orta ve Diz Üstü İç Kısım)",
+    "muscle": "Dış Ön Bacak, İç Ön Bacak",
     "name": "Dambıl Goblet Squat",
     "positions": [
       {
@@ -518,8 +521,8 @@
       "lower"
     ],
     "weightKey": "squat",
-    "primarySubMuscles": "Ön Bacak (Dış, Orta ve Diz Üstü İç Kısım)",
-    "secondarySubMuscles": "Ana Kalça Kası, Üst Sırt & Bel Kasları (Dik Duruş), Derin İç Karın (Core)",
+    "primarySubMuscles": "Dış Ön Bacak, İç Ön Bacak",
+    "secondarySubMuscles": "Orta Ön Bacak, Ana Kalça, Derin İç Karın",
     "biomechanicalProof": "Ağırlığı göğüs önünde tutmak sırtı dik tutmayı kolaylaştırır ve derin çömelme sağlar; böylece ön bacağın dış, orta ve diz üstü iç kısmı tam çalışır.",
     "fitCategory": "squat",
     "fitName": "goblet_squat",
@@ -542,7 +545,7 @@
     "id": "db_front_squat",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ön Bacak (Dış, Orta ve Diz Üstü İç Kısım)",
+    "muscle": "Dış Ön Bacak, İç Ön Bacak",
     "name": "Çift Dambıl Ön Squat (Front Squat)",
     "positions": [
       {
@@ -566,6 +569,7 @@
     ],
     "secondaryMuscles": [
       "glutes",
+      "back",
       "core"
     ],
     "tags": [
@@ -573,8 +577,8 @@
       "lower"
     ],
     "weightKey": "squat",
-    "primarySubMuscles": "Ön Bacak (Dış, Orta ve Diz Üstü İç Kısım)",
-    "secondarySubMuscles": "Ana Kalça Kası, Üst Sırt & Bel Kasları, Derin İç Karın (Core)",
+    "primarySubMuscles": "Dış Ön Bacak, İç Ön Bacak",
+    "secondarySubMuscles": "Orta Ön Bacak, Ana Kalça, Orta Sırt, Derin İç Karın",
     "biomechanicalProof": "İki dambılı omuz önünde tutarak dik gövdeyle çömelmek, yükü kalçadan çok dizlere ve ön bacak kaslarına odaklar.",
     "fitCategory": "squat",
     "fitName": "dumbbell_front_squat",
@@ -597,7 +601,7 @@
     "id": "db_bulgarian_squat",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ön Bacak (Özellikle Diz Üstü İç Kısım ve Dış Kısım), Ana Kalça Kası",
+    "muscle": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça",
     "name": "Bulgar Split Squat",
     "positions": [
       {
@@ -617,19 +621,17 @@
       }
     ],
     "primaryMuscles": [
-      "quads"
+      "quads",
+      "glutes"
     ],
-    "secondaryMuscles": [
-      "glutes",
-      "hamstrings"
-    ],
+    "secondaryMuscles": [],
     "tags": [
       "legs",
       "lower"
     ],
     "weightKey": "squat",
-    "primarySubMuscles": "Ön Bacak (Özellikle Diz Üstü İç Kısım ve Dış Kısım), Ana Kalça Kası",
-    "secondarySubMuscles": "Yan Kalça (Tek Ayak Denge Kası), Arka Bacak, Kalf & Ayak Bileği Denge Kasları",
+    "primarySubMuscles": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça, Yan Kalça",
+    "secondarySubMuscles": "Derin Kalça, Orta Ön Bacak",
     "biomechanicalProof": "Arka ayağı sehpaya koyup tek bacakla derin çömelmek, öndeki bacağın diz üstü iç kısmını ve ana kalçayı vururken, devrilmemek için yan kalça denge kasını çok yoğun çalıştırır.",
     "fitCategory": "lunge",
     "fitName": "dumbbell_bulgarian_split_squat",
@@ -651,7 +653,7 @@
     "id": "db_walking_lunge",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ön Bacak (Dış ve Diz Üstü İç Kısım), Ana Kalça Kası",
+    "muscle": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça",
     "name": "Yürüyerek Lunge (Walking Lunge)",
     "positions": [
       {
@@ -671,10 +673,11 @@
       }
     ],
     "primaryMuscles": [
-      "quads"
+      "quads",
+      "glutes"
     ],
     "secondaryMuscles": [
-      "glutes"
+      "calves"
     ],
     "tags": [
       "full_body",
@@ -682,8 +685,8 @@
       "lower"
     ],
     "weightKey": "squat",
-    "primarySubMuscles": "Ön Bacak (Dış ve Diz Üstü İç Kısım), Ana Kalça Kası",
-    "secondarySubMuscles": "Yan Kalça (Denge Kası), Arka Bacak, Kalf, Ön Kol (Dambıl Tutuşu)",
+    "primarySubMuscles": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça",
+    "secondarySubMuscles": "Yan Kalça, Orta Ön Bacak, Üst Baldır",
     "biomechanicalProof": "İleri adım atıp çömelmek ve öndeki bacakla kendini yukarı-ileri çekmek, ön bacak ile ana ve yan kalça kaslarını her adımda güçlü çalıştırır.",
     "fitCategory": "lunge",
     "fitName": "walking_dumbbell_lunge",
@@ -705,7 +708,7 @@
     "id": "db_reverse_lunge",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ön Bacak (Diz Üstü İç ve Dış Kısım), Ana Kalça Kası",
+    "muscle": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça",
     "name": "Reverse Lunge",
     "positions": [
       {
@@ -725,18 +728,19 @@
       }
     ],
     "primaryMuscles": [
-      "quads"
+      "quads",
+      "glutes"
     ],
     "secondaryMuscles": [
-      "glutes"
+      "core"
     ],
     "tags": [
       "legs",
       "lower"
     ],
     "weightKey": "squat",
-    "primarySubMuscles": "Ön Bacak (Diz Üstü İç ve Dış Kısım), Ana Kalça Kası",
-    "secondarySubMuscles": "Yan Kalça (Denge Kası), Arka Bacak, Derin İç Karın (Core)",
+    "primarySubMuscles": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça",
+    "secondarySubMuscles": "Yan Kalça, Orta Ön Bacak, Derin İç Karın",
     "biomechanicalProof": "Geriye doğru adım atmak dize binen baskıyı azaltır; öndeki bacağın ön kısmını ve ana kalça kasını diz dostu açıda çalıştırır.",
     "fitCategory": "lunge",
     "fitName": "dumbbell_reverse_lunge",
@@ -758,7 +762,7 @@
     "id": "db_rdl",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Arka Bacak (Kalçadan Eğilen Üst/Uzun Kısım), Ana Kalça Kası",
+    "muscle": "Arka Bacak, Arka Bacak & Kalça Bağı, Ana Kalça",
     "name": "Dambıl RDL",
     "positions": [
       {
@@ -782,7 +786,8 @@
       "glutes"
     ],
     "secondaryMuscles": [
-      "back"
+      "back",
+      "biceps"
     ],
     "tags": [
       "full_body",
@@ -790,8 +795,8 @@
       "lower"
     ],
     "weightKey": "hinge",
-    "primarySubMuscles": "Arka Bacak (Kalçadan Eğilen Üst/Uzun Kısım), Ana Kalça Kası",
-    "secondarySubMuscles": "Alt Sırt & Bel Kasları, Ön Kol (Kavrama), Kanatlar & Orta Sırt (Dambılları Bacağa Yakın Tutma)",
+    "primarySubMuscles": "Arka Bacak, Arka Bacak & Kalça Bağı, Ana Kalça",
+    "secondarySubMuscles": "Alt Sırt & Bel, Ön Kol & Dış Pazı",
     "biomechanicalProof": "Dizleri çok az kırıp kalçayı geriye iterek öne eğilmek, arka bacağın üst/uzun kısmını sonuna kadar esnetir ve doğrulurken ana kalça kasıyla birlikte kasar.",
     "fitCategory": "deadlift",
     "fitName": "romanian_deadlift",
@@ -818,7 +823,7 @@
     "id": "db_single_leg_rdl",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Arka Bacak, Yan Kalça (Tek Ayak Denge Kası), Ana Kalça Kası",
+    "muscle": "Arka Bacak, Ana Kalça, Yan Kalça",
     "name": "Tek Bacak RDL",
     "positions": [
       {
@@ -842,15 +847,17 @@
       "glutes"
     ],
     "secondaryMuscles": [
-      "core"
+      "back",
+      "core",
+      "calves"
     ],
     "tags": [
       "legs",
       "lower"
     ],
     "weightKey": "hinge",
-    "primarySubMuscles": "Arka Bacak, Yan Kalça (Tek Ayak Denge Kası), Ana Kalça Kası",
-    "secondarySubMuscles": "Alt Sırt & Bel Kasları, Yan Karın (Core), Ayak Bileği Denge Kasları",
+    "primarySubMuscles": "Arka Bacak, Ana Kalça, Yan Kalça, Derin Kalça",
+    "secondarySubMuscles": "Arka Bacak & Kalça Bağı, Alt Sırt & Bel, Yan Karın, Ön Kaval & Bilek",
     "biomechanicalProof": "Tek ayak üzerinde öne eğilip kalkmak arka bacak ve ana kalçayı çalıştırırken, kalçanın yana devrilmesini önlemek için yan kalça ve ayak bileği denge kaslarını yoğun çalıştırır.",
     "fitCategory": "deadlift",
     "fitName": "single_leg_romanian_deadlift_with_dumbbell",
@@ -875,7 +882,7 @@
     "id": "db_saw_row",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Kanatlar (Sırt Genişliği)",
+    "muscle": "Kanatlar",
     "name": "Dambıl Saw Row",
     "positions": [
       {
@@ -898,6 +905,7 @@
       "back"
     ],
     "secondaryMuscles": [
+      "shoulders",
       "biceps"
     ],
     "tags": [
@@ -906,8 +914,8 @@
       "upper"
     ],
     "weightKey": "pull",
-    "primarySubMuscles": "Kanatlar (Sırt Genişliği)",
-    "secondarySubMuscles": "Orta Sırt & Kürek Kemiği Kasları, Arka Omuz, Biceps & Ön Kol",
+    "primarySubMuscles": "Kanatlar",
+    "secondarySubMuscles": "Orta Sırt, Arka Omuz, Pazı Dış Baş, Ön Kol & Dış Pazı",
     "biomechanicalProof": "Dirseği gövdeye yakın tutup dambılı göğse değil arka cebe doğru (testere gibi) çekmek, sırtı üçgenleştiren kanat kaslarını en alt ucuna kadar çalıştırır.",
     "fitCategory": "row",
     "fitName": "one_arm_bent_over_row",
@@ -931,7 +939,7 @@
     "id": "db_chest_supported_row",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Orta Sırt & Kürek Kemiği Kasları (Sırt Kalınlığı)",
+    "muscle": "Orta Sırt, Kanatlar",
     "name": "Göğüs Destekli Row",
     "positions": [
       {
@@ -954,6 +962,7 @@
       "back"
     ],
     "secondaryMuscles": [
+      "shoulders",
       "biceps"
     ],
     "tags": [
@@ -961,8 +970,8 @@
       "upper"
     ],
     "weightKey": "pull",
-    "primarySubMuscles": "Orta Sırt & Kürek Kemiği Kasları (Sırt Kalınlığı)",
-    "secondarySubMuscles": "Kanatlar, Arka Omuz, Biceps & Ön Kol",
+    "primarySubMuscles": "Orta Sırt, Kanatlar",
+    "secondarySubMuscles": "Arka Omuz, Üst Sırt & Trapez, Pazı Dış Baş, Ön Kol & Dış Pazı",
     "biomechanicalProof": "Göğsü sehpaya dayamak belden hız almayı tamamen keser; kürek kemiklerini arkada birbirine sıkıştırarak çekmek orta sırt kalınlığını doğrudan vurur.",
     "fitCategory": "row",
     "fitName": "chest_supported_dumbbell_row",
@@ -986,7 +995,7 @@
     "id": "db_renegade_row",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Orta Sırt & Kanatlar, Yan Karın & Derin İç Karın (Core)",
+    "muscle": "Orta Sırt, Kanatlar, Yan Karın",
     "name": "Renegade Row",
     "positions": [
       {
@@ -1007,11 +1016,12 @@
     ],
     "primaryMuscles": [
       "back",
-      "shoulders"
+      "core"
     ],
     "secondaryMuscles": [
       "chest",
-      "core",
+      "shoulders",
+      "triceps",
       "biceps"
     ],
     "tags": [
@@ -1019,8 +1029,8 @@
       "core"
     ],
     "weightKey": "pull",
-    "primarySubMuscles": "Orta Sırt & Kanatlar, Yan Karın & Derin İç Karın (Core)",
-    "secondarySubMuscles": "Arka Omuz, Biceps & Ön Kol, Orta Göğüs & Triceps (Yerdeki Destek Kolu)",
+    "primarySubMuscles": "Orta Sırt, Kanatlar, Yan Karın, Derin İç Karın",
+    "secondarySubMuscles": "Orta Göğüs, Ön Omuz, Arka Kol Alt Baş, Pazı Dış Baş, Ön Kol & Dış Pazı",
     "biomechanicalProof": "Şınav duruşunda tek kolla yerden dambıl çekerken gövdenin dönmemesi için kendini sıkmak, orta sırt/kanatlarla birlikte yan karın kaslarını çok sert çalıştırır.",
     "fitCategory": "row",
     "fitName": "renegade_row",
@@ -1044,7 +1054,7 @@
     "id": "db_pullover",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Kanatlar (Sırt Genişliği), Yan Göğüs & Kaburga Kasları",
+    "muscle": "Kanatlar",
     "name": "Dambıl Pullover",
     "positions": [
       {
@@ -1075,8 +1085,8 @@
       "upper"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Kanatlar (Sırt Genişliği), Yan Göğüs & Kaburga Kasları",
-    "secondarySubMuscles": "Orta ve Alt Göğüs, Triceps İç/Uzun Kısım",
+    "primarySubMuscles": "Kanatlar",
+    "secondarySubMuscles": "Alt Göğüs, Orta Göğüs, Arka Kol Uzun Baş",
     "biomechanicalProof": "Sırtüstü yatarken kolları başın gerisinden yukarı çekmek, kanat kaslarını boydan boya esnetip çalıştırırken göğüs kafesini ve orta/alt göğsü de devreye sokar.",
     "fitCategory": "pull_up",
     "fitName": "ez_bar_pullover",
@@ -1100,7 +1110,7 @@
     "id": "db_hammer_curl",
     "isComplex": false,
     "mechanic": "isolation",
-    "muscle": "Biceps Altı Dış Kol Kası (Kol Kalınlaştırıcı), Ön Kol Üst Kası, Biceps Dış Kısım",
+    "muscle": "Ön Kol & Dış Pazı, Pazı Dış Baş",
     "name": "Hammer Curl",
     "positions": [
       {
@@ -1128,8 +1138,8 @@
       "upper"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Biceps Altı Dış Kol Kası (Kol Kalınlaştırıcı), Ön Kol Üst Kası, Biceps Dış Kısım",
-    "secondarySubMuscles": "Biceps İç Kısım, Bilek ve El Tutuş Kasları",
+    "primarySubMuscles": "Ön Kol & Dış Pazı, Pazı Dış Baş",
+    "secondarySubMuscles": "Pazı İç Baş",
     "biomechanicalProof": "Avuç içleri birbirine bakacak şekilde (çekiç tutuşu) kaldırmak, yükü bicepsin altındaki kol kalınlaştırıcı kasa ve ön kolun üst kısmına kaydırır.",
     "fitCategory": "curl",
     "fitName": "dumbbell_hammer_curl",
@@ -1150,7 +1160,7 @@
     "id": "db_incline_curl",
     "isComplex": false,
     "mechanic": "isolation",
-    "muscle": "Biceps Dış Kısım (Pazı Tepesi / Uzun Baş)",
+    "muscle": "Pazı Dış Baş",
     "name": "Incline Dambıl Curl",
     "positions": [
       {
@@ -1178,8 +1188,8 @@
       "upper"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Biceps Dış Kısım (Pazı Tepesi / Uzun Baş)",
-    "secondarySubMuscles": "Biceps İç Kısım, Biceps Altı Dış Kol Kası, Ön Kol",
+    "primarySubMuscles": "Pazı Dış Baş",
+    "secondarySubMuscles": "Pazı İç Baş, Ön Kol & Dış Pazı",
     "biomechanicalProof": "Eğimli sehpada otururken kolların gövdenin gerisinde kalması, pazının dış/tepe kısmını (uzun baş) hareketin en başında maksimum gerer ve tepe görünümünü büyütür.",
     "fitCategory": "curl",
     "fitName": "incline_dumbbell_biceps_curl",
@@ -1200,7 +1210,7 @@
     "id": "db_farmers_walk",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Derin İç Karın & Yan Karın (Core), Ön Kol & Bilek (Kavrama Gücü), Üst Sırt (Üst Trapez)",
+    "muscle": "Derin İç Karın, Üst Sırt & Trapez, Ön Kol & Dış Pazı",
     "name": "Çiftçi Yürüyüşü (Farmer's Walk / Carry)",
     "positions": [
       {
@@ -1221,11 +1231,12 @@
     ],
     "primaryMuscles": [
       "core",
-      "back"
+      "back",
+      "biceps"
     ],
     "secondaryMuscles": [
-      "biceps",
-      "glutes"
+      "glutes",
+      "calves"
     ],
     "tags": [
       "full_body",
@@ -1233,8 +1244,8 @@
       "conditioning"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Derin İç Karın & Yan Karın (Core), Ön Kol & Bilek (Kavrama Gücü), Üst Sırt (Üst Trapez)",
-    "secondarySubMuscles": "Yan Kalça (Yürüyüş Dengesi), Alt Sırt & Bel Kasları, Kalf (Baldır)",
+    "primarySubMuscles": "Derin İç Karın, Üst Sırt & Trapez, Ön Kol & Dış Pazı",
+    "secondarySubMuscles": "Yan Karın, Yan Kalça, Alt Sırt & Bel, Üst Baldır",
     "biomechanicalProof": "İki elde ağır yükle dik yürümek; karnı içe tutan derin korse kasını, yan karınları, omuzları taşıyan üst trapezi ve el/bilek kavrama kaslarını aynı anda çalıştırır.",
     "fitCategory": "carry",
     "fitName": "farmers_walk",
@@ -1259,7 +1270,7 @@
     "id": "db_suitcase_carry",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Yan Karın & Bel Yanları (Simit Bölgesi)",
+    "muscle": "Yan Karın, Derin İç Karın",
     "name": "Tek El Çanta Taşıma (Suitcase Carry)",
     "positions": [
       {
@@ -1282,16 +1293,16 @@
       "core"
     ],
     "secondaryMuscles": [
+      "glutes",
       "back",
-      "biceps",
-      "glutes"
+      "biceps"
     ],
     "tags": [
       "core"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Yan Karın & Bel Yanları (Simit Bölgesi)",
-    "secondarySubMuscles": "Yan Kalça (Yürürken Kalça Dengesi), Ön Kol & Bilek (Kavrama), Üst Trapez & Omuz",
+    "primarySubMuscles": "Yan Karın, Derin İç Karın",
+    "secondarySubMuscles": "Yan Kalça, Üst Sırt & Trapez, Ön Kol & Dış Pazı",
     "biomechanicalProof": "Sadece tek elde ağır dambıl taşırken vücudun o tarafa yatmasını engellemek, ağırlığın tam tersi taraftaki yan karın ve bel yanı kaslarını çok güçlü çalıştırır.",
     "fitCategory": "carry",
     "fitName": "farmers_walk",
@@ -1316,7 +1327,7 @@
     "id": "db_russian_twist",
     "isComplex": false,
     "mechanic": "isolation",
-    "muscle": "Yan Karın (Bel Yanları / Dönüş Kasları)",
+    "muscle": "Yan Karın",
     "name": "Russian Twist",
     "positions": [
       {
@@ -1343,8 +1354,8 @@
       "core"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Yan Karın (Bel Yanları / Dönüş Kasları)",
-    "secondarySubMuscles": "Ön Karın (Üst ve Alt Karın - Gövdeyi Tutma), Derin İç Karın, Ön Kalça Kası",
+    "primarySubMuscles": "Yan Karın",
+    "secondarySubMuscles": "Ön Karın, Derin İç Karın",
     "biomechanicalProof": "Yerde gövde hafif geriye yatıkken ağırlığı sağa sola döndürmek, belin yanlarındaki dönüş kaslarını (yan karın) doğrudan çalıştırır.",
     "fitCategory": "core",
     "fitName": "russian_twist",
@@ -1366,7 +1377,7 @@
     "id": "db_snatch",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Ana Kalça Kası, Arka Bacak, Ön ve Yan Omuz",
+    "muscle": "Ana Kalça, Arka Bacak, Ön Omuz",
     "name": "Dambıl Snatch",
     "positions": [
       {
@@ -1386,16 +1397,15 @@
       }
     ],
     "primaryMuscles": [
-      "glutes",
       "shoulders",
-      "quads",
-      "back"
+      "glutes",
+      "hamstrings"
     ],
     "secondaryMuscles": [
-      "core",
-      "biceps",
-      "hamstrings",
-      "triceps"
+      "back",
+      "quads",
+      "triceps",
+      "core"
     ],
     "tags": [
       "full_body",
@@ -1403,8 +1413,8 @@
       "conditioning"
     ],
     "weightKey": "hinge",
-    "primarySubMuscles": "Ana Kalça Kası, Arka Bacak, Ön ve Yan Omuz",
-    "secondarySubMuscles": "Ön Bacak, Üst Sırt (Trapez), Alt Sırt & Bel, Yan ve Derin İç Karın (Core)",
+    "primarySubMuscles": "Ana Kalça, Arka Bacak, Ön Omuz",
+    "secondarySubMuscles": "Yan Omuz, Üst Sırt & Trapez, Alt Sırt & Bel, Dış Ön Bacak, Arka Kol Alt Baş, Derin İç Karın",
     "biomechanicalProof": "Yerdeki dambılı bacak ve kalça patlamasıyla tek hamlede baş üstüne çekip kilitlemek; kalça, arka/ön bacak, üst sırt ve omuzları patlayıcı çalıştırır.",
     "fitCategory": "olympic_lift",
     "fitName": "dumbbell_snatch",
@@ -1434,7 +1444,7 @@
     "id": "db_swing",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ana Kalça Kası, Arka Bacak",
+    "muscle": "Ana Kalça, Arka Bacak & Kalça Bağı, Arka Bacak",
     "name": "Dambıl Swing",
     "positions": [
       {
@@ -1454,15 +1464,13 @@
       }
     ],
     "primaryMuscles": [
-      "hamstrings",
       "glutes",
-      "quads",
-      "shoulders"
+      "hamstrings"
     ],
     "secondaryMuscles": [
-      "core",
       "back",
-      "calves"
+      "core",
+      "biceps"
     ],
     "tags": [
       "full_body",
@@ -1470,8 +1478,8 @@
       "conditioning"
     ],
     "weightKey": "hinge",
-    "primarySubMuscles": "Ana Kalça Kası, Arka Bacak",
-    "secondarySubMuscles": "Alt Sırt & Bel Kasları, Derin İç Karın & Ön Karın (Core), Ön Kol (Kavrama) & Kanatlar",
+    "primarySubMuscles": "Ana Kalça, Arka Bacak & Kalça Bağı, Arka Bacak",
+    "secondarySubMuscles": "Alt Sırt & Bel, Derin İç Karın, Ön Kol & Dış Pazı",
     "biomechanicalProof": "Dambılı bacak arasından kalçayı ileri patlatarak savurmak, ana kalça kasını ve arka bacakları güçlü çalıştırırken en üst noktada karın ve beli kilitler.",
     "fitCategory": "hip_swing",
     "fitName": "single_arm_dumbbell_swing",
@@ -1495,7 +1503,7 @@
     "id": "kb_swing",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ana Kalça Kası, Arka Bacak",
+    "muscle": "Ana Kalça, Arka Bacak & Kalça Bağı, Arka Bacak",
     "name": "Kettlebell Swing",
     "positions": [
       {
@@ -1515,15 +1523,13 @@
       }
     ],
     "primaryMuscles": [
-      "hamstrings",
       "glutes",
-      "quads",
-      "shoulders"
+      "hamstrings"
     ],
     "secondaryMuscles": [
-      "core",
       "back",
-      "calves"
+      "core",
+      "biceps"
     ],
     "tags": [
       "full_body",
@@ -1531,8 +1537,8 @@
       "conditioning"
     ],
     "weightKey": "hinge",
-    "primarySubMuscles": "Ana Kalça Kası, Arka Bacak",
-    "secondarySubMuscles": "Alt Sırt & Bel Kasları, Derin İç Karın & Ön Karın (Core), Kanatlar, Ön Kol (Kavrama)",
+    "primarySubMuscles": "Ana Kalça, Arka Bacak & Kalça Bağı, Arka Bacak",
+    "secondarySubMuscles": "Alt Sırt & Bel, Derin İç Karın, Ön Kol & Dış Pazı",
     "biomechanicalProof": "Kettlebell'i kollarla değil kalçanın ileri patlamasıyla savurmak, ana kalça, arka bacak ve alt sırt zincirinin tamamını çalıştırır.",
     "fitCategory": "hip_swing",
     "fitName": "single_arm_kettlebell_swing",
@@ -1556,7 +1562,7 @@
     "id": "kb_clean",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Ana Kalça Kası, Arka Bacak, Orta ve Üst Sırt (Trapez & Kürek Kemiği)",
+    "muscle": "Ana Kalça, Arka Bacak, Üst Sırt & Trapez",
     "name": "Kettlebell Clean",
     "positions": [
       {
@@ -1577,24 +1583,20 @@
     ],
     "primaryMuscles": [
       "glutes",
-      "back",
-      "quads",
-      "hamstrings"
+      "hamstrings",
+      "back"
     ],
     "secondaryMuscles": [
       "biceps",
-      "core",
-      "shoulders",
-      "forearms",
-      "calves"
+      "core"
     ],
     "tags": [
       "full_body",
       "power"
     ],
     "weightKey": "hinge",
-    "primarySubMuscles": "Ana Kalça Kası, Arka Bacak, Orta ve Üst Sırt (Trapez & Kürek Kemiği)",
-    "secondarySubMuscles": "Biceps & Ön Kol, Derin İç Karın & Yan Karın (Core), Kanatlar",
+    "primarySubMuscles": "Ana Kalça, Arka Bacak, Üst Sırt & Trapez, Orta Sırt",
+    "secondarySubMuscles": "Alt Sırt & Bel, Ön Kol & Dış Pazı, Pazı Dış Baş, Derin İç Karın",
     "biomechanicalProof": "Ağırlığı kalça gücüyle yerden hızlandırıp dirseği bükerek omuz önüne (göğüs hizasına) almak; kalça, arka bacak, orta/üst sırt ve bicepsleri birlikte çalıştırır.",
     "fitCategory": "olympic_lift",
     "fitName": "clean",
@@ -1624,7 +1626,7 @@
     "id": "kb_press",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ön Omuz, Yan Omuz",
+    "muscle": "Ön Omuz",
     "name": "Kettlebell Press",
     "positions": [
       {
@@ -1648,6 +1650,7 @@
     ],
     "secondaryMuscles": [
       "triceps",
+      "back",
       "core"
     ],
     "tags": [
@@ -1655,8 +1658,8 @@
       "upper"
     ],
     "weightKey": "press",
-    "primarySubMuscles": "Ön Omuz, Yan Omuz",
-    "secondarySubMuscles": "Triceps, Omuz İç Denge Kasları, Yan Karın (Tek Kol Denge), Kanat (Başlangıç Desteği)",
+    "primarySubMuscles": "Ön Omuz",
+    "secondarySubMuscles": "Yan Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş, Üst Sırt & Trapez, Yan Karın",
     "biomechanicalProof": "Kettlebell'in topuzu elin dış kısmında durduğu için yukarı iterken omuzun iç denge kasları dambıla göre çok daha fazla çalışır; tek kolla yapılması yan karnı da devreye sokar.",
     "fitCategory": "shoulder_press",
     "fitName": "overhead_dumbbell_press",
@@ -1679,7 +1682,7 @@
     "id": "kb_half_snatch",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Ana Kalça Kası, Arka Bacak, Ön ve Yan Omuz + Omuz İç Denge Kasları",
+    "muscle": "Ana Kalça, Arka Bacak, Ön Omuz",
     "name": "Kettlebell Snatch",
     "positions": [
       {
@@ -1699,16 +1702,15 @@
       }
     ],
     "primaryMuscles": [
-      "glutes",
       "shoulders",
-      "quads",
-      "back"
+      "glutes",
+      "hamstrings"
     ],
     "secondaryMuscles": [
-      "core",
-      "biceps",
-      "hamstrings",
-      "triceps"
+      "back",
+      "quads",
+      "triceps",
+      "core"
     ],
     "tags": [
       "full_body",
@@ -1716,8 +1718,8 @@
       "conditioning"
     ],
     "weightKey": "hinge",
-    "primarySubMuscles": "Ana Kalça Kası, Arka Bacak, Ön ve Yan Omuz + Omuz İç Denge Kasları",
-    "secondarySubMuscles": "Üst ve Orta Sırt, Alt Sırt & Bel Kasları, Yan ve Derin İç Karın (Core)",
+    "primarySubMuscles": "Ana Kalça, Arka Bacak, Ön Omuz",
+    "secondarySubMuscles": "Yan Omuz, Üst Sırt & Trapez, Alt Sırt & Bel, Dış Ön Bacak, Arka Kol Alt Baş, Yan Karın",
     "biomechanicalProof": "Kettlebell'i bacak arasından tek hamlede baş üstüne fırlatıp kilitlemek; alt vücutta kalça ve arka bacağı, üstte ise sırt, omuz ve karın kaslarını çalıştırır.",
     "fitCategory": "olympic_lift",
     "fitName": "single_arm_kettlebell_snatch",
@@ -1747,7 +1749,7 @@
     "id": "kb_goblet_squat",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ön Bacak (Dış, Orta ve Diz Üstü İç Kısım)",
+    "muscle": "Dış Ön Bacak, İç Ön Bacak",
     "name": "Kettlebell Goblet Squat",
     "positions": [
       {
@@ -1778,8 +1780,8 @@
       "lower"
     ],
     "weightKey": "squat",
-    "primarySubMuscles": "Ön Bacak (Dış, Orta ve Diz Üstü İç Kısım)",
-    "secondarySubMuscles": "Ana Kalça Kası, İç Bacak Kasları, Üst Sırt & Derin İç Karın (Core)",
+    "primarySubMuscles": "Dış Ön Bacak, İç Ön Bacak",
+    "secondarySubMuscles": "Orta Ön Bacak, Ana Kalça, Derin İç Karın",
     "biomechanicalProof": "Kettlebell'i göğüs önünde tutarak en dibe kadar çömelmek, ön bacak kaslarını, ana kalçayı ve kasık/iç bacak kaslarını tam açıda çalıştırır.",
     "fitCategory": "squat",
     "fitName": "goblet_squat",
@@ -1802,7 +1804,7 @@
     "id": "kb_gorilla_row",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Kanatlar (Sırt Genişliği), Orta Sırt & Kürek Kemiği Kasları",
+    "muscle": "Kanatlar, Orta Sırt",
     "name": "Gorilla Row",
     "positions": [
       {
@@ -1825,16 +1827,17 @@
       "back"
     ],
     "secondaryMuscles": [
-      "biceps",
-      "core"
+      "core",
+      "shoulders",
+      "biceps"
     ],
     "tags": [
       "upper_pull",
       "core"
     ],
     "weightKey": "pull",
-    "primarySubMuscles": "Kanatlar (Sırt Genişliği), Orta Sırt & Kürek Kemiği Kasları",
-    "secondarySubMuscles": "Alt Sırt & Bel Kasları, Yan Karın (Core), Biceps & Ön Kol, Kalça & Ön Bacak (Çömelme Duruşu)",
+    "primarySubMuscles": "Kanatlar, Orta Sırt",
+    "secondarySubMuscles": "Alt Sırt & Bel, Yan Karın, Arka Omuz, Pazı Dış Baş, Ön Kol & Dış Pazı",
     "biomechanicalProof": "Geniş çömelme duruşunda yerdeki iki ağırlığı sırayla çekmek, kanat ve orta sırtı çalıştırırken gövdenin dönmesini önleyen yan karın ve bacakları da aktif tutar.",
     "fitCategory": "row",
     "fitName": "kettlebell_row",
@@ -1858,7 +1861,7 @@
     "id": "kb_windmill",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Yan Karın & Bel Yanları (Core), Omuz İç Denge Kasları & Omuz",
+    "muscle": "Yan Karın, Yan Kalça, Derin Kalça",
     "name": "Kettlebell Windmill",
     "positions": [
       {
@@ -1879,9 +1882,10 @@
     ],
     "primaryMuscles": [
       "core",
-      "shoulders"
+      "glutes"
     ],
     "secondaryMuscles": [
+      "shoulders",
       "hamstrings"
     ],
     "tags": [
@@ -1889,8 +1893,8 @@
       "mobility"
     ],
     "weightKey": "press",
-    "primarySubMuscles": "Yan Karın & Bel Yanları (Core), Omuz İç Denge Kasları & Omuz",
-    "secondarySubMuscles": "Yan ve Ana Kalça, Arka Bacak (Esneterek Güçlendirme), Triceps (Kol Kilidi)",
+    "primarySubMuscles": "Yan Karın, Yan Kalça, Derin Kalça",
+    "secondarySubMuscles": "Ön Omuz, Arka Omuz, Arka Bacak, Derin İç Karın",
     "biomechanicalProof": "Ağırlık baş üstünde havadayken kalçayı yana itip yere doğru eğilmek, yan karın ve bel yanlarını çalıştırırken arka bacağı esnetir ve omzu dengede tutar.",
     "fitCategory": "core",
     "fitName": "kettlebell_windmill",
@@ -1909,7 +1913,7 @@
     "id": "kb_turkish_getup",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Omuz İç Denge Kasları & Ön/Yan Omuz, Tüm Karın Çevresi (Ön, Yan ve Derin İç Karın)",
+    "muscle": "Derin İç Karın, Ön Karın, Yan Karın",
     "name": "Turkish Get-Up",
     "positions": [
       {
@@ -1934,7 +1938,8 @@
     ],
     "secondaryMuscles": [
       "glutes",
-      "quads"
+      "quads",
+      "triceps"
     ],
     "tags": [
       "full_body",
@@ -1942,8 +1947,8 @@
       "mobility"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Omuz İç Denge Kasları & Ön/Yan Omuz, Tüm Karın Çevresi (Ön, Yan ve Derin İç Karın)",
-    "secondarySubMuscles": "Ana ve Yan Kalça, Ön Bacak, Triceps (Yukarıdaki Kolu Sabit Tutma)",
+    "primarySubMuscles": "Derin İç Karın, Ön Karın, Yan Karın, Ön Omuz",
+    "secondarySubMuscles": "Yan Omuz, Ana Kalça, Yan Kalça, Dış Ön Bacak, Arka Kol Alt Baş",
     "biomechanicalProof": "Ağırlığı baş üstünde tutarak yerden adım adım ayağa kalkıp geri yatmak; omuz denge kaslarını, tüm karın/bel çevresini ve bacak/kalça kaslarını tek harekette birleştirir.",
     "fitCategory": "core",
     "fitName": "turkish_get_up",
@@ -1961,14 +1966,14 @@
     "garminMatchType": "exact_verified"
   },
   {
-    "category": "core",
+    "category": "pull",
     "cue": "Gülleyi ters çevirip boynuzlardan tut, başını oynatmadan gülleyi başının etrafında haleler çizerek döndür.",
     "diagram": "assets/diagrams/seq_db_press.svg",
     "equipment": "kettlebell",
     "id": "kb_halo",
     "isComplex": false,
     "mechanic": "isolation",
-    "muscle": "Arka ve Yan Omuz, Omuz İç Denge Kasları",
+    "muscle": "Arka Omuz, Yan Omuz",
     "name": "Kettlebell Halo",
     "positions": [
       {
@@ -1991,15 +1996,17 @@
       "shoulders"
     ],
     "secondaryMuscles": [
+      "back",
       "core"
     ],
     "tags": [
       "core",
-      "mobility"
+      "mobility",
+      "upper_pull"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Arka ve Yan Omuz, Omuz İç Denge Kasları",
-    "secondarySubMuscles": "Orta Sırt & Kürek Kemiği Kasları, Ön Kol & Kavrama Kasları, Derin İç Karın (Core)",
+    "primarySubMuscles": "Arka Omuz, Yan Omuz",
+    "secondarySubMuscles": "Üst Sırt & Trapez, Orta Sırt, Derin İç Karın",
     "biomechanicalProof": "Ağırlığı başın etrafında tam tur döndürmek omuz eklemini her açıdan çalıştırır; özellikle arka/yan omuz, omuz iç denge kasları ve kürek kemiği çevresini açar.",
     "fitCategory": "shoulder_stability",
     "fitName": "shoulder_stability",
@@ -2018,7 +2025,7 @@
     "id": "kb_thruster",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Ön Bacak, Ana Kalça Kası, Ön ve Yan Omuz",
+    "muscle": "Dış Ön Bacak, İç Ön Bacak, Ana Kalça",
     "name": "Kettlebell Thruster",
     "positions": [
       {
@@ -2039,12 +2046,13 @@
     ],
     "primaryMuscles": [
       "quads",
+      "glutes",
       "shoulders"
     ],
     "secondaryMuscles": [
-      "glutes",
       "triceps",
-      "core"
+      "core",
+      "back"
     ],
     "tags": [
       "full_body",
@@ -2052,8 +2060,8 @@
       "conditioning"
     ],
     "weightKey": "press",
-    "primarySubMuscles": "Ön Bacak, Ana Kalça Kası, Ön ve Yan Omuz",
-    "secondarySubMuscles": "Triceps, Derin İç Karın (Core), Üst Sırt",
+    "primarySubMuscles": "Dış Ön Bacak, İç Ön Bacak, Ana Kalça, Ön Omuz",
+    "secondarySubMuscles": "Yan Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş, Derin İç Karın, Üst Sırt & Trapez",
     "biomechanicalProof": "Kettlebell'lerle derin çömelip kalkarken baş üstüne pres yapmak; ön bacak, kalça ve omuz kaslarını yüksek nabızla çalıştırır.",
     "fitCategory": "squat",
     "fitName": "dumbbell_thrusters",
@@ -2107,8 +2115,8 @@
       "chest"
     ],
     "secondaryMuscles": [
-      "triceps",
-      "shoulders"
+      "shoulders",
+      "triceps"
     ],
     "tags": [
       "upper_push",
@@ -2116,7 +2124,7 @@
     ],
     "weightKey": "press",
     "primarySubMuscles": "Orta Göğüs",
-    "secondarySubMuscles": "Triceps (Dış ve Alt Kısım), Ön Omuz, Üst Göğüs",
+    "secondarySubMuscles": "Ön Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş",
     "biomechanicalProof": "Düz sehpada iki eli sabit barla birleştirerek ağır itiş yapmak, orta göğse en yüksek ağırlığı yüklerken kolları kilitleyen tricepsi ve ön omzu güçlü çalıştırır.",
     "fitCategory": "bench_press",
     "fitName": "barbell_bench_press",
@@ -2170,7 +2178,7 @@
     ],
     "weightKey": "press",
     "primarySubMuscles": "Üst Göğüs",
-    "secondarySubMuscles": "Ön Omuz, Triceps (Dış ve Alt Kısım)",
+    "secondarySubMuscles": "Orta Göğüs, Ön Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş",
     "biomechanicalProof": "Yukarı eğimli sehpada barı üst göğse indirip itmek, göğsün üst kısmını (köprücük kemiği altını) ve ön omuzları ana hedef yapar.",
     "fitCategory": "bench_press",
     "fitName": "incline_barbell_bench_press",
@@ -2192,7 +2200,7 @@
     "id": "bb_overhead_press",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ön Omuz, Yan Omuz",
+    "muscle": "Ön Omuz",
     "name": "Barbell Omuz Presi",
     "positions": [
       {
@@ -2216,6 +2224,7 @@
     ],
     "secondaryMuscles": [
       "triceps",
+      "back",
       "core"
     ],
     "tags": [
@@ -2223,8 +2232,8 @@
       "upper"
     ],
     "weightKey": "press",
-    "primarySubMuscles": "Ön Omuz, Yan Omuz",
-    "secondarySubMuscles": "Triceps, Üst Göğüs, Üst Trapez, Derin İç Karın & Alt Sırt (Core)",
+    "primarySubMuscles": "Ön Omuz",
+    "secondarySubMuscles": "Yan Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş, Üst Sırt & Trapez, Derin İç Karın",
     "biomechanicalProof": "Ayakta düz barı baş üstüne ağır şekilde itmek ön ve yan omuzları büyütürken, barı dengede tutmak için karın, alt bel ve üst sırtı taş gibi sıkar.",
     "fitCategory": "shoulder_press",
     "fitName": "overhead_barbell_press",
@@ -2247,7 +2256,7 @@
     "id": "bb_back_squat",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ön Bacak (Dış, Orta ve İç Kısım Tamamı), Ana Kalça Kası",
+    "muscle": "Dış Ön Bacak, İç Ön Bacak, Ana Kalça",
     "name": "Barbell Back Squat",
     "positions": [
       {
@@ -2267,11 +2276,12 @@
       }
     ],
     "primaryMuscles": [
-      "quads"
+      "quads",
+      "glutes"
     ],
     "secondaryMuscles": [
-      "glutes",
-      "hamstrings"
+      "back",
+      "core"
     ],
     "tags": [
       "full_body",
@@ -2279,8 +2289,8 @@
       "lower"
     ],
     "weightKey": "squat",
-    "primarySubMuscles": "Ön Bacak (Dış, Orta ve İç Kısım Tamamı), Ana Kalça Kası",
-    "secondarySubMuscles": "İç Bacak Kasları, Alt Sırt & Bel Kasları, Derin İç Karın (Core), Arka Bacak",
+    "primarySubMuscles": "Dış Ön Bacak, İç Ön Bacak, Ana Kalça",
+    "secondarySubMuscles": "Orta Ön Bacak, Alt Sırt & Bel, Derin İç Karın",
     "biomechanicalProof": "Sırtta ağır barla çömelip kalkmak, tüm ön bacak kaslarını, ana kalçayı ve dip noktadan çıkarken iç bacak kaslarını en yüksek ağırlıkla çalıştırır.",
     "fitCategory": "squat",
     "fitName": "barbell_back_squat",
@@ -2302,7 +2312,7 @@
     "id": "bb_front_squat",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ön Bacak (Dış, Orta ve Diz Üstü İç Kısım)",
+    "muscle": "Dış Ön Bacak, İç Ön Bacak",
     "name": "Barbell Front Squat",
     "positions": [
       {
@@ -2326,6 +2336,7 @@
     ],
     "secondaryMuscles": [
       "glutes",
+      "back",
       "core"
     ],
     "tags": [
@@ -2333,8 +2344,8 @@
       "lower"
     ],
     "weightKey": "squat",
-    "primarySubMuscles": "Ön Bacak (Dış, Orta ve Diz Üstü İç Kısım)",
-    "secondarySubMuscles": "Ana Kalça Kası, Üst ve Orta Sırt (Gövdeyi Dik Tutma), Derin İç Karın (Core)",
+    "primarySubMuscles": "Dış Ön Bacak, İç Ön Bacak",
+    "secondarySubMuscles": "Orta Ön Bacak, Ana Kalça, Orta Sırt, Derin İç Karın",
     "biomechanicalProof": "Barı ön omuzda taşımak gövdeyi dimdik tutmaya zorlar; bu da ön bacak kaslarını ve sırtın üst/orta kısmını normal squat'tan daha fazla çalıştırır.",
     "fitCategory": "squat",
     "fitName": "barbell_front_squat",
@@ -2357,7 +2368,7 @@
     "id": "bb_deadlift",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ana Kalça Kası, Arka Bacak, Alt Sırt & Bel Kasları",
+    "muscle": "Ana Kalça, Arka Bacak, Arka Bacak & Kalça Bağı",
     "name": "Barbell Deadlift",
     "positions": [
       {
@@ -2382,6 +2393,7 @@
       "back"
     ],
     "secondaryMuscles": [
+      "quads",
       "biceps",
       "core"
     ],
@@ -2391,8 +2403,8 @@
       "lower"
     ],
     "weightKey": "hinge",
-    "primarySubMuscles": "Ana Kalça Kası, Arka Bacak, Alt Sırt & Bel Kasları",
-    "secondarySubMuscles": "Ön Bacak (Yerden İlk Kalkış), Üst Sırt (Trapez) & Kanatlar, Ön Kol (Kavrama), Derin İç Karın (Core)",
+    "primarySubMuscles": "Ana Kalça, Arka Bacak, Arka Bacak & Kalça Bağı, Alt Sırt & Bel",
+    "secondarySubMuscles": "Dış Ön Bacak, Üst Sırt & Trapez, Orta Sırt, Ön Kol & Dış Pazı, Derin İç Karın",
     "biomechanicalProof": "Yerdeki ağır barı ayağa kalkarak kaldırmak; yerden keserken ön bacağı, doğrulurken arka bacak ve ana kalçayı, omurgayı düz tutarken de alt/üst tüm sırtı çalıştırır.",
     "fitCategory": "deadlift",
     "fitName": "barbell_deadlift",
@@ -2419,7 +2431,7 @@
     "id": "bb_rdl",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Arka Bacak (Üst/Uzun Kısım), Ana Kalça Kası",
+    "muscle": "Arka Bacak, Arka Bacak & Kalça Bağı, Ana Kalça",
     "name": "Barbell RDL",
     "positions": [
       {
@@ -2443,15 +2455,16 @@
       "glutes"
     ],
     "secondaryMuscles": [
-      "back"
+      "back",
+      "biceps"
     ],
     "tags": [
       "legs",
       "lower"
     ],
     "weightKey": "hinge",
-    "primarySubMuscles": "Arka Bacak (Üst/Uzun Kısım), Ana Kalça Kası",
-    "secondarySubMuscles": "Alt Sırt & Bel Kasları, Üst Sırt & Kanatlar (Barı Gövdeye Yakın Sabitleme), Ön Kol (Kavrama)",
+    "primarySubMuscles": "Arka Bacak, Arka Bacak & Kalça Bağı, Ana Kalça",
+    "secondarySubMuscles": "Alt Sırt & Bel, Üst Sırt & Trapez, Ön Kol & Dış Pazı",
     "biomechanicalProof": "Ağır barı bacaklara sürterek kalçayı geriye itmek, arka bacak kaslarının tamamında ve ana kalça kasında en yüksek gerilimi üretir.",
     "fitCategory": "deadlift",
     "fitName": "romanian_deadlift",
@@ -2478,7 +2491,7 @@
     "id": "bb_hip_thrust",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ana Kalça Kası (Kalça Hacim & İtiş Kası)",
+    "muscle": "Ana Kalça",
     "name": "Barbell Hip Thrust",
     "positions": [
       {
@@ -2508,8 +2521,8 @@
       "lower"
     ],
     "weightKey": "hinge",
-    "primarySubMuscles": "Ana Kalça Kası (Kalça Hacim & İtiş Kası)",
-    "secondarySubMuscles": "Yan Kalça, Arka Bacak, Ön Bacak & Ön Karın (Denge)",
+    "primarySubMuscles": "Ana Kalça",
+    "secondarySubMuscles": "Yan Kalça, Arka Bacak & Kalça Bağı",
     "biomechanicalProof": "Sırt sehpada ve dizler bükülüyken barı kalçayla yukarı itmek, arka bacağın yük çalmasını engeller ve bütün gücü doğrudan ana kalça kasına verir.",
     "fitCategory": "hip_raise",
     "fitName": "barbell_hip_thrust_with_bench",
@@ -2531,7 +2544,7 @@
     "id": "bb_bent_over_row",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Orta Sırt & Kürek Kemiği Kasları, Kanatlar (Sırt Genişliği)",
+    "muscle": "Orta Sırt, Kanatlar",
     "name": "Barbell Row",
     "positions": [
       {
@@ -2554,16 +2567,16 @@
       "back"
     ],
     "secondaryMuscles": [
-      "biceps",
-      "hamstrings"
+      "shoulders",
+      "biceps"
     ],
     "tags": [
       "upper_pull",
       "upper"
     ],
     "weightKey": "pull",
-    "primarySubMuscles": "Orta Sırt & Kürek Kemiği Kasları, Kanatlar (Sırt Genişliği)",
-    "secondarySubMuscles": "Alt Sırt & Bel Kasları, Arka Omuz, Biceps & Ön Kol, Arka Bacak (Duruş Desteği)",
+    "primarySubMuscles": "Orta Sırt, Kanatlar",
+    "secondarySubMuscles": "Alt Sırt & Bel, Üst Sırt & Trapez, Arka Omuz, Pazı Dış Baş, Ön Kol & Dış Pazı",
     "biomechanicalProof": "Kalçadan öne eğilerek ağır barı karna çekmek orta sırt ve kanatları büyütürken, eğik gövdeyi sabit tutmak için alt sırt ve bel kaslarını da güçlü çalıştırır.",
     "fitCategory": "row",
     "fitName": "bent_over_row_with_barbell",
@@ -2587,7 +2600,7 @@
     "id": "bb_pendlay_row",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Orta Sırt & Kürek Kemiği Kasları, Kanatlar, Üst Sırt (Trapez)",
+    "muscle": "Orta Sırt, Kanatlar, Üst Sırt & Trapez",
     "name": "Pendlay Row",
     "positions": [
       {
@@ -2610,16 +2623,16 @@
       "back"
     ],
     "secondaryMuscles": [
-      "biceps",
-      "hamstrings"
+      "shoulders",
+      "biceps"
     ],
     "tags": [
       "upper_pull",
       "power"
     ],
     "weightKey": "pull",
-    "primarySubMuscles": "Orta Sırt & Kürek Kemiği Kasları, Kanatlar, Üst Sırt (Trapez)",
-    "secondarySubMuscles": "Alt Sırt & Bel Kasları, Arka Omuz, Biceps & Ön Kol, Arka Bacak",
+    "primarySubMuscles": "Orta Sırt, Kanatlar, Üst Sırt & Trapez",
+    "secondarySubMuscles": "Alt Sırt & Bel, Arka Omuz, Pazı Dış Baş, Ön Kol & Dış Pazı",
     "biomechanicalProof": "Gövde yere paralelken her tekrarda yerdeki barı patlayıcı şekilde karnına çekmek, üst/orta sırt ve kanatlarda saf çekiş gücü üretir.",
     "fitCategory": "row",
     "fitName": "bent_over_row_with_barbell",
@@ -2643,7 +2656,7 @@
     "id": "bb_biceps_curl",
     "isComplex": false,
     "mechanic": "isolation",
-    "muscle": "Biceps İç Kısım (Dolgunluk), Biceps Dış Kısım (Tepe)",
+    "muscle": "Pazı İç Baş, Pazı Dış Baş",
     "name": "Barbell Curl",
     "positions": [
       {
@@ -2671,8 +2684,8 @@
       "upper"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Biceps İç Kısım (Dolgunluk), Biceps Dış Kısım (Tepe)",
-    "secondarySubMuscles": "Biceps Altı Dış Kol Kası, Ön Kol & Bilek Kavrama Kasları",
+    "primarySubMuscles": "Pazı İç Baş, Pazı Dış Baş",
+    "secondarySubMuscles": "Ön Kol & Dış Pazı",
     "biomechanicalProof": "Düz barla avuç içleri tam yukarı bakarak iki elle ağır kaldırmak, özellikle kolun ön/iç dolgunluğunu veren biceps iç ve dış kısmına en yüksek yükü bindirir.",
     "fitCategory": "curl",
     "fitName": "barbell_biceps_curl",
@@ -2693,7 +2706,7 @@
     "id": "bb_close_grip_bench",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Triceps Dış Kısım, Triceps Alt Kısım",
+    "muscle": "Arka Kol Dış Baş, Arka Kol Alt Baş",
     "name": "Dar Tutuş Bench",
     "positions": [
       {
@@ -2716,15 +2729,16 @@
       "triceps"
     ],
     "secondaryMuscles": [
-      "chest"
+      "chest",
+      "shoulders"
     ],
     "tags": [
       "upper_push",
       "upper"
     ],
     "weightKey": "press",
-    "primarySubMuscles": "Triceps Dış Kısım, Triceps Alt Kısım",
-    "secondarySubMuscles": "İç ve Orta Göğüs, Ön Omuz, Triceps İç/Uzun Kısım",
+    "primarySubMuscles": "Arka Kol Dış Baş, Arka Kol Alt Baş",
+    "secondarySubMuscles": "Orta Göğüs, Ön Omuz, Arka Kol Uzun Baş",
     "biomechanicalProof": "Barı dar tutup dirsekleri gövdeye yakın indirip itmek, göğsün yükünü azaltır ve arka kolun dış ile alt kısmına çok yüksek itiş gücü bindirir.",
     "fitCategory": "bench_press",
     "fitName": "close_grip_barbell_bench_press",
@@ -2746,7 +2760,7 @@
     "id": "mach_lat_pulldown",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Kanatlar (Sırt Genişliği)",
+    "muscle": "Kanatlar",
     "name": "Lat Pulldown",
     "positions": [
       {
@@ -2769,6 +2783,7 @@
       "back"
     ],
     "secondaryMuscles": [
+      "shoulders",
       "biceps"
     ],
     "tags": [
@@ -2776,8 +2791,8 @@
       "upper"
     ],
     "weightKey": "pull",
-    "primarySubMuscles": "Kanatlar (Sırt Genişliği)",
-    "secondarySubMuscles": "Biceps & Biceps Altı Dış Kol Kası, Orta Sırt & Kürek Kemiği Kasları, Arka Omuz, Ön Kol (Kavrama)",
+    "primarySubMuscles": "Kanatlar",
+    "secondarySubMuscles": "Orta Sırt, Arka Omuz, Pazı Dış Baş, Ön Kol & Dış Pazı",
     "biomechanicalProof": "Yukarıdaki barı göğse doğru çekmek, sırta genişlik (V görünümü) veren kanat kaslarını doğrudan çalıştırır; çekiş sırasında biceps ve ön kollar yardımcı olur.",
     "fitCategory": "pull_up",
     "fitName": "lat_pulldown",
@@ -2800,7 +2815,7 @@
     "id": "mach_cable_row",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Orta Sırt & Kürek Kemiği Kasları (Sırt Kalınlığı), Kanatlar",
+    "muscle": "Orta Sırt, Kanatlar",
     "name": "Kablo Row",
     "positions": [
       {
@@ -2823,6 +2838,7 @@
       "back"
     ],
     "secondaryMuscles": [
+      "shoulders",
       "biceps"
     ],
     "tags": [
@@ -2830,8 +2846,8 @@
       "upper"
     ],
     "weightKey": "pull",
-    "primarySubMuscles": "Orta Sırt & Kürek Kemiği Kasları (Sırt Kalınlığı), Kanatlar",
-    "secondarySubMuscles": "Arka Omuz, Biceps & Ön Kol, Alt Sırt (Dik Oturuşu Koruma)",
+    "primarySubMuscles": "Orta Sırt, Kanatlar",
+    "secondarySubMuscles": "Arka Omuz, Pazı Dış Baş, Ön Kol & Dış Pazı",
     "biomechanicalProof": "Oturarak kabloyu karnına doğru çekerken omuzları geriye alıp kürek kemiklerini birbirine yaklaştırmak, orta sırt kalınlığını ve kanatları birlikte çalıştırır.",
     "fitCategory": "row",
     "fitName": "cable_row_standing",
@@ -2855,7 +2871,7 @@
     "id": "mach_face_pull",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Arka Omuz, Omuz İç Denge Kasları",
+    "muscle": "Arka Omuz",
     "name": "Face Pull",
     "positions": [
       {
@@ -2886,8 +2902,8 @@
       "posture"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Arka Omuz, Omuz İç Denge Kasları",
-    "secondarySubMuscles": "Orta Sırt & Kürek Kemiği Kasları, Orta ve Alt Trapez, Yan Omuz",
+    "primarySubMuscles": "Arka Omuz",
+    "secondarySubMuscles": "Orta Sırt, Üst Sırt & Trapez",
     "biomechanicalProof": "Halatı yüzüne doğru çekip elleri iki yana açmak, duruşu dikleştiren arka omuzları, kürek kemiği çevresini ve omuz eklemini koruyan iç denge kaslarını doğrudan çalıştırır.",
     "fitCategory": "row",
     "fitName": "face_pull",
@@ -2910,7 +2926,7 @@
     "id": "mach_cable_crossover",
     "isComplex": false,
     "mechanic": "isolation",
-    "muscle": "Orta Göğüs, İç Göğüs",
+    "muscle": "Orta Göğüs, Alt Göğüs",
     "name": "Kablo Crossover",
     "positions": [
       {
@@ -2940,8 +2956,8 @@
       "upper"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Orta Göğüs, İç Göğüs",
-    "secondarySubMuscles": "Ön Omuz, Biceps İç Kısım (Dirseği Sabit Tutmak İçin)",
+    "primarySubMuscles": "Orta Göğüs, Alt Göğüs",
+    "secondarySubMuscles": "Ön Omuz",
     "biomechanicalProof": "Dirsekleri büküp açmadan kolları önde birbirine kavuşturmak (sarılmak gibi), tricepsi devre dışı bırakır ve doğrudan orta ile iç göğüs liflerini sıkıştırır.",
     "fitCategory": "flye",
     "fitName": "cable_crossover",
@@ -2962,7 +2978,7 @@
     "id": "mach_pec_deck",
     "isComplex": false,
     "mechanic": "isolation",
-    "muscle": "Orta Göğüs, İç Göğüs",
+    "muscle": "Orta Göğüs",
     "name": "Pec Deck Kelebek",
     "positions": [
       {
@@ -2984,13 +3000,15 @@
     "primaryMuscles": [
       "chest"
     ],
-    "secondaryMuscles": [],
+    "secondaryMuscles": [
+      "shoulders"
+    ],
     "tags": [
       "upper_push",
       "upper"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Orta Göğüs, İç Göğüs",
+    "primarySubMuscles": "Orta Göğüs",
     "secondarySubMuscles": "Ön Omuz",
     "biomechanicalProof": "Makinede oturarak kolları önde birleştirmek, kol kaslarını yormadan sadece orta ve iç göğsü izole şekilde çalıştırır.",
     "fitCategory": "flye",
@@ -3012,7 +3030,7 @@
     "id": "mach_triceps_pushdown",
     "isComplex": false,
     "mechanic": "isolation",
-    "muscle": "Triceps Dış Kısım, Triceps Alt Kısım",
+    "muscle": "Arka Kol Dış Baş, Arka Kol Alt Baş",
     "name": "Halat Triceps Pushdown",
     "positions": [
       {
@@ -3040,8 +3058,8 @@
       "upper"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Triceps Dış Kısım, Triceps Alt Kısım",
-    "secondarySubMuscles": "Triceps İç / Uzun Kısım, Ön Kol Kavrama Kasları",
+    "primarySubMuscles": "Arka Kol Dış Baş, Arka Kol Alt Baş",
+    "secondarySubMuscles": "Arka Kol Uzun Baş",
     "biomechanicalProof": "Dirsekleri bel yanında sabit tutup halatı aşağı itmek ve en altta iki yana açmak, arka kolun dış (at nalı) kısmını ve alt kısmını tam sıkıştırır.",
     "fitCategory": "triceps_extension",
     "fitName": "triceps_pressdown",
@@ -3060,7 +3078,7 @@
     "id": "mach_cable_biceps",
     "isComplex": false,
     "mechanic": "isolation",
-    "muscle": "Biceps İç Kısım, Biceps Dış Kısım",
+    "muscle": "Pazı İç Baş, Pazı Dış Baş",
     "name": "Kablo Biceps Curl",
     "positions": [
       {
@@ -3088,8 +3106,8 @@
       "upper"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Biceps İç Kısım, Biceps Dış Kısım",
-    "secondarySubMuscles": "Biceps Altı Dış Kol Kası, Ön Kol & Bilek Kasları",
+    "primarySubMuscles": "Pazı İç Baş, Pazı Dış Baş",
+    "secondarySubMuscles": "Ön Kol & Dış Pazı",
     "biomechanicalProof": "Kablo makarası hareketin en altında da en üstünde de yükü hiç boşaltmadığı için bicepsin iç ve dış kısmında kesintisiz yanma ve gerilim sağlar.",
     "fitCategory": "curl",
     "fitName": "cable_biceps_curl",
@@ -3132,14 +3150,16 @@
     "primaryMuscles": [
       "shoulders"
     ],
-    "secondaryMuscles": [],
+    "secondaryMuscles": [
+      "back"
+    ],
     "tags": [
       "upper_push",
       "upper"
     ],
     "weightKey": "",
     "primarySubMuscles": "Yan Omuz",
-    "secondarySubMuscles": "Omuz İç Denge Kasları, Ön Omuz, Üst Trapez",
+    "secondarySubMuscles": "Üst Sırt & Trapez",
     "biomechanicalProof": "Dambılda kol aşağıdayken yük sıfırlanır ama kablo makarası hareketin en alt noktasından en üst noktasına kadar yan omuza sürekli yük bindirir.",
     "fitCategory": "lateral_raise",
     "fitName": "one_arm_cable_lateral_raise",
@@ -3160,7 +3180,7 @@
     "id": "mach_leg_press",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ön Bacak (Dış, Orta ve Diz Üstü İç Kısım)",
+    "muscle": "Dış Ön Bacak, İç Ön Bacak",
     "name": "45° Leg Press",
     "positions": [
       {
@@ -3190,8 +3210,8 @@
       "lower"
     ],
     "weightKey": "squat",
-    "primarySubMuscles": "Ön Bacak (Dış, Orta ve Diz Üstü İç Kısım)",
-    "secondarySubMuscles": "Ana Kalça Kası, İç Bacak Kasları",
+    "primarySubMuscles": "Dış Ön Bacak, İç Ön Bacak",
+    "secondarySubMuscles": "Orta Ön Bacak, Ana Kalça",
     "biomechanicalProof": "Sırt ve bel koltukta sabitken bacaklarla ağır platformu itmek, beli hiç yormadan tüm yükü ön bacak ve kalça kaslarına verir.",
     "fitCategory": "squat",
     "fitName": "leg_press",
@@ -3213,7 +3233,7 @@
     "id": "mach_leg_extension",
     "isComplex": false,
     "mechanic": "isolation",
-    "muscle": "Ön Bacak Orta Kısım, Ön Bacak Diz Üstü İç Kısım, Ön Bacak Dış Kısım",
+    "muscle": "Orta Ön Bacak, Dış Ön Bacak, İç Ön Bacak",
     "name": "Leg Extension",
     "positions": [
       {
@@ -3241,8 +3261,8 @@
       "lower"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Ön Bacak Orta Kısım, Ön Bacak Diz Üstü İç Kısım, Ön Bacak Dış Kısım",
-    "secondarySubMuscles": "Ön Kaval Kemiği Kası (Ayak Bileğini Sabit Tutma)",
+    "primarySubMuscles": "Orta Ön Bacak, Dış Ön Bacak, İç Ön Bacak",
+    "secondarySubMuscles": "",
     "biomechanicalProof": "Oturarak sadece dizleri düzleştirmek, başka hiçbir kası karıştırmadan ön bacağın orta, dış ve diz üstü iç kısmını tek başına izole eder.",
     "fitCategory": "banded_exercises",
     "fitName": "leg_extension",
@@ -3261,7 +3281,7 @@
     "id": "mach_leg_curl",
     "isComplex": false,
     "mechanic": "isolation",
-    "muscle": "Arka Bacak (Diz Büken Alt ve Üst Kısım Tamamı)",
+    "muscle": "Diz Büken Arka Bacak",
     "name": "Leg Curl",
     "positions": [
       {
@@ -3291,8 +3311,8 @@
       "lower"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Arka Bacak (Diz Büken Alt ve Üst Kısım Tamamı)",
-    "secondarySubMuscles": "Üst Kalf (Diz Bükme Yardımcı Kası)",
+    "primarySubMuscles": "Diz Büken Arka Bacak",
+    "secondarySubMuscles": "Arka Bacak, Üst Baldır",
     "biomechanicalProof": "Makinede sadece dizleri bükmek, eğilme hareketlerinde (RDL) tam çalışmayan arka bacağın diz üstü alt kısmını da doğrudan ve izole çalıştırır.",
     "fitCategory": "leg_curl",
     "fitName": "leg_curl",
@@ -3305,29 +3325,29 @@
   },
   {
     "category": "legs_quad",
-    "cue": "Topukları yerden maksimum yüksekliğe kaldırarak TAMAMEN AYAK PARMAK UÇLARINDA YÜKSEL. Tepe noktada baldır kaslarını (kalf) 2 saniye kilitli tut, topukları yere çarpmadan 3 saniyede kontrollü indir.",
+    "cue": "Makinenin omuz pedleri altına yerleş, ayak parmak kökleriyle platform kenarına bas. Topukları en tepeye kaldırıp baldırı 2 saniye sık, 3 saniyede esneterek indir.",
     "diagram": "assets/diagrams/seq_calf_raise.svg",
     "equipment": "machine",
     "id": "mach_calf_raise",
     "isComplex": false,
     "mechanic": "isolation",
-    "muscle": "Üst Kalf (Görünür Baldır Kası), Alt Kalf (Derin Baldır Kası)",
+    "muscle": "Üst Baldır, Alt Baldır",
     "name": "Calf Raise",
     "positions": [
       {
         "badge": "setup",
-        "desc": "İki elde dambıllarla dik duruş. Ayak parmak kökleri düz zemine veya basamak kenarına basar, topuklar gergin.",
-        "phase": "1. Düz Taban & Kurulum"
+        "desc": "Omuz pedlerinin altına yerleşip gövdeyi dik kilitle. Ayak parmak kökleri makine platformunun kenarında, topuklar boşlukta.",
+        "phase": "1. Omuz Pedi & Platform Kurulumu"
       },
       {
         "badge": "action",
-        "desc": "Ayak parmak köklerine tüm gücünle basarak topukları göğe dik. Vücut ağırlığını ve dambılları tamamen parmak uçlarında taşıyarak kalf kaslarını zirvede 2 sn boyunca taş gibi sıkıştır.",
-        "phase": "2. Parmak Ucunda Maksimum Zirve"
+        "desc": "Dizleri bükmeden parmak köklerine basarak topukları maksimum yüksekliğe kaldır ve baldırı zirvede 2 sn sıkıştır.",
+        "phase": "2. Zirve Sıkıştırma"
       },
       {
         "badge": "lock",
-        "desc": "Topukları yere çarpmadan veya yaylanmadan, 3 saniyede kontrollü olarak tabana indirerek aşil tendonunu ve baldırı derinlemesine esnet.",
-        "phase": "3. 3 Sn Kontrollü Negatif İniş"
+        "desc": "Yaylanmadan 3 saniyede kontrollü inerek topukları platform seviyesinin altına indir ve baldırı derin esnet.",
+        "phase": "3. 3 Sn Kontrollü Esneme"
       }
     ],
     "primaryMuscles": [
@@ -3338,10 +3358,10 @@
       "legs",
       "lower"
     ],
-    "weightKey": "",
-    "primarySubMuscles": "Üst Kalf (Görünür Baldır Kası), Alt Kalf (Derin Baldır Kası)",
-    "secondarySubMuscles": "Ayak Bileği Denge Kasları",
-    "biomechanicalProof": "Dizler düzken parmak ucunda yükselmek, baldırın hem dışarıdan görünen üst kısmını hem de altındaki derin baldır kasını tam boyda çalıştırır.",
+    "weightKey": "calves",
+    "primarySubMuscles": "Üst Baldır, Alt Baldır",
+    "secondarySubMuscles": "Ön Kaval & Bilek",
+    "biomechanicalProof": "Ayakta kalf makinesinde omuz pedleriyle sabit yük altında tam esneme ve zirve sıkıştırma yapmak, üst ve alt baldır kaslarını en güvenli ve yüksek yükle çalıştırır.",
     "fitCategory": "calf_raise",
     "fitName": "standing_calf_raise",
     "fitNote": "",
@@ -3359,7 +3379,7 @@
     "id": "mach_cable_woodchopper",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Yan Karın (Bel Yanları / Dönüş Kasları), Derin İç Karın (Core)",
+    "muscle": "Yan Karın, Derin İç Karın",
     "name": "Kablo Woodchopper",
     "positions": [
       {
@@ -3382,15 +3402,16 @@
       "core"
     ],
     "secondaryMuscles": [
-      "shoulders"
+      "shoulders",
+      "glutes"
     ],
     "tags": [
       "core",
       "conditioning"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Yan Karın (Bel Yanları / Dönüş Kasları), Derin İç Karın (Core)",
-    "secondarySubMuscles": "Ön ve Yan Omuz, Yan Kalça (Gövde Dönüş Desteği), Yan Göğüs Kasları",
+    "primarySubMuscles": "Yan Karın, Derin İç Karın",
+    "secondarySubMuscles": "Ön Karın, Ön Omuz, Yan Kalça",
     "biomechanicalProof": "Kabloyu odun keser gibi çapraz çekip gövdeyi döndürmek, sağ ve sol yan karın kaslarını ile derin iç karın kasını güçlü şekilde çalıştırır.",
     "fitCategory": "chop",
     "fitName": "kneeling_woodchopper",
@@ -3435,8 +3456,9 @@
       "chest"
     ],
     "secondaryMuscles": [
+      "shoulders",
       "triceps",
-      "shoulders"
+      "core"
     ],
     "tags": [
       "full_body",
@@ -3444,7 +3466,7 @@
     ],
     "weightKey": "",
     "primarySubMuscles": "Orta Göğüs",
-    "secondarySubMuscles": "Triceps (Dış ve Alt Kısım), Ön Omuz, Yan Göğüs Kaburga Kasları, Ön ve Derin İç Karın (Core)",
+    "secondarySubMuscles": "Ön Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş, Derin İç Karın",
     "biomechanicalProof": "Yerde vücudu düz bir tahta gibi tutarak kendini yukarı itmek orta göğsü ve tricepsi çalıştırırken, belin sarkmasını önlemek için karın (core) kaslarını sürekli sıkar.",
     "fitCategory": "push_up",
     "fitName": "push_up",
@@ -3491,14 +3513,15 @@
     ],
     "secondaryMuscles": [
       "shoulders",
-      "triceps"
+      "triceps",
+      "core"
     ],
     "tags": [
       "upper_push"
     ],
     "weightKey": "",
     "primarySubMuscles": "Üst Göğüs",
-    "secondarySubMuscles": "Ön Omuz, Triceps (Dış ve Alt Kısım), Ön ve Derin İç Karın (Core)",
+    "secondarySubMuscles": "Orta Göğüs, Ön Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş, Derin İç Karın",
     "biomechanicalProof": "Ayakları sehpaya koyup eller yerde şınav çekmek, vücut açısını yukarı eğimli (incline) prese çevirir ve yükü üst göğüs ile ön omuza bindirir.",
     "fitCategory": "push_up",
     "fitName": "decline_push_up",
@@ -3521,7 +3544,7 @@
     "id": "bw_diamond_pushup",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Triceps Dış Kısım, Triceps Alt Kısım",
+    "muscle": "Arka Kol Dış Baş, Arka Kol Alt Baş",
     "name": "Elmas Şınav",
     "positions": [
       {
@@ -3544,14 +3567,16 @@
       "triceps"
     ],
     "secondaryMuscles": [
-      "chest"
+      "chest",
+      "shoulders",
+      "core"
     ],
     "tags": [
       "upper_push"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Triceps Dış Kısım, Triceps Alt Kısım",
-    "secondarySubMuscles": "İç ve Orta Göğüs, Ön Omuz, Derin İç Karın (Core)",
+    "primarySubMuscles": "Arka Kol Dış Baş, Arka Kol Alt Baş",
+    "secondarySubMuscles": "Orta Göğüs, Ön Omuz, Derin İç Karın",
     "biomechanicalProof": "Eller göğüs altında birbirine yakın (elmas şeklinde) şınav çekildiğinde dirsekler tamamen bükülüp açılır; arka kolu en sert çalıştıran vücut ağırlığı hareketidir.",
     "fitCategory": "push_up",
     "fitName": "diamond_push_up",
@@ -3574,7 +3599,7 @@
     "id": "bw_dips",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Alt Göğüs, Triceps (Dış ve Alt Kısım)",
+    "muscle": "Alt Göğüs, Arka Kol Dış Baş, Arka Kol Alt Baş",
     "name": "Dips",
     "positions": [
       {
@@ -3605,8 +3630,8 @@
       "upper"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Alt Göğüs, Triceps (Dış ve Alt Kısım)",
-    "secondarySubMuscles": "Ön Omuz, Orta Göğüs, Alt Trapez (Omuzları Aşağıda Tutma)",
+    "primarySubMuscles": "Alt Göğüs, Arka Kol Dış Baş, Arka Kol Alt Baş",
+    "secondarySubMuscles": "Orta Göğüs, Ön Omuz",
     "biomechanicalProof": "Gövdeyi hafif öne eğerek paralel barda kendini yukarı itmek, göğsün alt çizgisini (alt göğüs) ve arka kolun dış/alt kısmını çok yoğun çalıştırır.",
     "fitCategory": "triceps_extension",
     "fitName": "body_weight_dip",
@@ -3628,7 +3653,7 @@
     "id": "bw_pullup",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Kanatlar (Sırt Genişliği)",
+    "muscle": "Kanatlar",
     "name": "Barfiks (Pull-Up)",
     "positions": [
       {
@@ -3651,6 +3676,7 @@
       "back"
     ],
     "secondaryMuscles": [
+      "shoulders",
       "biceps",
       "core"
     ],
@@ -3659,8 +3685,8 @@
       "upper"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Kanatlar (Sırt Genişliği)",
-    "secondarySubMuscles": "Biceps & Ön Kol Üst Kası, Orta Sırt & Kürek Kemiği Kasları, Arka Omuz, Ön ve Derin İç Karın (Core)",
+    "primarySubMuscles": "Kanatlar",
+    "secondarySubMuscles": "Orta Sırt, Arka Omuz, Pazı Dış Baş, Ön Kol & Dış Pazı, Ön Karın",
     "biomechanicalProof": "Avuç içleri karşıya bakacak şekilde geniş tutuşla barfiks çekmek, bicepsin yardımını azaltıp bütün yükü üst ve dış kanat kaslarına bindirir.",
     "fitCategory": "pull_up",
     "fitName": "pull_up",
@@ -3684,7 +3710,7 @@
     "id": "bw_chinup",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Kanatlar (Sırt Genişliği), Biceps (İç ve Dış Kısım)",
+    "muscle": "Kanatlar, Pazı İç Baş, Pazı Dış Baş",
     "name": "Chin-Up (Ters Barfiks)",
     "positions": [
       {
@@ -3708,6 +3734,7 @@
       "biceps"
     ],
     "secondaryMuscles": [
+      "shoulders",
       "core"
     ],
     "tags": [
@@ -3715,8 +3742,8 @@
       "upper"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Kanatlar (Sırt Genişliği), Biceps (İç ve Dış Kısım)",
-    "secondarySubMuscles": "Ön Kol & Kavrama Kasları, Orta Sırt & Kürek Kemiği Kasları, Arka Omuz, Ön Karın (Core)",
+    "primarySubMuscles": "Kanatlar, Pazı İç Baş, Pazı Dış Baş",
+    "secondarySubMuscles": "Orta Sırt, Ön Kol & Dış Pazı, Arka Omuz, Ön Karın",
     "biomechanicalProof": "Avuç içleri sana bakacak şekilde omuz genişliğinde barfiks çekmek, hem kanat kaslarını tam boyda çalıştırır hem de bicepsleri en güçlü açısında kasar.",
     "fitCategory": "pull_up",
     "fitName": "chin_up",
@@ -3740,7 +3767,7 @@
     "id": "bw_inverted_row",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Orta Sırt & Kürek Kemiği Kasları (Sırt Kalınlığı), Kanatlar",
+    "muscle": "Orta Sırt, Kanatlar",
     "name": "Yatay Barfiks",
     "positions": [
       {
@@ -3763,15 +3790,17 @@
       "back"
     ],
     "secondaryMuscles": [
-      "biceps"
+      "shoulders",
+      "biceps",
+      "core"
     ],
     "tags": [
       "upper_pull",
       "upper"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Orta Sırt & Kürek Kemiği Kasları (Sırt Kalınlığı), Kanatlar",
-    "secondarySubMuscles": "Arka Omuz, Biceps & Ön Kol, Alt Sırt & Kalça (Vücudu Düz Tutma)",
+    "primarySubMuscles": "Orta Sırt, Kanatlar",
+    "secondarySubMuscles": "Arka Omuz, Pazı Dış Baş, Ön Kol & Dış Pazı, Derin İç Karın",
     "biomechanicalProof": "Alçak barın altına girip göğsü bara çekmek, bele hiç yük bindirmeden kürek kemiklerini birbirine kenetler ve orta sırt ile arka omzu çalıştırır.",
     "fitCategory": "row",
     "fitName": "inverted_row",
@@ -3794,7 +3823,7 @@
     "id": "bw_air_squat",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ön Bacak (Dış ve İç Kısım), Ana Kalça Kası",
+    "muscle": "Dış Ön Bacak, İç Ön Bacak",
     "name": "Air Squat",
     "positions": [
       {
@@ -3817,15 +3846,16 @@
       "quads"
     ],
     "secondaryMuscles": [
-      "glutes"
+      "glutes",
+      "core"
     ],
     "tags": [
       "legs",
       "lower"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Ön Bacak (Dış ve İç Kısım), Ana Kalça Kası",
-    "secondarySubMuscles": "İç Bacak Kasları, Alt Sırt & Karın (Core)",
+    "primarySubMuscles": "Dış Ön Bacak, İç Ön Bacak",
+    "secondarySubMuscles": "Ana Kalça, Derin İç Karın",
     "biomechanicalProof": "Kendi vücut ağırlığınla tam çömelip kalkmak, ön bacak ve kalça kaslarını doğal hareket açıklığında çalıştırır.",
     "fitCategory": "squat",
     "fitName": "air_squat",
@@ -3847,7 +3877,7 @@
     "id": "bw_jump_squat",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ön Bacak, Ana Kalça Kası, Üst Kalf (Baldır)",
+    "muscle": "Dış Ön Bacak, Orta Ön Bacak, Ana Kalça",
     "name": "Jump Squat",
     "positions": [
       {
@@ -3867,19 +3897,20 @@
       }
     ],
     "primaryMuscles": [
-      "quads"
-    ],
-    "secondaryMuscles": [
+      "quads",
       "glutes",
       "calves"
+    ],
+    "secondaryMuscles": [
+      "core"
     ],
     "tags": [
       "legs",
       "conditioning"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Ön Bacak, Ana Kalça Kası, Üst Kalf (Baldır)",
-    "secondarySubMuscles": "Arka Bacak, Alt Kalf, Derin İç Karın (Yere İniş Dengesi)",
+    "primarySubMuscles": "Dış Ön Bacak, Orta Ön Bacak, Ana Kalça, Üst Baldır",
+    "secondarySubMuscles": "İç Ön Bacak, Alt Baldır, Derin İç Karın",
     "biomechanicalProof": "Çömelip yukarı doğru patlayıcı sıçramak; ön bacak, ana kalça ve parmak ucundan itiş yapan kalf (baldır) kaslarının patlayıcı liflerini ateşler.",
     "fitCategory": "plyo",
     "fitName": "body_weight_jump_squat",
@@ -3903,7 +3934,7 @@
     "id": "bw_glute_bridge",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ana Kalça Kası",
+    "muscle": "Ana Kalça",
     "name": "Glute Bridge",
     "positions": [
       {
@@ -3933,8 +3964,8 @@
       "lower"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Ana Kalça Kası",
-    "secondarySubMuscles": "Arka Bacak, Alt Sırt & Derin İç Karın (Core)",
+    "primarySubMuscles": "Ana Kalça",
+    "secondarySubMuscles": "Yan Kalça, Arka Bacak & Kalça Bağı",
     "biomechanicalProof": "Sırtüstü yatarken dizler bükülü şekilde kalçayı yukarı kaldırıp sıkmak, bele yük bindirmeden doğrudan ana kalça kasını çalıştırır.",
     "fitCategory": "hip_raise",
     "fitName": "hip_raise",
@@ -3956,7 +3987,7 @@
     "id": "bw_hanging_knee_raise",
     "isComplex": false,
     "mechanic": "isolation",
-    "muscle": "Alt Karın (Ön Karın Alt Kısmı), Ön Kalça Kası (Bacak Kaldırıcı)",
+    "muscle": "Ön Karın",
     "name": "Barda Dize Çekme",
     "positions": [
       {
@@ -3976,21 +4007,19 @@
       }
     ],
     "primaryMuscles": [
-      "core",
-      "quads"
+      "core"
     ],
     "secondaryMuscles": [
-      "glutes",
-      "forearms",
-      "shoulders",
+      "quads",
+      "biceps",
       "back"
     ],
     "tags": [
       "core"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Alt Karın (Ön Karın Alt Kısmı), Ön Kalça Kası (Bacak Kaldırıcı)",
-    "secondarySubMuscles": "Üst Karın & Yan Karın, Ön Kol & Bilek (Barda Tutunma), Kanatlar (Omuzları Sabit Tutma)",
+    "primarySubMuscles": "Ön Karın",
+    "secondarySubMuscles": "Derin İç Karın, Orta Ön Bacak, Ön Kol & Dış Pazı, Kanatlar",
     "biomechanicalProof": "Barda asılıyken dizleri göğse doğru çekip kalçayı yukarı kıvırmak, özellikle göbek deliğinin altındaki alt karın kaslarını doğrudan çalıştırır.",
     "fitCategory": "leg_raise",
     "fitName": "hanging_knee_raise",
@@ -4014,7 +4043,7 @@
     "id": "bw_hollow_body",
     "isComplex": false,
     "mechanic": "isolation",
-    "muscle": "Derin İç Karın (Korse Kası), Ön Karın (Üst ve Alt Karın Tamamı)",
+    "muscle": "Ön Karın, Derin İç Karın",
     "name": "Hollow Body",
     "positions": [
       {
@@ -4036,13 +4065,15 @@
     "primaryMuscles": [
       "core"
     ],
-    "secondaryMuscles": [],
+    "secondaryMuscles": [
+      "quads"
+    ],
     "tags": [
       "core"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Derin İç Karın (Korse Kası), Ön Karın (Üst ve Alt Karın Tamamı)",
-    "secondarySubMuscles": "Yan Karın, Ön Kalça & Ön Bacak Orta Kısım (Bacakları Havada Tutma)",
+    "primarySubMuscles": "Ön Karın, Derin İç Karın",
+    "secondarySubMuscles": "Yan Karın, Orta Ön Bacak",
     "biomechanicalProof": "Sırtüstü yatarken beli yere tam yapıştırıp kol ve bacakları yerden kesmek, ön karın (üst ve alt) ile derin iç karın kaslarını en zorlu açıda çalıştırır.",
     "fitCategory": "crunch",
     "fitName": "hollow_rock",
@@ -4063,7 +4094,7 @@
     "id": "bw_plank",
     "isComplex": false,
     "mechanic": "isolation",
-    "muscle": "Derin İç Karın (Korse Kası), Ön Karın (Üst ve Alt Karın)",
+    "muscle": "Derin İç Karın, Ön Karın",
     "name": "Plank",
     "positions": [
       {
@@ -4086,15 +4117,14 @@
       "core"
     ],
     "secondaryMuscles": [
-      "shoulders",
-      "glutes"
+      "shoulders"
     ],
     "tags": [
       "core"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Derin İç Karın (Korse Kası), Ön Karın (Üst ve Alt Karın)",
-    "secondarySubMuscles": "Yan Karın, Omuz & Yan Göğüs Sabitleyicileri, Ana Kalça & Ön Bacak",
+    "primarySubMuscles": "Derin İç Karın, Ön Karın",
+    "secondarySubMuscles": "Yan Karın, Ön Omuz",
     "biomechanicalProof": "Dirsekler üzerinde vücudu düz tutarken belin çukurlaşmasına direnmek, karnı içe çeken derin korse kasını ve ön karın kaslarını baştan sona kilitler.",
     "fitCategory": "plank",
     "fitName": "plank",
@@ -4115,7 +4145,7 @@
     "id": "bw_burpee",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Ön Bacak & Ana Kalça Kası, Orta Göğüs & Ön Omuz",
+    "muscle": "Dış Ön Bacak, Ana Kalça, Orta Göğüs",
     "name": "Burpee",
     "positions": [
       {
@@ -4135,24 +4165,23 @@
       }
     ],
     "primaryMuscles": [
-      "chest",
       "quads",
-      "core",
       "glutes",
-      "calves"
+      "chest"
     ],
     "secondaryMuscles": [
       "shoulders",
       "triceps",
-      "hamstrings"
+      "core",
+      "calves"
     ],
     "tags": [
       "full_body",
       "conditioning"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Ön Bacak & Ana Kalça Kası, Orta Göğüs & Ön Omuz",
-    "secondarySubMuscles": "Triceps, Ön ve Derin İç Karın (Core), Ön Kalça Kası, Kalf (Baldır)",
+    "primarySubMuscles": "Dış Ön Bacak, Ana Kalça, Orta Göğüs",
+    "secondarySubMuscles": "Ön Omuz, Arka Kol Alt Baş, Ön Karın, Üst Baldır",
     "biomechanicalProof": "Yere inip şınav çekmek göğüs, omuz ve tricepsi; ayakları karna çekip yukarı sıçramak ise karın, ön bacak, kalça ve kalfları çalıştırır.",
     "fitCategory": "total_body",
     "fitName": "burpee",
@@ -4180,7 +4209,7 @@
     "id": "bw_mountain_climber",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ön Karın (Üst ve Alt Karın), Derin İç Karın, Ön Kalça Kası",
+    "muscle": "Ön Karın, Derin İç Karın",
     "name": "Mountain Climber",
     "positions": [
       {
@@ -4211,8 +4240,8 @@
       "conditioning"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Ön Karın (Üst ve Alt Karın), Derin İç Karın, Ön Kalça Kası",
-    "secondarySubMuscles": "Ön Omuz & Triceps (Kolları Sabit Tutma), Yan Karın",
+    "primarySubMuscles": "Ön Karın, Derin İç Karın",
+    "secondarySubMuscles": "Orta Ön Bacak, Ön Omuz, Yan Karın",
     "biomechanicalProof": "Şınav duruşunda gövdeyi bozmadan dizleri hızla karna çekmek, ön/alt karın ve ön kalça kaslarını çalıştırırken nabzı hızla yükseltir.",
     "fitCategory": "plank",
     "fitName": "mountain_climber",
@@ -4231,7 +4260,7 @@
     "category": "push",
     "cue": "Dizler üzerinde dik dur, ağırlık plakasını iki elle kollarını bükmeden tut. Bacaklardan hiç savurmadan sadece omuz gücüyle omuz hizasına (paralel) kadar kaldır ve kontrollü indir.",
     "diagram": "assets/diagrams/seq_kneeling_plate_front_raise.svg",
-    "equipment": "dumbbell",
+    "equipment": "barbell",
     "id": "kneeling_plate_front_raise",
     "isComplex": false,
     "mechanic": "isolation",
@@ -4255,11 +4284,10 @@
       }
     ],
     "primaryMuscles": [
-      "shoulders",
-      "chest"
+      "shoulders"
     ],
     "secondaryMuscles": [
-      "back",
+      "chest",
       "core"
     ],
     "tags": [
@@ -4268,7 +4296,7 @@
     ],
     "weightKey": "press",
     "primarySubMuscles": "Ön Omuz",
-    "secondarySubMuscles": "Üst Göğüs, Ön ve Derin İç Karın (Core), Yan Göğüs Kaburga Kasları",
+    "secondarySubMuscles": "Üst Göğüs, Derin İç Karın",
     "biomechanicalProof": "İki diz üstünde durmak belden hız almayı keser; plakayı önden yüz hizasına kaldırmak doğrudan ön omuz ve üst göğsü çalıştırır.",
     "fitCategory": "shoulder_press",
     "fitName": "weight_plate_front_raise",
@@ -4286,11 +4314,11 @@
     "category": "core",
     "cue": "Yarım diz üstü duruş al (bir diz yerde, diğer bacak 90° önde). Plakayı yerde olan dizinin kalça yanından başlatıp iki elle çapraz şekilde zıt omzun üstüne doğru fırlatır gibi savur, gövdeyi ve yan karnı sıkarak kilitle.",
     "diagram": "assets/diagrams/seq_half_kneeling_plate_chop.svg",
-    "equipment": "dumbbell",
+    "equipment": "barbell",
     "id": "half_kneeling_plate_chop",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Yan Karın (Bel Yanları), Derin İç Karın (Core)",
+    "muscle": "Yan Karın, Derin İç Karın",
     "name": "Yarım Diz Üstü Plaka Oduncu (Woodchopper)",
     "positions": [
       {
@@ -4313,7 +4341,8 @@
       "core"
     ],
     "secondaryMuscles": [
-      "shoulders"
+      "shoulders",
+      "glutes"
     ],
     "tags": [
       "core",
@@ -4321,8 +4350,8 @@
       "conditioning"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Yan Karın (Bel Yanları), Derin İç Karın (Core)",
-    "secondarySubMuscles": "Yan ve Ana Kalça (Kalçayı Sabit Tutma), Ön Omuz",
+    "primarySubMuscles": "Yan Karın, Derin İç Karın",
+    "secondarySubMuscles": "Ön Karın, Ön Omuz, Yan Kalça",
     "biomechanicalProof": "Tek diz yerde durmak bacaklardan hız almayı engeller; plakayı çapraz savurup durdurmak sadece yan karın ve derin kor kaslarının gücüyle yapılır.",
     "fitCategory": "chop",
     "fitName": "half_kneeling_rotational_chop",
@@ -4343,7 +4372,7 @@
     "id": "db_thruster",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Ön Bacak, Ana Kalça Kası, Ön ve Yan Omuz",
+    "muscle": "Dış Ön Bacak, İç Ön Bacak, Ana Kalça",
     "name": "Dambıl Thruster",
     "positions": [
       {
@@ -4364,12 +4393,13 @@
     ],
     "primaryMuscles": [
       "quads",
+      "glutes",
       "shoulders"
     ],
     "secondaryMuscles": [
       "triceps",
       "core",
-      "glutes"
+      "back"
     ],
     "tags": [
       "full_body",
@@ -4377,8 +4407,8 @@
       "conditioning"
     ],
     "weightKey": "press",
-    "primarySubMuscles": "Ön Bacak, Ana Kalça Kası, Ön ve Yan Omuz",
-    "secondarySubMuscles": "Triceps, Derin İç Karın & Üst Sırt (Core)",
+    "primarySubMuscles": "Dış Ön Bacak, İç Ön Bacak, Ana Kalça, Ön Omuz",
+    "secondarySubMuscles": "Yan Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş, Derin İç Karın, Üst Sırt & Trapez",
     "biomechanicalProof": "Dambıllarla tam çömelip kalkarken kazandığın hızla ağırlığı kesintisiz baş üstüne itmek; ön bacak, kalça, ön/yan omuz ve tricepsi aynı anda çalıştırır.",
     "fitCategory": "squat",
     "fitName": "dumbbell_thrusters",
@@ -4409,7 +4439,7 @@
     "id": "db_push_press",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ön Omuz, Yan Omuz",
+    "muscle": "Ön Omuz",
     "name": "Dambıl Push Press",
     "positions": [
       {
@@ -4441,8 +4471,8 @@
       "upper"
     ],
     "weightKey": "press",
-    "primarySubMuscles": "Ön Omuz, Yan Omuz",
-    "secondarySubMuscles": "Ön Bacak, Triceps, Ana Kalça Kası, Derin İç Karın (Core)",
+    "primarySubMuscles": "Ön Omuz",
+    "secondarySubMuscles": "Yan Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş, Dış Ön Bacak, Derin İç Karın",
     "biomechanicalProof": "Bacak itişiyle hız kazandırıp dambılları baş üstüne kilitlemek; ön/yan omuz, triceps ve bacak itiş gücünü aynı anda çalıştırır.",
     "fitCategory": "shoulder_press",
     "fitName": "dumbbell_push_press",
@@ -4466,7 +4496,7 @@
     "id": "db_renegade_pushup",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Orta Göğüs, Orta Sırt & Kanatlar",
+    "muscle": "Orta Göğüs, Kanatlar, Orta Sırt",
     "name": "Renegade Row + Şınav",
     "positions": [
       {
@@ -4486,12 +4516,13 @@
       }
     ],
     "primaryMuscles": [
+      "back",
       "chest",
-      "back"
+      "core"
     ],
     "secondaryMuscles": [
-      "core",
       "triceps",
+      "shoulders",
       "biceps"
     ],
     "tags": [
@@ -4500,8 +4531,8 @@
       "core"
     ],
     "weightKey": "press",
-    "primarySubMuscles": "Orta Göğüs, Orta Sırt & Kanatlar",
-    "secondarySubMuscles": "Yan Karın & Derin İç Karın (Core), Triceps, Ön Omuz, Biceps (Çekiş Kısmı)",
+    "primarySubMuscles": "Orta Göğüs, Kanatlar, Orta Sırt, Yan Karın",
+    "secondarySubMuscles": "Arka Kol Dış Baş, Arka Kol Alt Baş, Ön Omuz, Pazı Dış Baş, Derin İç Karın",
     "biomechanicalProof": "Şınav kısmında orta göğüs ve triceps iterken, tek kolla dambılı çektiğin kısımda kanat ve orta sırt çalışır; tek el üstünde dengede kalmak yan karın kaslarını ateşler.",
     "fitCategory": "push_up",
     "fitName": "push_up_and_row",
@@ -4521,11 +4552,11 @@
     "category": "core",
     "cue": "Dizler 90° bükük fakat yerden 5 cm havada (ayı duruşu) kal. Plakayı gövdenin altından zıt elle çapraz yana çekip bırak.",
     "diagram": "assets/diagrams/seq_plank_pull_through.svg",
-    "equipment": "dumbbell",
+    "equipment": "barbell",
     "id": "bear_crawl_pull_through",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Derin İç Karın (Korse Kası), Yan Karın (Bel Yanları)",
+    "muscle": "Derin İç Karın, Yan Karın",
     "name": "Ayı Emeklemesi Plaka Çekişi",
     "positions": [
       {
@@ -4549,6 +4580,7 @@
     ],
     "secondaryMuscles": [
       "shoulders",
+      "back",
       "quads"
     ],
     "tags": [
@@ -4556,8 +4588,8 @@
       "conditioning"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Derin İç Karın (Korse Kası), Yan Karın (Bel Yanları)",
-    "secondarySubMuscles": "Ön Omuz (Destek Kolu), Ön Bacak (Dizleri Havada Tutma), Kanat (Çekiş Kolu)",
+    "primarySubMuscles": "Derin İç Karın, Yan Karın",
+    "secondarySubMuscles": "Ön Karın, Ön Omuz, Kanatlar, Orta Ön Bacak",
     "biomechanicalProof": "Dizler yerden 2-3 parmak havadayken tek elle ağırlığı alttan çekmek, gövdenin sağa sola devrilmesini önleyen derin iç karın ve yan karın kaslarını yoğun çalıştırır.",
     "fitCategory": "sandbag",
     "fitName": "bear_crawl_pull_through",
@@ -4583,7 +4615,7 @@
     "id": "db_clean_and_press",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Ana Kalça Kası & Arka Bacak, Ön ve Yan Omuz",
+    "muscle": "Ana Kalça, Arka Bacak, Ön Omuz",
     "name": "Dambıl Clean & Press",
     "positions": [
       {
@@ -4603,17 +4635,14 @@
       }
     ],
     "primaryMuscles": [
-      "glutes",
       "shoulders",
-      "quads",
-      "hamstrings",
-      "back"
+      "glutes",
+      "hamstrings"
     ],
     "secondaryMuscles": [
+      "back",
       "triceps",
       "biceps",
-      "forearms",
-      "calves",
       "core"
     ],
     "tags": [
@@ -4621,8 +4650,8 @@
       "power"
     ],
     "weightKey": "press",
-    "primarySubMuscles": "Ana Kalça Kası & Arka Bacak, Ön ve Yan Omuz",
-    "secondarySubMuscles": "Üst ve Orta Sırt, Triceps, Biceps & Ön Kol, Derin İç Karın (Core)",
+    "primarySubMuscles": "Ana Kalça, Arka Bacak, Ön Omuz",
+    "secondarySubMuscles": "Yan Omuz, Üst Sırt & Trapez, Orta Sırt, Arka Kol Dış Baş, Arka Kol Alt Baş, Ön Kol & Dış Pazı, Derin İç Karın",
     "biomechanicalProof": "İlk kısımda kalça ve sırt gücüyle omuza alınan dambıllar, ikinci kısımda omuz ve triceps gücüyle baş üstüne itilir.",
     "fitCategory": "olympic_lift",
     "fitName": "clean_and_press",
@@ -4654,7 +4683,7 @@
     "id": "db_manmaker",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Orta Göğüs, Kanatlar & Orta Sırt, Ön Bacak & Ana Kalça, Ön ve Yan Omuz",
+    "muscle": "Orta Göğüs, Kanatlar, Dış Ön Bacak",
     "name": "Dambıl Manmaker",
     "positions": [
       {
@@ -4684,17 +4713,15 @@
       }
     ],
     "primaryMuscles": [
-      "chest",
       "quads",
-      "shoulders",
+      "chest",
       "back",
-      "core",
       "glutes",
-      "triceps",
-      "calves"
+      "shoulders"
     ],
     "secondaryMuscles": [
-      "hamstrings"
+      "triceps",
+      "core"
     ],
     "tags": [
       "full_body",
@@ -4702,8 +4729,8 @@
       "power"
     ],
     "weightKey": "press",
-    "primarySubMuscles": "Orta Göğüs, Kanatlar & Orta Sırt, Ön Bacak & Ana Kalça, Ön ve Yan Omuz",
-    "secondarySubMuscles": "Triceps, Biceps, Yan ve Derin İç Karın (Core), Arka Bacak",
+    "primarySubMuscles": "Orta Göğüs, Kanatlar, Dış Ön Bacak, Ana Kalça, Ön Omuz",
+    "secondarySubMuscles": "Orta Sırt, Yan Omuz, Arka Kol Alt Baş, Yan Karın, Derin İç Karın",
     "biomechanicalProof": "Şınav + sağ/sol sırt çekişi + çömelerek omuza alma + baş üstü pres birleşimi; göğüs, sırt, bacak, kalça, omuz ve karın kaslarının tamamını çalıştırır.",
     "fitCategory": "total_body",
     "fitName": "man_makers",
@@ -4733,7 +4760,7 @@
     "id": "waiters_carry",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Omuz İç Denge Kasları, Ön ve Yan Omuz, Yan Karın & Bel Yanları (Core)",
+    "muscle": "Yan Karın, Derin İç Karın, Ön Omuz",
     "name": "Garson Taşıması (Waiter Carry)",
     "positions": [
       {
@@ -4753,20 +4780,20 @@
       }
     ],
     "primaryMuscles": [
-      "shoulders",
-      "core"
+      "core",
+      "shoulders"
     ],
     "secondaryMuscles": [
       "back",
-      "biceps"
+      "triceps"
     ],
     "tags": [
       "core",
       "upper_push"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Omuz İç Denge Kasları, Ön ve Yan Omuz, Yan Karın & Bel Yanları (Core)",
-    "secondarySubMuscles": "Triceps (Kol Kilidi), Üst ve Alt Trapez, Derin İç Karın",
+    "primarySubMuscles": "Yan Karın, Derin İç Karın, Ön Omuz",
+    "secondarySubMuscles": "Yan Omuz, Üst Sırt & Trapez, Arka Kol Alt Baş",
     "biomechanicalProof": "Ağırlığı tek elle garson tepsisi gibi baş üstünde tutarak yürümek, omuz iç denge kaslarını ve gövdenin yana yatmasını önleyen yan karın kaslarını aralıksız çalıştırır.",
     "fitCategory": "carry",
     "fitName": "dumbbell_waiter_carry",
@@ -4785,7 +4812,7 @@
     "id": "cross_body_carry",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Yan Karın & Bel Yanları (Core), Omuz İç Denge Kasları & Ön/Yan Omuz",
+    "muscle": "Yan Karın, Derin İç Karın, Ön Omuz",
     "name": "Çapraz Taşıma (Cross-Body Carry)",
     "positions": [
       {
@@ -4810,15 +4837,16 @@
     ],
     "secondaryMuscles": [
       "back",
-      "biceps"
+      "biceps",
+      "glutes"
     ],
     "tags": [
       "core",
       "full_body"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Yan Karın & Bel Yanları (Core), Omuz İç Denge Kasları & Ön/Yan Omuz",
-    "secondarySubMuscles": "Derin İç Karın, Üst Trapez, Ön Kol (Kavrama), Yan Kalça",
+    "primarySubMuscles": "Yan Karın, Derin İç Karın, Ön Omuz",
+    "secondarySubMuscles": "Yan Omuz, Üst Sırt & Trapez, Ön Kol & Dış Pazı, Yan Kalça",
     "biomechanicalProof": "Bir dambılı baş üstünde, diğerini yanda tutarak yürümek; hem üstteki omuz denge kaslarını hem de çapraz yan karın ve bel kaslarını çalıştırır.",
     "fitCategory": "carry",
     "fitName": "farmers_walk",
@@ -4839,11 +4867,11 @@
     "category": "legs_quad",
     "cue": "Öne derin lunge adımı at. İnişte elindeki plakayı öndeki bacağının yönüne doğru gövdeden çevir, toparlanırken merkeze dön.",
     "diagram": "assets/diagrams/seq_db_lunge.svg",
-    "equipment": "dumbbell",
+    "equipment": "barbell",
     "id": "lunge_with_twist",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ön Bacak, Ana Kalça Kası, Yan Karın (Bel Yanları)",
+    "muscle": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça",
     "name": "Lunge + Gövde Rotasyonu",
     "positions": [
       {
@@ -4864,20 +4892,18 @@
     ],
     "primaryMuscles": [
       "quads",
+      "glutes",
       "core"
     ],
-    "secondaryMuscles": [
-      "glutes",
-      "hamstrings"
-    ],
+    "secondaryMuscles": [],
     "tags": [
       "legs",
       "core",
       "lower"
     ],
     "weightKey": "squat",
-    "primarySubMuscles": "Ön Bacak, Ana Kalça Kası, Yan Karın (Bel Yanları)",
-    "secondarySubMuscles": "Yan Kalça (Denge Kası), Arka Bacak",
+    "primarySubMuscles": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça, Yan Karın",
+    "secondarySubMuscles": "Yan Kalça, Orta Ön Bacak, Derin İç Karın",
     "biomechanicalProof": "Öne adım atıp çömelirken gövdeyi öndeki bacak yönüne çevirmek; alt vücutta ön bacak ve kalçayı, üst vücutta ise yan karın kaslarını çalıştırır.",
     "fitCategory": "lunge",
     "fitName": "reverse_lunge_with_twist_and_overhead_reach",
@@ -4901,7 +4927,7 @@
     "id": "step_up_press",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ön Bacak, Ana ve Yan Kalça, Ön Omuz",
+    "muscle": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça",
     "name": "Step-Up + Omuz Presi",
     "positions": [
       {
@@ -4922,10 +4948,10 @@
     ],
     "primaryMuscles": [
       "quads",
+      "glutes",
       "shoulders"
     ],
     "secondaryMuscles": [
-      "glutes",
       "triceps",
       "core"
     ],
@@ -4935,8 +4961,8 @@
       "lower"
     ],
     "weightKey": "squat",
-    "primarySubMuscles": "Ön Bacak, Ana ve Yan Kalça, Ön Omuz",
-    "secondarySubMuscles": "Yan Omuz, Triceps, Derin İç Karın & Kalf (Tek Ayak Denge)",
+    "primarySubMuscles": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça, Ön Omuz",
+    "secondarySubMuscles": "Yan Kalça, Yan Omuz, Arka Kol Alt Baş, Yan Karın",
     "biomechanicalProof": "Yüksek kutuya tek ayakla çıkarken ön bacak ve ana/yan kalça tüm vücudu yukarı kaldırır; tepede ağırlığı baş üstüne itmek ön ve yan omzu çalıştırır.",
     "fitCategory": "shoulder_press",
     "fitName": "single_arm_step_up_and_press",
@@ -4963,7 +4989,7 @@
     "id": "bb_thruster",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Ön Bacak, Ana Kalça Kası, Ön ve Yan Omuz",
+    "muscle": "Dış Ön Bacak, İç Ön Bacak, Ana Kalça",
     "name": "Barbell Thruster",
     "positions": [
       {
@@ -4984,12 +5010,13 @@
     ],
     "primaryMuscles": [
       "quads",
+      "glutes",
       "shoulders"
     ],
     "secondaryMuscles": [
-      "glutes",
       "triceps",
-      "core"
+      "core",
+      "back"
     ],
     "tags": [
       "full_body",
@@ -4998,8 +5025,8 @@
       "power"
     ],
     "weightKey": "press",
-    "primarySubMuscles": "Ön Bacak, Ana Kalça Kası, Ön ve Yan Omuz",
-    "secondarySubMuscles": "Triceps, Üst ve Alt Sırt, Derin İç Karın (Core)",
+    "primarySubMuscles": "Dış Ön Bacak, İç Ön Bacak, Ana Kalça, Ön Omuz",
+    "secondarySubMuscles": "Yan Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş, Derin İç Karın, Üst Sırt & Trapez",
     "biomechanicalProof": "Omuzda barla tam çömelme (Front Squat) ve kalkarken baş üstü itiş; ön bacak, kalça, omuz ve tricepsi ağır yük altında birleştirir.",
     "fitCategory": "squat",
     "fitName": "thrusters",
@@ -5030,7 +5057,7 @@
     "id": "bb_hang_power_clean",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Ana Kalça Kası, Arka Bacak, Üst ve Orta Sırt (Trapez)",
+    "muscle": "Ana Kalça, Arka Bacak, Üst Sırt & Trapez",
     "name": "Barbell Hang Power Clean",
     "positions": [
       {
@@ -5051,13 +5078,12 @@
     ],
     "primaryMuscles": [
       "glutes",
-      "back",
-      "quads",
-      "hamstrings"
+      "hamstrings",
+      "back"
     ],
     "secondaryMuscles": [
-      "shoulders",
-      "calves_grip",
+      "quads",
+      "calves",
       "biceps",
       "core"
     ],
@@ -5068,8 +5094,8 @@
       "conditioning"
     ],
     "weightKey": "pull",
-    "primarySubMuscles": "Ana Kalça Kası, Arka Bacak, Üst ve Orta Sırt (Trapez)",
-    "secondarySubMuscles": "Ön Bacak (Yakalama Anı), Kalf (Baldır), Alt Sırt & Bel, Ön Kol & Biceps",
+    "primarySubMuscles": "Ana Kalça, Arka Bacak, Üst Sırt & Trapez, Orta Sırt",
+    "secondarySubMuscles": "Dış Ön Bacak, Alt Sırt & Bel, Üst Baldır, Ön Kol & Dış Pazı, Derin İç Karın",
     "biomechanicalProof": "Diz üstünden barı kalça patlaması ve omuz çekişiyle bir anda ön omuzlara almak; kalça, arka bacak ve üst sırt (trapez) kaslarında patlayıcı güç üretir.",
     "fitCategory": "olympic_lift",
     "fitName": "barbell_hang_power_clean",
@@ -5098,7 +5124,7 @@
     "id": "bb_push_press",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ön Omuz, Yan Omuz",
+    "muscle": "Ön Omuz",
     "name": "Barbell Push Press",
     "positions": [
       {
@@ -5131,8 +5157,8 @@
       "power"
     ],
     "weightKey": "press",
-    "primarySubMuscles": "Ön Omuz, Yan Omuz",
-    "secondarySubMuscles": "Ön Bacak, Triceps, Ana Kalça Kası, Üst Trapez, Üst Kalf",
+    "primarySubMuscles": "Ön Omuz",
+    "secondarySubMuscles": "Yan Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş, Dış Ön Bacak, Derin İç Karın",
     "biomechanicalProof": "Dizleri hafif büküp bacaklardan patlayıcı güç alarak barı baş üstüne fırlatmak, normalden daha ağır kilolarla ön/yan omuz ve tricepsi çalıştırmanı sağlar.",
     "fitCategory": "shoulder_press",
     "fitName": "barbell_push_press",
@@ -5156,7 +5182,7 @@
     "id": "bb_zercher_squat",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ön Bacak, Ana Kalça Kası, Üst Sırt & Derin İç Karın (Core)",
+    "muscle": "Dış Ön Bacak, İç Ön Bacak, Ana Kalça",
     "name": "Barbell Zercher Squat",
     "positions": [
       {
@@ -5177,11 +5203,11 @@
     ],
     "primaryMuscles": [
       "quads",
-      "core"
+      "glutes"
     ],
     "secondaryMuscles": [
-      "glutes",
       "back",
+      "core",
       "biceps"
     ],
     "tags": [
@@ -5191,8 +5217,8 @@
       "power"
     ],
     "weightKey": "squat",
-    "primarySubMuscles": "Ön Bacak, Ana Kalça Kası, Üst Sırt & Derin İç Karın (Core)",
-    "secondarySubMuscles": "Biceps & Ön Kol (Barı Kucaklama), İç Bacak Kasları",
+    "primarySubMuscles": "Dış Ön Bacak, İç Ön Bacak, Ana Kalça",
+    "secondarySubMuscles": "Orta Sırt, Üst Sırt & Trapez, Derin İç Karın, Pazı İç Baş, Ön Kol & Dış Pazı",
     "biomechanicalProof": "Barı dirseklerin iç kısmında kucaklayarak çömelmek; ön bacak ve kalçanın yanı sıra gövdeyi öne yıkılmaktan koruyan üst sırt, karın (core) ve bicepsleri çok sert çalıştırır.",
     "fitCategory": "squat",
     "fitName": "zercher_squat",
@@ -5218,7 +5244,7 @@
     "id": "bb_landmine_squat_press",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Ön Bacak, Ön Omuz, Üst Göğüs",
+    "muscle": "Dış Ön Bacak, İç Ön Bacak, Ön Omuz",
     "name": "Landmine Squat to Press",
     "positions": [
       {
@@ -5239,12 +5265,12 @@
     ],
     "primaryMuscles": [
       "quads",
-      "shoulders"
+      "shoulders",
+      "chest"
     ],
     "secondaryMuscles": [
-      "chest",
-      "triceps",
       "glutes",
+      "triceps",
       "core"
     ],
     "tags": [
@@ -5254,8 +5280,8 @@
       "conditioning"
     ],
     "weightKey": "press",
-    "primarySubMuscles": "Ön Bacak, Ön Omuz, Üst Göğüs",
-    "secondarySubMuscles": "Ana Kalça Kası, Triceps, Derin İç Karın (Core) & Yan Göğüs Kasları",
+    "primarySubMuscles": "Dış Ön Bacak, İç Ön Bacak, Ön Omuz, Üst Göğüs",
+    "secondarySubMuscles": "Ana Kalça, Arka Kol Dış Baş, Arka Kol Alt Baş, Derin İç Karın",
     "biomechanicalProof": "Barın ucunu göğüste tutup çömelmek ön bacak ve kalçayı, kalkarken ileri-yukarı doğru itmek ise ön omuz ve üst göğsü omuzları zorlamadan çalıştırır.",
     "fitCategory": "shoulder_press",
     "fitName": "barbell_front_squat_to_push_press",
@@ -5278,14 +5304,14 @@
     "garminMatchType": "exact_verified"
   },
   {
-    "category": "legs",
+    "category": "legs_quad",
     "cue": "Topukları yerden maksimum yüksekliğe kaldırarak TAMAMEN AYAK PARMAK UÇLARINDA YÜKSEL. Tepe noktada baldır kaslarını (kalf) 2 saniye kilitli tut, topukları yere çarpmadan 3 saniyede kontrollü indir.",
     "diagram": "assets/diagrams/seq_calf_raise.svg",
     "equipment": "dumbbell",
     "id": "db_standing_calf_raise",
     "isComplex": false,
     "mechanic": "isolation",
-    "muscle": "Üst Kalf (Görünür Baldır Kası), Alt Kalf (Derin Baldır Kası)",
+    "muscle": "Üst Baldır, Alt Baldır",
     "name": "Dambıl Ayakta Kalf Yükseltme",
     "positions": [
       {
@@ -5307,9 +5333,7 @@
     "primaryMuscles": [
       "calves"
     ],
-    "secondaryMuscles": [
-      "core"
-    ],
+    "secondaryMuscles": [],
     "tags": [
       "legs",
       "calves",
@@ -5317,8 +5341,8 @@
       "hypertrophy"
     ],
     "weightKey": "calves",
-    "primarySubMuscles": "Üst Kalf (Görünür Baldır Kası), Alt Kalf (Derin Baldır Kası)",
-    "secondarySubMuscles": "Ayak Tabanı & Bilek Denge Kasları, Ön Kol (Dambıl Tutuşu)",
+    "primarySubMuscles": "Üst Baldır, Alt Baldır",
+    "secondarySubMuscles": "Ön Kaval & Bilek",
     "biomechanicalProof": "Elde dambılla ayakta parmak ucuna yükselip tepe noktada sıkıştırmak, üst ve alt kalf kaslarını doğrudan çalıştırır.",
     "fitCategory": "calf_raise",
     "fitName": "standing_dumbbell_calf_raise",
@@ -5330,14 +5354,14 @@
     "garminMatchType": "exact_verified"
   },
   {
-    "category": "pull",
+    "category": "legs_hinge",
     "cue": "Düz sehpaya yüzüstü uzan, dambılı iki ayak tabanı arasına sıkıştır. Kalçayı mindere yapışık tutarak topukları kalçaya doğru bük, zirvede hamstringi 1.5 sn sık.",
     "diagram": "assets/diagrams/seq_leg_curl.svg",
     "equipment": "dumbbell",
     "id": "db_lying_leg_curl",
     "isComplex": false,
     "mechanic": "isolation",
-    "muscle": "Arka Bacak (Diz Büken Alt ve Üst Kısım)",
+    "muscle": "Diz Büken Arka Bacak",
     "name": "Dambıl Yatarak Leg Curl",
     "positions": [
       {
@@ -5360,7 +5384,6 @@
       "hamstrings"
     ],
     "secondaryMuscles": [
-      "glutes",
       "calves"
     ],
     "tags": [
@@ -5370,8 +5393,8 @@
       "hypertrophy"
     ],
     "weightKey": "hamstrings",
-    "primarySubMuscles": "Arka Bacak (Diz Büken Alt ve Üst Kısım)",
-    "secondarySubMuscles": "Üst Kalf, İç Bacak, Ana Kalça Kası (Kalçayı Yere Bastırma)",
+    "primarySubMuscles": "Diz Büken Arka Bacak",
+    "secondarySubMuscles": "Arka Bacak, Üst Baldır",
     "biomechanicalProof": "Yüzüstü yatarken iki ayak arasındaki dambılı kalçaya doğru bükmek, arka bacağın diz büken alt/dış kısmını ve iç kısmını doğrudan çalıştırır.",
     "fitCategory": "leg_curl",
     "fitName": "leg_curl",
@@ -5383,14 +5406,14 @@
     "garminMatchType": "exact_verified"
   },
   {
-    "category": "legs",
+    "category": "legs_quad",
     "cue": "Parmak ucuna kalkıp dizleri öne iterken gövdeyi arkaya yatır. Düz bir çizgi halinde uylukları ger ve sadece quad gücüyle kendini doğrult.",
     "diagram": "assets/diagrams/seq_leg_extension.svg",
     "equipment": "bodyweight",
     "id": "bw_sissy_squat",
     "isComplex": false,
     "mechanic": "isolation",
-    "muscle": "Ön Bacak Orta Kısım, Ön Bacak Diz Üstü İç Kısım",
+    "muscle": "Orta Ön Bacak, İç Ön Bacak",
     "name": "Sissy Squat (Quad İzolasyonu)",
     "positions": [
       {
@@ -5413,9 +5436,8 @@
       "quads"
     ],
     "secondaryMuscles": [
-      "glutes",
-      "hamstrings",
-      "core"
+      "core",
+      "calves"
     ],
     "tags": [
       "legs",
@@ -5424,8 +5446,8 @@
       "isolation"
     ],
     "weightKey": "quads",
-    "primarySubMuscles": "Ön Bacak Orta Kısım, Ön Bacak Diz Üstü İç Kısım",
-    "secondarySubMuscles": "Ön ve Derin İç Karın (Core), Kalf (Parmak Ucu Denge)",
+    "primarySubMuscles": "Orta Ön Bacak, İç Ön Bacak",
+    "secondarySubMuscles": "Dış Ön Bacak, Ön Karın, Üst Baldır",
     "biomechanicalProof": "Kalçayı hiç kırmadan dizleri öne verip gövdeyi geriye yatırmak, ön bacağın kalçaya kadar uzanan tam orta kasını maksimum gererek çalıştırır.",
     "fitCategory": "squat",
     "fitName": "balancing_squat",
@@ -5448,7 +5470,7 @@
     "id": "db_pullover_to_halo",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Kanatlar (Sırt Genişliği), Arka ve Yan Omuz + Omuz İç Denge Kasları",
+    "muscle": "Kanatlar, Arka Omuz, Yan Omuz",
     "name": "Dambıl Pullover to Halo (Torasik & Omuz Akışı)",
     "positions": [
       {
@@ -5469,12 +5491,12 @@
     ],
     "primaryMuscles": [
       "back",
-      "shoulders"
+      "shoulders",
+      "core"
     ],
     "secondaryMuscles": [
       "chest",
-      "triceps",
-      "core"
+      "triceps"
     ],
     "tags": [
       "complex",
@@ -5484,8 +5506,8 @@
       "dumbbell"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Kanatlar (Sırt Genişliği), Arka ve Yan Omuz + Omuz İç Denge Kasları",
-    "secondarySubMuscles": "Orta Göğüs & Yan Göğüs Kaburga Kasları, Triceps İç/Uzun Kısım, Derin İç Karın (Core)",
+    "primarySubMuscles": "Kanatlar, Arka Omuz, Yan Omuz, Ön Karın",
+    "secondarySubMuscles": "Orta Göğüs, Arka Kol Uzun Baş, Üst Sırt & Trapez, Derin İç Karın",
     "biomechanicalProof": "Yatarken ağırlığı baş gerisinden çekmek kanat ve göğüs kafesini çalıştırır; ardından baş etrafında döndürmek (Halo) arka/yan omuz ve omuz iç kaslarını açar.",
     "fitCategory": "pull_up",
     "fitName": "ez_bar_pullover",
@@ -5509,7 +5531,7 @@
     "id": "db_seesaw_lunge",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Ön Bacak (Diz Üstü İç ve Dış Kısım), Ana ve Yan Kalça",
+    "muscle": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça",
     "name": "Dambıl Seesaw Lunge (Dinamik İleri-Geri Lunge)",
     "positions": [
       {
@@ -5533,7 +5555,6 @@
       "glutes"
     ],
     "secondaryMuscles": [
-      "hamstrings",
       "core"
     ],
     "tags": [
@@ -5545,8 +5566,8 @@
       "dumbbell"
     ],
     "weightKey": "squat",
-    "primarySubMuscles": "Ön Bacak (Diz Üstü İç ve Dış Kısım), Ana ve Yan Kalça",
-    "secondarySubMuscles": "Arka Bacak, Kalf & Ayak Bileği Denge Kasları, Derin İç Karın (Core)",
+    "primarySubMuscles": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça, Yan Kalça",
+    "secondarySubMuscles": "Orta Ön Bacak, Derin İç Karın",
     "biomechanicalProof": "Bir ayak yerde sabitken diğer ayakla hiç durmadan bir ileri bir geri lunge yapmak, sabit kalan bacağın ön kısmını ve kalçasını aralıksız çalıştırır.",
     "fitCategory": "lunge",
     "fitName": "walking_dumbbell_lunge",
@@ -5568,7 +5589,7 @@
     "id": "db_clean_squat_press",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Ön Bacak, Ön ve Yan Omuz, Ana Kalça Kası, Arka Bacak",
+    "muscle": "Dış Ön Bacak, İç Ön Bacak, Ana Kalça",
     "name": "Dambıl Clean to Front Squat to Push Press",
     "positions": [
       {
@@ -5589,12 +5610,13 @@
     ],
     "primaryMuscles": [
       "quads",
+      "glutes",
       "shoulders"
     ],
     "secondaryMuscles": [
-      "glutes",
-      "triceps",
+      "hamstrings",
       "back",
+      "triceps",
       "core"
     ],
     "tags": [
@@ -5606,8 +5628,8 @@
       "dumbbell"
     ],
     "weightKey": "press",
-    "primarySubMuscles": "Ön Bacak, Ön ve Yan Omuz, Ana Kalça Kası, Arka Bacak",
-    "secondarySubMuscles": "Karın, Yan Karın & Alt Sırt/Bel (Core), Üst ve Orta Sırt (Trapez), Triceps (Arka Kol), Ön Kol & Kavrama Kasları, Üst ve Alt Kalf (Baldır)",
+    "primarySubMuscles": "Dış Ön Bacak, İç Ön Bacak, Ana Kalça, Ön Omuz",
+    "secondarySubMuscles": "Yan Omuz, Arka Bacak, Üst Sırt & Trapez, Arka Kol Alt Baş, Derin İç Karın",
     "biomechanicalProof": "Clean aşamasında arka bacak ve kalça patlayıcı gücü üretir; Front Squat aşamasında ön bacak ve kalça çömelmeyi yönetir; Push Press aşamasında ise omuzlar ana itişi yaparken karın/bel, trapez, triceps, ön kol ve kalflar hareketi destekler.",
     "fitCategory": "olympic_lift",
     "fitName": "dumbbell_power_clean_and_push_press",
@@ -5636,7 +5658,7 @@
     "id": "db_rdl_to_high_pull",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Arka Bacak, Ana Kalça Kası, Üst ve Orta Sırt (Trapez), Yan ve Ön Omuz",
+    "muscle": "Arka Bacak, Ana Kalça, Üst Sırt & Trapez",
     "name": "Dambıl RDL to High Pull (Arka Zincir & Üst Çekiş)",
     "positions": [
       {
@@ -5657,14 +5679,12 @@
     ],
     "primaryMuscles": [
       "hamstrings",
+      "glutes",
       "back",
-      "quads"
+      "shoulders"
     ],
     "secondaryMuscles": [
-      "glutes",
-      "shoulders",
-      "calves",
-      "forearms"
+      "biceps"
     ],
     "tags": [
       "complex",
@@ -5675,8 +5695,8 @@
       "dumbbell"
     ],
     "weightKey": "hinge",
-    "primarySubMuscles": "Arka Bacak, Ana Kalça Kası, Üst ve Orta Sırt (Trapez), Yan ve Ön Omuz",
-    "secondarySubMuscles": "Alt Sırt & Bel Kasları (Omurga Doğrultucu), Ön ve Yan Karın (Core), Ön Kol & Kavrama Kasları, Ön Bacak (Geçiş İtiş Desteği)",
+    "primarySubMuscles": "Arka Bacak, Ana Kalça, Üst Sırt & Trapez, Yan Omuz",
+    "secondarySubMuscles": "Arka Bacak & Kalça Bağı, Orta Sırt, Arka Omuz, Alt Sırt & Bel, Ön Kol & Dış Pazı",
     "biomechanicalProof": "RDL (öne eğilme) fazında arka bacak ve ana kalça kası yükü çekerken; High Pull (yukarı çekiş) fazında omuz silkme ile trapezler ve yan/ön omuzlar ağırlığı göğüs/çene hizasına ivmelendirir.",
     "fitCategory": "deadlift",
     "fitName": "sumo_deadlift_high_pull",
@@ -5702,7 +5722,7 @@
     "id": "db_swing_to_goblet_squat",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Ana Kalça Kası, Arka Bacak, Ön Bacak",
+    "muscle": "Ana Kalça, Arka Bacak & Kalça Bağı, Dış Ön Bacak",
     "name": "Dambıl Swing to Goblet Squat (Hinge-Squat Akışı)",
     "positions": [
       {
@@ -5722,12 +5742,14 @@
       }
     ],
     "primaryMuscles": [
+      "quads",
       "glutes",
-      "quads"
+      "hamstrings"
     ],
     "secondaryMuscles": [
-      "hamstrings",
-      "core"
+      "back",
+      "core",
+      "biceps"
     ],
     "tags": [
       "complex",
@@ -5738,8 +5760,8 @@
       "dumbbell"
     ],
     "weightKey": "squat",
-    "primarySubMuscles": "Ana Kalça Kası, Arka Bacak, Ön Bacak",
-    "secondarySubMuscles": "Alt Sırt & Bel Kasları, Ön ve Derin İç Karın (Core), Biceps & Ön Kol",
+    "primarySubMuscles": "Ana Kalça, Arka Bacak & Kalça Bağı, Dış Ön Bacak, İç Ön Bacak",
+    "secondarySubMuscles": "Arka Bacak, Alt Sırt & Bel, Derin İç Karın, Ön Kol & Dış Pazı",
     "biomechanicalProof": "İlk savuruşta (Swing) kalça ve arka bacak çalışır; ağırlığı göğüste yakalayıp çömeldiğinde (Goblet Squat) ise ön bacak devreye girer.",
     "fitCategory": "squat",
     "fitName": "goblet_squat",
@@ -5762,7 +5784,7 @@
     "id": "db_lunge_to_curl_press",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Ön Bacak & Ana Kalça Kası, Biceps, Ön ve Yan Omuz",
+    "muscle": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça",
     "name": "Dambıl Lunge to Biceps Curl to Overhead Press",
     "positions": [
       {
@@ -5783,11 +5805,12 @@
     ],
     "primaryMuscles": [
       "quads",
+      "glutes",
+      "biceps",
       "shoulders"
     ],
     "secondaryMuscles": [
-      "biceps",
-      "glutes",
+      "triceps",
       "core"
     ],
     "tags": [
@@ -5800,8 +5823,8 @@
       "dumbbell"
     ],
     "weightKey": "press",
-    "primarySubMuscles": "Ön Bacak & Ana Kalça Kası, Biceps, Ön ve Yan Omuz",
-    "secondarySubMuscles": "Yan Kalça (Denge), Triceps, Ön Kol, Derin İç Karın (Core)",
+    "primarySubMuscles": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça, Ön Kol & Dış Pazı, Pazı Dış Baş, Ön Omuz",
+    "secondarySubMuscles": "Yan Omuz, Yan Kalça, Arka Kol Alt Baş, Derin İç Karın",
     "biomechanicalProof": "Adım alıp çömelirken ön bacak ve kalça, kalkarken dambılı büktüğünde biceps, baş üstüne ittiğinde ise ön/yan omuz ve triceps sırasıyla çalışır.",
     "fitCategory": "shoulder_press",
     "fitName": "dumbbell_hammer_curl_to_lunge_to_press",
@@ -5827,7 +5850,7 @@
     "id": "db_gorilla_row_to_clean",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Kanatlar (Sırt Genişliği), Üst Sırt & Kürek Kemiği (Trapez & Orta Sırt), Ana Kalça Kası",
+    "muscle": "Kanatlar, Orta Sırt, Üst Sırt & Trapez",
     "name": "Dambıl Goril Row to Clean (Menteşe & Çekiş Akışı)",
     "positions": [
       {
@@ -5848,12 +5871,11 @@
     ],
     "primaryMuscles": [
       "back",
-      "hamstrings",
       "glutes"
     ],
     "secondaryMuscles": [
+      "hamstrings",
       "biceps",
-      "shoulders",
       "core"
     ],
     "tags": [
@@ -5865,8 +5887,8 @@
       "dumbbell"
     ],
     "weightKey": "row",
-    "primarySubMuscles": "Kanatlar (Sırt Genişliği), Üst Sırt & Kürek Kemiği (Trapez & Orta Sırt), Ana Kalça Kası",
-    "secondarySubMuscles": "Biceps (Pazı), Arka Bacak & Alt Sırt/Bel (Eğik Duruş Dengesi), Ön Omuz (Omuzda Sabitleme), Ön ve Yan Karın (Core), Ön Kol & Kavrama Kasları",
+    "primarySubMuscles": "Kanatlar, Orta Sırt, Üst Sırt & Trapez, Ana Kalça",
+    "secondarySubMuscles": "Arka Bacak, Alt Sırt & Bel, Pazı Dış Baş, Ön Kol & Dış Pazı, Derin İç Karın",
     "biomechanicalProof": "Row aşamasında kanatlar ve üst sırt/kürek kemikleri dambılı yerden çeker; Clean aşamasında ise kalça patlaması ve trapez silkmesiyle ağırlık omuz hizasına alınır.",
     "fitCategory": "row",
     "fitName": "barbell_straight_leg_deadlift_to_row",
@@ -5892,7 +5914,7 @@
     "id": "db_floor_press_to_bridge",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Orta Göğüs, Ana Kalça Kası, Triceps (Dış ve Alt Kısım)",
+    "muscle": "Orta Göğüs, Ana Kalça, Arka Kol Dış Baş",
     "name": "Dambıl Floor Press to Glute Bridge (Göğüs & Kalça Köprüsü)",
     "positions": [
       {
@@ -5913,10 +5935,11 @@
     ],
     "primaryMuscles": [
       "chest",
-      "glutes"
+      "glutes",
+      "triceps"
     ],
     "secondaryMuscles": [
-      "triceps",
+      "shoulders",
       "hamstrings",
       "core"
     ],
@@ -5929,8 +5952,8 @@
       "dumbbell"
     ],
     "weightKey": "press",
-    "primarySubMuscles": "Orta Göğüs, Ana Kalça Kası, Triceps (Dış ve Alt Kısım)",
-    "secondarySubMuscles": "Ön Omuz, Arka Bacak, Alt Sırt & Derin İç Karın (Köprü Duruşu)",
+    "primarySubMuscles": "Orta Göğüs, Ana Kalça, Arka Kol Dış Baş, Arka Kol Alt Baş",
+    "secondarySubMuscles": "Ön Omuz, Arka Bacak & Kalça Bağı, Derin İç Karın",
     "biomechanicalProof": "Kalçayı yukarı kaldırıp sıkarak (ana kalça) tutarken aynı anda dambılları yukarı preslemek (orta göğüs ve triceps) alt ve üst vücudu birlikte çalıştırır.",
     "fitCategory": "bench_press",
     "fitName": "",
@@ -5959,7 +5982,7 @@
     "id": "db_step_back_lunge_to_knee_drive",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Ön Bacak, Ana ve Yan Kalça, Ön Omuz, Ön Kalça Kası (Diz Çekme)",
+    "muscle": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça",
     "name": "Dambıl Geri Lunge to Diz Çekme & Tek Kol Omuz Pres",
     "positions": [
       {
@@ -5980,11 +6003,12 @@
     ],
     "primaryMuscles": [
       "quads",
+      "glutes",
       "shoulders"
     ],
     "secondaryMuscles": [
-      "glutes",
-      "core"
+      "core",
+      "triceps"
     ],
     "tags": [
       "complex",
@@ -5995,8 +6019,8 @@
       "dumbbell"
     ],
     "weightKey": "press",
-    "primarySubMuscles": "Ön Bacak, Ana ve Yan Kalça, Ön Omuz, Ön Kalça Kası (Diz Çekme)",
-    "secondarySubMuscles": "Yan Karın (Tek Kol Denge), Triceps, Kalf (Baldır)",
+    "primarySubMuscles": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça, Ön Omuz",
+    "secondarySubMuscles": "Orta Ön Bacak, Yan Kalça, Yan Karın, Arka Kol Alt Baş",
     "biomechanicalProof": "Geri lunge'dan tek ayak üzerinde yükselip arka dizi yukarı çekerken aynı anda tek kol omuz presi yapmak; ön bacak, kalça, ön kalça ve omzu birlikte çalıştırır.",
     "fitCategory": "lunge",
     "fitName": "dumbbell_reverse_lunge_to_high_knee_and_press",
@@ -6020,7 +6044,7 @@
     "id": "bw_inchworm_to_pushup",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Orta Göğüs, Ön Omuz, Triceps (Arka Kol), Ön ve Derin İç Karın (Core)",
+    "muscle": "Orta Göğüs, Ön Karın, Derin İç Karın",
     "name": "Vücut Ağırlığı Inchworm to Şınav (Mobilite & İtiş Akışı)",
     "positions": [
       {
@@ -6041,11 +6065,11 @@
     ],
     "primaryMuscles": [
       "chest",
-      "triceps"
+      "core"
     ],
     "secondaryMuscles": [
       "shoulders",
-      "core",
+      "triceps",
       "hamstrings"
     ],
     "tags": [
@@ -6057,8 +6081,8 @@
       "bodyweight"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Orta Göğüs, Ön Omuz, Triceps (Arka Kol), Ön ve Derin İç Karın (Core)",
-    "secondarySubMuscles": "Arka Bacak (Esnetme & Mobilite), Alt Sırt/Bel & Ana Kalça Kası, Üst Sırt, Kanatlar & Yan Göğüs Kasları (Kürek Kemiği Sabitleme)",
+    "primarySubMuscles": "Orta Göğüs, Ön Karın, Derin İç Karın",
+    "secondarySubMuscles": "Ön Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş, Arka Bacak",
     "biomechanicalProof": "Eller üzerinde yürürken ve şınav çekerken göğüs, ön omuz, triceps ve karın (core) ana işi üstlenir; başlangıç ve bitişteki eğilme/yürüme fazında arka bacaklar esner, bel/kalça ve üst sırt/kanatlar duruşu korur.",
     "fitCategory": "push_up",
     "fitName": "pilates_pushup",
@@ -6081,7 +6105,7 @@
     "id": "mach_straight_arm_pulldown",
     "isComplex": false,
     "mechanic": "isolation",
-    "muscle": "Kanatlar (Özellikle Alt Kanat)",
+    "muscle": "Kanatlar",
     "name": "Kablo Düz Kol Çekiş (Straight-Arm Pulldown)",
     "positions": [
       {
@@ -6113,8 +6137,8 @@
       "isolation"
     ],
     "weightKey": "pull",
-    "primarySubMuscles": "Kanatlar (Özellikle Alt Kanat)",
-    "secondarySubMuscles": "Triceps İç/Uzun Kısım, Arka Omuz, Ön ve Derin İç Karın (Core)",
+    "primarySubMuscles": "Kanatlar",
+    "secondarySubMuscles": "Arka Kol Uzun Baş, Ön Karın",
     "biomechanicalProof": "Dirsekleri hiç bükmeden düz kollarla barı yukarıdan bacaklarına indirmek, bicepsi tamamen devre dışı bırakır ve sadece kanat kaslarını (özellikle alt kanadı) çalıştırır.",
     "fitCategory": "pull_up",
     "fitName": "straight_arm_pulldown",
@@ -6139,7 +6163,7 @@
     "id": "bw_hyperextension",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Alt Sırt & Bel Kasları, Ana Kalça Kası",
+    "muscle": "Alt Sırt & Bel, Ana Kalça",
     "name": "45° Hiperekstansiyon (Back Extension)",
     "positions": [
       {
@@ -6159,11 +6183,11 @@
       }
     ],
     "primaryMuscles": [
-      "back"
+      "back",
+      "glutes"
     ],
     "secondaryMuscles": [
-      "hamstrings",
-      "glutes"
+      "hamstrings"
     ],
     "tags": [
       "legs_hinge",
@@ -6171,8 +6195,8 @@
       "posterior_chain"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Alt Sırt & Bel Kasları, Ana Kalça Kası",
-    "secondarySubMuscles": "Arka Bacak (Üst/Uzun Kısım)",
+    "primarySubMuscles": "Alt Sırt & Bel, Ana Kalça",
+    "secondarySubMuscles": "Arka Bacak & Kalça Bağı, Arka Bacak",
     "biomechanicalProof": "Sehpada öne eğilip kalça ve bel gücüyle doğrulmak, omurgayı dik tutan alt sırt/bel kaslarını, ana kalça kasını ve arka bacakları doğrudan güçlendirir.",
     "fitCategory": "hyperextension",
     "fitName": "hyperextension",
@@ -6194,7 +6218,7 @@
     "id": "db_rotational_lunge_chop",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Ön Bacak & Ana Kalça Kası, Yan Karın (Bel Yanları)",
+    "muscle": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça",
     "name": "Rotasyonel Lunge & Dambıl Savuruş",
     "positions": [
       {
@@ -6219,8 +6243,7 @@
       "core"
     ],
     "secondaryMuscles": [
-      "shoulders",
-      "hamstrings"
+      "shoulders"
     ],
     "tags": [
       "complex",
@@ -6231,9 +6254,9 @@
       "dumbbell"
     ],
     "weightKey": "squat",
-    "primarySubMuscles": "Ön Bacak & Ana Kalça Kası, Yan Karın (Bel Yanları)",
-    "secondarySubMuscles": "Yan Kalça (Denge), Ön Omuz, Derin İç Karın (Core)",
-    "biomechanicalProof": "Lunge adımıyla çömelirken dambılı çapraz aşağı savurmak, bacak ve kalçayla birlikte bel yanlarındaki dönüş kaslarını (yan karın) güçlü çalıştırır.",
+    "primarySubMuscles": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça, Yan Karın",
+    "secondarySubMuscles": "Ön Omuz, Yan Kalça, Derin İç Karın",
+    "biomechanicalProof": "Ters lunge adımından doğrulurken gövdeyi 180° çevirip dambılı çapraz yukarı savurmak; ön bacak ve ana kalçayla birlikte yan karın kaslarını patlayıcı çalıştırır.",
     "fitCategory": "lunge",
     "fitName": "side_to_side_lunge_chops",
     "fitNote": "",
@@ -6258,7 +6281,7 @@
     "id": "db_rotational_gorilla_row",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Kanatlar (Sırt Genişliği), Orta Sırt & Kürek Kemiği Kasları",
+    "muscle": "Kanatlar, Orta Sırt",
     "name": "Rotasyonel Gorilla Row",
     "positions": [
       {
@@ -6282,8 +6305,8 @@
     ],
     "secondaryMuscles": [
       "core",
-      "biceps",
-      "shoulders"
+      "shoulders",
+      "biceps"
     ],
     "tags": [
       "upper_pull",
@@ -6292,8 +6315,8 @@
       "dumbbell"
     ],
     "weightKey": "pull",
-    "primarySubMuscles": "Kanatlar (Sırt Genişliği), Orta Sırt & Kürek Kemiği Kasları",
-    "secondarySubMuscles": "Yan Karın (Bel Yanları), Arka Omuz, Biceps & Ön Kol, Alt Sırt",
+    "primarySubMuscles": "Kanatlar, Orta Sırt",
+    "secondarySubMuscles": "Yan Karın, Arka Omuz, Alt Sırt & Bel, Pazı Dış Baş, Ön Kol & Dış Pazı",
     "biomechanicalProof": "Eğik duruşta dambılı çekerken gövdeyi de hafifçe döndürmek, kanat ve orta sırt çekişine yan karın (oblik) ve arka omuz kaslarını dahil eder.",
     "fitCategory": "row",
     "fitName": "kettlebell_row",
@@ -6340,7 +6363,8 @@
       "shoulders"
     ],
     "secondaryMuscles": [
-      "back"
+      "back",
+      "biceps"
     ],
     "tags": [
       "upper_pull",
@@ -6350,7 +6374,7 @@
     ],
     "weightKey": "pull",
     "primarySubMuscles": "Arka Omuz",
-    "secondarySubMuscles": "Orta Sırt & Kürek Kemiği Kasları, Omuz İç Denge Kasları, Biceps Altı Dış Kol Kası",
+    "secondarySubMuscles": "Orta Sırt, Ön Kol & Dış Pazı",
     "biomechanicalProof": "Öne eğilip dirseği vücuda yapıştırmak yerine yana doğru geniş açıyla çekmek, yükü kanatlardan alıp doğrudan arka omuza ve kürek kemiği çevresine verir.",
     "fitCategory": "lateral_raise",
     "fitName": "overhand_grip_rear_lateral_raise",
@@ -6370,7 +6394,7 @@
     "id": "db_high_pull_cuban_rotation",
     "isComplex": true,
     "mechanic": "compound",
-    "muscle": "Omuz İç Denge Kasları, Arka Omuz, Üst ve Orta Sırt (Trapez & Kürek Kemiği Kasları)",
+    "muscle": "Arka Omuz, Orta Sırt, Üst Sırt & Trapez",
     "name": "Eğilerek Row & High Pull + Cuban Rotasyon",
     "positions": [
       {
@@ -6394,8 +6418,7 @@
       "back"
     ],
     "secondaryMuscles": [
-      "core",
-      "glutes"
+      "biceps"
     ],
     "tags": [
       "complex",
@@ -6405,8 +6428,8 @@
       "dumbbell"
     ],
     "weightKey": "pull",
-    "primarySubMuscles": "Omuz İç Denge Kasları, Arka Omuz, Üst ve Orta Sırt (Trapez & Kürek Kemiği Kasları)",
-    "secondarySubMuscles": "Kanatlar (Başlangıç Çekişi), Yan Omuz, Biceps & Ön Kol, Alt Sırt/Bel, Karın (Core), Arka Bacak & Kalça (Eğik Duruş Sabitleme)",
+    "primarySubMuscles": "Arka Omuz, Orta Sırt, Üst Sırt & Trapez",
+    "secondarySubMuscles": "Yan Omuz, Alt Sırt & Bel, Ön Kol & Dış Pazı",
     "biomechanicalProof": "Eğilerek yapılan yüksek çekiş ve kolları yukarı döndürme (Cuban rotasyon) hareketinde omuz iç denge kasları (rotator manşet), arka omuz, trapez ve kürek kemiği kasları ana yükü çeker; eğik duruşta bel, karın ve arka bacak/kalça vücudu sabit tutar.",
     "fitCategory": "lateral_raise",
     "fitName": "combo_shoulder_raise",
@@ -6428,7 +6451,7 @@
     "id": "db_dumbbell_shrug_burnout",
     "isComplex": false,
     "mechanic": "isolation",
-    "muscle": "Üst Sırt & Boyun Kökü (Üst Trapez)",
+    "muscle": "Üst Sırt & Trapez",
     "name": "Dambıl Trapez Silkme (Burnout)",
     "positions": [
       {
@@ -6451,7 +6474,7 @@
       "back"
     ],
     "secondaryMuscles": [
-      "core"
+      "biceps"
     ],
     "tags": [
       "upper_pull",
@@ -6460,8 +6483,8 @@
       "dumbbell"
     ],
     "weightKey": "pull",
-    "primarySubMuscles": "Üst Sırt & Boyun Kökü (Üst Trapez)",
-    "secondarySubMuscles": "Orta Trapez, Ön Kol & El Bileği Kavrama Kasları",
+    "primarySubMuscles": "Üst Sırt & Trapez",
+    "secondarySubMuscles": "Orta Sırt, Ön Kol & Dış Pazı",
     "biomechanicalProof": "Kolları bükmeden omuzları kulaklara doğru yukarı çekip sıkmak, doğrudan boyun iki yanındaki üst trapez kaslarını çalıştırır.",
     "fitCategory": "shrug",
     "fitName": "dumbbell_shrug",
@@ -6482,7 +6505,7 @@
     "id": "db_quadruped_external_rotation",
     "isComplex": false,
     "mechanic": "isolation",
-    "muscle": "Arka Omuz, Omuz İç Denge Kasları",
+    "muscle": "Arka Omuz",
     "name": "Dört Ayak Pozisyonunda Yatay Arka Omuz Uçuşu",
     "positions": [
       {
@@ -6505,8 +6528,8 @@
       "shoulders"
     ],
     "secondaryMuscles": [
-      "core",
-      "back"
+      "back",
+      "core"
     ],
     "tags": [
       "mobility",
@@ -6516,8 +6539,8 @@
       "dumbbell"
     ],
     "weightKey": "press",
-    "primarySubMuscles": "Arka Omuz, Omuz İç Denge Kasları",
-    "secondarySubMuscles": "Orta Sırt & Kürek Kemiği Kasları, Derin İç Karın & Yan Karın (Core)",
+    "primarySubMuscles": "Arka Omuz",
+    "secondarySubMuscles": "Orta Sırt, Derin İç Karın",
     "biomechanicalProof": "Dört ayak üzerinde tek kolu yana açıp döndürmek arka omuz ve omuz iç kaslarını çalıştırırken, üç uzuv üstünde düz kalmak karın ve kürek kemiği kaslarını dengeler.",
     "fitCategory": "shoulder_stability",
     "fitName": "dumbbell_face_pull_with_external_rotation",
@@ -6538,7 +6561,7 @@
     "id": "bw_jumping_jack",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Üst ve Alt Kalf (Baldır), Yan Omuz, Yan Kalça & İç Bacak",
+    "muscle": "Üst Baldır, Alt Baldır, Yan Omuz",
     "name": "Jumping Jack (Yıldız Sıçrama)",
     "positions": [
       {
@@ -6563,12 +6586,12 @@
       }
     ],
     "primaryMuscles": [
-      "quads",
-      "glutes",
-      "calves"
+      "calves",
+      "shoulders",
+      "glutes"
     ],
     "secondaryMuscles": [
-      "shoulders",
+      "back",
       "core"
     ],
     "tags": [
@@ -6578,8 +6601,8 @@
       "aerobic"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Üst ve Alt Kalf (Baldır), Yan Omuz, Yan Kalça & İç Bacak",
-    "secondarySubMuscles": "Üst Trapez, Ön ve Derin İç Karın (Core)",
+    "primarySubMuscles": "Üst Baldır, Alt Baldır, Yan Omuz, Yan Kalça",
+    "secondarySubMuscles": "Üst Sırt & Trapez, Derin İç Karın",
     "biomechanicalProof": "Zıplayarak bacakları ve kolları açıp kapamak; parmak ucunda sıçrama ile kalfları, kolları yukarı kaldırma ile yan omuzları, bacak açma ile yan kalça ve iç bacağı çalıştırır.",
     "fitCategory": "cardio",
     "fitName": "jumping_jacks",
@@ -6604,7 +6627,7 @@
     "id": "bw_high_knees",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Alt Karın & Ön Kalça Kası, Ön Bacak Orta Kısım, Üst ve Alt Kalf (Baldır)",
+    "muscle": "Ön Karın, Orta Ön Bacak, Üst Baldır",
     "name": "High Knees (Dize Çekerek Koşu)",
     "positions": [
       {
@@ -6624,11 +6647,11 @@
       }
     ],
     "primaryMuscles": [
+      "core",
       "quads",
-      "core"
+      "calves"
     ],
     "secondaryMuscles": [
-      "calves",
       "glutes"
     ],
     "tags": [
@@ -6638,8 +6661,8 @@
       "cardio"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Alt Karın & Ön Kalça Kası, Ön Bacak Orta Kısım, Üst ve Alt Kalf (Baldır)",
-    "secondarySubMuscles": "Yan Kalça (Tek Ayak Denge), Yan Karın (Core)",
+    "primarySubMuscles": "Ön Karın, Orta Ön Bacak, Üst Baldır",
+    "secondarySubMuscles": "Alt Baldır, Yan Kalça",
     "biomechanicalProof": "Olduğun yerde dizleri hızla bel hizasına çekerek koşmak; bacağı yukarı çeken ön kalça ve alt karın kasları ile yerden sıçrayan kalfları çalıştırır.",
     "fitCategory": "plyo",
     "fitName": "front_knee_strike",
@@ -6661,7 +6684,7 @@
     "id": "bw_jump_rope",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Üst ve Alt Kalf (Baldır), Ayak Bileği Denge Kasları",
+    "muscle": "Üst Baldır, Alt Baldır, Ön Kaval & Bilek",
     "name": "İp Atlama (Gölge İp / Jump Rope)",
     "positions": [
       {
@@ -6684,8 +6707,8 @@
       "calves"
     ],
     "secondaryMuscles": [
+      "biceps",
       "shoulders",
-      "forearms",
       "core"
     ],
     "tags": [
@@ -6695,8 +6718,8 @@
       "calves"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Üst ve Alt Kalf (Baldır), Ayak Bileği Denge Kasları",
-    "secondarySubMuscles": "Ön Kol & Bilek Kasları, Yan Omuz (Sabit Tutuş), Derin İç Karın (Core)",
+    "primarySubMuscles": "Üst Baldır, Alt Baldır, Ön Kaval & Bilek",
+    "secondarySubMuscles": "Ön Kol & Dış Pazı, Yan Omuz, Derin İç Karın",
     "biomechanicalProof": "Parmak ucunda ritmik sıçramak doğrudan üst ve alt kalf (baldır) ile ayak bileği kaslarını, ip çevirme hareketi ise ön kol ve omuzları çalıştırır.",
     "fitCategory": "cardio",
     "fitName": "jump_rope",
@@ -6718,7 +6741,7 @@
     "id": "bw_butt_kicks",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Arka Bacak (Diz Büken Kısım), Üst ve Alt Kalf (Baldır)",
+    "muscle": "Diz Büken Arka Bacak, Üst Baldır, Alt Baldır",
     "name": "Topuk Kalçaya Koşu (Butt Kicks)",
     "positions": [
       {
@@ -6738,11 +6761,12 @@
       }
     ],
     "primaryMuscles": [
-      "hamstrings"
+      "hamstrings",
+      "calves"
     ],
     "secondaryMuscles": [
-      "quads",
-      "calves"
+      "glutes",
+      "core"
     ],
     "tags": [
       "legs",
@@ -6751,8 +6775,8 @@
       "warmup"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Arka Bacak (Diz Büken Kısım), Üst ve Alt Kalf (Baldır)",
-    "secondarySubMuscles": "Ana Kalça Kası, Derin İç Karın (Core)",
+    "primarySubMuscles": "Diz Büken Arka Bacak, Üst Baldır, Alt Baldır",
+    "secondarySubMuscles": "Ana Kalça, Derin İç Karın",
     "biomechanicalProof": "Koşarken topukları hızla kalçaya vurmak dizleri büken arka bacak kaslarını, parmak ucunda yaylanmak ise kalf (baldır) kaslarını çalıştırır.",
     "fitCategory": "cardio",
     "fitName": "jump_rope_jog",
@@ -6774,7 +6798,7 @@
     "id": "bw_skater_jumps",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Yan Kalça (Dış Kalça & Denge Kası), Ana Kalça Kası, Ön Bacak",
+    "muscle": "Yan Kalça, Ana Kalça, Dış Ön Bacak",
     "name": "Skater Jumps (Paten Sıçraması)",
     "positions": [
       {
@@ -6808,8 +6832,8 @@
       "bodyweight"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Yan Kalça (Dış Kalça & Denge Kası), Ana Kalça Kası, Ön Bacak",
-    "secondarySubMuscles": "Kalf & Ayak Bileği Denge Kasları, Yan Karın (Core), İç Bacak",
+    "primarySubMuscles": "Yan Kalça, Ana Kalça, Dış Ön Bacak",
+    "secondarySubMuscles": "Üst Baldır, Ön Kaval & Bilek, Yan Karın",
     "biomechanicalProof": "Buz patencisi gibi sağa ve sola tek ayak üstüne sıçramak; yana itiş yapan yan kalça, ana kalça ve ön bacak kaslarını patlayıcı çalıştırır.",
     "fitCategory": "plyo",
     "fitName": "lateral_leap_and_hop",
@@ -6834,7 +6858,7 @@
     "id": "bw_plank_jacks",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Derin İç Karın & Ön Karın (Core), Yan Kalça & İç Bacak",
+    "muscle": "Derin İç Karın, Ön Karın",
     "name": "Plank Jacks (Plank Bacak Aç-Kapa)",
     "positions": [
       {
@@ -6857,8 +6881,8 @@
       "core"
     ],
     "secondaryMuscles": [
-      "shoulders",
       "glutes",
+      "shoulders",
       "calves"
     ],
     "tags": [
@@ -6867,8 +6891,8 @@
       "bodyweight"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Derin İç Karın & Ön Karın (Core), Yan Kalça & İç Bacak",
-    "secondarySubMuscles": "Ön Omuz & Triceps (Kolları Sabit Tutma), Kalf (Baldır)",
+    "primarySubMuscles": "Derin İç Karın, Ön Karın",
+    "secondarySubMuscles": "Yan Kalça, Ön Omuz, Üst Baldır",
     "biomechanicalProof": "Şınav/Plank duruşunda beli düşürmeden ayakları zıplayarak açıp kapamak; ön/derin karın kaslarını, omuzları ve yan kalça/iç bacak kaslarını çalıştırır.",
     "fitCategory": "plank",
     "fitName": "elbow_plank_pike_jacks",
@@ -6890,7 +6914,7 @@
     "id": "bw_squat_thrust",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Ön Bacak, Ana Kalça Kası, Ön ve Derin İç Karın (Core)",
+    "muscle": "Dış Ön Bacak, Ana Kalça, Ön Karın",
     "name": "Squat Thrust (Yarım Burpee)",
     "positions": [
       {
@@ -6911,15 +6935,13 @@
     ],
     "primaryMuscles": [
       "quads",
-      "core",
-      "chest",
       "glutes",
-      "calves"
+      "core"
     ],
     "secondaryMuscles": [
       "shoulders",
-      "triceps",
-      "hamstrings"
+      "chest",
+      "calves"
     ],
     "tags": [
       "full_body",
@@ -6927,8 +6949,8 @@
       "bodyweight"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Ön Bacak, Ana Kalça Kası, Ön ve Derin İç Karın (Core)",
-    "secondarySubMuscles": "Ön Kalça Kası, Ön Omuz & Orta Göğüs, Triceps",
+    "primarySubMuscles": "Dış Ön Bacak, Ana Kalça, Ön Karın, Derin İç Karın",
+    "secondarySubMuscles": "Ön Omuz, Orta Göğüs, Üst Baldır",
     "biomechanicalProof": "Çömelip elleri yere koyarak ayakları geriye fırlatmak ve tekrar toplayıp ayağa kalkmak; ön bacak, kalça ve karın (core) kaslarını birlikte çalıştırır.",
     "fitCategory": "total_body",
     "fitName": "squat_thrusts",
@@ -6956,7 +6978,7 @@
     "id": "bw_lateral_shuffle",
     "isComplex": false,
     "mechanic": "compound",
-    "muscle": "Yan Kalça, Ön Bacak (Dış ve İç Kısım), İç Bacak Kasları",
+    "muscle": "Yan Kalça, Dış Ön Bacak, İç Ön Bacak",
     "name": "Lateral Shuffle (Yanal Hızlı Adımlama)",
     "positions": [
       {
@@ -6976,8 +6998,8 @@
       }
     ],
     "primaryMuscles": [
-      "quads",
-      "glutes"
+      "glutes",
+      "quads"
     ],
     "secondaryMuscles": [
       "calves",
@@ -6990,8 +7012,8 @@
       "agility"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Yan Kalça, Ön Bacak (Dış ve İç Kısım), İç Bacak Kasları",
-    "secondarySubMuscles": "Üst ve Alt Kalf (Baldır), Ana Kalça Kası, Derin İç Karın (Core)",
+    "primarySubMuscles": "Yan Kalça, Dış Ön Bacak, İç Ön Bacak",
+    "secondarySubMuscles": "Üst Baldır, Ön Kaval & Bilek, Derin İç Karın",
     "biomechanicalProof": "Dizler hafif bükülü alçak duruşta sağa sola hızlı adımlamak; sürekli bükülü kalan ön bacağı, yana itiş yapan yan kalçayı ve iç bacakları çalıştırır.",
     "fitCategory": "plyo",
     "fitName": "side_to_side_shuffle_jump",
@@ -7018,7 +7040,7 @@
     "isTimeBased": true,
     "trackingType": "time",
     "mechanic": "compound",
-    "muscle": "Kanat (Latissimus), Orta Sırt, Ön Bacak & Kalça, Kondisyon",
+    "muscle": "Kanatlar, Orta Sırt, Dış Ön Bacak",
     "name": "Kürek Çekme (Indoor Rowing / Ergometre)",
     "positions": [
       {
@@ -7043,8 +7065,8 @@
       "glutes"
     ],
     "secondaryMuscles": [
-      "biceps",
       "shoulders",
+      "biceps",
       "hamstrings",
       "core"
     ],
@@ -7056,8 +7078,8 @@
       "rowing"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Kanat (Latissimus), Orta Sırt (Rhomboid/Trapez), Ön Bacak & Ana Kalça Kası",
-    "secondarySubMuscles": "Arka Omuz, Biceps & Ön Kol, Arka Bacak, Derin İç Karın (Core)",
+    "primarySubMuscles": "Kanatlar, Orta Sırt, Dış Ön Bacak, Ana Kalça",
+    "secondarySubMuscles": "Arka Omuz, Pazı Dış Baş, Ön Kol & Dış Pazı, Arka Bacak, Ön Karın",
     "biomechanicalProof": "Kürek ergometresinde itiş fazının %60'ı bacak ve kalça itişinden, %20'si gövde menteşesinden, %20'si ise kanat, orta sırt ve kol çekişinden üretilir.",
     "fitCategory": "row",
     "fitName": "indoor_row",
@@ -7084,7 +7106,7 @@
     "isTimeBased": true,
     "trackingType": "time",
     "mechanic": "compound",
-    "muscle": "Ön Bacak, Kalça, Üst ve Alt Kalf (Baldır), Kondisyon",
+    "muscle": "Üst Baldır, Alt Baldır, Dış Ön Bacak",
     "name": "Tempolu Yürüyüş & Doğa Yürüyüşü (Walking)",
     "positions": [
       {
@@ -7104,9 +7126,9 @@
       }
     ],
     "primaryMuscles": [
+      "calves",
       "quads",
-      "glutes",
-      "calves"
+      "glutes"
     ],
     "secondaryMuscles": [
       "hamstrings",
@@ -7120,8 +7142,8 @@
       "walking"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Üst ve Alt Kalf (Baldır), Ön Bacak, Ana ve Yan Kalça Kasları",
-    "secondarySubMuscles": "Arka Bacak, Ön Kaval Kemiği (Tibialis Anterior), Derin İç Karın (Core)",
+    "primarySubMuscles": "Üst Baldır, Alt Baldır, Dış Ön Bacak, Ana Kalça",
+    "secondarySubMuscles": "Yan Kalça, Ön Kaval & Bilek, Arka Bacak, Derin İç Karın",
     "biomechanicalProof": "Tempolu ve eğimli yürüyüş; her adımda ayak bileği itişiyle kalfları, diz ve kalça açılımıyla ön bacak ile kalça kaslarını aerobik dayanıklılık altında çalıştırır.",
     "fitCategory": "run",
     "fitName": "walk",
@@ -7148,7 +7170,7 @@
     "isTimeBased": true,
     "trackingType": "time",
     "mechanic": "compound",
-    "muscle": "Ön ve Arka Bacak, Kalça, Üst ve Alt Kalf (Baldır), Kondisyon",
+    "muscle": "Üst Baldır, Alt Baldır, Arka Bacak",
     "name": "Koşu & Koşu Bandı (Running / Treadmill)",
     "positions": [
       {
@@ -7168,10 +7190,10 @@
       }
     ],
     "primaryMuscles": [
-      "quads",
+      "calves",
       "hamstrings",
-      "glutes",
-      "calves"
+      "quads",
+      "glutes"
     ],
     "secondaryMuscles": [
       "core"
@@ -7184,8 +7206,8 @@
       "running"
     ],
     "weightKey": "",
-    "primarySubMuscles": "Üst ve Alt Kalf (Baldır), Arka Bacak, Ön Bacak & Ana Kalça Kası",
-    "secondarySubMuscles": "Ön Kalça (İliopsoas), Yan Kalça (Tek Ayak Denge), Derin İç Karın (Core)",
+    "primarySubMuscles": "Üst Baldır, Alt Baldır, Arka Bacak, Dış Ön Bacak, Ana Kalça",
+    "secondarySubMuscles": "Orta Ön Bacak, Yan Kalça, Ön Kaval & Bilek, Derin İç Karın",
     "biomechanicalProof": "Koşu sırasında yere temas ve itiş fazı kalf, arka bacak ve kalçayı yüksek elastik gerilimle yüklerken, tek ayak üzerindeki denge fazı yan kalça ve core kaslarını çalıştırır.",
     "fitCategory": "run",
     "fitName": "run",
@@ -7203,7 +7225,6 @@
     "garminMatchType": "exact_verified"
   }
 ];
-
 // ─── GARMIN FIT SDK & TREDICT DOĞRULANMIŞ EŞLEŞTİRME YARDIMCILARI (7. ŞEF: GARMIN-TREDICT-GUARD) ───
 function getExerciseFitMapping(exOrId) {
   const ex = typeof exOrId === 'string'

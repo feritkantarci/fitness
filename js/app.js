@@ -51,425 +51,857 @@
         const EXERCISE_ANATOMY_MAP = {
           "db_bench_press": {
                     "primary": "Orta Göğüs",
-                    "secondary": "Ön Omuz, Triceps (Dış ve Alt Kısım), Yan Göğüs Kaburga Kasları",
+                    "secondary": "Ön Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş",
                     "subKey": "chest_mid",
-                    "proof": "Düz sehpada dirsekleri 45° açıyla indirip itmek, göğsün tam orta kısmını en geniş açıda gerip sıkıştırır; kolları düzleştirirken triceps ve ön omuz da yardıma girer.",
+                    "primarySubKeys": [
+                              "chest_mid"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_front",
+                              "triceps_lateral",
+                              "triceps_medial"
+                    ],
                     "allSubKeys": [
                               "chest_mid"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Düz sehpada dirsekleri 45° açıyla indirip itmek, göğsün tam orta kısmını en geniş açıda gerip sıkıştırır; kolları düzleştirirken triceps ve ön omuz da yardıma girer."
           },
           "db_incline_press": {
                     "primary": "Üst Göğüs",
-                    "secondary": "Ön Omuz, Triceps (Dış ve Alt Kısım), Yan Göğüs Kaburga Kasları",
+                    "secondary": "Orta Göğüs, Ön Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş",
                     "subKey": "chest_upper",
-                    "proof": "Sehpayı 30-45° yukarı kaldırmak itiş yönünü köprücük kemiğine taşır; böylece yük orta göğüsten doğrudan üst göğse ve ön omuza geçer.",
+                    "primarySubKeys": [
+                              "chest_upper"
+                    ],
+                    "secondarySubKeys": [
+                              "chest_mid",
+                              "shoulders_front",
+                              "triceps_lateral",
+                              "triceps_medial"
+                    ],
                     "allSubKeys": [
                               "chest_upper"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Sehpayı 30-45° yukarı kaldırmak itiş yönünü köprücük kemiğine taşır; böylece yük orta göğüsten doğrudan üst göğse ve ön omuza geçer."
           },
           "db_floor_press": {
-                    "primary": "Orta Göğüs, Triceps (Dış ve Alt Kısım)",
+                    "primary": "Orta Göğüs, Arka Kol Dış Baş, Arka Kol Alt Baş",
                     "secondary": "Ön Omuz",
                     "subKey": "chest_mid",
-                    "proof": "Yerde yatarken dirseklerin zemine değmesi kolun fazla geriye gitmesini önler; dipten hız almadan yapılan itiş orta göğsü ve özellikle tricepsin kol kilitleme gücünü vurur.",
+                    "primarySubKeys": [
+                              "chest_mid",
+                              "triceps_lateral",
+                              "triceps_medial"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_front"
+                    ],
                     "allSubKeys": [
-                              "chest_mid"
-                    ]
+                              "chest_mid",
+                              "triceps_lateral",
+                              "triceps_medial"
+                    ],
+                    "isComplex": false,
+                    "proof": "Yerde yatarken dirseklerin zemine değmesi kolun fazla geriye gitmesini önler; dipten hız almadan yapılan itiş orta göğsü ve özellikle tricepsin kol kilitleme gücünü vurur."
           },
           "bb_bench_press": {
                     "primary": "Orta Göğüs",
-                    "secondary": "Triceps (Dış ve Alt Kısım), Ön Omuz, Üst Göğüs",
+                    "secondary": "Ön Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş",
                     "subKey": "chest_mid",
-                    "proof": "Düz sehpada iki eli sabit barla birleştirerek ağır itiş yapmak, orta göğse en yüksek ağırlığı yüklerken kolları kilitleyen tricepsi ve ön omzu güçlü çalıştırır.",
+                    "primarySubKeys": [
+                              "chest_mid"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_front",
+                              "triceps_lateral",
+                              "triceps_medial"
+                    ],
                     "allSubKeys": [
                               "chest_mid"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Düz sehpada iki eli sabit barla birleştirerek ağır itiş yapmak, orta göğse en yüksek ağırlığı yüklerken kolları kilitleyen tricepsi ve ön omzu güçlü çalıştırır."
           },
           "bb_incline_bench": {
                     "primary": "Üst Göğüs",
-                    "secondary": "Ön Omuz, Triceps (Dış ve Alt Kısım)",
+                    "secondary": "Orta Göğüs, Ön Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş",
                     "subKey": "chest_upper",
-                    "proof": "Yukarı eğimli sehpada barı üst göğse indirip itmek, göğsün üst kısmını (köprücük kemiği altını) ve ön omuzları ana hedef yapar.",
+                    "primarySubKeys": [
+                              "chest_upper"
+                    ],
+                    "secondarySubKeys": [
+                              "chest_mid",
+                              "shoulders_front",
+                              "triceps_lateral",
+                              "triceps_medial"
+                    ],
                     "allSubKeys": [
                               "chest_upper"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Yukarı eğimli sehpada barı üst göğse indirip itmek, göğsün üst kısmını (köprücük kemiği altını) ve ön omuzları ana hedef yapar."
           },
           "bb_close_grip_bench": {
-                    "primary": "Triceps Dış Kısım, Triceps Alt Kısım",
-                    "secondary": "İç ve Orta Göğüs, Ön Omuz, Triceps İç/Uzun Kısım",
+                    "primary": "Arka Kol Dış Baş, Arka Kol Alt Baş",
+                    "secondary": "Orta Göğüs, Ön Omuz, Arka Kol Uzun Baş",
                     "subKey": "triceps_lateral",
-                    "proof": "Barı dar tutup dirsekleri gövdeye yakın indirip itmek, göğsün yükünü azaltır ve arka kolun dış ile alt kısmına çok yüksek itiş gücü bindirir.",
+                    "primarySubKeys": [
+                              "triceps_lateral",
+                              "triceps_medial"
+                    ],
+                    "secondarySubKeys": [
+                              "chest_mid",
+                              "shoulders_front",
+                              "triceps_long"
+                    ],
                     "allSubKeys": [
                               "triceps_lateral",
                               "triceps_medial"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Barı dar tutup dirsekleri gövdeye yakın indirip itmek, göğsün yükünü azaltır ve arka kolun dış ile alt kısmına çok yüksek itiş gücü bindirir."
           },
           "mach_cable_crossover": {
-                    "primary": "Orta Göğüs, İç Göğüs",
-                    "secondary": "Ön Omuz, Biceps İç Kısım (Dirseği Sabit Tutmak İçin)",
-                    "subKey": "chest_mid",
-                    "proof": "Dirsekleri büküp açmadan kolları önde birbirine kavuşturmak (sarılmak gibi), tricepsi devre dışı bırakır ve doğrudan orta ile iç göğüs liflerini sıkıştırır.",
-                    "allSubKeys": [
-                              "chest_mid"
-                    ]
-          },
-          "mach_pec_deck": {
-                    "primary": "Orta Göğüs, İç Göğüs",
+                    "primary": "Orta Göğüs, Alt Göğüs",
                     "secondary": "Ön Omuz",
                     "subKey": "chest_mid",
-                    "proof": "Makinede oturarak kolları önde birleştirmek, kol kaslarını yormadan sadece orta ve iç göğsü izole şekilde çalıştırır.",
+                    "primarySubKeys": [
+                              "chest_mid",
+                              "chest_lower"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_front"
+                    ],
+                    "allSubKeys": [
+                              "chest_mid",
+                              "chest_lower"
+                    ],
+                    "isComplex": false,
+                    "proof": "Dirsekleri büküp açmadan kolları önde birbirine kavuşturmak (sarılmak gibi), tricepsi devre dışı bırakır ve doğrudan orta ile iç göğüs liflerini sıkıştırır."
+          },
+          "mach_pec_deck": {
+                    "primary": "Orta Göğüs",
+                    "secondary": "Ön Omuz",
+                    "subKey": "chest_mid",
+                    "primarySubKeys": [
+                              "chest_mid"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_front"
+                    ],
                     "allSubKeys": [
                               "chest_mid"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Makinede oturarak kolları önde birleştirmek, kol kaslarını yormadan sadece orta ve iç göğsü izole şekilde çalıştırır."
           },
           "bw_pushup": {
                     "primary": "Orta Göğüs",
-                    "secondary": "Triceps (Dış ve Alt Kısım), Ön Omuz, Yan Göğüs Kaburga Kasları, Ön ve Derin İç Karın (Core)",
+                    "secondary": "Ön Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş, Derin İç Karın",
                     "subKey": "chest_mid",
-                    "proof": "Yerde vücudu düz bir tahta gibi tutarak kendini yukarı itmek orta göğsü ve tricepsi çalıştırırken, belin sarkmasını önlemek için karın (core) kaslarını sürekli sıkar.",
+                    "primarySubKeys": [
+                              "chest_mid"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_front",
+                              "triceps_lateral",
+                              "triceps_medial",
+                              "core_deep"
+                    ],
                     "allSubKeys": [
                               "chest_mid"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Yerde vücudu düz bir tahta gibi tutarak kendini yukarı itmek orta göğsü ve tricepsi çalıştırırken, belin sarkmasını önlemek için karın (core) kaslarını sürekli sıkar."
           },
           "bw_decline_pushup": {
                     "primary": "Üst Göğüs",
-                    "secondary": "Ön Omuz, Triceps (Dış ve Alt Kısım), Ön ve Derin İç Karın (Core)",
+                    "secondary": "Orta Göğüs, Ön Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş, Derin İç Karın",
                     "subKey": "chest_upper",
-                    "proof": "Ayakları sehpaya koyup eller yerde şınav çekmek, vücut açısını yukarı eğimli (incline) prese çevirir ve yükü üst göğüs ile ön omuza bindirir.",
+                    "primarySubKeys": [
+                              "chest_upper"
+                    ],
+                    "secondarySubKeys": [
+                              "chest_mid",
+                              "shoulders_front",
+                              "triceps_lateral",
+                              "triceps_medial",
+                              "core_deep"
+                    ],
                     "allSubKeys": [
                               "chest_upper"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Ayakları sehpaya koyup eller yerde şınav çekmek, vücut açısını yukarı eğimli (incline) prese çevirir ve yükü üst göğüs ile ön omuza bindirir."
           },
           "bw_diamond_pushup": {
-                    "primary": "Triceps Dış Kısım, Triceps Alt Kısım",
-                    "secondary": "İç ve Orta Göğüs, Ön Omuz, Derin İç Karın (Core)",
+                    "primary": "Arka Kol Dış Baş, Arka Kol Alt Baş",
+                    "secondary": "Orta Göğüs, Ön Omuz, Derin İç Karın",
                     "subKey": "triceps_lateral",
-                    "proof": "Eller göğüs altında birbirine yakın (elmas şeklinde) şınav çekildiğinde dirsekler tamamen bükülüp açılır; arka kolu en sert çalıştıran vücut ağırlığı hareketidir.",
+                    "primarySubKeys": [
+                              "triceps_lateral",
+                              "triceps_medial"
+                    ],
+                    "secondarySubKeys": [
+                              "chest_mid",
+                              "shoulders_front",
+                              "core_deep"
+                    ],
                     "allSubKeys": [
                               "triceps_lateral",
                               "triceps_medial"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Eller göğüs altında birbirine yakın (elmas şeklinde) şınav çekildiğinde dirsekler tamamen bükülüp açılır; arka kolu en sert çalıştıran vücut ağırlığı hareketidir."
           },
           "bw_dips": {
-                    "primary": "Alt Göğüs, Triceps (Dış ve Alt Kısım)",
-                    "secondary": "Ön Omuz, Orta Göğüs, Alt Trapez (Omuzları Aşağıda Tutma)",
+                    "primary": "Alt Göğüs, Arka Kol Dış Baş, Arka Kol Alt Baş",
+                    "secondary": "Orta Göğüs, Ön Omuz",
                     "subKey": "chest_lower",
+                    "primarySubKeys": [
+                              "chest_lower",
+                              "triceps_lateral",
+                              "triceps_medial"
+                    ],
+                    "secondarySubKeys": [
+                              "chest_mid",
+                              "shoulders_front"
+                    ],
                     "allSubKeys": [
                               "chest_lower",
                               "triceps_lateral",
                               "triceps_medial"
                     ],
+                    "isComplex": false,
                     "proof": "Gövdeyi hafif öne eğerek paralel barda kendini yukarı itmek, göğsün alt çizgisini (alt göğüs) ve arka kolun dış/alt kısmını çok yoğun çalıştırır."
           },
           "db_renegade_pushup": {
-                    "primary": "Orta Göğüs, Orta Sırt & Kanatlar",
-                    "secondary": "Yan Karın & Derin İç Karın (Core), Triceps, Ön Omuz, Biceps (Çekiş Kısmı)",
+                    "primary": "Orta Göğüs, Kanatlar, Orta Sırt, Yan Karın",
+                    "secondary": "Arka Kol Dış Baş, Arka Kol Alt Baş, Ön Omuz, Pazı Dış Baş, Derin İç Karın",
                     "subKey": "chest_mid",
+                    "primarySubKeys": [
+                              "chest_mid",
+                              "back_lats",
+                              "back_mid",
+                              "core_obliques"
+                    ],
+                    "secondarySubKeys": [
+                              "triceps_lateral",
+                              "triceps_medial",
+                              "shoulders_front",
+                              "biceps_long",
+                              "core_deep"
+                    ],
                     "allSubKeys": [
                               "chest_mid",
+                              "back_lats",
                               "back_mid",
-                              "core_obliques",
-                              "back_lats"
+                              "core_obliques"
                     ],
+                    "isComplex": true,
                     "proof": "Şınav kısmında orta göğüs ve triceps iterken, tek kolla dambılı çektiğin kısımda kanat ve orta sırt çalışır; tek el üstünde dengede kalmak yan karın kaslarını ateşler."
           },
           "db_overhead_press": {
-                    "primary": "Ön Omuz, Yan Omuz",
-                    "secondary": "Triceps (Uzun ve Dış Kısım), Üst Göğüs, Üst Trapez",
+                    "primary": "Ön Omuz",
+                    "secondary": "Yan Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş, Üst Sırt & Trapez",
                     "subKey": "shoulders_front",
-                    "proof": "Sırtı sehpaya yaslayıp oturarak ağırlığı baş üstüne itmek, bacaklardan güç almayı engeller ve doğrudan ön ile yan omuzları çalıştırır.",
+                    "primarySubKeys": [
+                              "shoulders_front"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_side",
+                              "triceps_lateral",
+                              "triceps_medial",
+                              "traps"
+                    ],
                     "allSubKeys": [
-                              "shoulders_front",
-                              "shoulders_side"
-                    ]
+                              "shoulders_front"
+                    ],
+                    "isComplex": false,
+                    "proof": "Sırtı 80-85° dik sehpaya yaslayıp ağırlığı baş üstüne itmek bacaklardan hız almayı keser; ön omuzu ana hedef yaparken yan omuz ve arka kolu yardımcı çalıştırır."
           },
           "db_standing_overhead_press": {
-                    "primary": "Ön Omuz, Yan Omuz",
-                    "secondary": "Triceps, Ön ve Derin İç Karın (Core), Üst Trapez, Ana Kalça Kası (Duruş Kilidi)",
+                    "primary": "Ön Omuz",
+                    "secondary": "Yan Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş, Üst Sırt & Trapez, Derin İç Karın",
                     "subKey": "shoulders_front",
-                    "proof": "Ayakta dambılları baş üstüne iterken ön ve yan omuz ana işi yapar; ağırlık tepedeyken sağa sola sallanmamak için tüm karın (core) ve kalça kasları kilitlenir.",
+                    "primarySubKeys": [
+                              "shoulders_front"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_side",
+                              "triceps_lateral",
+                              "triceps_medial",
+                              "traps",
+                              "core_deep"
+                    ],
                     "allSubKeys": [
-                              "shoulders_front",
-                              "shoulders_side"
-                    ]
+                              "shoulders_front"
+                    ],
+                    "isComplex": false,
+                    "proof": "Ayakta dambılları baş üstüne iterken ön ve yan omuz ana işi yapar; ağırlık tepedeyken sağa sola sallanmamak için tüm karın (core) ve kalça kasları kilitlenir."
           },
           "db_arnold_press": {
                     "primary": "Ön Omuz, Yan Omuz",
-                    "secondary": "Triceps (Dış ve Alt Kısım), Üst Trapez, Arka Omuz (Dengeleyici)",
+                    "secondary": "Arka Kol Dış Baş, Arka Kol Alt Baş, Üst Sırt & Trapez",
                     "subKey": "shoulders_front",
+                    "primarySubKeys": [
+                              "shoulders_front",
+                              "shoulders_side"
+                    ],
+                    "secondarySubKeys": [
+                              "triceps_lateral",
+                              "triceps_medial",
+                              "traps"
+                    ],
                     "allSubKeys": [
                               "shoulders_front",
                               "shoulders_side"
                     ],
+                    "isComplex": false,
                     "proof": "Avuç içleri sana bakarken başlayıp yukarı iterken dışa çevirmek, hareketin başında ön omzu, yukarı çıkarken ise yan omzu kesintisiz çalıştırır."
           },
           "db_lateral_raise": {
                     "primary": "Yan Omuz",
-                    "secondary": "Ön Omuz, Üst Sırt & Boyun Kökü (Üst Trapez), Omuz İç Denge Kasları",
+                    "secondary": "Üst Sırt & Trapez",
                     "subKey": "shoulders_side",
-                    "proof": "Kolları yanlardan omuz hizasına doğru açmak, omuza genişlik veren yan omuz kasını doğrudan ve tek başına hedef alır.",
+                    "primarySubKeys": [
+                              "shoulders_side"
+                    ],
+                    "secondarySubKeys": [
+                              "traps"
+                    ],
                     "allSubKeys": [
                               "shoulders_side"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Kolları yanlardan omuz hizasına doğru açmak, omuza genişlik veren yan omuz kasını doğrudan ve tek başına hedef alır."
           },
           "mach_cable_lateral": {
                     "primary": "Yan Omuz",
-                    "secondary": "Omuz İç Denge Kasları, Ön Omuz, Üst Trapez",
+                    "secondary": "Üst Sırt & Trapez",
                     "subKey": "shoulders_side",
-                    "proof": "Dambılda kol aşağıdayken yük sıfırlanır ama kablo makarası hareketin en alt noktasından en üst noktasına kadar yan omuza sürekli yük bindirir.",
+                    "primarySubKeys": [
+                              "shoulders_side"
+                    ],
+                    "secondarySubKeys": [
+                              "traps"
+                    ],
                     "allSubKeys": [
                               "shoulders_side"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Dambılda kol aşağıdayken yük sıfırlanır ama kablo makarası hareketin en alt noktasından en üst noktasına kadar yan omuza sürekli yük bindirir."
           },
           "mach_face_pull": {
-                    "primary": "Arka Omuz, Omuz İç Denge Kasları",
-                    "secondary": "Orta Sırt & Kürek Kemiği Kasları, Orta ve Alt Trapez, Yan Omuz",
+                    "primary": "Arka Omuz",
+                    "secondary": "Orta Sırt, Üst Sırt & Trapez",
                     "subKey": "shoulders_rear",
-                    "proof": "Halatı yüzüne doğru çekip elleri iki yana açmak, duruşu dikleştiren arka omuzları, kürek kemiği çevresini ve omuz eklemini koruyan iç denge kaslarını doğrudan çalıştırır.",
+                    "primarySubKeys": [
+                              "shoulders_rear"
+                    ],
+                    "secondarySubKeys": [
+                              "back_mid",
+                              "traps"
+                    ],
                     "allSubKeys": [
                               "shoulders_rear"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Halatı yüzüne doğru çekip elleri iki yana açmak, duruşu dikleştiren arka omuzları, kürek kemiği çevresini ve omuz eklemini koruyan iç denge kaslarını doğrudan çalıştırır."
           },
           "kneeling_plate_front_raise": {
                     "primary": "Ön Omuz",
-                    "secondary": "Üst Göğüs, Ön ve Derin İç Karın (Core), Yan Göğüs Kaburga Kasları",
+                    "secondary": "Üst Göğüs, Derin İç Karın",
                     "subKey": "shoulders_front",
-                    "proof": "İki diz üstünde durmak belden hız almayı keser; plakayı önden yüz hizasına kaldırmak doğrudan ön omuz ve üst göğsü çalıştırır.",
+                    "primarySubKeys": [
+                              "shoulders_front"
+                    ],
+                    "secondarySubKeys": [
+                              "chest_upper",
+                              "core_deep"
+                    ],
                     "allSubKeys": [
                               "shoulders_front"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "İki diz üstünde durmak belden hız almayı keser; plakayı önden yüz hizasına kaldırmak doğrudan ön omuz ve üst göğsü çalıştırır."
           },
           "kb_press": {
-                    "primary": "Ön Omuz, Yan Omuz",
-                    "secondary": "Triceps, Omuz İç Denge Kasları, Yan Karın (Tek Kol Denge), Kanat (Başlangıç Desteği)",
+                    "primary": "Ön Omuz",
+                    "secondary": "Yan Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş, Üst Sırt & Trapez, Yan Karın",
                     "subKey": "shoulders_front",
-                    "proof": "Kettlebell'in topuzu elin dış kısmında durduğu için yukarı iterken omuzun iç denge kasları dambıla göre çok daha fazla çalışır; tek kolla yapılması yan karnı da devreye sokar.",
-                    "allSubKeys": [
-                              "shoulders_front",
-                              "shoulders_side"
-                    ]
-          },
-          "bb_overhead_press": {
-                    "primary": "Ön Omuz, Yan Omuz",
-                    "secondary": "Triceps, Üst Göğüs, Üst Trapez, Derin İç Karın & Alt Sırt (Core)",
-                    "subKey": "shoulders_front",
-                    "proof": "Ayakta düz barı baş üstüne ağır şekilde itmek ön ve yan omuzları büyütürken, barı dengede tutmak için karın, alt bel ve üst sırtı taş gibi sıkar.",
-                    "allSubKeys": [
-                              "shoulders_front",
-                              "shoulders_side"
-                    ]
-          },
-          "bb_push_press": {
-                    "primary": "Ön Omuz, Yan Omuz",
-                    "secondary": "Ön Bacak, Triceps, Ana Kalça Kası, Üst Trapez, Üst Kalf",
-                    "subKey": "shoulders_front",
-                    "proof": "Dizleri hafif büküp bacaklardan patlayıcı güç alarak barı baş üstüne fırlatmak, normalden daha ağır kilolarla ön/yan omuz ve tricepsi çalıştırmanı sağlar.",
-                    "allSubKeys": [
-                              "shoulders_front",
-                              "shoulders_side"
-                    ]
-          },
-          "db_push_press": {
-                    "primary": "Ön Omuz, Yan Omuz",
-                    "secondary": "Ön Bacak, Triceps, Ana Kalça Kası, Derin İç Karın (Core)",
-                    "subKey": "shoulders_front",
-                    "proof": "Bacak itişiyle hız kazandırıp dambılları baş üstüne kilitlemek; ön/yan omuz, triceps ve bacak itiş gücünü aynı anda çalıştırır.",
-                    "allSubKeys": [
-                              "shoulders_front",
-                              "shoulders_side"
-                    ]
-          },
-          "kb_halo": {
-                    "primary": "Arka ve Yan Omuz, Omuz İç Denge Kasları",
-                    "secondary": "Orta Sırt & Kürek Kemiği Kasları, Ön Kol & Kavrama Kasları, Derin İç Karın (Core)",
-                    "subKey": "shoulders_rear",
-                    "proof": "Ağırlığı başın etrafında tam tur döndürmek omuz eklemini her açıdan çalıştırır; özellikle arka/yan omuz, omuz iç denge kasları ve kürek kemiği çevresini açar.",
-                    "allSubKeys": [
-                              "shoulders_rear",
-                              "shoulders_side"
-                    ]
-          },
-          "waiters_carry": {
-                    "primary": "Omuz İç Denge Kasları, Ön ve Yan Omuz, Yan Karın & Bel Yanları (Core)",
-                    "secondary": "Triceps (Kol Kilidi), Üst ve Alt Trapez, Derin İç Karın",
-                    "subKey": "core_front",
-                    "allSubKeys": [
-                              "core_front",
-                              "shoulders_front",
+                    "primarySubKeys": [
+                              "shoulders_front"
+                    ],
+                    "secondarySubKeys": [
                               "shoulders_side",
-                              "shoulders_rear",
+                              "triceps_lateral",
+                              "triceps_medial",
+                              "traps",
                               "core_obliques"
                     ],
+                    "allSubKeys": [
+                              "shoulders_front"
+                    ],
+                    "isComplex": false,
+                    "proof": "Kettlebell'in topuzu elin dış kısmında durduğu için yukarı iterken omuzun iç denge kasları dambıla göre çok daha fazla çalışır; tek kolla yapılması yan karnı da devreye sokar."
+          },
+          "bb_overhead_press": {
+                    "primary": "Ön Omuz",
+                    "secondary": "Yan Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş, Üst Sırt & Trapez, Derin İç Karın",
+                    "subKey": "shoulders_front",
+                    "primarySubKeys": [
+                              "shoulders_front"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_side",
+                              "triceps_lateral",
+                              "triceps_medial",
+                              "traps",
+                              "core_deep"
+                    ],
+                    "allSubKeys": [
+                              "shoulders_front"
+                    ],
+                    "isComplex": false,
+                    "proof": "Ayakta düz barı baş üstüne ağır şekilde itmek ön ve yan omuzları büyütürken, barı dengede tutmak için karın, alt bel ve üst sırtı taş gibi sıkar."
+          },
+          "bb_push_press": {
+                    "primary": "Ön Omuz",
+                    "secondary": "Yan Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş, Dış Ön Bacak, Derin İç Karın",
+                    "subKey": "shoulders_front",
+                    "primarySubKeys": [
+                              "shoulders_front"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_side",
+                              "triceps_lateral",
+                              "triceps_medial",
+                              "legs_quad_outer",
+                              "core_deep"
+                    ],
+                    "allSubKeys": [
+                              "shoulders_front"
+                    ],
+                    "isComplex": false,
+                    "proof": "Dizleri hafif büküp bacaklardan patlayıcı güç alarak barı baş üstüne fırlatmak, normalden daha ağır kilolarla ön/yan omuz ve tricepsi çalıştırmanı sağlar."
+          },
+          "db_push_press": {
+                    "primary": "Ön Omuz",
+                    "secondary": "Yan Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş, Dış Ön Bacak, Derin İç Karın",
+                    "subKey": "shoulders_front",
+                    "primarySubKeys": [
+                              "shoulders_front"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_side",
+                              "triceps_lateral",
+                              "triceps_medial",
+                              "legs_quad_outer",
+                              "core_deep"
+                    ],
+                    "allSubKeys": [
+                              "shoulders_front"
+                    ],
+                    "isComplex": false,
+                    "proof": "Bacak itişiyle hız kazandırıp dambılları baş üstüne kilitlemek; ön/yan omuz, triceps ve bacak itiş gücünü aynı anda çalıştırır."
+          },
+          "kb_halo": {
+                    "primary": "Arka Omuz, Yan Omuz",
+                    "secondary": "Üst Sırt & Trapez, Orta Sırt, Derin İç Karın",
+                    "subKey": "shoulders_rear",
+                    "primarySubKeys": [
+                              "shoulders_rear",
+                              "shoulders_side"
+                    ],
+                    "secondarySubKeys": [
+                              "traps",
+                              "back_mid",
+                              "core_deep"
+                    ],
+                    "allSubKeys": [
+                              "shoulders_rear",
+                              "shoulders_side"
+                    ],
+                    "isComplex": false,
+                    "proof": "Ağırlığı başın etrafında tam tur döndürmek omuz eklemini her açıdan çalıştırır; özellikle arka/yan omuz, omuz iç denge kasları ve kürek kemiği çevresini açar."
+          },
+          "waiters_carry": {
+                    "primary": "Yan Karın, Derin İç Karın, Ön Omuz",
+                    "secondary": "Yan Omuz, Üst Sırt & Trapez, Arka Kol Alt Baş",
+                    "subKey": "core_obliques",
+                    "primarySubKeys": [
+                              "core_obliques",
+                              "core_deep",
+                              "shoulders_front"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_side",
+                              "traps",
+                              "triceps_medial"
+                    ],
+                    "allSubKeys": [
+                              "core_obliques",
+                              "core_front",
+                              "shoulders_front",
+                              "core_deep"
+                    ],
+                    "isComplex": false,
                     "proof": "Ağırlığı tek elle garson tepsisi gibi baş üstünde tutarak yürümek, omuz iç denge kaslarını ve gövdenin yana yatmasını önleyen yan karın kaslarını aralıksız çalıştırır."
           },
           "db_saw_row": {
-                    "primary": "Kanatlar (Sırt Genişliği)",
-                    "secondary": "Orta Sırt & Kürek Kemiği Kasları, Arka Omuz, Biceps & Ön Kol",
+                    "primary": "Kanatlar",
+                    "secondary": "Orta Sırt, Arka Omuz, Pazı Dış Baş, Ön Kol & Dış Pazı",
                     "subKey": "back_lats",
-                    "proof": "Dirseği gövdeye yakın tutup dambılı göğse değil arka cebe doğru (testere gibi) çekmek, sırtı üçgenleştiren kanat kaslarını en alt ucuna kadar çalıştırır.",
+                    "primarySubKeys": [
+                              "back_lats"
+                    ],
+                    "secondarySubKeys": [
+                              "back_mid",
+                              "shoulders_rear",
+                              "biceps_long",
+                              "brachialis"
+                    ],
                     "allSubKeys": [
                               "back_lats"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Dirseği gövdeye yakın tutup dambılı göğse değil arka cebe doğru (testere gibi) çekmek, sırtı üçgenleştiren kanat kaslarını en alt ucuna kadar çalıştırır."
           },
           "db_chest_supported_row": {
-                    "primary": "Orta Sırt & Kürek Kemiği Kasları (Sırt Kalınlığı)",
-                    "secondary": "Kanatlar, Arka Omuz, Biceps & Ön Kol",
+                    "primary": "Orta Sırt, Kanatlar",
+                    "secondary": "Arka Omuz, Üst Sırt & Trapez, Pazı Dış Baş, Ön Kol & Dış Pazı",
                     "subKey": "back_mid",
-                    "proof": "Göğsü sehpaya dayamak belden hız almayı tamamen keser; kürek kemiklerini arkada birbirine sıkıştırarak çekmek orta sırt kalınlığını doğrudan vurur.",
-                    "allSubKeys": [
-                              "back_mid"
-                    ]
-          },
-          "db_renegade_row": {
-                    "primary": "Orta Sırt & Kanatlar, Yan Karın & Derin İç Karın (Core)",
-                    "secondary": "Arka Omuz, Biceps & Ön Kol, Orta Göğüs & Triceps (Yerdeki Destek Kolu)",
-                    "subKey": "back_mid",
+                    "primarySubKeys": [
+                              "back_mid",
+                              "back_lats"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_rear",
+                              "traps",
+                              "biceps_long",
+                              "brachialis"
+                    ],
                     "allSubKeys": [
                               "back_mid",
-                              "core_obliques",
-                              "back_lats",
-                              "core_deep",
-                              "core_front"
+                              "back_lats"
                     ],
+                    "isComplex": false,
+                    "proof": "Göğsü sehpaya dayamak belden hız almayı tamamen keser; kürek kemiklerini arkada birbirine sıkıştırarak çekmek orta sırt kalınlığını doğrudan vurur."
+          },
+          "db_renegade_row": {
+                    "primary": "Orta Sırt, Kanatlar, Yan Karın, Derin İç Karın",
+                    "secondary": "Orta Göğüs, Ön Omuz, Arka Kol Alt Baş, Pazı Dış Baş, Ön Kol & Dış Pazı",
+                    "subKey": "back_mid",
+                    "primarySubKeys": [
+                              "back_mid",
+                              "back_lats",
+                              "core_obliques",
+                              "core_deep"
+                    ],
+                    "secondarySubKeys": [
+                              "chest_mid",
+                              "shoulders_front",
+                              "triceps_medial",
+                              "biceps_long",
+                              "brachialis"
+                    ],
+                    "allSubKeys": [
+                              "back_mid",
+                              "back_lats",
+                              "core_obliques",
+                              "core_front",
+                              "core_deep"
+                    ],
+                    "isComplex": false,
                     "proof": "Şınav duruşunda tek kolla yerden dambıl çekerken gövdenin dönmemesi için kendini sıkmak, orta sırt/kanatlarla birlikte yan karın kaslarını çok sert çalıştırır."
           },
           "db_pullover": {
-                    "primary": "Kanatlar (Sırt Genişliği), Yan Göğüs & Kaburga Kasları",
-                    "secondary": "Orta ve Alt Göğüs, Triceps İç/Uzun Kısım",
+                    "primary": "Kanatlar",
+                    "secondary": "Alt Göğüs, Orta Göğüs, Arka Kol Uzun Baş",
                     "subKey": "back_lats",
-                    "proof": "Sırtüstü yatarken kolları başın gerisinden yukarı çekmek, kanat kaslarını boydan boya esnetip çalıştırırken göğüs kafesini ve orta/alt göğsü de devreye sokar.",
+                    "primarySubKeys": [
+                              "back_lats"
+                    ],
+                    "secondarySubKeys": [
+                              "chest_lower",
+                              "chest_mid",
+                              "triceps_long"
+                    ],
                     "allSubKeys": [
                               "back_lats"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Sırtüstü yatarken kolları başın gerisinden yukarı çekmek, kanat kaslarını boydan boya esnetip çalıştırırken göğüs kafesini ve orta/alt göğsü de devreye sokar."
           },
           "mach_lat_pulldown": {
-                    "primary": "Kanatlar (Sırt Genişliği)",
-                    "secondary": "Biceps & Biceps Altı Dış Kol Kası, Orta Sırt & Kürek Kemiği Kasları, Arka Omuz, Ön Kol (Kavrama)",
+                    "primary": "Kanatlar",
+                    "secondary": "Orta Sırt, Arka Omuz, Pazı Dış Baş, Ön Kol & Dış Pazı",
                     "subKey": "back_lats",
-                    "proof": "Yukarıdaki barı göğse doğru çekmek, sırta genişlik (V görünümü) veren kanat kaslarını doğrudan çalıştırır; çekiş sırasında biceps ve ön kollar yardımcı olur.",
+                    "primarySubKeys": [
+                              "back_lats"
+                    ],
+                    "secondarySubKeys": [
+                              "back_mid",
+                              "shoulders_rear",
+                              "biceps_long",
+                              "brachialis"
+                    ],
                     "allSubKeys": [
                               "back_lats"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Yukarıdaki barı göğse doğru çekmek, sırta genişlik (V görünümü) veren kanat kaslarını doğrudan çalıştırır; çekiş sırasında biceps ve ön kollar yardımcı olur."
           },
           "mach_cable_row": {
-                    "primary": "Orta Sırt & Kürek Kemiği Kasları (Sırt Kalınlığı), Kanatlar",
-                    "secondary": "Arka Omuz, Biceps & Ön Kol, Alt Sırt (Dik Oturuşu Koruma)",
+                    "primary": "Orta Sırt, Kanatlar",
+                    "secondary": "Arka Omuz, Pazı Dış Baş, Ön Kol & Dış Pazı",
                     "subKey": "back_mid",
-                    "proof": "Oturarak kabloyu karnına doğru çekerken omuzları geriye alıp kürek kemiklerini birbirine yaklaştırmak, orta sırt kalınlığını ve kanatları birlikte çalıştırır.",
+                    "primarySubKeys": [
+                              "back_mid",
+                              "back_lats"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_rear",
+                              "biceps_long",
+                              "brachialis"
+                    ],
                     "allSubKeys": [
                               "back_mid",
                               "back_lats"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Oturarak kabloyu karnına doğru çekerken omuzları geriye alıp kürek kemiklerini birbirine yaklaştırmak, orta sırt kalınlığını ve kanatları birlikte çalıştırır."
           },
           "bw_pullup": {
-                    "primary": "Kanatlar (Sırt Genişliği)",
-                    "secondary": "Biceps & Ön Kol Üst Kası, Orta Sırt & Kürek Kemiği Kasları, Arka Omuz, Ön ve Derin İç Karın (Core)",
+                    "primary": "Kanatlar",
+                    "secondary": "Orta Sırt, Arka Omuz, Pazı Dış Baş, Ön Kol & Dış Pazı, Ön Karın",
                     "subKey": "back_lats",
-                    "proof": "Avuç içleri karşıya bakacak şekilde geniş tutuşla barfiks çekmek, bicepsin yardımını azaltıp bütün yükü üst ve dış kanat kaslarına bindirir.",
+                    "primarySubKeys": [
+                              "back_lats"
+                    ],
+                    "secondarySubKeys": [
+                              "back_mid",
+                              "shoulders_rear",
+                              "biceps_long",
+                              "brachialis",
+                              "core_front"
+                    ],
                     "allSubKeys": [
                               "back_lats"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Avuç içleri karşıya bakacak şekilde geniş tutuşla barfiks çekmek, bicepsin yardımını azaltıp bütün yükü üst ve dış kanat kaslarına bindirir."
           },
           "bw_chinup": {
-                    "primary": "Kanatlar (Sırt Genişliği), Biceps (İç ve Dış Kısım)",
-                    "secondary": "Ön Kol & Kavrama Kasları, Orta Sırt & Kürek Kemiği Kasları, Arka Omuz, Ön Karın (Core)",
+                    "primary": "Kanatlar, Pazı İç Baş, Pazı Dış Baş",
+                    "secondary": "Orta Sırt, Ön Kol & Dış Pazı, Arka Omuz, Ön Karın",
                     "subKey": "back_lats",
+                    "primarySubKeys": [
+                              "back_lats",
+                              "biceps_short",
+                              "biceps_long"
+                    ],
+                    "secondarySubKeys": [
+                              "back_mid",
+                              "brachialis",
+                              "shoulders_rear",
+                              "core_front"
+                    ],
                     "allSubKeys": [
                               "back_lats",
                               "biceps",
                               "biceps_short",
-                              "brachialis"
+                              "biceps_long"
                     ],
+                    "isComplex": false,
                     "proof": "Avuç içleri sana bakacak şekilde omuz genişliğinde barfiks çekmek, hem kanat kaslarını tam boyda çalıştırır hem de bicepsleri en güçlü açısında kasar."
           },
           "bw_inverted_row": {
-                    "primary": "Orta Sırt & Kürek Kemiği Kasları (Sırt Kalınlığı), Kanatlar",
-                    "secondary": "Arka Omuz, Biceps & Ön Kol, Alt Sırt & Kalça (Vücudu Düz Tutma)",
+                    "primary": "Orta Sırt, Kanatlar",
+                    "secondary": "Arka Omuz, Pazı Dış Baş, Ön Kol & Dış Pazı, Derin İç Karın",
                     "subKey": "back_mid",
-                    "proof": "Alçak barın altına girip göğsü bara çekmek, bele hiç yük bindirmeden kürek kemiklerini birbirine kenetler ve orta sırt ile arka omzu çalıştırır.",
+                    "primarySubKeys": [
+                              "back_mid",
+                              "back_lats"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_rear",
+                              "biceps_long",
+                              "brachialis",
+                              "core_deep"
+                    ],
                     "allSubKeys": [
                               "back_mid",
                               "back_lats"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Alçak barın altına girip göğsü bara çekmek, bele hiç yük bindirmeden kürek kemiklerini birbirine kenetler ve orta sırt ile arka omzu çalıştırır."
           },
           "bb_bent_over_row": {
-                    "primary": "Orta Sırt & Kürek Kemiği Kasları, Kanatlar (Sırt Genişliği)",
-                    "secondary": "Alt Sırt & Bel Kasları, Arka Omuz, Biceps & Ön Kol, Arka Bacak (Duruş Desteği)",
+                    "primary": "Orta Sırt, Kanatlar",
+                    "secondary": "Alt Sırt & Bel, Üst Sırt & Trapez, Arka Omuz, Pazı Dış Baş, Ön Kol & Dış Pazı",
                     "subKey": "back_mid",
-                    "proof": "Kalçadan öne eğilerek ağır barı karna çekmek orta sırt ve kanatları büyütürken, eğik gövdeyi sabit tutmak için alt sırt ve bel kaslarını da güçlü çalıştırır.",
+                    "primarySubKeys": [
+                              "back_mid",
+                              "back_lats"
+                    ],
+                    "secondarySubKeys": [
+                              "back_lower",
+                              "traps",
+                              "shoulders_rear",
+                              "biceps_long",
+                              "brachialis"
+                    ],
                     "allSubKeys": [
                               "back_mid",
                               "back_lats"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Kalçadan öne eğilerek ağır barı karna çekmek orta sırt ve kanatları büyütürken, eğik gövdeyi sabit tutmak için alt sırt ve bel kaslarını da güçlü çalıştırır."
           },
           "bb_pendlay_row": {
-                    "primary": "Orta Sırt & Kürek Kemiği Kasları, Kanatlar, Üst Sırt (Trapez)",
-                    "secondary": "Alt Sırt & Bel Kasları, Arka Omuz, Biceps & Ön Kol, Arka Bacak",
+                    "primary": "Orta Sırt, Kanatlar, Üst Sırt & Trapez",
+                    "secondary": "Alt Sırt & Bel, Arka Omuz, Pazı Dış Baş, Ön Kol & Dış Pazı",
                     "subKey": "back_mid",
-                    "proof": "Gövde yere paralelken her tekrarda yerdeki barı patlayıcı şekilde karnına çekmek, üst/orta sırt ve kanatlarda saf çekiş gücü üretir.",
+                    "primarySubKeys": [
+                              "back_mid",
+                              "back_lats",
+                              "traps"
+                    ],
+                    "secondarySubKeys": [
+                              "back_lower",
+                              "shoulders_rear",
+                              "biceps_long",
+                              "brachialis"
+                    ],
                     "allSubKeys": [
                               "back_mid",
                               "back_lats",
                               "traps"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Gövde yere paralelken her tekrarda yerdeki barı patlayıcı şekilde karnına çekmek, üst/orta sırt ve kanatlarda saf çekiş gücü üretir."
           },
           "kb_gorilla_row": {
-                    "primary": "Kanatlar (Sırt Genişliği), Orta Sırt & Kürek Kemiği Kasları",
-                    "secondary": "Alt Sırt & Bel Kasları, Yan Karın (Core), Biceps & Ön Kol, Kalça & Ön Bacak (Çömelme Duruşu)",
-                    "subKey": "back_mid",
-                    "allSubKeys": [
-                              "back_mid",
-                              "back_lats"
+                    "primary": "Kanatlar, Orta Sırt",
+                    "secondary": "Alt Sırt & Bel, Yan Karın, Arka Omuz, Pazı Dış Baş, Ön Kol & Dış Pazı",
+                    "subKey": "back_lats",
+                    "primarySubKeys": [
+                              "back_lats",
+                              "back_mid"
                     ],
+                    "secondarySubKeys": [
+                              "back_lower",
+                              "core_obliques",
+                              "shoulders_rear",
+                              "biceps_long",
+                              "brachialis"
+                    ],
+                    "allSubKeys": [
+                              "back_lats",
+                              "back_mid"
+                    ],
+                    "isComplex": false,
                     "proof": "Geniş çömelme duruşunda yerdeki iki ağırlığı sırayla çekmek, kanat ve orta sırtı çalıştırırken gövdenin dönmesini önleyen yan karın ve bacakları da aktif tutar."
           },
           "mach_straight_arm_pulldown": {
-                    "primary": "Kanatlar (Özellikle Alt Kanat)",
-                    "secondary": "Triceps İç/Uzun Kısım, Arka Omuz, Ön ve Derin İç Karın (Core)",
+                    "primary": "Kanatlar",
+                    "secondary": "Arka Kol Uzun Baş, Ön Karın",
                     "subKey": "back_lats",
-                    "proof": "Dirsekleri hiç bükmeden düz kollarla barı yukarıdan bacaklarına indirmek, bicepsi tamamen devre dışı bırakır ve sadece kanat kaslarını (özellikle alt kanadı) çalıştırır.",
+                    "primarySubKeys": [
+                              "back_lats"
+                    ],
+                    "secondarySubKeys": [
+                              "triceps_long",
+                              "core_front"
+                    ],
                     "allSubKeys": [
                               "back_lats"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Dirsekleri hiç bükmeden düz kollarla barı yukarıdan bacaklarına indirmek, bicepsi tamamen devre dışı bırakır ve sadece kanat kaslarını (özellikle alt kanadı) çalıştırır."
           },
           "bw_hyperextension": {
-                    "primary": "Alt Sırt & Bel Kasları, Ana Kalça Kası",
-                    "secondary": "Arka Bacak (Üst/Uzun Kısım)",
+                    "primary": "Alt Sırt & Bel, Ana Kalça",
+                    "secondary": "Arka Bacak & Kalça Bağı, Arka Bacak",
                     "subKey": "back_mid",
-                    "allSubKeys": [
-                              "back_mid",
-                              "legs_hamstrings",
-                              "legs_glutes",
+                    "primarySubKeys": [
+                              "back_lower",
                               "legs_glutes_max"
                     ],
+                    "secondarySubKeys": [
+                              "legs_ham_chain",
+                              "legs_ham_hinge"
+                    ],
+                    "allSubKeys": [
+                              "back_mid",
+                              "legs_glutes",
+                              "back_lower",
+                              "legs_glutes_max"
+                    ],
+                    "isComplex": false,
                     "proof": "Sehpada öne eğilip kalça ve bel gücüyle doğrulmak, omurgayı dik tutan alt sırt/bel kaslarını, ana kalça kasını ve arka bacakları doğrudan güçlendirir."
           },
           "db_goblet_squat": {
-                    "primary": "Ön Bacak (Dış, Orta ve Diz Üstü İç Kısım)",
-                    "secondary": "Ana Kalça Kası, Üst Sırt & Bel Kasları (Dik Duruş), Derin İç Karın (Core)",
+                    "primary": "Dış Ön Bacak, İç Ön Bacak",
+                    "secondary": "Orta Ön Bacak, Ana Kalça, Derin İç Karın",
                     "subKey": "legs_quad",
-                    "proof": "Ağırlığı göğüs önünde tutmak sırtı dik tutmayı kolaylaştırır ve derin çömelme sağlar; böylece ön bacağın dış, orta ve diz üstü iç kısmı tam çalışır.",
+                    "primarySubKeys": [
+                              "legs_quad_outer",
+                              "legs_quad_inner"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_quad_mid",
+                              "legs_glutes_max",
+                              "core_deep"
+                    ],
                     "allSubKeys": [
                               "legs_quad",
-                              "legs_quad_inner",
-                              "legs_quad_outer"
-                    ]
+                              "legs_quad_outer",
+                              "legs_quad_inner"
+                    ],
+                    "isComplex": false,
+                    "proof": "Ağırlığı göğüs önünde tutmak sırtı dik tutmayı kolaylaştırır ve derin çömelme sağlar; böylece ön bacağın dış, orta ve diz üstü iç kısmı tam çalışır."
           },
           "db_front_squat": {
-                    "primary": "Ön Bacak (Dış, Orta ve Diz Üstü İç Kısım)",
-                    "secondary": "Ana Kalça Kası, Üst Sırt & Bel Kasları, Derin İç Karın (Core)",
+                    "primary": "Dış Ön Bacak, İç Ön Bacak",
+                    "secondary": "Orta Ön Bacak, Ana Kalça, Orta Sırt, Derin İç Karın",
                     "subKey": "legs_quad",
-                    "proof": "İki dambılı omuz önünde tutarak dik gövdeyle çömelmek, yükü kalçadan çok dizlere ve ön bacak kaslarına odaklar.",
+                    "primarySubKeys": [
+                              "legs_quad_outer",
+                              "legs_quad_inner"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_quad_mid",
+                              "legs_glutes_max",
+                              "back_mid",
+                              "core_deep"
+                    ],
                     "allSubKeys": [
                               "legs_quad",
-                              "legs_quad_inner",
-                              "legs_quad_outer"
-                    ]
+                              "legs_quad_outer",
+                              "legs_quad_inner"
+                    ],
+                    "isComplex": false,
+                    "proof": "İki dambılı omuz önünde tutarak dik gövdeyle çömelmek, yükü kalçadan çok dizlere ve ön bacak kaslarına odaklar."
           },
           "db_bulgarian_squat": {
-                    "primary": "Ön Bacak (Özellikle Diz Üstü İç Kısım ve Dış Kısım), Ana Kalça Kası",
-                    "secondary": "Yan Kalça (Tek Ayak Denge Kası), Arka Bacak, Kalf & Ayak Bileği Denge Kasları",
+                    "primary": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça, Yan Kalça",
+                    "secondary": "Derin Kalça, Orta Ön Bacak",
                     "subKey": "legs_quad",
+                    "primarySubKeys": [
+                              "legs_quad_inner",
+                              "legs_quad_outer",
+                              "legs_glutes_max",
+                              "legs_glutes_med"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_glutes_min",
+                              "legs_quad_mid"
+                    ],
                     "allSubKeys": [
                               "legs_quad",
                               "legs_glutes",
@@ -478,913 +910,1665 @@
                               "legs_glutes_max",
                               "legs_glutes_med"
                     ],
+                    "isComplex": false,
                     "proof": "Arka ayağı sehpaya koyup tek bacakla derin çömelmek, öndeki bacağın diz üstü iç kısmını ve ana kalçayı vururken, devrilmemek için yan kalça denge kasını çok yoğun çalıştırır."
           },
           "db_walking_lunge": {
-                    "primary": "Ön Bacak (Dış ve Diz Üstü İç Kısım), Ana Kalça Kası",
-                    "secondary": "Yan Kalça (Denge Kası), Arka Bacak, Kalf, Ön Kol (Dambıl Tutuşu)",
+                    "primary": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça",
+                    "secondary": "Yan Kalça, Orta Ön Bacak, Üst Baldır",
                     "subKey": "legs_quad",
+                    "primarySubKeys": [
+                              "legs_quad_inner",
+                              "legs_quad_outer",
+                              "legs_glutes_max"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_glutes_med",
+                              "legs_quad_mid",
+                              "calves_gastroc"
+                    ],
                     "allSubKeys": [
                               "legs_quad",
                               "legs_glutes",
                               "legs_quad_inner",
                               "legs_quad_outer",
-                              "legs_glutes_max",
-                              "legs_glutes_med"
+                              "legs_glutes_max"
                     ],
+                    "isComplex": false,
                     "proof": "İleri adım atıp çömelmek ve öndeki bacakla kendini yukarı-ileri çekmek, ön bacak ile ana ve yan kalça kaslarını her adımda güçlü çalıştırır."
           },
           "db_reverse_lunge": {
-                    "primary": "Ön Bacak (Diz Üstü İç ve Dış Kısım), Ana Kalça Kası",
-                    "secondary": "Yan Kalça (Denge Kası), Arka Bacak, Derin İç Karın (Core)",
+                    "primary": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça",
+                    "secondary": "Yan Kalça, Orta Ön Bacak, Derin İç Karın",
                     "subKey": "legs_quad",
+                    "primarySubKeys": [
+                              "legs_quad_inner",
+                              "legs_quad_outer",
+                              "legs_glutes_max"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_glutes_med",
+                              "legs_quad_mid",
+                              "core_deep"
+                    ],
                     "allSubKeys": [
                               "legs_quad",
                               "legs_glutes",
                               "legs_quad_inner",
                               "legs_quad_outer",
-                              "legs_glutes_max",
-                              "legs_glutes_med"
+                              "legs_glutes_max"
                     ],
+                    "isComplex": false,
                     "proof": "Geriye doğru adım atmak dize binen baskıyı azaltır; öndeki bacağın ön kısmını ve ana kalça kasını diz dostu açıda çalıştırır."
           },
           "kb_goblet_squat": {
-                    "primary": "Ön Bacak (Dış, Orta ve Diz Üstü İç Kısım)",
-                    "secondary": "Ana Kalça Kası, İç Bacak Kasları, Üst Sırt & Derin İç Karın (Core)",
+                    "primary": "Dış Ön Bacak, İç Ön Bacak",
+                    "secondary": "Orta Ön Bacak, Ana Kalça, Derin İç Karın",
                     "subKey": "legs_quad",
-                    "proof": "Kettlebell'i göğüs önünde tutarak en dibe kadar çömelmek, ön bacak kaslarını, ana kalçayı ve kasık/iç bacak kaslarını tam açıda çalıştırır.",
+                    "primarySubKeys": [
+                              "legs_quad_outer",
+                              "legs_quad_inner"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_quad_mid",
+                              "legs_glutes_max",
+                              "core_deep"
+                    ],
                     "allSubKeys": [
                               "legs_quad",
-                              "legs_quad_inner",
-                              "legs_quad_outer"
-                    ]
+                              "legs_quad_outer",
+                              "legs_quad_inner"
+                    ],
+                    "isComplex": false,
+                    "proof": "Kettlebell'i göğüs önünde tutarak en dibe kadar çömelmek, ön bacak kaslarını, ana kalçayı ve kasık/iç bacak kaslarını tam açıda çalıştırır."
           },
           "bb_back_squat": {
-                    "primary": "Ön Bacak (Dış, Orta ve İç Kısım Tamamı), Ana Kalça Kası",
-                    "secondary": "İç Bacak Kasları, Alt Sırt & Bel Kasları, Derin İç Karın (Core), Arka Bacak",
+                    "primary": "Dış Ön Bacak, İç Ön Bacak, Ana Kalça",
+                    "secondary": "Orta Ön Bacak, Alt Sırt & Bel, Derin İç Karın",
                     "subKey": "legs_quad",
-                    "proof": "Sırtta ağır barla çömelip kalkmak, tüm ön bacak kaslarını, ana kalçayı ve dip noktadan çıkarken iç bacak kaslarını en yüksek ağırlıkla çalıştırır.",
+                    "primarySubKeys": [
+                              "legs_quad_outer",
+                              "legs_quad_inner",
+                              "legs_glutes_max"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_quad_mid",
+                              "back_lower",
+                              "core_deep"
+                    ],
                     "allSubKeys": [
                               "legs_quad",
-                              "legs_quad_outer",
                               "legs_glutes",
+                              "legs_quad_outer",
+                              "legs_quad_inner",
                               "legs_glutes_max"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Sırtta ağır barla çömelip kalkmak, tüm ön bacak kaslarını, ana kalçayı ve dip noktadan çıkarken iç bacak kaslarını en yüksek ağırlıkla çalıştırır."
           },
           "bb_front_squat": {
-                    "primary": "Ön Bacak (Dış, Orta ve Diz Üstü İç Kısım)",
-                    "secondary": "Ana Kalça Kası, Üst ve Orta Sırt (Gövdeyi Dik Tutma), Derin İç Karın (Core)",
+                    "primary": "Dış Ön Bacak, İç Ön Bacak",
+                    "secondary": "Orta Ön Bacak, Ana Kalça, Orta Sırt, Derin İç Karın",
                     "subKey": "legs_quad",
-                    "proof": "Barı ön omuzda taşımak gövdeyi dimdik tutmaya zorlar; bu da ön bacak kaslarını ve sırtın üst/orta kısmını normal squat'tan daha fazla çalıştırır.",
+                    "primarySubKeys": [
+                              "legs_quad_outer",
+                              "legs_quad_inner"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_quad_mid",
+                              "legs_glutes_max",
+                              "back_mid",
+                              "core_deep"
+                    ],
                     "allSubKeys": [
                               "legs_quad",
-                              "legs_quad_inner",
-                              "legs_quad_outer"
-                    ]
+                              "legs_quad_outer",
+                              "legs_quad_inner"
+                    ],
+                    "isComplex": false,
+                    "proof": "Barı ön omuzda taşımak gövdeyi dimdik tutmaya zorlar; bu da ön bacak kaslarını ve sırtın üst/orta kısmını normal squat'tan daha fazla çalıştırır."
           },
           "bb_zercher_squat": {
-                    "primary": "Ön Bacak, Ana Kalça Kası, Üst Sırt & Derin İç Karın (Core)",
-                    "secondary": "Biceps & Ön Kol (Barı Kucaklama), İç Bacak Kasları",
+                    "primary": "Dış Ön Bacak, İç Ön Bacak, Ana Kalça",
+                    "secondary": "Orta Sırt, Üst Sırt & Trapez, Derin İç Karın, Pazı İç Baş, Ön Kol & Dış Pazı",
                     "subKey": "legs_quad",
-                    "proof": "Barı dirseklerin iç kısmında kucaklayarak çömelmek; ön bacak ve kalçanın yanı sıra gövdeyi öne yıkılmaktan koruyan üst sırt, karın (core) ve bicepsleri çok sert çalıştırır.",
+                    "primarySubKeys": [
+                              "legs_quad_outer",
+                              "legs_quad_inner",
+                              "legs_glutes_max"
+                    ],
+                    "secondarySubKeys": [
+                              "back_mid",
+                              "traps",
+                              "core_deep",
+                              "biceps_short",
+                              "brachialis"
+                    ],
                     "allSubKeys": [
                               "legs_quad",
-                              "traps",
-                              "back_mid",
-                              "core_deep",
-                              "core_front",
-                              "legs_quad_outer",
                               "legs_glutes",
+                              "legs_quad_outer",
+                              "legs_quad_inner",
                               "legs_glutes_max"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Barı dirseklerin iç kısmında kucaklayarak çömelmek; ön bacak ve kalçanın yanı sıra gövdeyi öne yıkılmaktan koruyan üst sırt, karın (core) ve bicepsleri çok sert çalıştırır."
           },
           "mach_leg_press": {
-                    "primary": "Ön Bacak (Dış, Orta ve Diz Üstü İç Kısım)",
-                    "secondary": "Ana Kalça Kası, İç Bacak Kasları",
+                    "primary": "Dış Ön Bacak, İç Ön Bacak",
+                    "secondary": "Orta Ön Bacak, Ana Kalça",
                     "subKey": "legs_quad",
-                    "proof": "Sırt ve bel koltukta sabitken bacaklarla ağır platformu itmek, beli hiç yormadan tüm yükü ön bacak ve kalça kaslarına verir.",
+                    "primarySubKeys": [
+                              "legs_quad_outer",
+                              "legs_quad_inner"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_quad_mid",
+                              "legs_glutes_max"
+                    ],
                     "allSubKeys": [
                               "legs_quad",
-                              "legs_quad_inner",
-                              "legs_quad_outer"
-                    ]
+                              "legs_quad_outer",
+                              "legs_quad_inner"
+                    ],
+                    "isComplex": false,
+                    "proof": "Sırt ve bel koltukta sabitken bacaklarla ağır platformu itmek, beli hiç yormadan tüm yükü ön bacak ve kalça kaslarına verir."
           },
           "mach_leg_extension": {
-                    "primary": "Ön Bacak Orta Kısım, Ön Bacak Diz Üstü İç Kısım, Ön Bacak Dış Kısım",
-                    "secondary": "Ön Kaval Kemiği Kası (Ayak Bileğini Sabit Tutma)",
+                    "primary": "Orta Ön Bacak, Dış Ön Bacak, İç Ön Bacak",
+                    "secondary": "",
                     "subKey": "legs_quad",
-                    "proof": "Oturarak sadece dizleri düzleştirmek, başka hiçbir kası karıştırmadan ön bacağın orta, dış ve diz üstü iç kısmını tek başına izole eder.",
+                    "primarySubKeys": [
+                              "legs_quad_mid",
+                              "legs_quad_outer",
+                              "legs_quad_inner"
+                    ],
+                    "secondarySubKeys": [],
                     "allSubKeys": [
                               "legs_quad",
                               "legs_quad_mid",
-                              "legs_quad_inner",
-                              "legs_quad_outer"
-                    ]
+                              "legs_quad_outer",
+                              "legs_quad_inner"
+                    ],
+                    "isComplex": false,
+                    "proof": "Oturarak sadece dizleri düzleştirmek, başka hiçbir kası karıştırmadan ön bacağın orta, dış ve diz üstü iç kısmını tek başına izole eder."
           },
           "bw_air_squat": {
-                    "primary": "Ön Bacak (Dış ve İç Kısım), Ana Kalça Kası",
-                    "secondary": "İç Bacak Kasları, Alt Sırt & Karın (Core)",
+                    "primary": "Dış Ön Bacak, İç Ön Bacak",
+                    "secondary": "Ana Kalça, Derin İç Karın",
                     "subKey": "legs_quad",
-                    "proof": "Kendi vücut ağırlığınla tam çömelip kalkmak, ön bacak ve kalça kaslarını doğal hareket açıklığında çalıştırır.",
+                    "primarySubKeys": [
+                              "legs_quad_outer",
+                              "legs_quad_inner"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_glutes_max",
+                              "core_deep"
+                    ],
                     "allSubKeys": [
                               "legs_quad",
                               "legs_quad_outer",
-                              "legs_glutes",
-                              "legs_glutes_max"
-                    ]
+                              "legs_quad_inner"
+                    ],
+                    "isComplex": false,
+                    "proof": "Kendi vücut ağırlığınla tam çömelip kalkmak, ön bacak ve kalça kaslarını doğal hareket açıklığında çalıştırır."
           },
           "bw_jump_squat": {
-                    "primary": "Ön Bacak, Ana Kalça Kası, Üst Kalf (Baldır)",
-                    "secondary": "Arka Bacak, Alt Kalf, Derin İç Karın (Yere İniş Dengesi)",
+                    "primary": "Dış Ön Bacak, Orta Ön Bacak, Ana Kalça, Üst Baldır",
+                    "secondary": "İç Ön Bacak, Alt Baldır, Derin İç Karın",
                     "subKey": "legs_quad",
-                    "proof": "Çömelip yukarı doğru patlayıcı sıçramak; ön bacak, ana kalça ve parmak ucundan itiş yapan kalf (baldır) kaslarının patlayıcı liflerini ateşler.",
+                    "primarySubKeys": [
+                              "legs_quad_outer",
+                              "legs_quad_mid",
+                              "legs_glutes_max",
+                              "calves_gastroc"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_quad_inner",
+                              "calves_soleus",
+                              "core_deep"
+                    ],
                     "allSubKeys": [
                               "legs_quad",
-                              "legs_quad_outer",
                               "legs_glutes",
+                              "legs_calves",
+                              "legs_quad_outer",
+                              "legs_quad_mid",
                               "legs_glutes_max",
-                              "legs_calves"
-                    ]
+                              "calves_gastroc"
+                    ],
+                    "isComplex": false,
+                    "proof": "Çömelip yukarı doğru patlayıcı sıçramak; ön bacak, ana kalça ve parmak ucundan itiş yapan kalf (baldır) kaslarının patlayıcı liflerini ateşler."
           },
           "lunge_with_twist": {
-                    "primary": "Ön Bacak, Ana Kalça Kası, Yan Karın (Bel Yanları)",
-                    "secondary": "Yan Kalça (Denge Kası), Arka Bacak",
+                    "primary": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça, Yan Karın",
+                    "secondary": "Yan Kalça, Orta Ön Bacak, Derin İç Karın",
                     "subKey": "legs_quad",
+                    "primarySubKeys": [
+                              "legs_quad_inner",
+                              "legs_quad_outer",
+                              "legs_glutes_max",
+                              "core_obliques"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_glutes_med",
+                              "legs_quad_mid",
+                              "core_deep"
+                    ],
                     "allSubKeys": [
                               "legs_quad",
+                              "legs_glutes",
                               "core_obliques",
                               "legs_quad_inner",
-                              "legs_glutes",
-                              "legs_glutes_max",
-                              "legs_glutes_med"
+                              "legs_quad_outer",
+                              "legs_glutes_max"
                     ],
+                    "isComplex": false,
                     "proof": "Öne adım atıp çömelirken gövdeyi öndeki bacak yönüne çevirmek; alt vücutta ön bacak ve kalçayı, üst vücutta ise yan karın kaslarını çalıştırır."
           },
           "step_up_press": {
-                    "primary": "Ön Bacak, Ana ve Yan Kalça, Ön Omuz",
-                    "secondary": "Yan Omuz, Triceps, Derin İç Karın & Kalf (Tek Ayak Denge)",
+                    "primary": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça, Ön Omuz",
+                    "secondary": "Yan Kalça, Yan Omuz, Arka Kol Alt Baş, Yan Karın",
                     "subKey": "legs_quad",
+                    "primarySubKeys": [
+                              "legs_quad_inner",
+                              "legs_quad_outer",
+                              "legs_glutes_max",
+                              "shoulders_front"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_glutes_med",
+                              "shoulders_side",
+                              "triceps_medial",
+                              "core_obliques"
+                    ],
                     "allSubKeys": [
                               "legs_quad",
+                              "legs_glutes",
                               "shoulders_front",
                               "legs_quad_inner",
-                              "legs_glutes",
-                              "legs_glutes_med"
+                              "legs_quad_outer",
+                              "legs_glutes_max"
                     ],
-                    "isLowerUpperComplex": true,
+                    "isComplex": false,
                     "proof": "Yüksek kutuya tek ayakla çıkarken ön bacak ve ana/yan kalça tüm vücudu yukarı kaldırır; tepede ağırlığı baş üstüne itmek ön ve yan omzu çalıştırır."
           },
           "db_rdl": {
-                    "primary": "Arka Bacak (Kalçadan Eğilen Üst/Uzun Kısım), Ana Kalça Kası",
-                    "secondary": "Alt Sırt & Bel Kasları, Ön Kol (Kavrama), Kanatlar & Orta Sırt (Dambılları Bacağa Yakın Tutma)",
+                    "primary": "Arka Bacak, Arka Bacak & Kalça Bağı, Ana Kalça",
+                    "secondary": "Alt Sırt & Bel, Ön Kol & Dış Pazı",
                     "subKey": "legs_hamstrings",
-                    "proof": "Dizleri çok az kırıp kalçayı geriye iterek öne eğilmek, arka bacağın üst/uzun kısmını sonuna kadar esnetir ve doğrulurken ana kalça kasıyla birlikte kasar.",
+                    "primarySubKeys": [
+                              "legs_ham_hinge",
+                              "legs_ham_chain",
+                              "legs_glutes_max"
+                    ],
+                    "secondarySubKeys": [
+                              "back_lower",
+                              "brachialis"
+                    ],
                     "allSubKeys": [
                               "legs_hamstrings",
-                              "legs_ham_hinge",
                               "legs_glutes",
+                              "legs_ham_hinge",
+                              "legs_ham_chain",
                               "legs_glutes_max"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Dizleri çok az kırıp kalçayı geriye iterek öne eğilmek, arka bacağın üst/uzun kısmını sonuna kadar esnetir ve doğrulurken ana kalça kasıyla birlikte kasar."
           },
           "db_single_leg_rdl": {
-                    "primary": "Arka Bacak, Yan Kalça (Tek Ayak Denge Kası), Ana Kalça Kası",
-                    "secondary": "Alt Sırt & Bel Kasları, Yan Karın (Core), Ayak Bileği Denge Kasları",
+                    "primary": "Arka Bacak, Ana Kalça, Yan Kalça, Derin Kalça",
+                    "secondary": "Arka Bacak & Kalça Bağı, Alt Sırt & Bel, Yan Karın, Ön Kaval & Bilek",
                     "subKey": "legs_hamstrings",
-                    "proof": "Tek ayak üzerinde öne eğilip kalkmak arka bacak ve ana kalçayı çalıştırırken, kalçanın yana devrilmesini önlemek için yan kalça ve ayak bileği denge kaslarını yoğun çalıştırır.",
+                    "primarySubKeys": [
+                              "legs_ham_hinge",
+                              "legs_glutes_max",
+                              "legs_glutes_med",
+                              "legs_glutes_min"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_ham_chain",
+                              "back_lower",
+                              "core_obliques",
+                              "calves_tibialis"
+                    ],
                     "allSubKeys": [
                               "legs_hamstrings",
-                              "legs_ham_hinge",
                               "legs_glutes",
+                              "legs_ham_hinge",
                               "legs_glutes_max",
-                              "legs_glutes_med"
-                    ]
+                              "legs_glutes_med",
+                              "legs_glutes_min"
+                    ],
+                    "isComplex": false,
+                    "proof": "Tek ayak üzerinde öne eğilip kalkmak arka bacak ve ana kalçayı çalıştırırken, kalçanın yana devrilmesini önlemek için yan kalça ve ayak bileği denge kaslarını yoğun çalıştırır."
           },
           "bb_rdl": {
-                    "primary": "Arka Bacak (Üst/Uzun Kısım), Ana Kalça Kası",
-                    "secondary": "Alt Sırt & Bel Kasları, Üst Sırt & Kanatlar (Barı Gövdeye Yakın Sabitleme), Ön Kol (Kavrama)",
+                    "primary": "Arka Bacak, Arka Bacak & Kalça Bağı, Ana Kalça",
+                    "secondary": "Alt Sırt & Bel, Üst Sırt & Trapez, Ön Kol & Dış Pazı",
                     "subKey": "legs_hamstrings",
-                    "proof": "Ağır barı bacaklara sürterek kalçayı geriye itmek, arka bacak kaslarının tamamında ve ana kalça kasında en yüksek gerilimi üretir.",
+                    "primarySubKeys": [
+                              "legs_ham_hinge",
+                              "legs_ham_chain",
+                              "legs_glutes_max"
+                    ],
+                    "secondarySubKeys": [
+                              "back_lower",
+                              "traps",
+                              "brachialis"
+                    ],
                     "allSubKeys": [
                               "legs_hamstrings",
-                              "legs_ham_hinge",
                               "legs_glutes",
+                              "legs_ham_hinge",
+                              "legs_ham_chain",
                               "legs_glutes_max"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Ağır barı bacaklara sürterek kalçayı geriye itmek, arka bacak kaslarının tamamında ve ana kalça kasında en yüksek gerilimi üretir."
           },
           "mach_leg_curl": {
-                    "primary": "Arka Bacak (Diz Büken Alt ve Üst Kısım Tamamı)",
-                    "secondary": "Üst Kalf (Diz Bükme Yardımcı Kası)",
+                    "primary": "Diz Büken Arka Bacak",
+                    "secondary": "Arka Bacak, Üst Baldır",
                     "subKey": "legs_hamstrings",
-                    "proof": "Makinede sadece dizleri bükmek, eğilme hareketlerinde (RDL) tam çalışmayan arka bacağın diz üstü alt kısmını da doğrudan ve izole çalıştırır.",
+                    "primarySubKeys": [
+                              "legs_ham_curl"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_ham_hinge",
+                              "calves_gastroc"
+                    ],
                     "allSubKeys": [
                               "legs_hamstrings",
                               "legs_ham_curl"
-                    ]
+                    ],
+                    "isComplex": false,
+                    "proof": "Makinede sadece dizleri bükmek, eğilme hareketlerinde (RDL) tam çalışmayan arka bacağın diz üstü alt kısmını da doğrudan ve izole çalıştırır."
           },
           "bb_deadlift": {
-                    "primary": "Ana Kalça Kası, Arka Bacak, Alt Sırt & Bel Kasları",
-                    "secondary": "Ön Bacak (Yerden İlk Kalkış), Üst Sırt (Trapez) & Kanatlar, Ön Kol (Kavrama), Derin İç Karın (Core)",
-                    "subKey": "legs_hamstrings",
-                    "proof": "Yerdeki ağır barı ayağa kalkarak kaldırmak; yerden keserken ön bacağı, doğrulurken arka bacak ve ana kalçayı, omurgayı düz tutarken de alt/üst tüm sırtı çalıştırır.",
-                    "allSubKeys": [
-                              "legs_hamstrings",
-                              "back_mid",
+                    "primary": "Ana Kalça, Arka Bacak, Arka Bacak & Kalça Bağı, Alt Sırt & Bel",
+                    "secondary": "Dış Ön Bacak, Üst Sırt & Trapez, Orta Sırt, Ön Kol & Dış Pazı, Derin İç Karın",
+                    "subKey": "legs_glutes",
+                    "primarySubKeys": [
+                              "legs_glutes_max",
                               "legs_ham_hinge",
-                              "legs_glutes",
-                              "legs_glutes_max"
-                    ]
-          },
-          "bb_hip_thrust": {
-                    "primary": "Ana Kalça Kası (Kalça Hacim & İtiş Kası)",
-                    "secondary": "Yan Kalça, Arka Bacak, Ön Bacak & Ön Karın (Denge)",
-                    "subKey": "legs_glutes",
-                    "proof": "Sırt sehpada ve dizler bükülüyken barı kalçayla yukarı itmek, arka bacağın yük çalmasını engeller ve bütün gücü doğrudan ana kalça kasına verir.",
-                    "allSubKeys": [
-                              "legs_glutes",
-                              "legs_glutes_max"
-                    ]
-          },
-          "bw_glute_bridge": {
-                    "primary": "Ana Kalça Kası",
-                    "secondary": "Arka Bacak, Alt Sırt & Derin İç Karın (Core)",
-                    "subKey": "legs_glutes",
-                    "proof": "Sırtüstü yatarken dizler bükülü şekilde kalçayı yukarı kaldırıp sıkmak, bele yük bindirmeden doğrudan ana kalça kasını çalıştırır.",
-                    "allSubKeys": [
-                              "legs_glutes",
-                              "legs_glutes_max"
-                    ]
-          },
-          "mach_calf_raise": {
-                    "primary": "Üst Kalf (Görünür Baldır Kası), Alt Kalf (Derin Baldır Kası)",
-                    "secondary": "Ayak Bileği Denge Kasları",
-                    "subKey": "legs_calves",
-                    "proof": "Dizler düzken parmak ucunda yükselmek, baldırın hem dışarıdan görünen üst kısmını hem de altındaki derin baldır kasını tam boyda çalıştırır.",
-                    "allSubKeys": [
-                              "legs_calves"
-                    ]
-          },
-          "db_standing_calf_raise": {
-                    "primary": "Üst Kalf (Görünür Baldır Kası), Alt Kalf (Derin Baldır Kası)",
-                    "secondary": "Ayak Tabanı & Bilek Denge Kasları, Ön Kol (Dambıl Tutuşu)",
-                    "subKey": "legs_calves",
-                    "proof": "Elde dambılla ayakta parmak ucuna yükselip tepe noktada sıkıştırmak, üst ve alt kalf kaslarını doğrudan çalıştırır.",
-                    "allSubKeys": [
-                              "legs_calves"
-                    ]
-          },
-          "db_lying_leg_curl": {
-                    "primary": "Arka Bacak (Diz Büken Alt ve Üst Kısım)",
-                    "secondary": "Üst Kalf, İç Bacak, Ana Kalça Kası (Kalçayı Yere Bastırma)",
-                    "subKey": "legs_hamstrings",
-                    "proof": "Yüzüstü yatarken iki ayak arasındaki dambılı kalçaya doğru bükmek, arka bacağın diz büken alt/dış kısmını ve iç kısmını doğrudan çalıştırır.",
-                    "allSubKeys": [
-                              "legs_hamstrings",
-                              "legs_ham_curl"
-                    ]
-          },
-          "bw_sissy_squat": {
-                    "primary": "Ön Bacak Orta Kısım, Ön Bacak Diz Üstü İç Kısım",
-                    "secondary": "Ön ve Derin İç Karın (Core), Kalf (Parmak Ucu Denge)",
-                    "subKey": "legs_quad",
-                    "proof": "Kalçayı hiç kırmadan dizleri öne verip gövdeyi geriye yatırmak, ön bacağın kalçaya kadar uzanan tam orta kasını maksimum gererek çalıştırır.",
-                    "allSubKeys": [
-                              "legs_quad",
-                              "legs_quad_mid",
-                              "legs_quad_inner",
-                              "legs_quad_outer"
-                    ]
-          },
-          "db_triceps_overhead": {
-                    "primary": "Triceps İç / Uzun Kısım (Arka Kolun En Büyük Kısmı)",
-                    "secondary": "Triceps Dış ve Alt Kısım, Derin İç Karın (Beli Sabit Tutma)",
-                    "subKey": "triceps_long",
-                    "proof": "Arka kolun en büyük parçası olan iç/uzun kısım omuzdan başladığı için, ancak kol başın üstüne kaldırıldığında tam gerilir ve maksimum çalışır.",
-                    "allSubKeys": [
-                              "triceps_long"
-                    ]
-          },
-          "db_skullcrusher": {
-                    "primary": "Triceps İç / Uzun Kısım, Triceps Dış Kısım",
-                    "secondary": "Triceps Alt Kısım, Ön Kol Bilek Sabitleyicileri",
-                    "subKey": "triceps_long",
-                    "proof": "Sırtüstü yatarken dambılları alnına/baş gerisine indirip kaldırmak, arka kolun hem uzun iç kısmını hem de dış kısmını aynı anda yoğun çalıştırır.",
-                    "allSubKeys": [
-                              "triceps_long",
-                              "triceps_lateral"
-                    ]
-          },
-          "mach_triceps_pushdown": {
-                    "primary": "Triceps Dış Kısım, Triceps Alt Kısım",
-                    "secondary": "Triceps İç / Uzun Kısım, Ön Kol Kavrama Kasları",
-                    "subKey": "triceps_lateral",
-                    "proof": "Dirsekleri bel yanında sabit tutup halatı aşağı itmek ve en altta iki yana açmak, arka kolun dış (at nalı) kısmını ve alt kısmını tam sıkıştırır.",
-                    "allSubKeys": [
-                              "triceps_lateral",
-                              "triceps_medial"
-                    ]
-          },
-          "db_biceps_curl": {
-                    "primary": "Ön Kol (Pazı)",
-                    "secondary": "Bilek & El Tutuşu",
-                    "subKey": "biceps"
-          },
-          "db_hammer_curl": {
-                    "primary": "Biceps Altı Dış Kol Kası (Kol Kalınlaştırıcı), Ön Kol Üst Kası, Biceps Dış Kısım",
-                    "secondary": "Biceps İç Kısım, Bilek ve El Tutuş Kasları",
-                    "subKey": "biceps",
-                    "proof": "Avuç içleri birbirine bakacak şekilde (çekiç tutuşu) kaldırmak, yükü bicepsin altındaki kol kalınlaştırıcı kasa ve ön kolun üst kısmına kaydırır.",
-                    "allSubKeys": [
-                              "biceps",
-                              "biceps_long",
-                              "brachialis"
-                    ]
-          },
-          "db_incline_curl": {
-                    "primary": "Biceps Dış Kısım (Pazı Tepesi / Uzun Baş)",
-                    "secondary": "Biceps İç Kısım, Biceps Altı Dış Kol Kası, Ön Kol",
-                    "subKey": "biceps",
-                    "proof": "Eğimli sehpada otururken kolların gövdenin gerisinde kalması, pazının dış/tepe kısmını (uzun baş) hareketin en başında maksimum gerer ve tepe görünümünü büyütür.",
-                    "allSubKeys": [
-                              "biceps",
-                              "biceps_long",
-                              "biceps_short"
-                    ]
-          },
-          "bb_biceps_curl": {
-                    "primary": "Biceps İç Kısım (Dolgunluk), Biceps Dış Kısım (Tepe)",
-                    "secondary": "Biceps Altı Dış Kol Kası, Ön Kol & Bilek Kavrama Kasları",
-                    "subKey": "biceps",
-                    "proof": "Düz barla avuç içleri tam yukarı bakarak iki elle ağır kaldırmak, özellikle kolun ön/iç dolgunluğunu veren biceps iç ve dış kısmına en yüksek yükü bindirir.",
-                    "allSubKeys": [
-                              "biceps",
-                              "biceps_long",
-                              "biceps_short"
-                    ]
-          },
-          "mach_cable_biceps": {
-                    "primary": "Biceps İç Kısım, Biceps Dış Kısım",
-                    "secondary": "Biceps Altı Dış Kol Kası, Ön Kol & Bilek Kasları",
-                    "subKey": "biceps",
-                    "proof": "Kablo makarası hareketin en altında da en üstünde de yükü hiç boşaltmadığı için bicepsin iç ve dış kısmında kesintisiz yanma ve gerilim sağlar.",
-                    "allSubKeys": [
-                              "biceps",
-                              "biceps_long",
-                              "biceps_short"
-                    ]
-          },
-          "db_suitcase_carry": {
-                    "primary": "Yan Karın & Bel Yanları (Simit Bölgesi)",
-                    "secondary": "Yan Kalça (Yürürken Kalça Dengesi), Ön Kol & Bilek (Kavrama), Üst Trapez & Omuz",
-                    "subKey": "core_obliques",
-                    "proof": "Sadece tek elde ağır dambıl taşırken vücudun o tarafa yatmasını engellemek, ağırlığın tam tersi taraftaki yan karın ve bel yanı kaslarını çok güçlü çalıştırır.",
-                    "allSubKeys": [
-                              "core_obliques"
-                    ]
-          },
-          "db_farmers_walk": {
-                    "primary": "Derin İç Karın & Yan Karın (Core), Ön Kol & Bilek (Kavrama Gücü), Üst Sırt (Üst Trapez)",
-                    "secondary": "Yan Kalça (Yürüyüş Dengesi), Alt Sırt & Bel Kasları, Kalf (Baldır)",
-                    "subKey": "core_front",
-                    "proof": "İki elde ağır yükle dik yürümek; karnı içe tutan derin korse kasını, yan karınları, omuzları taşıyan üst trapezi ve el/bilek kavrama kaslarını aynı anda çalıştırır.",
-                    "allSubKeys": [
-                              "core_front",
+                              "legs_ham_chain",
+                              "back_lower"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_quad_outer",
                               "traps",
                               "back_mid",
                               "brachialis",
-                              "biceps",
-                              "core_obliques",
                               "core_deep"
-                    ]
-          },
-          "db_russian_twist": {
-                    "primary": "Yan Karın (Bel Yanları / Dönüş Kasları)",
-                    "secondary": "Ön Karın (Üst ve Alt Karın - Gövdeyi Tutma), Derin İç Karın, Ön Kalça Kası",
-                    "subKey": "core_obliques",
-                    "proof": "Yerde gövde hafif geriye yatıkken ağırlığı sağa sola döndürmek, belin yanlarındaki dönüş kaslarını (yan karın) doğrudan çalıştırır.",
+                    ],
                     "allSubKeys": [
-                              "core_obliques"
-                    ]
-          },
-          "mach_cable_woodchopper": {
-                    "primary": "Yan Karın (Bel Yanları / Dönüş Kasları), Derin İç Karın (Core)",
-                    "secondary": "Ön ve Yan Omuz, Yan Kalça (Gövde Dönüş Desteği), Yan Göğüs Kasları",
-                    "subKey": "core_obliques",
-                    "proof": "Kabloyu odun keser gibi çapraz çekip gövdeyi döndürmek, sağ ve sol yan karın kaslarını ile derin iç karın kasını güçlü şekilde çalıştırır.",
-                    "allSubKeys": [
-                              "core_obliques",
-                              "core_deep",
-                              "core_front"
-                    ]
-          },
-          "half_kneeling_plate_chop": {
-                    "primary": "Yan Karın (Bel Yanları), Derin İç Karın (Core)",
-                    "secondary": "Yan ve Ana Kalça (Kalçayı Sabit Tutma), Ön Omuz",
-                    "subKey": "core_obliques",
-                    "proof": "Tek diz yerde durmak bacaklardan hız almayı engeller; plakayı çapraz savurup durdurmak sadece yan karın ve derin kor kaslarının gücüyle yapılır.",
-                    "allSubKeys": [
-                              "core_obliques",
-                              "core_deep",
-                              "core_front"
-                    ]
-          },
-          "bw_plank": {
-                    "primary": "Derin İç Karın (Korse Kası), Ön Karın (Üst ve Alt Karın)",
-                    "secondary": "Yan Karın, Omuz & Yan Göğüs Sabitleyicileri, Ana Kalça & Ön Bacak",
-                    "subKey": "core_front",
-                    "proof": "Dirsekler üzerinde vücudu düz tutarken belin çukurlaşmasına direnmek, karnı içe çeken derin korse kasını ve ön karın kaslarını baştan sona kilitler.",
-                    "allSubKeys": [
-                              "core_front",
-                              "core_deep"
-                    ]
-          },
-          "bw_hollow_body": {
-                    "primary": "Derin İç Karın (Korse Kası), Ön Karın (Üst ve Alt Karın Tamamı)",
-                    "secondary": "Yan Karın, Ön Kalça & Ön Bacak Orta Kısım (Bacakları Havada Tutma)",
-                    "subKey": "core_front",
-                    "proof": "Sırtüstü yatarken beli yere tam yapıştırıp kol ve bacakları yerden kesmek, ön karın (üst ve alt) ile derin iç karın kaslarını en zorlu açıda çalıştırır.",
-                    "allSubKeys": [
-                              "core_front",
-                              "core_deep"
-                    ]
-          },
-          "bw_hanging_knee_raise": {
-                    "primary": "Alt Karın (Ön Karın Alt Kısmı), Ön Kalça Kası (Bacak Kaldırıcı)",
-                    "secondary": "Üst Karın & Yan Karın, Ön Kol & Bilek (Barda Tutunma), Kanatlar (Omuzları Sabit Tutma)",
-                    "subKey": "core_front",
-                    "proof": "Barda asılıyken dizleri göğse doğru çekip kalçayı yukarı kıvırmak, özellikle göbek deliğinin altındaki alt karın kaslarını doğrudan çalıştırır.",
-                    "allSubKeys": [
-                              "core_front"
-                    ]
-          },
-          "bw_mountain_climber": {
-                    "primary": "Ön Karın (Üst ve Alt Karın), Derin İç Karın, Ön Kalça Kası",
-                    "secondary": "Ön Omuz & Triceps (Kolları Sabit Tutma), Yan Karın",
-                    "subKey": "core_front",
-                    "proof": "Şınav duruşunda gövdeyi bozmadan dizleri hızla karna çekmek, ön/alt karın ve ön kalça kaslarını çalıştırırken nabzı hızla yükseltir.",
-                    "allSubKeys": [
-                              "core_front",
-                              "core_deep"
-                    ]
-          },
-          "bear_crawl_pull_through": {
-                    "primary": "Derin İç Karın (Korse Kası), Yan Karın (Bel Yanları)",
-                    "secondary": "Ön Omuz (Destek Kolu), Ön Bacak (Dizleri Havada Tutma), Kanat (Çekiş Kolu)",
-                    "subKey": "core_obliques",
-                    "proof": "Dizler yerden 2-3 parmak havadayken tek elle ağırlığı alttan çekmek, gövdenin sağa sola devrilmesini önleyen derin iç karın ve yan karın kaslarını yoğun çalıştırır.",
-                    "allSubKeys": [
-                              "core_obliques",
-                              "core_deep",
-                              "core_front"
-                    ]
-          },
-          "cross_body_carry": {
-                    "primary": "Yan Karın & Bel Yanları (Core), Omuz İç Denge Kasları & Ön/Yan Omuz",
-                    "secondary": "Derin İç Karın, Üst Trapez, Ön Kol (Kavrama), Yan Kalça",
-                    "subKey": "core_obliques",
-                    "proof": "Bir dambılı baş üstünde, diğerini yanda tutarak yürümek; hem üstteki omuz denge kaslarını hem de çapraz yan karın ve bel kaslarını çalıştırır.",
-                    "allSubKeys": [
-                              "core_obliques",
-                              "shoulders_side",
-                              "shoulders_rear"
-                    ]
-          },
-          "db_swing": {
-                    "primary": "Ana Kalça Kası, Arka Bacak",
-                    "secondary": "Alt Sırt & Bel Kasları, Derin İç Karın & Ön Karın (Core), Ön Kol (Kavrama) & Kanatlar",
-                    "subKey": "legs_hamstrings",
-                    "allSubKeys": [
-                              "legs_hamstrings",
                               "legs_glutes",
+                              "legs_hamstrings",
+                              "back_mid",
+                              "legs_glutes_max",
                               "legs_ham_hinge",
+                              "legs_ham_chain",
+                              "back_lower"
+                    ],
+                    "isComplex": false,
+                    "proof": "Yerdeki ağır barı ayağa kalkarak kaldırmak; yerden keserken ön bacağı, doğrulurken arka bacak ve ana kalçayı, omurgayı düz tutarken de alt/üst tüm sırtı çalıştırır."
+          },
+          "bb_hip_thrust": {
+                    "primary": "Ana Kalça",
+                    "secondary": "Yan Kalça, Arka Bacak & Kalça Bağı",
+                    "subKey": "legs_glutes",
+                    "primarySubKeys": [
                               "legs_glutes_max"
                     ],
+                    "secondarySubKeys": [
+                              "legs_glutes_med",
+                              "legs_ham_chain"
+                    ],
+                    "allSubKeys": [
+                              "legs_glutes",
+                              "legs_glutes_max"
+                    ],
+                    "isComplex": false,
+                    "proof": "Sırt sehpada ve dizler bükülüyken barı kalçayla yukarı itmek, arka bacağın yük çalmasını engeller ve bütün gücü doğrudan ana kalça kasına verir."
+          },
+          "bw_glute_bridge": {
+                    "primary": "Ana Kalça",
+                    "secondary": "Yan Kalça, Arka Bacak & Kalça Bağı",
+                    "subKey": "legs_glutes",
+                    "primarySubKeys": [
+                              "legs_glutes_max"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_glutes_med",
+                              "legs_ham_chain"
+                    ],
+                    "allSubKeys": [
+                              "legs_glutes",
+                              "legs_glutes_max"
+                    ],
+                    "isComplex": false,
+                    "proof": "Sırtüstü yatarken dizler bükülü şekilde kalçayı yukarı kaldırıp sıkmak, bele yük bindirmeden doğrudan ana kalça kasını çalıştırır."
+          },
+          "mach_calf_raise": {
+                    "primary": "Üst Baldır, Alt Baldır",
+                    "secondary": "Ön Kaval & Bilek",
+                    "subKey": "legs_calves",
+                    "primarySubKeys": [
+                              "calves_gastroc",
+                              "calves_soleus"
+                    ],
+                    "secondarySubKeys": [
+                              "calves_tibialis"
+                    ],
+                    "allSubKeys": [
+                              "legs_calves",
+                              "calves_gastroc",
+                              "calves_soleus"
+                    ],
+                    "isComplex": false,
+                    "proof": "Ayakta kalf makinesinde omuz pedleriyle sabit yük altında tam esneme ve zirve sıkıştırma yapmak, üst ve alt baldır kaslarını en güvenli ve yüksek yükle çalıştırır."
+          },
+          "db_standing_calf_raise": {
+                    "primary": "Üst Baldır, Alt Baldır",
+                    "secondary": "Ön Kaval & Bilek",
+                    "subKey": "legs_calves",
+                    "primarySubKeys": [
+                              "calves_gastroc",
+                              "calves_soleus"
+                    ],
+                    "secondarySubKeys": [
+                              "calves_tibialis"
+                    ],
+                    "allSubKeys": [
+                              "legs_calves",
+                              "calves_gastroc",
+                              "calves_soleus"
+                    ],
+                    "isComplex": false,
+                    "proof": "Elde dambılla ayakta parmak ucuna yükselip tepe noktada sıkıştırmak, üst ve alt kalf kaslarını doğrudan çalıştırır."
+          },
+          "db_lying_leg_curl": {
+                    "primary": "Diz Büken Arka Bacak",
+                    "secondary": "Arka Bacak, Üst Baldır",
+                    "subKey": "legs_hamstrings",
+                    "primarySubKeys": [
+                              "legs_ham_curl"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_ham_hinge",
+                              "calves_gastroc"
+                    ],
+                    "allSubKeys": [
+                              "legs_hamstrings",
+                              "legs_ham_curl"
+                    ],
+                    "isComplex": false,
+                    "proof": "Yüzüstü yatarken iki ayak arasındaki dambılı kalçaya doğru bükmek, arka bacağın diz büken alt/dış kısmını ve iç kısmını doğrudan çalıştırır."
+          },
+          "bw_sissy_squat": {
+                    "primary": "Orta Ön Bacak, İç Ön Bacak",
+                    "secondary": "Dış Ön Bacak, Ön Karın, Üst Baldır",
+                    "subKey": "legs_quad",
+                    "primarySubKeys": [
+                              "legs_quad_mid",
+                              "legs_quad_inner"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_quad_outer",
+                              "core_front",
+                              "calves_gastroc"
+                    ],
+                    "allSubKeys": [
+                              "legs_quad",
+                              "legs_quad_mid",
+                              "legs_quad_inner"
+                    ],
+                    "isComplex": false,
+                    "proof": "Kalçayı hiç kırmadan dizleri öne verip gövdeyi geriye yatırmak, ön bacağın kalçaya kadar uzanan tam orta kasını maksimum gererek çalıştırır."
+          },
+          "db_triceps_overhead": {
+                    "primary": "Arka Kol Uzun Baş",
+                    "secondary": "Arka Kol Dış Baş, Arka Kol Alt Baş",
+                    "subKey": "triceps_long",
+                    "primarySubKeys": [
+                              "triceps_long"
+                    ],
+                    "secondarySubKeys": [
+                              "triceps_lateral",
+                              "triceps_medial"
+                    ],
+                    "allSubKeys": [
+                              "triceps_long"
+                    ],
+                    "isComplex": false,
+                    "proof": "Arka kolun en büyük parçası olan iç/uzun kısım omuzdan başladığı için, ancak kol başın üstüne kaldırıldığında tam gerilir ve maksimum çalışır."
+          },
+          "db_skullcrusher": {
+                    "primary": "Arka Kol Uzun Baş, Arka Kol Dış Baş",
+                    "secondary": "Arka Kol Alt Baş",
+                    "subKey": "triceps_long",
+                    "primarySubKeys": [
+                              "triceps_long",
+                              "triceps_lateral"
+                    ],
+                    "secondarySubKeys": [
+                              "triceps_medial"
+                    ],
+                    "allSubKeys": [
+                              "triceps_long",
+                              "triceps_lateral"
+                    ],
+                    "isComplex": false,
+                    "proof": "Sırtüstü yatarken dambılları alnına/baş gerisine indirip kaldırmak, arka kolun hem uzun iç kısmını hem de dış kısmını aynı anda yoğun çalıştırır."
+          },
+          "mach_triceps_pushdown": {
+                    "primary": "Arka Kol Dış Baş, Arka Kol Alt Baş",
+                    "secondary": "Arka Kol Uzun Baş",
+                    "subKey": "triceps_lateral",
+                    "primarySubKeys": [
+                              "triceps_lateral",
+                              "triceps_medial"
+                    ],
+                    "secondarySubKeys": [
+                              "triceps_long"
+                    ],
+                    "allSubKeys": [
+                              "triceps_lateral",
+                              "triceps_medial"
+                    ],
+                    "isComplex": false,
+                    "proof": "Dirsekleri bel yanında sabit tutup halatı aşağı itmek ve en altta iki yana açmak, arka kolun dış (at nalı) kısmını ve alt kısmını tam sıkıştırır."
+          },
+          "db_biceps_curl": {
+                    "primary": "Pazı İç Baş, Pazı Dış Baş",
+                    "secondary": "Ön Kol & Dış Pazı",
+                    "subKey": "biceps",
+                    "primarySubKeys": [
+                              "biceps_short",
+                              "biceps_long"
+                    ],
+                    "secondarySubKeys": [
+                              "brachialis"
+                    ],
+                    "allSubKeys": [
+                              "biceps",
+                              "biceps_short",
+                              "biceps_long"
+                    ],
+                    "proof": ""
+          },
+          "db_hammer_curl": {
+                    "primary": "Ön Kol & Dış Pazı, Pazı Dış Baş",
+                    "secondary": "Pazı İç Baş",
+                    "subKey": "biceps",
+                    "primarySubKeys": [
+                              "brachialis",
+                              "biceps_long"
+                    ],
+                    "secondarySubKeys": [
+                              "biceps_short"
+                    ],
+                    "allSubKeys": [
+                              "biceps",
+                              "brachialis",
+                              "biceps_long"
+                    ],
+                    "isComplex": false,
+                    "proof": "Avuç içleri birbirine bakacak şekilde (çekiç tutuşu) kaldırmak, yükü bicepsin altındaki kol kalınlaştırıcı kasa ve ön kolun üst kısmına kaydırır."
+          },
+          "db_incline_curl": {
+                    "primary": "Pazı Dış Baş",
+                    "secondary": "Pazı İç Baş, Ön Kol & Dış Pazı",
+                    "subKey": "biceps",
+                    "primarySubKeys": [
+                              "biceps_long"
+                    ],
+                    "secondarySubKeys": [
+                              "biceps_short",
+                              "brachialis"
+                    ],
+                    "allSubKeys": [
+                              "biceps",
+                              "biceps_long"
+                    ],
+                    "isComplex": false,
+                    "proof": "Eğimli sehpada otururken kolların gövdenin gerisinde kalması, pazının dış/tepe kısmını (uzun baş) hareketin en başında maksimum gerer ve tepe görünümünü büyütür."
+          },
+          "bb_biceps_curl": {
+                    "primary": "Pazı İç Baş, Pazı Dış Baş",
+                    "secondary": "Ön Kol & Dış Pazı",
+                    "subKey": "biceps",
+                    "primarySubKeys": [
+                              "biceps_short",
+                              "biceps_long"
+                    ],
+                    "secondarySubKeys": [
+                              "brachialis"
+                    ],
+                    "allSubKeys": [
+                              "biceps",
+                              "biceps_short",
+                              "biceps_long"
+                    ],
+                    "isComplex": false,
+                    "proof": "Düz barla avuç içleri tam yukarı bakarak iki elle ağır kaldırmak, özellikle kolun ön/iç dolgunluğunu veren biceps iç ve dış kısmına en yüksek yükü bindirir."
+          },
+          "mach_cable_biceps": {
+                    "primary": "Pazı İç Baş, Pazı Dış Baş",
+                    "secondary": "Ön Kol & Dış Pazı",
+                    "subKey": "biceps",
+                    "primarySubKeys": [
+                              "biceps_short",
+                              "biceps_long"
+                    ],
+                    "secondarySubKeys": [
+                              "brachialis"
+                    ],
+                    "allSubKeys": [
+                              "biceps",
+                              "biceps_short",
+                              "biceps_long"
+                    ],
+                    "isComplex": false,
+                    "proof": "Kablo makarası hareketin en altında da en üstünde de yükü hiç boşaltmadığı için bicepsin iç ve dış kısmında kesintisiz yanma ve gerilim sağlar."
+          },
+          "db_suitcase_carry": {
+                    "primary": "Yan Karın, Derin İç Karın",
+                    "secondary": "Yan Kalça, Üst Sırt & Trapez, Ön Kol & Dış Pazı",
+                    "subKey": "core_obliques",
+                    "primarySubKeys": [
+                              "core_obliques",
+                              "core_deep"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_glutes_med",
+                              "traps",
+                              "brachialis"
+                    ],
+                    "allSubKeys": [
+                              "core_obliques",
+                              "core_front",
+                              "core_deep"
+                    ],
+                    "isComplex": false,
+                    "proof": "Sadece tek elde ağır dambıl taşırken vücudun o tarafa yatmasını engellemek, ağırlığın tam tersi taraftaki yan karın ve bel yanı kaslarını çok güçlü çalıştırır."
+          },
+          "db_farmers_walk": {
+                    "primary": "Derin İç Karın, Üst Sırt & Trapez, Ön Kol & Dış Pazı",
+                    "secondary": "Yan Karın, Yan Kalça, Alt Sırt & Bel, Üst Baldır",
+                    "subKey": "core_front",
+                    "primarySubKeys": [
+                              "core_deep",
+                              "traps",
+                              "brachialis"
+                    ],
+                    "secondarySubKeys": [
+                              "core_obliques",
+                              "legs_glutes_med",
+                              "back_lower",
+                              "calves_gastroc"
+                    ],
+                    "allSubKeys": [
+                              "core_front",
+                              "back_mid",
+                              "biceps",
+                              "core_deep",
+                              "traps",
+                              "brachialis"
+                    ],
+                    "isComplex": false,
+                    "proof": "İki elde ağır yükle dik yürümek; karnı içe tutan derin korse kasını, yan karınları, omuzları taşıyan üst trapezi ve el/bilek kavrama kaslarını aynı anda çalıştırır."
+          },
+          "db_russian_twist": {
+                    "primary": "Yan Karın",
+                    "secondary": "Ön Karın, Derin İç Karın",
+                    "subKey": "core_obliques",
+                    "primarySubKeys": [
+                              "core_obliques"
+                    ],
+                    "secondarySubKeys": [
+                              "core_front",
+                              "core_deep"
+                    ],
+                    "allSubKeys": [
+                              "core_obliques"
+                    ],
+                    "isComplex": false,
+                    "proof": "Yerde gövde hafif geriye yatıkken ağırlığı sağa sola döndürmek, belin yanlarındaki dönüş kaslarını (yan karın) doğrudan çalıştırır."
+          },
+          "mach_cable_woodchopper": {
+                    "primary": "Yan Karın, Derin İç Karın",
+                    "secondary": "Ön Karın, Ön Omuz, Yan Kalça",
+                    "subKey": "core_obliques",
+                    "primarySubKeys": [
+                              "core_obliques",
+                              "core_deep"
+                    ],
+                    "secondarySubKeys": [
+                              "core_front",
+                              "shoulders_front",
+                              "legs_glutes_med"
+                    ],
+                    "allSubKeys": [
+                              "core_obliques",
+                              "core_front",
+                              "core_deep"
+                    ],
+                    "isComplex": false,
+                    "proof": "Kabloyu odun keser gibi çapraz çekip gövdeyi döndürmek, sağ ve sol yan karın kaslarını ile derin iç karın kasını güçlü şekilde çalıştırır."
+          },
+          "half_kneeling_plate_chop": {
+                    "primary": "Yan Karın, Derin İç Karın",
+                    "secondary": "Ön Karın, Ön Omuz, Yan Kalça",
+                    "subKey": "core_obliques",
+                    "primarySubKeys": [
+                              "core_obliques",
+                              "core_deep"
+                    ],
+                    "secondarySubKeys": [
+                              "core_front",
+                              "shoulders_front",
+                              "legs_glutes_med"
+                    ],
+                    "allSubKeys": [
+                              "core_obliques",
+                              "core_front",
+                              "core_deep"
+                    ],
+                    "isComplex": true,
+                    "proof": "Tek diz yerde durmak bacaklardan hız almayı engeller; plakayı çapraz savurup durdurmak sadece yan karın ve derin kor kaslarının gücüyle yapılır."
+          },
+          "bw_plank": {
+                    "primary": "Derin İç Karın, Ön Karın",
+                    "secondary": "Yan Karın, Ön Omuz",
+                    "subKey": "core_front",
+                    "primarySubKeys": [
+                              "core_deep",
+                              "core_front"
+                    ],
+                    "secondarySubKeys": [
+                              "core_obliques",
+                              "shoulders_front"
+                    ],
+                    "allSubKeys": [
+                              "core_front",
+                              "core_deep"
+                    ],
+                    "isComplex": false,
+                    "proof": "Dirsekler üzerinde vücudu düz tutarken belin çukurlaşmasına direnmek, karnı içe çeken derin korse kasını ve ön karın kaslarını baştan sona kilitler."
+          },
+          "bw_hollow_body": {
+                    "primary": "Ön Karın, Derin İç Karın",
+                    "secondary": "Yan Karın, Orta Ön Bacak",
+                    "subKey": "core_front",
+                    "primarySubKeys": [
+                              "core_front",
+                              "core_deep"
+                    ],
+                    "secondarySubKeys": [
+                              "core_obliques",
+                              "legs_quad_mid"
+                    ],
+                    "allSubKeys": [
+                              "core_front",
+                              "core_deep"
+                    ],
+                    "isComplex": false,
+                    "proof": "Sırtüstü yatarken beli yere tam yapıştırıp kol ve bacakları yerden kesmek, ön karın (üst ve alt) ile derin iç karın kaslarını en zorlu açıda çalıştırır."
+          },
+          "bw_hanging_knee_raise": {
+                    "primary": "Ön Karın",
+                    "secondary": "Derin İç Karın, Orta Ön Bacak, Ön Kol & Dış Pazı, Kanatlar",
+                    "subKey": "core_front",
+                    "primarySubKeys": [
+                              "core_front"
+                    ],
+                    "secondarySubKeys": [
+                              "core_deep",
+                              "legs_quad_mid",
+                              "brachialis",
+                              "back_lats"
+                    ],
+                    "allSubKeys": [
+                              "core_front"
+                    ],
+                    "isComplex": false,
+                    "proof": "Barda asılıyken dizleri göğse doğru çekip kalçayı yukarı kıvırmak, özellikle göbek deliğinin altındaki alt karın kaslarını doğrudan çalıştırır."
+          },
+          "bw_mountain_climber": {
+                    "primary": "Ön Karın, Derin İç Karın",
+                    "secondary": "Orta Ön Bacak, Ön Omuz, Yan Karın",
+                    "subKey": "core_front",
+                    "primarySubKeys": [
+                              "core_front",
+                              "core_deep"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_quad_mid",
+                              "shoulders_front",
+                              "core_obliques"
+                    ],
+                    "allSubKeys": [
+                              "core_front",
+                              "core_deep"
+                    ],
+                    "isComplex": false,
+                    "proof": "Şınav duruşunda gövdeyi bozmadan dizleri hızla karna çekmek, ön/alt karın ve ön kalça kaslarını çalıştırırken nabzı hızla yükseltir."
+          },
+          "bear_crawl_pull_through": {
+                    "primary": "Derin İç Karın, Yan Karın",
+                    "secondary": "Ön Karın, Ön Omuz, Kanatlar, Orta Ön Bacak",
+                    "subKey": "core_front",
+                    "primarySubKeys": [
+                              "core_deep",
+                              "core_obliques"
+                    ],
+                    "secondarySubKeys": [
+                              "core_front",
+                              "shoulders_front",
+                              "back_lats",
+                              "legs_quad_mid"
+                    ],
+                    "allSubKeys": [
+                              "core_front",
+                              "core_obliques",
+                              "core_deep"
+                    ],
+                    "isComplex": false,
+                    "proof": "Dizler yerden 2-3 parmak havadayken tek elle ağırlığı alttan çekmek, gövdenin sağa sola devrilmesini önleyen derin iç karın ve yan karın kaslarını yoğun çalıştırır."
+          },
+          "cross_body_carry": {
+                    "primary": "Yan Karın, Derin İç Karın, Ön Omuz",
+                    "secondary": "Yan Omuz, Üst Sırt & Trapez, Ön Kol & Dış Pazı, Yan Kalça",
+                    "subKey": "core_obliques",
+                    "primarySubKeys": [
+                              "core_obliques",
+                              "core_deep",
+                              "shoulders_front"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_side",
+                              "traps",
+                              "brachialis",
+                              "legs_glutes_med"
+                    ],
+                    "allSubKeys": [
+                              "core_obliques",
+                              "core_front",
+                              "shoulders_front",
+                              "core_deep"
+                    ],
+                    "isComplex": false,
+                    "proof": "Bir dambılı baş üstünde, diğerini yanda tutarak yürümek; hem üstteki omuz denge kaslarını hem de çapraz yan karın ve bel kaslarını çalıştırır."
+          },
+          "db_swing": {
+                    "primary": "Ana Kalça, Arka Bacak & Kalça Bağı, Arka Bacak",
+                    "secondary": "Alt Sırt & Bel, Derin İç Karın, Ön Kol & Dış Pazı",
+                    "subKey": "legs_glutes",
+                    "primarySubKeys": [
+                              "legs_glutes_max",
+                              "legs_ham_chain",
+                              "legs_ham_hinge"
+                    ],
+                    "secondarySubKeys": [
+                              "back_lower",
+                              "core_deep",
+                              "brachialis"
+                    ],
+                    "allSubKeys": [
+                              "legs_glutes",
+                              "legs_hamstrings",
+                              "legs_glutes_max",
+                              "legs_ham_chain",
+                              "legs_ham_hinge"
+                    ],
+                    "isComplex": false,
                     "proof": "Dambılı bacak arasından kalçayı ileri patlatarak savurmak, ana kalça kasını ve arka bacakları güçlü çalıştırırken en üst noktada karın ve beli kilitler."
           },
           "kb_swing": {
-                    "primary": "Ana Kalça Kası, Arka Bacak",
-                    "secondary": "Alt Sırt & Bel Kasları, Derin İç Karın & Ön Karın (Core), Kanatlar, Ön Kol (Kavrama)",
-                    "subKey": "legs_hamstrings",
-                    "allSubKeys": [
-                              "legs_hamstrings",
-                              "legs_glutes",
-                              "legs_ham_hinge",
-                              "legs_glutes_max"
+                    "primary": "Ana Kalça, Arka Bacak & Kalça Bağı, Arka Bacak",
+                    "secondary": "Alt Sırt & Bel, Derin İç Karın, Ön Kol & Dış Pazı",
+                    "subKey": "legs_glutes",
+                    "primarySubKeys": [
+                              "legs_glutes_max",
+                              "legs_ham_chain",
+                              "legs_ham_hinge"
                     ],
+                    "secondarySubKeys": [
+                              "back_lower",
+                              "core_deep",
+                              "brachialis"
+                    ],
+                    "allSubKeys": [
+                              "legs_glutes",
+                              "legs_hamstrings",
+                              "legs_glutes_max",
+                              "legs_ham_chain",
+                              "legs_ham_hinge"
+                    ],
+                    "isComplex": false,
                     "proof": "Kettlebell'i kollarla değil kalçanın ileri patlamasıyla savurmak, ana kalça, arka bacak ve alt sırt zincirinin tamamını çalıştırır."
           },
           "kb_clean": {
-                    "primary": "Ana Kalça Kası, Arka Bacak, Orta ve Üst Sırt (Trapez & Kürek Kemiği)",
-                    "secondary": "Biceps & Ön Kol, Derin İç Karın & Yan Karın (Core), Kanatlar",
-                    "subKey": "back_mid",
-                    "allSubKeys": [
-                              "back_mid",
-                              "legs_hamstrings",
-                              "traps",
+                    "primary": "Ana Kalça, Arka Bacak, Üst Sırt & Trapez, Orta Sırt",
+                    "secondary": "Alt Sırt & Bel, Ön Kol & Dış Pazı, Pazı Dış Baş, Derin İç Karın",
+                    "subKey": "legs_glutes",
+                    "primarySubKeys": [
+                              "legs_glutes_max",
                               "legs_ham_hinge",
-                              "legs_glutes",
-                              "legs_glutes_max"
+                              "traps",
+                              "back_mid"
                     ],
+                    "secondarySubKeys": [
+                              "back_lower",
+                              "brachialis",
+                              "biceps_long",
+                              "core_deep"
+                    ],
+                    "allSubKeys": [
+                              "legs_glutes",
+                              "legs_hamstrings",
+                              "back_mid",
+                              "legs_glutes_max",
+                              "legs_ham_hinge",
+                              "traps"
+                    ],
+                    "isComplex": true,
                     "proof": "Ağırlığı kalça gücüyle yerden hızlandırıp dirseği bükerek omuz önüne (göğüs hizasına) almak; kalça, arka bacak, orta/üst sırt ve bicepsleri birlikte çalıştırır."
           },
           "kb_half_snatch": {
-                    "primary": "Ana Kalça Kası, Arka Bacak, Ön ve Yan Omuz + Omuz İç Denge Kasları",
-                    "secondary": "Üst ve Orta Sırt, Alt Sırt & Bel Kasları, Yan ve Derin İç Karın (Core)",
-                    "subKey": "shoulders_front",
-                    "allSubKeys": [
-                              "shoulders_front",
-                              "legs_hamstrings",
-                              "shoulders_side",
-                              "shoulders_rear",
+                    "primary": "Ana Kalça, Arka Bacak, Ön Omuz",
+                    "secondary": "Yan Omuz, Üst Sırt & Trapez, Alt Sırt & Bel, Dış Ön Bacak, Arka Kol Alt Baş, Yan Karın",
+                    "subKey": "legs_glutes",
+                    "primarySubKeys": [
+                              "legs_glutes_max",
                               "legs_ham_hinge",
-                              "legs_glutes",
-                              "legs_glutes_max"
+                              "shoulders_front"
                     ],
-                    "isLowerUpperComplex": true,
+                    "secondarySubKeys": [
+                              "shoulders_side",
+                              "traps",
+                              "back_lower",
+                              "legs_quad_outer",
+                              "triceps_medial",
+                              "core_obliques"
+                    ],
+                    "allSubKeys": [
+                              "legs_glutes",
+                              "legs_hamstrings",
+                              "shoulders_front",
+                              "legs_glutes_max",
+                              "legs_ham_hinge"
+                    ],
+                    "isComplex": true,
                     "proof": "Kettlebell'i bacak arasından tek hamlede baş üstüne fırlatıp kilitlemek; alt vücutta kalça ve arka bacağı, üstte ise sırt, omuz ve karın kaslarını çalıştırır."
           },
           "db_snatch": {
-                    "primary": "Ana Kalça Kası, Arka Bacak, Ön ve Yan Omuz",
-                    "secondary": "Ön Bacak, Üst Sırt (Trapez), Alt Sırt & Bel, Yan ve Derin İç Karın (Core)",
-                    "subKey": "shoulders_front",
-                    "allSubKeys": [
-                              "shoulders_front",
-                              "legs_hamstrings",
-                              "shoulders_side",
+                    "primary": "Ana Kalça, Arka Bacak, Ön Omuz",
+                    "secondary": "Yan Omuz, Üst Sırt & Trapez, Alt Sırt & Bel, Dış Ön Bacak, Arka Kol Alt Baş, Derin İç Karın",
+                    "subKey": "legs_glutes",
+                    "primarySubKeys": [
+                              "legs_glutes_max",
                               "legs_ham_hinge",
-                              "legs_glutes",
-                              "legs_glutes_max"
+                              "shoulders_front"
                     ],
-                    "isLowerUpperComplex": true,
+                    "secondarySubKeys": [
+                              "shoulders_side",
+                              "traps",
+                              "back_lower",
+                              "legs_quad_outer",
+                              "triceps_medial",
+                              "core_deep"
+                    ],
+                    "allSubKeys": [
+                              "legs_glutes",
+                              "legs_hamstrings",
+                              "shoulders_front",
+                              "legs_glutes_max",
+                              "legs_ham_hinge"
+                    ],
+                    "isComplex": true,
                     "proof": "Yerdeki dambılı bacak ve kalça patlamasıyla tek hamlede baş üstüne çekip kilitlemek; kalça, arka/ön bacak, üst sırt ve omuzları patlayıcı çalıştırır."
           },
           "kb_windmill": {
-                    "primary": "Yan Karın & Bel Yanları (Core), Omuz İç Denge Kasları & Omuz",
-                    "secondary": "Yan ve Ana Kalça, Arka Bacak (Esneterek Güçlendirme), Triceps (Kol Kilidi)",
+                    "primary": "Yan Karın, Yan Kalça, Derin Kalça",
+                    "secondary": "Ön Omuz, Arka Omuz, Arka Bacak, Derin İç Karın",
                     "subKey": "core_obliques",
+                    "primarySubKeys": [
+                              "core_obliques",
+                              "legs_glutes_med",
+                              "legs_glutes_min"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_front",
+                              "shoulders_rear",
+                              "legs_ham_hinge",
+                              "core_deep"
+                    ],
                     "allSubKeys": [
                               "core_obliques",
-                              "shoulders_front",
-                              "shoulders_rear"
+                              "legs_glutes",
+                              "legs_glutes_med",
+                              "legs_glutes_min"
                     ],
+                    "isComplex": true,
                     "proof": "Ağırlık baş üstünde havadayken kalçayı yana itip yere doğru eğilmek, yan karın ve bel yanlarını çalıştırırken arka bacağı esnetir ve omzu dengede tutar."
           },
           "kb_turkish_getup": {
-                    "primary": "Omuz İç Denge Kasları & Ön/Yan Omuz, Tüm Karın Çevresi (Ön, Yan ve Derin İç Karın)",
-                    "secondary": "Ana ve Yan Kalça, Ön Bacak, Triceps (Yukarıdaki Kolu Sabit Tutma)",
-                    "subKey": "shoulders_front",
-                    "allSubKeys": [
-                              "shoulders_front",
-                              "core_obliques",
-                              "legs_quad",
-                              "shoulders_side",
-                              "shoulders_rear",
+                    "primary": "Derin İç Karın, Ön Karın, Yan Karın, Ön Omuz",
+                    "secondary": "Yan Omuz, Ana Kalça, Yan Kalça, Dış Ön Bacak, Arka Kol Alt Baş",
+                    "subKey": "core_front",
+                    "primarySubKeys": [
+                              "core_deep",
                               "core_front",
+                              "core_obliques",
+                              "shoulders_front"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_side",
+                              "legs_glutes_max",
+                              "legs_glutes_med",
+                              "legs_quad_outer",
+                              "triceps_medial"
+                    ],
+                    "allSubKeys": [
+                              "core_front",
+                              "core_obliques",
+                              "shoulders_front",
                               "core_deep"
                     ],
-                    "isLowerUpperComplex": true,
+                    "isComplex": true,
                     "proof": "Ağırlığı baş üstünde tutarak yerden adım adım ayağa kalkıp geri yatmak; omuz denge kaslarını, tüm karın/bel çevresini ve bacak/kalça kaslarını tek harekette birleştirir."
           },
           "db_thruster": {
-                    "primary": "Ön Bacak, Ana Kalça Kası, Ön ve Yan Omuz",
-                    "secondary": "Triceps, Derin İç Karın & Üst Sırt (Core)",
-                    "subKey": "shoulders_front",
-                    "allSubKeys": [
-                              "shoulders_front",
-                              "legs_quad",
+                    "primary": "Dış Ön Bacak, İç Ön Bacak, Ana Kalça, Ön Omuz",
+                    "secondary": "Yan Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş, Derin İç Karın, Üst Sırt & Trapez",
+                    "subKey": "legs_quad",
+                    "primarySubKeys": [
+                              "legs_quad_outer",
+                              "legs_quad_inner",
+                              "legs_glutes_max",
+                              "shoulders_front"
+                    ],
+                    "secondarySubKeys": [
                               "shoulders_side",
+                              "triceps_lateral",
+                              "triceps_medial",
+                              "core_deep",
+                              "traps"
+                    ],
+                    "allSubKeys": [
+                              "legs_quad",
                               "legs_glutes",
+                              "shoulders_front",
+                              "legs_quad_outer",
+                              "legs_quad_inner",
                               "legs_glutes_max"
                     ],
-                    "isLowerUpperComplex": true,
+                    "isComplex": true,
                     "proof": "Dambıllarla tam çömelip kalkarken kazandığın hızla ağırlığı kesintisiz baş üstüne itmek; ön bacak, kalça, ön/yan omuz ve tricepsi aynı anda çalıştırır."
           },
           "kb_thruster": {
-                    "primary": "Ön Bacak, Ana Kalça Kası, Ön ve Yan Omuz",
-                    "secondary": "Triceps, Derin İç Karın (Core), Üst Sırt",
-                    "subKey": "shoulders_front",
-                    "allSubKeys": [
-                              "shoulders_front",
-                              "legs_quad",
+                    "primary": "Dış Ön Bacak, İç Ön Bacak, Ana Kalça, Ön Omuz",
+                    "secondary": "Yan Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş, Derin İç Karın, Üst Sırt & Trapez",
+                    "subKey": "legs_quad",
+                    "primarySubKeys": [
+                              "legs_quad_outer",
+                              "legs_quad_inner",
+                              "legs_glutes_max",
+                              "shoulders_front"
+                    ],
+                    "secondarySubKeys": [
                               "shoulders_side",
+                              "triceps_lateral",
+                              "triceps_medial",
+                              "core_deep",
+                              "traps"
+                    ],
+                    "allSubKeys": [
+                              "legs_quad",
                               "legs_glutes",
+                              "shoulders_front",
+                              "legs_quad_outer",
+                              "legs_quad_inner",
                               "legs_glutes_max"
                     ],
-                    "isLowerUpperComplex": true,
+                    "isComplex": true,
                     "proof": "Kettlebell'lerle derin çömelip kalkarken baş üstüne pres yapmak; ön bacak, kalça ve omuz kaslarını yüksek nabızla çalıştırır."
           },
           "bb_thruster": {
-                    "primary": "Ön Bacak, Ana Kalça Kası, Ön ve Yan Omuz",
-                    "secondary": "Triceps, Üst ve Alt Sırt, Derin İç Karın (Core)",
-                    "subKey": "shoulders_front",
-                    "allSubKeys": [
-                              "shoulders_front",
-                              "legs_quad",
+                    "primary": "Dış Ön Bacak, İç Ön Bacak, Ana Kalça, Ön Omuz",
+                    "secondary": "Yan Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş, Derin İç Karın, Üst Sırt & Trapez",
+                    "subKey": "legs_quad",
+                    "primarySubKeys": [
+                              "legs_quad_outer",
+                              "legs_quad_inner",
+                              "legs_glutes_max",
+                              "shoulders_front"
+                    ],
+                    "secondarySubKeys": [
                               "shoulders_side",
+                              "triceps_lateral",
+                              "triceps_medial",
+                              "core_deep",
+                              "traps"
+                    ],
+                    "allSubKeys": [
+                              "legs_quad",
                               "legs_glutes",
+                              "shoulders_front",
+                              "legs_quad_outer",
+                              "legs_quad_inner",
                               "legs_glutes_max"
                     ],
-                    "isLowerUpperComplex": true,
+                    "isComplex": true,
                     "proof": "Omuzda barla tam çömelme (Front Squat) ve kalkarken baş üstü itiş; ön bacak, kalça, omuz ve tricepsi ağır yük altında birleştirir."
           },
           "db_clean_and_press": {
-                    "primary": "Ana Kalça Kası & Arka Bacak, Ön ve Yan Omuz",
-                    "secondary": "Üst ve Orta Sırt, Triceps, Biceps & Ön Kol, Derin İç Karın (Core)",
-                    "subKey": "shoulders_front",
-                    "allSubKeys": [
-                              "shoulders_front",
-                              "legs_hamstrings",
-                              "back_mid",
-                              "shoulders_side",
+                    "primary": "Ana Kalça, Arka Bacak, Ön Omuz",
+                    "secondary": "Yan Omuz, Üst Sırt & Trapez, Orta Sırt, Arka Kol Dış Baş, Arka Kol Alt Baş, Ön Kol & Dış Pazı, Derin İç Karın",
+                    "subKey": "legs_glutes",
+                    "primarySubKeys": [
+                              "legs_glutes_max",
                               "legs_ham_hinge",
-                              "legs_glutes",
-                              "legs_glutes_max"
+                              "shoulders_front"
                     ],
-                    "isLowerUpperComplex": true,
+                    "secondarySubKeys": [
+                              "shoulders_side",
+                              "traps",
+                              "back_mid",
+                              "triceps_lateral",
+                              "triceps_medial",
+                              "brachialis",
+                              "core_deep"
+                    ],
+                    "allSubKeys": [
+                              "legs_glutes",
+                              "legs_hamstrings",
+                              "shoulders_front",
+                              "legs_glutes_max",
+                              "legs_ham_hinge"
+                    ],
+                    "isComplex": true,
                     "proof": "İlk kısımda kalça ve sırt gücüyle omuza alınan dambıllar, ikinci kısımda omuz ve triceps gücüyle baş üstüne itilir."
           },
           "db_manmaker": {
-                    "primary": "Orta Göğüs, Kanatlar & Orta Sırt, Ön Bacak & Ana Kalça, Ön ve Yan Omuz",
-                    "secondary": "Triceps, Biceps, Yan ve Derin İç Karın (Core), Arka Bacak",
-                    "subKey": "core_front",
-                    "allSubKeys": [
-                              "core_front",
+                    "primary": "Orta Göğüs, Kanatlar, Dış Ön Bacak, Ana Kalça, Ön Omuz",
+                    "secondary": "Orta Sırt, Yan Omuz, Arka Kol Alt Baş, Yan Karın, Derin İç Karın",
+                    "subKey": "chest_mid",
+                    "primarySubKeys": [
                               "chest_mid",
-                              "back_mid",
-                              "legs_quad",
-                              "shoulders_front",
-                              "shoulders_side",
                               "back_lats",
+                              "legs_quad_outer",
+                              "legs_glutes_max",
+                              "shoulders_front"
+                    ],
+                    "secondarySubKeys": [
+                              "back_mid",
+                              "shoulders_side",
+                              "triceps_medial",
+                              "core_obliques",
+                              "core_deep"
+                    ],
+                    "allSubKeys": [
+                              "chest_mid",
+                              "back_lats",
+                              "legs_quad",
                               "legs_glutes",
+                              "shoulders_front",
+                              "legs_quad_outer",
                               "legs_glutes_max"
                     ],
-                    "isLowerUpperComplex": true,
-                    "isFullBodyMetcon": true,
+                    "isComplex": true,
                     "proof": "Şınav + sağ/sol sırt çekişi + çömelerek omuza alma + baş üstü pres birleşimi; göğüs, sırt, bacak, kalça, omuz ve karın kaslarının tamamını çalıştırır."
           },
           "bb_hang_power_clean": {
-                    "primary": "Ana Kalça Kası, Arka Bacak, Üst ve Orta Sırt (Trapez)",
-                    "secondary": "Ön Bacak (Yakalama Anı), Kalf (Baldır), Alt Sırt & Bel, Ön Kol & Biceps",
-                    "subKey": "back_mid",
-                    "allSubKeys": [
-                              "back_mid",
-                              "legs_hamstrings",
-                              "traps",
+                    "primary": "Ana Kalça, Arka Bacak, Üst Sırt & Trapez, Orta Sırt",
+                    "secondary": "Dış Ön Bacak, Alt Sırt & Bel, Üst Baldır, Ön Kol & Dış Pazı, Derin İç Karın",
+                    "subKey": "legs_glutes",
+                    "primarySubKeys": [
+                              "legs_glutes_max",
                               "legs_ham_hinge",
-                              "legs_glutes",
-                              "legs_glutes_max"
+                              "traps",
+                              "back_mid"
                     ],
+                    "secondarySubKeys": [
+                              "legs_quad_outer",
+                              "back_lower",
+                              "calves_gastroc",
+                              "brachialis",
+                              "core_deep"
+                    ],
+                    "allSubKeys": [
+                              "legs_glutes",
+                              "legs_hamstrings",
+                              "back_mid",
+                              "legs_glutes_max",
+                              "legs_ham_hinge",
+                              "traps"
+                    ],
+                    "isComplex": true,
                     "proof": "Diz üstünden barı kalça patlaması ve omuz çekişiyle bir anda ön omuzlara almak; kalça, arka bacak ve üst sırt (trapez) kaslarında patlayıcı güç üretir."
           },
           "bb_landmine_squat_press": {
-                    "primary": "Ön Bacak, Ön Omuz, Üst Göğüs",
-                    "secondary": "Ana Kalça Kası, Triceps, Derin İç Karın (Core) & Yan Göğüs Kasları",
-                    "subKey": "shoulders_front",
-                    "allSubKeys": [
+                    "primary": "Dış Ön Bacak, İç Ön Bacak, Ön Omuz, Üst Göğüs",
+                    "secondary": "Ana Kalça, Arka Kol Dış Baş, Arka Kol Alt Baş, Derin İç Karın",
+                    "subKey": "legs_quad",
+                    "primarySubKeys": [
+                              "legs_quad_outer",
+                              "legs_quad_inner",
                               "shoulders_front",
-                              "legs_quad",
-                              "chest_upper",
-                              "legs_quad_outer"
+                              "chest_upper"
                     ],
-                    "isLowerUpperComplex": true,
+                    "secondarySubKeys": [
+                              "legs_glutes_max",
+                              "triceps_lateral",
+                              "triceps_medial",
+                              "core_deep"
+                    ],
+                    "allSubKeys": [
+                              "legs_quad",
+                              "shoulders_front",
+                              "chest_upper",
+                              "legs_quad_outer",
+                              "legs_quad_inner"
+                    ],
+                    "isComplex": true,
                     "proof": "Barın ucunu göğüste tutup çömelmek ön bacak ve kalçayı, kalkarken ileri-yukarı doğru itmek ise ön omuz ve üst göğsü omuzları zorlamadan çalıştırır."
           },
           "bw_burpee": {
-                    "primary": "Ön Bacak & Ana Kalça Kası, Orta Göğüs & Ön Omuz",
-                    "secondary": "Triceps, Ön ve Derin İç Karın (Core), Ön Kalça Kası, Kalf (Baldır)",
-                    "subKey": "core_front",
-                    "allSubKeys": [
-                              "core_front",
-                              "chest_mid",
-                              "legs_quad",
+                    "primary": "Dış Ön Bacak, Ana Kalça, Orta Göğüs",
+                    "secondary": "Ön Omuz, Arka Kol Alt Baş, Ön Karın, Üst Baldır",
+                    "subKey": "legs_quad",
+                    "primarySubKeys": [
+                              "legs_quad_outer",
+                              "legs_glutes_max",
+                              "chest_mid"
+                    ],
+                    "secondarySubKeys": [
                               "shoulders_front",
+                              "triceps_medial",
+                              "core_front",
+                              "calves_gastroc"
+                    ],
+                    "allSubKeys": [
+                              "legs_quad",
                               "legs_glutes",
+                              "chest_mid",
+                              "legs_quad_outer",
                               "legs_glutes_max"
                     ],
-                    "isLowerUpperComplex": true,
-                    "isFullBodyMetcon": true,
+                    "isComplex": true,
                     "proof": "Yere inip şınav çekmek göğüs, omuz ve tricepsi; ayakları karna çekip yukarı sıçramak ise karın, ön bacak, kalça ve kalfları çalıştırır."
           },
           "db_pullover_to_halo": {
-                    "primary": "Kanatlar (Sırt Genişliği), Arka ve Yan Omuz + Omuz İç Denge Kasları",
-                    "secondary": "Orta Göğüs & Yan Göğüs Kaburga Kasları, Triceps İç/Uzun Kısım, Derin İç Karın (Core)",
+                    "primary": "Kanatlar, Arka Omuz, Yan Omuz, Ön Karın",
+                    "secondary": "Orta Göğüs, Arka Kol Uzun Baş, Üst Sırt & Trapez, Derin İç Karın",
                     "subKey": "back_lats",
+                    "primarySubKeys": [
+                              "back_lats",
+                              "shoulders_rear",
+                              "shoulders_side",
+                              "core_front"
+                    ],
+                    "secondarySubKeys": [
+                              "chest_mid",
+                              "triceps_long",
+                              "traps",
+                              "core_deep"
+                    ],
                     "allSubKeys": [
                               "back_lats",
                               "shoulders_rear",
-                              "core_front",
-                              "shoulders_side"
+                              "shoulders_side",
+                              "core_front"
                     ],
                     "isComplex": true,
                     "proof": "Yatarken ağırlığı baş gerisinden çekmek kanat ve göğüs kafesini çalıştırır; ardından baş etrafında döndürmek (Halo) arka/yan omuz ve omuz iç kaslarını açar."
           },
           "db_seesaw_lunge": {
-                    "primary": "Ön Bacak (Diz Üstü İç ve Dış Kısım), Ana ve Yan Kalça",
-                    "secondary": "Arka Bacak, Kalf & Ayak Bileği Denge Kasları, Derin İç Karın (Core)",
+                    "primary": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça, Yan Kalça",
+                    "secondary": "Orta Ön Bacak, Derin İç Karın",
                     "subKey": "legs_quad",
+                    "primarySubKeys": [
+                              "legs_quad_inner",
+                              "legs_quad_outer",
+                              "legs_glutes_max",
+                              "legs_glutes_med"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_quad_mid",
+                              "core_deep"
+                    ],
                     "allSubKeys": [
                               "legs_quad",
                               "legs_glutes",
-                              "legs_hamstrings",
                               "legs_quad_inner",
                               "legs_quad_outer",
+                              "legs_glutes_max",
                               "legs_glutes_med"
                     ],
                     "isComplex": true,
                     "proof": "Bir ayak yerde sabitken diğer ayakla hiç durmadan bir ileri bir geri lunge yapmak, sabit kalan bacağın ön kısmını ve kalçasını aralıksız çalıştırır."
           },
           "db_clean_squat_press": {
-                    "primary": "Ön Bacak, Ön ve Yan Omuz, Ana Kalça Kası, Arka Bacak",
-                    "secondary": "Karın, Yan Karın & Alt Sırt/Bel (Core), Üst ve Orta Sırt (Trapez), Triceps (Arka Kol), Ön Kol & Kavrama Kasları, Üst ve Alt Kalf (Baldır)",
-                    "subKey": "shoulders_front",
-                    "allSubKeys": [
-                              "shoulders_front",
-                              "legs_hamstrings",
-                              "legs_quad",
-                              "back_mid",
-                              "shoulders_side",
+                    "primary": "Dış Ön Bacak, İç Ön Bacak, Ana Kalça, Ön Omuz",
+                    "secondary": "Yan Omuz, Arka Bacak, Üst Sırt & Trapez, Arka Kol Alt Baş, Derin İç Karın",
+                    "subKey": "legs_quad",
+                    "primarySubKeys": [
                               "legs_quad_outer",
+                              "legs_quad_inner",
+                              "legs_glutes_max",
+                              "shoulders_front"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_side",
                               "legs_ham_hinge",
+                              "traps",
+                              "triceps_medial",
+                              "core_deep"
+                    ],
+                    "allSubKeys": [
+                              "legs_quad",
                               "legs_glutes",
+                              "shoulders_front",
+                              "legs_quad_outer",
+                              "legs_quad_inner",
                               "legs_glutes_max"
                     ],
-                    "isLowerUpperComplex": true,
                     "isComplex": true,
                     "proof": "Clean aşamasında arka bacak ve kalça patlayıcı gücü üretir; Front Squat aşamasında ön bacak ve kalça çömelmeyi yönetir; Push Press aşamasında ise omuzlar ana itişi yaparken karın/bel, trapez, triceps, ön kol ve kalflar hareketi destekler."
           },
           "db_rdl_to_high_pull": {
-                    "primary": "Arka Bacak, Ana Kalça Kası, Üst ve Orta Sırt (Trapez), Yan ve Ön Omuz",
-                    "secondary": "Alt Sırt & Bel Kasları (Omurga Doğrultucu), Ön ve Yan Karın (Core), Ön Kol & Kavrama Kasları, Ön Bacak (Geçiş İtiş Desteği)",
+                    "primary": "Arka Bacak, Ana Kalça, Üst Sırt & Trapez, Yan Omuz",
+                    "secondary": "Arka Bacak & Kalça Bağı, Orta Sırt, Arka Omuz, Alt Sırt & Bel, Ön Kol & Dış Pazı",
                     "subKey": "legs_hamstrings",
+                    "primarySubKeys": [
+                              "legs_ham_hinge",
+                              "legs_glutes_max",
+                              "traps",
+                              "shoulders_side"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_ham_chain",
+                              "back_mid",
+                              "shoulders_rear",
+                              "back_lower",
+                              "brachialis"
+                    ],
                     "allSubKeys": [
                               "legs_hamstrings",
                               "legs_glutes",
                               "back_mid",
-                              "shoulders_rear",
-                              "shoulders_front",
-                              "traps",
+                              "shoulders_side",
                               "legs_ham_hinge",
-                              "legs_glutes_max"
+                              "legs_glutes_max",
+                              "traps"
                     ],
-                    "isLowerUpperComplex": true,
                     "isComplex": true,
                     "proof": "RDL (öne eğilme) fazında arka bacak ve ana kalça kası yükü çekerken; High Pull (yukarı çekiş) fazında omuz silkme ile trapezler ve yan/ön omuzlar ağırlığı göğüs/çene hizasına ivmelendirir."
           },
           "db_swing_to_goblet_squat": {
-                    "primary": "Ana Kalça Kası, Arka Bacak, Ön Bacak",
-                    "secondary": "Alt Sırt & Bel Kasları, Ön ve Derin İç Karın (Core), Biceps & Ön Kol",
-                    "subKey": "legs_quad",
-                    "allSubKeys": [
-                              "legs_quad",
-                              "legs_hamstrings",
-                              "legs_glutes",
-                              "core_front",
+                    "primary": "Ana Kalça, Arka Bacak & Kalça Bağı, Dış Ön Bacak, İç Ön Bacak",
+                    "secondary": "Arka Bacak, Alt Sırt & Bel, Derin İç Karın, Ön Kol & Dış Pazı",
+                    "subKey": "legs_glutes",
+                    "primarySubKeys": [
+                              "legs_glutes_max",
+                              "legs_ham_chain",
                               "legs_quad_outer",
+                              "legs_quad_inner"
+                    ],
+                    "secondarySubKeys": [
                               "legs_ham_hinge",
-                              "legs_glutes_max"
+                              "back_lower",
+                              "core_deep",
+                              "brachialis"
+                    ],
+                    "allSubKeys": [
+                              "legs_glutes",
+                              "legs_hamstrings",
+                              "legs_quad",
+                              "legs_glutes_max",
+                              "legs_ham_chain",
+                              "legs_quad_outer",
+                              "legs_quad_inner"
                     ],
                     "isComplex": true,
                     "proof": "İlk savuruşta (Swing) kalça ve arka bacak çalışır; ağırlığı göğüste yakalayıp çömeldiğinde (Goblet Squat) ise ön bacak devreye girer."
           },
           "db_lunge_to_curl_press": {
-                    "primary": "Ön Bacak & Ana Kalça Kası, Biceps, Ön ve Yan Omuz",
-                    "secondary": "Yan Kalça (Denge), Triceps, Ön Kol, Derin İç Karın (Core)",
+                    "primary": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça, Ön Kol & Dış Pazı, Pazı Dış Baş, Ön Omuz",
+                    "secondary": "Yan Omuz, Yan Kalça, Arka Kol Alt Baş, Derin İç Karın",
                     "subKey": "legs_quad",
+                    "primarySubKeys": [
+                              "legs_quad_inner",
+                              "legs_quad_outer",
+                              "legs_glutes_max",
+                              "brachialis",
+                              "biceps_long",
+                              "shoulders_front"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_side",
+                              "legs_glutes_med",
+                              "triceps_medial",
+                              "core_deep"
+                    ],
                     "allSubKeys": [
                               "legs_quad",
                               "legs_glutes",
                               "biceps",
                               "shoulders_front",
-                              "shoulders_side",
-                              "biceps_short",
                               "legs_quad_inner",
+                              "legs_quad_outer",
                               "legs_glutes_max",
-                              "legs_glutes_med"
+                              "brachialis",
+                              "biceps_long"
                     ],
-                    "isLowerUpperComplex": true,
                     "isComplex": true,
                     "proof": "Adım alıp çömelirken ön bacak ve kalça, kalkarken dambılı büktüğünde biceps, baş üstüne ittiğinde ise ön/yan omuz ve triceps sırasıyla çalışır."
           },
           "db_gorilla_row_to_clean": {
-                    "primary": "Kanatlar (Sırt Genişliği), Üst Sırt & Kürek Kemiği (Trapez & Orta Sırt), Ana Kalça Kası",
-                    "secondary": "Biceps (Pazı), Arka Bacak & Alt Sırt/Bel (Eğik Duruş Dengesi), Ön Omuz (Omuzda Sabitleme), Ön ve Yan Karın (Core), Ön Kol & Kavrama Kasları",
-                    "subKey": "back_mid",
-                    "allSubKeys": [
-                              "back_mid",
-                              "legs_hamstrings",
-                              "legs_glutes",
-                              "shoulders_rear",
+                    "primary": "Kanatlar, Orta Sırt, Üst Sırt & Trapez, Ana Kalça",
+                    "secondary": "Arka Bacak, Alt Sırt & Bel, Pazı Dış Baş, Ön Kol & Dış Pazı, Derin İç Karın",
+                    "subKey": "back_lats",
+                    "primarySubKeys": [
                               "back_lats",
+                              "back_mid",
                               "traps",
                               "legs_glutes_max"
                     ],
-                    "isLowerUpperComplex": true,
+                    "secondarySubKeys": [
+                              "legs_ham_hinge",
+                              "back_lower",
+                              "biceps_long",
+                              "brachialis",
+                              "core_deep"
+                    ],
+                    "allSubKeys": [
+                              "back_lats",
+                              "back_mid",
+                              "legs_glutes",
+                              "traps",
+                              "legs_glutes_max"
+                    ],
                     "isComplex": true,
                     "proof": "Row aşamasında kanatlar ve üst sırt/kürek kemikleri dambılı yerden çeker; Clean aşamasında ise kalça patlaması ve trapez silkmesiyle ağırlık omuz hizasına alınır."
           },
           "db_floor_press_to_bridge": {
-                    "primary": "Orta Göğüs, Ana Kalça Kası, Triceps (Dış ve Alt Kısım)",
-                    "secondary": "Ön Omuz, Arka Bacak, Alt Sırt & Derin İç Karın (Köprü Duruşu)",
+                    "primary": "Orta Göğüs, Ana Kalça, Arka Kol Dış Baş, Arka Kol Alt Baş",
+                    "secondary": "Ön Omuz, Arka Bacak & Kalça Bağı, Derin İç Karın",
                     "subKey": "chest_mid",
+                    "primarySubKeys": [
+                              "chest_mid",
+                              "legs_glutes_max",
+                              "triceps_lateral",
+                              "triceps_medial"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_front",
+                              "legs_ham_chain",
+                              "core_deep"
+                    ],
                     "allSubKeys": [
                               "chest_mid",
                               "legs_glutes",
-                              "triceps_long",
-                              "legs_glutes_max"
+                              "triceps_lateral",
+                              "legs_glutes_max",
+                              "triceps_medial"
                     ],
-                    "isLowerUpperComplex": true,
                     "isComplex": true,
                     "proof": "Kalçayı yukarı kaldırıp sıkarak (ana kalça) tutarken aynı anda dambılları yukarı preslemek (orta göğüs ve triceps) alt ve üst vücudu birlikte çalıştırır."
           },
           "db_step_back_lunge_to_knee_drive": {
-                    "primary": "Ön Bacak, Ana ve Yan Kalça, Ön Omuz, Ön Kalça Kası (Diz Çekme)",
-                    "secondary": "Yan Karın (Tek Kol Denge), Triceps, Kalf (Baldır)",
-                    "subKey": "shoulders_front",
-                    "allSubKeys": [
-                              "shoulders_front",
-                              "legs_quad",
-                              "core_obliques",
+                    "primary": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça, Ön Omuz",
+                    "secondary": "Orta Ön Bacak, Yan Kalça, Yan Karın, Arka Kol Alt Baş",
+                    "subKey": "legs_quad",
+                    "primarySubKeys": [
                               "legs_quad_inner",
-                              "legs_glutes",
-                              "legs_glutes_med"
+                              "legs_quad_outer",
+                              "legs_glutes_max",
+                              "shoulders_front"
                     ],
-                    "isLowerUpperComplex": true,
+                    "secondarySubKeys": [
+                              "legs_quad_mid",
+                              "legs_glutes_med",
+                              "core_obliques",
+                              "triceps_medial"
+                    ],
+                    "allSubKeys": [
+                              "legs_quad",
+                              "legs_glutes",
+                              "shoulders_front",
+                              "legs_quad_inner",
+                              "legs_quad_outer",
+                              "legs_glutes_max"
+                    ],
                     "isComplex": true,
                     "proof": "Geri lunge'dan tek ayak üzerinde yükselip arka dizi yukarı çekerken aynı anda tek kol omuz presi yapmak; ön bacak, kalça, ön kalça ve omzu birlikte çalıştırır."
           },
           "bw_inchworm_to_pushup": {
-                    "primary": "Orta Göğüs, Ön Omuz, Triceps (Arka Kol), Ön ve Derin İç Karın (Core)",
-                    "secondary": "Arka Bacak (Esnetme & Mobilite), Alt Sırt/Bel & Ana Kalça Kası, Üst Sırt, Kanatlar & Yan Göğüs Kasları (Kürek Kemiği Sabitleme)",
+                    "primary": "Orta Göğüs, Ön Karın, Derin İç Karın",
+                    "secondary": "Ön Omuz, Arka Kol Dış Baş, Arka Kol Alt Baş, Arka Bacak",
                     "subKey": "chest_mid",
-                    "allSubKeys": [
+                    "primarySubKeys": [
                               "chest_mid",
-                              "legs_hamstrings",
                               "core_front",
-                              "shoulders_front",
                               "core_deep"
                     ],
-                    "isLowerUpperComplex": true,
+                    "secondarySubKeys": [
+                              "shoulders_front",
+                              "triceps_lateral",
+                              "triceps_medial",
+                              "legs_ham_hinge"
+                    ],
+                    "allSubKeys": [
+                              "chest_mid",
+                              "core_front",
+                              "core_deep"
+                    ],
                     "isComplex": true,
                     "proof": "Eller üzerinde yürürken ve şınav çekerken göğüs, ön omuz, triceps ve karın (core) ana işi üstlenir; başlangıç ve bitişteki eğilme/yürüme fazında arka bacaklar esner, bel/kalça ve üst sırt/kanatlar duruşu korur."
           },
           "db_rotational_lunge_chop": {
-                    "primary": "Ön Bacak & Ana Kalça Kası, Yan Karın (Bel Yanları)",
-                    "secondary": "Yan Kalça (Denge), Ön Omuz, Derin İç Karın (Core)",
+                    "primary": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça, Yan Karın",
+                    "secondary": "Ön Omuz, Yan Kalça, Derin İç Karın",
                     "subKey": "legs_quad",
+                    "primarySubKeys": [
+                              "legs_quad_inner",
+                              "legs_quad_outer",
+                              "legs_glutes_max",
+                              "core_obliques"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_front",
+                              "legs_glutes_med",
+                              "core_deep"
+                    ],
                     "allSubKeys": [
                               "legs_quad",
                               "legs_glutes",
                               "core_obliques",
-                              "shoulders_front",
                               "legs_quad_inner",
-                              "legs_glutes_max",
-                              "legs_glutes_med"
+                              "legs_quad_outer",
+                              "legs_glutes_max"
                     ],
-                    "isLowerUpperComplex": true,
                     "isComplex": true,
-                    "proof": "Lunge adımıyla çömelirken dambılı çapraz aşağı savurmak, bacak ve kalçayla birlikte bel yanlarındaki dönüş kaslarını (yan karın) güçlü çalıştırır."
+                    "proof": "Ters lunge adımından doğrulurken gövdeyi 180° çevirip dambılı çapraz yukarı savurmak; ön bacak ve ana kalçayla birlikte yan karın kaslarını patlayıcı çalıştırır."
           },
           "db_rotational_gorilla_row": {
-                    "primary": "Kanatlar (Sırt Genişliği), Orta Sırt & Kürek Kemiği Kasları",
-                    "secondary": "Yan Karın (Bel Yanları), Arka Omuz, Biceps & Ön Kol, Alt Sırt",
+                    "primary": "Kanatlar, Orta Sırt",
+                    "secondary": "Yan Karın, Arka Omuz, Alt Sırt & Bel, Pazı Dış Baş, Ön Kol & Dış Pazı",
                     "subKey": "back_lats",
+                    "primarySubKeys": [
+                              "back_lats",
+                              "back_mid"
+                    ],
+                    "secondarySubKeys": [
+                              "core_obliques",
+                              "shoulders_rear",
+                              "back_lower",
+                              "biceps_long",
+                              "brachialis"
+                    ],
                     "allSubKeys": [
                               "back_lats",
-                              "back_mid",
-                              "shoulders_rear",
-                              "core_obliques"
+                              "back_mid"
                     ],
                     "isComplex": false,
                     "proof": "Eğik duruşta dambılı çekerken gövdeyi de hafifçe döndürmek, kanat ve orta sırt çekişine yan karın (oblik) ve arka omuz kaslarını dahil eder."
           },
           "db_single_arm_rear_delt_row": {
                     "primary": "Arka Omuz",
-                    "secondary": "Orta Sırt & Kürek Kemiği Kasları, Omuz İç Denge Kasları, Biceps Altı Dış Kol Kası",
+                    "secondary": "Orta Sırt, Ön Kol & Dış Pazı",
                     "subKey": "shoulders_rear",
+                    "primarySubKeys": [
+                              "shoulders_rear"
+                    ],
+                    "secondarySubKeys": [
+                              "back_mid",
+                              "brachialis"
+                    ],
                     "allSubKeys": [
-                              "shoulders_rear",
-                              "back_mid"
+                              "shoulders_rear"
                     ],
                     "isComplex": false,
                     "proof": "Öne eğilip dirseği vücuda yapıştırmak yerine yana doğru geniş açıyla çekmek, yükü kanatlardan alıp doğrudan arka omuza ve kürek kemiği çevresine verir."
           },
           "db_high_pull_cuban_rotation": {
-                    "primary": "Omuz İç Denge Kasları, Arka Omuz, Üst ve Orta Sırt (Trapez & Kürek Kemiği Kasları)",
-                    "secondary": "Kanatlar (Başlangıç Çekişi), Yan Omuz, Biceps & Ön Kol, Alt Sırt/Bel, Karın (Core), Arka Bacak & Kalça (Eğik Duruş Sabitleme)",
+                    "primary": "Arka Omuz, Orta Sırt, Üst Sırt & Trapez",
+                    "secondary": "Yan Omuz, Alt Sırt & Bel, Ön Kol & Dış Pazı",
                     "subKey": "shoulders_rear",
+                    "primarySubKeys": [
+                              "shoulders_rear",
+                              "back_mid",
+                              "traps"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_side",
+                              "back_lower",
+                              "brachialis"
+                    ],
                     "allSubKeys": [
                               "shoulders_rear",
                               "back_mid",
-                              "core_front",
                               "traps"
                     ],
-                    "isLowerUpperComplex": true,
                     "isComplex": true,
                     "proof": "Eğilerek yapılan yüksek çekiş ve kolları yukarı döndürme (Cuban rotasyon) hareketinde omuz iç denge kasları (rotator manşet), arka omuz, trapez ve kürek kemiği kasları ana yükü çeker; eğik duruşta bel, karın ve arka bacak/kalça vücudu sabit tutar."
           },
           "db_dumbbell_shrug_burnout": {
-                    "primary": "Üst Sırt & Boyun Kökü (Üst Trapez)",
-                    "secondary": "Orta Trapez, Ön Kol & El Bileği Kavrama Kasları",
+                    "primary": "Üst Sırt & Trapez",
+                    "secondary": "Orta Sırt, Ön Kol & Dış Pazı",
                     "subKey": "back_mid",
+                    "primarySubKeys": [
+                              "traps"
+                    ],
+                    "secondarySubKeys": [
+                              "back_mid",
+                              "brachialis"
+                    ],
                     "allSubKeys": [
                               "back_mid",
                               "traps"
@@ -1393,154 +2577,294 @@
                     "proof": "Kolları bükmeden omuzları kulaklara doğru yukarı çekip sıkmak, doğrudan boyun iki yanındaki üst trapez kaslarını çalıştırır."
           },
           "db_quadruped_external_rotation": {
-                    "primary": "Arka Omuz, Omuz İç Denge Kasları",
-                    "secondary": "Orta Sırt & Kürek Kemiği Kasları, Derin İç Karın & Yan Karın (Core)",
+                    "primary": "Arka Omuz",
+                    "secondary": "Orta Sırt, Derin İç Karın",
                     "subKey": "shoulders_rear",
+                    "primarySubKeys": [
+                              "shoulders_rear"
+                    ],
+                    "secondarySubKeys": [
+                              "back_mid",
+                              "core_deep"
+                    ],
                     "allSubKeys": [
-                              "shoulders_rear",
-                              "core_front"
+                              "shoulders_rear"
                     ],
                     "isComplex": false,
                     "proof": "Dört ayak üzerinde tek kolu yana açıp döndürmek arka omuz ve omuz iç kaslarını çalıştırırken, üç uzuv üstünde düz kalmak karın ve kürek kemiği kaslarını dengeler."
           },
           "bw_jumping_jack": {
-                    "primary": "Üst ve Alt Kalf (Baldır), Yan Omuz, Yan Kalça & İç Bacak",
-                    "secondary": "Üst Trapez, Ön ve Derin İç Karın (Core)",
-                    "subKey": "shoulders_side",
-                    "allSubKeys": [
+                    "primary": "Üst Baldır, Alt Baldır, Yan Omuz, Yan Kalça",
+                    "secondary": "Üst Sırt & Trapez, Derin İç Karın",
+                    "subKey": "legs_calves",
+                    "primarySubKeys": [
+                              "calves_gastroc",
+                              "calves_soleus",
                               "shoulders_side",
+                              "legs_glutes_med"
+                    ],
+                    "secondarySubKeys": [
+                              "traps",
+                              "core_deep"
+                    ],
+                    "allSubKeys": [
                               "legs_calves",
-                              "legs_quad",
-                              "core_front",
+                              "shoulders_side",
                               "legs_glutes",
+                              "calves_gastroc",
+                              "calves_soleus",
                               "legs_glutes_med"
                     ],
                     "isComplex": false,
                     "proof": "Zıplayarak bacakları ve kolları açıp kapamak; parmak ucunda sıçrama ile kalfları, kolları yukarı kaldırma ile yan omuzları, bacak açma ile yan kalça ve iç bacağı çalıştırır."
           },
           "bw_high_knees": {
-                    "primary": "Alt Karın & Ön Kalça Kası, Ön Bacak Orta Kısım, Üst ve Alt Kalf (Baldır)",
-                    "secondary": "Yan Kalça (Tek Ayak Denge), Yan Karın (Core)",
-                    "subKey": "legs_quad",
-                    "allSubKeys": [
-                              "legs_quad",
+                    "primary": "Ön Karın, Orta Ön Bacak, Üst Baldır",
+                    "secondary": "Alt Baldır, Yan Kalça",
+                    "subKey": "core_front",
+                    "primarySubKeys": [
                               "core_front",
+                              "legs_quad_mid",
+                              "calves_gastroc"
+                    ],
+                    "secondarySubKeys": [
+                              "calves_soleus",
+                              "legs_glutes_med"
+                    ],
+                    "allSubKeys": [
+                              "core_front",
+                              "legs_quad",
                               "legs_calves",
-                              "legs_quad_mid"
+                              "legs_quad_mid",
+                              "calves_gastroc"
                     ],
                     "isComplex": false,
                     "proof": "Olduğun yerde dizleri hızla bel hizasına çekerek koşmak; bacağı yukarı çeken ön kalça ve alt karın kasları ile yerden sıçrayan kalfları çalıştırır."
           },
           "bw_jump_rope": {
-                    "primary": "Üst ve Alt Kalf (Baldır), Ayak Bileği Denge Kasları",
-                    "secondary": "Ön Kol & Bilek Kasları, Yan Omuz (Sabit Tutuş), Derin İç Karın (Core)",
+                    "primary": "Üst Baldır, Alt Baldır, Ön Kaval & Bilek",
+                    "secondary": "Ön Kol & Dış Pazı, Yan Omuz, Derin İç Karın",
                     "subKey": "legs_calves",
+                    "primarySubKeys": [
+                              "calves_gastroc",
+                              "calves_soleus",
+                              "calves_tibialis"
+                    ],
+                    "secondarySubKeys": [
+                              "brachialis",
+                              "shoulders_side",
+                              "core_deep"
+                    ],
                     "allSubKeys": [
                               "legs_calves",
-                              "shoulders_side",
-                              "core_front"
+                              "calves_gastroc",
+                              "calves_soleus",
+                              "calves_tibialis"
                     ],
                     "isComplex": false,
                     "proof": "Parmak ucunda ritmik sıçramak doğrudan üst ve alt kalf (baldır) ile ayak bileği kaslarını, ip çevirme hareketi ise ön kol ve omuzları çalıştırır."
           },
           "bw_butt_kicks": {
-                    "primary": "Arka Bacak (Diz Büken Kısım), Üst ve Alt Kalf (Baldır)",
-                    "secondary": "Ana Kalça Kası, Derin İç Karın (Core)",
-                    "subKey": "legs_ham",
+                    "primary": "Diz Büken Arka Bacak, Üst Baldır, Alt Baldır",
+                    "secondary": "Ana Kalça, Derin İç Karın",
+                    "subKey": "legs_hamstrings",
+                    "primarySubKeys": [
+                              "legs_ham_curl",
+                              "calves_gastroc",
+                              "calves_soleus"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_glutes_max",
+                              "core_deep"
+                    ],
                     "allSubKeys": [
-                              "legs_ham",
-                              "legs_calves",
                               "legs_hamstrings",
-                              "legs_ham_curl"
+                              "legs_calves",
+                              "legs_ham_curl",
+                              "calves_gastroc",
+                              "calves_soleus"
                     ],
                     "isComplex": false,
                     "proof": "Koşarken topukları hızla kalçaya vurmak dizleri büken arka bacak kaslarını, parmak ucunda yaylanmak ise kalf (baldır) kaslarını çalıştırır."
           },
           "bw_skater_jumps": {
-                    "primary": "Yan Kalça (Dış Kalça & Denge Kası), Ana Kalça Kası, Ön Bacak",
-                    "secondary": "Kalf & Ayak Bileği Denge Kasları, Yan Karın (Core), İç Bacak",
-                    "subKey": "legs_glute",
-                    "allSubKeys": [
-                              "legs_glute",
-                              "legs_quad",
-                              "legs_calves",
-                              "core_obliques",
-                              "legs_quad_outer",
-                              "legs_glutes",
+                    "primary": "Yan Kalça, Ana Kalça, Dış Ön Bacak",
+                    "secondary": "Üst Baldır, Ön Kaval & Bilek, Yan Karın",
+                    "subKey": "legs_glutes",
+                    "primarySubKeys": [
+                              "legs_glutes_med",
                               "legs_glutes_max",
-                              "legs_glutes_med"
+                              "legs_quad_outer"
+                    ],
+                    "secondarySubKeys": [
+                              "calves_gastroc",
+                              "calves_tibialis",
+                              "core_obliques"
+                    ],
+                    "allSubKeys": [
+                              "legs_glutes",
+                              "legs_quad",
+                              "legs_glutes_med",
+                              "legs_glutes_max",
+                              "legs_quad_outer"
                     ],
                     "isComplex": false,
                     "proof": "Buz patencisi gibi sağa ve sola tek ayak üstüne sıçramak; yana itiş yapan yan kalça, ana kalça ve ön bacak kaslarını patlayıcı çalıştırır."
           },
           "bw_plank_jacks": {
-                    "primary": "Derin İç Karın & Ön Karın (Core), Yan Kalça & İç Bacak",
-                    "secondary": "Ön Omuz & Triceps (Kolları Sabit Tutma), Kalf (Baldır)",
+                    "primary": "Derin İç Karın, Ön Karın",
+                    "secondary": "Yan Kalça, Ön Omuz, Üst Baldır",
                     "subKey": "core_front",
+                    "primarySubKeys": [
+                              "core_deep",
+                              "core_front"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_glutes_med",
+                              "shoulders_front",
+                              "calves_gastroc"
+                    ],
                     "allSubKeys": [
                               "core_front",
-                              "core_obliques",
-                              "shoulders_front",
-                              "core_deep",
-                              "legs_glutes",
-                              "legs_glutes_med"
+                              "core_deep"
                     ],
                     "isComplex": false,
                     "proof": "Şınav/Plank duruşunda beli düşürmeden ayakları zıplayarak açıp kapamak; ön/derin karın kaslarını, omuzları ve yan kalça/iç bacak kaslarını çalıştırır."
           },
           "bw_squat_thrust": {
-                    "primary": "Ön Bacak, Ana Kalça Kası, Ön ve Derin İç Karın (Core)",
-                    "secondary": "Ön Kalça Kası, Ön Omuz & Orta Göğüs, Triceps",
+                    "primary": "Dış Ön Bacak, Ana Kalça, Ön Karın, Derin İç Karın",
+                    "secondary": "Ön Omuz, Orta Göğüs, Üst Baldır",
                     "subKey": "legs_quad",
+                    "primarySubKeys": [
+                              "legs_quad_outer",
+                              "legs_glutes_max",
+                              "core_front",
+                              "core_deep"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_front",
+                              "chest_mid",
+                              "calves_gastroc"
+                    ],
                     "allSubKeys": [
                               "legs_quad",
-                              "legs_glute",
-                              "core_front",
-                              "shoulders_front",
-                              "core_deep",
-                              "legs_quad_outer",
                               "legs_glutes",
-                              "legs_glutes_max"
+                              "core_front",
+                              "legs_quad_outer",
+                              "legs_glutes_max",
+                              "core_deep"
                     ],
                     "isComplex": false,
                     "proof": "Çömelip elleri yere koyarak ayakları geriye fırlatmak ve tekrar toplayıp ayağa kalkmak; ön bacak, kalça ve karın (core) kaslarını birlikte çalıştırır."
           },
           "bw_lateral_shuffle": {
-                    "primary": "Yan Kalça, Ön Bacak (Dış ve İç Kısım), İç Bacak Kasları",
-                    "secondary": "Üst ve Alt Kalf (Baldır), Ana Kalça Kası, Derin İç Karın (Core)",
-                    "subKey": "legs_quad",
-                    "allSubKeys": [
-                              "legs_quad",
-                              "legs_glute",
-                              "legs_calves",
+                    "primary": "Yan Kalça, Dış Ön Bacak, İç Ön Bacak",
+                    "secondary": "Üst Baldır, Ön Kaval & Bilek, Derin İç Karın",
+                    "subKey": "legs_glutes",
+                    "primarySubKeys": [
+                              "legs_glutes_med",
                               "legs_quad_outer",
+                              "legs_quad_inner"
+                    ],
+                    "secondarySubKeys": [
+                              "calves_gastroc",
+                              "calves_tibialis",
+                              "core_deep"
+                    ],
+                    "allSubKeys": [
                               "legs_glutes",
-                              "legs_glutes_med"
+                              "legs_quad",
+                              "legs_glutes_med",
+                              "legs_quad_outer",
+                              "legs_quad_inner"
                     ],
                     "isComplex": false,
                     "proof": "Dizler hafif bükülü alçak duruşta sağa sola hızlı adımlamak; sürekli bükülü kalan ön bacağı, yana itiş yapan yan kalçayı ve iç bacakları çalıştırır."
           },
           "cond_indoor_row": {
-                    "primary": "Kanat (Latissimus), Orta Sırt (Rhomboid/Trapez), Ön Bacak & Ana Kalça Kası",
-                    "secondary": "Arka Omuz, Biceps & Ön Kol, Arka Bacak, Derin İç Karın (Core)",
+                    "primary": "Kanatlar, Orta Sırt, Dış Ön Bacak, Ana Kalça",
+                    "secondary": "Arka Omuz, Pazı Dış Baş, Ön Kol & Dış Pazı, Arka Bacak, Ön Karın",
                     "subKey": "back_lats",
-                    "allSubKeys": ["back_lats", "back_mid", "legs_quad", "legs_glutes", "shoulders_rear", "core_front"],
+                    "primarySubKeys": [
+                              "back_lats",
+                              "back_mid",
+                              "legs_quad_outer",
+                              "legs_glutes_max"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_rear",
+                              "biceps_long",
+                              "brachialis",
+                              "legs_ham_hinge",
+                              "core_front"
+                    ],
+                    "allSubKeys": [
+                              "back_lats",
+                              "back_mid",
+                              "legs_quad",
+                              "legs_glutes",
+                              "legs_quad_outer",
+                              "legs_glutes_max"
+                    ],
                     "isComplex": false,
                     "proof": "Kürek ergometresinde itiş fazının %60'ı bacak ve kalça itişinden, %20'si gövde menteşesinden, %20'si ise kanat, orta sırt ve kol çekişinden üretilir."
           },
           "cond_walking": {
-                    "primary": "Üst ve Alt Kalf (Baldır), Ön Bacak, Ana ve Yan Kalça Kasları",
-                    "secondary": "Arka Bacak, Ön Kaval Kemiği (Tibialis Anterior), Derin İç Karın (Core)",
+                    "primary": "Üst Baldır, Alt Baldır, Dış Ön Bacak, Ana Kalça",
+                    "secondary": "Yan Kalça, Ön Kaval & Bilek, Arka Bacak, Derin İç Karın",
                     "subKey": "legs_calves",
-                    "allSubKeys": ["legs_calves", "legs_quad", "legs_glutes", "legs_glutes_med", "core_front"],
+                    "primarySubKeys": [
+                              "calves_gastroc",
+                              "calves_soleus",
+                              "legs_quad_outer",
+                              "legs_glutes_max"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_glutes_med",
+                              "calves_tibialis",
+                              "legs_ham_hinge",
+                              "core_deep"
+                    ],
+                    "allSubKeys": [
+                              "legs_calves",
+                              "legs_quad",
+                              "legs_glutes",
+                              "calves_gastroc",
+                              "calves_soleus",
+                              "legs_quad_outer",
+                              "legs_glutes_max"
+                    ],
                     "isComplex": false,
                     "proof": "Tempolu ve eğimli yürüyüş; her adımda ayak bileği itişiyle kalfları, diz ve kalça açılımıyla ön bacak ile kalça kaslarını aerobik dayanıklılık altında çalıştırır."
           },
           "cond_running": {
-                    "primary": "Üst ve Alt Kalf (Baldır), Arka Bacak, Ön Bacak & Ana Kalça Kası",
-                    "secondary": "Ön Kalça (İliopsoas), Yan Kalça (Tek Ayak Denge), Derin İç Karın (Core)",
+                    "primary": "Üst Baldır, Alt Baldır, Arka Bacak, Dış Ön Bacak, Ana Kalça",
+                    "secondary": "Orta Ön Bacak, Yan Kalça, Ön Kaval & Bilek, Derin İç Karın",
                     "subKey": "legs_calves",
-                    "allSubKeys": ["legs_calves", "legs_hamstrings", "legs_quad", "legs_glutes", "legs_glutes_med", "core_front"],
+                    "primarySubKeys": [
+                              "calves_gastroc",
+                              "calves_soleus",
+                              "legs_ham_hinge",
+                              "legs_quad_outer",
+                              "legs_glutes_max"
+                    ],
+                    "secondarySubKeys": [
+                              "legs_quad_mid",
+                              "legs_glutes_med",
+                              "calves_tibialis",
+                              "core_deep"
+                    ],
+                    "allSubKeys": [
+                              "legs_calves",
+                              "legs_hamstrings",
+                              "legs_quad",
+                              "legs_glutes",
+                              "calves_gastroc",
+                              "calves_soleus",
+                              "legs_ham_hinge",
+                              "legs_quad_outer",
+                              "legs_glutes_max"
+                    ],
                     "isComplex": false,
                     "proof": "Koşu sırasında yere temas ve itiş fazı kalf, arka bacak ve kalçayı yüksek elastik gerilimle yüklerken, tek ayak üzerindeki denge fazı yan kalça ve core kaslarını çalıştırır."
           }
@@ -2666,6 +3990,110 @@
             };
         }
 
+        function toLocalYmdString(dateInput = new Date()) {
+            const d = (dateInput instanceof Date) ? dateInput : new Date(dateInput);
+            if (isNaN(d.getTime())) return '';
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+        window.toLocalYmdString = toLocalYmdString;
+
+        function parseWorkoutLogDateLocal(lg) {
+            if (!lg) return null;
+            const rawD = String(lg.date || '').trim();
+            const isoDayMatch = rawD.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+            let candidateTs = null;
+            if (lg.timestamp && !isNaN(Number(lg.timestamp)) && Number(lg.timestamp) > 0) {
+                const tsDate = new Date(Number(lg.timestamp));
+                if (!isNaN(tsDate.getTime())) candidateTs = tsDate;
+            }
+            if (!candidateTs && lg.completedAt && !isNaN(new Date(lg.completedAt).getTime())) {
+                candidateTs = new Date(lg.completedAt);
+            }
+            if (!candidateTs && Array.isArray(lg.exercises)) {
+                let latestSetMs = 0;
+                lg.exercises.forEach(ex => {
+                    if (!ex || !Array.isArray(ex.sets)) return;
+                    ex.sets.forEach(st => {
+                        const rawSt = st && (st.completedAt || st.watchStartTime);
+                        if (!rawSt) return;
+                        const d = new Date(rawSt);
+                        if (!isNaN(d.getTime()) && d.getTime() > latestSetMs) {
+                            latestSetMs = d.getTime();
+                        }
+                    });
+                });
+                if (latestSetMs > 0) candidateTs = new Date(latestSetMs);
+            }
+
+            if (isoDayMatch) {
+                const y = parseInt(isoDayMatch[1], 10);
+                const m = parseInt(isoDayMatch[2], 10) - 1;
+                const d = parseInt(isoDayMatch[3], 10);
+                const dayNoon = new Date(y, m, d, 12, 0, 0, 0);
+                // Eğer timestamp aynı takvim gününe (±36 saat penceresine) aitse tam dakika/saniye bilgisini koru;
+                // eski bir yedeğin içe aktarım anındaki Date.now() damgasıysa tarihi bozmasına izin verme!
+                if (candidateTs && Math.abs(candidateTs.getTime() - dayNoon.getTime()) <= 36 * 60 * 60 * 1000) {
+                    return candidateTs;
+                }
+                const fmtMatch = String(lg.dateFormatted || '').match(/(\d{1,2}):(\d{2})/);
+                if (fmtMatch) {
+                    const hh = Math.min(23, parseInt(fmtMatch[1], 10));
+                    const mm = Math.min(59, parseInt(fmtMatch[2], 10));
+                    return new Date(y, m, d, hh, mm, 0, 0);
+                }
+                const now = new Date();
+                if (now.getFullYear() === y && now.getMonth() === m && now.getDate() === d) {
+                    return new Date(now.getTime() - 60 * 60 * 1000);
+                }
+                return new Date(y, m, d, 18, 0, 0, 0);
+            }
+
+            if (candidateTs) return candidateTs;
+            if (!rawD) return null;
+            const parsed = new Date(rawD);
+            return isNaN(parsed.getTime()) ? null : parsed;
+        }
+        window.parseWorkoutLogDateLocal = parseWorkoutLogDateLocal;
+
+        function getWorkoutLogTimestampMs(lg) {
+            const d = parseWorkoutLogDateLocal(lg);
+            return d && !isNaN(d.getTime()) ? d.getTime() : 0;
+        }
+        window.getWorkoutLogTimestampMs = getWorkoutLogTimestampMs;
+
+        function sortWorkoutLogsDesc(logs) {
+            if (!Array.isArray(logs)) return [];
+            return logs.sort((a, b) => {
+                const tb = getWorkoutLogTimestampMs(b);
+                const ta = getWorkoutLogTimestampMs(a);
+                if (tb !== ta) return tb - ta;
+                return (Number(b && b.timestamp) || 0) - (Number(a && a.timestamp) || 0);
+            });
+        }
+        window.sortWorkoutLogsDesc = sortWorkoutLogsDesc;
+
+        function getPlannedSlotReferenceDate(dayIdx, isNextWeek = false, preferredHour = 19, preferredMinute = 30) {
+            const baseDate = (typeof getDateForScheduleDay === 'function')
+                ? new Date(getDateForScheduleDay(dayIdx, isNextWeek).getTime())
+                : new Date();
+            baseDate.setHours(preferredHour, preferredMinute, 0, 0);
+            const now = new Date();
+            if (
+                baseDate.getFullYear() === now.getFullYear() &&
+                baseDate.getMonth() === now.getMonth() &&
+                baseDate.getDate() === now.getDate() &&
+                baseDate.getTime() < now.getTime()
+            ) {
+                return new Date(now.getTime());
+            }
+            return baseDate;
+        }
+        window.getPlannedSlotReferenceDate = getPlannedSlotReferenceDate;
+
         function getWeeklyTrainingStatus() {
             const logs = typeof getWorkoutLogs === 'function' ? getWorkoutLogs() : [];
             const now = new Date();
@@ -2684,12 +4112,10 @@
             let completedToday = false;
 
             logs.forEach(lg => {
-                const rawD = lg.date || lg.timestamp || lg.completedAt;
-                if (!rawD) return;
-                const dObj = new Date(rawD);
-                if (isNaN(dObj.getTime())) return;
+                const dObj = parseWorkoutLogDateLocal(lg);
+                if (!dObj) return;
                 if (dObj >= monday && dObj <= sunday) {
-                    completedLogsThisWeek.push(lg);
+                    completedLogsThisWeek.push({ log: lg, dateObj: dObj });
                     completedDaysSet.add(dObj.getDay());
                     if (
                         dObj.getFullYear() === now.getFullYear() &&
@@ -2701,7 +4127,11 @@
                 }
             });
 
-            const completedThisWeekCount = Math.max(completedLogsThisWeek.length, completedDaysSet.size);
+            completedLogsThisWeek.sort((a, b) => b.dateObj.getTime() - a.dateObj.getTime());
+            const sortedThisWeekRawLogs = completedLogsThisWeek.map(item => item.log);
+            const lastCompletedDayIdx = completedLogsThisWeek.length > 0 ? completedLogsThisWeek[0].dateObj.getDay() : null;
+
+            const completedThisWeekCount = Math.max(sortedThisWeekRawLogs.length, completedDaysSet.size);
             // Cuma günü antrenman tamamlanmışsa, veya bu hafta >=3 antrenman bittiyse, veya Cumartesi/Pazar ise bu haftanın ana döngüsü tamamlanmıştır -> Gelecek Hafta hedeflenir
             const isThisWeekComplete =
                 completedThisWeekCount >= 3 ||
@@ -2725,6 +4155,9 @@
             return {
                 completedThisWeekCount,
                 completedDays: Array.from(completedDaysSet),
+                completedLogsThisWeek: sortedThisWeekRawLogs,
+                lastCompletedLogThisWeek: sortedThisWeekRawLogs[0] || null,
+                lastCompletedDayIdx,
                 completedToday,
                 todayIdx,
                 todayName: (typeof DAY_NAMES_TR !== 'undefined' && DAY_NAMES_TR[todayIdx]) ? DAY_NAMES_TR[todayIdx] : 'Bugün',
@@ -3632,31 +5065,49 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 ? getRecentAndScheduledMuscleContext()
                 : { usedExerciseIds: new Set(), subKeyVolume: {}, usedFinishers: new Set(), fatiguedMuscles48h: [] };
             const wkStatus = getWeeklyTrainingStatus();
+            const isTargetNextWeek = Boolean(wkStatus.isThisWeekComplete);
+
+            const lastMuscleMap = baseHistoryCtx.lastSessionMuscleSets || {};
+            const weekMuscleMap = baseHistoryCtx.thisWeekMuscleSets || {};
+            const lastLegSets = Number(lastMuscleMap['Bacak']) || 0;
+            const lastPushSets = (Number(lastMuscleMap['Göğüs']) || 0) + (Number(lastMuscleMap['Omuz']) || 0) + (Number(lastMuscleMap['Arka Kol/Triceps']) || 0);
+            const lastPullSets = (Number(lastMuscleMap['Sırt']) || 0) + (Number(lastMuscleMap['Ön Kol/Biceps']) || 0);
+            const lastUpperSets = lastPushSets + lastPullSets;
 
             const precheck = window.activePrecheckState || { fatigue: 'none' };
-            const legsFatiguedNow = precheck.fatigue === 'legs' || (Array.isArray(baseHistoryCtx.fatiguedMuscles48h) && baseHistoryCtx.fatiguedMuscles48h.includes('Bacak'));
-            const upperFatiguedNow = precheck.fatigue === 'upper' || (Array.isArray(baseHistoryCtx.fatiguedMuscles48h) && (baseHistoryCtx.fatiguedMuscles48h.includes('Göğüs') && baseHistoryCtx.fatiguedMuscles48h.includes('Sırt')));
-            const backFatiguedNow = precheck.fatigue === 'back';
+            const hasThisWeekCompleted = wkStatus.completedThisWeekCount > 0 && !wkStatus.isThisWeekComplete;
 
-            // Bu hafta 1 veya 2 gün antrenman yapıldıysa sadece kalan günleri yapılan güne ve geçmiş eksiklere göre üret
+            // ADIM 1: Önce kalan antrenman sayısını ve takvim günlerini (en az 1 dinlenme günü bırakarak) yerleştir
             let weeklyDays = tpl.days.map(d => Object.assign({}, d));
-            if (wkStatus.completedThisWeekCount > 0 && !wkStatus.isThisWeekComplete && weeklyDays.length > 1) {
-                const skipCount = Math.min(wkStatus.completedThisWeekCount, weeklyDays.length - 1);
-                weeklyDays = weeklyDays.slice(skipCount);
+            const remCount = (hasThisWeekCompleted && weeklyDays.length > 1)
+                ? Math.max(1, weeklyDays.length - Math.min(wkStatus.completedThisWeekCount, weeklyDays.length - 1))
+                : weeklyDays.length;
+            if (hasThisWeekCompleted && weeklyDays.length > remCount) {
+                weeklyDays = weeklyDays.slice(weeklyDays.length - remCount);
             }
 
-            // Haftanın hangi günündeysek o günden başlatıp kalan günlere dengeli dağıt
             const isoMap = (d) => (d === 0 ? 7 : d);
             if (!wkStatus.isThisWeekComplete) {
                 const todayIdx = new Date().getDay();
                 const todayIso = isoMap(todayIdx);
-                const availableDays = [];
+                const lastDoneIso = (wkStatus.lastCompletedDayIdx !== null && wkStatus.lastCompletedDayIdx !== undefined)
+                    ? isoMap(wkStatus.lastCompletedDayIdx)
+                    : 0;
+
+                const allRemainingDays = [];
                 for (let iso = todayIso; iso <= 7; iso++) {
                     const realDay = (iso === 7) ? 0 : iso;
                     if (!wkStatus.completedDays.includes(realDay)) {
-                        availableDays.push(realDay);
+                        allRemainingDays.push(realDay);
                     }
                 }
+
+                // Eğer dün veya bugün antrenman yapıldıysa ve haftada yeterli gün varsa araya 1 dinlenme günü koy (Örn: Pzt yapıldıysa Salı yerine Çarşamba'dan başlat)
+                const minRestStartIso = lastDoneIso > 0 ? Math.max(todayIso, lastDoneIso + 2) : todayIso;
+                const restedAvailableDays = allRemainingDays.filter(d => isoMap(d) >= minRestStartIso);
+                const wCountTarget = Math.min(weeklyDays.length, Math.max(1, allRemainingDays.length));
+                const availableDays = (restedAvailableDays.length >= wCountTarget) ? restedAvailableDays : allRemainingDays;
+
                 if (availableDays.length > 0) {
                     if (weeklyDays.length > availableDays.length) {
                         weeklyDays = weeklyDays.slice(0, availableDays.length);
@@ -3665,6 +5116,18 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     const assignedDays = [];
                     if (wCount === 1) {
                         assignedDays.push(availableDays[0]);
+                    } else if (wCount === 2) {
+                        const firstDay = availableDays[0];
+                        const firstIso = isoMap(firstDay);
+                        const idealSecond = availableDays.find(d => isoMap(d) === firstIso + 2)
+                            || availableDays.find(d => isoMap(d) > firstIso + 1)
+                            || availableDays[availableDays.length - 1];
+                        assignedDays.push(firstDay);
+                        if (idealSecond !== undefined && idealSecond !== firstDay) {
+                            assignedDays.push(idealSecond);
+                        } else if (availableDays[1] !== undefined) {
+                            assignedDays.push(availableDays[1]);
+                        }
                     } else if (wCount === 3 && availableDays.length >= 5) {
                         assignedDays.push(availableDays[0], availableDays[2], availableDays[4]);
                     } else if (wCount === 3 && availableDays.length === 4) {
@@ -3686,6 +5149,68 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 }
             }
 
+            // ADIM 2: İlk planlanan günün gerçek saatine (firstSlotRefDate) göre kasların o gün hala yorgun olup olmadığını hesapla!
+            const firstSlotDayIdx = weeklyDays.length > 0 ? weeklyDays[0].dayIdx : 1;
+            const firstSlotRefDate = getPlannedSlotReferenceDate(firstSlotDayIdx, isTargetNextWeek);
+            const includeFirstPrecheck = (firstSlotRefDate.getTime() - Date.now()) <= 36 * 60 * 60 * 1000;
+            const firstSlotCtx = (typeof getRecentAndScheduledMuscleContext === 'function')
+                ? getRecentAndScheduledMuscleContext({ referenceTimeMs: firstSlotRefDate.getTime(), includePrecheck: includeFirstPrecheck })
+                : baseHistoryCtx;
+            const hoursSinceLastAtFirstSlot = (firstSlotCtx && firstSlotCtx.lastSessionHoursAgo !== null && firstSlotCtx.lastSessionHoursAgo !== undefined)
+                ? Number(firstSlotCtx.lastSessionHoursAgo)
+                : null;
+            const isRecentLastSessionAtFirstSlot = (hoursSinceLastAtFirstSlot !== null && hoursSinceLastAtFirstSlot <= 60);
+
+            const legsWorkedRecently = hasThisWeekCompleted && isRecentLastSessionAtFirstSlot && lastLegSets >= 2;
+            const upperOnlyRecently = hasThisWeekCompleted && isRecentLastSessionAtFirstSlot && lastLegSets < 2 && lastUpperSets >= 4;
+
+            const legsFatiguedNow = (includeFirstPrecheck && precheck.fatigue === 'legs')
+                || (Array.isArray(firstSlotCtx.fatiguedMuscles48h) && firstSlotCtx.fatiguedMuscles48h.includes('Bacak'))
+                || legsWorkedRecently;
+            const upperFatiguedNow = (includeFirstPrecheck && precheck.fatigue === 'upper')
+                || (Array.isArray(firstSlotCtx.fatiguedMuscles48h) && (firstSlotCtx.fatiguedMuscles48h.includes('Göğüs') && firstSlotCtx.fatiguedMuscles48h.includes('Sırt')) && !legsFatiguedNow)
+                || upperOnlyRecently;
+            const backFatiguedNow = (includeFirstPrecheck && precheck.fatigue === 'back');
+
+            // ADIM 3: Kalan günlerin bölgesel dağılımını (split) ilk günün gerçek toparlanma durumuna ve haftalık hacme göre kur
+            if (hasThisWeekCompleted && chosenTplKey !== 'flow_complex_3day') {
+                if (weeklyDays.length === 2) {
+                    if (chosenTplKey === 'ppl_3day') {
+                        if (legsFatiguedNow && lastUpperSets < 4) {
+                            weeklyDays[0].split = lastPushSets <= lastPullSets ? 'upper_push' : 'upper_pull';
+                            weeklyDays[1].split = lastPushSets <= lastPullSets ? 'upper_pull' : 'upper_push';
+                        } else if (legsFatiguedNow) {
+                            weeklyDays[0].split = lastPullSets <= lastPushSets ? 'upper_pull' : 'upper_push';
+                            weeklyDays[1].split = 'lower';
+                        } else if (lastPushSets > lastPullSets + 2) {
+                            weeklyDays[0].split = 'upper_pull';
+                            weeklyDays[1].split = 'lower';
+                        } else {
+                            weeklyDays[0].split = 'lower';
+                            weeklyDays[1].split = lastPullSets <= lastPushSets ? 'upper_pull' : 'upper_push';
+                        }
+                    } else if (legsFatiguedNow) {
+                        weeklyDays[0].split = 'upper';
+                        weeklyDays[0].customRestNote = 'Bacak Korumalı';
+                        weeklyDays[1].split = 'full_body';
+                    } else if (upperFatiguedNow) {
+                        weeklyDays[0].split = 'lower';
+                        weeklyDays[0].customRestNote = 'Üst Vücut Korumalı';
+                        weeklyDays[1].split = 'full_body';
+                    }
+                } else if (weeklyDays.length === 1) {
+                    const wkLegs = Number(weekMuscleMap['Bacak']) || 0;
+                    const wkUpper = (Number(weekMuscleMap['Göğüs']) || 0) + (Number(weekMuscleMap['Sırt']) || 0) + (Number(weekMuscleMap['Omuz']) || 0);
+                    let finalSplit = 'full_body';
+                    if (legsFatiguedNow || (wkLegs >= 8 && wkUpper < 8)) {
+                        finalSplit = 'upper';
+                    } else if (upperFatiguedNow || (wkUpper >= 12 && wkLegs < 4)) {
+                        finalSplit = 'lower';
+                    }
+                    weeklyDays[0].split = finalSplit;
+                }
+            }
+
             const splitTitleForLabel = {
                 upper: 'Üst Vücut',
                 lower: 'Alt Vücut',
@@ -3697,17 +5222,17 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
             // 1. KURAL: Yorgun bölgeyi SADECE İLK GÜN (idx === 0) için koru; 2. güne (48+ saat sonra) dinlenmiş olarak yerleştir
             if (weeklyDays.length >= 1) {
-                if (legsFatiguedNow && (weeklyDays[0].split === 'lower' || weeklyDays[0].split === 'full_body')) {
+                if (legsFatiguedNow && (weeklyDays[0].split === 'lower' || (weeklyDays[0].split === 'full_body' && chosenTplKey !== 'fullbody_3day'))) {
                     weeklyDays[0].split = 'upper';
                     weeklyDays[0].customRestNote = 'Bacak Korumalı';
                     if (weeklyDays.length >= 2 && weeklyDays[1].split === 'upper') {
-                        weeklyDays[1].split = 'lower';
+                        weeklyDays[1].split = hasThisWeekCompleted ? 'full_body' : 'lower';
                     }
-                } else if (upperFatiguedNow && (weeklyDays[0].split === 'upper' || weeklyDays[0].split === 'upper_push' || weeklyDays[0].split === 'upper_pull' || weeklyDays[0].split === 'full_body')) {
+                } else if (upperFatiguedNow && (weeklyDays[0].split === 'upper' || weeklyDays[0].split === 'upper_push' || weeklyDays[0].split === 'upper_pull' || (weeklyDays[0].split === 'full_body' && chosenTplKey !== 'fullbody_3day'))) {
                     weeklyDays[0].split = 'lower';
                     weeklyDays[0].customRestNote = 'Üst Vücut Korumalı';
                     if (weeklyDays.length >= 2 && weeklyDays[1].split === 'lower') {
-                        weeklyDays[1].split = 'upper';
+                        weeklyDays[1].split = hasThisWeekCompleted ? 'full_body' : 'upper';
                     }
                 } else if (backFatiguedNow && (weeklyDays[0].split === 'upper_pull' || weeklyDays[0].split === 'lower' || weeklyDays[0].split === 'full_body')) {
                     weeklyDays[0].split = 'upper_push';
@@ -3760,49 +5285,101 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 };
             }
 
-            // KATMAN 5: HAFTALIK GÜNLER ARASI HAFIZA + SON 30 GÜNLÜK EKSİK VE SON 48 SAAT YORGUNLUK KORUMASI
-            const weeklyContext = Object.assign({}, baseHistoryCtx, {
-                usedExerciseIds: new Set(baseHistoryCtx.usedExerciseIds ? Array.from(baseHistoryCtx.usedExerciseIds) : []),
-                usedMovementFamiliesBySplit: {},
-                subKeyVolume: Object.assign({}, baseHistoryCtx.subKeyVolume || {}),
-                usedFinishers: new Set(baseHistoryCtx.usedFinishers ? Array.from(baseHistoryCtx.usedFinishers) : []),
-                prevGeneratedDayMuscles: [],
-                prevGeneratedDaySubKeys: new Set(),
-                prevGeneratedDayHadSpinalHinge: false,
-                isConsecutiveWithPrevDay: false
-            });
+            // KATMAN 5: HER PLANLI GÜNÜN KENDİ SAATİNE GÖRE DİNLENME HESABI (referenceTimeMs) + ÖNCEKİ TASLAK GÜNLERİN HAFIZASI (virtualLogs)
+            const priorDraftVirtualLogs = [];
+            const cumulativeUsedIds = new Set(baseHistoryCtx.usedExerciseIds ? Array.from(baseHistoryCtx.usedExerciseIds) : []);
+            const cumulativeThisWeekIds = new Set(baseHistoryCtx.thisWeekExerciseIds ? Array.from(baseHistoryCtx.thisWeekExerciseIds) : []);
+            const cumulativeUsedFinishers = new Set(baseHistoryCtx.usedFinishers ? Array.from(baseHistoryCtx.usedFinishers) : []);
+            let prevGeneratedDayMuscles = [];
+            let prevGeneratedDaySubKeys = new Set();
+            let prevGeneratedDayFamilies = new Set();
+            let prevGeneratedDayHadSpinalHinge = false;
 
             const generatedDaysList = [];
             weeklyDays.forEach((slot, idx) => {
-                weeklyContext.dayOrderIndex = idx;
-                weeklyContext.isConsecutiveWithPrevDay = Boolean(slot.isConsecutive);
+                const slotRefDate = getPlannedSlotReferenceDate(slot.dayIdx, isTargetNextWeek);
+                const includeSlotPrecheck = idx === 0 && ((slotRefDate.getTime() - Date.now()) <= 36 * 60 * 60 * 1000);
+                const slotHistoryCtx = (typeof getRecentAndScheduledMuscleContext === 'function')
+                    ? getRecentAndScheduledMuscleContext({
+                        referenceTimeMs: slotRefDate.getTime(),
+                        virtualLogs: priorDraftVirtualLogs,
+                        includePrecheck: includeSlotPrecheck
+                    })
+                    : baseHistoryCtx;
+
+                cumulativeUsedIds.forEach(id => slotHistoryCtx.usedExerciseIds.add(id));
+                cumulativeThisWeekIds.forEach(id => slotHistoryCtx.thisWeekExerciseIds.add(id));
+                cumulativeUsedFinishers.forEach(fid => slotHistoryCtx.usedFinishers.add(fid));
+
+                const dayContext = Object.assign({}, slotHistoryCtx, {
+                    hasTimeTravelContext: true,
+                    dayOrderIndex: idx,
+                    isConsecutiveWithPrevDay: Boolean(slot.isConsecutive),
+                    prevGeneratedDayMuscles: [...prevGeneratedDayMuscles],
+                    prevGeneratedDaySubKeys: new Set(prevGeneratedDaySubKeys),
+                    prevGeneratedDayFamilies: new Set(prevGeneratedDayFamilies),
+                    prevGeneratedDayHadSpinalHinge: Boolean(prevGeneratedDayHadSpinalHinge)
+                });
+
                 selectSplit(slot.split);
                 const dayDoctrine = (chosenTplKey === 'flow_complex_3day' || slot.split === 'flow_complex') ? 'func_pure' : currentSelectedDoctrine;
-                handleGenerateWorkout(dayDoctrine, userWish, weeklyContext);
+                handleGenerateWorkout(dayDoctrine, userWish, dayContext);
                 if (currentGeneratedWorkout) {
                     const wClone = JSON.parse(JSON.stringify(currentGeneratedWorkout));
                     wClone.id = 'ai_wk_' + slot.dayIdx + '_' + (Date.now() + idx);
                     wClone.title = slot.label;
                     wClone.weeklyTemplate = chosenTplKey;
+                    wClone.plannedDate = toLocalYmdString(slotRefDate);
 
-                    // Bir sonraki günle aynı kasa veya omurgaya üst üste yük binmemesi için bu günün kaslarını kaydet
                     const dayMuscles = new Set();
                     const daySubKeys = new Set();
+                    const dayFamilies = new Set();
                     let dayHasSpinal = false;
+
                     (wClone.exercises || []).forEach(ex => {
+                        if (ex && ex.id) {
+                            cumulativeUsedIds.add(ex.id);
+                            cumulativeThisWeekIds.add(ex.id);
+                        }
                         const anat = typeof getExerciseAnatomy === 'function' ? getExerciseAnatomy(ex) : null;
                         const pName = anat && anat.primary ? anat.primary.split('(')[0].trim() : (ex.muscle || '');
                         if (pName) dayMuscles.add(pName);
-                        if (typeof getExerciseCoveredSubKeys === 'function') {
-                            getExerciseCoveredSubKeys(ex).forEach(sk => daySubKeys.add(sk));
+                        const fam = typeof getExerciseMovementFamily === 'function' ? getExerciseMovementFamily(ex) : '';
+                        if (fam) dayFamilies.add(fam);
+                        if (typeof getExercisePrimaryMuscleKeys === 'function') {
+                            getExercisePrimaryMuscleKeys(ex).forEach(sk => daySubKeys.add(sk));
                         }
                         if (typeof isSpinalAxialLoadedExercise === 'function' && isSpinalAxialLoadedExercise(ex)) {
                             dayHasSpinal = true;
                         }
                     });
-                    weeklyContext.prevGeneratedDayMuscles = Array.from(dayMuscles);
-                    weeklyContext.prevGeneratedDaySubKeys = daySubKeys;
-                    weeklyContext.prevGeneratedDayHadSpinalHinge = dayHasSpinal;
+                    if (wClone.finisher && wClone.finisher.exId) {
+                        cumulativeUsedFinishers.add(wClone.finisher.exId);
+                    }
+
+                    prevGeneratedDayMuscles = Array.from(dayMuscles);
+                    prevGeneratedDaySubKeys = daySubKeys;
+                    prevGeneratedDayFamilies = dayFamilies;
+                    prevGeneratedDayHadSpinalHinge = dayHasSpinal;
+
+                    // Bu günün planlanan antrenmanını sanal geçmişe (virtualLogs) ekle ki Cuma günü Çarşamba'da yapılan tüm setleri ve yorgunluğu bilsin!
+                    const defaultSets = Number(wClone.scheme && wClone.scheme.sets) || 3;
+                    priorDraftVirtualLogs.push({
+                        id: wClone.id,
+                        date: toLocalYmdString(slotRefDate),
+                        timestamp: slotRefDate.getTime(),
+                        title: wClone.title,
+                        program: wClone.title,
+                        isVirtualPlanned: true,
+                        rpe: 8,
+                        exercises: (wClone.exercises || []).map(ex => ({
+                            id: ex.id,
+                            name: ex.name,
+                            muscle: ex.muscle,
+                            category: ex.category,
+                            completedSetsCount: Number(ex.sets) || defaultSets
+                        }))
+                    });
 
                     draftSchedule[slot.dayIdx] = {
                         id: wClone.id,
@@ -4795,9 +6372,19 @@ Aşağıdaki JSON şemasında çıktı ver:
             return getExerciseMovementFamily(ex) || id;
         }
 
+        const SUB31_BROAD_LOOKUP = {"chest_upper":"chest_upper","chest_mid":"chest_mid","chest_lower":"chest_lower","shoulders_front":"shoulders_front","shoulders_side":"shoulders_side","shoulders_rear":"shoulders_rear","back_lats":"back_lats","back_mid":"back_mid","traps":"back_mid","back_lower":"back_mid","legs_quad_outer":"legs_quad","legs_quad_inner":"legs_quad","legs_quad_mid":"legs_quad","legs_ham_curl":"legs_hamstrings","legs_ham_hinge":"legs_hamstrings","legs_ham_chain":"legs_hamstrings","legs_glutes_max":"legs_glutes","legs_glutes_med":"legs_glutes","legs_glutes_min":"legs_glutes","biceps_long":"biceps","biceps_short":"biceps","brachialis":"biceps","triceps_long":"triceps_long","triceps_lateral":"triceps_lateral","triceps_medial":"triceps_lateral","core_front":"core_front","core_obliques":"core_obliques","core_deep":"core_front","calves_gastroc":"legs_calves","calves_soleus":"legs_calves","calves_tibialis":"legs_calves"};
         function getExercisePrimaryMuscleKeys(ex) {
             if (!ex) return [];
             const anat = getExerciseAnatomy(ex);
+            if (anat && Array.isArray(anat.primarySubKeys) && anat.primarySubKeys.length > 0) {
+                const mapped = new Set();
+                anat.primarySubKeys.forEach(k => {
+                    if (k === 'traps') mapped.add('traps');
+                    if (SUB31_BROAD_LOOKUP[k]) mapped.add(SUB31_BROAD_LOOKUP[k]);
+                    else mapped.add(k);
+                });
+                return Array.from(mapped);
+            }
             const pText = ((anat && anat.primary) ? anat.primary : (ex.muscle || '')).toLocaleLowerCase('tr-TR');
             const keys = new Set();
             if (/kanat|latissimus|sırt geniş/.test(pText)) keys.add('back_lats');
@@ -5378,188 +6965,442 @@ Aşağıdaki JSON şemasında çıktı ver:
         window.optimizeWorkoutExerciseOrderForSupersets = optimizeWorkoutExerciseOrderForSupersets;
         window.assignAcademicBlockStructure = assignAcademicBlockStructure;
 
-        // KATMAN 5: 3 KATMANLI GEÇMİŞ HAFIZA (SON 48 SAAT YORGUNLUK + GEÇEN HAFTA EKSİKLERİ + SON 30 GÜN AÇIKLARI)
-        function getRecentAndScheduledMuscleContext() {
+        // KATMAN 5: 3 KATMANLI GEÇMİŞ HAFIZA + 31 ALT KAS HARİTASI + SAAT/YORGUNLUK EĞRİSİ + 7 GÜN DOYGUNLUK FRENİ
+        function getRecentAndScheduledMuscleContext(options = {}) {
+            const refMs = (options && options.referenceTimeMs && !isNaN(Number(options.referenceTimeMs)))
+                ? Number(options.referenceTimeMs)
+                : Date.now();
+            const nowObj = new Date(refMs);
+            const nowMs = nowObj.getTime();
+            const virtualLogs = (options && Array.isArray(options.virtualLogs)) ? options.virtualLogs : [];
+            const includePrecheck = (options && options.includePrecheck !== undefined)
+                ? Boolean(options.includePrecheck)
+                : ((nowMs - Date.now()) <= 36 * 60 * 60 * 1000);
+
             const usedExerciseIds = new Set();
+            const thisWeekExerciseIds = new Set();
+            const recent14dExerciseIds = new Set();
+            const lastSessionExerciseIds = new Set();
+            const lastSessionFamilies = new Set();
             const overusedExerciseIds30d = new Set();
             const subKeyVolume = {};
             const usedFinishers = new Set();
             const fatiguedSubKeys48h = new Set();
+            const lastSessionSubKeys = new Set();
             const deficitSubKeys = new Set();
             const exFreq30d = {};
+
+            // 31 Alt Kas Bölmesi Takip Tabloları (1.0x Birincil / 0.35x İkincil)
+            const subKey31Sets7d = {};
+            const subKey31Sets30d = {};
+            const subKey31Fatigue = {};
+            const thisWeekSubKey31Sets = {};
+            const lastSessionSubKeys31 = new Set();
+            const deficitSubKeys31 = new Set();
+            const saturatedSubKeys31 = new Set();
 
             const muscleSets48h = {};
             const muscleSets7d = {};
             const muscleSets14d = {};
             const muscleSets30d = {};
+            const lastSessionMuscleSets = {};
+            const thisWeekMuscleSets = {};
+
+            let calvesSets48h = 0;
+            let calvesSets7d = 0;
+            let calvesSets30d = 0;
 
             let hadSpinalHinge48h = false;
+            let lastSessionHadSpinalHinge = false;
             let lastSessionTitle = '';
             let lastSessionHoursAgo = null;
             let totalSessionsLastWeek = 0;
             let totalSessionsMonth = 0;
 
-            const recordExObj = (exItem, weightFactor = 1, is48h = false) => {
+            const mapAcademicToContextMuscle = (mName) => {
+                if (!mName) return 'Genel';
+                const s = String(mName).trim();
+                if (s === 'Ön Bacak' || s === 'Arka Bacak' || s === 'Glute' || s === 'Kalf' || s === 'Bacak' || s === 'Kalça') return 'Bacak';
+                if (s === 'Biceps' || s === 'Ön Kol/Biceps' || s === 'Ön Kol') return 'Ön Kol/Biceps';
+                if (s === 'Triceps' || s === 'Arka Kol/Triceps' || s === 'Arka Kol') return 'Arka Kol/Triceps';
+                if (s === 'Karın' || s === 'Core' || s === 'Karın/Core') return 'Karın/Core';
+                if (s === 'Göğüs' || s === 'Sırt' || s === 'Omuz') return s;
+                const low = normSearchText(s);
+                if (low.includes('bacak') || low.includes('quad') || low.includes('hamstring') || low.includes('glute') || low.includes('kalca') || low.includes('kalf')) return 'Bacak';
+                if (low.includes('biceps') || low.includes('on kol') || low.includes('pazu')) return 'Ön Kol/Biceps';
+                if (low.includes('triceps') || low.includes('arka kol')) return 'Arka Kol/Triceps';
+                if (low.includes('gogus') || low.includes('chest') || low.includes('pectoral')) return 'Göğüs';
+                if (low.includes('sirt') || low.includes('kanat') || low.includes('lat') || low.includes('trapez') || low.includes('rhomboid')) return 'Sırt';
+                if (low.includes('omuz') || low.includes('deltoid')) return 'Omuz';
+                if (low.includes('karin') || low.includes('core') || low.includes('oblik') || low.includes('abs')) return 'Karın/Core';
+                return s;
+            };
+
+            const resolveDbExercise = (exItem) => {
+                if (!exItem) return null;
+                if (typeof EXERCISES_DB === 'undefined' || !Array.isArray(EXERCISES_DB)) return exItem;
+                const rawId = String(exItem.id || exItem.exId || '').trim();
+                if (rawId) {
+                    const byId = EXERCISES_DB.find(e => e.id === rawId);
+                    if (byId) return byId;
+                }
+                const cleanName = normSearchText(exItem.name || rawId);
+                if (!cleanName) return exItem;
+                const cleanBase = cleanName.split('(')[0].trim();
+                return EXERCISES_DB.find(e => normSearchText(e.id) === cleanName || normSearchText(e.name) === cleanName)
+                    || EXERCISES_DB.find(e => {
+                        const en = normSearchText(e.name);
+                        const eb = en.split('(')[0].trim();
+                        return cleanBase.length >= 4 && (en.includes(cleanBase) || (eb.length >= 4 && cleanName.includes(eb)));
+                    })
+                    || exItem;
+            };
+
+            const recordExObj = (exItem, weightFactor = 1, is48h = false, isThisWeek = false, isLatest = false) => {
                 if (!exItem) return;
-                const exId = exItem.id || exItem.exId || '';
-                const dbEx = (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB))
-                    ? (EXERCISES_DB.find(e => e.id === exId || e.name === exItem.name) || exItem)
-                    : exItem;
-                if (exId) usedExerciseIds.add(exId);
+                const dbEx = resolveDbExercise(exItem);
+                const canonicalId = (dbEx && dbEx.id) ? dbEx.id : (exItem.id || exItem.exId || '');
+                if (canonicalId && !exItem.isInterSetExtra) {
+                    if (isThisWeek || is48h || weightFactor >= 2) {
+                        usedExerciseIds.add(canonicalId);
+                    } else {
+                        recent14dExerciseIds.add(canonicalId);
+                    }
+                    if (isThisWeek) thisWeekExerciseIds.add(canonicalId);
+                    if (isLatest) lastSessionExerciseIds.add(canonicalId);
+                }
+                if (exItem.id && !exItem.isInterSetExtra && (isThisWeek || is48h || weightFactor >= 2)) {
+                    usedExerciseIds.add(exItem.id);
+                }
+                const fam = (typeof getExerciseMovementFamily === 'function') ? getExerciseMovementFamily(dbEx) : '';
+                if (fam && isLatest && !exItem.isInterSetExtra) {
+                    lastSessionFamilies.add(fam);
+                }
+                const primaryBroad = new Set(typeof getExercisePrimaryMuscleKeys === 'function' ? getExercisePrimaryMuscleKeys(dbEx) : []);
                 const covered = typeof getExerciseCoveredSubKeys === 'function' ? getExerciseCoveredSubKeys(dbEx) : [];
                 covered.forEach(sk => {
-                    subKeyVolume[sk] = (subKeyVolume[sk] || 0) + weightFactor;
-                    if (is48h) fatiguedSubKeys48h.add(sk);
+                    const isPrim = primaryBroad.size === 0 || primaryBroad.has(sk);
+                    const effW = isPrim ? weightFactor : Math.round(weightFactor * 0.35 * 10) / 10;
+                    subKeyVolume[sk] = (subKeyVolume[sk] || 0) + effW;
+                    if (is48h && isPrim) fatiguedSubKeys48h.add(sk);
+                    if (isLatest && isPrim) lastSessionSubKeys.add(sk);
                 });
-                if (is48h && typeof isSpinalAxialLoadedExercise === 'function' && isSpinalAxialLoadedExercise(dbEx)) {
-                    hadSpinalHinge48h = true;
+                if (typeof isSpinalAxialLoadedExercise === 'function' && isSpinalAxialLoadedExercise(dbEx)) {
+                    if (is48h) hadSpinalHinge48h = true;
+                    if (isLatest) lastSessionHadSpinalHinge = true;
                 }
             };
 
             try {
-                // 1. Gerçek antrenman geçmişini (getWorkoutLogs) 3 zaman katmanında tara
-                const allLogs = (typeof getWorkoutLogs === 'function') ? getWorkoutLogs() : [];
-                const nowMs = Date.now();
-                const ms54h = 54 * 60 * 60 * 1000;
+                // 1. Gerçek antrenman geçmişini + aynı taslak haftanın önceki planlı günlerini (virtualLogs) hedef günün saatine (nowMs) göre tara
+                const realLogs = (typeof getWorkoutLogs === 'function') ? getWorkoutLogs() : [];
+                const combinedLogs = virtualLogs.length > 0 ? [...realLogs, ...virtualLogs] : realLogs;
+
+                const todayDayIdx = nowObj.getDay();
+                const diffToMonday = todayDayIdx === 0 ? -6 : 1 - todayDayIdx;
+                const mondayOfThisWeek = new Date(nowObj);
+                mondayOfThisWeek.setHours(0, 0, 0, 0);
+                mondayOfThisWeek.setDate(nowObj.getDate() + diffToMonday);
+
                 const ms7d  = 7 * 24 * 60 * 60 * 1000;
                 const ms14d = 14 * 24 * 60 * 60 * 1000;
                 const ms30d = 30 * 24 * 60 * 60 * 1000;
 
-                const sortedLogs = [...allLogs].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
-                if (sortedLogs.length > 0 && sortedLogs[0] && sortedLogs[0].date) {
-                    const diffH = (nowMs - new Date(sortedLogs[0].date).getTime()) / (1000 * 60 * 60);
-                    if (diffH >= 0 && diffH <= 54) {
-                        lastSessionHoursAgo = Math.round(diffH);
-                        lastSessionTitle = sortedLogs[0].title || sortedLogs[0].workoutName || 'Son Antrenman';
-                    }
+                const parsedLogs = combinedLogs
+                    .map(lg => ({ log: lg, dateObj: parseWorkoutLogDateLocal(lg) }))
+                    .filter(item => item.log && item.dateObj && !isNaN(item.dateObj.getTime()) && item.dateObj.getTime() <= nowMs + 60000)
+                    .sort((a, b) => b.dateObj.getTime() - a.dateObj.getTime());
+
+                if (parsedLogs.length > 0) {
+                    const latestItem = parsedLogs[0];
+                    const diffH = Math.max(0, (nowMs - latestItem.dateObj.getTime()) / (1000 * 60 * 60));
+                    lastSessionHoursAgo = Math.round(diffH);
+                    lastSessionTitle = latestItem.log.program || latestItem.log.title || latestItem.log.workoutName || 'Son Antrenman';
                 }
 
-                allLogs.forEach(log => {
-                    if (!log) return;
-                    const logTs = log.timestamp || (log.date ? new Date(log.date).getTime() : 0);
-                    if (!logTs || isNaN(logTs)) return;
-                    const ageMs = nowMs - logTs;
-                    if (ageMs < 0 || ageMs > ms30d) return;
+                parsedLogs.forEach((item, logIdx) => {
+                    const log = item.log;
+                    const dObj = item.dateObj;
+                    const logTs = dObj.getTime();
+                    const ageMs = Math.max(0, nowMs - logTs);
+                    if (ageMs > ms30d) return;
 
-                    totalSessionsMonth++;
+                    const isLatestLog = (logIdx === 0);
+                    const isThisCalendarWeek = (dObj >= mondayOfThisWeek);
                     const isWithin14d = ageMs <= ms14d;
-                    const isWithin7d  = ageMs <= ms7d;
-                    const isWithin48h = ageMs <= ms54h;
-                    if (isWithin7d) totalSessionsLastWeek++;
+                    const isWithin7d  = ageMs <= ms7d || isThisCalendarWeek;
+                    if (!log.isVirtualPlanned) {
+                        totalSessionsMonth++;
+                        if (isWithin7d) totalSessionsLastWeek++;
+                    }
 
                     if (!Array.isArray(log.exercises)) return;
+
+                    const rpeMatch = (log.rpe !== undefined && log.rpe !== null) ? String(log.rpe).match(/(\d+(?:\.\d+)?)/) : null;
+                    const sessionRpe = rpeMatch ? parseFloat(rpeMatch[1]) : null;
+
+                    // Log içinde en az 1 hareketin seti tamamlanmışsa, tamamlanan set sayısı 0 olan (atlanmış) hareketleri hariç tut
+                    const hasAnyExplicitCompleted = log.exercises.some(e =>
+                        (e && e.completedSetsCount !== undefined && Number(e.completedSetsCount) > 0) ||
+                        (e && Array.isArray(e.sets) && e.sets.some(s => s && s.completed))
+                    );
+
                     log.exercises.forEach(ex => {
-                        const exId = ex.id || ex.exId || ex.name || '';
-                        if (exId) {
+                        if (!ex) return;
+                        if (hasAnyExplicitCompleted) {
+                            const explicitZero = (ex.completedSetsCount !== undefined && ex.completedSetsCount !== null && Number(ex.completedSetsCount) === 0) ||
+                                (Array.isArray(ex.sets) && ex.sets.length > 0 && ex.sets.every(s => s && s.completed === false));
+                            if (explicitZero) return;
+                        }
+
+                        const dbEx = resolveDbExercise(ex);
+                        const exId = (dbEx && dbEx.id) ? dbEx.id : (ex.id || ex.exId || ex.name || '');
+                        if (exId && !log.isVirtualPlanned && !ex.isInterSetExtra) {
                             exFreq30d[exId] = (exFreq30d[exId] || 0) + 1;
                             if (exFreq30d[exId] >= 3) overusedExerciseIds30d.add(exId);
                         }
 
-                        if (isWithin48h) {
-                            recordExObj(ex, 12, true); // Son 48 saatte çalışan alt kaslara yüksek yorgunluk ağırlığı
-                        } else if (isWithin7d) {
-                            recordExObj(ex, 2, false);
-                        } else if (isWithin14d) {
-                            recordExObj(ex, 0.5, false);
-                        }
-
                         const spec = (typeof resolveExerciseBiomechanics === 'function')
-                            ? resolveExerciseBiomechanics(ex.name, ex.muscle, ex.category)
+                            ? resolveExerciseBiomechanics(
+                                ex.name || (dbEx && dbEx.name),
+                                ex.muscle || (dbEx && dbEx.muscle),
+                                ex.category || (dbEx && dbEx.category),
+                                (dbEx && dbEx.id) || ex.id || ''
+                            )
                             : null;
-                        const primName = (spec && spec.primary) ? spec.primary : (ex.muscle || 'Genel');
+                        const rawPrimName = (spec && spec.primary) ? spec.primary : (ex.muscle || (dbEx && dbEx.muscle) || 'Genel');
+                        const primName = mapAcademicToContextMuscle(rawPrimName);
+
                         const cSets = (ex.completedSetsCount !== undefined && ex.completedSetsCount !== null)
                             ? Number(ex.completedSetsCount)
                             : (Array.isArray(ex.sets) ? ex.sets.filter(s => s && s.completed).length : (Number(ex.sets) || 3));
                         const setsCount = cSets > 0 ? cSets : 3;
 
-                        muscleSets30d[primName] = (muscleSets30d[primName] || 0) + setsCount;
-                        if (isWithin14d) muscleSets14d[primName] = (muscleSets14d[primName] || 0) + setsCount;
-                        if (isWithin7d)  muscleSets7d[primName]  = (muscleSets7d[primName] || 0) + setsCount;
-                        if (isWithin48h) muscleSets48h[primName] = (muscleSets48h[primName] || 0) + setsCount;
+                        // AKADEMİK + SAAT TELEMETRİSİ TOPARLANMA EĞRİSİ (Damas 2016, Pareja-Blanco 2020, Maeo 2023):
+                        const ageHours = ageMs / (1000 * 60 * 60);
+                        const isSpinalEx = typeof isSpinalAxialLoadedExercise === 'function' && isSpinalAxialLoadedExercise(dbEx);
+                        let baseRecoveryHours = 48;
+                        if (primName === 'Karın/Core' || primName === 'Ön Kol/Biceps' || rawPrimName === 'Kalf') {
+                            baseRecoveryHours = 36;
+                        } else if (primName === 'Bacak' || isSpinalEx) {
+                            baseRecoveryHours = isSpinalEx ? 68 : 60;
+                        }
+                        if (spec && spec.lengthened) {
+                            baseRecoveryHours += 8;
+                        }
+
+                        // Saatten gelen gerçek yük altında geçen süre (TUT), nabız/zirve nabız, HRR ve seans zorluk (RPE) etkisi:
+                        let setTutSec = 0;
+                        if (Array.isArray(ex.sets) && ex.sets.some(st => st && (st.durationSec || st.duration))) {
+                            setTutSec = ex.sets.reduce((s, st) => s + Math.min(90, Number(st && (st.durationSec || st.duration)) || 0), 0);
+                        }
+                        let telemetryTutSec = 0;
+                        if (ex.healthTelemetry) {
+                            const rawTut = Number(ex.healthTelemetry.totalTimeUnderTensionSec || ex.healthTelemetry.timeUnderTensionSec || 0);
+                            telemetryTutSec = Math.min(setsCount * 75, rawTut);
+                        }
+                        const tutSec = Math.max(setTutSec, telemetryTutSec);
+                        if (!ex.isInterSetExtra) {
+                            if (tutSec >= 200) baseRecoveryHours += 8;
+                            else if (tutSec >= 120) baseRecoveryHours += 4;
+                        }
+
+                        const exPeakHr = Number(
+                            (ex.healthTelemetry && (ex.healthTelemetry.peakHeartrate || ex.healthTelemetry.maxHeartrate)) ||
+                            (log.healthSummary && log.healthSummary.heartrateMax) || 0
+                        );
+                        const exAvgHr = Number(
+                            (ex.healthTelemetry && ex.healthTelemetry.avgHeartrate) ||
+                            (log.healthSummary && log.healthSummary.heartrateAvg) || 0
+                        );
+                        const exHrr = Number((ex.healthTelemetry && ex.healthTelemetry.heartrateRecovery) || 0);
+                        if (exPeakHr >= 165 || exAvgHr >= 145) baseRecoveryHours += 5;
+                        else if (exPeakHr >= 150 || exAvgHr >= 135) baseRecoveryHours += 3;
+                        if (exHrr > 0 && exHrr < 15) baseRecoveryHours += 3;
+
+                        if (sessionRpe !== null) {
+                            if (sessionRpe >= 9.5) baseRecoveryHours += 8;
+                            else if (sessionRpe >= 8.5) baseRecoveryHours += 5;
+                            else if (sessionRpe <= 6.5) baseRecoveryHours -= 4;
+                        }
+                        if (setsCount >= 5) baseRecoveryHours += 6;
+                        else if (setsCount === 4) baseRecoveryHours += 3;
+
+                        if (ex.isInterSetExtra || setsCount <= 1) {
+                            baseRecoveryHours = Math.round(baseRecoveryHours * 0.55);
+                        }
+                        baseRecoveryHours = Math.max(24, Math.min(88, baseRecoveryHours));
+
+                        // Saatlik kademeli yorgunluk katsayısı (0 ile 1 arası): Toparlanma penceresi içinde yüksek, pencere dolunca 0!
+                        const fatigueDecay = ageHours < baseRecoveryHours
+                            ? Math.max(0, 1 - Math.pow(ageHours / baseRecoveryHours, 1.35))
+                            : 0;
+                        const isCurrentlyFatiguedByEx = fatigueDecay >= 0.25;
+
+                        const subKeyWeight = isCurrentlyFatiguedByEx
+                            ? Math.round((8 + (fatigueDecay * 8)) * 10) / 10
+                            : (isWithin7d ? (isThisCalendarWeek ? 5 : 2.5) : (isWithin14d ? 0.6 : 0));
+
+                        if (subKeyWeight > 0) {
+                            recordExObj(ex, subKeyWeight, isCurrentlyFatiguedByEx, isThisCalendarWeek, isLatestLog);
+                        }
+
+                        // 31 Alt Kas Bölmesi Hacim ve Yorgunluk İşlemesi (Birincil 1.0x / İkincil 0.35x)
+                        const anat = (typeof getExerciseAnatomy === 'function') ? getExerciseAnatomy(dbEx) : null;
+                        const p31 = (anat && Array.isArray(anat.primarySubKeys)) ? anat.primarySubKeys : [];
+                        const s31 = (anat && Array.isArray(anat.secondarySubKeys)) ? anat.secondarySubKeys : [];
+                        const p31Set = new Set(p31);
+
+                        p31.forEach(pk => {
+                            subKey31Sets30d[pk] = (subKey31Sets30d[pk] || 0) + setsCount;
+                            if (isWithin7d) subKey31Sets7d[pk] = (subKey31Sets7d[pk] || 0) + setsCount;
+                            if (isThisCalendarWeek) thisWeekSubKey31Sets[pk] = (thisWeekSubKey31Sets[pk] || 0) + setsCount;
+                            if (fatigueDecay > 0) subKey31Fatigue[pk] = (subKey31Fatigue[pk] || 0) + (setsCount * fatigueDecay);
+                            if (isLatestLog && !ex.isInterSetExtra) lastSessionSubKeys31.add(pk);
+                        });
+                        s31.forEach(sk => {
+                            if (p31Set.has(sk)) return;
+                            const secVal = Math.round(setsCount * 0.35 * 100) / 100;
+                            subKey31Sets30d[sk] = (subKey31Sets30d[sk] || 0) + secVal;
+                            if (isWithin7d) subKey31Sets7d[sk] = (subKey31Sets7d[sk] || 0) + secVal;
+                            if (isThisCalendarWeek) thisWeekSubKey31Sets[sk] = (thisWeekSubKey31Sets[sk] || 0) + secVal;
+                            if (fatigueDecay > 0) subKey31Fatigue[sk] = (subKey31Fatigue[sk] || 0) + (secVal * fatigueDecay * 0.65);
+                        });
+
+                        // Baldır (Kalf) hacmini genel Bacak toplamının içinde kaybolmaması için ayrıca takip et
+                        const hitsCalvesPrimary = rawPrimName === 'Kalf' || p31.some(k => k.startsWith('calves_'));
+                        const hitsCalvesSecondary = !hitsCalvesPrimary && s31.some(k => k.startsWith('calves_'));
+                        if (hitsCalvesPrimary || hitsCalvesSecondary) {
+                            const cVal = hitsCalvesPrimary ? setsCount : Math.round(setsCount * 0.35 * 10) / 10;
+                            calvesSets30d += cVal;
+                            if (isWithin7d) calvesSets7d += cVal;
+                            if (fatigueDecay > 0) calvesSets48h += cVal * (hitsCalvesPrimary ? fatigueDecay : fatigueDecay * 0.6);
+                        }
+
+                        const addMuscleVolume = (mKey, val, mFatigueDecay) => {
+                            if (!mKey || val <= 0) return;
+                            muscleSets30d[mKey] = (muscleSets30d[mKey] || 0) + val;
+                            if (isWithin14d) muscleSets14d[mKey] = (muscleSets14d[mKey] || 0) + val;
+                            if (isWithin7d)  muscleSets7d[mKey]  = (muscleSets7d[mKey] || 0) + val;
+                            if (mFatigueDecay > 0) {
+                                muscleSets48h[mKey] = (muscleSets48h[mKey] || 0) + (val * mFatigueDecay);
+                            }
+                            if (isLatestLog) lastSessionMuscleSets[mKey] = (lastSessionMuscleSets[mKey] || 0) + val;
+                            if (isThisCalendarWeek) thisWeekMuscleSets[mKey] = (thisWeekMuscleSets[mKey] || 0) + val;
+                        };
+
+                        addMuscleVolume(primName, setsCount, fatigueDecay);
+
+                        // Bileşik hareketlerin ikincil kas katkılarını da hesaba kat
+                        if (spec && spec.sec && typeof spec.sec === 'object') {
+                            Object.entries(spec.sec).forEach(([secRaw, factor]) => {
+                                const secMapped = mapAcademicToContextMuscle(secRaw);
+                                if (secMapped && secMapped !== primName) {
+                                    const secSets = Math.round(setsCount * (Number(factor) || 0.35) * 10) / 10;
+                                    addMuscleVolume(secMapped, secSets, fatigueDecay * 0.65);
+                                }
+                            });
+                        }
                     });
                 });
             } catch (e) {}
 
-            try {
-                // 2. Mevcut haftalık takvimde bugün dışındaki diğer günlerde planlı olan hareketleri tara
-                if (typeof getWeeklySchedule === 'function') {
-                    const sched = getWeeklySchedule();
-                    const todayIdx = new Date().getDay();
-                    if (sched && typeof sched === 'object') {
-                        Object.keys(sched).forEach(dKey => {
-                            if (Number(dKey) === todayIdx) return;
-                            const dayObj = sched[dKey];
-                            if (dayObj && !dayObj.rest) {
-                                const exList = dayObj.exercises || (dayObj.customWorkout && dayObj.customWorkout.exercises) || [];
-                                if (Array.isArray(exList)) {
-                                    exList.forEach(ex => recordExObj(ex, 1, false));
-                                }
-                                const fin = dayObj.customWorkout && dayObj.customWorkout.finisher;
-                                if (fin && fin.exId) usedFinishers.add(fin.exId);
-                            }
-                        });
-                    }
+            // 2. Pop-up üzerinden bildirilen kayıtsız yorgunluk (yalnızca yakın zamanlı ilk seans için geçerli)
+            if (includePrecheck) {
+                const precheck = window.activePrecheckState || { fatigue: 'none' };
+                if (precheck.fatigue === 'legs') {
+                    muscleSets48h['Bacak'] = Math.max(muscleSets48h['Bacak'] || 0, 6);
+                    ['legs_quad', 'legs_hamstrings', 'legs_glutes', 'legs_calves'].forEach(sk => fatiguedSubKeys48h.add(sk));
+                    ['legs_quad_outer', 'legs_quad_inner', 'legs_quad_mid', 'legs_ham_curl', 'legs_ham_hinge', 'legs_ham_chain', 'legs_glutes_max', 'legs_glutes_med', 'legs_glutes_min'].forEach(k31 => {
+                        subKey31Fatigue[k31] = Math.max(subKey31Fatigue[k31] || 0, 3);
+                    });
+                    hadSpinalHinge48h = true;
+                } else if (precheck.fatigue === 'upper') {
+                    muscleSets48h['Göğüs'] = Math.max(muscleSets48h['Göğüs'] || 0, 6);
+                    muscleSets48h['Sırt'] = Math.max(muscleSets48h['Sırt'] || 0, 6);
+                    muscleSets48h['Omuz'] = Math.max(muscleSets48h['Omuz'] || 0, 6);
+                    ['chest_mid', 'chest_upper', 'back_lats', 'back_mid', 'shoulders_side', 'shoulders_rear', 'shoulders_front'].forEach(sk => fatiguedSubKeys48h.add(sk));
+                    ['chest_upper', 'chest_mid', 'chest_lower', 'back_lats', 'back_mid', 'traps', 'shoulders_front', 'shoulders_side', 'shoulders_rear'].forEach(k31 => {
+                        subKey31Fatigue[k31] = Math.max(subKey31Fatigue[k31] || 0, 3);
+                    });
+                } else if (precheck.fatigue === 'back') {
+                    muscleSets48h['Sırt'] = Math.max(muscleSets48h['Sırt'] || 0, 6);
+                    ['back_lats', 'back_mid'].forEach(sk => fatiguedSubKeys48h.add(sk));
+                    ['back_lats', 'back_mid', 'back_lower'].forEach(k31 => {
+                        subKey31Fatigue[k31] = Math.max(subKey31Fatigue[k31] || 0, 3);
+                    });
+                    hadSpinalHinge48h = true;
                 }
-            } catch (e) {}
+            }
 
-            // 3. Yorgun Kaslar (Son 48 Saat) vs Eksik / Atlanan Kaslar (Geçen Hafta & Son 30 Gün)
+            // 3. 31 Alt Bölge Eksik & Doygunluk Tespiti
+            if (typeof SUB31_BROAD_LOOKUP === 'object' && SUB31_BROAD_LOOKUP) {
+                Object.keys(SUB31_BROAD_LOOKUP).forEach(k31 => {
+                    const v7 = subKey31Sets7d[k31] || 0;
+                    const f48 = subKey31Fatigue[k31] || 0;
+                    if (v7 >= 6.5) {
+                        saturatedSubKeys31.add(k31);
+                    }
+                    if (f48 >= 1.8) {
+                        fatiguedSubKeys48h.add(SUB31_BROAD_LOOKUP[k31] || k31);
+                    } else if (f48 < 1.2 && v7 < 1.5) {
+                        deficitSubKeys31.add(k31);
+                    }
+                });
+            }
+
+            // 4. Ana Kas Grupları Yorgunluk, Eksik ve 7 Günlük Doygunluk Freni (max7d)
             const standardMuscleDefs = [
-                { name: 'Sırt', focusKey: 'back', subKeys: ['back_lats', 'back_mid'], min7d: 8, min30d: 20 },
-                { name: 'Bacak', focusKey: 'legs', subKeys: ['legs_quad', 'legs_hamstrings', 'legs_glutes'], min7d: 8, min30d: 20 },
-                { name: 'Omuz', focusKey: 'shoulders', subKeys: ['shoulders_side', 'shoulders_rear', 'shoulders_front'], min7d: 6, min30d: 16 },
-                { name: 'Göğüs', focusKey: 'chest', subKeys: ['chest_mid', 'chest_upper'], min7d: 8, min30d: 20 },
-                { name: 'Ön Kol/Biceps', focusKey: 'arms', subKeys: ['biceps'], min7d: 4, min30d: 12 },
-                { name: 'Arka Kol/Triceps', focusKey: 'arms', subKeys: ['triceps_long', 'triceps_lateral'], min7d: 4, min30d: 12 },
-                { name: 'Karın/Core', focusKey: 'core', subKeys: ['core_front', 'core_obliques'], min7d: 4, min30d: 12 }
+                { name: 'Sırt', focusKey: 'back', subKeys: ['back_lats', 'back_mid'], min7d: 8, max7d: 16, min30d: 20 },
+                { name: 'Bacak', focusKey: 'legs', subKeys: ['legs_quad', 'legs_hamstrings', 'legs_glutes'], min7d: 8, max7d: 15, min30d: 20 },
+                { name: 'Omuz', focusKey: 'shoulders', subKeys: ['shoulders_side', 'shoulders_rear', 'shoulders_front'], min7d: 6, max7d: 13, min30d: 16 },
+                { name: 'Göğüs', focusKey: 'chest', subKeys: ['chest_mid', 'chest_upper'], min7d: 8, max7d: 15, min30d: 20 },
+                { name: 'Ön Kol/Biceps', focusKey: 'arms', subKeys: ['biceps'], min7d: 4, max7d: 11, min30d: 12 },
+                { name: 'Arka Kol/Triceps', focusKey: 'arms', subKeys: ['triceps_long', 'triceps_lateral'], min7d: 4, max7d: 11, min30d: 12 },
+                { name: 'Karın/Core', focusKey: 'core', subKeys: ['core_front', 'core_obliques'], min7d: 4, max7d: 12, min30d: 12 }
             ];
 
             const fatiguedMuscles48h = [];
             const neglectedMuscles7d = [];
             const neglectedMuscles30d = [];
+            const saturatedMuscles7d = [];
+            const saturatedFocusKeys = [];
             const deficitFocusKeys = [];
 
-            // Pop-up üzerinden bildirilen kayıtsız yorgunluğu (son 2 gün) yorgun kaslara ekle
-            const precheck = window.activePrecheckState || { fatigue: 'none' };
-            if (precheck.fatigue === 'legs') {
-                muscleSets48h['Bacak'] = Math.max(muscleSets48h['Bacak'] || 0, 6);
-                ['legs_quad', 'legs_hamstrings', 'legs_glutes', 'legs_calves'].forEach(sk => fatiguedSubKeys48h.add(sk));
-                hadSpinalHinge48h = true;
-            } else if (precheck.fatigue === 'upper') {
-                muscleSets48h['Göğüs'] = Math.max(muscleSets48h['Göğüs'] || 0, 6);
-                muscleSets48h['Sırt'] = Math.max(muscleSets48h['Sırt'] || 0, 6);
-                muscleSets48h['Omuz'] = Math.max(muscleSets48h['Omuz'] || 0, 6);
-                ['chest_mid', 'chest_upper', 'back_lats', 'back_mid', 'shoulders_side', 'shoulders_rear', 'shoulders_front'].forEach(sk => fatiguedSubKeys48h.add(sk));
-            } else if (precheck.fatigue === 'back') {
-                muscleSets48h['Sırt'] = Math.max(muscleSets48h['Sırt'] || 0, 6);
-                ['back_lats', 'back_mid'].forEach(sk => fatiguedSubKeys48h.add(sk));
-                hadSpinalHinge48h = true;
-            }
-
-            // Eksik derecesine göre sırala (en az set alan en üstte)
             const scoredDefs = standardMuscleDefs.map(def => {
-                const s48 = muscleSets48h[def.name] || 0;
-                const s7  = muscleSets7d[def.name] || 0;
-                const s30 = muscleSets30d[def.name] || 0;
-                const isFatigued = s48 >= 3;
+                const s48 = Math.round((muscleSets48h[def.name] || 0) * 10) / 10;
+                const s7  = Math.round((muscleSets7d[def.name] || 0) * 10) / 10;
+                const s30 = Math.round((muscleSets30d[def.name] || 0) * 10) / 10;
+                const isFatigued = s48 >= 2.8;
+                const isSaturated = s7 >= def.max7d;
                 if (isFatigued && !fatiguedMuscles48h.includes(def.name)) {
                     fatiguedMuscles48h.push(def.name);
                 }
-                if (s7 === 0) {
-                    neglectedMuscles7d.push(`${def.name} (0 set)`);
-                } else if (s7 < def.min7d) {
-                    neglectedMuscles7d.push(`${def.name} (${s7} set)`);
+                if (isSaturated) {
+                    saturatedMuscles7d.push(`${def.name} (${Math.round(s7)} set)`);
+                    if (!saturatedFocusKeys.includes(def.focusKey)) {
+                        saturatedFocusKeys.push(def.focusKey);
+                    }
                 }
-                if (s30 < def.min30d) {
-                    neglectedMuscles30d.push(`${def.name} (${s30} set/ay)`);
+                if (!isFatigued) {
+                    if (s7 === 0) {
+                        neglectedMuscles7d.push(`${def.name} (0 set)`);
+                    } else if (s7 < def.min7d) {
+                        const dispS7 = Math.round(s7) >= def.min7d ? Math.floor(s7) : Math.round(s7);
+                        neglectedMuscles7d.push(`${def.name} (${dispS7} set)`);
+                    }
+                }
+                if (s30 < def.min30d && s7 < def.min7d * 1.15) {
+                    neglectedMuscles30d.push(`${def.name} (${Math.round(s30)} set/ay)`);
                 }
                 const ratio7d = s7 / def.min7d;
                 const ratio30d = s30 / def.min30d;
-                return Object.assign({}, def, { s48, s7, s30, isFatigued, deficitScore: (ratio7d * 0.65) + (ratio30d * 0.35) });
+                return Object.assign({}, def, { s48, s7, s30, isFatigued, isSaturated, deficitScore: (ratio7d * 0.65) + (ratio30d * 0.35) });
             }).sort((a, b) => a.deficitScore - b.deficitScore);
 
             scoredDefs.forEach(item => {
-                // Son 48 saatte yorulmamış VE haftalık/aylık hedefin altında kalmış kasları öncelikli telafi listesine al
-                if (!item.isFatigued && (item.s7 < item.min7d || item.s30 < item.min30d)) {
+                const needsVolume = item.s7 < item.min7d || (item.s7 < item.min7d * 1.15 && item.s30 < item.min30d);
+                if (!item.isFatigued && !item.isSaturated && needsVolume) {
                     if (!deficitFocusKeys.includes(item.focusKey)) {
                         deficitFocusKeys.push(item.focusKey);
                     }
@@ -5571,10 +7412,61 @@ Aşağıdaki JSON şemasında çıktı ver:
                 }
             });
 
+            // 5. Kas İçi Alt Bölge Boşlukları (Örn: Ön/Yan Omuz çalıştı ama Arka Omuz 0 set; Orta Göğüs çalıştı ama Üst Göğüs 0 set; Bacak çok çalıştı ama Baldır 0 set!)
+            const rearDelt7d = subKey31Sets7d['shoulders_rear'] || 0;
+            const frontSideDelt7d = (subKey31Sets7d['shoulders_front'] || 0) + (subKey31Sets7d['shoulders_side'] || 0);
+            if (rearDelt7d < 1.5 && (subKey31Fatigue['shoulders_rear'] || 0) < 1.2) {
+                deficitSubKeys.add('shoulders_rear');
+                if (frontSideDelt7d >= 3 || totalSessionsLastWeek >= 1) {
+                    if (!neglectedMuscles7d.some(x => x.startsWith('Arka Omuz'))) {
+                        neglectedMuscles7d.push(`Arka Omuz (${Math.round(rearDelt7d)} set)`);
+                    }
+                    if (!deficitFocusKeys.includes('rear_delt')) deficitFocusKeys.push('rear_delt');
+                }
+            }
+
+            const upperChest7d = subKey31Sets7d['chest_upper'] || 0;
+            const midChest7d = subKey31Sets7d['chest_mid'] || 0;
+            if (upperChest7d < 1.5 && (subKey31Fatigue['chest_upper'] || 0) < 1.2) {
+                deficitSubKeys.add('chest_upper');
+                if (midChest7d >= 3 && !deficitFocusKeys.includes('upper_chest')) {
+                    if (!neglectedMuscles7d.some(x => x.startsWith('Üst Göğüs'))) {
+                        neglectedMuscles7d.push(`Üst Göğüs (${Math.round(upperChest7d)} set)`);
+                    }
+                    deficitFocusKeys.push('upper_chest');
+                }
+            }
+
+            if (calvesSets7d < 2 && calvesSets48h < 1.5 && totalSessionsLastWeek >= 1) {
+                deficitSubKeys.add('legs_calves');
+                if (calvesSets7d === 0 && !neglectedMuscles7d.some(x => x.startsWith('Baldır'))) {
+                    neglectedMuscles7d.push('Baldır (0 set)');
+                }
+                if ((saturatedMuscles7d.length > 0 || calvesSets30d < 6) && !deficitFocusKeys.includes('calves')) {
+                    deficitFocusKeys.push('calves');
+                }
+            }
+
             return {
+                referenceTimeMs: nowMs,
                 usedExerciseIds,
+                thisWeekExerciseIds,
+                recent14dExerciseIds,
+                lastSessionExerciseIds,
+                lastSessionFamilies,
+                lastSessionSubKeys,
+                lastSessionSubKeys31,
+                lastSessionMuscleSets,
+                thisWeekMuscleSets,
+                thisWeekSubKey31Sets,
+                lastSessionHadSpinalHinge,
                 overusedExerciseIds30d,
                 subKeyVolume,
+                subKey31Sets7d,
+                subKey31Sets30d,
+                subKey31Fatigue,
+                deficitSubKeys31,
+                saturatedSubKeys31,
                 usedFinishers,
                 fatiguedSubKeys48h,
                 fatiguedMuscles48h,
@@ -5583,6 +7475,8 @@ Aşağıdaki JSON şemasında çıktı ver:
                 lastSessionHoursAgo,
                 neglectedMuscles7d,
                 neglectedMuscles30d,
+                saturatedMuscles7d,
+                saturatedFocusKeys,
                 deficitFocusKeys,
                 deficitSubKeys,
                 totalSessionsLastWeek,
@@ -5880,9 +7774,11 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             const usedFamilies = new Set();
             const usedMediaIds = new Set();
             const subKeyCounts = {};
+            const sessionSubKey31Counts = {};
 
-            // Haftalık kurulumdaysa ortak weeklyContext'i kullan; günlük üretimdeyse 3 katmanlı geçmiş hafızasını (48s + 7g + 30g) baz al
+            // Haftalık kurulumdaysa o günün saatine göre hesaplanmış weeklyContext'i kullan; günlük üretimdeyse 3 katmanlı geçmiş hafızasını baz al
             const activeWeeklyCtx = weeklyContext || getRecentAndScheduledMuscleContext();
+            const hasTimeTravel = Boolean(weeklyContext && weeklyContext.hasTimeTravelContext);
             const isFirstOrSingleDay = !weeklyContext || weeklyContext.dayOrderIndex === 0;
             const isConsecutiveDay = Boolean(weeklyContext && weeklyContext.isConsecutiveWithPrevDay);
 
@@ -5894,18 +7790,45 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             }
 
             const weeklyUsedIds = (activeWeeklyCtx && activeWeeklyCtx.usedExerciseIds) ? activeWeeklyCtx.usedExerciseIds : new Set();
+            const thisWeekUsedIds = (activeWeeklyCtx && activeWeeklyCtx.thisWeekExerciseIds) ? activeWeeklyCtx.thisWeekExerciseIds : new Set();
+            const recent14dIds = (activeWeeklyCtx && activeWeeklyCtx.recent14dExerciseIds) ? activeWeeklyCtx.recent14dExerciseIds : new Set();
             const overusedIds30d = (activeWeeklyCtx && activeWeeklyCtx.overusedExerciseIds30d) ? activeWeeklyCtx.overusedExerciseIds30d : new Set();
-            // Pop-up / 48s yorgunluk SADECE 1. gün (veya tek günlük seans) için geçerlidir; sonraki günlerde sadece ardışık günse önceki günün alt kasları korunur
-            const fatiguedSubKeys48h = isFirstOrSingleDay
-                ? ((activeWeeklyCtx && activeWeeklyCtx.fatiguedSubKeys48h) ? activeWeeklyCtx.fatiguedSubKeys48h : new Set())
-                : (isConsecutiveDay && weeklyContext && weeklyContext.prevGeneratedDaySubKeys ? weeklyContext.prevGeneratedDaySubKeys : new Set());
+            const prevSessionFamilies = hasTimeTravel
+                ? new Set([
+                    ...(activeWeeklyCtx.lastSessionFamilies || []),
+                    ...((weeklyContext && weeklyContext.prevGeneratedDayFamilies) || [])
+                ])
+                : (isFirstOrSingleDay
+                    ? ((activeWeeklyCtx && activeWeeklyCtx.lastSessionFamilies) ? activeWeeklyCtx.lastSessionFamilies : new Set())
+                    : ((weeklyContext && weeklyContext.prevGeneratedDayFamilies) ? weeklyContext.prevGeneratedDayFamilies : new Set()));
+
+            const fatiguedSubKeys48h = hasTimeTravel
+                ? new Set([
+                    ...(activeWeeklyCtx.fatiguedSubKeys48h || []),
+                    ...(isConsecutiveDay && weeklyContext && weeklyContext.prevGeneratedDaySubKeys ? weeklyContext.prevGeneratedDaySubKeys : [])
+                ])
+                : (isFirstOrSingleDay
+                    ? ((activeWeeklyCtx && activeWeeklyCtx.fatiguedSubKeys48h && activeWeeklyCtx.fatiguedSubKeys48h.size > 0)
+                        ? activeWeeklyCtx.fatiguedSubKeys48h
+                        : ((activeWeeklyCtx && activeWeeklyCtx.lastSessionSubKeys) ? activeWeeklyCtx.lastSessionSubKeys : new Set()))
+                    : (isConsecutiveDay && weeklyContext && weeklyContext.prevGeneratedDaySubKeys ? weeklyContext.prevGeneratedDaySubKeys : new Set()));
             const deficitSubKeys = (activeWeeklyCtx && activeWeeklyCtx.deficitSubKeys) ? activeWeeklyCtx.deficitSubKeys : new Set();
             const weeklySubKeyVolume = (activeWeeklyCtx && activeWeeklyCtx.subKeyVolume) ? activeWeeklyCtx.subKeyVolume : {};
+            const weeklySubKey31Sets7d = Object.assign({}, (activeWeeklyCtx && activeWeeklyCtx.subKey31Sets7d) ? activeWeeklyCtx.subKey31Sets7d : {});
+            const activeSubKey31Fatigue = (activeWeeklyCtx && activeWeeklyCtx.subKey31Fatigue) ? activeWeeklyCtx.subKey31Fatigue : {};
+            const deficitSubKeys31 = (activeWeeklyCtx && activeWeeklyCtx.deficitSubKeys31) ? activeWeeklyCtx.deficitSubKeys31 : new Set();
+            const saturatedSubKeys31 = (activeWeeklyCtx && activeWeeklyCtx.saturatedSubKeys31) ? activeWeeklyCtx.saturatedSubKeys31 : new Set();
+            const saturatedFocusKeys = (activeWeeklyCtx && Array.isArray(activeWeeklyCtx.saturatedFocusKeys)) ? activeWeeklyCtx.saturatedFocusKeys : [];
             const weeklyUsedFinishers = (activeWeeklyCtx && activeWeeklyCtx.usedFinishers) ? activeWeeklyCtx.usedFinishers : new Set();
-            const avoidSpinalHingeToday = Boolean(
-                (isFirstOrSingleDay && activeWeeklyCtx && activeWeeklyCtx.hadSpinalHinge48h) ||
-                (weeklyContext && weeklyContext.prevGeneratedDayHadSpinalHinge)
-            );
+            const avoidSpinalHingeToday = hasTimeTravel
+                ? Boolean(
+                    activeWeeklyCtx.hadSpinalHinge48h ||
+                    (isConsecutiveDay && weeklyContext && weeklyContext.prevGeneratedDayHadSpinalHinge)
+                )
+                : Boolean(
+                    (isFirstOrSingleDay && activeWeeklyCtx && (activeWeeklyCtx.hadSpinalHinge48h || activeWeeklyCtx.lastSessionHadSpinalHinge)) ||
+                    (weeklyContext && weeklyContext.prevGeneratedDayHadSpinalHinge)
+                );
 
             // Saf Üst Vücut veya Saf Core seçiliyse Bacak+Omuz hibrit komplekslerini (Thruster, Landmine Squat to Press, Man Maker vb.) dışla
             const hasComplexWish = Boolean(customWish && /birleşik|kompleks|akış|flow|chain|zincir|hibrit|kombinasyon/i.test(customWish));
@@ -5932,10 +7855,15 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 const fam = getExerciseMovementFamily(ex);
                 if (fam && usedFamilies.has(fam)) return false;
 
-                // Squat-to-Press kompleksleri ile Dikey Omuz Pres veya Çift Bacak Squat aynı seansta çakışmasın
-                // (Örn: Squat yapılmışken üstüne Thruster/Landmine Squat-to-Press veya Thruster yapılmışken üstüne Push Press/OHP gelmesin)
+                // Squat-to-Press / Hinge-Squat / RDL-HighPull kompleksleri ile ana bileşenleri aynı seansta çakışmasın
                 if (fam === 'squat_or_clean_press_complex' && (usedFamilies.has('vertical_shoulder_press') || usedFamilies.has('bilateral_squat'))) return false;
                 if ((fam === 'vertical_shoulder_press' || fam === 'bilateral_squat') && usedFamilies.has('squat_or_clean_press_complex')) return false;
+                if (fam === 'swing_goblet_complex' && (usedFamilies.has('bilateral_squat') || usedFamilies.has('ballistic_hip_hinge') || usedFamilies.has('hip_hinge_rdl_deadlift'))) return false;
+                if ((fam === 'bilateral_squat' || fam === 'ballistic_hip_hinge' || fam === 'hip_hinge_rdl_deadlift') && usedFamilies.has('swing_goblet_complex')) return false;
+                if (fam === 'rdl_high_pull_complex' && (usedFamilies.has('hip_hinge_rdl_deadlift') || usedFamilies.has('row_high_pull_cuban'))) return false;
+                if ((fam === 'hip_hinge_rdl_deadlift' || fam === 'row_high_pull_cuban') && usedFamilies.has('rdl_high_pull_complex')) return false;
+                if ((fam === 'lunge_curl_press_complex' || fam === 'lunge_knee_drive_complex' || fam === 'lunge_chop_rotational') && usedFamilies.has('unilateral_lunge_split')) return false;
+                if (fam === 'unilateral_lunge_split' && (usedFamilies.has('lunge_curl_press_complex') || usedFamilies.has('lunge_knee_drive_complex') || usedFamilies.has('lunge_chop_rotational'))) return false;
 
                 // Aynı OpenGym video/görsel ID'sine sahip hareketler (örn. 1540, 0426, 0538) aynı seansta yan yana gelmesin
                 const mediaId = getExerciseMediaId(ex);
@@ -5948,9 +7876,52 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
 
                 const anat = getExerciseAnatomy(ex);
                 if (!isComplexFlow && (!hasLowerOrFullOrFuncSplit || !allowLowerUpperComplexInSlot)) {
-                    if (anat && (anat.isLowerUpperComplex || anat.isFullBodyMetcon)) return false;
+                    if (ex.isComplex || (anat && (anat.isComplex || anat.isLowerUpperComplex || anat.isFullBodyMetcon))) return false;
                 }
                 return true;
+            }
+
+            function scoreCandidateBy31SubMuscles(ex) {
+                if (!ex) return 999;
+                const anat = getExerciseAnatomy(ex);
+                const p31 = (anat && Array.isArray(anat.primarySubKeys) && anat.primarySubKeys.length > 0)
+                    ? anat.primarySubKeys
+                    : getExercisePrimaryMuscleKeys(ex);
+                const s31 = (anat && Array.isArray(anat.secondarySubKeys)) ? anat.secondarySubKeys : [];
+                const candSpec = (typeof resolveExerciseBiomechanics === 'function')
+                    ? resolveExerciseBiomechanics(ex.name, ex.muscle, ex.category, ex.id)
+                    : null;
+                const isCandLengthened = Boolean(candSpec && candSpec.lengthened);
+                let totalScore = 0;
+
+                const evalSubKey31 = (k31, roleWeight, denom) => {
+                    const sessCnt = sessionSubKey31Counts[k31] || 0;
+                    const wkSets = weeklySubKey31Sets7d[k31] || 0;
+                    const fatSets = activeSubKey31Fatigue[k31] || 0;
+                    const broad = (typeof SUB31_BROAD_LOOKUP === 'object' && SUB31_BROAD_LOOKUP && SUB31_BROAD_LOOKUP[k31]) || k31;
+                    const isBroadFatigued = fatiguedSubKeys48h.has(broad);
+                    const is31Fatigued = fatSets >= 1.2 || isBroadFatigued;
+                    const is31Saturated = saturatedSubKeys31.has(k31) || wkSets >= 6.5;
+                    const is31Deficit = (deficitSubKeys31.has(k31) || deficitSubKeys.has(broad)) && !is31Fatigued;
+
+                    let kScore = (sessCnt * 10) + (wkSets * 1.6) + ((subKeyCounts[broad] || 0) * 5);
+                    if (fatSets > 0) {
+                        kScore += Math.min(34, fatSets * 10);
+                        if (isCandLengthened && roleWeight >= 1.0 && fatSets >= 0.85) {
+                            kScore += 8;
+                        }
+                    } else if (isBroadFatigued) {
+                        kScore += 18;
+                    }
+                    if (is31Saturated) kScore += 12;
+                    if (is31Deficit) kScore -= (wkSets === 0 ? 12 : 7);
+
+                    totalScore += (kScore * roleWeight) / Math.max(1, denom);
+                };
+
+                p31.forEach(k => evalSubKey31(k, 1.0, p31.length));
+                s31.forEach(k => evalSubKey31(k, 0.30, s31.length));
+                return Math.round(totalScore * 100) / 100;
             }
 
             function recordChosenExercise(chosen) {
@@ -5958,15 +7929,33 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 const clone = Object.assign({}, chosen);
                 usedIds.push(clone.id);
                 weeklyUsedIds.add(clone.id);
+                thisWeekUsedIds.add(clone.id);
                 const fam = getExerciseMovementFamily(clone);
                 if (fam) usedFamilies.add(fam);
                 const mediaId = getExerciseMediaId(clone);
                 if (mediaId) usedMediaIds.add(mediaId);
+                const pBroad = new Set(getExercisePrimaryMuscleKeys(clone));
                 const coveredKeys = getExerciseCoveredSubKeys(clone);
                 coveredKeys.forEach(sk => {
-                    subKeyCounts[sk] = (subKeyCounts[sk] || 0) + 1;
-                    weeklySubKeyVolume[sk] = (weeklySubKeyVolume[sk] || 0) + 1;
+                    const isPrim = pBroad.size === 0 || pBroad.has(sk);
+                    const delta = isPrim ? 1 : 0.35;
+                    subKeyCounts[sk] = (subKeyCounts[sk] || 0) + delta;
+                    weeklySubKeyVolume[sk] = (weeklySubKeyVolume[sk] || 0) + delta;
                 });
+                const anat = getExerciseAnatomy(clone);
+                const estSets = Number(scheme && scheme.sets) || 3;
+                if (anat && Array.isArray(anat.primarySubKeys)) {
+                    anat.primarySubKeys.forEach(pk => {
+                        sessionSubKey31Counts[pk] = (sessionSubKey31Counts[pk] || 0) + 1;
+                        weeklySubKey31Sets7d[pk] = (weeklySubKey31Sets7d[pk] || 0) + estSets;
+                    });
+                }
+                if (anat && Array.isArray(anat.secondarySubKeys)) {
+                    anat.secondarySubKeys.forEach(sk => {
+                        sessionSubKey31Counts[sk] = (sessionSubKey31Counts[sk] || 0) + 0.35;
+                        weeklySubKey31Sets7d[sk] = (weeklySubKey31Sets7d[sk] || 0) + Math.round(estSets * 0.35 * 10) / 10;
+                    });
+                }
                 chosenExercises.push(clone);
                 return true;
             }
@@ -5992,20 +7981,39 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 return pool;
             }
 
-            // Haftanın diğer günlerinde kullanılmamış (taze) hareketleri önceliklendirir;
-            // ancak ekipman havuzu darsa (örn. sadece Halter) seans içi tekilliği koruyarak güvenli geri dönüş yapar.
+            // Bu hafta tamamlanan veya önceki günlerde seçilen hareketleri KESİN olarak eler,
+            // ayrıca bir önceki seansta kullanılan hareket ailesini (örn. RDL -> Tek Bacak RDL) üst üste seçmekten kaçınır.
             function preferWeeklyFreshExercises(pool) {
                 if (!Array.isArray(pool) || pool.length <= 1) return pool;
                 let working = pool;
-                // Eğer son 48 saatte veya önceki günde ağır omurga yükü (Deadlift/Barbell Row) yapıldıysa bugün göğüs destekli / omurga dostu olanları tercih et
-                if (avoidSpinalHingeToday && typeof isSpinalAxialLoadedExercise === 'function') {
+
+                // 1. ÖNCE BU HAFTA YAPILAN (örn. 9 Kasım) VE BU PLANIN ÖNCEKİ GÜNLERİNDE SEÇİLEN HAREKETLERİ KESİN FİLTRELE
+                const notDoneThisWeek = working.filter(e => !thisWeekUsedIds.has(e.id) && !weeklyUsedIds.has(e.id));
+                if (notDoneThisWeek.length > 0) {
+                    working = notDoneThisWeek;
+                } else {
+                    const notInStrictThisWeek = working.filter(e => !thisWeekUsedIds.has(e.id));
+                    if (notInStrictThisWeek.length > 0) working = notInStrictThisWeek;
+                }
+
+                // 2. Bir önceki seansta (veya 9 Kasım antrenmanında) kullanılan hareket ailesini (örn. hip_hinge_rdl_deadlift) üst üste tekrar etme
+                if (prevSessionFamilies && prevSessionFamilies.size > 0 && working.length > 1) {
+                    const diffFamilyPool = working.filter(e => !prevSessionFamilies.has(getExerciseMovementFamily(e)));
+                    if (diffFamilyPool.length > 0) working = diffFamilyPool;
+                }
+
+                // 3. Eğer son 48 saatte veya önceki günde ağır omurga yükü (Deadlift/Barbell Row/RDL) yapıldıysa bugün göğüs destekli / omurga dostu olanları tercih et
+                if (avoidSpinalHingeToday && typeof isSpinalAxialLoadedExercise === 'function' && working.length > 1) {
                     const spineSafe = working.filter(e => !isSpinalAxialLoadedExercise(e));
                     if (spineSafe.length > 0) working = spineSafe;
                 }
-                const freshInWeek = working.filter(e => !weeklyUsedIds.has(e.id));
-                if (freshInWeek.length > 0) {
-                    const notOverusedInMonth = freshInWeek.filter(e => !overusedIds30d.has(e.id) && !overusedIds30d.has(e.name));
-                    return notOverusedInMonth.length > 0 ? notOverusedInMonth : freshInWeek;
+
+                // 4. Son 14 gün ve son 30 gün aşırı tekrar koruması (esnek tercih)
+                if (working.length > 1) {
+                    const fresh14d = working.filter(e => !recent14dIds.has(e.id));
+                    const baseFresh = fresh14d.length > 0 ? fresh14d : working;
+                    const notOverusedInMonth = baseFresh.filter(e => !overusedIds30d.has(e.id) && !overusedIds30d.has(e.name));
+                    return notOverusedInMonth.length > 0 ? notOverusedInMonth : baseFresh;
                 }
                 return working;
             }
@@ -6085,7 +8093,12 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                             if (selectedSplit === 'iso_shoulders' && getExerciseAngleVector(ex) === 'pull_hinge_unsupported_back') return false;
                         }
                         const anat = getExerciseAnatomy(ex);
-                        return anat && keys.includes(anat.subKey);
+                        if (!anat) return false;
+                        if (keys.includes(anat.subKey)) return true;
+                        if (Array.isArray(anat.primarySubKeys)) {
+                            return anat.primarySubKeys.some(pk => keys.includes(pk) || (SUB31_BROAD_LOOKUP[pk] && keys.includes(SUB31_BROAD_LOOKUP[pk])));
+                        }
+                        return false;
                     };
                     const matchesPrimaryMuscleKeysFor = (keys) => (ex) => {
                         if (strictIso) {
@@ -6103,22 +8116,21 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                         return allKeys.some(k => keys.includes(k));
                     };
 
-                    // ADIM 1: Önce haftalık en az çalışmış hedef alt kası (targetKeys), bulunamazsa genel candidateSubKeys'i ara
-                    let subKeyMatches = basePool.filter(matchesPrimaryFor(targetKeys));
+                    // ADIM 1: Önce bu hafta yapılmamış taze havuzda (freshBasePool) en az çalışmış hedef alt kası (targetKeys) ve candidateSubKeys'i ara
+                    const freshBasePool = basePool.filter(e => !thisWeekUsedIds.has(e.id) && !weeklyUsedIds.has(e.id));
+                    const findSubMatchesIn = (poolToSearch) => {
+                        let m = poolToSearch.filter(matchesPrimaryFor(targetKeys));
+                        if (m.length === 0) m = poolToSearch.filter(matchesPrimaryFor(candidateSubKeys));
+                        if (m.length === 0) m = poolToSearch.filter(matchesPrimaryMuscleKeysFor(targetKeys));
+                        if (m.length === 0) m = poolToSearch.filter(matchesPrimaryMuscleKeysFor(candidateSubKeys));
+                        if (m.length === 0 && !strictIso) m = poolToSearch.filter(matchesAnyCoveredFor(targetKeys));
+                        if (m.length === 0 && !strictIso) m = poolToSearch.filter(matchesAnyCoveredFor(candidateSubKeys));
+                        return m;
+                    };
+
+                    let subKeyMatches = freshBasePool.length > 0 ? findSubMatchesIn(freshBasePool) : [];
                     if (subKeyMatches.length === 0) {
-                        subKeyMatches = basePool.filter(matchesPrimaryFor(candidateSubKeys));
-                    }
-                    if (subKeyMatches.length === 0) {
-                        subKeyMatches = basePool.filter(matchesPrimaryMuscleKeysFor(targetKeys));
-                    }
-                    if (subKeyMatches.length === 0) {
-                        subKeyMatches = basePool.filter(matchesPrimaryMuscleKeysFor(candidateSubKeys));
-                    }
-                    if (subKeyMatches.length === 0 && !strictIso) {
-                        subKeyMatches = basePool.filter(matchesAnyCoveredFor(targetKeys));
-                    }
-                    if (subKeyMatches.length === 0 && !strictIso) {
-                        subKeyMatches = basePool.filter(matchesAnyCoveredFor(candidateSubKeys));
+                        subKeyMatches = findSubMatchesIn(basePool);
                     }
                     if (subKeyMatches.length === 0) {
                         // Tüm EXERCISES_DB içinde seçili ekipmanlarla bu subKey'i birincil olarak vuran ve ikiz olmayan hareketi ara
@@ -6182,20 +8194,15 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                         }
                     }
 
-                    // ADIM 4: Birden fazla aday varsa; son 48 saatte yorulmuş alt kaslardan kaçın (+20 ceza) ve geçmiş hafta/ay eksik kalan alt kasları önceliklendir (-5 ödül)
+                    // ADIM 4: 31 Alt Kas Bölmesi Puanlaması (Akut yorgunluktan ve 7 günlük doygunluktan kaçın, 0 set / eksik alt kasları önceliklendir!)
                     if (subKeyMatches.length > 1) {
                         let minOverlapScore = Infinity;
                         const scored = subKeyMatches.map(ex => {
-                            const keys = getExerciseCoveredSubKeys(ex);
-                            const overlapScore = keys.reduce((sum, k) => {
-                                const fatiguePenalty = fatiguedSubKeys48h.has(k) ? 20 : 0;
-                                const deficitBonus = deficitSubKeys.has(k) ? -5 : 0;
-                                return sum + ((subKeyCounts[k] || 0) * 10) + (weeklySubKeyVolume[k] || 0) + fatiguePenalty + deficitBonus;
-                            }, 0);
+                            const overlapScore = scoreCandidateBy31SubMuscles(ex);
                             if (overlapScore < minOverlapScore) minOverlapScore = overlapScore;
                             return { ex, overlapScore };
                         });
-                        const freshest = scored.filter(item => item.overlapScore <= minOverlapScore + 1).map(item => item.ex);
+                        const freshest = scored.filter(item => item.overlapScore <= minOverlapScore + 2.5).map(item => item.ex);
                         if (freshest.length > 0) subKeyMatches = freshest;
                     }
 
@@ -6354,11 +8361,11 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                         { subKeys: ['core_front', 'core_obliques'], cat: 'core', mode: isPureBb ? 'any' : 'functional' }   // Slot 8 (60dk): Ön Karın Zırhı
                     ];
                 } else if (splitKey === 'upper') {
-                    // ÜST VÜCUT: Göğüs + Kanat + Omuz + Orta Sırt + Triceps + Biceps + Arka Omuz + Core
+                    // ÜST VÜCUT: Göğüs + Kanat + Omuz (Yan/Arka/Ön eksik başa göre) + Orta Sırt + Triceps + Biceps + Arka Omuz/Üst Göğüs + Core
                     return [
                         { subKeys: ['chest_mid', 'chest_upper'], cat: 'push', mode: 'bb_compound' },                       // Slot 1 (Düz 1): Ana Göğüs Pres
                         { subKeys: ['back_lats'], cat: 'pull', mode: 'bb_compound' },                                      // Slot 2 (A1): Kanat Çekiş
-                        { subKeys: ['shoulders_side', 'shoulders_front'], cat: 'push', mode: 'any' },                      // Slot 3 (A2): Omuz Pres / Yan Açış
+                        { subKeys: ['shoulders_side', 'shoulders_rear', 'shoulders_front'], cat: ['push', 'pull'], mode: 'any' }, // Slot 3 (A2): En Taze / Eksik Omuz Başı
                         { subKeys: ['back_mid'], cat: 'pull', mode: isFuncDom ? 'functional' : 'bb_compound' },            // Slot 4 (Düz 2): Orta Sırt Row
                         { subKeys: ['triceps_long', 'triceps_lateral'], cat: 'push', mode: 'bb_isolation' },               // Slot 5 (B1): Triceps (Antagonist Kol 1)
                         { subKeys: ['biceps'], cat: 'pull', mode: 'bb_isolation' },                                        // Slot 6 (B2): Biceps (Antagonist Kol 2)
@@ -6381,15 +8388,15 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                     // FULL BODY (TÜM VÜCUT):
                     // Slot 1 (Düz 1): Ön Bacak Squat
                     // Slot 2+3 (Süperset A1+A2): Göğüs İtiş + Sırt Çekiş (Agonist-Antagonist Eşleşme!)
-                    // Slot 4 (Düz 2): Arka Zincir RDL / Deadlift / Swing
-                    // Slot 5+6 (Süperset B1+B2): Omuz (Yan/Ön) + Core Zırhı
+                    // Slot 4 (Düz 2): Arka Zincir RDL / Deadlift / Swing / Leg Curl
+                    // Slot 5+6 (Süperset B1+B2): Omuz (Yan/Ön/Arka) + Core Zırhı
                     // Slot 7+8 (60dk): Kol (Biceps/Triceps) + Arka Omuz/Kalf
                     return [
                         { subKeys: ['legs_quad'], cat: 'legs_quad', mode: isFuncDom ? 'functional' : 'bb_compound', allowComplex: false },
                         { subKeys: ['chest_mid', 'chest_upper'], cat: 'push', mode: isFuncDom ? 'functional' : 'bb_compound', allowComplex: false },
                         { subKeys: ['back_lats', 'back_mid'], cat: 'pull', mode: isFuncDom ? 'functional' : 'bb_compound', allowComplex: false },
                         { subKeys: ['legs_hamstrings', 'legs_glutes'], cat: 'legs_hinge', mode: (isPureBb ? 'bb_compound' : (isFuncDom || isBalanced ? 'functional' : 'bb_compound')), allowComplex: false },
-                        { subKeys: ['shoulders_side', 'shoulders_front'], cat: isFuncDom ? ['push', 'conditioning'] : 'push', mode: (isPureBb ? 'bb_isolation' : (isFuncDom ? 'functional' : 'any')), allowComplex: isFuncDom },
+                        { subKeys: ['shoulders_side', 'shoulders_front', 'shoulders_rear'], cat: isFuncDom ? ['push', 'pull', 'conditioning'] : ['push', 'pull'], mode: (isPureBb ? 'bb_isolation' : (isFuncDom ? 'functional' : 'any')), allowComplex: isFuncDom },
                         { subKeys: ['core_front', 'core_obliques'], cat: 'core', mode: isPureBb ? 'any' : 'functional', allowComplex: false },
                         { subKeys: ['biceps', 'triceps_long', 'triceps_lateral'], cat: ['pull', 'push'], mode: 'bb_isolation', allowComplex: false },
                         { subKeys: ['shoulders_rear', 'legs_calves'], cat: ['pull', 'legs_quad'], mode: isPureBb ? 'bb_isolation' : 'any', allowComplex: false }
@@ -6415,11 +8422,14 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 const effectiveSplit = selectedSplits[0] || 'full_body';
                 let blueprint = getAnatomicalSlotsForSplit(effectiveSplit, activeDoctrineKey).map(s => Object.assign({}, s));
 
-                // Yorgun bölge zorunlu kutu kilidini kır: İlk gün veya tek günlük seansta yorgun bölge kutularını eksik kaslara çevir
-                const isFirstOrSingleDay = !weeklyContext || weeklyContext.dayOrderIndex === 0;
+                // Yorgun bölge zorunlu kutu kilidini kır: Bu günün zaman diliminde hala akut yorgun olan bölge kutularını eksik kaslara çevir
                 const precheckNow = window.activePrecheckState || { fatigue: 'none' };
-                const legsFatiguedToday = isFirstOrSingleDay && (precheckNow.fatigue === 'legs' || (Array.isArray(activeWeeklyCtx.fatiguedMuscles48h) && activeWeeklyCtx.fatiguedMuscles48h.includes('Bacak')));
-                const upperFatiguedToday = isFirstOrSingleDay && (precheckNow.fatigue === 'upper');
+                const legsFatiguedToday = hasTimeTravel
+                    ? (Array.isArray(activeWeeklyCtx.fatiguedMuscles48h) && activeWeeklyCtx.fatiguedMuscles48h.includes('Bacak'))
+                    : (isFirstOrSingleDay && (precheckNow.fatigue === 'legs' || (Array.isArray(activeWeeklyCtx.fatiguedMuscles48h) && activeWeeklyCtx.fatiguedMuscles48h.includes('Bacak'))));
+                const upperFatiguedToday = hasTimeTravel
+                    ? (Array.isArray(activeWeeklyCtx.fatiguedMuscles48h) && activeWeeklyCtx.fatiguedMuscles48h.includes('Göğüs') && activeWeeklyCtx.fatiguedMuscles48h.includes('Sırt') && !legsFatiguedToday)
+                    : (isFirstOrSingleDay && precheckNow.fatigue === 'upper');
 
                 if (legsFatiguedToday && (effectiveSplit === 'full_body' || effectiveSplit === 'functional')) {
                     blueprint = blueprint.map(slot => {
@@ -6485,13 +8495,15 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 const isLowerCompatibleSplit = ['full_body', 'lower', 'functional'].includes(currentSplitPrimary);
 
                 const focusMatchers = [
-                    { key: 'back', label: 'Sırt', allow: isUpperCompatibleSplit && currentSplitPrimary !== 'upper_push', targetMin: currentSplitPrimary === 'upper' ? 2 : 1, regex: /(?:^|\s)(?:sırt|kanat|kürek|çekiş|lat|latissimus)(?:$|\s|[.,])/i, testEx: e => { const pk = getExercisePrimaryMuscleKeys(e); return (pk.includes('back_lats') || pk.includes('back_mid')) && !e.isComplex; } },
-                    { key: 'arms', label: 'Kol', allow: isUpperCompatibleSplit, targetMin: 1, regex: /(?:^|\s)(?:kol|biceps|triceps|pazu|arka kol)(?:$|\s|[.,])/i, testEx: e => { const pk = getExercisePrimaryMuscleKeys(e); return (pk.includes('biceps') || pk.includes('triceps_long') || pk.includes('triceps_lateral')) && e.mechanic === 'isolation'; } },
-                    { key: 'rear_delt', label: 'Arka Omuz', allow: isUpperCompatibleSplit && currentSplitPrimary !== 'upper_push', targetMin: 1, regex: /arka omuz|rear delt|face pull/i, testEx: e => getExercisePrimaryMuscleKeys(e).includes('shoulders_rear') },
-                    { key: 'shoulders', label: 'Omuz', allow: isUpperCompatibleSplit && currentSplitPrimary !== 'upper_pull', targetMin: 1, regex: /(?:^|\s)(?:omuz|deltoid|trapez)(?:$|\s|[.,])/i, testEx: e => { const pk = getExercisePrimaryMuscleKeys(e); return pk.includes('shoulders_front') || pk.includes('shoulders_side') || pk.includes('shoulders_rear'); } },
-                    { key: 'chest', label: 'Göğüs', allow: isUpperCompatibleSplit && currentSplitPrimary !== 'upper_pull', targetMin: 1, regex: /(?:^|\s)(?:göğüs|chest|pectoral)(?:$|\s|[.,])/i, testEx: e => { const pk = getExercisePrimaryMuscleKeys(e); return pk.includes('chest_mid') || pk.includes('chest_upper') || pk.includes('chest_lower'); } },
-                    { key: 'legs', label: 'Bacak', allow: isLowerCompatibleSplit, targetMin: currentSplitPrimary === 'lower' ? 3 : 2, regex: /(?:^|\s)(?:bacak|kalça|glute|hamstring|quad)(?:$|\s|[.,])/i, testEx: e => { const pk = getExercisePrimaryMuscleKeys(e); return pk.includes('legs_quad') || pk.includes('legs_hamstrings') || pk.includes('legs_glutes'); } },
-                    { key: 'core', label: 'Core', allow: true, targetMin: 1, regex: /(?:^|\s)(?:karın|core|abs)(?:$|\s|[.,])/i, testEx: e => { const pk = getExercisePrimaryMuscleKeys(e); return pk.includes('core_front') || pk.includes('core_obliques'); } }
+                    { key: 'back', label: 'Sırt', isGranular: false, allow: isUpperCompatibleSplit && currentSplitPrimary !== 'upper_push', targetMin: currentSplitPrimary === 'upper' ? 2 : 1, regex: /(?:^|\s)(?:sırt|kanat|kürek|çekiş|lat|latissimus)(?:$|\s|[.,])/i, testEx: e => { const pk = getExercisePrimaryMuscleKeys(e); return (pk.includes('back_lats') || pk.includes('back_mid')) && !e.isComplex; } },
+                    { key: 'arms', label: 'Kol', isGranular: true, allow: isUpperCompatibleSplit, targetMin: currentSplitPrimary === 'upper' ? 2 : 1, regex: /(?:^|\s)(?:kol|biceps|triceps|pazu|arka kol)(?:$|\s|[.,])/i, testEx: e => { const pk = getExercisePrimaryMuscleKeys(e); return (pk.includes('biceps') || pk.includes('triceps_long') || pk.includes('triceps_lateral')) && e.mechanic === 'isolation'; } },
+                    { key: 'rear_delt', label: 'Arka Omuz', isGranular: true, allow: isUpperCompatibleSplit && currentSplitPrimary !== 'upper_push', targetMin: 1, regex: /arka omuz|rear delt|face pull/i, testEx: e => getExercisePrimaryMuscleKeys(e).includes('shoulders_rear') },
+                    { key: 'upper_chest', label: 'Üst Göğüs', isGranular: true, allow: isUpperCompatibleSplit && currentSplitPrimary !== 'upper_pull', targetMin: 1, regex: /üst göğüs|incline/i, testEx: e => getExercisePrimaryMuscleKeys(e).includes('chest_upper') },
+                    { key: 'calves', label: 'Baldır', isGranular: true, allow: isLowerCompatibleSplit, targetMin: 1, regex: /kalf|baldır|calf/i, testEx: e => getExercisePrimaryMuscleKeys(e).includes('legs_calves') },
+                    { key: 'shoulders', label: 'Omuz', isGranular: false, allow: isUpperCompatibleSplit && currentSplitPrimary !== 'upper_pull', targetMin: 1, regex: /(?:^|\s)(?:omuz|deltoid|trapez)(?:$|\s|[.,])/i, testEx: e => { const pk = getExercisePrimaryMuscleKeys(e); return pk.includes('shoulders_front') || pk.includes('shoulders_side') || pk.includes('shoulders_rear'); } },
+                    { key: 'chest', label: 'Göğüs', isGranular: false, allow: isUpperCompatibleSplit && currentSplitPrimary !== 'upper_pull', targetMin: 1, regex: /(?:^|\s)(?:göğüs|chest|pectoral)(?:$|\s|[.,])/i, testEx: e => { const pk = getExercisePrimaryMuscleKeys(e); return pk.includes('chest_mid') || pk.includes('chest_upper') || pk.includes('chest_lower'); } },
+                    { key: 'legs', label: 'Bacak', isGranular: false, allow: isLowerCompatibleSplit, targetMin: currentSplitPrimary === 'lower' ? 3 : 2, regex: /(?:^|\s)(?:bacak|kalça|glute|hamstring|quad)(?:$|\s|[.,])/i, testEx: e => { const pk = getExercisePrimaryMuscleKeys(e); return pk.includes('legs_quad') || pk.includes('legs_hamstrings') || pk.includes('legs_glutes'); } },
+                    { key: 'core', label: 'Core', isGranular: true, allow: true, targetMin: 1, regex: /(?:^|\s)(?:karın|core|abs)(?:$|\s|[.,])/i, testEx: e => { const pk = getExercisePrimaryMuscleKeys(e); return pk.includes('core_front') || pk.includes('core_obliques'); } }
                 ];
 
                 const activeFocusMatchers = focusMatchers.filter(fm => {
@@ -6502,13 +8514,27 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                     const isAutoDeficit = !wishLower && autoDeficitKeys.includes(fm.key);
                     if (isAiFocus || isRegexFocus) {
                         fm.targetMin = Math.max(fm.targetMin, 2);
-                    } else if (isAutoDeficit) {
+                    } else if (isAutoDeficit && !fm.isGranular) {
                         const isTopDeficit = autoDeficitKeys[0] === fm.key;
-                        fm.targetMin = isTopDeficit ? Math.max(fm.targetMin, 2) : Math.max(fm.targetMin, duration >= 45 ? 2 : 1);
+                        if (currentSplitPrimary !== 'full_body' && (saturatedFocusKeys.length > 0 || duration >= 60)) {
+                            fm.targetMin = isTopDeficit ? Math.max(fm.targetMin, 2) : Math.max(fm.targetMin, 1);
+                        }
                     }
                     return isAiFocus || isRegexFocus || isAutoDeficit;
                 });
                 const isAnyFocusMatch = (ex) => activeFocusMatchers.some(fm => fm.testEx(ex));
+
+                const mapExToFocusDomain = (ex) => {
+                    const pk = getExercisePrimaryMuscleKeys(ex);
+                    if (pk.some(k => k === 'legs_quad' || k === 'legs_hamstrings' || k === 'legs_glutes')) return 'legs';
+                    if (pk.some(k => k.startsWith('chest_'))) return 'chest';
+                    if (pk.some(k => k.startsWith('back_'))) return 'back';
+                    if (pk.some(k => k.startsWith('shoulders_'))) return 'shoulders';
+                    if (pk.some(k => k === 'biceps' || k.startsWith('triceps_'))) return 'arms';
+                    if (pk.some(k => k.startsWith('core_'))) return 'core';
+                    if (pk.includes('legs_calves')) return 'calves';
+                    return 'other';
+                };
 
                 activeFocusMatchers.forEach(fm => {
                     let existingMatches = chosenExercises.filter(fm.testEx);
@@ -6518,11 +8544,22 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                         });
                     }
                     while (existingMatches.length < fm.targetMin) {
-                        const candidates = preferWeeklyFreshExercises(EXERCISES_DB.filter(e =>
+                        const rawCandidates = preferWeeklyFreshExercises(EXERCISES_DB.filter(e =>
                             isCandidateBiochemicallyCompatible(e, hasLowerOrFullOrFuncSplit) &&
                             fm.testEx(e)
                         ));
-                        const picked = pickRandom(candidates);
+                        let bestCandidates = rawCandidates;
+                        if (rawCandidates.length > 1) {
+                            let minCScore = Infinity;
+                            const cScored = rawCandidates.map(e => {
+                                const sc = scoreCandidateBy31SubMuscles(e);
+                                if (sc < minCScore) minCScore = sc;
+                                return { e, sc };
+                            });
+                            const topTier = cScored.filter(x => x.sc <= minCScore + 2.5).map(x => x.e);
+                            if (topTier.length > 0) bestCandidates = topTier;
+                        }
+                        const picked = pickRandom(bestCandidates);
                         if (!picked) break;
 
                         const pickedClone = Object.assign({}, picked, {
@@ -6531,16 +8568,44 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                         });
                         usedIds.push(pickedClone.id);
                         weeklyUsedIds.add(pickedClone.id);
+                        thisWeekUsedIds.add(pickedClone.id);
                         const fam = getExerciseMovementFamily(pickedClone);
                         if (fam) usedFamilies.add(fam);
                         const mId = getExerciseMediaId(pickedClone);
                         if (mId) usedMediaIds.add(mId);
 
+                        const domainCounts = {};
+                        chosenExercises.forEach(ce => {
+                            const dom = mapExToFocusDomain(ce);
+                            domainCounts[dom] = (domainCounts[dom] || 0) + 1;
+                        });
+
                         let replaceIdx = -1;
+                        // 1. Öncelik (7 Günlük Doygunluk Freni): Geçen hafta aşırı çalışmış (saturatedFocusKeys) kasın ikincil slotunu eksik kasa devret!
                         for (let r = chosenExercises.length - 1; r >= 0; r--) {
-                            if (!isAnyFocusMatch(chosenExercises[r])) {
+                            const dom = mapExToFocusDomain(chosenExercises[r]);
+                            if (!isAnyFocusMatch(chosenExercises[r]) && saturatedFocusKeys.includes(dom) && (domainCounts[dom] >= 2 || currentSplitPrimary !== 'full_body')) {
                                 replaceIdx = r;
                                 break;
+                            }
+                        }
+                        // 2. Öncelik: Aynı seansta 2+ kez yer alan odak dışı kas grubunun son slotunu devret (tekil ana Göğüs/Sırt/Bacak omurgasını bozma!)
+                        if (replaceIdx === -1) {
+                            for (let r = chosenExercises.length - 1; r >= 0; r--) {
+                                const dom = mapExToFocusDomain(chosenExercises[r]);
+                                if (!isAnyFocusMatch(chosenExercises[r]) && (domainCounts[dom] >= 2 || dom === 'core')) {
+                                    replaceIdx = r;
+                                    break;
+                                }
+                            }
+                        }
+                        // 3. Yedek: Odak dışı son uygun slot
+                        if (replaceIdx === -1) {
+                            for (let r = chosenExercises.length - 1; r >= 0; r--) {
+                                if (!isAnyFocusMatch(chosenExercises[r])) {
+                                    replaceIdx = r;
+                                    break;
+                                }
                             }
                         }
                         if (replaceIdx > -1 && chosenExercises.length >= targetCount) {
@@ -6731,12 +8796,17 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 exercises: structuredExercises,
                 finisher: selectedFinisher,
                 historyContext: {
-                    fatiguedMuscles48h: (isFirstOrSingleDay && Array.isArray(activeWeeklyCtx.fatiguedMuscles48h)) ? activeWeeklyCtx.fatiguedMuscles48h : [],
-                    hadSpinalHinge48h: Boolean((isFirstOrSingleDay && activeWeeklyCtx.hadSpinalHinge48h) || activeWeeklyCtx.prevGeneratedDayHadSpinalHinge),
+                    fatiguedMuscles48h: hasTimeTravel
+                        ? (Array.isArray(activeWeeklyCtx.fatiguedMuscles48h) ? activeWeeklyCtx.fatiguedMuscles48h : [])
+                        : ((isFirstOrSingleDay && Array.isArray(activeWeeklyCtx.fatiguedMuscles48h)) ? activeWeeklyCtx.fatiguedMuscles48h : []),
+                    hadSpinalHinge48h: hasTimeTravel
+                        ? Boolean(activeWeeklyCtx.hadSpinalHinge48h || (isConsecutiveDay && activeWeeklyCtx.prevGeneratedDayHadSpinalHinge))
+                        : Boolean((isFirstOrSingleDay && activeWeeklyCtx.hadSpinalHinge48h) || activeWeeklyCtx.prevGeneratedDayHadSpinalHinge),
                     prevDayMuscles: (!isFirstOrSingleDay && activeWeeklyCtx.prevGeneratedDayMuscles) ? Array.from(activeWeeklyCtx.prevGeneratedDayMuscles) : [],
                     isConsecutiveDay: isConsecutiveDay,
                     neglectedMuscles7d: Array.isArray(activeWeeklyCtx.neglectedMuscles7d) ? activeWeeklyCtx.neglectedMuscles7d : [],
-                    neglectedMuscles30d: Array.isArray(activeWeeklyCtx.neglectedMuscles30d) ? activeWeeklyCtx.neglectedMuscles30d : []
+                    neglectedMuscles30d: Array.isArray(activeWeeklyCtx.neglectedMuscles30d) ? activeWeeklyCtx.neglectedMuscles30d : [],
+                    saturatedMuscles7d: Array.isArray(activeWeeklyCtx.saturatedMuscles7d) ? activeWeeklyCtx.saturatedMuscles7d : []
                 },
                 createdAt: Date.now()
             };
@@ -8429,13 +10499,14 @@ KURALLAR:
 
             let lastSessionNote = 'Son 48 saatte kayıtlı seans yok';
             if (allLogs.length > 0) {
-                const sortedLogs = [...allLogs].sort((a,b) => new Date(b.date) - new Date(a.date));
+                const sortedLogs = sortWorkoutLogsDesc([...allLogs]);
                 const latest = sortedLogs[0];
-                if (latest && latest.date) {
-                    const diffHours = (now.getTime() - new Date(latest.date).getTime()) / (1000 * 60 * 60);
+                const latestDateObj = latest ? parseWorkoutLogDateLocal(latest) : null;
+                if (latest && latestDateObj) {
+                    const diffHours = Math.max(0, (now.getTime() - latestDateObj.getTime()) / (1000 * 60 * 60));
                     if (diffHours <= 54) {
                         const exNames = Array.isArray(latest.exercises) ? latest.exercises.slice(0, 4).map(e => e.name).join(', ') : '';
-                        lastSessionNote = Math.round(diffHours) + ' saat önce yapıldı (' + (latest.title || 'Seans') + ' - ' + exNames + ')';
+                        lastSessionNote = Math.round(diffHours) + ' saat önce yapıldı (' + (latest.title || latest.program || 'Seans') + ' - ' + exNames + ')';
                     }
                 }
             }
@@ -13337,7 +15408,7 @@ KESİN KURALLAR:
 
             const newLog = {
                 id: 'log_' + Date.now(),
-                date: new Date().toISOString().split('T')[0],
+                date: toLocalYmdString(new Date()),
                 dateFormatted: new Intl.DateTimeFormat('tr-TR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date()),
                 program: programName,
                 locationType: locType,
@@ -15583,7 +17654,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (/omuz|deltoid|overhead|military|pike|lateral raise|arnold/.test(text)) tags.add('shoulders');
             if (/triceps|arka kol|skull|pushdown|extension/.test(text)) tags.add('triceps');
             if (/sırt|kanat|lat|row|çekiş|barfiks|pull-up|chin-up|rhomboid|trapez/.test(text)) tags.add('back');
-            if (/biceps|ön kol|curl|pazu/.test(text)) tags.add('biceps');
+            if (/biceps|ön kol|curl|pazu|pazı/.test(text)) tags.add('biceps');
             if (/quad|ön bacak|squat|lunge|split squat|step-up|thruster|wall sit/.test(text)) tags.add('quads');
             if (/hamstring|arka bacak|kalça|glute|deadlift|rdl|swing|hip thrust|bridge|good morning|hinge/.test(text)) tags.add('posterior');
             if (/karın|core|abs|plank|deadbug|hollow|crunch|pallof|carry|farmers/.test(text)) tags.add('core');
@@ -17272,7 +19343,7 @@ KURALLAR:
                             const map = new Map();
                             existing.forEach(l => map.set(l.id, l));
                             logs.forEach(l => map.set(l.id, l));
-                            const merged = Array.from(map.values()).sort((a, b) => new Date(b.date || b.timestamp) - new Date(a.date || a.timestamp));
+                            const merged = sortWorkoutLogsDesc(Array.from(map.values()));
                             localStorage.setItem(`celik_kodu_history_${uid}`, JSON.stringify(merged));
                         }
                     });
@@ -17429,8 +19500,7 @@ KURALLAR:
             }
 
             if (logMap.size > 0) {
-                const mergedLogs = Array.from(logMap.values());
-                mergedLogs.sort((a, b) => new Date(b.date || b.timestamp) - new Date(a.date || a.timestamp));
+                const mergedLogs = sortWorkoutLogsDesc(Array.from(logMap.values()));
                 localStorage.setItem(`celik_kodu_history_${uid}`, JSON.stringify(mergedLogs));
                 if (window.GarminTredictChief && typeof window.GarminTredictChief.handoffCompletedActivitiesToTabChiefs === 'function') {
                     window.GarminTredictChief.handoffCompletedActivitiesToTabChiefs();
@@ -17494,7 +19564,7 @@ KURALLAR:
                     const nov9Idx = logs.findIndex(l => l && (l.id === 'log_1794246654598' || String(l.date || '').slice(0, 10) === '2026-11-09'));
                     if (nov9Idx === -1) {
                         logs.unshift(nov9RecoveredLog);
-                        logs.sort((a, b) => new Date(b.date || b.timestamp) - new Date(a.date || a.timestamp));
+                        sortWorkoutLogsDesc(logs);
                         fileModified = true;
                         anyModified = true;
                     } else if (!logs[nov9Idx].healthSummary || !logs[nov9Idx].garminActivityId) {
@@ -22123,7 +24193,8 @@ KURALLAR:
         function getUserLogsById(userId) {
             try {
                 const raw = localStorage.getItem(`celik_kodu_history_${userId}`);
-                return raw ? JSON.parse(raw) : [];
+                const parsed = raw ? JSON.parse(raw) : [];
+                return Array.isArray(parsed) ? sortWorkoutLogsDesc(parsed) : [];
             } catch(e) {
                 return [];
             }
@@ -22136,8 +24207,9 @@ KURALLAR:
 
         function setWorkoutLogs(logs) {
             const uid = getActiveUserId();
-            localStorage.setItem(`celik_kodu_history_${uid}`, JSON.stringify(logs));
-            syncWorkoutLogsToCloud(logs, uid);
+            const sorted = Array.isArray(logs) ? sortWorkoutLogsDesc([...logs]) : [];
+            localStorage.setItem(`celik_kodu_history_${uid}`, JSON.stringify(sorted));
+            syncWorkoutLogsToCloud(sorted, uid);
         }
 
         function deleteLog(id) {
@@ -22154,7 +24226,7 @@ KURALLAR:
             const uniqueDates = [...new Set(logs.map(l => l.date))].sort().reverse();
             let checkDate = new Date();
             for (let i = 0; i < 30; i++) {
-                const dateStr = checkDate.toISOString().split('T')[0];
+                const dateStr = toLocalYmdString(checkDate);
                 if (uniqueDates.includes(dateStr)) {
                     streak++;
                 } else if (i > 0) {
@@ -22505,7 +24577,7 @@ KURALLAR:
                                 totalIsometricSecsCompleted: Number(item.totalIsometricSecsCompleted) || 0,
                                 garminActivityId: item.garminActivityId ? String(item.garminActivityId).slice(0, 60) : undefined,
                                 healthSummary: item.healthSummary && typeof item.healthSummary === 'object' ? item.healthSummary : undefined,
-                                timestamp: Number(item.timestamp) || Date.now()
+                                timestamp: Number(item.timestamp) || getWorkoutLogTimestampMs({ date: item.date, dateFormatted: item.dateFormatted }) || Date.now()
                             }));
                         const existingLogs = getWorkoutLogs();
                         const mergedById = new Map();
@@ -22520,12 +24592,7 @@ KURALLAR:
                                 healthSummary: item.healthSummary || prev.healthSummary
                             }) : item);
                         });
-                        const mergedList = Array.from(mergedById.values()).sort((a, b) => {
-                            const da = String(a.date || '').slice(0, 10);
-                            const db = String(b.date || '').slice(0, 10);
-                            if (da !== db) return db.localeCompare(da);
-                            return (Number(b.timestamp) || 0) - (Number(a.timestamp) || 0);
-                        });
+                        const mergedList = sortWorkoutLogsDesc(Array.from(mergedById.values()));
                         setWorkoutLogs(mergedList);
                         if (window.GarminTredictChief && typeof window.GarminTredictChief.handoffCompletedActivitiesToTabChiefs === 'function') {
                             window.GarminTredictChief.handoffCompletedActivitiesToTabChiefs();
@@ -23647,24 +25714,1374 @@ KURALLAR:
             hamstrings: 'Arka Bacak',
             glutes: 'Glute',
             biceps: 'Biceps',
+            forearms: 'Biceps',
             triceps: 'Triceps',
             core: 'Karın/Core',
-            calves: 'Kalf'
+            calves: 'Kalf',
+            calves_grip: 'Kalf'
         };
+
+        const ACADEMIC_SPECS_BY_ID = {
+          "db_bench_press": {
+                    "primary": "Göğüs",
+                    "pFactor": 1,
+                    "sec": {
+                              "Omuz": 0.35,
+                              "Triceps": 0.35
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "bb_bench_press": {
+                    "primary": "Göğüs",
+                    "pFactor": 1,
+                    "sec": {
+                              "Omuz": 0.35,
+                              "Triceps": 0.35
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "db_incline_press": {
+                    "primary": "Göğüs",
+                    "pFactor": 1,
+                    "sec": {
+                              "Omuz": 0.45,
+                              "Triceps": 0.35
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "bb_incline_bench": {
+                    "primary": "Göğüs",
+                    "pFactor": 1,
+                    "sec": {
+                              "Omuz": 0.45,
+                              "Triceps": 0.35
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "db_floor_press": {
+                    "primary": "Göğüs",
+                    "pFactor": 0.85,
+                    "sec": {
+                              "Triceps": 0.45,
+                              "Omuz": 0.25
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "MODERATE",
+                    "lengthened": false
+          },
+          "mach_cable_crossover": {
+                    "primary": "Göğüs",
+                    "pFactor": 1,
+                    "sec": {
+                              "Omuz": 0.2
+                    },
+                    "type": "ISOLATION",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "mach_pec_deck": {
+                    "primary": "Göğüs",
+                    "pFactor": 1,
+                    "sec": {
+                              "Omuz": 0.2
+                    },
+                    "type": "ISOLATION",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "bw_pushup": {
+                    "primary": "Göğüs",
+                    "pFactor": 0.65,
+                    "sec": {
+                              "Omuz": 0.25,
+                              "Triceps": 0.25,
+                              "Karın/Core": 0.2
+                    },
+                    "type": "BODYWEIGHT_STRENGTH",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "bw_decline_pushup": {
+                    "primary": "Göğüs",
+                    "pFactor": 0.75,
+                    "sec": {
+                              "Omuz": 0.35,
+                              "Triceps": 0.25,
+                              "Karın/Core": 0.2
+                    },
+                    "type": "BODYWEIGHT_STRENGTH",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "bw_dips": {
+                    "primary": "Göğüs",
+                    "pFactor": 0.85,
+                    "sec": {
+                              "Triceps": 0.5,
+                              "Omuz": 0.3
+                    },
+                    "type": "BODYWEIGHT_STRENGTH",
+                    "sfr": "MODERATE",
+                    "lengthened": true
+          },
+          "db_overhead_press": {
+                    "primary": "Omuz",
+                    "pFactor": 1,
+                    "sec": {
+                              "Triceps": 0.35
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "db_standing_overhead_press": {
+                    "primary": "Omuz",
+                    "pFactor": 1,
+                    "sec": {
+                              "Triceps": 0.35,
+                              "Karın/Core": 0.25
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "bb_overhead_press": {
+                    "primary": "Omuz",
+                    "pFactor": 1,
+                    "sec": {
+                              "Triceps": 0.35,
+                              "Karın/Core": 0.25
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "kb_press": {
+                    "primary": "Omuz",
+                    "pFactor": 1,
+                    "sec": {
+                              "Triceps": 0.35,
+                              "Karın/Core": 0.3
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "db_arnold_press": {
+                    "primary": "Omuz",
+                    "pFactor": 1,
+                    "sec": {
+                              "Triceps": 0.35
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "db_push_press": {
+                    "primary": "Omuz",
+                    "pFactor": 0.85,
+                    "sec": {
+                              "Triceps": 0.3,
+                              "Ön Bacak": 0.25
+                    },
+                    "type": "BALLISTIC_POWER",
+                    "sfr": "MODERATE",
+                    "lengthened": false
+          },
+          "bb_push_press": {
+                    "primary": "Omuz",
+                    "pFactor": 0.85,
+                    "sec": {
+                              "Triceps": 0.3,
+                              "Ön Bacak": 0.25
+                    },
+                    "type": "BALLISTIC_POWER",
+                    "sfr": "MODERATE",
+                    "lengthened": false
+          },
+          "kneeling_plate_front_raise": {
+                    "primary": "Omuz",
+                    "pFactor": 0.85,
+                    "sec": {
+                              "Göğüs": 0.2,
+                              "Karın/Core": 0.2
+                    },
+                    "type": "ISOLATION",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "db_lateral_raise": {
+                    "primary": "Omuz",
+                    "pFactor": 1,
+                    "sec": {},
+                    "type": "ISOLATION",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "mach_cable_lateral": {
+                    "primary": "Omuz",
+                    "pFactor": 1,
+                    "sec": {},
+                    "type": "ISOLATION",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "mach_face_pull": {
+                    "primary": "Omuz",
+                    "pFactor": 0.85,
+                    "sec": {
+                              "Sırt": 0.45
+                    },
+                    "type": "ISOLATION",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "db_single_arm_rear_delt_row": {
+                    "primary": "Omuz",
+                    "pFactor": 1,
+                    "sec": {
+                              "Sırt": 0.35,
+                              "Biceps": 0.25
+                    },
+                    "type": "ISOLATION",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "db_quadruped_external_rotation": {
+                    "primary": "Omuz",
+                    "pFactor": 0.9,
+                    "sec": {
+                              "Sırt": 0.3,
+                              "Karın/Core": 0.25
+                    },
+                    "type": "ISOLATION",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "db_high_pull_cuban_rotation": {
+                    "primary": "Omuz",
+                    "pFactor": 0.85,
+                    "sec": {
+                              "Sırt": 0.65,
+                              "Biceps": 0.25
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "kb_halo": {
+                    "primary": "Omuz",
+                    "pFactor": 0.5,
+                    "sec": {
+                              "Sırt": 0.25,
+                              "Karın/Core": 0.2
+                    },
+                    "type": "MOBILITY_STABILITY",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "db_triceps_overhead": {
+                    "primary": "Triceps",
+                    "pFactor": 1,
+                    "sec": {},
+                    "type": "ISOLATION",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "db_skullcrusher": {
+                    "primary": "Triceps",
+                    "pFactor": 1,
+                    "sec": {},
+                    "type": "ISOLATION",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "mach_triceps_pushdown": {
+                    "primary": "Triceps",
+                    "pFactor": 1,
+                    "sec": {},
+                    "type": "ISOLATION",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "bb_close_grip_bench": {
+                    "primary": "Triceps",
+                    "pFactor": 0.9,
+                    "sec": {
+                              "Göğüs": 0.5,
+                              "Omuz": 0.3
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "bw_diamond_pushup": {
+                    "primary": "Triceps",
+                    "pFactor": 0.75,
+                    "sec": {
+                              "Göğüs": 0.35,
+                              "Omuz": 0.2
+                    },
+                    "type": "BODYWEIGHT_STRENGTH",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "db_incline_curl": {
+                    "primary": "Biceps",
+                    "pFactor": 1,
+                    "sec": {},
+                    "type": "ISOLATION",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "bb_biceps_curl": {
+                    "primary": "Biceps",
+                    "pFactor": 1,
+                    "sec": {},
+                    "type": "ISOLATION",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "mach_cable_biceps": {
+                    "primary": "Biceps",
+                    "pFactor": 1,
+                    "sec": {},
+                    "type": "ISOLATION",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "db_biceps_curl": {
+                    "primary": "Biceps",
+                    "pFactor": 1,
+                    "sec": {},
+                    "type": "ISOLATION",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "db_hammer_curl": {
+                    "primary": "Biceps",
+                    "pFactor": 1,
+                    "sec": {},
+                    "type": "ISOLATION",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "bw_pullup": {
+                    "primary": "Sırt",
+                    "pFactor": 0.9,
+                    "sec": {
+                              "Biceps": 0.4,
+                              "Omuz": 0.2
+                    },
+                    "type": "BODYWEIGHT_STRENGTH",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "bw_chinup": {
+                    "primary": "Sırt",
+                    "pFactor": 0.85,
+                    "sec": {
+                              "Biceps": 0.7,
+                              "Omuz": 0.2
+                    },
+                    "type": "BODYWEIGHT_STRENGTH",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "mach_lat_pulldown": {
+                    "primary": "Sırt",
+                    "pFactor": 1,
+                    "sec": {
+                              "Biceps": 0.35,
+                              "Omuz": 0.2
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "mach_straight_arm_pulldown": {
+                    "primary": "Sırt",
+                    "pFactor": 1,
+                    "sec": {
+                              "Triceps": 0.25
+                    },
+                    "type": "ISOLATION",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "db_pullover": {
+                    "primary": "Sırt",
+                    "pFactor": 0.8,
+                    "sec": {
+                              "Göğüs": 0.4,
+                              "Triceps": 0.25
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "MODERATE",
+                    "lengthened": true
+          },
+          "db_saw_row": {
+                    "primary": "Sırt",
+                    "pFactor": 1,
+                    "sec": {
+                              "Biceps": 0.4,
+                              "Omuz": 0.2
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "db_chest_supported_row": {
+                    "primary": "Sırt",
+                    "pFactor": 1,
+                    "sec": {
+                              "Biceps": 0.35,
+                              "Omuz": 0.25
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "mach_cable_row": {
+                    "primary": "Sırt",
+                    "pFactor": 1,
+                    "sec": {
+                              "Biceps": 0.35,
+                              "Omuz": 0.2
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "bw_inverted_row": {
+                    "primary": "Sırt",
+                    "pFactor": 0.75,
+                    "sec": {
+                              "Biceps": 0.35,
+                              "Omuz": 0.25
+                    },
+                    "type": "BODYWEIGHT_STRENGTH",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "bb_bent_over_row": {
+                    "primary": "Sırt",
+                    "pFactor": 1,
+                    "sec": {
+                              "Biceps": 0.4,
+                              "Omuz": 0.3
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "MODERATE",
+                    "lengthened": true
+          },
+          "bb_pendlay_row": {
+                    "primary": "Sırt",
+                    "pFactor": 1,
+                    "sec": {
+                              "Biceps": 0.35,
+                              "Omuz": 0.3
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "MODERATE",
+                    "lengthened": false
+          },
+          "kb_gorilla_row": {
+                    "primary": "Sırt",
+                    "pFactor": 1,
+                    "sec": {
+                              "Biceps": 0.4,
+                              "Karın/Core": 0.3,
+                              "Omuz": 0.25
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "MODERATE",
+                    "lengthened": true
+          },
+          "db_rotational_gorilla_row": {
+                    "primary": "Sırt",
+                    "pFactor": 1,
+                    "sec": {
+                              "Biceps": 0.4,
+                              "Karın/Core": 0.4,
+                              "Omuz": 0.25
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "MODERATE",
+                    "lengthened": true
+          },
+          "db_renegade_row": {
+                    "primary": "Sırt",
+                    "pFactor": 0.75,
+                    "sec": {
+                              "Karın/Core": 0.7,
+                              "Biceps": 0.3,
+                              "Göğüs": 0.25,
+                              "Omuz": 0.2
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "MODERATE",
+                    "lengthened": false
+          },
+          "db_dumbbell_shrug_burnout": {
+                    "primary": "Sırt",
+                    "pFactor": 1,
+                    "sec": {
+                              "Biceps": 0.25
+                    },
+                    "type": "ISOLATION",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "bw_hyperextension": {
+                    "primary": "Sırt",
+                    "pFactor": 0.85,
+                    "sec": {
+                              "Glute": 0.55,
+                              "Arka Bacak": 0.4
+                    },
+                    "type": "BODYWEIGHT_STRENGTH",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "bb_back_squat": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 1,
+                    "sec": {
+                              "Glute": 0.55,
+                              "Sırt": 0.25
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "MODERATE",
+                    "lengthened": true
+          },
+          "bb_front_squat": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 1,
+                    "sec": {
+                              "Glute": 0.4,
+                              "Sırt": 0.3,
+                              "Karın/Core": 0.3
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "db_front_squat": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 1,
+                    "sec": {
+                              "Glute": 0.4,
+                              "Karın/Core": 0.25
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "db_goblet_squat": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 0.9,
+                    "sec": {
+                              "Glute": 0.4,
+                              "Karın/Core": 0.2
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "kb_goblet_squat": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 0.9,
+                    "sec": {
+                              "Glute": 0.4,
+                              "Karın/Core": 0.2
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "bb_zercher_squat": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 1,
+                    "sec": {
+                              "Glute": 0.45,
+                              "Sırt": 0.4,
+                              "Karın/Core": 0.4,
+                              "Biceps": 0.25
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "MODERATE",
+                    "lengthened": true
+          },
+          "mach_leg_press": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 1,
+                    "sec": {
+                              "Glute": 0.35
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "mach_leg_extension": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 1,
+                    "sec": {},
+                    "type": "ISOLATION",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "bw_sissy_squat": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 1,
+                    "sec": {
+                              "Karın/Core": 0.2
+                    },
+                    "type": "ISOLATION",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "bw_air_squat": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 0.35,
+                    "sec": {
+                              "Glute": 0.25
+                    },
+                    "type": "BODYWEIGHT_STRENGTH",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "bw_jump_squat": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 0.55,
+                    "sec": {
+                              "Glute": 0.4,
+                              "Kalf": 0.35
+                    },
+                    "type": "BALLISTIC_POWER",
+                    "sfr": "MODERATE",
+                    "lengthened": false
+          },
+          "db_bulgarian_squat": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 1,
+                    "sec": {
+                              "Glute": 0.65
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "db_walking_lunge": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 1,
+                    "sec": {
+                              "Glute": 0.55
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "db_reverse_lunge": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 1,
+                    "sec": {
+                              "Glute": 0.55
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "db_seesaw_lunge": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 1,
+                    "sec": {
+                              "Glute": 0.6
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "bb_deadlift": {
+                    "primary": "Arka Bacak",
+                    "pFactor": 1,
+                    "sec": {
+                              "Glute": 0.7,
+                              "Sırt": 0.55,
+                              "Ön Bacak": 0.25
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "LOW",
+                    "lengthened": true
+          },
+          "bb_rdl": {
+                    "primary": "Arka Bacak",
+                    "pFactor": 1,
+                    "sec": {
+                              "Glute": 0.55,
+                              "Sırt": 0.3
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "db_rdl": {
+                    "primary": "Arka Bacak",
+                    "pFactor": 1,
+                    "sec": {
+                              "Glute": 0.55,
+                              "Sırt": 0.25
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "db_single_leg_rdl": {
+                    "primary": "Arka Bacak",
+                    "pFactor": 1,
+                    "sec": {
+                              "Glute": 0.65,
+                              "Karın/Core": 0.25
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "mach_leg_curl": {
+                    "primary": "Arka Bacak",
+                    "pFactor": 1,
+                    "sec": {},
+                    "type": "ISOLATION",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "db_lying_leg_curl": {
+                    "primary": "Arka Bacak",
+                    "pFactor": 1,
+                    "sec": {},
+                    "type": "ISOLATION",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "bb_hip_thrust": {
+                    "primary": "Glute",
+                    "pFactor": 1,
+                    "sec": {
+                              "Arka Bacak": 0.3
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "bw_glute_bridge": {
+                    "primary": "Glute",
+                    "pFactor": 0.75,
+                    "sec": {
+                              "Arka Bacak": 0.25
+                    },
+                    "type": "BODYWEIGHT_STRENGTH",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "db_swing": {
+                    "primary": "Glute",
+                    "pFactor": 0.65,
+                    "sec": {
+                              "Arka Bacak": 0.45,
+                              "Sırt": 0.2
+                    },
+                    "type": "BALLISTIC_POWER",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "kb_swing": {
+                    "primary": "Glute",
+                    "pFactor": 0.65,
+                    "sec": {
+                              "Arka Bacak": 0.45,
+                              "Sırt": 0.2
+                    },
+                    "type": "BALLISTIC_POWER",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "mach_calf_raise": {
+                    "primary": "Kalf",
+                    "pFactor": 1,
+                    "sec": {},
+                    "type": "ISOLATION",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "db_standing_calf_raise": {
+                    "primary": "Kalf",
+                    "pFactor": 1,
+                    "sec": {},
+                    "type": "ISOLATION",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "bw_plank": {
+                    "primary": "Karın/Core",
+                    "pFactor": 0.55,
+                    "sec": {},
+                    "type": "CORE",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "bw_hollow_body": {
+                    "primary": "Karın/Core",
+                    "pFactor": 0.8,
+                    "sec": {},
+                    "type": "CORE",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "bw_hanging_knee_raise": {
+                    "primary": "Karın/Core",
+                    "pFactor": 0.85,
+                    "sec": {
+                              "Biceps": 0.2
+                    },
+                    "type": "BODYWEIGHT_STRENGTH",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "db_russian_twist": {
+                    "primary": "Karın/Core",
+                    "pFactor": 0.75,
+                    "sec": {},
+                    "type": "CORE",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "mach_cable_woodchopper": {
+                    "primary": "Karın/Core",
+                    "pFactor": 0.85,
+                    "sec": {
+                              "Omuz": 0.2
+                    },
+                    "type": "CORE",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "half_kneeling_plate_chop": {
+                    "primary": "Karın/Core",
+                    "pFactor": 0.85,
+                    "sec": {
+                              "Omuz": 0.25
+                    },
+                    "type": "CORE",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "bear_crawl_pull_through": {
+                    "primary": "Karın/Core",
+                    "pFactor": 0.75,
+                    "sec": {
+                              "Omuz": 0.3,
+                              "Sırt": 0.2
+                    },
+                    "type": "CORE",
+                    "sfr": "MODERATE",
+                    "lengthened": false
+          },
+          "db_farmers_walk": {
+                    "primary": "Karın/Core",
+                    "pFactor": 0.65,
+                    "sec": {
+                              "Sırt": 0.4,
+                              "Biceps": 0.35
+                    },
+                    "type": "LOADED_CARRY",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "db_suitcase_carry": {
+                    "primary": "Karın/Core",
+                    "pFactor": 0.7,
+                    "sec": {
+                              "Sırt": 0.3,
+                              "Biceps": 0.3,
+                              "Glute": 0.2
+                    },
+                    "type": "LOADED_CARRY",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "waiters_carry": {
+                    "primary": "Karın/Core",
+                    "pFactor": 0.65,
+                    "sec": {
+                              "Omuz": 0.45
+                    },
+                    "type": "LOADED_CARRY",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "cross_body_carry": {
+                    "primary": "Karın/Core",
+                    "pFactor": 0.65,
+                    "sec": {
+                              "Omuz": 0.35,
+                              "Sırt": 0.25,
+                              "Biceps": 0.25
+                    },
+                    "type": "LOADED_CARRY",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "kb_windmill": {
+                    "primary": "Karın/Core",
+                    "pFactor": 0.8,
+                    "sec": {
+                              "Glute": 0.4,
+                              "Omuz": 0.35,
+                              "Arka Bacak": 0.25
+                    },
+                    "type": "MOBILITY_STABILITY",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "kb_turkish_getup": {
+                    "primary": "Karın/Core",
+                    "pFactor": 0.65,
+                    "sec": {
+                              "Omuz": 0.5,
+                              "Glute": 0.35,
+                              "Ön Bacak": 0.25
+                    },
+                    "type": "MOBILITY_STABILITY",
+                    "sfr": "MODERATE",
+                    "lengthened": false
+          },
+          "db_snatch": {
+                    "primary": "Omuz",
+                    "pFactor": 0.55,
+                    "sec": {
+                              "Glute": 0.45,
+                              "Arka Bacak": 0.35,
+                              "Sırt": 0.3,
+                              "Ön Bacak": 0.25,
+                              "Triceps": 0.25
+                    },
+                    "type": "BALLISTIC_POWER",
+                    "sfr": "MODERATE",
+                    "lengthened": false
+          },
+          "kb_half_snatch": {
+                    "primary": "Omuz",
+                    "pFactor": 0.55,
+                    "sec": {
+                              "Glute": 0.45,
+                              "Arka Bacak": 0.35,
+                              "Sırt": 0.3,
+                              "Ön Bacak": 0.25,
+                              "Triceps": 0.25
+                    },
+                    "type": "BALLISTIC_POWER",
+                    "sfr": "MODERATE",
+                    "lengthened": false
+          },
+          "kb_clean": {
+                    "primary": "Glute",
+                    "pFactor": 0.55,
+                    "sec": {
+                              "Arka Bacak": 0.4,
+                              "Sırt": 0.4,
+                              "Biceps": 0.25
+                    },
+                    "type": "BALLISTIC_POWER",
+                    "sfr": "MODERATE",
+                    "lengthened": false
+          },
+          "bb_hang_power_clean": {
+                    "primary": "Glute",
+                    "pFactor": 0.55,
+                    "sec": {
+                              "Arka Bacak": 0.45,
+                              "Sırt": 0.45,
+                              "Ön Bacak": 0.25
+                    },
+                    "type": "BALLISTIC_POWER",
+                    "sfr": "MODERATE",
+                    "lengthened": false
+          },
+          "db_clean_and_press": {
+                    "primary": "Omuz",
+                    "pFactor": 0.75,
+                    "sec": {
+                              "Glute": 0.4,
+                              "Arka Bacak": 0.35,
+                              "Sırt": 0.3,
+                              "Triceps": 0.3,
+                              "Biceps": 0.2
+                    },
+                    "type": "BALLISTIC_POWER",
+                    "sfr": "MODERATE",
+                    "lengthened": false
+          },
+          "db_clean_squat_press": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 0.75,
+                    "sec": {
+                              "Omuz": 0.7,
+                              "Glute": 0.45,
+                              "Arka Bacak": 0.3,
+                              "Triceps": 0.25,
+                              "Sırt": 0.25
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "MODERATE",
+                    "lengthened": false
+          },
+          "db_thruster": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 0.75,
+                    "sec": {
+                              "Omuz": 0.7,
+                              "Glute": 0.4,
+                              "Triceps": 0.3
+                    },
+                    "type": "BALLISTIC_POWER",
+                    "sfr": "LOW",
+                    "lengthened": false
+          },
+          "kb_thruster": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 0.75,
+                    "sec": {
+                              "Omuz": 0.7,
+                              "Glute": 0.4,
+                              "Triceps": 0.3
+                    },
+                    "type": "BALLISTIC_POWER",
+                    "sfr": "LOW",
+                    "lengthened": false
+          },
+          "bb_thruster": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 0.75,
+                    "sec": {
+                              "Omuz": 0.7,
+                              "Glute": 0.4,
+                              "Triceps": 0.3
+                    },
+                    "type": "BALLISTIC_POWER",
+                    "sfr": "LOW",
+                    "lengthened": false
+          },
+          "bb_landmine_squat_press": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 0.75,
+                    "sec": {
+                              "Omuz": 0.6,
+                              "Göğüs": 0.35,
+                              "Glute": 0.35,
+                              "Triceps": 0.25
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "step_up_press": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 0.75,
+                    "sec": {
+                              "Omuz": 0.6,
+                              "Glute": 0.45,
+                              "Triceps": 0.25
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "MODERATE",
+                    "lengthened": false
+          },
+          "lunge_with_twist": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 0.8,
+                    "sec": {
+                              "Glute": 0.45,
+                              "Karın/Core": 0.5
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "db_rotational_lunge_chop": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 0.8,
+                    "sec": {
+                              "Glute": 0.5,
+                              "Karın/Core": 0.55,
+                              "Omuz": 0.3
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "MODERATE",
+                    "lengthened": true
+          },
+          "db_step_back_lunge_to_knee_drive": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 0.8,
+                    "sec": {
+                              "Omuz": 0.6,
+                              "Glute": 0.45,
+                              "Karın/Core": 0.35
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "MODERATE",
+                    "lengthened": true
+          },
+          "db_lunge_to_curl_press": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 0.75,
+                    "sec": {
+                              "Omuz": 0.6,
+                              "Biceps": 0.55,
+                              "Glute": 0.45,
+                              "Triceps": 0.25
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "MODERATE",
+                    "lengthened": false
+          },
+          "db_rdl_to_high_pull": {
+                    "primary": "Arka Bacak",
+                    "pFactor": 0.85,
+                    "sec": {
+                              "Glute": 0.5,
+                              "Sırt": 0.5,
+                              "Omuz": 0.45,
+                              "Biceps": 0.25
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "MODERATE",
+                    "lengthened": true
+          },
+          "db_swing_to_goblet_squat": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 0.75,
+                    "sec": {
+                              "Glute": 0.65,
+                              "Arka Bacak": 0.45,
+                              "Karın/Core": 0.25
+                    },
+                    "type": "BALLISTIC_POWER",
+                    "sfr": "MODERATE",
+                    "lengthened": true
+          },
+          "db_gorilla_row_to_clean": {
+                    "primary": "Sırt",
+                    "pFactor": 0.85,
+                    "sec": {
+                              "Glute": 0.55,
+                              "Arka Bacak": 0.45,
+                              "Biceps": 0.4
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "MODERATE",
+                    "lengthened": true
+          },
+          "db_floor_press_to_bridge": {
+                    "primary": "Göğüs",
+                    "pFactor": 0.85,
+                    "sec": {
+                              "Glute": 0.65,
+                              "Triceps": 0.45,
+                              "Omuz": 0.25
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "HIGH",
+                    "lengthened": false
+          },
+          "db_pullover_to_halo": {
+                    "primary": "Sırt",
+                    "pFactor": 0.7,
+                    "sec": {
+                              "Omuz": 0.55,
+                              "Karın/Core": 0.5,
+                              "Göğüs": 0.3,
+                              "Triceps": 0.25
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "MODERATE",
+                    "lengthened": true
+          },
+          "db_renegade_pushup": {
+                    "primary": "Sırt",
+                    "pFactor": 0.65,
+                    "sec": {
+                              "Göğüs": 0.6,
+                              "Karın/Core": 0.6,
+                              "Triceps": 0.3,
+                              "Omuz": 0.25,
+                              "Biceps": 0.25
+                    },
+                    "type": "HEAVY_COMPOUND",
+                    "sfr": "MODERATE",
+                    "lengthened": false
+          },
+          "db_manmaker": {
+                    "primary": "Ön Bacak",
+                    "pFactor": 0.55,
+                    "sec": {
+                              "Göğüs": 0.5,
+                              "Sırt": 0.5,
+                              "Omuz": 0.5,
+                              "Glute": 0.4,
+                              "Karın/Core": 0.4,
+                              "Triceps": 0.25
+                    },
+                    "type": "BALLISTIC_POWER",
+                    "sfr": "LOW",
+                    "lengthened": false
+          },
+          "bw_inchworm_to_pushup": {
+                    "primary": "Göğüs",
+                    "pFactor": 0.55,
+                    "sec": {
+                              "Karın/Core": 0.45,
+                              "Omuz": 0.3,
+                              "Triceps": 0.25
+                    },
+                    "type": "BODYWEIGHT_STRENGTH",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
+          "bw_mountain_climber": {
+                    "primary": "Karın/Core",
+                    "pFactor": 0.4,
+                    "sec": {},
+                    "type": "CORE",
+                    "sfr": "MODERATE",
+                    "lengthened": false
+          },
+          "bw_plank_jacks": {
+                    "primary": "Karın/Core",
+                    "pFactor": 0.4,
+                    "sec": {},
+                    "type": "CORE",
+                    "sfr": "MODERATE",
+                    "lengthened": false
+          },
+          "bw_burpee": {
+                    "primary": null,
+                    "pFactor": 0,
+                    "sec": {},
+                    "type": "CONDITIONING",
+                    "sfr": "N/A",
+                    "lengthened": false
+          },
+          "bw_squat_thrust": {
+                    "primary": null,
+                    "pFactor": 0,
+                    "sec": {},
+                    "type": "CONDITIONING",
+                    "sfr": "N/A",
+                    "lengthened": false
+          },
+          "bw_jumping_jack": {
+                    "primary": null,
+                    "pFactor": 0,
+                    "sec": {},
+                    "type": "CONDITIONING",
+                    "sfr": "N/A",
+                    "lengthened": false
+          },
+          "bw_high_knees": {
+                    "primary": null,
+                    "pFactor": 0,
+                    "sec": {},
+                    "type": "CONDITIONING",
+                    "sfr": "N/A",
+                    "lengthened": false
+          },
+          "bw_jump_rope": {
+                    "primary": "Kalf",
+                    "pFactor": 0.35,
+                    "sec": {},
+                    "type": "BALLISTIC_POWER",
+                    "sfr": "MODERATE",
+                    "lengthened": false
+          },
+          "bw_butt_kicks": {
+                    "primary": null,
+                    "pFactor": 0,
+                    "sec": {},
+                    "type": "CONDITIONING",
+                    "sfr": "N/A",
+                    "lengthened": false
+          },
+          "bw_skater_jumps": {
+                    "primary": null,
+                    "pFactor": 0,
+                    "sec": {},
+                    "type": "CONDITIONING",
+                    "sfr": "N/A",
+                    "lengthened": false
+          },
+          "bw_lateral_shuffle": {
+                    "primary": null,
+                    "pFactor": 0,
+                    "sec": {},
+                    "type": "CONDITIONING",
+                    "sfr": "N/A",
+                    "lengthened": false
+          },
+          "cond_indoor_row": {
+                    "primary": null,
+                    "pFactor": 0,
+                    "sec": {},
+                    "type": "CONDITIONING",
+                    "sfr": "N/A",
+                    "lengthened": false
+          },
+          "cond_walking": {
+                    "primary": null,
+                    "pFactor": 0,
+                    "sec": {},
+                    "type": "CONDITIONING",
+                    "sfr": "N/A",
+                    "lengthened": false
+          },
+          "cond_running": {
+                    "primary": null,
+                    "pFactor": 0,
+                    "sec": {},
+                    "type": "CONDITIONING",
+                    "sfr": "N/A",
+                    "lengthened": false
+          }
+};
 
         function resolveExerciseBiomechanics(name = '', rawMuscle = '', category = '') {
             const cleanName = normSearchText(name);
             const cleanBase = cleanName.split('(')[0].trim();
 
-            // 1. Önce EXERCISES_DB üzerinden tam eşleşmeyi kontrol et (kondisyon ve çoklu kas desteği)
+            // 1. Önce EXERCISES_DB üzerinden tam ID / tam isim eşleşmesini kontrol et (alt-dize çarpışmalarını %100 önler)
             const dbEx = (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB))
                 ? (EXERCISES_DB.find(e => normSearchText(e.id) === cleanName || normSearchText(e.name) === cleanName)
+                    || EXERCISES_DB.find(e => normSearchText((e.name || '').split('(')[0].trim()) === cleanBase && cleanBase.length >= 4)
                     || EXERCISES_DB.find(e => {
                         const en = normSearchText(e.name);
                         const eb = en.split('(')[0].trim();
                         return cleanBase.length >= 4 && (en.includes(cleanBase) || (eb.length >= 4 && cleanName.includes(eb)));
                     }))
                 : null;
+
+            if (dbEx && ACADEMIC_SPECS_BY_ID[dbEx.id]) {
+                return ACADEMIC_SPECS_BY_ID[dbEx.id];
+            }
+            if (ACADEMIC_SPECS_BY_ID[name]) {
+                return ACADEMIC_SPECS_BY_ID[name];
+            }
 
             if (dbEx && dbEx.category === 'conditioning') {
                 return { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false };
@@ -23674,7 +27091,9 @@ KURALLAR:
                 const nk = normSearchText(key);
                 if (cleanName === nk) return val;
             }
-            for (const [key, val] of Object.entries(ACADEMIC_EXERCISE_SPEC)) {
+            // Uzun anahtarları önce dene ki 'şınav' -> 'elmas şınav' çarpışması yaşanmasın
+            const sortedSpecEntries = Object.entries(ACADEMIC_EXERCISE_SPEC).sort((a, b) => b[0].length - a[0].length);
+            for (const [key, val] of sortedSpecEntries) {
                 const nk = normSearchText(key);
                 if (cleanName.includes(nk) || nk.includes(cleanName)) {
                     return val;
@@ -24660,7 +28079,7 @@ KURALLAR:
                 columns: [
                     { key: 'lats', label: 'KANATLAR (SIRT GENİŞLİĞİ)', subKeys: ['back_lats'], recId: 'mach_lat_pulldown', recName: 'Sırt Çekiş (Lat Pulldown)', keywords: ['kanat', 'lats', 'latissimus', 'pulldown', 'pullup', 'pull-up', 'barfiks', 'chinup', 'chin-up', 'saw row', 'pullover', 'straight arm', 'düz kol'] },
                     { key: 'mid', label: 'ORTA SIRT & KÜREK KEMİĞİ', subKeys: ['back_mid'], recId: 'db_chest_supported_row', recName: 'Göğüs Destekli Sırt Çekiş', keywords: ['orta sırt', 'kürek kemiği', 'rhomboid', 'row', 'kürek', 'pendlay', 'renegade row'] },
-                    { key: 'traps', label: 'ÜST SIRT & BOYUN ÇEVRESİ', subKeys: ['traps'], recId: 'mach_face_pull', recName: 'Yüze Çekiş (Face Pull)', keywords: ['trapez', 'üst sırt', 'shrug', 'face pull', 'clean', 'farmers', 'halo', 'high pull'] },
+                    { key: 'traps', label: 'ÜST SIRT & BOYUN ÇEVRESİ', subKeys: ['traps'], recId: 'db_dumbbell_shrug_burnout', recName: 'Dambıl Trapez Silkme', keywords: ['trapez', 'üst sırt', 'shrug', 'clean', 'farmers', 'high pull'] },
                     { key: 'lower', label: 'ALT SIRT & BEL (OMURGA DESTEK)', subKeys: ['back_lower', 'core_lower'], recId: 'bw_hyperextension', recName: 'Sırt Uzatma (Hiperekstansiyon)', keywords: ['alt sırt', 'bel kas', 'hiperekstansiyon', 'hyperextension', 'back extension', 'good morning', 'rdl', 'deadlift', 'swing', 'gorilla'] }
                 ]
             },
@@ -24730,7 +28149,7 @@ KURALLAR:
             }
         };
 
-        function getExerciseCompartmentsForMuscle(muscleId, exNameOrId, allowFallback = true) {
+        function getExerciseCompartmentWeightsForMuscle(muscleId, exNameOrId, allowFallback = true) {
             const def = MUSCLE_DIAGRAM_DEFS[muscleId];
             if (!def) return [];
 
@@ -24739,6 +28158,7 @@ KURALLAR:
 
             const dbEx = (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB))
                 ? (EXERCISES_DB.find(e => normSearchText(e.id) === rawQ || normSearchText(e.name) === rawQ)
+                    || EXERCISES_DB.find(e => normSearchText((e.name || '').split('(')[0].trim()) === cleanQ && cleanQ.length >= 4)
                     || EXERCISES_DB.find(e => {
                         if (!e.name) return false;
                         const eLower = normSearchText(e.name);
@@ -24749,6 +28169,41 @@ KURALLAR:
             const exId = dbEx ? dbEx.id : exNameOrId;
             const anat = (typeof EXERCISE_ANATOMY_MAP !== 'undefined') ? EXERCISE_ANATOMY_MAP[exId] : null;
 
+            // Doğrulanmış SSOT alt kas haritası varsa anahtar kelime tahminine girmeden %100 kesin eşleştir
+            if (anat && Array.isArray(anat.primarySubKeys)) {
+                const pSet = new Set(anat.primarySubKeys);
+                const sSet = new Set(Array.isArray(anat.secondarySubKeys) ? anat.secondarySubKeys : []);
+                const primCols = [];
+                const secCols = [];
+
+                for (const col of def.columns) {
+                    const colKeys = col.subKeys || [];
+                    if (colKeys.some(sk => pSet.has(sk))) {
+                        primCols.push(col.key);
+                    } else if (colKeys.some(sk => sSet.has(sk))) {
+                        secCols.push(col.key);
+                    }
+                }
+
+                // 1) Bu kas grubu hareketin 1. derece ana hedefiyse: ana alt bölgeler 1.0x, aynı grup içindeki yardımcı başlar 0.35x alır
+                if (primCols.length > 0) {
+                    return [
+                        ...primCols.map(key => ({ key, weight: 1.0, tier: 'primary' })),
+                        ...secCols.map(key => ({ key, weight: 0.35, tier: 'secondary' }))
+                    ];
+                }
+                // 2) Bu kas grubu hareketin 2. derece yardımcı kasıysa (gelen set zaten yardımcı katsayısıyla çarpılmıştır): ilgili alt bölgeler 1.0x alır
+                if (secCols.length > 0) {
+                    return secCols.map(key => ({ key, weight: 1.0, tier: 'secondary' }));
+                }
+                // 3) Bu kas grubunda hiçbir alt bölge çalışmıyorsa sızıntı yapma
+                if (allowFallback) {
+                    return [{ key: def.columns[0].key, weight: 1.0, tier: 'fallback' }];
+                }
+                return [];
+            }
+
+            // Yalnızca katalog dışı (kullanıcının elle yazdığı özel) hareketler için yedek anahtar kelime çözümlemesi
             const nameAndPrimaryText = normSearchText([
                 exNameOrId || '',
                 dbEx ? dbEx.name : '',
@@ -24762,19 +28217,6 @@ KURALLAR:
             ].join(' '));
 
             const matched = new Set();
-
-            // 1. Önce spesifik subKey / allSubKeys eşleşmelerini kontrol et
-            const allKeys = new Set();
-            if (anat && anat.subKey) allKeys.add(anat.subKey);
-            if (anat && Array.isArray(anat.allSubKeys)) anat.allSubKeys.forEach(k => allKeys.add(k));
-
-            for (const col of def.columns) {
-                if (col.subKeys && col.subKeys.some(sk => allKeys.has(sk))) {
-                    matched.add(col.key);
-                }
-            }
-
-            // 2. Hareket adı ve PRİMER kas metni üzerinden eşleşen alt bölmeleri ekle
             for (const col of def.columns) {
                 for (const kw of col.keywords) {
                     if (nameAndPrimaryText.includes(normSearchText(kw))) {
@@ -24783,8 +28225,6 @@ KURALLAR:
                     }
                 }
             }
-
-            // 3. Eğer primer metinde bu kas grubu için hiçbir alt bölge eşleşmediyse (yardımcı kas rolündeyse) sekonder metne bak
             if (matched.size === 0) {
                 for (const col of def.columns) {
                     for (const kw of col.keywords) {
@@ -24795,53 +28235,14 @@ KURALLAR:
                     }
                 }
             }
-
-            const fullText = `${nameAndPrimaryText} ${secondaryOnlyText}`;
-
-            // 4. Çok eklemli temel hareketlerde aynı kasın birden fazla alt bölgesini kapsama kuralları
-            if (muscleId === 'quads' && (nameAndPrimaryText.includes('squat') || nameAndPrimaryText.includes('comelme') || nameAndPrimaryText.includes('leg press') || nameAndPrimaryText.includes('lunge') || nameAndPrimaryText.includes('step'))) {
-                def.columns.forEach(c => matched.add(c.key));
-            } else if (muscleId === 'glutes' && (fullText.includes('squat') || fullText.includes('lunge') || fullText.includes('bulgar') || fullText.includes('deadlift') || fullText.includes('rdl') || fullText.includes('swing') || fullText.includes('thrust'))) {
-                matched.add('maximus');
-                if (fullText.includes('bulgar') || fullText.includes('lunge') || fullText.includes('tek bacak') || fullText.includes('single leg') || fullText.includes('step')) {
-                    matched.add('medius');
-                    matched.add('minimus');
-                }
-            } else if (muscleId === 'hamstrings' && (nameAndPrimaryText.includes('rdl') || nameAndPrimaryText.includes('deadlift') || nameAndPrimaryText.includes('swing') || nameAndPrimaryText.includes('good morning'))) {
-                matched.add('semitend');
-                matched.add('hinge_chain');
-                matched.add('biceps_fem');
-            } else if (muscleId === 'chest' && (nameAndPrimaryText.includes('bench press') || nameAndPrimaryText.includes('sinav') || nameAndPrimaryText.includes('push-up') || nameAndPrimaryText.includes('pushup') || nameAndPrimaryText.includes('dips'))) {
-                matched.add('mid');
-                if (nameAndPrimaryText.includes('incline') || nameAndPrimaryText.includes('ust gogus')) matched.add('upper');
-                if (nameAndPrimaryText.includes('dips') || nameAndPrimaryText.includes('alt gogus') || nameAndPrimaryText.includes('bench press')) matched.add('lower');
-            } else if (muscleId === 'back' && (nameAndPrimaryText.includes('row') || nameAndPrimaryText.includes('barfiks') || nameAndPrimaryText.includes('pull-up') || nameAndPrimaryText.includes('pulldown') || nameAndPrimaryText.includes('chin-up'))) {
-                matched.add('lats');
-                matched.add('mid');
-                if (fullText.includes('barbell row') || fullText.includes('pendlay') || fullText.includes('gorilla') || fullText.includes('renegade') || fullText.includes('alt sirt')) {
-                    matched.add('lower');
-                }
-            } else if (muscleId === 'triceps' && matched.size === 0 && (fullText.includes('press') || fullText.includes('pres') || fullText.includes('sinav') || fullText.includes('push-up') || fullText.includes('pushup') || fullText.includes('dips') || fullText.includes('thruster'))) {
-                matched.add('lateral');
-                matched.add('medial');
-            } else if (muscleId === 'biceps' && (nameAndPrimaryText.includes('barbell curl') || nameAndPrimaryText.includes('biceps curl') || nameAndPrimaryText.includes('cable curl') || nameAndPrimaryText.includes('chin-up') || nameAndPrimaryText.includes('chinup'))) {
-                matched.add('long_head');
-                matched.add('short_head');
-            } else if (muscleId === 'calves' && (nameAndPrimaryText.includes('calf raise') || nameAndPrimaryText.includes('kalf'))) {
-                matched.add('gastrocnemius');
-                matched.add('soleus');
-            } else if (muscleId === 'core' && (fullText.includes('plank') || fullText.includes('hollow') || fullText.includes('carry') || fullText.includes('farmer') || fullText.includes('get-up') || fullText.includes('renegade'))) {
-                matched.add('rectus');
-                matched.add('transverse');
-                if (fullText.includes('twist') || fullText.includes('chop') || fullText.includes('suitcase') || fullText.includes('renegade') || fullText.includes('get-up')) {
-                    matched.add('obliques');
-                }
-            }
-
             if (matched.size === 0 && allowFallback) {
                 matched.add(def.columns[0].key);
             }
-            return Array.from(matched);
+            return Array.from(matched).map(key => ({ key, weight: 1.0, tier: 'primary' }));
+        }
+
+        function getExerciseCompartmentsForMuscle(muscleId, exNameOrId, allowFallback = true) {
+            return getExerciseCompartmentWeightsForMuscle(muscleId, exNameOrId, allowFallback).map(item => item.key);
         }
 
         function getExerciseCompartmentForMuscle(muscleId, exNameOrId, allowFallback = true) {
@@ -24871,22 +28272,23 @@ KURALLAR:
 
             if (includeDone) {
                 (m.contributions || []).forEach(c => {
-                    const cKeys = getExerciseCompartmentsForMuscle(m.id, c.exercise, true);
-                    cKeys.forEach(cKey => {
-                        if (compMap[cKey]) {
-                            compMap[cKey].earnedSets += (Number(c.earnedSets) || 0);
-                            compMap[cKey].doneExs.add(c.exercise);
+                    const weightedCols = getExerciseCompartmentWeightsForMuscle(m.id, c.exercise, true);
+                    weightedCols.forEach(item => {
+                        if (compMap[item.key]) {
+                            const factor = (c.role === 'Yardımcı Kas') ? 1.0 : item.weight;
+                            compMap[item.key].earnedSets += (Number(c.earnedSets) || 0) * factor;
+                            compMap[item.key].doneExs.add(c.exercise);
                         }
                     });
                 });
 
                 if ((!m.contributions || m.contributions.length === 0) && m.doneExercises && Array.isArray(m.doneExercises)) {
                     m.doneExercises.forEach(exName => {
-                        const cKeys = getExerciseCompartmentsForMuscle(m.id, exName, true);
-                        cKeys.forEach(cKey => {
-                            if (compMap[cKey]) {
-                                compMap[cKey].doneExs.add(exName);
-                                if (compMap[cKey].earnedSets === 0) compMap[cKey].earnedSets = 1;
+                        const weightedCols = getExerciseCompartmentWeightsForMuscle(m.id, exName, true);
+                        weightedCols.forEach(item => {
+                            if (compMap[item.key]) {
+                                compMap[item.key].doneExs.add(exName);
+                                if (compMap[item.key].earnedSets === 0) compMap[item.key].earnedSets = item.weight;
                             }
                         });
                     });
@@ -24895,15 +28297,16 @@ KURALLAR:
 
             if (includePlan) {
                 (m.plannedExercises || []).forEach(pe => {
-                    const cKeys = getExerciseCompartmentsForMuscle(m.id, pe.name, true);
-                    cKeys.forEach(cKey => {
-                        if (compMap[cKey]) {
+                    const weightedCols = getExerciseCompartmentWeightsForMuscle(m.id, pe.name, true);
+                    weightedCols.forEach(item => {
+                        if (compMap[item.key]) {
                             if (isTemplateMode) {
-                                compMap[cKey].earnedSets += (Number(pe.sets) || 3);
-                                compMap[cKey].doneExs.add(pe.name);
+                                const factor = (pe.role === 'Yardımcı Kas') ? 1.0 : item.weight;
+                                compMap[item.key].earnedSets += (Number(pe.sets) || 3) * factor;
+                                compMap[item.key].doneExs.add(pe.name);
                             } else {
-                                compMap[cKey].plannedCount += 1;
-                                compMap[cKey].plannedExs.add(pe.name);
+                                compMap[item.key].plannedCount += 1;
+                                compMap[item.key].plannedExs.add(pe.name);
                             }
                         }
                     });
@@ -28714,7 +32117,7 @@ KURALLAR:
             if ('serviceWorker' in navigator && navigator.serviceWorker) {
                 window.addEventListener('load', () => {
                     try {
-                        navigator.serviceWorker.register('./sw.js?v=282')
+                        navigator.serviceWorker.register('./sw.js?v=283')
                             .then(reg => {
                                 console.log('SW scope:', reg.scope);
                                 if (reg.update) reg.update();

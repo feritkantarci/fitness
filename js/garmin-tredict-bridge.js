@@ -1190,6 +1190,16 @@
       });
 
       if (changed) {
+        if (typeof window.sortWorkoutLogsDesc === 'function') {
+          window.sortWorkoutLogsDesc(logs);
+        } else {
+          logs.sort((a, b) => {
+            const da = String((a && a.date) || '').slice(0, 10);
+            const db = String((b && b.date) || '').slice(0, 10);
+            if (da !== db) return db.localeCompare(da);
+            return (Number(b && b.timestamp) || 0) - (Number(a && a.timestamp) || 0);
+          });
+        }
         localStorage.setItem(historyKey, JSON.stringify(logs));
         if (typeof window.syncWorkoutLogsToCloud === 'function') {
           try { window.syncWorkoutLogsToCloud(logs, uid); } catch {}
