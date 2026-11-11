@@ -1,6 +1,6 @@
 # 🛡️ ÇELİK KODU — 7 ŞEF (6 SEKME + GARMIN/TREDICT ŞEFİ) KONTROL PANELİ (TAB_HEALTH)
 
-> **Son Otomatik Kontrol:** `2026-11-10 21:34:59` | **Toplam Hareket:** `280` | **Kırık Hareket Bağlantısı:** `0`
+> **Son Otomatik Kontrol:** `2026-11-11 17:17:46` | **Toplam Hareket:** `280` | **Kırık Hareket Bağlantısı:** `0`
 
 ---
 
@@ -41,5 +41,5 @@ Bir alanda yaptığın işlem diğer şefleri şu 8 bağlantı üzerinden etkile
 - **7. Şef (`garmin-tredict-guard`) Orijinal Ad & Sağlık Telemetrisi Koruması:** ✅ Aktif (Garmin'de olmayan hareketler isimsiz+notlu gider; dönüşte saatin adı değil bizdeki orijinal hareket adı korunup yalnızca Nabız/HRR/TUT/Kalori sağlık verisi enjekte edilir)
 - **Modal & Hareketli Görsel Denetimi (126 Ana Hareket):**
   - `window.exerciseGuideMap` Global Erişim (`library-guard` / `generator-guard`): **✅ Açık**
-  - Diskte Eksik Olan MP4 Dosyası (`library-guard`): **❌ db_high_pull_cuban_rotation -> assets/opengym/clips/db_high_pull_cuban_rotation.mp4?v=284**
+  - Diskte Eksik Olan MP4 Dosyası (`library-guard`): **❌ db_single_arm_rear_delt_row -> assets/opengym/clips/db_single_arm_rear_delt_row.mp4?v=285, db_high_pull_cuban_rotation -> assets/opengym/clips/db_high_pull_cuban_rotation.mp4?v=284**
   - Animasyonu Olmayan (Sadece Sabit Fotoğraf Gösteren) Hareketler (**8 adet**): `db_suitcase_carry (Tek El Çanta Taşıma (Suitcase Carry))`, `bb_hip_thrust (Barbell Hip Thrust)`, `mach_leg_press (45° Leg Press)`, `mach_straight_arm_pulldown (Kablo Düz Kol Çekiş (Straight-Arm Pulldown))`, `bw_hyperextension (45° Hiperekstansiyon (Back Extension))`, `cond_indoor_row (Kürek Çekme (Indoor Rowing / Ergometre))`, `cond_walking (Tempolu Yürüyüş & Doğa Yürüyüşü (Walking))`, `cond_running (Koşu & Koşu Bandı (Running / Treadmill))`

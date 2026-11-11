@@ -3581,7 +3581,7 @@
             'db_seesaw_lunge': { id: 'db_seesaw_lunge', name: "Dambıl Seesaw Lunge", clip: 'assets/opengym/clips/db_seesaw_lunge.mp4', still: 'assets/opengym/stills/db_seesaw_lunge.webp' },
             'db_rotational_lunge_chop': { id: 'db_rotational_lunge_chop', name: "Rotasyonel Lunge & Dambıl Savuruş", clip: 'assets/opengym/clips/db_rotational_lunge_chop.mp4', still: 'assets/opengym/stills/db_rotational_lunge_chop.webp' },
             'db_rotational_gorilla_row': { id: 'db_rotational_gorilla_row', name: "Rotasyonel Gorilla Row", clip: 'assets/opengym/clips/db_rotational_gorilla_row.mp4', still: 'assets/opengym/stills/db_rotational_gorilla_row.webp' },
-            'db_single_arm_rear_delt_row': { id: 'db_single_arm_rear_delt_row', name: "Eğilerek Tek Kol Arka Omuz Çekişi (Parabolik Sweep)", clip: 'assets/opengym/clips/db_single_arm_rear_delt_row.mp4', still: 'assets/opengym/stills/db_single_arm_rear_delt_row.webp' },
+            'db_single_arm_rear_delt_row': { id: 'db_single_arm_rear_delt_row', name: "Eğilerek Tek Kol Arka Omuz Çekişi (Parabolik Sweep)", clip: 'assets/opengym/clips/db_single_arm_rear_delt_row.mp4?v=285', still: 'assets/opengym/stills/db_single_arm_rear_delt_row.webp?v=285' },
             'db_high_pull_cuban_rotation': { id: 'db_high_pull_cuban_rotation', name: "Eğilerek Row & High Pull + Cuban Rotasyon", clip: 'assets/opengym/clips/db_high_pull_cuban_rotation.mp4?v=284', still: 'assets/opengym/stills/db_high_pull_cuban_rotation.webp?v=284' },
             'db_dumbbell_shrug_burnout': { id: 'db_dumbbell_shrug_burnout', name: "Dambıl Trapez Silkme (Burnout)", clip: 'assets/opengym/clips/db_dumbbell_shrug_burnout.mp4', still: 'assets/opengym/stills/db_dumbbell_shrug_burnout.webp' },
             'db_quadruped_external_rotation': { id: 'db_quadruped_external_rotation', name: "Dört Ayak Pozisyonunda Yatay Arka Omuz Uçuşu", clip: 'assets/opengym/clips/db_quadruped_external_rotation.mp4', still: 'assets/opengym/stills/db_quadruped_external_rotation.webp' },
@@ -9447,7 +9447,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 'db_seesaw_lunge': { form: 'assets/exercises/db_seesaw_lunge.webp', anatomi: null },
                 'db_rotational_lunge_chop': { form: 'assets/exercises/db_rotational_lunge_chop.webp', anatomi: null },
                 'db_rotational_gorilla_row': { form: 'assets/exercises/db_rotational_gorilla_row.webp', anatomi: null },
-                'db_single_arm_rear_delt_row': { form: 'assets/exercises/db_single_arm_rear_delt_row.webp', anatomi: null },
+                'db_single_arm_rear_delt_row': { form: 'assets/exercises/db_single_arm_rear_delt_row.gif', anatomi: null },
                 'db_high_pull_cuban_rotation': { form: 'assets/exercises/db_high_pull_cuban_rotation.gif', anatomi: null },
                 'db_dumbbell_shrug_burnout': { form: 'assets/exercises/db_dumbbell_shrug_burnout.webp', anatomi: null },
                 'db_quadruped_external_rotation': { form: 'assets/exercises/db_quadruped_external_rotation.webp', anatomi: null },
@@ -32117,7 +32117,7 @@ KURALLAR:
             if ('serviceWorker' in navigator && navigator.serviceWorker) {
                 window.addEventListener('load', () => {
                     try {
-                        navigator.serviceWorker.register('./sw.js?v=284')
+                        navigator.serviceWorker.register('./sw.js?v=285')
                             .then(reg => {
                                 console.log('SW scope:', reg.scope);
                                 if (reg.update) reg.update();

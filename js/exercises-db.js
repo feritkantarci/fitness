@@ -6335,7 +6335,7 @@
   {
     "category": "pull",
     "cue": "Destek elini dize koy, dambılı karşı diz altından omuz hizasına geniş bir parabolik yay çizerek süpür.",
-    "diagram": "assets/diagrams/seq_incline_row.svg",
+    "diagram": "assets/exercises/db_single_arm_rear_delt_row.gif",
     "equipment": "dumbbell",
     "id": "db_single_arm_rear_delt_row",
     "isComplex": false,

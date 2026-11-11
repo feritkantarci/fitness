@@ -33,7 +33,9 @@ Aşağıdaki 8 hata **bizzat denenmiş, görsel kanıtlarıyla çürütülmüş 
 
 4. **⛔ MASTER VARLIK DIŞI ZİNCİRLEME REFERANS YASAĞI (ÇİZGİ ROMAN / STİL KAYMASI HATASI):**
    - Üretilen bir ara kareyi bir sonraki karenin referansı yapmak veya sıfırdan metinle çizdirmek KESİNLİKLE YASAKTIR (kalın siyah dış hatlı çizgi roman stiline ve kısa bacak oranına kayar).
-   - *Kural:* Her `image-generator` çağrısı doğrudan **`assets/opengym/master_athlete_neutral.png`** dosyasını referans alır. Üretilen her yeni pozun ana gövde ile korelasyonu (`corr_with_master >= 0.95`) ve `head_top = 87` hizası Python ile doğrulanır.
+   - *Kural:* Her `image-generator` çağrısı doğrudan beceri içindeki hazır kalıp görselleri referans alır:
+     - 3/4 açı (dambıl/kettlebell/menteşe/çekiş): `/Users/mrkantarci/Desktop/AI PROJELERI/FITNESS/.agents/skills/exercise-visual-pipeline/resources/master_3q_dumbbell.png`
+     - 0° tam cephe açı (kardiyo/sıçrama): `/Users/mrkantarci/Desktop/AI PROJELERI/FITNESS/.agents/skills/exercise-visual-pipeline/resources/master_frontal_neutral.png`
 
 5. **⛔ ZEMİN REFERANSSIZ VE YAYLANMASIZ SIÇRAMA YASAĞI (HAVADA ASILI KUKLA HATASI):**
    - Boş beyaz fonda zemin çizgisi olmadan figürü yukarı-aşağı oynatmak veya bacakları yerdeyken açmak KESİNLİKLE YASAKTIR.
@@ -72,9 +74,9 @@ Jumping Jack ve benzeri pliometrik/kardiyo sıçrama egzersizlerinde uygulanan 6
 ## 🛠️ UÇTAN UCA UYGULAMA ADIMLARI
 
 ### Adım 1: `image-generator` ile Anahtar Pozların Üretimi (Tek Paralel Dalga)
-- **Açı Seçimi:**
-  - Pliometrik / kardiyo sıçrama hareketleri (Jumping Jack vb.): `STRICT 0-DEGREE DIRECT FRONTAL VIEW` (`/Users/mrkantarci/Desktop/AI PROJELERI/FITNESS/assets/opengym/master_athlete_neutral.png` referanslı).
-  - Kalça menteşesi (hinge), çekiş (row) ve çok fazlı dambıl/kettlebell hareketleri (Row, RDL, High Pull, Cuban Rotasyon vb.): Sırt düzlüğünün ve menteşe açısının net okunması için **OpenGym standart 3/4 sağ-ön anatomik açı** (ilk üretilen master nötr duruş tüm pozlara referans verilerek karakter %100 kilitlenir).
+- **Hazır Kalıp Referanslar (Sıfırdan Karakter Üretme — Doğrudan Kullan):**
+  - Pliometrik / kardiyo sıçrama hareketleri (Jumping Jack vb.): `STRICT 0-DEGREE DIRECT FRONTAL VIEW` -> `/Users/mrkantarci/Desktop/AI PROJELERI/FITNESS/.agents/skills/exercise-visual-pipeline/resources/master_frontal_neutral.png`
+  - Kalça menteşesi (hinge), çekiş (row) ve çok fazlı dambıl/kettlebell hareketleri (Row, RDL, High Pull, Cuban Rotasyon vb.): **OpenGym standart 3/4 sağ-ön anatomik açı** -> `/Users/mrkantarci/Desktop/AI PROJELERI/FITNESS/.agents/skills/exercise-visual-pipeline/resources/master_3q_dumbbell.png`
 - **Ortak Stil Kuralları:**
   - `Soft greyscale pencil-shaded musculature striations (do NOT use thick black cartoon outlines)`.
   - `Bright coral orange (#ea580c) highlights ONLY on active target muscles`.
@@ -92,11 +94,13 @@ Jumping Jack ve benzeri pliometrik/kardiyo sıçrama egzersizlerinde uygulanan 6
 - **Ters Ping-Pong Yasağı:** Birleşik hareketlerde (örn. Eğilerek Row + High Pull + Cuban) çıkış karelerini geriye sarmak inişte **sahte ikinci çekiş (reverse row)** hatası yaratır. İniş fazı için dik duruştan düz kollarla kalça menteşesine inen ayrı geçiş karesi kullanılır.
 - **Sabit Ölçek Kilidi (`fixed_scale`):** Öne eğilme (hinge) pozlarında bacak açıklığı (`foot_span`) üzerinden dinamik `extra_scale` hesaplamak boy titremesine yol açar. Tüm pozlarda `fixed_scale = 0.8000` (veya kardiyoda `0.7617`) sabit tutulur; yalnız `foot_xc -> 512.0` ve `y_max -> floor_y` hizalanır.
 
-### Adım 3: Diz Yaylanması (`make_knee_dip`) ve 20 Kare Montajı
-- Derleyici betik çalıştırılarak:
-  1. Arka plan `scipy.ndimage.label` ile saf beyaza (`#FFFFFF`) temizlenir ve yatay ayak merkezi `X=512.0` eksenine kilitlenir.
-  2. Zemin çizgisi ve temas gölgesi üzerine sabit ölçekle yerleştirilir.
-  3. `Image.blend` kullanılmadan (`steps = 0`) ortak 256 renk paletiyle doğrudan çıktı üretilir.
+### Adım 3: Hazır Derleyici Araç ile Tek Komutta Montaj (Sıfırdan Kod Yazma!)
+- Yeni konuşmalarda derleme kodu baştan yazılmaz; doğrudan hazır CLI derleyicisi çalıştırılır:
+  ```bash
+  python3 /Users/mrkantarci/Desktop/AI\ PROJELERI/FITNESS/.agents/skills/exercise-visual-pipeline/scripts/compile_studio_exercise.py \
+    --id <hareket_id> --spec <spec.json> --artifact-gif <preview.gif> --verify-sheet <verify_sheet.jpg>
+  ```
+  (Onay sonrası `--write-repo` bayrağı eklenerek `GIF + WebP + MP4 + Kapak` tek komutta yerel klasörlere yazılır.)
 
 ### Adım 4: Görsel Doğrulama Şeridi (`verify_final_20_sheet.jpg`) Denetimi
 - Üretilen 20 karenin tamamı 5x4 tablo olarak kaydedilir ve kullanıcıya sunulmadan önce `read_file` ile bizzat incelenerek:
