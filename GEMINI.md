@@ -143,5 +143,13 @@ Kullanıcı "canlıya al / push et" dediğinde şu adımlar uygulanır:
   - **Kompakt Aksiyon Barı ve Nizami Üst Bar:** Tam genişlikli alt alta buton yığınları yerine 2 satırlık kompakt ızgara kullanılır; üst bardaki tüm sağ aksiyonlar eşit yükseklikte (`34px`) hizalanır ve sürüm numarası (`vXX`) ortada kopuk durmak yerine alt başlığın yanına (`ÜRETİCİ • vXX`) entegre edilir.
   - **Sohbette Sıfır İngilizce Alt Başlık:** Sohbet yanıtlarının sonuna hiçbir zaman İngilizce teknik özet veya kontrol başlıkları (`Modern Web Guidance` vb.) eklenmez.
 
+---
+
+## 12. Tekil Yama Yasağı & Bütüncül (Global) Mimari Düşünce Yasası
+* **Spesifik/Tekil Çözüm Yasağı:** Kullanıcı belirli bir örnek üzerinden (ör. sadece omuz, tek bir hareket veya tek bir gün) hata ya da geliştirme bildirdiğinde, çözüm ASLA yalnızca o örneğe özel (spesifik yama) olarak yazılamaz.
+* **Evrensel ve Sistem Genelinde Tasarım:** Her düzeltme ve geliştirme, programın genel yapısını ve tüm benzer bileşenlerini (10 ana kas grubu, 31 alt bölge, tüm antrenman şablonları ve tüm sekmeler) kapsayacak şekilde evrensel olarak kurgulanır.
+* **Bütüncül Mimari Etki Denetimi:** Değişiklik yapılmadan önce programın genel yapısına etkisi uçtan uca hesaplanır; tekil istisnalar yerine sistemin tamamını yöneten genel mekanizmalar kurulur.
+
+
 
 
