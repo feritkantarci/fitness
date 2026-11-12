@@ -12,13 +12,33 @@ Kullanım:
 """
 
 import sys
+import os
 import json
+import subprocess
 import urllib.request
 import urllib.error
 from datetime import datetime
 
 PROJECT_ID = "fitness-4f427"
 FIRESTORE_URL = f"https://firestore.googleapis.com/v1/projects/{PROJECT_ID}/databases/(default)/documents/exercise_bug_reports"
+
+
+def get_auth_headers(extra=None):
+    headers = dict(extra or {})
+    for bin_path in [os.path.expanduser("~/google-cloud-sdk/bin/gcloud"), "gcloud"]:
+        try:
+            res = subprocess.run(
+                [bin_path, "auth", "print-access-token"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+            if res.returncode == 0 and res.stdout.strip():
+                headers["Authorization"] = f"Bearer {res.stdout.strip()}"
+                break
+        except Exception:
+            continue
+    return headers
 
 def parse_firestore_fields(fields):
     data = {}
@@ -59,7 +79,7 @@ def to_firestore_fields(data):
 
 def list_reports():
     try:
-        req = urllib.request.Request(FIRESTORE_URL)
+        req = urllib.request.Request(FIRESTORE_URL, headers=get_auth_headers())
         with urllib.request.urlopen(req) as resp:
             data = json.loads(resp.read().decode())
         
@@ -104,7 +124,8 @@ def list_reports():
 def get_report(doc_id):
     url = f"{FIRESTORE_URL}/{doc_id}"
     try:
-        with urllib.request.urlopen(url) as resp:
+        req = urllib.request.Request(url, headers=get_auth_headers())
+        with urllib.request.urlopen(req) as resp:
             data = json.loads(resp.read().decode())
         fields = parse_firestore_fields(data.get("fields", {}))
         print(json.dumps(fields, indent=2, ensure_ascii=False))
@@ -120,7 +141,7 @@ def resolve_report(doc_id, resolution_note="AI tarafından incelendi ve düzelti
         "aiResolutionNote": resolution_note
     }
     body = json.dumps(to_firestore_fields(payload)).encode("utf-8")
-    req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"}, method="PATCH")
+    req = urllib.request.Request(url, data=body, headers=get_auth_headers({"Content-Type": "application/json"}), method="PATCH")
     try:
         with urllib.request.urlopen(req) as resp:
             print(f"✅ Rapor '{doc_id}' durumu 'ai_processed_awaiting_user_ok' olarak güncellendi.")
@@ -130,7 +151,7 @@ def resolve_report(doc_id, resolution_note="AI tarafından incelendi ve düzelti
 
 def delete_report(doc_id):
     url = f"{FIRESTORE_URL}/{doc_id}"
-    req = urllib.request.Request(url, method="DELETE")
+    req = urllib.request.Request(url, headers=get_auth_headers(), method="DELETE")
     try:
         with urllib.request.urlopen(req) as resp:
             print(f"🗑️ Rapor '{doc_id}' Firestore havuzundan başarıyla silindi.")

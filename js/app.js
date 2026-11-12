@@ -19192,8 +19192,27 @@ KURALLAR:
         };
 
         let fbApp = null;
+        let fbAuth = null;
+        let secondaryFbApp = null;
         let fbDb = null;
         let isFirebaseReady = false;
+
+        function getSecondaryFirebaseAuth() {
+            try {
+                if (typeof firebase === 'undefined' || typeof firebase.auth !== 'function') return null;
+                if (!secondaryFbApp) {
+                    const existing = (firebase.apps || []).find(a => a && a.name === 'CelikSecondaryAuthWorker');
+                    secondaryFbApp = existing || firebase.initializeApp(FIREBASE_CONFIG, 'CelikSecondaryAuthWorker');
+                }
+                const secAuth = secondaryFbApp.auth();
+                if (firebase.auth.Auth && firebase.auth.Auth.Persistence) {
+                    secAuth.setPersistence(firebase.auth.Auth.Persistence.NONE).catch(() => {});
+                }
+                return secAuth;
+            } catch (e) {
+                return null;
+            }
+        }
 
         function updateCloudSyncBadge(status, text) {
             const badges = document.querySelectorAll('.cloud-sync-badge');
@@ -19216,6 +19235,14 @@ KURALLAR:
             const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : 'usr_admin');
             const sealKey = `celik_kodu_cloud_seal_${uid}`;
             try {
+                const saved = localStorage.getItem(sealKey);
+                if (saved && saved.length >= 12) return saved;
+                const localCred = typeof getLocalUserCred === 'function' ? getLocalUserCred(uid) : null;
+                if (localCred && localCred.passwordHash && String(localCred.passwordHash).length >= 16) {
+                    const derived = 'seal_' + String(localCred.passwordHash).slice(0, 28);
+                    localStorage.setItem(sealKey, derived);
+                    return derived;
+                }
                 const users = typeof getAuthUsers === 'function' ? getAuthUsers() : [];
                 const u = Array.isArray(users) ? users.find(x => x && x.id === uid) : null;
                 if (u && u.passwordHash && String(u.passwordHash).length >= 16) {
@@ -19223,8 +19250,6 @@ KURALLAR:
                     localStorage.setItem(sealKey, derived);
                     return derived;
                 }
-                const saved = localStorage.getItem(sealKey);
-                if (saved && saved.length >= 12) return saved;
             } catch {}
             return 'seal_ck_v1_' + String(uid);
         }
@@ -19280,9 +19305,15 @@ KURALLAR:
 
                 if (typeof firebase.auth === 'function') {
                     try {
-                        if (!firebase.auth().currentUser) {
-                            firebase.auth().signInAnonymously().catch(() => {});
+                        fbAuth = firebase.auth();
+                        if (firebase.auth.Auth && firebase.auth.Auth.Persistence) {
+                            fbAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(() => {});
                         }
+                        fbAuth.onAuthStateChanged(fbUser => {
+                            if (fbUser && navigator.onLine) {
+                                flushPendingCloudOutbox();
+                            }
+                        });
                     } catch {}
                 }
 
@@ -19394,7 +19425,16 @@ KURALLAR:
                             mergedMap.set(u.id, u);
                         });
 
-                        data.users.forEach(u => {
+                        data.users.forEach(rawCloudU => {
+                            if (!rawCloudU || !rawCloudU.id) return;
+                            if (rawCloudU.id === 'usr_1792524620913') return;
+                            const u = { ...rawCloudU };
+                            // Güvenlik & Stabilite: Buluttan gelebilecek eski/zayıf şifre kalıntılarını asla yerel doğrulayıcıya bulaştırma
+                            delete u.password;
+                            delete u.passwordHash;
+                            delete u.salt;
+                            delete u.geminiApiKey;
+
                             const localU = mergedMap.get(u.id) || {};
                             const isLocalNewer = (localU.updatedAt || 0) > (u.updatedAt || 0);
                             const merged = isLocalNewer ? { ...u, ...localU } : { ...localU, ...u };
@@ -19402,11 +19442,20 @@ KURALLAR:
                             if (u.status !== 'pending' && merged.status === 'pending') {
                                 merged.status = u.status || 'approved';
                             }
-                            // Eğer buluttaki objede passwordHash eksikse yerel hash ve salt'ı koru
-                            if (!merged.passwordHash && localU.passwordHash) {
-                                merged.passwordHash = localU.passwordHash;
-                                merged.salt = localU.salt;
+                            if (u.fbAuthEmail || localU.fbAuthEmail) {
+                                merged.fbAuthEmail = u.fbAuthEmail || localU.fbAuthEmail;
                             }
+                            if (localU.passwordStrengthLevel && !merged.passwordStrengthLevel) {
+                                merged.passwordStrengthLevel = localU.passwordStrengthLevel;
+                            }
+                            const vaultCred = typeof getLocalUserCred === 'function' ? getLocalUserCred(u.id) : null;
+                            if (vaultCred && vaultCred.passwordHash) {
+                                merged.passwordStrengthLevel = vaultCred.passwordStrengthLevel || merged.passwordStrengthLevel || 'Güçlü';
+                                if (vaultCred.mustChangePassword === false) merged.mustChangePassword = false;
+                            }
+                            delete merged.password;
+                            delete merged.passwordHash;
+                            delete merged.salt;
                             mergedMap.set(u.id, merged);
                         });
                         const finalUsers = Array.from(mergedMap.values());
@@ -19439,10 +19488,34 @@ KURALLAR:
                 const snap = await res.json();
                 let didHydrate = false;
 
-                if (Array.isArray(snap.users) && snap.users.length > 0) {
+                const snapUsersArr = Array.isArray(snap.users)
+                    ? snap.users
+                    : (snap.collections && snap.collections.app_system && snap.collections.app_system.users && Array.isArray(snap.collections.app_system.users.users)
+                        ? snap.collections.app_system.users.users
+                        : []);
+                if (snapUsersArr.length > 0) {
                     const localUsers = getAuthUsers();
                     const mergedMap = new Map();
-                    snap.users.forEach(u => mergedMap.set(u.id, u));
+                    snapUsersArr.forEach(u => {
+                        if (!u || !u.id) return;
+                        if (u.salt && u.salt !== 'celik_salt_default' && u.passwordHash && typeof setLocalUserCred === 'function') {
+                            const existingVault = getLocalUserCred(u.id);
+                            if (!existingVault || (Number(u.passwordUpdatedAt || 0) > Number(existingVault.passwordUpdatedAt || 0))) {
+                                setLocalUserCred(u.id, {
+                                    salt: u.salt,
+                                    passwordHash: u.passwordHash,
+                                    passwordStrengthLevel: u.passwordStrengthLevel || 'Çok Güçlü',
+                                    mustChangePassword: Boolean(u.mustChangePassword),
+                                    passwordUpdatedAt: u.passwordUpdatedAt || Date.now()
+                                });
+                            }
+                        }
+                        const cleanU = { ...u };
+                        delete cleanU.password;
+                        delete cleanU.passwordHash;
+                        delete cleanU.salt;
+                        mergedMap.set(cleanU.id, cleanU);
+                    });
                     localUsers.forEach(u => mergedMap.set(u.id, Object.assign({}, mergedMap.get(u.id) || {}, u)));
                     localStorage.setItem('celik_kodu_auth_users', JSON.stringify(Array.from(mergedMap.values())));
                     didHydrate = true;
@@ -22300,6 +22373,121 @@ KURALLAR:
             return String(str).trim().replace(/^@+/, '').toLocaleLowerCase('tr-TR').normalize('NFC');
         }
 
+        const LOCAL_CRED_VAULT_STORAGE_KEY = 'celik_kodu_cred_vault_v2';
+        const AUTH_RATE_LIMIT_STORAGE_KEY = 'celik_kodu_auth_ratelimit_v1';
+        const KNOWN_WEAK_HASHES_GLOBAL = new Set([
+            'a924925a37aaa6c8e9f3d54b4f00a30b1d7445611efb0ee3641b3c959e13fea7', // 123
+            '03cde27561b94bc8b0f58721b21c3c5010435fd22dc6d202106c262c7e010bbc'  // 123456
+        ]);
+
+        function getLocalCredVault() {
+            try {
+                const raw = localStorage.getItem(LOCAL_CRED_VAULT_STORAGE_KEY);
+                const parsed = raw ? JSON.parse(raw) : {};
+                return (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) ? parsed : {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function getLocalUserCred(uid) {
+            if (!uid) return null;
+            const vault = getLocalCredVault();
+            return vault[uid] || null;
+        }
+
+        function setLocalUserCred(uid, credObj) {
+            if (!uid || !credObj || !credObj.passwordHash || !credObj.salt) return;
+            try {
+                const vault = getLocalCredVault();
+                vault[uid] = {
+                    salt: String(credObj.salt),
+                    passwordHash: String(credObj.passwordHash),
+                    passwordStrengthLevel: credObj.passwordStrengthLevel || 'Güçlü',
+                    mustChangePassword: Boolean(credObj.mustChangePassword),
+                    passwordUpdatedAt: Number(credObj.passwordUpdatedAt) || Date.now()
+                };
+                localStorage.setItem(LOCAL_CRED_VAULT_STORAGE_KEY, JSON.stringify(vault));
+            } catch (e) {}
+        }
+
+        function getCanonicalFbAuthEmail(user) {
+            if (!user) return '';
+            if (user.id === 'usr_admin') {
+                return String(user.fbAuthEmail || user.email || 'feritkantarci@gmail.com').trim().toLowerCase();
+            }
+            const raw = user.fbAuthEmail || user.email || (user.id ? `${user.id}@auth.celikkodu.app` : '');
+            return String(raw).trim().toLowerCase();
+        }
+
+        function clearAuthInlineError() {
+            const errBox = document.getElementById('loginErrorMsg');
+            if (errBox && errBox.style.display !== 'none') {
+                errBox.style.display = 'none';
+            }
+        }
+        window.clearAuthInlineError = clearAuthInlineError;
+
+        function togglePasswordFieldVisibility(inputId, btnEl) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const makeVisible = input.type === 'password';
+            input.type = makeVisible ? 'text' : 'password';
+            if (btnEl) {
+                btnEl.setAttribute('aria-pressed', makeVisible ? 'true' : 'false');
+                btnEl.setAttribute('aria-label', makeVisible ? 'Şifreyi gizle' : 'Şifreyi göster');
+                btnEl.textContent = makeVisible ? 'Gizle' : 'Göster';
+            }
+        }
+        window.togglePasswordFieldVisibility = togglePasswordFieldVisibility;
+
+        function getRemainingAuthLockoutSeconds(identKey) {
+            if (!identKey) return 0;
+            try {
+                const map = JSON.parse(localStorage.getItem(AUTH_RATE_LIMIT_STORAGE_KEY) || '{}');
+                const entry = map[identKey];
+                if (!entry || !entry.lockedUntil) return 0;
+                const rem = Math.ceil((entry.lockedUntil - Date.now()) / 1000);
+                return rem > 0 ? rem : 0;
+            } catch (e) {
+                return 0;
+            }
+        }
+
+        function recordAuthFailure(identKey) {
+            if (!identKey) return 0;
+            try {
+                const map = JSON.parse(localStorage.getItem(AUTH_RATE_LIMIT_STORAGE_KEY) || '{}');
+                const now = Date.now();
+                const prev = map[identKey] || { count: 0, firstAt: now, lockedUntil: 0 };
+                if (now - (prev.firstAt || 0) > 10 * 60 * 1000) {
+                    prev.count = 0;
+                    prev.firstAt = now;
+                }
+                prev.count = (prev.count || 0) + 1;
+                if (prev.count >= 5) {
+                    const penaltySec = Math.min(120, 30 * (prev.count - 4));
+                    prev.lockedUntil = now + penaltySec * 1000;
+                }
+                map[identKey] = prev;
+                localStorage.setItem(AUTH_RATE_LIMIT_STORAGE_KEY, JSON.stringify(map));
+                return prev.lockedUntil > now ? Math.ceil((prev.lockedUntil - now) / 1000) : 0;
+            } catch (e) {
+                return 0;
+            }
+        }
+
+        function clearAuthFailures(identKey) {
+            if (!identKey) return;
+            try {
+                const map = JSON.parse(localStorage.getItem(AUTH_RATE_LIMIT_STORAGE_KEY) || '{}');
+                if (map[identKey]) {
+                    delete map[identKey];
+                    localStorage.setItem(AUTH_RATE_LIMIT_STORAGE_KEY, JSON.stringify(map));
+                }
+            } catch (e) {}
+        }
+
         function initAuthDatabase() {
             let users = [];
             try {
@@ -22308,18 +22496,18 @@ KURALLAR:
             } catch(e) {}
 
             if (!Array.isArray(users) || users.length === 0) {
-                // Şifre: 123 (Salted SHA-256 Hash ile korunur)
-                const defaultHash = 'a924925a37aaa6c8e9f3d54b4f00a30b1d7445611efb0ee3641b3c959e13fea7';
-                const defaultSalt = 'celik_salt_default';
                 users = [
                     {
                         id: 'usr_admin',
                         username: 'admin',
                         aliases: ['ferit', 'admin'],
-                        passwordHash: defaultHash,
-                        salt: defaultSalt,
+                        email: 'feritkantarci@gmail.com',
+                        fbAuthEmail: 'feritkantarci@gmail.com',
                         role: 'admin',
-                        name: 'Ferit (Admin)',
+                        status: 'approved',
+                        passwordStrengthLevel: 'Çok Güçlü',
+                        mustChangePassword: false,
+                        name: 'Ferit KANTARCI',
                         avatar: '🥋',
                         theme: 'gold',
                         level: 'İleri Seviye',
@@ -22330,9 +22518,10 @@ KURALLAR:
                     {
                         id: 'usr_ismail',
                         username: 'ismail',
-                        passwordHash: defaultHash,
-                        salt: defaultSalt,
+                        fbAuthEmail: 'usr_ismail@auth.celikkodu.app',
                         role: 'athlete',
+                        status: 'approved',
+                        mustChangePassword: true,
                         name: 'İsmail',
                         avatar: '🦁',
                         theme: 'cyan',
@@ -22345,19 +22534,17 @@ KURALLAR:
                 localStorage.setItem('celik_kodu_auth_users', JSON.stringify(users));
             } else {
                 let hasChanged = false;
-                // Otomatik temizleme: Eski mükerrer usr_ferit varsa usr_admin ile birleştir ve kaldır
-                const hasFerit = users.some(u => u.id === 'usr_ferit');
-                if (hasFerit) {
-                    users = users.filter(u => u.id !== 'usr_ferit');
+                // Otomatik temizleme: Eski mükerrer usr_ferit veya eski sinan kopyasını temizle
+                if (users.some(u => u && (u.id === 'usr_ferit' || u.id === 'usr_1792524620913'))) {
+                    users = users.filter(u => u && u.id !== 'usr_ferit' && u.id !== 'usr_1792524620913');
                     const adminUser = users.find(u => u.id === 'usr_admin');
                     if (adminUser) {
                         adminUser.aliases = ['ferit', 'admin'];
-                        adminUser.name = 'Ferit (Admin)';
                     }
                     hasChanged = true;
                 }
 
-                // Otomatik temizleme: Aynı kullanıcı adıyla (ör. sinan) mükerrer açılmış kayıt varsa en güncel olanı koru
+                // Otomatik temizleme: Aynı kullanıcı adıyla mükerrer kayıt varsa en güncel olanı koru
                 const byUname = new Map();
                 const dedupedUsers = [];
                 users.forEach(u => {
@@ -22376,10 +22563,7 @@ KURALLAR:
                         const curTime = Number(u.updatedAt || u.createdAt || 0);
                         const prevTime = Number(prev.updatedAt || prev.createdAt || 0);
                         if (curTime >= prevTime) {
-                            dedupedUsers[prevIdx] = Object.assign({}, prev, u, {
-                                passwordHash: u.passwordHash || prev.passwordHash,
-                                salt: u.salt || prev.salt
-                            });
+                            dedupedUsers[prevIdx] = Object.assign({}, prev, u);
                         }
                         hasChanged = true;
                     }
@@ -22387,11 +22571,50 @@ KURALLAR:
                 if (dedupedUsers.length !== users.length) {
                     users = dedupedUsers;
                 }
+
                 users.forEach(u => {
-                    if (!u.passwordHash && !u.password) {
-                        u.salt = 'celik_salt_default';
-                        u.passwordHash = '03cde27561b94bc8b0f58721b21c3c5010435fd22dc6d202106c262c7e010bbc'; // 123456
+                    // Geçerli güçlü yerel doğrulayıcı varsa izole kasaya taşı; usr_admin üzerindeki eski varsayılan 123 kalıntısını temizle
+                    if (u.passwordHash && u.salt) {
+                        const isLegacyWeak = u.salt === 'celik_salt_default' || KNOWN_WEAK_HASHES_GLOBAL.has(u.passwordHash);
+                        if (!isLegacyWeak) {
+                            const existingVault = getLocalUserCred(u.id);
+                            if (!existingVault || Number(u.passwordUpdatedAt || 0) >= Number(existingVault.passwordUpdatedAt || 0)) {
+                                setLocalUserCred(u.id, {
+                                    salt: u.salt,
+                                    passwordHash: u.passwordHash,
+                                    passwordStrengthLevel: u.passwordStrengthLevel || 'Güçlü',
+                                    mustChangePassword: Boolean(u.mustChangePassword),
+                                    passwordUpdatedAt: u.passwordUpdatedAt || u.updatedAt || Date.now()
+                                });
+                            }
+                        } else if (u.id !== 'usr_admin') {
+                            if (!getLocalUserCred(u.id)) {
+                                setLocalUserCred(u.id, {
+                                    salt: u.salt,
+                                    passwordHash: u.passwordHash,
+                                    passwordStrengthLevel: 'Zayıf',
+                                    mustChangePassword: true,
+                                    passwordUpdatedAt: u.createdAt || 0
+                                });
+                            }
+                        }
+                        delete u.passwordHash;
+                        delete u.salt;
                         hasChanged = true;
+                    }
+                    if (u.password) {
+                        delete u.password;
+                        hasChanged = true;
+                    }
+                    if (u.id === 'usr_admin') {
+                        if (!u.email) { u.email = 'feritkantarci@gmail.com'; hasChanged = true; }
+                        if (!u.fbAuthEmail) { u.fbAuthEmail = 'feritkantarci@gmail.com'; hasChanged = true; }
+                        if (!Array.isArray(u.aliases) || !u.aliases.includes('ferit')) {
+                            u.aliases = ['ferit', 'admin'];
+                            hasChanged = true;
+                        }
+                        if (!u.passwordStrengthLevel) { u.passwordStrengthLevel = 'Çok Güçlü'; hasChanged = true; }
+                        if (u.mustChangePassword) { u.mustChangePassword = false; hasChanged = true; }
                     }
                     // Güvenlik: Yönetici olmayan kullanıcılara buluttan sızmış eski paylaşımlı Gemini API anahtarını temizle
                     if (u.role !== 'admin' && u.geminiApiKey && !u.geminiKeyOwnedByUser) {
@@ -22483,24 +22706,21 @@ KURALLAR:
                 return;
             }
 
-            // Mevcut açık oturumda kullanıcının şifresi hala varsayılan/zayıf ise veya yeni güvenlik standardından geçmemişse
-            // siteyi doğrudan açmak yerine güvenli şifre belirleme ekranına yönlendir
+            // Mevcut açık oturumda yalnızca açıkça geçici şifre (mustChangePassword) işaretliyse şifre yenilemeye yönlendir;
+            // bulut eşitlemesi kaynaklı eksik alanlar yüzünden doğrulanmış aktif oturumu asla düşürme!
             const users = getAuthUsers();
             const activeUser = users.find(u => u.id === session.userId);
-            if (activeUser) {
-                const storedWeakCheck = isUserStoredCredentialWeak(activeUser);
-                if (storedWeakCheck.isWeak || !activeUser.passwordStrengthLevel) {
-                    localStorage.removeItem('celik_kodu_session');
-                    currentSession = null;
-                    if (loginScreen) loginScreen.classList.add('active');
-                    if (mainAppWrapper) mainAppWrapper.style.display = 'none';
-                    openForcePasswordUpgradeStep(
-                        activeUser,
-                        storedWeakCheck.reason || 'Güvenlik güncellemesi: Hesabınızı korumak için en az 8 karakterli (harf ve rakam içeren) yeni şifrenizi belirleyin.',
-                        ''
-                    );
-                    return;
-                }
+            if (activeUser && activeUser.mustChangePassword === true && !session.passwordPolicyVerified) {
+                localStorage.removeItem('celik_kodu_session');
+                currentSession = null;
+                if (loginScreen) loginScreen.classList.add('active');
+                if (mainAppWrapper) mainAppWrapper.style.display = 'none';
+                openForcePasswordUpgradeStep(
+                    activeUser,
+                    'Hesabınızda geçici şifre tanımlı. Devam etmek için kendinize özel güçlü bir şifre belirleyin.',
+                    ''
+                );
+                return;
             }
 
             if (loginScreen) loginScreen.classList.remove('active');
@@ -22636,17 +22856,16 @@ KURALLAR:
 
         function isUserStoredCredentialWeak(user, plainPasswordIfKnown) {
             if (!user) return { isWeak: false, reason: '' };
-            const KNOWN_WEAK_HASHES = new Set([
-                'a924925a37aaa6c8e9f3d54b4f00a30b1d7445611efb0ee3641b3c959e13fea7', // 123
-                '03cde27561b94bc8b0f58721b21c3c5010435fd22dc6d202106c262c7e010bbc'  // 123456
-            ]);
             if (user.mustChangePassword === true) {
                 return {
                     isWeak: true,
                     reason: 'Hesabınızda geçici şifre tanımlı. Devam etmek için kendinize özel güçlü bir şifre belirleyin.'
                 };
             }
-            if (user.salt === 'celik_salt_default' || KNOWN_WEAK_HASHES.has(user.passwordHash)) {
+            const vaultCred = getLocalUserCred(user.id);
+            const effSalt = (vaultCred && vaultCred.salt) || user.salt || '';
+            const effHash = (vaultCred && vaultCred.passwordHash) || user.passwordHash || '';
+            if (effSalt === 'celik_salt_default' || KNOWN_WEAK_HASHES_GLOBAL.has(effHash)) {
                 return {
                     isWeak: true,
                     reason: 'Varsayılan başlangıç şifresi kullanıyorsunuz. Hesabınızı korumak için güçlü bir şifre oluşturun.'
@@ -22836,10 +23055,14 @@ KURALLAR:
                 role: matched.role,
                 name: matched.name,
                 authVerified: true,
+                passwordPolicyVerified: true,
                 loginAt: Date.now()
             });
             if (usernameInput) usernameInput.value = '';
-            if (passwordInput) passwordInput.value = '';
+            if (passwordInput) {
+                passwordInput.value = '';
+                passwordInput.type = 'password';
+            }
 
             applyWednesdayHammerCurlPatch();
             updateProfileGeminiStatusUI();
@@ -22906,15 +23129,42 @@ KURALLAR:
                 return;
             }
 
+            // Firebase Auth üzerinde de şifreyi senkron güncelle
+            if (fbAuth && navigator.onLine !== false) {
+                const fbEmail = getCanonicalFbAuthEmail(user);
+                if (fbEmail) {
+                    try {
+                        if (!fbAuth.currentUser || (fbAuth.currentUser.email || '').toLowerCase() !== fbEmail) {
+                            if (pendingWeakPasswordUpgradeState.oldPlainPassword) {
+                                await fbAuth.signInWithEmailAndPassword(fbEmail, pendingWeakPasswordUpgradeState.oldPlainPassword);
+                            }
+                        }
+                        if (fbAuth.currentUser && (fbAuth.currentUser.email || '').toLowerCase() === fbEmail) {
+                            await fbAuth.currentUser.updatePassword(newPass);
+                        }
+                    } catch (fbErr) {
+                        console.warn('Firebase Auth şifre yükseltme uyarısı:', fbErr && fbErr.code);
+                    }
+                }
+            }
+
+            const nowMs = Date.now();
             const newSalt = generateSecureSalt();
             const newHash = await sha256Hex(newSalt + newPass);
-            user.salt = newSalt;
-            user.passwordHash = newHash;
+            setLocalUserCred(user.id, {
+                salt: newSalt,
+                passwordHash: newHash,
+                passwordStrengthLevel: evalRes.levelLabel,
+                mustChangePassword: false,
+                passwordUpdatedAt: nowMs
+            });
             delete user.password;
+            delete user.passwordHash;
+            delete user.salt;
             user.mustChangePassword = false;
             user.passwordStrengthLevel = evalRes.levelLabel;
-            user.passwordUpdatedAt = Date.now();
-            user.updatedAt = Date.now();
+            user.passwordUpdatedAt = nowMs;
+            user.updatedAt = nowMs;
 
             users[userIdx] = user;
             saveAuthUsers(users);
@@ -22926,6 +23176,76 @@ KURALLAR:
             completeAuthenticatedLogin(user);
         }
         window.handleForcePasswordUpgradeSubmit = handleForcePasswordUpgradeSubmit;
+
+        async function handleSendFirebaseResetLink() {
+            const idEl = document.getElementById('forgotIdentity');
+            const errorBox = document.getElementById('loginErrorMsg');
+            const successBox = document.getElementById('loginSuccessMsg');
+            if (errorBox) errorBox.style.display = 'none';
+            if (successBox) successBox.style.display = 'none';
+
+            const rawIdentity = (idEl ? idEl.value : '').trim();
+            if (!rawIdentity) {
+                if (errorBox) {
+                    errorBox.innerText = '❌ Önce kayıtlı e-posta adresinizi veya kullanıcı adınızı yazın.';
+                    errorBox.style.display = 'block';
+                }
+                return;
+            }
+            if (!fbAuth || navigator.onLine === false) {
+                if (errorBox) {
+                    errorBox.innerText = '❌ Şu an çevrimdışısınız. Aşağıdaki doğrudan yenileme alanını kullanın.';
+                    errorBox.style.display = 'block';
+                }
+                return;
+            }
+
+            if (typeof syncUsersFromCloud === 'function' && isFirebaseReady && !IS_LOCAL_DEV) {
+                try {
+                    await Promise.race([
+                        syncUsersFromCloud(),
+                        new Promise(resolve => setTimeout(resolve, 3000))
+                    ]);
+                } catch (e) {}
+            }
+
+            const normId = normalizeAuthString(rawIdentity);
+            const emailId = rawIdentity.toLowerCase();
+            const users = getAuthUsers();
+            const matched = users.find(u => {
+                const uUname = normalizeAuthString(u.username);
+                const uEmail = (u.email || '').trim().toLowerCase();
+                const aliases = Array.isArray(u.aliases) ? u.aliases.map(normalizeAuthString) : [];
+                return (uUname && uUname === normId) ||
+                    (uEmail && uEmail === emailId) ||
+                    (u.id === 'usr_admin' && (normId === 'admin' || normId === 'ferit')) ||
+                    aliases.includes(normId);
+            });
+
+            const targetEmail = matched ? getCanonicalFbAuthEmail(matched) : (emailId.includes('@') ? emailId : '');
+            if (!targetEmail || targetEmail.endsWith('@auth.celikkodu.app')) {
+                if (errorBox) {
+                    errorBox.innerText = '❌ Bu hesapta tanımlı gerçek bir e-posta adresi bulunamadı. Lütfen aşağıdaki Ad Soyad doğrulama alanıyla şifrenizi yenileyin.';
+                    errorBox.style.display = 'block';
+                }
+                return;
+            }
+
+            try {
+                await fbAuth.sendPasswordResetEmail(targetEmail);
+                switchAuthScreenTab('login');
+                if (successBox) {
+                    successBox.innerText = `📩 Şifre sıfırlama bağlantısı (${targetEmail}) adresinize gönderildi. E-postadaki bağlantıdan yeni şifrenizi belirleyip giriş yapabilirsiniz.`;
+                    successBox.style.display = 'block';
+                }
+            } catch (err) {
+                if (errorBox) {
+                    errorBox.innerText = '❌ Sıfırlama e-postası gönderilemedi. Lütfen birkaç dakika sonra tekrar deneyin.';
+                    errorBox.style.display = 'block';
+                }
+            }
+        }
+        window.handleSendFirebaseResetLink = handleSendFirebaseResetLink;
 
         async function handleForgotPasswordSubmit(e) {
             e.preventDefault();
@@ -23059,16 +23379,24 @@ KURALLAR:
                 }
             }
 
-            // Yeni şifreyi kriptografik Salted SHA-256 ile kaydet
+            // Yeni şifreyi izole yerel kasaya kriptografik Salted SHA-256 ile kaydet
+            const nowMs = Date.now();
             const salt = generateSecureSalt();
             const passHash = await sha256Hex(salt + newPass);
-            matchedUser.salt = salt;
-            matchedUser.passwordHash = passHash;
+            setLocalUserCred(matchedUser.id, {
+                salt,
+                passwordHash: passHash,
+                passwordStrengthLevel: fullSecCheck.levelLabel,
+                mustChangePassword: false,
+                passwordUpdatedAt: nowMs
+            });
             delete matchedUser.password;
+            delete matchedUser.passwordHash;
+            delete matchedUser.salt;
             matchedUser.mustChangePassword = false;
             matchedUser.passwordStrengthLevel = fullSecCheck.levelLabel;
-            matchedUser.passwordUpdatedAt = Date.now();
-            matchedUser.updatedAt = Date.now();
+            matchedUser.passwordUpdatedAt = nowMs;
+            matchedUser.updatedAt = nowMs;
 
             saveAuthUsers(users);
             pendingForgotOtpState = null;
@@ -23157,17 +23485,45 @@ KURALLAR:
             }
             const finalUname = derivedUname;
 
+            const nowMs = Date.now();
             const salt = generateSecureSalt();
             const passHash = await sha256Hex(salt + pass);
+            let assignedId = 'usr_' + nowMs;
 
-            const newPendingUser = {
-                id: 'usr_' + Date.now(),
-                username: finalUname,
-                email: rawEmail,
+            const secAuth = getSecondaryFirebaseAuth();
+            if (secAuth && navigator.onLine !== false) {
+                try {
+                    const cred = await secAuth.createUserWithEmailAndPassword(rawEmail, pass);
+                    if (cred && cred.user && cred.user.uid) {
+                        const cleanFbUid = String(cred.user.uid).replace(/[^a-zA-Z0-9_]/g, '').slice(0, 32);
+                        if (cleanFbUid) assignedId = 'usr_' + cleanFbUid;
+                    }
+                    await secAuth.signOut().catch(() => {});
+                } catch (fbRegErr) {
+                    if (fbRegErr && fbRegErr.code === 'auth/email-already-in-use') {
+                        errorBox.innerText = "❌ Bu e-posta adresi zaten kayıtlı! Giriş Yap sekmesinden giriş yapabilirsiniz.";
+                        errorBox.style.display = 'block';
+                        return;
+                    }
+                }
+            }
+
+            setLocalUserCred(assignedId, {
+                salt,
                 passwordHash: passHash,
-                salt: salt,
                 passwordStrengthLevel: secCheck.levelLabel,
                 mustChangePassword: false,
+                passwordUpdatedAt: nowMs
+            });
+
+            const newPendingUser = {
+                id: assignedId,
+                username: finalUname,
+                email: rawEmail,
+                fbAuthEmail: rawEmail,
+                passwordStrengthLevel: secCheck.levelLabel,
+                mustChangePassword: false,
+                passwordUpdatedAt: nowMs,
                 role: 'athlete',
                 status: 'pending',
                 name: dname,
@@ -23176,8 +23532,8 @@ KURALLAR:
                 level: level,
                 gender: gender,
                 weights: { press: '12', squat: '18', row: '16', rdl: '18', swing: '14', lunge: '12' },
-                createdAt: Date.now(),
-                updatedAt: Date.now()
+                createdAt: nowMs,
+                updatedAt: nowMs
             };
 
             users.push(newPendingUser);
@@ -23198,102 +23554,222 @@ KURALLAR:
             }
         }
 
+        let isAuthLoginInProgress = false;
+
         async function handleAuthLogin(e) {
             e.preventDefault();
+            if (isAuthLoginInProgress) return;
+
             const usernameInput = document.getElementById('loginUsername');
             const passwordInput = document.getElementById('loginPassword');
+            const submitBtn = document.getElementById('loginSubmitBtn');
             const errorBox = document.getElementById('loginErrorMsg');
             const successBox = document.getElementById('loginSuccessMsg');
 
             if (successBox) successBox.style.display = 'none';
+            if (errorBox) errorBox.style.display = 'none';
 
-            const rawInput = (usernameInput.value || '').trim();
+            const rawInput = (usernameInput ? usernameInput.value : '').trim();
             const uname = normalizeAuthString(rawInput);
             const emailInput = rawInput.toLowerCase();
-            const pass = (passwordInput.value || '').trim();
+            const pass = (passwordInput ? passwordInput.value : '').trim();
 
             if (!uname || !pass) {
-                errorBox.innerText = "❌ Lütfen e-posta/kullanıcı adı ve şifrenizi girin.";
-                errorBox.style.display = 'block';
+                if (errorBox) {
+                    errorBox.innerText = "❌ Lütfen kullanıcı adı/e-posta ve şifrenizi girin.";
+                    errorBox.style.display = 'block';
+                }
                 return;
             }
 
-            if (typeof syncUsersFromCloud === 'function' && isFirebaseReady && !IS_LOCAL_DEV) {
-                try { await syncUsersFromCloud(); } catch (err) {}
+            const lockRem = getRemainingAuthLockoutSeconds(uname);
+            if (lockRem > 0) {
+                if (errorBox) {
+                    errorBox.innerText = `⏳ Çok fazla hatalı giriş denemesi yapıldı. Güvenliğiniz için ${lockRem} saniye bekleyin.`;
+                    errorBox.style.display = 'block';
+                }
+                return;
             }
 
-            const users = getAuthUsers();
-            let matched = null;
+            isAuthLoginInProgress = true;
+            const prevBtnLabel = submitBtn ? submitBtn.textContent : 'GİRİŞ YAP';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'DOĞRULANIYOR...';
+            }
 
-            for (const u of users) {
-                const uUsername = normalizeAuthString(u.username);
-                const uName = normalizeAuthString(u.name);
-                const uEmail = (u.email || '').trim().toLowerCase();
-                const aliases = Array.isArray(u.aliases) ? u.aliases.map(normalizeAuthString) : [];
+            try {
+                // Buluttan güncel kullanıcı dizinini çek (maks. 3.5 sn zaman aşımı ile mobil gecikmeye takılmaz)
+                if (typeof syncUsersFromCloud === 'function' && isFirebaseReady && !IS_LOCAL_DEV && navigator.onLine !== false) {
+                    try {
+                        await Promise.race([
+                            syncUsersFromCloud(),
+                            new Promise(resolve => setTimeout(resolve, 3500))
+                        ]);
+                    } catch (err) {}
+                }
 
-                const isUnameMatch = (uUsername && uUsername === uname) ||
-                    (uName && uName === uname) ||
-                    (uEmail && uEmail === emailInput) ||
-                    (u.id === 'usr_admin' && (uname === 'admin' || uname === 'ferit')) ||
-                    aliases.includes(uname);
-                if (!isUnameMatch) continue;
+                const users = getAuthUsers();
+                const candidates = users.filter(u => {
+                    if (!u) return false;
+                    const uUsername = normalizeAuthString(u.username);
+                    const uName = normalizeAuthString(u.name);
+                    const uEmail = (u.email || '').trim().toLowerCase();
+                    const aliases = Array.isArray(u.aliases) ? u.aliases.map(normalizeAuthString) : [];
+                    return (uUsername && uUsername === uname) ||
+                        (uName && uName === uname) ||
+                        (uEmail && uEmail === emailInput) ||
+                        (u.id === 'usr_admin' && (uname === 'admin' || uname === 'ferit' || emailInput === 'feritkantarci@gmail.com')) ||
+                        aliases.includes(uname);
+                });
 
-                // 1. Salted SHA-256 hash kontrolü
-                if (u.passwordHash) {
-                    const enteredHash = await sha256Hex((u.salt || '') + pass);
-                    if (enteredHash === u.passwordHash) {
+                let matched = null;
+                let rateLimitedByServer = false;
+
+                for (const u of candidates) {
+                    const fbEmail = getCanonicalFbAuthEmail(u);
+                    let fbVerified = false;
+                    let fbNetworkUnavailable = (navigator.onLine === false || !fbAuth);
+
+                    // 1. Birincil Kurumsal Doğrulama: Google Firebase Authentication (Tüm cihaz ve tarayıcılarda tek doğruluk kaynağı)
+                    if (fbAuth && fbEmail && navigator.onLine !== false) {
+                        try {
+                            await fbAuth.signInWithEmailAndPassword(fbEmail, pass);
+                            fbVerified = true;
+                        } catch (fbErr) {
+                            const code = (fbErr && fbErr.code) || '';
+                            if (code === 'auth/too-many-requests') {
+                                rateLimitedByServer = true;
+                                break;
+                            }
+                            if (code === 'auth/network-request-failed' || code === 'auth/internal-error') {
+                                fbNetworkUnavailable = true;
+                            }
+                        }
+                    }
+
+                    if (fbVerified) {
+                        const evalRes = evaluatePasswordSecurity(pass, u);
+                        const freshSalt = generateSecureSalt();
+                        const freshHash = await sha256Hex(freshSalt + pass);
+                        setLocalUserCred(u.id, {
+                            salt: freshSalt,
+                            passwordHash: freshHash,
+                            passwordStrengthLevel: evalRes.levelLabel || u.passwordStrengthLevel || 'Güçlü',
+                            mustChangePassword: Boolean(u.mustChangePassword),
+                            passwordUpdatedAt: Date.now()
+                        });
                         matched = u;
                         break;
                     }
-                }
-                // 2. Geriye dönük uyumluluk: Eski açık şifre eşleşirse hemen hash'e yükselt
-                if (u.password && u.password === pass) {
-                    matched = u;
-                    const salt = generateSecureSalt();
-                    u.salt = salt;
-                    u.passwordHash = await sha256Hex(salt + pass);
-                    delete u.password;
-                    saveAuthUsers(users);
-                    break;
-                }
-            }
 
-            if (matched) {
-                // YÖNETİCİ ONAYI KONTROLÜ (status === 'pending' veya 'rejected' ise girişi engelle)
-                if (matched.role !== 'admin' && matched.status === 'pending') {
-                    errorBox.innerText = `⏳ Hesabınız henüz yönetici onayında bekliyor. Onaylandığında ${matched.email ? '(' + matched.email + ') adresinize' : 'size'} onay e-postası gönderilecektir.`;
-                    errorBox.style.display = 'block';
+                    // 2. Çevrimdışı / Yerel Kasa Doğrulaması (İnternet yokken veya yerel şifre yenileme sonrası)
+                    const vaultCred = getLocalUserCred(u.id);
+                    const effSalt = (vaultCred && vaultCred.salt) || u.salt || '';
+                    const effHash = (vaultCred && vaultCred.passwordHash) || u.passwordHash || '';
+                    if (effHash && effSalt) {
+                        const isDefaultWeakOnAdmin = (u.id === 'usr_admin') && (effSalt === 'celik_salt_default' || KNOWN_WEAK_HASHES_GLOBAL.has(effHash));
+                        const allowLocalFallback = !isDefaultWeakOnAdmin && (
+                            fbNetworkUnavailable ||
+                            IS_LOCAL_DEV ||
+                            ((vaultCred && Number(vaultCred.passwordUpdatedAt || 0)) > Number(u.passwordUpdatedAt || 0))
+                        );
+                        if (allowLocalFallback) {
+                            const enteredHash = await sha256Hex(effSalt + pass);
+                            if (enteredHash === effHash) {
+                                matched = u;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // Aday bulunamadıysa ancak e-posta girildiyse doğrudan Firebase Auth üzerinden dene
+                if (!matched && !rateLimitedByServer && candidates.length === 0 && emailInput.includes('@') && fbAuth && navigator.onLine !== false) {
+                    try {
+                        const cred = await fbAuth.signInWithEmailAndPassword(emailInput, pass);
+                        if (cred && cred.user) {
+                            if (typeof syncUsersFromCloud === 'function' && !IS_LOCAL_DEV) {
+                                try { await syncUsersFromCloud(); } catch (e) {}
+                            }
+                            const refreshedUsers = getAuthUsers();
+                            matched = refreshedUsers.find(u => u && (
+                                u.id === cred.user.uid ||
+                                u.id === ('usr_' + cred.user.uid) ||
+                                (u.email || '').toLowerCase() === emailInput ||
+                                (u.fbAuthEmail || '').toLowerCase() === emailInput
+                            )) || null;
+                        }
+                    } catch (directErr) {
+                        if (directErr && directErr.code === 'auth/too-many-requests') {
+                            rateLimitedByServer = true;
+                        }
+                    }
+                }
+
+                if (rateLimitedByServer) {
+                    if (errorBox) {
+                        errorBox.innerText = "⏳ Çok fazla başarısız giriş denemesi tespit edildi. Lütfen birkaç dakika bekleyip tekrar deneyin.";
+                        errorBox.style.display = 'block';
+                    }
                     return;
                 }
-                if (matched.role !== 'admin' && matched.status === 'rejected') {
-                    errorBox.innerText = "❌ Kayıt başvurunuz yönetici tarafından onaylanmadı.";
-                    errorBox.style.display = 'block';
-                    return;
-                }
 
-                // ZAYIF ŞİFRE DENETİMİ: Şifre basitse siteye almadan önce güvenli şifre oluşturma adımına yönlendir
-                const weakCheck = isUserStoredCredentialWeak(matched, pass);
-                if (weakCheck.isWeak) {
-                    errorBox.style.display = 'none';
-                    openForcePasswordUpgradeStep(matched, weakCheck.reason, pass);
-                    return;
-                }
+                if (matched) {
+                    clearAuthFailures(uname);
 
-                if (!matched.passwordStrengthLevel) {
-                    const evalRes = evaluatePasswordSecurity(pass, matched);
-                    matched.passwordStrengthLevel = evalRes.levelLabel || 'Güçlü';
-                    saveAuthUsers(users);
-                }
+                    // YÖNETİCİ ONAYI KONTROLÜ (status === 'pending' veya 'rejected' ise girişi engelle)
+                    if (matched.role !== 'admin' && matched.status === 'pending') {
+                        if (fbAuth) { try { await fbAuth.signOut(); } catch (e) {} }
+                        errorBox.innerText = `⏳ Hesabınız henüz yönetici onayında bekliyor. Onaylandığında ${matched.email ? '(' + matched.email + ') adresinize' : 'size'} onay e-postası gönderilecektir.`;
+                        errorBox.style.display = 'block';
+                        return;
+                    }
+                    if (matched.role !== 'admin' && matched.status === 'rejected') {
+                        if (fbAuth) { try { await fbAuth.signOut(); } catch (e) {} }
+                        errorBox.innerText = "❌ Kayıt başvurunuz yönetici tarafından onaylanmadı.";
+                        errorBox.style.display = 'block';
+                        return;
+                    }
 
-                completeAuthenticatedLogin(matched);
-            } else {
-                errorBox.innerText = "❌ Hatalı e-posta/kullanıcı adı veya şifre!";
-                errorBox.style.display = 'block';
+                    // ZAYIF ŞİFRE DENETİMİ: Şifre basitse siteye almadan önce güvenli şifre oluşturma adımına yönlendir
+                    const weakCheck = isUserStoredCredentialWeak(matched, pass);
+                    if (weakCheck.isWeak) {
+                        errorBox.style.display = 'none';
+                        openForcePasswordUpgradeStep(matched, weakCheck.reason, pass);
+                        return;
+                    }
+
+                    if (!matched.passwordStrengthLevel) {
+                        const evalRes = evaluatePasswordSecurity(pass, matched);
+                        matched.passwordStrengthLevel = evalRes.levelLabel || 'Güçlü';
+                        saveAuthUsers(users);
+                    }
+
+                    completeAuthenticatedLogin(matched);
+                } else {
+                    const newLockSec = recordAuthFailure(uname);
+                    if (errorBox) {
+                        errorBox.innerText = newLockSec > 0
+                            ? `❌ Hatalı şifre! Çok sayıda deneme nedeniyle ${newLockSec} saniye güvenlik kilidi uygulandı.`
+                            : "❌ Hatalı kullanıcı adı/e-posta veya şifre!";
+                        errorBox.style.display = 'block';
+                    }
+                }
+            } finally {
+                isAuthLoginInProgress = false;
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = prevBtnLabel;
+                }
             }
         }
 
         function handleAuthLogout() {
             if (confirm("Oturumu kapatmak istediğinize emin misiniz?")) {
+                if (fbAuth) {
+                    try { fbAuth.signOut().catch(() => {}); } catch (e) {}
+                }
                 setSession(null);
             }
         }
@@ -23323,12 +23799,31 @@ KURALLAR:
             }
 
             const user = users[userIdx];
+            const fbEmail = getCanonicalFbAuthEmail(user);
             let isCurrentCorrect = false;
-            if (user.passwordHash) {
-                const testHash = await sha256Hex((user.salt || '') + currentPass);
-                isCurrentCorrect = (testHash === user.passwordHash);
-            } else if (user.password) {
-                isCurrentCorrect = (user.password === currentPass);
+            let fbSignedForChange = false;
+
+            if (fbAuth && fbEmail && navigator.onLine !== false) {
+                try {
+                    await fbAuth.signInWithEmailAndPassword(fbEmail, currentPass);
+                    isCurrentCorrect = true;
+                    fbSignedForChange = true;
+                } catch (fbErr) {
+                    const code = (fbErr && fbErr.code) || '';
+                    if (code !== 'auth/network-request-failed' && code !== 'auth/internal-error') {
+                        isCurrentCorrect = false;
+                    }
+                }
+            }
+
+            if (!isCurrentCorrect) {
+                const vaultCred = getLocalUserCred(user.id);
+                const effSalt = (vaultCred && vaultCred.salt) || user.salt || '';
+                const effHash = (vaultCred && vaultCred.passwordHash) || user.passwordHash || '';
+                if (effHash && effSalt && (navigator.onLine === false || !fbAuth || IS_LOCAL_DEV)) {
+                    const testHash = await sha256Hex(effSalt + currentPass);
+                    isCurrentCorrect = (testHash === effHash);
+                }
             }
 
             if (!isCurrentCorrect) {
@@ -23347,16 +23842,34 @@ KURALLAR:
                 return;
             }
 
+            if (fbSignedForChange && fbAuth && fbAuth.currentUser) {
+                try {
+                    await fbAuth.currentUser.updatePassword(newPass);
+                } catch (updErr) {
+                    alert("❌ Şifre sunucuda güncellenemedi. Lütfen tekrar giriş yapıp deneyin.");
+                    return;
+                }
+            }
+
+            const nowMs = Date.now();
             const newSalt = generateSecureSalt();
             const newHash = await sha256Hex(newSalt + newPass);
 
-            user.salt = newSalt;
-            user.passwordHash = newHash;
+            setLocalUserCred(user.id, {
+                salt: newSalt,
+                passwordHash: newHash,
+                passwordStrengthLevel: secCheck.levelLabel,
+                mustChangePassword: false,
+                passwordUpdatedAt: nowMs
+            });
+
             delete user.password;
+            delete user.passwordHash;
+            delete user.salt;
             user.mustChangePassword = false;
             user.passwordStrengthLevel = secCheck.levelLabel;
-            user.passwordUpdatedAt = Date.now();
-            user.updatedAt = Date.now();
+            user.passwordUpdatedAt = nowMs;
+            user.updatedAt = nowMs;
 
             users[userIdx] = user;
             saveAuthUsers(users);
@@ -23365,7 +23878,7 @@ KURALLAR:
             if (newPassEl) newPassEl.value = '';
 
             playAlertSound();
-            alert("✅ Güçlü şifreniz başarıyla kaydedildi!");
+            alert("✅ Güçlü şifreniz tüm cihazlarınız için başarıyla kaydedildi!");
         }
 
         // ADMIN PANEL
@@ -23524,8 +24037,8 @@ KURALLAR:
                 return;
             }
 
-            if (pass.length < 3) {
-                alert("Parola en az 3 karakter olmalıdır!");
+            if (pass.length < 6) {
+                alert("Parola en az 6 karakter olmalıdır!");
                 return;
             }
 
@@ -23535,17 +24048,45 @@ KURALLAR:
                 return;
             }
 
+            const nowMs = Date.now();
             const salt = generateSecureSalt();
             const passHash = await sha256Hex(salt + pass);
             const secCheck = evaluatePasswordSecurity(pass, { username: uname, name: dname, email: rawEmail });
+            let assignedId = 'usr_' + nowMs;
+            const fbEmailForNew = rawEmail || `${assignedId}@auth.celikkodu.app`;
+
+            const secAuth = getSecondaryFirebaseAuth();
+            if (secAuth && navigator.onLine !== false) {
+                try {
+                    const cred = await secAuth.createUserWithEmailAndPassword(fbEmailForNew, pass);
+                    if (cred && cred.user && cred.user.uid) {
+                        const cleanFbUid = String(cred.user.uid).replace(/[^a-zA-Z0-9_]/g, '').slice(0, 32);
+                        if (cleanFbUid) assignedId = 'usr_' + cleanFbUid;
+                    }
+                    await secAuth.signOut().catch(() => {});
+                } catch (fbCreateErr) {
+                    if (fbCreateErr && fbCreateErr.code === 'auth/email-already-in-use') {
+                        alert("Bu e-posta adresi zaten başka bir hesapta kayıtlı!");
+                        return;
+                    }
+                }
+            }
+
+            setLocalUserCred(assignedId, {
+                salt,
+                passwordHash: passHash,
+                passwordStrengthLevel: secCheck.levelLabel,
+                mustChangePassword: !secCheck.isValid,
+                passwordUpdatedAt: nowMs
+            });
 
             const newUser = {
-                id: 'usr_' + Date.now(),
+                id: assignedId,
                 username: uname,
-                passwordHash: passHash,
-                salt: salt,
+                fbAuthEmail: fbEmailForNew,
                 mustChangePassword: !secCheck.isValid,
                 passwordStrengthLevel: secCheck.levelLabel,
+                passwordUpdatedAt: nowMs,
                 role: role,
                 status: 'approved',
                 name: dname,
@@ -23554,8 +24095,8 @@ KURALLAR:
                 level: level,
                 gender: gender,
                 weights: { press: '12', squat: '18', row: '16', rdl: '18', swing: '14', lunge: '12' },
-                createdAt: Date.now(),
-                updatedAt: Date.now()
+                createdAt: nowMs,
+                updatedAt: nowMs
             };
             if (rawEmail) newUser.email = rawEmail;
 
@@ -24131,22 +24672,48 @@ KURALLAR:
                 alert("Kullanıcı bulunamadı.");
                 return;
             }
-            const newPass = prompt(`@${target.username} (${target.name}) için yeni şifre belirleyin:`, "123456");
+            const fbEmail = getCanonicalFbAuthEmail(target);
+            if (session.userId !== userId && fbAuth && fbEmail && !fbEmail.endsWith('@auth.celikkodu.app') && navigator.onLine !== false) {
+                const sendLink = confirm(`@${target.username} (${fbEmail}) adresine resmi şifre sıfırlama bağlantısı gönderilsin mi?\n\nTamam: E-postaya sıfırlama bağlantısı gönderir\nİptal: Bu cihaz için geçici şifre tanımlar`);
+                if (sendLink) {
+                    try {
+                        await fbAuth.sendPasswordResetEmail(fbEmail);
+                        alert(`📩 Şifre sıfırlama bağlantısı (${fbEmail}) adresine gönderildi.`);
+                        return;
+                    } catch (e) {}
+                }
+            }
+
+            const newPass = prompt(`@${target.username} (${target.name}) için yeni şifre belirleyin (en az 6 karakter):`, "123456");
             if (!newPass) return;
             const cleanPass = newPass.trim();
-            if (cleanPass.length < 3) {
-                alert("Parola en az 3 karakter olmalıdır!");
+            if (cleanPass.length < 6) {
+                alert("Parola en az 6 karakter olmalıdır!");
                 return;
             }
+            if (session.userId === userId && fbAuth && fbAuth.currentUser && navigator.onLine !== false) {
+                try {
+                    await fbAuth.currentUser.updatePassword(cleanPass);
+                } catch (e) {}
+            }
+            const nowMs = Date.now();
             const salt = generateSecureSalt();
             const passHash = await sha256Hex(salt + cleanPass);
             const secCheck = evaluatePasswordSecurity(cleanPass, target);
-            target.salt = salt;
-            target.passwordHash = passHash;
+            setLocalUserCred(target.id, {
+                salt,
+                passwordHash: passHash,
+                passwordStrengthLevel: secCheck.levelLabel,
+                mustChangePassword: !secCheck.isValid,
+                passwordUpdatedAt: nowMs
+            });
+            delete target.password;
+            delete target.passwordHash;
+            delete target.salt;
             target.mustChangePassword = !secCheck.isValid;
             target.passwordStrengthLevel = secCheck.levelLabel;
-            delete target.password;
-            target.updatedAt = Date.now();
+            target.passwordUpdatedAt = nowMs;
+            target.updatedAt = nowMs;
             saveAuthUsers(users);
             renderAdminUserList();
             const noteMsg = secCheck.isValid
@@ -32228,7 +32795,7 @@ KURALLAR:
             if ('serviceWorker' in navigator && navigator.serviceWorker) {
                 window.addEventListener('load', () => {
                     try {
-                        navigator.serviceWorker.register('./sw.js?v=286')
+                        navigator.serviceWorker.register('./sw.js?v=287')
                             .then(reg => {
                                 console.log('SW scope:', reg.scope);
                                 if (reg.update) reg.update();

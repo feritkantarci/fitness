@@ -1,4 +1,55 @@
 rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model — Çelik Kodu (fitness-4f427)
+// ===============================================================
+//
+// Collection: workout_logs/{uid}
+// Document ID: Athlete ID (^usr_[a-zA-Z0-9_-]{1,64}$)
+// Fields:
+//   - logs: list (required, max 500 items) - workout session history entries
+//   - updatedAt: timestamp | string | number (optional) - server/ISO sync timestamp
+//   - clientUpdatedAt: number (optional, >= 0) - client epoch ms
+//   - lastUpdatedBy: string (optional, <= 120 chars) - actor identifier
+//   - syncSeal: string (optional, 10..120 chars) - offline-fallback integrity seal
+//
+// Collection: scale_logs/{uid} & measurement_logs/{uid}
+// Document ID: Athlete ID (^usr_[a-zA-Z0-9_-]{1,64}$)
+// Fields:
+//   - logs: list (required, max 500 items) - body weight / tape measurement entries
+//   - updatedAt: timestamp | string | number (optional)
+//   - clientUpdatedAt: number (optional, >= 0)
+//   - syncSeal: string (optional, 10..120 chars)
+//
+// Collection: user_state/{uid}
+// Document ID: Athlete ID (^usr_[a-zA-Z0-9_-]{1,64}$)
+// Fields (strictly isolated from credentials & API keys):
+//   - weeklySchedule, nextWeeklySchedule: map | null (optional, <= 50 keys)
+//   - dateSchedule, rememberedWeights, garminManifests: map | null (optional, <= 1500 keys)
+//   - excludedExercises: list | null (optional, <= 1000 items)
+//   - selectedEquipments, customGyms: list | null (optional, <= 200 items)
+//   - aiDoctrine: string (optional, <= 120 chars)
+//   - aiCoachSummary, lastGeneratedWorkout, activeWorkoutDraft: map | null (optional, <= 100 keys)
+//   - updatedAt: timestamp | string | number (optional)
+//   - clientUpdatedAt: number (optional, >= 0)
+//   - syncSeal: string (optional, 10..120 chars)
+//
+// Collection: coach_directives/{uid} & custom_programs/{uid}
+// Document ID: Athlete ID (^usr_[a-zA-Z0-9_-]{1,64}$)
+// Fields: Admin-authored coaching directives and custom programs (read by athlete/admin, write by admin only).
+//
+// Collection: exercise_bug_reports/{docId}
+// Document ID: string (<= 120 chars)
+// Fields: Either an exercise bug report payload or a Garmin outbox cloud relay envelope.
+//
+// Collection: app_system/{docId}
+// Document ID: 'users' | 'ai_config'
+// Fields:
+//   - 'users': { users: list (1..200 sanitized user profiles, zero plaintext passwords/hashes/salts/API keys), updatedAt }
+//   - 'ai_config': Admin-managed AI configuration (write restricted strictly to isAdmin()).
+//
+// ===============================================================
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -7,37 +58,99 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Doğrulama ve Rol Yardımcı Fonksiyonları
+    // ===============================================================
+    // Doğrulama, Kimlik ve Rol Yardımcı Fonksiyonları (Helper Functions)
+    // ===============================================================
+
     function isAuthenticated() {
       return request.auth != null;
     }
 
     function isOwner(uid) {
-      return isAuthenticated() && request.auth.uid == uid;
+      return isAuthenticated() && (
+        request.auth.uid == uid ||
+        ('usr_' + request.auth.uid) == uid ||
+        ('appUid' in request.auth.token && request.auth.token.appUid == uid)
+      );
     }
 
     function isAdmin() {
       return isAuthenticated() && (
-        request.auth.token.admin == true ||
-        request.auth.token.role == 'admin'
+        request.auth.uid == 'usr_admin' ||
+        ('admin' in request.auth.token && request.auth.token.admin == true) ||
+        ('role' in request.auth.token && request.auth.token.role == 'admin')
       );
     }
 
     function isValidAthleteId(uid) {
-      return uid is string && uid.matches('^usr_[a-zA-Z0-9_]{1,40}$');
+      return uid is string && uid.matches('^usr_[a-zA-Z0-9_-]{1,64}$');
     }
 
-    function isSealValidForCreate() {
-      return !('syncSeal' in request.resource.data)
+    function uidUnchanged() {
+      return !('uid' in request.resource.data) ||
+        (isAuthenticated() && request.resource.data.uid == request.auth.uid);
+    }
+
+    function uidNotModified() {
+      return !('uid' in request.resource.data) ||
+        request.resource.data.uid == resource.data.uid;
+    }
+
+    function hasOnlyAllowedFields(data, fields) {
+      return data.keys().hasOnly(fields);
+    }
+
+    function isValidOptionalString(data, field, minLen, maxLen) {
+      return !(field in data)
+        || data[field] == null
         || (
-          request.resource.data.syncSeal is string
-          && request.resource.data.syncSeal.size() >= 10
-          && request.resource.data.syncSeal.size() <= 120
+          data[field] is string
+          && data[field].size() >= minLen
+          && data[field].size() <= maxLen
         );
     }
 
-    function isSealValidForWrite() {
-      return !('syncSeal' in resource.data)
+    function isValidOptionalTimestampOrIso(data, field) {
+      return !(field in data)
+        || data[field] == null
+        || data[field] is timestamp
+        || (data[field] is string && data[field].size() <= 64)
+        || (data[field] is number && data[field] >= 0);
+    }
+
+    function isValidOptionalMapOrNull(data, field, maxKeys) {
+      return !(field in data)
+        || data[field] == null
+        || (data[field] is map && data[field].keys().size() <= maxKeys);
+    }
+
+    function isValidOptionalListOrNull(data, field, maxItems) {
+      return !(field in data)
+        || data[field] == null
+        || (data[field] is list && data[field].size() <= maxItems);
+    }
+
+    function isValidOptionalSyncSeal(data) {
+      return !('syncSeal' in data)
+        || (
+          data.syncSeal is string
+          && data.syncSeal.size() >= 10
+          && data.syncSeal.size() <= 120
+        );
+    }
+
+    function isSealValidForCreate() {
+      return isValidOptionalSyncSeal(request.resource.data);
+    }
+
+    // Şifre değişimi (password rotation) sonrası gerçek Firebase Auth sahibi (isOwner) veya
+    // yönetici (isAdmin) yeni syncSeal mührünü sorunsuzca döndürebilir; çevrimdışı (offline outbox)
+    // yedek senkronizasyonlar ise mevcut syncSeal eşleşmesini korur.
+    function isSealValidForWrite(uid) {
+      return isValidOptionalSyncSeal(request.resource.data) && (
+        isOwner(uid)
+        || isAdmin()
+        || !('syncSeal' in resource.data)
         || !(resource.data.syncSeal is string)
         || resource.data.syncSeal.size() == 0
         || (
@@ -45,24 +158,36 @@ service cloud.firestore {
           && request.resource.data.syncSeal is string
           && request.resource.data.syncSeal == resource.data.syncSeal
         )
-        || isAdmin();
+      );
     }
 
-    // Şema Doğrulayıcılar (Create & Update için ortak)
+    // ===============================================================
+    // Şema Doğrulayıcılar (Domain Validators — Create & Update ortak)
+    // ===============================================================
+
     function isValidWorkoutLogPayload(data) {
-      return data.keys().hasOnly(['logs', 'updatedAt', 'clientUpdatedAt', 'lastUpdatedBy', 'syncSeal'])
+      return hasOnlyAllowedFields(data, ['logs', 'updatedAt', 'clientUpdatedAt', 'lastUpdatedBy', 'syncSeal'])
+        && 'logs' in data
         && data.logs is list
-        && data.logs.size() <= 500;
+        && data.logs.size() <= 500
+        && isValidOptionalTimestampOrIso(data, 'updatedAt')
+        && (!('clientUpdatedAt' in data) || (data.clientUpdatedAt is number && data.clientUpdatedAt >= 0))
+        && isValidOptionalString(data, 'lastUpdatedBy', 0, 120)
+        && isValidOptionalSyncSeal(data);
     }
 
     function isValidMetricLogPayload(data) {
-      return data.keys().hasOnly(['logs', 'updatedAt', 'clientUpdatedAt', 'syncSeal'])
+      return hasOnlyAllowedFields(data, ['logs', 'updatedAt', 'clientUpdatedAt', 'syncSeal'])
+        && 'logs' in data
         && data.logs is list
-        && data.logs.size() <= 500;
+        && data.logs.size() <= 500
+        && isValidOptionalTimestampOrIso(data, 'updatedAt')
+        && (!('clientUpdatedAt' in data) || (data.clientUpdatedAt is number && data.clientUpdatedAt >= 0))
+        && isValidOptionalSyncSeal(data);
     }
 
     function isValidUserStatePayload(data) {
-      return data.keys().hasOnly([
+      return hasOnlyAllowedFields(data, [
           'weeklySchedule',
           'nextWeeklySchedule',
           'dateSchedule',
@@ -82,88 +207,224 @@ service cloud.firestore {
         && !('password' in data)
         && !('passwordHash' in data)
         && !('salt' in data)
-        && !('geminiApiKey' in data);
+        && !('geminiApiKey' in data)
+        && isValidOptionalMapOrNull(data, 'weeklySchedule', 50)
+        && isValidOptionalMapOrNull(data, 'nextWeeklySchedule', 50)
+        && isValidOptionalMapOrNull(data, 'dateSchedule', 1500)
+        && isValidOptionalMapOrNull(data, 'rememberedWeights', 1500)
+        && isValidOptionalListOrNull(data, 'excludedExercises', 1000)
+        && isValidOptionalListOrNull(data, 'selectedEquipments', 200)
+        && isValidOptionalListOrNull(data, 'customGyms', 200)
+        && isValidOptionalString(data, 'aiDoctrine', 0, 120)
+        && isValidOptionalMapOrNull(data, 'aiCoachSummary', 100)
+        && isValidOptionalMapOrNull(data, 'lastGeneratedWorkout', 100)
+        && isValidOptionalMapOrNull(data, 'activeWorkoutDraft', 100)
+        && isValidOptionalMapOrNull(data, 'garminManifests', 1500)
+        && isValidOptionalTimestampOrIso(data, 'updatedAt')
+        && (!('clientUpdatedAt' in data) || (data.clientUpdatedAt is number && data.clientUpdatedAt >= 0))
+        && isValidOptionalSyncSeal(data);
+    }
+
+    function isValidUserRecordSample(u) {
+      return u is map
+        && !('password' in u)
+        && !('passwordHash' in u)
+        && !('salt' in u)
+        && !('geminiApiKey' in u);
     }
 
     function isValidUsersSystemPayload(data) {
-      return data.keys().hasOnly(['users', 'updatedAt'])
+      return hasOnlyAllowedFields(data, ['users', 'updatedAt'])
+        && !('password' in data)
+        && !('passwordHash' in data)
+        && !('salt' in data)
+        && !('geminiApiKey' in data)
+        && 'users' in data
         && data.users is list
-        && data.users.size() <= 100;
+        && data.users.size() >= 1
+        && data.users.size() <= 200
+        && isValidUserRecordSample(data.users[0])
+        && isValidUserRecordSample(data.users[data.users.size() - 1])
+        && isValidOptionalTimestampOrIso(data, 'updatedAt');
     }
+
+    function isSafeNonAdminUsersUpdate() {
+      return !(
+          'users' in resource.data
+          && resource.data.users is list
+          && request.resource.data.users.size() > resource.data.users.size()
+        )
+        || (
+          !('role' in request.resource.data.users[request.resource.data.users.size() - 1])
+          || request.resource.data.users[request.resource.data.users.size() - 1].role != 'admin'
+        );
+    }
+
+    function isValidBugReportOrRelayPayload(data) {
+      return 'exerciseId' in data
+        && data.exerciseId is string
+        && data.exerciseId.size() >= 1
+        && data.exerciseId.size() <= 120
+        && (
+          (
+            data.exerciseId == 'garmin_outbox_relay'
+            && hasOnlyAllowedFields(data, ['exerciseId', 'action', 'createdAt', 'payloadJson'])
+            && (!('action' in data) || (data.action is string && data.action in ['push-workout', 'delete-dates']))
+            && isValidOptionalTimestampOrIso(data, 'createdAt')
+            && isValidOptionalString(data, 'payloadJson', 0, 350000)
+          )
+          || (
+            hasOnlyAllowedFields(data, [
+              'id',
+              'exerciseId',
+              'exerciseName',
+              'category',
+              'categoryLabel',
+              'userNote',
+              'currentImageSrc',
+              'equipment',
+              'muscle',
+              'sourceScreen',
+              'workoutTitle',
+              'userId',
+              'userName',
+              'status',
+              'aiResolutionNote',
+              'createdAt',
+              'createdAtFormatted',
+              'serverTimestamp',
+              'resolvedAt'
+            ])
+            && isValidOptionalString(data, 'id', 0, 120)
+            && isValidOptionalString(data, 'exerciseName', 0, 200)
+            && isValidOptionalString(data, 'category', 0, 80)
+            && isValidOptionalString(data, 'categoryLabel', 0, 120)
+            && isValidOptionalString(data, 'userNote', 0, 2000)
+            && isValidOptionalString(data, 'currentImageSrc', 0, 500)
+            && isValidOptionalString(data, 'equipment', 0, 120)
+            && isValidOptionalString(data, 'muscle', 0, 300)
+            && isValidOptionalString(data, 'sourceScreen', 0, 160)
+            && isValidOptionalString(data, 'workoutTitle', 0, 200)
+            && isValidOptionalString(data, 'userId', 0, 80)
+            && isValidOptionalString(data, 'userName', 0, 120)
+            && isValidOptionalString(data, 'status', 0, 80)
+            && isValidOptionalString(data, 'aiResolutionNote', 0, 2000)
+            && isValidOptionalTimestampOrIso(data, 'createdAt')
+            && isValidOptionalString(data, 'createdAtFormatted', 0, 80)
+            && isValidOptionalTimestampOrIso(data, 'serverTimestamp')
+            && isValidOptionalTimestampOrIso(data, 'resolvedAt')
+          )
+        );
+    }
+
+    function isValidAdminManagedDoc(data) {
+      return data is map
+        && data.keys().size() <= 40
+        && !('password' in data)
+        && !('passwordHash' in data)
+        && !('salt' in data);
+    }
+
+    function isValidAdminSystemDoc(data) {
+      return data is map
+        && data.keys().size() <= 30
+        && !('password' in data);
+    }
+
+    // ===============================================================
+    // Koleksiyon Kuralları (Collection Match Rules)
+    // ===============================================================
 
     // Sporcu Antrenman Kayıtları
     match /workout_logs/{uid} {
-      allow read: if isValidAthleteId(uid) || isOwner(uid) || isAdmin();
-      allow create: if (isValidAthleteId(uid) || isOwner(uid) || isAdmin())
+      allow read: if isOwner(uid) || isAdmin() || isValidAthleteId(uid);
+      allow create: if (isOwner(uid) || isAdmin() || isValidAthleteId(uid))
         && isValidWorkoutLogPayload(request.resource.data)
         && isSealValidForCreate();
-      allow update: if (isValidAthleteId(uid) || isOwner(uid) || isAdmin())
+      allow update: if (isOwner(uid) || isAdmin() || isValidAthleteId(uid))
         && isValidWorkoutLogPayload(request.resource.data)
-        && isSealValidForWrite();
+        && isSealValidForWrite(uid);
       allow delete: if isAdmin();
     }
 
     // Vücut Kompozisyonu ve Tartı Geçmişi
     match /scale_logs/{uid} {
-      allow read: if isValidAthleteId(uid) || isOwner(uid) || isAdmin();
-      allow create: if (isValidAthleteId(uid) || isOwner(uid) || isAdmin())
+      allow read: if isOwner(uid) || isAdmin() || isValidAthleteId(uid);
+      allow create: if (isOwner(uid) || isAdmin() || isValidAthleteId(uid))
         && isValidMetricLogPayload(request.resource.data)
         && isSealValidForCreate();
-      allow update: if (isValidAthleteId(uid) || isOwner(uid) || isAdmin())
+      allow update: if (isOwner(uid) || isAdmin() || isValidAthleteId(uid))
         && isValidMetricLogPayload(request.resource.data)
-        && isSealValidForWrite();
+        && isSealValidForWrite(uid);
       allow delete: if isAdmin();
     }
 
     // Mezura ve Vücut Ölçü Geçmişi
     match /measurement_logs/{uid} {
-      allow read: if isValidAthleteId(uid) || isOwner(uid) || isAdmin();
-      allow create: if (isValidAthleteId(uid) || isOwner(uid) || isAdmin())
+      allow read: if isOwner(uid) || isAdmin() || isValidAthleteId(uid);
+      allow create: if (isOwner(uid) || isAdmin() || isValidAthleteId(uid))
         && isValidMetricLogPayload(request.resource.data)
         && isSealValidForCreate();
-      allow update: if (isValidAthleteId(uid) || isOwner(uid) || isAdmin())
+      allow update: if (isOwner(uid) || isAdmin() || isValidAthleteId(uid))
         && isValidMetricLogPayload(request.resource.data)
-        && isSealValidForWrite();
+        && isSealValidForWrite(uid);
       allow delete: if isAdmin();
     }
 
     // Sporcu Plan, Ekipman, Ağırlık Hafızası ve AI Koç Durumu Senkronizasyonu
     match /user_state/{uid} {
-      allow read: if isValidAthleteId(uid) || isOwner(uid) || isAdmin();
-      allow create: if (isValidAthleteId(uid) || isOwner(uid) || isAdmin())
+      allow read: if isOwner(uid) || isAdmin() || isValidAthleteId(uid);
+      allow create: if (isOwner(uid) || isAdmin() || isValidAthleteId(uid))
         && isValidUserStatePayload(request.resource.data)
         && isSealValidForCreate();
-      allow update: if (isValidAthleteId(uid) || isOwner(uid) || isAdmin())
+      allow update: if (isOwner(uid) || isAdmin() || isValidAthleteId(uid))
         && isValidUserStatePayload(request.resource.data)
-        && isSealValidForWrite();
+        && isSealValidForWrite(uid);
       allow delete: if isAdmin();
     }
 
     // Koç Direktifleri
     match /coach_directives/{uid} {
-      allow read: if isValidAthleteId(uid) || isOwner(uid) || isAdmin();
-      allow write: if isAdmin();
+      allow read: if isOwner(uid) || isAdmin() || isValidAthleteId(uid);
+      allow create, update: if isAdmin()
+        && isValidAdminManagedDoc(request.resource.data)
+        && uidNotModified();
+      allow delete: if isAdmin();
     }
 
     // Özel Akademik Programlar
     match /custom_programs/{uid} {
-      allow read: if isValidAthleteId(uid) || isOwner(uid) || isAdmin();
-      allow write: if isAdmin();
+      allow read: if isOwner(uid) || isAdmin() || isValidAthleteId(uid);
+      allow create, update: if isAdmin()
+        && isValidAdminManagedDoc(request.resource.data)
+        && uidNotModified();
+      allow delete: if isAdmin();
     }
 
-    // Egzersiz Hata Bildirim Havuzu
+    // Egzersiz Hata Bildirim Havuzu & Garmin Bulut Rölesi
     match /exercise_bug_reports/{docId} {
-      allow create: if request.resource.data.exerciseId is string
-        && request.resource.data.exerciseId.size() <= 120;
-      allow read: if docId is string && docId.size() <= 120;
-      allow update, delete: if isAdmin();
+      allow read: if isAuthenticated() || (docId is string && docId.size() <= 120);
+      allow create: if docId is string
+        && docId.size() <= 120
+        && isValidBugReportOrRelayPayload(request.resource.data)
+        && uidUnchanged();
+      allow update: if isAdmin()
+        && isValidBugReportOrRelayPayload(request.resource.data)
+        && request.resource.data.exerciseId == resource.data.exerciseId;
+      allow delete: if isAdmin();
     }
 
     // Sistem Konfigürasyonu ve Kullanıcı Listesi
     match /app_system/{docId} {
       allow read: if docId == 'users' || docId == 'ai_config' || isAdmin();
-      allow create, update: if (docId == 'users' && isValidUsersSystemPayload(request.resource.data))
-        || isAdmin();
+      allow create: if (docId == 'users' && isValidUsersSystemPayload(request.resource.data))
+        || (isAdmin() && isValidAdminSystemDoc(request.resource.data));
+      allow update: if (
+          docId == 'users'
+          && isValidUsersSystemPayload(request.resource.data)
+          && isSafeNonAdminUsersUpdate()
+        )
+        || (isAdmin() && isValidAdminSystemDoc(request.resource.data));
       allow delete: if isAdmin();
     }
   }

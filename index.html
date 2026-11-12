@@ -27,7 +27,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=286">
+    <link rel="stylesheet" href="css/style.css?v=287">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH (CANVA MODERN ATHLETIC LIGHT V229) */
         html, body { background-color: #F8FAFC; color: #0F172A; color-scheme: light; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -54,7 +54,7 @@
                     <path d="M34 25L26 36H33L30 46L39 34H32L34 25Z" fill="#FFFFFF"/>
                 </svg>
             </div>
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v286</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v287</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -76,8 +76,8 @@
             <!-- GİRİŞ FORMU -->
             <form id="loginForm" onsubmit="handleAuthLogin(event)">
                 <div class="login-field">
-                    <label class="login-label" for="loginUsername" style="color:#334155;">Kullanıcı Adı, E-Posta veya Ad Soyad</label>
-                    <input type="text" id="loginUsername" name="username" class="login-input" placeholder="Kullanıcı adı, E-posta veya Ad Soyad…" required autocomplete="username" autocapitalize="none" spellcheck="false">
+                    <label class="login-label" for="loginUsername" style="color:#334155;">Kullanıcı Adı veya E-Posta</label>
+                    <input type="text" id="loginUsername" name="username" class="login-input" placeholder="admin veya e-posta adresiniz" required autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false" enterkeyhint="next" oninput="clearAuthInlineError()">
                 </div>
 
                 <div class="login-field" style="margin-bottom:10px;">
@@ -87,7 +87,10 @@
                             Şifremi Unuttum?
                         </button>
                     </div>
-                    <input type="password" id="loginPassword" name="password" class="login-input" placeholder="••••••" required autocomplete="current-password">
+                    <div style="position:relative; display:flex; align-items:center;">
+                        <input type="password" id="loginPassword" name="password" class="login-input" placeholder="••••••••" required autocomplete="current-password" enterkeyhint="done" oninput="clearAuthInlineError()" style="padding-right:44px;">
+                        <button type="button" onclick="togglePasswordFieldVisibility('loginPassword', this)" aria-label="Şifreyi göster" aria-pressed="false" style="position:absolute; right:8px; background:transparent; border:none; color:#334155; font-size:12px; font-weight:800; cursor:pointer; padding:6px 8px; border-radius:6px;">Göster</button>
+                    </div>
                 </div>
 
                 <button type="submit" class="login-btn" id="loginSubmitBtn">GİRİŞ YAP</button>
@@ -96,16 +99,20 @@
             <!-- ŞİFREMİ UNUTTUM / ŞİFRE YENİLEME FORMU -->
             <form id="forgotPasswordForm" onsubmit="handleForgotPasswordSubmit(event)" style="display:none;">
                 <div style="font-size:12px; color:#14532D; font-weight:600; margin-bottom:12px; text-align:left; line-height:1.45; background:#F0FDF4; border:1.5px solid #86EFAC; padding:9px 11px; border-radius:8px;">
-                    Kayıtlı e-posta/kullanıcı adınızı ve ad soyadınızı doğrulayarak yeni şifrenizi hemen belirleyebilirsiniz.
+                    Kayıtlı e-posta adresinize sıfırlama bağlantısı gönderebilir veya kimlik doğrulamasıyla yeni şifre belirleyebilirsiniz.
                 </div>
 
                 <div class="login-field" style="margin-bottom:12px;">
                     <label class="login-label" for="forgotIdentity" style="color:#334155;">Kayıtlı E-Posta veya Kullanıcı Adı *</label>
-                    <input type="text" id="forgotIdentity" class="login-input" placeholder="ornek@gmail.com veya kullanıcı adı" required autocapitalize="none" spellcheck="false">
+                    <input type="text" id="forgotIdentity" class="login-input" placeholder="ornek@gmail.com veya kullanıcı adı" required autocorrect="off" autocapitalize="none" spellcheck="false">
                 </div>
 
+                <button type="button" onclick="handleSendFirebaseResetLink()" style="width:100%; margin-bottom:12px; padding:10px 12px; background:#0F172A; border:1.5px solid #0F172A; border-radius:10px; color:#FFFFFF; font-size:12.5px; font-weight:800; cursor:pointer;">
+                    E-Postaya Sıfırlama Bağlantısı Gönder
+                </button>
+
                 <div class="login-field" style="margin-bottom:12px;">
-                    <label class="login-label" for="forgotFullName" style="color:#334155;">Kayıtlı Ad Soyad (Kimlik Doğrulama) *</label>
+                    <label class="login-label" for="forgotFullName" style="color:#334155;">Kayıtlı Ad Soyad (Doğrudan Yenileme) *</label>
                     <input type="text" id="forgotFullName" class="login-input" placeholder="Örn: Ahmet Yılmaz" required>
                 </div>
 
@@ -246,7 +253,7 @@
                         <div class="modern-brand-subrow">
                             <span id="headerActiveTabLabel">ÜRETİCİ</span>
                             <span class="modern-brand-subdot" aria-hidden="true">•</span>
-                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v286</span>
+                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v287</span>
                         </div>
                     </div>
                 </div>
@@ -1235,8 +1242,8 @@
                             <input type="text" id="newUsername" class="form-input" placeholder="Örn: ahmet" autocapitalize="none">
                         </div>
                         <div>
-                            <label class="form-label">Şifre (Min. 3 karakter)</label>
-                            <input type="text" id="newPassword" class="form-input" value="123456" minlength="3">
+                            <label class="form-label">Şifre (En az 6 karakter)</label>
+                            <input type="text" id="newPassword" class="form-input" value="123456" minlength="6">
                         </div>
                     </div>
 
@@ -2793,8 +2800,8 @@
     </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
-    <script src="js/exercises-db.js?v=285"></script>
-    <script src="js/app.js?v=285"></script>
+    <script src="js/exercises-db.js?v=287"></script>
+    <script src="js/app.js?v=287"></script>
     <script>
         function getNotifStorageKey() {
             const uid = localStorage.getItem('celik_kodu_active_user_id') || 'default';
@@ -2987,6 +2994,6 @@
             </div>
         </div>
     </div>
-    <script src="js/garmin-tredict-bridge.js?v=285" defer></script>
+    <script src="js/garmin-tredict-bridge.js?v=287" defer></script>
 </body>
 </html>
