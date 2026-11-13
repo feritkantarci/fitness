@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import tredictHandler from './api/tredict.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,6 +22,7 @@ app.use((req, res, next) => {
   if (p.startsWith('/.') || 
       p === '/server.js' || 
       p === '/package.json' || 
+      p === '/vercel.json' ||
       p === '/package-lock.json' ||
       p === '/firestore.rules' ||
       p.startsWith('/scripts') ||
@@ -38,43 +40,14 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', app: 'Çelik Kodu' });
 });
 
-// Proxy /api/tredict requests directly to local bridge (Zero CORS, zero port issues)
+// Handle /api/tredict requests directly via stateless gateway module
 app.use('/api/tredict', async (req, res) => {
   const ip = req.socket.remoteAddress || '';
   const isLoopback = ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
   if (!isLoopback) {
     return res.status(403).json({ ok: false, error: 'Forbidden: Local requests only' });
   }
-
-  const allowedPaths = new Set(['', '/', '/status', '/wellness', '/activities', '/push-workout', '/delete-dates', '/activity-update', '/workout-logs']);
-  const cleanPath = (req.path || '').replace(/\/+$/, '') || '/';
-  if (!allowedPaths.has(cleanPath)) {
-    return res.status(404).json({ ok: false, error: 'Endpoint not allowed' });
-  }
-
-  try {
-    const targetUrl = `http://127.0.0.1:3847/api/tredict${req.url}`;
-    const opts = {
-      method: req.method,
-      headers: { ...req.headers, host: '127.0.0.1:3847' }
-    };
-    if (req.method === 'POST' || req.method === 'PUT') {
-      opts.body = JSON.stringify(req.body);
-      opts.headers['content-type'] = 'application/json';
-    }
-    const response = await fetch(targetUrl, opts);
-    res.status(response.status);
-    const skipHeaders = new Set(['transfer-encoding', 'content-length', 'connection', 'keep-alive', 'content-encoding']);
-    response.headers.forEach((val, key) => {
-      if (!skipHeaders.has(key.toLowerCase())) {
-        res.setHeader(key, val);
-      }
-    });
-    const buf = await response.arrayBuffer();
-    res.send(Buffer.from(buf));
-  } catch (err) {
-    res.status(502).json({ ok: false, error: 'Bridge unreachable: ' + err.message });
-  }
+  return tredictHandler(req, res);
 });
 
 // Serve static assets from root directory

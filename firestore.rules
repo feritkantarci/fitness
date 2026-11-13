@@ -39,8 +39,8 @@ rules_version = '2';
 // Fields: Admin-authored coaching directives and custom programs (read by athlete/admin, write by admin only).
 //
 // Collection: exercise_bug_reports/{docId}
-// Document ID: string (<= 120 chars)
-// Fields: Either an exercise bug report payload or a Garmin outbox cloud relay envelope.
+// Document ID: string (<= 120 chars, non-relay)
+// Fields: Genuine exercise bug report payload (strictly non-relay; exerciseId != 'garmin_outbox_relay').
 //
 // Collection: app_system/{docId}
 // Document ID: 'users' | 'ai_config'
@@ -78,7 +78,8 @@ service cloud.firestore {
       return isAuthenticated() && (
         request.auth.uid == 'usr_admin' ||
         ('admin' in request.auth.token && request.auth.token.admin == true) ||
-        ('role' in request.auth.token && request.auth.token.role == 'admin')
+        ('role' in request.auth.token && request.auth.token.role == 'admin') ||
+        ('email' in request.auth.token && 'email_verified' in request.auth.token && request.auth.token.email_verified == true && request.auth.token.email == 'feritkantarci@gmail.com')
       );
     }
 
@@ -186,6 +187,15 @@ service cloud.firestore {
         && isValidOptionalSyncSeal(data);
     }
 
+    function hasNoWatchBridgeTokens(obj) {
+      return !(obj is map)
+        || (!('tredictToken' in obj) && !('intervalsToken' in obj));
+    }
+
+    function hasNoWatchBridgeTokensInField(data, field) {
+      return !(field in data) || hasNoWatchBridgeTokens(data[field]);
+    }
+
     function isValidUserStatePayload(data) {
       return hasOnlyAllowedFields(data, [
           'weeklySchedule',
@@ -208,6 +218,8 @@ service cloud.firestore {
         && !('passwordHash' in data)
         && !('salt' in data)
         && !('geminiApiKey' in data)
+        && !('tredictToken' in data)
+        && !('intervalsToken' in data)
         && isValidOptionalMapOrNull(data, 'weeklySchedule', 50)
         && isValidOptionalMapOrNull(data, 'nextWeeklySchedule', 50)
         && isValidOptionalMapOrNull(data, 'dateSchedule', 1500)
@@ -220,6 +232,19 @@ service cloud.firestore {
         && isValidOptionalMapOrNull(data, 'lastGeneratedWorkout', 100)
         && isValidOptionalMapOrNull(data, 'activeWorkoutDraft', 100)
         && isValidOptionalMapOrNull(data, 'garminManifests', 1500)
+        && hasNoWatchBridgeTokensInField(data, 'weeklySchedule')
+        && hasNoWatchBridgeTokensInField(data, 'nextWeeklySchedule')
+        && hasNoWatchBridgeTokensInField(data, 'dateSchedule')
+        && hasNoWatchBridgeTokensInField(data, 'rememberedWeights')
+        && hasNoWatchBridgeTokensInField(data, 'aiCoachSummary')
+        && hasNoWatchBridgeTokensInField(data, 'lastGeneratedWorkout')
+        && hasNoWatchBridgeTokensInField(data, 'activeWorkoutDraft')
+        && hasNoWatchBridgeTokensInField(data, 'garminManifests')
+        && (
+          !('activeWorkoutDraft' in data)
+          || !(data.activeWorkoutDraft is map)
+          || hasNoWatchBridgeTokensInField(data.activeWorkoutDraft, 'session')
+        )
         && isValidOptionalTimestampOrIso(data, 'updatedAt')
         && (!('clientUpdatedAt' in data) || (data.clientUpdatedAt is number && data.clientUpdatedAt >= 0))
         && isValidOptionalSyncSeal(data);
@@ -230,7 +255,19 @@ service cloud.firestore {
         && !('password' in u)
         && !('passwordHash' in u)
         && !('salt' in u)
-        && !('geminiApiKey' in u);
+        && !('geminiApiKey' in u)
+        && !('tredictToken' in u)
+        && !('intervalsToken' in u)
+        && hasNoWatchBridgeTokensInField(u, 'weights')
+        && hasNoWatchBridgeTokensInField(u, 'settings')
+        && hasNoWatchBridgeTokensInField(u, 'preferences')
+        && hasNoWatchBridgeTokensInField(u, 'integrations')
+        && hasNoWatchBridgeTokensInField(u, 'garmin')
+        && hasNoWatchBridgeTokensInField(u, 'tredict')
+        && hasNoWatchBridgeTokensInField(u, 'intervals')
+        && hasNoWatchBridgeTokensInField(u, 'bridge')
+        && hasNoWatchBridgeTokensInField(u, 'watch')
+        && hasNoWatchBridgeTokensInField(u, 'tokens');
     }
 
     function isValidUsersSystemPayload(data) {
@@ -239,11 +276,14 @@ service cloud.firestore {
         && !('passwordHash' in data)
         && !('salt' in data)
         && !('geminiApiKey' in data)
+        && !('tredictToken' in data)
+        && !('intervalsToken' in data)
         && 'users' in data
         && data.users is list
         && data.users.size() >= 1
         && data.users.size() <= 200
         && isValidUserRecordSample(data.users[0])
+        && (data.users.size() <= 2 || isValidUserRecordSample(data.users[1]))
         && isValidUserRecordSample(data.users[data.users.size() - 1])
         && isValidOptionalTimestampOrIso(data, 'updatedAt');
     }
@@ -265,56 +305,46 @@ service cloud.firestore {
         && data.exerciseId is string
         && data.exerciseId.size() >= 1
         && data.exerciseId.size() <= 120
-        && (
-          (
-            data.exerciseId == 'garmin_outbox_relay'
-            && hasOnlyAllowedFields(data, ['exerciseId', 'action', 'createdAt', 'payloadJson'])
-            && (!('action' in data) || (data.action is string && data.action in ['push-workout', 'delete-dates']))
-            && isValidOptionalTimestampOrIso(data, 'createdAt')
-            && isValidOptionalString(data, 'payloadJson', 0, 350000)
-          )
-          || (
-            hasOnlyAllowedFields(data, [
-              'id',
-              'exerciseId',
-              'exerciseName',
-              'category',
-              'categoryLabel',
-              'userNote',
-              'currentImageSrc',
-              'equipment',
-              'muscle',
-              'sourceScreen',
-              'workoutTitle',
-              'userId',
-              'userName',
-              'status',
-              'aiResolutionNote',
-              'createdAt',
-              'createdAtFormatted',
-              'serverTimestamp',
-              'resolvedAt'
-            ])
-            && isValidOptionalString(data, 'id', 0, 120)
-            && isValidOptionalString(data, 'exerciseName', 0, 200)
-            && isValidOptionalString(data, 'category', 0, 80)
-            && isValidOptionalString(data, 'categoryLabel', 0, 120)
-            && isValidOptionalString(data, 'userNote', 0, 2000)
-            && isValidOptionalString(data, 'currentImageSrc', 0, 500)
-            && isValidOptionalString(data, 'equipment', 0, 120)
-            && isValidOptionalString(data, 'muscle', 0, 300)
-            && isValidOptionalString(data, 'sourceScreen', 0, 160)
-            && isValidOptionalString(data, 'workoutTitle', 0, 200)
-            && isValidOptionalString(data, 'userId', 0, 80)
-            && isValidOptionalString(data, 'userName', 0, 120)
-            && isValidOptionalString(data, 'status', 0, 80)
-            && isValidOptionalString(data, 'aiResolutionNote', 0, 2000)
-            && isValidOptionalTimestampOrIso(data, 'createdAt')
-            && isValidOptionalString(data, 'createdAtFormatted', 0, 80)
-            && isValidOptionalTimestampOrIso(data, 'serverTimestamp')
-            && isValidOptionalTimestampOrIso(data, 'resolvedAt')
-          )
-        );
+        && data.exerciseId != 'garmin_outbox_relay'
+        && hasOnlyAllowedFields(data, [
+          'id',
+          'exerciseId',
+          'exerciseName',
+          'category',
+          'categoryLabel',
+          'userNote',
+          'currentImageSrc',
+          'equipment',
+          'muscle',
+          'sourceScreen',
+          'workoutTitle',
+          'userId',
+          'userName',
+          'status',
+          'aiResolutionNote',
+          'createdAt',
+          'createdAtFormatted',
+          'serverTimestamp',
+          'resolvedAt'
+        ])
+        && isValidOptionalString(data, 'id', 0, 120)
+        && isValidOptionalString(data, 'exerciseName', 0, 200)
+        && isValidOptionalString(data, 'category', 0, 80)
+        && isValidOptionalString(data, 'categoryLabel', 0, 120)
+        && isValidOptionalString(data, 'userNote', 0, 2000)
+        && isValidOptionalString(data, 'currentImageSrc', 0, 500)
+        && isValidOptionalString(data, 'equipment', 0, 120)
+        && isValidOptionalString(data, 'muscle', 0, 300)
+        && isValidOptionalString(data, 'sourceScreen', 0, 160)
+        && isValidOptionalString(data, 'workoutTitle', 0, 200)
+        && isValidOptionalString(data, 'userId', 0, 80)
+        && isValidOptionalString(data, 'userName', 0, 120)
+        && isValidOptionalString(data, 'status', 0, 80)
+        && isValidOptionalString(data, 'aiResolutionNote', 0, 2000)
+        && isValidOptionalTimestampOrIso(data, 'createdAt')
+        && isValidOptionalString(data, 'createdAtFormatted', 0, 80)
+        && isValidOptionalTimestampOrIso(data, 'serverTimestamp')
+        && isValidOptionalTimestampOrIso(data, 'resolvedAt');
     }
 
     function isValidAdminManagedDoc(data) {
@@ -401,11 +431,12 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // Egzersiz Hata Bildirim Havuzu & Garmin Bulut Rölesi
+    // Egzersiz Hata Bildirim Havuzu
     match /exercise_bug_reports/{docId} {
       allow read: if isAuthenticated() || (docId is string && docId.size() <= 120);
       allow create: if docId is string
         && docId.size() <= 120
+        && !docId.matches('^garmin_relay.*')
         && isValidBugReportOrRelayPayload(request.resource.data)
         && uidUnchanged();
       allow update: if isAdmin()

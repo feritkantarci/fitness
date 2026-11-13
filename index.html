@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <!-- Security: CSP & Permissions -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://apis.google.com https://accounts.google.com; connect-src 'self' http://127.0.0.1:3847 http://localhost:3847 https://firestore.googleapis.com https://generativelanguage.googleapis.com https://fitness-4f427.firebaseio.com https://fitness-4f427-default-rtdb.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://raw.githubusercontent.com https://cdn.jsdelivr.net https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com https://api.emailjs.com data: blob:; img-src 'self' data: blob: https://lh3.googleusercontent.com https://www.gstatic.com https://fitness.kantarci.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; media-src 'self' data: blob:; frame-src 'self' https://fitness-4f427.firebaseapp.com https://accounts.google.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://apis.google.com https://accounts.google.com; connect-src 'self' https://intervals.icu https://garmin.kantarci.io https://europe-west1-fitness-4f427.cloudfunctions.net https://us-central1-fitness-4f427.cloudfunctions.net https://firestore.googleapis.com https://generativelanguage.googleapis.com https://fitness-4f427.firebaseio.com https://fitness-4f427-default-rtdb.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://raw.githubusercontent.com https://cdn.jsdelivr.net https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com https://api.emailjs.com data: blob:; img-src 'self' data: blob: https://lh3.googleusercontent.com https://www.gstatic.com https://fitness.kantarci.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; media-src 'self' data: blob:; frame-src 'self' https://fitness-4f427.firebaseapp.com https://accounts.google.com;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -27,7 +27,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=287">
+    <link rel="stylesheet" href="css/style.css?v=288">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH (CANVA MODERN ATHLETIC LIGHT V229) */
         html, body { background-color: #F8FAFC; color: #0F172A; color-scheme: light; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -54,7 +54,7 @@
                     <path d="M34 25L26 36H33L30 46L39 34H32L34 25Z" fill="#FFFFFF"/>
                 </svg>
             </div>
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v287</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v288</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -253,7 +253,7 @@
                         <div class="modern-brand-subrow">
                             <span id="headerActiveTabLabel">ÜRETİCİ</span>
                             <span class="modern-brand-subdot" aria-hidden="true">•</span>
-                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v287</span>
+                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v288</span>
                         </div>
                     </div>
                 </div>
@@ -1832,6 +1832,85 @@
         </div>
     </div>
 
+    <!-- ==================== EDIT COMPLETED WORKOUT LOG MODAL ==================== -->
+    <div id="editWorkoutLogModal" class="modal-overlay" style="overscroll-behavior:contain;" onclick="if(event.target === this) closeEditWorkoutLogModal()">
+        <div id="editWorkoutLogModalBox" class="modal-box edit-log-modal-box" style="max-width: 560px; max-height: 90vh; overflow-y: auto; overscroll-behavior: contain;">
+            <div class="modal-header" style="margin-bottom:10px;">
+                <h3 class="modal-title" style="font-size:16px; font-weight:900; color:#0F172A; margin:0; white-space:nowrap;">Antrenmanı Düzenle</h3>
+                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeEditWorkoutLogModal()">✕</button>
+            </div>
+
+            <div class="edit-log-top-grid">
+                <div>
+                    <label for="editLogProgramInput" class="edit-log-field-label">Başlık</label>
+                    <input type="text" id="editLogProgramInput" class="form-input edit-log-input" maxlength="140" placeholder="Antrenman adı">
+                </div>
+                <div>
+                    <label for="editLogDurationInput" class="edit-log-field-label">Süre (Dk)</label>
+                    <input type="number" id="editLogDurationInput" class="form-input edit-log-input" min="1" max="600" inputmode="numeric">
+                </div>
+            </div>
+
+            <button type="button" class="edit-log-meta-toggle" id="editLogMetaToggleBtn" onclick="toggleEditLogMetaDrawer()">
+                <span>Tarih, Mekan ve Not</span>
+                <span id="editLogMetaToggleArrow">▼ Aç</span>
+            </button>
+
+            <div id="editLogMetaDrawer" class="edit-log-meta-drawer" style="display:none;">
+                <div class="edit-log-meta-grid">
+                    <div>
+                        <label for="editLogDateInput" class="edit-log-field-label">Tarih</label>
+                        <input type="date" id="editLogDateInput" class="form-input edit-log-input">
+                    </div>
+                    <div>
+                        <label for="editLogRpeSelect" class="edit-log-field-label">Zorluk</label>
+                        <select id="editLogRpeSelect" class="form-select edit-log-input">
+                            <option value="RPE 7 (Rahattı, 3 tekrar daha çıkardı)">RPE 7 • Hafif</option>
+                            <option value="RPE 8 (İdeal, cepte 2 tekrar kaldı)">RPE 8 • İdeal</option>
+                            <option value="RPE 9 (Zordu, son tekrarda zorlandım)">RPE 9 • Zor</option>
+                            <option value="RPE 10 (Tam Tükeniş, sınırdaydım)">RPE 10 • Maksimum</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="edit-log-meta-grid" style="margin-top:8px;">
+                    <div>
+                        <label for="editLogLocationTypeSelect" class="edit-log-field-label">Mekan Tipi</label>
+                        <select id="editLogLocationTypeSelect" class="form-select edit-log-input">
+                            <option value="salon">Spor Salonu</option>
+                            <option value="ev">Ev</option>
+                            <option value="acik_hava">Açık Hava</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="editLogLocationNameInput" class="edit-log-field-label">Salon / Konum</label>
+                        <input type="text" id="editLogLocationNameInput" class="form-input edit-log-input" maxlength="50" placeholder="Örn: Rodium">
+                    </div>
+                </div>
+                <div style="margin-top:8px;">
+                    <label for="editLogNotesInput" class="edit-log-field-label">Not</label>
+                    <textarea id="editLogNotesInput" class="form-input edit-log-input" rows="2" maxlength="2000" placeholder="Kısa seans notu"></textarea>
+                </div>
+            </div>
+
+            <div id="editLogLiveTotalsBar" class="edit-log-live-bar"></div>
+
+            <div id="editLogExercisesContainer" class="edit-log-exercises-wrap"></div>
+
+            <div class="edit-log-add-ex-block">
+                <button type="button" class="edit-log-secondary-btn" id="editLogAddExToggleBtn" onclick="toggleEditLogAddExerciseDrawer()">+ Hareket Ekle</button>
+                <div id="editLogAddExDrawer" style="display:none; margin-top:8px;">
+                    <input type="text" id="editLogAddExSearchInput" class="form-input edit-log-input" placeholder="Hareket ara..." oninput="renderEditLogAddExerciseResults()">
+                    <div id="editLogAddExResults" class="edit-log-picker-list"></div>
+                </div>
+            </div>
+
+            <div class="edit-log-footer-actions">
+                <button type="button" class="btn btn-outline edit-log-cancel-btn" onclick="closeEditWorkoutLogModal()">İptal</button>
+                <button type="button" class="btn btn-gold edit-log-save-btn" onclick="saveEditedWorkoutLog()">Kaydet</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ==================== SCALE & BODY COMPOSITION MODAL ==================== -->
     <div id="scaleModal" class="modal-overlay">
         <div class="modal-box" style="max-width: 520px; max-height: 90vh; overflow-y: auto;">
@@ -2800,8 +2879,8 @@
     </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
-    <script src="js/exercises-db.js?v=287"></script>
-    <script src="js/app.js?v=287"></script>
+    <script src="js/exercises-db.js?v=288"></script>
+    <script src="js/app.js?v=288"></script>
     <script>
         function getNotifStorageKey() {
             const uid = localStorage.getItem('celik_kodu_active_user_id') || 'default';
@@ -2994,6 +3073,6 @@
             </div>
         </div>
     </div>
-    <script src="js/garmin-tredict-bridge.js?v=287" defer></script>
+    <script src="js/garmin-tredict-bridge.js?v=288" defer></script>
 </body>
 </html>

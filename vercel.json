@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/api/tredict",
+      "destination": "/api/tredict.mjs"
+    },
+    {
+      "source": "/api/tredict/:action*",
+      "destination": "/api/tredict.mjs?action=:action*"
+    }
+  ]
+}

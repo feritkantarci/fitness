@@ -1,10 +1,11 @@
-const CACHE_NAME = 'celik-kodu-cache-v287';
+const CACHE_NAME = 'celik-kodu-cache-v288';
 const ASSETS = [
   './',
   './index.html',
   './css/style.css',
   './js/exercises-db.js',
   './js/app.js',
+  './js/garmin-tredict-bridge.js',
   './assets/diagrams/canva_anatomy_neutral.png',
   './assets/diagrams/seq_manmaker.svg',
   './assets/guides/guide_bb_thruster_form.png',
@@ -243,7 +244,8 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET' ||
       event.request.url.includes('127.0.0.1') ||
       event.request.url.includes('localhost') ||
-      event.request.url.includes(':3847') ||
+      event.request.url.includes('garmin.kantarci.io') ||
+      event.request.url.includes('intervals.icu') ||
       event.request.url.includes('/api/') ||
       event.request.url.includes('googleapis.com') ||
       event.request.url.includes('firebaseio.com') ||

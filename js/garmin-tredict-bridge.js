@@ -17,7 +17,6 @@
 (function () {
   'use strict';
 
-  const DIRECT_BRIDGE_URL = 'http://127.0.0.1:3847';
   const TELEMETRY_STORAGE_KEY = 'celik_garmin_telemetry_v2';
   const WELLNESS_STEPS_KEY = 'celik_garmin_wellness_steps_v1';
   const RESOLVED_SETS_KEY = 'celik_garmin_resolved_sets_v1';
@@ -25,78 +24,120 @@
   const SENT_MANIFESTS_KEY = 'celik_garmin_sent_manifests_v1';
   const LAST_PUSHED_SIG_KEY = 'celik_garmin_last_pushed_sig_v281';
   const GARMIN_ENABLED_PREFIX = 'celik_garmin_enabled_';
+  const TREDICT_TOKEN_KEY = 'celik_garmin_tredict_token';
+  const INTERVALS_TOKEN_KEY = 'celik_garmin_intervals_token';
+  const GATEWAY_URL_KEY = 'celik_garmin_gateway_url';
+  const DEFAULT_CLOUD_GATEWAY_BASE = 'https://garmin.kantarci.io';
 
-  async function relayWorkoutActionViaCloud(apiPath, rawBody) {
-    const action = apiPath.includes('delete-dates') ? 'delete-dates' : 'push-workout';
-    const docId = 'garmin_relay_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
-    const url = `https://firestore.googleapis.com/v1/projects/fitness-4f427/databases/(default)/documents/exercise_bug_reports?documentId=${docId}`;
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fields: {
-          exerciseId: { stringValue: 'garmin_outbox_relay' },
-          action: { stringValue: action },
-          createdAt: { stringValue: new Date().toISOString() },
-          payloadJson: { stringValue: typeof rawBody === 'string' ? rawBody : JSON.stringify(rawBody || {}) }
-        }
-      })
-    });
-    if (!res.ok) throw new Error('Cloud relay failed: ' + res.status);
-    let parsed = {};
-    try { parsed = typeof rawBody === 'string' ? JSON.parse(rawBody) : (rawBody || {}); } catch {}
-    const count = Array.isArray(parsed?.planPayload?.planTrainings) ? parsed.planPayload.planTrainings.length : 1;
-    return {
-      ok: true,
-      json: async () => ({
-        ok: true,
-        provider: 'tredict_cloud_relay',
-        directCalendarSync: true,
-        count,
-        deletedCount: Array.isArray(parsed?.dates) ? parsed.dates.length : 0,
-        workouts: [{ id: docId }]
-      })
+  function normalizeGatewayBase(rawUrl) {
+    const trimmed = String(rawUrl || '').trim().replace(/\/+$/, '');
+    if (!trimmed || !/^https:\/\//i.test(trimmed)) return '';
+    return trimmed.replace(/\/api\/tredict(?:\/.*)?$/i, '');
+  }
+
+  function getUserTredictToken(uidOverride) {
+    const uid = uidOverride || getActiveUidSafe();
+    if (!uid) return '';
+    try { return String(localStorage.getItem(`${TREDICT_TOKEN_KEY}_${uid}`) || '').trim(); } catch { return ''; }
+  }
+
+  function getUserIntervalsToken(uidOverride) {
+    const uid = uidOverride || getActiveUidSafe();
+    if (!uid) return '';
+    try { return String(localStorage.getItem(`${INTERVALS_TOKEN_KEY}_${uid}`) || '').trim(); } catch { return ''; }
+  }
+
+  function getUserGatewayBase(uidOverride) {
+    const uid = uidOverride || getActiveUidSafe();
+    if (!uid) return '';
+    try { return normalizeGatewayBase(localStorage.getItem(`${GATEWAY_URL_KEY}_${uid}`) || ''); } catch { return ''; }
+  }
+
+  function hasGarminCredentialsConfigured(uidOverride) {
+    return Boolean(getUserTredictToken(uidOverride) || getUserIntervalsToken(uidOverride));
+  }
+
+  function buildGatewayTargetUrls(apiPath, uidOverride) {
+    const cleanPath = apiPath.startsWith('/api/tredict')
+      ? apiPath
+      : `/api/tredict/${apiPath.replace(/^\/+/, '')}`;
+    const isLocalHost = typeof window !== 'undefined' &&
+      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    const currentOrigin = typeof window !== 'undefined' ? String(window.location.origin || '') : '';
+    const customBase = getUserGatewayBase(uidOverride);
+
+    const urls = [];
+    const pushUnique = u => {
+      if (u && !urls.includes(u)) urls.push(u);
     };
+
+    if (customBase) pushUnique(`${customBase}${cleanPath}`);
+    if (typeof window !== 'undefined' && (window.location.protocol === 'https:' || window.location.protocol === 'http:')) {
+      pushUnique(cleanPath);
+    }
+    if (currentOrigin !== DEFAULT_CLOUD_GATEWAY_BASE) {
+      pushUnique(`${DEFAULT_CLOUD_GATEWAY_BASE}${cleanPath}`);
+    }
+    return urls;
   }
 
   async function fetchGarminBridge(apiPath, options = {}) {
-    const isLocalHost = typeof window !== 'undefined' &&
-      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-    const isHttpsRemote = typeof window !== 'undefined' &&
-      window.location.protocol === 'https:' && !isLocalHost;
+    const uid = options.uid || getActiveUidSafe();
+    const tredictToken = options.tredictToken !== undefined
+      ? String(options.tredictToken || '').trim()
+      : getUserTredictToken(uid);
+    const intervalsToken = options.intervalsToken !== undefined
+      ? String(options.intervalsToken || '').trim()
+      : getUserIntervalsToken(uid);
+    const customGatewayOverride = options.gatewayBase !== undefined
+      ? normalizeGatewayBase(options.gatewayBase)
+      : '';
 
-    if (isLocalHost && window.location.port !== '3847') {
+    if (!tredictToken && !intervalsToken) {
+      const err = new Error('MISSING_USER_WATCH_TOKEN');
+      err.code = 'MISSING_USER_WATCH_TOKEN';
+      throw err;
+    }
+
+    const headers = { ...(options.headers || {}) };
+    if (tredictToken) headers['X-Tredict-Token'] = tredictToken;
+    if (intervalsToken) headers['X-Intervals-Token'] = intervalsToken;
+    headers['X-Client-Tz-Offset'] = String(new Date().getTimezoneOffset());
+
+    const fetchOpts = { ...options, headers };
+    delete fetchOpts.uid;
+    delete fetchOpts.tredictToken;
+    delete fetchOpts.intervalsToken;
+    delete fetchOpts.gatewayBase;
+
+    let targets = buildGatewayTargetUrls(apiPath, uid);
+    if (customGatewayOverride) {
+      const cleanPath = apiPath.startsWith('/api/tredict')
+        ? apiPath
+        : `/api/tredict/${apiPath.replace(/^\/+/, '')}`;
+      targets = [`${customGatewayOverride}${cleanPath}`, ...targets.filter(u => !u.startsWith(customGatewayOverride))];
+    }
+
+    let authError = null;
+    for (const targetUrl of targets) {
       try {
-        const proxyRes = await fetch(apiPath, options);
-        if (proxyRes && proxyRes.ok) return proxyRes;
+        const res = await fetch(targetUrl, fetchOpts);
+        const ct = String(res.headers.get('content-type') || '').toLowerCase();
+        if (res.status === 401 || res.status === 403) {
+          authError = new Error('WATCH_AUTH_FAILED');
+          authError.code = 'WATCH_AUTH_FAILED';
+          continue;
+        }
+        if ((res.ok || res.status === 400) && ct.includes('application/json')) {
+          return res;
+        }
       } catch {}
     }
 
-    // HTTPS canlı sitede (mobil / Safari) Mixed Content engeline takılmadan doğrudan Bulut Rölesi üzerinden ilet
-    if (isHttpsRemote && options.method === 'POST' && (apiPath === '/api/tredict/push-workout' || apiPath === '/api/tredict/delete-dates')) {
-      return relayWorkoutActionViaCloud(apiPath, options.body);
-    }
-
-    const directOpts = { ...options };
-    if (directOpts.method === 'POST' && directOpts.headers) {
-      // CORS simple request (preflight engelini aşmak için text/plain kullanılır; sunucu JSON olarak okur)
-      directOpts.headers = { 'Content-Type': 'text/plain;charset=UTF-8' };
-    }
-    if (!isHttpsRemote) {
-      try {
-        const res127 = await fetch(`${DIRECT_BRIDGE_URL}${apiPath}`, directOpts);
-        if (res127 && res127.ok) return res127;
-      } catch {}
-      try {
-        const resLocal = await fetch(`http://localhost:3847${apiPath}`, directOpts);
-        if (resLocal && resLocal.ok) return resLocal;
-      } catch {}
-    }
-
-    if (options.method === 'POST' && (apiPath === '/api/tredict/push-workout' || apiPath === '/api/tredict/delete-dates')) {
-      return relayWorkoutActionViaCloud(apiPath, options.body);
-    }
-    throw new Error('Bridge unreachable');
+    if (authError) throw authError;
+    const gwErr = new Error('CLOUD_GATEWAY_UNREACHABLE');
+    gwErr.code = 'CLOUD_GATEWAY_UNREACHABLE';
+    throw gwErr;
   }
 
   // Kişisel sağlık verileri kaynak kodda sabit tutulmaz; yalnızca kullanıcının kendi yerel önbelleğinden okunur
@@ -117,67 +158,8 @@
     core: ['ABS', 'OBLIQUES', 'HIPS', 'LOWER_BACK']
   };
 
-  // Doğrulanmış test antrenmanlarının orijinal Çelik Kodu manifestoları
-  const DEFAULT_SENT_MANIFESTS = {
-    o5bRRWBN3piMYWtXuUm4sM: {
-      manifestId: 'manifest_o5bRRWBN3piMYWtXuUm4sM',
-      activityId: 'o5bRRWBN3piMYWtXuUm4sM',
-      title: 'Çelik Kodu Test: Tam Vücut Güç',
-      sentAt: '2026-10-24T21:10:00.000Z',
-      plannedExercises: [
-        {
-          stepOrder: 0,
-          originalId: 'db_goblet_squat',
-          originalName: 'Dambıl Goblet Squat',
-          primaryMuscles: ['quads', 'glutes'],
-          secondaryMuscles: ['core', 'hamstrings', 'shoulders'],
-          plannedSets: 3,
-          plannedReps: 10,
-          plannedWeight: 16,
-          fitCategory: 'squat',
-          fitName: 'goblet_squat',
-          fitNote: '',
-          matchType: 'exact_verified'
-        }
-      ]
-    },
-    utretVdwLMwDYvpHw4S1wR: {
-      manifestId: 'manifest_utretVdwLMwDYvpHw4S1wR',
-      activityId: 'utretVdwLMwDYvpHw4S1wR',
-      title: 'Güç Antrenmanı (Garmin FR945 — Planlı + İlave Setler)',
-      sentAt: '2026-10-21T16:00:00.000Z',
-      plannedExercises: [
-        {
-          stepOrder: 0,
-          originalId: 'db_bench_press',
-          originalName: 'Dambıl Bench Press',
-          primaryMuscles: ['chest'],
-          secondaryMuscles: ['triceps', 'shoulders'],
-          plannedSets: 2,
-          plannedReps: 12,
-          plannedWeight: 17.5,
-          fitCategory: 'bench_press',
-          fitName: 'dumbbell_bench_press',
-          fitNote: '',
-          matchType: 'exact_verified'
-        },
-        {
-          stepOrder: 1,
-          originalId: 'db_saw_row',
-          originalName: 'Dambıl Saw Row (Tek Kol Çekiş)',
-          primaryMuscles: ['back'],
-          secondaryMuscles: ['biceps', 'core'],
-          plannedSets: 1,
-          plannedReps: 12,
-          plannedWeight: 17.5,
-          fitCategory: 'row',
-          fitName: 'one_arm_bent_over_row',
-          fitNote: '',
-          matchType: 'exact_verified'
-        }
-      ]
-    }
-  };
+  // Kullanıcıya özel manifestolar yalnızca kendi yerel depolamasında tutulur
+  const DEFAULT_SENT_MANIFESTS = {};
 
   // Sabit test seansları kaldırıldı; yalnızca gerçek senkronize edilen seanslar tutulur
   const LEGACY_TEST_ACTIVITY_IDS = new Set([
@@ -230,11 +212,6 @@
     return null;
   }
 
-  function isPersonalGarminOwner(u) {
-    if (!u || !u.id) return false;
-    return u.id === 'usr_admin' || u.id === 'usr_ferit' || /ferit/i.test(String(u.name || ''));
-  }
-
   function getActiveUidSafe() {
     const u = getCurrentUserObj();
     return (u && u.id) ? u.id : '';
@@ -269,29 +246,41 @@
 
   function isGarminEnabledForCurrentUser() {
     const u = getCurrentUserObj();
-    if (!isPersonalGarminOwner(u)) return false;
+    if (!u || !u.id) return false;
     const uid = u.id;
     try {
       const explicit = localStorage.getItem(GARMIN_ENABLED_PREFIX + uid);
       if (explicit === 'true') return true;
       if (explicit === 'false') return false;
+      if (hasGarminCredentialsConfigured(uid)) return true;
+      return Boolean(localStorage.getItem(`${TELEMETRY_STORAGE_KEY}_${uid}`));
     } catch {}
-    return true;
+    return false;
   }
 
   window.toggleGarminIntegrationForUser = function (enableFlag) {
     const u = getCurrentUserObj();
-    if (!isPersonalGarminOwner(u)) return;
+    if (!u || !u.id) return;
     const uid = u.id;
     const nextVal = typeof enableFlag === 'boolean' ? enableFlag : !isGarminEnabledForCurrentUser();
+    if (nextVal && !hasGarminCredentialsConfigured(uid)) {
+      if (typeof window.openGarminSetupModal === 'function') {
+        window.openGarminSetupModal();
+      }
+      return;
+    }
     try {
       localStorage.setItem(GARMIN_ENABLED_PREFIX + uid, nextVal ? 'true' : 'false');
     } catch {}
     refreshGarminPanelsForUserState();
+    if (nextVal) {
+      setTimeout(syncActiveSchedulesOnBoot, 200);
+      setTimeout(syncGarminActivitiesSilent, 400);
+    }
     if (typeof showToast === 'function') {
       showToast(nextVal
-        ? '⌚ Garmin & Tredict Takvim Senkronizasyonu aktif edildi.'
-        : '⌚ Garmin & Tredict bağlantısı bu kullanıcı için kapatıldı.');
+        ? '⌚ Saat bağlantısı aktif edildi.'
+        : '⌚ Saat bağlantısı bu hesap için kapatıldı.');
     }
   };
 
@@ -479,7 +468,7 @@
     manifests.__lastSent = manifestObj;
     try {
       localStorage.setItem(getScopedGarminKey(SENT_MANIFESTS_KEY), JSON.stringify(manifests));
-      if (typeof window.scheduleUserStateCloudSync === 'function') window.scheduleUserStateCloudSync();
+      if (typeof window.scheduleUserStateCloudSync === 'function') window.scheduleUserStateCloudSync(getActiveUidSafe());
     } catch {}
     return manifestObj;
   }
@@ -975,6 +964,11 @@
     try {
       const uid = getActiveUidSafe();
       if (!uid) return;
+      let deletedLogIds = new Set();
+      try {
+        const delRaw = JSON.parse(localStorage.getItem(`celik_kodu_deleted_logs_${uid}`) || '[]');
+        if (Array.isArray(delRaw)) delRaw.forEach(x => { if (x) deletedLogIds.add(String(x)); });
+      } catch {}
       const historyKey = `celik_kodu_history_${uid}`;
       const rawLogs = JSON.parse(localStorage.getItem(historyKey) || '[]');
       let logs = Array.isArray(rawLogs)
@@ -1003,6 +997,7 @@
       });
 
       activities.forEach(act => {
+        if (act && (deletedLogIds.has(String(act.id)) || deletedLogIds.has(`garmin_${act.id}`))) return;
         const groups = analyzeActivityGroups(act);
         const resolvedGroups = groups.filter(g => g.isResolved && (g.matchedEx || g.originalName));
         if (!resolvedGroups.length) return;
@@ -1128,6 +1123,13 @@
           logs.unshift(existingLog);
           changed = true;
         } else {
+          if (existingLog.userEditedAt) {
+            if (!existingLog.healthSummary && healthSummaryObj) {
+              existingLog.healthSummary = healthSummaryObj;
+              changed = true;
+            }
+            return;
+          }
           if (existingLog.date !== logDate) {
             existingLog.date = logDate;
             changed = true;
@@ -1605,6 +1607,29 @@
     }
   }
 
+  const lastGarminErrorNoticeAt = {};
+
+  function notifyGarminDeliveryIssue(err, forceShow = false) {
+    const code = err && (err.code || err.message) ? String(err.code || err.message) : 'CLOUD_GATEWAY_UNREACHABLE';
+    const now = Date.now();
+    const uid = getActiveUidSafe() || 'anon';
+    const throttleKey = `${uid}_${code}`;
+    if (!forceShow && now - (lastGarminErrorNoticeAt[throttleKey] || 0) < 90000) return;
+    lastGarminErrorNoticeAt[throttleKey] = now;
+
+    let msg = 'Program telefona kaydedildi, bulut saat geçidine ulaşılamadığı için saate aktarılamadı.';
+    if (code === 'MISSING_USER_WATCH_TOKEN') {
+      msg = 'Saat aktarımı için Profil sekmesinden saat bağlantı anahtarınızı girin.';
+    } else if (code === 'WATCH_AUTH_FAILED') {
+      msg = 'Saat bağlantı anahtarı reddedildi. Profil sekmesindeki ayarı kontrol edin.';
+    }
+    if (typeof window.pushAppNotification === 'function') {
+      window.pushAppNotification(msg, 'warn', 'garmin');
+    } else if (typeof showToast === 'function') {
+      showToast(msg);
+    }
+  }
+
   let inFlightPushSig = '';
   let pushQueueChain = Promise.resolve();
   const storageWriteDebounceTimers = {};
@@ -1646,7 +1671,7 @@
           body: JSON.stringify({ intervalsEvents: intervalsEvents || [], planPayload })
         });
         const data = await res.json();
-        if (data && data.ok) {
+        if (data && data.ok === true && data.directCalendarSync === true) {
           try {
             localStorage.removeItem(getScopedGarminKey(OUTBOX_PLANS_KEY));
           } catch {}
@@ -1655,10 +1680,14 @@
             const count = Number(data.count) || (Array.isArray(planPayload?.planTrainings) ? planPayload.planTrainings.length : 1);
             showGarminDirectCalendarSyncNotice(planPayload?.plan?.title || 'Çelik Kodu Seansı', count);
           }
+          if (inFlightPushSig === computedSig) inFlightPushSig = '';
           return;
         }
-      } catch {
-        // Köprü kapalıysa sessizce yerel kuyruğa al, ASLA hata fırlatma
+        const failErr = new Error((data && data.error) || 'CLOUD_GATEWAY_UNREACHABLE');
+        failErr.code = 'CLOUD_GATEWAY_UNREACHABLE';
+        throw failErr;
+      } catch (err) {
+        notifyGarminDeliveryIssue(err, false);
       }
 
       try {
@@ -1908,9 +1937,6 @@
         ) {
           if (storageWriteDebounceTimers[key]) clearTimeout(storageWriteDebounceTimers[key]);
           storageWriteDebounceTimers[key] = setTimeout(() => handleCalendarStorageWrite(key, value, prevValue), 350);
-        } else if (key === 'celik_kodu_last_generated_workout') {
-          if (storageWriteDebounceTimers[key]) clearTimeout(storageWriteDebounceTimers[key]);
-          storageWriteDebounceTimers[key] = setTimeout(() => handleGeneratedSingleDayWorkoutWrite(value), 450);
         } else if (key === 'celik_kodu_active_user_id' || key === 'celik_kodu_session') {
           setTimeout(() => refreshGarminPanelsForUserState(), 0);
         }
@@ -1950,7 +1976,9 @@
         localStorage.setItem(getScopedGarminKey(TELEMETRY_STORAGE_KEY), JSON.stringify(data.activities));
         syncedLive = true;
       }
-    } catch {}
+    } catch (err) {
+      notifyGarminDeliveryIssue(err, true);
+    }
 
     await syncGarminWellnessStepsSilent();
 
@@ -2233,13 +2261,183 @@
   }
 
   // ─── 6. SEKME (PROFILE-GUARD): KULLANICI BAZLI GARMIN AÇ/KAPAT KARTI ───
+  function ensureGarminSetupModalEl() {
+    let modal = document.getElementById('garminSetupModal');
+    if (modal) return modal;
+    modal = document.createElement('div');
+    modal.id = 'garminSetupModal';
+    modal.className = 'modal-overlay';
+    modal.style.background = 'rgba(15, 23, 42, 0.58)';
+    modal.onclick = function (e) {
+      if (e.target === modal) window.closeGarminSetupModal();
+    };
+    modal.innerHTML = `
+      <div class="modal-box" style="background:#FFFFFF;color:#0F172A;border:1px solid #CBD5E1;border-radius:14px;max-width:420px;width:94%;padding:16px;box-shadow:0 20px 45px rgba(15,23,42,0.22);">
+        <div class="modal-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <span class="modal-title" style="font-size:15px;font-weight:800;color:#0F172A;">⌚ Saat Bağlantı Ayarları</span>
+          <button type="button" class="modal-close" aria-label="Kapat" onclick="window.closeGarminSetupModal()" style="background:#F1F5F9;color:#0F172A;border:1px solid #CBD5E1;border-radius:8px;width:30px;height:30px;font-weight:800;cursor:pointer;">✕</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div>
+            <label for="garminModalTredictInput" style="display:block;font-size:12px;font-weight:800;color:#0F172A;margin-bottom:4px;">Tredict Bağlantı Anahtarı</label>
+            <input id="garminModalTredictInput" type="password" autocomplete="off" placeholder="Tredict anahtarını girin" style="width:100%;box-sizing:border-box;background:#F8FAFC;color:#0F172A;border:1px solid #CBD5E1;border-radius:8px;padding:8px 10px;font-size:13px;">
+            <div style="font-size:11px;color:#475569;margin-top:2px;">Kuvvet antrenmanı takvim aktarımı</div>
+          </div>
+          <div>
+            <label for="garminModalIntervalsInput" style="display:block;font-size:12px;font-weight:800;color:#0F172A;margin-bottom:4px;">Intervals.icu Anahtarı (Opsiyonel)</label>
+            <input id="garminModalIntervalsInput" type="password" autocomplete="off" placeholder="İsteğe bağlı" style="width:100%;box-sizing:border-box;background:#F8FAFC;color:#0F172A;border:1px solid #CBD5E1;border-radius:8px;padding:8px 10px;font-size:13px;">
+            <div style="font-size:11px;color:#475569;margin-top:2px;">Günlük adım ve nabız</div>
+          </div>
+          <div>
+            <label for="garminModalGatewayInput" style="display:block;font-size:12px;font-weight:800;color:#0F172A;margin-bottom:4px;">Özel Bulut Adresi (Opsiyonel)</label>
+            <input id="garminModalGatewayInput" type="url" autocomplete="off" placeholder="https://garmin.kantarci.io" style="width:100%;box-sizing:border-box;background:#F8FAFC;color:#0F172A;border:1px solid #CBD5E1;border-radius:8px;padding:8px 10px;font-size:13px;">
+            <div style="font-size:11px;color:#475569;margin-top:2px;">Varsayılan boş bırakılabilir</div>
+          </div>
+          <div id="garminSetupStatusMsg" style="display:none;border-radius:8px;padding:8px 10px;font-size:12px;font-weight:700;"></div>
+          <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;">
+            <button id="garminSetupSaveBtn" type="button" onclick="window.saveAndTestGarminSetupFromModal()" style="flex:1;min-width:150px;background:#0F172A;color:#FFFFFF;border:none;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:800;cursor:pointer;">Test Et ve Kaydet</button>
+            <button id="garminSetupClearBtn" type="button" onclick="window.disconnectGarminForUser()" style="background:#FEF2F2;color:#B91C1C;border:1px solid #FECACA;border-radius:8px;padding:9px 12px;font-size:12px;font-weight:700;cursor:pointer;">Kaldır</button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    return modal;
+  }
+
+  function setGarminSetupStatus(text, tone = 'info') {
+    const el = document.getElementById('garminSetupStatusMsg');
+    if (!el) return;
+    if (!text) {
+      el.style.display = 'none';
+      el.textContent = '';
+      return;
+    }
+    const palette = {
+      ok: { bg: '#DCFCE7', color: '#15803D', border: '#86EFAC' },
+      warn: { bg: '#FEF3C7', color: '#B45309', border: '#FDE68A' },
+      err: { bg: '#FEE2E2', color: '#B91C1C', border: '#FCA5A5' },
+      info: { bg: '#F1F5F9', color: '#334155', border: '#CBD5E1' }
+    }[tone] || { bg: '#F1F5F9', color: '#334155', border: '#CBD5E1' };
+    el.style.display = 'block';
+    el.style.background = palette.bg;
+    el.style.color = palette.color;
+    el.style.border = `1px solid ${palette.border}`;
+    el.textContent = text;
+  }
+
+  window.openGarminSetupModal = function () {
+    const uid = getActiveUidSafe();
+    if (!uid) return;
+    const modal = ensureGarminSetupModalEl();
+    const trInput = document.getElementById('garminModalTredictInput');
+    const icuInput = document.getElementById('garminModalIntervalsInput');
+    const gwInput = document.getElementById('garminModalGatewayInput');
+    const clearBtn = document.getElementById('garminSetupClearBtn');
+    if (trInput) trInput.value = getUserTredictToken(uid);
+    if (icuInput) icuInput.value = getUserIntervalsToken(uid);
+    if (gwInput) gwInput.value = getUserGatewayBase(uid);
+    if (clearBtn) clearBtn.style.display = hasGarminCredentialsConfigured(uid) ? 'inline-block' : 'none';
+    setGarminSetupStatus('', 'info');
+    modal.classList.add('active');
+    const box = modal.querySelector('.modal-box');
+    if (box) box.scrollTop = 0;
+  };
+
+  window.closeGarminSetupModal = function () {
+    const modal = document.getElementById('garminSetupModal');
+    if (modal) modal.classList.remove('active');
+  };
+
+  window.disconnectGarminForUser = function () {
+    const uid = getActiveUidSafe();
+    if (!uid) return;
+    try {
+      localStorage.removeItem(`${TREDICT_TOKEN_KEY}_${uid}`);
+      localStorage.removeItem(`${INTERVALS_TOKEN_KEY}_${uid}`);
+      localStorage.removeItem(`${GATEWAY_URL_KEY}_${uid}`);
+      localStorage.setItem(GARMIN_ENABLED_PREFIX + uid, 'false');
+    } catch {}
+    refreshGarminPanelsForUserState();
+    window.closeGarminSetupModal();
+    if (typeof showToast === 'function') {
+      showToast('⌚ Saat bağlantısı bu hesaptan kaldırıldı.');
+    }
+  };
+
+  window.saveAndTestGarminSetupFromModal = async function () {
+    const uid = getActiveUidSafe();
+    if (!uid) return;
+    const trInput = document.getElementById('garminModalTredictInput');
+    const icuInput = document.getElementById('garminModalIntervalsInput');
+    const gwInput = document.getElementById('garminModalGatewayInput');
+    const saveBtn = document.getElementById('garminSetupSaveBtn');
+
+    const tredictToken = String(trInput?.value || '').trim();
+    const intervalsToken = String(icuInput?.value || '').trim();
+    const rawGw = String(gwInput?.value || '').trim();
+
+    if (!tredictToken && !intervalsToken) {
+      setGarminSetupStatus('Lütfen en az bir saat bağlantı anahtarı girin.', 'err');
+      return;
+    }
+    if (rawGw && !/^https:\/\//i.test(rawGw)) {
+      setGarminSetupStatus('Özel bulut adresi https:// ile başlamalıdır.', 'err');
+      return;
+    }
+    const gatewayBase = normalizeGatewayBase(rawGw);
+
+    if (saveBtn) saveBtn.disabled = true;
+    setGarminSetupStatus('Bağlantı test ediliyor...', 'info');
+
+    try {
+      const res = await fetchGarminBridge('/api/tredict/health', {
+        uid,
+        tredictToken,
+        intervalsToken,
+        gatewayBase
+      });
+      const data = await res.json();
+      if (!data || !data.ok) {
+        setGarminSetupStatus('Saat anahtarı doğrulanamadı.', 'err');
+        return;
+      }
+      localStorage.setItem(`${TREDICT_TOKEN_KEY}_${uid}`, tredictToken);
+      localStorage.setItem(`${INTERVALS_TOKEN_KEY}_${uid}`, intervalsToken);
+      if (gatewayBase) localStorage.setItem(`${GATEWAY_URL_KEY}_${uid}`, gatewayBase);
+      else localStorage.removeItem(`${GATEWAY_URL_KEY}_${uid}`);
+      localStorage.setItem(GARMIN_ENABLED_PREFIX + uid, 'true');
+
+      setGarminSetupStatus('Saat bağlantısı doğrulandı ve kaydedildi.', 'ok');
+      refreshGarminPanelsForUserState();
+      setTimeout(syncActiveSchedulesOnBoot, 200);
+      setTimeout(syncGarminActivitiesSilent, 400);
+      setTimeout(() => window.closeGarminSetupModal(), 800);
+    } catch (err) {
+      const code = err && (err.code || err.message);
+      if (code === 'WATCH_AUTH_FAILED') {
+        setGarminSetupStatus('Anahtar reddedildi. Lütfen saat anahtarınızı kontrol edin.', 'err');
+      } else {
+        localStorage.setItem(`${TREDICT_TOKEN_KEY}_${uid}`, tredictToken);
+        localStorage.setItem(`${INTERVALS_TOKEN_KEY}_${uid}`, intervalsToken);
+        if (gatewayBase) localStorage.setItem(`${GATEWAY_URL_KEY}_${uid}`, gatewayBase);
+        else localStorage.removeItem(`${GATEWAY_URL_KEY}_${uid}`);
+        localStorage.setItem(GARMIN_ENABLED_PREFIX + uid, 'true');
+        refreshGarminPanelsForUserState();
+        setGarminSetupStatus('Anahtar kaydedildi, ancak bulut geçidine şu an ulaşılamıyor.', 'warn');
+      }
+    } finally {
+      if (saveBtn) saveBtn.disabled = false;
+    }
+  };
+
   function renderProfileGarminBridgeCard() {
     const profileTab = document.getElementById('profileTab');
     if (!profileTab) return;
 
     let card = document.getElementById('garminProfileBridgeCard');
     const u = getCurrentUserObj();
-    if (!isPersonalGarminOwner(u)) {
+    if (!u || !u.id) {
       if (card) card.remove();
       return;
     }
@@ -2252,18 +2450,33 @@
     }
 
     const enabled = isGarminEnabledForCurrentUser();
+    const hasCreds = hasGarminCredentialsConfigured(u.id);
+    const badgeBg = enabled && hasCreds ? '#DCFCE7' : (hasCreds ? '#F1F5F9' : '#FEF3C7');
+    const badgeColor = enabled && hasCreds ? '#15803D' : (hasCreds ? '#334155' : '#B45309');
+    const badgeText = enabled && hasCreds ? 'Açık' : (hasCreds ? 'Kapalı' : 'Kurulum Gerekli');
+
     card.innerHTML = `
-      <div style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:10px;padding:10px 14px;color:#0F172A;display:flex;justify-content:space-between;align-items:center;gap:8px;">
-        <strong style="font-size:13.5px;color:#0F172A;">⌚ Garmin Bağlantısı: <span style="color:${enabled ? '#15803D' : '#475569'};">${enabled ? 'Açık' : 'Kapalı'}</span></strong>
-        <button type="button" onclick="window.toggleGarminIntegrationForUser(${!enabled})" style="background:${enabled ? '#F1F5F9' : '#0F172A'};color:${enabled ? '#334155' : '#FFFFFF'};border:${enabled ? '1px solid #CBD5E1' : 'none'};border-radius:6px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;">
-          ${enabled ? 'Kapat' : 'Aç'}
-        </button>
+      <div style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:10px;padding:10px 14px;color:#0F172A;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+          <strong style="font-size:13.5px;color:#0F172A;">⌚ Saat Bağlantısı:</strong>
+          <span style="background:${badgeBg};color:${badgeColor};border-radius:999px;padding:2px 8px;font-size:11.5px;font-weight:800;">${badgeText}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button type="button" onclick="window.openGarminSetupModal()" style="background:#0F172A;color:#FFFFFF;border:none;border-radius:6px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer;">
+            ${hasCreds ? 'Ayarlar' : 'Saat Bağla'}
+          </button>
+          ${hasCreds ? `
+            <button type="button" onclick="window.toggleGarminIntegrationForUser(${!enabled})" style="background:#F1F5F9;color:#334155;border:1px solid #CBD5E1;border-radius:6px;padding:5px 11px;font-size:12px;font-weight:700;cursor:pointer;">
+              ${enabled ? 'Kapat' : 'Aç'}
+            </button>
+          ` : ''}
+        </div>
       </div>
     `;
   }
 
   function syncActiveSchedulesOnBoot() {
-    if (!isGarminEnabledForCurrentUser()) return;
+    if (!isGarminEnabledForCurrentUser() || !hasGarminCredentialsConfigured()) return;
     try {
       const uid = getActiveUidSafe();
       const outboxKey = getScopedGarminKey(OUTBOX_PLANS_KEY);
@@ -2273,13 +2486,10 @@
       }
 
       const now = new Date();
-      const todayStr = formatLocalIsoDate(now);
       let dateSched = {};
       let weekSched = {};
-      let lastGen = null;
       try { dateSched = JSON.parse(localStorage.getItem(`celik_kodu_date_schedule_${uid}`) || '{}') || {}; } catch {}
       try { weekSched = JSON.parse(localStorage.getItem(`celik_kodu_weekly_schedule_${uid}`) || '{}') || {}; } catch {}
-      try { lastGen = JSON.parse(localStorage.getItem('celik_kodu_last_generated_workout') || 'null'); } catch {}
 
       const multiDays = [];
       const intervalsEvents = [];
@@ -2301,26 +2511,14 @@
         let chosenEx = [];
         let chosenCardio = [];
 
-        if (offset === 0 && lastGen && Array.isArray(lastGen.exercises) && lastGen.exercises.length > 0) {
-          const genCreatedStr = lastGen.createdAt ? formatLocalIsoDate(new Date(lastGen.createdAt)) : todayStr;
-          const genUpdatedStr = lastGen.updatedAt ? formatLocalIsoDate(new Date(lastGen.updatedAt)) : genCreatedStr;
-          const genTs = Number(lastGen.updatedAt || lastGen.createdAt || 0);
-          if ((genCreatedStr === todayStr || genUpdatedStr === todayStr) && (genTs >= Math.max(ovTs, wkTs) || (ovEx.length === 0 && wkEx.length === 0))) {
-            chosenEx = hydrateExercisesWithWorkoutScheme(lastGen, lastGen.exercises);
-            chosenTitle = lastGen.title || `Çelik Kodu (${dStr})`;
-          }
-        }
-
-        if (chosenEx.length === 0) {
-          if (ovEx.length > 0 && (ovTs >= wkTs || wkEx.length === 0)) {
-            chosenEx = ovEx;
-            chosenTitle = ovEntry.title || (ovEntry.customWorkout && ovEntry.customWorkout.title) || `Çelik Kodu (${dStr})`;
-            chosenCardio = Array.isArray(ovEntry.extraCardioSessions) ? ovEntry.extraCardioSessions : [];
-          } else if (wkEx.length > 0 && !(ovEntry && ovEntry.rest && ovTs > wkTs)) {
-            chosenEx = wkEx;
-            chosenTitle = wkEntry.title || (wkEntry.customWorkout && wkEntry.customWorkout.title) || `Çelik Kodu Gün ${dNum}`;
-            chosenCardio = Array.isArray(wkEntry.extraCardioSessions) ? wkEntry.extraCardioSessions : [];
-          }
+        if (ovEx.length > 0 && (ovTs >= wkTs || wkEx.length === 0)) {
+          chosenEx = ovEx;
+          chosenTitle = ovEntry.title || (ovEntry.customWorkout && ovEntry.customWorkout.title) || `Çelik Kodu (${dStr})`;
+          chosenCardio = Array.isArray(ovEntry.extraCardioSessions) ? ovEntry.extraCardioSessions : [];
+        } else if (wkEx.length > 0 && !(ovEntry && ovEntry.rest && ovTs > wkTs)) {
+          chosenEx = wkEx;
+          chosenTitle = wkEntry.title || (wkEntry.customWorkout && wkEntry.customWorkout.title) || `Çelik Kodu Gün ${dNum}`;
+          chosenCardio = Array.isArray(wkEntry.extraCardioSessions) ? wkEntry.extraCardioSessions : [];
         }
 
         if (chosenEx.length > 0 || chosenCardio.length > 0) {
@@ -2371,7 +2569,7 @@
   }
 
   async function syncGarminWellnessStepsSilent() {
-    if (!isGarminEnabledForCurrentUser()) return false;
+    if (!isGarminEnabledForCurrentUser() || !hasGarminCredentialsConfigured()) return false;
     try {
       const res = await fetchGarminBridge('/api/tredict/wellness?days=21');
       const data = await res.json();
@@ -2446,7 +2644,7 @@
   };
 
   async function syncGarminActivitiesSilent() {
-    if (!isGarminEnabledForCurrentUser()) return false;
+    if (!isGarminEnabledForCurrentUser() || !hasGarminCredentialsConfigured()) return false;
     try {
       const res = await fetchGarminBridge('/api/tredict/activities?days=30');
       const data = await res.json();
@@ -2482,7 +2680,7 @@
       }
     });
     setInterval(() => {
-      if (!isGarminEnabledForCurrentUser()) return;
+      if (!isGarminEnabledForCurrentUser() || !hasGarminCredentialsConfigured()) return;
       try {
         const outbox = JSON.parse(localStorage.getItem(getScopedGarminKey(OUTBOX_PLANS_KEY)) || '[]');
         if (Array.isArray(outbox) && outbox.length > 0) {

@@ -150,6 +150,13 @@ Kullanıcı "canlıya al / push et" dediğinde şu adımlar uygulanır:
 * **Evrensel ve Sistem Genelinde Tasarım:** Her düzeltme ve geliştirme, programın genel yapısını ve tüm benzer bileşenlerini (10 ana kas grubu, 31 alt bölge, tüm antrenman şablonları ve tüm sekmeler) kapsayacak şekilde evrensel olarak kurgulanır.
 * **Bütüncül Mimari Etki Denetimi:** Değişiklik yapılmadan önce programın genel yapısına etkisi uçtan uca hesaplanır; tekil istisnalar yerine sistemin tamamını yöneten genel mekanizmalar kurulur.
 
+---
+
+## 13. Herkese Açık, Çok Kullanıcılı Mobil Mimari ve Sıfır Bilgisayar Bağımlılığı Yasası
+* **%100 Mobil-Öncelikli ve Sıfır Bilgisayar Bağımlılığı:** Bu uygulama bilgisayar başında değil, tüm kullanıcılar tarafından doğrudan kendi cep telefonlarında kullanılır. Kod geliştirmesi yerelde test edilse de (Madde 1), uygulamanın çalışma zamanındaki **hiçbir özelliği, veri eşitlemesi, bildirimi veya dış servis entegrasyonu (Garmin/Tredict, AI vb.) geliştiricinin ya da kullanıcının bilgisayarının açık olmasına (`127.0.0.1`, yerel köprü scripti, bilgisayar arka plan servisi, yerel `gcloud` veya yerel `.token` dosyası) ASLA bağımlı kurgulanamaz**.
+* **Herkese Açık Çok Kullanıcılı (Multi-Tenant) İzolasyon:** Uygulama tek bir yöneticiye özel değildir; herkese açık çok kullanıcılı bir platformdur. Tüm özellikler, veritabanı kuralları, bulut eşitleme mühürleri ve dış servis bağlantıları her sporcunun kendi telefonundan, kendi izole hesabıyla ve kendi kişisel kimlik/anahtar bilgileriyle diğer kullanıcılardan tamamen bağımsız 7/24 çalışacak şekilde tasarlanır.
+* **7/24 Bulut Geçişi ve Dürüst Teslimat Doğrulaması:** Mobil tarayıcıdan doğrudan çağrılamayan dış servisler kişisel bilgisayar rölesi yerine 7/24 aktif bulut uç noktaları üzerinden çalıştırılır; karşı servisten gerçek kabul onayı alınmadan kullanıcıya *"aktarıldı"* bildirimi ASLA gösterilmez.
+
 
 
 

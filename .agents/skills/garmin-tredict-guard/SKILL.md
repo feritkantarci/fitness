@@ -47,13 +47,14 @@ Bu şef, **Çelik Kodu PWA** ile **Garmin Forerunner 945 / Tredict** arasındaki
    - Kuvvet antrenmanları saate **ASLA** Intervals.icu üzerinden veya `Crossfit`/`Generic` (Kardiyo) tipinde gönderilmez; çünkü Intervals.icu Garmin'in `exerciseCategory`, `exerciseName`, `durationType: "repetitions"` ve `exerciseWeight` alanlarını desteklemez ve saatte kilo/tekrar girişini kapatır.
    - Tüm antrenmanlar **Tredict MCP v2** üzerinden `sportType: "misc"`, `subSportType: "strength_training"` ve `durationType: "repetitions"` şemasıyla gönderilir.
 2. **Doğrudan Canlı Takvim Zinciri (`plan-creation` Yerine `add-plan-training`):**
-   - Antrenmanın `"My Plans"` taslağında beklememesi için yerel köprü (`scripts/tredict-local-bridge.mjs`), şu 3 adımı arka planda otomatik yürütür:
+   - Antrenmanın `"My Plans"` taslağında beklememesi için 7/24 bulut geçiş kapısı şu 3 adımı arka planda otomatik yürütür:
      1. `planned-workout-list` ile aynı günde bekleyen eski planlı kuvvet antrenmanı varsa `deleteWorkoutIds` listesine ekler.
      2. `calendar-change-ui` çağrısıyla `decisionUrl` ve `requestToken` alır, `POST decisionUrl` (`decision: "confirm"`) ile `allowedToken` üretir.
      3. `add-plan-training` aracını `calendarDate`, `allowedToken` ve `planTraining` ile çağırarak antrenmanı doğrudan **Tredict Canlı Takvimine** ve saatin **Güç (`Strength`)** menüsüne yazar.
-   - Eğer Tredict herhangi bir adımda `Unknown exerciseName` dönerse, köprü otomatik olarak yalnız o adımın `exerciseName` alanını kaldırıp (`exerciseCategory` + Türkçe `note` + `exerciseRepetitions` + `exerciseWeight` korunarak) işlemi hatasız tamamlar.
-3. **Yerel Köprü Çalıştırma & IIFE Oturum Kuralı:**
-   - Yerel köprü Windows üzerinde her zaman `node --use-system-ca scripts/tredict-local-bridge.mjs` komutuyla başlatılır.
+   - Eğer Tredict herhangi bir adımda `Unknown exerciseName` dönerse, geçiş servisi otomatik olarak yalnız o adımın `exerciseName` alanını kaldırıp (`exerciseCategory` + Türkçe `note` + `exerciseRepetitions` + `exerciseWeight` korunarak) işlemi hatasız tamamlar.
+3. **%100 Mobil, Çok Kullanıcılı ve Sıfır Bilgisayar Bağımlılığı Kuralı:**
+   - Garmin/Tredict entegrasyonu geliştiricinin veya kullanıcının bilgisayarının açık olmasına (`127.0.0.1`, yerel script veya bilgisayar arka plan servisi) **ASLA bağımlı olamaz**.
+   - Her sporcu kendi telefonundan, `Profil` sekmesindeki kendi izole bağlantısıyla 7/24 bulut geçiş kapısı üzerinden doğrudan saatine bağlanır; diğer kullanıcıların verisiyle asla karışmaz ve karşı servisten gerçek onay dönmeden *"saate aktarıldı"* bildirimi gösterilmez.
    - `js/app.js` IIFE içinde çalıştığından `garmin-tredict-bridge.js` aktif kullanıcıyı `window.getActiveUser` yerine doğrudan `localStorage.getItem('celik_kodu_session')` ve `localStorage.getItem('celik_kodu_active_user_id')` üzerinden okur.
 
 ---
@@ -67,4 +68,4 @@ Bu şef, **Çelik Kodu PWA** ile **Garmin Forerunner 945 / Tredict** arasındaki
 | **`workout-guard`** (2. Sekme) | Aktif antrenman adımlarını alıp Orijinal Manifesto kaydıyla saate gönderir. | Saatten dönen sağlık verilerini orijinal hareket adlarıyla aktif seansa işler. |
 | **`history-guard`** (4. Sekme) | — | Saatten dönen antrenmanı **bizdeki orijinal hareket adlarıyla + sağlık verileriyle** geçmişe yazar. |
 | **`analytics-guard`** (5. Sekme) | — | Orijinal kas gruplarının setlerini + kardiyak/TUT sağlık analizini teslim eder. |
-| **`profile-guard`** (6. Sekme) | Yerel bağlantı durumunu kontrol eder (`.tredict-token` asla buluta çıkmaz). | Köprü sağlık durumunu ve doğrulanan hareket sayısını bildirir. |
+| **`profile-guard`** (6. Sekme) | Kullanıcının kendi izole mobil saat bağlantı durumunu kontrol eder (kişisel anahtarlar ortak koleksiyonlara sızmaz). | 7/24 bulut bağlantı durumunu ve doğrulanan hareket sayısını bildirir. |

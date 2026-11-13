@@ -12188,7 +12188,7 @@ KESİN KURALLAR:
                 } catch(e) {}
             }
 
-            reports = (reports || []).filter(r => r && r.exerciseId !== 'garmin_outbox_relay');
+            reports = (reports || []).filter(r => r && !String(r._docId || r.id || '').startsWith('garmin_relay_') && !r.payloadJson);
 
             if (countEl) countEl.innerText = `${reports.length} Bildirim Havuzda`;
 
@@ -16297,8 +16297,50 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 if (raw) return JSON.parse(raw);
             } catch(e) {}
             const def = getDefaultWeeklySchedule();
-            saveWeeklySchedule(def, uid);
+            try { localStorage.setItem(key, JSON.stringify(def)); } catch(e) {}
             return def;
+        }
+
+        function stripScheduleUpdatedAtForCmp(slot) {
+            if (!slot || typeof slot !== 'object') return slot;
+            const copy = Object.assign({}, slot);
+            delete copy.updatedAt;
+            delete copy._explicitCardioUpdate;
+            return copy;
+        }
+
+        function persistWeeklyScheduleSlotSet(key, schedule, uid) {
+            try {
+                let prevSchedule = null;
+                try {
+                    const rawPrev = localStorage.getItem(key);
+                    if (rawPrev) prevSchedule = JSON.parse(rawPrev);
+                } catch (_) {}
+                const nowTs = Date.now();
+                if (schedule && typeof schedule === 'object') {
+                    [0, 1, 2, 3, 4, 5, 6].forEach(d => {
+                        const slot = schedule[d];
+                        if (!slot || typeof slot !== 'object') return;
+                        const prevSlot = prevSchedule && prevSchedule[d];
+                        if (slot._explicitCardioUpdate) {
+                            delete slot._explicitCardioUpdate;
+                            slot.updatedAt = nowTs;
+                            return;
+                        }
+                        const prevCardio = (prevSlot && Array.isArray(prevSlot.extraCardioSessions)) ? prevSlot.extraCardioSessions : [];
+                        const currCardio = Array.isArray(slot.extraCardioSessions) ? slot.extraCardioSessions : [];
+                        if (prevCardio.length > 0 || currCardio.length > 0) {
+                            slot.extraCardioSessions = mergeExtraCardioSessions(prevCardio, currCardio);
+                        }
+                        const changed = !prevSlot || JSON.stringify(stripScheduleUpdatedAtForCmp(prevSlot)) !== JSON.stringify(stripScheduleUpdatedAtForCmp(slot));
+                        if (changed || !slot.updatedAt) {
+                            slot.updatedAt = nowTs;
+                        }
+                    });
+                }
+                localStorage.setItem(key, JSON.stringify(schedule));
+                if (typeof window.scheduleUserStateCloudSync === 'function') window.scheduleUserStateCloudSync(uid);
+            } catch(e) {}
         }
 
         function mergeExtraCardioSessions(listA, listB) {
@@ -16321,32 +16363,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         function saveWeeklySchedule(schedule, targetUid) {
             const user = getActiveUser();
             const uid = targetUid || (user ? user.id : 'default');
-            const key = `celik_kodu_weekly_schedule_${uid}`;
-            try {
-                let prevSchedule = null;
-                try {
-                    const rawPrev = localStorage.getItem(key);
-                    if (rawPrev) prevSchedule = JSON.parse(rawPrev);
-                } catch (_) {}
-                if (schedule && typeof schedule === 'object') {
-                    [0, 1, 2, 3, 4, 5, 6].forEach(d => {
-                        const slot = schedule[d];
-                        if (!slot || typeof slot !== 'object') return;
-                        if (slot._explicitCardioUpdate) {
-                            delete slot._explicitCardioUpdate;
-                            return;
-                        }
-                        const prevSlot = prevSchedule && prevSchedule[d];
-                        const prevCardio = (prevSlot && Array.isArray(prevSlot.extraCardioSessions)) ? prevSlot.extraCardioSessions : [];
-                        const currCardio = Array.isArray(slot.extraCardioSessions) ? slot.extraCardioSessions : [];
-                        if (prevCardio.length > 0 || currCardio.length > 0) {
-                            slot.extraCardioSessions = mergeExtraCardioSessions(prevCardio, currCardio);
-                        }
-                    });
-                }
-                localStorage.setItem(key, JSON.stringify(schedule));
-                if (typeof window.scheduleUserStateCloudSync === 'function') window.scheduleUserStateCloudSync(uid);
-            } catch(e) {}
+            persistWeeklyScheduleSlotSet(`celik_kodu_weekly_schedule_${uid}`, schedule, uid);
         }
 
         // ==================== GELECEK HAFTA & AI REÇETE KÖPRÜSÜ ====================
@@ -16359,39 +16376,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 if (raw) return JSON.parse(raw);
             } catch(e) {}
             const def = getDefaultWeeklySchedule();
-            saveNextWeeklySchedule(def, uid);
+            try { localStorage.setItem(key, JSON.stringify(def)); } catch(e) {}
             return def;
         }
 
         function saveNextWeeklySchedule(schedule, targetUid) {
             const user = getActiveUser();
             const uid = targetUid || (user ? user.id : 'default');
-            const key = `celik_kodu_next_weekly_schedule_${uid}`;
-            try {
-                let prevSchedule = null;
-                try {
-                    const rawPrev = localStorage.getItem(key);
-                    if (rawPrev) prevSchedule = JSON.parse(rawPrev);
-                } catch (_) {}
-                if (schedule && typeof schedule === 'object') {
-                    [0, 1, 2, 3, 4, 5, 6].forEach(d => {
-                        const slot = schedule[d];
-                        if (!slot || typeof slot !== 'object') return;
-                        if (slot._explicitCardioUpdate) {
-                            delete slot._explicitCardioUpdate;
-                            return;
-                        }
-                        const prevSlot = prevSchedule && prevSchedule[d];
-                        const prevCardio = (prevSlot && Array.isArray(prevSlot.extraCardioSessions)) ? prevSlot.extraCardioSessions : [];
-                        const currCardio = Array.isArray(slot.extraCardioSessions) ? slot.extraCardioSessions : [];
-                        if (prevCardio.length > 0 || currCardio.length > 0) {
-                            slot.extraCardioSessions = mergeExtraCardioSessions(prevCardio, currCardio);
-                        }
-                    });
-                }
-                localStorage.setItem(key, JSON.stringify(schedule));
-                if (typeof window.scheduleUserStateCloudSync === 'function') window.scheduleUserStateCloudSync(uid);
-            } catch(e) {}
+            persistWeeklyScheduleSlotSet(`celik_kodu_next_weekly_schedule_${uid}`, schedule, uid);
         }
 
         function promoteNextWeekToCurrent(targetUid) {
@@ -17336,9 +17328,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                     <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 12px; color:#065F46; border-color:#10b981;" onclick="switchTab('historyTab'); closeScheduleDayModal();">
                                         📋 Tüm Geçmiş Günlüğünde Gör
                                     </button>
-                                    <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 10px; color:#DC2626; border-color:rgba(239,68,68,0.4);" onclick="deleteLogFromScheduleModal('${cLog.id}')">
-                                        🗑️ Bu Seans Kaydını Sil
-                                    </button>
+                                    <div style="display:flex; gap:6px; align-items:center;">
+                                        <button type="button" class="btn-edit-log" onclick="editWorkoutLog(decodeURIComponent('${encodeURIComponent(cLog.id)}'))" title="Antrenmanı Düzenle">
+                                            Düzenle
+                                        </button>
+                                        <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 10px; color:#DC2626; border-color:rgba(239,68,68,0.4);" onclick="deleteLogFromScheduleModal(decodeURIComponent('${encodeURIComponent(cLog.id)}'))">
+                                            🗑️ Bu Seans Kaydını Sil
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         `;
@@ -17534,9 +17531,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
         function deleteLogFromScheduleModal(id) {
             if (!confirm("Bu tamamlanan antrenman kaydını silmek istediğinize emin misiniz?")) return;
-            deleteLog(id);
-            if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
-            openScheduleDayModal(activeSchedulingDayIdx, activeSchedulingDateStr);
+            deleteLog(id, true);
         }
 
         function closeScheduleDayModal() {
@@ -19231,12 +19226,17 @@ KURALLAR:
             });
         }
 
-        function getAthleteCloudSeal(targetUid) {
+        function getAthleteCloudSeal(targetUid, colName = '') {
             const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : 'usr_admin');
+            const colSealKey = colName ? `celik_kodu_cloud_seal_${colName}_${uid}` : '';
             const sealKey = `celik_kodu_cloud_seal_${uid}`;
             try {
+                if (colSealKey) {
+                    const colSaved = localStorage.getItem(colSealKey);
+                    if (colSaved && colSaved.length >= 10) return colSaved;
+                }
                 const saved = localStorage.getItem(sealKey);
-                if (saved && saved.length >= 12) return saved;
+                if (saved && saved.length >= 10) return saved;
                 const localCred = typeof getLocalUserCred === 'function' ? getLocalUserCred(uid) : null;
                 if (localCred && localCred.passwordHash && String(localCred.passwordHash).length >= 16) {
                     const derived = 'seal_' + String(localCred.passwordHash).slice(0, 28);
@@ -19254,11 +19254,42 @@ KURALLAR:
             return 'seal_ck_v1_' + String(uid);
         }
 
+        function adoptCloudSyncSealIfPresent(colName, targetUid, cloudData) {
+            if (!targetUid || !cloudData || typeof cloudData.syncSeal !== 'string') return '';
+            const seal = cloudData.syncSeal.trim();
+            if (seal.length < 10 || seal.length > 120) return '';
+            try {
+                if (colName) localStorage.setItem(`celik_kodu_cloud_seal_${colName}_${targetUid}`, seal);
+                localStorage.setItem(`celik_kodu_cloud_seal_${targetUid}`, seal);
+            } catch {}
+            return seal;
+        }
+
+        async function writeAthleteDocWithSealHeal(colName, uid, buildPayloadFn) {
+            const docRef = fbDb.collection(colName).doc(uid);
+            const firstSeal = getAthleteCloudSeal(uid, colName);
+            try {
+                await docRef.set(buildPayloadFn(firstSeal), { merge: true });
+                return true;
+            } catch (err) {
+                const isPermErr = err && (err.code === 'permission-denied' || /permission|insufficient/i.test(String(err.message || '')));
+                if (!isPermErr) throw err;
+                const snap = await docRef.get();
+                const remoteSeal = snap.exists ? adoptCloudSyncSealIfPresent(colName, uid, snap.data()) : '';
+                if (!remoteSeal || remoteSeal === firstSeal) throw err;
+                await docRef.set(buildPayloadFn(remoteSeal), { merge: true });
+                return true;
+            }
+        }
+
         function markLocalUserStateModified(targetUid) {
             const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
             if (!uid) return;
             try {
                 localStorage.setItem(`celik_kodu_state_updated_at_${uid}`, String(Date.now()));
+                if (!IS_LOCAL_DEV) {
+                    localStorage.setItem(`celik_kodu_pending_state_sync_${uid}`, '1');
+                }
             } catch {}
         }
 
@@ -19520,29 +19551,52 @@ KURALLAR:
                     localStorage.setItem('celik_kodu_auth_users', JSON.stringify(Array.from(mergedMap.values())));
                     didHydrate = true;
                 }
-                if (snap.workout_logs && typeof snap.workout_logs === 'object') {
-                    Object.entries(snap.workout_logs).forEach(([uid, logs]) => {
-                        if (Array.isArray(logs) && logs.length > 0) {
+                const workoutLogsSource = snap.workout_logs || (snap.collections && snap.collections.workout_logs);
+                if (workoutLogsSource && typeof workoutLogsSource === 'object') {
+                    Object.entries(workoutLogsSource).forEach(([uid, entry]) => {
+                        const logs = Array.isArray(entry) ? entry : (entry && Array.isArray(entry.logs) ? entry.logs : []);
+                        if (logs.length > 0) {
+                            const deletedSet = new Set(typeof getDeletedWorkoutLogIds === 'function' ? getDeletedWorkoutLogIds(uid) : []);
                             const existing = getUserLogsById(uid);
                             const map = new Map();
-                            existing.forEach(l => map.set(l.id, l));
-                            logs.forEach(l => map.set(l.id, l));
+                            const pushLog = (l, preferOnTie) => {
+                                if (!l || !l.id) return;
+                                const lid = String(l.id);
+                                const gid = l.garminActivityId ? String(l.garminActivityId) : '';
+                                if (deletedSet.has(lid) || (gid && deletedSet.has(gid))) return;
+                                const prev = map.get(lid);
+                                if (!prev) {
+                                    map.set(lid, l);
+                                    return;
+                                }
+                                const prevEd = Number(prev.userEditedAt || 0);
+                                const nextEd = Number(l.userEditedAt || 0);
+                                if (nextEd > prevEd || (preferOnTie && nextEd === prevEd)) {
+                                    map.set(lid, l);
+                                }
+                            };
+                            logs.forEach(l => pushLog(l, false));
+                            existing.forEach(l => pushLog(l, true));
                             const merged = sortWorkoutLogsDesc(Array.from(map.values()));
                             localStorage.setItem(`celik_kodu_history_${uid}`, JSON.stringify(merged));
                         }
                     });
                     didHydrate = true;
                 }
-                if (snap.scale_logs && typeof snap.scale_logs === 'object') {
-                    Object.entries(snap.scale_logs).forEach(([uid, logs]) => {
-                        if (Array.isArray(logs) && logs.length > 0) {
+                const scaleLogsSource = snap.scale_logs || (snap.collections && snap.collections.scale_logs);
+                if (scaleLogsSource && typeof scaleLogsSource === 'object') {
+                    Object.entries(scaleLogsSource).forEach(([uid, entry]) => {
+                        const logs = Array.isArray(entry) ? entry : (entry && Array.isArray(entry.logs) ? entry.logs : []);
+                        if (logs.length > 0) {
                             localStorage.setItem(`celik_kodu_scale_${uid}`, JSON.stringify(logs));
                         }
                     });
                 }
-                if (snap.measurement_logs && typeof snap.measurement_logs === 'object') {
-                    Object.entries(snap.measurement_logs).forEach(([uid, logs]) => {
-                        if (Array.isArray(logs) && logs.length > 0) {
+                const measLogsSource = snap.measurement_logs || (snap.collections && snap.collections.measurement_logs);
+                if (measLogsSource && typeof measLogsSource === 'object') {
+                    Object.entries(measLogsSource).forEach(([uid, entry]) => {
+                        const logs = Array.isArray(entry) ? entry : (entry && Array.isArray(entry.logs) ? entry.logs : []);
+                        if (logs.length > 0) {
                             localStorage.setItem(`celik_kodu_measurements_${uid}`, JSON.stringify(logs));
                         }
                     });
@@ -19593,20 +19647,7 @@ KURALLAR:
             }
         }
 
-        async function fetchWorkoutLogsFromLocalBridge(uid) {
-            if (uid !== 'usr_admin') return [];
-            const urls = IS_LOCAL_DEV
-                ? [`/api/tredict/workout-logs?uid=${encodeURIComponent(uid)}`, `http://127.0.0.1:3847/api/tredict/workout-logs?uid=${encodeURIComponent(uid)}`]
-                : [`http://127.0.0.1:3847/api/tredict/workout-logs?uid=${encodeURIComponent(uid)}`];
-            for (const u of urls) {
-                try {
-                    const r = await fetch(u);
-                    if (r && r.ok) {
-                        const d = await r.json();
-                        if (d && Array.isArray(d.logs) && d.logs.length > 0) return d.logs;
-                    }
-                } catch {}
-            }
+        async function fetchWorkoutLogsFromLocalBridge() {
             return [];
         }
 
@@ -19639,6 +19680,7 @@ KURALLAR:
                     const doc = await docRef.get();
                     if (doc.exists) {
                         const data = doc.data();
+                        adoptCloudSyncSealIfPresent('workout_logs', uid, data);
                         if (data && Array.isArray(data.logs)) {
                             cloudLogs = data.logs;
                         }
@@ -19648,27 +19690,45 @@ KURALLAR:
                 console.warn("Antrenmanlar buluttan doğrudan çekilemedi:", err);
             }
 
-            const bridgeLogs = await fetchWorkoutLogsFromLocalBridge(uid);
-
+            const deletedSet = new Set(typeof getDeletedWorkoutLogIds === 'function' ? getDeletedWorkoutLogIds(uid) : []);
+            const cloudById = new Map();
+            cloudLogs.forEach(c => { if (c && c.id) cloudById.set(String(c.id), c); });
             const logMap = new Map();
+            let filteredCloudDeletion = false;
             const upsertLog = (l) => {
                 if (!l || !l.id) return;
-                const prev = logMap.get(l.id);
+                const lid = String(l.id);
+                const gid = l.garminActivityId ? String(l.garminActivityId) : '';
+                if (deletedSet.has(lid) || (gid && deletedSet.has(gid))) {
+                    filteredCloudDeletion = true;
+                    return;
+                }
+                const prev = logMap.get(lid);
                 if (!prev) {
-                    logMap.set(l.id, l);
+                    logMap.set(lid, l);
+                    return;
+                }
+                const prevEd = Number(prev.userEditedAt || 0);
+                const nextEd = Number(l.userEditedAt || 0);
+                if (prevEd > nextEd) {
+                    logMap.set(lid, Object.assign({}, prev, {
+                        garminActivityId: prev.garminActivityId || l.garminActivityId,
+                        healthSummary: prev.healthSummary || l.healthSummary
+                    }));
                 } else {
-                    logMap.set(l.id, Object.assign({}, prev, l, {
+                    logMap.set(lid, Object.assign({}, prev, l, {
                         garminActivityId: l.garminActivityId || prev.garminActivityId,
                         healthSummary: l.healthSummary || prev.healthSummary,
-                        exercises: (Array.isArray(l.exercises) && l.exercises.some(e => e && e.healthTelemetry))
+                        exercises: nextEd > prevEd
                             ? l.exercises
-                            : (Array.isArray(prev.exercises) && prev.exercises.some(e => e && e.healthTelemetry) ? prev.exercises : l.exercises)
+                            : ((Array.isArray(l.exercises) && l.exercises.some(e => e && e.healthTelemetry))
+                                ? l.exercises
+                                : (Array.isArray(prev.exercises) && prev.exercises.some(e => e && e.healthTelemetry) ? prev.exercises : l.exercises))
                     }));
                 }
             };
             cloudLogs.forEach(upsertLog);
             localLogs.forEach(upsertLog);
-            bridgeLogs.forEach(upsertLog);
 
             // Aynı gün gerçek uygulama kaydı varsa mükerrer garmin_... kaydını temizle
             const realDates = new Set();
@@ -19683,7 +19743,13 @@ KURALLAR:
                 }
             }
 
-            if (logMap.size > 0) {
+            const hasLocalEditNewerThanCloud = localLogs.some(l => {
+                if (!l || !l.id) return false;
+                const cloudMatch = cloudById.get(String(l.id));
+                return Number(l.userEditedAt || 0) > Number((cloudMatch && cloudMatch.userEditedAt) || 0);
+            });
+
+            if (logMap.size > 0 || (cloudLogs.length > 0 && filteredCloudDeletion)) {
                 const mergedLogs = sortWorkoutLogsDesc(Array.from(logMap.values()));
                 localStorage.setItem(`celik_kodu_history_${uid}`, JSON.stringify(mergedLogs));
                 if (window.GarminTredictChief && typeof window.GarminTredictChief.handoffCompletedActivitiesToTabChiefs === 'function') {
@@ -19692,7 +19758,7 @@ KURALLAR:
                 renderHistory();
                 applyWednesdayHammerCurlPatch();
 
-                if (!IS_LOCAL_DEV && (mergedLogs.length > cloudLogs.length || bridgeLogs.length > 0)) {
+                if (!IS_LOCAL_DEV && (mergedLogs.length !== cloudLogs.length || hasLocalEditNewerThanCloud || filteredCloudDeletion)) {
                     syncWorkoutLogsToCloud(mergedLogs, uid);
                 }
             }
@@ -19707,12 +19773,12 @@ KURALLAR:
             try {
                 updateCloudSyncBadge('syncing', 'Kaydediliyor...');
                 if (isFirebaseReady && fbDb && navigator.onLine !== false) {
-                    await fbDb.collection('workout_logs').doc(uid).set({
+                    await writeAthleteDocWithSealHeal('workout_logs', uid, (seal) => ({
                         logs: logs,
                         clientUpdatedAt: Date.now(),
-                        syncSeal: getAthleteCloudSeal(uid),
+                        syncSeal: seal,
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true });
+                    }));
                     localStorage.removeItem(`celik_kodu_pending_workout_sync_${uid}`);
                     updateCloudSyncBadge('synced', 'Bulut Aktif');
                 } else {
@@ -19744,17 +19810,36 @@ KURALLAR:
                     if (!Array.isArray(logs) || logs.length === 0) continue;
 
                     let fileModified = false;
+                    const deletedSet = (typeof getDeletedWorkoutLogIds === 'function')
+                        ? new Set(getDeletedWorkoutLogIds(uid))
+                        : new Set();
                     const nov9RecoveredLog = {"id":"log_1794246654598","date":"2026-11-09","dateFormatted":"9 Kas 2026 20:50","title":"Pazartesi: Tüm Vücut","program":"Pazartesi: Tüm Vücut","programName":"Pazartesi: Tüm Vücut","locationType":"salon","locationName":"Rodium","duration":59,"durationFormatted":"59:30","durationSecs":3570,"rpe":"RPE 8 (İdeal, cepte 2 tekrar kaldı)","notes":"","totalVolumeKg":5616.8,"totalSetsCompleted":27,"totalRepsCompleted":276,"totalIsometricSecsCompleted":20,"muscleGroups":["Kanatlar (Sırt Genişliği)","Orta Sırt & Kürek Kemiği Kasları","Arka Bacak (Kalçadan Eğilen Üst/Uzun Kısım)","Ana Kalça Kası","Orta Göğüs","Ön Bacak (Diz Üstü İç ve Dış Kısım)","Ana ve Yan Kalça","Ön Omuz","Yan Omuz","Ön Karın (Üst ve Alt Karın)","Derin İç Karın","Ön Kalça Kası","Triceps İç / Uzun Kısım","Triceps Dış Kısım","Ön Bacak & Ana Kalça Kası","Orta Göğüs & Ön Omuz","Derin İç Karın (Korse Kası)"],"exercises":[{"id":"db_rotational_gorilla_row","name":"Rotasyonel Gorilla Row","equipment":"dumbbell","category":"pull","muscle":"Kanatlar (Sırt Genişliği), Orta Sırt & Kürek Kemiği Kasları","cue":"Geniş sumo menteşesinde bir dambılı yere bastırırken diğerini gövdeyi döndürerek kaburgaya patlayıcı çek.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":10,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":120,"interSet":null,"heartrate":114,"heartrateMax":124,"durationSec":82,"watchStartTime":"2026-11-09T16:51:44.000Z","matchedBy":"sequence"},{"setNo":2,"weight":10,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":120,"interSet":null,"heartrate":122,"heartrateMax":131,"durationSec":25,"watchStartTime":"2026-11-09T16:53:17.000Z","matchedBy":"sequence"},{"setNo":3,"weight":10,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":120,"interSet":null,"heartrate":135,"heartrateMax":138,"durationSec":26,"watchStartTime":"2026-11-09T16:55:10.000Z","matchedBy":"sequence"}],"completedSetsCount":3,"maxWeight":10,"maxReps":12,"exerciseVolume":360,"healthTelemetry":{"avgHeartrate":119,"peakHeartrate":131,"totalTimeUnderTensionSec":118}},{"id":"db_rdl","name":"Dambıl RDL","equipment":"dumbbell","category":"legs_hinge","muscle":"Arka Bacak (Kalçadan Eğilen Üst/Uzun Kısım), Ana Kalça Kası","cue":"Dizleri hafif kırık sabitle, kalçayı arkadaki duvara değdirir gibi geriye uzat, sırtı masa gibi düz tut.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":15,"reps":15,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":225,"interSet":null,"heartrate":119,"heartrateMax":126,"durationSec":57,"watchStartTime":"2026-11-09T16:57:54.000Z","matchedBy":"sequence"},{"setNo":2,"weight":17.5,"reps":15,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":263,"interSet":null,"heartrate":122,"heartrateMax":137,"durationSec":81,"watchStartTime":"2026-11-09T16:59:05.000Z","matchedBy":"sequence"},{"setNo":3,"weight":20,"reps":15,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":300,"interSet":null,"heartrate":129,"heartrateMax":129,"durationSec":2,"watchStartTime":"2026-11-09T17:01:00.000Z","matchedBy":"sequence"}],"completedSetsCount":3,"maxWeight":20,"maxReps":15,"exerciseVolume":788,"healthTelemetry":{"avgHeartrate":131,"peakHeartrate":141,"totalTimeUnderTensionSec":252}},{"id":"db_bench_press","name":"Dambıl Bench Press","equipment":"dumbbell","category":"push","muscle":"Orta Göğüs","cue":"Dirsekleri gövdeye 45° açıda tut, dambılları yukarıda çarpmadan göğüs kaslarını sıkarak kilitle.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":35,"reps":9,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":315,"interSet":null,"heartrate":134,"heartrateMax":148,"durationSec":63,"watchStartTime":"2026-11-09T17:02:18.000Z","matchedBy":"sequence"},{"setNo":2,"weight":30,"reps":10,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":300,"interSet":null,"heartrate":142,"heartrateMax":144,"durationSec":66,"watchStartTime":"2026-11-09T17:03:32.000Z","matchedBy":"sequence"},{"setNo":3,"weight":30,"reps":10,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":300,"interSet":null,"heartrate":126,"heartrateMax":139,"durationSec":69,"watchStartTime":"2026-11-09T17:07:47.000Z","matchedBy":"sequence"}],"completedSetsCount":3,"maxWeight":35,"maxReps":10,"exerciseVolume":915,"healthTelemetry":{"avgHeartrate":121,"peakHeartrate":137,"totalTimeUnderTensionSec":152}},{"id":"db_seesaw_lunge","name":"Dambıl Seesaw Lunge (Dinamik İleri-Geri Lunge)","equipment":"dumbbell","category":"legs_quad","muscle":"Ön Bacak (Diz Üstü İç ve Dış Kısım), Ana ve Yan Kalça","cue":"Öne lunge ile 90° çöküşten dönerken ayağı orta hatta yere basmadan sarkaç gibi kesintisiz geriye lunge fazına aktarın.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":7.5,"reps":6,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":45,"interSet":null,"heartrate":132,"heartrateMax":144,"durationSec":43,"watchStartTime":"2026-11-09T17:09:28.000Z","matchedBy":"sequence"},{"setNo":2,"weight":7.5,"reps":6,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":45,"interSet":null,"heartrate":132,"heartrateMax":147,"durationSec":111,"watchStartTime":"2026-11-09T17:14:10.000Z","matchedBy":"sequence"},{"setNo":3,"weight":2.5,"reps":6,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":15,"interSet":null,"heartrate":138,"heartrateMax":138,"durationSec":1,"watchStartTime":"2026-11-09T17:22:19.000Z","matchedBy":"sequence"}],"completedSetsCount":3,"maxWeight":7.5,"maxReps":6,"exerciseVolume":105,"healthTelemetry":{"avgHeartrate":131,"peakHeartrate":138,"totalTimeUnderTensionSec":112}},{"id":"db_push_press","name":"Dambıl Push Press","equipment":"dumbbell","category":"push","muscle":"Ön Omuz, Yan Omuz","cue":"Dambıllar omuzdayken dizleri 20° hafifçe büküp yaylan, bacaklardan aldığın yaylanma gücüyle dambılları baş üstüne fırlat.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":7.5,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":90,"interSet":null,"heartrate":133,"heartrateMax":137,"durationSec":26,"watchStartTime":"2026-11-09T17:26:45.000Z","matchedBy":"sequence"},{"setNo":2,"weight":10,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":120,"interSet":{"id":"bw_burpee","name":"Burpee","muscle":"Ön Bacak & Ana Kalça Kası, Orta Göğüs & Ön Omuz","category":"conditioning","equipment":"bodyweight","metricType":"reps","value":10,"completed":true},"heartrate":131,"heartrateMax":131,"durationSec":2,"watchStartTime":"2026-11-09T17:27:31.000Z","matchedBy":"sequence"},{"setNo":3,"weight":12.5,"reps":10,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":125,"interSet":null,"heartrate":131,"heartrateMax":131,"durationSec":1,"watchStartTime":"2026-11-09T17:28:19.000Z","matchedBy":"sequence"}],"completedSetsCount":3,"maxWeight":12.5,"maxReps":12,"exerciseVolume":335,"healthTelemetry":{"avgHeartrate":140,"peakHeartrate":148,"totalTimeUnderTensionSec":141}},{"id":"bw_mountain_climber","name":"Mountain Climber","equipment":"bodyweight","category":"core","muscle":"Ön Karın (Üst ve Alt Karın), Derin İç Karın, Ön Kalça Kası","cue":"Yüksek şınav pozisyonunda kalçayı kaldırmadan dizleri sırayla koşar adım göğse çek.","isBodyweight":true,"isTimeBased":false,"sets":[{"setNo":1,"weight":0,"reps":15,"isBodyweight":true,"isTimeBased":false,"completed":true,"volume":675,"interSet":null,"heartrate":122,"heartrateMax":127,"durationSec":24,"watchStartTime":"2026-11-09T17:30:02.000Z","matchedBy":"sequence"},{"setNo":2,"weight":0,"reps":15,"isBodyweight":true,"isTimeBased":false,"completed":true,"volume":675,"interSet":null,"heartrate":128,"heartrateMax":135,"durationSec":44,"watchStartTime":"2026-11-09T17:30:57.000Z","matchedBy":"sequence"},{"setNo":3,"weight":0,"reps":15,"isBodyweight":true,"isTimeBased":false,"completed":true,"volume":675,"interSet":null,"heartrate":137,"heartrateMax":137,"durationSec":1,"watchStartTime":"2026-11-09T17:31:55.000Z","matchedBy":"sequence"}],"completedSetsCount":3,"maxWeight":0,"maxReps":15,"exerciseVolume":2025,"healthTelemetry":{"avgHeartrate":128,"peakHeartrate":142,"totalTimeUnderTensionSec":289}},{"id":"db_skullcrusher","name":"Dambıl Skullcrusher","equipment":"dumbbell","category":"push","muscle":"Triceps İç / Uzun Kısım, Triceps Dış Kısım","cue":"Düz sehpada dirsekleri omuz hizasında dikey sabitle, dambılları şakaklara indirip triceps ile uzat.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":7.5,"reps":8,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":60,"interSet":null,"heartrate":133,"heartrateMax":136,"durationSec":32,"watchStartTime":"2026-11-09T17:32:02.000Z","matchedBy":"sequence"},{"setNo":2,"weight":7.5,"reps":8,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":60,"interSet":{"id":"bw_plank","name":"Plank","muscle":"Derin İç Karın (Korse Kası), Ön Karın (Üst ve Alt Karın)","category":"core","equipment":"bodyweight","metricType":"time","value":20,"completed":true},"heartrate":121,"heartrateMax":135,"durationSec":37,"watchStartTime":"2026-11-09T17:34:20.000Z","matchedBy":"sequence"},{"setNo":3,"weight":7.5,"reps":6,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":45,"interSet":null,"heartrate":132,"heartrateMax":132,"durationSec":5,"watchStartTime":"2026-11-09T17:35:22.000Z","matchedBy":"sequence"}],"completedSetsCount":3,"maxWeight":7.5,"maxReps":8,"exerciseVolume":165,"healthTelemetry":{"avgHeartrate":131,"peakHeartrate":151,"totalTimeUnderTensionSec":393}},{"id":"db_lateral_raise","name":"Dambıl Lateral Raise","equipment":"dumbbell","category":"push","muscle":"Yan Omuz","cue":"Dirsekleri hafif kırık tut, kolları omuz hizasına kadar sürahi döker gibi kaldır.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":7.5,"reps":10,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":75,"interSet":null,"heartrate":130,"heartrateMax":133,"durationSec":37,"watchStartTime":"2026-11-09T17:35:36.000Z","matchedBy":"sequence"},{"setNo":2,"weight":7.5,"reps":10,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":75,"interSet":null,"heartrate":124,"heartrateMax":128,"durationSec":35,"watchStartTime":"2026-11-09T17:38:44.000Z","matchedBy":"sequence"},{"setNo":3,"weight":7.5,"reps":10,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":75,"interSet":null,"heartrate":118,"heartrateMax":122,"durationSec":34,"watchStartTime":"2026-11-09T17:41:01.000Z","matchedBy":"sequence"},{"setNo":4,"weight":5,"reps":7,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":35,"interSet":null,"heartrate":120,"heartrateMax":132,"durationSec":108,"watchStartTime":"2026-11-09T17:41:41.000Z","matchedBy":"sequence"}],"completedSetsCount":4,"maxWeight":7.5,"maxReps":10,"exerciseVolume":260,"healthTelemetry":{"avgHeartrate":131,"peakHeartrate":146,"totalTimeUnderTensionSec":670}},{"id":"bw_burpee","name":"Burpee (Set Arası)","equipment":"bodyweight","category":"conditioning","muscle":"Ön Bacak & Ana Kalça Kası, Orta Göğüs & Ön Omuz","cue":"Set arası aktif dinlenme / ilave hareket.","isBodyweight":true,"isTimeBased":false,"isInterSetExtra":true,"sets":[{"setNo":1,"weight":0,"reps":10,"isBodyweight":true,"isTimeBased":false,"completed":true,"volume":450,"heartrate":121,"heartrateMax":128,"durationSec":29,"watchStartTime":"2026-11-09T17:45:26.000Z","matchedBy":"sequence"}],"completedSetsCount":1,"maxWeight":0,"maxReps":10,"exerciseVolume":450,"healthTelemetry":{"avgHeartrate":136,"peakHeartrate":137,"totalTimeUnderTensionSec":20}},{"id":"bw_plank","name":"Plank (Set Arası)","equipment":"bodyweight","category":"core","muscle":"Derin İç Karın (Korse Kası), Ön Karın (Üst ve Alt Karın)","cue":"Set arası aktif dinlenme / ilave hareket.","isBodyweight":true,"isTimeBased":true,"isInterSetExtra":true,"sets":[{"setNo":1,"weight":0,"reps":20,"isBodyweight":true,"isTimeBased":true,"completed":true,"volume":214,"heartrate":116,"heartrateMax":134,"durationSec":41,"watchStartTime":"2026-11-09T17:47:22.000Z","matchedBy":"sequence"}],"completedSetsCount":1,"maxWeight":0,"maxReps":20,"exerciseVolume":214,"healthTelemetry":{"avgHeartrate":131,"peakHeartrate":131,"totalTimeUnderTensionSec":2}}],"timestamp":1794246654602,"garminActivityId":"sfWR98KCBGqhDxBKYXULr2","healthSummary":{"durationTotalSec":3581,"durationSetsSec":1142,"durationRestSec":2440,"calories":375,"heartrateAvg":127,"heartrateMax":151}};
-                    const nov9Idx = logs.findIndex(l => l && (l.id === 'log_1794246654598' || String(l.date || '').slice(0, 10) === '2026-11-09'));
-                    if (nov9Idx === -1) {
-                        logs.unshift(nov9RecoveredLog);
-                        sortWorkoutLogsDesc(logs);
-                        fileModified = true;
-                        anyModified = true;
-                    } else if (!logs[nov9Idx].healthSummary || !logs[nov9Idx].garminActivityId) {
-                        logs[nov9Idx] = Object.assign({}, logs[nov9Idx], nov9RecoveredLog);
-                        fileModified = true;
-                        anyModified = true;
+                    if (!deletedSet.has('log_1794246654598') && !deletedSet.has('sfWR98KCBGqhDxBKYXULr2') && !deletedSet.has('garmin_sfWR98KCBGqhDxBKYXULr2')) {
+                        const nov9Idx = logs.findIndex(l => l && (l.id === 'log_1794246654598' || String(l.date || '').slice(0, 10) === '2026-11-09'));
+                        if (nov9Idx === -1) {
+                            logs.unshift(nov9RecoveredLog);
+                            sortWorkoutLogsDesc(logs);
+                            fileModified = true;
+                            anyModified = true;
+                        } else if ((!logs[nov9Idx].healthSummary || !logs[nov9Idx].garminActivityId) && !logs[nov9Idx].userEditedAt) {
+                            logs[nov9Idx] = Object.assign({}, logs[nov9Idx], nov9RecoveredLog);
+                            fileModified = true;
+                            anyModified = true;
+                        }
+                    }
+                    const nov13RecoveredLog = {"id":"garmin_ezUmorGZxaWoPigQdmGbrX","garminActivityId":"ezUmorGZxaWoPigQdmGbrX","sourceChief":"garmin-tredict-guard","date":"2026-11-13","dateFormatted":"13 Kas 2026 19:26","timestamp":1794587163223,"program":"⚔️ Cuma: Cuma: Tüm Vücut","title":"⚔️ Cuma: Cuma: Tüm Vücut","locationType":"salon","locationName":"Garmin FR945","duration":44,"durationFormatted":"44:27","durationSecs":2667,"totalVolumeKg":5387.5,"totalSetsCompleted":25,"totalRepsCompleted":277,"totalIsometricSecsCompleted":0,"muscleGroups":["Arka Bacak","Arka Bacak & Kalça Bağı","Ana Kalça","Arka Kol Uzun Baş","Pazı İç Baş","Pazı Dış Baş","Üst Göğüs","Kanatlar","Yan Omuz","Dış Ön Bacak","İç Ön Bacak","Yan Karın","Derin İç Karın"],"exercises":[{"id":"db_rdl","name":"Dambıl RDL","equipment":"dumbbell","category":"legs_hinge","muscle":"Arka Bacak, Arka Bacak & Kalça Bağı, Ana Kalça","cue":"Dizleri hafif kırık sabitle, kalçayı arkadaki duvara değdirir gibi geriye uzat, sırtı masa gibi düz tut.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":15,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":180,"interSet":null,"heartrate":93,"heartrateMax":101,"durationSec":55,"watchStartTime":"2026-11-13T16:26:03.000Z","matchedBy":"planned_workout_step"},{"setNo":2,"weight":17.5,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":210,"interSet":null,"heartrate":97,"heartrateMax":106,"durationSec":53,"watchStartTime":"2026-11-13T16:27:43.000Z","matchedBy":"planned_workout_step"},{"setNo":3,"weight":17.5,"reps":15,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":262.5,"interSet":null,"heartrate":105,"heartrateMax":112,"durationSec":58,"watchStartTime":"2026-11-13T16:29:36.000Z","matchedBy":"planned_workout_step"}],"completedSetsCount":3,"maxWeight":17.5,"maxReps":15,"exerciseVolume":652.5,"healthTelemetry":{"avgHeartrate":98,"peakHeartrate":112,"totalTimeUnderTensionSec":166}},{"id":"db_triceps_overhead","name":"Dambıl Başüstü Triceps","equipment":"dumbbell","category":"push","muscle":"Arka Kol Uzun Baş","cue":"Dirsekleri başın iki yanında tavana bakacak şekilde sabit tut, sadece ön kolları büküp baş arkasından uzat.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":12.5,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":150,"interSet":null,"heartrate":91,"heartrateMax":107,"durationSec":48,"watchStartTime":"2026-11-13T16:31:44.000Z","matchedBy":"planned_workout_step"},{"setNo":2,"weight":12.5,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":150,"interSet":null,"heartrate":110,"heartrateMax":115,"durationSec":44,"watchStartTime":"2026-11-13T16:33:21.000Z","matchedBy":"planned_workout_step"},{"setNo":3,"weight":10,"reps":0,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":0,"interSet":null,"heartrate":122,"heartrateMax":122,"durationSec":8,"watchStartTime":"2026-11-13T16:35:05.000Z","matchedBy":"planned_workout_step"}],"completedSetsCount":3,"maxWeight":12.5,"maxReps":12,"exerciseVolume":300,"healthTelemetry":{"avgHeartrate":102,"peakHeartrate":122,"totalTimeUnderTensionSec":100}},{"id":"mach_cable_biceps","name":"Kablo Biceps Curl","equipment":"machine","category":"pull","muscle":"Pazı İç Baş, Pazı Dış Baş","cue":"Düşük makarada düz barı tut, dirsekleri sabit tutarak kablonun sürekli geriliminde biceps kaslarını sık.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":12,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":144,"interSet":null,"heartrate":116,"heartrateMax":119,"durationSec":31,"watchStartTime":"2026-11-13T16:35:28.000Z","matchedBy":"planned_workout_step"},{"setNo":2,"weight":20,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":240,"interSet":null,"heartrate":131,"heartrateMax":135,"durationSec":21,"watchStartTime":"2026-11-13T16:36:44.000Z","matchedBy":"planned_workout_step"},{"setNo":3,"weight":20,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":240,"interSet":null,"heartrate":114,"heartrateMax":122,"durationSec":26,"watchStartTime":"2026-11-13T16:37:44.000Z","matchedBy":"planned_workout_step"}],"completedSetsCount":3,"maxWeight":20,"maxReps":12,"exerciseVolume":624,"healthTelemetry":{"avgHeartrate":119,"peakHeartrate":135,"totalTimeUnderTensionSec":78}},{"id":"bb_incline_bench","name":"Incline Barbell Bench","equipment":"barbell","category":"push","muscle":"Üst Göğüs","cue":"30° açılı sehpada barı köprücük kemiğinin hemen altına indir, üst göğüs lifleriyle yukarı presle.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":30,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":360,"interSet":null,"heartrate":119,"heartrateMax":131,"durationSec":101,"watchStartTime":"2026-11-13T16:38:56.000Z","matchedBy":"planned_workout_step"},{"setNo":2,"weight":30,"reps":10,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":300,"interSet":null,"heartrate":125,"heartrateMax":133,"durationSec":49,"watchStartTime":"2026-11-13T16:41:51.000Z","matchedBy":"planned_workout_step"},{"setNo":3,"weight":30,"reps":7,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":210,"interSet":null,"heartrate":122,"heartrateMax":127,"durationSec":59,"watchStartTime":"2026-11-13T16:43:49.000Z","matchedBy":"planned_workout_step"}],"completedSetsCount":3,"maxWeight":30,"maxReps":12,"exerciseVolume":870,"healthTelemetry":{"avgHeartrate":121,"peakHeartrate":133,"totalTimeUnderTensionSec":209}},{"id":"mach_lat_pulldown","name":"Lat Pulldown","equipment":"machine","category":"pull","muscle":"Kanatlar","cue":"Bacak pedine sıkıca otur, barı üst göğse doğru dirsekleri kaburgalara çekerek indir, arkaya aşırı yatma.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":25,"reps":15,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":375,"interSet":null,"heartrate":122,"heartrateMax":131,"durationSec":91,"watchStartTime":"2026-11-13T16:46:02.000Z","matchedBy":"planned_workout_step"},{"setNo":2,"weight":30,"reps":15,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":450,"interSet":null,"heartrate":125,"heartrateMax":130,"durationSec":43,"watchStartTime":"2026-11-13T16:48:25.000Z","matchedBy":"planned_workout_step"},{"setNo":3,"weight":40,"reps":15,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":600,"interSet":null,"heartrate":120,"heartrateMax":124,"durationSec":43,"watchStartTime":"2026-11-13T16:50:08.000Z","matchedBy":"planned_workout_step"}],"completedSetsCount":3,"maxWeight":40,"maxReps":15,"exerciseVolume":1425,"healthTelemetry":{"avgHeartrate":122,"peakHeartrate":131,"totalTimeUnderTensionSec":177}},{"id":"db_lateral_raise","name":"Dambıl Lateral Raise","equipment":"dumbbell","category":"push","muscle":"Yan Omuz","cue":"Dirsekleri hafif kırık tut, kolları omuz hizasına kadar sürahi döker gibi kaldır.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":7.5,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":90,"interSet":null,"heartrate":112,"heartrateMax":120,"durationSec":53,"watchStartTime":"2026-11-13T16:51:51.000Z","matchedBy":"planned_workout_step"},{"setNo":2,"weight":7.5,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":90,"interSet":null,"heartrate":120,"heartrateMax":124,"durationSec":44,"watchStartTime":"2026-11-13T16:53:29.000Z","matchedBy":"planned_workout_step"},{"setNo":3,"weight":7,"reps":16,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":112,"interSet":null,"heartrate":121,"heartrateMax":127,"durationSec":59,"watchStartTime":"2026-11-13T16:54:57.000Z","matchedBy":"planned_workout_step"}],"completedSetsCount":3,"maxWeight":7.5,"maxReps":16,"exerciseVolume":292,"healthTelemetry":{"avgHeartrate":118,"peakHeartrate":127,"totalTimeUnderTensionSec":156}},{"id":"db_goblet_squat","name":"Dambıl Goblet Squat","equipment":"dumbbell","category":"legs_quad","muscle":"Dış Ön Bacak, İç Ön Bacak","cue":"Dambılı göğsüne dikey yapıştır, topuklar yerden kalkmadan dirsekler dizlerin içine değene kadar çömel.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":12.5,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":150,"interSet":null,"heartrate":121,"heartrateMax":145,"durationSec":49,"watchStartTime":"2026-11-13T16:56:00.000Z","matchedBy":"planned_workout_step"},{"setNo":2,"weight":15,"reps":4,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":60,"interSet":null,"heartrate":132,"heartrateMax":141,"durationSec":36,"watchStartTime":"2026-11-13T16:57:49.000Z","matchedBy":"planned_workout_step"},{"setNo":3,"weight":17.5,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":210,"interSet":null,"heartrate":135,"heartrateMax":147,"durationSec":115,"watchStartTime":"2026-11-13T16:59:13.000Z","matchedBy":"planned_workout_step"}],"completedSetsCount":3,"maxWeight":17.5,"maxReps":12,"exerciseVolume":420,"healthTelemetry":{"avgHeartrate":131,"peakHeartrate":147,"totalTimeUnderTensionSec":200}},{"id":"mach_cable_woodchopper","name":"Kablo Woodchopper","equipment":"machine","category":"core","muscle":"Yan Karın, Derin İç Karın","cue":"Yüksek makaradan tutacağı çift elle kavra, kolları düz tutarak gövde rotasyonuyla zıt diz yönüne çapraz çek.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":25,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":300,"interSet":null,"heartrate":136,"heartrateMax":155,"durationSec":172,"watchStartTime":"2026-11-13T17:02:10.000Z","matchedBy":"planned_workout_step"},{"setNo":2,"weight":22,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":264,"interSet":null,"heartrate":144,"heartrateMax":155,"durationSec":83,"watchStartTime":"2026-11-13T17:05:47.000Z","matchedBy":"planned_workout_step"},{"setNo":3,"weight":20,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":240,"interSet":null,"heartrate":137,"heartrateMax":155,"durationSec":117,"watchStartTime":"2026-11-13T17:07:55.000Z","matchedBy":"planned_workout_step"}],"completedSetsCount":3,"maxWeight":25,"maxReps":12,"exerciseVolume":804,"healthTelemetry":{"avgHeartrate":138,"peakHeartrate":155,"totalTimeUnderTensionSec":372}},{"id":"mach_cable_biceps","name":"Kablo Biceps Curl","equipment":"machine","category":"pull","muscle":"Pazı İç Baş, Pazı Dış Baş","cue":"Düşük makarada düz barı tut, dirsekleri sabit tutarak kablonun sürekli geriliminde biceps kaslarını sık.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":0,"reps":0,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":0,"interSet":null,"heartrate":139,"heartrateMax":140,"durationSec":2,"watchStartTime":"2026-11-13T17:10:28.000Z","matchedBy":"watch_category_extra"}],"completedSetsCount":1,"maxWeight":0,"maxReps":0,"exerciseVolume":0,"healthTelemetry":{"avgHeartrate":139,"peakHeartrate":140,"totalTimeUnderTensionSec":2},"isInterSetExtra":true}],"healthSummary":{"durationTotalSec":2667,"durationSetsSec":1459,"durationRestSec":1207,"calories":287,"heartrateAvg":122,"heartrateMax":156},"programName":"⚔️ Cuma: Cuma: Tüm Vücut"};
+                    if (!deletedSet.has('garmin_ezUmorGZxaWoPigQdmGbrX') && !deletedSet.has('ezUmorGZxaWoPigQdmGbrX')) {
+                        const nov13Idx = logs.findIndex(l => l && (String(l.id || '') === 'garmin_ezUmorGZxaWoPigQdmGbrX' || String(l.garminActivityId || '') === 'ezUmorGZxaWoPigQdmGbrX'));
+                        if (nov13Idx === -1) {
+                            logs.unshift(nov13RecoveredLog);
+                            sortWorkoutLogsDesc(logs);
+                            fileModified = true;
+                            anyModified = true;
+                        } else if ((!logs[nov13Idx].healthSummary || !logs[nov13Idx].garminActivityId) && !logs[nov13Idx].userEditedAt) {
+                            logs[nov13Idx] = Object.assign({}, logs[nov13Idx], nov13RecoveredLog);
+                            fileModified = true;
+                            anyModified = true;
+                        }
                     }
                     logs.forEach(log => {
                         const logDate = String(log.date || '').split('T')[0];
@@ -19762,7 +19847,7 @@ KURALLAR:
                                       (log.dateFormatted && log.dateFormatted.includes('7 Eki 2026')) ||
                                       (log.dateFormatted && log.dateFormatted.includes('07.10.2026'));
 
-                        if (isWed) {
+                        if (isWed && !log.userEditedAt) {
                             if (!Array.isArray(log.exercises)) log.exercises = [];
                             const alreadyHasHammer = log.exercises.some(e => 
                                 e.id === 'db_hammer_curl' || 
@@ -19835,6 +19920,7 @@ KURALLAR:
 
                 if (doc.exists) {
                     const data = doc.data();
+                    adoptCloudSyncSealIfPresent('scale_logs', uid, data);
                     if (data && Array.isArray(data.logs)) {
                         const logMap = new Map();
                         localLogs.forEach(l => logMap.set(l.id, l));
@@ -19845,12 +19931,12 @@ KURALLAR:
                     }
                 }
                 if (!IS_LOCAL_DEV && localLogs.length > 0) {
-                    await docRef.set({
+                    await writeAthleteDocWithSealHeal('scale_logs', uid, (seal) => ({
                         logs: localLogs,
                         clientUpdatedAt: Date.now(),
-                        syncSeal: getAthleteCloudSeal(uid),
+                        syncSeal: seal,
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true });
+                    }));
                 }
             } catch(e) {}
         }
@@ -19859,12 +19945,12 @@ KURALLAR:
             if (IS_LOCAL_DEV) return;
             if (!isFirebaseReady || !fbDb || !uid) return;
             try {
-                await fbDb.collection('scale_logs').doc(uid).set({
+                await writeAthleteDocWithSealHeal('scale_logs', uid, (seal) => ({
                     logs: logs,
                     clientUpdatedAt: Date.now(),
-                    syncSeal: getAthleteCloudSeal(uid),
+                    syncSeal: seal,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
+                }));
             } catch(e) {}
         }
 
@@ -19877,6 +19963,7 @@ KURALLAR:
 
                 if (doc.exists) {
                     const data = doc.data();
+                    adoptCloudSyncSealIfPresent('measurement_logs', uid, data);
                     if (data && Array.isArray(data.logs)) {
                         const logMap = new Map();
                         localLogs.forEach(l => logMap.set(l.id, l));
@@ -19887,12 +19974,12 @@ KURALLAR:
                     }
                 }
                 if (!IS_LOCAL_DEV && localLogs.length > 0) {
-                    await docRef.set({
+                    await writeAthleteDocWithSealHeal('measurement_logs', uid, (seal) => ({
                         logs: localLogs,
                         clientUpdatedAt: Date.now(),
-                        syncSeal: getAthleteCloudSeal(uid),
+                        syncSeal: seal,
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true });
+                    }));
                 }
             } catch(e) {}
         }
@@ -19901,12 +19988,12 @@ KURALLAR:
             if (IS_LOCAL_DEV) return;
             if (!isFirebaseReady || !fbDb || !uid) return;
             try {
-                await fbDb.collection('measurement_logs').doc(uid).set({
+                await writeAthleteDocWithSealHeal('measurement_logs', uid, (seal) => ({
                     logs: logs,
                     clientUpdatedAt: Date.now(),
-                    syncSeal: getAthleteCloudSeal(uid),
+                    syncSeal: seal,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
+                }));
             } catch(e) {}
         }
 
@@ -19925,6 +20012,80 @@ KURALLAR:
         }
         window.scheduleUserStateCloudSync = scheduleUserStateCloudSync;
 
+        function stripWatchBridgeSecretsFromObj(val) {
+            if (!val || typeof val !== 'object') return val;
+            if (Array.isArray(val)) return val.map(stripWatchBridgeSecretsFromObj);
+            const clean = {};
+            for (const [k, v] of Object.entries(val)) {
+                if (k === 'tredictToken' || k === 'intervalsToken') continue;
+                clean[k] = stripWatchBridgeSecretsFromObj(v);
+            }
+            return clean;
+        }
+
+        function scheduleHasActiveWorkoutContent(sched) {
+            if (!sched || typeof sched !== 'object') return false;
+            return [0, 1, 2, 3, 4, 5, 6].some(d => {
+                const s = sched[d];
+                if (!s || typeof s !== 'object') return false;
+                if (!s.rest) {
+                    if (Array.isArray(s.exercises) && s.exercises.length > 0) return true;
+                    if (s.customWorkout && Array.isArray(s.customWorkout.exercises) && s.customWorkout.exercises.length > 0) return true;
+                    if (s.program) return true;
+                }
+                return Array.isArray(s.extraCardioSessions) && s.extraCardioSessions.length > 0;
+            });
+        }
+
+        function scheduleSlotHasContent(slot) {
+            if (!slot || typeof slot !== 'object') return false;
+            if (!slot.rest) {
+                if (Array.isArray(slot.exercises) && slot.exercises.length > 0) return true;
+                if (slot.customWorkout && Array.isArray(slot.customWorkout.exercises) && slot.customWorkout.exercises.length > 0) return true;
+                if (slot.program) return true;
+            }
+            return Array.isArray(slot.extraCardioSessions) && slot.extraCardioSessions.length > 0;
+        }
+
+        function mergeWeeklyScheduleSafely(storageKey, cloudSched, cloudUpdatedAt, localUpdatedAt, isPendingLocal) {
+            if (!cloudSched || typeof cloudSched !== 'object' || Object.keys(cloudSched).length === 0) return;
+            let localSched = null;
+            try {
+                const raw = localStorage.getItem(storageKey);
+                if (raw) localSched = JSON.parse(raw);
+            } catch {}
+
+            if (!localSched || Object.keys(localSched).length === 0 || !scheduleHasActiveWorkoutContent(localSched)) {
+                localStorage.setItem(storageKey, JSON.stringify(cloudSched));
+                return;
+            }
+
+            const merged = Object.assign({}, cloudSched);
+            const preferLocalByDefault = Boolean(isPendingLocal || localUpdatedAt > cloudUpdatedAt);
+            [0, 1, 2, 3, 4, 5, 6].forEach(d => {
+                const lSlot = localSched[d];
+                const cSlot = cloudSched[d];
+                if (!lSlot) return;
+                const lTs = Number(lSlot.updatedAt || localUpdatedAt || 0);
+                const cTs = Number((cSlot && cSlot.updatedAt) || cloudUpdatedAt || 0);
+
+                if (preferLocalByDefault) {
+                    if (cSlot && Number(cSlot.updatedAt || 0) > Math.max(lTs, localUpdatedAt)) {
+                        merged[d] = cSlot;
+                    } else {
+                        merged[d] = lSlot;
+                    }
+                    return;
+                }
+
+                // Bulut genel olarak yeni görünse bile yereldeki saat damgalı aktif günü eski bir "rest: true" günle ezme
+                if (scheduleSlotHasContent(lSlot) && (!cSlot || cSlot.rest) && lTs > cTs) {
+                    merged[d] = lSlot;
+                }
+            });
+            localStorage.setItem(storageKey, JSON.stringify(merged));
+        }
+
         async function syncUserStateToCloud(targetUid) {
             if (IS_LOCAL_DEV) return;
             const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
@@ -19940,8 +20101,21 @@ KURALLAR:
                         return r ? JSON.parse(r) : fallback;
                     } catch { return fallback; }
                 };
+                const activeUid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
+                let lastGenVal = safeParse(`celik_kodu_last_generated_workout_${uid}`, null);
+                if (!lastGenVal && activeUid === uid) {
+                    const activeGen = safeParse('celik_kodu_last_generated_workout', null);
+                    if (activeGen && (!activeGen.userId || activeGen.userId === uid)) {
+                        lastGenVal = activeGen;
+                    }
+                }
+                const manifestsMerged = Object.assign(
+                    {},
+                    safeParse(`celik_kodu_garmin_sent_manifests_v1__${uid}`, {}),
+                    safeParse(`celik_garmin_sent_manifests_v1_${uid}`, {})
+                );
                 const clientUpdatedAt = Number(localStorage.getItem(`celik_kodu_state_updated_at_${uid}`) || Date.now());
-                const payload = {
+                await writeAthleteDocWithSealHeal('user_state', uid, (seal) => stripWatchBridgeSecretsFromObj({
                     weeklySchedule: safeParse(`celik_kodu_weekly_schedule_${uid}`, {}),
                     nextWeeklySchedule: safeParse(`celik_kodu_next_weekly_schedule_${uid}`, {}),
                     dateSchedule: safeParse(`celik_kodu_date_schedule_${uid}`, {}),
@@ -19951,14 +20125,13 @@ KURALLAR:
                     customGyms: safeParse(`celik_kodu_custom_gyms_${uid}`, []),
                     aiDoctrine: String(currentSelectedDoctrine || 'bb_hybrid'),
                     aiCoachSummary: safeParse(`celik_kodu_ai_program_${uid}`, null),
-                    lastGeneratedWorkout: safeParse(`celik_kodu_last_generated_workout_${uid}`, null),
+                    lastGeneratedWorkout: lastGenVal,
                     activeWorkoutDraft: safeParse(`celik_kodu_active_state_${uid}`, null),
-                    garminManifests: uid === 'usr_admin' ? safeParse(`celik_kodu_garmin_sent_manifests_v1__${uid}`, {}) : {},
+                    garminManifests: manifestsMerged,
                     clientUpdatedAt,
-                    syncSeal: getAthleteCloudSeal(uid),
+                    syncSeal: seal,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                };
-                await fbDb.collection('user_state').doc(uid).set(payload, { merge: true });
+                }));
                 localStorage.removeItem(`celik_kodu_pending_state_sync_${uid}`);
             } catch (err) {
                 try { localStorage.setItem(`celik_kodu_pending_state_sync_${uid}`, '1'); } catch {}
@@ -19978,28 +20151,24 @@ KURALLAR:
                     return;
                 }
                 const data = doc.data() || {};
+                adoptCloudSyncSealIfPresent('user_state', uid, data);
                 const cloudUpdatedAt = Number(data.clientUpdatedAt || 0);
                 const localUpdatedAt = Number(localStorage.getItem(`celik_kodu_state_updated_at_${uid}`) || 0);
-                const isCloudNewerOrEqual = cloudUpdatedAt >= localUpdatedAt;
+                const hasPendingLocalState = localStorage.getItem(`celik_kodu_pending_state_sync_${uid}`) === '1';
+                const isCloudNewerOrEqual = !hasPendingLocalState && cloudUpdatedAt >= localUpdatedAt;
+                const activeUid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
 
-                if (data.weeklySchedule && typeof data.weeklySchedule === 'object' && Object.keys(data.weeklySchedule).length > 0) {
-                    const hasLocalSched = Boolean(localStorage.getItem(`celik_kodu_weekly_schedule_${uid}`));
-                    if (isCloudNewerOrEqual || !hasLocalSched) {
-                        localStorage.setItem(`celik_kodu_weekly_schedule_${uid}`, JSON.stringify(data.weeklySchedule));
-                    }
-                }
-                if (data.nextWeeklySchedule && typeof data.nextWeeklySchedule === 'object' && Object.keys(data.nextWeeklySchedule).length > 0) {
-                    const hasLocalNext = Boolean(localStorage.getItem(`celik_kodu_next_weekly_schedule_${uid}`));
-                    if (isCloudNewerOrEqual || !hasLocalNext) {
-                        localStorage.setItem(`celik_kodu_next_weekly_schedule_${uid}`, JSON.stringify(data.nextWeeklySchedule));
-                    }
-                }
+                mergeWeeklyScheduleSafely(`celik_kodu_weekly_schedule_${uid}`, data.weeklySchedule, cloudUpdatedAt, localUpdatedAt, hasPendingLocalState);
+                mergeWeeklyScheduleSafely(`celik_kodu_next_weekly_schedule_${uid}`, data.nextWeeklySchedule, cloudUpdatedAt, localUpdatedAt, hasPendingLocalState);
+
                 if (data.dateSchedule && typeof data.dateSchedule === 'object') {
                     const localDateSched = JSON.parse(localStorage.getItem(`celik_kodu_date_schedule_${uid}`) || '{}') || {};
                     const mergedDateSched = Object.assign({}, data.dateSchedule, localDateSched);
                     for (const [dt, entry] of Object.entries(data.dateSchedule)) {
                         const locEntry = localDateSched[dt];
-                        if (!locEntry || (Number(entry?.updatedAt || cloudUpdatedAt) >= Number(locEntry?.updatedAt || localUpdatedAt))) {
+                        const entryTs = Number(entry?.updatedAt || cloudUpdatedAt || 0);
+                        const locTs = Number(locEntry?.updatedAt || localUpdatedAt || 0);
+                        if (!locEntry || (!hasPendingLocalState && entryTs >= locTs)) {
                             mergedDateSched[dt] = entry;
                         }
                     }
@@ -20029,18 +20198,21 @@ KURALLAR:
                 }
                 if (data.lastGeneratedWorkout && typeof data.lastGeneratedWorkout === 'object' && (isCloudNewerOrEqual || !localStorage.getItem(`celik_kodu_last_generated_workout_${uid}`))) {
                     localStorage.setItem(`celik_kodu_last_generated_workout_${uid}`, JSON.stringify(data.lastGeneratedWorkout));
+                    if (activeUid === uid && (!localStorage.getItem('celik_kodu_last_generated_workout') || isCloudNewerOrEqual)) {
+                        localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(data.lastGeneratedWorkout));
+                    }
                 }
                 if (data.activeWorkoutDraft && typeof data.activeWorkoutDraft === 'object' && !localStorage.getItem(`celik_kodu_active_state_${uid}`)) {
                     localStorage.setItem(`celik_kodu_active_state_${uid}`, JSON.stringify(data.activeWorkoutDraft));
                 }
                 if (data.garminManifests && typeof data.garminManifests === 'object') {
-                    const mKey = `celik_kodu_garmin_sent_manifests_v1__${uid}`;
+                    const mKey = `celik_garmin_sent_manifests_v1_${uid}`;
                     const localM = JSON.parse(localStorage.getItem(mKey) || '{}') || {};
                     localStorage.setItem(mKey, JSON.stringify(Object.assign({}, data.garminManifests, localM)));
                 }
-                if (cloudUpdatedAt > localUpdatedAt) {
+                if (!hasPendingLocalState && cloudUpdatedAt > localUpdatedAt) {
                     localStorage.setItem(`celik_kodu_state_updated_at_${uid}`, String(cloudUpdatedAt));
-                } else if (!IS_LOCAL_DEV && localUpdatedAt > cloudUpdatedAt) {
+                } else if (!IS_LOCAL_DEV && (hasPendingLocalState || localUpdatedAt > cloudUpdatedAt)) {
                     await syncUserStateToCloud(uid);
                 }
                 if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
@@ -24890,14 +25062,670 @@ KURALLAR:
             syncWorkoutLogsToCloud(sorted, uid);
         }
 
-        function deleteLog(id) {
-            if (confirm("Bu antrenman kaydını silmek istediğinize emin misiniz?")) {
-                let logs = getWorkoutLogs();
-                logs = logs.filter(l => l.id !== id);
-                setWorkoutLogs(logs);
-                renderHistory();
+        function getDeletedWorkoutLogIds(uid) {
+            const targetUid = uid || getActiveUserId();
+            if (!targetUid) return [];
+            try {
+                const parsed = JSON.parse(localStorage.getItem(`celik_kodu_deleted_logs_${targetUid}`) || '[]');
+                return Array.isArray(parsed) ? parsed.map(x => String(x)).filter(Boolean) : [];
+            } catch {
+                return [];
             }
         }
+
+        function markWorkoutLogDeleted(uid, logObjOrId) {
+            const targetUid = uid || getActiveUserId();
+            if (!targetUid || !logObjOrId) return;
+            const list = getDeletedWorkoutLogIds(targetUid);
+            const set = new Set(list);
+            if (typeof logObjOrId === 'string') {
+                set.add(logObjOrId);
+            } else if (typeof logObjOrId === 'object') {
+                if (logObjOrId.id) set.add(String(logObjOrId.id));
+                if (logObjOrId.garminActivityId) set.add(String(logObjOrId.garminActivityId));
+            }
+            const next = Array.from(set).slice(-250);
+            try {
+                localStorage.setItem(`celik_kodu_deleted_logs_${targetUid}`, JSON.stringify(next));
+            } catch {}
+        }
+
+        function syncLastWeightsCacheFromHistory(affectedExercises = []) {
+            if (!Array.isArray(affectedExercises) || affectedExercises.length === 0) return;
+            const uid = typeof getActiveUserId === 'function' ? getActiveUserId() : 'default';
+            const storageKey = `celik_kodu_last_weights_${uid}`;
+            try {
+                const map = JSON.parse(localStorage.getItem(storageKey) || '{}') || {};
+                const seen = new Set();
+                affectedExercises.forEach(ex => {
+                    if (!ex || (!ex.id && !ex.name)) return;
+                    const id = ex.id ? String(ex.id) : '';
+                    const nameKey = ex.name ? String(ex.name).trim().toLowerCase() : '';
+                    const sig = `${id}::${nameKey}`;
+                    if (seen.has(sig)) return;
+                    seen.add(sig);
+
+                    const perf = (id && typeof getLastExercisePerformance === 'function' && getLastExercisePerformance(id))
+                        || (ex.name && typeof getLastExercisePerformance === 'function' && getLastExercisePerformance(ex.name));
+                    const wNum = perf ? parseFloat(perf.lastWeight !== '' && perf.lastWeight != null ? perf.lastWeight : perf.weight) : NaN;
+                    if (!isNaN(wNum) && wNum > 0) {
+                        if (id) map[id] = wNum;
+                        if (nameKey) map[nameKey] = wNum;
+                    } else {
+                        if (id) delete map[id];
+                        if (nameKey) delete map[nameKey];
+                    }
+                });
+                localStorage.setItem(storageKey, JSON.stringify(map));
+                const user = typeof getActiveUser === 'function' ? getActiveUser() : null;
+                if (user) {
+                    user.lastExerciseWeights = Object.assign({}, map);
+                }
+                if (typeof window.scheduleUserStateCloudSync === 'function') window.scheduleUserStateCloudSync(uid);
+            } catch (e) {}
+        }
+
+        function refreshViewsAfterHistoryMutation(affectedExercises = []) {
+            syncLastWeightsCacheFromHistory(affectedExercises);
+            const savedScrollY = typeof window !== 'undefined' ? window.scrollY : 0;
+            renderHistory();
+            if (typeof window !== 'undefined') window.scrollTo({ top: savedScrollY, behavior: 'instant' });
+            if (typeof renderAnalytics === 'function') renderAnalytics();
+            if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
+            if (typeof refreshTopFitnessCardioScoreBars === 'function') refreshTopFitnessCardioScoreBars();
+            const schedModal = document.getElementById('scheduleDayModal');
+            if (schedModal && schedModal.classList.contains('active') && activeSchedulingDayIdx !== null && typeof openScheduleDayModal === 'function') {
+                openScheduleDayModal(activeSchedulingDayIdx, activeSchedulingDateStr);
+            }
+        }
+
+        function deleteLog(id, skipConfirm = false) {
+            if (!skipConfirm && !confirm("Bu antrenman kaydını silmek istediğinize emin misiniz?")) return;
+            const uid = getActiveUserId();
+            let logs = getWorkoutLogs();
+            const targetLog = logs.find(l => l && String(l.id) === String(id));
+            markWorkoutLogDeleted(uid, targetLog || id);
+            logs = logs.filter(l => l && String(l.id) !== String(id));
+            setWorkoutLogs(logs);
+            refreshViewsAfterHistoryMutation(targetLog && Array.isArray(targetLog.exercises) ? targetLog.exercises : []);
+        }
+
+        function deleteWorkoutLog(id) {
+            return deleteLog(id, false);
+        }
+
+        // ==================== EDIT COMPLETED WORKOUT LOG MODAL ====================
+        let editingWorkoutLogState = null;
+
+        function normalizeEditLogExercise(ex) {
+            const dbEx = (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB))
+                ? (EXERCISES_DB.find(e => e.id === ex.id) || EXERCISES_DB.find(e => e.name === ex.name))
+                : null;
+            const mergedEx = Object.assign({}, ex, {
+                id: ex.id || (dbEx ? dbEx.id : 'custom'),
+                name: ex.name || (dbEx ? dbEx.name : 'Hareket'),
+                equipment: ex.equipment || (dbEx ? dbEx.equipment : 'dumbbell'),
+                category: ex.category || (dbEx ? dbEx.category : 'push'),
+                muscle: ex.muscle || (dbEx ? dbEx.muscle : ''),
+                cue: ex.cue || (dbEx ? dbEx.cue : '')
+            });
+            const isBw = isExerciseBodyweight(mergedEx);
+            const isTb = isExerciseTimeBased(mergedEx);
+            mergedEx.isBodyweight = isBw;
+            mergedEx.isTimeBased = isTb;
+
+            const rawSets = Array.isArray(ex.sets)
+                ? ex.sets
+                : Array.from({ length: Math.max(1, Number(ex.sets || ex.completedSets || 1)) }, (_, idx) => ({
+                    setNo: idx + 1,
+                    weight: Number(ex.weight || 0),
+                    reps: Number(ex.reps || (isTb ? 30 : 10)),
+                    completed: true
+                }));
+
+            mergedEx.sets = rawSets.map((st, idx) => {
+                const cloneSet = Object.assign({}, st);
+                cloneSet.setNo = idx + 1;
+                cloneSet.weight = st && st.weight !== '' && st.weight !== null && !isNaN(st.weight) ? Number(st.weight) : 0;
+                cloneSet.reps = st && st.reps !== '' && st.reps !== null && !isNaN(st.reps) ? parseInt(st.reps, 10) : 0;
+                cloneSet.isBodyweight = isBw;
+                cloneSet.isTimeBased = isTb;
+                cloneSet.completed = st ? st.completed !== false : true;
+                return cloneSet;
+            });
+            return mergedEx;
+        }
+
+        function computeEditLogDraftStats(draft) {
+            let totalVolumeKg = 0;
+            let totalSetsCompleted = 0;
+            let totalRepsCompleted = 0;
+            let totalIsometricSecsCompleted = 0;
+            const musclesSet = new Set();
+
+            const exercises = (Array.isArray(draft.exercises) ? draft.exercises : []).map(ex => {
+                const isTime = isExerciseTimeBased(ex);
+                let exVol = 0;
+                let maxWeight = 0;
+                let maxReps = 0;
+                let completedCount = 0;
+
+                const nextSets = (Array.isArray(ex.sets) ? ex.sets : []).map((st, sIdx) => {
+                    const isDone = !!st.completed;
+                    const w = Math.max(0, Number(st.weight) || 0);
+                    const r = Math.max(0, parseInt(st.reps, 10) || 0);
+                    const setVol = isDone ? Math.round(calculateExerciseSetVolume(ex, w, r) * 10) / 10 : 0;
+                    if (isDone) {
+                        completedCount++;
+                        totalSetsCompleted++;
+                        if (isTime) totalIsometricSecsCompleted += r;
+                        else totalRepsCompleted += r;
+                        exVol += setVol;
+                        totalVolumeKg += setVol;
+                        if (w > maxWeight) maxWeight = w;
+                        if (r > maxReps) maxReps = r;
+                    }
+                    const outSet = Object.assign({}, st, {
+                        setNo: sIdx + 1,
+                        weight: w,
+                        reps: r,
+                        isBodyweight: isExerciseBodyweight(ex),
+                        isTimeBased: isTime,
+                        completed: isDone,
+                        volume: setVol
+                    });
+                    return outSet;
+                });
+
+                if (completedCount > 0 && ex.muscle) {
+                    ex.muscle.split(',').forEach(m => {
+                        const t = m.trim();
+                        if (t) musclesSet.add(t);
+                    });
+                }
+
+                return Object.assign({}, ex, {
+                    sets: nextSets,
+                    completedSetsCount: completedCount,
+                    completedSets: completedCount,
+                    maxWeight,
+                    maxReps,
+                    exerciseVolume: Math.round(exVol * 10) / 10
+                });
+            });
+
+            return {
+                exercises,
+                totalVolumeKg: Math.round(totalVolumeKg * 10) / 10,
+                totalSetsCompleted,
+                totalRepsCompleted,
+                totalIsometricSecsCompleted,
+                muscleGroups: Array.from(musclesSet)
+            };
+        }
+
+        function updateEditWorkoutLogLiveTotals() {
+            if (!editingWorkoutLogState) return;
+            const stats = computeEditLogDraftStats(editingWorkoutLogState.draft);
+            const bar = document.getElementById('editLogLiveTotalsBar');
+            if (!bar) return;
+            const timePart = stats.totalIsometricSecsCompleted > 0 ? ` • ${stats.totalIsometricSecsCompleted} sn` : '';
+            bar.innerHTML = `
+                <span>Toplam: ${Math.round(stats.totalVolumeKg).toLocaleString('tr-TR')} kg</span>
+                <span>${stats.totalSetsCompleted} Set • ${stats.totalRepsCompleted} Tekrar${timePart}</span>
+            `;
+        }
+
+        function filterEditLogDbExercises(query) {
+            if (typeof EXERCISES_DB === 'undefined' || !Array.isArray(EXERCISES_DB)) return [];
+            const q = normSearchText(query);
+            return EXERCISES_DB.filter(ex => {
+                if (!ex || !ex.id) return false;
+                if (!q && typeof isExerciseExcludedByUser === 'function' && isExerciseExcludedByUser(ex.id)) return false;
+                if (!q) return true;
+                const hay = normSearchText(`${ex.name || ''} ${ex.muscle || ''} ${ex.equipment || ''} ${ex.category || ''}`);
+                return hay.includes(q);
+            }).slice(0, 40);
+        }
+
+        function renderEditLogSwapResults(exIdx) {
+            if (!editingWorkoutLogState) return;
+            const container = document.getElementById(`editLogSwapResults_${exIdx}`);
+            if (!container) return;
+            const matches = filterEditLogDbExercises(editingWorkoutLogState.swapQuery || '');
+            if (matches.length === 0) {
+                container.innerHTML = `<div style="font-size:11.5px; color:#64748B; padding:6px;">Sonuç bulunamadı</div>`;
+                return;
+            }
+            container.innerHTML = matches.map(dbEx => {
+                const cleanTitle = String(dbEx.name || '').replace(/\s*\([^)]*\)/g, '').trim() || dbEx.name;
+                return `
+                    <button type="button" class="edit-log-picker-item" onclick="selectEditLogSwapExercise(${exIdx}, decodeURIComponent('${encodeURIComponent(dbEx.id)}'))">
+                        <span>${escapeHTML(cleanTitle)}</span>
+                        <span style="font-size:10.5px; color:#64748B; font-weight:700;">${escapeHTML(dbEx.equipment || '')}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function renderEditWorkoutLogExercises() {
+            if (!editingWorkoutLogState) return;
+            const modalBox = document.getElementById('editWorkoutLogModalBox');
+            const savedModalScroll = modalBox ? modalBox.scrollTop : 0;
+            const container = document.getElementById('editLogExercisesContainer');
+            if (!container) return;
+
+            const exercises = editingWorkoutLogState.draft.exercises || [];
+            if (exercises.length === 0) {
+                container.innerHTML = `<div style="padding:14px; text-align:center; background:#F8FAFC; border:1px dashed #CBD5E1; border-radius:10px; font-size:12px; color:#475569;">Henüz hareket yok. Aşağıdan hareket ekleyin.</div>`;
+                if (modalBox) modalBox.scrollTop = savedModalScroll;
+                return;
+            }
+
+            container.innerHTML = exercises.map((ex, exIdx) => {
+                const isBw = isExerciseBodyweight(ex);
+                const isTime = isExerciseTimeBased(ex);
+                const cleanName = String(ex.name || 'Hareket').replace(/\s*\([^)]*\)/g, '').trim() || ex.name;
+                const extraSuffix = ex.isInterSetExtra ? ' • Set Arası' : '';
+                const exVol = (Array.isArray(ex.sets) ? ex.sets : []).reduce((s, st) => s + (st.completed ? calculateExerciseSetVolume(ex, st.weight, st.reps) : 0), 0);
+                const isSwapOpen = editingWorkoutLogState.swapExIdx === exIdx;
+
+                const setsHtml = (Array.isArray(ex.sets) ? ex.sets : []).map((st, sIdx) => {
+                    const weightUnit = isBw ? 'ek kg' : 'kg';
+                    const metricUnit = isTime ? 'sn' : 'tk';
+                    return `
+                        <div class="edit-log-set-row ${st.completed ? '' : 'is-skipped'}">
+                            <span style="font-size:11.5px; font-weight:900; color:#475569;">S${sIdx + 1}</span>
+                            <input type="number" class="edit-log-num-input" step="any" min="0" max="1000" inputmode="decimal" aria-label="${escapeHTML(cleanName)} Set ${sIdx + 1} ${weightUnit}" placeholder="${weightUnit}" value="${st.weight}" oninput="onEditLogSetFieldInput(${exIdx}, ${sIdx}, 'weight', this.value)">
+                            <span style="font-size:11.5px; font-weight:800; color:#64748B; text-align:center;">×</span>
+                            <input type="number" class="edit-log-num-input" step="1" min="0" max="3600" inputmode="numeric" aria-label="${escapeHTML(cleanName)} Set ${sIdx + 1} ${metricUnit}" placeholder="${metricUnit}" value="${st.reps}" oninput="onEditLogSetFieldInput(${exIdx}, ${sIdx}, 'reps', this.value)">
+                            <button type="button" class="edit-log-status-btn ${st.completed ? 'done' : 'skipped'}" onclick="toggleEditLogSetCompleted(${exIdx}, ${sIdx})">${st.completed ? '✓ Tamam' : 'Atlandı'}</button>
+                            <button type="button" class="edit-log-del-set-btn" aria-label="Seti sil" onclick="removeEditLogSet(${exIdx}, ${sIdx})">✕</button>
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="edit-log-ex-card">
+                        <div class="edit-log-ex-head">
+                            <div style="min-width:0; flex:1;">
+                                <div class="edit-log-ex-title">${escapeHTML(cleanName + extraSuffix)}</div>
+                                <div style="font-size:11px; font-weight:700; color:#475569;" id="editLogExCardVol_${exIdx}">${Math.round(exVol).toLocaleString('tr-TR')} kg • ${isBw ? 'Vücut Ağırlığı' : 'Kilo'} / ${isTime ? 'Süre (sn)' : 'Tekrar'}</div>
+                            </div>
+                            <div style="display:flex; gap:5px; flex-shrink:0;">
+                                <button type="button" class="edit-log-mini-btn" onclick="toggleEditLogSwapPicker(${exIdx})">${isSwapOpen ? 'Kapat' : 'Değiştir'}</button>
+                                <button type="button" class="edit-log-mini-btn danger" onclick="removeEditLogExercise(${exIdx})">Sil</button>
+                            </div>
+                        </div>
+                        ${isSwapOpen ? `
+                            <div style="margin-bottom:8px;">
+                                <input type="text" class="form-input edit-log-input" placeholder="Yeni hareket ara..." value="${escapeHTML(editingWorkoutLogState.swapQuery || '')}" oninput="onEditLogSwapSearchInput(this.value)">
+                                <div id="editLogSwapResults_${exIdx}" class="edit-log-picker-list"></div>
+                            </div>
+                        ` : ''}
+                        <div>${setsHtml}</div>
+                        <button type="button" class="edit-log-secondary-btn" style="margin-top:6px; padding:6px 8px; font-size:11.5px;" onclick="addEditLogSet(${exIdx})">+ Set Ekle</button>
+                    </div>
+                `;
+            }).join('');
+
+            if (editingWorkoutLogState.swapExIdx !== null) {
+                renderEditLogSwapResults(editingWorkoutLogState.swapExIdx);
+            }
+            if (modalBox) modalBox.scrollTop = savedModalScroll;
+        }
+
+        function onEditLogSetFieldInput(exIdx, sIdx, field, rawVal) {
+            if (!editingWorkoutLogState) return;
+            const ex = editingWorkoutLogState.draft.exercises[exIdx];
+            const st = ex && Array.isArray(ex.sets) ? ex.sets[sIdx] : null;
+            if (!st) return;
+            if (field === 'weight') {
+                const parsed = parseFloat(rawVal);
+                st.weight = (!isNaN(parsed) && parsed >= 0) ? parsed : 0;
+            } else {
+                const parsed = parseInt(rawVal, 10);
+                st.reps = (!isNaN(parsed) && parsed >= 0) ? parsed : 0;
+            }
+            const volEl = document.getElementById(`editLogExCardVol_${exIdx}`);
+            if (volEl) {
+                const isBw = isExerciseBodyweight(ex);
+                const isTime = isExerciseTimeBased(ex);
+                const exVol = ex.sets.reduce((s, x) => s + (x.completed ? calculateExerciseSetVolume(ex, x.weight, x.reps) : 0), 0);
+                volEl.textContent = `${Math.round(exVol).toLocaleString('tr-TR')} kg • ${isBw ? 'Vücut Ağırlığı' : 'Kilo'} / ${isTime ? 'Süre (sn)' : 'Tekrar'}`;
+            }
+            updateEditWorkoutLogLiveTotals();
+        }
+
+        function toggleEditLogSetCompleted(exIdx, sIdx) {
+            if (!editingWorkoutLogState) return;
+            const st = editingWorkoutLogState.draft.exercises[exIdx]?.sets?.[sIdx];
+            if (!st) return;
+            st.completed = !st.completed;
+            renderEditWorkoutLogExercises();
+            updateEditWorkoutLogLiveTotals();
+        }
+
+        function addEditLogSet(exIdx) {
+            if (!editingWorkoutLogState) return;
+            const ex = editingWorkoutLogState.draft.exercises[exIdx];
+            if (!ex) return;
+            if (!Array.isArray(ex.sets)) ex.sets = [];
+            const lastSet = ex.sets[ex.sets.length - 1];
+            const isBw = isExerciseBodyweight(ex);
+            const isTime = isExerciseTimeBased(ex);
+            const fallbackWeight = lastSet ? Number(lastSet.weight || 0) : (isBw ? 0 : (Number(getExerciseRememberedWeight(ex)) || 0));
+            const fallbackReps = lastSet ? Number(lastSet.reps || (isTime ? 30 : 10)) : (isTime ? 30 : 10);
+            ex.sets.push({
+                setNo: ex.sets.length + 1,
+                weight: fallbackWeight,
+                reps: fallbackReps,
+                isBodyweight: isBw,
+                isTimeBased: isTime,
+                completed: true
+            });
+            renderEditWorkoutLogExercises();
+            updateEditWorkoutLogLiveTotals();
+        }
+
+        function removeEditLogSet(exIdx, sIdx) {
+            if (!editingWorkoutLogState) return;
+            const ex = editingWorkoutLogState.draft.exercises[exIdx];
+            if (!ex || !Array.isArray(ex.sets)) return;
+            if (ex.sets.length <= 1) {
+                editingWorkoutLogState.draft.exercises.splice(exIdx, 1);
+                if (editingWorkoutLogState.swapExIdx === exIdx) editingWorkoutLogState.swapExIdx = null;
+            } else {
+                ex.sets.splice(sIdx, 1);
+                ex.sets.forEach((st, i) => { st.setNo = i + 1; });
+            }
+            renderEditWorkoutLogExercises();
+            updateEditWorkoutLogLiveTotals();
+        }
+
+        function removeEditLogExercise(exIdx) {
+            if (!editingWorkoutLogState) return;
+            editingWorkoutLogState.draft.exercises.splice(exIdx, 1);
+            if (editingWorkoutLogState.swapExIdx === exIdx) editingWorkoutLogState.swapExIdx = null;
+            else if (editingWorkoutLogState.swapExIdx !== null && editingWorkoutLogState.swapExIdx > exIdx) {
+                editingWorkoutLogState.swapExIdx--;
+            }
+            renderEditWorkoutLogExercises();
+            updateEditWorkoutLogLiveTotals();
+        }
+
+        function toggleEditLogSwapPicker(exIdx) {
+            if (!editingWorkoutLogState) return;
+            editingWorkoutLogState.swapExIdx = editingWorkoutLogState.swapExIdx === exIdx ? null : exIdx;
+            editingWorkoutLogState.swapQuery = '';
+            renderEditWorkoutLogExercises();
+        }
+
+        function onEditLogSwapSearchInput(val) {
+            if (!editingWorkoutLogState || editingWorkoutLogState.swapExIdx === null) return;
+            editingWorkoutLogState.swapQuery = String(val || '');
+            renderEditLogSwapResults(editingWorkoutLogState.swapExIdx);
+        }
+
+        function selectEditLogSwapExercise(exIdx, newExId) {
+            if (!editingWorkoutLogState || typeof EXERCISES_DB === 'undefined') return;
+            const dbEx = EXERCISES_DB.find(e => e.id === newExId);
+            const curEx = editingWorkoutLogState.draft.exercises[exIdx];
+            if (!dbEx || !curEx) return;
+            const isBw = isExerciseBodyweight(dbEx);
+            const isTime = isExerciseTimeBased(dbEx);
+            curEx.id = dbEx.id;
+            curEx.name = dbEx.name;
+            curEx.equipment = dbEx.equipment || 'dumbbell';
+            curEx.category = dbEx.category || 'push';
+            curEx.muscle = dbEx.muscle || '';
+            curEx.cue = dbEx.cue || '';
+            curEx.isBodyweight = isBw;
+            curEx.isTimeBased = isTime;
+            (curEx.sets || []).forEach(st => {
+                st.isBodyweight = isBw;
+                st.isTimeBased = isTime;
+            });
+            editingWorkoutLogState.swapExIdx = null;
+            editingWorkoutLogState.swapQuery = '';
+            renderEditWorkoutLogExercises();
+            updateEditWorkoutLogLiveTotals();
+        }
+
+        function toggleEditLogMetaDrawer() {
+            const drawer = document.getElementById('editLogMetaDrawer');
+            const arrow = document.getElementById('editLogMetaToggleArrow');
+            if (!drawer) return;
+            const isHidden = drawer.style.display === 'none';
+            drawer.style.display = isHidden ? 'block' : 'none';
+            if (arrow) arrow.textContent = isHidden ? '▲ Kapat' : '▼ Aç';
+        }
+
+        function toggleEditLogAddExerciseDrawer() {
+            const drawer = document.getElementById('editLogAddExDrawer');
+            if (!drawer) return;
+            const isHidden = drawer.style.display === 'none';
+            drawer.style.display = isHidden ? 'block' : 'none';
+            if (isHidden) {
+                const inp = document.getElementById('editLogAddExSearchInput');
+                if (inp) inp.value = '';
+                renderEditLogAddExerciseResults();
+            }
+        }
+
+        function renderEditLogAddExerciseResults() {
+            const container = document.getElementById('editLogAddExResults');
+            const inp = document.getElementById('editLogAddExSearchInput');
+            if (!container) return;
+            const matches = filterEditLogDbExercises(inp ? inp.value : '');
+            if (matches.length === 0) {
+                container.innerHTML = `<div style="font-size:11.5px; color:#64748B; padding:6px;">Sonuç bulunamadı</div>`;
+                return;
+            }
+            container.innerHTML = matches.map(dbEx => {
+                const cleanTitle = String(dbEx.name || '').replace(/\s*\([^)]*\)/g, '').trim() || dbEx.name;
+                return `
+                    <button type="button" class="edit-log-picker-item" onclick="appendExerciseToEditLog(decodeURIComponent('${encodeURIComponent(dbEx.id)}'))">
+                        <span>${escapeHTML(cleanTitle)}</span>
+                        <span style="font-size:10.5px; color:#64748B; font-weight:700;">${escapeHTML(dbEx.equipment || '')}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function appendExerciseToEditLog(exId) {
+            if (!editingWorkoutLogState || typeof EXERCISES_DB === 'undefined') return;
+            const dbEx = EXERCISES_DB.find(e => e.id === exId);
+            if (!dbEx) return;
+            const isBw = isExerciseBodyweight(dbEx);
+            const isTime = isExerciseTimeBased(dbEx);
+            const remembered = isBw ? 0 : (Number(getExerciseRememberedWeight(dbEx)) || 0);
+            const defaultMetric = isTime ? 30 : 10;
+            editingWorkoutLogState.draft.exercises.push({
+                id: dbEx.id,
+                name: dbEx.name,
+                equipment: dbEx.equipment || 'dumbbell',
+                category: dbEx.category || 'push',
+                muscle: dbEx.muscle || '',
+                cue: dbEx.cue || '',
+                isBodyweight: isBw,
+                isTimeBased: isTime,
+                sets: Array.from({ length: 3 }, (_, idx) => ({
+                    setNo: idx + 1,
+                    weight: remembered,
+                    reps: defaultMetric,
+                    isBodyweight: isBw,
+                    isTimeBased: isTime,
+                    completed: true
+                }))
+            });
+            const drawer = document.getElementById('editLogAddExDrawer');
+            if (drawer) drawer.style.display = 'none';
+            renderEditWorkoutLogExercises();
+            updateEditWorkoutLogLiveTotals();
+        }
+
+        function editWorkoutLog(id) {
+            const logs = getWorkoutLogs();
+            const target = logs.find(l => l && String(l.id) === String(id));
+            if (!target) return;
+
+            const draft = JSON.parse(JSON.stringify(target));
+            draft.exercises = (Array.isArray(draft.exercises) ? draft.exercises : []).map(normalizeEditLogExercise);
+            const origDurationSecs = Number(target.durationSecs || 0);
+            const origDurationMin = Number(target.duration) || Math.max(1, Math.round((origDurationSecs || 2700) / 60));
+
+            editingWorkoutLogState = {
+                originalId: target.id,
+                originalExercises: JSON.parse(JSON.stringify(draft.exercises)),
+                originalDate: String(target.date || '').slice(0, 10),
+                originalDuration: origDurationMin,
+                originalDurationSecs: origDurationSecs,
+                originalDateFormatted: String(target.dateFormatted || ''),
+                originalTimestamp: Number(target.timestamp || 0),
+                draft,
+                swapExIdx: null,
+                swapQuery: ''
+            };
+
+            const progEl = document.getElementById('editLogProgramInput');
+            const durEl = document.getElementById('editLogDurationInput');
+            const dateEl = document.getElementById('editLogDateInput');
+            const rpeEl = document.getElementById('editLogRpeSelect');
+            const locTypeEl = document.getElementById('editLogLocationTypeSelect');
+            const locNameEl = document.getElementById('editLogLocationNameInput');
+            const notesEl = document.getElementById('editLogNotesInput');
+
+            if (progEl) progEl.value = draft.program || draft.title || '';
+            if (durEl) durEl.value = String(origDurationMin);
+            if (dateEl) dateEl.value = String(draft.date || '').slice(0, 10);
+            if (rpeEl) {
+                const rpePrefix = String(draft.rpe || 'RPE 8').match(/RPE\s*\d+/i)?.[0]?.toUpperCase() || 'RPE 8';
+                const matchOpt = Array.from(rpeEl.options).find(opt => opt.value.toUpperCase().startsWith(rpePrefix));
+                rpeEl.value = matchOpt ? matchOpt.value : rpeEl.options[1].value;
+            }
+            if (locTypeEl) {
+                const lt = draft.locationType || (draft.locationName === 'Ev' ? 'ev' : (draft.locationName === 'Açık Hava' ? 'acik_hava' : 'salon'));
+                locTypeEl.value = ['salon', 'ev', 'acik_hava'].includes(lt) ? lt : 'salon';
+            }
+            if (locNameEl) locNameEl.value = draft.locationName || '';
+            if (notesEl) notesEl.value = draft.notes || '';
+
+            const metaDrawer = document.getElementById('editLogMetaDrawer');
+            const metaArrow = document.getElementById('editLogMetaToggleArrow');
+            if (metaDrawer) metaDrawer.style.display = 'none';
+            if (metaArrow) metaArrow.textContent = '▼ Aç';
+
+            const addDrawer = document.getElementById('editLogAddExDrawer');
+            if (addDrawer) addDrawer.style.display = 'none';
+
+            renderEditWorkoutLogExercises();
+            updateEditWorkoutLogLiveTotals();
+
+            const modal = document.getElementById('editWorkoutLogModal');
+            const modalBox = document.getElementById('editWorkoutLogModalBox');
+            if (modal) modal.classList.add('active');
+            if (modalBox) modalBox.scrollTop = 0;
+        }
+
+        function closeEditWorkoutLogModal() {
+            const modal = document.getElementById('editWorkoutLogModal');
+            if (modal) modal.classList.remove('active');
+            editingWorkoutLogState = null;
+        }
+
+        function saveEditedWorkoutLog() {
+            if (!editingWorkoutLogState) return;
+            const st = editingWorkoutLogState;
+            const draft = st.draft;
+            if (!Array.isArray(draft.exercises) || draft.exercises.length === 0) {
+                alert('En az 1 hareket kalmalıdır.');
+                return;
+            }
+
+            const progVal = (document.getElementById('editLogProgramInput')?.value || '').trim() || 'Antrenman Seansı';
+            const durRaw = parseInt(document.getElementById('editLogDurationInput')?.value, 10);
+            const duration = (!isNaN(durRaw) && durRaw >= 1 && durRaw <= 600) ? durRaw : st.originalDuration;
+            const dateInputVal = (document.getElementById('editLogDateInput')?.value || '').trim();
+            const nextDate = /^\d{4}-\d{2}-\d{2}$/.test(dateInputVal) ? dateInputVal : (st.originalDate || toLocalYmdString(new Date()));
+            const rpeVal = document.getElementById('editLogRpeSelect')?.value || 'RPE 8 (İdeal, cepte 2 tekrar kaldı)';
+            const locTypeVal = document.getElementById('editLogLocationTypeSelect')?.value || 'salon';
+            const defaultLocName = locTypeVal === 'ev' ? 'Ev' : (locTypeVal === 'acik_hava' ? 'Açık Hava' : 'Spor Salonu');
+            const locNameVal = (document.getElementById('editLogLocationNameInput')?.value || '').trim() || defaultLocName;
+            const notesVal = (document.getElementById('editLogNotesInput')?.value || '').trim();
+
+            const durationSecs = (duration === st.originalDuration && st.originalDurationSecs > 0) ? st.originalDurationSecs : duration * 60;
+            const durationFormatted = formatSecondsToHMS(durationSecs);
+
+            let dateFormatted = st.originalDateFormatted;
+            let timestamp = st.originalTimestamp || Date.now();
+            if (nextDate !== st.originalDate) {
+                const timeMatch = String(st.originalDateFormatted || '').match(/(\d{2}:\d{2})\s*$/);
+                const hhmm = timeMatch ? timeMatch[1] : new Intl.DateTimeFormat('tr-TR', { hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(timestamp || Date.now()));
+                const parts = nextDate.split('-').map(Number);
+                const [hh, mm] = hhmm.split(':').map(Number);
+                const localDt = new Date(parts[0], (parts[1] || 1) - 1, parts[2] || 1, hh || 12, mm || 0, 0);
+                const datePart = new Intl.DateTimeFormat('tr-TR', { dateStyle: 'medium' }).format(localDt);
+                dateFormatted = `${datePart} ${hhmm}`;
+                timestamp = localDt.getTime();
+            }
+
+            const stats = computeEditLogDraftStats(draft);
+            const logs = getWorkoutLogs();
+            const targetIdx = logs.findIndex(l => l && String(l.id) === String(st.originalId));
+            if (targetIdx === -1) {
+                closeEditWorkoutLogModal();
+                return;
+            }
+
+            const updatedLog = Object.assign({}, logs[targetIdx], {
+                program: progVal,
+                title: progVal,
+                duration,
+                durationSecs,
+                durationFormatted,
+                date: nextDate,
+                dateFormatted,
+                timestamp,
+                rpe: rpeVal,
+                locationType: locTypeVal,
+                locationName: locNameVal,
+                notes: notesVal,
+                exercises: stats.exercises,
+                totalVolumeKg: stats.totalVolumeKg,
+                totalSetsCompleted: stats.totalSetsCompleted,
+                totalRepsCompleted: stats.totalRepsCompleted,
+                totalIsometricSecsCompleted: stats.totalIsometricSecsCompleted,
+                muscleGroups: stats.muscleGroups,
+                userEditedAt: Date.now()
+            });
+            if ('programName' in updatedLog) updatedLog.programName = progVal;
+
+            logs[targetIdx] = updatedLog;
+            setWorkoutLogs(logs);
+
+            const affectedExercises = [...(st.originalExercises || []), ...(updatedLog.exercises || [])];
+            closeEditWorkoutLogModal();
+            refreshViewsAfterHistoryMutation(affectedExercises);
+        }
+
+        window.editWorkoutLog = editWorkoutLog;
+        window.deleteWorkoutLog = deleteWorkoutLog;
+        window.closeEditWorkoutLogModal = closeEditWorkoutLogModal;
+        window.saveEditedWorkoutLog = saveEditedWorkoutLog;
+        window.toggleEditLogMetaDrawer = toggleEditLogMetaDrawer;
+        window.toggleEditLogAddExerciseDrawer = toggleEditLogAddExerciseDrawer;
+        window.renderEditLogAddExerciseResults = renderEditLogAddExerciseResults;
+        window.appendExerciseToEditLog = appendExerciseToEditLog;
+        window.toggleEditLogSwapPicker = toggleEditLogSwapPicker;
+        window.onEditLogSwapSearchInput = onEditLogSwapSearchInput;
+        window.selectEditLogSwapExercise = selectEditLogSwapExercise;
+        window.onEditLogSetFieldInput = onEditLogSetFieldInput;
+        window.toggleEditLogSetCompleted = toggleEditLogSetCompleted;
+        window.addEditLogSet = addEditLogSet;
+        window.removeEditLogSet = removeEditLogSet;
+        window.removeEditLogExercise = removeEditLogExercise;
+        window.syncLastWeightsCacheFromHistory = syncLastWeightsCacheFromHistory;
 
         function calculateStreakForLogs(logs) {
             let streak = 0;
@@ -25041,7 +25869,8 @@ KURALLAR:
                             </div>
                             <div style="display:flex; align-items:center; gap:6px;">
                                 <span class="ex-badge badge-equip">${escapeHTML(rpeLabel)}</span>
-                                <button class="btn-delete-log" onclick="deleteLog('${l.id}')" title="Kaydı Sil">✕</button>
+                                <button type="button" class="btn-edit-log" onclick="editWorkoutLog(decodeURIComponent('${encodeURIComponent(l.id)}'))" title="Antrenmanı Düzenle">Düzenle</button>
+                                <button type="button" class="btn-delete-log" onclick="deleteWorkoutLog(decodeURIComponent('${encodeURIComponent(l.id)}'))" title="Kaydı Sil">✕</button>
                             </div>
                         </div>
 
@@ -25255,6 +26084,7 @@ KURALLAR:
                                 totalIsometricSecsCompleted: Number(item.totalIsometricSecsCompleted) || 0,
                                 garminActivityId: item.garminActivityId ? String(item.garminActivityId).slice(0, 60) : undefined,
                                 healthSummary: item.healthSummary && typeof item.healthSummary === 'object' ? item.healthSummary : undefined,
+                                userEditedAt: Number(item.userEditedAt) || undefined,
                                 timestamp: Number(item.timestamp) || getWorkoutLogTimestampMs({ date: item.date, dateFormatted: item.dateFormatted }) || Date.now()
                             }));
                         const existingLogs = getWorkoutLogs();
@@ -25265,10 +26095,23 @@ KURALLAR:
                         sanitizedHistory.forEach(item => {
                             if (!item || !item.id) return;
                             const prev = mergedById.get(String(item.id));
-                            mergedById.set(String(item.id), prev ? Object.assign({}, prev, item, {
-                                garminActivityId: item.garminActivityId || prev.garminActivityId,
-                                healthSummary: item.healthSummary || prev.healthSummary
-                            }) : item);
+                            if (!prev) {
+                                mergedById.set(String(item.id), item);
+                                return;
+                            }
+                            const prevEd = Number(prev.userEditedAt || 0);
+                            const nextEd = Number(item.userEditedAt || 0);
+                            if (prevEd > nextEd) {
+                                mergedById.set(String(item.id), Object.assign({}, prev, {
+                                    garminActivityId: prev.garminActivityId || item.garminActivityId,
+                                    healthSummary: prev.healthSummary || item.healthSummary
+                                }));
+                            } else {
+                                mergedById.set(String(item.id), Object.assign({}, prev, item, {
+                                    garminActivityId: item.garminActivityId || prev.garminActivityId,
+                                    healthSummary: item.healthSummary || prev.healthSummary
+                                }));
+                            }
                         });
                         const mergedList = sortWorkoutLogsDesc(Array.from(mergedById.values()));
                         setWorkoutLogs(mergedList);
@@ -32795,7 +33638,7 @@ KURALLAR:
             if ('serviceWorker' in navigator && navigator.serviceWorker) {
                 window.addEventListener('load', () => {
                     try {
-                        navigator.serviceWorker.register('./sw.js?v=287')
+                        navigator.serviceWorker.register('./sw.js?v=288')
                             .then(reg => {
                                 console.log('SW scope:', reg.scope);
                                 if (reg.update) reg.update();
