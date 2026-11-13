@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <!-- Security: CSP & Permissions -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://apis.google.com https://accounts.google.com; connect-src 'self' https://intervals.icu https://garmin.kantarci.io https://europe-west1-fitness-4f427.cloudfunctions.net https://us-central1-fitness-4f427.cloudfunctions.net https://firestore.googleapis.com https://generativelanguage.googleapis.com https://fitness-4f427.firebaseio.com https://fitness-4f427-default-rtdb.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://raw.githubusercontent.com https://cdn.jsdelivr.net https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com https://api.emailjs.com data: blob:; img-src 'self' data: blob: https://lh3.googleusercontent.com https://www.gstatic.com https://fitness.kantarci.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; media-src 'self' data: blob:; frame-src 'self' https://fitness-4f427.firebaseapp.com https://accounts.google.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://www.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://apis.google.com https://accounts.google.com; worker-src 'self' blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; connect-src 'self' https://intervals.icu https://garmin.kantarci.io https://europe-west1-fitness-4f427.cloudfunctions.net https://us-central1-fitness-4f427.cloudfunctions.net https://firestore.googleapis.com https://generativelanguage.googleapis.com https://fitness-4f427.firebaseio.com https://fitness-4f427-default-rtdb.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://raw.githubusercontent.com https://cdn.jsdelivr.net https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com https://api.emailjs.com data: blob:; img-src 'self' data: blob: https://lh3.googleusercontent.com https://www.gstatic.com https://fitness.kantarci.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; media-src 'self' data: blob:; frame-src 'self' https://fitness-4f427.firebaseapp.com https://accounts.google.com;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -27,7 +27,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=288">
+    <link rel="stylesheet" href="css/style.css?v=289">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH (CANVA MODERN ATHLETIC LIGHT V229) */
         html, body { background-color: #F8FAFC; color: #0F172A; color-scheme: light; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -54,7 +54,7 @@
                     <path d="M34 25L26 36H33L30 46L39 34H32L34 25Z" fill="#FFFFFF"/>
                 </svg>
             </div>
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v288</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v289</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -253,7 +253,7 @@
                         <div class="modern-brand-subrow">
                             <span id="headerActiveTabLabel">ÜRETİCİ</span>
                             <span class="modern-brand-subdot" aria-hidden="true">•</span>
-                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v288</span>
+                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v289</span>
                         </div>
                     </div>
                 </div>
@@ -1925,9 +1925,9 @@
                  ondragleave="this.classList.remove('dragover');" 
                  ondrop="handleScalePdfDrop(event)">
                 <div style="font-size:32px; margin-bottom:4px;">📊</div>
-                <div style="font-weight:900; font-size:14.5px; color:#0F172A;">Unique Health Raporu (PDF veya PNG) Yükleyin</div>
+                <div style="font-weight:900; font-size:14.5px; color:#0F172A;">Tartı veya Ölçüm Raporu Yükle</div>
                 <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px; margin-bottom:12px;">
-                    PDF dosyasını veya galerideki PNG/JPG görselini seçin, sürükleyin veya yapıştırın
+                    PDF veya görsel seçin, sürükleyin ya da yapıştırın
                 </div>
                 
                 <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
@@ -1957,7 +1957,7 @@
                     </div>
                 </div>
 
-                <div id="scalePdfSuccessBanner" style="display:none; margin-top:12px; padding:8px 12px; background:rgba(16,185,129,0.15); border:1px solid var(--green-success); border-radius:8px; font-size:11.5px; color:#34d399; font-weight:700;"></div>
+                <div id="scalePdfSuccessBanner" style="display:none; margin-top:12px; padding:8px 12px; background:#F0FDF4; border:1px solid #16A34A; border-radius:8px; font-size:11.5px; color:#15803D; font-weight:700;"></div>
             </div>
 
             <div style="display:flex; align-items:center; gap:8px; margin: 10px 0 14px;">
@@ -1973,7 +1973,7 @@
                 </div>
                 <div>
                     <label class="form-label">Kilo (kg) <span style="color:var(--gold);">*</span></label>
-                    <input type="number" id="scaleWeight" class="form-input" step="0.1" placeholder="Örn: 82.4">
+                    <input type="number" id="scaleWeight" class="form-input" step="0.01" placeholder="Örn: 82.4">
                 </div>
             </div>
 
@@ -2879,8 +2879,8 @@
     </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
-    <script src="js/exercises-db.js?v=288"></script>
-    <script src="js/app.js?v=288"></script>
+    <script src="js/exercises-db.js?v=289"></script>
+    <script src="js/app.js?v=289"></script>
     <script>
         function getNotifStorageKey() {
             const uid = localStorage.getItem('celik_kodu_active_user_id') || 'default';
@@ -3073,6 +3073,6 @@
             </div>
         </div>
     </div>
-    <script src="js/garmin-tredict-bridge.js?v=288" defer></script>
+    <script src="js/garmin-tredict-bridge.js?v=289" defer></script>
 </body>
 </html>

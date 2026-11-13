@@ -10194,12 +10194,19 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                             .map(m => m.name.replace(/^models\//, ''))
                             .filter(name => !/tts|image|vision|embedding|aqa|audio|robotics|computer-use|learnlm|gemma/i.test(name));
                         
-                        // Gerçek ve en hızlı Flash modellerini en öne al
-                        const flash25 = supported.filter(m => m === 'gemini-2.5-flash' || m.startsWith('gemini-2.5-flash'));
-                        const flash20 = supported.filter(m => m === 'gemini-2.0-flash' || m.startsWith('gemini-2.0-flash'));
-                        const otherFlash = supported.filter(m => m.includes('flash') && !m.startsWith('gemini-2.5-flash') && !m.startsWith('gemini-2.0-flash'));
-                        const otherModels = supported.filter(m => !m.includes('flash'));
-                        const ordered = [...flash25, ...flash20, ...otherFlash, ...otherModels];
+                        // Gerçek ve kararlı Flash modellerini en öne al; omni/preview/exp modelleri sona bırak
+                        const preferredFlash = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-flash-lite-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+                        const prioritized = preferredFlash.filter(name => supported.includes(name));
+                        const stableOtherFlash = supported.filter(m =>
+                            m.includes('flash') && !preferredFlash.includes(m) && !/omni|preview|exp/i.test(m)
+                        );
+                        const stableOtherModels = supported.filter(m =>
+                            !m.includes('flash') && !/omni|preview|exp/i.test(m)
+                        );
+                        const previewOrOmniModels = supported.filter(m =>
+                            !prioritized.includes(m) && !stableOtherFlash.includes(m) && !stableOtherModels.includes(m)
+                        );
+                        const ordered = [...prioritized, ...stableOtherFlash, ...stableOtherModels, ...previewOrOmniModels];
 
                         ordered.forEach(m => {
                             if (!candidateModels.includes(m)) candidateModels.push(m);
@@ -10212,10 +10219,11 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
 
             // Keşif başarısız olduysa veya modeller listelenemediyse denenmesi gereken güncel modeller
             const fallbackModels = [
+                'gemini-3.8-flash',
+                'gemini-flash-latest',
+                'gemini-flash-lite-latest',
                 'gemini-2.5-flash',
-                'gemini-2.0-flash',
-                'gemini-2.0-flash-lite',
-                'gemini-1.5-flash'
+                'gemini-2.0-flash'
             ];
             fallbackModels.forEach(m => {
                 if (!candidateModels.includes(m)) candidateModels.push(m);
@@ -10223,7 +10231,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
 
             let lastError = null;
 
-            for (const model of candidateModels) {
+            modelLoop: for (const model of candidateModels) {
                 // Hem v1beta hem v1 sürümlerini dene
                 const versions = ['v1beta', 'v1'];
                 for (const ver of versions) {
@@ -10255,12 +10263,15 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                             const errData = await resp.json().catch(() => ({}));
                             const errMsg = (errData && errData.error && errData.error.message) || resp.statusText;
                             lastError = new Error(`Gemini API (${model}) [${resp.status}]: ${errMsg}`);
-                            if (resp.status === 404) {
-                                // Bu sürümde veya model adında bulunamadı, sonrakine geç
+                            if (resp.status === 404 || resp.status === 400) {
+                                // Bu sürümde veya model adında bulunamadı/uyumsuzsa sonraki sürüme veya modele geç
                                 continue;
-                            } else {
-                                // Yetki (403, 400) veya kota (429) hatası ise diğer modeller de aynı anahtarla aynı hatayı verecektir
+                            } else if (resp.status === 429 || resp.status === 503) {
+                                // Kota veya geçici yoğunlukta sıradaki modele geç
                                 break;
+                            } else {
+                                // Yetki (401, 403) hatasında tüm döngüyü durdur
+                                break modelLoop;
                             }
                         }
 
@@ -26232,6 +26243,45 @@ KURALLAR:
             window._lastParsedScaleData = null;
         }
 
+        const MAX_SCALE_UPLOAD_BYTES = 15 * 1024 * 1024;
+        window._scaleTesseractWorker = null;
+
+        /** Update scale modal status banner with WCAG-compliant contrast. */
+        function setScaleBannerState(state, html) {
+            const banner = document.getElementById('scalePdfSuccessBanner');
+            if (!banner) return;
+            const palette = {
+                loading: { bg: '#F0F9FF', brd: '#0284C7', color: '#0369A1' },
+                success: { bg: '#F0FDF4', brd: '#16A34A', color: '#15803D' },
+                error:   { bg: '#FEF2F2', brd: '#DC2626', color: '#B91C1C' }
+            };
+            const theme = palette[state] || palette.loading;
+            banner.style.display = 'block';
+            banner.style.background = theme.bg;
+            banner.style.borderColor = theme.brd;
+            banner.style.color = theme.color;
+            banner.innerHTML = html;
+        }
+
+        /** Convert any thrown value (Error, string, undefined, Event) into a safe readable message. */
+        function formatScaleUploadError(err) {
+            if (!err) return 'Rapor dosyası okunamadı. Lütfen farklı bir görsel veya PDF deneyin.';
+            if (typeof err === 'string') return err;
+            if (typeof err.message === 'string' && err.message.trim()) return err.message;
+            try { return String(err); } catch (_) { return 'Bilinmeyen okuma hatası.'; }
+        }
+
+        /** Check whether parsed data contains weight or at least one body measurement. */
+        function hasParsedScaleOrMeasData(parsed) {
+            if (!parsed || typeof parsed !== 'object') return false;
+            if (parsed.weight && Number.isFinite(parsed.weight)) return true;
+            const m = parsed.measurements;
+            if (m && typeof m === 'object') {
+                return ['waist', 'chest', 'shoulder', 'arms', 'thigh', 'hips', 'neck'].some(k => m[k] != null && Number.isFinite(m[k]));
+            }
+            return false;
+        }
+
         function handleScalePdfDrop(e) {
             e.preventDefault();
             const dropzone = document.getElementById('scalePdfDropzone');
@@ -26251,6 +26301,10 @@ KURALLAR:
 
         async function processScaleUploadFile(file) {
             if (!file) return;
+            if (typeof file.size === 'number' && file.size > MAX_SCALE_UPLOAD_BYTES) {
+                setScaleBannerState('error', '❌ Dosya boyutu 15 MB sınırını aşıyor. Lütfen daha küçük bir dosya seçin.');
+                return;
+            }
             const isImage = (file.type && file.type.startsWith('image/')) || /\.(png|jpe?g|webp)$/i.test(file.name || '');
             const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name || '');
 
@@ -26259,37 +26313,48 @@ KURALLAR:
             } else if (isPdf) {
                 await processScalePdfFile(file);
             } else {
-                // Varsayılan olarak görsel olarak dene
                 await processScaleImageFile(file);
             }
         }
 
+        /** Reconstruct PDF text lines using Y/X coordinates to preserve table row structure. */
+        function reconstructPdfTextLines(items) {
+            if (!Array.isArray(items) || items.length === 0) return '';
+            const rows = [];
+            for (const item of items) {
+                const str = (item && typeof item.str === 'string') ? item.str.trim() : '';
+                if (!str) continue;
+                const x = Array.isArray(item.transform) ? Number(item.transform[4]) || 0 : 0;
+                const y = Array.isArray(item.transform) ? Number(item.transform[5]) || 0 : 0;
+                let row = rows.find(r => Math.abs(r.y - y) <= 4);
+                if (!row) {
+                    row = { y, parts: [] };
+                    rows.push(row);
+                }
+                row.parts.push({ x, str });
+            }
+            rows.sort((a, b) => b.y - a.y);
+            return rows.map(r => r.parts.sort((a, b) => a.x - b.x).map(p => p.str).join(' ')).join('\n');
+        }
+
         async function processScalePdfFile(file) {
             if (!file) return;
-            const banner = document.getElementById('scalePdfSuccessBanner');
-            if (banner) {
-                banner.style.display = 'block';
-                banner.style.background = 'rgba(56,189,248,0.15)';
-                banner.style.borderColor = 'var(--cyan)';
-                banner.style.color = 'var(--cyan)';
-                banner.innerHTML = '⏳ PDF dosyası taranıyor...';
-            }
+            setScaleBannerState('loading', '⏳ PDF dosyası taranıyor...');
 
             try {
                 if (!window.pdfjsLib) {
-                    throw new Error("PDF.js kütüphanesi hazır değil. Lütfen internet bağlantınızı kontrol edip sayfayı yenileyiniz.");
+                    throw new Error("PDF okuyucu henüz hazır değil. İnternet bağlantınızı kontrol edip sayfayı yenileyin.");
                 }
                 const arrayBuffer = await file.arrayBuffer();
                 const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
                 const pdf = await loadingTask.promise;
-                
-                // 1. Önce doğrudan metin katmanı var mı diye bak (metin içeren PDF'ler için ultra hızlı)
+
                 let extractedText = '';
                 for (let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
                     const textContent = await page.getTextContent();
-                    const pageText = textContent.items.map(item => item.str).join(' ');
-                    extractedText += ' ' + pageText;
+                    const pageText = reconstructPdfTextLines(textContent.items);
+                    if (pageText) extractedText += (extractedText ? '\n' : '') + pageText;
                 }
 
                 let parsed = null;
@@ -26297,19 +26362,16 @@ KURALLAR:
                     parsed = extractUniqueHealthData(extractedText);
                 }
 
-                if (parsed && parsed.weight) {
-                    applyParsedScaleData(parsed, 'Unique Health PDF (Metin Katmanı)');
+                const compCount = parsed ? ['bodyFat', 'skeletalMuscle', 'totalWater', 'bmr', 'visceralFat'].filter(k => parsed[k] != null).length : 0;
+                if (parsed && parsed.weight && compCount >= 2) {
+                    applyParsedScaleData(parsed, 'PDF Raporu');
                     return;
                 }
 
-                // 2. Metin katmanı yoksa (Unique Health gibi tek parça görsel içeren taranmış PDF ise):
-                // PDF'in 1. sayfasını yüksek çözünürlüklü Canvas'a çiz ve OCR çalıştır!
-                if (banner) {
-                    banner.innerHTML = '📄 PDF görsel katmanı ayrıştırılıyor, yapay zeka OCR başlatılıyor...';
-                }
+                setScaleBannerState('loading', '📄 PDF görseli ayrıştırılıyor, akıllı tarama başlatılıyor...');
                 const page = await pdf.getPage(1);
                 const baseViewport = page.getViewport({ scale: 1.0 });
-                const targetScale = Math.min(2.0, Math.max(1.0, 2000 / (baseViewport.width || 1000)));
+                const targetScale = Math.min(3.0, Math.max(1.8, 2400 / (baseViewport.width || 800)));
                 const viewport = page.getViewport({ scale: targetScale });
                 const canvas = document.createElement('canvas');
                 canvas.width = viewport.width;
@@ -26317,37 +26379,29 @@ KURALLAR:
                 const ctx = canvas.getContext('2d');
                 await page.render({ canvasContext: ctx, viewport: viewport }).promise;
 
-                await runOcrOnCanvas(canvas, 'Unique Health PDF Raporu');
+                await runOcrOnCanvas(canvas, 'PDF Görsel Raporu');
             } catch(err) {
                 console.error("PDF Parsing error:", err);
-                if (banner) {
-                    banner.style.background = 'rgba(239,68,68,0.15)';
-                    banner.style.borderColor = 'var(--red-alert)';
-                    banner.style.color = '#DC2626';
-                    banner.innerHTML = `❌ Ayrıştırma Hatası: ${err.message || 'Geçersiz PDF'}`;
-                }
+                setScaleBannerState('error', `❌ Ayrıştırma Hatası: ${escapeHTML(formatScaleUploadError(err))}`);
             }
         }
 
         async function processScaleImageFile(file) {
             if (!file) return;
-            const banner = document.getElementById('scalePdfSuccessBanner');
-            if (banner) {
-                banner.style.display = 'block';
-                banner.style.background = 'rgba(56,189,248,0.15)';
-                banner.style.borderColor = 'var(--cyan)';
-                banner.style.color = 'var(--cyan)';
-                banner.innerHTML = '⏳ Rapor görseli yükleniyor...';
-            }
+            setScaleBannerState('loading', '⏳ Rapor görseli yükleniyor...');
 
             try {
                 const img = new Image();
                 const objectUrl = URL.createObjectURL(file);
-                await new Promise((resolve, reject) => {
-                    img.onload = resolve;
-                    img.onerror = () => reject(new Error("Görsel yüklenemedi. Lütfen geçerli bir PNG veya JPG seçin."));
-                    img.src = objectUrl;
-                });
+                try {
+                    await new Promise((resolve, reject) => {
+                        img.onload = resolve;
+                        img.onerror = () => reject(new Error("Görsel yüklenemedi. Lütfen geçerli bir PNG veya JPG seçin."));
+                        img.src = objectUrl;
+                    });
+                } finally {
+                    URL.revokeObjectURL(objectUrl);
+                }
 
                 const canvas = document.createElement('canvas');
                 const maxDim = 2400;
@@ -26361,103 +26415,530 @@ KURALLAR:
                 canvas.width = w;
                 canvas.height = h;
                 const ctx = canvas.getContext('2d');
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
                 ctx.drawImage(img, 0, 0, w, h);
-                URL.revokeObjectURL(objectUrl);
 
-                await runOcrOnCanvas(canvas, 'Unique Health Görsel Raporu (PNG/JPG)');
+                await runOcrOnCanvas(canvas, 'Görsel Rapor');
             } catch(err) {
                 console.error("Görsel OCR hatası:", err);
-                if (banner) {
-                    banner.style.background = 'rgba(239,68,68,0.15)';
-                    banner.style.borderColor = 'var(--red-alert)';
-                    banner.style.color = '#DC2626';
-                    banner.innerHTML = `❌ Görsel Okunamadı: ${err.message || 'Geçersiz Dosya'}`;
-                }
+                setScaleBannerState('error', `❌ Görsel Okunamadı: ${escapeHTML(formatScaleUploadError(err))}`);
             }
         }
 
-        async function runOcrOnCanvas(canvas, sourceLabel) {
-            const banner = document.getElementById('scalePdfSuccessBanner');
-            if (typeof Tesseract === 'undefined') {
-                throw new Error("OCR kütüphanesi henüz yüklenemedi. Lütfen internet bağlantınızı kontrol edip sayfayı yenileyiniz.");
+        /** Normalize numeric range and cross-check biophysical fields on AI or OCR output. */
+        function normalizeAndValidateScaleData(raw) {
+            if (!raw || typeof raw !== 'object') return null;
+            const inRange = (val, min, max, decimals = 2) => {
+                if (val == null || val === '') return null;
+                const n = typeof val === 'number' ? val : parseFloat(String(val).replace(',', '.'));
+                if (!Number.isFinite(n) || n < min || n > max) return null;
+                const factor = Math.pow(10, decimals);
+                return Math.round(n * factor) / factor;
+            };
+
+            const out = { rawTextLength: raw.rawTextLength || 0 };
+            if (typeof raw.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(raw.date.trim())) {
+                out.date = raw.date.trim();
+                const p = out.date.split('-');
+                out.dateFormatted = `${p[2]}/${p[1]}/${p[0]}`;
             }
 
-            if (banner) {
-                banner.style.display = 'block';
-                banner.style.background = 'rgba(56,189,248,0.15)';
-                banner.style.borderColor = 'var(--cyan)';
-                banner.style.color = 'var(--cyan)';
-                banner.innerHTML = '🔍 Yapay zeka Unique Health raporunu okuyor... %0';
+            out.totalWater = inRange(raw.totalWater, 20, 90, 2);
+            out.protein = inRange(raw.protein, 4, 35, 2);
+            out.minerals = inRange(raw.minerals, 1, 12, 2);
+            out.bone = inRange(raw.bone, 1, 10, 2);
+            out.bodyFatKg = inRange(raw.bodyFatKg, 2, 95, 2);
+            out.subcutaneousFatKg = inRange(raw.subcutaneousFatKg, 1, 75, 2);
+            out.intraWater = inRange(raw.intraWater, 10, 65, 2);
+            out.extraWater = inRange(raw.extraWater, 6, 40, 2);
+            out.leanBodyMass = inRange(raw.leanBodyMass, 25, 160, 2);
+            out.heightCm = inRange(raw.heightCm, 120, 230, 1);
+
+            out.weight = inRange(raw.weight, 30, 250, 2);
+            const hasSumParts = out.totalWater && out.protein && (out.minerals || out.bone) && out.bodyFatKg;
+            if (hasSumParts) {
+                const massSum = Math.round((out.totalWater + out.protein + (out.minerals || out.bone) + out.bodyFatKg) * 100) / 100;
+                if (!out.weight || Math.abs(out.weight - massSum) > 1.8) {
+                    out.weight = Math.round(massSum * 10) / 10;
+                }
             }
 
-            // Tesseract ile hızlı ve yüksek doğrulukta optik tarama
-            const res = await Tesseract.recognize(canvas, 'eng+tur', {
-                logger: m => {
-                    if (banner && m.status === 'recognizing text') {
-                        const pct = Math.round((m.progress || 0) * 100);
-                        banner.innerHTML = `🔍 Yapay zeka değerleri analiz ediyor... %${pct}`;
-                    } else if (banner && m.status === 'loading language traineddata') {
-                        banner.innerHTML = `📥 OCR dil paketleri hazırlanıyor...`;
+            out.skeletalMuscle = inRange(raw.skeletalMuscle, 12, 80, 2);
+            if (out.skeletalMuscle && out.totalWater && out.protein) {
+                const ffmHydro = out.totalWater + out.protein;
+                if (out.skeletalMuscle < ffmHydro * 0.42 || out.skeletalMuscle > ffmHydro * 0.75) {
+                    out.skeletalMuscle = null;
+                }
+            }
+            out.muscleMass = inRange(raw.muscleMass, 15, 120, 2);
+
+            out.bodyFat = inRange(raw.bodyFat, 3, 60, 1);
+            if (out.bodyFatKg && out.weight) {
+                const calcFatPct = Math.round((out.bodyFatKg / out.weight) * 1000) / 10;
+                if (!out.bodyFat || Math.abs(out.bodyFat - calcFatPct) > 1.5) {
+                    out.bodyFat = calcFatPct;
+                }
+            }
+
+            if (out.totalWater && out.weight) {
+                out.totalWaterPct = Math.round((out.totalWater / out.weight) * 1000) / 10;
+            } else {
+                out.totalWaterPct = inRange(raw.totalWaterPct, 30, 80, 1);
+            }
+
+            if (!out.leanBodyMass && out.weight && out.bodyFatKg) {
+                out.leanBodyMass = Math.round((out.weight - out.bodyFatKg) * 10) / 10;
+            }
+
+            out.visceralFat = inRange(raw.visceralFat, 1, 30, 0);
+            out.bmr = inRange(raw.bmr, 800, 4500, 0);
+            out.recommendedCalories = inRange(raw.recommendedCalories, 1000, 6000, 0);
+            out.idealWeight = inRange(raw.idealWeight, 35, 150, 2);
+            out.bodyScore = inRange(raw.bodyScore, 1, 100, 0);
+            out.bodyAge = inRange(raw.bodyAge, 12, 99, 0);
+
+            out.bmi = inRange(raw.bmi, 12, 55, 1);
+            if (out.weight && out.heightCm) {
+                const calcBmi = Math.round((out.weight / Math.pow(out.heightCm / 100, 2)) * 10) / 10;
+                if (!out.bmi || Math.abs(out.bmi - calcBmi) > 2.0) {
+                    out.bmi = calcBmi;
+                }
+            }
+
+            if (raw.segmental && typeof raw.segmental === 'object') {
+                const segOut = {};
+                let hasSeg = false;
+                for (const part of ['leftArm', 'rightArm', 'trunk', 'leftLeg', 'rightLeg']) {
+                    const src = raw.segmental[part];
+                    if (src && typeof src === 'object') {
+                        const item = {
+                            fatKg: inRange(src.fatKg, 0.1, 45, 2),
+                            fatPct: inRange(src.fatPct, 10, 400, 1),
+                            muscleKg: inRange(src.muscleKg, 0.5, 60, 2),
+                            musclePct: inRange(src.musclePct, 30, 250, 1)
+                        };
+                        if (Object.values(item).some(v => v !== null)) {
+                            segOut[part] = item;
+                            hasSeg = true;
+                        }
                     }
                 }
-            });
-
-            const text = (res && res.data && res.data.text) ? res.data.text : '';
-            if (!text || text.length < 20) {
-                throw new Error("Görsel üzerinde okunabilir metin tespit edilemedi. Lütfen net bir Unique Health raporu yükleyiniz.");
+                if (hasSeg) out.segmental = segOut;
             }
 
-            const parsed = extractUniqueHealthData(text);
-            if (!parsed || !parsed.weight) {
-                throw new Error("Görsel üzerinde kilo ve vücut analizi tespit edilemedi. Lütfen Unique Health 3. 'Vücut Kompozisyon Analiz Raporu' görselini seçtiğinizden emin olun.");
+            if (raw.measurements && typeof raw.measurements === 'object') {
+                const measRanges = {
+                    waist: [45, 180], chest: [55, 180], shoulder: [70, 190],
+                    arms: [18, 70], thigh: [30, 100], hips: [60, 180], neck: [25, 65]
+                };
+                const measOut = {};
+                let hasMeas = false;
+                for (const [k, [mn, mx]] of Object.entries(measRanges)) {
+                    const v = inRange(raw.measurements[k], mn, mx, 1);
+                    if (v !== null) {
+                        measOut[k] = v;
+                        hasMeas = true;
+                    }
+                }
+                if (hasMeas) out.measurements = measOut;
+            }
+
+            return out;
+        }
+
+        /** Tier 1: Fast Gemini Vision structured JSON extraction with timeout and safe fallback. */
+        async function tryGeminiVisionScaleExtraction(canvas) {
+            if (!navigator.onLine) return null;
+            let apiKey = typeof getGeminiApiKey === 'function' ? getGeminiApiKey() : '';
+            if (!apiKey && typeof fastFetchCloudAiConfig === 'function') {
+                apiKey = await fastFetchCloudAiConfig();
+            }
+            if (!apiKey) return null;
+
+            const maxDim = 1600;
+            let w = canvas.width, h = canvas.height;
+            let sendCanvas = canvas;
+            if (w > maxDim || h > maxDim) {
+                const ratio = Math.min(maxDim / w, maxDim / h);
+                sendCanvas = document.createElement('canvas');
+                sendCanvas.width = Math.round(w * ratio);
+                sendCanvas.height = Math.round(h * ratio);
+                const sctx = sendCanvas.getContext('2d');
+                sctx.imageSmoothingEnabled = true;
+                sctx.imageSmoothingQuality = 'high';
+                sctx.drawImage(canvas, 0, 0, sendCanvas.width, sendCanvas.height);
+            }
+            const dataUrl = sendCanvas.toDataURL('image/jpeg', 0.86);
+            const base64Data = dataUrl.split(',')[1];
+            if (!base64Data) return null;
+
+            const prompt = `Bu vücut analizi, akıllı tartı veya mezura ölçüm raporundaki değerleri dikkatle oku ve SADECE geçerli JSON döndür. Raporda açıkça yazmayan alanlara null yaz (asla tahmin etme; parantez içindeki normal referans aralıklarını değil, çubuğun/kutunun gösterdiği gerçek ölçümü al). Tarih GG/AA/YYYY ise YYYY-MM-DD yap.
+Şema: {"date":null,"weight":null,"skeletalMuscle":null,"muscleMass":null,"leanBodyMass":null,"bodyFat":null,"bodyFatKg":null,"subcutaneousFatKg":null,"totalWater":null,"totalWaterPct":null,"intraWater":null,"extraWater":null,"protein":null,"minerals":null,"bone":null,"visceralFat":null,"bmr":null,"recommendedCalories":null,"bmi":null,"bodyScore":null,"bodyAge":null,"idealWeight":null,"heightCm":null,"segmental":{"leftArm":{"fatKg":null,"fatPct":null,"muscleKg":null,"musclePct":null},"rightArm":{"fatKg":null,"fatPct":null,"muscleKg":null,"musclePct":null},"trunk":{"fatKg":null,"fatPct":null,"muscleKg":null,"musclePct":null},"leftLeg":{"fatKg":null,"fatPct":null,"muscleKg":null,"musclePct":null},"rightLeg":{"fatKg":null,"fatPct":null,"muscleKg":null,"musclePct":null}},"measurements":{"waist":null,"chest":null,"shoulder":null,"arms":null,"thigh":null,"hips":null,"neck":null}}`;
+
+            const visionModels = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-flash-lite-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+            for (const model of visionModels) {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), 8000);
+                try {
+                    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+                        method: 'POST',
+                        signal: controller.signal,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ role: 'user', parts: [{ text: prompt }, { inlineData: { mimeType: 'image/jpeg', data: base64Data } }] }],
+                            generationConfig: { temperature: 0.1, maxOutputTokens: 2048, responseMimeType: 'application/json' }
+                        })
+                    });
+                    clearTimeout(timer);
+                    if (!resp.ok) {
+                        if (resp.status === 401 || resp.status === 403) break;
+                        continue;
+                    }
+                    const json = await resp.json();
+                    const rawText = json?.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (!rawText) continue;
+                    const cleaned = rawText.replace(/^```json\s*/i, '').replace(/```$/i, '').trim();
+                    const parsedJson = JSON.parse(cleaned);
+                    const normalized = normalizeAndValidateScaleData(parsedJson);
+                    if (hasParsedScaleOrMeasData(normalized)) return normalized;
+                } catch (_) {
+                    clearTimeout(timer);
+                }
+            }
+            return null;
+        }
+
+        /** Build multi-region signal-processed OCR panels (handles multi-column charts, colored bars, and dark pills). */
+        function buildScaleOcrPanels(sourceCanvas) {
+            const w0 = sourceCanvas.width, h0 = sourceCanvas.height;
+            const ctx0 = sourceCanvas.getContext('2d');
+            const p0 = ctx0.getImageData(0, 0, w0, h0).data;
+
+            const lum0 = new Float32Array(w0 * h0);
+            const minCh0 = new Float32Array(w0 * h0);
+            let lumSum = 0;
+            for (let i = 0, j = 0; i < p0.length; i += 4, j++) {
+                const r = p0[i], g = p0[i + 1], b = p0[i + 2];
+                const L = 0.299 * r + 0.587 * g + 0.114 * b;
+                lum0[j] = L;
+                minCh0[j] = Math.min(r, g, b);
+                lumSum += L;
+            }
+            const meanLum = lumSum / Math.max(1, w0 * h0);
+
+            const fadeSaturatedPixels = (c, xThresholdRatio = 0) => {
+                const ctx = c.getContext('2d');
+                const cw = c.width, ch = c.height;
+                const id = ctx.getImageData(0, 0, cw, ch);
+                const d = id.data;
+                const minX = Math.floor(cw * xThresholdRatio);
+                for (let y = 0; y < ch; y++) {
+                    for (let x = minX; x < cw; x++) {
+                        const i = (y * cw + x) * 4;
+                        const r = d[i], g = d[i + 1], b = d[i + 2];
+                        const sat = Math.max(r, g, b) - Math.min(r, g, b);
+                        const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+                        const cwgt = Math.max(0, Math.min(1, (sat - 25) / 35));
+                        const out = Math.round(lum * (1 - cwgt) + 255 * cwgt);
+                        d[i] = d[i + 1] = d[i + 2] = out;
+                    }
+                }
+                ctx.putImageData(id, 0, 0);
+                return c;
+            };
+
+            const singleStepUp = (src, sx, sy, sw, sh, scale) => {
+                const c = document.createElement('canvas');
+                c.width = Math.max(1, Math.round(sw * scale));
+                c.height = Math.max(1, Math.round(sh * scale));
+                const ctx = c.getContext('2d');
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                ctx.drawImage(src, sx, sy, sw, sh, 0, 0, c.width, c.height);
+                return c;
+            };
+
+            const twoStepUp = (src, sx, sy, sw, sh, scale) => {
+                const cMid = singleStepUp(src, sx, sy, sw, sh, 2.0);
+                return singleStepUp(cMid, 0, 0, cMid.width, cMid.height, scale / 2.0);
+            };
+
+            const makeBorderlessPillCanvas = () => {
+                const isCardSeed = new Uint8Array(w0 * h0);
+                for (let y = 0; y < h0 - 1; y++) {
+                    for (let x = 0; x < w0 - 1; x++) {
+                        const idx = y * w0 + x;
+                        if (minCh0[idx] > 235 && minCh0[idx + 1] > 235 && minCh0[idx + w0] > 235 && minCh0[idx + w0 + 1] > 235) {
+                            isCardSeed[idx] = 1;
+                        }
+                    }
+                }
+                const isExterior = new Uint8Array(w0 * h0);
+                for (let y = 0; y < h0; y++) {
+                    for (let x = 0; x < w0; x++) {
+                        let found = 0;
+                        for (let dy = -3; dy <= 3 && !found; dy++) {
+                            const ny = y + dy;
+                            if (ny < 0 || ny >= h0) continue;
+                            for (let dx = -3; dx <= 3; dx++) {
+                                const nx = x + dx;
+                                if (nx < 0 || nx >= w0) continue;
+                                if (isCardSeed[ny * w0 + nx]) { found = 1; break; }
+                            }
+                        }
+                        isExterior[y * w0 + x] = found;
+                    }
+                }
+                const isThickBlob = new Uint8Array(w0 * h0);
+                for (let y = 2; y < h0 - 2; y++) {
+                    for (let x = 2; x < w0 - 2; x++) {
+                        let allBright = 1;
+                        for (let dy = -2; dy <= 2 && allBright; dy++) {
+                            for (let dx = -2; dx <= 2; dx++) {
+                                if (minCh0[(y + dy) * w0 + (x + dx)] < 175) { allBright = 0; break; }
+                            }
+                        }
+                        if (allBright) isThickBlob[y * w0 + x] = 1;
+                    }
+                }
+                const pill0 = document.createElement('canvas');
+                pill0.width = w0;
+                pill0.height = h0;
+                const pctx = pill0.getContext('2d');
+                const pid = pctx.createImageData(w0, h0);
+                const pd = pid.data;
+                for (let y = 0; y < h0; y++) {
+                    for (let x = 0; x < w0; x++) {
+                        const j = y * w0 + x;
+                        let out = 255;
+                        if (!isExterior[j] && !isThickBlob[j]) {
+                            let bgMin = 255;
+                            for (let dy = -2; dy <= 2; dy++) {
+                                const ny = y + dy;
+                                if (ny < 0 || ny >= h0) continue;
+                                for (let dx = -5; dx <= 5; dx += 2) {
+                                    const nx = x + dx;
+                                    if (nx < 0 || nx >= w0) continue;
+                                    const nIdx = ny * w0 + nx;
+                                    if (!isExterior[nIdx] && minCh0[nIdx] < bgMin) bgMin = minCh0[nIdx];
+                                }
+                            }
+                            if (bgMin >= 35 && bgMin <= 170) {
+                                const diff = minCh0[j] - bgMin;
+                                if (diff > 10) {
+                                    out = Math.max(0, Math.min(255, Math.round(255 - (diff - 8) * 3.2)));
+                                }
+                            }
+                        }
+                        const o4 = j * 4;
+                        pd[o4] = pd[o4 + 1] = pd[o4 + 2] = out;
+                        pd[o4 + 3] = 255;
+                    }
+                }
+                pctx.putImageData(pid, 0, 0);
+                return pill0;
+            };
+
+            if (meanLum < 95) {
+                const scale = Math.max(1.5, Math.min(3.5, 1600 / Math.max(1, w0)));
+                const c = singleStepUp(sourceCanvas, 0, 0, w0, h0, scale);
+                const ctx = c.getContext('2d');
+                const id = ctx.getImageData(0, 0, c.width, c.height);
+                const d = id.data;
+                for (let i = 0; i < d.length; i += 4) {
+                    const inv = Math.round(255 - (0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]));
+                    d[i] = d[i + 1] = d[i + 2] = inv;
+                }
+                ctx.putImageData(id, 0, 0);
+                return [{ name: 'PANEL_DARK_INVERT', canvas: c }];
+            }
+
+            let isTwoColumn = false;
+            let splitX0 = Math.round(w0 * 0.405);
+            const aspect = h0 / Math.max(1, w0);
+            if (w0 >= 480 && aspect >= 1.0 && aspect <= 1.9) {
+                const yStart = Math.round(h0 * 0.10), yEnd = Math.round(h0 * 0.88);
+                let bestX = -1, bestEnergy = Infinity;
+                for (let x = Math.round(w0 * 0.35); x <= Math.round(w0 * 0.52); x += 2) {
+                    let energy = 0;
+                    for (let y = yStart; y < yEnd; y += 2) {
+                        energy += Math.abs(lum0[y * w0 + x + 1] - lum0[y * w0 + x - 1]);
+                    }
+                    const avgGrad = energy / Math.max(1, (yEnd - yStart) / 2);
+                    if (avgGrad < bestEnergy) { bestEnergy = avgGrad; bestX = x; }
+                }
+                if (bestX > 0 && bestEnergy < 4.0) {
+                    isTwoColumn = true;
+                    splitX0 = (bestX >= Math.round(w0 * 0.38) && bestX <= Math.round(w0 * 0.43))
+                        ? Math.max(bestX, Math.round(w0 * 0.405))
+                        : bestX;
+                }
+            }
+
+            if (isTwoColumn) {
+                const rightW0 = w0 - splitX0;
+                const segMidX0 = splitX0 + Math.round(rightW0 * 0.50);
+                const pill0 = makeBorderlessPillCanvas();
+
+                const leftScale = Math.max(1.5, Math.min(3.5, 1050 / Math.max(1, splitX0)));
+                const rightBarScale = Math.max(1.5, Math.min(4.0, 1750 / Math.max(1, rightW0)));
+
+                const pLeftTop = fadeSaturatedPixels(
+                    singleStepUp(sourceCanvas, 0, 0, splitX0, Math.round(h0 * 0.45), leftScale),
+                    0.48
+                );
+                const pRightBar = fadeSaturatedPixels(
+                    singleStepUp(sourceCanvas, splitX0, Math.round(h0 * 0.05), rightW0, Math.round(h0 * 0.43), rightBarScale),
+                    0
+                );
+                const pLeftPill = twoStepUp(pill0, 0, Math.round(h0 * 0.55), splitX0, Math.round(h0 * 0.40), 3.5);
+                const pSegFat = twoStepUp(pill0, splitX0, Math.round(h0 * 0.48), Math.round(rightW0 * 0.50), Math.round(h0 * 0.45), 3.5);
+                const pSegMuscle = twoStepUp(pill0, segMidX0, Math.round(h0 * 0.48), w0 - segMidX0, Math.round(h0 * 0.45), 3.5);
+
+                return [
+                    { name: 'PANEL_SOL_UST', canvas: pLeftTop },
+                    { name: 'PANEL_SAG_BAR', canvas: pRightBar },
+                    { name: 'PANEL_SOL_PILL', canvas: pLeftPill },
+                    { name: 'PANEL_BOLGESEL_YAG', canvas: pSegFat },
+                    { name: 'PANEL_BOLGESEL_KAS', canvas: pSegMuscle }
+                ];
+            }
+
+            const fullScale = Math.max(1.5, Math.min(3.5, 1400 / Math.max(1, w0)));
+            const panels = [
+                { name: 'PANEL_TAM_NORMAL', canvas: fadeSaturatedPixels(singleStepUp(sourceCanvas, 0, 0, w0, h0, fullScale), 0) }
+            ];
+            let darkCount = 0;
+            for (let j = 0; j < lum0.length; j += 4) {
+                if (lum0[j] >= 40 && lum0[j] <= 165) darkCount++;
+            }
+            if (darkCount / Math.max(1, lum0.length / 4) > 0.03) {
+                const pill0 = makeBorderlessPillCanvas();
+                panels.push({ name: 'PANEL_TAM_PILL', canvas: twoStepUp(pill0, 0, 0, w0, h0, Math.min(3.5, fullScale)) });
+            }
+            return panels;
+        }
+
+        async function getCachedScaleOcrWorker(onStatus) {
+            if (window._scaleTesseractWorker) return window._scaleTesseractWorker;
+            if (onStatus) onStatus('📥 Akıllı metin tarayıcı hazırlanıyor...');
+            const worker = await Tesseract.createWorker(['eng', 'tur']);
+            await worker.setParameters({ tessedit_pageseg_mode: '6' });
+            window._scaleTesseractWorker = worker;
+            return worker;
+        }
+
+        async function runOcrOnCanvas(canvas, sourceLabel) {
+            setScaleBannerState('loading', '🔍 Rapor yapay zeka ile taranıyor...');
+
+            // Katman 1: Anahtar ve kota müsaitse Gemini Vision ile doğrudan JSON okuma
+            try {
+                const visionParsed = await tryGeminiVisionScaleExtraction(canvas);
+                if (hasParsedScaleOrMeasData(visionParsed)) {
+                    applyParsedScaleData(visionParsed, sourceLabel);
+                    return;
+                }
+            } catch (_) {}
+
+            // Katman 2: Çok bölgeli sinyal işlemeli yerel OCR
+            if (typeof Tesseract === 'undefined') {
+                throw new Error("Metin okuma modülü henüz yüklenemedi. İnternet bağlantınızı kontrol edip sayfayı yenileyin.");
+            }
+
+            setScaleBannerState('loading', '🔍 Görsel bölümleri ayrı ayrı okunuyor... %0');
+            const panels = buildScaleOcrPanels(canvas);
+
+            let combinedText = '';
+            let worker;
+            try {
+                worker = await getCachedScaleOcrWorker((msg) => setScaleBannerState('loading', msg));
+                for (let i = 0; i < panels.length; i++) {
+                    const pct = Math.round((i / panels.length) * 100);
+                    setScaleBannerState('loading', `🔍 Değerler çözümleniyor... %${pct}`);
+                    const res = await worker.recognize(panels[i].canvas);
+                    const pText = (res && res.data && res.data.text) ? res.data.text.trim() : '';
+                    if (pText) {
+                        combinedText += `\n=== ${panels[i].name} ===\n${pText}\n`;
+                    }
+                }
+                setScaleBannerState('loading', '🔍 Değerler çözümleniyor... %100');
+            } catch (ocrErr) {
+                try { if (window._scaleTesseractWorker) await window._scaleTesseractWorker.terminate(); } catch (_) {}
+                window._scaleTesseractWorker = null;
+                throw ocrErr;
+            }
+
+            if (!combinedText || combinedText.trim().length < 20) {
+                throw new Error("Görsel üzerinde okunabilir metin tespit edilemedi. Lütfen daha net bir rapor seçin.");
+            }
+
+            const parsed = extractUniqueHealthData(combinedText);
+            if (!hasParsedScaleOrMeasData(parsed)) {
+                throw new Error("Görsel üzerinde kilo veya ölçüm verisi tespit edilemedi. Lütfen geçerli bir analiz raporu seçin.");
             }
 
             applyParsedScaleData(parsed, sourceLabel);
         }
 
         function applyParsedScaleData(parsed, sourceLabel = 'Rapor') {
-            if (!parsed || !parsed.weight) return;
+            if (!hasParsedScaleOrMeasData(parsed)) return;
             window._lastParsedScaleData = parsed;
 
-            // Form alanlarını otomatik doldur
             if (parsed.date && document.getElementById('scaleDate')) {
                 document.getElementById('scaleDate').value = parsed.date;
             }
-            if (parsed.weight && document.getElementById('scaleWeight')) {
-                document.getElementById('scaleWeight').value = parsed.weight;
-            }
-            if (parsed.bodyFat && document.getElementById('scaleBodyFat')) {
-                document.getElementById('scaleBodyFat').value = parsed.bodyFat;
-            }
-            if ((parsed.skeletalMuscle || parsed.muscleMass) && document.getElementById('scaleMuscleMass')) {
-                document.getElementById('scaleMuscleMass').value = parsed.skeletalMuscle || parsed.muscleMass;
-            }
-            if (parsed.totalWaterPct && document.getElementById('scaleWaterPct')) {
-                document.getElementById('scaleWaterPct').value = parsed.totalWaterPct;
-            } else if (parsed.totalWater && parsed.weight && document.getElementById('scaleWaterPct')) {
-                document.getElementById('scaleWaterPct').value = (Math.round((parsed.totalWater / parsed.weight) * 1000) / 10);
-            }
-            if (parsed.visceralFat && document.getElementById('scaleVisceralFat')) {
-                document.getElementById('scaleVisceralFat').value = parsed.visceralFat;
-            }
-            if (parsed.bmr && document.getElementById('scaleBmr')) {
-                document.getElementById('scaleBmr').value = parsed.bmr;
-            }
-            if (document.getElementById('scaleNotes')) {
-                const score = parsed.bodyScore ? ` • Puan: ${parsed.bodyScore}` : '';
-                const age = parsed.bodyAge ? ` • Vücut Yaşı: ${parsed.bodyAge}` : '';
-                document.getElementById('scaleNotes').value = `Unique Health BIA Analizi${score}${age}`;
+
+            if (parsed.weight) {
+                // Yeni tartı raporu yüklendiğinde önceki ölçüm kalıntılarını temizle, sadece yeni rapordan gelenleri yaz
+                const fieldMap = [
+                    ['scaleWeight', parsed.weight],
+                    ['scaleBodyFat', parsed.bodyFat],
+                    ['scaleMuscleMass', parsed.skeletalMuscle || parsed.muscleMass],
+                    ['scaleWaterPct', parsed.totalWaterPct != null ? parsed.totalWaterPct : (parsed.totalWater && parsed.weight ? Math.round((parsed.totalWater / parsed.weight) * 1000) / 10 : null)],
+                    ['scaleVisceralFat', parsed.visceralFat],
+                    ['scaleBmr', parsed.bmr]
+                ];
+                for (const [id, val] of fieldMap) {
+                    const el = document.getElementById(id);
+                    if (el) el.value = (val != null && !isNaN(val)) ? val : '';
+                }
             }
 
-            const banner = document.getElementById('scalePdfSuccessBanner');
-            if (banner) {
-                banner.style.display = 'block';
-                banner.style.background = 'rgba(16,185,129,0.15)';
-                banner.style.borderColor = 'var(--green-success)';
-                banner.style.color = '#15803D';
-                banner.innerHTML = `✅ <strong>${sourceLabel} Başarıyla Ayrıştırıldı!</strong><br>${parsed.weight} kg • ${parsed.skeletalMuscle ? `${parsed.skeletalMuscle} kg İskelet Kası` : ''}${parsed.bodyFat ? ` • %${parsed.bodyFat} Yağ` : ''}${parsed.bmr ? ` • BMR ${parsed.bmr} kcal` : ''}`;
+            if (parsed.measurements && typeof parsed.measurements === 'object') {
+                const measFieldMap = [
+                    ['scaleWaist', parsed.measurements.waist],
+                    ['scaleChest', parsed.measurements.chest],
+                    ['scaleShoulder', parsed.measurements.shoulder],
+                    ['scaleArms', parsed.measurements.arms],
+                    ['scaleThigh', parsed.measurements.thigh],
+                    ['scaleHips', parsed.measurements.hips],
+                    ['scaleNeck', parsed.measurements.neck]
+                ];
+                for (const [id, val] of measFieldMap) {
+                    const el = document.getElementById(id);
+                    if (el && val != null && !isNaN(val)) el.value = val;
+                }
             }
-            playAlertSound();
+
+            if (document.getElementById('scaleNotes')) {
+                if (parsed.weight) {
+                    const score = parsed.bodyScore ? ` • Puan: ${parsed.bodyScore}` : '';
+                    const age = parsed.bodyAge ? ` • Vücut Yaşı: ${parsed.bodyAge}` : '';
+                    document.getElementById('scaleNotes').value = `BIA Analizi${score}${age}`;
+                } else {
+                    document.getElementById('scaleNotes').value = 'Mezura Ölçümü';
+                }
+            }
+
+            const summaryParts = [];
+            if (parsed.weight) summaryParts.push(`${parsed.weight} kg`);
+            if (parsed.skeletalMuscle || parsed.muscleMass) summaryParts.push(`${parsed.skeletalMuscle || parsed.muscleMass} kg Kas`);
+            if (parsed.bodyFat) summaryParts.push(`%${parsed.bodyFat} Yağ`);
+            if (parsed.bmr) summaryParts.push(`BMR ${parsed.bmr} kcal`);
+            if (parsed.measurements?.waist) summaryParts.push(`Bel ${parsed.measurements.waist} cm`);
+            setScaleBannerState('success', `✅ <strong>${escapeHTML(sourceLabel)} Okundu!</strong><br>${escapeHTML(summaryParts.join(' • '))}`);
+            if (typeof playAlertSound === 'function') playAlertSound();
         }
 
         // ----- MOBILE & BUTTON PASTE (CLIPBOARD API & INLINE BOX) -----
@@ -26469,9 +26950,7 @@ KURALLAR:
             box.style.display = show ? 'block' : 'none';
             if (show) {
                 const ta = document.getElementById('scalePasteArea');
-                if (ta) {
-                    ta.focus();
-                }
+                if (ta) ta.focus();
             }
         }
 
@@ -26480,26 +26959,25 @@ KURALLAR:
                 e.stopPropagation();
                 e.preventDefault();
             }
-            const banner = document.getElementById('scalePdfSuccessBanner');
 
-            // 1. Önce modern tarayıcı panosundan otomatik okumayı dene (Masaüstü Chrome/Edge vb.)
             if (navigator.clipboard) {
-                // PDF Dosyası kontrolü (Cmd+C ile kopyalanan dosya)
                 if (navigator.clipboard.read) {
                     try {
                         const items = await navigator.clipboard.read();
                         for (const item of items) {
                             for (const type of item.types) {
-                                if (type === 'application/pdf' || type.includes('pdf')) {
-                                    if (banner) {
-                                        banner.style.display = 'block';
-                                        banner.style.background = 'rgba(56,189,248,0.15)';
-                                        banner.style.borderColor = 'var(--cyan)';
-                                        banner.style.color = 'var(--cyan)';
-                                        banner.innerHTML = '⏳ Panodaki PDF taranıyor...';
-                                    }
+                                if (type.startsWith('image/')) {
+                                    setScaleBannerState('loading', '⏳ Panodaki görsel okunuyor...');
                                     const blob = await item.getType(type);
-                                    const file = new File([blob], "unique_health_pasted.pdf", { type: 'application/pdf' });
+                                    const ext = type.split('/')[1] || 'png';
+                                    const file = new File([blob], `pasted_report.${ext}`, { type });
+                                    await processScaleImageFile(file);
+                                    return;
+                                }
+                                if (type === 'application/pdf' || type.includes('pdf')) {
+                                    setScaleBannerState('loading', '⏳ Panodaki PDF taranıyor...');
+                                    const blob = await item.getType(type);
+                                    const file = new File([blob], "pasted_report.pdf", { type: 'application/pdf' });
                                     await processScalePdfFile(file);
                                     return;
                                 }
@@ -26510,13 +26988,12 @@ KURALLAR:
                     }
                 }
 
-                // Metin kontrolü (PDF içinden seçilip kopyalanan metin)
                 if (navigator.clipboard.readText) {
                     try {
                         const text = await navigator.clipboard.readText();
                         if (text && text.trim().length > 0) {
                             const parsed = extractUniqueHealthData(text);
-                            if (parsed && parsed.weight) {
+                            if (hasParsedScaleOrMeasData(parsed)) {
                                 applyParsedScaleData(parsed, 'Panodan Okunan Metin');
                                 return;
                             }
@@ -26527,8 +27004,6 @@ KURALLAR:
                 }
             }
 
-            // 2. Mobil tarayıcıda veya panoya doğrudan erişilemeyen durumlarda:
-            // Hata vermek yerine doğrudan metin yapıştırma kutusunu aç!
             toggleScalePasteBox(true);
         }
 
@@ -26539,8 +27014,8 @@ KURALLAR:
                 return;
             }
             const parsed = extractUniqueHealthData(ta.value);
-            if (!parsed || !parsed.weight) {
-                alert("Metin içinde geçerli kilo (ağırlık) verisi tespit edilemedi.\n\nEn kolay yöntem: 'Dosyalarımdan PDF Seç' butonuna dokunarak PDF dosyasını doğrudan seçebilirsiniz.");
+            if (!hasParsedScaleOrMeasData(parsed)) {
+                alert("Metin içinde geçerli kilo veya mezura verisi tespit edilemedi.");
                 return;
             }
             applyParsedScaleData(parsed, 'Yapıştırılan Metin');
@@ -26550,12 +27025,10 @@ KURALLAR:
 
         // ----- GLOBAL CMD+V / CTRL+V PASTE LISTENER -----
         window.addEventListener('paste', async function(e) {
-            // Eğer kullanıcı arama veya başka bir metin kutusuna yazıyorsa ve bu scale modal değilse es geç
             const target = e.target;
             const isScaleInput = target && (target.id === 'scaleNotes' || target.id === 'scalePdfInput' || target.id === 'scaleWeight' || target.id === 'scalePdfDropzone');
             const isOtherTextInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') && !isScaleInput;
 
-            // 1. Panodan yapıştırılan PDF veya Görsel dosyasını kontrol et (Finder, Dosyalar veya Pano kopyası)
             let attachedFile = null;
             if (e.clipboardData && e.clipboardData.files && e.clipboardData.files.length > 0) {
                 for (let i = 0; i < e.clipboardData.files.length; i++) {
@@ -26592,19 +27065,21 @@ KURALLAR:
                 return;
             }
 
-            // 2. Panodan kopyalanan rapor metnini kontrol et (PDF içinden metin kopyalanıp Cmd+V yapıldıysa)
             if (!isOtherTextInput && e.clipboardData) {
                 const pastedText = e.clipboardData.getData('text') || '';
-                if (pastedText && (
-                    pastedText.includes('Unique Health') || 
-                    pastedText.includes('Vücut Kompozisyon') || 
-                    pastedText.includes('İskelet Kası') || 
+                const modalActive = document.getElementById('scaleModal')?.classList.contains('active');
+                const looksLikeReport = pastedText && (
+                    pastedText.includes('Unique Health') ||
+                    pastedText.includes('Vücut Kompozisyon') ||
+                    pastedText.includes('İskelet Kası') ||
                     (pastedText.includes('Yağ') && pastedText.includes('Kilo')) ||
-                    pastedText.includes('BMR')
-                )) {
+                    pastedText.includes('BMR') ||
+                    (modalActive && /(?:Bel|Göğüs|Kalça|Omuz|Boyun|Kol)\s*[:\-]?\s*\d/i.test(pastedText))
+                );
+                if (looksLikeReport) {
                     e.preventDefault();
                     const parsed = extractUniqueHealthData(pastedText);
-                    if (parsed && parsed.weight) {
+                    if (hasParsedScaleOrMeasData(parsed)) {
                         const modal = document.getElementById('scaleModal');
                         if (modal && !modal.classList.contains('active')) {
                             openScaleModal();
@@ -26615,139 +27090,307 @@ KURALLAR:
             }
         });
 
+        /** Parse any body composition / BIA / tape measurement report text using structural + biophysical checks. */
         function extractUniqueHealthData(text) {
-            const cleanNum = (str) => {
-                if (!str) return null;
-                const cleanStr = str.toString().replace(/\s+/g, '').replace(',', '.');
-                const val = parseFloat(cleanStr);
-                return isNaN(val) ? null : val;
+            if (!text || typeof text !== 'string') return { rawTextLength: 0 };
+
+            const parseScaleNum = (str) => {
+                if (str == null) return null;
+                const clean = String(str).replace(/\s+/g, '').replace(',', '.');
+                const val = parseFloat(clean);
+                return Number.isFinite(val) ? val : null;
             };
 
-            const data = { rawTextLength: text.length };
+            const stripRefRanges = (str) => String(str || '')
+                .replace(/\([^)]*\)/g, ' ')
+                .replace(/\d+(?:[.,]\d+)?\s*[~–]\s*\d+(?:[.,]\d+)?/g, ' ')
+                .replace(/\b\d{1,3}[.,]\d\s*[-]\s*\d{1,3}[.,]\d\b/g, ' ');
 
-            // Tarih (DD/MM/YYYY)
-            const dateMatch = text.match(/(\d{2})[./-](\d{2})[./-](\d{4})/);
-            if (dateMatch) {
-                data.date = `${dateMatch[3]}-${dateMatch[2]}-${dateMatch[1]}`;
-                data.dateFormatted = `${dateMatch[1]}/${dateMatch[2]}/${dateMatch[3]}`;
-            }
+            const repairOcrDigits = (tok) => String(tok || '')
+                .replace(/[Il|!]/g, '1')
+                .replace(/[OoQD]/g, '0')
+                .replace(/[Ss]/g, '5')
+                .replace(/[Bb]/g, '8')
+                .replace(/[Zz]/g, '2')
+                .replace(/[Yy]/g, '9')
+                .replace(/[Tt]/g, '7');
 
-            // 1. KİLO / AĞIRLIK:
-            // "77. 65kg" veya "77.65k g" gibi OCR ayrışma durumlarında 65 yerine 77.65 almak için
-            let weightVal = null;
-            const twoPartMatch = text.match(/(?:Ağırlık|Agirlik|Ağırhk)[\s\S]{0,60}?\b(\d{2,3})\s*[.,]\s*(\d{1,2})\s*k?\s*g/i) ||
-                                 text.match(/Standart[^\n]*?\b(\d{2,3})\s*[.,]\s*(\d{1,2})\s*k?\s*g/i) ||
-                                 text.match(/\b([5-9]\d)\s*[.,]\s*(\d{2})\s*k?\s*g/i);
-            if (twoPartMatch) {
-                weightVal = parseFloat(twoPartMatch[1] + '.' + twoPartMatch[2]);
-            } else {
-                const singleMatch = text.match(/(?:Ağırlık|Agirlik|Ağırhk)[\s\S]{0,60}?\b(\d{2,3}(?:[.,]\d{1,2})?)\s*k?\s*g/i) ||
-                                    text.match(/\b(\d{2,3}[.,]\d{1,2})\s*k\s*g/i);
-                if (singleMatch) {
-                    weightVal = cleanNum(singleMatch[1]);
+            const getSection = (sectionName) => {
+                const re = new RegExp(`=== ${sectionName} ===([\\s\\S]*?)(?:=== PANEL_|$)`, 'i');
+                const m = text.match(re);
+                return m ? m[1] : '';
+            };
+
+            const raw = { rawTextLength: text.length };
+
+            // 1. Tarih (DD/MM/YYYY, DD.MM.YYYY, DD:MM.YYYY, DDMM/YYYY, YYYY-MM-DD)
+            const isoDate = text.match(/\b(20\d{2})[./-](\d{2})[./-](\d{2})\b/);
+            const trDate = text.match(/(\d{2})\s*[:./-]?\s*(\d{2})\s*[:./-]\s*(20\d{2})/);
+            if (trDate) {
+                const dd = parseInt(trDate[1], 10), mm = parseInt(trDate[2], 10), yy = parseInt(trDate[3], 10);
+                if (dd >= 1 && dd <= 31 && mm >= 1 && mm <= 12) {
+                    raw.date = `${yy}-${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
                 }
-            }
-            if (weightVal && weightVal > 30 && weightVal < 250) {
-                data.weight = Math.round(weightVal * 100) / 100;
-            }
-
-            // 2. İSKELET KASI KÜTLESİ:
-            // OCR: "İskelet Kası Kütlesilkg) 30.2 36.9 37.2" -> Son değer kullanıcının mevcut değeridir!
-            const skMatch = text.match(/İskelet\s*Kas[ıi][^\n]*?(\d{1,2}(?:[.,]\d{1,2})?)\s*(?:\n|$)/i);
-            if (skMatch) {
-                data.skeletalMuscle = cleanNum(skMatch[1]);
-            } else {
-                const skFallback = text.match(/İskelet\s*Kas[ıi][^\n]*?(\d{1,2}[.,]\d{1,2})/i);
-                if (skFallback) data.skeletalMuscle = cleanNum(skFallback[1]);
-            }
-
-            // 3. GENEL KAS KÜTLESİ:
-            const muscleMatch = text.match(/(?:^|\n)\s*Kas\s*K[üu]tlesi[^\n]*?(\d{1,2}(?:[.,]\d{1,2})?)\s*(?:\n|$)/i);
-            if (muscleMatch) data.muscleMass = cleanNum(muscleMatch[1]);
-
-            // 4. VÜCUT YAĞ ORANI (%):
-            // OCR: "Yağ Orani(%) o 15.9"
-            const fatPctMatch = text.match(/Yağ\s*Oran[ıi]\s*\(%\)[^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i) ||
-                                text.match(/Yağ\s*Oran[ıi][^\n]*?%?\s*(\d{1,2}(?:[.,]\d{1,2})?)\s*%/i);
-            if (fatPctMatch) data.bodyFat = cleanNum(fatPctMatch[1]);
-
-            // 5. YAĞ KÜTLESİ (KG):
-            const fatKgMatch = text.match(/Yağ\s*K[üu]tlesi[^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i);
-            if (fatKgMatch) data.bodyFatKg = cleanNum(fatKgMatch[1]);
-
-            // 6. TOPLAM VÜCUT SUYU:
-            const waterMatch = text.match(/Toplam\s*V[üu]cut\s*Suyu[^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i);
-            if (waterMatch) data.totalWater = cleanNum(waterMatch[1]);
-            if (data.totalWater && data.weight) {
-                data.totalWaterPct = Math.round((data.totalWater / data.weight) * 1000) / 10;
-            }
-
-            // 7. HÜCRE İÇİ & DIŞI SU:
-            const ecwMatch = text.match(/H[üu]cre\s*D[ıi][şs][ıi]\s*Su[^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i);
-            if (ecwMatch) data.extraWater = cleanNum(ecwMatch[1]);
-
-            const icwMatch = text.match(/H[üu]cre\s*[İIi]ç[ıi]\s*Su[^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i);
-            if (icwMatch) data.intraWater = cleanNum(icwMatch[1]);
-
-            // 8. PROTEİN & MİNERALLER:
-            const proteinMatch = text.match(/Protein\s*Miktar[ıi][^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i);
-            if (proteinMatch) data.protein = cleanNum(proteinMatch[1]);
-
-            const mineralMatch = text.match(/Mineraller[^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i);
-            if (mineralMatch) data.minerals = cleanNum(mineralMatch[1]);
-
-            const boneMatch = text.match(/Kemik\s*K[üu]tlesi[^\d\n]*?(\d{1,2}(?:[.,]\d{1,2})?)/i);
-            if (boneMatch) data.bone = cleanNum(boneMatch[1]);
-
-            // 9. BMR (KCAL):
-            const bmrLineMatch = text.match(/(?:BMR|BREED)[^\n]*/i);
-            if (bmrLineMatch) {
-                const bmrNums = bmrLineMatch[0].match(/\b\d{4}\b/g);
-                if (bmrNums && bmrNums.length > 0) {
-                    data.bmr = parseInt(bmrNums[bmrNums.length - 1], 10);
+            } else if (isoDate) {
+                const yy = parseInt(isoDate[1], 10), mm = parseInt(isoDate[2], 10), dd = parseInt(isoDate[3], 10);
+                if (dd >= 1 && dd <= 31 && mm >= 1 && mm <= 12) {
+                    raw.date = `${yy}-${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
                 }
             }
 
-            // 10. VİSERAL YAĞ (1-15):
-            const viscMatch = text.match(/Vis[ec]ral\s*Yağ[^\n]*?(\d{1,2})\s*$/m) || text.match(/Vis[ec]ral\s*Yağ[^\n]*/i);
+            const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+
+            // Çok satırlı grafik çubuğu değer çıkarıcı (eksen ölçeğini ve normal aralığı atlar)
+            const extractBarRowValue = (labelRegex, minVal, maxVal, stopRegex) => {
+                const idx = lines.findIndex(l => labelRegex.test(l));
+                if (idx === -1) return null;
+
+                const isAxisRuler = (line) => {
+                    const nums = line.match(/\b\d+(?:[.,]\d+)?\b/g) || [];
+                    return nums.length >= 4 && nums.every(n => !/[.,]/.test(n) || nums.length >= 6);
+                };
+
+                const firstLineClean = stripRefRanges(lines[idx]).replace(labelRegex, ' ');
+                const sameLineNums = (firstLineClean.match(/\b\d{1,3}(?:[.,]\d{1,2})?\b/g) || [])
+                    .map(parseScaleNum)
+                    .filter(n => n != null && n >= minVal && n <= maxVal);
+                if (sameLineNums.length > 0 && !isAxisRuler(firstLineClean)) {
+                    return sameLineNums[sameLineNums.length - 1];
+                }
+
+                for (let k = idx + 1; k < Math.min(lines.length, idx + 5); k++) {
+                    const ln = lines[k];
+                    if (stopRegex && stopRegex.test(ln)) break;
+                    if (isAxisRuler(ln)) continue;
+                    const cleaned = stripRefRanges(ln).trim();
+                    if (!cleaned) continue;
+                    const cands = (cleaned.match(/\b\d{1,3}(?:[.,]\d{1,2})?\b/g) || [])
+                        .map(parseScaleNum)
+                        .filter(n => n != null && n >= minVal && n <= maxVal);
+                    if (cands.length > 0) return cands[cands.length - 1];
+                }
+                return null;
+            };
+
+            const compArea = getSection('PANEL_SOL_UST') || text;
+            const barArea = getSection('PANEL_SAG_BAR') || text;
+            const pillArea = getSection('PANEL_SOL_PILL') || text;
+
+            // 2. Bileşen Kütleleri (Toplam Su, Protein, Mineraller, Kemik, Yağ Kütlesi, Hücre İçi/Dışı Su)
+            const matchNumAfter = (src, re, minV, maxV) => {
+                const m = src.match(re);
+                if (!m) return null;
+                const v = parseScaleNum(m[1]);
+                return (v != null && v >= minV && v <= maxV) ? v : null;
+            };
+
+            raw.totalWater = matchNumAfter(compArea, /Toplam\s*V[üui][cç][üu]t\s*Suyu[^\d\n]{0,18}(\d{2}(?:[.,]\s*\d{1,2})?)/i, 20, 90);
+            raw.protein = matchNumAfter(compArea, /Prot[ec]in\s*Miktar[ıil][^\d\n]{0,18}(\d{1,2}(?:[.,]\s*\d{1,2})?)/i, 4, 35);
+            raw.minerals = matchNumAfter(compArea, /Min[ec]rall?er[^\d\n]{0,18}(\d{1,2}(?:[.,]\s*\d{1,2})?)/i, 1, 12);
+            raw.bone = matchNumAfter(text, /Kemik\s*K[üu]tlesi[^\d\n]{0,18}(\d{1,2}(?:[.,]\s*\d{1,2})?)/i, 1, 10);
+            raw.extraWater = matchNumAfter(text, /H[üu]cre\s*D[ıi][şs][ıi]\s*Su[^\d\n]{0,18}(\d{1,2}(?:[.,]\s*\d{1,2})?)/i, 6, 40);
+            raw.intraWater = matchNumAfter(text, /H[üu]cre\s*[İIi][çc][ıi]\s*Su[^\d\n]{0,18}(\d{1,2}(?:[.,]\s*\d{1,2})?)/i, 10, 65);
+
+            // Yağ Kütlesi: Önce kompozisyon kartındaki satırı kontrol et (Deri Altı Yağ ve Bölgesel Yağ ile karıştırma)
+            for (const ln of compArea.split(/\r?\n/)) {
+                if (/Deri\s*Alt|Sol\s*Kol|Sa[ğg]\s*Kol|G[öo]vde|Bacak|Kas\s*ve\s*Ya[ğg]/i.test(ln)) continue;
+                const m = ln.match(/Ya[ğg]\s*K[üu]tlesi[^\d\n]{0,15}(\d{1,2}(?:[.,]\s*\d{1,2})?)/i);
+                if (m) {
+                    const v = parseScaleNum(m[1]);
+                    if (v != null && v >= 2 && v <= 95) { raw.bodyFatKg = v; break; }
+                }
+            }
+            if (raw.bodyFatKg == null) {
+                raw.bodyFatKg = extractBarRowValue(/Ya[ğg]\s*K[üu]tlesi/i, 2, 95, /Obezite|VK[İI]/i);
+            }
+
+            // 3. Boy, Sağlık/Vücut Puanı ve Vücut Yaşı
+            raw.heightCm = matchNumAfter(compArea, /(?:Boy[^\d\n]{0,15}|Ya[şs][^\d\n]{0,12})(\d{3})\s*(?:cm|¢m)?/i, 120, 230)
+                || matchNumAfter(text, /\b(1[3-9]\d|2[0-2]\d)\s*(?:cm|¢m)\b/i, 120, 230);
+            raw.bodyScore = matchNumAfter(compArea, /(?:Sa[ğg]l[ıi]k|V[üu]cut)\s*Puan[ıi][^\d\n]{0,20}(\d{2,3})/i, 1, 100)
+                || matchNumAfter(compArea, /(\d{2,3})\s*(?:Puan|ruan|iyi)\b/i, 1, 100);
+            raw.bodyAge = matchNumAfter(pillArea + '\n' + text, /(?:V[üu]cut|Metabolik)\s*Ya[şs][ıi][^\d\n]{0,15}(\d{2})/i, 12, 99);
+
+            // 4. Kilo / Ağırlık (Daire, Başlık, Grafik Çubuğu ve Kütle Korunumu Doğrulaması)
+            let weightCand = null;
+            const compClean = stripRefRanges(compArea);
+            const donutMatch = compClean.match(/Kompozisyon[^\n]*?\b(\d{2,3}[.,]\s*\d{1,2})\b/i)
+                || compClean.match(/\b(\d{2,3}[.,]\s*\d{1,2})\b[^\n]{0,40}\n[^\n]{0,25}Kilo/i);
+            if (donutMatch) {
+                const v = parseScaleNum(donutMatch[1]);
+                if (v != null && v >= 30 && v <= 250) weightCand = v;
+            }
+            if (weightCand == null) {
+                for (const ln of text.split(/\r?\n/)) {
+                    if (/İdeal\s*Kilo|Kilo\s*Kontrol|Ya[ğg]\s*Kontrol|Kas\s*Kontrol/i.test(ln)) continue;
+                    const cl = stripRefRanges(ln);
+                    const wm = cl.match(/(?:A[ğg][ıi]rl[ıi]k|Agirlik|Weight)[^\d\n]{0,25}(\d{2,3}\s*[.,]\s*\d{1,2}|\d{2,3})\s*k?\s*g/i)
+                        || cl.match(/\bKilo(?:\s*\(kg\))?\s*[:\-]?\s*(\d{2,3}\s*[.,]\s*\d{1,2})\s*(?:kg)?\b/i)
+                        || cl.match(/Standart[^\n]*?\b(\d{2,3}\s*[.,]\s*\d{1,2})\s*k?\s*g/i);
+                    if (wm) {
+                        const v = parseScaleNum(wm[1]);
+                        if (v != null && v >= 30 && v <= 250) { weightCand = v; break; }
+                    }
+                }
+            }
+            if (weightCand == null) {
+                weightCand = extractBarRowValue(/^\s*Kilo\s*\(?kg\)?/i, 30, 250, /İskelet/i);
+            }
+            if (weightCand == null) {
+                const twoDecKg = text.match(/\b([4-9]\d|1\d{2})\s*[.,]\s*(\d{2})\s*k\s*g/i);
+                if (twoDecKg) {
+                    const v = parseFloat(`${twoDecKg[1]}.${twoDecKg[2]}`);
+                    if (v >= 30 && v <= 250) weightCand = v;
+                }
+            }
+
+            if (raw.totalWater && raw.protein && (raw.minerals || raw.bone) && raw.bodyFatKg) {
+                const massSum = raw.totalWater + raw.protein + (raw.minerals || raw.bone) + raw.bodyFatKg;
+                if (weightCand == null || Math.abs(weightCand - massSum) > 1.5) {
+                    const allCleanNums = (stripRefRanges(compArea + '\n' + text).match(/\b\d{2,3}[.,]\d{1,2}\b/g) || [])
+                        .map(s => ({ rawStr: s, val: parseScaleNum(s) }))
+                        .filter(x => x.val != null && Math.abs(x.val - massSum) <= 1.2);
+                    const twoDec = allCleanNums.find(x => /\d{2,3}[.,]\d{2}$/.test(x.rawStr));
+                    weightCand = twoDec ? twoDec.val : (allCleanNums[0] ? allCleanNums[0].val : Math.round(massSum * 10) / 10);
+                }
+            }
+            raw.weight = weightCand;
+
+            // 5. İskelet Kası & Genel Kas Kütlesi
+            raw.skeletalMuscle = extractBarRowValue(/[İI]skelet\s*Kas/i, 12, 80, /Ya[ğg]\s*K[üu]tlesi|Obezite/i);
+            if (raw.skeletalMuscle == null) {
+                const skLine = text.match(/[İI]skelet\s*Kas[^\n]*/i);
+                if (skLine) {
+                    const nums = (stripRefRanges(skLine[0]).match(/\b\d{2}(?:[.,]\d{1,2})?\b/g) || [])
+                        .map(parseScaleNum)
+                        .filter(v => v != null && v >= 12 && v <= 80);
+                    if (nums.length > 0) raw.skeletalMuscle = nums[nums.length - 1];
+                }
+            }
+            raw.muscleMass = matchNumAfter(text, /(?:^|\n)\s*Kas\s*K[üu]tlesi[^\d\n]{0,18}(\d{2}(?:[.,]\d{1,2})?)/i, 15, 120);
+
+            // 6. Vücut Yağ Oranı (%) & VKİ & Yağsız Kütle & Deri Altı Yağ
+            raw.bodyFat = extractBarRowValue(/Ya[ğg]\s*Oran/i, 3, 60, /Obezite|B[öo]lgesel/i);
+            if (raw.bodyFat == null) {
+                raw.bodyFat = matchNumAfter(text, /Ya[ğg]\s*Oran[ıi][^\d\n]{0,20}(\d{1,2}(?:[.,]\d{1,2})?)\s*%?/i, 3, 60);
+            }
+            if (raw.bodyFatKg && raw.weight && raw.bodyFat == null) {
+                const calcFatPct = Math.round((raw.bodyFatKg / raw.weight) * 1000) / 10;
+                raw.bodyFat = calcFatPct;
+            }
+            raw.bmi = extractBarRowValue(/V\.?\s*K\.?\s*[İI]|BMI/i, 12, 55, /Ya[ğg]\s*Oran/i);
+            raw.leanBodyMass = matchNumAfter(pillArea + '\n' + text, /Ya[ğg]s[ıia]z\s*K[üu]tle[^\d\n]{0,18}(\d{2}(?:[.,]\d{1,2})?)/i, 25, 160);
+            raw.subcutaneousFatKg = matchNumAfter(pillArea + '\n' + text, /Deri\s*Alt[ıi]\s*Ya[ğg]\s*(?:Miktar[ıi])?[^\d\n]{0,18}(\d{1,2}(?:[.,]\d{1,2})?)/i, 1, 75);
+
+            // 7. Viseral Yağ, BMR, Önerilen Kalori, İdeal Kilo
+            const viscSrc = pillArea + '\n' + text;
+            const viscMatch = viscSrc.match(/(?:V[iı]s[ec]ral|[İI]ç\s*Organ)\s*Y[au][ğg][^\n]{0,20}/i);
             if (viscMatch) {
-                const digits = viscMatch[0].match(/\b\d{1,2}\b/g);
-                if (digits && digits.length > 0) {
-                    data.visceralFat = parseInt(digits[digits.length - 1], 10);
-                }
+                const digits = viscMatch[0].match(/\b(\d{1,2})\b/g);
+                if (digits && digits.length > 0) raw.visceralFat = parseInt(digits[digits.length - 1], 10);
             }
 
-            // 11. VÜCUT PUANI & YAŞI:
-            const scoreMatch = text.match(/V[üu]cut\s*Puan[ıi][^\d\n]*?(\d{1,3})/i) || text.match(/(\d{2,3})\s*iyi/i);
-            if (scoreMatch) data.bodyScore = parseInt(scoreMatch[1], 10);
+            const bmrSrc = pillArea + '\n' + text;
+            for (const ln of bmrSrc.split(/\r?\n/)) {
+                if (/Önerilen\s*Kal/i.test(ln)) continue;
+                if (!/\b(?:BMR|BVIR|BVR|BMH)\b|Bazal\s*Metabolizma/i.test(ln)) continue;
+                const stripped = ln.replace(/^.*?(?:BMR|BVIR|BVR|BMH|Bazal\s*Metabolizma(?:\s*H[ıi]z[ıi])?)/i, '')
+                    .replace(/k?\s*c?e?a?l.*/i, '').trim();
+                const tokens = stripped.match(/[0-9A-Za-z]{3,5}/g) || [];
+                for (let t = tokens.length - 1; t >= 0; t--) {
+                    const num = parseInt(repairOcrDigits(tokens[t]), 10);
+                    if (Number.isFinite(num) && num >= 800 && num <= 4500) {
+                        raw.bmr = num;
+                        break;
+                    }
+                }
+                if (raw.bmr) break;
+            }
 
-            const ageMatch = text.match(/V[üu]cut\s*Ya[şs][ıi][^\d\n]*?(\d{1,2})/i);
-            if (ageMatch) data.bodyAge = parseInt(ageMatch[1], 10);
+            const recCalMatch = bmrSrc.match(/Önerilen\s*Kal[oa]r[ıi][^\n]*/i);
+            if (recCalMatch) {
+                const tok = recCalMatch[0].replace(/k?\s*c?e?a?l.*/i, '').match(/([0-9IlOoSsBbZzYy]{4})/);
+                if (tok) {
+                    const n = parseInt(repairOcrDigits(tok[1]), 10);
+                    if (n >= 1000 && n <= 6000) raw.recommendedCalories = n;
+                }
+            }
+            raw.idealWeight = matchNumAfter(bmrSrc, /(?:[İI]deal|Ideal)\s*Kilo[^\d\n]{0,15}(\d{2,3}(?:[.,]\d{1,2})?)/i, 35, 150);
 
-            // 12. BÖLGESEL KAS VE YAĞ:
-            const getVal = (regex) => {
-                const m = text.match(regex);
-                return m ? cleanNum(m[1]) : null;
+            // 8. Bölgesel (Segmental) Kas ve Yağ (Sabit sahte veri yok — yalnızca gerçek okunanlar)
+            const segFatSec = getSection('PANEL_BOLGESEL_YAG');
+            const segMusSec = getSection('PANEL_BOLGESEL_KAS');
+            const seg = { leftArm: {}, rightArm: {}, trunk: {}, leftLeg: {}, rightLeg: {} };
+
+            const mArmFat = matchNumAfter(text, /Sol\s*Kol\s*Ya[ğg]\s*K[üu]tlesi[^\d\n]{0,15}(\d+(?:[.,]\d+)?)/i, 0.1, 20);
+            const mRArmFat = matchNumAfter(text, /Sa[ğg]\s*Kol\s*Ya[ğg]\s*K[üu]tlesi[^\d\n]{0,15}(\d+(?:[.,]\d+)?)/i, 0.1, 20);
+            const mTrunkFat = matchNumAfter(text, /(?:G[öo]vde|Bel\s*Çevresi)\s*Ya[ğg]\s*K[üu]tlesi[^\d\n]{0,15}(\d+(?:[.,]\d+)?)/i, 0.5, 45);
+            const mLLegFat = matchNumAfter(text, /Sol\s*Bacak\s*Ya[ğg]\s*K[üu]tlesi[^\d\n]{0,15}(\d+(?:[.,]\d+)?)/i, 0.2, 25);
+            const mRLegFat = matchNumAfter(text, /Sa[ğg]\s*Bacak\s*Ya[ğg]\s*K[üu]tlesi[^\d\n]{0,15}(\d+(?:[.,]\d+)?)/i, 0.2, 25);
+
+            const mArmMus = matchNumAfter(text, /Sol\s*Kol\s*Kas\s*K[üu]tlesi[^\d\n]{0,15}(\d+(?:[.,]\d+)?)/i, 0.5, 20);
+            const mRArmMus = matchNumAfter(text, /Sa[ğg]\s*Kol\s*Kas\s*K[üu]tlesi[^\d\n]{0,15}(\d+(?:[.,]\d+)?)/i, 0.5, 20);
+            const mTrunkMus = matchNumAfter(text, /(?:G[öo]vde|Bel\s*Çevresi)\s*Kas\s*K[üu]tlesi[^\d\n]{0,15}(\d+(?:[.,]\d+)?)/i, 5, 60);
+            const mLLegMus = matchNumAfter(text, /Sol\s*Bacak\s*Kas\s*K[üu]tlesi[^\d\n]{0,15}(\d+(?:[.,]\d+)?)/i, 2, 30);
+            const mRLegMus = matchNumAfter(text, /Sa[ğg]\s*Bacak\s*Kas\s*K[üu]tlesi[^\d\n]{0,15}(\d+(?:[.,]\d+)?)/i, 2, 30);
+
+            if (mArmFat != null) seg.leftArm.fatKg = mArmFat;
+            if (mRArmFat != null) seg.rightArm.fatKg = mRArmFat; else if (mArmFat != null) seg.rightArm.fatKg = mArmFat;
+            if (mTrunkFat != null) seg.trunk.fatKg = mTrunkFat;
+            if (mLLegFat != null) seg.leftLeg.fatKg = mLLegFat;
+            if (mRLegFat != null) seg.rightLeg.fatKg = mRLegFat; else if (mLLegFat != null) seg.rightLeg.fatKg = mLLegFat;
+
+            if (mArmMus != null) seg.leftArm.muscleKg = mArmMus;
+            if (mRArmMus != null) seg.rightArm.muscleKg = mRArmMus; else if (mArmMus != null) seg.rightArm.muscleKg = mArmMus;
+            if (mTrunkMus != null) seg.trunk.muscleKg = mTrunkMus;
+            if (mLLegMus != null) seg.leftLeg.muscleKg = mLLegMus;
+            if (mRLegMus != null) seg.rightLeg.muscleKg = mRLegMus;
+
+            const parseSegPanelTokens = (secText, field) => {
+                if (!secText) return;
+                const sLines = secText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+                const vals = [];
+                for (const ln of sLines) {
+                    const lr = [...ln.matchAll(/([LRB])\s*[:;.]?\s*(\d{1,2}[.,]\d)\s*(?:kg|ke|kp)?/gi)];
+                    for (const m of lr) {
+                        const v = parseScaleNum(m[2]);
+                        if (v != null) vals.push({ tag: m[1].toUpperCase(), val: v });
+                    }
+                }
+                const arms = vals.filter(v => v.tag === 'L' || v.tag === 'R').slice(0, 2);
+                const trunkV = vals.find(v => v.tag === 'B');
+                const legs = vals.filter(v => (v.tag === 'L' || v.tag === 'R') && !arms.includes(v)).slice(0, 2);
+                if (arms[0] && seg.leftArm[field] == null) seg.leftArm[field] = arms[0].val;
+                if (arms[1] && seg.rightArm[field] == null) seg.rightArm[field] = arms[1].val;
+                if (trunkV && seg.trunk[field] == null) seg.trunk[field] = trunkV.val;
+                if (legs[0] && seg.leftLeg[field] == null) seg.leftLeg[field] = legs[0].val;
+                if (legs[1] && seg.rightLeg[field] == null) seg.rightLeg[field] = legs[1].val;
             };
+            parseSegPanelTokens(segFatSec, 'fatKg');
+            parseSegPanelTokens(segMusSec, 'muscleKg');
+            raw.segmental = seg;
 
-            const armFat = getVal(/Sol\s*Kol\s*Yağ\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 0.8;
-            const trunkFat = getVal(/(?:Gövde|Bel\s*Çevresi)\s*Yağ\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 6.3;
-            const legFat = getVal(/Sol\s*Bacak\s*Yağ\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 1.6;
-
-            const armMuscle = getVal(/Sol\s*Kol\s*Kas\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 3.4;
-            const trunkMuscle = getVal(/(?:Gövde|Bel\s*Çevresi)\s*Kas\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 28.6;
-            const legMuscle = getVal(/Sol\s*Bacak\s*Kas\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 10.6;
-            const rightLegMuscle = getVal(/Sa[ğg]\s*Bacak\s*Kas\s*K[üu]tlesi[^\d]*?(\d+(?:[.,]\d+)?)/i) || 10.4;
-
-            data.segmental = {
-                leftArm: { fatKg: armFat, fatPct: 114.2, muscleKg: armMuscle, musclePct: 103 },
-                rightArm: { fatKg: armFat, fatPct: 114.2, muscleKg: armMuscle, musclePct: 103 },
-                trunk: { fatKg: trunkFat, fatPct: 140, muscleKg: trunkMuscle, musclePct: 107.9 },
-                leftLeg: { fatKg: legFat, fatPct: 88.8, muscleKg: legMuscle, musclePct: 115.2 },
-                rightLeg: { fatKg: legFat, fatPct: 88.8, muscleKg: rightLegMuscle, musclePct: 113 }
+            // 9. Mezura Ölçümleri (Yalnızca açıkça cm çevre ölçümü içeren satırlardan)
+            const meas = {};
+            const measPatterns = {
+                waist: /(?:Bel(?:\s*Çevresi)?|Waist)[^\d\n]{0,12}(\d{2,3}(?:[.,]\d)?)\s*cm/i,
+                chest: /(?:G[öo][ğg][üu]s(?:\s*Çevresi)?|Chest)[^\d\n]{0,12}(\d{2,3}(?:[.,]\d)?)\s*cm/i,
+                shoulder: /(?:Omuz(?:\s*Çevresi)?|Shoulder)[^\d\n]{0,12}(\d{2,3}(?:[.,]\d)?)\s*cm/i,
+                arms: /(?:Kol|Paz[ıu]|Biceps|Arm)[^\d\n]{0,12}(\d{2}(?:[.,]\d)?)\s*cm/i,
+                thigh: /(?:Bacak|Uyluk|Thigh)[^\d\n]{0,12}(\d{2,3}(?:[.,]\d)?)\s*cm/i,
+                hips: /(?:Kal[çc]a|Hips?)[^\d\n]{0,12}(\d{2,3}(?:[.,]\d)?)\s*cm/i,
+                neck: /(?:Boyun|Neck)[^\d\n]{0,12}(\d{2}(?:[.,]\d)?)\s*cm/i
             };
+            for (const [key, re] of Object.entries(measPatterns)) {
+                const m = text.match(re);
+                if (m) {
+                    const v = parseScaleNum(m[1]);
+                    if (v != null) meas[key] = v;
+                }
+            }
+            if (Object.keys(meas).length > 0) raw.measurements = meas;
 
-            return data;
+            return normalizeAndValidateScaleData(raw) || { rawTextLength: text.length };
         }
 
         // ----- UNIFIED BODY COMPOSITION & MEASUREMENTS MODEL -----
@@ -26853,7 +27496,7 @@ KURALLAR:
                 const entry = {
                     id: 'scale_' + Date.now(),
                     date: date,
-                    weight: Math.round(weightVal * 10) / 10,
+                    weight: Math.round(weightVal * 100) / 100,
                     bodyFat: bodyFat ? Math.round(bodyFat * 10) / 10 : null,
                     muscleMass: muscleMass ? Math.round(muscleMass * 10) / 10 : null,
                     waterPct: waterPct ? Math.round(waterPct * 10) / 10 : null,
@@ -32254,41 +32897,52 @@ KURALLAR:
                     </div>
                 </div>
 
-                ${uh ? `
+                ${(uh && (uh.totalWater || uh.protein || uh.minerals || uh.bone || uh.leanBodyMass || uh.subcutaneousFatKg)) ? `
                 <!-- CELLULAR & FLUID BALANCE CARD (COMPACT 2x2) -->
                 <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:12px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <h3 style="font-size:13.5px; font-weight:900; color:#0F172A; margin:0;">🧬 Su, Protein & Kemik</h3>
-                        <span style="font-size:10.5px; color:#15803D; font-weight:800; background:rgba(16,185,129,0.15); padding:2px 8px; border-radius:99px;">Ödem Yok</span>
+                        <h3 style="font-size:13.5px; font-weight:900; color:#0F172A; margin:0;">🧬 Su, Protein & Bileşenler</h3>
+                        <span style="font-size:10.5px; color:#15803D; font-weight:800; background:rgba(16,185,129,0.15); padding:2px 8px; border-radius:99px;">${(uh.extraWater && uh.totalWater && (uh.extraWater / uh.totalWater) <= 0.40) ? 'Ödem Yok' : 'Vücut Bileşenleri'}</span>
                     </div>
 
                     <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:6px;">
+                        ${(uh.totalWater || latestScale?.waterPct) ? `
                         <div style="background:#F8FAFC; padding:8px 10px; border-radius:8px;">
                             <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">TOPLAM SU</div>
-                            <div style="font-size:14.5px; font-weight:900; color:var(--cyan); margin-top:1px;">${uh?.totalWater || 47.8} kg</div>
-                            <div style="font-size:9.5px; color:var(--text-secondary);">İç: ${uh?.intraWater || 29.8} / Dış: ${uh?.extraWater || 18.0}</div>
-                        </div>
+                            <div style="font-size:14.5px; font-weight:900; color:var(--cyan); margin-top:1px;">${uh.totalWater ? `${uh.totalWater} kg` : `%${latestScale.waterPct}`}</div>
+                            <div style="font-size:9.5px; color:var(--text-secondary);">${(uh.intraWater && uh.extraWater) ? `İç: ${uh.intraWater} / Dış: ${uh.extraWater}` : (latestScale?.waterPct ? `Oran: %${latestScale.waterPct}` : 'Vücut Suyu')}</div>
+                        </div>` : ''}
 
+                        ${uh.protein ? `
                         <div style="background:#F8FAFC; padding:8px 10px; border-radius:8px;">
                             <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">PROTEİN</div>
-                            <div style="font-size:14.5px; font-weight:900; color:var(--gold); margin-top:1px;">${uh?.protein || 12.9} kg</div>
-                            <div style="font-size:9.5px; color:#15803D; font-weight:700;">İdeal Düzey</div>
-                        </div>
+                            <div style="font-size:14.5px; font-weight:900; color:var(--gold); margin-top:1px;">${uh.protein} kg</div>
+                            <div style="font-size:9.5px; color:#15803D; font-weight:700;">Kas Yapısı</div>
+                        </div>` : ''}
 
+                        ${uh.minerals ? `
                         <div style="background:#F8FAFC; padding:8px 10px; border-radius:8px;">
                             <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">MİNERAL</div>
-                            <div style="font-size:14.5px; font-weight:900; color:#0F172A; margin-top:1px;">${uh?.minerals || 4.5} kg</div>
-                            <div style="font-size:9.5px; color:#15803D; font-weight:700;">Normal</div>
-                        </div>
+                            <div style="font-size:14.5px; font-weight:900; color:#0F172A; margin-top:1px;">${uh.minerals} kg</div>
+                            <div style="font-size:9.5px; color:#15803D; font-weight:700;">Kemik & İyon</div>
+                        </div>` : ''}
 
+                        ${uh.bone ? `
                         <div style="background:#F8FAFC; padding:8px 10px; border-radius:8px;">
                             <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">KEMİK</div>
-                            <div style="font-size:14.5px; font-weight:900; color:#0F172A; margin-top:1px;">${uh?.bone || 3.6} kg</div>
+                            <div style="font-size:14.5px; font-weight:900; color:#0F172A; margin-top:1px;">${uh.bone} kg</div>
                             <div style="font-size:9.5px; color:var(--text-secondary);">İskelet</div>
-                        </div>
+                        </div>` : (uh.leanBodyMass ? `
+                        <div style="background:#F8FAFC; padding:8px 10px; border-radius:8px;">
+                            <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">YAĞSIZ KÜTLE</div>
+                            <div style="font-size:14.5px; font-weight:900; color:#0F172A; margin-top:1px;">${uh.leanBodyMass} kg</div>
+                            <div style="font-size:9.5px; color:var(--text-secondary);">Aktif Doku</div>
+                        </div>` : '')}
                     </div>
                 </div>
+                ` : ''}
 
+                ${(uh?.segmental && (uh.segmental.leftArm?.muscleKg || uh.segmental.rightArm?.muscleKg || uh.segmental.trunk?.muscleKg || uh.segmental.trunk?.fatKg || uh.segmental.leftLeg?.muscleKg || uh.segmental.rightLeg?.muscleKg)) ? `
                 <!-- SEGMENTAL (BÖLGESEL) KAS & YAĞ HARİTASI -->
                 <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:12px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
@@ -32297,23 +32951,26 @@ KURALLAR:
                     </div>
 
                     <div class="scale-segmental-grid" style="gap:8px;">
+                        ${(uh.segmental.leftArm?.muscleKg || uh.segmental.rightArm?.muscleKg || uh.segmental.leftArm?.fatKg) ? `
                         <div class="scale-segmental-card" style="border-left:3px solid var(--cyan); padding:8px 10px;">
                             <div style="font-weight:900; color:#0F172A; font-size:12px;">🦾 Kollar</div>
-                            <div style="color:var(--text-secondary); font-size:11px; margin-top:2px;">Sol: <strong>${uh?.segmental?.leftArm?.muscleKg || 3.4}kg</strong> • Sağ: <strong>${uh?.segmental?.rightArm?.muscleKg || 3.4}kg</strong></div>
-                            <div style="color:#15803D; font-size:10.5px; font-weight:800; margin-top:2px;">Dengeli Simetri</div>
-                        </div>
+                            <div style="color:var(--text-secondary); font-size:11px; margin-top:2px;">Sol: <strong>${uh.segmental.leftArm?.muscleKg != null ? `${uh.segmental.leftArm.muscleKg}kg` : '-'}</strong> • Sağ: <strong>${uh.segmental.rightArm?.muscleKg != null ? `${uh.segmental.rightArm.muscleKg}kg` : '-'}</strong></div>
+                            <div style="color:#15803D; font-size:10.5px; font-weight:800; margin-top:2px;">Kas Dengesi</div>
+                        </div>` : ''}
 
+                        ${(uh.segmental.trunk?.muscleKg || uh.segmental.trunk?.fatKg) ? `
                         <div class="scale-segmental-card" style="border-left:3px solid var(--gold); background:rgba(245,158,11,0.06); padding:8px 10px;">
                             <div style="font-weight:900; color:#0F172A; font-size:12px;">🎯 Gövde & Bel</div>
-                            <div style="color:#0F172A; font-size:11px; margin-top:2px;">Kas: <strong>${uh?.segmental?.trunk?.muscleKg || 28.6}kg</strong> • Yağ: <strong style="color:#DC2626;">${uh?.segmental?.trunk?.fatKg || 6.3}kg</strong></div>
-                            <div style="color:#B45309; font-size:10.5px; font-weight:800; margin-top:2px;">Öncelikli Yağ Yakım Bölgesi</div>
-                        </div>
+                            <div style="color:#0F172A; font-size:11px; margin-top:2px;">Kas: <strong>${uh.segmental.trunk?.muscleKg != null ? `${uh.segmental.trunk.muscleKg}kg` : '-'}</strong> • Yağ: <strong style="color:#DC2626;">${uh.segmental.trunk?.fatKg != null ? `${uh.segmental.trunk.fatKg}kg` : '-'}</strong></div>
+                            <div style="color:#B45309; font-size:10.5px; font-weight:800; margin-top:2px;">Merkez Bölge</div>
+                        </div>` : ''}
 
+                        ${(uh.segmental.leftLeg?.muscleKg || uh.segmental.rightLeg?.muscleKg || uh.segmental.leftLeg?.fatKg) ? `
                         <div class="scale-segmental-card" style="border-left:3px solid var(--green-success); padding:8px 10px;">
                             <div style="font-weight:900; color:#15803D; font-size:12px;">🦵 Bacaklar</div>
-                            <div style="color:var(--text-secondary); font-size:11px; margin-top:2px;">Sol: <strong>${uh?.segmental?.leftLeg?.muscleKg || 10.6}kg</strong> • Sağ: <strong>${uh?.segmental?.rightLeg?.muscleKg || 10.4}kg</strong></div>
-                            <div style="color:#15803D; font-size:10.5px; font-weight:800; margin-top:2px;">Yüksek Kas Kuvveti</div>
-                        </div>
+                            <div style="color:var(--text-secondary); font-size:11px; margin-top:2px;">Sol: <strong>${uh.segmental.leftLeg?.muscleKg != null ? `${uh.segmental.leftLeg.muscleKg}kg` : '-'}</strong> • Sağ: <strong>${uh.segmental.rightLeg?.muscleKg != null ? `${uh.segmental.rightLeg.muscleKg}kg` : '-'}</strong></div>
+                            <div style="color:#15803D; font-size:10.5px; font-weight:800; margin-top:2px;">Alt Vücut</div>
+                        </div>` : ''}
                     </div>
                 </div>
                 ` : ''}
@@ -33638,7 +34295,7 @@ KURALLAR:
             if ('serviceWorker' in navigator && navigator.serviceWorker) {
                 window.addEventListener('load', () => {
                     try {
-                        navigator.serviceWorker.register('./sw.js?v=288')
+                        navigator.serviceWorker.register('./sw.js?v=289')
                             .then(reg => {
                                 console.log('SW scope:', reg.scope);
                                 if (reg.update) reg.update();
