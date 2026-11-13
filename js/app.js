@@ -3598,15 +3598,28 @@
         function purgeExcludedExerciseFromSavedPlans(exId) {
             if (!exId) return;
             try {
+                const uid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
                 const stripEx = (arr) => Array.isArray(arr) ? arr.filter(item => item && item.id !== exId && item.exId !== exId) : arr;
-                const rawGen = localStorage.getItem('celik_kodu_last_generated_workout');
-                if (rawGen && rawGen.includes(exId)) {
+                const cleanGenWorkoutKey = (storageKey, requireUidMatch) => {
+                    const rawGen = localStorage.getItem(storageKey);
+                    if (!rawGen || !rawGen.includes(exId)) return;
                     const parsedGen = JSON.parse(rawGen);
-                    if (parsedGen && Array.isArray(parsedGen.exercises)) {
-                        parsedGen.exercises = stripEx(parsedGen.exercises);
-                        localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(parsedGen));
+                    if (!parsedGen || typeof parsedGen !== 'object') return;
+                    if (requireUidMatch && parsedGen.userId && uid && parsedGen.userId !== uid) return;
+                    if (Array.isArray(parsedGen.exercises)) {
+                        const next = stripEx(parsedGen.exercises);
+                        if (next.length !== parsedGen.exercises.length) {
+                            parsedGen.exercises = next;
+                            if (typeof persistLastGeneratedWorkout === 'function') {
+                                persistLastGeneratedWorkout(parsedGen, parsedGen.userId || uid, { skipCloudSync: true });
+                            } else {
+                                localStorage.setItem(storageKey, JSON.stringify(parsedGen));
+                            }
+                        }
                     }
-                }
+                };
+                if (uid) cleanGenWorkoutKey(`celik_kodu_last_generated_workout_${uid}`, true);
+                cleanGenWorkoutKey('celik_kodu_last_generated_workout', true);
                 if (typeof currentGeneratedWorkout !== 'undefined' && currentGeneratedWorkout && Array.isArray(currentGeneratedWorkout.exercises)) {
                     currentGeneratedWorkout.exercises = stripEx(currentGeneratedWorkout.exercises);
                 }
@@ -3666,15 +3679,28 @@
             return uid ? `celik_excluded_exercises_${uid}` : 'celik_excluded_exercises';
         }
 
-        function getUserExcludedExerciseIds() {
+        function getExcludedExercisesUpdatedAt(targetUid) {
+            const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
+            if (!uid) return 0;
             try {
-                const uid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
+                const n = Number(localStorage.getItem(`celik_excluded_updated_at_${uid}`) || 0);
+                return (Number.isFinite(n) && n > 0) ? n : 0;
+            } catch (e) {
+                return 0;
+            }
+        }
+
+        function getUserExcludedExerciseIds(targetUid) {
+            try {
+                const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
                 const scopedKey = getExcludedExercisesStorageKey(uid);
                 let raw = localStorage.getItem(scopedKey);
                 if (!raw && uid === 'usr_admin') {
                     raw = localStorage.getItem('celik_excluded_exercises');
                 }
-                let arr = JSON.parse(raw || '[]');
+                let arr = typeof sanitizeExcludedExerciseIds === 'function'
+                    ? sanitizeExcludedExerciseIds(JSON.parse(raw || '[]'))
+                    : JSON.parse(raw || '[]');
                 if (!Array.isArray(arr)) arr = [];
                 if (uid === 'usr_admin' && !localStorage.getItem('celik_excl_seed_sissy_v1')) {
                     if (!arr.includes('bw_sissy_squat')) {
@@ -3691,15 +3717,26 @@
         }
         getUserExcludedExerciseIds();
 
-        function setUserExcludedExerciseIds(arr) {
+        function setUserExcludedExerciseIds(arr, options = {}) {
             try {
-                const uid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
+                const uid = options.uid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
                 const scopedKey = getExcludedExercisesStorageKey(uid);
-                localStorage.setItem(scopedKey, JSON.stringify(arr));
+                const cleanArr = typeof sanitizeExcludedExerciseIds === 'function'
+                    ? sanitizeExcludedExerciseIds(arr)
+                    : (Array.isArray(arr) ? arr : []);
+                localStorage.setItem(scopedKey, JSON.stringify(cleanArr));
                 if (uid === 'usr_admin') {
-                    localStorage.setItem('celik_excluded_exercises', JSON.stringify(arr));
+                    localStorage.setItem('celik_excluded_exercises', JSON.stringify(cleanArr));
                 }
-                if (typeof window.scheduleUserStateCloudSync === 'function') window.scheduleUserStateCloudSync(uid);
+                if (uid) {
+                    const ts = (Number.isFinite(Number(options.updatedAt)) && Number(options.updatedAt) >= 0)
+                        ? Number(options.updatedAt)
+                        : Date.now();
+                    localStorage.setItem(`celik_excluded_updated_at_${uid}`, String(ts));
+                }
+                if (!options.fromCloud && !options.skipCloudSync && typeof window.scheduleUserStateCloudSync === 'function') {
+                    window.scheduleUserStateCloudSync(uid);
+                }
             } catch(e) {}
         }
 
@@ -5432,7 +5469,11 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             window.activeWeeklyPreviewDayIdx = 0;
             try {
                 if (generatedDaysList[0] && generatedDaysList[0].workout) {
-                    localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(generatedDaysList[0].workout));
+                    if (typeof persistLastGeneratedWorkout === 'function') {
+                        persistLastGeneratedWorkout(generatedDaysList[0].workout);
+                    } else {
+                        localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(generatedDaysList[0].workout));
+                    }
                 }
             } catch (e) {}
             closeAiHybridArchitectModal();
@@ -8938,7 +8979,11 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 }
             }
             try {
-                localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(currentGeneratedWorkout));
+                if (typeof persistLastGeneratedWorkout === 'function') {
+                    persistLastGeneratedWorkout(currentGeneratedWorkout);
+                } else {
+                    localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(currentGeneratedWorkout));
+                }
             } catch(e) {}
 
             window.expandedGeneratedExIndex = null;
@@ -9149,8 +9194,9 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             let workout = currentGeneratedWorkout;
             if (!workout) {
                 try {
-                    const raw = localStorage.getItem('celik_kodu_last_generated_workout');
-                    if (raw) workout = JSON.parse(raw);
+                    workout = typeof readActiveLastGeneratedWorkout === 'function'
+                        ? readActiveLastGeneratedWorkout()
+                        : JSON.parse(localStorage.getItem('celik_kodu_last_generated_workout') || 'null');
                 } catch(e) {}
             }
             if (!workout || !Array.isArray(workout.exercises) || workout.exercises.length === 0) {
@@ -10718,8 +10764,9 @@ KURALLAR:
                 workout = currentGeneratedWorkout;
                 if (!workout) {
                     try {
-                        const raw = localStorage.getItem('celik_kodu_last_generated_workout');
-                        if (raw) workout = JSON.parse(raw);
+                        workout = typeof readActiveLastGeneratedWorkout === 'function'
+                            ? readActiveLastGeneratedWorkout()
+                            : JSON.parse(localStorage.getItem('celik_kodu_last_generated_workout') || 'null');
                     } catch (e) {}
                 }
             }
@@ -10955,7 +11002,11 @@ KESİN KURALLAR:
                     currentGeneratedWorkout = workout;
                     window.currentGeneratedWorkout = workout;
                     try {
-                        localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(workout));
+                        if (typeof persistLastGeneratedWorkout === 'function') {
+                            persistLastGeneratedWorkout(workout);
+                        } else {
+                            localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(workout));
+                        }
                     } catch(e) {}
                     window.expandedGeneratedExIndex = null;
                     if (typeof renderGeneratedWorkout === 'function') renderGeneratedWorkout({ preserveScroll: true });
@@ -11582,7 +11633,11 @@ KESİN KURALLAR:
             if (workout === currentGeneratedWorkout) {
                 window.currentGeneratedWorkout = currentGeneratedWorkout;
                 try {
-                    localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(currentGeneratedWorkout));
+                    if (typeof persistLastGeneratedWorkout === 'function') {
+                        persistLastGeneratedWorkout(currentGeneratedWorkout);
+                    } else {
+                        localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(currentGeneratedWorkout));
+                    }
                 } catch(e) {}
             }
 
@@ -11730,9 +11785,6 @@ KESİN KURALLAR:
                 if (plan && !plan.rest) {
                     const details = getWorkoutDetailsForPlan(plan) || {};
                     const user = getActiveUser();
-                    const key = `celik_kodu_custom_programs_${user.id}`;
-                    let saved = [];
-                    try { saved = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
 
                     const targetItemIdx = pickerContext.scheduleExIndex !== null ? pickerContext.scheduleExIndex : 0;
                     const currentExs = (details && Array.isArray(details.exercises)) ? details.exercises : [];
@@ -11803,22 +11855,8 @@ KESİN KURALLAR:
                     }
 
                     // 2. Also persist in custom programs library
-                    const existingIdx = saved.findIndex(p => p.id === progId);
-                    if (existingIdx !== -1) {
-                        saved[existingIdx] = updatedWorkout;
-                    } else {
-                        saved.unshift(updatedWorkout);
-                    }
-                    localStorage.setItem(key, JSON.stringify(saved));
-
-                    if (!user.savedWorkouts) user.savedWorkouts = [];
-                    const userSavedIdx = user.savedWorkouts.findIndex(p => p.id === progId);
-                    if (userSavedIdx !== -1) {
-                        user.savedWorkouts[userSavedIdx] = updatedWorkout;
-                    } else {
-                        user.savedWorkouts.unshift(updatedWorkout);
-                    }
-                    saveAthletesToStorage();
+                    upsertUserCustomProgram(updatedWorkout, user.id);
+                    if (typeof renderLibrary === 'function') renderLibrary();
 
                     // 3. Update active day and calendar view
                     renderActiveWorkout();
@@ -13424,7 +13462,11 @@ KESİN KURALLAR:
             currentGeneratedWorkout = flowWorkout;
             window.currentGeneratedWorkout = currentGeneratedWorkout;
             try {
-                localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(currentGeneratedWorkout));
+                if (typeof persistLastGeneratedWorkout === 'function') {
+                    persistLastGeneratedWorkout(currentGeneratedWorkout);
+                } else {
+                    localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(currentGeneratedWorkout));
+                }
             } catch (e) {}
             if (autoStart) {
                 startActiveWorkoutFromGenerated();
@@ -15579,39 +15621,61 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         // ==================== LIBRARY & SAVED PROGRAMS ====================
         function saveGeneratedToLibrary() {
             if (!currentGeneratedWorkout) return;
-            const user = getActiveUser();
-            const key = `celik_kodu_custom_programs_${user.id}`;
-
-            let saved = [];
-            try {
-                const raw = localStorage.getItem(key);
-                if (raw) saved = JSON.parse(raw);
-            } catch(e) {}
+            const user = typeof getActiveUser === 'function' ? getActiveUser() : null;
+            const uid = (user && user.id) || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
+            if (!uid) return;
 
             const name = prompt("Bu antrenman programı için bir isim verin:", currentGeneratedWorkout.title);
-            if (!name) return;
+            if (!name || !name.trim()) return;
 
             const programToSave = JSON.parse(JSON.stringify(currentGeneratedWorkout));
             programToSave.id = 'saved_' + Date.now();
-            programToSave.title = name.trim();
+            programToSave.title = name.trim().slice(0, 160);
+            programToSave.isCustom = true;
+            programToSave.updatedAt = Date.now();
 
-            saved.unshift(programToSave);
-            localStorage.setItem(key, JSON.stringify(saved));
-            alert("✅ Program başarıyla kütüphanenize kaydedildi!");
+            upsertUserCustomProgram(programToSave, uid);
+            if (typeof renderLibrary === 'function') renderLibrary();
+            if (typeof showToast === 'function') {
+                showToast("✅ Program kütüphaneye kaydedildi!");
+            } else {
+                alert("✅ Program başarıyla kütüphanenize kaydedildi!");
+            }
         }
 
         // ==================== LIBRARY SUB-TABS & EXERCISE CATALOG ====================
         let currentLibrarySubTab = 'exercises';
 
+        function updateLibrarySubTabButtons() {
+            const btnEx = document.getElementById('libSubTabExercisesBtn');
+            const btnProg = document.getElementById('libSubTabProgramsBtn');
+            const isProg = currentLibrarySubTab === 'programs';
+            if (btnEx) {
+                btnEx.style.background = isProg ? '#F1F5F9' : '#0F172A';
+                btnEx.style.color = isProg ? '#334155' : '#FFFFFF';
+            }
+            if (btnProg) {
+                btnProg.style.background = isProg ? '#0F172A' : '#F1F5F9';
+                btnProg.style.color = isProg ? '#FFFFFF' : '#334155';
+                const savedCount = typeof getUserCustomPrograms === 'function' ? getUserCustomPrograms().length : 0;
+                btnProg.textContent = savedCount > 0 ? `Programlarım (${savedCount})` : 'Programlarım';
+            }
+        }
+
         function switchLibrarySubTab(tab) {
-            currentLibrarySubTab = 'exercises';
+            currentLibrarySubTab = (tab === 'programs') ? 'programs' : 'exercises';
             const paneProg = document.getElementById('libPanePrograms');
             const paneEx = document.getElementById('libPaneExercises');
 
-            if (paneProg) paneProg.style.display = 'none';
-            if (paneEx) paneEx.style.display = 'block';
+            if (paneProg) paneProg.style.display = currentLibrarySubTab === 'programs' ? 'block' : 'none';
+            if (paneEx) paneEx.style.display = currentLibrarySubTab === 'programs' ? 'none' : 'block';
 
-            renderLibraryExerciseCatalog();
+            updateLibrarySubTabButtons();
+            if (currentLibrarySubTab === 'programs') {
+                renderSavedProgramsPane();
+            } else {
+                renderLibraryExerciseCatalog();
+            }
         }
 
         function openExerciseLibraryTab(searchQuery = '') {
@@ -16186,35 +16250,115 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             showToast(`🚀 "${ex.name}" ile canlı antrenman başladı!`);
         }
 
-        function renderLibrary() {
+        function renderSavedProgramsPane() {
+            if (typeof updateLibrarySubTabButtons === 'function') updateLibrarySubTabButtons();
+            const savedListEl = document.getElementById('savedProgramsList');
+            const officialListEl = document.getElementById('officialProgramsList');
+            const esc = typeof escapeHTML === 'function' ? escapeHTML : (s => String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])));
+
+            if (savedListEl) {
+                const saved = typeof getUserCustomPrograms === 'function' ? getUserCustomPrograms() : [];
+                if (!saved.length) {
+                    savedListEl.innerHTML = `<div style="background:#F8FAFC; border:1px dashed #CBD5E1; border-radius:10px; padding:14px; text-align:center; color:#475569; font-size:13px; font-weight:600;">Henüz kayıtlı program yok.</div>`;
+                } else {
+                    savedListEl.innerHTML = saved.map(prog => {
+                        const titleText = esc(prog.title || 'Kayıtlı Program');
+                        const exCount = Array.isArray(prog.exercises) ? prog.exercises.length : 0;
+                        const dur = Number(prog.duration) > 0 ? Math.round(Number(prog.duration)) : 0;
+                        const metaText = dur > 0 ? `${exCount} Hareket • ${dur} Dk` : `${exCount} Hareket`;
+                        const encodedId = encodeURIComponent(String(prog.id || ''));
+                        return `
+                            <div style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:12px; padding:12px 14px; margin-bottom:8px; box-shadow:0 1px 2px rgba(15,23,42,0.04);">
+                                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
+                                    <div style="min-width:0;">
+                                        <div style="font-size:14px; font-weight:800; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${titleText}</div>
+                                        <div style="font-size:12px; font-weight:600; color:#475569; margin-top:2px;">${esc(metaText)}</div>
+                                    </div>
+                                </div>
+                                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                                    <button type="button" onclick="loadSavedProgram(decodeURIComponent('${encodedId}'))" style="flex:1; min-width:80px; padding:8px 10px; font-size:12px; font-weight:800; border-radius:8px; border:none; background:#0F172A; color:#FFFFFF; cursor:pointer; white-space:nowrap;">Başlat</button>
+                                    <button type="button" onclick="assignSavedProgramToCalendar(decodeURIComponent('${encodedId}'))" style="flex:1; min-width:96px; padding:8px 10px; font-size:12px; font-weight:800; border-radius:8px; border:1px solid #BFDBFE; background:#EFF6FF; color:#1D4ED8; cursor:pointer; white-space:nowrap;">Takvime Ekle</button>
+                                    <button type="button" onclick="deleteSavedProgram(decodeURIComponent('${encodedId}'))" style="padding:8px 12px; font-size:12px; font-weight:800; border-radius:8px; border:1px solid #FECACA; background:#FEF2F2; color:#B91C1C; cursor:pointer; white-space:nowrap;">Sil</button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+
+            if (officialListEl) {
+                const templates = [
+                    { id: 'la_forja_day1', title: 'Çelik Kodu Gün 1', meta: '45 Dk • 6 Hareket • Omuz & Bacak Ön' },
+                    { id: 'la_forja_day2', title: 'Çelik Kodu Gün 2', meta: '45 Dk • 6 Hareket • Sırt & Balistik Güç' },
+                    { id: 'la_forja_day3', title: 'Çelik Kodu Gün 3', meta: '50 Dk • 5 Hareket • Kompleks & Merdiven' }
+                ];
+                officialListEl.innerHTML = templates.map(tpl => {
+                    const encodedId = encodeURIComponent(tpl.id);
+                    return `
+                        <div style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:12px; padding:12px 14px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                            <div style="min-width:0;">
+                                <div style="font-size:14px; font-weight:800; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(tpl.title)}</div>
+                                <div style="font-size:12px; font-weight:600; color:#475569; margin-top:2px;">${esc(tpl.meta)}</div>
+                            </div>
+                            <button type="button" onclick="loadOfficialRoutine(decodeURIComponent('${encodedId}'))" style="padding:8px 14px; font-size:12px; font-weight:800; border-radius:8px; border:none; background:#0F172A; color:#FFFFFF; cursor:pointer; white-space:nowrap; flex-shrink:0;">Aç</button>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function renderLibrary(options = {}) {
+            if (options && (options.subTab === 'programs' || options.subTab === 'exercises')) {
+                currentLibrarySubTab = options.subTab;
+            }
             const paneProg = document.getElementById('libPanePrograms');
             const paneEx = document.getElementById('libPaneExercises');
-            if (paneProg) paneProg.style.display = 'none';
-            if (paneEx) paneEx.style.display = 'block';
-            renderLibraryExerciseCatalog();
+            const isProg = currentLibrarySubTab === 'programs';
+            if (paneProg) paneProg.style.display = isProg ? 'block' : 'none';
+            if (paneEx) paneEx.style.display = isProg ? 'none' : 'block';
+            if (typeof updateLibrarySubTabButtons === 'function') updateLibrarySubTabButtons();
+            if (isProg) {
+                renderSavedProgramsPane();
+            } else {
+                renderLibraryExerciseCatalog();
+            }
         }
 
         function loadSavedProgram(progId) {
-            const user = getActiveUser();
-            const key = `celik_kodu_custom_programs_${user.id}`;
             try {
-                const saved = JSON.parse(localStorage.getItem(key) || '[]');
-                const found = saved.find(p => p.id === progId);
+                const uid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
+                const saved = typeof getUserCustomPrograms === 'function' ? getUserCustomPrograms(uid) : [];
+                const found = saved.find(p => p && p.id === progId);
                 if (found) {
-                    currentGeneratedWorkout = found;
+                    const cloned = JSON.parse(JSON.stringify(found));
+                    currentGeneratedWorkout = cloned;
+                    window.currentGeneratedWorkout = cloned;
+                    if (typeof persistLastGeneratedWorkout === 'function') {
+                        persistLastGeneratedWorkout(cloned, uid, { skipCloudSync: true });
+                    }
                     startActiveWorkoutFromGenerated();
                 }
             } catch(e) {}
         }
 
+        function assignSavedProgramToCalendar(progId) {
+            try {
+                const uid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
+                const saved = typeof getUserCustomPrograms === 'function' ? getUserCustomPrograms(uid) : [];
+                const found = saved.find(p => p && p.id === progId);
+                if (found && typeof openAssignWorkoutCalendarModal === 'function') {
+                    openAssignWorkoutCalendarModal(JSON.parse(JSON.stringify(found)), 'current');
+                }
+            } catch(e) {}
+        }
+
         function deleteSavedProgram(progId) {
-            const user = getActiveUser();
-            const key = `celik_kodu_custom_programs_${user.id}`;
             if (confirm("Bu kayıtlı programı silmek istediğinize emin misiniz?")) {
                 try {
-                    let saved = JSON.parse(localStorage.getItem(key) || '[]');
-                    saved = saved.filter(p => p.id !== progId);
-                    localStorage.setItem(key, JSON.stringify(saved));
+                    const uid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
+                    if (typeof removeUserCustomProgram === 'function') {
+                        removeUserCustomProgram(progId, uid);
+                    }
                     renderLibrary();
                 } catch(e) {}
             }
@@ -16975,37 +17119,35 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 }
             }
 
-            // 3. Search ALL custom program keys in localStorage FIRST (user custom workouts always win over official templates)
+            // 3. Search ONLY active user's custom programs FIRST (respecting deletion tombstones)
             try {
-                for (let i = 0; i < localStorage.length; i++) {
-                    const k = localStorage.key(i);
-                    if (k && k.startsWith('celik_kodu_custom_programs')) {
-                        const saved = JSON.parse(localStorage.getItem(k) || '[]');
-                        if (Array.isArray(saved)) {
-                            let found = saved.find(p => p && p.id === planId);
+                const activeUid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
+                if (activeUid && typeof getUserCustomPrograms === 'function') {
+                    const saved = getUserCustomPrograms(activeUid);
+                    if (Array.isArray(saved)) {
+                        let found = saved.find(p => p && p.id === planId);
+                        if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return normalizeWorkout(found);
+                        if (planTitle) {
+                            found = saved.find(p => p && p.title && p.title.trim().toLowerCase() === planTitle);
                             if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return normalizeWorkout(found);
-                            if (planTitle) {
-                                found = saved.find(p => p && p.title && p.title.trim().toLowerCase() === planTitle);
-                                if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return normalizeWorkout(found);
-                            }
                         }
                     }
                 }
             } catch(e) {}
 
-            // 4. Search in all users' savedWorkouts
+            // 4. Search ONLY active user's savedWorkouts (respecting deletion tombstones)
             try {
-                const users = JSON.parse(localStorage.getItem('celik_kodu_auth_users') || '[]');
-                if (Array.isArray(users)) {
-                    for (const u of users) {
-                        if (u && Array.isArray(u.savedWorkouts)) {
-                            let found = u.savedWorkouts.find(p => p && p.id === planId);
-                            if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return normalizeWorkout(found);
-                            if (planTitle) {
-                                found = u.savedWorkouts.find(p => p && p.title && p.title.trim().toLowerCase() === planTitle);
-                                if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return normalizeWorkout(found);
-                            }
-                        }
+                const activeUid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
+                const deletedSet = activeUid && typeof getDeletedCustomProgramIds === 'function'
+                    ? new Set(getDeletedCustomProgramIds(activeUid))
+                    : new Set();
+                const u = typeof getActiveUser === 'function' ? getActiveUser() : null;
+                if (u && Array.isArray(u.savedWorkouts)) {
+                    let found = u.savedWorkouts.find(p => p && p.id === planId && !deletedSet.has(p.id));
+                    if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return normalizeWorkout(found);
+                    if (planTitle) {
+                        found = u.savedWorkouts.find(p => p && !deletedSet.has(p.id) && p.title && p.title.trim().toLowerCase() === planTitle);
+                        if (found && Array.isArray(found.exercises) && found.exercises.length > 0) return normalizeWorkout(found);
                     }
                 }
             } catch(e) {}
@@ -17017,12 +17159,15 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 }
             }
 
-            // 6. Last generated workout persisted in localStorage
+            // 6. Last generated workout persisted for active user in localStorage
             try {
-                const rawLastGen = localStorage.getItem('celik_kodu_last_generated_workout');
+                const activeUid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
+                const scopedKey = activeUid ? `celik_kodu_last_generated_workout_${activeUid}` : 'celik_kodu_last_generated_workout';
+                const rawLastGen = (activeUid && localStorage.getItem(scopedKey)) || localStorage.getItem('celik_kodu_last_generated_workout');
                 if (rawLastGen) {
                     const lastGen = JSON.parse(rawLastGen);
-                    if (lastGen && Array.isArray(lastGen.exercises) && lastGen.exercises.length > 0) {
+                    const ownerOk = !lastGen?.userId || !activeUid || lastGen.userId === activeUid;
+                    if (ownerOk && lastGen && Array.isArray(lastGen.exercises) && lastGen.exercises.length > 0) {
                         if (lastGen.id === planId || planId.startsWith('gen_') || plan.type === 'custom_generated' || (planTitle && lastGen.title && lastGen.title.toLowerCase().includes(planTitle))) {
                             return lastGen;
                         }
@@ -17980,11 +18125,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 }
 
                 try {
-                    const key = `celik_kodu_custom_programs_${uid}`;
-                    const saved = JSON.parse(localStorage.getItem(key) || '[]');
-                    if (Array.isArray(saved)) {
-                        saved.unshift(updatedWorkout);
-                        localStorage.setItem(key, JSON.stringify(saved.slice(0, 50)));
+                    if (updatedWorkout && typeof upsertUserCustomProgram === 'function') {
+                        const withId = updatedWorkout.id ? updatedWorkout : Object.assign({}, updatedWorkout, { id: 'moved_' + Date.now() });
+                        upsertUserCustomProgram(withId, uid);
                     }
                 } catch (e) {}
 
@@ -18422,28 +18565,9 @@ KURALLAR:
 
             // Also update or add to custom programs in library
             const user = getActiveUser();
-            const key = `celik_kodu_custom_programs_${user.id}`;
-            let saved = [];
-            try {
-                saved = JSON.parse(localStorage.getItem(key) || '[]');
-            } catch(e) {}
-
-            const existingIdx = saved.findIndex(p => p.id === progId);
-            if (existingIdx !== -1) {
-                saved[existingIdx] = updatedWorkout;
-            } else {
-                saved.unshift(updatedWorkout);
+            if (user && typeof upsertUserCustomProgram === 'function') {
+                upsertUserCustomProgram(updatedWorkout, user.id);
             }
-            localStorage.setItem(key, JSON.stringify(saved));
-
-            if (!user.savedWorkouts) user.savedWorkouts = [];
-            const userSavedIdx = user.savedWorkouts.findIndex(p => p.id === progId);
-            if (userSavedIdx !== -1) {
-                user.savedWorkouts[userSavedIdx] = updatedWorkout;
-            } else {
-                user.savedWorkouts.unshift(updatedWorkout);
-            }
-            saveAthletesToStorage();
 
             // Clear editing state cleanly without prompt
             cancelStudioEditingSilent();
@@ -18813,8 +18937,9 @@ KURALLAR:
             let workoutToAssign = currentGeneratedWorkout;
             if (!workoutToAssign) {
                 try {
-                    const raw = localStorage.getItem('celik_kodu_last_generated_workout');
-                    if (raw) workoutToAssign = JSON.parse(raw);
+                    workoutToAssign = typeof readActiveLastGeneratedWorkout === 'function'
+                        ? readActiveLastGeneratedWorkout()
+                        : JSON.parse(localStorage.getItem('celik_kodu_last_generated_workout') || 'null');
                 } catch(e) {}
             }
             if (!workoutToAssign) return;
@@ -19055,19 +19180,21 @@ KURALLAR:
 
             if (workout.isCustom || workout.type === 'custom' || workout.type === 'custom_saved' || workout.type === 'custom_generated') {
                 try {
-                    const key = `celik_kodu_custom_programs_${uid}`;
-                    let saved = JSON.parse(localStorage.getItem(key) || '[]');
-                    const exIdx = saved.findIndex(p => p.id === planObj.id);
-                    if (exIdx !== -1) saved[exIdx] = planObj.customWorkout;
-                    else saved.unshift(planObj.customWorkout);
-                    localStorage.setItem(key, JSON.stringify(saved));
+                    if (planObj && planObj.customWorkout && typeof upsertUserCustomProgram === 'function') {
+                        upsertUserCustomProgram(planObj.customWorkout, uid);
+                    }
                 } catch(e) {}
             }
 
             if (isAssigningToToday) {
                 currentGeneratedWorkout = planObj.customWorkout;
+                window.currentGeneratedWorkout = planObj.customWorkout;
                 try {
-                    localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(planObj.customWorkout));
+                    if (typeof persistLastGeneratedWorkout === 'function') {
+                        persistLastGeneratedWorkout(planObj.customWorkout, uid);
+                    } else {
+                        localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(planObj.customWorkout));
+                    }
                 } catch(e) {}
             }
 
@@ -19093,8 +19220,9 @@ KURALLAR:
             let workoutToAssign = currentGeneratedWorkout;
             if (!workoutToAssign) {
                 try {
-                    const raw = localStorage.getItem('celik_kodu_last_generated_workout');
-                    if (raw) workoutToAssign = JSON.parse(raw);
+                    workoutToAssign = typeof readActiveLastGeneratedWorkout === 'function'
+                        ? readActiveLastGeneratedWorkout()
+                        : JSON.parse(localStorage.getItem('celik_kodu_last_generated_workout') || 'null');
                 } catch(e) {}
             }
             if (!workoutToAssign) {
@@ -19158,8 +19286,9 @@ KURALLAR:
             let workoutToSchedule = currentGeneratedWorkout;
             if (!workoutToSchedule) {
                 try {
-                    const raw = localStorage.getItem('celik_kodu_last_generated_workout');
-                    if (raw) workoutToSchedule = JSON.parse(raw);
+                    workoutToSchedule = typeof readActiveLastGeneratedWorkout === 'function'
+                        ? readActiveLastGeneratedWorkout()
+                        : JSON.parse(localStorage.getItem('celik_kodu_last_generated_workout') || 'null');
                 } catch(e) {}
             }
             if (!workoutToSchedule) {
@@ -19319,14 +19448,44 @@ KURALLAR:
             } catch {}
         }
 
+        let lastForegroundCloudRefreshAt = 0;
+        let foregroundCloudRefreshPromise = null;
+
+        function triggerForegroundCloudRefresh() {
+            if (IS_LOCAL_DEV || navigator.onLine === false) return Promise.resolve();
+            const uid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
+            if (!uid) return Promise.resolve();
+            const now = Date.now();
+            if (foregroundCloudRefreshPromise) return foregroundCloudRefreshPromise;
+            if (now - lastForegroundCloudRefreshAt < 8000) return Promise.resolve();
+            lastForegroundCloudRefreshAt = now;
+            foregroundCloudRefreshPromise = (async () => {
+                try {
+                    await flushPendingCloudOutbox();
+                    if (typeof syncAllFromCloud === 'function') {
+                        await syncAllFromCloud();
+                    }
+                } catch (e) {
+                } finally {
+                    foregroundCloudRefreshPromise = null;
+                }
+            })();
+            return foregroundCloudRefreshPromise;
+        }
+
         if (typeof window !== 'undefined') {
             window.addEventListener('online', () => {
                 flushPendingCloudOutbox();
-                syncAllFromCloud();
+                if (typeof syncAllFromCloud === 'function') syncAllFromCloud();
             });
             document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState === 'visible' && navigator.onLine) {
-                    flushPendingCloudOutbox();
+                if (document.visibilityState === 'visible' && navigator.onLine !== false) {
+                    triggerForegroundCloudRefresh();
+                }
+            });
+            window.addEventListener('focus', () => {
+                if (navigator.onLine !== false) {
+                    triggerForegroundCloudRefresh();
                 }
             });
         }
@@ -20023,15 +20182,360 @@ KURALLAR:
         }
         window.scheduleUserStateCloudSync = scheduleUserStateCloudSync;
 
-        function stripWatchBridgeSecretsFromObj(val) {
+        const CLOUD_SECRET_KEY_SET = new Set([
+            'password', 'passwordhash', 'salt', 'geminiapikey', 'apikey',
+            'tredicttoken', 'intervalstoken', 'gcaltoken', 'accesstoken', 'refreshtoken'
+        ]);
+        const PROTO_POLLUTION_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
+        function stripWatchBridgeSecretsFromObj(val, depth = 0) {
+            if (val === undefined) return undefined;
             if (!val || typeof val !== 'object') return val;
-            if (Array.isArray(val)) return val.map(stripWatchBridgeSecretsFromObj);
+            const proto = Object.getPrototypeOf(val);
+            const isCrossRealmPlain = Boolean(
+                proto &&
+                Object.getPrototypeOf(proto) === null &&
+                proto.constructor &&
+                proto.constructor.name === 'Object'
+            );
+            const isPlain = proto === Object.prototype || proto === null || isCrossRealmPlain;
+            if (
+                val instanceof Date ||
+                Object.prototype.toString.call(val) === '[object Date]' ||
+                typeof val._methodName === 'string' ||
+                typeof val.toDate === 'function' ||
+                (!Array.isArray(val) && !isPlain)
+            ) {
+                return val;
+            }
+            if (depth > 12) return Array.isArray(val) ? [] : {};
+            if (Array.isArray(val)) {
+                const out = [];
+                for (let i = 0; i < val.length; i++) {
+                    const item = stripWatchBridgeSecretsFromObj(val[i], depth + 1);
+                    if (item !== undefined) out.push(item);
+                }
+                return out;
+            }
             const clean = {};
             for (const [k, v] of Object.entries(val)) {
-                if (k === 'tredictToken' || k === 'intervalsToken') continue;
-                clean[k] = stripWatchBridgeSecretsFromObj(v);
+                if (PROTO_POLLUTION_KEYS.has(k)) continue;
+                if (CLOUD_SECRET_KEY_SET.has(String(k).toLowerCase())) continue;
+                if (v === undefined) continue;
+                const cleanedVal = stripWatchBridgeSecretsFromObj(v, depth + 1);
+                if (cleanedVal !== undefined) clean[k] = cleanedVal;
             }
             return clean;
+        }
+
+        function getJsonByteSize(val) {
+            try {
+                const s = JSON.stringify(val);
+                if (typeof s !== 'string') return 0;
+                if (typeof TextEncoder !== 'undefined') return new TextEncoder().encode(s).length;
+                return s.length * 2;
+            } catch (e) {
+                return Infinity;
+            }
+        }
+
+        function sanitizeExcludedExerciseIds(raw) {
+            if (!Array.isArray(raw)) return [];
+            const seen = new Set();
+            const out = [];
+            for (let i = 0; i < raw.length && out.length < 500; i++) {
+                if (typeof raw[i] !== 'string') continue;
+                const cleanId = raw[i].trim();
+                if (!cleanId || cleanId.length > 120 || PROTO_POLLUTION_KEYS.has(cleanId)) continue;
+                if (seen.has(cleanId)) continue;
+                seen.add(cleanId);
+                out.push(cleanId);
+            }
+            return out;
+        }
+
+        function sanitizeDeletedProgramIds(raw) {
+            if (!Array.isArray(raw)) return [];
+            const seen = new Set();
+            const out = [];
+            for (let i = 0; i < raw.length && out.length < 300; i++) {
+                if (typeof raw[i] !== 'string') continue;
+                const cleanId = raw[i].trim();
+                if (!cleanId || cleanId.length > 120 || PROTO_POLLUTION_KEYS.has(cleanId)) continue;
+                if (seen.has(cleanId)) continue;
+                seen.add(cleanId);
+                out.push(cleanId);
+            }
+            return out;
+        }
+
+        function sanitizeCustomProgramEntry(raw) {
+            if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+            const cleaned = stripWatchBridgeSecretsFromObj(raw, 0);
+            if (!cleaned || typeof cleaned !== 'object' || Array.isArray(cleaned)) return null;
+            const rawId = typeof cleaned.id === 'string' ? cleaned.id.trim() : '';
+            if (!rawId || rawId.length > 120 || PROTO_POLLUTION_KEYS.has(rawId)) return null;
+            if (!Array.isArray(cleaned.exercises)) return null;
+
+            const safeExercises = [];
+            for (let i = 0; i < cleaned.exercises.length && safeExercises.length < 80; i++) {
+                const ex = cleaned.exercises[i];
+                if (!ex || typeof ex !== 'object' || Array.isArray(ex)) continue;
+                safeExercises.push(ex);
+            }
+
+            const rawTitle = typeof cleaned.title === 'string' ? cleaned.title.trim() : '';
+            const updatedAtNum = Number(cleaned.updatedAt);
+            const entry = {
+                ...cleaned,
+                id: rawId,
+                title: (rawTitle || 'Kayıtlı Program').slice(0, 160),
+                exercises: safeExercises,
+                updatedAt: (Number.isFinite(updatedAtNum) && updatedAtNum > 0) ? updatedAtNum : 0
+            };
+            if (getJsonByteSize(entry) > 128000) return null;
+            return entry;
+        }
+
+        function sanitizeCustomProgramsList(raw) {
+            if (!Array.isArray(raw)) return [];
+            const byId = new Map();
+            const order = [];
+            for (let i = 0; i < raw.length; i++) {
+                const entry = sanitizeCustomProgramEntry(raw[i]);
+                if (!entry) continue;
+                if (!byId.has(entry.id)) {
+                    order.push(entry.id);
+                    byId.set(entry.id, entry);
+                } else {
+                    const existing = byId.get(entry.id);
+                    if ((entry.updatedAt || 0) > (existing.updatedAt || 0)) {
+                        byId.set(entry.id, entry);
+                    }
+                }
+            }
+            const out = [];
+            let totalBytes = 2;
+            for (let i = 0; i < order.length && out.length < 200; i++) {
+                const entry = byId.get(order[i]);
+                const itemBytes = getJsonByteSize(entry) + 1;
+                if (totalBytes + itemBytes > 512000) break;
+                totalBytes += itemBytes;
+                out.push(entry);
+            }
+            return out;
+        }
+
+        function sanitizeMobilityTestsPayload(raw) {
+            if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return { history: [], updatedAt: 0 };
+            const cleaned = stripWatchBridgeSecretsFromObj(raw, 0);
+            if (!cleaned || typeof cleaned !== 'object' || Array.isArray(cleaned)) return { history: [], updatedAt: 0 };
+
+            const safeHistory = [];
+            if (Array.isArray(cleaned.history)) {
+                for (let i = 0; i < cleaned.history.length && safeHistory.length < 200; i++) {
+                    const h = cleaned.history[i];
+                    if (!h || typeof h !== 'object' || Array.isArray(h)) continue;
+                    const ts = Number(h.timestamp);
+                    const dateStr = typeof h.date === 'string' ? h.date.trim().slice(0, 32) : '';
+                    const safeLevels = {};
+                    if (h.levels && typeof h.levels === 'object' && !Array.isArray(h.levels)) {
+                        let keyCount = 0;
+                        for (const [lk, lv] of Object.entries(h.levels)) {
+                            if (keyCount >= 40) break;
+                            if (PROTO_POLLUTION_KEYS.has(lk) || lk.length > 80) continue;
+                            if (typeof lv === 'number' && Number.isFinite(lv)) {
+                                safeLevels[lk] = lv;
+                                keyCount++;
+                            } else if (typeof lv === 'string') {
+                                safeLevels[lk] = lv.slice(0, 80);
+                                keyCount++;
+                            }
+                        }
+                    }
+                    safeHistory.push({
+                        date: dateStr,
+                        timestamp: (Number.isFinite(ts) && ts >= 0) ? ts : 0,
+                        levels: safeLevels
+                    });
+                }
+            }
+
+            const updatedAtNum = Number(cleaned.updatedAt);
+            const result = {
+                history: safeHistory,
+                updatedAt: (Number.isFinite(updatedAtNum) && updatedAtNum >= 0) ? updatedAtNum : 0
+            };
+            if (getJsonByteSize(result) > 65536) {
+                result.history = safeHistory.slice(-50);
+            }
+            return result;
+        }
+
+        function getDeletedCustomProgramIds(uid) {
+            const targetUid = uid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
+            if (!targetUid) return [];
+            try {
+                const raw = localStorage.getItem(`celik_kodu_deleted_programs_${targetUid}`);
+                if (!raw) return [];
+                return sanitizeDeletedProgramIds(JSON.parse(raw));
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveDeletedCustomProgramIds(ids, uid) {
+            const targetUid = uid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
+            if (!targetUid) return [];
+            const cleanIds = sanitizeDeletedProgramIds(ids);
+            try {
+                localStorage.setItem(`celik_kodu_deleted_programs_${targetUid}`, JSON.stringify(cleanIds));
+            } catch (e) {}
+            return cleanIds;
+        }
+
+        function getUserCustomPrograms(uid) {
+            const targetUid = uid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
+            if (!targetUid) return [];
+            try {
+                const raw = localStorage.getItem(`celik_kodu_custom_programs_${targetUid}`);
+                if (!raw) return [];
+                const deletedSet = new Set(getDeletedCustomProgramIds(targetUid));
+                return sanitizeCustomProgramsList(JSON.parse(raw)).filter(p => !deletedSet.has(p.id));
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveUserCustomPrograms(arr, uid, options = {}) {
+            const targetUid = uid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
+            if (!targetUid) return [];
+            const deletedSet = options.skipDeletedFilter ? new Set() : new Set(getDeletedCustomProgramIds(targetUid));
+            const cleanList = sanitizeCustomProgramsList(arr).filter(p => !deletedSet.has(p.id));
+            try {
+                localStorage.setItem(`celik_kodu_custom_programs_${targetUid}`, JSON.stringify(cleanList));
+            } catch (e) {}
+
+            if (!options.skipAthleteSync && typeof getAuthUsers === 'function') {
+                try {
+                    const users = getAuthUsers();
+                    const userObj = Array.isArray(users) ? users.find(u => u && u.id === targetUid) : null;
+                    if (userObj) {
+                        userObj.savedWorkouts = cleanList.slice(0, 50);
+                        if (options.fromCloud) {
+                            localStorage.setItem('celik_kodu_auth_users', JSON.stringify(users));
+                        } else if (typeof saveAuthUsers === 'function') {
+                            saveAuthUsers(users);
+                        } else {
+                            localStorage.setItem('celik_kodu_auth_users', JSON.stringify(users));
+                        }
+                    }
+                } catch (e) {}
+            }
+
+            if (!options.skipCloudSync && !options.fromCloud && typeof window.scheduleUserStateCloudSync === 'function') {
+                window.scheduleUserStateCloudSync(targetUid);
+            }
+            return cleanList;
+        }
+
+        function upsertUserCustomProgram(progObj, uid, options = {}) {
+            const targetUid = uid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
+            if (!targetUid || !progObj || typeof progObj !== 'object') return null;
+            const prepared = { ...progObj };
+            if (!options.preserveUpdatedAt) {
+                prepared.updatedAt = Date.now();
+            }
+            const cleanEntry = sanitizeCustomProgramEntry(prepared);
+            if (!cleanEntry) return null;
+
+            const deletedIds = getDeletedCustomProgramIds(targetUid).filter(id => id !== cleanEntry.id);
+            saveDeletedCustomProgramIds(deletedIds, targetUid);
+
+            const current = getUserCustomPrograms(targetUid).filter(p => p.id !== cleanEntry.id);
+            current.unshift(cleanEntry);
+            saveUserCustomPrograms(current, targetUid, options);
+            return cleanEntry;
+        }
+
+        function removeUserCustomProgram(progId, uid, options = {}) {
+            const targetUid = uid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
+            if (!targetUid || typeof progId !== 'string' || !progId.trim()) return [];
+            const cleanId = progId.trim();
+            const deletedIds = getDeletedCustomProgramIds(targetUid).filter(id => id !== cleanId);
+            deletedIds.unshift(cleanId);
+            saveDeletedCustomProgramIds(deletedIds.slice(0, 300), targetUid);
+
+            const current = getUserCustomPrograms(targetUid).filter(p => p.id !== cleanId);
+            return saveUserCustomPrograms(current, targetUid, options);
+        }
+
+        function getLastGeneratedWorkoutStorageKey(uid) {
+            const targetUid = uid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
+            return targetUid ? `celik_kodu_last_generated_workout_${targetUid}` : 'celik_kodu_last_generated_workout';
+        }
+
+        function persistLastGeneratedWorkout(workout, uid, options = {}) {
+            const targetUid = uid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
+            const activeUid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
+            if (!targetUid) return null;
+            const scopedKey = getLastGeneratedWorkoutStorageKey(targetUid);
+
+            if (!workout || typeof workout !== 'object') {
+                if (options.clearIfNull) {
+                    try {
+                        localStorage.removeItem(scopedKey);
+                        if (targetUid === activeUid) localStorage.removeItem('celik_kodu_last_generated_workout');
+                    } catch (e) {}
+                    if (!options.skipCloudSync && !options.fromCloud && typeof window.scheduleUserStateCloudSync === 'function') {
+                        window.scheduleUserStateCloudSync(targetUid);
+                    }
+                }
+                return null;
+            }
+
+            const cleaned = stripWatchBridgeSecretsFromObj(workout, 0);
+            if (!cleaned || typeof cleaned !== 'object' || Array.isArray(cleaned)) return null;
+            cleaned.userId = targetUid;
+            const existingTs = Number(cleaned.updatedAt);
+            cleaned.updatedAt = (!options.preserveUpdatedAt && !options.fromCloud)
+                ? Date.now()
+                : ((Number.isFinite(existingTs) && existingTs > 0) ? existingTs : Date.now());
+            if (getJsonByteSize(cleaned) > 256000) return null;
+
+            try {
+                const serialized = JSON.stringify(cleaned);
+                localStorage.setItem(scopedKey, serialized);
+                if (targetUid === activeUid) {
+                    localStorage.setItem('celik_kodu_last_generated_workout', serialized);
+                }
+            } catch (e) {}
+
+            if (!options.skipCloudSync && !options.fromCloud && typeof window.scheduleUserStateCloudSync === 'function') {
+                window.scheduleUserStateCloudSync(targetUid);
+            }
+            return cleaned;
+        }
+
+        function readActiveLastGeneratedWorkout(uid) {
+            const targetUid = uid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
+            const parseValid = (raw) => {
+                if (!raw) return null;
+                try {
+                    const obj = JSON.parse(raw);
+                    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return null;
+                    if (obj.userId && targetUid && obj.userId !== targetUid) return null;
+                    if (obj.userId && !targetUid) return null;
+                    return obj;
+                } catch (e) {
+                    return null;
+                }
+            };
+            if (targetUid) {
+                const scoped = parseValid(localStorage.getItem(getLastGeneratedWorkoutStorageKey(targetUid)));
+                if (scoped) return scoped;
+            }
+            return parseValid(localStorage.getItem('celik_kodu_last_generated_workout'));
         }
 
         function scheduleHasActiveWorkoutContent(sched) {
@@ -20120,6 +20624,29 @@ KURALLAR:
                         lastGenVal = activeGen;
                     }
                 }
+                const cleanLastGen = lastGenVal ? stripWatchBridgeSecretsFromObj(lastGenVal, 0) : null;
+                const safeLastGen = (
+                    cleanLastGen &&
+                    typeof cleanLastGen === 'object' &&
+                    !Array.isArray(cleanLastGen) &&
+                    Object.keys(cleanLastGen).length <= 100 &&
+                    getJsonByteSize(cleanLastGen) <= 256000
+                ) ? cleanLastGen : null;
+
+                const safeExclIds = sanitizeExcludedExerciseIds(safeParse(getExcludedExercisesStorageKey(uid), []));
+                const exclUpdatedAt = typeof getExcludedExercisesUpdatedAt === 'function'
+                    ? getExcludedExercisesUpdatedAt(uid)
+                    : 0;
+                const safeCustomPrograms = typeof getUserCustomPrograms === 'function'
+                    ? getUserCustomPrograms(uid)
+                    : [];
+                const safeDeletedIds = typeof getDeletedCustomProgramIds === 'function'
+                    ? getDeletedCustomProgramIds(uid)
+                    : [];
+                const safeMobilityTests = sanitizeMobilityTestsPayload(
+                    safeParse(`celik_kodu_mobility_tests_${uid}`, { history: [], updatedAt: 0 })
+                );
+
                 const manifestsMerged = Object.assign(
                     {},
                     safeParse(`celik_kodu_garmin_sent_manifests_v1__${uid}`, {}),
@@ -20131,12 +20658,16 @@ KURALLAR:
                     nextWeeklySchedule: safeParse(`celik_kodu_next_weekly_schedule_${uid}`, {}),
                     dateSchedule: safeParse(`celik_kodu_date_schedule_${uid}`, {}),
                     rememberedWeights: safeParse(`celik_kodu_last_weights_${uid}`, {}),
-                    excludedExercises: safeParse(getExcludedExercisesStorageKey(uid), []),
+                    excludedExercises: safeExclIds,
+                    excludedExercisesUpdatedAt: exclUpdatedAt,
+                    customPrograms: safeCustomPrograms,
+                    deletedCustomProgramIds: safeDeletedIds,
+                    mobilityTests: safeMobilityTests,
                     selectedEquipments: Array.isArray(selectedEquipments) ? selectedEquipments : [],
                     customGyms: safeParse(`celik_kodu_custom_gyms_${uid}`, []),
                     aiDoctrine: String(currentSelectedDoctrine || 'bb_hybrid'),
                     aiCoachSummary: safeParse(`celik_kodu_ai_program_${uid}`, null),
-                    lastGeneratedWorkout: lastGenVal,
+                    lastGeneratedWorkout: safeLastGen,
                     activeWorkoutDraft: safeParse(`celik_kodu_active_state_${uid}`, null),
                     garminManifests: manifestsMerged,
                     clientUpdatedAt,
@@ -20168,6 +20699,29 @@ KURALLAR:
                 const hasPendingLocalState = localStorage.getItem(`celik_kodu_pending_state_sync_${uid}`) === '1';
                 const isCloudNewerOrEqual = !hasPendingLocalState && cloudUpdatedAt >= localUpdatedAt;
                 const activeUid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
+                let hasUnsyncedLocalDiff = false;
+
+                const safeParseCloud = (k, fallback) => {
+                    try {
+                        const r = localStorage.getItem(k);
+                        return r ? JSON.parse(r) : fallback;
+                    } catch { return fallback; }
+                };
+                const parseCloudTimestamp = (val) => {
+                    if (val == null) return 0;
+                    if (typeof val === 'number') return (Number.isFinite(val) && val > 0) ? val : 0;
+                    if (typeof val.toMillis === 'function') {
+                        const ms = val.toMillis();
+                        return (Number.isFinite(ms) && ms > 0) ? ms : 0;
+                    }
+                    if (typeof val === 'string') {
+                        const num = Number(val);
+                        if (Number.isFinite(num) && num > 0) return num;
+                        const ms = Date.parse(val);
+                        return (Number.isFinite(ms) && ms > 0) ? ms : 0;
+                    }
+                    return 0;
+                };
 
                 mergeWeeklyScheduleSafely(`celik_kodu_weekly_schedule_${uid}`, data.weeklySchedule, cloudUpdatedAt, localUpdatedAt, hasPendingLocalState);
                 mergeWeeklyScheduleSafely(`celik_kodu_next_weekly_schedule_${uid}`, data.nextWeeklySchedule, cloudUpdatedAt, localUpdatedAt, hasPendingLocalState);
@@ -20192,12 +20746,124 @@ KURALLAR:
                         : Object.assign({}, data.rememberedWeights, localW);
                     localStorage.setItem(`celik_kodu_last_weights_${uid}`, JSON.stringify(mergedW));
                 }
-                if (Array.isArray(data.excludedExercises) && data.excludedExercises.length > 0) {
-                    const exKey = getExcludedExercisesStorageKey(uid);
-                    const localExcl = JSON.parse(localStorage.getItem(exKey) || '[]') || [];
-                    const mergedExcl = Array.from(new Set([...data.excludedExercises, ...localExcl]));
-                    localStorage.setItem(exKey, JSON.stringify(mergedExcl));
+
+                // Merge custom program deletion tombstones + custom programs
+                const localDeletedIds = getDeletedCustomProgramIds(uid);
+                const cloudDeletedIds = Array.isArray(data.deletedCustomProgramIds)
+                    ? sanitizeDeletedProgramIds(data.deletedCustomProgramIds)
+                    : [];
+                const cloudDeletedSet = new Set(cloudDeletedIds);
+                const mergedDeletedIds = sanitizeDeletedProgramIds([...cloudDeletedIds, ...localDeletedIds]);
+                saveDeletedCustomProgramIds(mergedDeletedIds, uid);
+                const deletedSet = new Set(mergedDeletedIds);
+
+                const localProgs = sanitizeCustomProgramsList(safeParseCloud(`celik_kodu_custom_programs_${uid}`, []));
+                const cloudProgs = Array.isArray(data.customPrograms) ? sanitizeCustomProgramsList(data.customPrograms) : [];
+                if (localDeletedIds.some(id => !cloudDeletedSet.has(id))) hasUnsyncedLocalDiff = true;
+                if (!hasUnsyncedLocalDiff && cloudProgs.some(p => p && p.id && deletedSet.has(p.id))) {
+                    hasUnsyncedLocalDiff = true;
                 }
+                const mergedProgMap = new Map();
+                cloudProgs.forEach(p => {
+                    if (!p || !p.id || deletedSet.has(p.id)) return;
+                    mergedProgMap.set(p.id, p);
+                });
+                localProgs.forEach(p => {
+                    if (!p || !p.id || deletedSet.has(p.id)) return;
+                    const existing = mergedProgMap.get(p.id);
+                    if (!existing) {
+                        mergedProgMap.set(p.id, p);
+                        hasUnsyncedLocalDiff = true;
+                    } else {
+                        const lTs = Number(p.updatedAt || 0);
+                        const cTs = Number(existing.updatedAt || 0);
+                        if (lTs > cTs || (lTs === cTs && !isCloudNewerOrEqual)) {
+                            mergedProgMap.set(p.id, p);
+                            if (lTs > cTs) hasUnsyncedLocalDiff = true;
+                        }
+                    }
+                });
+                const mergedProgs = Array.from(mergedProgMap.values())
+                    .sort((a, b) => Number(b.updatedAt || 0) - Number(a.updatedAt || 0));
+                saveUserCustomPrograms(mergedProgs, uid, { fromCloud: true, skipCloudSync: true });
+
+                // Timestamp-authoritative excludedExercises merge (empty list [] propagates un-hide)
+                const cloudExclTs = parseCloudTimestamp(data.excludedExercisesUpdatedAt);
+                const localExclTs = getExcludedExercisesUpdatedAt(uid);
+                const localExclArr = getUserExcludedExerciseIds(uid);
+                if (Array.isArray(data.excludedExercises)) {
+                    const cloudExclArr = sanitizeExcludedExerciseIds(data.excludedExercises);
+                    if (cloudExclTs > 0 || localExclTs > 0) {
+                        if (!hasPendingLocalState && cloudExclTs >= localExclTs) {
+                            const localExclSet = new Set(localExclArr);
+                            setUserExcludedExerciseIds(cloudExclArr, {
+                                uid,
+                                updatedAt: cloudExclTs,
+                                fromCloud: true,
+                                skipCloudSync: true
+                            });
+                            cloudExclArr.forEach(exId => {
+                                if (!localExclSet.has(exId)) purgeExcludedExerciseFromSavedPlans(exId);
+                            });
+                        } else if (localExclTs > cloudExclTs || hasPendingLocalState) {
+                            hasUnsyncedLocalDiff = true;
+                        }
+                    } else if (isCloudNewerOrEqual) {
+                        const localExclSet = new Set(localExclArr);
+                        setUserExcludedExerciseIds(cloudExclArr, {
+                            uid,
+                            updatedAt: 0,
+                            fromCloud: true,
+                            skipCloudSync: true
+                        });
+                        cloudExclArr.forEach(exId => {
+                            if (!localExclSet.has(exId)) purgeExcludedExerciseFromSavedPlans(exId);
+                        });
+                    } else if (localExclArr.length > 0) {
+                        hasUnsyncedLocalDiff = true;
+                    }
+                } else if (localExclTs > 0 || localExclArr.length > 0) {
+                    hasUnsyncedLocalDiff = true;
+                }
+
+                // Merge mobilityTests by date keeping newer timestamp
+                const localMobRaw = safeParseCloud(`celik_kodu_mobility_tests_${uid}`, null);
+                const localMob = sanitizeMobilityTestsPayload(localMobRaw || { history: [], updatedAt: 0 });
+                if (data.mobilityTests && typeof data.mobilityTests === 'object') {
+                    const cloudMob = sanitizeMobilityTestsPayload(data.mobilityTests);
+                    const byDate = new Map();
+                    const addMobEntry = (entry) => {
+                        if (!entry || typeof entry !== 'object') return;
+                        const key = entry.date || String(entry.timestamp || '');
+                        if (!key) return;
+                        const prev = byDate.get(key);
+                        if (!prev || Number(entry.timestamp || 0) > Number(prev.timestamp || 0)) {
+                            byDate.set(key, entry);
+                        } else if (Number(entry.timestamp || 0) === Number(prev.timestamp || 0)) {
+                            byDate.set(key, {
+                                date: prev.date || entry.date,
+                                timestamp: Math.max(Number(prev.timestamp || 0), Number(entry.timestamp || 0)),
+                                levels: Object.assign({}, entry.levels || {}, prev.levels || {})
+                            });
+                        }
+                    };
+                    cloudMob.history.forEach(addMobEntry);
+                    localMob.history.forEach(addMobEntry);
+                    const mergedHistory = Array.from(byDate.values())
+                        .sort((a, b) => Number(b.timestamp || 0) - Number(a.timestamp || 0) || String(b.date || '').localeCompare(String(a.date || '')))
+                        .slice(0, 200);
+                    const mergedMob = sanitizeMobilityTestsPayload({
+                        history: mergedHistory,
+                        updatedAt: Math.max(Number(cloudMob.updatedAt || 0), Number(localMob.updatedAt || 0))
+                    });
+                    localStorage.setItem(`celik_kodu_mobility_tests_${uid}`, JSON.stringify(mergedMob));
+                    if (Number(localMob.updatedAt || 0) > Number(cloudMob.updatedAt || 0) || mergedHistory.length > cloudMob.history.length) {
+                        hasUnsyncedLocalDiff = true;
+                    }
+                } else if (localMob.history.length > 0) {
+                    hasUnsyncedLocalDiff = true;
+                }
+
                 if (Array.isArray(data.customGyms) && data.customGyms.length > 0) {
                     const gymKey = `celik_kodu_custom_gyms_${uid}`;
                     const localGyms = JSON.parse(localStorage.getItem(gymKey) || '[]') || [];
@@ -20207,12 +20873,33 @@ KURALLAR:
                 if (data.aiCoachSummary && typeof data.aiCoachSummary === 'object' && isCloudNewerOrEqual) {
                     localStorage.setItem(`celik_kodu_ai_program_${uid}`, JSON.stringify(data.aiCoachSummary));
                 }
-                if (data.lastGeneratedWorkout && typeof data.lastGeneratedWorkout === 'object' && (isCloudNewerOrEqual || !localStorage.getItem(`celik_kodu_last_generated_workout_${uid}`))) {
-                    localStorage.setItem(`celik_kodu_last_generated_workout_${uid}`, JSON.stringify(data.lastGeneratedWorkout));
-                    if (activeUid === uid && (!localStorage.getItem('celik_kodu_last_generated_workout') || isCloudNewerOrEqual)) {
-                        localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(data.lastGeneratedWorkout));
+
+                // Merge lastGeneratedWorkout with timestamp comparison and memory isolation
+                const rawLocalGen = safeParseCloud(`celik_kodu_last_generated_workout_${uid}`, null)
+                    || (activeUid === uid ? safeParseCloud('celik_kodu_last_generated_workout', null) : null);
+                const localGenValid = (rawLocalGen && typeof rawLocalGen === 'object' && (!rawLocalGen.userId || rawLocalGen.userId === uid))
+                    ? rawLocalGen
+                    : null;
+                if (data.lastGeneratedWorkout && typeof data.lastGeneratedWorkout === 'object') {
+                    const cloudGenTs = Number(data.lastGeneratedWorkout.updatedAt || data.lastGeneratedWorkout.createdAt || cloudUpdatedAt || 0);
+                    const localGenTs = Number(localGenValid?.updatedAt || localGenValid?.createdAt || localUpdatedAt || 0);
+                    if (!localGenValid || (!hasPendingLocalState && cloudGenTs >= localGenTs)) {
+                        const savedGen = persistLastGeneratedWorkout(data.lastGeneratedWorkout, uid, {
+                            fromCloud: true,
+                            skipCloudSync: true,
+                            preserveUpdatedAt: true
+                        });
+                        if (activeUid === uid && savedGen && typeof currentGeneratedWorkout !== 'undefined') {
+                            currentGeneratedWorkout = savedGen;
+                            window.currentGeneratedWorkout = savedGen;
+                        }
+                    } else if (localGenValid && localGenTs > cloudGenTs) {
+                        hasUnsyncedLocalDiff = true;
                     }
+                } else if (localGenValid) {
+                    hasUnsyncedLocalDiff = true;
                 }
+
                 if (data.activeWorkoutDraft && typeof data.activeWorkoutDraft === 'object' && !localStorage.getItem(`celik_kodu_active_state_${uid}`)) {
                     localStorage.setItem(`celik_kodu_active_state_${uid}`, JSON.stringify(data.activeWorkoutDraft));
                 }
@@ -20221,13 +20908,28 @@ KURALLAR:
                     const localM = JSON.parse(localStorage.getItem(mKey) || '{}') || {};
                     localStorage.setItem(mKey, JSON.stringify(Object.assign({}, data.garminManifests, localM)));
                 }
-                if (!hasPendingLocalState && cloudUpdatedAt > localUpdatedAt) {
+                if (!hasPendingLocalState && cloudUpdatedAt > localUpdatedAt && !hasUnsyncedLocalDiff) {
                     localStorage.setItem(`celik_kodu_state_updated_at_${uid}`, String(cloudUpdatedAt));
-                } else if (!IS_LOCAL_DEV && (hasPendingLocalState || localUpdatedAt > cloudUpdatedAt)) {
+                } else if (!IS_LOCAL_DEV && (hasPendingLocalState || localUpdatedAt > cloudUpdatedAt || hasUnsyncedLocalDiff)) {
                     await syncUserStateToCloud(uid);
                 }
+
+                const savedScrollY = typeof window !== 'undefined' ? window.scrollY : 0;
                 if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
                 if (typeof renderAiHybridHeroBanner === 'function') renderAiHybridHeroBanner();
+                if (typeof updateLibrarySubTabButtons === 'function') updateLibrarySubTabButtons();
+                const isActiveTab = (tabId) => {
+                    const el = typeof document !== 'undefined' ? document.getElementById(tabId) : null;
+                    return !!(el && (el.classList.contains('active') || el.style.display === 'block'));
+                };
+                if (isActiveTab('libraryTab') && typeof renderLibrary === 'function') renderLibrary();
+                if (isActiveTab('analyticsTab') && typeof renderAnalytics === 'function') renderAnalytics();
+                if (isActiveTab('generatorTab') && typeof currentGeneratedWorkout !== 'undefined' && currentGeneratedWorkout && typeof renderGeneratedWorkout === 'function') {
+                    renderGeneratedWorkout({ preserveScroll: true });
+                }
+                if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+                    window.scrollTo({ top: savedScrollY, behavior: 'instant' });
+                }
             } catch (err) {
                 console.warn("Kullanıcı durumu buluttan çekilemedi:", err);
             }
@@ -20415,14 +21117,9 @@ KURALLAR:
 
                 // Kütüphaneye de kaydet
                 const user = getActiveUser();
-                if (user) {
-                    const key = `celik_kodu_custom_programs_${user.id}`;
-                    let saved = [];
-                    try { saved = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
-                    const exIdx = saved.findIndex(p => p.id === workout.id);
-                    if (exIdx !== -1) saved[exIdx] = workout;
-                    else saved.unshift(workout);
-                    localStorage.setItem(key, JSON.stringify(saved));
+                if (user && typeof upsertUserCustomProgram === 'function') {
+                    const progEntry = workout.id ? workout : Object.assign({}, workout, { id: schedule[todayIdx].id, isCustom: true });
+                    upsertUserCustomProgram(progEntry, user.id);
                 }
 
                 renderActiveWorkout();
@@ -20521,8 +21218,9 @@ KURALLAR:
             let workout = currentGeneratedWorkout;
             if (!workout) {
                 try {
-                    const raw = localStorage.getItem('celik_kodu_last_generated_workout');
-                    if (raw) workout = JSON.parse(raw);
+                    workout = typeof readActiveLastGeneratedWorkout === 'function'
+                        ? readActiveLastGeneratedWorkout()
+                        : JSON.parse(localStorage.getItem('celik_kodu_last_generated_workout') || 'null');
                 } catch(e) {}
             }
             if (!workout || !Array.isArray(workout.exercises) || workout.exercises.length === 0) {
@@ -22849,10 +23547,40 @@ KURALLAR:
                 localStorage.setItem('celik_kodu_session', JSON.stringify(session));
                 localStorage.setItem('celik_kodu_active_user_id', session.userId);
                 localStorage.removeItem('celik_kodu_logged_out');
+                try {
+                    const scopedKey = typeof getLastGeneratedWorkoutStorageKey === 'function'
+                        ? getLastGeneratedWorkoutStorageKey(session.userId)
+                        : `celik_kodu_last_generated_workout_${session.userId}`;
+                    const scopedRaw = localStorage.getItem(scopedKey);
+                    if (scopedRaw) {
+                        const parsed = JSON.parse(scopedRaw);
+                        if (parsed && typeof parsed === 'object' && (!parsed.userId || parsed.userId === session.userId)) {
+                            localStorage.setItem('celik_kodu_last_generated_workout', scopedRaw);
+                            currentGeneratedWorkout = parsed;
+                            window.currentGeneratedWorkout = parsed;
+                        }
+                    } else {
+                        const legacyRaw = localStorage.getItem('celik_kodu_last_generated_workout');
+                        if (legacyRaw) {
+                            const legacyParsed = JSON.parse(legacyRaw);
+                            if (legacyParsed && legacyParsed.userId && legacyParsed.userId !== session.userId) {
+                                localStorage.removeItem('celik_kodu_last_generated_workout');
+                                currentGeneratedWorkout = null;
+                                window.currentGeneratedWorkout = null;
+                            }
+                        } else if (typeof currentGeneratedWorkout !== 'undefined' && currentGeneratedWorkout && currentGeneratedWorkout.userId && currentGeneratedWorkout.userId !== session.userId) {
+                            currentGeneratedWorkout = null;
+                            window.currentGeneratedWorkout = null;
+                        }
+                    }
+                } catch (e) {}
                 syncAllFromCloud();
             } else {
                 localStorage.removeItem('celik_kodu_session');
                 localStorage.removeItem('celik_kodu_active_user_id');
+                localStorage.removeItem('celik_kodu_last_generated_workout');
+                if (typeof currentGeneratedWorkout !== 'undefined') currentGeneratedWorkout = null;
+                window.currentGeneratedWorkout = null;
                 localStorage.setItem('celik_kodu_logged_out', 'true');
             }
             syncAppViewState();
@@ -24923,6 +25651,13 @@ KURALLAR:
             if (confirm(`@${target.username} (${target.name}) kullanıcısını silmek istediğinize emin misiniz?`)) {
                 localStorage.removeItem(`celik_kodu_history_${userId}`);
                 localStorage.removeItem(`celik_kodu_custom_programs_${userId}`);
+                localStorage.removeItem(`celik_kodu_deleted_programs_${userId}`);
+                localStorage.removeItem(`celik_kodu_mobility_tests_${userId}`);
+                localStorage.removeItem(`celik_excluded_exercises_${userId}`);
+                localStorage.removeItem(`celik_excluded_updated_at_${userId}`);
+                localStorage.removeItem(`celik_kodu_last_generated_workout_${userId}`);
+                localStorage.removeItem(`celik_kodu_state_updated_at_${userId}`);
+                localStorage.removeItem(`celik_kodu_pending_state_sync_${userId}`);
                 localStorage.removeItem(`celik_kodu_active_state_${userId}`);
                 const updated = users.filter(u => u.id !== userId);
                 saveAuthUsers(updated);
@@ -29971,11 +30706,9 @@ KURALLAR:
 
             try {
                 const user = getActiveUser();
-                const key = `celik_kodu_custom_programs_${user.id}`;
-                let saved = [];
-                try { saved = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
-                saved.unshift(customWorkout);
-                localStorage.setItem(key, JSON.stringify(saved));
+                if (user && typeof upsertUserCustomProgram === 'function') {
+                    upsertUserCustomProgram(customWorkout, user.id);
+                }
             } catch(e) {}
 
             return true;
@@ -32252,26 +32985,36 @@ KURALLAR:
             if (!validIds.includes(testId) || isNaN(lvl) || lvl < 1 || lvl > 4) return;
 
             const uid = (typeof getActiveUserId === 'function') ? getActiveUserId() : 'default';
-            const data = getMobilityPhysicalTestsData();
+            const data = typeof sanitizeMobilityTestsPayload === 'function'
+                ? sanitizeMobilityTestsPayload(getMobilityPhysicalTestsData())
+                : getMobilityPhysicalTestsData();
+            if (!Array.isArray(data.history)) data.history = [];
             const todayIso = new Date().toISOString().split('T')[0];
 
             const latestEntry = data.history.length > 0 ? data.history[0] : null;
             const currentLevels = latestEntry && latestEntry.levels ? { ...latestEntry.levels } : {};
             currentLevels[testId] = lvl;
 
+            const nowTs = Date.now();
             if (latestEntry && latestEntry.date === todayIso) {
                 latestEntry.levels = currentLevels;
-                latestEntry.timestamp = Date.now();
+                latestEntry.timestamp = nowTs;
             } else {
                 data.history.unshift({
                     date: todayIso,
-                    timestamp: Date.now(),
+                    timestamp: nowTs,
                     levels: currentLevels
                 });
             }
+            data.updatedAt = nowTs;
+
+            const cleanData = typeof sanitizeMobilityTestsPayload === 'function'
+                ? sanitizeMobilityTestsPayload(data)
+                : data;
 
             try {
-                localStorage.setItem(`celik_kodu_mobility_tests_${uid}`, JSON.stringify(data));
+                localStorage.setItem(`celik_kodu_mobility_tests_${uid}`, JSON.stringify(cleanData));
+                if (typeof window.scheduleUserStateCloudSync === 'function') window.scheduleUserStateCloudSync(uid);
             } catch (e) {}
 
             renderAnalytics();
@@ -34295,7 +35038,7 @@ KURALLAR:
             if ('serviceWorker' in navigator && navigator.serviceWorker) {
                 window.addEventListener('load', () => {
                     try {
-                        navigator.serviceWorker.register('./sw.js?v=289')
+                        navigator.serviceWorker.register('./sw.js?v=290')
                             .then(reg => {
                                 console.log('SW scope:', reg.scope);
                                 if (reg.update) reg.update();
@@ -34763,28 +35506,9 @@ KURALLAR:
                 isCustom: true
             };
 
-            const key = `celik_kodu_custom_programs_${user.id}`;
-            let saved = [];
-            try {
-                saved = JSON.parse(localStorage.getItem(key) || '[]');
-            } catch(e) {}
-
-            const existingIdx = saved.findIndex(p => p.id === progId);
-            if (existingIdx !== -1) {
-                saved[existingIdx] = newRoutine;
-            } else {
-                saved.unshift(newRoutine);
+            if (user && typeof upsertUserCustomProgram === 'function') {
+                upsertUserCustomProgram(newRoutine, user.id);
             }
-            localStorage.setItem(key, JSON.stringify(saved));
-
-            if (!user.savedWorkouts) user.savedWorkouts = [];
-            const userSavedIdx = user.savedWorkouts.findIndex(p => p.id === progId);
-            if (userSavedIdx !== -1) {
-                user.savedWorkouts[userSavedIdx] = newRoutine;
-            } else {
-                user.savedWorkouts.unshift(newRoutine);
-            }
-            saveAthletesToStorage();
 
             // Synchronize any day in weeklySchedule using this program
             const schedule = getWeeklySchedule();

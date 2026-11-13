@@ -27,6 +27,10 @@ rules_version = '2';
 //   - weeklySchedule, nextWeeklySchedule: map | null (optional, <= 50 keys)
 //   - dateSchedule, rememberedWeights, garminManifests: map | null (optional, <= 1500 keys)
 //   - excludedExercises: list | null (optional, <= 1000 items)
+//   - excludedExercisesUpdatedAt: timestamp | string | number | null (optional)
+//   - customPrograms: list | null (optional, <= 200 program maps, zero credentials/API keys/watch tokens)
+//   - deletedCustomProgramIds: list | null (optional, <= 500 items)
+//   - mobilityTests: map | null (optional, <= 20 keys, zero credentials/API keys/watch tokens)
 //   - selectedEquipments, customGyms: list | null (optional, <= 200 items)
 //   - aiDoctrine: string (optional, <= 120 chars)
 //   - aiCoachSummary, lastGeneratedWorkout, activeWorkoutDraft: map | null (optional, <= 100 keys)
@@ -196,6 +200,25 @@ service cloud.firestore {
       return !(field in data) || hasNoWatchBridgeTokens(data[field]);
     }
 
+    function hasNoSensitiveSecrets(obj) {
+      return !(obj is map)
+        || (
+          !('password' in obj)
+          && !('passwordHash' in obj)
+          && !('salt' in obj)
+          && !('geminiApiKey' in obj)
+          && hasNoWatchBridgeTokens(obj)
+        );
+    }
+
+    function hasNoSensitiveSecretsInField(data, field) {
+      return !(field in data) || hasNoSensitiveSecrets(data[field]);
+    }
+
+    function isValidCustomProgramSample(p) {
+      return p is map && hasNoSensitiveSecrets(p);
+    }
+
     function isValidUserStatePayload(data) {
       return hasOnlyAllowedFields(data, [
           'weeklySchedule',
@@ -203,6 +226,10 @@ service cloud.firestore {
           'dateSchedule',
           'rememberedWeights',
           'excludedExercises',
+          'excludedExercisesUpdatedAt',
+          'customPrograms',
+          'deletedCustomProgramIds',
+          'mobilityTests',
           'selectedEquipments',
           'customGyms',
           'aiDoctrine',
@@ -225,6 +252,29 @@ service cloud.firestore {
         && isValidOptionalMapOrNull(data, 'dateSchedule', 1500)
         && isValidOptionalMapOrNull(data, 'rememberedWeights', 1500)
         && isValidOptionalListOrNull(data, 'excludedExercises', 1000)
+        && isValidOptionalTimestampOrIso(data, 'excludedExercisesUpdatedAt')
+        && isValidOptionalListOrNull(data, 'customPrograms', 200)
+        && (
+          !('customPrograms' in data)
+          || !(data.customPrograms is list)
+          || data.customPrograms.size() == 0
+          || (
+            isValidCustomProgramSample(data.customPrograms[0])
+            && (data.customPrograms.size() <= 2 || isValidCustomProgramSample(data.customPrograms[1]))
+            && isValidCustomProgramSample(data.customPrograms[data.customPrograms.size() - 1])
+          )
+        )
+        && isValidOptionalListOrNull(data, 'deletedCustomProgramIds', 500)
+        && (
+          !('deletedCustomProgramIds' in data)
+          || !(data.deletedCustomProgramIds is list)
+          || data.deletedCustomProgramIds.size() == 0
+          || (
+            hasNoSensitiveSecrets(data.deletedCustomProgramIds[0])
+            && hasNoSensitiveSecrets(data.deletedCustomProgramIds[data.deletedCustomProgramIds.size() - 1])
+          )
+        )
+        && isValidOptionalMapOrNull(data, 'mobilityTests', 20)
         && isValidOptionalListOrNull(data, 'selectedEquipments', 200)
         && isValidOptionalListOrNull(data, 'customGyms', 200)
         && isValidOptionalString(data, 'aiDoctrine', 0, 120)
@@ -232,18 +282,30 @@ service cloud.firestore {
         && isValidOptionalMapOrNull(data, 'lastGeneratedWorkout', 100)
         && isValidOptionalMapOrNull(data, 'activeWorkoutDraft', 100)
         && isValidOptionalMapOrNull(data, 'garminManifests', 1500)
-        && hasNoWatchBridgeTokensInField(data, 'weeklySchedule')
-        && hasNoWatchBridgeTokensInField(data, 'nextWeeklySchedule')
-        && hasNoWatchBridgeTokensInField(data, 'dateSchedule')
-        && hasNoWatchBridgeTokensInField(data, 'rememberedWeights')
-        && hasNoWatchBridgeTokensInField(data, 'aiCoachSummary')
-        && hasNoWatchBridgeTokensInField(data, 'lastGeneratedWorkout')
-        && hasNoWatchBridgeTokensInField(data, 'activeWorkoutDraft')
-        && hasNoWatchBridgeTokensInField(data, 'garminManifests')
+        && hasNoSensitiveSecretsInField(data, 'weeklySchedule')
+        && hasNoSensitiveSecretsInField(data, 'nextWeeklySchedule')
+        && hasNoSensitiveSecretsInField(data, 'dateSchedule')
+        && hasNoSensitiveSecretsInField(data, 'rememberedWeights')
+        && hasNoSensitiveSecretsInField(data, 'aiCoachSummary')
+        && hasNoSensitiveSecretsInField(data, 'lastGeneratedWorkout')
+        && hasNoSensitiveSecretsInField(data, 'activeWorkoutDraft')
+        && hasNoSensitiveSecretsInField(data, 'garminManifests')
+        && hasNoSensitiveSecretsInField(data, 'mobilityTests')
         && (
           !('activeWorkoutDraft' in data)
           || !(data.activeWorkoutDraft is map)
-          || hasNoWatchBridgeTokensInField(data.activeWorkoutDraft, 'session')
+          || hasNoSensitiveSecretsInField(data.activeWorkoutDraft, 'session')
+        )
+        && (
+          !('mobilityTests' in data)
+          || !(data.mobilityTests is map)
+          || !('history' in data.mobilityTests)
+          || !(data.mobilityTests.history is list)
+          || data.mobilityTests.history.size() == 0
+          || (
+            hasNoSensitiveSecrets(data.mobilityTests.history[0])
+            && hasNoSensitiveSecrets(data.mobilityTests.history[data.mobilityTests.history.size() - 1])
+          )
         )
         && isValidOptionalTimestampOrIso(data, 'updatedAt')
         && (!('clientUpdatedAt' in data) || (data.clientUpdatedAt is number && data.clientUpdatedAt >= 0))

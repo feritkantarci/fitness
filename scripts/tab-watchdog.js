@@ -189,8 +189,11 @@ function auditExerciseMedia(appText, dbText) {
     const og = opengym[ex.id];
     if (!og || !og.clip) {
       staticOnlyExercises.push(`${ex.id} (${ex.name})`);
-    } else if (!fs.existsSync(path.join(ROOT, og.clip))) {
-      missingClipFiles.push(`${ex.id} -> ${og.clip}`);
+    } else {
+      const cleanClip = String(og.clip).split(/[?#]/)[0];
+      if (!fs.existsSync(path.join(ROOT, cleanClip))) {
+        missingClipFiles.push(`${ex.id} -> ${og.clip}`);
+      }
     }
   }
   return { totalExercises: exercises.length, isGuideGlobal, missingClipFiles, staticOnlyExercises };

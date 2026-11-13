@@ -27,7 +27,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=289">
+    <link rel="stylesheet" href="css/style.css?v=290">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH (CANVA MODERN ATHLETIC LIGHT V229) */
         html, body { background-color: #F8FAFC; color: #0F172A; color-scheme: light; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -54,7 +54,7 @@
                     <path d="M34 25L26 36H33L30 46L39 34H32L34 25Z" fill="#FFFFFF"/>
                 </svg>
             </div>
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v289</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v290</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -253,7 +253,7 @@
                         <div class="modern-brand-subrow">
                             <span id="headerActiveTabLabel">ÜRETİCİ</span>
                             <span class="modern-brand-subdot" aria-hidden="true">•</span>
-                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v289</span>
+                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v290</span>
                         </div>
                     </div>
                 </div>
@@ -865,26 +865,24 @@
             <!-- ==================== TAB 3: EXERCISE ARCHIVE ==================== -->
             <div id="libraryTab" class="tab-content">
                 <div class="generator-card">
-                    <!-- SUB-TAB SWITCHER (HIDDEN FOR SIMPLICITY) -->
-                    <div class="library-subnav" style="display:none;">
-                        <button type="button" id="libSubTabProgramsBtn" class="lib-subtab-btn" onclick="switchLibrarySubTab('programs')">
-                            Hazır Programlar
+                    <!-- SUB-TAB SWITCHER -->
+                    <div class="library-subnav" style="display:flex; background:#F1F5F9; padding:3px; border-radius:10px; border:1px solid #E2E8F0; gap:4px; margin-bottom:12px;">
+                        <button type="button" id="libSubTabExercisesBtn" onclick="switchLibrarySubTab('exercises')" style="flex:1; padding:8px 10px; font-size:12.5px; font-weight:800; border-radius:8px; border:none; background:#0F172A; color:#FFFFFF; cursor:pointer; white-space:nowrap;">
+                            Hareketler
                         </button>
-                        <button type="button" id="libSubTabExercisesBtn" class="lib-subtab-btn active" onclick="switchLibrarySubTab('exercises')">
-                            Egzersiz Kütüphanesi
+                        <button type="button" id="libSubTabProgramsBtn" onclick="switchLibrarySubTab('programs')" style="flex:1; padding:8px 10px; font-size:12.5px; font-weight:800; border-radius:8px; border:none; background:#F1F5F9; color:#334155; cursor:pointer; white-space:nowrap;">
+                            Programlarım
                         </button>
                     </div>
 
-                    <!-- PANE 1: HAZIR VE KAYITLI PROGRAMLAR (HIDDEN) -->
+                    <!-- PANE 1: HAZIR VE KAYITLI PROGRAMLAR -->
                     <div id="libPanePrograms" style="display:none;">
-                        <h2 style="font-size:18px; font-weight:900; color:#0F172A; margin-bottom:12px;">Kayıtlı ve Hazır Programlar</h2>
-                        
-                        <h3 style="font-size:13px; font-weight:800; color:var(--gold); margin-bottom:10px;">Kişisel Kayıtlı Programlarım</h3>
+                        <h3 style="font-size:13.5px; font-weight:900; color:#0F172A; margin:0 0 10px;">Kayıtlı Programlarım</h3>
                         <div id="savedProgramsList">
                             <!-- Populated dynamically -->
                         </div>
 
-                        <h3 style="font-size:13px; font-weight:800; color:var(--gold); margin:24px 0 10px;">Resmi Çelik Kodu (La Forja) Klasik Serisi</h3>
+                        <h3 style="font-size:13.5px; font-weight:900; color:#0F172A; margin:18px 0 10px;">Klasik Şablonlar</h3>
                         <div id="officialProgramsList">
                             <!-- Classic La Forja templates -->
                         </div>
@@ -2879,8 +2877,8 @@
     </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
-    <script src="js/exercises-db.js?v=289"></script>
-    <script src="js/app.js?v=289"></script>
+    <script src="js/exercises-db.js?v=290"></script>
+    <script src="js/app.js?v=290"></script>
     <script>
         function getNotifStorageKey() {
             const uid = localStorage.getItem('celik_kodu_active_user_id') || 'default';
@@ -3073,6 +3071,6 @@
             </div>
         </div>
     </div>
-    <script src="js/garmin-tredict-bridge.js?v=289" defer></script>
+    <script src="js/garmin-tredict-bridge.js?v=290" defer></script>
 </body>
 </html>
