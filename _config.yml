@@ -4,21 +4,13 @@ exclude:
   - ios-app
   - scripts
   - docs
-  - app
-  - salon_kilavuzu.pdf
-  - salon_kilavuzu.html
-  - salon_kilavuzu_mobil.html
-  - ui-template.html
-  - test-live-workout.html
-  - design-lab.html
-  - anatomi-onay-tablosu.html
+  - data
+  - api
   - server.js
-  - build.sh
   - package.json
-  - bun.lock
   - skills-lock.json
-  - metadata.json
   - firestore.rules
+  - vercel.json
   - GEMINI.md
   - TAB_HEALTH.md
   - README.md

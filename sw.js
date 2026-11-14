@@ -1,4 +1,4 @@
-const CACHE_NAME = 'celik-kodu-cache-v291';
+const CACHE_NAME = 'celik-kodu-cache-v292';
 const ASSETS = [
   './',
   './index.html',
@@ -262,8 +262,7 @@ self.addEventListener('fetch', (event) => {
       event.request.url.includes('securetoken') ||
       event.request.url.includes('jsdelivr') ||
       event.request.url.includes('tesseract') ||
-      event.request.url.includes('tessdata') ||
-      event.request.url.includes('test-live-workout.html')) {
+      event.request.url.includes('tessdata')) {
     return;
   }
 

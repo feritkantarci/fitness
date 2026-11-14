@@ -28,8 +28,7 @@ app.use((req, res, next) => {
       p.startsWith('/scripts') ||
       /\.(rules|sh|mjs|py|env|lock|md|zip|tar|gz)$/i.test(p) ||
       p.includes('/node_modules') || 
-      p.includes('/desktop-app') ||
-      p.includes('/source_archive')) {
+      p.includes('/desktop-app')) {
     return res.status(403).send('Forbidden');
   }
   next();
