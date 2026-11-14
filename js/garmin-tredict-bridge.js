@@ -673,8 +673,8 @@
     return (u && u.id) ? u.id : '';
   }
 
-  function getScopedGarminKey(baseKey) {
-    return `${baseKey}_${getActiveUidSafe()}`;
+  function getScopedGarminKey(baseKey, uidOverride) {
+    return `${baseKey}_${uidOverride || getActiveUidSafe()}`;
   }
 
   function migrateLegacyGarminStorageToOwner() {
@@ -1480,6 +1480,118 @@
 
   const syncedActivityTitleUpdates = new Set();
 
+  function resolveWatchActivityIdFromLog(logObj) {
+    if (!logObj || typeof logObj !== 'object') return '';
+    if (logObj.garminActivityId) return String(logObj.garminActivityId).trim();
+    const lid = String(logObj.id || '').trim();
+    return lid.startsWith('garmin_') ? lid.slice('garmin_'.length) : '';
+  }
+
+  function buildEditedWatchTitleIndex(logsArg, uidOverride) {
+    const map = new Map();
+    const uid = uidOverride || getActiveUidSafe();
+    let sourceLogs = Array.isArray(logsArg) ? logsArg : null;
+    if (!sourceLogs && uid) {
+      try {
+        const raw = localStorage.getItem(`celik_kodu_history_${uid}`) || '[]';
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) sourceLogs = parsed;
+      } catch {}
+    }
+    if (!Array.isArray(sourceLogs)) return map;
+    sourceLogs.forEach(l => {
+      const actId = resolveWatchActivityIdFromLog(l);
+      const edAt = Number((l && l.userEditedAt) || 0);
+      const title = String((l && (l.program || l.title)) || '').trim();
+      if (!actId || edAt <= 0 || !title) return;
+      const prev = map.get(actId);
+      if (!prev || edAt >= prev.userEditedAt) {
+        map.set(actId, { title, userEditedAt: edAt, notes: String((l && l.notes) || '').trim() });
+      }
+    });
+    return map;
+  }
+
+  function syncWatchTitlesFromWorkoutLogs(logsArg, uidOverride) {
+    const uid = uidOverride || getActiveUidSafe();
+    if (!uid) return false;
+    const editedMap = buildEditedWatchTitleIndex(logsArg, uid);
+    if (editedMap.size === 0) return false;
+    try {
+      const telemetryKey = getScopedGarminKey(TELEMETRY_STORAGE_KEY, uid);
+      const raw = localStorage.getItem(telemetryKey);
+      if (!raw) return false;
+      const acts = JSON.parse(raw);
+      if (!Array.isArray(acts) || acts.length === 0) return false;
+      let changed = false;
+      acts.forEach(act => {
+        if (!act || !act.id) return;
+        const match = editedMap.get(String(act.id));
+        if (!match) return;
+        const actEd = Number(act.userEditedAt || 0);
+        if (match.userEditedAt >= actEd && (act.title !== match.title || actEd !== match.userEditedAt)) {
+          act.title = match.title;
+          act.userEditedAt = match.userEditedAt;
+          changed = true;
+        }
+      });
+      if (changed) {
+        localStorage.setItem(telemetryKey, JSON.stringify(acts));
+      }
+      return changed;
+    } catch {
+      return false;
+    }
+  }
+
+  async function propagateWorkoutLogTitleToWatch(logObj) {
+    const uid = getActiveUidSafe();
+    const actId = resolveWatchActivityIdFromLog(logObj);
+    const newTitle = String((logObj && (logObj.program || logObj.title)) || '').trim();
+    const editedAt = Number((logObj && logObj.userEditedAt) || Date.now());
+    if (!uid || !actId || !newTitle) return false;
+
+    const updatedLocal = syncWatchTitlesFromWorkoutLogs([{ ...logObj, userEditedAt: editedAt }], uid);
+    if (!updatedLocal) {
+      try {
+        const telemetryKey = getScopedGarminKey(TELEMETRY_STORAGE_KEY, uid);
+        const acts = JSON.parse(localStorage.getItem(telemetryKey) || '[]');
+        if (Array.isArray(acts)) {
+          let touched = false;
+          acts.forEach(act => {
+            if (act && String(act.id) === actId) {
+              act.title = newTitle;
+              act.userEditedAt = editedAt;
+              touched = true;
+            }
+          });
+          if (touched) localStorage.setItem(telemetryKey, JSON.stringify(acts));
+        }
+      } catch {}
+    }
+
+    renderHistoryGarminSyncPanel();
+    renderAnalyticsGarminCoachPanel();
+
+    if (typeof window !== 'undefined' && typeof window.scheduleUserStateCloudSync === 'function') {
+      try { window.scheduleUserStateCloudSync(uid); } catch {}
+    }
+
+    if (isGarminEnabledForCurrentUser(uid) && hasGarminCredentialsConfigured(uid)) {
+      try {
+        const payload = { id: actId, title: newTitle };
+        if (logObj && typeof logObj.notes === 'string') payload.notes = logObj.notes;
+        await fetchGarminBridge('/api/tredict/activity-update', {
+          uid,
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } catch {}
+    }
+    return true;
+  }
+
   function handoffCompletedActivitiesToTabChiefs() {
     if (!isGarminEnabledForCurrentUser() || typeof EXERCISES_DB === 'undefined') return;
     const activities = getStoredActivities();
@@ -1497,6 +1609,7 @@
         ? rawLogs.filter(l => !l || !LEGACY_TEST_ACTIVITY_IDS.has(l.garminActivityId))
         : [];
       let changed = logs.length !== rawLogs.length;
+      let watchTitlesSynced = false;
 
       // Eski hatalı sayısal ex.sets formatını diziye dönüştür (Geçmiş ekranının çökmesini önler)
       logs.forEach(l => {
@@ -1679,6 +1792,13 @@
             changed = true;
           }
           if (existingLog.userEditedAt) {
+            const editedTitle = String(existingLog.program || existingLog.title || '').trim();
+            const editedTs = Number(existingLog.userEditedAt || 0);
+            if (editedTitle && editedTs >= Number(act.userEditedAt || 0) && (act.title !== editedTitle || Number(act.userEditedAt || 0) !== editedTs)) {
+              act.title = editedTitle;
+              act.userEditedAt = editedTs;
+              watchTitlesSynced = true;
+            }
             if (!existingLog.healthSummary && healthSummaryObj) {
               existingLog.healthSummary = healthSummaryObj;
               changed = true;
@@ -1761,13 +1881,23 @@
           });
         }
         localStorage.setItem(historyKey, JSON.stringify(logs));
-        if (typeof window.syncWorkoutLogsToCloud === 'function') {
+        if (typeof window.syncWorkoutLogsToCloud === 'function' && window._initialWorkoutLogsCloudSyncDone === true) {
           try { window.syncWorkoutLogsToCloud(logs, uid); } catch {}
         }
         if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
         if (typeof renderHistory === 'function') renderHistory();
         if (typeof renderAiHybridHeroBanner === 'function') renderAiHybridHeroBanner();
         if (typeof window.refreshTopFitnessCardioScoreBars === 'function') window.refreshTopFitnessCardioScoreBars();
+      }
+      if (watchTitlesSynced) {
+        try {
+          const telemetryKey = getScopedGarminKey(TELEMETRY_STORAGE_KEY, uid);
+          localStorage.setItem(telemetryKey, JSON.stringify(activities));
+        } catch {}
+        renderHistoryGarminSyncPanel();
+        if (typeof window !== 'undefined' && typeof window.scheduleUserStateCloudSync === 'function') {
+          try { window.scheduleUserStateCloudSync(uid); } catch {}
+        }
       }
     } catch {}
   }
@@ -2624,12 +2754,16 @@
 
     const activities = getStoredActivities();
     const metrics = computePhysiologicalMetrics();
+    const editedTitleMap = buildEditedWatchTitleIndex(null, getActiveUidSafe());
 
     const cardsHtml = activities.map(act => {
       const manifest = findManifestForActivity(act);
-      const displayTitle = (manifest && manifest.title && (!act.title || act.title === 'Güç' || act.title === 'Garmin Antrenmanı'))
-        ? manifest.title
-        : act.title;
+      const editedEntry = editedTitleMap.get(String(act.id || ''));
+      const displayTitle = (editedEntry && editedEntry.title)
+        ? editedEntry.title
+        : ((manifest && manifest.title && (!act.title || act.title === 'Güç' || act.title === 'Garmin Antrenmanı'))
+          ? manifest.title
+          : act.title);
       const groups = analyzeActivityGroups(act);
       const unresolved = groups.filter(g => !g.isResolved);
       const resolved = groups.filter(g => g.isResolved);
@@ -3230,6 +3364,9 @@
     getStoredActivities,
     analyzeActivityGroups,
     handoffCompletedActivitiesToTabChiefs,
+    syncWatchTitlesFromWorkoutLogs,
+    propagateWorkoutLogTitleToWatch,
+    renderHistoryGarminSyncPanel,
     computePhysiologicalMetrics,
     getStoredWellnessStepsMap,
     syncGarminWellnessStepsSilent,
@@ -3254,15 +3391,24 @@
           if (Array.isArray(parsed)) existingList = parsed;
         } catch {}
 
+        const editedTitleMap = buildEditedWatchTitleIndex(null, uid);
         const combined = [];
-        const addMergedActivity = (act) => {
-          if (!act || !act.id) return;
+        const addMergedActivity = (rawAct) => {
+          if (!rawAct || !rawAct.id) return;
+          const act = Object.assign({}, rawAct);
+          const editedEntry = editedTitleMap.get(String(act.id));
+          if (editedEntry && editedEntry.userEditedAt >= Number(act.userEditedAt || 0)) {
+            act.title = editedEntry.title;
+            act.userEditedAt = editedEntry.userEditedAt;
+          }
           const dupIdx = combined.findIndex(item => areSameWatchSession(item, act));
           if (dupIdx === -1) {
             combined.push(act);
             return;
           }
           const prevItem = combined[dupIdx];
+          const prevEd = Number(prevItem.userEditedAt || 0);
+          const nextEd = Number(act.userEditedAt || 0);
           const prevRounds = Array.isArray(prevItem.rounds) ? prevItem.rounds.length : 0;
           const nextRounds = Array.isArray(act.rounds) ? act.rounds.length : 0;
           const prevSummary = (prevItem.summary && typeof prevItem.summary === 'object') ? prevItem.summary : {};
@@ -3277,11 +3423,22 @@
             pace: Number(prevSummary.pace || nextSummary.pace || 0) || null,
             cadence: Number(prevSummary.cadence || nextSummary.cadence || 0) || null
           };
-          if (nextRounds > prevRounds) {
-            combined[dupIdx] = { ...act, summary: mergedSummary };
-          } else {
-            combined[dupIdx] = { ...prevItem, summary: mergedSummary };
+          const mergedObj = nextRounds > prevRounds
+            ? { ...act, summary: mergedSummary }
+            : { ...prevItem, summary: mergedSummary };
+          if (editedEntry && editedEntry.userEditedAt >= Math.max(prevEd, nextEd)) {
+            mergedObj.title = editedEntry.title;
+            mergedObj.userEditedAt = editedEntry.userEditedAt;
+          } else if (prevEd > nextEd) {
+            mergedObj.title = prevItem.title || mergedObj.title;
+            mergedObj.userEditedAt = prevEd;
+          } else if (nextEd > prevEd) {
+            mergedObj.title = act.title || mergedObj.title;
+            mergedObj.userEditedAt = nextEd;
+          } else if (act.title && !prevEd && !nextEd) {
+            mergedObj.title = act.title;
           }
+          combined[dupIdx] = mergedObj;
         };
 
         existingList.forEach(addMergedActivity);

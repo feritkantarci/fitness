@@ -688,6 +688,14 @@
             logs[targetIdx] = updatedLog;
             setWorkoutLogs(logs);
 
+            if (
+                (updatedLog.garminActivityId || String(updatedLog.id || '').startsWith('garmin_')) &&
+                window.GarminTredictChief &&
+                typeof window.GarminTredictChief.propagateWorkoutLogTitleToWatch === 'function'
+            ) {
+                try { window.GarminTredictChief.propagateWorkoutLogTitleToWatch(updatedLog); } catch {}
+            }
+
             const affectedExercises = [...(st.originalExercises || []), ...(updatedLog.exercises || [])];
             closeEditWorkoutLogModal();
             refreshViewsAfterHistoryMutation(affectedExercises);
@@ -849,7 +857,7 @@
                                         </span>
                                     ` : ''}
                                 </div>
-                                <h3 style="font-size:15px; font-weight:800; color:#0F172A; line-height:1.3;">${escapeHTML(l.program)}</h3>
+                                <h3 style="font-size:15px; font-weight:800; color:#0F172A; line-height:1.3;">${escapeHTML(l.program || l.title || 'Antrenman Seansı')}</h3>
                             </div>
                             <div style="display:flex; align-items:center; gap:6px;">
                                 <span class="ex-badge badge-equip">${escapeHTML(rpeLabel)}</span>

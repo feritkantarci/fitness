@@ -1149,6 +1149,123 @@ function runAcademicMathSuite(moduleSources, dbText) {
           actual: `kasa=${res.enabledAfterVault}/mühür=${res.vaultSealedNoPlaintext}, katalog=${res.catalogSynced}, kuvvet=${res.strengthIntact}, kayıt=${res.logsLen}, yürüyüş=${res.walkExId}(${res.walkDist}m,${res.walkHrAvg}/${res.walkHrMax}bpm,${res.walkCals}kcal)`
         };
       }
+    },
+    {
+      id: 'T21',
+      owner: 'garmin-tredict-guard',
+      title: 'Çoklu Cihaz İsim Düzenleme Koruması & Saat/Geçmiş Senkronu',
+      expected: 'eski saat önbelleği kullanıcı düzenlemesini ezemez, ilk bulut açılış kapısı erken push engeller, aynı gün kuvvet+yürüyüş korunur, saat paneli güncel başlığı gösterir',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const uid = 'usr_exam';
+          const NEW_TITLE = "Kan Şekeri Yükselmesi Sonrası (202 - 96'a Düştü)";
+          const OLD_TITLE = 'Defne Yürüyüş';
+          const EDITED_AT = 1794678124261;
+          localStorage.setItem('celik_garmin_enabled_' + uid, 'true');
+
+          const strengthLog = {
+            id: 'app_strength_14',
+            date: '2026-11-14',
+            timestamp: 1794650000000,
+            program: 'Üst Vücut A',
+            title: 'Üst Vücut A',
+            totalVolumeKg: 200,
+            exercises: [{ id: 'db_bench_press', name: 'Dambıl Bench Press', sets: [{ weight: 20, reps: 10, completed: true, volume: 200 }] }]
+          };
+          const editedWalkLog = {
+            id: 'garmin_tmd_nov14',
+            garminActivityId: 'tmd_nov14',
+            sourceChief: 'garmin-tredict-guard',
+            isCardioActivity: true,
+            date: '2026-11-14',
+            timestamp: 1794672037230,
+            program: NEW_TITLE,
+            title: NEW_TITLE,
+            userEditedAt: EDITED_AT,
+            healthSummary: { heartrateAvg: 123, heartrateMax: 152, calories: 135, distanceMeters: 2212 },
+            exercises: [{
+              id: 'cond_walking',
+              name: 'Tempo Yürüyüş',
+              primaryMuscles: ['quads', 'calves'],
+              sets: [{ setNo: 1, weight: 0, reps: 1, completed: true, durationSec: 1276 }]
+            }]
+          };
+          const staleWalkLog = Object.assign({}, editedWalkLog, {
+            program: OLD_TITLE,
+            title: OLD_TITLE,
+            userEditedAt: 0
+          });
+          const staleWatchAct = {
+            id: 'tmd_nov14',
+            date: '2026-11-14T16:00:37.230Z',
+            title: OLD_TITLE,
+            sportType: 'walking',
+            subSportType: 'generic',
+            summary: { duration: 1276, durationTotal: 1286, distance: 2212, calories: 135, heartrate: 123, heartrateMax: 152 },
+            rounds: []
+          };
+
+          localStorage.setItem('celik_kodu_history_' + uid, JSON.stringify([editedWalkLog, strengthLog]));
+          localStorage.setItem('celik_garmin_telemetry_v2_' + uid, JSON.stringify([Object.assign({}, staleWatchAct)]));
+
+          // 1) Açılış kapısı: ilk bulut eşitlemesi bitmeden handoff buluta yazmamalı; düzenlenmiş başlığı saat önbelleğine aktarmalı
+          const origSyncToCloud = window.syncWorkoutLogsToCloud;
+          let prematureCloudPushCount = 0;
+          window.syncWorkoutLogsToCloud = () => { prematureCloudPushCount++; };
+          window._initialWorkoutLogsCloudSyncDone = false;
+
+          const gt = window.GarminTredictChief;
+          gt.handoffCompletedActivitiesToTabChiefs();
+          const afterHandoffWatch = JSON.parse(localStorage.getItem('celik_garmin_telemetry_v2_' + uid) || '[]')[0] || {};
+          const afterHandoffWalk = JSON.parse(localStorage.getItem('celik_kodu_history_' + uid) || '[]').find(l => l && l.id === 'garmin_tmd_nov14') || {};
+
+          // 2) mergeWorkoutLogCollections: hem çekme (pull) hem eski cihazdan itme (push) yönünde yeni userEditedAt kazanmalı, aynı gün kuvvet+yürüyüş kalmalı
+          const pullMerge = mergeWorkoutLogCollections([staleWalkLog, strengthLog], [editedWalkLog, strengthLog], uid);
+          const pushMerge = mergeWorkoutLogCollections([editedWalkLog, strengthLog], [staleWalkLog, strengthLog], uid);
+          const pullWalk = (pullMerge.mergedLogs || []).find(l => l && l.id === 'garmin_tmd_nov14') || {};
+          const pushWalk = (pushMerge.mergedLogs || []).find(l => l && l.id === 'garmin_tmd_nov14') || {};
+
+          // 3) Düzenleme sonrası saat + panel yayılımı (önce eski telemetri üzerinde panel fallback, sonra propagate)
+          localStorage.setItem('celik_garmin_telemetry_v2_' + uid, JSON.stringify([Object.assign({}, staleWatchAct)]));
+          gt.renderHistoryGarminSyncPanel();
+          const panelHtmlBeforePropagate = String(document.getElementById('garminHistorySyncContainer').innerHTML || '');
+          gt.propagateWorkoutLogTitleToWatch(editedWalkLog);
+          gt.renderHistoryGarminSyncPanel();
+          const propagatedWatch = JSON.parse(localStorage.getItem('celik_garmin_telemetry_v2_' + uid) || '[]')[0] || {};
+          const panelHtml = String(document.getElementById('garminHistorySyncContainer').innerHTML || '');
+
+          window.syncWorkoutLogsToCloud = origSyncToCloud;
+          window._initialWorkoutLogsCloudSyncDone = true;
+
+          return {
+            prematureCloudPushCount,
+            handoffKeptTitle: afterHandoffWalk.program === NEW_TITLE,
+            handoffUpdatedWatchTitle: afterHandoffWatch.title === NEW_TITLE,
+            pullCount: (pullMerge.mergedLogs || []).length,
+            pullWon: pullWalk.program === NEW_TITLE && Number(pullWalk.userEditedAt) === EDITED_AT,
+            pushCount: (pushMerge.mergedLogs || []).length,
+            pushWon: pushWalk.program === NEW_TITLE && Number(pushWalk.userEditedAt) === EDITED_AT,
+            propagatedWatchTitle: propagatedWatch.title === NEW_TITLE,
+            panelHasNewTitle: panelHtml.includes('Kan Şekeri Yükselmesi Sonrası') && panelHtmlBeforePropagate.includes('Kan Şekeri Yükselmesi Sonrası'),
+            panelDropsOldTitle: !panelHtml.includes(OLD_TITLE) && !panelHtmlBeforePropagate.includes(OLD_TITLE)
+          };
+        })()`, ctx);
+        const ok = res.prematureCloudPushCount === 0
+          && res.handoffKeptTitle
+          && res.handoffUpdatedWatchTitle
+          && res.pullCount === 2
+          && res.pullWon
+          && res.pushCount === 2
+          && res.pushWon
+          && res.propagatedWatchTitle
+          && res.panelHasNewTitle
+          && res.panelDropsOldTitle;
+        return {
+          ok,
+          actual: `erkenPush=${res.prematureCloudPushCount}, eldenÇıkış=${res.handoffKeptTitle}/${res.handoffUpdatedWatchTitle}, pull=${res.pullWon}(${res.pullCount}), push=${res.pushWon}(${res.pushCount}), panel=${res.panelHasNewTitle}/eskiYok=${res.panelDropsOldTitle}`
+        };
+      }
     }
   ];
 

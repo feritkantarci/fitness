@@ -524,6 +524,7 @@
         function initFirebaseEngine() {
             try {
                 if (typeof firebase === 'undefined') {
+                    if (typeof window !== 'undefined') window._initialWorkoutLogsCloudSyncDone = true;
                     console.warn("Firebase SDK yüklenemedi. Yerel modda devam ediliyor.");
                     updateCloudSyncBadge('offline', 'Yerel Mod');
                     return;
@@ -568,9 +569,27 @@
                 flushPendingCloudOutbox().then(() => syncAllFromCloud());
 
             } catch (err) {
+                if (typeof window !== 'undefined') window._initialWorkoutLogsCloudSyncDone = true;
                 console.error("Firebase başlatma hatası:", err);
                 updateCloudSyncBadge('offline', 'Yerel Mod');
             }
+        }
+
+        let workoutLogsRealtimeUnsub = null;
+        let workoutLogsRealtimeUid = null;
+        const workoutLogsLastFetchAt = {};
+        if (typeof window !== 'undefined' && window._initialWorkoutLogsCloudSyncDone === undefined) {
+            window._initialWorkoutLogsCloudSyncDone = false;
+        }
+
+        async function fetchCloudDocPreferServer(docRef) {
+            if (!docRef || typeof docRef.get !== 'function') return null;
+            if (typeof navigator === 'undefined' || navigator.onLine !== false) {
+                try {
+                    return await docRef.get({ source: 'server' });
+                } catch (e) {}
+            }
+            return await docRef.get();
         }
 
         // Buluttan verileri çekme ve birleştirme (Merge)
@@ -579,16 +598,17 @@
             updateCloudSyncBadge('syncing', 'Eşitleniyor...');
 
             try {
-                // 1. AI Biyomekanik Koç Anahtarını Eşitle (Öncelikli hızlı senkron)
-                await syncAiConfigFromCloud();
+                // 1. AI anahtarı ve aktif kullanıcının antrenman geçmişini öncelikli paralel eşitle
+                const uid = getActiveUserId();
+                const priorityTasks = [syncAiConfigFromCloud()];
+                if (uid) priorityTasks.push(syncUserWorkoutLogsFromCloud(uid, { forceServer: true }));
+                await Promise.all(priorityTasks);
 
                 // 2. Kullanıcıları eşitle
                 await syncUsersFromCloud();
 
-                // 3. Aktif kullanıcının verilerini eşitle (FitLAB otomatik direktif/program dinleme stabilite için kapalıdır)
-                const uid = getActiveUserId();
+                // 3. Kalan aktif kullanıcı verilerini eşitle (FitLAB otomatik direktif/program dinleme stabilite için kapalıdır)
                 if (uid) {
-                    await syncUserWorkoutLogsFromCloud(uid);
                     await syncUserScaleLogsFromCloud(uid);
                     await syncUserMeasurementsFromCloud(uid);
                     await syncUserStateFromCloud(uid);
@@ -880,49 +900,29 @@
         }
 
         // ANTRENMAN GEÇMİŞİ BULUT EŞİTLEME
-        async function syncUserWorkoutLogsFromCloud(uid) {
-            if (!uid) return;
-            const localLogs = getUserLogsById(uid);
-
-            // Mükerrer yerel usr_ferit kayıtlarını da güvenle dahil et
-            if (uid === 'usr_admin') {
-                try {
-                    const feritRaw = localStorage.getItem('celik_kodu_history_usr_ferit');
-                    if (feritRaw) {
-                        const feritLocal = JSON.parse(feritRaw);
-                        if (Array.isArray(feritLocal)) {
-                            feritLocal.forEach(fl => {
-                                if (!localLogs.some(l => l.id === fl.id || (l.date === fl.date && l.totalSetsCompleted === fl.totalSetsCompleted))) {
-                                    localLogs.push(fl);
-                                }
-                            });
-                        }
-                    }
-                } catch(e) {}
-            }
-
-            let cloudLogs = [];
-            try {
-                if (isFirebaseReady && fbDb) {
-                    const docRef = fbDb.collection('workout_logs').doc(uid);
-                    const doc = await docRef.get();
-                    if (doc.exists) {
-                        const data = doc.data();
-                        adoptCloudSyncSealIfPresent('workout_logs', uid, data);
-                        if (data && Array.isArray(data.logs)) {
-                            cloudLogs = data.logs;
-                        }
-                    }
-                }
-            } catch (err) {
-                console.warn("Antrenmanlar buluttan doğrudan çekilemedi:", err);
-            }
-
+        function mergeWorkoutLogCollections(baseLogs, incomingLogs, uid) {
             const deletedSet = new Set(typeof getDeletedWorkoutLogIds === 'function' ? getDeletedWorkoutLogIds(uid) : []);
-            const cloudById = new Map();
-            cloudLogs.forEach(c => { if (c && c.id) cloudById.set(String(c.id), c); });
             const logMap = new Map();
             let filteredCloudDeletion = false;
+
+            const pickTitle = (winner, other) => {
+                const w = String((winner && (winner.program || winner.title)) || '').trim();
+                const o = String((other && (other.program || other.title)) || '').trim();
+                return w || o || '';
+            };
+
+            const normalizeCopy = (rawLog) => {
+                const copy = Object.assign({}, rawLog);
+                const resolvedTitle = pickTitle(copy, null);
+                if (resolvedTitle) {
+                    if (!copy.program) copy.program = resolvedTitle;
+                    if (!copy.title) copy.title = resolvedTitle;
+                }
+                return copy;
+            };
+
+            const hasTelemetry = (exList) => Array.isArray(exList) && exList.some(e => e && e.healthTelemetry);
+
             const upsertLog = (l) => {
                 if (!l || !l.id) return;
                 const lid = String(l.id);
@@ -933,32 +933,44 @@
                 }
                 const prev = logMap.get(lid);
                 if (!prev) {
-                    logMap.set(lid, l);
+                    logMap.set(lid, normalizeCopy(l));
                     return;
                 }
                 const prevEd = Number(prev.userEditedAt || 0);
                 const nextEd = Number(l.userEditedAt || 0);
                 if (prevEd > nextEd) {
+                    const winnerTitle = pickTitle(prev, l);
                     logMap.set(lid, Object.assign({}, prev, {
+                        program: winnerTitle || prev.program,
+                        title: winnerTitle || prev.title,
                         garminActivityId: prev.garminActivityId || l.garminActivityId,
-                        healthSummary: prev.healthSummary || l.healthSummary
+                        healthSummary: prev.healthSummary || l.healthSummary,
+                        isCardioActivity: Boolean(prev.isCardioActivity || l.isCardioActivity)
                     }));
                 } else {
-                    logMap.set(lid, Object.assign({}, prev, l, {
+                    const winnerTitle = pickTitle(l, prev);
+                    const merged = Object.assign({}, prev, l, {
+                        program: winnerTitle || l.program || prev.program,
+                        title: winnerTitle || l.title || prev.title,
                         garminActivityId: l.garminActivityId || prev.garminActivityId,
                         healthSummary: l.healthSummary || prev.healthSummary,
+                        isCardioActivity: Boolean(l.isCardioActivity || prev.isCardioActivity),
                         exercises: nextEd > prevEd
                             ? l.exercises
-                            : ((Array.isArray(l.exercises) && l.exercises.some(e => e && e.healthTelemetry))
+                            : (hasTelemetry(l.exercises)
                                 ? l.exercises
-                                : (Array.isArray(prev.exercises) && prev.exercises.some(e => e && e.healthTelemetry) ? prev.exercises : l.exercises))
-                    }));
+                                : (hasTelemetry(prev.exercises) ? prev.exercises : l.exercises))
+                    });
+                    if (nextEd > prevEd) merged.userEditedAt = nextEd;
+                    else if (prevEd > 0 && !merged.userEditedAt) merged.userEditedAt = prevEd;
+                    logMap.set(lid, merged);
                 }
             };
-            cloudLogs.forEach(upsertLog);
-            localLogs.forEach(upsertLog);
 
-            // Aynı gün gerçek uygulama kaydı varsa mükerrer garmin_... kaydını temizle
+            (Array.isArray(baseLogs) ? baseLogs : []).forEach(upsertLog);
+            (Array.isArray(incomingLogs) ? incomingLogs : []).forEach(upsertLog);
+
+            // Aynı gün gerçek uygulama kaydı varsa yalnızca düzenlenmemiş kuvvet saat mükerrerlerini temizle (kardiyo & kullanıcı düzenlemeleri korunur)
             const realDates = new Set();
             for (const item of logMap.values()) {
                 if (item && !String(item.id || '').startsWith('garmin_') && item.date) {
@@ -966,29 +978,137 @@
                 }
             }
             for (const [k, item] of logMap.entries()) {
-                if (String(k).startsWith('garmin_') && item && item.date && realDates.has(String(item.date).slice(0, 10))) {
+                if (
+                    String(k).startsWith('garmin_') &&
+                    item &&
+                    item.date &&
+                    !item.isCardioActivity &&
+                    !item.userEditedAt &&
+                    realDates.has(String(item.date).slice(0, 10))
+                ) {
                     logMap.delete(k);
                 }
             }
 
-            const hasLocalEditNewerThanCloud = localLogs.some(l => {
-                if (!l || !l.id) return false;
-                const cloudMatch = cloudById.get(String(l.id));
-                return Number(l.userEditedAt || 0) > Number((cloudMatch && cloudMatch.userEditedAt) || 0);
-            });
+            return {
+                mergedLogs: sortWorkoutLogsDesc(Array.from(logMap.values())),
+                filteredCloudDeletion
+            };
+        }
 
-            if (logMap.size > 0 || (cloudLogs.length > 0 && filteredCloudDeletion)) {
-                const mergedLogs = sortWorkoutLogsDesc(Array.from(logMap.values()));
-                localStorage.setItem(`celik_kodu_history_${uid}`, JSON.stringify(mergedLogs));
-                if (window.GarminTredictChief && typeof window.GarminTredictChief.handoffCompletedActivitiesToTabChiefs === 'function') {
-                    window.GarminTredictChief.handoffCompletedActivitiesToTabChiefs();
-                }
-                renderHistory();
-                applyWednesdayHammerCurlPatch();
+        function ensureWorkoutLogsRealtimeListener(uid) {
+            if (IS_LOCAL_DEV || !isFirebaseReady || !fbDb || !uid) return;
+            if (workoutLogsRealtimeUid === uid && typeof workoutLogsRealtimeUnsub === 'function') return;
+            if (typeof workoutLogsRealtimeUnsub === 'function') {
+                try { workoutLogsRealtimeUnsub(); } catch {}
+                workoutLogsRealtimeUnsub = null;
+            }
+            workoutLogsRealtimeUid = uid;
+            try {
+                const docRef = fbDb.collection('workout_logs').doc(uid);
+                if (typeof docRef.onSnapshot !== 'function') return;
+                workoutLogsRealtimeUnsub = docRef.onSnapshot((snap) => {
+                    if (!snap || !snap.exists) return;
+                    if (snap.metadata && (snap.metadata.hasPendingWrites || snap.metadata.fromCache)) return;
+                    const data = snap.data() || {};
+                    if (!Array.isArray(data.logs)) return;
+                    syncUserWorkoutLogsFromCloud(uid, { snapshotLogs: data.logs, snapshotData: data });
+                }, (err) => {
+                    console.warn("Antrenman canlı dinleyicisi geçici olarak durakladı:", err);
+                });
+            } catch (e) {}
+        }
 
-                if (!IS_LOCAL_DEV && (mergedLogs.length !== cloudLogs.length || hasLocalEditNewerThanCloud || filteredCloudDeletion)) {
-                    syncWorkoutLogsToCloud(mergedLogs, uid);
+        async function syncUserWorkoutLogsFromCloud(uid, options = {}) {
+            if (!uid) return;
+            const opts = options && typeof options === 'object' ? options : {};
+            ensureWorkoutLogsRealtimeListener(uid);
+
+            if (
+                !opts.snapshotLogs &&
+                !opts.forceServer &&
+                opts.throttleMs &&
+                workoutLogsLastFetchAt[uid] &&
+                (Date.now() - workoutLogsLastFetchAt[uid]) < Number(opts.throttleMs)
+            ) {
+                return;
+            }
+
+            try {
+                const localLogs = getUserLogsById(uid);
+
+                // Mükerrer yerel usr_ferit kayıtlarını da güvenle dahil et
+                if (uid === 'usr_admin') {
+                    try {
+                        const feritRaw = localStorage.getItem('celik_kodu_history_usr_ferit');
+                        if (feritRaw) {
+                            const feritLocal = JSON.parse(feritRaw);
+                            if (Array.isArray(feritLocal)) {
+                                feritLocal.forEach(fl => {
+                                    if (!localLogs.some(l => l.id === fl.id || (l.date === fl.date && l.totalSetsCompleted === fl.totalSetsCompleted))) {
+                                        localLogs.push(fl);
+                                    }
+                                });
+                            }
+                        }
+                    } catch(e) {}
                 }
+
+                let cloudLogs = [];
+                if (Array.isArray(opts.snapshotLogs)) {
+                    cloudLogs = opts.snapshotLogs;
+                    if (opts.snapshotData) adoptCloudSyncSealIfPresent('workout_logs', uid, opts.snapshotData);
+                } else {
+                    try {
+                        if (isFirebaseReady && fbDb) {
+                            const docRef = fbDb.collection('workout_logs').doc(uid);
+                            const doc = await fetchCloudDocPreferServer(docRef);
+                            workoutLogsLastFetchAt[uid] = Date.now();
+                            if (doc && doc.exists) {
+                                const data = doc.data();
+                                adoptCloudSyncSealIfPresent('workout_logs', uid, data);
+                                if (data && Array.isArray(data.logs)) {
+                                    cloudLogs = data.logs;
+                                }
+                            }
+                        }
+                    } catch (err) {
+                        console.warn("Antrenmanlar buluttan doğrudan çekilemedi:", err);
+                    }
+                }
+
+                const cloudById = new Map();
+                cloudLogs.forEach(c => { if (c && c.id) cloudById.set(String(c.id), c); });
+                const hasLocalEditNewerThanCloud = localLogs.some(l => {
+                    if (!l || !l.id) return false;
+                    const cloudMatch = cloudById.get(String(l.id));
+                    return Number(l.userEditedAt || 0) > Number((cloudMatch && cloudMatch.userEditedAt) || 0);
+                });
+
+                // localLogs taban, cloudLogs öncelikli: eşit zaman damgasında güncel bulut kazanır
+                const { mergedLogs, filteredCloudDeletion } = mergeWorkoutLogCollections(localLogs, cloudLogs, uid);
+
+                if (mergedLogs.length > 0 || (cloudLogs.length > 0 && filteredCloudDeletion)) {
+                    localStorage.setItem(`celik_kodu_history_${uid}`, JSON.stringify(mergedLogs));
+                    if (typeof window !== 'undefined') window._initialWorkoutLogsCloudSyncDone = true;
+                    if (window.GarminTredictChief && typeof window.GarminTredictChief.syncWatchTitlesFromWorkoutLogs === 'function') {
+                        window.GarminTredictChief.syncWatchTitlesFromWorkoutLogs(mergedLogs, uid);
+                    }
+                    if (window.GarminTredictChief && typeof window.GarminTredictChief.handoffCompletedActivitiesToTabChiefs === 'function') {
+                        window.GarminTredictChief.handoffCompletedActivitiesToTabChiefs();
+                    }
+                    if (typeof renderHistory === 'function') renderHistory();
+                    if (window.GarminTredictChief && typeof window.GarminTredictChief.renderHistoryGarminSyncPanel === 'function') {
+                        window.GarminTredictChief.renderHistoryGarminSyncPanel();
+                    }
+                    applyWednesdayHammerCurlPatch();
+
+                    if (!IS_LOCAL_DEV && (mergedLogs.length !== cloudLogs.length || hasLocalEditNewerThanCloud || filteredCloudDeletion)) {
+                        syncWorkoutLogsToCloud(mergedLogs, uid);
+                    }
+                }
+            } finally {
+                if (typeof window !== 'undefined') window._initialWorkoutLogsCloudSyncDone = true;
             }
         }
 
@@ -1001,8 +1121,32 @@
             try {
                 updateCloudSyncBadge('syncing', 'Kaydediliyor...');
                 if (isFirebaseReady && fbDb && navigator.onLine !== false) {
+                    const docRef = fbDb.collection('workout_logs').doc(uid);
+                    let logsToWrite = Array.isArray(logs) ? logs : [];
+                    try {
+                        const remoteDoc = await fetchCloudDocPreferServer(docRef);
+                        if (remoteDoc && remoteDoc.exists) {
+                            const remoteData = remoteDoc.data() || {};
+                            adoptCloudSyncSealIfPresent('workout_logs', uid, remoteData);
+                            const remoteLogs = Array.isArray(remoteData.logs) ? remoteData.logs : [];
+                            if (remoteLogs.length > 0) {
+                                const merged = mergeWorkoutLogCollections(remoteLogs, logsToWrite, uid);
+                                logsToWrite = merged.mergedLogs;
+                                if (JSON.stringify(logsToWrite) !== JSON.stringify(logs || [])) {
+                                    try { localStorage.setItem(`celik_kodu_history_${uid}`, JSON.stringify(logsToWrite)); } catch {}
+                                    if (window.GarminTredictChief && typeof window.GarminTredictChief.syncWatchTitlesFromWorkoutLogs === 'function') {
+                                        window.GarminTredictChief.syncWatchTitlesFromWorkoutLogs(logsToWrite, uid);
+                                    }
+                                    if (typeof renderHistory === 'function') renderHistory();
+                                }
+                            }
+                        }
+                    } catch (preMergeErr) {
+                        console.warn("Bulut ön birleştirme atlandı, yerel kayıt yazılıyor:", preMergeErr);
+                    }
+
                     await writeAthleteDocWithSealHeal('workout_logs', uid, (seal) => ({
-                        logs: logs,
+                        logs: logsToWrite,
                         clientUpdatedAt: Date.now(),
                         syncSeal: seal,
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -1019,6 +1163,10 @@
                 console.warn("Antrenmanlar çevrimdışı kuyruğa alındı (internet gelince eşitlenecek):", err);
                 updateCloudSyncBadge('offline', 'Kuyrukta (İnternet Bekleniyor)');
             }
+        }
+        if (typeof window !== 'undefined') {
+            window.syncUserWorkoutLogsFromCloud = syncUserWorkoutLogsFromCloud;
+            window.syncWorkoutLogsToCloud = syncWorkoutLogsToCloud;
         }
 
         // ==================== 7 EKİM 2026 ÇARŞAMBA DÖNÜK VERİ ENJEKSİYONU ====================
@@ -1826,7 +1974,7 @@
             if (!isFirebaseReady || !fbDb || !uid) return;
             try {
                 const docRef = fbDb.collection('user_state').doc(uid);
-                const doc = await docRef.get();
+                const doc = await fetchCloudDocPreferServer(docRef);
                 if (!doc.exists) {
                     if (!IS_LOCAL_DEV) await syncUserStateToCloud(uid);
                     return;
@@ -2069,18 +2217,35 @@
                         const tKey = `celik_garmin_telemetry_v2_${uid}`;
                         const localActs = safeParseCloud(tKey, []);
                         const actMap = new Map();
+                        const pickPreferredWatchAct = (prev, next) => {
+                            if (!prev) return next;
+                            if (!next) return prev;
+                            const prevEd = Number(prev.userEditedAt || 0);
+                            const nextEd = Number(next.userEditedAt || 0);
+                            const prevRounds = Array.isArray(prev.rounds) ? prev.rounds.length : 0;
+                            const nextRounds = Array.isArray(next.rounds) ? next.rounds.length : 0;
+                            const base = nextRounds > prevRounds
+                                ? Object.assign({}, prev, next)
+                                : Object.assign({}, next, prev);
+                            if (prevEd > nextEd) {
+                                base.title = prev.title || next.title;
+                                base.userEditedAt = prevEd;
+                            } else if (nextEd > prevEd) {
+                                base.title = next.title || prev.title;
+                                base.userEditedAt = nextEd;
+                            } else if (prev.title) {
+                                base.title = prev.title;
+                            }
+                            return base;
+                        };
                         cloudWatchActivities.forEach(a => {
                             if (a && a.id) actMap.set(String(a.id), a);
                         });
                         if (Array.isArray(localActs)) {
                             localActs.forEach(a => {
                                 if (!a || !a.id) return;
-                                const prev = actMap.get(String(a.id));
-                                const prevRounds = Array.isArray(prev?.rounds) ? prev.rounds.length : 0;
-                                const nextRounds = Array.isArray(a?.rounds) ? a.rounds.length : 0;
-                                if (!prev || nextRounds >= prevRounds) {
-                                    actMap.set(String(a.id), Object.assign({}, prev || {}, a));
-                                }
+                                const key = String(a.id);
+                                actMap.set(key, pickPreferredWatchAct(actMap.get(key), a));
                             });
                         }
                         const mergedActs = Array.from(actMap.values())

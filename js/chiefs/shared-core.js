@@ -3121,7 +3121,15 @@
 
             if (tabId === 'generatorTab') renderAiHybridHeroBanner();
             if (tabId === 'libraryTab') renderLibrary();
-            if (tabId === 'historyTab') renderHistory();
+            if (tabId === 'historyTab') {
+                renderHistory();
+                if (typeof window.syncUserWorkoutLogsFromCloud === 'function' && typeof getActiveUserId === 'function') {
+                    try {
+                        const activeUid = getActiveUserId();
+                        if (activeUid) window.syncUserWorkoutLogsFromCloud(activeUid, { throttleMs: 2500 });
+                    } catch (e) {}
+                }
+            }
             if (tabId === 'analyticsTab') renderAnalytics();
             if (tabId === 'profileTab') updateProfileGeminiStatusUI();
             if (typeof refreshTopFitnessCardioScoreBars === 'function') refreshTopFitnessCardioScoreBars();
