@@ -1,5 +1,6 @@
 exclude:
   - .agents
+  - config
   - desktop-app
   - ios-app
   - scripts
@@ -8,9 +9,5 @@ exclude:
   - api
   - server.js
   - package.json
-  - skills-lock.json
-  - firestore.rules
   - vercel.json
   - GEMINI.md
-  - TAB_HEALTH.md
-  - README.md

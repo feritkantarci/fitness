@@ -25,6 +25,7 @@ app.use((req, res, next) => {
       p === '/vercel.json' ||
       p === '/package-lock.json' ||
       p === '/firestore.rules' ||
+      p.startsWith('/config') ||
       p.startsWith('/scripts') ||
       /\.(rules|sh|mjs|py|env|lock|md|zip|tar|gz)$/i.test(p) ||
       p.includes('/node_modules') || 

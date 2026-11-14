@@ -16,7 +16,7 @@ const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, '..');
 const INDEX_PATH = path.join(ROOT, 'index.html');
 const DB_PATH = path.join(ROOT, 'js', 'exercises-db.js');
-const REPORT_PATH = path.join(ROOT, 'TAB_HEALTH.md');
+const REPORT_PATH = path.join(ROOT, 'docs', 'TAB_HEALTH.md');
 
 const LOAD_ORDER_FILES = [
   { rel: 'js/chiefs/shared-core.js', owner: 'shared-core' },
