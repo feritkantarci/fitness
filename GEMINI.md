@@ -21,8 +21,10 @@ Kullanıcı "canlıya al / push et" dediğinde şu adımlar uygulanır:
 3. `sw.js` Service Worker Önbellek Adı: `const CACHE_NAME = 'celik-kodu-cache-vXX';`
 4. `index.html` Service Worker Kayıt Parametresi: `navigator.serviceWorker.register('./sw.js?v=XX')`
 
-### Adım 2: Sözdizimi (Syntax) ve Bütünlük Kontrolü
-* Değiştirilen dosyalarda (özellikle `index.html` içindeki JS bloklarında) sözdizimi hatası olmadığını doğrula (`node -e ...`).
+### Adım 2: 7 Şef Bekçisi, Köprü Gümrüğü ve Sözdizimi Kapısı (Zorunlu)
+* Değiştirilen dosyalarda (`js/chiefs/*.js`, `js/garmin-tredict-bridge.js`, `js/app.js`, `index.html`, `sw.js`) sözdizimi ve referans hatası olmadığını doğrula.
+* `npm run verify` (`node scripts/tab-watchdog.js`) komutunu çalıştır: 7 şefin tamamının hem `Ekran Kontrolü` hem de `18/18 Matematik & Gümrük Sınavı` denetiminden sıfır hatayla (`0` kırık `recId`, `0` kaydırma uyarısı) geçtiğini teyit et.
+* `.git/hooks/pre-push` kilidi bu sınavı otomatik koşturur; herhangi bir şef hata verirse `git push` otomatik olarak reddedilir.
 
 ### Adım 3: Kullanıcı Onaylı Git Commit ve Push
 * `git add <dosyalar>`
@@ -93,6 +95,8 @@ Kullanıcı "canlıya al / push et" dediğinde şu adımlar uygulanır:
   2. *Bütünlük & Regresyon Kontrolü:* Yapılan değişiklik mevcut butonları, PWA önbelleğini, yerel veri saklamayı veya görsel hiyerarşiyi bozdu mu?
 * **Ajan Öz-Teşhisi (Döngü Kırıcı):**
   Bir hata 2 denemede çözülemezse spekülatif 3. deneme YASAKTIR. Ajan derhal durur, oturum transkriptini tarar, peşin kabul ettiği hatalı varsayımı (assumption) açıkça masaya yatırır ve kullanıcıdan tek bir net kanıt ister.
+* **Kalıcı Hata Hafızası Sicili (Bug-Memory Regression Yasası):**
+  Kullanıcının yakaladığı her gerçek hata veya tutarsızlık yalnızca kodda düzeltilip geçilmez; ilgili kısım şefinin `SKILL.md` kılavuzuna kural olarak işlenir ve `scripts/tab-watchdog.js` içine numaralı kalıcı sınav maddesi (`T18+`) olarak eklenir. Böylece aynı hata gelecekteki hiçbir güncellemede bir daha tekrarlanamaz.
 
 ---
 
@@ -156,6 +160,18 @@ Kullanıcı "canlıya al / push et" dediğinde şu adımlar uygulanır:
 * **%100 Mobil-Öncelikli ve Sıfır Bilgisayar Bağımlılığı:** Bu uygulama bilgisayar başında değil, tüm kullanıcılar tarafından doğrudan kendi cep telefonlarında kullanılır. Kod geliştirmesi yerelde test edilse de (Madde 1), uygulamanın çalışma zamanındaki **hiçbir özelliği, veri eşitlemesi, bildirimi veya dış servis entegrasyonu (Garmin/Tredict, AI vb.) geliştiricinin ya da kullanıcının bilgisayarının açık olmasına (`127.0.0.1`, yerel köprü scripti, bilgisayar arka plan servisi, yerel `gcloud` veya yerel `.token` dosyası) ASLA bağımlı kurgulanamaz**.
 * **Herkese Açık Çok Kullanıcılı (Multi-Tenant) İzolasyon:** Uygulama tek bir yöneticiye özel değildir; herkese açık çok kullanıcılı bir platformdur. Tüm özellikler, veritabanı kuralları, bulut eşitleme mühürleri ve dış servis bağlantıları her sporcunun kendi telefonundan, kendi izole hesabıyla ve kendi kişisel kimlik/anahtar bilgileriyle diğer kullanıcılardan tamamen bağımsız 7/24 çalışacak şekilde tasarlanır.
 * **7/24 Bulut Geçişi ve Dürüst Teslimat Doğrulaması:** Mobil tarayıcıdan doğrudan çağrılamayan dış servisler kişisel bilgisayar rölesi yerine 7/24 aktif bulut uç noktaları üzerinden çalıştırılır; karşı servisten gerçek kabul onayı alınmadan kullanıcıya *"aktarıldı"* bildirimi ASLA gösterilmez.
+
+---
+
+## 14. Varsayımsız Danışma, Kısım Şefi Tanımlama ve Veri Sağlaması Yasası
+* **İşleyiş ve Hesap Kararlarında Önce Danışma Zorunluluğu:**
+  - Antrenman akışını, kısım şefi yetkilerini, set/tekrar/süre değerlendirmesini veya puanlama/analiz hesaplarını değiştiren hiçbir noktada model kendi kafasından kural uyduramaz; kod içi teknik detaylara girmeden sade Türkçe ile önce kullanıcıya danışır.
+* **Kısım Şefi ve Yeni Özelliklerde Görev Sorma Kuralı:**
+  - Bir alana kısım şefi, bekçi veya yeni değerlendirme modülü ekleneceği zaman yalnızca isim/tabela konulmaz; bu şefin neleri kontrol edeceği, hangi uç durumları nasıl yorumlayacağı ve kırmızı çizgileri kullanıcıya sorularak birlikte belirlenir.
+* **Çoklu İhtimalleri Sunma Zorunluluğu:**
+  - Piramit set, kilo düşürme, düşük tekrar, süreli hareket veya veri eşitleme gibi birden fazla yorum ihtimali olan her noktada tüm ihtimaller sonuçlarıyla birlikte kullanıcıya sorulur (`ask_question` veya net seçeneklerle).
+* **Veri ve Hesap İşlerinde "Talep = Ortaya Çıkan Veri" Sağlaması:**
+  - Veri işleyen, kaydeden veya hesaplayan her görev sonunda yalnızca görsel/buton kontrolüyle *"Sorunsuz"* denilemez; sıfırdan gerçekçi ve ters köşe sporcu verileri girilerek **beklenen hesap ile ekranda ortaya çıkan verinin birebir örtüştüğü** kanıtlanmadan görev kapatılmaz (yalnızca saf görsel/stil dokunuşları bu kapsamın dışındadır).
 
 
 

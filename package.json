@@ -9,6 +9,7 @@
     "start": "node server.js",
     "build": "echo 'Static build complete'",
     "lint": "node -c server.js",
+    "verify": "node scripts/tab-watchdog.js",
     "watchdog": "node scripts/tab-watchdog.js --write-report"
   },
   "dependencies": {

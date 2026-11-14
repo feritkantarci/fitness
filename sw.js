@@ -1,9 +1,18 @@
-const CACHE_NAME = 'celik-kodu-cache-v290';
+const CACHE_NAME = 'celik-kodu-cache-v291';
 const ASSETS = [
   './',
   './index.html',
   './css/style.css',
   './js/exercises-db.js',
+  './js/chiefs/shared-core.js',
+  './js/chiefs/bridge-customs.js',
+  './js/chiefs/liaison-subchiefs.js',
+  './js/chiefs/profile-chief.js',
+  './js/chiefs/library-chief.js',
+  './js/chiefs/history-chief.js',
+  './js/chiefs/analytics-chief.js',
+  './js/chiefs/generator-chief.js',
+  './js/chiefs/workout-chief.js',
   './js/app.js',
   './js/garmin-tredict-bridge.js',
   './assets/diagrams/canva_anatomy_neutral.png',

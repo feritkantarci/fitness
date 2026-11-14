@@ -1192,6 +1192,9 @@
       });
 
       if (changed) {
+        if (window.CelikBridgeCustoms && typeof window.CelikBridgeCustoms.sanitizeWorkoutLogsList === 'function') {
+          logs = window.CelikBridgeCustoms.sanitizeWorkoutLogsList(logs);
+        }
         if (typeof window.sortWorkoutLogsDesc === 'function') {
           window.sortWorkoutLogsDesc(logs);
         } else {

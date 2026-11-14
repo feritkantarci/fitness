@@ -3,9 +3,12 @@ name: garmin-tredict-guard
 description: Çelik Kodu PWA içindeki 7. Özel Şef (Garmin & Tredict Telemetri ve Doğrulama Şefi). Yeni eklenen hareketlerin çalışan kas gruplarını library-guard'dan alıp Garmin resmi kas kataloğuyla kıyaslar; Garmin'de karşılığı olmayan hareketleri saate isimsiz ama notlu gönderir; saatte tamamlanan antrenmandan yalnızca sağlık verilerini (nabız, zirve nabız, HRR, TUT, kalori) çekip ilgili şeflere bizdeki orijinal hareket adıyla teslim eder.
 ---
 
-# ⌚ Çelik Kodu — 7. Şef: Garmin & Tredict Şefi (`garmin-tredict-guard`)
+# ⌚ Çelik Kodu — 7. Oda: Garmin & Tredict Şefi (`garmin-tredict-guard`)
 
-Bu şef, **Çelik Kodu PWA** ile **Garmin Forerunner 945 / Tredict** arasındaki tüm veri trafiğinin tek sorumlusudur. Uygulamanın kendi bilimsel egzersiz ve kas mimarisini Garmin'in eksik veya hatalı tahminlerinden korur.
+- **Fiziksel Oda Dosyası:** `js/garmin-tredict-bridge.js`
+- **Zorunlu Sınav Maddeleri:** `T16` (Garmin kas doğrulaması, Garmin'de olmayan hareketi isimsiz+notlu gönderme ve saatten dönüşte orijinal hareket kimliği + yalnızca sağlık verisi birleştirmesi)
+
+Bu şef, **Çelik Kodu PWA** ile **Garmin Forerunner 945 / Tredict** arasındaki tüm veri trafiğinin tek sorumlusudur. Uygulamanın kendi bilimsel egzersiz ve kas mimarisini Garmin'in eksik veya hatalı tahminlerinden korur ve ürettiği geçmiş kayıtlarını `window.CelikBridgeCustoms` gümrüğünden geçirerek teslim eder.
 
 ---
 
