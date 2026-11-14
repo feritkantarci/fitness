@@ -6766,34 +6766,71 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             return !!(user && user.role === 'admin');
         }
 
+        let _inMemorySystemAiKey = '';
+        if (typeof window !== 'undefined') {
+            window.setSystemAiKeyMemoryOnly = function(plainKey) {
+                _inMemorySystemAiKey = String(plainKey || '').trim();
+            };
+        }
+
         function getGeminiApiKey() {
-            let key = (localStorage.getItem(GEMINI_API_STORAGE_KEY) || '').trim();
-            if (!key) {
-                const adminKey = (localStorage.getItem(`${GEMINI_API_STORAGE_KEY}_usr_admin`) || '').trim();
-                if (adminKey) {
-                    key = adminKey;
-                    localStorage.setItem(GEMINI_API_STORAGE_KEY, adminKey);
+            if (_inMemorySystemAiKey) return _inMemorySystemAiKey;
+
+            const codec = (typeof window !== 'undefined' && window.CelikVaultCodec) ? window.CelikVaultCodec : null;
+            const vaultKeyName = codec ? codec.SYSTEM_AI_VAULT_KEY : 'celik_kodu_sealed_ai_vault';
+            try {
+                const rawVault = localStorage.getItem(vaultKeyName);
+                if (rawVault) {
+                    const parsed = JSON.parse(rawVault);
+                    if (parsed && parsed.masterCatalogMeta && codec && typeof codec.applyMasterCatalogMeta === 'function') {
+                        codec.applyMasterCatalogMeta(parsed.masterCatalogMeta);
+                    }
+                    if (parsed && parsed.sealedAiKey) {
+                        const unsealed = codec ? codec.unsealSystemAiKey(parsed.sealedAiKey) : '';
+                        if (unsealed) {
+                            _inMemorySystemAiKey = unsealed.trim();
+                            return _inMemorySystemAiKey;
+                        }
+                    }
                 }
+            } catch {}
+
+            // Tek seferlik miras temizliği: eski yerel açık metin anahtarı mühürlü kasaya taşınır
+            let legacyKey = (localStorage.getItem(GEMINI_API_STORAGE_KEY) || '').trim();
+            if (!legacyKey) {
+                legacyKey = (localStorage.getItem(`${GEMINI_API_STORAGE_KEY}_usr_admin`) || '').trim();
             }
-            if (!key && typeof getAuthUsers === 'function') {
+            if (!legacyKey && typeof getAuthUsers === 'function') {
                 const users = getAuthUsers();
                 const adminUser = Array.isArray(users) ? users.find(u => u.role === 'admin' && u.geminiApiKey) : null;
                 if (adminUser && adminUser.geminiApiKey) {
-                    key = adminUser.geminiApiKey.trim();
-                    localStorage.setItem(GEMINI_API_STORAGE_KEY, key);
+                    legacyKey = String(adminUser.geminiApiKey).trim();
                 }
             }
-            if (!key && !isFetchingCloudAiConfig) {
-                // Arka planda tüm sporcular için sistem AI motorunu hazır tut
+            if (legacyKey) {
+                _inMemorySystemAiKey = legacyKey;
+                try {
+                    if (codec) {
+                        localStorage.setItem(vaultKeyName, JSON.stringify({
+                            sealedAiKey: codec.sealSystemAiKey(legacyKey),
+                            updatedAt: Date.now()
+                        }));
+                    }
+                    localStorage.removeItem(GEMINI_API_STORAGE_KEY);
+                    localStorage.removeItem(`${GEMINI_API_STORAGE_KEY}_usr_admin`);
+                } catch {}
+                return _inMemorySystemAiKey;
+            }
+
+            if (!isFetchingCloudAiConfig) {
                 fastFetchCloudAiConfig();
             }
-            return key;
+            return '';
         }
 
         async function fastFetchCloudAiConfig() {
             if (isFetchingCloudAiConfig) return '';
-            const existingKey = (localStorage.getItem(GEMINI_API_STORAGE_KEY) || '').trim();
-            if (existingKey) return existingKey;
+            if (_inMemorySystemAiKey) return _inMemorySystemAiKey;
 
             isFetchingCloudAiConfig = true;
             try {
@@ -6801,9 +6838,27 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 const res = await fetch(endpoint);
                 if (res.ok) {
                     const doc = await res.json();
-                    const cloudKey = doc?.fields?.geminiApiKey?.stringValue?.trim();
+                    const codec = (typeof window !== 'undefined' && window.CelikVaultCodec) ? window.CelikVaultCodec : null;
+                    const vaultKeyName = codec ? codec.SYSTEM_AI_VAULT_KEY : 'celik_kodu_sealed_ai_vault';
+                    const sealedField = doc?.fields?.sealedAiKey?.stringValue?.trim() || '';
+                    const legacyField = doc?.fields?.geminiApiKey?.stringValue?.trim() || '';
+                    const cloudKey = sealedField
+                        ? (codec ? codec.unsealSystemAiKey(sealedField) : '')
+                        : legacyField;
+                    const sealedForVault = sealedField || (legacyField && codec ? codec.sealSystemAiKey(legacyField) : '');
+
                     if (cloudKey) {
-                        localStorage.setItem(GEMINI_API_STORAGE_KEY, cloudKey);
+                        _inMemorySystemAiKey = cloudKey;
+                        try {
+                            localStorage.removeItem(GEMINI_API_STORAGE_KEY);
+                            localStorage.removeItem(`${GEMINI_API_STORAGE_KEY}_usr_admin`);
+                            if (sealedForVault) {
+                                localStorage.setItem(vaultKeyName, JSON.stringify({
+                                    sealedAiKey: sealedForVault,
+                                    updatedAt: Date.now()
+                                }));
+                            }
+                        } catch {}
                         if (typeof updateProfileGeminiStatusUI === 'function') updateProfileGeminiStatusUI();
                         const curEx = (typeof pickerContext !== 'undefined' && pickerContext && pickerContext.targetExId) ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
                         if (typeof updateGeminiAiModalUI === 'function') updateGeminiAiModalUI(curEx);
@@ -6821,18 +6876,27 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
         function setGeminiApiKey(key, syncCloud = true) {
             if (!isCurrentUserAdmin()) return;
             const cleanKey = (key || '').trim();
-            if (!cleanKey) {
+            const codec = (typeof window !== 'undefined' && window.CelikVaultCodec) ? window.CelikVaultCodec : null;
+            const vaultKeyName = codec ? codec.SYSTEM_AI_VAULT_KEY : 'celik_kodu_sealed_ai_vault';
+            _inMemorySystemAiKey = cleanKey;
+
+            try {
                 localStorage.removeItem(GEMINI_API_STORAGE_KEY);
                 localStorage.removeItem(`${GEMINI_API_STORAGE_KEY}_usr_admin`);
-            } else {
-                localStorage.setItem(GEMINI_API_STORAGE_KEY, cleanKey);
-                localStorage.setItem(`${GEMINI_API_STORAGE_KEY}_usr_admin`, cleanKey);
-            }
+                if (!cleanKey) {
+                    localStorage.removeItem(vaultKeyName);
+                } else if (codec) {
+                    localStorage.setItem(vaultKeyName, JSON.stringify({
+                        sealedAiKey: codec.sealSystemAiKey(cleanKey),
+                        updatedAt: Date.now()
+                    }));
+                }
+            } catch {}
 
             if (syncCloud && typeof getActiveUser === 'function') {
                 const user = getActiveUser();
-                if (user && user.role === 'admin') {
-                    user.geminiApiKey = cleanKey;
+                if (user && user.role === 'admin' && user.geminiApiKey) {
+                    delete user.geminiApiKey;
                     const users = typeof getAuthUsers === 'function' ? getAuthUsers() : [];
                     const idx = users.findIndex(u => u.id === user.id);
                     if (idx !== -1) {
@@ -6840,6 +6904,17 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                         if (typeof saveAuthUsers === 'function') saveAuthUsers(users);
                         if (typeof syncUsersToCloud === 'function') syncUsersToCloud(users);
                     }
+                }
+                if (
+                    typeof isFirebaseReady !== 'undefined' && isFirebaseReady &&
+                    typeof fbDb !== 'undefined' && fbDb &&
+                    !(typeof IS_LOCAL_DEV !== 'undefined' && IS_LOCAL_DEV)
+                ) {
+                    const sealedPayload = cleanKey && codec ? codec.sealSystemAiKey(cleanKey) : '';
+                    fbDb.collection('app_system').doc('ai_config').set({
+                        sealedAiKey: sealedPayload,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true }).catch(() => {});
                 }
             }
 
@@ -6866,8 +6941,9 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             if (input) {
                 if (isAdmin) {
                     if (document.activeElement !== input) {
-                        input.value = key;
+                        input.value = '';
                     }
+                    input.placeholder = key ? '•••••••• (Google Firebase Bulutunda Kilitli)' : 'AIzaSy… anahtarınızı girin';
                 } else {
                     // Güvenlik: Yönetici olmayan sporcuların DOM'una API anahtarı asla yazılmaz
                     input.value = '';
@@ -6894,6 +6970,9 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             const input = document.getElementById('profileGeminiApiKeyInput');
             const key = input ? input.value.trim() : '';
             if (!key) {
+                if (getGeminiApiKey() && !confirm("Merkez kasadaki mevcut Gemini API anahtarı kaldırılsın mı?")) {
+                    return;
+                }
                 setGeminiApiKey('');
                 showToast("ℹ️ Gemini API anahtarı temizlendi.");
                 return;
@@ -6904,7 +6983,8 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 const testResp = await callGeminiAPI("Biyomekanik test mesajı. Tek kelimeyle 'Hazır' de.", "Sen fitness koçusun.", key);
                 if (testResp) {
                     setGeminiApiKey(key);
-                    showToast("✅ Gemini API başarıyla doğrulandı ve kaydedildi!");
+                    if (input) input.value = '';
+                    showToast("✅ Gemini API başarıyla doğrulandı ve merkez kasaya mühürlendi!");
                 }
             } catch (err) {
                 alert("Gemini API Bağlantı Hatası:\n" + (err.message || err));
@@ -6924,7 +7004,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 const testResp = await callGeminiAPI("Biyomekanik test mesajı. Tek kelimeyle 'Hazır' de.", "Sen fitness koçusun.", key);
                 if (testResp) {
                     setGeminiApiKey(key);
-                    showToast("✅ Gemini API başarıyla doğrulandı ve kaydedildi!");
+                    showToast("✅ Gemini API başarıyla doğrulandı ve merkez kasaya mühürlendi!");
                     const curEx = (pickerContext && pickerContext.targetExId) ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
                     updateGeminiAiModalUI(curEx);
                 }
@@ -6935,11 +7015,14 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
 
         function editGeminiApiKey() {
             if (!isCurrentUserAdmin()) return;
-            const curKey = getGeminiApiKey();
-            const newKey = prompt("Google Gemini API Anahtarınızı güncelleyin (Silmek için boş bırakın):", curKey);
+            const newKey = prompt("Yeni Google Gemini API Anahtarınızı girin (Mevcut anahtarı silmek için boş bırakın):", "");
             if (newKey !== null) {
-                setGeminiApiKey(newKey);
-                showToast(newKey.trim() ? "✅ API Anahtarı güncellendi!" : "ℹ️ API Anahtarı silindi.");
+                const clean = newKey.trim();
+                if (!clean && getGeminiApiKey() && !confirm("Mevcut Gemini API anahtarı merkez kasadan silinsin mi?")) {
+                    return;
+                }
+                setGeminiApiKey(clean);
+                showToast(clean ? "✅ API Anahtarı merkez kasada güncellendi!" : "ℹ️ API Anahtarı silindi.");
             }
         }
 
@@ -6967,7 +7050,37 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
         let cachedGeminiWorkingModel = null;
 
         async function callGeminiAPI(prompt, systemInstruction = '', overrideKey = '', maxTokens = 3500) {
-            let apiKey = overrideKey || getGeminiApiKey();
+            const cleanOverride = String(overrideKey || '').trim();
+            if (!cleanOverride) {
+                try {
+                    const savedCentralUrl = String(localStorage.getItem('celik_kodu_central_bridge_url') || 'https://celik-kodu.vercel.app').trim().replace(/\/+$/, '');
+                    const locOrigin = typeof window !== 'undefined' ? String(window.location.origin || '') : '';
+                    const locHost = typeof window !== 'undefined' ? String(window.location.hostname || '') : '';
+                    const bridgeTargets = [];
+                    if (locHost === 'localhost' || locHost === '127.0.0.1' || (locOrigin.startsWith('https://') && locHost !== 'fitness.kantarci.io')) {
+                        bridgeTargets.push('/api/tredict/ai-generate');
+                    }
+                    if (savedCentralUrl && /^https:\/\//i.test(savedCentralUrl) && !bridgeTargets.includes(`${savedCentralUrl}/api/tredict/ai-generate`)) {
+                        bridgeTargets.push(`${savedCentralUrl}/api/tredict/ai-generate`);
+                    }
+                    for (const bridgeUrl of bridgeTargets) {
+                        const bridgeResp = await fetch(bridgeUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ prompt, systemInstruction, maxTokens })
+                        });
+                        const ct = String(bridgeResp.headers.get('content-type') || '').toLowerCase();
+                        if (bridgeResp.ok && ct.includes('application/json')) {
+                            const bridgeData = await bridgeResp.json();
+                            if (bridgeData && bridgeData.ok && bridgeData.text) {
+                                return bridgeData.text;
+                            }
+                        }
+                    }
+                } catch {}
+            }
+
+            let apiKey = cleanOverride || getGeminiApiKey();
             if (!apiKey) {
                 apiKey = await fastFetchCloudAiConfig();
             }
@@ -6990,7 +7103,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                             .filter(name => !/tts|image|vision|embedding|aqa|audio|robotics|computer-use|learnlm|gemma/i.test(name));
                         
                         // Gerçek ve kararlı Flash modellerini en öne al; omni/preview/exp modelleri sona bırak
-                        const preferredFlash = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-flash-lite-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+                        const preferredFlash = ['gemini-3-flash-preview', 'gemini-3.1-flash-lite-preview', 'gemini-3.8-flash', 'gemini-flash-lite-latest', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
                         const prioritized = preferredFlash.filter(name => supported.includes(name));
                         const stableOtherFlash = supported.filter(m =>
                             m.includes('flash') && !preferredFlash.includes(m) && !/omni|preview|exp/i.test(m)
@@ -7014,9 +7127,11 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
 
             // Keşif başarısız olduysa veya modeller listelenemediyse denenmesi gereken güncel modeller
             const fallbackModels = [
+                'gemini-3-flash-preview',
+                'gemini-3.1-flash-lite-preview',
                 'gemini-3.8-flash',
-                'gemini-flash-latest',
                 'gemini-flash-lite-latest',
+                'gemini-flash-latest',
                 'gemini-2.5-flash',
                 'gemini-2.0-flash'
             ];

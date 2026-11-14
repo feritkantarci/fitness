@@ -13,17 +13,18 @@ const EXACT_ALLOWED_ORIGINS = new Set([
   'https://fitness-4f427.firebaseapp.com'
 ]);
 
-const LOCALHOST_ORIGIN_RE = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i;
+const LOCALHOST_ORIGIN_RE = /^(https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?|(capacitor|ionic):\/\/localhost)$/i;
+const VERCEL_PROJECT_ORIGIN_RE = /^https:\/\/celik-kodu(-[a-z0-9-]+)?\.vercel\.app$/i;
 
 function isAllowedOrigin(origin) {
   if (!origin || typeof origin !== 'string') return false;
-  return EXACT_ALLOWED_ORIGINS.has(origin) || LOCALHOST_ORIGIN_RE.test(origin);
+  return EXACT_ALLOWED_ORIGINS.has(origin) || LOCALHOST_ORIGIN_RE.test(origin) || VERCEL_PROJECT_ORIGIN_RE.test(origin);
 }
 
 function applyCorsHeaders(res, origin) {
   res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Tredict-Token, X-Intervals-Token, X-Client-Tz-Offset');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Tredict-Token, X-Intervals-Token, X-Client-Tz-Offset, X-Gemini-Key');
   if (isAllowedOrigin(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
@@ -535,6 +536,73 @@ function resolveAction(req, url) {
   return path.toLowerCase();
 }
 
+function parseFirestoreDocValue(val) {
+  if (!val || typeof val !== 'object') return null;
+  if ('nullValue' in val) return null;
+  if ('booleanValue' in val) return Boolean(val.booleanValue);
+  if ('integerValue' in val) return Number(val.integerValue);
+  if ('doubleValue' in val) return Number(val.doubleValue);
+  if ('stringValue' in val) return String(val.stringValue);
+  if ('timestampValue' in val) return String(val.timestampValue);
+  if ('arrayValue' in val) return (val.arrayValue.values || []).map(parseFirestoreDocValue);
+  if ('mapValue' in val) {
+    const out = {};
+    for (const [k, v] of Object.entries(val.mapValue.fields || {})) {
+      out[k] = parseFirestoreDocValue(v);
+    }
+    return out;
+  }
+  return null;
+}
+
+function unsealSystemVaultKeyServer(sealed) {
+  const raw = String(sealed || '').trim();
+  if (!raw) return '';
+  if (!raw.startsWith('v1:')) return raw;
+  const xBytes = Array.from(Buffer.from(raw.slice(3), 'base64'));
+  const kBytes = Array.from(Buffer.from('fitness-4f427:celik-kodu-sys-vault-v1', 'utf8'));
+  const pBytes = xBytes.map((b, idx) => (b ^ kBytes[idx % kBytes.length] ^ ((idx * 31 + 17) & 0xFF)) & 0xFF);
+  return Buffer.from(pBytes).toString('utf8');
+}
+
+async function fetchCentralMasterCatalogFromFirestore() {
+  const res = await fetch('https://firestore.googleapis.com/v1/projects/fitness-4f427/databases/(default)/documents/app_system/master_catalog');
+  if (!res.ok) {
+    const err = new Error(`Firestore master_catalog HTTP ${res.status}`);
+    err.statusCode = res.status;
+    throw err;
+  }
+  const doc = await res.json();
+  const fields = doc?.fields || {};
+  const parsed = {};
+  for (const [k, v] of Object.entries(fields)) {
+    parsed[k] = parseFirestoreDocValue(v);
+  }
+  return {
+    version: Number(parsed.version || 0),
+    updatedAt: Number(parsed.updatedAt || 0),
+    exerciseCount: Number(parsed.exerciseCount || 0),
+    totalCatalogIds: Number(parsed.totalCatalogIds || 0),
+    opengymCount: Number(parsed.opengymCount || 0),
+    guideCount: Number(parsed.guideCount || 0),
+    exercises: parsed.exercisesJson ? JSON.parse(parsed.exercisesJson) : [],
+    opengymCatalog: parsed.opengymCatalogJson ? JSON.parse(parsed.opengymCatalogJson) : {},
+    exerciseGuideMap: parsed.exerciseGuideMapJson ? JSON.parse(parsed.exerciseGuideMapJson) : {}
+  };
+}
+
+async function resolveCentralGeminiApiKey(req) {
+  const headerKey = getHeader(req, 'x-gemini-key');
+  if (headerKey) return headerKey;
+  if (process.env.GEMINI_API_KEY) return String(process.env.GEMINI_API_KEY).trim();
+  const res = await fetch('https://firestore.googleapis.com/v1/projects/fitness-4f427/databases/(default)/documents/app_system/ai_config');
+  if (!res.ok) return '';
+  const doc = await res.json();
+  const sealed = doc?.fields?.sealedAiKey?.stringValue || '';
+  const plain = doc?.fields?.geminiApiKey?.stringValue || '';
+  return (sealed ? unsealSystemVaultKeyServer(sealed) : plain).trim();
+}
+
 export default async function handler(req, res) {
   const origin = getHeader(req, 'origin');
   if (origin && !isAllowedOrigin(origin)) {
@@ -546,9 +614,68 @@ export default async function handler(req, res) {
     return res.end();
   }
 
-  const host = getHeader(req, 'host') || 'garmin.kantarci.io';
+  const host = getHeader(req, 'host') || 'celik-kodu.vercel.app';
   const url = new URL(req.url || '/', `https://${host}`);
   const action = resolveAction(req, url);
+
+  if (req.method === 'GET' && action === 'master-catalog') {
+    try {
+      const catalog = await fetchCentralMasterCatalogFromFirestore();
+      applyCorsHeaders(res, origin);
+      res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=86400');
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      return res.end(JSON.stringify({ ok: true, ...catalog }));
+    } catch (err) {
+      return sendJson(res, Number(err?.statusCode) || 502, { ok: false, error: String(err?.message || err) }, origin);
+    }
+  }
+
+  if (req.method === 'POST' && action === 'ai-generate') {
+    try {
+      const body = await readJsonBody(req);
+      const prompt = String(body?.prompt || '').trim();
+      const systemInstruction = String(body?.systemInstruction || '').trim();
+      const maxTokens = Math.min(8192, Math.max(64, Number(body?.maxTokens || 3500)));
+      if (!prompt) return sendJson(res, 400, { ok: false, error: 'Prompt gerekli.' }, origin);
+      const apiKey = await resolveCentralGeminiApiKey(req);
+      if (!apiKey) return sendJson(res, 503, { ok: false, error: 'Merkez AI anahtarı tanımlı değil.' }, origin);
+
+      const candidateModels = ['gemini-3-flash-preview', 'gemini-3.1-flash-lite-preview', 'gemini-flash-lite-latest', 'gemini-flash-latest', 'gemini-3.8-flash'];
+      let lastErr = 'Gemini yanıt üretemedi.';
+      for (const model of candidateModels) {
+        const gUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+        const gBody = {
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.35, maxOutputTokens: maxTokens }
+        };
+        if (systemInstruction) {
+          gBody.systemInstruction = { parts: [{ text: systemInstruction }] };
+        }
+        const gResp = await fetch(gUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(gBody)
+        });
+        if (!gResp.ok) {
+          const errJson = await gResp.json().catch(() => ({}));
+          lastErr = errJson?.error?.message || `Gemini HTTP ${gResp.status}`;
+          if (gResp.status === 401 || gResp.status === 403) {
+            return sendJson(res, gResp.status, { ok: false, error: lastErr }, origin);
+          }
+          continue;
+        }
+        const gData = await gResp.json();
+        const text = gData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        if (text) {
+          return sendJson(res, 200, { ok: true, text, model, source: 'central_ai_bridge' }, origin);
+        }
+      }
+      return sendJson(res, 502, { ok: false, error: lastErr }, origin);
+    } catch (err) {
+      return sendJson(res, 500, { ok: false, error: String(err?.message || err) }, origin);
+    }
+  }
 
   const tredictToken = getHeader(req, 'x-tredict-token');
   const intervalsToken = getHeader(req, 'x-intervals-token');
@@ -619,6 +746,10 @@ export default async function handler(req, res) {
               sub === 'rowing' ||
               sub === 'walking' ||
               sub === 'hiking' ||
+              sub === 'casual_walking' ||
+              sub === 'speed_walking' ||
+              sp === 'walking' ||
+              sp === 'hiking' ||
               sp === 'running'
             ) {
               candidateIds.push(id);
@@ -626,7 +757,18 @@ export default async function handler(req, res) {
           }
         } else if (Array.isArray(listRes?.activities)) {
           candidateIds = listRes.activities
-            .filter(a => a.subSportType === 'strength_training' || a.subSportType === 'indoor_rowing' || a.subSportType === 'walking' || a.sportType === 'running')
+            .filter(a => (
+              a.subSportType === 'strength_training' ||
+              a.subSportType === 'indoor_rowing' ||
+              a.subSportType === 'rowing' ||
+              a.subSportType === 'walking' ||
+              a.subSportType === 'hiking' ||
+              a.subSportType === 'casual_walking' ||
+              a.subSportType === 'speed_walking' ||
+              a.sportType === 'walking' ||
+              a.sportType === 'hiking' ||
+              a.sportType === 'running'
+            ))
             .map(a => a.id);
         }
 
@@ -666,11 +808,17 @@ export default async function handler(req, res) {
               } catch {}
             }
 
+            const rawSp = String(detObj.sportType || 'misc').toLowerCase();
+            const rawSub = String(detObj.subSportType || '').toLowerCase();
+            const normSub = (rawSp === 'walking' || rawSp === 'hiking' || /walking|hiking/.test(rawSub))
+              ? 'walking'
+              : (detObj.subSportType || 'strength_training');
+
             detailed.push({
               id: canonicalId,
               plannedWorkoutId: resolvedPlannedId,
               sportType: detObj.sportType || 'misc',
-              subSportType: detObj.subSportType || 'strength_training',
+              subSportType: normSub,
               title: detObj.title || 'Garmin Antrenmanı',
               date: detObj.date || detObj.activityStartDate,
               device: detObj.attribution || detObj.device || 'Garmin Watch',

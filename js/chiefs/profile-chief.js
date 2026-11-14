@@ -50,6 +50,353 @@
             });
         }
 
+        // ==================== MERKEZ KASA MÜHÜRLEME KODEĞİ (SAFE UTF-8 + BASE64) ====================
+        const SYSTEM_AI_VAULT_KEY = 'celik_kodu_sealed_ai_vault';
+        const MASTER_CATALOG_META_KEY = 'celik_kodu_master_catalog_meta';
+        const VAULT_B64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+        function vaultUtf8ToBytes(str) {
+            const s = String(str || '');
+            const bytes = [];
+            for (let i = 0; i < s.length; i++) {
+                let code = s.charCodeAt(i);
+                if (code >= 0xD800 && code <= 0xDBFF && i + 1 < s.length) {
+                    const next = s.charCodeAt(i + 1);
+                    if (next >= 0xDC00 && next <= 0xDFFF) {
+                        code = 0x10000 + ((code - 0xD800) << 10) + (next - 0xDC00);
+                        i++;
+                    }
+                }
+                if (code < 0x80) {
+                    bytes.push(code);
+                } else if (code < 0x800) {
+                    bytes.push(0xC0 | (code >> 6), 0x80 | (code & 0x3F));
+                } else if (code < 0x10000) {
+                    bytes.push(0xE0 | (code >> 12), 0x80 | ((code >> 6) & 0x3F), 0x80 | (code & 0x3F));
+                } else {
+                    bytes.push(
+                        0xF0 | (code >> 18),
+                        0x80 | ((code >> 12) & 0x3F),
+                        0x80 | ((code >> 6) & 0x3F),
+                        0x80 | (code & 0x3F)
+                    );
+                }
+            }
+            return bytes;
+        }
+
+        function vaultBytesToUtf8(bytes) {
+            let out = '';
+            for (let i = 0; i < bytes.length;) {
+                const b0 = bytes[i++];
+                if (b0 < 0x80) {
+                    out += String.fromCharCode(b0);
+                } else if ((b0 & 0xE0) === 0xC0 && i < bytes.length) {
+                    const b1 = bytes[i++] & 0x3F;
+                    out += String.fromCharCode(((b0 & 0x1F) << 6) | b1);
+                } else if ((b0 & 0xF0) === 0xE0 && i + 1 < bytes.length) {
+                    const b1 = bytes[i++] & 0x3F;
+                    const b2 = bytes[i++] & 0x3F;
+                    out += String.fromCharCode(((b0 & 0x0F) << 12) | (b1 << 6) | b2);
+                } else if ((b0 & 0xF8) === 0xF0 && i + 2 < bytes.length) {
+                    const b1 = bytes[i++] & 0x3F;
+                    const b2 = bytes[i++] & 0x3F;
+                    const b3 = bytes[i++] & 0x3F;
+                    const cp = ((b0 & 0x07) << 18) | (b1 << 12) | (b2 << 6) | b3;
+                    const adj = cp - 0x10000;
+                    out += String.fromCharCode(0xD800 + (adj >> 10), 0xDC00 + (adj & 0x3FF));
+                }
+            }
+            return out;
+        }
+
+        function vaultEncodeBase64(bytes) {
+            let out = '';
+            for (let i = 0; i < bytes.length; i += 3) {
+                const b0 = bytes[i];
+                const has1 = i + 1 < bytes.length;
+                const has2 = i + 2 < bytes.length;
+                const b1 = has1 ? bytes[i + 1] : 0;
+                const b2 = has2 ? bytes[i + 2] : 0;
+                const trip = (b0 << 16) | (b1 << 8) | b2;
+                out += VAULT_B64_CHARS[(trip >> 18) & 0x3F];
+                out += VAULT_B64_CHARS[(trip >> 12) & 0x3F];
+                out += has1 ? VAULT_B64_CHARS[(trip >> 6) & 0x3F] : '=';
+                out += has2 ? VAULT_B64_CHARS[trip & 0x3F] : '=';
+            }
+            return out;
+        }
+
+        function vaultDecodeBase64(b64) {
+            const clean = String(b64 || '').replace(/[^A-Za-z0-9+/=]/g, '');
+            const bytes = [];
+            for (let i = 0; i < clean.length; i += 4) {
+                const c0 = VAULT_B64_CHARS.indexOf(clean[i]);
+                const c1 = VAULT_B64_CHARS.indexOf(clean[i + 1]);
+                const ch2 = clean[i + 2];
+                const ch3 = clean[i + 3];
+                if (c0 < 0 || c1 < 0) break;
+                const c2 = ch2 && ch2 !== '=' ? VAULT_B64_CHARS.indexOf(ch2) : -1;
+                const c3 = ch3 && ch3 !== '=' ? VAULT_B64_CHARS.indexOf(ch3) : -1;
+                const trip = (c0 << 18) | (c1 << 12) | ((c2 >= 0 ? c2 : 0) << 6) | (c3 >= 0 ? c3 : 0);
+                bytes.push((trip >> 16) & 0xFF);
+                if (c2 >= 0) bytes.push((trip >> 8) & 0xFF);
+                if (c3 >= 0) bytes.push(trip & 0xFF);
+            }
+            return bytes;
+        }
+
+        function sealWithKey(plaintext, secretKey) {
+            const clean = String(plaintext || '');
+            if (!clean) return '';
+            const pBytes = vaultUtf8ToBytes(clean);
+            const rawKey = vaultUtf8ToBytes(String(secretKey || 'celik-kodu-default-seal'));
+            const kBytes = rawKey.length ? rawKey : [99, 101, 108, 105, 107];
+            const xBytes = pBytes.map((b, idx) => (b ^ kBytes[idx % kBytes.length] ^ ((idx * 31 + 17) & 0xFF)) & 0xFF);
+            return 'v1:' + vaultEncodeBase64(xBytes);
+        }
+
+        function unsealWithKey(sealed, secretKey) {
+            const raw = String(sealed || '').trim();
+            if (!raw || !raw.startsWith('v1:')) return '';
+            const xBytes = vaultDecodeBase64(raw.slice(3));
+            const rawKey = vaultUtf8ToBytes(String(secretKey || 'celik-kodu-default-seal'));
+            const kBytes = rawKey.length ? rawKey : [99, 101, 108, 105, 107];
+            const pBytes = xBytes.map((b, idx) => (b ^ kBytes[idx % kBytes.length] ^ ((idx * 31 + 17) & 0xFF)) & 0xFF);
+            return vaultBytesToUtf8(pBytes);
+        }
+
+        function getSystemVaultPassphrase() {
+            const pid = (typeof FIREBASE_CONFIG !== 'undefined' && FIREBASE_CONFIG.projectId) ? FIREBASE_CONFIG.projectId : 'fitness-4f427';
+            return `${pid}:celik-kodu-sys-vault-v1`;
+        }
+
+        function sealSystemAiKey(plainKey) {
+            const clean = String(plainKey || '').trim();
+            return clean ? sealWithKey(clean, getSystemVaultPassphrase()) : '';
+        }
+
+        function unsealSystemAiKey(sealedKey) {
+            const raw = String(sealedKey || '').trim();
+            if (!raw) return '';
+            if (raw.startsWith('v1:')) return unsealWithKey(raw, getSystemVaultPassphrase());
+            return raw;
+        }
+
+        function applyMasterCatalogMeta(meta) {
+            if (!meta || typeof meta !== 'object') return;
+            try {
+                localStorage.setItem(MASTER_CATALOG_META_KEY, JSON.stringify(meta));
+            } catch {}
+            if (typeof window !== 'undefined') {
+                window.CELIK_MASTER_CATALOG_META = meta;
+            }
+        }
+
+        const CLOUD_MASTER_CATALOG_STORAGE_KEY = 'celik_kodu_cloud_master_catalog_v1';
+        const CENTRAL_BRIDGE_URL_KEY = 'celik_kodu_central_bridge_url';
+
+        function applyCloudMasterCatalogPayload(payload, persistLocal = true) {
+            if (!payload || typeof payload !== 'object') return false;
+            try {
+                const parsedExercises = Array.isArray(payload.exercises)
+                    ? payload.exercises
+                    : (typeof payload.exercisesJson === 'string' && payload.exercisesJson.trim() ? JSON.parse(payload.exercisesJson) : null);
+                const parsedOpengym = (payload.opengymCatalog && typeof payload.opengymCatalog === 'object')
+                    ? payload.opengymCatalog
+                    : (typeof payload.opengymCatalogJson === 'string' && payload.opengymCatalogJson.trim() ? JSON.parse(payload.opengymCatalogJson) : null);
+                const parsedGuideMap = (payload.exerciseGuideMap && typeof payload.exerciseGuideMap === 'object')
+                    ? payload.exerciseGuideMap
+                    : (typeof payload.exerciseGuideMapJson === 'string' && payload.exerciseGuideMapJson.trim() ? JSON.parse(payload.exerciseGuideMapJson) : null);
+
+                if (Array.isArray(parsedExercises) && parsedExercises.length > 0 && typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB)) {
+                    EXERCISES_DB.splice(0, EXERCISES_DB.length, ...parsedExercises);
+                    if (typeof window !== 'undefined') window.EXERCISES_DB = EXERCISES_DB;
+                }
+                if (parsedOpengym && typeof parsedOpengym === 'object' && !Array.isArray(parsedOpengym) && typeof window !== 'undefined') {
+                    if (window.OPENGYM_GLOBAL_CATALOG && typeof window.OPENGYM_GLOBAL_CATALOG === 'object') {
+                        Object.assign(window.OPENGYM_GLOBAL_CATALOG, parsedOpengym);
+                    } else {
+                        window._pendingCloudOpengymCatalog = Object.assign(window._pendingCloudOpengymCatalog || {}, parsedOpengym);
+                    }
+                }
+                if (parsedGuideMap && typeof parsedGuideMap === 'object' && !Array.isArray(parsedGuideMap) && typeof window !== 'undefined') {
+                    if (window.exerciseGuideMap && typeof window.exerciseGuideMap === 'object') {
+                        Object.assign(window.exerciseGuideMap, parsedGuideMap);
+                    } else {
+                        window._pendingCloudGuideMap = Object.assign(window._pendingCloudGuideMap || {}, parsedGuideMap);
+                    }
+                }
+
+                const metaObj = {
+                    version: Number(payload.version || 0),
+                    exerciseCount: Number(payload.exerciseCount || (Array.isArray(parsedExercises) ? parsedExercises.length : 0)),
+                    totalCatalogIds: Number(payload.totalCatalogIds || 0),
+                    opengymCount: Number(payload.opengymCount || 0),
+                    guideCount: Number(payload.guideCount || 0),
+                    updatedAt: Number(payload.updatedAt || Date.now())
+                };
+                if (typeof window !== 'undefined') {
+                    window.CELIK_MASTER_CATALOG_META = Object.assign({}, window.CELIK_MASTER_CATALOG_META || {}, metaObj);
+                }
+
+                if (persistLocal) {
+                    const cacheRecord = {
+                        ...metaObj,
+                        exercisesJson: typeof payload.exercisesJson === 'string'
+                            ? payload.exercisesJson
+                            : (Array.isArray(parsedExercises) ? JSON.stringify(parsedExercises) : ''),
+                        opengymCatalogJson: typeof payload.opengymCatalogJson === 'string'
+                            ? payload.opengymCatalogJson
+                            : (parsedOpengym ? JSON.stringify(parsedOpengym) : ''),
+                        exerciseGuideMapJson: typeof payload.exerciseGuideMapJson === 'string'
+                            ? payload.exerciseGuideMapJson
+                            : (parsedGuideMap ? JSON.stringify(parsedGuideMap) : '')
+                    };
+                    localStorage.setItem(CLOUD_MASTER_CATALOG_STORAGE_KEY, JSON.stringify(cacheRecord));
+                }
+                return true;
+            } catch (err) {
+                console.warn('Bulut ana katalogu uygulanamadı:', err);
+                return false;
+            }
+        }
+
+        function loadCachedCloudMasterCatalogOnBoot() {
+            try {
+                const raw = localStorage.getItem(CLOUD_MASTER_CATALOG_STORAGE_KEY);
+                if (!raw) return false;
+                const parsed = JSON.parse(raw);
+                return applyCloudMasterCatalogPayload(parsed, false);
+            } catch {
+                return false;
+            }
+        }
+
+        function parseFirestoreValueForCatalog(val) {
+            if (!val || typeof val !== 'object') return null;
+            if ('nullValue' in val) return null;
+            if ('booleanValue' in val) return Boolean(val.booleanValue);
+            if ('integerValue' in val) return Number(val.integerValue);
+            if ('doubleValue' in val) return Number(val.doubleValue);
+            if ('stringValue' in val) return String(val.stringValue);
+            if ('arrayValue' in val) return (val.arrayValue.values || []).map(parseFirestoreValueForCatalog);
+            if ('mapValue' in val) {
+                const out = {};
+                for (const [k, v] of Object.entries(val.mapValue.fields || {})) {
+                    out[k] = parseFirestoreValueForCatalog(v);
+                }
+                return out;
+            }
+            return null;
+        }
+
+        async function syncMasterCatalogFromCloud(expectedVersion = 0) {
+            try {
+                const cachedRaw = localStorage.getItem(CLOUD_MASTER_CATALOG_STORAGE_KEY);
+                const cachedObj = cachedRaw ? JSON.parse(cachedRaw) : null;
+                const localVersion = Number(cachedObj?.version || 0);
+                if (cachedObj && Number(expectedVersion || 0) > 0 && localVersion >= Number(expectedVersion)) {
+                    loadCachedCloudMasterCatalogOnBoot();
+                    return true;
+                }
+
+                let cloudPayload = null;
+                if (isFirebaseReady && fbDb) {
+                    const catSnap = await fbDb.collection('app_system').doc('master_catalog').get();
+                    if (catSnap && catSnap.exists) {
+                        cloudPayload = catSnap.data();
+                    }
+                }
+                if (!cloudPayload) {
+                    const apiKeyParam = (typeof FIREBASE_CONFIG !== 'undefined' && FIREBASE_CONFIG.apiKey) ? `?key=${encodeURIComponent(FIREBASE_CONFIG.apiKey)}` : '';
+                    const restUrl = `https://firestore.googleapis.com/v1/projects/fitness-4f427/databases/(default)/documents/app_system/master_catalog${apiKeyParam}`;
+                    const restRes = await fetch(restUrl);
+                    if (restRes.ok) {
+                        const docJson = await restRes.json();
+                        cloudPayload = {};
+                        for (const [k, v] of Object.entries(docJson?.fields || {})) {
+                            cloudPayload[k] = parseFirestoreValueForCatalog(v);
+                        }
+                    }
+                }
+
+                if (cloudPayload && applyCloudMasterCatalogPayload(cloudPayload, true)) {
+                    if (typeof updateLibrarySubTabButtons === 'function') updateLibrarySubTabButtons();
+                    if (typeof document !== 'undefined') {
+                        const isLibActive = document.getElementById('libraryTab')?.classList.contains('active');
+                        if (isLibActive && typeof renderLibrary === 'function') renderLibrary();
+                    }
+                    return true;
+                }
+            } catch (err) {
+                console.warn('Ana katalog buluttan eşitlenemedi:', err);
+            }
+            return false;
+        }
+
+        async function publishMasterCatalogToCloud(newVersion) {
+            if (typeof isCurrentUserAdmin === 'function' && !isCurrentUserAdmin()) return false;
+            if (!isFirebaseReady || !fbDb) return false;
+            const versionNum = Number(newVersion || (Number(window.CELIK_MASTER_CATALOG_META?.version || 293) + 1));
+            const exercisesArr = (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB)) ? EXERCISES_DB : [];
+            const opengymObj = (typeof window !== 'undefined' && window.OPENGYM_GLOBAL_CATALOG) ? window.OPENGYM_GLOBAL_CATALOG : {};
+            const guideObj = (typeof window !== 'undefined' && window.exerciseGuideMap) ? window.exerciseGuideMap : {};
+            const nowTs = Date.now();
+            const payload = {
+                version: versionNum,
+                updatedAt: nowTs,
+                exerciseCount: exercisesArr.length,
+                totalCatalogIds: exercisesArr.length,
+                opengymCount: Object.keys(opengymObj).length,
+                guideCount: Object.keys(guideObj).length,
+                exercisesJson: JSON.stringify(exercisesArr),
+                opengymCatalogJson: JSON.stringify(opengymObj),
+                exerciseGuideMapJson: JSON.stringify(guideObj)
+            };
+            await fbDb.collection('app_system').doc('master_catalog').set(payload, { merge: true });
+            await fbDb.collection('app_system').doc('ai_config').set({
+                masterCatalogMeta: {
+                    version: versionNum,
+                    docPath: 'app_system/master_catalog',
+                    exerciseCount: payload.exerciseCount,
+                    totalCatalogIds: payload.totalCatalogIds,
+                    opengymCount: payload.opengymCount,
+                    guideCount: payload.guideCount,
+                    muscleCount: 10,
+                    subMuscleCount: 31,
+                    updatedAt: nowTs
+                }
+            }, { merge: true });
+            applyCloudMasterCatalogPayload(payload, true);
+            return true;
+        }
+
+        loadCachedCloudMasterCatalogOnBoot();
+        if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+            document.addEventListener('DOMContentLoaded', () => {
+                loadCachedCloudMasterCatalogOnBoot();
+            });
+        }
+
+        if (typeof window !== 'undefined') {
+            window.applyCloudMasterCatalogPayload = applyCloudMasterCatalogPayload;
+            window.syncMasterCatalogFromCloud = syncMasterCatalogFromCloud;
+            window.publishMasterCatalogToCloud = publishMasterCatalogToCloud;
+            window.CelikVaultCodec = {
+                sealWithKey,
+                unsealWithKey,
+                sealSystemAiKey,
+                unsealSystemAiKey,
+                applyMasterCatalogMeta,
+                applyCloudMasterCatalogPayload,
+                SYSTEM_AI_VAULT_KEY,
+                MASTER_CATALOG_META_KEY,
+                CLOUD_MASTER_CATALOG_STORAGE_KEY,
+                CENTRAL_BRIDGE_URL_KEY
+            };
+        }
+
         function getAthleteCloudSeal(targetUid, colName = '') {
             const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : 'usr_admin');
             const colSealKey = colName ? `celik_kodu_cloud_seal_${colName}_${uid}` : '';
@@ -257,23 +604,50 @@
         async function syncAiConfigFromCloud() {
             if (!isFirebaseReady || !fbDb) return;
             try {
-                const localKey = (localStorage.getItem(GEMINI_API_STORAGE_KEY) || '').trim();
                 const docRef = fbDb.collection('app_system').doc('ai_config');
                 const docSnap = await docRef.get();
 
                 if (docSnap && docSnap.exists) {
-                    const data = docSnap.data();
-                    if (data && data.geminiApiKey) {
-                        const cloudKey = data.geminiApiKey.trim();
-                        if (cloudKey) {
-                            if (localKey !== cloudKey) {
-                                localStorage.setItem(GEMINI_API_STORAGE_KEY, cloudKey);
+                    const data = docSnap.data() || {};
+                    if (data.centralBridgeConfig && typeof data.centralBridgeConfig === 'object') {
+                        const baseUrl = String(data.centralBridgeConfig.baseUrl || '').trim().replace(/\/+$/, '');
+                        try {
+                            if (baseUrl && /^https:\/\//i.test(baseUrl)) {
+                                localStorage.setItem(CENTRAL_BRIDGE_URL_KEY, baseUrl);
+                            } else {
+                                localStorage.removeItem(CENTRAL_BRIDGE_URL_KEY);
                             }
-                            if (typeof updateProfileGeminiStatusUI === 'function') updateProfileGeminiStatusUI();
-                            const curEx = (typeof pickerContext !== 'undefined' && pickerContext && pickerContext.targetExId) ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
-                            if (typeof updateGeminiAiModalUI === 'function') updateGeminiAiModalUI(curEx);
-                            return;
+                        } catch {}
+                    }
+                    if (data.masterCatalogMeta && typeof data.masterCatalogMeta === 'object') {
+                        applyMasterCatalogMeta(data.masterCatalogMeta);
+                        const metaVer = Number(data.masterCatalogMeta.version || 0);
+                        syncMasterCatalogFromCloud(metaVer);
+                    } else {
+                        syncMasterCatalogFromCloud(0);
+                    }
+                    const rawSealed = typeof data.sealedAiKey === 'string' ? data.sealedAiKey.trim() : '';
+                    const legacyPlain = typeof data.geminiApiKey === 'string' ? data.geminiApiKey.trim() : '';
+                    const cloudKey = rawSealed ? unsealSystemAiKey(rawSealed) : legacyPlain;
+                    const sealedForVault = rawSealed || (legacyPlain ? sealSystemAiKey(legacyPlain) : '');
+
+                    if (cloudKey && sealedForVault) {
+                        try {
+                            localStorage.removeItem(GEMINI_API_STORAGE_KEY);
+                            localStorage.removeItem(`${GEMINI_API_STORAGE_KEY}_usr_admin`);
+                            localStorage.setItem(SYSTEM_AI_VAULT_KEY, JSON.stringify({
+                                sealedAiKey: sealedForVault,
+                                masterCatalogMeta: data.masterCatalogMeta || null,
+                                updatedAt: Date.now()
+                            }));
+                        } catch {}
+                        if (typeof window !== 'undefined' && typeof window.setSystemAiKeyMemoryOnly === 'function') {
+                            window.setSystemAiKeyMemoryOnly(cloudKey);
                         }
+                        if (typeof updateProfileGeminiStatusUI === 'function') updateProfileGeminiStatusUI();
+                        const curEx = (typeof pickerContext !== 'undefined' && pickerContext && pickerContext.targetExId) ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
+                        if (typeof updateGeminiAiModalUI === 'function') updateGeminiAiModalUI(curEx);
+                        return;
                     }
                 }
             } catch (err) {
@@ -1349,6 +1723,74 @@
                     safeParse(`celik_kodu_garmin_sent_manifests_v1__${uid}`, {}),
                     safeParse(`celik_garmin_sent_manifests_v1_${uid}`, {})
                 );
+                delete manifestsMerged.__watchVault;
+                delete manifestsMerged.__watchActivities;
+                delete manifestsMerged.__wellnessSteps;
+
+                const manifestKeys = Object.keys(manifestsMerged);
+                if (manifestKeys.length > 300) {
+                    manifestKeys.sort().slice(0, manifestKeys.length - 300).forEach(oldKey => {
+                        delete manifestsMerged[oldKey];
+                    });
+                }
+
+                const localWatchVault = safeParse(`celik_garmin_watch_vault_v1_${uid}`, null);
+                if (localWatchVault && typeof localWatchVault === 'object' && !Array.isArray(localWatchVault)) {
+                    manifestsMerged.__watchVault = {
+                        enabled: localWatchVault.enabled !== false,
+                        sealedTredict: typeof localWatchVault.sealedTredict === 'string' ? localWatchVault.sealedTredict : '',
+                        sealedIntervals: typeof localWatchVault.sealedIntervals === 'string' ? localWatchVault.sealedIntervals : '',
+                        sealedGateway: typeof localWatchVault.sealedGateway === 'string' ? localWatchVault.sealedGateway : '',
+                        sealRef: typeof localWatchVault.sealRef === 'string' ? localWatchVault.sealRef : '',
+                        updatedAt: Number(localWatchVault.updatedAt || Date.now())
+                    };
+                }
+
+                const rawWatchTelemetry = safeParse(`celik_garmin_telemetry_v2_${uid}`, null);
+                if (Array.isArray(rawWatchTelemetry) && rawWatchTelemetry.length > 0) {
+                    manifestsMerged.__watchActivities = rawWatchTelemetry
+                        .filter(a => a && typeof a === 'object' && a.id)
+                        .slice(0, 15)
+                        .map(a => {
+                            const sm = (a.summary && typeof a.summary === 'object') ? a.summary : a;
+                            return {
+                                id: String(a.id),
+                                date: String(a.date || ''),
+                                title: String(a.title || ''),
+                                sportType: String(a.sportType || ''),
+                                subSportType: String(a.subSportType || ''),
+                                summary: {
+                                    duration: Number(sm.duration || 0),
+                                    durationTotal: Number(sm.durationTotal || sm.duration || 0),
+                                    distance: Number(sm.distance || 0),
+                                    calories: Number(sm.calories || 0),
+                                    heartrate: Number(sm.heartrate || 0),
+                                    heartrateMax: Number(sm.heartrateMax || 0),
+                                    pace: Number(sm.pace || 0),
+                                    cadence: Number(sm.cadence || 0),
+                                    cadenceMax: Number(sm.cadenceMax || 0)
+                                },
+                                sourceProvider: String(a.sourceProvider || '')
+                            };
+                        });
+                }
+
+                const rawWellnessSteps = safeParse(`celik_garmin_wellness_steps_v1_${uid}`, null);
+                if (rawWellnessSteps && typeof rawWellnessSteps === 'object' && !Array.isArray(rawWellnessSteps)) {
+                    const stepDates = Object.keys(rawWellnessSteps)
+                        .filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k))
+                        .sort()
+                        .slice(-30);
+                    if (stepDates.length > 0) {
+                        const compactWellness = {};
+                        stepDates.forEach(dt => {
+                            const entry = rawWellnessSteps[dt];
+                            if (entry && typeof entry === 'object') compactWellness[dt] = entry;
+                        });
+                        manifestsMerged.__wellnessSteps = compactWellness;
+                    }
+                }
+
                 const clientUpdatedAt = Number(localStorage.getItem(`celik_kodu_state_updated_at_${uid}`) || Date.now());
                 await writeAthleteDocWithSealHeal('user_state', uid, (seal) => stripWatchBridgeSecretsFromObj({
                     weeklySchedule: safeParse(`celik_kodu_weekly_schedule_${uid}`, {}),
@@ -1601,9 +2043,81 @@
                     localStorage.setItem(`celik_kodu_active_state_${uid}`, JSON.stringify(data.activeWorkoutDraft));
                 }
                 if (data.garminManifests && typeof data.garminManifests === 'object') {
+                    const cloudManifests = Object.assign({}, data.garminManifests);
+                    const cloudWatchVault = cloudManifests.__watchVault;
+                    const cloudWatchActivities = cloudManifests.__watchActivities;
+                    const cloudWellnessSteps = cloudManifests.__wellnessSteps;
+                    delete cloudManifests.__watchVault;
+                    delete cloudManifests.__watchActivities;
+                    delete cloudManifests.__wellnessSteps;
+
+                    if (cloudWatchVault && typeof cloudWatchVault === 'object' && !Array.isArray(cloudWatchVault)) {
+                        const vKey = `celik_garmin_watch_vault_v1_${uid}`;
+                        const localVault = safeParseCloud(vKey, null);
+                        const cloudVaultTs = Number(cloudWatchVault.updatedAt || 0);
+                        const localVaultTs = Number(localVault?.updatedAt || 0);
+                        const cloudHasCreds = Boolean(cloudWatchVault.sealedTredict || cloudWatchVault.sealedIntervals);
+                        const localHasCreds = Boolean(localVault?.sealedTredict || localVault?.sealedIntervals);
+                        if (!localVault || (!hasPendingLocalState && cloudVaultTs >= localVaultTs) || (cloudHasCreds && !localHasCreds)) {
+                            localStorage.setItem(vKey, JSON.stringify(cloudWatchVault));
+                        } else if (localVaultTs > cloudVaultTs && localHasCreds) {
+                            hasUnsyncedLocalDiff = true;
+                        }
+                    }
+
+                    if (Array.isArray(cloudWatchActivities) && cloudWatchActivities.length > 0) {
+                        const tKey = `celik_garmin_telemetry_v2_${uid}`;
+                        const localActs = safeParseCloud(tKey, []);
+                        const actMap = new Map();
+                        cloudWatchActivities.forEach(a => {
+                            if (a && a.id) actMap.set(String(a.id), a);
+                        });
+                        if (Array.isArray(localActs)) {
+                            localActs.forEach(a => {
+                                if (!a || !a.id) return;
+                                const prev = actMap.get(String(a.id));
+                                const prevRounds = Array.isArray(prev?.rounds) ? prev.rounds.length : 0;
+                                const nextRounds = Array.isArray(a?.rounds) ? a.rounds.length : 0;
+                                if (!prev || nextRounds >= prevRounds) {
+                                    actMap.set(String(a.id), Object.assign({}, prev || {}, a));
+                                }
+                            });
+                        }
+                        const mergedActs = Array.from(actMap.values())
+                            .sort((a, b) => String(b?.date || '').localeCompare(String(a?.date || '')))
+                            .slice(0, 30);
+                        localStorage.setItem(tKey, JSON.stringify(mergedActs));
+                    }
+
+                    if (cloudWellnessSteps && typeof cloudWellnessSteps === 'object' && !Array.isArray(cloudWellnessSteps)) {
+                        const wKey = `celik_garmin_wellness_steps_v1_${uid}`;
+                        const localW = safeParseCloud(wKey, {}) || {};
+                        const cloudDateSource = (cloudWellnessSteps.days && typeof cloudWellnessSteps.days === 'object')
+                            ? cloudWellnessSteps.days
+                            : cloudWellnessSteps;
+                        const mergedW = Object.assign({}, localW);
+                        delete mergedW.days;
+                        delete mergedW.updatedAt;
+                        for (const [dKey, cVal] of Object.entries(cloudDateSource)) {
+                            if (!/^\d{4}-\d{2}-\d{2}$/.test(dKey) || !cVal || typeof cVal !== 'object') continue;
+                            const lVal = mergedW[dKey];
+                            if (!lVal || Number(cVal.steps || 0) >= Number(lVal.steps || 0)) {
+                                mergedW[dKey] = Object.assign({}, lVal || {}, cVal, { date: cVal.date || dKey });
+                            }
+                        }
+                        localStorage.setItem(wKey, JSON.stringify(mergedW));
+                    }
+
                     const mKey = `celik_garmin_sent_manifests_v1_${uid}`;
-                    const localM = JSON.parse(localStorage.getItem(mKey) || '{}') || {};
-                    localStorage.setItem(mKey, JSON.stringify(Object.assign({}, data.garminManifests, localM)));
+                    const localM = safeParseCloud(mKey, {}) || {};
+                    delete localM.__watchVault;
+                    delete localM.__watchActivities;
+                    delete localM.__wellnessSteps;
+                    localStorage.setItem(mKey, JSON.stringify(Object.assign({}, cloudManifests, localM)));
+
+                    if (typeof window !== 'undefined' && window.GarminTredictChief && typeof window.GarminTredictChief.refreshFromCentralVault === 'function') {
+                        try { window.GarminTredictChief.refreshFromCentralVault(uid); } catch {}
+                    }
                 }
                 if (!hasPendingLocalState && cloudUpdatedAt > localUpdatedAt && !hasUnsyncedLocalDiff) {
                     localStorage.setItem(`celik_kodu_state_updated_at_${uid}`, String(cloudUpdatedAt));
@@ -4215,8 +4729,10 @@
             const geminiInput = document.getElementById('profileGeminiApiKeyInput');
             if (geminiInput && user.role === 'admin') {
                 const gKey = geminiInput.value.trim();
-                setGeminiApiKey(gKey, true);
-                user.geminiApiKey = gKey;
+                if (gKey) {
+                    setGeminiApiKey(gKey, true);
+                }
+                if (user.geminiApiKey) delete user.geminiApiKey;
             }
 
             const users = getAuthUsers();

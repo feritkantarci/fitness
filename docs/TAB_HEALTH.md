@@ -1,6 +1,6 @@
 # 🛡️ ÇELİK KODU — 7 BAĞIMSIZ ŞEF ODASI, KÖPRÜ GÜMRÜĞÜ & HATA HAFIZASI PANELİ (TAB_HEALTH)
 
-> **Son Otomatik Kontrol:** `2026-11-14 07:29:33` | **Bağımsız Oda Dosyası:** `11/11` | **Toplam Hareket:** `284` | **Kırık Bağlantı:** `0` | **Matematik & Gümrük Sınavı:** `19/19`
+> **Son Otomatik Kontrol:** `2026-11-14 17:40:03` | **Bağımsız Oda Dosyası:** `11/11` | **Toplam Hareket:** `284` | **Kırık Bağlantı:** `0` | **Matematik & Gümrük Sınavı:** `20/20`
 
 ---
 
@@ -13,8 +13,8 @@
 | **3. Kütüphane Şefi** (`library-guard`) | `js/chiefs/library-chief.js` (38 fn) | Tüm hareketlerin form/kas/birim kimliğini korur, istemediğin hareketi tüm sistemden gizler | Süreli/dakikalı hareketi tekrarlı sanması, gizlenen hareketin sayacı bozması | 🟢 Sorunsuz | 🟢 2/2 Geçti |
 | **4. Geçmiş Şefi** (`history-guard`) | `js/chiefs/history-chief.js` (37 fn) | Tamamlanan seansları gümrükten geçirip saklar, bozuk veriyi engeller, düzenleme/silmeyi Analiz ile eşitler | Bozuk/boş kaydın geçmişe sızması, kardiyo dakikasının tonaj şişirmesi, silinen kaydın Analizden düşmemesi | 🟢 Sorunsuz | 🟢 2/2 Geçti |
 | **5. Analiz Şefi** (`analytics-guard`) | `js/chiefs/analytics-chief.js` (91 fn) | Kas yükünü, set dayanıklılığını, Epley zirve rekorunu, haftalık fitness/kardiyo puanını ve güncel kiloyu hesaplar | Piramit/drop-seti güç düşüşü sanmak, çift Zirve Rekor basmak, 30 günlük eski tartı kiloyu sıfırlamak | 🟢 Sorunsuz | 🟢 9/9 Geçti |
-| **6. Profil Şefi** (`profile-guard`) | `js/chiefs/profile-chief.js` (110 fn) | Verilerini güvenle yedekler, şifre/API anahtarlarını buluttan izole eder ve tema okunabilirliğini korur | Açık zeminde açık renk yazı kalması, dışa aktarımda gizli anahtar/şifre sızması | 🟢 Sorunsuz | 🟢 1/1 Geçti |
-| **7. Garmin & Tredict Şefi** (`garmin-tredict-guard`) | `js/garmin-tredict-bridge.js` (61 fn) | Yeni hareketlerin Garmin karşılığını library-guard kaslarıyla kıyaslar, olmayanları isimsiz+notlu gönderir, dönüşte saatin adını değil bizdeki orijinal adı koruyup sağlık verilerini ilgili şefe iletir | Saatten gelen ham hareket adının olduğu gibi alınması, Garmin’de olmayan harekete zorlama isim verilmesi | 🟢 Sorunsuz | 🟢 1/1 Geçti |
+| **6. Profil Şefi** (`profile-guard`) | `js/chiefs/profile-chief.js` (125 fn) | Verilerini güvenle yedekler, şifre/API anahtarlarını buluttan izole eder ve tema okunabilirliğini korur | Açık zeminde açık renk yazı kalması, dışa aktarımda gizli anahtar/şifre sızması | 🟢 Sorunsuz | 🟢 1/1 Geçti |
+| **7. Garmin & Tredict Şefi** (`garmin-tredict-guard`) | `js/garmin-tredict-bridge.js` (82 fn) | Yeni hareketlerin Garmin karşılığını library-guard kaslarıyla kıyaslar, olmayanları isimsiz+notlu gönderir, dönüşte saatin adını değil bizdeki orijinal adı koruyup sağlık verilerini ilgili şefe iletir | Saatten gelen ham hareket adının olduğu gibi alınması, Garmin’de olmayan harekete zorlama isim verilmesi | 🟢 Sorunsuz | 🟢 2/2 Geçti |
 
 ---
 
@@ -46,7 +46,7 @@
 
 ---
 
-## 4. Otomatik Bekçi Raporu — B) 7 Şef Matematik, Gümrük & Hata Hafızası Sınavı (19/19)
+## 4. Otomatik Bekçi Raporu — B) 7 Şef Matematik, Gümrük & Hata Hafızası Sınavı (20/20)
 
 | Test | Sorumlu Şef | Senaryo | Beklenen (Olması Gereken) | Gerçekleşen (Sistem Çıktısı) | Sonuç |
 | :--- | :--- | :--- | :--- | :--- | :---: |
@@ -69,3 +69,4 @@
 | `T17` | `history-guard` | Köprü Gümrüğü (A2): Eksik Birim/Tarih Onarımı & Bozuk Kayıt Engeli | bozuk/boş kayıt engellendi (>=2), kardiyo sahte tonajı 0 kg onarıldı (>=1) | kayıt=1, tonaj=0kg, tartı=1, onarılan=3, engellenen=2 | ✅ Geçti |
 | `T18` | `analytics-guard` | Hata Hafızası Sicili: Tekil "🏆 Zirve Rekor" & Kardiyo Dakika Tekrar Hariçliği | Kart başına "🏆 Zirve Rekor" = 1 adet, tamamlanan seans tekrarında kardiyo dk = 0 | zirveRekorSayısı=1, toplamTekrar=12 (25 dk kürek hariç) | ✅ Geçti |
 | `T19` | `library-guard` | Bağlantı Alt Şefleri, Kutu Arıza Duvarı, Döngü Kilidi & Ekranda Bildirim | Gizli hareket taslak+takvimden değişir, hatalı kutu karantinaya alınır, döngü=1, bildirim > 0 | taslakTemiz=true, takvimTemiz=true, karantina=true, komşuSağlam=true, bildirim=2 | ✅ Geçti |
+| `T20` | `garmin-tredict-guard` | Merkez Saat Kasası & Aynı Gün Bağımsız Yürüyüş İzolasyonu | mühürlü saat kasası açık, açık metin sızıntısı 0, Defne Yürüyüşü (cond_walking) aynı gün kuvvet kaydını ezmeden bağımsız açıldı | kasa=true/mühür=true, katalog=true, kuvvet=true, kayıt=2, yürüyüş=cond_walking(2212m,123/152bpm,135kcal) | ✅ Geçti |

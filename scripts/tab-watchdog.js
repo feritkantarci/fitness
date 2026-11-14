@@ -1015,6 +1015,140 @@ function runAcademicMathSuite(moduleSources, dbText) {
         const ok = !res.stillInDraft && !res.stillInSched && res.quarantined && res.neighborSurvived && res.depth === 1 && res.loopBlocked >= 1 && res.noticesCount >= 2;
         return { ok, actual: `taslakTemiz=${!res.stillInDraft}, takvimTemiz=${!res.stillInSched}, karantina=${res.quarantined}, komşuSağlam=${res.neighborSurvived}, bildirim=${res.noticesCount}` };
       }
+    },
+    {
+      id: 'T20',
+      owner: 'garmin-tredict-guard',
+      title: 'Merkez Saat Kasası & Aynı Gün Bağımsız Yürüyüş İzolasyonu',
+      expected: 'mühürlü saat kasası açık, açık metin sızıntısı 0, Defne Yürüyüşü (cond_walking) aynı gün kuvvet kaydını ezmeden bağımsız açıldı',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const uid = 'usr_exam';
+          localStorage.removeItem('celik_garmin_enabled_' + uid);
+          localStorage.removeItem('celik_garmin_tredict_token_' + uid);
+          localStorage.removeItem('celik_garmin_intervals_token_' + uid);
+
+          setWorkoutLogs([
+            {
+              id: 'app_strength_nov14',
+              date: '2026-11-14',
+              timestamp: 1794650000000,
+              program: 'Üst Vücut A',
+              title: 'Üst Vücut A',
+              totalVolumeKg: 200,
+              exercises: [
+                {
+                  id: 'db_bench_press',
+                  name: 'Dambıl Bench Press',
+                  sets: [{ weight: 20, reps: 10, completed: true, volume: 200 }]
+                }
+              ]
+            }
+          ]);
+
+          const sealRef = 'seal_exam_watch_vault_2026';
+          const demoTr = 'trd_demo_vault_token_2026';
+          const demoIcu = 'icu_demo_vault_key_2026';
+          const vaultObj = {
+            enabled: true,
+            sealedTredict: window.CelikVaultCodec.sealWithKey(demoTr, sealRef),
+            sealedIntervals: window.CelikVaultCodec.sealWithKey(demoIcu, sealRef),
+            sealedGateway: '',
+            sealRef,
+            updatedAt: 1794675000000
+          };
+          const vaultKey = 'celik_garmin_watch_vault_v1_' + uid;
+          localStorage.setItem(vaultKey, JSON.stringify(vaultObj));
+          const rawVault = localStorage.getItem(vaultKey) || '';
+
+          const walkAct = {
+            id: 'tmd_walk_nov14',
+            date: '2026-11-14T16:00:37.230Z',
+            title: 'Defne Yürüyüş',
+            sportType: 'walking',
+            subSportType: 'generic',
+            summary: {
+              duration: 1276,
+              durationTotal: 1286,
+              distance: 2212.17,
+              calories: 135,
+              heartrate: 123,
+              heartrateMax: 152,
+              pace: 577,
+              cadence: 121
+            },
+            rounds: []
+          };
+          localStorage.setItem('celik_garmin_telemetry_v2_' + uid, JSON.stringify([walkAct]));
+
+          const gt = window.GarminTredictChief;
+          gt.refreshFromCentralVault(uid);
+          gt.handoffCompletedActivitiesToTabChiefs();
+
+          const enabledAfterVault = gt.isGarminEnabledForCurrentUser();
+          const finalLogs = getWorkoutLogs();
+          const strengthLog = finalLogs.find(l => l && l.id === 'app_strength_nov14');
+          const walkLog = finalLogs.find(l => l && l.garminActivityId === 'tmd_walk_nov14');
+
+          const origLen = EXERCISES_DB.length;
+          const origBackup = EXERCISES_DB.slice();
+          const cloudExList = origBackup
+            .map((e, idx) => idx === 0 ? Object.assign({}, e, { cue: 'CLOUD_VERIFIED_CUE' }) : e)
+            .concat([{
+              id: 'cloud_test_ex',
+              name: 'Bulut Test Hareketi',
+              category: 'conditioning',
+              equipment: 'bodyweight',
+              primaryMuscles: ['core'],
+              secondaryMuscles: []
+            }]);
+          const appliedCatalog = window.applyCloudMasterCatalogPayload({
+            version: 999,
+            exerciseCount: cloudExList.length,
+            exercises: cloudExList,
+            opengymCatalog: {
+              cloud_test_ex: { clip: 'assets/media/cloud_test.webp', still: 'assets/media/cloud_test.webp' }
+            }
+          }, true);
+          const catalogUpdatedCue = EXERCISES_DB[0] && EXERCISES_DB[0].cue === 'CLOUD_VERIFIED_CUE';
+          const catalogAddedEx = EXERCISES_DB.length === origLen + 1 && EXERCISES_DB.some(e => e.id === 'cloud_test_ex');
+          const catalogMediaAdded = Boolean(window.OPENGYM_GLOBAL_CATALOG && window.OPENGYM_GLOBAL_CATALOG.cloud_test_ex);
+          EXERCISES_DB.splice(0, EXERCISES_DB.length, ...origBackup);
+          if (window.OPENGYM_GLOBAL_CATALOG) delete window.OPENGYM_GLOBAL_CATALOG.cloud_test_ex;
+
+          return {
+            enabledAfterVault,
+            vaultSealedNoPlaintext: rawVault.includes('v1:') && !rawVault.includes(demoTr) && !rawVault.includes(demoIcu),
+            logsLen: finalLogs.length,
+            strengthIntact: Boolean(strengthLog && strengthLog.totalVolumeKg === 200 && strengthLog.exercises?.[0]?.id === 'db_bench_press'),
+            walkExId: walkLog?.exercises?.[0]?.id || '',
+            walkDate: walkLog?.date || '',
+            walkIsCardio: Boolean(walkLog?.isCardioActivity),
+            walkHrAvg: walkLog?.healthSummary?.heartrateAvg || 0,
+            walkHrMax: walkLog?.healthSummary?.heartrateMax || 0,
+            walkDist: walkLog?.healthSummary?.distanceMeters || 0,
+            walkCals: walkLog?.healthSummary?.calories || 0,
+            catalogSynced: Boolean(appliedCatalog && catalogUpdatedCue && catalogAddedEx && catalogMediaAdded)
+          };
+        })()`, ctx);
+        const ok = res.enabledAfterVault
+          && res.vaultSealedNoPlaintext
+          && res.logsLen === 2
+          && res.strengthIntact
+          && res.walkExId === 'cond_walking'
+          && res.walkDate === '2026-11-14'
+          && res.walkIsCardio
+          && res.walkHrAvg === 123
+          && res.walkHrMax === 152
+          && res.walkDist === 2212
+          && res.walkCals === 135
+          && res.catalogSynced;
+        return {
+          ok,
+          actual: `kasa=${res.enabledAfterVault}/mühür=${res.vaultSealedNoPlaintext}, katalog=${res.catalogSynced}, kuvvet=${res.strengthIntact}, kayıt=${res.logsLen}, yürüyüş=${res.walkExId}(${res.walkDist}m,${res.walkHrAvg}/${res.walkHrMax}bpm,${res.walkCals}kcal)`
+        };
+      }
     }
   ];
 

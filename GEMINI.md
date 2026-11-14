@@ -173,6 +173,17 @@ Kullanıcı "canlıya al / push et" dediğinde şu adımlar uygulanır:
 * **Veri ve Hesap İşlerinde "Talep = Ortaya Çıkan Veri" Sağlaması:**
   - Veri işleyen, kaydeden veya hesaplayan her görev sonunda yalnızca görsel/buton kontrolüyle *"Sorunsuz"* denilemez; sıfırdan gerçekçi ve ters köşe sporcu verileri girilerek **beklenen hesap ile ekranda ortaya çıkan verinin birebir örtüştüğü** kanıtlanmadan görev kapatılmaz (yalnızca saf görsel/stil dokunuşları bu kapsamın dışındadır).
 
+---
+
+## 15. Profesyonel Mimari Rehberlik, Gerçek Konum Şeffaflığı ve Kod/Hafıza Ayrımı Yasası
+* **Soyut/Uydurma Terim Yasağı (Gerçek Konum Şeffaflığı):**
+  - Sohbette kod/dosya adı yazılmaz; ancak verinin veya servisin gerçekte **nerede** durduğu (örn. *Google Firebase bulut veritabanı*, *GitHub Pages statik sunucusu*, *Vercel bulut köprü sunucusu*, *telefonun yerel önbelleği*) ASLA *"merkez kasa"* gibi uydurma/muğlak kelimelerle örtülmez. Gerçek servis adı ve görevi sade Türkçe ile açıkça ifade edilir.
+* **Ürün Sahibi Kullanıcıya Profesyonel Mimari Liderlik:**
+  - Kullanıcı *"kod ayrı, hafıza ayrı olsun"* veya *"tüm cihazlar aynı yerden çeksin"* gibi yapısal bir hedef söylediğinde, yalnızca anlık yama yapılmaz; profesyonel mimari katmanları (**1. İnce Arayüz Kabuğu [Android/iOS/Web]**, **2. Merkez Bulut Hafızası [Google Firebase `app_system/master_catalog` + kullanıcı belgeleri]**, **3. 7/24 Merkez Bulut Köprüsü [API Sunucusu]**) net seçenekler ve gerçek kısıtlarla anlatılarak profesyonel yönlendirme yapılır.
+* **Kod (Arayüz) ve Hafıza (Merkez Bulut) Ayrımı Standardı:**
+  - Değişmez ana katalog (`EXERCISES_DB`, animasyon haritaları, form rehberleri) ile sporcu hafızası Google Firebase merkez bulutunda yaşar; saat ve yapay zeka dış köprüleri merkez API sunucusunda çalışır; Android, iOS ve Web yalnızca bu merkezden beslenen arayüz katmanı olarak tasarlanır (çevrimdışı önbellek yedekli).
+
+
 
 
 
