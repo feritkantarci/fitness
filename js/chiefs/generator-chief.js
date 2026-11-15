@@ -1176,9 +1176,9 @@
             if (grp) {
                 grp.querySelectorAll('button[data-val]').forEach(btn => {
                     const isSel = btn.getAttribute('data-val') === window.activePrecheckState.scope;
-                    btn.style.background = isSel ? '#0F172A' : '#F8FAFC';
-                    btn.style.color = isSel ? '#FFFFFF' : '#0F172A';
-                    btn.style.borderColor = isSel ? '#0F172A' : '#CBD5E1';
+                    btn.style.background = isSel ? 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)' : 'rgba(24, 21, 48, 0.7)';
+                    btn.style.color = isSel ? '#FFFFFF' : '#94A3B8';
+                    btn.style.borderColor = isSel ? '#8B5CF6' : 'rgba(167, 139, 250, 0.2)';
                     btn.style.fontWeight = isSel ? '800' : '700';
                 });
             }

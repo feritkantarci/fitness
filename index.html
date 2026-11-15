@@ -27,7 +27,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=300">
+    <link rel="stylesheet" href="css/style.css?v=301">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH (CANVA MODERN ATHLETIC LIGHT V229) */
         html, body { background-color: #F8FAFC; color: #0F172A; color-scheme: light; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -54,7 +54,7 @@
                     <path d="M34 25L26 36H33L30 46L39 34H32L34 25Z" fill="#FFFFFF"/>
                 </svg>
             </div>
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v300</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v301</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -253,7 +253,7 @@
                         <div class="modern-brand-subrow">
                             <span id="headerActiveTabLabel">ÜRETİCİ</span>
                             <span class="modern-brand-subdot" aria-hidden="true">•</span>
-                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v300</span>
+                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v301</span>
                         </div>
                     </div>
                 </div>
@@ -2393,54 +2393,54 @@
         </div>
     </div>
 
-    <!-- ==================== QUICK PRE-CHECK POPUP MODAL (YALIN & İKONSUZ) ==================== -->
-    <div id="aiQuickPrecheckModal" class="modal-overlay" style="overscroll-behavior:contain;" onclick="if(event.target === this) closeQuickAiPrecheckModal()">
-        <div class="modal-box" style="max-width:440px; width:92%; padding:20px; border-radius:16px; background:#FFFFFF; border:1.5px solid #CBD5E1; box-shadow:0 18px 40px rgba(15,23,42,0.22); overscroll-behavior:contain;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid #E2E8F0;">
-                <span style="font-size:15px; font-weight:900; color:#0F172A; letter-spacing:0.2px;">Program Planlama Kontrolü</span>
-                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeQuickAiPrecheckModal()" style="font-size:15px; color:#475569;">✕</button>
+    <!-- ==================== QUICK PRE-CHECK POPUP MODAL (FİGMA ATHLETIQ MOR STANDARDI) ==================== -->
+    <div id="aiQuickPrecheckModal" class="modal-overlay" style="overscroll-behavior:contain; background:rgba(6,5,12,0.85); backdrop-filter:blur(14px);" onclick="if(event.target === this) closeQuickAiPrecheckModal()">
+        <div class="modal-box" style="max-width:440px; width:92%; padding:22px; border-radius:24px; background:linear-gradient(165deg, #181530 0%, #100E22 100%); border:1.5px solid rgba(167,139,250,0.3); box-shadow:0 25px 60px -10px rgba(0,0,0,0.9), 0 0 30px rgba(139,92,246,0.25); overscroll-behavior:contain;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid rgba(167,139,250,0.18);">
+                <span style="font-size:16px; font-weight:900; color:#FFFFFF; letter-spacing:0.2px;">Program Planlama Kontrolü</span>
+                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeQuickAiPrecheckModal()" style="font-size:14px; color:#A78BFA; background:rgba(167,139,250,0.14); border:1px solid rgba(167,139,250,0.25); width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;">✕</button>
             </div>
 
             <!-- SORU 1: BUGÜN İÇİN Mİ, HAFTALIK MI? -->
             <div style="margin-bottom:16px;">
-                <div style="font-size:12.5px; font-weight:800; color:#0F172A; margin-bottom:8px;">Program Kapsamı</div>
+                <div style="font-size:12px; font-weight:800; color:#94A3B8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">Program Kapsamı</div>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;" id="aiPrecheckScopeGroup">
-                    <button type="button" data-val="single" onclick="selectQuickPrecheckScope('single')" style="padding:11px 10px; border-radius:10px; font-size:13px; font-weight:800; cursor:pointer; border:1.5px solid #0F172A; background:#0F172A; color:#FFFFFF;">Bugün İçin</button>
-                    <button type="button" data-val="weekly" onclick="selectQuickPrecheckScope('weekly')" style="padding:11px 10px; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; border:1.5px solid #CBD5E1; background:#F8FAFC; color:#0F172A;">Haftalık (Kalan Günler)</button>
+                    <button type="button" data-val="single" onclick="selectQuickPrecheckScope('single')" style="padding:12px 10px; border-radius:12px; font-size:13px; font-weight:800; cursor:pointer; border:1.5px solid #8B5CF6; background:linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); color:#FFFFFF; box-shadow:0 4px 14px rgba(139,92,246,0.35);">Bugün İçin</button>
+                    <button type="button" data-val="weekly" onclick="selectQuickPrecheckScope('weekly')" style="padding:12px 10px; border-radius:12px; font-size:13px; font-weight:700; cursor:pointer; border:1.5px solid rgba(167,139,250,0.2); background:rgba(24,21,48,0.7); color:#94A3B8;">Haftalık (Kalan Günler)</button>
                 </div>
-                <div id="aiPrecheckWeekProgressNote" style="display:none; margin-top:7px; padding:7px 10px; border-radius:8px; background:#F1F5F9; border-left:3px solid #0284C7; font-size:11.5px; font-weight:700; color:#334155; line-height:1.35;"></div>
+                <div id="aiPrecheckWeekProgressNote" style="display:none; margin-top:8px; padding:10px 12px; border-radius:10px; background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.25); border-left:3px solid #38BDF8; font-size:12px; font-weight:700; color:#38BDF8; line-height:1.4;"></div>
             </div>
 
             <!-- SORU 2: YORGUN KAS GRUBU -->
             <div style="margin-bottom:16px;">
-                <div style="font-size:12.5px; font-weight:800; color:#0F172A; margin-bottom:8px;">Yorgun Kas Grubu</div>
+                <div style="font-size:12px; font-weight:800; color:#94A3B8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">Yorgun Kas Grubu</div>
                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px;" id="aiPrecheckFatigueGroup">
-                    <button type="button" data-val="none" onclick="selectQuickPrecheckFatigue('none')" style="padding:10px 6px; border-radius:10px; font-size:12px; font-weight:800; cursor:pointer; border:1.5px solid #0F172A; background:#0F172A; color:#FFFFFF;">Yok</button>
-                    <button type="button" data-val="legs" onclick="selectQuickPrecheckFatigue('legs')" style="padding:10px 6px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; border:1.5px solid #CBD5E1; background:#F8FAFC; color:#0F172A;">Bacak</button>
-                    <button type="button" data-val="upper" onclick="selectQuickPrecheckFatigue('upper')" style="padding:10px 6px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; border:1.5px solid #CBD5E1; background:#F8FAFC; color:#0F172A;">Üst Vücut</button>
-                    <button type="button" data-val="back" onclick="selectQuickPrecheckFatigue('back')" style="padding:10px 6px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; border:1.5px solid #CBD5E1; background:#F8FAFC; color:#0F172A;">Sırt / Bel</button>
+                    <button type="button" data-val="none" onclick="selectQuickPrecheckFatigue('none')" style="padding:10px 6px; border-radius:10px; font-size:12px; font-weight:800; cursor:pointer; border:1.5px solid #8B5CF6; background:linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); color:#FFFFFF;">Yok</button>
+                    <button type="button" data-val="legs" onclick="selectQuickPrecheckFatigue('legs')" style="padding:10px 6px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; border:1.5px solid rgba(167,139,250,0.2); background:rgba(24,21,48,0.7); color:#94A3B8;">Bacak</button>
+                    <button type="button" data-val="upper" onclick="selectQuickPrecheckFatigue('upper')" style="padding:10px 6px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; border:1.5px solid rgba(167,139,250,0.2); background:rgba(24,21,48,0.7); color:#94A3B8;">Üst Vücut</button>
+                    <button type="button" data-val="back" onclick="selectQuickPrecheckFatigue('back')" style="padding:10px 6px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; border:1.5px solid rgba(167,139,250,0.2); background:rgba(24,21,48,0.7); color:#94A3B8;">Sırt / Bel</button>
                 </div>
             </div>
 
             <!-- TARTI GÜNCELSE BİLGİ SATIRI -->
-            <div id="aiPrecheckScaleFreshNotice" style="display:none; margin-bottom:16px; padding:10px 12px; border-radius:10px; background:#F0FDF4; border:1px solid #86EFAC; font-size:12px; font-weight:700; color:#15803D;">
+            <div id="aiPrecheckScaleFreshNotice" style="display:none; margin-bottom:16px; padding:10px 14px; border-radius:12px; background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.3); font-size:12px; font-weight:700; color:#34D399;">
                 Tartı verisi güncel (son 30 gün), programa otomatik dahil edildi.
             </div>
 
             <!-- SORU 3: SADECE TARTI 30 GÜNDEN ESKİYSE AÇILIR -->
             <div id="aiPrecheckScaleStaleRow" style="display:none; margin-bottom:16px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <span style="font-size:12.5px; font-weight:800; color:#0F172A;">Son 1 Ay Vücut Yönü</span>
-                    <span id="aiPrecheckScaleStaleBadge" style="font-size:10.5px; font-weight:800; color:#B45309; background:#FEF3C7; border:1px solid #FCD34D; padding:2px 7px; border-radius:6px;">Tartı 30+ Gün Eski</span>
+                    <span style="font-size:12px; font-weight:800; color:#94A3B8; text-transform:uppercase;">Son 1 Ay Vücut Yönü</span>
+                    <span id="aiPrecheckScaleStaleBadge" style="font-size:10.5px; font-weight:800; color:#F59E0B; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.35); padding:2px 7px; border-radius:6px;">Tartı 30+ Gün Eski</span>
                 </div>
                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;" id="aiPrecheckScaleGroup">
-                    <button type="button" data-val="stable" onclick="selectQuickPrecheckScale('stable')" style="padding:10px 8px; border-radius:10px; font-size:12.5px; font-weight:800; cursor:pointer; border:1.5px solid #0F172A; background:#0F172A; color:#FFFFFF;">Sabit</button>
-                    <button type="button" data-val="gained" onclick="selectQuickPrecheckScale('gained')" style="padding:10px 8px; border-radius:10px; font-size:12.5px; font-weight:700; cursor:pointer; border:1.5px solid #CBD5E1; background:#F8FAFC; color:#0F172A;">Kilo Arttı</button>
-                    <button type="button" data-val="lost" onclick="selectQuickPrecheckScale('lost')" style="padding:10px 8px; border-radius:10px; font-size:12.5px; font-weight:700; cursor:pointer; border:1.5px solid #CBD5E1; background:#F8FAFC; color:#0F172A;">Kilo Düştü</button>
+                    <button type="button" data-val="stable" onclick="selectQuickPrecheckScale('stable')" style="padding:10px 8px; border-radius:10px; font-size:12.5px; font-weight:800; cursor:pointer; border:1.5px solid #8B5CF6; background:linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); color:#FFFFFF;">Sabit</button>
+                    <button type="button" data-val="gained" onclick="selectQuickPrecheckScale('gained')" style="padding:10px 8px; border-radius:10px; font-size:12.5px; font-weight:700; cursor:pointer; border:1.5px solid rgba(167,139,250,0.2); background:rgba(24,21,48,0.7); color:#94A3B8;">Kilo Arttı</button>
+                    <button type="button" data-val="lost" onclick="selectQuickPrecheckScale('lost')" style="padding:10px 8px; border-radius:10px; font-size:12.5px; font-weight:700; cursor:pointer; border:1.5px solid rgba(167,139,250,0.2); background:rgba(24,21,48,0.7); color:#94A3B8;">Kilo Düştü</button>
                 </div>
             </div>
 
-            <button type="button" onclick="confirmQuickAiPrecheckAndGenerate()" style="width:100%; padding:13px 16px; border-radius:12px; border:none; background:#0F172A; color:#FFFFFF; font-size:13.5px; font-weight:900; cursor:pointer; letter-spacing:0.3px;">
+            <button type="button" onclick="confirmQuickAiPrecheckAndGenerate()" style="width:100%; padding:14px 16px; border-radius:14px; border:none; background:linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); color:#FFFFFF; font-size:14px; font-weight:900; cursor:pointer; letter-spacing:0.3px; box-shadow:0 8px 24px rgba(139,92,246,0.45);">
                 Programı Hazırla
             </button>
         </div>
@@ -3040,17 +3040,17 @@
     </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE (7 BAĞIMSIZ ŞEF ODASI + ORKESTRA) ==================== -->
-    <script src="js/exercises-db.js?v=300"></script>
-    <script src="js/chiefs/shared-core.js?v=300"></script>
-    <script src="js/chiefs/bridge-customs.js?v=300"></script>
-    <script src="js/chiefs/liaison-subchiefs.js?v=300"></script>
-    <script src="js/chiefs/profile-chief.js?v=300"></script>
-    <script src="js/chiefs/library-chief.js?v=300"></script>
+    <script src="js/exercises-db.js?v=301"></script>
+    <script src="js/chiefs/shared-core.js?v=301"></script>
+    <script src="js/chiefs/bridge-customs.js?v=301"></script>
+    <script src="js/chiefs/liaison-subchiefs.js?v=301"></script>
+    <script src="js/chiefs/profile-chief.js?v=301"></script>
+    <script src="js/chiefs/library-chief.js?v=301"></script>
     <script src="js/chiefs/history-chief.js?v=305"></script>
-    <script src="js/chiefs/analytics-chief.js?v=300"></script>
-    <script src="js/chiefs/generator-chief.js?v=300"></script>
-    <script src="js/chiefs/workout-chief.js?v=300"></script>
-    <script src="js/app.js?v=300"></script>
+    <script src="js/chiefs/analytics-chief.js?v=301"></script>
+    <script src="js/chiefs/generator-chief.js?v=301"></script>
+    <script src="js/chiefs/workout-chief.js?v=301"></script>
+    <script src="js/app.js?v=301"></script>
     <script>
         function getNotifStorageKey() {
             const uid = localStorage.getItem('celik_kodu_active_user_id') || 'default';
@@ -3243,6 +3243,6 @@
             </div>
         </div>
     </div>
-    <script src="js/garmin-tredict-bridge.js?v=300" defer></script>
+    <script src="js/garmin-tredict-bridge.js?v=301" defer></script>
 </body>
 </html>
