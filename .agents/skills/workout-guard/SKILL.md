@@ -6,7 +6,7 @@ description: Çelik Kodu Antrenman & Stüdyo sekmesini (#activeWorkoutTab, js/ch
 # 🏋️ 2. Oda — Antrenman & Stüdyo Şefi (`workout-guard`)
 
 - **Fiziksel Oda Dosyası:** `js/chiefs/workout-chief.js`
-- **Zorunlu Sınav Maddeleri:** `T9` (Eric Helms en ağır set ağırlık hafızası + saf vücut ağırlığında hayalet kilo yasağı), `T10` (Canlı seans/Stüdyo 3 modlu varsayılan hedef doğrulaması)
+- **Zorunlu Sınav Maddeleri:** `T9` (Eric Helms en ağır set ağırlık hafızası + saf vücut ağırlığında hayalet kilo yasağı), `T10` (Canlı seans/Stüdyo 3 modlu varsayılan hedef doğrulaması), `T20` (Daylight odak modu dinlenme ekranı, çift gelişim eğrisi [Kilo/Tekrar] ve süperset geçiş bütünlüğü)
 
 ## Görev Kapsamı (`#activeWorkoutTab`)
 1. Aktif antrenman ve Kişisel Stüdyo seanslarının başlangıç set hedeflerini (`resolveDefaultExerciseSetTarget`) kurar.
@@ -22,4 +22,5 @@ description: Çelik Kodu Antrenman & Stüdyo sekmesini (#activeWorkoutTab, js/ch
   - `time_sec` (izometrik/taşıma): Birim `sn`, varsayılan hedef en az `30 sn` (dinamik `8-12` tekrar şemasından `8 sn` türetilmez).
   - `reps`: Birim `tk` / `tekrar`.
 - **Köprü Gümrüğü & Veri Koruma:** Antrenman yarıda kalsa bile girilen setler silinmez; bitince `isTimeBased`, `isBodyweight` ve kanonik ID alanları Köprü Gümrüğü onayından geçerek eksiksiz yazılır.
+- **Daylight Odak Modu & Çift Gelişim Eğrisi (T20):** Canlı antrenmanda set tamamlandığında dinlenme ekranı devreye girer. Dinlenme ekranında dikey alanı şişirmeden tek kart içinde hem Kilo hem Tekrar gelişim eğrisi alt alta çizilir (kardiyoda Süre & Nabız). Süpersetlerde 1. hareket (A1) bitince 2. harekete (A2) geçiş sunulur; dinlenme bitince odak A2'ye, 2. hareket bitince tur dinlenmesi sonrası odak tekrar A1 sonraki tura kayar.
 - **Hata Hafızası Sicili:** Kullanıcının canlı antrenman/Stüdyo akışında yakaladığı her hata `scripts/tab-watchdog.js` sınavına kalıcı madde olarak eklenir.

@@ -14,6 +14,11 @@
 **/__pycache__/
 ios-app/
 desktop-app/
+android-app/
+*.apk
+*.aab
+*.jks
+*.keystore
 .agents/skills/best-skills/data/
 .garmin-tokens.json
 data/local-cloud-snapshot.json

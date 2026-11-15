@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Çelik Kodu • Granger Tasarımı & AthletiQ Renkleri (iPhone 14 Pro Max)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* AthletiQ Koyu Zemin & Yüksek Enerji Paleti */
+            --bg-base: #0B0A14;
+            --bg-surface: #121024;
+            --bg-card: #181530;
+            --bg-card-hover: #221D42;
+            --border-subtle: rgba(167, 139, 250, 0.12);
+            --border-highlight: rgba(167, 139, 250, 0.4);
+            
+            /* AthletiQ Enerji & Durum Vurguları */
+            --athletiq-purple: #8B5CF6;
+            --athletiq-violet: #A78BFA;
+            --athletiq-cyan: #38BDF8;
+            --athletiq-emerald: #10B981;
+            --athletiq-amber: #F59E0B;
+            --athletiq-rose: #F43F5E;
+            
+            --text-primary: #F8FAFC;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #06050C;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 24px 12px 60px;
+        }
+
+        /* Dış Çerçeve: iPhone 14 Pro Max Simülatörü */
+        .phone-wrapper {
+            width: 100%;
+            max-width: 430px;
+            background: var(--bg-base);
+            border-radius: 50px;
+            border: 8px solid #1A172E;
+            box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(167, 139, 250, 0.15);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Dynamic Island & Status Bar */
+        .status-bar {
+            height: 48px;
+            padding: 12px 26px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #F1F5F9;
+            z-index: 10;
+        }
+        .dynamic-island {
+            width: 112px;
+            height: 28px;
+            background: #000000;
+            border-radius: 20px;
+            margin: 0 auto;
+        }
+
+        /* Granger Üst Başlık & Rozet */
+        .granger-header-wrap {
+            padding: 16px 20px 14px;
+        }
+        .athletiq-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(139, 92, 246, 0.14);
+            color: var(--athletiq-violet);
+            border: 1px solid rgba(167, 139, 250, 0.28);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+        .athletiq-badge-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--athletiq-violet);
+            box-shadow: 0 0 8px var(--athletiq-purple);
+        }
+        .granger-title {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            color: #FFFFFF;
+            line-height: 1.15;
+            margin-bottom: 4px;
+        }
+        .granger-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .view-content {
+            padding: 0 16px 36px;
+        }
+
+        /* ========================================================
+           GRANGER 2x2 MODÜLER KART IZGARASI (ATHLETIQ RENKLERİ)
+           ======================================================== */
+        .granger-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .granger-card {
+            background: linear-gradient(165deg, var(--bg-card) 0%, rgba(24, 21, 48, 0.7) 100%);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xl);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 134px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+        .granger-card:active {
+            transform: scale(0.97);
+            border-color: var(--border-highlight);
+        }
+
+        /* Arka Plan Hafif Renk Parıltısı */
+        .granger-card::after {
+            content: '';
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            filter: blur(24px);
+            opacity: 0.15;
+            pointer-events: none;
+        }
+        .card-time::after { background: var(--athletiq-purple); }
+        .card-equip::after { background: var(--athletiq-cyan); }
+        .card-recovery::after { background: var(--athletiq-emerald); }
+        .card-target::after { background: var(--athletiq-rose); }
+
+        .card-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .card-icon-box {
+            width: 34px;
+            height: 34px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+        }
+        .box-purple { background: rgba(139, 92, 246, 0.16); color: var(--athletiq-violet); border: 1px solid rgba(167, 139, 250, 0.2); }
+        .box-cyan { background: rgba(56, 189, 248, 0.16); color: var(--athletiq-cyan); border: 1px solid rgba(56, 189, 248, 0.2); }
+        .box-emerald { background: rgba(16, 185, 129, 0.16); color: var(--athletiq-emerald); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .box-rose { background: rgba(244, 63, 94, 0.16); color: var(--athletiq-rose); border: 1px solid rgba(244, 63, 94, 0.2); }
+
+        .card-badge-pill {
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 7px;
+            border-radius: 8px;
+            letter-spacing: 0.02em;
+        }
+        .pill-purple { background: rgba(139, 92, 246, 0.18); color: var(--athletiq-violet); }
+        .pill-cyan { background: rgba(56, 189, 248, 0.18); color: var(--athletiq-cyan); }
+        .pill-emerald { background: rgba(16, 185, 129, 0.18); color: var(--athletiq-emerald); }
+        .pill-rose { background: rgba(244, 63, 94, 0.18); color: var(--athletiq-rose); }
+
+        .card-category {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+        .card-main-title {
+            font-size: 15.5px;
+            font-weight: 800;
+            color: #FFFFFF;
+            line-height: 1.2;
+        }
+        .card-subtext {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-top: 3px;
+        }
+
+        /* Mini SVG Enerji Halkası */
+        .ring-svg {
+            width: 26px;
+            height: 26px;
+            transform: rotate(-90deg);
+        }
+
+        /* Granger Not Kartı (AthletiQ Vurgulu) */
+        .granger-wish-card {
+            background: linear-gradient(165deg, var(--bg-card) 0%, rgba(24, 21, 48, 0.8) 100%);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xl);
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+        }
+        .wish-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .wish-label {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--athletiq-violet);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .wish-input {
+            width: 100%;
+            background: rgba(11, 10, 20, 0.8);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+            font-size: 13px;
+            font-family: inherit;
+            color: #FFFFFF;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .wish-input:focus {
+            border-color: var(--athletiq-purple);
+            box-shadow: 0 0 12px rgba(139, 92, 246, 0.25);
+        }
+
+        /* Granger Büyük Aksiyon Butonu (AthletiQ Mor & Çivit Gradyan) */
+        .btn-athletiq-generate {
+            width: 100%;
+            background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 18px;
+            padding: 16px;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 900;
+            letter-spacing: 0.02em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 10px 28px rgba(139, 92, 246, 0.45);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .btn-athletiq-generate:active {
+            transform: scale(0.98);
+            box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
+        }
+
+        /* Çift Düğme Alt Bar: Manuel Oluşturucu Seçeneği */
+        .secondary-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .btn-sub-action {
+            flex: 1;
+            background: rgba(24, 21, 48, 0.6);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 11px;
+            border-radius: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.15s;
+        }
+        .btn-sub-action:active {
+            background: var(--bg-card-hover);
+            color: #FFFFFF;
+        }
+
+        /* Toast Bildirim */
+        .toast-notify {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(50px);
+            background: #8B5CF6;
+            color: #FFFFFF;
+            font-size: 12.5px;
+            font-weight: 800;
+            padding: 10px 20px;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+        }
+        .toast-notify.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone-wrapper">
+        <!-- Status Bar & Dynamic Island -->
+        <div class="status-bar">
+            <span>09:41</span>
+            <div class="dynamic-island"></div>
+            <span>5G 100%</span>
+        </div>
+
+        <!-- Üst Başlık & Rozet -->
+        <div class="granger-header-wrap">
+            <div class="athletiq-badge">
+                <span class="athletiq-badge-dot"></span>
+                <span>GRANGER DÜZENİ • ATHLETIQ PALETİ</span>
+            </div>
+            <h1 class="granger-title">Antrenmanı Hazırla</h1>
+            <p class="granger-subtitle">Analitik verilerine göre optimize edilmiş 4 anahtar kokpit kartı.</p>
+        </div>
+
+        <div class="view-content">
+
+            <!-- ========================================================
+                 2x2 GRANGER KARTLARI (ATHLETIQ MOR/SİYAH/NEON PALETİ)
+                 ======================================================== -->
+            <div class="granger-grid">
+
+                <!-- 1. Süre & Model (AthletiQ Purple) -->
+                <div class="granger-card card-time" onclick="showToast('Süre ve Model Ayarları Açıldı')">
+                    <div class="card-header-row">
+                        <div class="card-icon-box box-purple">⏱️</div>
+                        <svg class="ring-svg" viewBox="0 0 36 36">
+                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3.5"/>
+                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831" fill="none" stroke="#A78BFA" stroke-width="3.5" stroke-dasharray="75, 100"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="card-category">Model & Süre</div>
+                        <div class="card-main-title">45 Dk</div>
+                        <div class="card-subtext" style="color:var(--athletiq-violet);">Orta Süperset</div>
+                    </div>
+                </div>
+
+                <!-- 2. Ekipman Havuzu (AthletiQ Cyan) -->
+                <div class="granger-card card-equip" onclick="showToast('Ekipman Seçici Açıldı')">
+                    <div class="card-header-row">
+                        <div class="card-icon-box box-cyan">🏋️</div>
+                        <span class="card-badge-pill pill-cyan">3 Aktif</span>
+                    </div>
+                    <div>
+                        <div class="card-category">Ekipman Havuzu</div>
+                        <div class="card-main-title">Dambıl • Sehpa</div>
+                        <div class="card-subtext">+ Kettlebell</div>
+                    </div>
+                </div>
+
+                <!-- 3. Toparlanma & Koruma (AthletiQ Emerald) -->
+                <div class="granger-card card-recovery" onclick="showToast('Yorgun Kas Detayı Açıldı')">
+                    <div class="card-header-row">
+                        <div class="card-icon-box box-emerald">🛡️</div>
+                        <span class="card-badge-pill pill-emerald">Korumalı</span>
+                    </div>
+                    <div>
+                        <div class="card-category">Yorgun Kas</div>
+                        <div class="card-main-title">Göğüs Korumada</div>
+                        <div class="card-subtext">Dün 8 set tamamlandı</div>
+                    </div>
+                </div>
+
+                <!-- 4. Öncelikli Hedef (AthletiQ Rose) -->
+                <div class="granger-card card-target" onclick="showToast('Eksik Kas Analizi Açıldı')">
+                    <div class="card-header-row">
+                        <div class="card-icon-box box-rose">🎯</div>
+                        <span class="card-badge-pill pill-rose">Açık</span>
+                    </div>
+                    <div>
+                        <div class="card-category">Öncelikli Kas</div>
+                        <div class="card-main-title">Omuz & Sırt</div>
+                        <div class="card-subtext">5 gündür 0 set</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Granger Koç Özel Not Kartı (AthletiQ Mor Çerçeve) -->
+            <div class="granger-wish-card">
+                <div class="wish-header">
+                    <span class="wish-label">
+                        <span>💬</span>
+                        <span>AI KOÇ ÖZEL NOTU</span>
+                    </span>
+                    <span style="font-size:10px; font-weight:700; color:var(--text-muted);">İSTEĞE BAĞLI</span>
+                </div>
+                <input type="text" class="wish-input" placeholder="Örn: Omuz ve sırt odaklı olsun, diz yormasın..." value="Diz yormasın, omuz ve sırt odaklı olsun">
+            </div>
+
+            <!-- Granger Büyük Aksiyon Butonu (AthletiQ Mor & Çivit) -->
+            <button class="btn-athletiq-generate" onclick="showToast('⚡ Çelik Kodu Programı Hazırlandı!')">
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M9 1.5L3 9h4.5L6.8 14.5L13 7H8.5L9 1.5Z"/>
+                </svg>
+                <span>PROGRAMI OLUŞTUR</span>
+            </button>
+
+            <!-- İkincil Eylemler -->
+            <div class="secondary-actions">
+                <button class="btn-sub-action" onclick="showToast('Haftalık Plan Seçici Açıldı')">
+                    <span>📅</span>
+                    <span>Haftalık Plan (3 Gün)</span>
+                </button>
+                <button class="btn-sub-action" onclick="showToast('Manuel İstasyon Editörü Açıldı')">
+                    <span>🛠️</span>
+                    <span>Manuel Oluştur</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Bildirim Rozeti -->
+    <div id="toastNotify" class="toast-notify">İşlem Gerçekleşti!</div>
+
+    <script>
+        function showToast(text) {
+            const toast = document.getElementById('toastNotify');
+            toast.textContent = text;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

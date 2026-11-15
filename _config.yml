@@ -3,6 +3,7 @@ exclude:
   - config
   - desktop-app
   - ios-app
+  - android-app
   - scripts
   - docs
   - data

@@ -27,7 +27,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=293">
+    <link rel="stylesheet" href="css/style.css?v=297">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH (CANVA MODERN ATHLETIC LIGHT V229) */
         html, body { background-color: #F8FAFC; color: #0F172A; color-scheme: light; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -54,7 +54,7 @@
                     <path d="M34 25L26 36H33L30 46L39 34H32L34 25Z" fill="#FFFFFF"/>
                 </svg>
             </div>
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v293</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v297</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -253,7 +253,7 @@
                         <div class="modern-brand-subrow">
                             <span id="headerActiveTabLabel">ÜRETİCİ</span>
                             <span class="modern-brand-subdot" aria-hidden="true">•</span>
-                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v293</span>
+                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v297</span>
                         </div>
                     </div>
                 </div>
@@ -996,6 +996,9 @@
                             <div style="font-size:22px; font-weight:900; color:var(--green-success);" id="statStreak">0</div>
                         </div>
                     </div>
+
+                    <!-- GARMIN & SAAT KAPSÜLÜ EŞLEME & ONAY PANELİ -->
+                    <div id="garminHistorySyncContainer" style="margin-bottom:16px;"></div>
 
                     <div id="logHistoryContainer">
                         <!-- Populated dynamically -->
@@ -1825,6 +1828,99 @@
                 </button>
                 <button type="button" class="btn btn-gold" style="flex:2; padding:13px; font-weight:900; font-size:13px;" onclick="saveCompletedWorkout()">
                     ✅ GÜNLÜĞE KAYDET
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== VIEW COMPLETED WORKOUT DETAILS MODAL ==================== -->
+    <div id="workoutDetailsModal" class="modal-overlay" style="overscroll-behavior:contain;" onclick="if(event.target === this) closeWorkoutDetailsModal()">
+        <div id="workoutDetailsModalBox" class="modal-box" style="max-width: 520px; max-height: 90vh; overflow-y: auto; overscroll-behavior: contain; padding: 18px 18px 20px 18px; border-radius: 16px;">
+            <div class="modal-header" style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; gap:8px;">
+                <div style="min-width:0; flex:1;">
+                    <div id="workoutDetailsSubtitle" style="font-size:12px; font-weight:700; color:#64748B; margin-bottom:4px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;"></div>
+                    <h3 id="workoutDetailsTitle" class="modal-title" style="font-size:16px; font-weight:900; color:#0F172A; margin:0; line-height:1.25;"></h3>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                    <button type="button" id="workoutDetailsViewModeBtn" onclick="window.toggleWorkoutDetailsViewMode()" style="height:30px; padding:0 8px; background:#F1F5F9; border:1px solid #CBD5E1; color:#0F172A; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" title="Görünümü Değiştir">
+                        <span id="workoutDetailsViewModeIcon">📋</span>
+                        <span id="workoutDetailsViewModeText" style="font-size:11px; font-weight:800;">Liste</span>
+                    </button>
+                    <button type="button" class="modal-close" aria-label="Kapat" onclick="closeWorkoutDetailsModal()" style="font-size:16px; background:#F1F5F9; border:none; border-radius:50%; width:30px; height:30px; display:inline-flex; align-items:center; justify-content:center; color:#64748B; cursor:pointer;">✕</button>
+                </div>
+            </div>
+
+            <!-- STATS STRIP -->
+            <div id="workoutDetailsStats" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px; padding:8px 10px; margin-bottom:12px; text-align:center;"></div>
+
+            <!-- MUSCLES COLLAPSIBLE STRIP (KOMPAKT & YER TASARRUFU) -->
+            <div id="workoutDetailsMusclesContainer" style="display:none; margin-bottom:10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <button type="button" id="workoutDetailsMusclesToggleBtn" onclick="window.toggleWorkoutDetailsMuscles()" style="background:#F0FDF4; border:1px solid #BBF7D0; color:#15803D; border-radius:8px; padding:4px 10px; font-size:11.5px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:5px;" title="Çalışan Kas Gruplarını Göster/Gizle">
+                        <span id="workoutDetailsMusclesCountText">💪 0 Kas</span>
+                        <span id="workoutDetailsMusclesArrow" style="font-size:9px;">▼</span>
+                    </button>
+                </div>
+                <div id="workoutDetailsMuscles" style="display:none; flex-wrap:wrap; gap:4px; margin-top:6px; padding:8px 10px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px;"></div>
+            </div>
+
+            <!-- CAROUSEL CONTROLS BAR -->
+            <div id="workoutDetailsCarouselNav" style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:6px 12px; margin-bottom:10px;">
+                <button type="button" id="workoutDetailsPrevBtn" onclick="window.navigateWorkoutDetailsExercise(-1)" style="height:32px; width:36px; background:#FFFFFF; border:1px solid #CBD5E1; color:#0F172A; border-radius:8px; font-size:13px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; box-shadow:0 1px 2px rgba(0,0,0,0.05);" title="Önceki Hareket">
+                    ◀
+                </button>
+                <div style="text-align:center; user-select:none;">
+                    <span id="workoutDetailsCarouselCounter" style="font-size:12px; font-weight:800; color:#0F172A;">Hareket 1 / 1</span>
+                    <div id="workoutDetailsCarouselDots" style="display:flex; justify-content:center; gap:4px; margin-top:3px; max-width:200px; overflow-x:auto;"></div>
+                </div>
+                <button type="button" id="workoutDetailsNextBtn" onclick="window.navigateWorkoutDetailsExercise(1)" style="height:32px; width:36px; background:#FFFFFF; border:1px solid #CBD5E1; color:#0F172A; border-radius:8px; font-size:13px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; box-shadow:0 1px 2px rgba(0,0,0,0.05);" title="Sonraki Hareket">
+                    ▶
+                </button>
+            </div>
+
+            <!-- SINGLE EXERCISE CARD VIEWPORT (SWIPEABLE) -->
+            <div id="workoutDetailsCardViewport" style="position:relative; overflow:hidden; touch-action:pan-y;">
+                <div id="workoutDetailsActiveCard" style="background:#FFFFFF; border:1.5px solid #E2E8F0; border-radius:14px; padding:14px; box-shadow:0 4px 12px -2px rgba(15,23,42,0.06); min-height:160px; transition:opacity 0.15s ease, transform 0.15s ease;">
+                    <!-- Exercise Content will be injected here -->
+                </div>
+            </div>
+
+            <!-- SIMPLE EXERCISE LIST VIEW (ALTERNATİF LİSTE GÖRÜNÜMÜ) -->
+            <div id="workoutDetailsSimpleListView" style="display:none; flex-direction:column; gap:8px;"></div>
+
+            <!-- NOTES CONTAINER -->
+            <div id="workoutDetailsNotes" style="display:none; margin-top:12px; padding:10px; background:#FEF3C7; border:1px solid #FDE68A; border-radius:8px; font-size:12px; color:#92400E;"></div>
+
+            <!-- FOOTER ACTION BUTTONS -->
+            <div style="margin-top:16px;">
+                <button type="button" onclick="closeWorkoutDetailsModal()" style="width:100%; background:#0F172A; border:none; color:#FFFFFF; border-radius:10px; padding:10px; font-size:13px; font-weight:800; cursor:pointer;">
+                    Kapat
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SUB-MODAL: TEK HAREKET SET DETAYI ==================== -->
+    <div id="workoutExerciseDetailSubModal" class="modal-overlay" style="z-index: 10500 !important; overscroll-behavior: contain; display: none;" onclick="if(event.target === this) closeWorkoutExerciseDetailSubModal()">
+        <div id="workoutExerciseDetailSubModalBox" class="modal-box" style="max-width: 440px; max-height: 85vh; overflow-y: auto; overscroll-behavior: contain; padding: 16px 18px 20px 18px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(15,23,42,0.35);">
+            <div class="modal-header" style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; gap:8px;">
+                <div style="min-width:0; flex:1;">
+                    <span id="subModalExerciseCategory" style="font-size:11px; font-weight:700; color:#64748B; text-transform:uppercase;"></span>
+                    <h3 id="subModalExerciseTitle" class="modal-title" style="font-size:16px; font-weight:900; color:#0F172A; margin:2px 0 0 0; line-height:1.25;"></h3>
+                </div>
+                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeWorkoutExerciseDetailSubModal()" style="font-size:15px; background:#F1F5F9; border:none; border-radius:50%; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; color:#64748B; cursor:pointer;">✕</button>
+            </div>
+
+            <!-- SUB-MODAL BODY -->
+            <div id="subModalExerciseBody"></div>
+
+            <!-- FOOTER -->
+            <div id="subModalExerciseFooter" style="margin-top:16px; display:flex; gap:8px;">
+                <button type="button" id="subModalExerciseEditBtn" onclick="window.startSubModalExerciseEdit()" style="flex:1; background:#F1F5F9; border:1px solid #CBD5E1; color:#0F172A; border-radius:10px; padding:10px; font-size:13px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+                    ✏️ Düzenle
+                </button>
+                <button type="button" onclick="closeWorkoutExerciseDetailSubModal()" style="flex:1; background:#0F172A; border:none; color:#FFFFFF; border-radius:10px; padding:10px; font-size:13px; font-weight:800; cursor:pointer;">
+                    Geri Dön
                 </button>
             </div>
         </div>
@@ -2772,6 +2868,73 @@
         </div>
     </div>
 
+    <!-- ==================== DAYLIGHT HALTER & PLAKA HESAPLAMA MODALI ==================== -->
+    <div id="daylightPlateModal" class="modal-overlay" style="display:none;" onclick="if(event.target===this) closePlateModal()">
+        <div class="modal-box" style="max-width: 500px; background:#FFFFFF; border-radius:20px; border:1.5px solid #E2E8F0; padding:20px; box-shadow:0 10px 30px rgba(15,23,42,0.15);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <div>
+                    <h3 style="font-size:17px; font-weight:900; color:#0F172A; margin:0;" id="plateModalExerciseTitle">Halter & Plaka Hesabı</h3>
+                    <p style="font-size:12px; color:#64748B; margin:2px 0 0;">Olimpik bar ve her bir yana takılacak simetrik plakalar</p>
+                </div>
+                <button type="button" class="modal-close-btn" onclick="closePlateModal()" style="font-size:20px; background:none; border:none; cursor:pointer; color:#64748B;">✕</button>
+            </div>
+
+            <!-- Bar Türü Seçimi -->
+            <div style="display:flex; gap:6px; margin-bottom:12px;">
+                <button type="button" id="plateBarOlympic" class="btn btn-outline" style="flex:1; font-size:11.5px; font-weight:800; padding:7px; border-color:#EA580C; background:#FFF7ED; color:#C2410C;" onclick="setPlateBarWeight(20)">20 kg Olimpik</button>
+                <button type="button" id="plateBarEZ" class="btn btn-outline" style="flex:1; font-size:11.5px; font-weight:800; padding:7px; border-color:#CBD5E1; color:#475569;" onclick="setPlateBarWeight(10)">10 kg EZ Bar</button>
+                <button type="button" id="plateBarDumbbell" class="btn btn-outline" style="flex:1; font-size:11.5px; font-weight:800; padding:7px; border-color:#CBD5E1; color:#475569;" onclick="setPlateBarWeight(2.5)">2.5 kg Dambıl</button>
+            </div>
+
+            <!-- SVG Halter Görseli -->
+            <div id="plateBarbellSvgContainer" style="background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:14px; padding:16px 10px; margin-bottom:14px; text-align:center;">
+                <!-- Populated dynamically -->
+            </div>
+
+            <!-- Plaka Dağılım Özeti -->
+            <div id="plateBreakdownSummary" style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:12px; padding:12px; font-size:13px; font-weight:800; color:#0F172A; text-align:center; margin-bottom:14px;">
+                <!-- Populated dynamically -->
+            </div>
+
+            <button type="button" class="daylight-primary-cta" onclick="closePlateModal()" style="padding:12px;">Tamam</button>
+        </div>
+    </div>
+
+    <!-- ==================== DAYLIGHT HIZLI ANTRENMAN SEÇİCİ MODALI ==================== -->
+    <div id="daylightQuickWorkoutModal" class="modal-overlay" style="display:none;" onclick="if(event.target===this) closeQuickWorkoutModal()">
+        <div class="modal-box" style="max-width: 560px; max-height:85vh; display:flex; flex-direction:column; background:#FFFFFF; border-radius:20px; border:1.5px solid #E2E8F0; padding:16px; box-shadow:0 10px 30px rgba(15,23,42,0.15);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <div>
+                    <h3 style="font-size:17px; font-weight:900; color:#0F172A; margin:0;">⚡ Hızlı Antrenman Başlat</h3>
+                    <p style="font-size:12px; color:#64748B; margin:2px 0 0;">Tek hareketle hemen başla veya hareketleri seçip seans kur</p>
+                </div>
+                <button type="button" class="modal-close-btn" onclick="closeQuickWorkoutModal()" style="font-size:20px; background:none; border:none; cursor:pointer; color:#64748B;">✕</button>
+            </div>
+
+            <!-- Arama Kutusu -->
+            <div style="margin-bottom:10px;">
+                <input type="text" id="quickWorkoutSearchInput" class="form-input" style="padding:10px 14px; font-size:14px; font-weight:800; border-radius:12px; background:#F8FAFC; border:1.5px solid #CBD5E1; color:#0F172A; width:100%;" placeholder="🔍 Egzersiz adı veya kas grubu yazın..." oninput="onQuickWorkoutSearch(this.value)">
+            </div>
+
+            <!-- Kategori Hapları -->
+            <div id="quickWorkoutCategoryRow" style="display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; margin-bottom:10px; -webkit-overflow-scrolling:touch;">
+                <!-- Populated dynamically -->
+            </div>
+
+            <!-- Egzersiz Listesi -->
+            <div id="quickWorkoutListContainer" style="flex:1; overflow-y:auto; max-height:48vh; padding-right:4px;">
+                <!-- Populated dynamically -->
+            </div>
+
+            <!-- Seçilenlerle Başlat Alt Barı -->
+            <div id="quickWorkoutBottomActionBar" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid #E2E8F0;">
+                <button type="button" class="daylight-primary-cta" id="btnStartSelectedQuickWorkout" onclick="startSelectedQuickWorkout()">
+                    🚀 Seçilenlerle Başlat (0 Hareket)
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- ==================== STITCH 6-TAB BOTTOM NAVIGATION BAR ==================== -->
     <div class="bottom-nav-wrapper" id="bottomNavWrapper">
         <div class="bottom-pull-handle" onclick="toggleBottomBar()" title="Menüyü Gizle/Göster"></div>
@@ -2877,17 +3040,17 @@
     </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE (7 BAĞIMSIZ ŞEF ODASI + ORKESTRA) ==================== -->
-    <script src="js/exercises-db.js?v=293"></script>
-    <script src="js/chiefs/shared-core.js?v=293"></script>
-    <script src="js/chiefs/bridge-customs.js?v=293"></script>
-    <script src="js/chiefs/liaison-subchiefs.js?v=293"></script>
-    <script src="js/chiefs/profile-chief.js?v=293"></script>
-    <script src="js/chiefs/library-chief.js?v=293"></script>
-    <script src="js/chiefs/history-chief.js?v=293"></script>
-    <script src="js/chiefs/analytics-chief.js?v=293"></script>
-    <script src="js/chiefs/generator-chief.js?v=293"></script>
-    <script src="js/chiefs/workout-chief.js?v=293"></script>
-    <script src="js/app.js?v=293"></script>
+    <script src="js/exercises-db.js?v=297"></script>
+    <script src="js/chiefs/shared-core.js?v=297"></script>
+    <script src="js/chiefs/bridge-customs.js?v=297"></script>
+    <script src="js/chiefs/liaison-subchiefs.js?v=297"></script>
+    <script src="js/chiefs/profile-chief.js?v=297"></script>
+    <script src="js/chiefs/library-chief.js?v=297"></script>
+    <script src="js/chiefs/history-chief.js?v=305"></script>
+    <script src="js/chiefs/analytics-chief.js?v=297"></script>
+    <script src="js/chiefs/generator-chief.js?v=297"></script>
+    <script src="js/chiefs/workout-chief.js?v=297"></script>
+    <script src="js/app.js?v=297"></script>
     <script>
         function getNotifStorageKey() {
             const uid = localStorage.getItem('celik_kodu_active_user_id') || 'default';
@@ -3080,6 +3243,6 @@
             </div>
         </div>
     </div>
-    <script src="js/garmin-tredict-bridge.js?v=293" defer></script>
+    <script src="js/garmin-tredict-bridge.js?v=297" defer></script>
 </body>
 </html>

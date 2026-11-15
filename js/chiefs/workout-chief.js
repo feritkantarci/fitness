@@ -4,6 +4,44 @@
         let wakeLockKeepAliveTimer = null;
         let isHUDCollapsed = false;
 
+        // Daylight Two-Zone Studio State
+        let isDaylightRestActive = false;
+        let selectedDaylightHubDayIdx = new Date().getDay();
+        let selectedDaylightHubDateStr = null;
+        let currentPlateExerciseId = null;
+        let currentPlateBarWeight = 20;
+        let quickWorkoutSelectedIds = new Set();
+        let quickWorkoutActiveCategory = 'all';
+
+        function dismissDaylightRest() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            timerRemaining = 0;
+            isDaylightRestActive = false;
+            window.isDaylightRestActive = false;
+            if (activeWorkoutSession && Array.isArray(activeWorkoutSession.exercises)) {
+                const curEx = activeWorkoutSession.exercises[activeFocusExIndex];
+                const pair = getSupersetPairInfo(activeWorkoutSession.exercises, activeFocusExIndex);
+                if (pair && curEx && curEx.supersetRole === 1) {
+                    activeFocusExIndex = pair.secondIdx;
+                    activeFocusSetIndex = null;
+                } else if (pair && curEx && curEx.supersetRole === 2) {
+                    const firstSets = activeWorkoutSetsData[pair.firstEx.id] || [];
+                    const nextFirstIdx = firstSets.findIndex(st => !st.completed);
+                    if (nextFirstIdx !== -1) {
+                        activeFocusExIndex = pair.firstIdx;
+                        activeFocusSetIndex = nextFirstIdx;
+                    }
+                } else {
+                    activeFocusSetIndex = null;
+                }
+            }
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+            window.scrollTo({ top: 0, behavior: 'instant' });
+        }
+        window.dismissDaylightRest = dismissDaylightRest;
+
         function initNoSleepVideoFallback() {
             if (noSleepVideoEl) return;
             try {
@@ -151,6 +189,7 @@
                 btnFocus.classList.toggle('active', mode === 'focus');
                 btnList.classList.toggle('active', mode === 'list');
             }
+            isDaylightRestActive = false;
             saveActiveWorkoutStateToStorage();
             renderActiveWorkout();
         }
@@ -159,25 +198,34 @@
             if (!activeWorkoutSession || activeFocusExIndex <= 0) return;
             const exercises = activeWorkoutSession.exercises;
             const pair = getSupersetPairInfo(exercises, activeFocusExIndex);
-            activeFocusExIndex = pair ? pair.firstIdx - 1 : activeFocusExIndex - 1;
+            if (pair && activeFocusExIndex === pair.secondIdx) {
+                activeFocusExIndex = pair.firstIdx;
+            } else {
+                activeFocusExIndex = pair ? pair.firstIdx - 1 : activeFocusExIndex - 1;
+            }
             if (activeFocusExIndex < 0) activeFocusExIndex = 0;
-            const previousPair = getSupersetPairInfo(exercises, activeFocusExIndex);
-            if (previousPair) activeFocusExIndex = previousPair.firstIdx;
             activeFocusSetIndex = null;
+            isDaylightRestActive = false;
             saveActiveWorkoutStateToStorage();
             renderActiveWorkout();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function goToNextExercise() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            timerRemaining = 0;
             if (!activeWorkoutSession || activeFocusExIndex >= activeWorkoutSession.exercises.length - 1) return;
             const exercises = activeWorkoutSession.exercises;
             const pair = getSupersetPairInfo(exercises, activeFocusExIndex);
-            activeFocusExIndex = pair ? pair.secondIdx + 1 : activeFocusExIndex + 1;
+            if (pair && activeFocusExIndex === pair.firstIdx) {
+                activeFocusExIndex = pair.secondIdx;
+            } else {
+                activeFocusExIndex = pair ? pair.secondIdx + 1 : activeFocusExIndex + 1;
+            }
             if (activeFocusExIndex >= exercises.length) activeFocusExIndex = exercises.length - 1;
-            const nextPair = getSupersetPairInfo(exercises, activeFocusExIndex);
-            if (nextPair) activeFocusExIndex = nextPair.firstIdx;
             activeFocusSetIndex = null;
+            isDaylightRestActive = false;
             saveActiveWorkoutStateToStorage();
             renderActiveWorkout();
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -245,6 +293,7 @@
             if (!sets || !sets[setIdx]) return;
             sets[setIdx].weight = weight;
             sets[setIdx].reps = reps;
+            isDaylightRestActive = false;
             saveActiveWorkoutStateToStorage();
             renderActiveWorkout();
             if (typeof showToast === 'function') showToast(`⚡ Set ${setIdx + 1}'e ${weight}kg × ${reps}tk uygulandı!`);
@@ -254,6 +303,7 @@
             if (!activeWorkoutSession || idx < 0 || idx >= activeWorkoutSession.exercises.length) return;
             activeFocusExIndex = idx;
             activeFocusSetIndex = null;
+            isDaylightRestActive = false;
             saveActiveWorkoutStateToStorage();
             renderActiveWorkout();
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -278,6 +328,7 @@
                     st.reps = reps;
                 }
             });
+            isDaylightRestActive = true;
             saveActiveWorkoutStateToStorage();
             renderActiveWorkout();
             playAlertSound();
@@ -541,6 +592,7 @@
             if (activeFocusSetIndex !== null && activeFocusSetIndex >= sets.length) {
                 activeFocusSetIndex = sets.length - 1;
             }
+            isDaylightRestActive = true;
             saveActiveWorkoutStateToStorage();
             renderActiveWorkout();
         }
@@ -576,6 +628,7 @@
                 activeFocusExIndex = activeWorkoutSession.exercises.length - 1;
             }
             activeFocusSetIndex = null;
+            isDaylightRestActive = true;
             saveActiveWorkoutStateToStorage();
             renderActiveWorkout();
             playAlertSound();
@@ -597,6 +650,7 @@
                 activeFocusExIndex = targetIdx;
             }
             activeFocusSetIndex = null;
+            isDaylightRestActive = true;
             saveActiveWorkoutStateToStorage();
             renderActiveWorkout();
         }
@@ -908,6 +962,1039 @@
             }, 80);
         }
 
+        // ==============================================================================
+        // DAYLIGHT TWO-ZONE STUDIO: BEYAZ GÜN IŞIĞI, HAREKETLİ VİDEOLAR & DİNAMİK GRAFİK
+        // ==============================================================================
+
+        function getTurkishMuscleBadge(muscleKey) {
+            if (!muscleKey) return 'Genel';
+            const s = String(muscleKey).toLowerCase();
+            if (s.includes('chest') || s.includes('göğüs')) return '🛡️ Göğüs';
+            if (s.includes('back') || s.includes('sırt') || s.includes('kanat') || s.includes('lat')) return '🏹 Sırt & Kanat';
+            if (s.includes('shoulder') || s.includes('omuz') || s.includes('delt')) return '⚔️ Omuz';
+            if (s.includes('triceps') || s.includes('arka kol')) return '⚔️ Arka Kol';
+            if (s.includes('biceps') || s.includes('ön kol') || s.includes('kol')) return '💪 Ön Kol / Biceps';
+            if (s.includes('quad') || s.includes('ön bacak')) return '🦵 Ön Bacak';
+            if (s.includes('hamstring') || s.includes('arka bacak')) return '🦵 Arka Bacak';
+            if (s.includes('glute') || s.includes('kalça')) return '🍑 Kalça';
+            if (s.includes('leg') || s.includes('bacak')) return '🦵 Bacak';
+            if (s.includes('abs') || s.includes('karın') || s.includes('core')) return '🧘 Karın & Core';
+            if (s.includes('cal') || s.includes('kalf')) return '⚡ Kalf';
+            if (s.includes('cardio') || s.includes('kardiyo')) return '🏃 Kardiyo';
+            return '💪 ' + muscleKey;
+        }
+
+        function getDaylightExerciseMedia(cardEx) {
+            if (!cardEx) return { clip: null, still: null, hasVideo: false };
+            const exId = cardEx.id || cardEx.exId || '';
+            if (typeof getExerciseVisualMedia === 'function') {
+                const med = getExerciseVisualMedia(exId, cardEx.category);
+                if (med && (med.clip || med.still)) {
+                    return {
+                        clip: med.clip || null,
+                        still: med.still || cardEx.diagram || null,
+                        hasVideo: !!med.clip
+                    };
+                }
+            }
+            const opengym = (typeof OPENGYM_GLOBAL_CATALOG !== 'undefined' && OPENGYM_GLOBAL_CATALOG) ? OPENGYM_GLOBAL_CATALOG[exId] : null;
+            return {
+                clip: opengym ? opengym.clip : null,
+                still: opengym ? opengym.still : (cardEx.diagram || null),
+                hasVideo: !!(opengym && opengym.clip)
+            };
+        }
+
+        function getAdaptiveHistoryDataForExercise(exId, exName, unitMode) {
+            let history = [];
+            try {
+                if (typeof getWorkoutLogs === 'function') {
+                    history = getWorkoutLogs() || [];
+                } else {
+                    const uid = getActiveUserId();
+                    const raw = localStorage.getItem(`celik_kodu_history_${uid}`);
+                    if (raw) history = JSON.parse(raw) || [];
+                }
+            } catch(e) {}
+
+            const sorted = [...history].reverse();
+            const points = [];
+            const trMonths = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+            const targetNorm = String(exId || exName || '').toLowerCase().trim();
+
+            for (const log of sorted) {
+                if (points.length >= 4) break;
+                const exList = log.detailedExercises || log.exercises;
+                if (!Array.isArray(exList)) continue;
+                const found = exList.find(e => {
+                    if (!e) return false;
+                    const idStr = String(e.id || '').toLowerCase();
+                    const nmStr = String(e.name || '').toLowerCase();
+                    return idStr === targetNorm || nmStr === targetNorm;
+                });
+                if (!found) continue;
+
+                let bestVal = 0;
+                let bestWeight = 0;
+                let bestReps = 0;
+                let hr = (found.healthTelemetry && (found.healthTelemetry.avgHeartrate || found.healthTelemetry.peakHeartrate)) || 0;
+                if (Array.isArray(found.sets)) {
+                    found.sets.forEach(st => {
+                        if (!st) return;
+                        const w = parseFloat(st.weight) || 0;
+                        const r = parseInt(st.reps, 10) || 0;
+                        if (w > bestWeight) {
+                            bestWeight = w;
+                            bestReps = r;
+                        } else if (w === bestWeight && r > bestReps) {
+                            bestReps = r;
+                        }
+                        if (unitMode === 'time_sec' || unitMode === 'cardio_min') {
+                            const dur = parseFloat(st.reps || st.durationSec || 0) || 0;
+                            if (dur > bestVal) bestVal = dur;
+                        } else if (unitMode === 'bodyweight') {
+                            if (r > bestVal) bestVal = r;
+                        } else {
+                            if (w > bestVal) bestVal = w;
+                        }
+                    });
+                }
+                if (bestVal > 0 || bestWeight > 0 || bestReps > 0) {
+                    const d = log.date ? new Date(log.date) : new Date(log.timestamp || Date.now());
+                    const dStr = isNaN(d.getTime()) ? 'Seans' : `${d.getDate()} ${trMonths[d.getMonth()] || ''}`;
+                    points.push({
+                        dateLabel: dStr,
+                        value: bestVal || bestWeight || bestReps,
+                        weight: bestWeight,
+                        reps: bestReps || 10,
+                        displayValue: unitMode === 'time_sec' ? `${bestVal} sn` : (unitMode === 'cardio_min' ? `${bestVal} dk` : (unitMode === 'bodyweight' ? `${bestVal} tk` : `${bestWeight} kg`)),
+                        hrBpm: hr,
+                        isToday: false
+                    });
+                }
+            }
+            return points;
+        }
+
+        function renderDaylightAdaptiveChartSvg(points, curWeightOrVal, curRepsOrUnit, unitModeParam, exNameParam = '') {
+            let curWeight = curWeightOrVal;
+            let curReps = curRepsOrUnit;
+            let unitMode = unitModeParam;
+            let exName = exNameParam;
+
+            if (typeof curRepsOrUnit === 'string' && (curRepsOrUnit === 'reps' || curRepsOrUnit === 'bodyweight' || curRepsOrUnit === 'cardio_min' || curRepsOrUnit === 'time_sec')) {
+                unitMode = curRepsOrUnit;
+                exName = unitModeParam || '';
+                curWeight = curWeightOrVal;
+                curReps = 10;
+            }
+
+            const W = 320, H = 168, padL = 36, padR = 20;
+            const isCardio = unitMode === 'cardio_min' || unitMode === 'time_sec';
+            const isBw = unitMode === 'bodyweight';
+
+            let label1 = '🏋️ KİLO';
+            let unit1 = 'kg';
+            let color1 = '#EA580C';
+
+            let label2 = '🔁 TEKRAR';
+            let unit2 = 'tk';
+            let color2 = '#0284C7';
+
+            if (isCardio) {
+                label1 = '⏱️ SÜRE';
+                unit1 = unitMode === 'time_sec' ? 'sn' : 'dk';
+                color1 = '#16A34A';
+                label2 = '💓 NABIZ';
+                unit2 = 'bpm';
+                color2 = '#EF4444';
+            } else if (isBw) {
+                label1 = '🔁 TEKRAR';
+                unit1 = 'tk';
+                color1 = '#0284C7';
+                label2 = '➕ EK AĞIRLIK';
+                unit2 = 'kg';
+                color2 = '#EA580C';
+            }
+
+            const wPts = [];
+            const rPts = [];
+            (points || []).forEach(p => {
+                const val1 = isCardio ? (p.value || 0) : (isBw ? (p.reps || p.value || 0) : (p.weight || p.value || 0));
+                const val2 = isCardio ? (p.hrBpm || 140) : (isBw ? (p.weight || 0) : (p.reps || 10));
+                wPts.push({ dateLabel: p.dateLabel, value: Number(val1), isToday: false });
+                rPts.push({ dateLabel: p.dateLabel, value: Number(val2), isToday: false });
+            });
+
+            const today1 = isCardio ? (Number(curReps || curWeight) || 20) : (isBw ? (Number(curReps) || 10) : (Number(curWeight) || 0));
+            const today2 = isCardio ? 145 : (isBw ? (Number(curWeight) || 0) : (Number(curReps) || 10));
+
+            wPts.push({ dateLabel: 'Bugün', value: today1, isToday: true });
+            rPts.push({ dateLabel: 'Bugün', value: today2, isToday: true });
+
+            if (wPts.length === 1) {
+                const base1 = Math.max(1, Math.round(today1 * 0.9)) || (isBw ? 8 : 7);
+                const base2 = Math.max(1, Math.round(today2 * 0.9)) || (isBw ? 0 : 8);
+                wPts.unshift({ dateLabel: 'Önceki', value: base1, isToday: false });
+                rPts.unshift({ dateLabel: 'Önceki', value: base2, isToday: false });
+            }
+
+            function buildTrack(pts, topY, botY, color, unit) {
+                const vals = pts.map(p => p.value);
+                const minVal = Math.max(0, Math.floor(Math.min(...vals) * 0.85));
+                const maxVal = Math.ceil(Math.max(...vals) * 1.15) || 10;
+                const range = (maxVal - minVal) || 1;
+
+                const coords = pts.map((p, i) => {
+                    const x = padL + (i / Math.max(pts.length - 1, 1)) * (W - padL - padR);
+                    const y = topY + (1 - (p.value - minVal) / range) * (botY - topY);
+                    return { x, y, p };
+                });
+
+                let pathD = '';
+                coords.forEach((pt, i) => {
+                    pathD += (i === 0 ? 'M ' : ' L ') + pt.x.toFixed(1) + ' ' + pt.y.toFixed(1);
+                });
+
+                let circles = '';
+                coords.forEach(pt => {
+                    const disp = `${pt.p.value} ${unit}`;
+                    if (pt.p.isToday) {
+                        circles += `
+                            <circle cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="5.5" fill="${color}" fill-opacity="0.25" />
+                            <circle cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="3.5" fill="${color}" stroke="#FFFFFF" stroke-width="1.5" />
+                            <text x="${pt.x.toFixed(1)}" y="${(pt.y - 7).toFixed(1)}" text-anchor="middle" font-size="9" font-weight="900" fill="${color}">${disp}</text>
+                        `;
+                    } else {
+                        circles += `
+                            <circle cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="3" fill="${color}" stroke="#FFFFFF" stroke-width="1" />
+                            <text x="${pt.x.toFixed(1)}" y="${(pt.y - 6).toFixed(1)}" text-anchor="middle" font-size="8.5" font-weight="700" fill="#64748B">${disp}</text>
+                        `;
+                    }
+                });
+
+                return { pathD, circles, coords, minVal, maxVal };
+            }
+
+            const t1 = buildTrack(wPts, 18, 62, color1, unit1);
+            const t2 = buildTrack(rPts, 94, 138, color2, unit2);
+
+            let xLabels = '';
+            t1.coords.forEach(pt => {
+                const fw = pt.p.isToday ? '900' : '700';
+                const fill = pt.p.isToday ? '#0F172A' : '#64748B';
+                xLabels += `<text x="${pt.x.toFixed(1)}" y="160" text-anchor="middle" font-size="9.5" font-weight="${fw}" fill="${fill}">${pt.p.dateLabel}</text>`;
+            });
+
+            return `
+                <div class="daylight-chart-card">
+                    <div class="daylight-chart-head">
+                        <span class="daylight-chart-title">📈 GELİŞİM EĞRİLERİ (${label1.replace(/[^a-zA-ZğüşıöçĞÜŞİÖÇ ]/g, '').trim()} & ${label2.replace(/[^a-zA-ZğüşıöçĞÜŞİÖÇ ]/g, '').trim()})</span>
+                        <div style="display:flex; gap:6px;">
+                            <span class="daylight-chart-badge" style="border-color:${color1}; color:${color1};">${unit1.toUpperCase()}</span>
+                            <span class="daylight-chart-badge" style="border-color:${color2}; color:${color2};">${unit2.toUpperCase()}</span>
+                        </div>
+                    </div>
+                    <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" style="overflow:visible; display:block;">
+                        <!-- Track 1: ${label1} -->
+                        <text x="${padL}" y="11" font-size="8.5" font-weight="900" fill="${color1}" letter-spacing="0.5">${label1} (${unit1})</text>
+                        <line x1="${padL}" y1="18" x2="${W - padR}" y2="18" stroke="#F1F5F9" stroke-dasharray="2,2" />
+                        <line x1="${padL}" y1="62" x2="${W - padR}" y2="62" stroke="#E2E8F0" />
+                        <path d="${t1.pathD}" fill="none" stroke="${color1}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                        ${t1.circles}
+
+                        <!-- Track Divider -->
+                        <line x1="${padL}" y1="78" x2="${W - padR}" y2="78" stroke="#E2E8F0" stroke-dasharray="3,3" />
+
+                        <!-- Track 2: ${label2} -->
+                        <text x="${padL}" y="87" font-size="8.5" font-weight="900" fill="${color2}" letter-spacing="0.5">${label2} (${unit2})</text>
+                        <line x1="${padL}" y1="94" x2="${W - padR}" y2="94" stroke="#F1F5F9" stroke-dasharray="2,2" />
+                        <line x1="${padL}" y1="138" x2="${W - padR}" y2="138" stroke="#E2E8F0" />
+                        <path d="${t2.pathD}" fill="none" stroke="${color2}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                        ${t2.circles}
+
+                        <!-- X Axis Dates -->
+                        ${xLabels}
+                    </svg>
+                </div>
+            `;
+        }
+
+        function renderSymmetricalBarbellSvg(weight, barWeight = 20) {
+            const totalW = Math.max(0, Number(weight) || 0);
+            const barW = Number(barWeight) || 20;
+            const plateLoadPerSide = Math.max(0, (totalW - barW) / 2);
+
+            const plateColors = {
+                20: { fill: '#2563EB', h: 64, name: '20' },
+                15: { fill: '#EAB308', h: 56, name: '15' },
+                10: { fill: '#16A34A', h: 48, name: '10' },
+                5: { fill: '#FFFFFF', stroke: '#0F172A', h: 40, name: '5' },
+                2.5: { fill: '#DC2626', h: 32, name: '2.5' },
+                1.25: { fill: '#94A3B8', h: 26, name: '1.25' }
+            };
+
+            let rem = plateLoadPerSide;
+            const plates = [];
+            [20, 15, 10, 5, 2.5, 1.25].forEach(denom => {
+                while (rem >= denom - 0.01) {
+                    plates.push(denom);
+                    rem = Math.round((rem - denom) * 100) / 100;
+                }
+            });
+
+            const W = 360, H = 90, midY = 45;
+            const barX1 = 40, barX2 = 320, barH = 10;
+            const collarW = 8, collarH = 24;
+
+            let leftPlatesSvg = '';
+            let rightPlatesSvg = '';
+            let curOffset = 0;
+
+            plates.forEach(denom => {
+                const spec = plateColors[denom];
+                const pWidth = denom >= 10 ? 10 : 8;
+                const pH = spec.h;
+                const pY = midY - pH / 2;
+
+                const leftX = 110 - curOffset - pWidth;
+                const rightX = 250 + curOffset;
+
+                leftPlatesSvg += `
+                    <rect x="${leftX}" y="${pY}" width="${pWidth}" height="${pH}" rx="2" fill="${spec.fill}" stroke="${spec.stroke || '#0F172A'}" stroke-width="1.2" />
+                `;
+                rightPlatesSvg += `
+                    <rect x="${rightX}" y="${pY}" width="${pWidth}" height="${pH}" rx="2" fill="${spec.fill}" stroke="${spec.stroke || '#0F172A'}" stroke-width="1.2" />
+                `;
+                curOffset += pWidth + 2;
+            });
+
+            const breakdownText = plates.length > 0
+                ? `Her yana: ${plates.map(p => p + ' kg').join(' + ')} (Yan başı ${plateLoadPerSide.toFixed(1)} kg)`
+                : `Yalnızca bar (${barW} kg, plakasız)`;
+
+            return {
+                svg: `
+                    <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" style="display:block; margin:0 auto;">
+                        <rect x="${barX1}" y="${midY - barH/2}" width="${barX2 - barX1}" height="${barH}" rx="3" fill="#64748B" stroke="#334155" stroke-width="1" />
+                        <line x1="140" y1="${midY - barH/2}" x2="220" y2="${midY - barH/2}" stroke="#CBD5E1" stroke-width="2" stroke-dasharray="2,2" />
+                        <line x1="140" y1="${midY + barH/2}" x2="220" y2="${midY + barH/2}" stroke="#CBD5E1" stroke-width="2" stroke-dasharray="2,2" />
+                        <rect x="112" y="${midY - collarH/2}" width="${collarW}" height="${collarH}" rx="2" fill="#475569" />
+                        <rect x="240" y="${midY - collarH/2}" width="${collarW}" height="${collarH}" rx="2" fill="#475569" />
+                        ${leftPlatesSvg}
+                        ${rightPlatesSvg}
+                    </svg>
+                `,
+                summary: `Toplam: <strong>${totalW} kg</strong> • Bar: <strong>${barW} kg</strong> • ${breakdownText}`
+            };
+        }
+
+        function openPlateModalForExercise(exId) {
+            currentPlateExerciseId = exId;
+            const modal = document.getElementById('daylightPlateModal');
+            if (!modal) return;
+
+            let targetW = 60;
+            if (activeWorkoutSetsData && activeWorkoutSetsData[exId]) {
+                const sets = activeWorkoutSetsData[exId];
+                const curSet = sets.find(s => !s.completed) || sets[0];
+                if (curSet && curSet.weight) targetW = parseFloat(curSet.weight) || 60;
+            }
+
+            const titleEl = document.getElementById('plateModalExerciseTitle');
+            const exObj = (activeWorkoutSession && activeWorkoutSession.exercises)
+                ? activeWorkoutSession.exercises.find(e => e.id === exId)
+                : (typeof EXERCISES_DB !== 'undefined' ? EXERCISES_DB.find(e => e.id === exId) : null);
+            if (titleEl) titleEl.innerText = `${(exObj && exObj.name) || 'Halter'} • Plaka Hesabı (${targetW} kg)`;
+
+            updatePlateModalView(targetW, currentPlateBarWeight);
+            modal.style.display = 'flex';
+        }
+
+        function setPlateBarWeight(w) {
+            currentPlateBarWeight = w;
+            ['plateBarOlympic', 'plateBarEZ', 'plateBarDumbbell'].forEach(btnId => {
+                const btn = document.getElementById(btnId);
+                if (!btn) return;
+                const isMatch = (btnId === 'plateBarOlympic' && w === 20) ||
+                                (btnId === 'plateBarEZ' && w === 10) ||
+                                (btnId === 'plateBarDumbbell' && w === 2.5);
+                btn.style.borderColor = isMatch ? '#EA580C' : '#CBD5E1';
+                btn.style.background = isMatch ? '#FFF7ED' : '#FFFFFF';
+                btn.style.color = isMatch ? '#C2410C' : '#475569';
+            });
+
+            let targetW = 60;
+            if (currentPlateExerciseId && activeWorkoutSetsData && activeWorkoutSetsData[currentPlateExerciseId]) {
+                const sets = activeWorkoutSetsData[currentPlateExerciseId];
+                const curSet = sets.find(s => !s.completed) || sets[0];
+                if (curSet && curSet.weight) targetW = parseFloat(curSet.weight) || 60;
+            }
+            updatePlateModalView(targetW, currentPlateBarWeight);
+        }
+
+        function updatePlateModalView(weight, barWeight) {
+            const res = renderSymmetricalBarbellSvg(weight, barWeight);
+            const svgBox = document.getElementById('plateBarbellSvgContainer');
+            const sumBox = document.getElementById('plateBreakdownSummary');
+            if (svgBox) svgBox.innerHTML = res.svg;
+            if (sumBox) sumBox.innerHTML = res.summary;
+        }
+
+        function closePlateModal() {
+            const modal = document.getElementById('daylightPlateModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function openQuickWorkoutModal() {
+            quickWorkoutSelectedIds.clear();
+            quickWorkoutActiveCategory = 'all';
+            const modal = document.getElementById('daylightQuickWorkoutModal');
+            if (!modal) return;
+            const inp = document.getElementById('quickWorkoutSearchInput');
+            if (inp) inp.value = '';
+
+            renderQuickWorkoutCategories();
+            renderQuickWorkoutList('');
+            modal.style.display = 'flex';
+        }
+
+        function closeQuickWorkoutModal() {
+            const modal = document.getElementById('daylightQuickWorkoutModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function onQuickWorkoutSearch(query) {
+            renderQuickWorkoutList(query);
+        }
+
+        function setQuickWorkoutCategory(cat) {
+            quickWorkoutActiveCategory = cat;
+            renderQuickWorkoutCategories();
+            const inp = document.getElementById('quickWorkoutSearchInput');
+            renderQuickWorkoutList(inp ? inp.value : '');
+        }
+
+        function renderQuickWorkoutCategories() {
+            const cats = [
+                { id: 'all', name: 'Tümü' },
+                { id: 'chest', name: 'Göğüs' },
+                { id: 'back', name: 'Sırt' },
+                { id: 'shoulders', name: 'Omuz' },
+                { id: 'legs', name: 'Bacak' },
+                { id: 'arms', name: 'Kol' },
+                { id: 'core', name: 'Karın' },
+                { id: 'cardio', name: 'Kardiyo' }
+            ];
+            const row = document.getElementById('quickWorkoutCategoryRow');
+            if (!row) return;
+            row.innerHTML = cats.map(c => {
+                const isAct = c.id === quickWorkoutActiveCategory;
+                return `
+                    <button type="button" class="btn btn-outline" onclick="setQuickWorkoutCategory('${c.id}')" style="flex-shrink:0; font-size:11.5px; font-weight:800; padding:6px 12px; border-radius:999px; border-color:${isAct ? '#EA580C' : '#CBD5E1'}; background:${isAct ? '#FFF7ED' : '#FFFFFF'}; color:${isAct ? '#C2410C' : '#475569'};">
+                        ${c.name}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function renderQuickWorkoutList(query = '') {
+            const listCont = document.getElementById('quickWorkoutListContainer');
+            if (!listCont || typeof EXERCISES_DB === 'undefined') return;
+
+            const q = (query || '').toLowerCase().trim();
+            const cat = quickWorkoutActiveCategory;
+
+            const filtered = EXERCISES_DB.filter(ex => {
+                if (!ex) return false;
+                if (cat !== 'all') {
+                    const pMus = ((ex.primaryMuscles && ex.primaryMuscles.join(' ')) || ex.muscle || '').toLowerCase();
+                    const catMatch = (cat === 'chest' && (pMus.includes('chest') || pMus.includes('göğüs'))) ||
+                                     (cat === 'back' && (pMus.includes('back') || pMus.includes('sırt') || pMus.includes('lat'))) ||
+                                     (cat === 'shoulders' && (pMus.includes('shoulder') || pMus.includes('omuz') || pMus.includes('delt'))) ||
+                                     (cat === 'legs' && (pMus.includes('leg') || pMus.includes('bacak') || pMus.includes('quad') || pMus.includes('glute'))) ||
+                                     (cat === 'arms' && (pMus.includes('arm') || pMus.includes('kol') || pMus.includes('biceps') || pMus.includes('triceps'))) ||
+                                     (cat === 'core' && (pMus.includes('core') || pMus.includes('abs') || pMus.includes('karın'))) ||
+                                     (cat === 'cardio' && (ex.category === 'cardio' || ex.unitMode === 'cardio_min'));
+                    if (!catMatch) return false;
+                }
+                if (!q) return true;
+                const normName = (ex.name || '').toLowerCase();
+                const normMuscle = (ex.muscle || '').toLowerCase();
+                return normName.includes(q) || normMuscle.includes(q);
+            });
+
+            if (filtered.length === 0) {
+                listCont.innerHTML = `<div style="text-align:center; padding:30px 10px; color:#64748B; font-size:13px;">Eşleşen hareket bulunamadı.</div>`;
+                return;
+            }
+
+            listCont.innerHTML = filtered.slice(0, 40).map(ex => {
+                const isSel = quickWorkoutSelectedIds.has(ex.id);
+                const opengym = (typeof OPENGYM_GLOBAL_CATALOG !== 'undefined' && OPENGYM_GLOBAL_CATALOG) ? OPENGYM_GLOBAL_CATALOG[ex.id] : null;
+                const thumb = opengym ? opengym.still : (ex.diagram || 'assets/icon-512.png');
+                return `
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 10px; background:#FFFFFF; border:1.5px solid ${isSel ? '#EA580C' : '#E2E8F0'}; border-radius:12px; margin-bottom:8px;">
+                        <div style="display:flex; align-items:center; gap:10px; min-width:0; cursor:pointer;" onclick="toggleQuickWorkoutSelect('${ex.id}')">
+                            <input type="checkbox" ${isSel ? 'checked' : ''} style="width:18px; height:18px; accent-color:#EA580C; pointer-events:none;">
+                            <img src="${thumb}" style="width:42px; height:42px; object-fit:cover; border-radius:8px; border:1px solid #E2E8F0; background:#F8FAFC;" alt="${escapeHTML(ex.name)}" onerror="this.src='assets/icon-512.png'">
+                            <div style="min-width:0;">
+                                <div style="font-size:13.5px; font-weight:900; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(ex.name)}</div>
+                                <div style="font-size:11px; color:#64748B; font-weight:700;">${getTurkishMuscleBadge(ex.muscle || (ex.primaryMuscles && ex.primaryMuscles[0]))}</div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-gold" style="font-size:11px; font-weight:900; padding:6px 12px; border-radius:8px; flex-shrink:0;" onclick="startSingleExerciseWorkout('${ex.id}')">
+                            ⚡ Başlat
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            updateQuickWorkoutBottomBar();
+        }
+
+        function toggleQuickWorkoutSelect(exId) {
+            if (quickWorkoutSelectedIds.has(exId)) {
+                quickWorkoutSelectedIds.delete(exId);
+            } else {
+                quickWorkoutSelectedIds.add(exId);
+            }
+            const inp = document.getElementById('quickWorkoutSearchInput');
+            renderQuickWorkoutList(inp ? inp.value : '');
+        }
+
+        function updateQuickWorkoutBottomBar() {
+            const bar = document.getElementById('quickWorkoutBottomActionBar');
+            const btn = document.getElementById('btnStartSelectedQuickWorkout');
+            if (!bar || !btn) return;
+            const cnt = quickWorkoutSelectedIds.size;
+            if (cnt > 0) {
+                bar.style.display = 'block';
+                btn.innerText = `🚀 Seçilenlerle Başlat (${cnt} Hareket)`;
+            } else {
+                bar.style.display = 'none';
+            }
+        }
+
+        function startSingleExerciseWorkout(exId) {
+            closeQuickWorkoutModal();
+            if (typeof EXERCISES_DB === 'undefined') return;
+            const dbEx = EXERCISES_DB.find(e => e.id === exId);
+            if (!dbEx) return;
+
+            currentGeneratedWorkout = {
+                id: 'quick_' + Date.now(),
+                title: dbEx.name + ' (Hızlı Seans)',
+                scheme: { sets: 3, reps: '8-12', rest: 60 },
+                exercises: [dbEx]
+            };
+            startActiveWorkoutFromGenerated();
+        }
+
+        function startSelectedQuickWorkout() {
+            closeQuickWorkoutModal();
+            if (quickWorkoutSelectedIds.size === 0 || typeof EXERCISES_DB === 'undefined') return;
+
+            const list = Array.from(quickWorkoutSelectedIds).map(id => EXERCISES_DB.find(e => e.id === id)).filter(Boolean);
+            if (list.length === 0) return;
+
+            currentGeneratedWorkout = {
+                id: 'quick_multi_' + Date.now(),
+                title: 'Hızlı Antrenman (' + list.length + ' Hareket)',
+                scheme: { sets: 3, reps: '8-12', rest: 60 },
+                exercises: list
+            };
+            startActiveWorkoutFromGenerated();
+        }
+
+        function selectDaylightHubDay(dayIdx, dateYMD) {
+            selectedDaylightHubDayIdx = dayIdx;
+            selectedDaylightHubDateStr = dateYMD;
+            renderActiveWorkout();
+        }
+
+        function renderDaylightPreWorkoutHubHtml(uid) {
+            const today = new Date();
+            const todayIdx = today.getDay();
+            const todayYMD = typeof formatDateYMD === 'function' ? formatDateYMD(today) : '';
+
+            if (selectedDaylightHubDayIdx === null || selectedDaylightHubDayIdx === undefined) {
+                selectedDaylightHubDayIdx = todayIdx;
+            }
+
+            const diffToMon = todayIdx === 0 ? -6 : 1 - todayIdx;
+            const monDate = new Date(today);
+            monDate.setDate(today.getDate() + diffToMon);
+
+            const dayNames = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+            const weekStrip = [];
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(monDate);
+                d.setDate(monDate.getDate() + i);
+                const dayIdx = (i + 1) % 7;
+                const ymd = typeof formatDateYMD === 'function' ? formatDateYMD(d) : '';
+                const isToday = ymd === todayYMD;
+                const isSel = dayIdx === selectedDaylightHubDayIdx;
+
+                let isDone = false;
+                try {
+                    const logs = (typeof getWorkoutLogs === 'function') ? getWorkoutLogs() : [];
+                    isDone = logs.some(l => l && (l.date === ymd || l.dateKey === ymd));
+                } catch(e) {}
+
+                weekStrip.push({
+                    dayIdx,
+                    shortLabel: dayNames[i],
+                    dateNumber: d.getDate(),
+                    ymd,
+                    isToday,
+                    isSel,
+                    isDone
+                });
+            }
+
+            const isNextWeek = (typeof activePlannerWeek !== 'undefined' && activePlannerWeek === 'next');
+            let plan = null;
+            if (selectedDaylightHubDateStr && !isNextWeek && typeof getPlanForDate === 'function') {
+                plan = getPlanForDate(new Date(selectedDaylightHubDateStr + 'T00:00:00'));
+            }
+            if (!plan) {
+                const schedule = isNextWeek ? getNextWeeklySchedule(uid) : getWeeklySchedule(uid);
+                plan = schedule ? schedule[selectedDaylightHubDayIdx] : null;
+            }
+
+            const isRest = !plan || plan.rest;
+            const planTitle = isRest ? 'Dinlenme & Aktif Toparlanma' : (plan.title || plan.program || 'Günün Antrenmanı');
+            const planExs = (!isRest && Array.isArray(plan.exercises)) ? plan.exercises : [];
+            const exCount = planExs.length;
+            const estMin = Math.max(25, Math.round(exCount * 7.5));
+
+            const muscleBadges = [];
+            if (!isRest && planExs.length > 0) {
+                const rawMuscles = new Set();
+                planExs.forEach(ex => {
+                    const dbEx = typeof ex === 'string'
+                        ? (typeof EXERCISES_DB !== 'undefined' ? EXERCISES_DB.find(e => e.id === ex) : null)
+                        : ex;
+                    if (dbEx) {
+                        const m = dbEx.muscle || (dbEx.primaryMuscles && dbEx.primaryMuscles[0]) || '';
+                        if (m) rawMuscles.add(m);
+                    }
+                });
+                rawMuscles.forEach(m => {
+                    if (muscleBadges.length < 3) muscleBadges.push(getTurkishMuscleBadge(m));
+                });
+            }
+
+            return `
+                <div class="daylight-studio-wrap">
+                    <div class="daylight-hub-top-zone">
+                        <div class="daylight-hub-kicker">
+                            <span>⚡ HAFTALIK PROGRAM</span>
+                            <span style="color:#0284C7;">${isNextWeek ? 'Gelecek Hafta' : 'Bu Hafta'}</span>
+                        </div>
+
+                        <div class="daylight-week-strip">
+                            ${weekStrip.map(w => `
+                                <div class="daylight-day-chip ${w.isToday ? 'is-today' : ''} ${w.isSel ? 'is-selected' : ''} ${w.isDone ? 'is-completed' : ''}" onclick="selectDaylightHubDay(${w.dayIdx}, '${w.ymd}')">
+                                    <span class="daylight-day-name">${w.shortLabel}</span>
+                                    <span class="daylight-day-num">${w.isDone ? '✓' : w.dateNumber}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <div class="daylight-draft-card">
+                            <div style="font-size:10.5px; font-weight:900; color:#EA580C; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:4px;">
+                                ${isRest ? '🌱 TOPARLANMA GÜNÜ' : '🔥 HAZIR TASLAK'}
+                            </div>
+                            <h2 class="daylight-draft-title">${escapeHTML(planTitle)}</h2>
+                            <div class="daylight-draft-meta">
+                                ${isRest ? 'Hafif esneme, mobilite ve yeterli uyku önerilir.' : `⏱️ ${exCount} Hareket • ~${estMin} dk`}
+                            </div>
+
+                            ${muscleBadges.length > 0 ? `
+                                <div class="daylight-badges-row">
+                                    ${muscleBadges.map(b => `<span class="daylight-badge">${b}</span>`).join('')}
+                                </div>
+                            ` : ''}
+
+                            ${!isRest ? `
+                                <button type="button" class="daylight-primary-cta" onclick="handleScheduleDayClick(${selectedDaylightHubDayIdx}, '${selectedDaylightHubDateStr || ''}')">
+                                    🚀 ANTRENMANI BAŞLAT
+                                </button>
+                            ` : `
+                                <button type="button" class="daylight-btn-secondary" onclick="openQuickWorkoutModal()" style="width:100%; border-color:#CBD5E1;">
+                                    ⚡ Yine de Hızlı Antrenman Başlat
+                                </button>
+                            `}
+                        </div>
+                    </div>
+
+                    <div class="daylight-hub-bottom-zone">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div style="font-size:12px; font-weight:900; color:#0F172A;">Garmin & Tredict Hazırlık Durumu</div>
+                                <div style="font-size:11px; color:#64748B; margin-top:2px;">
+                                    ${(typeof isGarminConnectedAndReady === 'function' && isGarminConnectedAndReady()) ? '🟢 Saat bağlı ve hazır' : '🟢 Toparlanma Yüksek (%92)'}
+                                </div>
+                            </div>
+                            <span style="font-size:11.5px; font-weight:900; padding:3px 8px; border-radius:999px; background:#DCFCE7; color:#166534; border:1px solid #86EFAC;">
+                                Hazır
+                            </span>
+                        </div>
+
+                        <div class="daylight-hub-actions-grid">
+                            <button type="button" class="daylight-btn-secondary" onclick="openQuickWorkoutModal()">
+                                ⚡ Hızlı Antrenman
+                            </button>
+                            <button type="button" class="daylight-btn-secondary" onclick="switchTab('historyTab')">
+                                📋 Önceki Geçmiş
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectDaylightSet(exId, setIdx) {
+            activeFocusSetIndex = setIdx;
+            isDaylightRestActive = false;
+            renderActiveWorkout();
+        }
+
+        function renderDaylightActiveSetStudioHtml(cardEx, cardIdx, s, isPairCard = false, isPairTarget = false, pairObj = null) {
+            const isBw = isExerciseBodyweight(cardEx);
+            const isTime = isExerciseTimeBased(cardEx);
+            const isCardio = isExerciseCardioMinutes(cardEx);
+            const sets = activeWorkoutSetsData[cardEx.id] || [];
+            const activeSetIdx = (activeFocusSetIndex !== null && activeFocusSetIndex < sets.length)
+                ? activeFocusSetIndex
+                : Math.max(0, sets.findIndex(st => !st.completed));
+            const curSet = sets[activeSetIdx] || sets[0] || { setNo: 1, weight: '', reps: 10, completed: false };
+
+            const media = getDaylightExerciseMedia(cardEx);
+            const lastPerf = getLastExercisePerformance(cardEx.id) || getLastExercisePerformance(cardEx.name);
+            const prevText = lastPerf ? formatPerformancePill(cardEx, lastPerf.weight, lastPerf.reps) : '';
+
+            const stepWeightDelta = 2.5;
+            const stepRepsDelta = isTime ? 5 : 1;
+
+            const isLastSet = activeSetIdx === sets.length - 1;
+            const isLastEx = cardIdx === s.exercises.length - 1;
+            let ctaLabel = `SETİ TAMAMLA VE DİNLEN (${activeSetIdx + 1} / ${sets.length})`;
+            if (pairObj && cardEx.supersetRole === 1) {
+                const partnerName = pairObj.secondEx ? (pairObj.secondEx.blockLabel || '2. Hareket') : '2. Hareket';
+                ctaLabel = `⚡ SETİ TAMAMLA ➔ ${partnerName}'YE GEÇ (${activeSetIdx + 1} / ${sets.length})`;
+            } else if (isLastSet && isLastEx) {
+                ctaLabel = `🏁 HAREKETİ TAMAMLA VE BİTİR (${sets.length} / ${sets.length})`;
+            } else if (isLastSet) {
+                ctaLabel = `✅ HAREKETİ TAMAMLA (${sets.length} / ${sets.length})`;
+            }
+
+            const weightDisp = (curSet.weight !== '' && curSet.weight !== null && !isNaN(Number(curSet.weight)) && Number(curSet.weight) > 0)
+                ? `${curSet.weight} kg`
+                : (isBw ? 'Vücut' : '0 kg');
+
+            const repsDisp = isTime
+                ? `${curSet.reps || 30} sn`
+                : (isCardio ? `${curSet.reps || 20} dk` : `${curSet.reps || 10} tk`);
+
+            return `
+                <div class="daylight-studio-wrap">
+                    <div class="daylight-studio-card">
+                        <div class="daylight-studio-header">
+                            <button type="button" class="btn btn-outline" style="font-size:11.5px; font-weight:800; padding:5px 10px; border-color:#CBD5E1; color:#475569;" onclick="cancelActiveWorkout()">
+                                Sekmelere Dön
+                            </button>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <button type="button" class="wk-ex-i-btn" onclick="openExerciseQuickInfoModal('${cardEx.id}')" title="Form ve Kas Bilgisi">i</button>
+                                <span style="font-size:11.5px; font-weight:800; color:#EF4444; background:#FEF2F2; border:1px solid #FECACA; padding:3px 8px; border-radius:999px;">
+                                    💓 ${(cardEx.healthTelemetry && cardEx.healthTelemetry.avgHeartrate) ? cardEx.healthTelemetry.avgHeartrate + ' bpm' : 'Nabız'}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="daylight-btn-subnav">
+                            <button type="button" class="daylight-subnav-btn" onclick="goToPrevExercise()" ${cardIdx === 0 ? 'disabled' : ''}>
+                                ⬅️ Önceki
+                            </button>
+                            <button type="button" class="daylight-subnav-btn" onclick="goToNextExercise()" ${cardIdx >= s.exercises.length - 1 ? 'disabled' : ''}>
+                                Sonraki ➡️
+                            </button>
+                            <button type="button" class="daylight-subnav-btn" onclick="openAlternativeModal('${cardEx.id}', 'active')">
+                                🔄 Değiştir
+                            </button>
+                            <button type="button" class="daylight-subnav-btn" onclick="setActiveWorkoutViewMode('list')">
+                                📋 Liste
+                            </button>
+                            <button type="button" class="daylight-subnav-btn danger" onclick="openCompleteModal()">
+                                🏁 Bitir
+                            </button>
+                        </div>
+
+                        <div class="daylight-media-box" onclick="openExerciseQuickInfoModal('${cardEx.id}')" title="Form rehberini aç">
+                            ${media.clip ? `
+                                <video src="${escapeHTML(media.clip)}" poster="${escapeHTML(media.still || '')}" autoplay loop muted playsinline class="daylight-video" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';"></video>
+                                <img src="${escapeHTML(media.still || 'assets/icon-512.png')}" alt="${escapeHTML(cardEx.name)}" class="daylight-video" style="display:none;">
+                            ` : (media.still ? `
+                                <img src="${escapeHTML(media.still)}" alt="${escapeHTML(cardEx.name)}" class="daylight-video">
+                            ` : `
+                                <div style="padding:40px 10px; color:#64748B; font-weight:800; font-size:13px;">${escapeHTML(cardEx.name)}</div>
+                            `)}
+                        </div>
+
+                        <div class="daylight-ex-title-row">
+                            <div>
+                                <h2 class="daylight-ex-name">${escapeHTML(cardEx.name)}</h2>
+                                <span class="daylight-badge" style="margin-top:4px; display:inline-block;">
+                                    ${getTurkishMuscleBadge(cardEx.muscle || cardEx.primaryMuscle)}
+                                </span>
+                            </div>
+                            ${!isBw && !isCardio ? `
+                                <button type="button" class="daylight-plate-link-btn" onclick="openPlateModalForExercise('${cardEx.id}')">
+                                    ⚖️ Plaka
+                                </button>
+                            ` : ''}
+                        </div>
+
+                        <div class="daylight-sets-row">
+                            ${sets.map((st, sIdx) => {
+                                const isDone = st.completed;
+                                const isAct = sIdx === activeSetIdx;
+                                return `
+                                    <button type="button" class="daylight-set-chip ${isAct ? 'active' : ''} ${isDone ? 'completed' : ''}" onclick="selectDaylightSet('${cardEx.id}', ${sIdx})">
+                                        ${isDone ? '✓ ' : ''}Set ${st.setNo}
+                                    </button>
+                                `;
+                            }).join('')}
+                            <button type="button" class="daylight-set-chip" onclick="addSetToExercise('${cardEx.id}')" style="border-style:dashed; color:#EA580C;">
+                                + Set Ekle
+                            </button>
+                        </div>
+
+                        ${lastPerf ? `
+                            <div class="daylight-ghost-bar">
+                                <span>💡 Önceki: <strong>${prevText}</strong></span>
+                                <button type="button" class="daylight-ghost-copy-btn" onclick="applyGhostToSet('${cardEx.id}', ${activeSetIdx}, ${lastPerf.weight}, ${lastPerf.reps})">
+                                    Kopyala
+                                </button>
+                            </div>
+                        ` : ''}
+
+                        <div class="daylight-stepper-grid">
+                            <div class="daylight-stepper-box">
+                                <div class="daylight-stepper-label">${isBw ? 'VÜCUT AĞIRLIĞI' : 'AĞIRLIK'}</div>
+                                <div class="daylight-stepper-row">
+                                    <button type="button" class="daylight-step-btn" onclick="stepActiveSetValue('${cardEx.id}', ${activeSetIdx}, 'weight', -${stepWeightDelta})">−</button>
+                                    <button type="button" class="daylight-step-val-btn" onclick="openListboxPicker('${cardEx.id}', ${activeSetIdx}, 'weight')">
+                                        ${weightDisp}
+                                    </button>
+                                    <button type="button" class="daylight-step-btn" onclick="stepActiveSetValue('${cardEx.id}', ${activeSetIdx}, 'weight', ${stepWeightDelta})">+</button>
+                                </div>
+                            </div>
+
+                            <div class="daylight-stepper-box">
+                                <div class="daylight-stepper-label">${isTime ? 'SÜRE (SN)' : (isCardio ? 'SÜRE (DK)' : 'TEKRAR')}</div>
+                                <div class="daylight-stepper-row">
+                                    <button type="button" class="daylight-step-btn" onclick="stepActiveSetValue('${cardEx.id}', ${activeSetIdx}, 'reps', -${stepRepsDelta})">−</button>
+                                    <button type="button" class="daylight-step-val-btn" onclick="openListboxPicker('${cardEx.id}', ${activeSetIdx}, 'reps')">
+                                        ${repsDisp}
+                                    </button>
+                                    <button type="button" class="daylight-step-btn" onclick="stepActiveSetValue('${cardEx.id}', ${activeSetIdx}, 'reps', ${stepRepsDelta})">+</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" class="daylight-primary-cta" onclick="handleSetCheckClick('${cardEx.id}', ${activeSetIdx})">
+                            ${ctaLabel}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderDaylightRestScreenHtml(cardEx, cardIdx, s) {
+            const isBw = isExerciseBodyweight(cardEx);
+            const isTime = isExerciseTimeBased(cardEx);
+            const isCardio = isExerciseCardioMinutes(cardEx);
+            const unitMode = isTime ? 'time_sec' : (isCardio ? 'cardio_min' : (isBw ? 'bodyweight' : 'reps'));
+
+            const sets = activeWorkoutSetsData[cardEx.id] || [];
+            const nextIncomplete = sets.find(st => !st.completed);
+            const lastCompleted = [...sets].reverse().find(st => st.completed);
+            const nextEx = (s && Array.isArray(s.exercises) && cardIdx < s.exercises.length - 1) ? s.exercises[cardIdx + 1] : null;
+            const nextMedia = nextEx ? getDaylightExerciseMedia(nextEx) : null;
+
+            const pairInfo = getSupersetPairInfo(s.exercises, cardIdx);
+            let isSupersetPartnerNext = false;
+            let isSupersetRoundNext = false;
+            let targetNextEx = nextEx;
+            let targetNextMedia = nextMedia;
+            let nextRoundNo = 1;
+
+            if (pairInfo && cardEx.supersetRole === 1) {
+                isSupersetPartnerNext = true;
+                targetNextEx = pairInfo.secondEx;
+                targetNextMedia = getDaylightExerciseMedia(targetNextEx);
+            } else if (pairInfo && cardEx.supersetRole === 2) {
+                const firstSets = activeWorkoutSetsData[pairInfo.firstEx.id] || [];
+                const nextFirstIdx = firstSets.findIndex(st => !st.completed);
+                if (nextFirstIdx !== -1) {
+                    isSupersetRoundNext = true;
+                    targetNextEx = pairInfo.firstEx;
+                    targetNextMedia = getDaylightExerciseMedia(targetNextEx);
+                    nextRoundNo = nextFirstIdx + 1;
+                }
+            }
+
+            const curWeight = lastCompleted ? (lastCompleted.weight !== '' && lastCompleted.weight !== null ? lastCompleted.weight : 0) : 0;
+            const curReps = lastCompleted ? (lastCompleted.reps || 10) : 10;
+            const historyPoints = getAdaptiveHistoryDataForExercise(cardEx.id, cardEx.name, unitMode);
+
+            const mins = Math.floor(timerRemaining / 60);
+            const secs = timerRemaining % 60;
+            const timerStr = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+            return `
+                <div class="daylight-studio-wrap">
+                    <div class="daylight-rest-card">
+                        <div class="daylight-rest-timer-box">
+                            <div style="font-size:11px; font-weight:900; color:#64748B; letter-spacing:0.6px; text-transform:uppercase; margin-bottom:4px;">
+                                ⏱️ DİNLENME SAYACI
+                            </div>
+                            <div class="daylight-rest-timer-val" id="daylightTimerDisplay">${timerStr}</div>
+                            <div class="daylight-rest-timer-actions">
+                                <button type="button" class="daylight-rest-adj-btn" onclick="adjustTimerSecs(-15)">−15 sn</button>
+                                <button type="button" class="daylight-rest-adj-btn" onclick="adjustTimerSecs(30)">+30 sn</button>
+                                <button type="button" class="daylight-rest-skip-btn" onclick="skipRestTimer()">⏩ Dinlenmeyi Atla</button>
+                            </div>
+                        </div>
+
+                        ${renderDaylightAdaptiveChartSvg(historyPoints, curWeight, curReps, unitMode, cardEx.name)}
+
+                        ${isSupersetPartnerNext ? `
+                            <div class="daylight-next-exercise-card" style="margin-top:14px; background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:16px; padding:14px; text-align:center;">
+                                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                                    <span style="font-size:11px; font-weight:900; color:#EA580C; letter-spacing:0.5px; text-transform:uppercase;">
+                                        ⚡ SÜPERSET: 2. HAREKETE GEÇ (${escapeHTML(targetNextEx.blockLabel || 'A2')})
+                                    </span>
+                                    <span class="daylight-badge" style="font-size:10.5px; padding:2px 8px;">
+                                        ${getTurkishMuscleBadge(targetNextEx.muscle || targetNextEx.primaryMuscle)}
+                                    </span>
+                                </div>
+                                <div style="font-size:15.5px; font-weight:900; color:#0F172A; text-align:left; margin-bottom:8px;">
+                                    ${escapeHTML(targetNextEx.name)}
+                                </div>
+                                <div style="width:100%; height:180px; border-radius:12px; overflow:hidden; background:#FFFFFF; border:1px solid #CBD5E1; margin-bottom:12px; display:flex; align-items:center; justify-content:center; box-shadow:inset 0 1px 3px rgba(0,0,0,0.04);">
+                                    ${targetNextMedia && targetNextMedia.clip ? `
+                                        <video src="${escapeHTML(targetNextMedia.clip)}" poster="${escapeHTML(targetNextMedia.still || '')}" autoplay loop muted playsinline style="width:100%; height:100%; object-fit:contain; display:block;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';"></video>
+                                        <img src="${escapeHTML(targetNextMedia.still || 'assets/icon-512.png')}" alt="${escapeHTML(targetNextEx.name)}" style="width:100%; height:100%; object-fit:contain; display:none;">
+                                    ` : ((targetNextMedia && targetNextMedia.still) ? `
+                                        <img src="${escapeHTML(targetNextMedia.still)}" alt="${escapeHTML(targetNextEx.name)}" style="width:100%; height:100%; object-fit:contain; display:block;">
+                                    ` : `
+                                        <div style="font-size:13px; font-weight:800; color:#64748B;">${escapeHTML(targetNextEx.name)}</div>
+                                    `)}
+                                </div>
+                                <button type="button" class="daylight-primary-cta" onclick="dismissDaylightRest()">
+                                    ${escapeHTML(targetNextEx.name)}'ye Başla ➔
+                                </button>
+                            </div>
+                        ` : (isSupersetRoundNext ? `
+                            <div class="daylight-next-exercise-card" style="margin-top:14px; background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:16px; padding:14px; text-align:center;">
+                                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                                    <span style="font-size:11px; font-weight:900; color:#EA580C; letter-spacing:0.5px; text-transform:uppercase;">
+                                        ⚡ SÜPERSET: SIRADAKİ TUR (Tur ${nextRoundNo})
+                                    </span>
+                                    <span class="daylight-badge" style="font-size:10.5px; padding:2px 8px;">
+                                        ${getTurkishMuscleBadge(targetNextEx.muscle || targetNextEx.primaryMuscle)}
+                                    </span>
+                                </div>
+                                <div style="font-size:15.5px; font-weight:900; color:#0F172A; text-align:left; margin-bottom:8px;">
+                                    ${escapeHTML(targetNextEx.name)}
+                                </div>
+                                <div style="width:100%; height:180px; border-radius:12px; overflow:hidden; background:#FFFFFF; border:1px solid #CBD5E1; margin-bottom:12px; display:flex; align-items:center; justify-content:center; box-shadow:inset 0 1px 3px rgba(0,0,0,0.04);">
+                                    ${targetNextMedia && targetNextMedia.clip ? `
+                                        <video src="${escapeHTML(targetNextMedia.clip)}" poster="${escapeHTML(targetNextMedia.still || '')}" autoplay loop muted playsinline style="width:100%; height:100%; object-fit:contain; display:block;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';"></video>
+                                        <img src="${escapeHTML(targetNextMedia.still || 'assets/icon-512.png')}" alt="${escapeHTML(targetNextEx.name)}" style="width:100%; height:100%; object-fit:contain; display:none;">
+                                    ` : ((targetNextMedia && targetNextMedia.still) ? `
+                                        <img src="${escapeHTML(targetNextMedia.still)}" alt="${escapeHTML(targetNextEx.name)}" style="width:100%; height:100%; object-fit:contain; display:block;">
+                                    ` : `
+                                        <div style="font-size:13px; font-weight:800; color:#64748B;">${escapeHTML(targetNextEx.name)}</div>
+                                    `)}
+                                </div>
+                                <button type="button" class="daylight-primary-cta" onclick="dismissDaylightRest()">
+                                    ${escapeHTML(targetNextEx.name)} Tur ${nextRoundNo}'e Başla ➔
+                                </button>
+                            </div>
+                        ` : (nextIncomplete ? `
+                            <div class="daylight-next-preview">
+                                <div>
+                                    <span style="font-size:11px; color:#64748B; font-weight:700;">Sıradaki:</span>
+                                    <div style="font-size:14px; font-weight:900; color:#0F172A;">Set ${nextIncomplete.setNo} • ${nextIncomplete.weight ? nextIncomplete.weight + ' kg × ' : ''}${nextIncomplete.reps || 10} tekrar</div>
+                                </div>
+                                <button type="button" class="btn btn-outline" style="font-size:11px; font-weight:800; padding:6px 10px; border-color:#CBD5E1; color:#0F172A;" onclick="dismissDaylightRest()">
+                                    ✏️ Sete Geç
+                                </button>
+                            </div>
+                        ` : (nextEx ? `
+                            <div class="daylight-next-exercise-card" style="margin-top:14px; background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:16px; padding:14px; text-align:center;">
+                                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                                    <span style="font-size:11px; font-weight:900; color:#EA580C; letter-spacing:0.5px; text-transform:uppercase;">
+                                        ⚡ SIRADAKİ HAREKET (${cardIdx + 2} / ${s.exercises.length})
+                                    </span>
+                                    <span class="daylight-badge" style="font-size:10.5px; padding:2px 8px;">
+                                        ${getTurkishMuscleBadge(nextEx.muscle || nextEx.primaryMuscle)}
+                                    </span>
+                                </div>
+                                <div style="font-size:15.5px; font-weight:900; color:#0F172A; text-align:left; margin-bottom:8px;">
+                                    ${escapeHTML(nextEx.name)}
+                                </div>
+                                <div style="width:100%; height:180px; border-radius:12px; overflow:hidden; background:#FFFFFF; border:1px solid #CBD5E1; margin-bottom:12px; display:flex; align-items:center; justify-content:center; box-shadow:inset 0 1px 3px rgba(0,0,0,0.04);">
+                                    ${nextMedia && nextMedia.clip ? `
+                                        <video src="${escapeHTML(nextMedia.clip)}" poster="${escapeHTML(nextMedia.still || '')}" autoplay loop muted playsinline style="width:100%; height:100%; object-fit:contain; display:block;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';"></video>
+                                        <img src="${escapeHTML(nextMedia.still || 'assets/icon-512.png')}" alt="${escapeHTML(nextEx.name)}" style="width:100%; height:100%; object-fit:contain; display:none;">
+                                    ` : ((nextMedia && nextMedia.still) ? `
+                                        <img src="${escapeHTML(nextMedia.still)}" alt="${escapeHTML(nextEx.name)}" style="width:100%; height:100%; object-fit:contain; display:block;">
+                                    ` : `
+                                        <div style="font-size:13px; font-weight:800; color:#64748B;">${escapeHTML(nextEx.name)}</div>
+                                    `)}
+                                </div>
+                                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; font-size:12px; color:#475569; font-weight:700;">
+                                    <span>🎯 Hedef: ${nextEx.targetSets || 3} Set</span>
+                                    <span>⏱️ Dinlenme: ${nextEx.customRest || 60} sn</span>
+                                </div>
+                                <button type="button" class="daylight-primary-cta" onclick="goToNextExercise()">
+                                    Sıradaki Egzersize Geç ➔
+                                </button>
+                            </div>
+                        ` : `
+                            <div class="daylight-next-preview" style="background:#F0FDF4; border-color:#86EFAC; margin-top:14px; text-align:center; padding:16px;">
+                                <div style="font-size:24px; margin-bottom:4px;">🏆</div>
+                                <div style="font-size:15px; font-weight:900; color:#166534; margin-bottom:4px;">Tüm Antrenman Tamamlandı!</div>
+                                <div style="font-size:12px; color:#15803D; margin-bottom:12px; font-weight:600;">Harika bir performans! Tüm hareketleri başarıyla bitirdin.</div>
+                                <button type="button" class="daylight-primary-cta" style="background:#16A34A;" onclick="openCompleteModal()">
+                                    🏁 Antrenmanı Bitir & Kaydet
+                                </button>
+                            </div>
+                        `)))}
+                    </div>
+                </div>
+            `;
+        }
+
+        window.selectDaylightHubDay = selectDaylightHubDay;
+        window.selectDaylightSet = selectDaylightSet;
+        window.openPlateModalForExercise = openPlateModalForExercise;
+        window.setPlateBarWeight = setPlateBarWeight;
+        window.closePlateModal = closePlateModal;
+        window.openQuickWorkoutModal = openQuickWorkoutModal;
+        window.closeQuickWorkoutModal = closeQuickWorkoutModal;
+        window.onQuickWorkoutSearch = onQuickWorkoutSearch;
+        window.setQuickWorkoutCategory = setQuickWorkoutCategory;
+        window.toggleQuickWorkoutSelect = toggleQuickWorkoutSelect;
+        window.startSingleExerciseWorkout = startSingleExerciseWorkout;
+        window.startSelectedQuickWorkout = startSelectedQuickWorkout;
+
         function renderActiveWorkout() {
             const container = document.getElementById('activeWorkoutContainer');
             const liveTrackerBar = document.querySelector('.live-tracker-bar');
@@ -996,6 +2083,9 @@
 
                                 <!-- GÜN TAŞIMA & AI ARDIŞIK GÜN REVİZYON ÖZETİ -->
                                 ${lastMoveSummaryBannerHtml}
+
+                                <!-- DAYLIGHT PRE-WORKOUT HUB (ZONE 1 & ZONE 2) -->
+                                ${renderDaylightPreWorkoutHubHtml(uid)}
                             </div>
                         `;
                     } catch(renderErr) {
@@ -1008,7 +2098,7 @@
             }
 
             if (liveTrackerBar) liveTrackerBar.style.display = 'block';
-            if (hud) hud.style.display = 'block';
+            if (hud) hud.style.display = (activeWorkoutViewMode === 'focus') ? 'none' : 'block';
             if (studioSec) studioSec.style.display = 'none';
             if (calSec) calSec.style.display = 'none';
 
@@ -1093,168 +2183,10 @@
 
             // ==================== MODE 1: CANLI ODAK MODU (STITCH ODAK BÜYÜK SET KARTI) ====================
             const renderFocusSingleCardHtml = (cardEx, cardIdx, isPairCard = false, isPairTarget = false, pairObj = null) => {
-                const isBw = isExerciseBodyweight(cardEx);
-                const isTime = isExerciseTimeBased(cardEx);
-                const sets = activeWorkoutSetsData[cardEx.id] || [];
-                const firstIncompleteIdx = sets.findIndex(st => !st.completed);
-                const isAllSetsDone = sets.length > 0 && sets.every(st => st.completed);
-                const lastPerf = getLastExercisePerformance(cardEx.id) || getLastExercisePerformance(cardEx.name);
-                const isFormOpen = !!workoutFormGuideOpenState[cardEx.id];
-                const stepWeightDelta = 2.5;
-                const stepRepsDelta = isTime ? 5 : 1;
-
-                return `
-                    <div class="hevy-exercise-card stitch-focus-ex-card ${isPairTarget ? 'is-pair-target' : ''}" data-exercise-id="${cardEx.id}">
-                        <div class="stitch-focus-head">
-                            <div class="stitch-focus-head-left">
-                                ${(typeof OPENGYM_GLOBAL_CATALOG !== 'undefined' && OPENGYM_GLOBAL_CATALOG[cardEx.id]) ? `
-                                    <div class="stitch-focus-thumb" onclick="toggleWorkoutFormGuide('${cardEx.id}')" title="Form rehberini aç/kapat">
-                                        <img src="${OPENGYM_GLOBAL_CATALOG[cardEx.id].still}" width="40" height="40" loading="lazy" decoding="async" alt="${escapeHTML(cardEx.name)}" style="width:100%; height:100%; object-fit:cover;">
-                                    </div>
-                                ` : ''}
-                                <div class="stitch-focus-title-col">
-                                    <div class="stitch-focus-kicker">AKTİF HAREKET (${cardIdx + 1} / ${s.exercises.length})</div>
-                                    <h2 class="stitch-focus-title">${escapeHTML(cardEx.name)}</h2>
-                                </div>
-                            </div>
-                            <div class="stitch-focus-head-actions">
-                                <button type="button" class="wk-ex-i-btn" onclick="openExerciseQuickInfoModal('${escapeHTML(String(cardEx.id || ''))}')" title="Hareket Bilgisi">i</button>
-                                <button type="button" class="stitch-form-icon-btn ${isFormOpen ? 'active' : ''}" onclick="toggleWorkoutFormGuide('${cardEx.id}')" title="Form Rehberi">📖</button>
-                            </div>
-                        </div>
-
-                        <div id="formGuideBody_${cardEx.id}" class="hevy-form-guide-body stitch-flush-form-drawer" style="display:${isFormOpen ? 'block' : 'none'};">
-                            ${isFormOpen ? renderExercisePositionsHtml(cardEx, `focus_${cardEx.id}`, false) : ''}
-                        </div>
-
-                        <div class="stitch-sets-stack">
-                            ${sets.map((st, sIdx) => {
-                                const isDone = st.completed;
-                                const isTarget = !isDone && sIdx === firstIncompleteIdx && (!isPairCard || isPairTarget);
-                                const prevText = lastPerf ? formatPerformancePill(cardEx, lastPerf.weight, lastPerf.reps) : '';
-                                const wDisp = formatSetWeightDisplay(isBw, st.weight);
-                                const rDisp = formatSetMetricDisplay(cardEx, st.reps);
-
-                                if (isDone) {
-                                    return `
-                                        <div class="stitch-set-done-row" id="setRow_${cardEx.id}_${sIdx}">
-                                            <div class="stitch-set-done-left" onclick="openListboxPicker('${cardEx.id}', ${sIdx}, 'weight')">
-                                                <span class="stitch-set-num-pill done">${st.setNo}</span>
-                                                <span class="stitch-set-done-text">${wDisp} × ${rDisp}</span>
-                                            </div>
-                                            <button type="button" class="stitch-check-done-btn" onclick="handleSetCheckClick('${cardEx.id}', ${sIdx})" title="Geri Al">✓</button>
-                                        </div>
-                                        ${renderInterSetSlotHtml(cardEx.id, st, sIdx, sets.length)}
-                                    `;
-                                }
-
-                                if (isTarget) {
-                                    return `
-                                        <div class="stitch-active-set-box" id="setRow_${cardEx.id}_${sIdx}">
-                                            <div class="stitch-active-set-top">
-                                                <span class="stitch-active-set-badge">ŞU ANKİ SET • ${st.setNo}. SET</span>
-                                                ${lastPerf ? `
-                                                    <button type="button" class="stitch-ghost-pill-btn" onclick="applyGhostToSet('${cardEx.id}', ${sIdx}, ${lastPerf.weight}, ${lastPerf.reps})">
-                                                        Önceki: ${prevText}
-                                                    </button>
-                                                ` : ''}
-                                            </div>
-                                            <div class="stitch-stepper-grid">
-                                                <div class="stitch-stepper-box">
-                                                    <div class="stitch-stepper-lbl">${isBw ? 'EK YÜK (KG)' : 'AĞIRLIK (KG)'}</div>
-                                                    <div class="stitch-stepper-controls">
-                                                        <button type="button" class="stitch-step-btn" onclick="stepActiveSetValue('${cardEx.id}', ${sIdx}, 'weight', -${stepWeightDelta})">−</button>
-                                                        <button type="button" class="stitch-step-val-btn" onclick="openListboxPicker('${cardEx.id}', ${sIdx}, 'weight')">${wDisp}</button>
-                                                        <button type="button" class="stitch-step-btn" onclick="stepActiveSetValue('${cardEx.id}', ${sIdx}, 'weight', ${stepWeightDelta})">+</button>
-                                                    </div>
-                                                </div>
-                                                <div class="stitch-stepper-box">
-                                                    <div class="stitch-stepper-lbl">${isTime ? 'SÜRE (SN)' : 'TEKRAR'}</div>
-                                                    <div class="stitch-stepper-controls">
-                                                        <button type="button" class="stitch-step-btn" onclick="stepActiveSetValue('${cardEx.id}', ${sIdx}, 'reps', -${stepRepsDelta})">−</button>
-                                                        <button type="button" class="stitch-step-val-btn" onclick="openListboxPicker('${cardEx.id}', ${sIdx}, 'reps')">${rDisp}</button>
-                                                        <button type="button" class="stitch-step-btn" onclick="stepActiveSetValue('${cardEx.id}', ${sIdx}, 'reps', ${stepRepsDelta})">+</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <button type="button" class="stitch-complete-set-cta" onclick="handleSetCheckClick('${cardEx.id}', ${sIdx})">
-                                                ✓ ${st.setNo}. Seti Tamamla
-                                            </button>
-                                        </div>
-                                        ${renderInterSetSlotHtml(cardEx.id, st, sIdx, sets.length)}
-                                    `;
-                                }
-
-                                return `
-                                    <div class="stitch-set-upcoming-row" id="setRow_${cardEx.id}_${sIdx}">
-                                        <div class="stitch-set-done-left" onclick="openListboxPicker('${cardEx.id}', ${sIdx}, 'weight')">
-                                            <span class="stitch-set-num-pill">${st.setNo}</span>
-                                            <span class="stitch-set-upcoming-text">Hedef: ${wDisp} × ${rDisp}</span>
-                                        </div>
-                                        <button type="button" class="stitch-check-upcoming-btn" onclick="handleSetCheckClick('${cardEx.id}', ${sIdx})" title="Seti Tamamla">○</button>
-                                    </div>
-                                    ${renderInterSetSlotHtml(cardEx.id, st, sIdx, sets.length)}
-                                `;
-                            }).join('')}
-
-                            <div class="stitch-set-footer-actions">
-                                <button type="button" class="stitch-set-mini-btn" onclick="addSetToExercise('${cardEx.id}')">+ Set Ekle</button>
-                                ${sets.length > 1 ? `
-                                    <button type="button" class="stitch-set-mini-btn danger" onclick="removeSetFromExercise('${cardEx.id}')">− Set Sil</button>
-                                ` : ''}
-                            </div>
-                        </div>
-
-                        ${(!isPairCard && isAllSetsDone) ? `
-                            <div class="hevy-exercise-done-banner">
-                                <div class="hevy-done-title">🎉 ${escapeHTML(cardEx.name)} Bitti!</div>
-                                <div class="hevy-done-sub">Tüm ${sets.length} set başarıyla tamamlandı.</div>
-                                ${cardIdx < s.exercises.length - 1 ? `
-                                    <button type="button" class="btn-hevy-next-cta" onclick="goToNextExercise()">
-                                        Sıradaki Egzersize Geç (${cardIdx + 2}/${s.exercises.length}) ➔
-                                    </button>
-                                ` : `
-                                    <button type="button" class="btn-hevy-finish-cta" onclick="openCompleteModal()">
-                                        🏁 Antrenmanı Tamamla & Günlüğe Kaydet
-                                    </button>
-                                `}
-                            </div>
-                        ` : ''}
-
-                        <div class="hevy-more-wrapper">
-                            <button type="button" class="btn-hevy-more-toggle" onclick="toggleExerciseMoreActions('${cardEx.id}')" id="btnMoreActions_${cardEx.id}">
-                                <span>⚙️ Diğer Seçenekler (Alternatif, Alet...)</span>
-                                <span class="more-toggle-icon">${activeWorkoutMoreDrawersState[cardEx.id] ? '▲ Kapat' : '•••'}</span>
-                            </button>
-                            <div class="hevy-more-drawer" id="moreActionsDrawer_${cardEx.id}" style="display:${activeWorkoutMoreDrawersState[cardEx.id] ? 'grid' : 'none'};">
-                                <button class="btn-hevy-action" onclick="openAlternativeModal('${cardEx.id}', 'active')">
-                                    📋 Alternatif Seç
-                                </button>
-                                <button class="btn-hevy-action" onclick="deferExerciseToEnd('${cardEx.id}')" style="color:#f59e0b;">
-                                    ⏳ Alet Dolu (Sona At)
-                                </button>
-                                <button class="btn-hevy-action" onclick="moveExerciseOrder('${cardEx.id}', -1)">
-                                    ⬆️ Sırayı Öne Al
-                                </button>
-                                <button class="btn-hevy-action" onclick="moveExerciseOrder('${cardEx.id}', 1)">
-                                    ⬇️ Sırayı Arkaya Al
-                                </button>
-                                <button class="btn-hevy-action" onclick="openAddFinisherModal()">
-                                    ➕ Finisher Ekle
-                                </button>
-                                <button class="btn-hevy-action" onclick="openExerciseBugReportModal(decodeURIComponent('${encodeURIComponent(cardEx.id)}'), decodeURIComponent('${encodeURIComponent(cardEx.name || '')}'), '', decodeURIComponent('${encodeURIComponent(cardEx.equipment || '')}'), decodeURIComponent('${encodeURIComponent(cardEx.muscle || '')}'))">
-                                    ⚠️ Hata Bildir
-                                </button>
-                                <button class="btn-hevy-action danger" onclick="removeExerciseFromWorkout('${cardEx.id}', 'active')">
-                                    🗑️ Hareketi Kaldır
-                                </button>
-                                <button class="btn-hevy-action danger" onclick="cancelActiveWorkout()">
-                                    🛑 İptal Et
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                if (isDaylightRestActive) {
+                    return renderDaylightRestScreenHtml(cardEx, cardIdx, s);
+                }
+                return renderDaylightActiveSetStudioHtml(cardEx, cardIdx, s, isPairCard, isPairTarget, pairObj);
             };
 
             if (activeWorkoutViewMode === 'focus') {
@@ -1308,101 +2240,38 @@
                     }).join('');
 
                     mainFocusBodyHtml = `
-                        <div class="superset-round-tracker">
+                        <div class="superset-round-tracker" style="margin-bottom:10px;">
                             <div style="margin-bottom:6px; color:#92400E; font-weight:900;">${stepBannerText}</div>
                             <div style="display:flex; flex-wrap:wrap; gap:6px;">${roundPillsHtml}</div>
                         </div>
-                        <div class="superset-pair-focus-shell">
-                            ${renderFocusSingleCardHtml(focusPair.firstEx, focusPair.firstIdx, true, targetExId === focusPair.firstEx.id, focusPair)}
-                            <div class="superset-focus-connector">
-                                ⚡ DİNLENMEDEN ${escapeHTML(lblB)} (${escapeHTML(focusPair.secondEx.name)}) HAREKETİNE GEÇ (0 sn) ➔
+                        ${isDaylightRestActive
+                            ? renderDaylightRestScreenHtml(ex, activeFocusExIndex, s)
+                            : renderFocusSingleCardHtml(ex, activeFocusExIndex, true, false, focusPair)}
+                        ${isPairAllDone ? `
+                            <div class="hevy-exercise-done-banner" style="margin-top:12px;">
+                                <div class="hevy-done-title">🎉 Süperset Blok ${escapeHTML(focusPair.groupId)} Bitti!</div>
+                                <div class="hevy-done-sub">Her iki hareketin tüm turları tamamlandı.</div>
+                                ${!isLastNavDisabled ? `
+                                    <button type="button" class="btn-hevy-next-cta" onclick="goToNextExercise()">
+                                        Sıradaki Bloğa Geç ➔
+                                    </button>
+                                ` : `
+                                    <button type="button" class="btn-hevy-finish-cta" onclick="openCompleteModal()">
+                                        🏁 Antrenmanı Tamamla & Günlüğe Kaydet
+                                    </button>
+                                `}
                             </div>
-                            ${renderFocusSingleCardHtml(focusPair.secondEx, focusPair.secondIdx, true, targetExId === focusPair.secondEx.id, focusPair)}
-                            ${isPairAllDone ? `
-                                <div class="hevy-exercise-done-banner" style="margin-top:4px;">
-                                    <div class="hevy-done-title">🎉 Süperset Blok ${escapeHTML(focusPair.groupId)} Bitti!</div>
-                                    <div class="hevy-done-sub">Her iki hareketin tüm turları tamamlandı.</div>
-                                    ${!isLastNavDisabled ? `
-                                        <button type="button" class="btn-hevy-next-cta" onclick="goToNextExercise()">
-                                            Sıradaki Bloğa Geç ➔
-                                        </button>
-                                    ` : `
-                                        <button type="button" class="btn-hevy-finish-cta" onclick="openCompleteModal()">
-                                            🏁 Antrenmanı Tamamla & Günlüğe Kaydet
-                                        </button>
-                                    `}
-                                </div>
-                            ` : ''}
-                        </div>
+                        ` : ''}
                     `;
                 } else {
-                    const exBlockTag = ex.blockType === 'superset'
-                        ? `🔥 Süperset (${ex.blockLabel})`
-                        : `🎯 Düz Set (${ex.blockLabel || (activeFocusExIndex + 1)})`;
-                    navCounterHtml = `EGZERSİZ ${activeFocusExIndex + 1} / ${s.exercises.length} • ${escapeHTML(exBlockTag)}`;
-                    mainFocusBodyHtml = renderFocusSingleCardHtml(ex, activeFocusExIndex, false, false, null);
+                    mainFocusBodyHtml = isDaylightRestActive
+                        ? renderDaylightRestScreenHtml(ex, activeFocusExIndex, s)
+                        : renderFocusSingleCardHtml(ex, activeFocusExIndex, false, false, null);
                 }
 
                 container.innerHTML = `
-                    <div class="hevy-workout-wrapper">
-                        <!-- TOP EXERCISE NAVIGATION STEPPER -->
-                        <div class="hevy-exercise-nav">
-                            <button type="button" class="hevy-nav-arrow" onclick="goToPrevExercise()" ${isFirstNavDisabled ? 'disabled' : ''} title="Önceki Blok/Egzersiz">
-                                ◀
-                            </button>
-                            <div class="hevy-nav-center">
-                                <div class="hevy-nav-counter">${navCounterHtml}</div>
-                                <div class="hevy-nav-pills">
-                                    ${s.exercises.map((e, eIdx) => {
-                                        const eSets = activeWorkoutSetsData[e.id] || [];
-                                        const isDone = eSets.length > 0 && eSets.every(st => st.completed);
-                                        const isCur = focusPair ? (eIdx === focusPair.firstIdx || eIdx === focusPair.secondIdx) : eIdx === activeFocusExIndex;
-                                        const pillLbl = e.blockLabel || (eIdx + 1);
-                                        return `
-                                            <button type="button" 
-                                                    class="hevy-pill-dot ${isCur ? 'active' : ''} ${isDone ? 'done' : ''}" 
-                                                    onclick="jumpToExercise(${eIdx})" 
-                                                    title="${escapeHTML(e.name)}">
-                                                ${isDone ? '✓' : escapeHTML(String(pillLbl))}
-                                            </button>
-                                        `;
-                                    }).join('')}
-                                </div>
-                            </div>
-                            <button type="button" class="hevy-nav-arrow" onclick="goToNextExercise()" ${isLastNavDisabled ? 'disabled' : ''} title="Sonraki Blok/Egzersiz">
-                                ▶
-                            </button>
-                        </div>
-
+                    <div class="daylight-studio-wrap">
                         ${mainFocusBodyHtml}
-
-                        <!-- NAVIGATION FOOTER -->
-                        <div class="hevy-footer-nav">
-                            <button type="button" class="btn-hevy-nav" onclick="goToPrevExercise()" ${isFirstNavDisabled ? 'disabled' : ''}>
-                                ◀ Önceki Hrk
-                            </button>
-                            <button type="button" class="btn-hevy-nav" style="border-color:var(--gold); color:var(--gold); font-weight:900;" onclick="openCompleteModal()">
-                                🏁 Seansı Bitir
-                            </button>
-                            <button type="button" class="btn-hevy-nav" onclick="goToNextExercise()" ${isLastNavDisabled ? 'disabled' : ''}>
-                                Sonraki Hrk ▶
-                            </button>
-                        </div>
-
-                        ${allWorkoutDone ? `
-                            <div style="text-align:center; margin:14px 0 20px;">
-                                <button type="button" class="btn-hevy-finish-cta" style="padding:16px; font-size:15px; box-shadow:0 0 25px rgba(245,158,11,0.6);" onclick="openCompleteModal()">
-                                    🏆 TEBRİKLER! TÜM SETLER BİTTİ • BİTİR & GÜNLÜĞE KAYDET
-                                </button>
-                            </div>
-                        ` : ''}
-
-                        <!-- ODAK MODU ALT İPTAL BUTONU -->
-                        <div style="display:flex; justify-content:center; margin-top:6px; padding-top:10px; border-top:1px dashed var(--border);">
-                            <button type="button" class="btn btn-danger-soft" style="padding:8px 18px; font-size:12px; font-weight:700;" onclick="cancelActiveWorkout()">
-                                🛑 Antrenmanı İptal Et
-                            </button>
-                        </div>
                     </div>
                 `;
                 return;
@@ -1668,21 +2537,8 @@
             const curIdx = curExObj ? activeWorkoutSession.exercises.indexOf(curExObj) : -1;
             const pair = curIdx >= 0 ? getSupersetPairInfo(activeWorkoutSession.exercises, curIdx) : null;
 
-            if (pair && curExObj.supersetRole === 1) {
-                const partnerSets = activeWorkoutSetsData[pair.secondEx.id] || [];
-                if (partnerSets[setIdx] && !partnerSets[setIdx].completed) {
-                    activeFocusExIndex = pair.secondIdx;
-                }
-            } else if (pair && curExObj.supersetRole === 2) {
-                const firstSets = activeWorkoutSetsData[pair.firstEx.id] || [];
-                const hasMoreFirstSets = firstSets.some(sItem => !sItem.completed);
-                if (hasMoreFirstSets) {
-                    activeFocusExIndex = pair.firstIdx;
-                }
-            }
-
+            isDaylightRestActive = true;
             saveActiveWorkoutStateToStorage();
-            renderActiveWorkout();
 
             // TRIGGER REST TIMER (Blok bazlı akademik dinlenme süresi varsa onu kullan)
             if (pair && curExObj.supersetRole === 1) {
@@ -1690,18 +2546,24 @@
                 const targetPartnerIdx = (partnerSets[setIdx] && !partnerSets[setIdx].completed)
                     ? setIdx
                     : partnerSets.findIndex(sItem => !sItem.completed);
-                if (targetPartnerIdx !== -1) {
-                    resetTimer(0);
-                    const lblA = pair.firstEx.blockLabel || 'A1';
-                    const lblB = pair.secondEx.blockLabel || 'A2';
-                    if (typeof showToast === 'function') showToast(`⚡ ${lblA} Set ${setIdx + 1} tamam! Dinlenmeden ${lblB} (${pair.secondEx.name}) Set ${targetPartnerIdx + 1}'e geçin!`);
-                    setTimeout(() => {
-                        const row = document.getElementById(`setRow_${pair.secondEx.id}_${targetPartnerIdx}`);
-                        if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }, 60);
-                    requestWakeLock();
-                    return;
-                }
+                const interRest = (pair.interRest !== undefined && pair.interRest !== null)
+                    ? pair.interRest
+                    : (curExObj.customRest !== undefined ? curExObj.customRest : 15);
+
+                activeFocusSetIndex = null;
+                resetTimer(interRest);
+                startTimer();
+                isDaylightRestActive = true;
+                saveActiveWorkoutStateToStorage();
+                renderActiveWorkout();
+                window.scrollTo({ top: 0, behavior: 'instant' });
+                const lblA = pair.firstEx.blockLabel || 'A1';
+                const lblB = pair.secondEx.blockLabel || 'A2';
+                if (typeof showToast === 'function') showToast(`⚡ ${lblA} tamamlandı! (${interRest}sn) ➔ Sıradaki: ${lblB} (${pair.secondEx.name})`);
+                playAlertSound();
+                if (navigator.vibrate) navigator.vibrate([120, 80, 120]);
+                requestWakeLock();
+                return;
             }
             if (pair && curExObj.supersetRole === 2) {
                 const roundRest = pair.roundRest || curExObj.roundRest || curExObj.customRest || 60;
@@ -1712,26 +2574,19 @@
                 const nextSecondIdx = secondSets.findIndex(sItem => !sItem.completed);
                 const lblA = pair.firstEx.blockLabel || 'A1';
 
+                activeFocusSetIndex = null;
                 resetTimer(roundRest);
                 startTimer();
+                isDaylightRestActive = true;
+                saveActiveWorkoutStateToStorage();
+                renderActiveWorkout();
+                window.scrollTo({ top: 0, behavior: 'instant' });
                 if (nextFirstIdx !== -1) {
                     if (typeof showToast === 'function') showToast(`⏱️ Tur ${setIdx + 1} bitti (${roundRest}sn dinlenme) • Sıradaki: ${lblA} (${pair.firstEx.name}) Set ${nextFirstIdx + 1}`);
-                    setTimeout(() => {
-                        const nextRow = document.getElementById(`setRow_${pair.firstEx.id}_${nextFirstIdx}`);
-                        if (nextRow) nextRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }, 60);
                 } else if (nextSecondIdx !== -1) {
                     if (typeof showToast === 'function') showToast(`⏱️ Tur ${setIdx + 1} bitti (${roundRest}sn dinlenme) • Sıradaki Set ${nextSecondIdx + 1}`);
-                    setTimeout(() => {
-                        const nextRow = document.getElementById(`setRow_${pair.secondEx.id}_${nextSecondIdx}`);
-                        if (nextRow) nextRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }, 60);
                 } else {
                     if (typeof showToast === 'function') showToast(`🎉 Süperset Blok ${pair.groupId} tamamlandı! (${roundRest}sn dinlenme)`);
-                    setTimeout(() => {
-                        const doneBanner = document.querySelector('.hevy-exercise-done-banner');
-                        if (doneBanner) doneBanner.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }, 60);
                 }
                 playAlertSound();
                 if (navigator.vibrate) navigator.vibrate([120, 80, 120]);
@@ -1741,14 +2596,20 @@
             const restSecs = (curExObj && curExObj.customRest !== undefined && curExObj.customRest !== null)
                 ? curExObj.customRest
                 : (activeWorkoutSession && activeWorkoutSession.scheme ? (activeWorkoutSession.scheme.rest || 45) : 45);
+            activeFocusSetIndex = null;
             if (restSecs > 0) {
                 resetTimer(restSecs);
                 startTimer();
+                isDaylightRestActive = true;
                 playAlertSound();
                 if (navigator.vibrate) navigator.vibrate([120, 80, 120]);
             } else {
                 resetTimer(0);
+                isDaylightRestActive = false;
             }
+
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
 
             // Ekran kilidini canlı tut
             requestWakeLock();
@@ -1759,6 +2620,7 @@
             if (!sets || !sets[setIdx]) return;
             sets[setIdx].completed = !sets[setIdx].completed;
             sets[setIdx].completedAt = sets[setIdx].completed ? Date.now() : null;
+            isDaylightRestActive = false;
             saveActiveWorkoutStateToStorage();
             renderActiveWorkout();
         }
@@ -1786,6 +2648,7 @@
                 completedAt: null
             });
             activeWorkoutSetsData[exId] = sets;
+            isDaylightRestActive = true;
             saveActiveWorkoutStateToStorage();
             renderActiveWorkout();
         }
@@ -2103,6 +2966,7 @@
             }
 
             closeInterSetModal();
+            isDaylightRestActive = true;
             saveActiveWorkoutStateToStorage();
             renderActiveWorkout();
             if (typeof showToast === 'function') {
@@ -2117,6 +2981,7 @@
             if (!sets[setIdx] || !sets[setIdx].interSet) return;
             sets[setIdx].interSet.completed = !sets[setIdx].interSet.completed;
             sets[setIdx].interSet.completedAt = sets[setIdx].interSet.completed ? Date.now() : null;
+            isDaylightRestActive = true;
             saveActiveWorkoutStateToStorage();
             renderActiveWorkout();
             if (sets[setIdx].interSet.completed && typeof playAlertSound === 'function') {
@@ -2128,6 +2993,7 @@
             const sets = activeWorkoutSetsData[exId] || [];
             if (!sets[setIdx] || !sets[setIdx].interSet) return;
             delete sets[setIdx].interSet;
+            isDaylightRestActive = true;
             saveActiveWorkoutStateToStorage();
             renderActiveWorkout();
         }
@@ -2148,16 +3014,7 @@
         }
 
         function skipRestTimer() {
-            clearInterval(timerInterval);
-            isTimerRunning = false;
-            timerRemaining = 0;
-            updateTimerDisplay();
-            const btn = document.getElementById('btnPlayPauseTimer');
-            if (btn) btn.innerText = "▶ Başlat";
-            const restBox = document.getElementById('hudRestBox');
-            if (restBox) restBox.classList.remove('resting');
-            playAlertSound();
-            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            dismissDaylightRest();
         }
 
         function resetTimer(secs) {
@@ -2205,12 +3062,35 @@
                 } else {
                     clearInterval(timerInterval);
                     isTimerRunning = false;
+                    isDaylightRestActive = false;
                     const btn = document.getElementById('btnPlayPauseTimer');
                     if (btn) btn.innerText = "▶ Başlat";
                     const restBox = document.getElementById('hudRestBox');
                     if (restBox) restBox.classList.remove('resting');
                     playAlertSound();
                     if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100]);
+
+                    if (activeWorkoutSession && Array.isArray(activeWorkoutSession.exercises)) {
+                        const curEx = activeWorkoutSession.exercises[activeFocusExIndex];
+                        const pair = getSupersetPairInfo(activeWorkoutSession.exercises, activeFocusExIndex);
+                        if (pair && curEx && curEx.supersetRole === 1) {
+                            activeFocusExIndex = pair.secondIdx;
+                            activeFocusSetIndex = null;
+                        } else if (pair && curEx && curEx.supersetRole === 2) {
+                            const firstSets = activeWorkoutSetsData[pair.firstEx.id] || [];
+                            const nextFirstIdx = firstSets.findIndex(st => !st.completed);
+                            if (nextFirstIdx !== -1) {
+                                activeFocusExIndex = pair.firstIdx;
+                                activeFocusSetIndex = nextFirstIdx;
+                            }
+                        } else {
+                            activeFocusSetIndex = null;
+                        }
+                    }
+
+                    saveActiveWorkoutStateToStorage();
+                    renderActiveWorkout();
+                    window.scrollTo({ top: 0, behavior: 'instant' });
                 }
             }, 1000);
         }
@@ -2221,6 +3101,8 @@
             const str = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
             const el = document.getElementById('timerDisplay');
             if (el) el.innerText = str;
+            const daylightEl = document.getElementById('daylightTimerDisplay');
+            if (daylightEl) daylightEl.innerText = str;
         }
 
         function playCountdownBeep(freq = 600) {
@@ -3764,12 +4646,12 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             const todayYMD = typeof formatDateYMD === 'function' ? formatDateYMD(todayDate) : '';
             const effectiveDateStr = targetDateStr || (dayIdx === todayIdx ? todayYMD : null);
 
+            const isNextWeek = (typeof activePlannerWeek !== 'undefined' && activePlannerWeek === 'next');
             let plan = null;
-            if (effectiveDateStr && activePlannerWeek !== 'next' && typeof getPlanForDate === 'function') {
+            if (effectiveDateStr && !isNextWeek && typeof getPlanForDate === 'function') {
                 plan = getPlanForDate(new Date(effectiveDateStr + 'T00:00:00'));
             }
             if (!plan) {
-                const isNextWeek = activePlannerWeek === 'next';
                 const schedule = isNextWeek ? getNextWeeklySchedule(uid) : getWeeklySchedule(uid);
                 plan = schedule ? schedule[dayIdx] : null;
             }

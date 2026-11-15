@@ -736,12 +736,13 @@ function runAcademicMathSuite(moduleSources, dbText) {
       run: () => {
         const yDt = new Date();
         yDt.setDate(yDt.getDate() - 1);
+        yDt.setHours(18, 0, 0, 0);
         const yIso = ctx.toIsoDateKeyLocal(yDt);
         ctx.__seedState({
           history: [{
             id: 'h_yest',
             date: yIso,
-            timestamp: Date.now() - 22 * 3600000,
+            timestamp: yDt.getTime(),
             exercises: [
               { id: 'db_bench_press', name: 'Dambıl Bench Press', sets: [{ weight: 20, reps: 10, completed: true }] },
               { id: 'db_overhead_press', name: 'Dambıl Overhead Press', sets: [{ weight: 15, reps: 10, completed: true }] },
@@ -1014,6 +1015,68 @@ function runAcademicMathSuite(moduleSources, dbText) {
         })()`, ctx);
         const ok = !res.stillInDraft && !res.stillInSched && res.quarantined && res.neighborSurvived && res.depth === 1 && res.loopBlocked >= 1 && res.noticesCount >= 2;
         return { ok, actual: `taslakTemiz=${!res.stillInDraft}, takvimTemiz=${!res.stillInSched}, karantina=${res.quarantined}, komşuSağlam=${res.neighborSurvived}, bildirim=${res.noticesCount}` };
+      }
+    },
+    {
+      id: 'T20',
+      owner: 'workout-guard',
+      title: 'Hata Hafızası Sicili: Canlı Odak Dinlenme Ekranı, Çift Gelişim Eğrisi & Süperset Döngüsü',
+      expected: 'Düz set dinlenme=aktif, çift eğri=kilo+tekrar, A1 bitişi=A2 önizleme, A2 bitişi=A1 tur 2',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          activeWorkoutSession = {
+            title: 'T20 Dinlenme & Süperset Sınavı',
+            scheme: { sets: 2, reps: 10, rest: 45 },
+            exercises: [
+              { id: 'db_bench_press', name: 'Dambıl Bench Press', category: 'push', targetSets: 2, targetReps: 10, blockType: 'straight', blockLabel: '1' },
+              { id: 'lat_pulldown', name: 'Lat Pulldown', category: 'pull', targetSets: 2, targetReps: 10, blockType: 'superset', supersetRole: 1, blockLabel: 'A1', groupId: 'A' },
+              { id: 'cable_row', name: 'Cable Row', category: 'pull', targetSets: 2, targetReps: 10, blockType: 'superset', supersetRole: 2, blockLabel: 'A2', groupId: 'A' }
+            ]
+          };
+          activeWorkoutSetsData = {};
+          activeWorkoutViewMode = 'focus';
+          activeFocusExIndex = 0;
+          activeFocusSetIndex = null;
+          renderActiveWorkout();
+
+          // 1. Düz set 1'i tamamla -> Dinlenme kartı ve çift eğri kontrolü
+          completeSetAndStartRest('db_bench_press', 0);
+          const c1 = document.getElementById('activeWorkoutContainer');
+          const hasRestScreen = String(c1?.innerHTML || '').includes('daylight-rest-card');
+          const hasDualCurve = String(c1?.innerHTML || '').includes('GELİŞİM EĞRİLERİ') && String(c1?.innerHTML || '').includes('KİLO') && String(c1?.innerHTML || '').includes('TEKRAR');
+
+          // Dinlenmeyi kapat -> Sete dön
+          dismissDaylightRest();
+
+          // 2. Süperset A1'e geç ve Set 1'i tamamla -> Dinlenme ekranında A2 önizlemesi
+          goToNextExercise();
+          completeSetAndStartRest('lat_pulldown', 0);
+          const hasA2Preview = String(c1?.innerHTML || '').includes('Cable Row') && String(c1?.innerHTML || '').includes('2. HAREKETE GEÇ');
+
+          // Dinlenmeyi kapat -> Odak doğrudan A2'ye kaymalı
+          dismissDaylightRest();
+          const focusIsA2 = (activeFocusExIndex === 2);
+
+          // 3. Süperset A2'yi tamamla -> Dinlenme ekranında A1 Tur 2 önizlemesi
+          completeSetAndStartRest('cable_row', 0);
+          const hasTur2Preview = String(c1?.innerHTML || '').includes('Lat Pulldown') && String(c1?.innerHTML || '').includes('SIRADAKİ TUR');
+
+          // Dinlenmeyi kapat -> Odak tekrar A1'e dönmeli
+          dismissDaylightRest();
+          const focusIsA1Tur2 = (activeFocusExIndex === 1);
+
+          return {
+            hasRestScreen,
+            hasDualCurve,
+            hasA2Preview,
+            focusIsA2,
+            hasTur2Preview,
+            focusIsA1Tur2
+          };
+        })()`, ctx);
+        const ok = res.hasRestScreen && res.hasDualCurve && res.hasA2Preview && res.focusIsA2 && res.hasTur2Preview && res.focusIsA1Tur2;
+        return { ok, actual: `dinlenmeKartı=${res.hasRestScreen}, çiftEğri=${res.hasDualCurve}, A2Önizleme=${res.hasA2Preview}, odakA2=${res.focusIsA2}, tur2Önizleme=${res.hasTur2Preview}, odakA1Tur2=${res.focusIsA1Tur2}` };
       }
     }
   ];

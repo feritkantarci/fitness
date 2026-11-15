@@ -20,6 +20,8 @@
   const TELEMETRY_STORAGE_KEY = 'celik_garmin_telemetry_v2';
   const WELLNESS_STEPS_KEY = 'celik_garmin_wellness_steps_v1';
   const RESOLVED_SETS_KEY = 'celik_garmin_resolved_sets_v1';
+  const APPROVED_ACTIVITIES_KEY = 'celik_garmin_approved_activities_v1';
+  const DISMISSED_ACTIVITIES_KEY = 'celik_garmin_dismissed_activities_v1';
   const OUTBOX_PLANS_KEY = 'celik_garmin_outbox_plans_v1';
   const SENT_MANIFESTS_KEY = 'celik_garmin_sent_manifests_v1';
   const LAST_PUSHED_SIG_KEY = 'celik_garmin_last_pushed_sig_v281';
@@ -27,7 +29,211 @@
   const TREDICT_TOKEN_KEY = 'celik_garmin_tredict_token';
   const INTERVALS_TOKEN_KEY = 'celik_garmin_intervals_token';
   const GATEWAY_URL_KEY = 'celik_garmin_gateway_url';
-  const DEFAULT_CLOUD_GATEWAY_BASE = 'https://garmin.kantarci.io';
+  const WATCH_VAULT_KEY_PREFIX = 'celik_garmin_watch_vault_v1_';
+  const DEFAULT_CLOUD_GATEWAY_BASE = 'https://celik-kodu.vercel.app';
+  const BRIDGE_B64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+  function bridgeUtf8ToBytes(str) {
+    const s = String(str || '');
+    const bytes = [];
+    for (let i = 0; i < s.length; i++) {
+      let code = s.charCodeAt(i);
+      if (code >= 0xD800 && code <= 0xDBFF && i + 1 < s.length) {
+        const next = s.charCodeAt(i + 1);
+        if (next >= 0xDC00 && next <= 0xDFFF) {
+          code = 0x10000 + ((code - 0xD800) << 10) + (next - 0xDC00);
+          i++;
+        }
+      }
+      if (code < 0x80) bytes.push(code);
+      else if (code < 0x800) bytes.push(0xC0 | (code >> 6), 0x80 | (code & 0x3F));
+      else if (code < 0x10000) bytes.push(0xE0 | (code >> 12), 0x80 | ((code >> 6) & 0x3F), 0x80 | (code & 0x3F));
+      else bytes.push(0xF0 | (code >> 18), 0x80 | ((code >> 12) & 0x3F), 0x80 | ((code >> 6) & 0x3F), 0x80 | (code & 0x3F));
+    }
+    return bytes;
+  }
+
+  function bridgeBytesToUtf8(bytes) {
+    let out = '';
+    for (let i = 0; i < bytes.length;) {
+      const b0 = bytes[i++];
+      if (b0 < 0x80) out += String.fromCharCode(b0);
+      else if ((b0 & 0xE0) === 0xC0 && i < bytes.length) {
+        out += String.fromCharCode(((b0 & 0x1F) << 6) | (bytes[i++] & 0x3F));
+      } else if ((b0 & 0xF0) === 0xE0 && i + 1 < bytes.length) {
+        const b1 = bytes[i++] & 0x3F;
+        const b2 = bytes[i++] & 0x3F;
+        out += String.fromCharCode(((b0 & 0x0F) << 12) | (b1 << 6) | b2);
+      } else if ((b0 & 0xF8) === 0xF0 && i + 2 < bytes.length) {
+        const b1 = bytes[i++] & 0x3F;
+        const b2 = bytes[i++] & 0x3F;
+        const b3 = bytes[i++] & 0x3F;
+        const cp = ((b0 & 0x07) << 18) | (b1 << 12) | (b2 << 6) | b3;
+        const adj = cp - 0x10000;
+        out += String.fromCharCode(0xD800 + (adj >> 10), 0xDC00 + (adj & 0x3FF));
+      }
+    }
+    return out;
+  }
+
+  function bridgeEncodeBase64(bytes) {
+    let out = '';
+    for (let i = 0; i < bytes.length; i += 3) {
+      const b0 = bytes[i];
+      const has1 = i + 1 < bytes.length;
+      const has2 = i + 2 < bytes.length;
+      const b1 = has1 ? bytes[i + 1] : 0;
+      const b2 = has2 ? bytes[i + 2] : 0;
+      const trip = (b0 << 16) | (b1 << 8) | b2;
+      out += BRIDGE_B64_CHARS[(trip >> 18) & 0x3F];
+      out += BRIDGE_B64_CHARS[(trip >> 12) & 0x3F];
+      out += has1 ? BRIDGE_B64_CHARS[(trip >> 6) & 0x3F] : '=';
+      out += has2 ? BRIDGE_B64_CHARS[trip & 0x3F] : '=';
+    }
+    return out;
+  }
+
+  function bridgeDecodeBase64(b64) {
+    const clean = String(b64 || '').replace(/[^A-Za-z0-9+/=]/g, '');
+    const bytes = [];
+    for (let i = 0; i < clean.length; i += 4) {
+      const c0 = BRIDGE_B64_CHARS.indexOf(clean[i]);
+      const c1 = BRIDGE_B64_CHARS.indexOf(clean[i + 1]);
+      const ch2 = clean[i + 2];
+      const ch3 = clean[i + 3];
+      if (c0 < 0 || c1 < 0) break;
+      const c2 = ch2 && ch2 !== '=' ? BRIDGE_B64_CHARS.indexOf(ch2) : -1;
+      const c3 = ch3 && ch3 !== '=' ? BRIDGE_B64_CHARS.indexOf(ch3) : -1;
+      const trip = (c0 << 18) | (c1 << 12) | ((c2 >= 0 ? c2 : 0) << 6) | (c3 >= 0 ? c3 : 0);
+      bytes.push((trip >> 16) & 0xFF);
+      if (c2 >= 0) bytes.push((trip >> 8) & 0xFF);
+      if (c3 >= 0) bytes.push(trip & 0xFF);
+    }
+    return bytes;
+  }
+
+  function bridgeSealWithKey(plaintext, secretKey) {
+    const clean = String(plaintext || '');
+    if (!clean) return '';
+    if (typeof window !== 'undefined' && window.CelikVaultCodec && typeof window.CelikVaultCodec.sealWithKey === 'function') {
+      return window.CelikVaultCodec.sealWithKey(clean, secretKey);
+    }
+    const pBytes = bridgeUtf8ToBytes(clean);
+    const rawKey = bridgeUtf8ToBytes(String(secretKey || 'celik-kodu-default-seal'));
+    const kBytes = rawKey.length ? rawKey : [99, 101, 108, 105, 107];
+    const xBytes = pBytes.map((b, idx) => (b ^ kBytes[idx % kBytes.length] ^ ((idx * 31 + 17) & 0xFF)) & 0xFF);
+    return 'v1:' + bridgeEncodeBase64(xBytes);
+  }
+
+  function bridgeUnsealWithKey(sealed, secretKey) {
+    const raw = String(sealed || '').trim();
+    if (!raw || !raw.startsWith('v1:')) return '';
+    if (typeof window !== 'undefined' && window.CelikVaultCodec && typeof window.CelikVaultCodec.unsealWithKey === 'function') {
+      return window.CelikVaultCodec.unsealWithKey(raw, secretKey);
+    }
+    const xBytes = bridgeDecodeBase64(raw.slice(3));
+    const rawKey = bridgeUtf8ToBytes(String(secretKey || 'celik-kodu-default-seal'));
+    const kBytes = rawKey.length ? rawKey : [99, 101, 108, 105, 107];
+    const pBytes = xBytes.map((b, idx) => (b ^ kBytes[idx % kBytes.length] ^ ((idx * 31 + 17) & 0xFF)) & 0xFF);
+    return bridgeBytesToUtf8(pBytes);
+  }
+
+  function getWatchVaultSecret(uid, sealRef = '') {
+    try {
+      const ref = String(sealRef || '').trim();
+      if (ref.length >= 10) return ref;
+      const stateSeal = localStorage.getItem(`celik_kodu_cloud_seal_user_state_${uid}`);
+      if (stateSeal && stateSeal.length >= 10) return stateSeal;
+      const userSeal = localStorage.getItem(`celik_kodu_cloud_seal_${uid}`);
+      if (userSeal && userSeal.length >= 10) return userSeal;
+    } catch {}
+    return `celik-watch-vault:${uid || 'anon'}`;
+  }
+
+  function sealWatchSecret(plainVal, uid, sealRef = '') {
+    const clean = String(plainVal || '').trim();
+    if (!clean) return '';
+    return bridgeSealWithKey(clean, getWatchVaultSecret(uid, sealRef));
+  }
+
+  function unsealWatchSecret(sealedVal, uid, sealRef = '') {
+    const raw = String(sealedVal || '').trim();
+    if (!raw) return '';
+    if (!raw.startsWith('v1:')) return raw;
+    const candidates = [
+      sealRef,
+      (() => { try { return localStorage.getItem(`celik_kodu_cloud_seal_user_state_${uid}`); } catch { return ''; } })(),
+      (() => { try { return localStorage.getItem(`celik_kodu_cloud_seal_${uid}`); } catch { return ''; } })(),
+      `celik-watch-vault:${uid || 'anon'}`
+    ].filter(Boolean);
+    for (const keyCandidate of candidates) {
+      const out = bridgeUnsealWithKey(raw, keyCandidate);
+      if (out) return out;
+    }
+    return '';
+  }
+
+  function readWatchVault(uid) {
+    if (!uid) return null;
+    try {
+      const raw = localStorage.getItem(`${WATCH_VAULT_KEY_PREFIX}${uid}`);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) ? parsed : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function writeWatchVault(uid, updates = {}, scheduleSync = true) {
+    if (!uid) return null;
+    const seal = getWatchVaultSecret(uid);
+    const prev = readWatchVault(uid) || {};
+    const nextVault = {
+      enabled: updates.enabled !== undefined ? Boolean(updates.enabled) : (prev.enabled !== false),
+      sealedTredict: updates.tredictToken !== undefined
+        ? sealWatchSecret(updates.tredictToken, uid, seal)
+        : (prev.sealedTredict || ''),
+      sealedIntervals: updates.intervalsToken !== undefined
+        ? sealWatchSecret(updates.intervalsToken, uid, seal)
+        : (prev.sealedIntervals || ''),
+      sealedGateway: updates.gatewayBase !== undefined
+        ? sealWatchSecret(normalizeGatewayBase(updates.gatewayBase), uid, seal)
+        : (prev.sealedGateway || ''),
+      sealRef: seal,
+      updatedAt: Date.now()
+    };
+    try {
+      localStorage.setItem(`${WATCH_VAULT_KEY_PREFIX}${uid}`, JSON.stringify(nextVault));
+      localStorage.setItem(`${GARMIN_ENABLED_PREFIX}${uid}`, nextVault.enabled ? 'true' : 'false');
+      localStorage.removeItem(`${TREDICT_TOKEN_KEY}_${uid}`);
+      localStorage.removeItem(`${INTERVALS_TOKEN_KEY}_${uid}`);
+      localStorage.removeItem(`${GATEWAY_URL_KEY}_${uid}`);
+    } catch {}
+    if (scheduleSync && typeof window !== 'undefined' && typeof window.scheduleUserStateCloudSync === 'function') {
+      try { window.scheduleUserStateCloudSync(uid); } catch {}
+    }
+    return nextVault;
+  }
+
+  function migrateLegacyWatchSecretsToVault(uid) {
+    if (!uid) return null;
+    try {
+      const legT = String(localStorage.getItem(`${TREDICT_TOKEN_KEY}_${uid}`) || '').trim();
+      const legI = String(localStorage.getItem(`${INTERVALS_TOKEN_KEY}_${uid}`) || '').trim();
+      const legG = normalizeGatewayBase(localStorage.getItem(`${GATEWAY_URL_KEY}_${uid}`) || '');
+      if (!legT && !legI && !legG) return null;
+      const exp = localStorage.getItem(`${GARMIN_ENABLED_PREFIX}${uid}`);
+      return writeWatchVault(uid, {
+        enabled: exp === 'false' ? false : true,
+        tredictToken: legT,
+        intervalsToken: legI,
+        gatewayBase: legG
+      }, false);
+    } catch {
+      return null;
+    }
+  }
 
   function normalizeGatewayBase(rawUrl) {
     const trimmed = String(rawUrl || '').trim().replace(/\/+$/, '');
@@ -38,23 +244,259 @@
   function getUserTredictToken(uidOverride) {
     const uid = uidOverride || getActiveUidSafe();
     if (!uid) return '';
-    try { return String(localStorage.getItem(`${TREDICT_TOKEN_KEY}_${uid}`) || '').trim(); } catch { return ''; }
+    try {
+      const vault = readWatchVault(uid);
+      if (vault && vault.sealedTredict) {
+        const unsealed = unsealWatchSecret(vault.sealedTredict, uid, vault.sealRef || '');
+        if (unsealed) return unsealed.trim();
+      }
+      const leg = String(localStorage.getItem(`${TREDICT_TOKEN_KEY}_${uid}`) || '').trim();
+      if (leg) {
+        migrateLegacyWatchSecretsToVault(uid);
+        return leg;
+      }
+      return '';
+    } catch { return ''; }
   }
 
   function getUserIntervalsToken(uidOverride) {
     const uid = uidOverride || getActiveUidSafe();
     if (!uid) return '';
-    try { return String(localStorage.getItem(`${INTERVALS_TOKEN_KEY}_${uid}`) || '').trim(); } catch { return ''; }
+    try {
+      const vault = readWatchVault(uid);
+      if (vault && vault.sealedIntervals) {
+        const unsealed = unsealWatchSecret(vault.sealedIntervals, uid, vault.sealRef || '');
+        if (unsealed) return unsealed.trim();
+      }
+      const leg = String(localStorage.getItem(`${INTERVALS_TOKEN_KEY}_${uid}`) || '').trim();
+      if (leg) {
+        migrateLegacyWatchSecretsToVault(uid);
+        return leg;
+      }
+      return '';
+    } catch { return ''; }
   }
 
   function getUserGatewayBase(uidOverride) {
     const uid = uidOverride || getActiveUidSafe();
     if (!uid) return '';
-    try { return normalizeGatewayBase(localStorage.getItem(`${GATEWAY_URL_KEY}_${uid}`) || ''); } catch { return ''; }
+    try {
+      const vault = readWatchVault(uid);
+      if (vault && vault.sealedGateway) {
+        const unsealed = unsealWatchSecret(vault.sealedGateway, uid, vault.sealRef || '');
+        if (unsealed) return normalizeGatewayBase(unsealed);
+      }
+      return normalizeGatewayBase(localStorage.getItem(`${GATEWAY_URL_KEY}_${uid}`) || '');
+    } catch { return ''; }
   }
 
   function hasGarminCredentialsConfigured(uidOverride) {
     return Boolean(getUserTredictToken(uidOverride) || getUserIntervalsToken(uidOverride));
+  }
+
+  function makeSyntheticJsonResponse(payload, status = 200) {
+    return {
+      ok: status >= 200 && status < 300,
+      status,
+      headers: {
+        get: (name) => (String(name || '').toLowerCase() === 'content-type' ? 'application/json' : '')
+      },
+      json: async () => payload
+    };
+  }
+
+  function mapIntervalsTypeToSport(rawType) {
+    const t = String(rawType || '').toLowerCase().trim();
+    if (t.includes('walk') || t.includes('hike')) {
+      return { sportType: 'walking', subSportType: 'walking' };
+    }
+    if (t.includes('run')) {
+      return { sportType: 'running', subSportType: t.includes('treadmill') ? 'treadmill' : 'generic' };
+    }
+    if (t.includes('row')) {
+      return { sportType: 'fitness_equipment', subSportType: 'indoor_rowing' };
+    }
+    if (t.includes('weight') || t.includes('strength')) {
+      return { sportType: 'training', subSportType: 'strength_training' };
+    }
+    if (t.includes('ride') || t.includes('cycl') || t.includes('bike')) {
+      return { sportType: 'cycling', subSportType: t.includes('indoor') ? 'virtual_activity' : 'generic' };
+    }
+    return { sportType: t || 'other', subSportType: 'generic' };
+  }
+
+  function shiftDateIsoDays(daysOffset) {
+    const d = new Date();
+    d.setDate(d.getDate() + Number(daysOffset || 0));
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  async function executeDirectIntervalsBrowserFallback(apiPath, options, intervalsToken) {
+    const cleanToken = String(intervalsToken || '').trim();
+    if (!cleanToken) return null;
+    const authHeader = 'Basic ' + bridgeEncodeBase64(bridgeUtf8ToBytes(`API_KEY:${cleanToken}`));
+    const base = 'https://intervals.icu/api/v1/athlete/0';
+    const qIdx = apiPath.indexOf('?');
+    const route = qIdx >= 0 ? apiPath.slice(0, qIdx) : apiPath;
+    const qs = qIdx >= 0 ? apiPath.slice(qIdx + 1) : '';
+    const daysMatch = qs.match(/(?:^|&)days=(\d+)/);
+    const daysNum = daysMatch ? Math.min(90, Math.max(1, Number(daysMatch[1]))) : 21;
+
+    const icuFetch = async (url, reqOpts = {}) => {
+      const res = await fetch(url, {
+        ...reqOpts,
+        headers: {
+          Authorization: authHeader,
+          ...(reqOpts.headers || {})
+        }
+      });
+      if (res.status === 401 || res.status === 403) {
+        const err = new Error('WATCH_AUTH_FAILED');
+        err.code = 'WATCH_AUTH_FAILED';
+        throw err;
+      }
+      return res;
+    };
+
+    if (route.endsWith('/health')) {
+      const res = await icuFetch(base);
+      if (!res.ok) return null;
+      const athlete = await res.json();
+      return makeSyntheticJsonResponse({
+        ok: true,
+        connected: true,
+        tredict: false,
+        intervals: {
+          ok: true,
+          connected: true,
+          athlete: athlete?.name || athlete?.id || '0'
+        },
+        source: 'intervals_direct_browser'
+      });
+    }
+
+    if (route.endsWith('/activities')) {
+      const oldest = shiftDateIsoDays(-daysNum);
+      const newest = shiftDateIsoDays(1);
+      const res = await icuFetch(`${base}/activities?oldest=${oldest}&newest=${newest}`);
+      if (!res.ok) return null;
+      const rawList = await res.json();
+      const activities = Array.isArray(rawList)
+        ? rawList.filter(a => a && a.id).map(a => {
+            const { sportType, subSportType } = mapIntervalsTypeToSport(a.type);
+            const durSec = Number(a.moving_time || a.elapsed_time || 0);
+            const totalSec = Number(a.elapsed_time || a.moving_time || durSec);
+            return {
+              id: String(a.id),
+              date: a.start_date || a.start_date_local || '',
+              title: a.name || '',
+              sportType,
+              subSportType,
+              summary: {
+                duration: durSec,
+                durationTotal: totalSec,
+                distance: Number(a.distance || 0),
+                calories: Number(a.calories || 0),
+                heartrate: Number(a.average_hr || a.average_heartrate || 0) || null,
+                heartrateMax: Number(a.max_hr || a.max_heartrate || 0) || null,
+                pace: Number(a.pace || 0) || null,
+                cadence: Number(a.average_cadence || 0) || null
+              },
+              rounds: [],
+              sourceProvider: 'intervals'
+            };
+          })
+        : [];
+      return makeSyntheticJsonResponse({
+        ok: true,
+        activities,
+        source: 'intervals_direct_browser'
+      });
+    }
+
+    if (route.endsWith('/wellness')) {
+      const oldest = shiftDateIsoDays(-daysNum);
+      const newest = shiftDateIsoDays(0);
+      const res = await icuFetch(`${base}/wellness?oldest=${oldest}&newest=${newest}`);
+      if (!res.ok) return null;
+      const rawList = await res.json();
+      const daily = Array.isArray(rawList)
+        ? rawList.filter(w => w && w.id).map(w => ({
+            date: String(w.id).slice(0, 10),
+            steps: Number(w.steps || 0),
+            floorsClimbed: Number(w.floorsClimbed || 0),
+            restingHR: w.restingHR ? Number(w.restingHR) : null,
+            sleepScore: w.sleepScore ? Number(w.sleepScore) : null
+          }))
+        : [];
+      return makeSyntheticJsonResponse({
+        ok: true,
+        daily,
+        source: 'intervals_direct_browser'
+      });
+    }
+
+    if (route.endsWith('/push-workout')) {
+      let bodyObj = {};
+      try { bodyObj = options.body ? JSON.parse(options.body) : {}; } catch {}
+      const events = Array.isArray(bodyObj.intervalsEvents) ? bodyObj.intervalsEvents : [];
+      if (events.length === 0) return null;
+      const res = await icuFetch(`${base}/events/bulk`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(events)
+      });
+      if (!res.ok) return null;
+      const created = await res.json();
+      return makeSyntheticJsonResponse({
+        ok: true,
+        directCalendarSync: true,
+        count: Array.isArray(created) ? created.length : events.length,
+        workouts: Array.isArray(created) ? created : events,
+        source: 'intervals_direct_browser'
+      });
+    }
+
+    if (route.endsWith('/activity-update')) {
+      let bodyObj = {};
+      try { bodyObj = options.body ? JSON.parse(options.body) : {}; } catch {}
+      const actId = String(bodyObj.activityId || '').trim();
+      const title = String(bodyObj.title || '').trim();
+      if (actId.startsWith('i') && title) {
+        await icuFetch(`https://intervals.icu/api/v1/activity/${encodeURIComponent(actId)}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: title })
+        });
+      }
+      return makeSyntheticJsonResponse({ ok: true, source: 'intervals_direct_browser' });
+    }
+
+    if (route.endsWith('/delete-dates')) {
+      let bodyObj = {};
+      try { bodyObj = options.body ? JSON.parse(options.body) : {}; } catch {}
+      const dates = Array.isArray(bodyObj.dates) ? bodyObj.dates : [];
+      let deletedCount = 0;
+      if (dates.length > 0) {
+        const sorted = [...dates].sort();
+        const evRes = await icuFetch(`${base}/events?oldest=${sorted[0]}&newest=${sorted[sorted.length - 1]}`);
+        if (evRes.ok) {
+          const evList = await evRes.json();
+          const dateSet = new Set(sorted);
+          const toDel = Array.isArray(evList) ? evList.filter(e => e && e.id && dateSet.has(String(e.start_date_local || '').slice(0, 10)) && String(e.description || '').includes('Çelik Kodu')) : [];
+          for (const ev of toDel) {
+            const delRes = await icuFetch(`${base}/events/${encodeURIComponent(ev.id)}`, { method: 'DELETE' });
+            if (delRes.ok) deletedCount++;
+          }
+        }
+      }
+      return makeSyntheticJsonResponse({ ok: true, deletedCount, source: 'intervals_direct_browser' });
+    }
+
+    return null;
   }
 
   function buildGatewayTargetUrls(apiPath, uidOverride) {
@@ -65,6 +507,10 @@
       (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
     const currentOrigin = typeof window !== 'undefined' ? String(window.location.origin || '') : '';
     const customBase = getUserGatewayBase(uidOverride);
+    let centralBridgeBase = '';
+    try {
+      centralBridgeBase = normalizeGatewayBase(localStorage.getItem('celik_kodu_central_bridge_url') || '');
+    } catch {}
 
     const urls = [];
     const pushUnique = u => {
@@ -72,7 +518,8 @@
     };
 
     if (customBase) pushUnique(`${customBase}${cleanPath}`);
-    if (typeof window !== 'undefined' && (window.location.protocol === 'https:' || window.location.protocol === 'http:')) {
+    if (centralBridgeBase) pushUnique(`${centralBridgeBase}${cleanPath}`);
+    if (isLocalHost || (typeof window !== 'undefined' && (window.location.protocol === 'https:' || window.location.protocol === 'http:'))) {
       pushUnique(cleanPath);
     }
     if (currentOrigin !== DEFAULT_CLOUD_GATEWAY_BASE) {
@@ -132,6 +579,17 @@
           return res;
         }
       } catch {}
+    }
+
+    if (intervalsToken) {
+      try {
+        const directRes = await executeDirectIntervalsBrowserFallback(apiPath, options, intervalsToken);
+        if (directRes) return directRes;
+      } catch (directErr) {
+        if (directErr && (directErr.code === 'WATCH_AUTH_FAILED' || directErr.message === 'WATCH_AUTH_FAILED')) {
+          authError = directErr;
+        }
+      }
     }
 
     if (authError) throw authError;
@@ -217,8 +675,8 @@
     return (u && u.id) ? u.id : '';
   }
 
-  function getScopedGarminKey(baseKey) {
-    return `${baseKey}_${getActiveUidSafe()}`;
+  function getScopedGarminKey(baseKey, uidOverride) {
+    return `${baseKey}_${uidOverride || getActiveUidSafe()}`;
   }
 
   function migrateLegacyGarminStorageToOwner() {
@@ -244,11 +702,15 @@
     } catch {}
   }
 
-  function isGarminEnabledForCurrentUser() {
-    const u = getCurrentUserObj();
-    if (!u || !u.id) return false;
-    const uid = u.id;
+  function isGarminEnabledForCurrentUser(uidOverride) {
+    const uid = uidOverride || getActiveUidSafe();
+    if (!uid) return false;
     try {
+      const vault = readWatchVault(uid);
+      if (vault && typeof vault.enabled === 'boolean') {
+        if (!vault.enabled) return false;
+        if (vault.sealedTredict || vault.sealedIntervals) return true;
+      }
       const explicit = localStorage.getItem(GARMIN_ENABLED_PREFIX + uid);
       if (explicit === 'true') return true;
       if (explicit === 'false') return false;
@@ -270,7 +732,12 @@
       return;
     }
     try {
-      localStorage.setItem(GARMIN_ENABLED_PREFIX + uid, nextVal ? 'true' : 'false');
+      const prevVault = readWatchVault(uid);
+      if (prevVault) {
+        writeWatchVault(uid, { enabled: nextVal }, true);
+      } else {
+        localStorage.setItem(GARMIN_ENABLED_PREFIX + uid, nextVal ? 'true' : 'false');
+      }
     } catch {}
     refreshGarminPanelsForUserState();
     if (nextVal) {
@@ -516,14 +983,90 @@
     };
   }
 
+  function resolveStandaloneCardioSpec(activity) {
+    if (!activity || typeof activity !== 'object') return null;
+    const sub = String(activity.subSportType || '').toLowerCase().trim();
+    const sp = String(activity.sportType || '').toLowerCase().trim();
+    const titleLow = String(activity.title || '').toLowerCase().trim();
+    if (sp === 'strength_training' || sp === 'training' || sub === 'strength_training' || sub === 'strength') {
+      return null;
+    }
+    const rounds = Array.isArray(activity.rounds) ? activity.rounds : [];
+    const hasStrengthRound = rounds.some(r =>
+      r && (
+        Number(r.weight || 0) > 0 ||
+        /\[id:(?!cond_)[a-z0-9_]+\]/i.test(String(r.note || '')) ||
+        (r.exerciseCategory && !['cardio', 'run', 'row'].includes(String(r.exerciseCategory).toLowerCase()))
+      )
+    );
+    if (hasStrengthRound) return null;
+
+    if (sp === 'rowing' || sub === 'indoor_rowing' || sub === 'rowing' || titleLow.includes('kürek') || titleLow.includes('row')) {
+      return { cardioExId: 'cond_indoor_row', fitCat: 'row', fitNm: 'indoor_row' };
+    }
+    if (
+      sp === 'walking' || sp === 'hiking' ||
+      sub === 'walking' || sub === 'hiking' || sub === 'casual_walking' || sub === 'speed_walking' ||
+      titleLow.includes('yürüyüş') || titleLow.includes('yuruyus') || titleLow.includes('walk') || titleLow.includes('hike')
+    ) {
+      return { cardioExId: 'cond_walking', fitCat: 'run', fitNm: 'walk' };
+    }
+    if (
+      sp === 'running' || sub === 'treadmill' || sub === 'running' ||
+      titleLow.includes('koşu') || titleLow.includes('kosu') || titleLow.includes('run')
+    ) {
+      return { cardioExId: 'cond_running', fitCat: 'run', fitNm: 'run' };
+    }
+    return null;
+  }
+
+  function isStandaloneCardioActivity(activity) {
+    return Boolean(resolveStandaloneCardioSpec(activity));
+  }
+
+  function isCardioLogRecord(log) {
+    if (!log || typeof log !== 'object') return false;
+    if (log.isCardioActivity === true) return true;
+    const exs = Array.isArray(log.exercises) ? log.exercises : [];
+    if (exs.length === 0) return false;
+    return exs.every(ex => ex && (ex.id === 'cond_walking' || ex.id === 'cond_running' || ex.id === 'cond_indoor_row'));
+  }
+
+  function areSameWatchSession(actA, actB) {
+    if (!actA || !actB) return false;
+    if (String(actA.id || '') === String(actB.id || '')) return true;
+    const dA = toLocalIsoDateString(actA.date);
+    const dB = toLocalIsoDateString(actB.date);
+    if (!dA || dA !== dB) return false;
+    const tA = actA.date ? new Date(actA.date).getTime() : NaN;
+    const tB = actB.date ? new Date(actB.date).getTime() : NaN;
+    const timeClose = Number.isFinite(tA) && Number.isFinite(tB) && Math.abs(tA - tB) <= 180 * 1000;
+    const titleA = String(actA.title || '').toLowerCase().trim();
+    const titleB = String(actB.title || '').toLowerCase().trim();
+    const specA = resolveStandaloneCardioSpec(actA);
+    const specB = resolveStandaloneCardioSpec(actB);
+    const durA = Number(actA.summary?.duration || 0);
+    const durB = Number(actB.summary?.duration || 0);
+    const durClose = durA > 0 && durB > 0 && Math.abs(durA - durB) <= 45;
+    if (timeClose && ((titleA && titleA === titleB) || (specA && specB && specA.cardioExId === specB.cardioExId) || durClose)) {
+      return true;
+    }
+    if (specA && specB && specA.cardioExId === specB.cardioExId && durClose && titleA && titleA === titleB) {
+      return true;
+    }
+    return false;
+  }
+
   function findManifestForActivity(activity) {
+    if (isStandaloneCardioActivity(activity)) return null;
     const localDatePrefix = toLocalIsoDateString(activity.date);
     const rounds = Array.isArray(activity.rounds) ? activity.rounds : [];
     const hasStructuredNoteTags = rounds.some(r => /\[id:[a-z0-9_]+\]/i.test(String(r?.note || '')));
 
     // YEDEK AKIŞ (Yalnızca program Garmin'e aktarılmadıysa ve saatte bağımsız/serbest kayıt açıldıysa):
-    // Kullanıcının aynı gün uygulama içinden adım adım kaydettiği telefon antrenmanını baz al.
-    if (!hasStructuredNoteTags && localDatePrefix) {
+    // Yalnızca saat aktivitesi daha önce onaylanmış veya eşleşmişse ve takvimde plan yoksa appLog baz alınabilir.
+    // Kullanıcının onaysız bağımsız saat seansı salondaki antrenmanı otomatik olarak manifest yapıp ezemez!
+    if (!hasStructuredNoteTags && localDatePrefix && (activity.garminActivityId || activity.id)) {
       try {
         const uid = getActiveUidSafe();
         const historyRaw = localStorage.getItem(`celik_kodu_history_${uid}`);
@@ -534,7 +1077,7 @@
               l &&
               !String(l.id || '').startsWith('garmin_') &&
               l.sourceChief !== 'garmin-tredict-guard' &&
-              (l.garminActivityId === activity.id || toLocalIsoDateString(l.date) === localDatePrefix) &&
+              l.garminActivityId === (activity.garminActivityId || activity.id) &&
               Array.isArray(l.exercises) &&
               l.exercises.length > 0
             );
@@ -611,20 +1154,92 @@
     return [];
   }
 
-  function getResolvedSetsMap() {
-    if (!isGarminEnabledForCurrentUser()) return {};
+  function getResolvedSetsMap(uidOverride) {
+    const uid = uidOverride || getActiveUidSafe();
+    if (!uid) return {};
     try {
-      return JSON.parse(localStorage.getItem(getScopedGarminKey(RESOLVED_SETS_KEY)) || '{}') || {};
+      return JSON.parse(localStorage.getItem(getScopedGarminKey(RESOLVED_SETS_KEY, uid)) || '{}') || {};
     } catch {
       return {};
     }
   }
 
-  function saveResolvedSetsMap(map) {
-    if (!isGarminEnabledForCurrentUser()) return;
+  function saveResolvedSetsMap(map, uidOverride) {
+    const uid = uidOverride || getActiveUidSafe();
+    if (!uid) return;
     try {
-      localStorage.setItem(getScopedGarminKey(RESOLVED_SETS_KEY), JSON.stringify(map));
+      localStorage.setItem(getScopedGarminKey(RESOLVED_SETS_KEY, uid), JSON.stringify(map));
     } catch {}
+  }
+
+  function getApprovedActivitiesSet(uidOverride) {
+    const uid = uidOverride || getActiveUidSafe();
+    if (!uid) return new Set();
+    try {
+      const raw = localStorage.getItem(getScopedGarminKey(APPROVED_ACTIVITIES_KEY, uid));
+      const parsed = JSON.parse(raw || '[]');
+      return new Set(Array.isArray(parsed) ? parsed.map(String) : []);
+    } catch {
+      return new Set();
+    }
+  }
+
+  function saveApprovedActivitiesSet(setObj, uidOverride) {
+    const uid = uidOverride || getActiveUidSafe();
+    if (!uid) return;
+    try {
+      const arr = Array.from(setObj || []).map(String).slice(-300);
+      localStorage.setItem(getScopedGarminKey(APPROVED_ACTIVITIES_KEY, uid), JSON.stringify(arr));
+    } catch {}
+  }
+
+  function markGarminActivityApproved(activityId, uidOverride) {
+    if (!activityId) return;
+    const uid = uidOverride || getActiveUidSafe();
+    const set = getApprovedActivitiesSet(uid);
+    set.add(String(activityId));
+    saveApprovedActivitiesSet(set, uid);
+  }
+
+  function isGarminActivityApproved(activityId, uidOverride) {
+    if (!activityId) return false;
+    const set = getApprovedActivitiesSet(uidOverride);
+    return set.has(String(activityId));
+  }
+
+  function getDismissedActivitiesSet(uidOverride) {
+    const uid = uidOverride || getActiveUidSafe();
+    if (!uid) return new Set();
+    try {
+      const raw = localStorage.getItem(getScopedGarminKey(DISMISSED_ACTIVITIES_KEY, uid));
+      const parsed = JSON.parse(raw || '[]');
+      return new Set(Array.isArray(parsed) ? parsed.map(String) : []);
+    } catch {
+      return new Set();
+    }
+  }
+
+  function saveDismissedActivitiesSet(setObj, uidOverride) {
+    const uid = uidOverride || getActiveUidSafe();
+    if (!uid) return;
+    try {
+      const arr = Array.from(setObj || []).map(String).slice(-300);
+      localStorage.setItem(getScopedGarminKey(DISMISSED_ACTIVITIES_KEY, uid), JSON.stringify(arr));
+    } catch {}
+  }
+
+  function markGarminActivityDismissed(activityId, uidOverride) {
+    if (!activityId) return;
+    const uid = uidOverride || getActiveUidSafe();
+    const set = getDismissedActivitiesSet(uid);
+    set.add(String(activityId));
+    saveDismissedActivitiesSet(set, uid);
+  }
+
+  function isGarminActivityDismissed(activityId, uidOverride) {
+    if (!activityId) return false;
+    const set = getDismissedActivitiesSet(uidOverride);
+    return set.has(String(activityId));
   }
 
   // ─── GÖREV 3: SAATTEN GELEN VERİYİ OLDUĞU GİBİ ALMA! ───
@@ -665,45 +1280,26 @@
     });
 
     // Bağımsız Garmin Kürek / Yürüyüş / Koşu aktivitesi ise doğrudan kütüphanemizdeki orijinal hareketle eşleştir
-    if (activeSets.length === 0) {
-      const sub = String(activity.subSportType || '').toLowerCase();
-      const sp = String(activity.sportType || '').toLowerCase();
-      const titleLow = String(activity.title || '').toLowerCase();
-      let cardioExId = null;
-      let fitCat = 'cardio';
-      let fitNm = '';
-
-      if (sub === 'indoor_rowing' || sub === 'rowing' || titleLow.includes('kürek') || titleLow.includes('row')) {
-        cardioExId = 'cond_indoor_row';
-        fitCat = 'row';
-        fitNm = 'indoor_row';
-      } else if (sub === 'walking' || sub === 'hiking' || titleLow.includes('yürüyüş') || titleLow.includes('walk')) {
-        cardioExId = 'cond_walking';
-        fitCat = 'run';
-        fitNm = 'walk';
-      } else if (sp === 'running' || sub === 'treadmill' || titleLow.includes('koşu') || titleLow.includes('run')) {
-        cardioExId = 'cond_running';
-        fitCat = 'run';
-        fitNm = 'run';
-      }
-
-      if (cardioExId) {
-        const durSec = Number(activity.summary?.duration || activity.summary?.durationSets || activity.summary?.durationTotal || 600);
-        activeSets.push({
-          roundIndex: 0,
-          exerciseCategory: fitCat,
-          exerciseName: fitNm,
-          note: `[id:${cardioExId}]`,
-          repetitions: Math.max(1, Math.round(durSec / 60)), // dakika karşılığı
-          weight: 0,
-          duration: durSec,
-          heartrate: Number(activity.summary?.heartrate || 120),
-          heartrateMax: Number(activity.summary?.heartrateMax || 145),
-          restDuration: Math.max(0, Number(activity.summary?.durationTotal || durSec) - durSec),
-          hrRecovery: null,
-          isCardioSession: true
-        });
-      } else if (plannedQueue.length > 0) {
+    const cardioSpec = resolveStandaloneCardioSpec(activity);
+    if (cardioSpec && (activeSets.length === 0 || !activeSets.some(s => Number(s.weight || 0) > 0 || /\[id:[a-z0-9_]+\]/i.test(String(s.note || ''))))) {
+      activeSets.length = 0;
+      const durSec = Number(activity.summary?.duration || activity.summary?.durationSets || activity.summary?.durationTotal || 600);
+      activeSets.push({
+        roundIndex: 0,
+        exerciseCategory: cardioSpec.fitCat,
+        exerciseName: cardioSpec.fitNm,
+        note: `[id:${cardioSpec.cardioExId}]`,
+        repetitions: Math.max(1, Math.round(durSec / 60)), // dakika karşılığı
+        weight: 0,
+        duration: durSec,
+        heartrate: Number(activity.summary?.heartrate || 120),
+        heartrateMax: Number(activity.summary?.heartrateMax || 145),
+        restDuration: Math.max(0, Number(activity.summary?.durationTotal || durSec) - durSec),
+        hrRecovery: null,
+        isCardioSession: true
+      });
+    } else if (activeSets.length === 0) {
+      if (plannedQueue.length > 0) {
         // Özet aktivite döndüyse (henüz alt set kırılımı gelmediyse) o günün planlı hareketleriyle eşleştir
         let rIdx = 0;
         plannedQueue.forEach(pStep => {
@@ -839,7 +1435,7 @@
           const isKnown = Boolean(s.exerciseName);
           const groupKey = isKnown
             ? `known:${s.exerciseCategory}:${s.exerciseName}`
-            : `undef:${s.exerciseCategory}:${s.weight}:${s.note || ''}`;
+            : `undef:${s.exerciseCategory}:${s.note || ''}`;
           const prev = rawGroups[rawGroups.length - 1];
           if (prev && !prev.forcedPlannedStep && prev.groupKey === groupKey) {
             prev.sets.push(s);
@@ -861,7 +1457,7 @@
         const isKnown = Boolean(s.exerciseName);
         const groupKey = isKnown
           ? `known:${s.exerciseCategory}:${s.exerciseName}`
-          : `undef:${s.exerciseCategory}:${s.weight}:${s.note || ''}`;
+          : `undef:${s.exerciseCategory}:${s.note || ''}`;
         const prev = rawGroups[rawGroups.length - 1];
         if (prev && prev.groupKey === groupKey) {
           prev.sets.push(s);
@@ -893,12 +1489,12 @@
       if (resolvedExId && typeof EXERCISES_DB !== 'undefined') {
         matchedEx = EXERCISES_DB.find(x => x.id === resolvedExId) || null;
         identitySource = 'user_resolved';
-      } else if (plannedStep && typeof EXERCISES_DB !== 'undefined') {
-        matchedEx = EXERCISES_DB.find(x => x.id === plannedStep.originalId || x.name === plannedStep.originalName) || null;
-        identitySource = manifest && manifest.fromAppHistoryLogId ? 'app_logged_workout' : 'original_manifest';
       } else if (noteExId && typeof EXERCISES_DB !== 'undefined') {
         matchedEx = EXERCISES_DB.find(x => x.id === noteExId) || null;
         identitySource = 'original_note_tag';
+      } else if (plannedStep && typeof EXERCISES_DB !== 'undefined') {
+        matchedEx = EXERCISES_DB.find(x => x.id === plannedStep.originalId || x.name === plannedStep.originalName) || null;
+        identitySource = manifest && manifest.fromAppHistoryLogId ? 'app_logged_workout' : 'original_manifest';
       } else if (rg.isKnown && typeof window.findExercisesByGarminFit === 'function') {
         const matches = window.findExercisesByGarminFit(rg.rawCategory, rg.rawName);
         matchedEx = matches[0] || null;
@@ -958,6 +1554,118 @@
 
   const syncedActivityTitleUpdates = new Set();
 
+  function resolveWatchActivityIdFromLog(logObj) {
+    if (!logObj || typeof logObj !== 'object') return '';
+    if (logObj.garminActivityId) return String(logObj.garminActivityId).trim();
+    const lid = String(logObj.id || '').trim();
+    return lid.startsWith('garmin_') ? lid.slice('garmin_'.length) : '';
+  }
+
+  function buildEditedWatchTitleIndex(logsArg, uidOverride) {
+    const map = new Map();
+    const uid = uidOverride || getActiveUidSafe();
+    let sourceLogs = Array.isArray(logsArg) ? logsArg : null;
+    if (!sourceLogs && uid) {
+      try {
+        const raw = localStorage.getItem(`celik_kodu_history_${uid}`) || '[]';
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) sourceLogs = parsed;
+      } catch {}
+    }
+    if (!Array.isArray(sourceLogs)) return map;
+    sourceLogs.forEach(l => {
+      const actId = resolveWatchActivityIdFromLog(l);
+      const edAt = Number((l && l.userEditedAt) || 0);
+      const title = String((l && (l.program || l.title)) || '').trim();
+      if (!actId || edAt <= 0 || !title) return;
+      const prev = map.get(actId);
+      if (!prev || edAt >= prev.userEditedAt) {
+        map.set(actId, { title, userEditedAt: edAt, notes: String((l && l.notes) || '').trim() });
+      }
+    });
+    return map;
+  }
+
+  function syncWatchTitlesFromWorkoutLogs(logsArg, uidOverride) {
+    const uid = uidOverride || getActiveUidSafe();
+    if (!uid) return false;
+    const editedMap = buildEditedWatchTitleIndex(logsArg, uid);
+    if (editedMap.size === 0) return false;
+    try {
+      const telemetryKey = getScopedGarminKey(TELEMETRY_STORAGE_KEY, uid);
+      const raw = localStorage.getItem(telemetryKey);
+      if (!raw) return false;
+      const acts = JSON.parse(raw);
+      if (!Array.isArray(acts) || acts.length === 0) return false;
+      let changed = false;
+      acts.forEach(act => {
+        if (!act || !act.id) return;
+        const match = editedMap.get(String(act.id));
+        if (!match) return;
+        const actEd = Number(act.userEditedAt || 0);
+        if (match.userEditedAt >= actEd && (act.title !== match.title || actEd !== match.userEditedAt)) {
+          act.title = match.title;
+          act.userEditedAt = match.userEditedAt;
+          changed = true;
+        }
+      });
+      if (changed) {
+        localStorage.setItem(telemetryKey, JSON.stringify(acts));
+      }
+      return changed;
+    } catch {
+      return false;
+    }
+  }
+
+  async function propagateWorkoutLogTitleToWatch(logObj) {
+    const uid = getActiveUidSafe();
+    const actId = resolveWatchActivityIdFromLog(logObj);
+    const newTitle = String((logObj && (logObj.program || logObj.title)) || '').trim();
+    const editedAt = Number((logObj && logObj.userEditedAt) || Date.now());
+    if (!uid || !actId || !newTitle) return false;
+
+    const updatedLocal = syncWatchTitlesFromWorkoutLogs([{ ...logObj, userEditedAt: editedAt }], uid);
+    if (!updatedLocal) {
+      try {
+        const telemetryKey = getScopedGarminKey(TELEMETRY_STORAGE_KEY, uid);
+        const acts = JSON.parse(localStorage.getItem(telemetryKey) || '[]');
+        if (Array.isArray(acts)) {
+          let touched = false;
+          acts.forEach(act => {
+            if (act && String(act.id) === actId) {
+              act.title = newTitle;
+              act.userEditedAt = editedAt;
+              touched = true;
+            }
+          });
+          if (touched) localStorage.setItem(telemetryKey, JSON.stringify(acts));
+        }
+      } catch {}
+    }
+
+    renderHistoryGarminSyncPanel();
+    renderAnalyticsGarminCoachPanel();
+
+    if (typeof window !== 'undefined' && typeof window.scheduleUserStateCloudSync === 'function') {
+      try { window.scheduleUserStateCloudSync(uid); } catch {}
+    }
+
+    if (isGarminEnabledForCurrentUser(uid) && hasGarminCredentialsConfigured(uid)) {
+      try {
+        const payload = { id: actId, title: newTitle };
+        if (logObj && typeof logObj.notes === 'string') payload.notes = logObj.notes;
+        await fetchGarminBridge('/api/tredict/activity-update', {
+          uid,
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } catch {}
+    }
+    return true;
+  }
+
   function handoffCompletedActivitiesToTabChiefs() {
     if (!isGarminEnabledForCurrentUser() || typeof EXERCISES_DB === 'undefined') return;
     const activities = getStoredActivities();
@@ -975,6 +1683,7 @@
         ? rawLogs.filter(l => !l || !LEGACY_TEST_ACTIVITY_IDS.has(l.garminActivityId))
         : [];
       let changed = logs.length !== rawLogs.length;
+      let watchTitlesSynced = false;
 
       // Eski hatalı sayısal ex.sets formatını diziye dönüştür (Geçmiş ekranının çökmesini önler)
       logs.forEach(l => {
@@ -1013,23 +1722,41 @@
           heartrateAvg: act.summary?.heartrate || null,
           heartrateMax: act.summary?.heartrateMax || null,
           calories: act.summary?.calories || null,
+          distanceMeters: Number(act.summary?.distance || 0) > 0 ? Math.round(Number(act.summary.distance)) : null,
+          paceSecPerKm: Number(act.summary?.pace || 0) > 0 ? Math.round(Number(act.summary.pace)) : null,
+          cadence: Number(act.summary?.cadence || 0) > 0 ? Math.round(Number(act.summary.cadence)) : null,
           durationSetsSec: act.summary?.durationSets || null,
           durationRestSec: act.summary?.durationRest || null
         };
 
-        // 1) Kullanıcı aynı gün uygulama içinden antrenmanını adım adım kaydettiyse:
-        //    Mükerrer "garmin_..." kaydı açma (varsa temizle); saatin yalnızca nabız/kalori/TUT sağlık verisini
-        //    doğrudan kullanıcının kendi uygulama kaydının içine birleştir!
-        const userAppLog = logs.find(l =>
-          l &&
-          !String(l.id || '').startsWith('garmin_') &&
-          l.sourceChief !== 'garmin-tredict-guard' &&
-          (l.garminActivityId === act.id || toLocalIsoDateString(l.date) === logDate)
-        );
+        // 1) Kullanıcı aynı gün uygulama içinden kuvvet antrenmanını adım adım kaydettiyse:
+        //    Mükerrer kuvvet kaydı açma (saatin bağımsız kardiyo/yürüyüş seansları kendi bağımsız kaydını açar);
+        //    kuvvet saatinin nabız/kalori/TUT sağlık verisini doğrudan uygulama kaydının içine birleştir!
+        const isCardioAct = isStandaloneCardioActivity(act);
+        if (!isCardioAct && isGarminActivityDismissed(act.id, uid)) {
+          return; // Kullanıcı kapsülden sildi/reddedildi, geçmişe ve analize aktarma
+        }
+        if (!isCardioAct && !isGarminActivityApproved(act.id, uid)) {
+          return; // Kullanıcı onayı bekleyen bağımsız kuvvet seansı: Kapsülde beklet, onaylanana kadar analize ve geçmişe alma!
+        }
+        const userAppLog = isCardioAct
+          ? logs.find(l =>
+              l &&
+              !String(l.id || '').startsWith('garmin_') &&
+              l.sourceChief !== 'garmin-tredict-guard' &&
+              l.garminActivityId === act.id
+            )
+          : null; // Kullanıcı kararı: Saat fitness seansı onaylandığında daima BAĞIMSIZ yeni seans olarak açılır, mevcut antrenmanı ezmez!
 
         if (userAppLog) {
           const beforeLen = logs.length;
-          logs = logs.filter(l => !(l && (l.id === 'garmin_' + act.id || (String(l.id || '').startsWith('garmin_') && toLocalIsoDateString(l.date) === logDate))));
+          logs = logs.filter(l => !(
+            l &&
+            (
+              l.id === 'garmin_' + act.id ||
+              (!isCardioAct && !isCardioLogRecord(l) && String(l.id || '').startsWith('garmin_') && toLocalIsoDateString(l.date) === logDate)
+            )
+          ));
           if (logs.length !== beforeLen) changed = true;
 
           if (userAppLog.garminActivityId !== act.id) {
@@ -1101,16 +1828,28 @@
         const totalSetsCount = Number(act.summary?.exerciseSetCount) || resolvedGroups.reduce((s, g) => s + g.sets.length, 0);
         const totalRepsCount = resolvedGroups.reduce((sum, g) => sum + g.sets.reduce((s, x) => s + Number(x.repetitions || 0), 0), 0);
 
+        const actTs = act.date ? new Date(act.date).getTime() : Date.now();
+        const actTitleLow = String(act.title || '').toLowerCase().trim();
         let existingLog = logs.find(l => l && (l.garminActivityId === act.id || l.id === 'garmin_' + act.id));
+        if (!existingLog && isCardioAct) {
+          existingLog = logs.find(l => {
+            if (!l || toLocalIsoDateString(l.date) !== logDate || !isCardioLogRecord(l)) return false;
+            const logTitleLow = String(l.program || l.title || '').toLowerCase().trim();
+            const tsClose = Number.isFinite(Number(l.timestamp)) && Number.isFinite(actTs) && Math.abs(Number(l.timestamp) - actTs) <= 180000;
+            const durClose = Math.abs(Number(l.durationSecs || 0) - durSec) <= 45;
+            return tsClose || (durClose && (!actTitleLow || !logTitleLow || actTitleLow === logTitleLow));
+          });
+        }
         if (!existingLog) {
           existingLog = {
             id: 'garmin_' + act.id,
             garminActivityId: act.id,
             sourceChief: 'garmin-tredict-guard',
+            isCardioActivity: isCardioAct,
             date: logDate,
-            timestamp: act.date ? new Date(act.date).getTime() : Date.now(),
-            program: act.title || 'Garmin FR945 Kuvvet Seansı',
-            title: act.title || 'Garmin FR945 Kuvvet Seansı',
+            timestamp: Number.isFinite(actTs) ? actTs : Date.now(),
+            program: act.title || (isCardioAct ? 'Garmin Kardiyo Seansı' : 'Garmin FR945 Kuvvet Seansı'),
+            title: act.title || (isCardioAct ? 'Garmin Kardiyo Seansı' : 'Garmin FR945 Kuvvet Seansı'),
             duration: durMin,
             durationFormatted: durFmt,
             durationSecs: durSec,
@@ -1123,7 +1862,18 @@
           logs.unshift(existingLog);
           changed = true;
         } else {
+          if (isCardioAct && !existingLog.isCardioActivity) {
+            existingLog.isCardioActivity = true;
+            changed = true;
+          }
           if (existingLog.userEditedAt) {
+            const editedTitle = String(existingLog.program || existingLog.title || '').trim();
+            const editedTs = Number(existingLog.userEditedAt || 0);
+            if (editedTitle && editedTs >= Number(act.userEditedAt || 0) && (act.title !== editedTitle || Number(act.userEditedAt || 0) !== editedTs)) {
+              act.title = editedTitle;
+              act.userEditedAt = editedTs;
+              watchTitlesSynced = true;
+            }
             if (!existingLog.healthSummary && healthSummaryObj) {
               existingLog.healthSummary = healthSummaryObj;
               changed = true;
@@ -1206,13 +1956,23 @@
           });
         }
         localStorage.setItem(historyKey, JSON.stringify(logs));
-        if (typeof window.syncWorkoutLogsToCloud === 'function') {
+        if (typeof window.syncWorkoutLogsToCloud === 'function' && window._initialWorkoutLogsCloudSyncDone === true) {
           try { window.syncWorkoutLogsToCloud(logs, uid); } catch {}
         }
         if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
         if (typeof renderHistory === 'function') renderHistory();
         if (typeof renderAiHybridHeroBanner === 'function') renderAiHybridHeroBanner();
         if (typeof window.refreshTopFitnessCardioScoreBars === 'function') window.refreshTopFitnessCardioScoreBars();
+      }
+      if (watchTitlesSynced) {
+        try {
+          const telemetryKey = getScopedGarminKey(TELEMETRY_STORAGE_KEY, uid);
+          localStorage.setItem(telemetryKey, JSON.stringify(activities));
+        } catch {}
+        renderHistoryGarminSyncPanel();
+        if (typeof window !== 'undefined' && typeof window.scheduleUserStateCloudSync === 'function') {
+          try { window.scheduleUserStateCloudSync(uid); } catch {}
+        }
       }
     } catch {}
   }
@@ -2002,12 +2762,14 @@
   };
 
   window.resolveGarminUndefinedGroup = async function (activityId, groupId, exerciseId) {
-    if (!isGarminEnabledForCurrentUser() || !activityId || !groupId || !exerciseId) return;
-    const savedY = window.scrollY;
-    const resolved = getResolvedSetsMap();
+    if (!activityId || !groupId || !exerciseId) return;
+    const uid = getActiveUidSafe();
+    if (!uid || !isGarminEnabledForCurrentUser(uid)) return;
+    const savedY = typeof window !== 'undefined' ? window.scrollY : 0;
+    const resolved = getResolvedSetsMap(uid);
     if (!resolved[activityId]) resolved[activityId] = {};
     resolved[activityId][groupId] = exerciseId;
-    saveResolvedSetsMap(resolved);
+    saveResolvedSetsMap(resolved, uid);
 
     const exObj = typeof EXERCISES_DB !== 'undefined' ? EXERCISES_DB.find(x => x.id === exerciseId) : null;
     const activities = getStoredActivities();
@@ -2036,17 +2798,296 @@
     renderHistoryGarminSyncPanel();
     renderAnalyticsGarminCoachPanel();
     if (typeof renderHistory === 'function') renderHistory();
-    window.scrollTo({ top: savedY, behavior: 'instant' });
+    if (typeof window !== 'undefined' && window.scrollTo) {
+      window.scrollTo({ top: savedY, behavior: 'instant' });
+    }
 
     if (typeof showToast === 'function' && exObj) {
-      showToast(`✅ Orijinal ad ("${exObj.name}") atandı, saatin yalnızca nabız/TUT sağlık verisi eklendi!`);
+      showToast(`✅ Hareket ("${exObj.name}") olarak eşlendi, set ve ağırlıklar bağlandı.`);
+    }
+  };
+
+  window.updateGarminGroupWeightAndReps = function (activityId, groupId, newWeight, newReps) {
+    if (!activityId || !groupId) return;
+    const uid = getActiveUidSafe();
+    if (!uid) return;
+    const key = getScopedGarminKey(TELEMETRY_STORAGE_KEY, uid);
+    const savedY = typeof window !== 'undefined' ? window.scrollY : 0;
+    try {
+      const activities = JSON.parse(localStorage.getItem(key) || '[]');
+      const act = activities.find(a => a && a.id === activityId);
+      if (!act) return;
+
+      const groups = analyzeActivityGroups(act);
+      const grp = groups.find(g => g.groupId === groupId);
+      if (!grp || !Array.isArray(grp.sets)) return;
+
+      if (!Array.isArray(act.rounds) || act.rounds.length === 0) {
+        act.rounds = grp.sets.map(s => ({ ...s, setType: 'active' }));
+      }
+
+      const wVal = (newWeight !== null && newWeight !== undefined && newWeight !== '')
+        ? Math.max(0, parseFloat(newWeight) || 0)
+        : null;
+      const rVal = (newReps !== null && newReps !== undefined && newReps !== '')
+        ? Math.max(1, parseInt(newReps, 10) || 1)
+        : null;
+
+      grp.sets.forEach(s => {
+        const rIdx = s.roundIndex;
+        if (rIdx !== undefined && act.rounds[rIdx]) {
+          if (wVal !== null) act.rounds[rIdx].weight = wVal;
+          if (rVal !== null) act.rounds[rIdx].repetitions = rVal;
+        }
+      });
+
+      localStorage.setItem(key, JSON.stringify(activities));
+      handoffCompletedActivitiesToTabChiefs();
+      renderHistoryGarminSyncPanel();
+      renderAnalyticsGarminCoachPanel();
+      if (typeof renderHistory === 'function') renderHistory();
+      if (typeof renderAnalytics === 'function') renderAnalytics();
+      if (typeof window !== 'undefined' && window.scrollTo) {
+        window.scrollTo({ top: savedY, behavior: 'instant' });
+      }
+      if (typeof showToast === 'function') {
+        showToast('✅ Ağırlık ve tekrar güncellendi.');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  window.updateGarminSingleSet = function (activityId, roundIndex, newWeight, newReps) {
+    if (!activityId || roundIndex === undefined) return;
+    const uid = getActiveUidSafe();
+    if (!uid) return;
+    const key = getScopedGarminKey(TELEMETRY_STORAGE_KEY, uid);
+    const savedY = typeof window !== 'undefined' ? window.scrollY : 0;
+    try {
+      const activities = JSON.parse(localStorage.getItem(key) || '[]');
+      const act = activities.find(a => a && a.id === activityId);
+      if (!act) return;
+
+      if (!Array.isArray(act.rounds)) act.rounds = [];
+      const r = act.rounds[roundIndex];
+      if (r) {
+        if (newWeight !== null && newWeight !== undefined && newWeight !== '') {
+          r.weight = Math.max(0, parseFloat(newWeight) || 0);
+        }
+        if (newReps !== null && newReps !== undefined && newReps !== '') {
+          r.repetitions = Math.max(1, parseInt(newReps, 10) || 1);
+        }
+      }
+      localStorage.setItem(key, JSON.stringify(activities));
+      handoffCompletedActivitiesToTabChiefs();
+      renderHistoryGarminSyncPanel();
+      renderAnalyticsGarminCoachPanel();
+      if (typeof renderHistory === 'function') renderHistory();
+      if (typeof renderAnalytics === 'function') renderAnalytics();
+      if (typeof window !== 'undefined' && window.scrollTo) {
+        window.scrollTo({ top: savedY, behavior: 'instant' });
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // ─── AYRI EKRANDA / MODALDA TEKİL HAREKET DÜZENLEME ───
+  window.openGarminExerciseEditModal = function (activityId, groupId) {
+    if (!activityId || !groupId) return;
+    const act = getStoredActivities().find(a => String(a.id) === String(activityId));
+    if (!act) return;
+    const groups = analyzeActivityGroups(act);
+    const g = groups.find(x => String(x.groupId) === String(groupId));
+    if (!g) return;
+
+    let modal = document.getElementById('garminExerciseEditModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'garminExerciseEditModal';
+      document.body.appendChild(modal);
+    }
+
+    const originalLabel = g.originalName || (g.matchedEx ? g.matchedEx.name : (g.rawCategory || 'Orijinal Hareket'));
+    const avgReps = Math.round(g.sets.reduce((s, x) => s + x.repetitions, 0) / g.sets.length);
+    const encAct = encodeURIComponent(act.id);
+    const encGrp = encodeURIComponent(g.groupId);
+
+    const allOptions = (typeof EXERCISES_DB !== 'undefined' ? EXERCISES_DB : []).map(ex => {
+      const isSelected = (g.matchedEx && g.matchedEx.id === ex.id) || (g.originalId === ex.id);
+      return `<option value="${escHtml(ex.id)}" ${isSelected ? 'selected' : ''}>${escHtml(ex.name)}</option>`;
+    }).join('');
+
+    const modalSetRows = g.sets.map((s, sIdx) => {
+      const curW = Number(s.weight ?? g.weight ?? 0);
+      const curR = Number(s.repetitions || avgReps || 10);
+      const rIdx = s.roundIndex !== undefined ? s.roundIndex : sIdx;
+      return `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;">
+          <span style="font-weight:700;font-size:13px;color:#334155;">Set ${sIdx + 1}</span>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <input type="number" step="0.5" min="0" value="${curW}" onchange="window.updateGarminSingleSet(decodeURIComponent('${encAct}'), ${rIdx}, this.value, null)" style="width:55px;padding:5px;border:1px solid #CBD5E1;border-radius:6px;font-size:13px;font-weight:700;text-align:center;color:#0F172A;background:#FFFFFF;" title="Kilo (kg)" /> <span style="font-size:12px;color:#64748B;">kg</span>
+            <span style="color:#94A3B8;font-weight:700;">×</span>
+            <input type="number" step="1" min="1" value="${curR}" onchange="window.updateGarminSingleSet(decodeURIComponent('${encAct}'), ${rIdx}, null, this.value)" style="width:48px;padding:5px;border:1px solid #CBD5E1;border-radius:6px;font-size:13px;font-weight:700;text-align:center;color:#0F172A;background:#FFFFFF;" title="Tekrar" /> <span style="font-size:12px;color:#64748B;">tkr</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.65);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px);';
+    modal.innerHTML = `
+      <div style="background:#FFFFFF;border-radius:16px;max-width:440px;width:100%;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);color:#0F172A;overflow:hidden;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#0284C7;text-transform:uppercase;letter-spacing:0.5px;">Hareketi Düzenle</div>
+            <div style="font-size:15px;font-weight:800;color:#0F172A;margin-top:2px;">🏋️ ${escHtml(originalLabel)}</div>
+          </div>
+          <button type="button" onclick="window.closeGarminExerciseEditModal()" style="background:#E2E8F0;border:none;border-radius:50%;width:32px;height:32px;font-size:14px;font-weight:700;color:#475569;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+        </div>
+
+        <div style="padding:16px 18px;overflow-y:auto;flex:1;">
+          <!-- 1. Hareketi Eşle / Değiştir -->
+          <div style="margin-bottom:16px;">
+            <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">⇄ Kütüphanedeki Hareketi Seç / Eşle:</label>
+            <select onchange="window.resolveGarminUndefinedGroup(decodeURIComponent('${encAct}'), decodeURIComponent('${encGrp}'), this.value); window.openGarminExerciseEditModal(decodeURIComponent('${encAct}'), decodeURIComponent('${encGrp}'));" style="width:100%;padding:9px 12px;border:1px solid #CBD5E1;border-radius:8px;font-size:13px;color:#0F172A;background:#FFFFFF;font-weight:600;cursor:pointer;">
+              <option value="">(Mevcut Eşleşme): ${escHtml(originalLabel)}</option>
+              ${allOptions}
+            </select>
+          </div>
+
+          <!-- 2. Tüm Setleri Hızlı Ayarla -->
+          <div style="background:#F1F5F9;border:1px solid #E2E8F0;border-radius:10px;padding:12px;margin-bottom:16px;">
+            <div style="font-size:12px;font-weight:700;color:#0F172A;margin-bottom:8px;">⚡ Tüm Setleri Tek Seferde Güncelle:</div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <input type="number" step="0.5" min="0" id="modalBulkWeight" value="${g.weight || 0}" style="width:65px;padding:7px;border:1px solid #CBD5E1;border-radius:6px;font-size:13px;font-weight:700;text-align:center;color:#0F172A;background:#FFFFFF;" /> <span style="font-size:12px;color:#64748B;">kg</span>
+              <span style="color:#94A3B8;font-weight:700;">×</span>
+              <input type="number" step="1" min="1" id="modalBulkReps" value="${avgReps}" style="width:55px;padding:7px;border:1px solid #CBD5E1;border-radius:6px;font-size:13px;font-weight:700;text-align:center;color:#0F172A;background:#FFFFFF;" /> <span style="font-size:12px;color:#64748B;">tkr</span>
+              <button type="button" onclick="window.updateGarminGroupWeightAndReps(decodeURIComponent('${encAct}'), decodeURIComponent('${encGrp}'), document.getElementById('modalBulkWeight').value, document.getElementById('modalBulkReps').value); window.openGarminExerciseEditModal(decodeURIComponent('${encAct}'), decodeURIComponent('${encGrp}'));" style="background:#0F172A;color:#FFFFFF;border:none;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;flex:1;">Uygula</button>
+            </div>
+          </div>
+
+          <!-- 3. Tekil Setler -->
+          <div>
+            <div style="font-size:12px;font-weight:700;color:#334155;margin-bottom:8px;">Tekil Set Ağırlık ve Tekrarları:</div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              ${modalSetRows}
+            </div>
+          </div>
+        </div>
+
+        <div style="padding:12px 18px;border-top:1px solid #E2E8F0;background:#F8FAFC;">
+          <button type="button" onclick="window.closeGarminExerciseEditModal()" style="width:100%;background:#16A34A;color:#FFFFFF;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 2px 4px rgba(22,163,74,0.2);">
+            ✓ Tamamla ve Kapat
+          </button>
+        </div>
+      </div>
+    `;
+  };
+
+  window.closeGarminExerciseEditModal = function () {
+    const modal = document.getElementById('garminExerciseEditModal');
+    if (modal) modal.remove();
+    renderHistoryGarminSyncPanel();
+  };
+
+  window.approveGarminStrengthActivity = function (activityId) {
+    if (!activityId) return;
+    const uid = getActiveUidSafe();
+    if (!uid || !isGarminEnabledForCurrentUser(uid)) return;
+    markGarminActivityApproved(activityId, uid);
+    handoffCompletedActivitiesToTabChiefs();
+    renderHistoryGarminSyncPanel();
+    renderAnalyticsGarminCoachPanel();
+    if (typeof renderHistory === 'function') renderHistory();
+    if (typeof renderAnalytics === 'function') renderAnalytics();
+    if (typeof showToast === 'function') {
+      showToast('✅ Seans onaylandı ve bağımsız antrenman olarak geçmişe eklendi.');
+    }
+  };
+
+  window.dismissGarminStrengthActivity = function (activityId) {
+    if (!activityId) return;
+    const uid = getActiveUidSafe();
+    if (!uid || !isGarminEnabledForCurrentUser(uid)) return;
+    if (typeof confirm === 'function' && !confirm('Bu saat antrenmanını silmek istediğinize emin misiniz?')) return;
+    markGarminActivityDismissed(activityId, uid);
+
+    // Eğer daha önce onaylanıp geçmişe eklenmişse geçmişten de temizle
+    const historyKey = `celik_kodu_history_${uid}`;
+    try {
+      const raw = localStorage.getItem(historyKey) || '[]';
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        const filtered = parsed.filter(l => l && l.garminActivityId !== activityId && l.id !== `garmin_${activityId}`);
+        if (filtered.length !== parsed.length) {
+          localStorage.setItem(historyKey, JSON.stringify(filtered));
+          if (typeof window.syncWorkoutLogsToCloud === 'function' && window._initialWorkoutLogsCloudSyncDone === true) {
+            try { window.syncWorkoutLogsToCloud(filtered, uid); } catch {}
+          }
+        }
+      }
+    } catch {}
+
+    handoffCompletedActivitiesToTabChiefs();
+    renderHistoryGarminSyncPanel();
+    renderAnalyticsGarminCoachPanel();
+    if (typeof renderHistory === 'function') renderHistory();
+    if (typeof renderAnalytics === 'function') renderAnalytics();
+    if (typeof showToast === 'function') {
+      showToast('🗑️ Saat antrenmanı silindi.');
+    }
+  };
+
+  window.injectMockGarminStrengthActivity = function () {
+    const uid = getActiveUidSafe() || 'usr_admin';
+    try {
+      localStorage.setItem(GARMIN_ENABLED_PREFIX + uid, 'true');
+      const nowIso = new Date().toISOString();
+      const mockAct = {
+        id: 'mock_fr945_' + Date.now(),
+        date: nowIso,
+        title: 'Garmin FR945 Kuvvet Seansı',
+        sportType: 'training',
+        subSportType: 'strength_training',
+        summary: {
+          duration: 2700,
+          durationTotal: 2750,
+          exerciseSetCount: 3,
+          calories: 245,
+          heartrate: 136,
+          heartrateMax: 164
+        },
+        rounds: [
+          { setType: 'active', exerciseCategory: 'chest', exerciseName: 'dumbbell_chest_press', repetitions: 8, weight: 24, duration: 40, heartrate: 134, heartrateMax: 154 },
+          { setType: 'rest', duration: 60, heartrateRecovery: 24 },
+          { setType: 'active', exerciseCategory: 'chest', exerciseName: 'dumbbell_chest_press', repetitions: 8, weight: 24, duration: 42, heartrate: 138, heartrateMax: 160 },
+          { setType: 'rest', duration: 60, heartrateRecovery: 28 },
+          { setType: 'active', exerciseCategory: 'chest', exerciseName: 'dumbbell_chest_press', repetitions: 8, weight: 24, duration: 45, heartrate: 142, heartrateMax: 164 }
+        ]
+      };
+      const key = getScopedGarminKey(TELEMETRY_STORAGE_KEY, uid);
+      const prev = JSON.parse(localStorage.getItem(key) || '[]');
+      const filtered = prev.filter(a => a && !String(a.id || '').startsWith('mock_fr945_'));
+      filtered.unshift(mockAct);
+      localStorage.setItem(key, JSON.stringify(filtered));
+      renderHistoryGarminSyncPanel();
+      if (typeof renderHistory === 'function') renderHistory();
+      if (typeof showToast === 'function') {
+        showToast('⌚ Test seansı (24 kg Dambıl Press) saate eklendi!');
+      }
+      return mockAct;
+    } catch (e) {
+      console.error(e);
+      return null;
     }
   };
 
   // ─── 4. SEKME (HISTORY-GUARD): YALNIZCA GARMIN AÇIK KULLANICIDA GÖSTERİLİR ───
   function renderHistoryGarminSyncPanel() {
     const existing = document.getElementById('garminHistorySyncContainer');
-    if (!isGarminEnabledForCurrentUser()) {
+    const isLocal = typeof window !== 'undefined' && window.location && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    if (!isGarminEnabledForCurrentUser() && !isLocal) {
       if (existing) existing.remove();
       return;
     }
@@ -2058,7 +3099,7 @@
     if (!container) {
       container = document.createElement('div');
       container.id = 'garminHistorySyncContainer';
-      container.style.marginBottom = '16px';
+      container.style.marginBottom = '12px';
       const firstChild = historyTab.firstElementChild;
       if (firstChild && firstChild.nextSibling) {
         historyTab.insertBefore(container, firstChild.nextSibling);
@@ -2069,12 +3110,24 @@
 
     const activities = getStoredActivities();
     const metrics = computePhysiologicalMetrics();
+    const editedTitleMap = buildEditedWatchTitleIndex(null, getActiveUidSafe());
 
-    const cardsHtml = activities.map(act => {
+    const pendingActivities = activities.filter(act => {
+      if (isGarminActivityDismissed(act.id)) return false;
+      const isCardio = isStandaloneCardioActivity(act);
+      const isApproved = isGarminActivityApproved(act.id);
+      // Kardiyo ve henüz onaylanmamış fitness seansları kapsüle girer
+      return !isApproved || isCardio;
+    });
+
+    const cardsHtml = pendingActivities.map(act => {
       const manifest = findManifestForActivity(act);
-      const displayTitle = (manifest && manifest.title && (!act.title || act.title === 'Güç' || act.title === 'Garmin Antrenmanı'))
-        ? manifest.title
-        : act.title;
+      const editedEntry = editedTitleMap.get(String(act.id || ''));
+      const displayTitle = (editedEntry && editedEntry.title)
+        ? editedEntry.title
+        : ((manifest && manifest.title && (!act.title || act.title === 'Güç' || act.title === 'Garmin Antrenmanı'))
+          ? manifest.title
+          : act.title);
       const groups = analyzeActivityGroups(act);
       const unresolved = groups.filter(g => !g.isResolved);
       const resolved = groups.filter(g => g.isResolved);
@@ -2082,92 +3135,123 @@
       const avgHr = act.summary?.heartrate || 120;
       const maxHr = act.summary?.heartrateMax || 148;
       const cal = act.summary?.calories || 0;
+      const isCardio = isStandaloneCardioActivity(act);
+      const isApproved = isGarminActivityApproved(act.id);
+      const encAct = encodeURIComponent(act.id);
 
-      const resolvedPills = resolved.map(g => {
-        const originalLabel = g.originalName || (g.matchedEx ? g.matchedEx.name : 'Orijinal Hareket');
+      // ── KARDİYO (YÜRÜYÜŞ / KOŞU): YALIN TEK SATIRLIK BİLDİRİM ──
+      if (isCardio) {
+        return `
+          <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-left:4px solid #0284C7;border-radius:10px;padding:8px 12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+            <div style="min-width:0;">
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <span style="font-size:13px;font-weight:700;color:#0F172A;">🏃 ${escHtml(displayTitle)}</span>
+                <span style="background:#E0F2FE;color:#0369A1;font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;">Kardiyo (Doğrudan Puanlandı)</span>
+              </div>
+              <div style="font-size:11.5px;color:#64748B;margin-top:2px;">
+                📅 ${escHtml(dateStr)} • ❤️ Ort. ${avgHr} / Zirve ${maxHr} bpm • 🔥 ${cal} kcal
+              </div>
+            </div>
+            <button type="button" onclick="window.dismissGarminStrengthActivity(decodeURIComponent('${encAct}'))" title="Bildirimi Kaldır" style="background:#F1F5F9;border:1px solid #CBD5E1;color:#64748B;border-radius:6px;padding:4px 8px;font-size:11.5px;font-weight:700;cursor:pointer;flex-shrink:0;">
+              Sil
+            </button>
+          </div>
+        `;
+      }
+
+      // ── FİTNESS / KUVVET: YALIN ONAY KAPSÜLÜ ──
+      const allOptions = (typeof EXERCISES_DB !== 'undefined' ? EXERCISES_DB : []).map(ex =>
+        `<option value="${escHtml(ex.id)}">${escHtml(ex.name)}</option>`
+      ).join('');
+
+      const renderGroup = (g, isUnres = false) => {
+        const originalLabel = g.originalName || (g.matchedEx ? g.matchedEx.name : (g.rawCategory || 'Orijinal Hareket'));
         const avgReps = Math.round(g.sets.reduce((s, x) => s + x.repetitions, 0) / g.sets.length);
-        const h = g.healthTelemetry;
-        const isCardio = Boolean(g.sets[0]?.isCardioSession || /^cond_/.test(String(g.originalId || '')));
-        if (isCardio) {
-          const paceStr = h.paceSecPerKm
-            ? `${Math.floor(h.paceSecPerKm / 60)}:${String(h.paceSecPerKm % 60).padStart(2, '0')} /km`
-            : '';
-          const distStr = h.distanceMeters ? `${(h.distanceMeters / 1000).toFixed(2)} km` : '';
-          const cadStr = h.cadenceSpm ? `${h.cadenceSpm} spm` : '';
-          const pwrStr = h.powerWatts ? `${h.powerWatts} W` : '';
-          const extraStats = [distStr, paceStr, cadStr, pwrStr].filter(Boolean).join(' • ');
-          return `<span style="display:inline-flex;align-items:center;gap:5px;background:#DBEAFE;color:#0369A1;border:1px solid #93C5FD;padding:5px 10px;border-radius:6px;font-size:12px;font-weight:700;">
-            ✅ ${escHtml(originalLabel)} • ${Math.max(1, Math.round(h.timeUnderTensionSec / 60))} dk
-            <span style="background:#FFFFFF;color:#0F172A;padding:1px 6px;border-radius:4px;font-size:11px;">❤️ ${h.avgHeartrate}/${h.maxHeartrate} bpm${extraStats ? ` • ${escHtml(extraStats)}` : ''}</span>
-          </span>`;
-        }
-        return `<span style="display:inline-flex;align-items:center;gap:5px;background:#DCFCE7;color:#15803D;border:1px solid #86EFAC;padding:5px 10px;border-radius:6px;font-size:12px;font-weight:700;">
-          ✅ ${escHtml(originalLabel)} • ${g.sets.length}×${avgReps} ${g.weight ? `@ ${g.weight}kg` : ''}
-          <span style="background:#FFFFFF;color:#0F172A;padding:1px 6px;border-radius:4px;font-size:11px;">❤️ ${h.avgHeartrate} bpm • ⏱️ ${h.timeUnderTensionSec}sn TUT${h.heartrateRecovery ? ` • 📉 -${h.heartrateRecovery} HRR` : ''}</span>
-        </span>`;
-      }).join(' ');
-
-      const unresolvedBlocks = unresolved.map(g => {
-        const avgReps = Math.round(g.sets.reduce((s, x) => s + x.repetitions, 0) / g.sets.length);
-        const suggestions = getSmartSuggestionsForGroup(g);
-        const quickBtns = suggestions.map(sug => {
-          const encAct = encodeURIComponent(act.id);
-          const encGrp = encodeURIComponent(g.groupId);
-          const encEx = encodeURIComponent(sug.id);
-          return `<button type="button" onclick="window.resolveGarminUndefinedGroup(decodeURIComponent('${encAct}'), decodeURIComponent('${encGrp}'), decodeURIComponent('${encEx}'))" style="background:#0F172A;color:#FFFFFF;border:none;border-radius:6px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer;">➕ ${escHtml(sug.name)}</button>`;
-        }).join(' ');
-
-        const allOptions = (typeof EXERCISES_DB !== 'undefined' ? EXERCISES_DB : []).map(ex =>
-          `<option value="${escHtml(ex.id)}">${escHtml(ex.name)}</option>`
-        ).join('');
-
-        const encAct = encodeURIComponent(act.id);
         const encGrp = encodeURIComponent(g.groupId);
-        const h = g.healthTelemetry;
 
-        return `<div style="background:#FEF3C7;border:1px solid #F59E0B;border-radius:8px;padding:10px 12px;margin-top:8px;color:#0F172A;">
-          <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px;">
-            <strong style="color:#B45309;font-size:13px;">⚠️ Plan Dışı İlave Set: ${g.sets.length} Set × ~${avgReps} Tekrar ${g.weight ? `@ ${g.weight} kg` : '(Vücut Ağırlığı)'}</strong>
-            <span style="font-size:11.5px;color:#0F172A;background:#FFFFFF;padding:2px 7px;border-radius:5px;font-weight:600;">Saatten Alınan Sağlık Verisi: ❤️ ${h.avgHeartrate}/${h.maxHeartrate} bpm • ⏱️ ${h.timeUnderTensionSec} sn TUT</span>
-          </div>
-          <div style="font-size:12px;color:#334155;margin:6px 0 4px;font-weight:600;">💡 Saatin ham tahmini (<code>${escHtml(g.rawCategory)}</code>) kabul edilmedi — Bizdeki Orijinal Hareketi Seç:</div>
-          <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
-            ${quickBtns}
-            <select onchange="if(this.value) window.resolveGarminUndefinedGroup(decodeURIComponent('${encAct}'), decodeURIComponent('${encGrp}'), this.value)" style="padding:5px 8px;border:1px solid #94A3B8;border-radius:6px;font-size:12px;color:#0F172A;background:#FFFFFF;max-width:240px;">
-              <option value="">🔍 Kütüphaneden Orijinal Adı Seç...</option>
-              ${allOptions}
-            </select>
-          </div>
-        </div>`;
-      }).join('');
+        const weights = g.sets.map(s => Number(s.weight ?? g.weight ?? 0));
+        const allSameW = weights.length > 0 && weights.every(w => w === weights[0]);
+        const weightSummary = allSameW
+          ? (weights[0] > 0 ? `${weights[0]} kg` : 'Vücut Ağırlığı')
+          : `${Math.min(...weights)}-${Math.max(...weights)} kg`;
+        const summaryText = `${weightSummary} × ~${avgReps} tkr`;
 
-      return `<div style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:10px;padding:12px 14px;margin-top:10px;color:#0F172A;">
-        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;">
-          <div>
-            <strong style="font-size:14px;color:#0F172A;">⌚ ${escHtml(displayTitle)} <span style="font-size:11.5px;font-weight:700;color:#0369A1;">• Garmin fr945</span></strong>
-            <div style="font-size:12px;color:#475569;">📅 ${escHtml(dateStr)} • ❤️ Ort. ${avgHr} / Zirve ${maxHr} bpm • 🔥 ${cal} kcal • 🏋️ ${groups.reduce((n, g) => n + g.sets.length, 0)} Set/Blok</div>
+        return `
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;margin-top:6px;gap:8px;">
+            <div style="min-width:0;flex:1;">
+              <div style="font-size:13.5px;font-weight:800;color:#0F172A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                🏋️ ${escHtml(originalLabel)}
+              </div>
+              <div style="font-size:11.5px;color:#64748B;margin-top:2px;">
+                ${g.sets.length} Set • ${summaryText}
+              </div>
+            </div>
+            <button type="button" onclick="window.openGarminExerciseEditModal(decodeURIComponent('${encAct}'), decodeURIComponent('${encGrp}'))" title="Bu Hareketi Düzenle" style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;color:#0F172A;cursor:pointer;display:inline-flex;align-items:center;gap:4px;flex-shrink:0;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+              ✏️ Düzenle
+            </button>
           </div>
-          <span style="background:${unresolved.length ? '#FEF3C7' : '#DCFCE7'};color:${unresolved.length ? '#B45309' : '#15803D'};padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;">
-            ${unresolved.length ? `⚠️ ${unresolved.length} Plan Dışı Grup` : '✅ Orijinal Ad + Sağlık Verisi İşlendi'}
-          </span>
+        `;
+      };
+
+      const groupBlocks = groups.map(g => renderGroup(g, !g.isResolved)).join('');
+      const totalSets = groups.reduce((n, g) => n + g.sets.length, 0);
+      const safeActKey = String(act.id || '').replace(/[^a-zA-Z0-9_]/g, '_');
+
+      return `
+        <div style="background:#FFFFFF;border:1.5px solid #F59E0B;border-radius:12px;padding:12px 14px;margin-bottom:10px;box-shadow:0 2px 6px rgba(245,158,11,0.08);">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+            <div style="min-width:0;flex:1;">
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <span style="font-size:13.5px;font-weight:800;color:#0F172A;">⌚ ${escHtml(displayTitle)}</span>
+                <span style="background:#FEF3C7;color:#B45309;font-size:11px;font-weight:800;padding:2px 6px;border-radius:6px;">⏳ Onay Bekliyor</span>
+              </div>
+              <div style="font-size:11.5px;color:#64748B;margin-top:2px;">
+                📅 ${escHtml(dateStr)} • ❤️ Ort. ${avgHr} / Zirve ${maxHr} bpm • 🔥 ${cal} kcal • 🏋️ ${totalSets} Set (${groups.length} Hareket)
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+              <button type="button" onclick="window.approveGarminStrengthActivity(decodeURIComponent('${encAct}'))" style="background:#16A34A;color:#FFFFFF;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 1px 3px rgba(22,163,74,0.3);">
+                ✓ Onayla
+              </button>
+              <button type="button" onclick="window.dismissGarminStrengthActivity(decodeURIComponent('${encAct}'))" title="Saat Kaydını Sil" style="background:#FEE2E2;color:#DC2626;border:none;border-radius:6px;padding:6px 9px;font-size:12px;font-weight:700;cursor:pointer;">
+                ✕ Sil
+              </button>
+            </div>
+          </div>
+
+          <!-- Talep Halinde Açılır Detay & Düzenleme Çekmecesi (Varsayılan Kapalı) -->
+          <div style="margin-top:8px;padding-top:8px;border-top:1px dashed #E2E8F0;">
+            <button type="button" onclick="const d = document.getElementById('details_${safeActKey}'); const isHid = d.style.display==='none'; d.style.display = isHid ? 'block' : 'none'; this.querySelector('.arrow').textContent = isHid ? '▲ Kapat' : '▼ İncele / Düzenle';" style="background:none;border:none;color:#0284C7;font-size:12px;font-weight:700;cursor:pointer;padding:0;display:inline-flex;align-items:center;gap:4px;">
+              <span>👁️ Hareket Detayları (${groups.length} Hareket)</span>
+              <span class="arrow" style="font-size:11px;background:#E0F2FE;padding:2px 6px;border-radius:4px;">▼ İncele / Düzenle</span>
+            </button>
+          </div>
+
+          <div id="details_${safeActKey}" style="display:none;margin-top:6px;">
+            ${groupBlocks}
+          </div>
         </div>
-        ${resolvedPills ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">${resolvedPills}</div>` : ''}
-        ${unresolvedBlocks}
-      </div>`;
+      `;
     }).join('');
 
+    // Üst Bar: Minimalist ve sade
     container.innerHTML = `
-      <div style="background:#F8FAFC;border:2px solid #0284C7;border-radius:12px;padding:14px 16px;color:#0F172A;">
-        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;">
-          <div>
-            <div style="font-size:15px;font-weight:800;color:#0F172A;">⌚ 7. Şef (Garmin &amp; Tredict Şefi): Orijinal Hareket Kimliği + Sağlık Telemetrisi</div>
-            <div style="font-size:12.5px;color:#334155;">Takvime eklediğin antrenmanlar saate otomatik gider; tamamlanan antrenmanda bizdeki orijinal hareket adları korunup yalnızca saatin sağlık verileri işlenir.</div>
+      <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:10px 14px;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:13px;font-weight:800;color:#0F172A;">⌚ Saat Senkronizasyonu</span>
+            <span style="font-size:11px;font-weight:700;background:#E0F2FE;color:#0284C7;padding:2px 7px;border-radius:10px;">${pendingActivities.length ? `${pendingActivities.length} Bildirim` : 'Güncel'}</span>
           </div>
-          <button type="button" onclick="window.syncGarminActivitiesFromTredict()" style="background:#0284C7;color:#FFFFFF;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;">
-            🔄 Sağlık Verilerini Eşitle (${metrics.activityCount})
-          </button>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <button type="button" onclick="window.injectMockGarminStrengthActivity()" style="background:none;border:none;color:#64748B;font-size:11px;font-weight:600;cursor:pointer;padding:2px 4px;">
+              🧪 Test
+            </button>
+            <button type="button" onclick="window.syncGarminActivitiesFromTredict()" style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:6px;padding:3px 8px;font-size:11.5px;font-weight:700;color:#0F172A;cursor:pointer;">
+              🔄 Eşitle (${metrics.activityCount})
+            </button>
+          </div>
         </div>
-        ${cardsHtml}
+        ${cardsHtml ? `<div style="margin-top:10px;">${cardsHtml}</div>` : ''}
       </div>
     `;
   }
@@ -2293,7 +3377,7 @@
           </div>
           <div>
             <label for="garminModalGatewayInput" style="display:block;font-size:12px;font-weight:800;color:#0F172A;margin-bottom:4px;">Özel Bulut Adresi (Opsiyonel)</label>
-            <input id="garminModalGatewayInput" type="url" autocomplete="off" placeholder="https://garmin.kantarci.io" style="width:100%;box-sizing:border-box;background:#F8FAFC;color:#0F172A;border:1px solid #CBD5E1;border-radius:8px;padding:8px 10px;font-size:13px;">
+            <input id="garminModalGatewayInput" type="url" autocomplete="off" placeholder="https://celik-kodu.vercel.app" style="width:100%;box-sizing:border-box;background:#F8FAFC;color:#0F172A;border:1px solid #CBD5E1;border-radius:8px;padding:8px 10px;font-size:13px;">
             <div style="font-size:11px;color:#475569;margin-top:2px;">Varsayılan boş bırakılabilir</div>
           </div>
           <div id="garminSetupStatusMsg" style="display:none;border-radius:8px;padding:8px 10px;font-size:12px;font-weight:700;"></div>
@@ -2337,8 +3421,16 @@
     const icuInput = document.getElementById('garminModalIntervalsInput');
     const gwInput = document.getElementById('garminModalGatewayInput');
     const clearBtn = document.getElementById('garminSetupClearBtn');
-    if (trInput) trInput.value = getUserTredictToken(uid);
-    if (icuInput) icuInput.value = getUserIntervalsToken(uid);
+    const hasTr = Boolean(getUserTredictToken(uid));
+    const hasIcu = Boolean(getUserIntervalsToken(uid));
+    if (trInput) {
+      trInput.value = '';
+      trInput.placeholder = hasTr ? '•••••••• (Merkez Kasada Kilitli)' : 'Tredict anahtarını girin';
+    }
+    if (icuInput) {
+      icuInput.value = '';
+      icuInput.placeholder = hasIcu ? '•••••••• (Merkez Kasada Kilitli)' : 'İsteğe bağlı';
+    }
     if (gwInput) gwInput.value = getUserGatewayBase(uid);
     if (clearBtn) clearBtn.style.display = hasGarminCredentialsConfigured(uid) ? 'inline-block' : 'none';
     setGarminSetupStatus('', 'info');
@@ -2355,12 +3447,12 @@
   window.disconnectGarminForUser = function () {
     const uid = getActiveUidSafe();
     if (!uid) return;
-    try {
-      localStorage.removeItem(`${TREDICT_TOKEN_KEY}_${uid}`);
-      localStorage.removeItem(`${INTERVALS_TOKEN_KEY}_${uid}`);
-      localStorage.removeItem(`${GATEWAY_URL_KEY}_${uid}`);
-      localStorage.setItem(GARMIN_ENABLED_PREFIX + uid, 'false');
-    } catch {}
+    writeWatchVault(uid, {
+      enabled: false,
+      tredictToken: '',
+      intervalsToken: '',
+      gatewayBase: ''
+    }, true);
     refreshGarminPanelsForUserState();
     window.closeGarminSetupModal();
     if (typeof showToast === 'function') {
@@ -2376,8 +3468,10 @@
     const gwInput = document.getElementById('garminModalGatewayInput');
     const saveBtn = document.getElementById('garminSetupSaveBtn');
 
-    const tredictToken = String(trInput?.value || '').trim();
-    const intervalsToken = String(icuInput?.value || '').trim();
+    const enteredTr = String(trInput?.value || '').trim();
+    const enteredIcu = String(icuInput?.value || '').trim();
+    const tredictToken = enteredTr || getUserTredictToken(uid);
+    const intervalsToken = enteredIcu || getUserIntervalsToken(uid);
     const rawGw = String(gwInput?.value || '').trim();
 
     if (!tredictToken && !intervalsToken) {
@@ -2405,13 +3499,16 @@
         setGarminSetupStatus('Saat anahtarı doğrulanamadı.', 'err');
         return;
       }
-      localStorage.setItem(`${TREDICT_TOKEN_KEY}_${uid}`, tredictToken);
-      localStorage.setItem(`${INTERVALS_TOKEN_KEY}_${uid}`, intervalsToken);
-      if (gatewayBase) localStorage.setItem(`${GATEWAY_URL_KEY}_${uid}`, gatewayBase);
-      else localStorage.removeItem(`${GATEWAY_URL_KEY}_${uid}`);
-      localStorage.setItem(GARMIN_ENABLED_PREFIX + uid, 'true');
+      writeWatchVault(uid, {
+        enabled: true,
+        tredictToken,
+        intervalsToken,
+        gatewayBase
+      }, true);
+      if (trInput) trInput.value = '';
+      if (icuInput) icuInput.value = '';
 
-      setGarminSetupStatus('Saat bağlantısı doğrulandı ve kaydedildi.', 'ok');
+      setGarminSetupStatus('Saat bağlantısı doğrulandı ve merkez kasaya kilitlendi.', 'ok');
       refreshGarminPanelsForUserState();
       setTimeout(syncActiveSchedulesOnBoot, 200);
       setTimeout(syncGarminActivitiesSilent, 400);
@@ -2421,13 +3518,16 @@
       if (code === 'WATCH_AUTH_FAILED') {
         setGarminSetupStatus('Anahtar reddedildi. Lütfen saat anahtarınızı kontrol edin.', 'err');
       } else {
-        localStorage.setItem(`${TREDICT_TOKEN_KEY}_${uid}`, tredictToken);
-        localStorage.setItem(`${INTERVALS_TOKEN_KEY}_${uid}`, intervalsToken);
-        if (gatewayBase) localStorage.setItem(`${GATEWAY_URL_KEY}_${uid}`, gatewayBase);
-        else localStorage.removeItem(`${GATEWAY_URL_KEY}_${uid}`);
-        localStorage.setItem(GARMIN_ENABLED_PREFIX + uid, 'true');
+        writeWatchVault(uid, {
+          enabled: true,
+          tredictToken,
+          intervalsToken,
+          gatewayBase
+        }, true);
+        if (trInput) trInput.value = '';
+        if (icuInput) icuInput.value = '';
         refreshGarminPanelsForUserState();
-        setGarminSetupStatus('Anahtar kaydedildi, ancak bulut geçidine şu an ulaşılamıyor.', 'warn');
+        setGarminSetupStatus('Anahtar merkez kasaya kaydedildi, ancak saat geçidine şu an ulaşılamıyor.', 'warn');
       }
     } finally {
       if (saveBtn) saveBtn.disabled = false;
@@ -2591,6 +3691,10 @@
           }
         });
         localStorage.setItem(getScopedGarminKey(WELLNESS_STEPS_KEY), JSON.stringify(current));
+        const uid = getActiveUidSafe();
+        if (uid && typeof window !== 'undefined' && typeof window.scheduleUserStateCloudSync === 'function') {
+          try { window.scheduleUserStateCloudSync(uid); } catch {}
+        }
         if (typeof window.refreshTopFitnessCardioScoreBars === 'function') {
           window.refreshTopFitnessCardioScoreBars();
         }
@@ -2630,6 +3734,22 @@
     }
   }
 
+  function refreshFromCentralVault(uidOverride) {
+    const uid = uidOverride || getActiveUidSafe();
+    if (!uid) return;
+    const vault = readWatchVault(uid);
+    if (vault && typeof vault.enabled === 'boolean') {
+      try {
+        localStorage.setItem(GARMIN_ENABLED_PREFIX + uid, vault.enabled ? 'true' : 'false');
+      } catch {}
+    }
+    refreshGarminPanelsForUserState();
+    if (isGarminEnabledForCurrentUser() && hasGarminCredentialsConfigured(uid)) {
+      setTimeout(syncGarminWellnessStepsSilent, 50);
+      setTimeout(syncGarminActivitiesSilent, 150);
+    }
+  }
+
   window.GarminTredictChief = {
     agent: 'garmin-tredict-guard',
     isGarminEnabledForCurrentUser,
@@ -2639,9 +3759,25 @@
     getStoredActivities,
     analyzeActivityGroups,
     handoffCompletedActivitiesToTabChiefs,
+    syncWatchTitlesFromWorkoutLogs,
+    propagateWorkoutLogTitleToWatch,
+    renderHistoryGarminSyncPanel,
+    approveGarminStrengthActivity: (id) => window.approveGarminStrengthActivity(id),
+    dismissGarminStrengthActivity: (id) => window.dismissGarminStrengthActivity(id),
+    isGarminActivityApproved,
+    isGarminActivityDismissed,
+    getResolvedSetsMap,
+    saveResolvedSetsMap,
+    resolveGarminUndefinedGroup: (aid, gid, exid) => window.resolveGarminUndefinedGroup(aid, gid, exid),
+    updateGarminGroupWeightAndReps: (aid, gid, w, r) => window.updateGarminGroupWeightAndReps(aid, gid, w, r),
+    updateGarminSingleSet: (aid, sidx, w, r) => window.updateGarminSingleSet(aid, sidx, w, r),
+    openGarminExerciseEditModal: (aid, gid) => window.openGarminExerciseEditModal(aid, gid),
+    closeGarminExerciseEditModal: () => window.closeGarminExerciseEditModal(),
     computePhysiologicalMetrics,
     getStoredWellnessStepsMap,
     syncGarminWellnessStepsSilent,
+    syncGarminActivitiesSilent,
+    refreshFromCentralVault,
     buildTredictPlanPayload,
     buildIntervalsWorkoutEvent
   };
@@ -2652,10 +3788,78 @@
       const res = await fetchGarminBridge('/api/tredict/activities?days=30');
       const data = await res.json();
       if (data && data.ok && Array.isArray(data.activities) && data.activities.length > 0) {
-        localStorage.setItem(getScopedGarminKey(TELEMETRY_STORAGE_KEY), JSON.stringify(data.activities));
+        const uid = getActiveUidSafe();
+        const telemetryKey = getScopedGarminKey(TELEMETRY_STORAGE_KEY);
+        const prevRaw = localStorage.getItem(telemetryKey) || '[]';
+        let existingList = [];
+        try {
+          const parsed = JSON.parse(prevRaw);
+          if (Array.isArray(parsed)) existingList = parsed;
+        } catch {}
+
+        const editedTitleMap = buildEditedWatchTitleIndex(null, uid);
+        const combined = [];
+        const addMergedActivity = (rawAct) => {
+          if (!rawAct || !rawAct.id) return;
+          const act = Object.assign({}, rawAct);
+          const editedEntry = editedTitleMap.get(String(act.id));
+          if (editedEntry && editedEntry.userEditedAt >= Number(act.userEditedAt || 0)) {
+            act.title = editedEntry.title;
+            act.userEditedAt = editedEntry.userEditedAt;
+          }
+          const dupIdx = combined.findIndex(item => areSameWatchSession(item, act));
+          if (dupIdx === -1) {
+            combined.push(act);
+            return;
+          }
+          const prevItem = combined[dupIdx];
+          const prevEd = Number(prevItem.userEditedAt || 0);
+          const nextEd = Number(act.userEditedAt || 0);
+          const prevRounds = Array.isArray(prevItem.rounds) ? prevItem.rounds.length : 0;
+          const nextRounds = Array.isArray(act.rounds) ? act.rounds.length : 0;
+          const prevSummary = (prevItem.summary && typeof prevItem.summary === 'object') ? prevItem.summary : {};
+          const nextSummary = (act.summary && typeof act.summary === 'object') ? act.summary : {};
+          const mergedSummary = {
+            ...nextSummary,
+            ...prevSummary,
+            distance: Number(prevSummary.distance || nextSummary.distance || 0),
+            calories: Number(prevSummary.calories || nextSummary.calories || 0),
+            heartrate: Number(prevSummary.heartrate || nextSummary.heartrate || 0) || null,
+            heartrateMax: Math.max(Number(prevSummary.heartrateMax || 0), Number(nextSummary.heartrateMax || 0)) || null,
+            pace: Number(prevSummary.pace || nextSummary.pace || 0) || null,
+            cadence: Number(prevSummary.cadence || nextSummary.cadence || 0) || null
+          };
+          const mergedObj = nextRounds > prevRounds
+            ? { ...act, summary: mergedSummary }
+            : { ...prevItem, summary: mergedSummary };
+          if (editedEntry && editedEntry.userEditedAt >= Math.max(prevEd, nextEd)) {
+            mergedObj.title = editedEntry.title;
+            mergedObj.userEditedAt = editedEntry.userEditedAt;
+          } else if (prevEd > nextEd) {
+            mergedObj.title = prevItem.title || mergedObj.title;
+            mergedObj.userEditedAt = prevEd;
+          } else if (nextEd > prevEd) {
+            mergedObj.title = act.title || mergedObj.title;
+            mergedObj.userEditedAt = nextEd;
+          } else if (act.title && !prevEd && !nextEd) {
+            mergedObj.title = act.title;
+          }
+          combined[dupIdx] = mergedObj;
+        };
+
+        existingList.forEach(addMergedActivity);
+        data.activities.forEach(addMergedActivity);
+        combined.sort((a, b) => String(b?.date || '').localeCompare(String(a?.date || '')));
+        const nextList = combined.slice(0, 40);
+        const nextRaw = JSON.stringify(nextList);
+
+        localStorage.setItem(telemetryKey, nextRaw);
         handoffCompletedActivitiesToTabChiefs();
         renderHistoryGarminSyncPanel();
         renderAnalyticsGarminCoachPanel();
+        if (uid && nextRaw !== prevRaw && typeof window !== 'undefined' && typeof window.scheduleUserStateCloudSync === 'function') {
+          try { window.scheduleUserStateCloudSync(uid); } catch {}
+        }
         return true;
       }
     } catch {}
@@ -2666,6 +3870,19 @@
     migrateLegacyGarminStorageToOwner();
     installCalendarAutoSyncHook();
     refreshGarminPanelsForUserState();
+    const isLocal = typeof window !== 'undefined' && window.location && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    const isBrowser = typeof window !== 'undefined' && window.navigator && window.navigator.userAgent !== 'node';
+    if (isLocal && isBrowser) {
+      const uid = getActiveUidSafe() || 'usr_admin';
+      const key = getScopedGarminKey(TELEMETRY_STORAGE_KEY, uid);
+      let acts = [];
+      try { acts = JSON.parse(localStorage.getItem(key) || '[]'); } catch {}
+      if (!acts || acts.length === 0 || (window.location.search && window.location.search.includes('mock=1'))) {
+        setTimeout(() => { if (typeof window.injectMockGarminStrengthActivity === 'function') window.injectMockGarminStrengthActivity(); }, 150);
+      }
+    } else if (typeof window !== 'undefined' && window.location && window.location.search && window.location.search.includes('mock=1')) {
+      setTimeout(() => { if (typeof window.injectMockGarminStrengthActivity === 'function') window.injectMockGarminStrengthActivity(); }, 150);
+    }
     setTimeout(syncActiveSchedulesOnBoot, 600);
     setTimeout(syncGarminWellnessStepsSilent, 900);
     setTimeout(syncGarminActivitiesSilent, 1200);

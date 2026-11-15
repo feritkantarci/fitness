@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Çelik Kodu • Üretilen Program Ekranı (Granger & AthletiQ)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* AthletiQ Koyu Zemin & Yüksek Kontrast */
+            --bg-base: #0B0A14;
+            --bg-surface: #121024;
+            --bg-card: #181530;
+            --bg-card-hover: #221D42;
+            --border-subtle: rgba(167, 139, 250, 0.12);
+            --border-highlight: rgba(167, 139, 250, 0.4);
+            
+            /* AthletiQ Enerji Vurguları */
+            --athletiq-purple: #8B5CF6;
+            --athletiq-violet: #A78BFA;
+            --athletiq-cyan: #38BDF8;
+            --athletiq-emerald: #10B981;
+            --athletiq-amber: #F59E0B;
+            --athletiq-rose: #F43F5E;
+            
+            --text-primary: #F8FAFC;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 14px;
+            --radius-sm: 10px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #06050C;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 24px 12px 60px;
+        }
+
+        /* iPhone 14 Pro Max Simülatörü */
+        .phone-wrapper {
+            width: 100%;
+            max-width: 430px;
+            background: var(--bg-base);
+            border-radius: 50px;
+            border: 8px solid #1A172E;
+            box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(167, 139, 250, 0.15);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .status-bar {
+            height: 48px;
+            padding: 12px 26px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #F1F5F9;
+            z-index: 10;
+        }
+        .dynamic-island {
+            width: 112px;
+            height: 28px;
+            background: #000000;
+            border-radius: 20px;
+            margin: 0 auto;
+        }
+
+        .view-content {
+            padding: 14px 16px 40px;
+        }
+
+        /* ========================================================
+           ÜRETİLEN PROGRAM BAŞLIK KARTI (GRANGER ÖZET PANELİ)
+           ======================================================== */
+        .generated-header-card {
+            background: linear-gradient(165deg, var(--bg-card) 0%, rgba(24, 21, 48, 0.9) 100%);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xl);
+            padding: 18px;
+            margin-bottom: 18px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+            position: relative;
+            overflow: hidden;
+        }
+        .generated-header-card::after {
+            content: '';
+            position: absolute;
+            top: -30px;
+            right: -30px;
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: var(--athletiq-purple);
+            filter: blur(36px);
+            opacity: 0.18;
+            pointer-events: none;
+        }
+
+        .program-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .badge-live {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(16, 185, 129, 0.14);
+            color: var(--athletiq-emerald);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+        }
+        .badge-live-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--athletiq-emerald);
+            box-shadow: 0 0 8px var(--athletiq-emerald);
+        }
+
+        .program-title {
+            font-size: 20px;
+            font-weight: 900;
+            color: #FFFFFF;
+            letter-spacing: -0.01em;
+            line-height: 1.2;
+            margin-bottom: 8px;
+        }
+
+        /* Granger Özet Metrikleri Şeridi */
+        .granger-stat-strip {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 14px;
+            background: rgba(11, 10, 20, 0.6);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 8px 10px;
+            text-align: center;
+        }
+        .stat-item-val {
+            font-size: 14px;
+            font-weight: 900;
+            color: #FFFFFF;
+        }
+        .stat-item-lbl {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        /* Kompakt Aksiyon Barı (AthletiQ Moru) */
+        .action-primary-row {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .btn-launch-primary {
+            background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-family: inherit;
+            font-size: 13.5px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 6px 18px rgba(139, 92, 246, 0.4);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-launch-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-refresh-util {
+            background: rgba(24, 21, 48, 0.7);
+            border: 1px solid var(--border-subtle);
+            color: var(--athletiq-violet);
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+        .btn-refresh-util:active {
+            background: var(--bg-card-hover);
+        }
+
+        /* 3'lü Hızlı Atama Butonları */
+        .action-sub-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+        }
+        .btn-sub-chip {
+            background: rgba(11, 10, 20, 0.7);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 8px 4px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s;
+        }
+        .btn-sub-chip:active {
+            border-color: var(--athletiq-purple);
+            color: #FFFFFF;
+        }
+        .chip-highlight {
+            border-color: rgba(245, 158, 11, 0.35);
+            color: var(--athletiq-amber);
+            background: rgba(245, 158, 11, 0.08);
+        }
+
+        /* ========================================================
+           ZAMAN TÜNELİ & İSTASYON KARTLARI (GRANGER MİMARİSİ)
+           ======================================================== */
+        .timeline-section-title {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--athletiq-violet);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin: 20px 0 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .station-block {
+            margin-bottom: 12px;
+            background: linear-gradient(170deg, var(--bg-card) 0%, rgba(24, 21, 48, 0.6) 100%);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xl);
+            padding: 14px;
+            position: relative;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Süperset Vurgu Çerçevesi */
+        .station-block.is-superset {
+            border-color: rgba(139, 92, 246, 0.35);
+            background: linear-gradient(170deg, rgba(30, 26, 60, 0.9) 0%, rgba(24, 21, 48, 0.7) 100%);
+        }
+
+        .station-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .station-badge-num {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 900;
+            color: #FFFFFF;
+            background: var(--athletiq-purple);
+            padding: 3px 8px;
+            border-radius: 8px;
+            letter-spacing: 0.04em;
+        }
+        .station-badge-single {
+            background: rgba(167, 139, 250, 0.2);
+            color: var(--athletiq-violet);
+        }
+
+        .station-rest-tag {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--athletiq-cyan);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Egzersiz Satırı */
+        .exercise-clean-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 0;
+            cursor: pointer;
+        }
+        .ex-name-main {
+            font-size: 14.5px;
+            font-weight: 800;
+            color: #FFFFFF;
+            line-height: 1.3;
+        }
+        .ex-meta-sub {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-top: 3px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .ex-weight-badge {
+            color: var(--athletiq-amber);
+            font-weight: 700;
+        }
+
+        .btn-info-circle {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: rgba(167, 139, 250, 0.15);
+            color: var(--athletiq-violet);
+            border: 1px solid rgba(167, 139, 250, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        /* Süperset 0 sn Geçiş Çizgisi */
+        .superset-divider {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0;
+        }
+        .superset-line {
+            flex: 1;
+            height: 1px;
+            background: rgba(139, 92, 246, 0.25);
+        }
+        .superset-pill {
+            font-size: 9.5px;
+            font-weight: 900;
+            color: var(--athletiq-violet);
+            background: rgba(139, 92, 246, 0.18);
+            padding: 2px 8px;
+            border-radius: 10px;
+            letter-spacing: 0.05em;
+        }
+
+        /* Finisher Kartı (Balistik Bitiş) */
+        .finisher-card {
+            background: linear-gradient(135deg, rgba(244, 63, 94, 0.15) 0%, rgba(24, 21, 48, 0.8) 100%);
+            border: 1px solid rgba(244, 63, 94, 0.35);
+            border-radius: var(--radius-xl);
+            padding: 14px;
+            margin-top: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .finisher-title {
+            font-size: 13.5px;
+            font-weight: 800;
+            color: #FFFFFF;
+        }
+        .finisher-desc {
+            font-size: 11.5px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+        .btn-finisher-guide {
+            background: rgba(244, 63, 94, 0.2);
+            border: 1px solid rgba(244, 63, 94, 0.4);
+            color: #FDA4AF;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 7px 11px;
+            border-radius: 10px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        /* Alt Sabit Eylem Çubuğu */
+        .bottom-action-bar {
+            display: flex;
+            gap: 8px;
+            margin-top: 20px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border-subtle);
+        }
+        .btn-dismiss {
+            background: rgba(24, 21, 48, 0.8);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            font-size: 13.5px;
+            font-weight: 800;
+            padding: 14px 20px;
+            border-radius: 16px;
+            cursor: pointer;
+        }
+        .btn-start-full {
+            flex: 1;
+            background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 16px;
+            padding: 14px;
+            font-family: inherit;
+            font-size: 14.5px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.45);
+            cursor: pointer;
+        }
+
+        .toast-notify {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(50px);
+            background: #8B5CF6;
+            color: #FFFFFF;
+            font-size: 12.5px;
+            font-weight: 800;
+            padding: 10px 20px;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s;
+            z-index: 100;
+        }
+        .toast-notify.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone-wrapper">
+        <div class="status-bar">
+            <span>09:41</span>
+            <div class="dynamic-island"></div>
+            <span>5G 100%</span>
+        </div>
+
+        <div class="view-content">
+
+            <!-- ========================================================
+                 GRANGER ÖZET BAŞLIK KARTI (ATHLETIQ PALETİ)
+                 ======================================================== -->
+            <div class="generated-header-card">
+                <div class="program-top-row">
+                    <span class="badge-live">
+                        <span class="badge-live-dot"></span>
+                        <span>HAZIRLANDI</span>
+                    </span>
+                    <span style="font-size:11px; font-weight:700; color:var(--athletiq-violet);">45 DK • ORTA SÜPERSET</span>
+                </div>
+
+                <h1 class="program-title">Üst Vücut İtiş & Omuz Zırhı</h1>
+
+                <!-- 3'lü Granger Metrik Şeridi -->
+                <div class="granger-stat-strip">
+                    <div>
+                        <div class="stat-item-val" style="color:var(--athletiq-violet);">5</div>
+                        <div class="stat-item-lbl">İstasyon</div>
+                    </div>
+                    <div>
+                        <div class="stat-item-val" style="color:var(--athletiq-cyan);">16</div>
+                        <div class="stat-item-lbl">Toplam Set</div>
+                    </div>
+                    <div>
+                        <div class="stat-item-val" style="color:var(--athletiq-emerald);">%100</div>
+                        <div class="stat-item-lbl">Dengeli</div>
+                    </div>
+                </div>
+
+                <!-- Kompakt Aksiyon Barı -->
+                <div class="action-primary-row">
+                    <button class="btn-launch-primary" onclick="showToast('Antrenman Başlatılıyor...')">
+                        <span>▶️ Şimdi Başlat</span>
+                    </button>
+                    <button class="btn-refresh-util" onclick="showToast('Yeni Hareketlerle Yenileniyor...')">
+                        <span>🔄 Yenile</span>
+                    </button>
+                </div>
+
+                <div class="action-sub-grid">
+                    <button class="btn-sub-chip chip-highlight" onclick="showToast('Bugünkü Takvime Eklendi')">⚡ Bugüne</button>
+                    <button class="btn-sub-chip" onclick="showToast('Yarına Planlandı')">📅 Yarına</button>
+                    <button class="btn-sub-chip" onclick="showToast('Kütüphaneye Kaydedildi')">💾 Kaydet</button>
+                </div>
+            </div>
+
+            <!-- ========================================================
+                 İSTASYONLAR LİSTESİ (GRANGER KAVİSLİ KARTLAR)
+                 ======================================================== -->
+            <div class="timeline-section-title">
+                <span>ANTRENMAN AKIŞI (5 İSTASYON)</span>
+                <span style="font-size:11px; color:var(--text-muted);">Sıralı Bloklar</span>
+            </div>
+
+            <!-- İSTASYON 01 (TEKİL DÜZ SET) -->
+            <div class="station-block">
+                <div class="station-header-row">
+                    <span class="station-badge-num station-badge-single">01 • DÜZ SET</span>
+                    <span class="station-rest-tag">⏱️ 75 sn Dinlenme</span>
+                </div>
+                <div class="exercise-clean-row">
+                    <div>
+                        <div class="ex-name-main">Dumbbell Bench Press</div>
+                        <div class="ex-meta-sub">
+                            <span>🎯 4 Set × 8-10 Tekrar</span>
+                            <span class="ex-weight-badge">🏋️ Son: 24 kg</span>
+                        </div>
+                    </div>
+                    <button class="btn-info-circle" onclick="showToast('Dumbbell Bench Press Rehberi Açıldı')">i</button>
+                </div>
+            </div>
+
+            <!-- İSTASYON 02 (SÜPERSET A1 + A2) -->
+            <div class="station-block is-superset">
+                <div class="station-header-row">
+                    <span class="station-badge-num">02 • SÜPERSET</span>
+                    <span class="station-rest-tag">⏱️ 60 sn Dinlenme</span>
+                </div>
+
+                <!-- A1 -->
+                <div class="exercise-clean-row">
+                    <div>
+                        <div class="ex-name-main">Incline Dumbbell Press</div>
+                        <div class="ex-meta-sub">
+                            <span>🎯 3 Set × 10-12 Tekrar</span>
+                            <span class="ex-weight-badge">🏋️ Son: 20 kg</span>
+                        </div>
+                    </div>
+                    <button class="btn-info-circle" onclick="showToast('Incline DB Press Rehberi')">i</button>
+                </div>
+
+                <div class="superset-divider">
+                    <div class="superset-line"></div>
+                    <span class="superset-pill">⚡ GEÇİŞ (0 SN)</span>
+                    <div class="superset-line"></div>
+                </div>
+
+                <!-- A2 -->
+                <div class="exercise-clean-row">
+                    <div>
+                        <div class="ex-name-main">Dumbbell Lateral Raise</div>
+                        <div class="ex-meta-sub">
+                            <span>🎯 3 Set × 12-15 Tekrar</span>
+                            <span class="ex-weight-badge">🏋️ Son: 10 kg</span>
+                        </div>
+                    </div>
+                    <button class="btn-info-circle" onclick="showToast('Lateral Raise Rehberi')">i</button>
+                </div>
+            </div>
+
+            <!-- İSTASYON 03 (SÜPERSET B1 + B2) -->
+            <div class="station-block is-superset">
+                <div class="station-header-row">
+                    <span class="station-badge-num">03 • SÜPERSET</span>
+                    <span class="station-rest-tag">⏱️ 60 sn Dinlenme</span>
+                </div>
+
+                <!-- B1 -->
+                <div class="exercise-clean-row">
+                    <div>
+                        <div class="ex-name-main">Overhead Dumbbell Extension</div>
+                        <div class="ex-meta-sub">
+                            <span>🎯 3 Set × 12 Tekrar</span>
+                            <span class="ex-weight-badge">🏋️ Son: 18 kg</span>
+                        </div>
+                    </div>
+                    <button class="btn-info-circle">i</button>
+                </div>
+
+                <div class="superset-divider">
+                    <div class="superset-line"></div>
+                    <span class="superset-pill">⚡ GEÇİŞ (0 SN)</span>
+                    <div class="superset-line"></div>
+                </div>
+
+                <!-- B2 -->
+                <div class="exercise-clean-row">
+                    <div>
+                        <div class="ex-name-main">Hanging Leg Raise (Core)</div>
+                        <div class="ex-meta-sub">
+                            <span>🎯 3 Set × 15 Tekrar</span>
+                            <span>🏋️ Vücut Ağırlığı</span>
+                        </div>
+                    </div>
+                    <button class="btn-info-circle">i</button>
+                </div>
+            </div>
+
+            <!-- BALİSTİK BİTİŞ / FINISHER -->
+            <div class="finisher-card">
+                <div>
+                    <div class="finisher-title">🔥 Finisher: Tabata Kettlebell Swing</div>
+                    <div class="finisher-desc">4 Dakika • 20 sn Maksimum Hız / 10 sn Dinlenme</div>
+                </div>
+                <button class="btn-finisher-guide" onclick="showToast('KB Swing Form Rehberi Açıldı')">Rehber</button>
+            </div>
+
+            <!-- ALT SABİT AKSİYON -->
+            <div class="bottom-action-bar">
+                <button class="btn-dismiss" onclick="showToast('Üreticiye Geri Dönüldü')">Vazgeç</button>
+                <button class="btn-start-full" onclick="showToast('⚡ Antrenman Başlatıldı!')">
+                    <span>▶️ Seansı Başlat</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="toastNotify" class="toast-notify">İşlem Yapıldı!</div>
+
+    <script>
+        function showToast(text) {
+            const toast = document.getElementById('toastNotify');
+            toast.textContent = text;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

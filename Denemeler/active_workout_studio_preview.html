@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Çelik Kodu • Tam Donanımlı Canlı Stüdyo (Granger & AthletiQ)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0B0A14;
+            --bg-surface: #121024;
+            --bg-card: #181530;
+            --bg-card-hover: #221D42;
+            --border-subtle: rgba(167, 139, 250, 0.12);
+            --border-highlight: rgba(167, 139, 250, 0.4);
+            
+            --athletiq-purple: #8B5CF6;
+            --athletiq-violet: #A78BFA;
+            --athletiq-cyan: #38BDF8;
+            --athletiq-emerald: #10B981;
+            --athletiq-amber: #F59E0B;
+            --athletiq-rose: #F43F5E;
+            
+            --text-primary: #F8FAFC;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 14px;
+            --radius-sm: 10px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #06050C;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 24px 12px 60px;
+        }
+
+        /* iPhone 14 Pro Max Simülatörü */
+        .phone-wrapper {
+            width: 100%;
+            max-width: 430px;
+            height: 900px;
+            background: var(--bg-base);
+            border-radius: 50px;
+            border: 8px solid #1A172E;
+            box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(167, 139, 250, 0.15);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .status-bar {
+            height: 48px;
+            padding: 12px 26px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #F1F5F9;
+            z-index: 10;
+        }
+        .dynamic-island {
+            width: 112px;
+            height: 28px;
+            background: #000000;
+            border-radius: 20px;
+            margin: 0 auto;
+        }
+
+        /* ========================================================
+           ÜST BÖLGE: GRANGER STICKY HUD (KOKPİT)
+           ======================================================== */
+        .live-hud-bar {
+            padding: 12px 16px;
+            background: rgba(18, 16, 36, 0.94);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 30;
+        }
+
+        .hud-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .hud-progress-circle {
+            position: relative;
+            width: 40px;
+            height: 40px;
+        }
+        .hud-progress-circle svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+        .hud-pct-text {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10.5px;
+            font-weight: 900;
+            color: #FFFFFF;
+        }
+
+        .hud-workout-name {
+            font-size: 13.5px;
+            font-weight: 800;
+            color: #FFFFFF;
+            line-height: 1.2;
+        }
+        .hud-sub-metric {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--athletiq-violet);
+            margin-top: 2px;
+        }
+
+        .hud-right-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .hud-timer-badge {
+            background: rgba(11, 10, 20, 0.85);
+            border: 1px solid var(--border-subtle);
+            padding: 6px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 800;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .hud-icon-btn {
+            background: rgba(167, 139, 250, 0.14);
+            border: 1px solid rgba(167, 139, 250, 0.25);
+            color: var(--athletiq-violet);
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .hud-icon-btn:active {
+            background: var(--athletiq-purple);
+            color: #FFFFFF;
+        }
+
+        /* Görünüm Modu Switcher (Odak vs Liste) */
+        .view-mode-pill {
+            display: flex;
+            background: rgba(11, 10, 20, 0.8);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 2px;
+        }
+        .mode-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 10.5px;
+            font-weight: 800;
+            padding: 4px 7px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .mode-btn.active {
+            background: var(--bg-card);
+            color: var(--athletiq-violet);
+        }
+
+        /* Ana İçerik Kaydırma Alanı */
+        .view-content {
+            padding: 14px 16px 180px;
+            flex: 1;
+            overflow-y: auto;
+            scrollbar-width: none;
+        }
+        .view-content::-webkit-scrollbar { display: none; }
+
+        /* ========================================================
+           ORTA BÖLGE: CANLI HAREKET KARTI (ODAK MODU)
+           ======================================================== */
+        .live-card {
+            background: linear-gradient(165deg, var(--bg-card) 0%, rgba(24, 21, 48, 0.85) 100%);
+            border: 1.5px solid rgba(139, 92, 246, 0.35);
+            border-radius: var(--radius-xl);
+            padding: 18px;
+            margin-bottom: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+            position: relative;
+            overflow: hidden;
+        }
+        .live-card::after {
+            content: '';
+            position: absolute;
+            top: -30px;
+            right: -30px;
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: var(--athletiq-purple);
+            filter: blur(40px);
+            opacity: 0.25;
+            pointer-events: none;
+        }
+
+        .card-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .station-tag {
+            font-size: 11px;
+            font-weight: 900;
+            color: var(--athletiq-violet);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+        .card-top-actions {
+            display: flex;
+            gap: 6px;
+        }
+        .btn-card-tool {
+            background: rgba(167, 139, 250, 0.12);
+            border: 1px solid rgba(167, 139, 250, 0.25);
+            color: var(--athletiq-violet);
+            font-size: 11px;
+            font-weight: 800;
+            padding: 4px 9px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-card-tool:active {
+            background: var(--athletiq-purple);
+            color: #FFFFFF;
+        }
+
+        .ex-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 4px;
+        }
+        .ex-main-title {
+            font-size: 21px;
+            font-weight: 900;
+            color: #FFFFFF;
+            letter-spacing: -0.01em;
+            line-height: 1.2;
+        }
+        .btn-swap-ex {
+            background: transparent;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-muted);
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            cursor: pointer;
+            flex-shrink: 0;
+            margin-left: 8px;
+        }
+
+        .ex-anatomy-sub {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 14px;
+        }
+
+        /* Akıllı Ağırlık Rozeti */
+        .memory-strip {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            padding: 6px 12px;
+            border-radius: 12px;
+            margin-bottom: 14px;
+        }
+        .memory-label {
+            font-size: 11.5px;
+            font-weight: 800;
+            color: var(--athletiq-amber);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-copy-weight {
+            background: var(--athletiq-amber);
+            color: #06050C;
+            border: none;
+            border-radius: 6px;
+            font-size: 10.5px;
+            font-weight: 900;
+            padding: 3px 8px;
+            cursor: pointer;
+        }
+
+        /* ========================================================
+           SET ÇETELESİ (3 SÜTUNLU GRANGER IZGARA)
+           ======================================================== */
+        .set-table {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .set-table-head {
+            display: grid;
+            grid-template-columns: 46px 1fr 1fr 48px;
+            gap: 8px;
+            padding: 0 10px;
+            font-size: 10.5px;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        .set-row {
+            display: grid;
+            grid-template-columns: 46px 1fr 1fr 48px;
+            gap: 8px;
+            align-items: center;
+            background: rgba(11, 10, 20, 0.6);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 8px 10px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .set-row.completed {
+            background: rgba(16, 185, 129, 0.08);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+        .set-row.active {
+            background: rgba(139, 92, 246, 0.16);
+            border-color: var(--athletiq-purple);
+            box-shadow: 0 0 18px rgba(139, 92, 246, 0.25);
+        }
+
+        .set-pill-label {
+            font-size: 12px;
+            font-weight: 900;
+            color: var(--text-muted);
+            text-align: center;
+        }
+        .set-row.active .set-pill-label { color: var(--athletiq-violet); }
+        .set-row.completed .set-pill-label { color: var(--athletiq-emerald); }
+
+        /* Sayısal Giriş Kontrolleri (- / + butonlu kompakt alan) */
+        .stepper-wrap {
+            display: flex;
+            align-items: center;
+            background: rgba(24, 21, 48, 0.85);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .stepper-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 900;
+            width: 22px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .stepper-btn:active { background: rgba(255, 255, 255, 0.1); color: #FFFFFF; }
+        .stepper-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #FFFFFF;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 800;
+            text-align: center;
+            outline: none;
+            width: 100%;
+            min-width: 0;
+            padding: 0 2px;
+        }
+
+        .set-status-toggle {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: 1.5px solid var(--border-subtle);
+            background: rgba(24, 21, 48, 0.7);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            cursor: pointer;
+            margin-left: auto;
+            transition: all 0.15s;
+        }
+        .set-row.completed .set-status-toggle {
+            background: var(--athletiq-emerald);
+            border-color: var(--athletiq-emerald);
+            color: #06050C;
+            font-weight: 900;
+        }
+        .set-row.active .set-status-toggle {
+            border-color: var(--athletiq-purple);
+            color: var(--athletiq-violet);
+            background: rgba(139, 92, 246, 0.25);
+        }
+
+        /* Set Ekle Butonu */
+        .btn-add-set-row {
+            background: transparent;
+            border: 1px dashed var(--border-subtle);
+            color: var(--athletiq-violet);
+            font-family: inherit;
+            font-size: 11.5px;
+            font-weight: 800;
+            padding: 9px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.15s;
+        }
+        .btn-add-set-row:active {
+            background: rgba(139, 92, 246, 0.12);
+            border-color: var(--athletiq-purple);
+        }
+
+        /* Süperset Eşi Kartı (A2 - Sırada) */
+        .superset-link-box {
+            background: linear-gradient(145deg, rgba(30, 26, 60, 0.8) 0%, rgba(24, 21, 48, 0.6) 100%);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: var(--radius-xl);
+            padding: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+        }
+        .superset-link-box:active {
+            border-color: var(--athletiq-purple);
+        }
+        .pair-badge {
+            font-size: 9.5px;
+            font-weight: 900;
+            color: var(--athletiq-violet);
+            background: rgba(139, 92, 246, 0.18);
+            padding: 2px 7px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-bottom: 3px;
+        }
+        .pair-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: #FFFFFF;
+        }
+        .pair-meta {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        .btn-switch-pair {
+            background: rgba(167, 139, 250, 0.16);
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            color: var(--athletiq-violet);
+            font-size: 11.5px;
+            font-weight: 800;
+            padding: 7px 11px;
+            border-radius: 10px;
+            white-space: nowrap;
+        }
+
+        /* ========================================================
+           ALT BÖLGE: GRANGER & ATHLETIQ BAŞPARMAK DOCK'U
+           ======================================================== */
+        .live-master-dock {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(14, 12, 28, 0.96);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border-subtle);
+            padding: 12px 16px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 40;
+            box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        /* 1. Dinlenme Çubuğu & Sayaç */
+        .rest-timer-strip {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(24, 21, 48, 0.85) 100%);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 16px;
+            padding: 8px 14px;
+        }
+        .rest-timer-val {
+            font-size: 18px;
+            font-weight: 900;
+            color: #FFFFFF;
+            letter-spacing: 0.02em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .rest-quick-tools {
+            display: flex;
+            gap: 6px;
+        }
+        .btn-rest-tool {
+            background: rgba(24, 21, 48, 0.9);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 6px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-rest-tool:active {
+            color: #FFFFFF;
+            border-color: var(--athletiq-purple);
+        }
+
+        /* 2. Ana Aksiyon Izgarası (Önceki, Seti Tamamla, Sonraki) */
+        .dock-main-row {
+            display: grid;
+            grid-template-columns: 46px 1fr 46px;
+            gap: 8px;
+        }
+        .btn-dock-arrow {
+            background: rgba(24, 21, 48, 0.85);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-dock-arrow:active {
+            background: var(--athletiq-purple);
+            color: #FFFFFF;
+        }
+
+        .btn-dock-complete {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 16px;
+            padding: 14px 16px;
+            font-family: inherit;
+            font-size: 14.5px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-dock-complete:active {
+            transform: scale(0.98);
+        }
+
+        /* 3. İkincil Araçlar (Bitir, Not, İlave İstasyon) */
+        .dock-extra-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 4px;
+        }
+        .btn-extra-link {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-extra-link:active {
+            color: var(--text-primary);
+        }
+        .btn-finish-alert {
+            color: var(--athletiq-rose);
+        }
+
+        /* Modal Overlay (Form & Animasyon Rehberi) */
+        .modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            z-index: 50;
+            display: none;
+            align-items: flex-end;
+        }
+        .modal-backdrop.open { display: flex; }
+        .modal-sheet {
+            width: 100%;
+            background: var(--bg-surface);
+            border-top: 1px solid var(--border-subtle);
+            border-radius: 30px 30px 0 0;
+            padding: 20px;
+            max-height: 80%;
+            overflow-y: auto;
+            position: relative;
+        }
+        .modal-sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+        .btn-modal-close {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #FFFFFF;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .toast-notify {
+            position: fixed;
+            bottom: 160px;
+            left: 50%;
+            transform: translateX(-50%) translateY(50px);
+            background: #8B5CF6;
+            color: #FFFFFF;
+            font-size: 12.5px;
+            font-weight: 800;
+            padding: 10px 20px;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s;
+            z-index: 100;
+        }
+        .toast-notify.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone-wrapper">
+        <div class="status-bar">
+            <span>09:41</span>
+            <div class="dynamic-island"></div>
+            <span>5G 100%</span>
+        </div>
+
+        <!-- ========================================================
+             ÜST BÖLGE: GRANGER STICKY HUD
+             ======================================================== -->
+        <div class="live-hud-bar">
+            <div class="hud-left">
+                <div class="hud-progress-circle">
+                    <svg viewBox="0 0 36 36">
+                        <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="3.5"/>
+                        <path id="hudSvgCircle" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831" fill="none" stroke="#10B981" stroke-width="3.5" stroke-dasharray="35, 100"/>
+                    </svg>
+                    <span class="hud-pct-text" id="hudPctText">35%</span>
+                </div>
+                <div>
+                    <div class="hud-workout-name">Üst Vücut İtiş</div>
+                    <div class="hud-sub-metric" id="hudSubMetric">İstasyon 2/5 • 6/16 Set</div>
+                </div>
+            </div>
+
+            <div class="hud-right-controls">
+                <div class="view-mode-pill">
+                    <button class="mode-btn active" id="btnModeFocus" onclick="switchLiveMode('focus')">Odak</button>
+                    <button class="mode-btn" id="btnModeList" onclick="switchLiveMode('list')">Liste</button>
+                </div>
+                <div class="hud-timer-badge">
+                    <span>⏱️</span>
+                    <span id="sessionTimer">14:20</span>
+                </div>
+                <button class="hud-icon-btn" onclick="toggleSessionPause()">⏸️</button>
+            </div>
+        </div>
+
+        <!-- ========================================================
+             ORTA BÖLGE: CANLI HAREKET & SET TABLOSU
+             ======================================================== -->
+        <div class="view-content">
+
+            <!-- AKTİF EGZERSİZ KARTI -->
+            <div class="live-card">
+                <div class="card-top-bar">
+                    <span class="station-tag">İSTASYON 02 • SÜPERSET (A1)</span>
+                    <div class="card-top-actions">
+                        <button class="btn-card-tool" onclick="openModal('guide')">
+                            <span>🎬</span>
+                            <span>Rehber</span>
+                        </button>
+                        <button class="btn-card-tool" onclick="showToast('RPE / Yorgunluk 8 olarak kaydedildi')">
+                            <span>🔥 RPE 8</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="ex-title-row">
+                    <div>
+                        <h1 class="ex-main-title" id="exMainTitle">Incline DB Press</h1>
+                        <p class="ex-anatomy-sub">Üst Göğüs & Ön Deltoit • 30° Eğim</p>
+                    </div>
+                    <button class="btn-swap-ex" onclick="showToast('Alternatif Egzersiz Seçici Açıldı')" title="Alternatif Değiştir">🔄</button>
+                </div>
+
+                <!-- Akıllı Ağırlık Hafızası Şeridi -->
+                <div class="memory-strip">
+                    <span class="memory-label">
+                        <span>⚡</span>
+                        <span>Geçen Hafta: <strong>22 kg × 10 tk</strong></span>
+                    </span>
+                    <button class="btn-copy-weight" onclick="copyLastWeight()">Aktif Sete Kopyala</button>
+                </div>
+
+                <!-- Set Çetelesi -->
+                <div class="set-table">
+                    <div class="set-table-head">
+                        <span style="text-align:center;">SET</span>
+                        <span style="text-align:center;">KİLO</span>
+                        <span style="text-align:center;">TEKRAR</span>
+                        <span style="text-align:right;">DURUM</span>
+                    </div>
+
+                    <!-- Set 1 -->
+                    <div class="set-row completed" id="row_s1">
+                        <span class="set-pill-label">S1</span>
+                        <div class="stepper-wrap">
+                            <button class="stepper-btn" onclick="stepVal('s1_w', -2)">-</button>
+                            <input type="text" id="s1_w" class="stepper-input" value="22 kg" readonly>
+                            <button class="stepper-btn" onclick="stepVal('s1_w', 2)">+</button>
+                        </div>
+                        <div class="stepper-wrap">
+                            <button class="stepper-btn" onclick="stepVal('s1_r', -1)">-</button>
+                            <input type="text" id="s1_r" class="stepper-input" value="10 tk" readonly>
+                            <button class="stepper-btn" onclick="stepVal('s1_r', 1)">+</button>
+                        </div>
+                        <button class="set-status-toggle" onclick="toggleSetCheck('s1')">✓</button>
+                    </div>
+
+                    <!-- Set 2 (Aktif) -->
+                    <div class="set-row active" id="row_s2">
+                        <span class="set-pill-label">S2</span>
+                        <div class="stepper-wrap">
+                            <button class="stepper-btn" onclick="stepVal('s2_w', -2)">-</button>
+                            <input type="text" id="s2_w" class="stepper-input" value="22 kg">
+                            <button class="stepper-btn" onclick="stepVal('s2_w', 2)">+</button>
+                        </div>
+                        <div class="stepper-wrap">
+                            <button class="stepper-btn" onclick="stepVal('s2_r', -1)">-</button>
+                            <input type="text" id="s2_r" class="stepper-input" value="10 tk">
+                            <button class="stepper-btn" onclick="stepVal('s2_r', 1)">+</button>
+                        </div>
+                        <button class="set-status-toggle" onclick="completeActiveSet()">●</button>
+                    </div>
+
+                    <!-- Set 3 -->
+                    <div class="set-row" id="row_s3">
+                        <span class="set-pill-label">S3</span>
+                        <div class="stepper-wrap">
+                            <button class="stepper-btn" onclick="stepVal('s3_w', -2)">-</button>
+                            <input type="text" id="s3_w" class="stepper-input" value="22 kg">
+                            <button class="stepper-btn" onclick="stepVal('s3_w', 2)">+</button>
+                        </div>
+                        <div class="stepper-wrap">
+                            <button class="stepper-btn" onclick="stepVal('s3_r', -1)">-</button>
+                            <input type="text" id="s3_r" class="stepper-input" value="10 tk">
+                            <button class="stepper-btn" onclick="stepVal('s3_r', 1)">+</button>
+                        </div>
+                        <button class="set-status-toggle" onclick="toggleSetCheck('s3')">○</button>
+                    </div>
+                </div>
+
+                <button class="btn-add-set-row" onclick="addSetRow()">
+                    <span>➕ İlave Set Ekle (S4)</span>
+                </button>
+            </div>
+
+            <!-- Süperset Eşleşme Köprüsü (A2) -->
+            <div class="superset-link-box" onclick="switchToPair()">
+                <div>
+                    <span class="pair-badge">SÜPERSET EŞİ (0 SN GEÇİŞ)</span>
+                    <div class="pair-title">Dumbbell Lateral Raise</div>
+                    <div class="pair-meta">Yan Omuz • 3 Set × 12 Tk (Sırada)</div>
+                </div>
+                <button class="btn-switch-pair">Geç ➔</button>
+            </div>
+
+        </div>
+
+        <!-- ========================================================
+           ALT BÖLGE: GRANGER & ATHLETIQ BAŞPARMAK DOCK'U
+           ======================================================== -->
+        <div class="live-master-dock">
+            <!-- 1. Dinlenme Çubuğu & Sayaç -->
+            <div class="rest-timer-strip">
+                <div class="rest-timer-val">
+                    <span style="color:var(--athletiq-cyan);">⏱️</span>
+                    <span id="restTimerDisplay">00:45</span>
+                    <span style="font-size:11px; font-weight:700; color:var(--text-muted); margin-left:4px;">Dinlenme</span>
+                </div>
+                <div class="rest-quick-tools">
+                    <button class="btn-rest-tool" onclick="adjustRest(15)">+15 sn</button>
+                    <button class="btn-rest-tool" onclick="skipRest()">⏭️ Atla</button>
+                </div>
+            </div>
+
+            <!-- 2. Ana Aksiyon Izgarası -->
+            <div class="dock-main-row">
+                <button class="btn-dock-arrow" onclick="showToast('Önceki İstasyona Geçildi')">⬅️</button>
+                <button class="btn-dock-complete" onclick="completeActiveSet()">
+                    <span>✓ Seti Tamamla & Dinlen</span>
+                </button>
+                <button class="btn-dock-arrow" onclick="showToast('Sonraki İstasyona Geçildi')">➡️</button>
+            </div>
+
+            <!-- 3. İkincil Bağlantılar -->
+            <div class="dock-extra-row">
+                <button class="btn-extra-link" onclick="openModal('notes')">
+                    <span>📝</span>
+                    <span>Set Notu</span>
+                </button>
+                <button class="btn-extra-link" onclick="showToast('Ek Finisher Modalı Açıldı')">
+                    <span>➕</span>
+                    <span>Hareket Ekle</span>
+                </button>
+                <button class="btn-extra-link btn-finish-alert" onclick="finishWorkoutEarly()">
+                    <span>⏹️</span>
+                    <span>Antrenmanı Bitir</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- REHBER & FORM MODALI -->
+        <div class="modal-backdrop" id="guideModal" onclick="closeModal('guide')">
+            <div class="modal-sheet" onclick="event.stopPropagation()">
+                <div class="modal-sheet-header">
+                    <h3 style="font-size:16px; font-weight:900; color:#FFFFFF;">Incline DB Press Rehberi</h3>
+                    <button class="btn-modal-close" onclick="closeModal('guide')">✕</button>
+                </div>
+                <div style="background:#000000; border-radius:14px; height:180px; display:flex; align-items:center; justify-content:center; margin-bottom:14px; border:1px solid var(--border-subtle);">
+                    <span style="font-size:13px; font-weight:700; color:var(--athletiq-violet);">🎬 Hareket Animasyonu Oynatılıyor</span>
+                </div>
+                <div style="font-size:13px; color:var(--text-secondary); line-height:1.5;">
+                    <strong style="color:#FFFFFF;">Altın Kural:</strong> Sehpa açısını 30 dereceden fazla dikleştirmeyin; dambılları indirirken dirseklerinizi gövdenizle 45 derecelik açıda tutun.
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="toastNotify" class="toast-notify">İşlem Yapıldı!</div>
+
+    <script>
+        let restSeconds = 45;
+        let isResting = false;
+        let restInterval = null;
+
+        function showToast(text) {
+            const toast = document.getElementById('toastNotify');
+            toast.textContent = text;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function stepVal(id, delta) {
+            const input = document.getElementById(id);
+            if (!input) return;
+            let val = parseInt(input.value) || 0;
+            val = Math.max(0, val + delta);
+            input.value = id.endsWith('_w') ? val + ' kg' : val + ' tk';
+            showToast(`${input.value} güncellendi`);
+        }
+
+        function copyLastWeight() {
+            document.getElementById('s2_w').value = '22 kg';
+            document.getElementById('s2_r').value = '10 tk';
+            showToast('22 kg × 10 tk aktif sete kopyalandı!');
+        }
+
+        function completeActiveSet() {
+            const row2 = document.getElementById('row_s2');
+            const row3 = document.getElementById('row_s3');
+            if (row2 && row2.classList.contains('active')) {
+                row2.classList.remove('active');
+                row2.classList.add('completed');
+                row2.querySelector('.set-status-toggle').textContent = '✓';
+                if (row3) {
+                    row3.classList.add('active');
+                    row3.querySelector('.set-status-toggle').textContent = '●';
+                }
+                startRestTimer();
+                updateProgress(45);
+                showToast('Set 2 Tamamlandı! 45 sn dinlenme başladı.');
+            } else {
+                showToast('Tüm setler tamamlandı! Tebrikler.');
+            }
+        }
+
+        function toggleSetCheck(id) {
+            const row = document.getElementById('row_' + id);
+            if (!row) return;
+            const btn = row.querySelector('.set-status-toggle');
+            if (row.classList.contains('completed')) {
+                row.classList.remove('completed');
+                btn.textContent = '○';
+                showToast(`${id.toUpperCase()} beklemede`);
+            } else {
+                row.classList.add('completed');
+                btn.textContent = '✓';
+                showToast(`${id.toUpperCase()} tamamlandı`);
+            }
+        }
+
+        function addSetRow() {
+            showToast('İlave Set S4 eklendi!');
+        }
+
+        function switchToPair() {
+            showToast('Süperset Eşine (Lateral Raise) Geçildi!');
+        }
+
+        function startRestTimer() {
+            restSeconds = 45;
+            clearInterval(restInterval);
+            isResting = true;
+            updateRestDisplay();
+            restInterval = setInterval(() => {
+                restSeconds--;
+                if (restSeconds <= 0) {
+                    clearInterval(restInterval);
+                    isResting = false;
+                    restSeconds = 0;
+                    showToast('⏰ Dinlenme Bitti! Sıradaki Sete Başla.');
+                }
+                updateRestDisplay();
+            }, 1000);
+        }
+
+        function updateRestDisplay() {
+            const disp = document.getElementById('restTimerDisplay');
+            const m = Math.floor(restSeconds / 60);
+            const s = restSeconds % 60;
+            disp.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+        }
+
+        function adjustRest(addSec) {
+            restSeconds += addSec;
+            updateRestDisplay();
+            showToast(`+${addSec} sn dinlenme süresi eklendi`);
+        }
+
+        function skipRest() {
+            clearInterval(restInterval);
+            restSeconds = 0;
+            updateRestDisplay();
+            showToast('Dinlenme atlandı, set hazır!');
+        }
+
+        function updateProgress(pct) {
+            document.getElementById('hudPctText').textContent = pct + '%';
+            document.getElementById('hudSvgCircle').setAttribute('stroke-dasharray', `${pct}, 100`);
+            document.getElementById('hudSubMetric').textContent = 'İstasyon 2/5 • 7/16 Set';
+        }
+
+        function switchLiveMode(mode) {
+            document.getElementById('btnModeFocus').classList.toggle('active', mode === 'focus');
+            document.getElementById('btnModeList').classList.toggle('active', mode === 'list');
+            showToast(mode === 'focus' ? 'Odak Modu Aktif' : 'Tüm Liste Modu Aktif');
+        }
+
+        function toggleSessionPause() {
+            showToast('Antrenman süresi duraklatıldı');
+        }
+
+        function openModal(id) {
+            const m = document.getElementById(id + 'Modal');
+            if (m) m.classList.add('open');
+        }
+        function closeModal(id) {
+            const m = document.getElementById(id + 'Modal');
+            if (m) m.classList.remove('open');
+        }
+
+        function finishWorkoutEarly() {
+            showToast('Antrenman tamamlanıp geçmişe kaydediliyor...');
+        }
+    </script>
+</body>
+</html>

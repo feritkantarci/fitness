@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Çelik Kodu • 1 Set Bitince Gelen Dinlenme & Grafik Ekranı (Granger & AthletiQ)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0B0A14;
+            --bg-surface: #121024;
+            --bg-card: #181530;
+            --bg-card-hover: #221D42;
+            --border-subtle: rgba(167, 139, 250, 0.12);
+            --border-highlight: rgba(167, 139, 250, 0.4);
+            
+            --athletiq-purple: #8B5CF6;
+            --athletiq-violet: #A78BFA;
+            --athletiq-cyan: #38BDF8;
+            --athletiq-emerald: #10B981;
+            --athletiq-amber: #F59E0B;
+            --athletiq-rose: #F43F5E;
+            
+            --text-primary: #F8FAFC;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 14px;
+            --radius-sm: 10px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #06050C;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 24px 12px 60px;
+        }
+
+        .phone-wrapper {
+            width: 100%;
+            max-width: 430px;
+            height: 900px;
+            background: var(--bg-base);
+            border-radius: 50px;
+            border: 8px solid #1A172E;
+            box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(167, 139, 250, 0.15);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .status-bar {
+            height: 48px;
+            padding: 12px 26px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #F1F5F9;
+            z-index: 10;
+        }
+        .dynamic-island {
+            width: 112px;
+            height: 28px;
+            background: #000000;
+            border-radius: 20px;
+            margin: 0 auto;
+        }
+
+        /* Üst Durum Çubuğu */
+        .live-hud-bar {
+            padding: 12px 18px;
+            background: rgba(18, 16, 36, 0.94);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 30;
+        }
+        .hud-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .hud-workout-name {
+            font-size: 14px;
+            font-weight: 800;
+            color: #FFFFFF;
+        }
+        .hud-sub-metric {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--athletiq-emerald);
+        }
+
+        .view-content {
+            padding: 14px 16px 140px;
+            flex: 1;
+            overflow-y: auto;
+            scrollbar-width: none;
+        }
+        .view-content::-webkit-scrollbar { display: none; }
+
+        /* ========================================================
+           1. GRANGER BÜYÜK DİNLENME SAYAÇ KARTI (ATHLETIQ MORU)
+           ======================================================== */
+        .rest-hero-card {
+            background: linear-gradient(165deg, var(--bg-card) 0%, rgba(24, 21, 48, 0.9) 100%);
+            border: 1.5px solid rgba(139, 92, 246, 0.35);
+            border-radius: var(--radius-xl);
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+            margin-bottom: 14px;
+        }
+        .rest-hero-card::after {
+            content: '';
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--athletiq-purple);
+            filter: blur(50px);
+            opacity: 0.25;
+            pointer-events: none;
+        }
+
+        .rest-badge-top {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--athletiq-emerald);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            margin-bottom: 10px;
+        }
+
+        .rest-circle-wrap {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 12px;
+        }
+        .rest-circle-wrap svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+        .rest-center-info {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .rest-big-time {
+            font-size: 34px;
+            font-weight: 900;
+            color: #FFFFFF;
+            letter-spacing: -0.02em;
+            line-height: 1;
+        }
+        .rest-sub-lbl {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: var(--athletiq-violet);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-top: 4px;
+        }
+
+        .rest-stepper-row {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .btn-time-step {
+            background: rgba(24, 21, 48, 0.85);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 11.5px;
+            font-weight: 800;
+            padding: 7px 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-time-step:active {
+            border-color: var(--athletiq-purple);
+            color: #FFFFFF;
+        }
+        .btn-skip-rest {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.25) 0%, rgba(109, 40, 217, 0.25) 100%);
+            border-color: rgba(167, 139, 250, 0.4);
+            color: #FFFFFF;
+        }
+
+        /* ========================================================
+           2. ADAPTİF GEÇMİŞ GELİŞİM GRAFİĞİ (GRANGER ÇİFT ÇİZGİ)
+           ======================================================== */
+        .chart-card {
+            background: linear-gradient(165deg, var(--bg-card) 0%, rgba(24, 21, 48, 0.7) 100%);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xl);
+            padding: 16px;
+            margin-bottom: 14px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .chart-title {
+            font-size: 12px;
+            font-weight: 800;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .chart-legends {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .legend-dot {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10.5px;
+            font-weight: 800;
+        }
+        .dot-weight { color: var(--athletiq-amber); }
+        .dot-reps { color: var(--athletiq-cyan); }
+        .dot-weight::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--athletiq-amber); }
+        .dot-reps::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--athletiq-cyan); }
+
+        .svg-chart-container {
+            width: 100%;
+            height: 120px;
+        }
+
+        /* ========================================================
+           3. SIRADAKİ HAREKET VEYA TUR ÖNİZLEME KARTI
+           ======================================================== */
+        .next-card {
+            background: rgba(24, 21, 48, 0.6);
+            border: 1.5px solid rgba(56, 189, 248, 0.25);
+            border-radius: var(--radius-xl);
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .next-thumb-box {
+            width: 54px;
+            height: 54px;
+            border-radius: 12px;
+            background: #000000;
+            border: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .next-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .next-tag {
+            font-size: 10px;
+            font-weight: 900;
+            color: var(--athletiq-cyan);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .next-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: #FFFFFF;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 2px;
+        }
+        .next-meta {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-top: 1px;
+        }
+
+        /* ========================================================
+           ALT BÖLGE: SABİT BÜYÜK DOCK (DİNLENMEYİ BİTİR VE BAŞLA)
+           ======================================================== */
+        .bottom-rest-dock {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(14, 12, 28, 0.96);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border-subtle);
+            padding: 14px 18px 24px;
+            z-index: 40;
+            box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.6);
+        }
+        .btn-dock-ready {
+            width: 100%;
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 16px;
+            padding: 15px;
+            font-family: inherit;
+            font-size: 14.5px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-dock-ready:active {
+            transform: scale(0.98);
+        }
+
+        .toast-notify {
+            position: fixed;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%) translateY(50px);
+            background: #8B5CF6;
+            color: #FFFFFF;
+            font-size: 12.5px;
+            font-weight: 800;
+            padding: 10px 20px;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s;
+            z-index: 100;
+        }
+        .toast-notify.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone-wrapper">
+        <div class="status-bar">
+            <span>09:41</span>
+            <div class="dynamic-island"></div>
+            <span>5G 100%</span>
+        </div>
+
+        <!-- ÜST KOKPİT -->
+        <div class="live-hud-bar">
+            <div class="hud-left">
+                <span style="font-size:16px;">🛡️</span>
+                <div>
+                    <div class="hud-workout-name">Incline Dumbbell Press</div>
+                    <div class="hud-sub-metric">Set 1/3 Tamamlandı (22 kg × 10 tk)</div>
+                </div>
+            </div>
+            <span style="font-size:11px; font-weight:800; color:var(--text-muted);">TOPLAM: 15:05</span>
+        </div>
+
+        <!-- ORTA İÇERİK: DİNLENME + GRAFİK + SIRADAKİ HAREKET -->
+        <div class="view-content">
+
+            <!-- 1. GRANGER BÜYÜK DİNLENME HALKASI KARTI -->
+            <div class="rest-hero-card">
+                <div class="rest-badge-top">
+                    <span>✓</span>
+                    <span>1. SET KAYDEDİLDİ</span>
+                </div>
+
+                <div class="rest-circle-wrap">
+                    <svg viewBox="0 0 36 36">
+                        <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3"/>
+                        <path id="restProgressPath" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#8B5CF6" stroke-width="3.5" stroke-dasharray="100, 100"/>
+                    </svg>
+                    <div class="rest-center-info">
+                        <span class="rest-big-time" id="restBigTimer">00:45</span>
+                        <span class="rest-sub-lbl">DİNLENME</span>
+                    </div>
+                </div>
+
+                <div class="rest-stepper-row">
+                    <button class="btn-time-step" onclick="adjustRest(-15)">−15 sn</button>
+                    <button class="btn-time-step" onclick="adjustRest(30)">+30 sn</button>
+                    <button class="btn-time-step btn-skip-rest" onclick="skipRest()">⏩ Atla</button>
+                </div>
+            </div>
+
+            <!-- 2. GEÇMİŞ GELİŞİM & ADAPTİF FORM GRAFİĞİ -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <span>📈</span>
+                        <span>Bu Hareketteki Gelişimin</span>
+                    </div>
+                    <div class="chart-legends">
+                        <span class="legend-dot dot-weight">Kilo (kg)</span>
+                        <span class="legend-dot dot-reps">Tekrar</span>
+                    </div>
+                </div>
+
+                <!-- SVG Adaptif Çift Çizgi Grafiği -->
+                <div class="svg-chart-container">
+                    <svg width="100%" height="100%" viewBox="0 0 340 120" preserveAspectRatio="none">
+                        <!-- Izgara Çizgileri -->
+                        <line x1="10" y1="20" x2="330" y2="20" stroke="rgba(255,255,255,0.05)" stroke-dasharray="3,3"/>
+                        <line x1="10" y1="60" x2="330" y2="60" stroke="rgba(255,255,255,0.05)" stroke-dasharray="3,3"/>
+                        <line x1="10" y1="100" x2="330" y2="100" stroke="rgba(255,255,255,0.05)" stroke-dasharray="3,3"/>
+
+                        <!-- Kilo Çizgisi (Amber/Sarı) - 18kg -> 20kg -> 20kg -> 22kg -->
+                        <path d="M 30 90 L 110 70 L 190 70 L 270 40 L 310 40" fill="none" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round"/>
+                        <!-- Kilo Noktaları -->
+                        <circle cx="30" cy="90" r="3.5" fill="#F59E0B"/>
+                        <circle cx="110" cy="70" r="3.5" fill="#F59E0B"/>
+                        <circle cx="190" cy="70" r="3.5" fill="#F59E0B"/>
+                        <circle cx="270" cy="40" r="4.5" fill="#FFFFFF" stroke="#F59E0B" stroke-width="2"/>
+                        <text x="270" y="30" fill="#F59E0B" font-size="9" font-weight="800" text-anchor="middle">22 kg</text>
+
+                        <!-- Tekrar Çizgisi (Cyan/Mavi) - 8 -> 10 -> 10 -> 10 -->
+                        <path d="M 30 75 L 110 50 L 190 50 L 270 50 L 310 50" fill="none" stroke="#38BDF8" stroke-width="2" stroke-dasharray="4,3" stroke-linecap="round"/>
+                        <circle cx="270" cy="50" r="3.5" fill="#38BDF8"/>
+
+                        <!-- X Ekseni Etiketleri -->
+                        <text x="30" y="115" fill="#64748B" font-size="9" font-weight="700" text-anchor="middle">3 Hf Önce</text>
+                        <text x="110" y="115" fill="#64748B" font-size="9" font-weight="700" text-anchor="middle">2 Hf Önce</text>
+                        <text x="190" y="115" fill="#64748B" font-size="9" font-weight="700" text-anchor="middle">Geçen Hf</text>
+                        <text x="270" y="115" fill="#10B981" font-size="9" font-weight="900" text-anchor="middle">BUGÜN</text>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- 3. SIRADAKİ ADIM ÖNİZLEMESİ (SÜPERSET EŞİ VEYA 2. SET) -->
+            <div class="next-card">
+                <div class="next-thumb-box">🏋️</div>
+                <div class="next-info">
+                    <div class="next-tag">⚡ SIRADAKİ ADIM: SÜPERSET (A2)</div>
+                    <div class="next-title">Dumbbell Lateral Raise</div>
+                    <div class="next-meta">Yan Omuz • Hedef: 10 kg × 12 Tekrar</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================================
+           ALT DOCK: DİNLENMEYİ BİTİR VE SIRADAKİNE BAŞLA
+           ======================================================== -->
+        <div class="bottom-rest-dock">
+            <button class="btn-dock-ready" onclick="showToast('Dinlenme Tamamlandı! 2. Sete Geçildi.')">
+                <span>▶️ Dinlenmeyi Bitir & Sıradakine Başla</span>
+            </button>
+        </div>
+
+    </div>
+
+    <div id="toastNotify" class="toast-notify">İşlem Yapıldı!</div>
+
+    <script>
+        let totalRest = 45;
+        let remaining = 45;
+        let timer = null;
+
+        function showToast(text) {
+            const toast = document.getElementById('toastNotify');
+            toast.textContent = text;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function runTimer() {
+            timer = setInterval(() => {
+                remaining--;
+                if (remaining <= 0) {
+                    clearInterval(timer);
+                    remaining = 0;
+                    showToast('⏰ Dinlenme Bitti! Sıradaki Sete Başla.');
+                }
+                updateUi();
+            }, 1000);
+        }
+
+        function updateUi() {
+            const m = Math.floor(remaining / 60);
+            const s = remaining % 60;
+            document.getElementById('restBigTimer').textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+            const pct = Math.max(0, (remaining / totalRest) * 100);
+            document.getElementById('restProgressPath').setAttribute('stroke-dasharray', `${pct}, 100`);
+        }
+
+        function adjustRest(delta) {
+            remaining = Math.max(5, remaining + delta);
+            totalRest = Math.max(totalRest, remaining);
+            updateUi();
+            showToast(`${delta > 0 ? '+' : ''}${delta} sn güncellendi`);
+        }
+
+        function skipRest() {
+            clearInterval(timer);
+            remaining = 0;
+            updateUi();
+            showToast('Dinlenme atlandı, sıradaki sete hazırsın!');
+        }
+
+        runTimer();
+    </script>
+</body>
+</html>

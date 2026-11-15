@@ -39,10 +39,20 @@ window.CELIK_CHIEF_ROOMS = Object.freeze({
         }
 
         try {
-            if ('serviceWorker' in navigator && navigator.serviceWorker) {
+            const isLocalHost = typeof window !== 'undefined' && window.location && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+            if (isLocalHost && 'serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(regs => {
+                    for (const r of regs) r.unregister();
+                }).catch(() => {});
+                if ('caches' in window) {
+                    caches.keys().then(keys => {
+                        keys.forEach(k => caches.delete(k));
+                    }).catch(() => {});
+                }
+            } else if ('serviceWorker' in navigator && navigator.serviceWorker) {
                 window.addEventListener('load', () => {
                     try {
-                        navigator.serviceWorker.register('./sw.js?v=293')
+                        navigator.serviceWorker.register('./sw.js?v=297')
                             .then(reg => {
                                 console.log('SW scope:', reg.scope);
                                 if (reg.update) reg.update();

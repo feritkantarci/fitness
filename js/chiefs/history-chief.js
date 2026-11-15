@@ -688,6 +688,14 @@
             logs[targetIdx] = updatedLog;
             setWorkoutLogs(logs);
 
+            if (
+                (updatedLog.garminActivityId || String(updatedLog.id || '').startsWith('garmin_')) &&
+                window.GarminTredictChief &&
+                typeof window.GarminTredictChief.propagateWorkoutLogTitleToWatch === 'function'
+            ) {
+                try { window.GarminTredictChief.propagateWorkoutLogTitleToWatch(updatedLog); } catch {}
+            }
+
             const affectedExercises = [...(st.originalExercises || []), ...(updatedLog.exercises || [])];
             closeEditWorkoutLogModal();
             refreshViewsAfterHistoryMutation(affectedExercises);
@@ -710,6 +718,970 @@
         window.removeEditLogSet = removeEditLogSet;
         window.removeEditLogExercise = removeEditLogExercise;
         window.syncLastWeightsCacheFromHistory = syncLastWeightsCacheFromHistory;
+
+        // ==================== WORKOUT DETAILS MODAL (CAROUSEL / SWIPEABLE & LIST MODE) ====================
+        let workoutDetailsModalState = {
+            logId: null,
+            exercises: [],
+            currentIndex: 0,
+            viewMode: 'card',
+            isEditingCurrentCard: false,
+            cardEditSets: [],
+            isEditingSubModal: false,
+            subModalEditIndex: null,
+            subModalEditSets: []
+        };
+
+        function toggleWorkoutDetailsViewMode() {
+            if (!workoutDetailsModalState) return;
+            const newMode = workoutDetailsModalState.viewMode === 'card' ? 'list' : 'card';
+            workoutDetailsModalState.viewMode = newMode;
+            applyWorkoutDetailsViewMode();
+        }
+
+        function applyWorkoutDetailsViewMode() {
+            const cardNav = document.getElementById('workoutDetailsCarouselNav');
+            const cardViewport = document.getElementById('workoutDetailsCardViewport');
+            const listView = document.getElementById('workoutDetailsSimpleListView');
+            const iconEl = document.getElementById('workoutDetailsViewModeIcon');
+            const textEl = document.getElementById('workoutDetailsViewModeText');
+
+            if (!workoutDetailsModalState) return;
+            const isList = workoutDetailsModalState.viewMode === 'list';
+
+            if (cardNav) cardNav.style.display = isList ? 'none' : 'flex';
+            if (cardViewport) cardViewport.style.display = isList ? 'none' : 'block';
+            if (listView) listView.style.display = isList ? 'flex' : 'none';
+
+            if (iconEl) iconEl.textContent = isList ? '🗂️' : '📋';
+            if (textEl) textEl.textContent = isList ? 'Kart' : 'Liste';
+
+            if (isList) {
+                renderWorkoutDetailsSimpleList();
+            } else {
+                renderWorkoutDetailsCurrentCard(0);
+            }
+        }
+
+        function renderWorkoutDetailsSimpleList() {
+            const listEl = document.getElementById('workoutDetailsSimpleListView');
+            if (!listEl || !workoutDetailsModalState) return;
+            const { exercises } = workoutDetailsModalState;
+
+            if (!exercises || exercises.length === 0) {
+                listEl.innerHTML = `<div style="text-align:center; padding:16px; color:#64748B; font-size:13px;">Kayıtlı hareket bulunamadı.</div>`;
+                return;
+            }
+
+            listEl.innerHTML = exercises.map((ex, idx) => {
+                const cleanExTitle = String(ex.name || '').replace(/\s*\([^)]*\)/g, '').trim() || ex.name;
+                const setsArr = Array.isArray(ex.sets) ? ex.sets : [];
+                const completedSetsCount = setsArr.filter(s => s && s.completed).length || Number(ex.completedSets || setsArr.length || 1);
+
+                return `
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#FFFFFF; border:1px solid #E2E8F0; border-radius:10px; padding:10px 12px; box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                        <div style="min-width:0; flex:1; display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:11px; font-weight:800; color:#64748B; background:#F1F5F9; border-radius:6px; padding:2px 7px;">
+                                ${idx + 1}
+                            </span>
+                            <span style="font-size:13px; font-weight:800; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                ${escapeHTML(cleanExTitle)}
+                            </span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                            <span style="font-size:11px; font-weight:700; color:#64748B;">
+                                ${completedSetsCount} Set
+                            </span>
+                            <button type="button" onclick="window.openWorkoutExerciseDetailSubModal(${idx})" style="height:28px; width:28px; background:#E0F2FE; border:1px solid #BAE6FD; color:#0369A1; border-radius:50%; font-size:12px; font-weight:900; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;" title="Set Detaylarını Gör">
+                                ℹ️
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleWorkoutDetailsMuscles() {
+            const musclesEl = document.getElementById('workoutDetailsMuscles');
+            const arrowEl = document.getElementById('workoutDetailsMusclesArrow');
+            if (!musclesEl) return;
+            const isOpen = musclesEl.style.display === 'flex';
+            musclesEl.style.display = isOpen ? 'none' : 'flex';
+            if (arrowEl) arrowEl.textContent = isOpen ? '▼' : '▲';
+        }
+
+        function updateWorkoutDetailsModalStats(l) {
+            const statsEl = document.getElementById('workoutDetailsStats');
+            if (statsEl) {
+                const totalVol = (l.totalVolumeKg > 0) ? `${Math.round(l.totalVolumeKg).toLocaleString('tr-TR')} kg` : '0 kg';
+                const durSecs = Number(l.durationSecs || 0);
+                const durMin = Number(l.duration || 0);
+                const durStr = durSecs > 0 ? formatSecondsToHMS(durSecs) : (durMin > 0 ? `${durMin}:00` : '00:00');
+                const setsCount = l.totalSetsCompleted || l.completedSetsCount || (l.exercises ? l.exercises.reduce((a, b) => a + (b.completedSets || (b.sets ? b.sets.filter(s => s.completed).length : 0)), 0) : 0);
+                const repsCount = l.totalRepsCompleted || l.completedRepsCount || (l.exercises ? l.exercises.reduce((a, b) => a + (b.sets ? b.sets.filter(s => s.completed).reduce((rA, rB) => rA + (Number(rB.reps) || 0), 0) : 0), 0) : 0);
+                const setsReps = repsCount > 0 ? `${setsCount} Set • ${repsCount} Tk` : `${setsCount} Set`;
+
+                statsEl.innerHTML = `
+                    <div>
+                        <div style="font-size:10.5px; font-weight:700; color:#64748B;">Toplam Tonaj</div>
+                        <div style="font-size:13.5px; font-weight:900; color:#B45309; margin-top:2px;">🏋️ ${totalVol}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:10.5px; font-weight:700; color:#64748B;">Set / Tekrar</div>
+                        <div style="font-size:13.5px; font-weight:900; color:#0F172A; margin-top:2px;">🎯 ${setsReps}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:10.5px; font-weight:700; color:#64748B;">Toplam Süre</div>
+                        <div style="font-size:13.5px; font-weight:900; color:#0F172A; margin-top:2px;">⏱️ ${durStr}</div>
+                    </div>
+                `;
+            }
+
+            const musclesContainer = document.getElementById('workoutDetailsMusclesContainer');
+            const musclesEl = document.getElementById('workoutDetailsMuscles');
+            const countTextEl = document.getElementById('workoutDetailsMusclesCountText');
+            if (musclesEl && musclesContainer) {
+                const mList = Array.isArray(l.muscleGroups) ? l.muscleGroups : [];
+                const shortMuscles = [];
+                mList.forEach(rawM => {
+                    let s = String(rawM || '').replace(/[()]/g, '').trim();
+                    if (!s) return;
+                    let tag = s;
+                    if (/kanat|sırt|kürek|trapez/i.test(s)) tag = 'Sırt';
+                    else if (/göğüs/i.test(s)) tag = 'Göğüs';
+                    else if (/omuz/i.test(s)) tag = 'Omuz';
+                    else if (/ön bacak|arka bacak|bacak|kalf|baldır|diz/i.test(s)) tag = 'Bacak';
+                    else if (/kalça/i.test(s)) tag = 'Kalça';
+                    else if (/triceps|arka kol/i.test(s)) tag = 'Triceps';
+                    else if (/biceps|ön kol|pazı/i.test(s)) tag = 'Biceps';
+                    else if (/karın|core|korse/i.test(s)) tag = 'Karın';
+                    if (tag && !shortMuscles.includes(tag)) shortMuscles.push(tag);
+                });
+
+                if (shortMuscles.length > 0) {
+                    musclesContainer.style.display = 'block';
+                    if (countTextEl) countTextEl.textContent = `💪 ${shortMuscles.length} Kas`;
+                    musclesEl.innerHTML = shortMuscles.map(m => `
+                        <span style="background:#F0FDF4; border:1px solid #BBF7D0; color:#15803D; font-size:11px; font-weight:700; padding:2px 7px; border-radius:6px;">
+                            ${escapeHTML(m)}
+                        </span>
+                    `).join('');
+                } else {
+                    musclesContainer.style.display = 'none';
+                }
+            }
+        }
+
+        // ==================== INLINE CARD EXERCISE EDIT ====================
+        function startDetailCardExerciseEdit() {
+            if (!workoutDetailsModalState || !workoutDetailsModalState.exercises) return;
+            const ex = workoutDetailsModalState.exercises[workoutDetailsModalState.currentIndex];
+            if (!ex) return;
+            const origSets = (Array.isArray(ex.sets) && ex.sets.length > 0)
+                ? ex.sets
+                : [{ setNo: 1, weight: Number(ex.weight || 0), reps: Number(ex.reps || 10), completed: true }];
+            workoutDetailsModalState.cardEditSets = JSON.parse(JSON.stringify(origSets));
+            workoutDetailsModalState.isEditingCurrentCard = true;
+            renderWorkoutDetailsCurrentCard(0);
+        }
+
+        function cancelDetailCardExerciseEdit() {
+            if (!workoutDetailsModalState) return;
+            workoutDetailsModalState.isEditingCurrentCard = false;
+            workoutDetailsModalState.cardEditSets = [];
+            renderWorkoutDetailsCurrentCard(0);
+        }
+
+        function syncCardEditInputsToState() {
+            if (!workoutDetailsModalState || !workoutDetailsModalState.cardEditSets) return;
+            workoutDetailsModalState.cardEditSets.forEach((st, idx) => {
+                const wInput = document.getElementById(`cardEditWeight_${idx}`);
+                const rInput = document.getElementById(`cardEditReps_${idx}`);
+                if (wInput) st.weight = Math.max(0, parseFloat(wInput.value) || 0);
+                if (rInput) st.reps = Math.max(0, parseInt(rInput.value, 10) || 0);
+            });
+        }
+
+        function addCardEditSet() {
+            if (!workoutDetailsModalState || !workoutDetailsModalState.cardEditSets) return;
+            syncCardEditInputsToState();
+            const sets = workoutDetailsModalState.cardEditSets;
+            const lastSet = sets[sets.length - 1] || { weight: 10, reps: 10 };
+            sets.push({
+                setNo: sets.length + 1,
+                weight: Number(lastSet.weight || 0),
+                reps: Number(lastSet.reps || 10),
+                completed: true
+            });
+            renderWorkoutDetailsCurrentCard(0);
+        }
+
+        function removeCardEditSet(sIdx) {
+            if (!workoutDetailsModalState || !workoutDetailsModalState.cardEditSets) return;
+            syncCardEditInputsToState();
+            const sets = workoutDetailsModalState.cardEditSets;
+            if (sets.length <= 1) {
+                alert('En az 1 set bulunmalıdır.');
+                return;
+            }
+            sets.splice(sIdx, 1);
+            sets.forEach((st, i) => { st.setNo = i + 1; });
+            renderWorkoutDetailsCurrentCard(0);
+        }
+
+        function toggleCardEditSetCompleted(sIdx) {
+            if (!workoutDetailsModalState || !workoutDetailsModalState.cardEditSets) return;
+            syncCardEditInputsToState();
+            const st = workoutDetailsModalState.cardEditSets[sIdx];
+            if (st) {
+                st.completed = !st.completed;
+                renderWorkoutDetailsCurrentCard(0);
+            }
+        }
+
+        function saveDetailCardExerciseEdit() {
+            if (!workoutDetailsModalState || !workoutDetailsModalState.logId) return;
+            syncCardEditInputsToState();
+            const currentIdx = workoutDetailsModalState.currentIndex;
+            const ex = workoutDetailsModalState.exercises[currentIdx];
+            if (!ex) return;
+
+            const sets = workoutDetailsModalState.cardEditSets;
+            if (!sets || sets.length === 0) {
+                alert('En az 1 set bulunmalıdır.');
+                return;
+            }
+
+            ex.sets = JSON.parse(JSON.stringify(sets));
+
+            const logs = getWorkoutLogs();
+            const targetLogIdx = logs.findIndex(l => l && String(l.id) === String(workoutDetailsModalState.logId));
+            if (targetLogIdx === -1) {
+                alert('Kayıt bulunamadı.');
+                return;
+            }
+
+            const draft = { exercises: workoutDetailsModalState.exercises };
+            const stats = computeEditLogDraftStats(draft);
+            const targetLog = logs[targetLogIdx];
+
+            const updatedLog = Object.assign({}, targetLog, {
+                exercises: stats.exercises,
+                totalVolumeKg: stats.totalVolumeKg,
+                totalSetsCompleted: stats.totalSetsCompleted,
+                totalRepsCompleted: stats.totalRepsCompleted,
+                totalIsometricSecsCompleted: stats.totalIsometricSecsCompleted,
+                muscleGroups: stats.muscleGroups,
+                userEditedAt: Date.now()
+            });
+
+            logs[targetLogIdx] = updatedLog;
+            setWorkoutLogs(logs);
+
+            workoutDetailsModalState.exercises = stats.exercises;
+            workoutDetailsModalState.isEditingCurrentCard = false;
+            workoutDetailsModalState.cardEditSets = [];
+
+            updateWorkoutDetailsModalStats(updatedLog);
+            renderWorkoutDetailsCurrentCard(0);
+            refreshViewsAfterHistoryMutation([ex]);
+        }
+
+        // ==================== INLINE SUB-MODAL EXERCISE EDIT ====================
+        function startSubModalExerciseEdit(idx) {
+            if (!workoutDetailsModalState || !workoutDetailsModalState.exercises) return;
+            const targetIdx = (typeof idx === 'number') ? idx : (workoutDetailsModalState.selectedSubModalIdx ?? 0);
+            const ex = workoutDetailsModalState.exercises[targetIdx];
+            if (!ex) return;
+            const origSets = (Array.isArray(ex.sets) && ex.sets.length > 0)
+                ? ex.sets
+                : [{ setNo: 1, weight: Number(ex.weight || 0), reps: Number(ex.reps || 10), completed: true }];
+            workoutDetailsModalState.isEditingSubModal = true;
+            workoutDetailsModalState.subModalEditIndex = targetIdx;
+            workoutDetailsModalState.subModalEditSets = JSON.parse(JSON.stringify(origSets));
+            renderSubModalExerciseEditView();
+        }
+
+        function cancelSubModalExerciseEdit() {
+            if (!workoutDetailsModalState) return;
+            workoutDetailsModalState.isEditingSubModal = false;
+            workoutDetailsModalState.subModalEditSets = [];
+            openWorkoutExerciseDetailSubModal(workoutDetailsModalState.subModalEditIndex);
+        }
+
+        function syncSubModalEditInputsToState() {
+            if (!workoutDetailsModalState || !workoutDetailsModalState.subModalEditSets) return;
+            workoutDetailsModalState.subModalEditSets.forEach((st, idx) => {
+                const wInput = document.getElementById(`subModalEditWeight_${idx}`);
+                const rInput = document.getElementById(`subModalEditReps_${idx}`);
+                if (wInput) st.weight = Math.max(0, parseFloat(wInput.value) || 0);
+                if (rInput) st.reps = Math.max(0, parseInt(rInput.value, 10) || 0);
+            });
+        }
+
+        function addSubModalEditSet() {
+            if (!workoutDetailsModalState || !workoutDetailsModalState.subModalEditSets) return;
+            syncSubModalEditInputsToState();
+            const sets = workoutDetailsModalState.subModalEditSets;
+            const lastSet = sets[sets.length - 1] || { weight: 10, reps: 10 };
+            sets.push({
+                setNo: sets.length + 1,
+                weight: Number(lastSet.weight || 0),
+                reps: Number(lastSet.reps || 10),
+                completed: true
+            });
+            renderSubModalExerciseEditView();
+        }
+
+        function removeSubModalEditSet(sIdx) {
+            if (!workoutDetailsModalState || !workoutDetailsModalState.subModalEditSets) return;
+            syncSubModalEditInputsToState();
+            const sets = workoutDetailsModalState.subModalEditSets;
+            if (sets.length <= 1) {
+                alert('En az 1 set bulunmalıdır.');
+                return;
+            }
+            sets.splice(sIdx, 1);
+            sets.forEach((st, i) => { st.setNo = i + 1; });
+            renderSubModalExerciseEditView();
+        }
+
+        function toggleSubModalEditSetCompleted(sIdx) {
+            if (!workoutDetailsModalState || !workoutDetailsModalState.subModalEditSets) return;
+            syncSubModalEditInputsToState();
+            const st = workoutDetailsModalState.subModalEditSets[sIdx];
+            if (st) {
+                st.completed = !st.completed;
+                renderSubModalExerciseEditView();
+            }
+        }
+
+        function saveSubModalExerciseEdit() {
+            if (!workoutDetailsModalState || !workoutDetailsModalState.logId) return;
+            syncSubModalEditInputsToState();
+            const targetIdx = workoutDetailsModalState.subModalEditIndex;
+            const ex = workoutDetailsModalState.exercises[targetIdx];
+            if (!ex) return;
+
+            const sets = workoutDetailsModalState.subModalEditSets;
+            if (!sets || sets.length === 0) {
+                alert('En az 1 set bulunmalıdır.');
+                return;
+            }
+
+            ex.sets = JSON.parse(JSON.stringify(sets));
+
+            const logs = getWorkoutLogs();
+            const targetLogIdx = logs.findIndex(l => l && String(l.id) === String(workoutDetailsModalState.logId));
+            if (targetLogIdx === -1) {
+                alert('Kayıt bulunamadı.');
+                return;
+            }
+
+            const draft = { exercises: workoutDetailsModalState.exercises };
+            const stats = computeEditLogDraftStats(draft);
+            const targetLog = logs[targetLogIdx];
+
+            const updatedLog = Object.assign({}, targetLog, {
+                exercises: stats.exercises,
+                totalVolumeKg: stats.totalVolumeKg,
+                totalSetsCompleted: stats.totalSetsCompleted,
+                totalRepsCompleted: stats.totalRepsCompleted,
+                totalIsometricSecsCompleted: stats.totalIsometricSecsCompleted,
+                muscleGroups: stats.muscleGroups,
+                userEditedAt: Date.now()
+            });
+
+            logs[targetLogIdx] = updatedLog;
+            setWorkoutLogs(logs);
+
+            workoutDetailsModalState.exercises = stats.exercises;
+            workoutDetailsModalState.isEditingSubModal = false;
+            workoutDetailsModalState.subModalEditSets = [];
+
+            updateWorkoutDetailsModalStats(updatedLog);
+            openWorkoutExerciseDetailSubModal(targetIdx);
+            renderWorkoutDetailsSimpleList();
+            refreshViewsAfterHistoryMutation([ex]);
+        }
+
+        function renderSubModalExerciseEditView() {
+            const bodyEl = document.getElementById('subModalExerciseBody');
+            const footerEl = document.getElementById('subModalExerciseFooter');
+            const targetIdx = workoutDetailsModalState.subModalEditIndex;
+            const ex = workoutDetailsModalState.exercises[targetIdx];
+            if (!bodyEl || !ex) return;
+
+            const isCardio = (typeof isExerciseCardioMinutes === 'function') ? isExerciseCardioMinutes(ex) : Boolean(ex.isCardio);
+            const isTime = (typeof isExerciseTimeBased === 'function') ? isExerciseTimeBased(ex) : false;
+            const editSets = workoutDetailsModalState.subModalEditSets || [];
+
+            if (footerEl) footerEl.style.display = 'none';
+
+            bodyEl.innerHTML = `
+                <div style="font-size:11px; font-weight:800; color:#0284C7; text-transform:uppercase; margin-bottom:8px;">
+                    ✏️ Setleri ve Ağırlıkları Düzenle
+                </div>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                    ${editSets.map((st, sIdx) => `
+                        <div style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border:1px solid #CBD5E1; border-radius:8px; padding:6px 10px; gap:6px;">
+                            <span style="font-size:11px; font-weight:800; color:#0F172A; background:#E2E8F0; border-radius:4px; padding:3px 6px;">
+                                S${st.setNo || sIdx + 1}
+                            </span>
+                            <div style="display:flex; align-items:center; gap:3px;">
+                                <input type="number" id="subModalEditWeight_${sIdx}" step="0.5" min="0" value="${st.weight ?? 0}" style="width:58px; height:32px; text-align:center; font-weight:800; border:1px solid #CBD5E1; border-radius:6px; font-size:13px; color:#0F172A; background:#FFFFFF;">
+                                <span style="font-size:11px; font-weight:700; color:#64748B;">kg</span>
+                            </div>
+                            <span style="color:#94A3B8; font-weight:700;">×</span>
+                            <div style="display:flex; align-items:center; gap:3px;">
+                                <input type="number" id="subModalEditReps_${sIdx}" step="1" min="0" value="${st.reps ?? 10}" style="width:48px; height:32px; text-align:center; font-weight:800; border:1px solid #CBD5E1; border-radius:6px; font-size:13px; color:#0F172A; background:#FFFFFF;">
+                                <span style="font-size:11px; font-weight:700; color:#64748B;">${isCardio ? 'dk' : (isTime ? 'sn' : 'tk')}</span>
+                            </div>
+                            <button type="button" onclick="window.toggleSubModalEditSetCompleted(${sIdx})" style="padding:4px 7px; border-radius:6px; font-size:11px; font-weight:800; border:1px solid ${st.completed ? '#BBF7D0' : '#CBD5E1'}; background:${st.completed ? '#F0FDF4' : '#F1F5F9'}; color:${st.completed ? '#15803D' : '#64748B'}; cursor:pointer;">
+                                ${st.completed ? '✓' : '—'}
+                            </button>
+                            <button type="button" onclick="window.removeSubModalEditSet(${sIdx})" style="background:none; border:none; color:#DC2626; font-size:13px; cursor:pointer; padding:2px 4px;" title="Seti Sil">
+                                🗑️
+                            </button>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <button type="button" onclick="window.addSubModalEditSet()" style="width:100%; margin-top:8px; padding:7px; background:#F8FAFC; border:1px dashed #CBD5E1; color:#0284C7; font-size:11.5px; font-weight:800; border-radius:8px; cursor:pointer;">
+                    ➕ Set Ekle
+                </button>
+
+                <div style="display:flex; gap:8px; margin-top:14px; padding-top:10px; border-top:1px solid #E2E8F0;">
+                    <button type="button" onclick="window.saveSubModalExerciseEdit()" style="flex:1; background:#0F172A; border:none; color:#FFFFFF; border-radius:10px; padding:10px; font-size:13px; font-weight:800; cursor:pointer;">
+                        💾 Kaydet
+                    </button>
+                    <button type="button" onclick="window.cancelSubModalExerciseEdit()" style="flex:1; background:#F1F5F9; border:1px solid #CBD5E1; color:#334155; border-radius:10px; padding:10px; font-size:13px; font-weight:800; cursor:pointer;">
+                        ✕ İptal
+                    </button>
+                </div>
+            `;
+        }
+
+        function openWorkoutExerciseDetailSubModal(idx) {
+            if (!workoutDetailsModalState || !workoutDetailsModalState.exercises) return;
+            workoutDetailsModalState.selectedSubModalIdx = idx;
+            workoutDetailsModalState.isEditingSubModal = false;
+            const ex = workoutDetailsModalState.exercises[idx];
+            if (!ex) return;
+
+            const modal = document.getElementById('workoutExerciseDetailSubModal');
+            const modalBox = document.getElementById('workoutExerciseDetailSubModalBox');
+            const catEl = document.getElementById('subModalExerciseCategory');
+            const titleEl = document.getElementById('subModalExerciseTitle');
+            const bodyEl = document.getElementById('subModalExerciseBody');
+            const footerEl = document.getElementById('subModalExerciseFooter');
+            const subModalEditBtn = document.getElementById('subModalExerciseEditBtn');
+            if (footerEl) footerEl.style.display = 'flex';
+            if (subModalEditBtn) {
+                subModalEditBtn.onclick = function () {
+                    window.startSubModalExerciseEdit(idx);
+                };
+            }
+            if (!modal || !bodyEl) return;
+
+            const isBw = (typeof isExerciseBodyweight === 'function') ? isExerciseBodyweight(ex) : Boolean(ex.isBodyweight);
+            const isCardio = (typeof isExerciseCardioMinutes === 'function') ? isExerciseCardioMinutes(ex) : Boolean(ex.isCardio);
+            const safeSetsArr = Array.isArray(ex.sets)
+                ? ex.sets
+                : Array.from({ length: Math.max(1, Number(ex.sets || ex.completedSets || 1)) }, (_, sIdx) => ({
+                    setNo: sIdx + 1,
+                    weight: Number(ex.weight || 0),
+                    reps: Number(ex.reps || 10),
+                    completed: true
+                }));
+
+            let exVol = ex.exerciseVolume || 0;
+            if (exVol === 0 && safeSetsArr.length > 0) {
+                safeSetsArr.forEach(st => {
+                    if (st.completed || parseInt(st.reps, 10) > 0) {
+                        exVol += (typeof calculateExerciseSetVolume === 'function')
+                            ? calculateExerciseSetVolume(ex, st.weight, st.reps)
+                            : ((Number(st.weight) || 0) * (Number(st.reps) || 0));
+                    }
+                });
+            }
+            const volText = exVol > 0 ? `${Math.round(exVol).toLocaleString('tr-TR')} kg` : '';
+            const cleanExTitle = String(ex.name || '').replace(/\s*\([^)]*\)/g, '').trim() || ex.name;
+
+            if (catEl) {
+                catEl.textContent = `${idx + 1}. Egzersiz ${ex.muscle ? `• ${ex.muscle}` : ''}`;
+            }
+            if (titleEl) {
+                titleEl.textContent = cleanExTitle;
+            }
+
+            bodyEl.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid #F1F5F9;">
+                    <div style="display:flex; gap:4px; flex-wrap:wrap;">
+                        ${ex.equipment ? `<span style="font-size:10.5px; font-weight:700; background:#F1F5F9; border:1px solid #CBD5E1; color:#334155; padding:2px 6px; border-radius:4px; text-transform:capitalize;">🔧 ${escapeHTML(ex.equipment)}</span>` : ''}
+                    </div>
+                    ${volText ? `<span style="font-size:11.5px; font-weight:800; color:#B45309; background:#FEF3C7; border:1px solid #FCD34D; border-radius:6px; padding:2px 7px;">🏋️ ${volText}</span>` : ''}
+                </div>
+
+                <div style="font-size:12px; font-weight:800; color:#0F172A; margin-bottom:6px;">Tamamlanan Setler:</div>
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                    ${safeSetsArr.map((st, sIdx) => {
+                        const wDisp = (typeof formatSetWeightDisplay === 'function') ? formatSetWeightDisplay(isBw, st.weight) : (Number(st.weight) > 0 ? `${st.weight} kg` : (isBw ? 'Vücut Ağ.' : '0 kg'));
+                        const rDisp = (typeof formatSetMetricDisplay === 'function') ? formatSetMetricDisplay(ex, st.reps) : `${st.reps} tk`;
+                        return st.completed ? `
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:8px 12px;">
+                                <span style="font-size:12px; font-weight:800; color:#0F172A;">Set ${st.setNo || sIdx + 1}</span>
+                                <span style="background:#F0FDF4; border:1px solid #BBF7D0; color:#15803D; font-size:12px; font-weight:800; padding:2px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;">
+                                    ${isCardio ? `${rDisp} ✓` : `${wDisp} × ${rDisp} ✓`}
+                                </span>
+                            </div>
+                        ` : `
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border:1px dashed #CBD5E1; border-radius:8px; padding:8px 12px; opacity:0.6;">
+                                <span style="font-size:12px; font-weight:800; color:#94A3B8;">Set ${st.setNo || sIdx + 1}</span>
+                                <span style="font-size:11.5px; font-weight:600; color:#94A3B8; text-decoration:line-through;">Atlandı</span>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+
+            modal.classList.add('active');
+            modal.style.display = 'flex';
+            if (modalBox) modalBox.scrollTop = 0;
+        }
+
+        function closeWorkoutExerciseDetailSubModal() {
+            const modal = document.getElementById('workoutExerciseDetailSubModal');
+            if (modal) {
+                modal.classList.remove('active');
+                modal.style.display = 'none';
+            }
+        }
+
+        function renderWorkoutDetailsCurrentCard(direction = 0) {
+            if (!workoutDetailsModalState) return;
+            const { exercises, currentIndex } = workoutDetailsModalState;
+            const counterEl = document.getElementById('workoutDetailsCarouselCounter');
+            const dotsEl = document.getElementById('workoutDetailsCarouselDots');
+            const prevBtn = document.getElementById('workoutDetailsPrevBtn');
+            const nextBtn = document.getElementById('workoutDetailsNextBtn');
+            const cardEl = document.getElementById('workoutDetailsActiveCard');
+
+            if (!exercises || exercises.length === 0) {
+                if (counterEl) counterEl.textContent = 'Hareket Yok';
+                if (cardEl) cardEl.innerHTML = `<div style="text-align:center; padding:20px; color:#64748B; font-size:13px;">Kayıtlı hareket bulunamadı.</div>`;
+                return;
+            }
+
+            if (counterEl) {
+                counterEl.textContent = `Hareket ${currentIndex + 1} / ${exercises.length}`;
+            }
+
+            if (dotsEl) {
+                if (exercises.length <= 15) {
+                    dotsEl.innerHTML = exercises.map((_, i) => `
+                        <span onclick="window.jumpToWorkoutDetailsExercise(${i})" style="cursor:pointer; height:6px; width:${i === currentIndex ? '18px' : '6px'}; background:${i === currentIndex ? '#0F172A' : '#CBD5E1'}; border-radius:3px; transition:all 0.2s ease;"></span>
+                    `).join('');
+                } else {
+                    dotsEl.innerHTML = '';
+                }
+            }
+
+            if (prevBtn) {
+                prevBtn.disabled = currentIndex === 0;
+                prevBtn.style.opacity = currentIndex === 0 ? '0.35' : '1';
+                prevBtn.style.cursor = currentIndex === 0 ? 'not-allowed' : 'pointer';
+            }
+            if (nextBtn) {
+                nextBtn.disabled = currentIndex === exercises.length - 1;
+                nextBtn.style.opacity = currentIndex === exercises.length - 1 ? '0.35' : '1';
+                nextBtn.style.cursor = currentIndex === exercises.length - 1 ? 'not-allowed' : 'pointer';
+            }
+
+            const ex = exercises[currentIndex];
+            if (!ex || !cardEl) return;
+
+            const isBw = (typeof isExerciseBodyweight === 'function') ? isExerciseBodyweight(ex) : Boolean(ex.isBodyweight);
+            const isCardio = (typeof isExerciseCardioMinutes === 'function') ? isExerciseCardioMinutes(ex) : Boolean(ex.isCardio);
+            const safeSetsArr = Array.isArray(ex.sets)
+                ? ex.sets
+                : Array.from({ length: Math.max(1, Number(ex.sets || ex.completedSets || 1)) }, (_, sIdx) => ({
+                    setNo: sIdx + 1,
+                    weight: Number(ex.weight || 0),
+                    reps: Number(ex.reps || 10),
+                    completed: true
+                }));
+
+            let exVol = ex.exerciseVolume || 0;
+            if (exVol === 0 && safeSetsArr.length > 0) {
+                safeSetsArr.forEach(st => {
+                    if (st.completed || parseInt(st.reps, 10) > 0) {
+                        exVol += (typeof calculateExerciseSetVolume === 'function')
+                            ? calculateExerciseSetVolume(ex, st.weight, st.reps)
+                            : ((Number(st.weight) || 0) * (Number(st.reps) || 0));
+                    }
+                });
+            }
+            const volText = exVol > 0 ? `${Math.round(exVol).toLocaleString('tr-TR')} kg` : '';
+            const cleanExTitle = String(ex.name || '').replace(/\s*\([^)]*\)/g, '').trim() || ex.name;
+            const completedSetsCount = safeSetsArr.filter(s => s.completed).length;
+
+            if (workoutDetailsModalState.isEditingCurrentCard) {
+                const isTime = (typeof isExerciseTimeBased === 'function') ? isExerciseTimeBased(ex) : false;
+                const editSets = workoutDetailsModalState.cardEditSets || [];
+                cardEl.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid #E2E8F0;">
+                        <div>
+                            <span style="font-size:11px; font-weight:800; color:#0284C7; text-transform:uppercase; letter-spacing:0.5px;">
+                                ✏️ SETLERİ DÜZENLE
+                            </span>
+                            <h4 style="font-size:14.5px; font-weight:900; color:#0F172A; margin:2px 0 0 0; line-height:1.25;">
+                                ${escapeHTML(cleanExTitle)}
+                            </h4>
+                        </div>
+                        <span style="font-size:11px; font-weight:700; color:#64748B;">
+                            ${editSets.length} Set
+                        </span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        ${editSets.map((st, sIdx) => `
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border:1px solid #CBD5E1; border-radius:8px; padding:6px 10px; gap:6px;">
+                                <span style="font-size:11px; font-weight:800; color:#0F172A; background:#E2E8F0; border-radius:4px; padding:3px 6px;">
+                                    S${st.setNo || sIdx + 1}
+                                </span>
+                                <div style="display:flex; align-items:center; gap:3px;">
+                                    <input type="number" id="cardEditWeight_${sIdx}" step="0.5" min="0" value="${st.weight ?? 0}" style="width:58px; height:32px; text-align:center; font-weight:800; border:1px solid #CBD5E1; border-radius:6px; font-size:13px; color:#0F172A; background:#FFFFFF;">
+                                    <span style="font-size:11px; font-weight:700; color:#64748B;">kg</span>
+                                </div>
+                                <span style="color:#94A3B8; font-weight:700;">×</span>
+                                <div style="display:flex; align-items:center; gap:3px;">
+                                    <input type="number" id="cardEditReps_${sIdx}" step="1" min="0" value="${st.reps ?? 10}" style="width:48px; height:32px; text-align:center; font-weight:800; border:1px solid #CBD5E1; border-radius:6px; font-size:13px; color:#0F172A; background:#FFFFFF;">
+                                    <span style="font-size:11px; font-weight:700; color:#64748B;">${isCardio ? 'dk' : (isTime ? 'sn' : 'tk')}</span>
+                                </div>
+                                <button type="button" onclick="window.toggleCardEditSetCompleted(${sIdx})" style="padding:4px 7px; border-radius:6px; font-size:11px; font-weight:800; border:1px solid ${st.completed ? '#BBF7D0' : '#CBD5E1'}; background:${st.completed ? '#F0FDF4' : '#F1F5F9'}; color:${st.completed ? '#15803D' : '#64748B'}; cursor:pointer;">
+                                    ${st.completed ? '✓' : '—'}
+                                </button>
+                                <button type="button" onclick="window.removeCardEditSet(${sIdx})" style="background:none; border:none; color:#DC2626; font-size:13px; cursor:pointer; padding:2px 4px;" title="Seti Sil">
+                                    🗑️
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <button type="button" onclick="window.addCardEditSet()" style="width:100%; margin-top:8px; padding:7px; background:#F8FAFC; border:1px dashed #CBD5E1; color:#0284C7; font-size:11.5px; font-weight:800; border-radius:8px; cursor:pointer;">
+                        ➕ Set Ekle
+                    </button>
+
+                    <div style="display:flex; gap:8px; margin-top:12px; padding-top:10px; border-top:1px solid #E2E8F0;">
+                        <button type="button" onclick="window.saveDetailCardExerciseEdit()" style="flex:1; background:#0F172A; border:none; color:#FFFFFF; border-radius:8px; padding:9px; font-size:12.5px; font-weight:800; cursor:pointer;">
+                            💾 Kaydet
+                        </button>
+                        <button type="button" onclick="window.cancelDetailCardExerciseEdit()" style="flex:1; background:#F1F5F9; border:1px solid #CBD5E1; color:#334155; border-radius:8px; padding:9px; font-size:12.5px; font-weight:800; cursor:pointer;">
+                            ✕ İptal
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            const cardHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; gap:8px;">
+                    <div style="min-width:0; flex:1;">
+                        <span style="font-size:11px; font-weight:700; color:#64748B; text-transform:uppercase; letter-spacing:0.5px;">
+                            ${currentIndex + 1}. Egzersiz ${ex.muscle ? `• ${escapeHTML(ex.muscle)}` : ''}
+                        </span>
+                        <h4 style="font-size:15px; font-weight:900; color:#0F172A; margin:2px 0 0 0; line-height:1.25;">
+                            ${escapeHTML(cleanExTitle)}
+                        </h4>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                        ${volText ? `
+                            <span style="font-size:11px; font-weight:800; color:#B45309; background:#FEF3C7; border:1px solid #FCD34D; border-radius:6px; padding:3px 7px; white-space:nowrap;">
+                                🏋️ ${volText}
+                            </span>
+                        ` : ''}
+                        <button type="button" onclick="window.startDetailCardExerciseEdit()" style="background:#F1F5F9; border:1px solid #CBD5E1; color:#0F172A; border-radius:7px; padding:3px 8px; font-size:11px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" title="Bu Hareketi Düzenle">
+                            ✏️ Düzenle
+                        </button>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid #F1F5F9; font-size:11.5px; color:#64748B; font-weight:700;">
+                    <span>Toplam ${completedSetsCount} / ${safeSetsArr.length} Set</span>
+                    ${ex.equipment ? `<span style="text-transform:capitalize;">🔧 ${escapeHTML(ex.equipment)}</span>` : ''}
+                </div>
+
+                <!-- SETS LIST -->
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                    ${safeSetsArr.map((st, idx) => {
+                        const wDisp = (typeof formatSetWeightDisplay === 'function') ? formatSetWeightDisplay(isBw, st.weight) : (Number(st.weight) > 0 ? `${st.weight} kg` : (isBw ? 'Vücut Ağ.' : '0 kg'));
+                        const rDisp = (typeof formatSetMetricDisplay === 'function') ? formatSetMetricDisplay(ex, st.reps) : `${st.reps} tk`;
+                        return st.completed ? `
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:8px 12px;">
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <span style="font-size:11px; font-weight:800; color:#0F172A; background:#E2E8F0; border-radius:4px; padding:2px 6px;">
+                                        S${st.setNo || idx + 1}
+                                    </span>
+                                    <span style="font-size:12.5px; font-weight:800; color:#0F172A;">
+                                        ${isCardio ? 'Kardiyo Süresi' : `<strong>${wDisp}</strong>`}
+                                    </span>
+                                </div>
+                                <span style="background:#F0FDF4; border:1px solid #BBF7D0; color:#15803D; font-size:12px; font-weight:800; padding:2px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;">
+                                    ${rDisp} ✓
+                                </span>
+                            </div>
+                        ` : `
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border:1px dashed #CBD5E1; border-radius:8px; padding:8px 12px; opacity:0.6;">
+                                <span style="font-size:11px; font-weight:800; color:#94A3B8; background:#E2E8F0; border-radius:4px; padding:2px 6px;">
+                                    S${st.setNo || idx + 1}
+                                </span>
+                                <span style="font-size:11.5px; font-weight:600; color:#94A3B8; text-decoration:line-through;">
+                                    Set Atlandı
+                                </span>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+
+                <!-- SWIPE GUIDANCE -->
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:8px; border-top:1px dashed #E2E8F0; font-size:11px; color:#94A3B8; font-weight:600; user-select:none;">
+                    <span style="cursor:pointer;" onclick="window.navigateWorkoutDetailsExercise(-1)">${currentIndex > 0 ? '◀ Önceki' : ''}</span>
+                    <span>👈 Sağa / Sola Kaydırın 👉</span>
+                    <span style="cursor:pointer;" onclick="window.navigateWorkoutDetailsExercise(1)">${currentIndex < exercises.length - 1 ? 'Sonraki ▶' : ''}</span>
+                </div>
+            `;
+
+            if (direction !== 0 && typeof setTimeout === 'function') {
+                cardEl.style.opacity = '0';
+                cardEl.style.transform = direction > 0 ? 'translateX(10px)' : 'translateX(-10px)';
+                setTimeout(() => {
+                    cardEl.innerHTML = cardHTML;
+                    cardEl.style.transform = 'translateX(0)';
+                    cardEl.style.opacity = '1';
+                }, 80);
+            } else {
+                cardEl.innerHTML = cardHTML;
+                cardEl.style.opacity = '1';
+                cardEl.style.transform = 'translateX(0)';
+            }
+        }
+
+        function navigateWorkoutDetailsExercise(direction) {
+            if (!workoutDetailsModalState || !workoutDetailsModalState.exercises.length) return;
+            if (workoutDetailsModalState.isEditingCurrentCard) {
+                workoutDetailsModalState.isEditingCurrentCard = false;
+                workoutDetailsModalState.cardEditSets = [];
+            }
+            const nextIdx = workoutDetailsModalState.currentIndex + direction;
+            if (nextIdx < 0 || nextIdx >= workoutDetailsModalState.exercises.length) return;
+            workoutDetailsModalState.currentIndex = nextIdx;
+            renderWorkoutDetailsCurrentCard(direction);
+        }
+
+        function jumpToWorkoutDetailsExercise(index) {
+            if (!workoutDetailsModalState || !workoutDetailsModalState.exercises.length) return;
+            if (index < 0 || index >= workoutDetailsModalState.exercises.length) return;
+            if (workoutDetailsModalState.isEditingCurrentCard) {
+                workoutDetailsModalState.isEditingCurrentCard = false;
+                workoutDetailsModalState.cardEditSets = [];
+            }
+            const dir = index > workoutDetailsModalState.currentIndex ? 1 : -1;
+            workoutDetailsModalState.currentIndex = index;
+            renderWorkoutDetailsCurrentCard(dir);
+        }
+
+        let detailsSwipeStartX = 0;
+        let detailsSwipeStartY = 0;
+
+        function setupWorkoutDetailsSwipe() {
+            const viewport = document.getElementById('workoutDetailsCardViewport');
+            if (!viewport || viewport._swipeBound) return;
+            viewport._swipeBound = true;
+
+            viewport.addEventListener('touchstart', (e) => {
+                if (!e.touches || !e.touches[0]) return;
+                detailsSwipeStartX = e.touches[0].clientX;
+                detailsSwipeStartY = e.touches[0].clientY;
+            }, { passive: true });
+
+            viewport.addEventListener('touchend', (e) => {
+                if (!e.changedTouches || !e.changedTouches[0]) return;
+                const deltaX = e.changedTouches[0].clientX - detailsSwipeStartX;
+                const deltaY = e.changedTouches[0].clientY - detailsSwipeStartY;
+                if (Math.abs(deltaX) > 35 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+                    if (deltaX < 0) {
+                        navigateWorkoutDetailsExercise(1);
+                    } else {
+                        navigateWorkoutDetailsExercise(-1);
+                    }
+                }
+            }, { passive: true });
+        }
+
+        if (typeof document !== 'undefined') {
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    const subModal = document.getElementById('workoutExerciseDetailSubModal');
+                    if (subModal && subModal.style.display !== 'none' && subModal.classList.contains('active')) {
+                        closeWorkoutExerciseDetailSubModal();
+                        e.stopPropagation();
+                        return;
+                    }
+                    const modal = document.getElementById('workoutDetailsModal');
+                    if (modal && modal.style.display !== 'none' && modal.classList.contains('active')) {
+                        closeWorkoutDetailsModal();
+                        return;
+                    }
+                }
+                const modal = document.getElementById('workoutDetailsModal');
+                if (!modal || modal.style.display === 'none' || !modal.classList.contains('active')) return;
+                if (workoutDetailsModalState && workoutDetailsModalState.viewMode === 'card') {
+                    if (e.key === 'ArrowLeft') {
+                        navigateWorkoutDetailsExercise(-1);
+                    } else if (e.key === 'ArrowRight') {
+                        navigateWorkoutDetailsExercise(1);
+                    }
+                }
+            });
+        }
+
+        function openWorkoutDetailsModal(logId) {
+            try {
+                const logs = getWorkoutLogs();
+                const l = logs.find(item => item && (String(item.id) === String(logId) || String(item.timestamp) === String(logId)));
+                if (!l) {
+                    console.warn('[History] Seans kaydi bulunamadi:', logId);
+                    return;
+                }
+
+                const modal = document.getElementById('workoutDetailsModal');
+                const modalBox = document.getElementById('workoutDetailsModalBox');
+                if (!modal) return;
+
+                const subtitleEl = document.getElementById('workoutDetailsSubtitle');
+                if (subtitleEl) {
+                    const locType = l.locationType || (l.locationName === 'Ev' ? 'ev' : 'salon');
+                    const locName = l.locationName || (locType === 'ev' ? 'Ev' : (locType === 'acik_hava' ? 'Açık Hava' : 'Spor Salonu'));
+                    const isEv = locType === 'ev';
+                    const isPark = locType === 'acik_hava';
+                    const locIcon = isEv ? '🏠' : (isPark ? '🌲' : '🏋️');
+                    const locBadgeStyle = isEv
+                        ? 'background:rgba(59, 130, 246, 0.15); border:1px solid rgba(59, 130, 246, 0.4); color:#1D4ED8;'
+                        : (isPark
+                            ? 'background:rgba(16, 185, 129, 0.15); border:1px solid rgba(16, 185, 129, 0.4); color:#047857;'
+                            : 'background:rgba(217, 119, 6, 0.15); border:1px solid rgba(217, 119, 6, 0.4); color:#92400E;');
+
+                    subtitleEl.innerHTML = `
+                        <span style="font-size:12px; font-weight:700; color:#0F172A; white-space:nowrap;">📅 ${escapeHTML(l.dateFormatted || l.date)}</span>
+                        <span style="${locBadgeStyle} border-radius:4px; padding:1px 6px; font-size:10.5px; font-weight:700; white-space:nowrap;">
+                            ${locIcon} ${escapeHTML(locName)}
+                        </span>
+                        ${l.healthSummary && l.healthSummary.heartrateAvg ? `
+                            <span style="background:#DCFCE7; border:1px solid #86EFAC; color:#15803D; border-radius:4px; padding:1px 6px; font-size:10.5px; font-weight:700; white-space:nowrap;">
+                                ⌚ ❤️ ${Number(l.healthSummary.heartrateAvg)} bpm${l.healthSummary.calories ? ` • 🔥 ${Number(l.healthSummary.calories)} kcal` : ''}
+                            </span>
+                        ` : ''}
+                    `;
+                }
+
+                const titleEl = document.getElementById('workoutDetailsTitle');
+                if (titleEl) {
+                    const cleanProgramTitle = String(l.program || l.programName || l.title || 'Antrenman Seansı').replace(/\s*\([^)]*\)/g, '').trim() || 'Antrenman Seansı';
+                    titleEl.textContent = cleanProgramTitle;
+                }
+
+                updateWorkoutDetailsModalStats(l);
+
+                // Initialize Carousel & View State
+                const exercises = Array.isArray(l.exercises) ? l.exercises : [];
+                workoutDetailsModalState = {
+                    logId: l.id,
+                    exercises: exercises,
+                    currentIndex: 0,
+                    viewMode: 'card',
+                    isEditingCurrentCard: false,
+                    cardEditSets: [],
+                    isEditingSubModal: false,
+                    subModalEditIndex: null,
+                    subModalEditSets: []
+                };
+
+                applyWorkoutDetailsViewMode();
+                setupWorkoutDetailsSwipe();
+
+                const notesEl = document.getElementById('workoutDetailsNotes');
+                if (notesEl) {
+                    if (l.notes) {
+                        notesEl.style.display = 'block';
+                        notesEl.textContent = `📝 Not: ${l.notes}`;
+                    } else {
+                        notesEl.style.display = 'none';
+                        notesEl.textContent = '';
+                    }
+                }
+
+                const editBtn = document.getElementById('workoutDetailsEditBtn');
+                if (editBtn) {
+                    editBtn.onclick = function () {
+                        closeWorkoutDetailsModal();
+                        editWorkoutLog(decodeURIComponent(encodeURIComponent(l.id)));
+                    };
+                }
+
+                modal.classList.add('active');
+                modal.style.display = 'flex';
+                if (modalBox) modalBox.scrollTop = 0;
+            } catch (err) {
+                console.error('[History] Detay modali acilirken hata:', err);
+            }
+        }
+
+        function closeWorkoutDetailsModal() {
+            closeWorkoutExerciseDetailSubModal();
+            const modal = document.getElementById('workoutDetailsModal');
+            if (modal) {
+                modal.classList.remove('active');
+                modal.style.display = 'none';
+            }
+            workoutDetailsModalState = {
+                logId: null,
+                exercises: [],
+                currentIndex: 0,
+                viewMode: 'card',
+                isEditingCurrentCard: false,
+                cardEditSets: [],
+                isEditingSubModal: false,
+                subModalEditIndex: null,
+                subModalEditSets: []
+            };
+        }
+
+        function editSpecificExerciseFromDetailsModal(idx) {
+            startDetailCardExerciseEdit();
+        }
+
+        window.openWorkoutDetailsModal = openWorkoutDetailsModal;
+        window.closeWorkoutDetailsModal = closeWorkoutDetailsModal;
+        window.navigateWorkoutDetailsExercise = navigateWorkoutDetailsExercise;
+        window.jumpToWorkoutDetailsExercise = jumpToWorkoutDetailsExercise;
+        window.toggleWorkoutDetailsViewMode = toggleWorkoutDetailsViewMode;
+        window.openWorkoutExerciseDetailSubModal = openWorkoutExerciseDetailSubModal;
+        window.closeWorkoutExerciseDetailSubModal = closeWorkoutExerciseDetailSubModal;
+        window.editSpecificExerciseFromDetailsModal = editSpecificExerciseFromDetailsModal;
+        window.toggleWorkoutDetailsMuscles = toggleWorkoutDetailsMuscles;
+        window.startDetailCardExerciseEdit = startDetailCardExerciseEdit;
+        window.cancelDetailCardExerciseEdit = cancelDetailCardExerciseEdit;
+        window.addCardEditSet = addCardEditSet;
+        window.removeCardEditSet = removeCardEditSet;
+        window.toggleCardEditSetCompleted = toggleCardEditSetCompleted;
+        window.saveDetailCardExerciseEdit = saveDetailCardExerciseEdit;
+        window.startSubModalExerciseEdit = startSubModalExerciseEdit;
+        window.cancelSubModalExerciseEdit = cancelSubModalExerciseEdit;
+        window.addSubModalEditSet = addSubModalEditSet;
+        window.removeSubModalEditSet = removeSubModalEditSet;
+        window.toggleSubModalEditSetCompleted = toggleSubModalEditSetCompleted;
+        window.saveSubModalExerciseEdit = saveSubModalExerciseEdit;
 
         function calculateStreakForLogs(logs) {
             let streak = 0;
@@ -734,7 +1706,51 @@
             renderHistory();
         }
 
+        window.toggleHistoryMuscleBubble = function (key, e) {
+            if (e) {
+                if (e.stopPropagation) e.stopPropagation();
+                if (e.preventDefault) e.preventDefault();
+            }
+            const target = document.getElementById('bubble_muscles_' + key);
+            if (!target) return;
+            const isClosed = target.style.display === 'none' || !target.style.display;
+            document.querySelectorAll('[id^="bubble_muscles_"]').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('[id^="menu_actions_"]').forEach(el => el.style.display = 'none');
+            if (isClosed) {
+                target.style.display = 'block';
+            }
+        };
+
+        window.toggleHistoryActionMenu = function (key, e) {
+            if (e) {
+                if (e.stopPropagation) e.stopPropagation();
+                if (e.preventDefault) e.preventDefault();
+            }
+            const target = document.getElementById('menu_actions_' + key);
+            if (!target) return;
+            const isClosed = target.style.display === 'none' || !target.style.display;
+            document.querySelectorAll('[id^="menu_actions_"]').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('[id^="bubble_muscles_"]').forEach(el => el.style.display = 'none');
+            if (isClosed) {
+                target.style.display = 'block';
+            }
+        };
+
+        if (typeof document !== 'undefined') {
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('[id^="bubble_muscles_"]') && !e.target.closest('button[onclick*="toggleHistoryMuscleBubble"]')) {
+                    document.querySelectorAll('[id^="bubble_muscles_"]').forEach(el => el.style.display = 'none');
+                }
+                if (!e.target.closest('[id^="menu_actions_"]') && !e.target.closest('button[onclick*="toggleHistoryActionMenu"]')) {
+                    document.querySelectorAll('[id^="menu_actions_"]').forEach(el => el.style.display = 'none');
+                }
+            });
+        }
+
         function renderHistory() {
+            if (window.GarminTredictChief && typeof window.GarminTredictChief.renderHistoryGarminSyncPanel === 'function') {
+                try { window.GarminTredictChief.renderHistoryGarminSyncPanel(); } catch (e) {}
+            }
             const allLogs = getWorkoutLogs();
             if (typeof refreshTopFitnessCardioScoreBars === 'function') refreshTopFitnessCardioScoreBars();
             const container = document.getElementById('logHistoryContainer');
@@ -834,27 +1850,76 @@
                         ? 'background:rgba(16, 185, 129, 0.15); border:1px solid rgba(16, 185, 129, 0.4); color:#047857;'
                         : 'background:rgba(217, 119, 6, 0.15); border:1px solid rgba(217, 119, 6, 0.4); color:#92400E;');
 
+                const safeLogKey = String(l.id || Math.random().toString(36).slice(2)).replace(/[^a-zA-Z0-9_]/g, '_');
+                const shortMuscles = [];
+                (l.muscleGroups || []).forEach(rawM => {
+                    let s = String(rawM || '').replace(/[()]/g, '').trim();
+                    if (!s) return;
+                    let tag = s;
+                    if (/kanat|sırt|kürek|trapez/i.test(s)) tag = 'Sırt';
+                    else if (/göğüs/i.test(s)) tag = 'Göğüs';
+                    else if (/omuz/i.test(s)) tag = 'Omuz';
+                    else if (/ön bacak|arka bacak|bacak|kalf|baldır|diz/i.test(s)) tag = 'Bacak';
+                    else if (/kalça/i.test(s)) tag = 'Kalça';
+                    else if (/triceps|arka kol/i.test(s)) tag = 'Triceps';
+                    else if (/biceps|ön kol|pazı/i.test(s)) tag = 'Biceps';
+                    else if (/karın|core|korse/i.test(s)) tag = 'Karın';
+                    if (tag && !shortMuscles.includes(tag)) shortMuscles.push(tag);
+                });
+
+                const cleanProgramTitle = String(l.program || l.title || 'Antrenman Seansı').replace(/\s*\([^)]*\)/g, '').trim();
+
                 return `
                     <div class="log-history-card">
-                        <div class="log-card-header">
-                            <div>
-                                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:4px;">
-                                    <span class="log-date">📅 ${escapeHTML(l.dateFormatted || l.date)}</span>
-                                    <span style="${locBadgeStyle} border-radius:4px; padding:2px 8px; font-size:11px; font-weight:700;">
+                        <div class="log-card-header" style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                            <div style="min-width:0; flex:1;">
+                                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:2px;">
+                                    <span class="log-date" style="font-size:12px; font-weight:700; color:#0F172A; white-space:nowrap;">📅 ${escapeHTML(l.dateFormatted || l.date)}</span>
+                                    <span style="${locBadgeStyle} border-radius:4px; padding:1px 6px; font-size:10.5px; font-weight:700; white-space:nowrap;">
                                         ${locIcon} ${escapeHTML(locName)}
                                     </span>
                                     ${l.healthSummary && l.healthSummary.heartrateAvg ? `
-                                        <span style="background:#DCFCE7; border:1px solid #86EFAC; color:#15803D; border-radius:4px; padding:2px 8px; font-size:11px; font-weight:700;">
-                                            ⌚ ❤️ Ort. ${Number(l.healthSummary.heartrateAvg)} / Zirve ${Number(l.healthSummary.heartrateMax || l.healthSummary.heartrateAvg)} bpm${l.healthSummary.calories ? ` • 🔥 ${Number(l.healthSummary.calories)} kcal` : ''}
+                                        <span style="background:#DCFCE7; border:1px solid #86EFAC; color:#15803D; border-radius:4px; padding:1px 6px; font-size:10.5px; font-weight:700; white-space:nowrap;">
+                                            ⌚ ❤️ ${Number(l.healthSummary.heartrateAvg)} bpm${l.healthSummary.calories ? ` • 🔥 ${Number(l.healthSummary.calories)} kcal` : ''}
                                         </span>
                                     ` : ''}
                                 </div>
-                                <h3 style="font-size:15px; font-weight:800; color:#0F172A; line-height:1.3;">${escapeHTML(l.program)}</h3>
+                                <h3 style="font-size:14.5px; font-weight:800; color:#0F172A; line-height:1.25;">${escapeHTML(cleanProgramTitle)}</h3>
                             </div>
-                            <div style="display:flex; align-items:center; gap:6px;">
-                                <span class="ex-badge badge-equip">${escapeHTML(rpeLabel)}</span>
-                                <button type="button" class="btn-edit-log" onclick="editWorkoutLog(decodeURIComponent('${encodeURIComponent(l.id)}'))" title="Antrenmanı Düzenle">Düzenle</button>
-                                <button type="button" class="btn-delete-log" onclick="deleteWorkoutLog(decodeURIComponent('${encodeURIComponent(l.id)}'))" title="Kaydı Sil">✕</button>
+                            <div style="display:flex; align-items:center; gap:6px; flex-shrink:0; white-space:nowrap;">
+                                ${shortMuscles.length > 0 ? `
+                                    <div style="position:relative; display:inline-block;">
+                                        <button type="button" onclick="window.toggleHistoryMuscleBubble('${safeLogKey}', event)" style="background:#F0FDF4; border:1px solid #86EFAC; color:#15803D; border-radius:8px; padding:4px 8px; font-size:11.5px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px; white-space:nowrap; height:30px;" title="Çalışan Kasları Gör">
+                                            <span>💪 ${shortMuscles.length} Kas</span>
+                                            <span style="font-size:9px;">▼</span>
+                                        </button>
+                                        <div id="bubble_muscles_${safeLogKey}" style="display:none; position:absolute; right:0; top:calc(100% + 6px); z-index:9999; background:#FFFFFF; border:1px solid #CBD5E1; border-radius:12px; padding:10px 12px; box-shadow:0 10px 25px -5px rgba(0,0,0,0.2); width:230px; animation:popIn 0.15s ease-out;">
+                                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding-bottom:5px; border-bottom:1px solid #F1F5F9;">
+                                                <span style="font-size:11.5px; font-weight:800; color:#0F172A;">🎯 Çalışan Kaslar</span>
+                                                <button type="button" onclick="window.toggleHistoryMuscleBubble('${safeLogKey}', event)" style="background:none; border:none; color:#64748B; font-size:11px; font-weight:700; cursor:pointer;">✕</button>
+                                            </div>
+                                            <div style="display:flex; flex-wrap:wrap; gap:4px;">
+                                                ${shortMuscles.map(m => `<span style="background:#F0FDF4; border:1px solid #BBF7D0; color:#15803D; font-size:11px; font-weight:700; padding:2px 7px; border-radius:6px;">${escapeHTML(m)}</span>`).join('')}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ` : ''}
+
+                                <!-- SEÇENEK B: ÜÇ NOKTA BUTONU VE AÇILIR MENÜ -->
+                                <div style="position:relative; display:inline-block;">
+                                    <button type="button" onclick="window.toggleHistoryActionMenu('${safeLogKey}', event)" title="Seans İşlemleri" style="height:30px; width:30px; background:#F1F5F9; border:1px solid #CBD5E1; color:#334155; border-radius:8px; font-size:15px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;">
+                                        ⋮
+                                    </button>
+                                    <div id="menu_actions_${safeLogKey}" style="display:none; position:absolute; right:0; top:calc(100% + 6px); z-index:9999; background:#FFFFFF; border:1px solid #CBD5E1; border-radius:12px; padding:6px; box-shadow:0 10px 25px -5px rgba(0,0,0,0.2); width:150px; animation:popIn 0.15s ease-out;">
+                                        <button type="button" class="btn-view-log" onclick="window.toggleHistoryActionMenu('${safeLogKey}'); window.openWorkoutDetailsModal(decodeURIComponent('${encodeURIComponent(l.id)}'));" style="width:100%; text-align:left; background:none; border:none; padding:8px 10px; border-radius:6px; font-size:12px; font-weight:700; color:#0F172A; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                                            <span>👁️</span> <span>Görüntüle</span>
+                                        </button>
+                                        <div style="height:1px; background:#F1F5F9; margin:4px 0;"></div>
+                                        <button type="button" class="btn-delete-log" onclick="window.toggleHistoryActionMenu('${safeLogKey}'); deleteWorkoutLog(decodeURIComponent('${encodeURIComponent(l.id)}'));" style="width:100%; text-align:left; background:none; border:none; padding:8px 10px; border-radius:6px; font-size:12px; font-weight:700; color:#DC2626; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                                            <span>🗑️</span> <span>Seansı Sil</span>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -874,77 +1939,7 @@
                             </div>
                         </div>
 
-                        <!-- MUSCLES WORKED (Kısa Ana Kas Özeti) -->
-                        ${l.muscleGroups && l.muscleGroups.length > 0 ? (() => {
-                            const shortMuscles = [];
-                            l.muscleGroups.forEach(rawM => {
-                                const s = String(rawM || '').replace(/\s*\([^)]*\)/g, '').trim();
-                                let tag = s;
-                                if (/kanat|sırt|kürek|trapez/i.test(s)) tag = 'Sırt';
-                                else if (/göğüs/i.test(s)) tag = 'Göğüs';
-                                else if (/omuz/i.test(s)) tag = 'Omuz';
-                                else if (/ön bacak|arka bacak|bacak|kalf|baldır/i.test(s)) tag = 'Bacak';
-                                else if (/kalça/i.test(s)) tag = 'Kalça';
-                                else if (/triceps|arka kol/i.test(s)) tag = 'Triceps';
-                                else if (/biceps|ön kol|pazı/i.test(s)) tag = 'Biceps';
-                                else if (/karın|core|korse/i.test(s)) tag = 'Karın';
-                                if (tag && !shortMuscles.includes(tag)) shortMuscles.push(tag);
-                            });
-                            return shortMuscles.length > 0 ? `
-                                <div style="margin: 6px 0 8px; display:flex; flex-wrap:wrap; gap:4px;">
-                                    ${shortMuscles.slice(0, 7).map(m => `<span class="muscle-tag">${escapeHTML(m)}</span>`).join('')}
-                                </div>
-                            ` : '';
-                        })() : ''}
-
-                        <!-- DETAILED EXERCISES & SETS -->
-                        ${l.exercises && l.exercises.length > 0 ? `
-                            <div class="log-exercises-list">
-                                ${l.exercises.map(ex => {
-                                    const isBw = isExerciseBodyweight(ex);
-                                    const isTime = isExerciseTimeBased(ex);
-                                    const safeSetsArr = Array.isArray(ex.sets)
-                                        ? ex.sets
-                                        : Array.from({ length: Math.max(1, Number(ex.sets || ex.completedSets || 1)) }, (_, sIdx) => ({
-                                            setNo: sIdx + 1,
-                                            weight: Number(ex.weight || 0),
-                                            reps: Number(ex.reps || 10),
-                                            completed: true
-                                        }));
-                                    let exVol = ex.exerciseVolume || 0;
-                                    if (exVol === 0 && safeSetsArr.length > 0) {
-                                        safeSetsArr.forEach(st => {
-                                            if (st.completed || parseInt(st.reps, 10) > 0) {
-                                                exVol += calculateExerciseSetVolume(ex, st.weight, st.reps);
-                                            }
-                                        });
-                                    }
-                                    const volText = exVol > 0 ? `${Math.round(exVol).toLocaleString('tr-TR')} kg` : '';
-                                    const cleanExTitle = String(ex.name || '').replace(/\s*\([^)]*\)/g, '').trim() || ex.name;
-                                    return `
-                                    <div class="log-exercise-item">
-                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                                            <strong class="log-ex-name" style="color:#0F172A; font-size:12.5px; font-weight:800;">${escapeHTML(cleanExTitle)}</strong>
-                                            <span style="font-size:11px; color:#64748B; font-weight:600;">${volText}</span>
-                                        </div>
-                                        <div class="log-sets-summary">
-                                            ${safeSetsArr.map(st => st.completed ? `
-                                                <span class="log-set-pill completed">
-                                                    ${isExerciseCardioMinutes(ex) ? `${formatSetMetricDisplay(ex, st.reps)} ✓` : `S${st.setNo}: <strong>${formatSetWeightDisplay(isBw, st.weight)}</strong> × ${formatSetMetricDisplay(ex, st.reps)} ✓`}
-                                                </span>
-                                            ` : `
-                                                <span class="log-set-pill" style="opacity:0.6; border-style:dashed; text-decoration:line-through; font-weight:600;">
-                                                    S${st.setNo}: Atlandı
-                                                </span>
-                                            `).join('')}
-                                        </div>
-                                    </div>
-                                    `;
-                                }).join('')}
-                            </div>
-                        ` : ''}
-
-                        ${l.notes ? `<div class="log-notes-box">📝 ${escapeHTML(l.notes)}</div>` : ''}
+                        ${l.notes ? `<div class="log-notes-box" style="margin-top:6px;">📝 ${escapeHTML(l.notes)}</div>` : ''}
                     </div>
                 `;
             }).join('');
