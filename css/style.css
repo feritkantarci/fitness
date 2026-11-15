@@ -12497,3 +12497,103 @@
 .login-btn:active {
     transform: scale(0.98) !important;
 }
+
+
+/* ==============================================================================
+   GRANGER & ATHLETIQ TAM MOBİL PANEL GİYDİRMESİ (FİGMA STANDARDI)
+   ============================================================================== */
+.gen-step-panel {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin-bottom: 10px !important;
+}
+
+/* 2 ve 3 numaralı seçim çubuklarını çevreleyen beyaz arka planı tamamen yok et */
+.gen-step-panel > div[style*="background:#FFFFFF"],
+.gen-step-panel > div[style*="background: #FFFFFF"],
+.gen-step-panel > div[style*="background:white"],
+.gen-step-panel > div[style*="background: white"] {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.gen-mobile-picker-bar {
+    background: linear-gradient(145deg, #1C1838 0%, #131028 100%) !important;
+    border: 1.5px solid rgba(167, 139, 250, 0.25) !important;
+    border-radius: 18px !important;
+    padding: 14px 16px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.gen-mobile-picker-bar:active {
+    transform: scale(0.98) !important;
+    border-color: var(--athletiq-purple) !important;
+}
+
+.gen-mobile-picker-bar .gen-step-badge {
+    background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4) !important;
+    border-radius: 8px !important;
+    font-weight: 900 !important;
+}
+
+.gen-mobile-picker-bar .picker-step-title {
+    color: #94A3B8 !important;
+    font-weight: 700 !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+.gen-mobile-picker-bar .picker-selected-val {
+    color: #FFFFFF !important;
+    font-weight: 800 !important;
+    font-size: 13.5px !important;
+}
+
+.gen-mobile-picker-bar .picker-arrow {
+    color: var(--athletiq-violet) !important;
+}
+
+/* Manuel Oluştur Butonunu Koyu Temaya Uyarla */
+.ai-unified-cta-row button.btn-outline,
+.ai-unified-cta-row .btn-outline {
+    background: rgba(24, 21, 48, 0.8) !important;
+    border: 1.5px solid rgba(167, 139, 250, 0.3) !important;
+    color: #FFFFFF !important;
+    border-radius: 16px !important;
+}
+
+.ai-unified-cta-row button.btn-outline:active {
+    background: #221D42 !important;
+}
+
+/* Üretici İstek / Özel Not Kutusu */
+.ai-unified-wish-row {
+    background: rgba(11, 10, 20, 0.7) !important;
+    border: 1px solid rgba(167, 139, 250, 0.2) !important;
+    border-radius: 14px !important;
+    padding: 12px 14px !important;
+}
+
+.ai-unified-wish-label {
+    color: var(--athletiq-violet) !important;
+    font-weight: 800 !important;
+    font-size: 11px !important;
+}
+
+.ai-unified-wish-input {
+    background: rgba(24, 21, 48, 0.8) !important;
+    border: 1px solid rgba(167, 139, 250, 0.25) !important;
+    color: #FFFFFF !important;
+    border-radius: 10px !important;
+}
+
+.ai-unified-wish-input:focus {
+    border-color: var(--athletiq-purple) !important;
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.3) !important;
+}
