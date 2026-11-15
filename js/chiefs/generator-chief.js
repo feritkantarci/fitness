@@ -5880,17 +5880,17 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                     ${timelineStationsHtml}
 
                     <div style="text-align:center; margin:14px 0 20px;">
-                        <button class="btn btn-outline" style="border-style:dashed; border-color:#0284C7; color:#0284C7; font-size:12px; padding:8px 16px; border-radius:8px; font-weight:700;" onclick="openAddExerciseModal('generated')">
+                        <button class="btn btn-outline" style="background:rgba(24, 21, 48, 0.7); border:1.5px dashed rgba(167, 139, 250, 0.4); color:var(--athletiq-violet); font-size:12.5px; padding:10px 18px; border-radius:12px; font-weight:800; cursor:pointer;" onclick="openAddExerciseModal('generated')">
                             ➕ Listeye Hareket Ekle
                         </button>
                     </div>
 
                     <!-- FINISHER -->
-                    <div class="block-header">🔥 Balistik Bitiş / Finisher</div>
-                    <div style="background:rgba(225, 29, 72, 0.05); border:1px solid rgba(225, 29, 72, 0.2); border-left:4px solid var(--red-alert); border-radius:10px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                    <div class="block-header" style="color:#F97316; font-weight:900; letter-spacing:0.04em;">🔥 BALİSTİK BİTİŞ / FINISHER</div>
+                    <div style="background:linear-gradient(135deg, rgba(244, 63, 94, 0.15) 0%, rgba(24, 21, 48, 0.85) 100%); border:1px solid rgba(244, 63, 94, 0.35); border-left:4px solid #F43F5E; border-radius:16px; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; box-shadow:0 4px 16px rgba(0,0,0,0.3);">
                         <div style="flex:1; min-width:200px;">
-                            <strong style="color:#0F172A; font-size:13px;">${escapeHTML(w.finisher.name)}</strong>
-                            <div style="font-size:12px; color:#64748B; margin-top:2px;">${escapeHTML(w.finisher.desc)}</div>
+                            <strong style="color:#FFFFFF; font-size:14px; display:block; margin-bottom:3px;">${escapeHTML(w.finisher.name)}</strong>
+                            <div style="font-size:12.5px; color:#CBD5E1; line-height:1.4;">${escapeHTML(w.finisher.desc)}</div>
                         </div>
                         ${(() => {
                             const fName = (w.finisher && w.finisher.name) ? w.finisher.name.toLowerCase() : '';
@@ -5912,11 +5912,11 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                     </div>
 
                     <!-- BOTTOM DUAL ACTION HIERARCHY (Vazgeç + Seansı Başlat) -->
-                    <div style="display:flex; align-items:center; gap:10px; margin-top:18px; padding-top:14px; border-top:1px solid #E2E8F0;">
-                        <button type="button" class="btn-action-secondary" style="padding:13px 22px; font-size:14px; font-weight:800; color:#0F172A; background:#F1F5F9; border:1px solid #E2E8F0; border-radius:14px; justify-content:center;" onclick="dismissGeneratedWorkoutView()">
+                    <div style="display:flex; align-items:center; gap:10px; margin-top:18px; padding-top:14px; border-top:1px solid rgba(167, 139, 250, 0.16);">
+                        <button type="button" class="btn-action-secondary" style="padding:14px 22px; font-size:14px; font-weight:800; color:#94A3B8; background:rgba(24, 21, 48, 0.8); border:1px solid rgba(167, 139, 250, 0.25); border-radius:16px; justify-content:center; cursor:pointer;" onclick="dismissGeneratedWorkoutView()">
                             Vazgeç
                         </button>
-                        <button type="button" class="btn-start-workout" style="flex:1; padding:13px 20px; font-size:14.5px; font-weight:800; background:#FF5A36; color:#FFFFFF; border:none; border-radius:14px; display:inline-flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 6px 18px rgba(255,90,54,0.28);" onclick="startActiveWorkoutFromGenerated()">
+                        <button type="button" class="btn-start-workout" style="flex:1; padding:14px 20px; font-size:14.5px; font-weight:900; background:linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); color:#FFFFFF; border:none; border-radius:16px; display:inline-flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 8px 24px rgba(139, 92, 246, 0.45); cursor:pointer;" onclick="startActiveWorkoutFromGenerated()">
                             <span>▶️ Seansı Başlat</span>
                         </button>
                     </div>
