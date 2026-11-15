@@ -12597,3 +12597,116 @@
     border-color: var(--athletiq-purple) !important;
     box-shadow: 0 0 12px rgba(139, 92, 246, 0.3) !important;
 }
+
+
+/* ==============================================================================
+   ÜRETİCİ MODALLARI & TÜM BAĞLI EKRANLAR (FİGMA ATHLETIQ & GRANGER MİMARİSİ)
+   ============================================================================== */
+.modal-overlay,
+.wk-info-modal-overlay {
+    background: rgba(6, 5, 12, 0.8) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+}
+
+.modal-box,
+.modal-card,
+.modal-body,
+.ai-architect-modal-box,
+.ai-quick-precheck-box,
+#exercisePickerModal .modal-box,
+#exerciseDetailModal .modal-box,
+#addToProgramOptionsModal .modal-box,
+#quickAddToDayModal .modal-box,
+#assignWorkoutCalendarModal .modal-box,
+#scheduleDayModal .modal-box,
+#interSetModal .modal-box,
+#addFinisherModal .modal-box,
+.quick-listbox-sheet,
+.wk-info-modal-sheet {
+    background: linear-gradient(165deg, #181530 0%, #100E22 100%) !important;
+    border: 1.5px solid rgba(167, 139, 250, 0.28) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 25px 70px -10px rgba(0, 0, 0, 0.85), 0 0 30px rgba(139, 92, 246, 0.2) !important;
+    color: #F8FAFC !important;
+}
+
+.modal-header,
+.modal-title,
+.ai-architect-modal-header,
+.quick-listbox-header,
+.wk-info-modal-header {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(167, 139, 250, 0.16) !important;
+    color: #FFFFFF !important;
+}
+
+.modal-footer,
+.ai-architect-modal-footer,
+.quick-listbox-custom-row,
+.wk-info-modal-footer {
+    background: rgba(11, 10, 20, 0.6) !important;
+    border-top: 1px solid rgba(167, 139, 250, 0.16) !important;
+    color: #FFFFFF !important;
+}
+
+/* Modallardaki Giriş Alanları, Select Kutuları ve Kartlar */
+.modal-box select,
+.modal-box input[type="text"],
+.modal-box input[type="number"],
+.form-input,
+.param-select {
+    background: rgba(11, 10, 20, 0.8) !important;
+    border: 1px solid rgba(167, 139, 250, 0.2) !important;
+    color: #FFFFFF !important;
+    border-radius: 12px !important;
+}
+
+.modal-box select:focus,
+.modal-box input:focus,
+.form-input:focus,
+.param-select:focus {
+    border-color: var(--athletiq-purple) !important;
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.3) !important;
+}
+
+/* Modal İçi Egzersiz Seçici Listeleri */
+.picker-item-card,
+.quick-listbox-item,
+.modal-box .ex-card {
+    background: rgba(24, 21, 48, 0.7) !important;
+    border: 1px solid rgba(167, 139, 250, 0.15) !important;
+    border-radius: 14px !important;
+    color: #FFFFFF !important;
+}
+
+.picker-item-card:hover,
+.quick-listbox-item:hover {
+    background: rgba(139, 92, 246, 0.16) !important;
+    border-color: rgba(167, 139, 250, 0.4) !important;
+}
+
+.modal-close-btn,
+.btn-close-modal {
+    background: rgba(167, 139, 250, 0.14) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(167, 139, 250, 0.25) !important;
+    border-radius: 50% !important;
+}
+
+/* Kapatma ve İkincil Butonlar */
+.modal-box .btn-outline {
+    background: rgba(24, 21, 48, 0.8) !important;
+    border: 1px solid rgba(167, 139, 250, 0.25) !important;
+    color: #94A3B8 !important;
+    border-radius: 14px !important;
+}
+
+.modal-box .btn-gold,
+.modal-box .btn-primary {
+    background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%) !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 14px !important;
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important;
+}
