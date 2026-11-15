@@ -12922,3 +12922,48 @@
         border-radius: 14px !important;
     }
 }
+
+
+/* ==============================================================================
+   DİNLENME & GELİŞİM EKRANI İÇİN ERGONOMİK KAYAN MİMARİ + SABİT DOCK
+   ============================================================================== */
+.daylight-rest-card {
+    padding-bottom: 90px !important;
+}
+
+.daylight-next-exercise-card {
+    background: linear-gradient(165deg, #181530 0%, #100E22 100%) !important;
+    border: 1.5px solid rgba(167, 139, 250, 0.28) !important;
+    border-radius: 20px !important;
+    color: #F8FAFC !important;
+}
+
+.daylight-next-exercise-card .daylight-ex-name,
+.daylight-next-exercise-card h2,
+.daylight-next-exercise-card div[style*="color:#0F172A"] {
+    color: #FFFFFF !important;
+}
+
+.daylight-next-preview {
+    background: rgba(24, 21, 48, 0.8) !important;
+    border: 1.5px solid rgba(167, 139, 250, 0.25) !important;
+    border-radius: 16px !important;
+    color: #FFFFFF !important;
+}
+
+.daylight-next-preview div[style*="color:#0F172A"] {
+    color: #FFFFFF !important;
+}
+
+/* Dinlenme Ekranında En Altta Başparmak Hizasına Sabitlenen Buton */
+.daylight-rest-card .daylight-primary-cta {
+    position: fixed !important;
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+    left: 16px !important;
+    right: 16px !important;
+    width: calc(100% - 32px) !important;
+    max-width: 440px !important;
+    margin: 0 auto !important;
+    z-index: 99 !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(16, 185, 129, 0.4) !important;
+}
