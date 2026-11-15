@@ -12710,3 +12710,108 @@
     border-radius: 14px !important;
     box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important;
 }
+
+
+/* ==============================================================================
+   CANLI ANTRENMAN STÜDYOSU (ATHLETIQ MOR & KOYU ÇİVİT TEMASI)
+   ============================================================================== */
+.daylight-studio-card {
+    background: linear-gradient(165deg, #181530 0%, #100E22 100%) !important;
+    border: 1.5px solid rgba(167, 139, 250, 0.28) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.7) !important;
+    color: #F8FAFC !important;
+}
+
+.daylight-btn-subnav {
+    background: rgba(11, 10, 20, 0.7) !important;
+    border: 1px solid rgba(167, 139, 250, 0.16) !important;
+    border-radius: 14px !important;
+}
+
+.daylight-subnav-btn {
+    color: #94A3B8 !important;
+}
+
+.daylight-subnav-btn:hover,
+.daylight-subnav-btn:active {
+    background: rgba(139, 92, 246, 0.2) !important;
+    color: #FFFFFF !important;
+}
+
+.daylight-media-box {
+    background: #0B0A14 !important;
+    border: 1.5px solid rgba(167, 139, 250, 0.2) !important;
+    border-radius: 18px !important;
+}
+
+.daylight-video {
+    background: #0B0A14 !important;
+}
+
+.daylight-ex-name {
+    color: #FFFFFF !important;
+}
+
+.daylight-set-chip {
+    background: rgba(24, 21, 48, 0.8) !important;
+    border: 1.5px solid rgba(167, 139, 250, 0.25) !important;
+    color: #94A3B8 !important;
+}
+
+.daylight-set-chip.active {
+    background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%) !important;
+    border-color: #8B5CF6 !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4) !important;
+}
+
+.daylight-set-chip.completed {
+    background: rgba(16, 185, 129, 0.15) !important;
+    border-color: #10B981 !important;
+    color: #34D399 !important;
+}
+
+.daylight-ghost-bar {
+    background: rgba(11, 10, 20, 0.6) !important;
+    border: 1px solid rgba(167, 139, 250, 0.15) !important;
+    color: #CBD5E1 !important;
+}
+
+.daylight-ghost-copy-btn {
+    background: rgba(245, 158, 11, 0.15) !important;
+    border: 1px solid rgba(245, 158, 11, 0.35) !important;
+    color: #F59E0B !important;
+}
+
+.daylight-stepper-box {
+    background: rgba(11, 10, 20, 0.7) !important;
+    border: 1.5px solid rgba(167, 139, 250, 0.2) !important;
+    border-radius: 16px !important;
+}
+
+.daylight-stepper-label {
+    color: var(--athletiq-violet) !important;
+}
+
+.daylight-step-btn {
+    background: rgba(24, 21, 48, 0.85) !important;
+    border: 1px solid rgba(167, 139, 250, 0.25) !important;
+    color: #FFFFFF !important;
+}
+
+.daylight-step-val-btn {
+    color: #FFFFFF !important;
+}
+
+.daylight-plate-link-btn {
+    background: rgba(16, 185, 129, 0.15) !important;
+    border: 1px solid rgba(16, 185, 129, 0.35) !important;
+    color: #34D399 !important;
+}
+
+.daylight-studio-header button.btn-outline {
+    background: rgba(24, 21, 48, 0.8) !important;
+    border: 1px solid rgba(167, 139, 250, 0.25) !important;
+    color: #CBD5E1 !important;
+}
