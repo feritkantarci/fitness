@@ -12815,3 +12815,110 @@
     border: 1px solid rgba(167, 139, 250, 0.25) !important;
     color: #CBD5E1 !important;
 }
+
+
+/* ==============================================================================
+   IPHONE & MOBİL EKRANA SIFIR KAYDIRMAYLA TAM OTURMA (ZERO-SCROLL VIEWPORT LOCK)
+   ============================================================================== */
+@media (max-width: 768px) {
+    /* Antrenman sekmesi açıkken gereksiz dikey boşlukları sıkılaştır */
+    #activeWorkoutTab {
+        padding-bottom: 72px !important;
+    }
+
+    .daylight-studio-wrap {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .daylight-studio-card {
+        padding: 10px 12px 12px !important;
+        border-radius: 20px !important;
+    }
+
+    .daylight-studio-header {
+        margin-bottom: 6px !important;
+    }
+
+    .daylight-btn-subnav {
+        margin-bottom: 8px !important;
+        padding: 3px !important;
+    }
+
+    .daylight-subnav-btn {
+        padding: 5px 2px !important;
+        font-size: 11px !important;
+    }
+
+    /* Medya kutusunu ekranı aşağı taşırmayacak kompakt yüksekliğe getir */
+    .daylight-media-box {
+        max-height: 155px !important;
+        height: 155px !important;
+        margin-bottom: 8px !important;
+        border-radius: 14px !important;
+    }
+
+    .daylight-video {
+        max-height: 155px !important;
+        height: 155px !important;
+    }
+
+    .daylight-ex-title-row {
+        margin-bottom: 6px !important;
+    }
+
+    .daylight-ex-name {
+        font-size: 16px !important;
+        line-height: 1.2 !important;
+    }
+
+    .daylight-sets-row {
+        margin-bottom: 8px !important;
+        padding-bottom: 4px !important;
+        gap: 6px !important;
+    }
+
+    .daylight-set-chip {
+        padding: 5px 11px !important;
+        font-size: 11.5px !important;
+    }
+
+    .daylight-ghost-bar {
+        padding: 5px 10px !important;
+        margin-bottom: 8px !important;
+        font-size: 11px !important;
+    }
+
+    .daylight-stepper-grid {
+        gap: 8px !important;
+        margin-bottom: 10px !important;
+    }
+
+    .daylight-stepper-box {
+        padding: 6px 6px !important;
+        border-radius: 12px !important;
+    }
+
+    .daylight-stepper-label {
+        font-size: 9.5px !important;
+        margin-bottom: 4px !important;
+    }
+
+    .daylight-step-btn {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 15px !important;
+        border-radius: 8px !important;
+    }
+
+    .daylight-step-val-btn {
+        font-size: 14px !important;
+        font-weight: 900 !important;
+    }
+
+    .daylight-primary-cta {
+        padding: 12px 14px !important;
+        font-size: 13.5px !important;
+        border-radius: 14px !important;
+    }
+}
