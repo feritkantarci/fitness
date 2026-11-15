@@ -12245,3 +12245,197 @@
     color: #0F172A;
     margin-bottom: 14px;
 }
+
+
+/* ==============================================================================
+   ATHLETIQ & GRANGER MODÜLER TEMA SİSTEMİ (KOYU ÇİVİT & MOR ENERJİ)
+   ============================================================================== */
+:root {
+    --athletiq-bg-base: #0B0A14;
+    --athletiq-bg-surface: #121024;
+    --athletiq-bg-card: #181530;
+    --athletiq-bg-card-hover: #221D42;
+    --athletiq-border: rgba(167, 139, 250, 0.16);
+    --athletiq-border-glow: rgba(167, 139, 250, 0.45);
+    --athletiq-purple: #8B5CF6;
+    --athletiq-violet: #A78BFA;
+    --athletiq-cyan: #38BDF8;
+    --athletiq-emerald: #10B981;
+    --athletiq-amber: #F59E0B;
+    --athletiq-rose: #F43F5E;
+}
+
+/* Üretici Hero Kartı - Granger & AthletiQ Koyu Mor Zemin */
+.ai-unified-architect-card,
+.ai-hybrid-hero-banner {
+    background: linear-gradient(165deg, #181530 0%, #100E22 100%) !important;
+    border: 1.5px solid rgba(167, 139, 250, 0.25) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(167, 139, 250, 0.1) !important;
+    color: #F8FAFC !important;
+}
+
+.ai-unified-architect-card .ai-prep-title,
+.ai-hybrid-hero-banner .ai-prep-title {
+    color: #FFFFFF !important;
+}
+
+.ai-unified-architect-card .ai-prep-subtitle,
+.ai-hybrid-hero-banner .ai-prep-subtitle {
+    color: #94A3B8 !important;
+}
+
+.ai-prep-pill {
+    background: rgba(139, 92, 246, 0.16) !important;
+    border: 1px solid rgba(167, 139, 250, 0.3) !important;
+    color: var(--athletiq-violet) !important;
+}
+
+.ai-pill-dot {
+    background: var(--athletiq-purple) !important;
+    box-shadow: 0 0 8px var(--athletiq-purple) !important;
+}
+
+.gen-mobile-picker-bar {
+    background: rgba(24, 21, 48, 0.7) !important;
+    border: 1px solid rgba(167, 139, 250, 0.15) !important;
+    border-radius: 14px !important;
+    color: #F8FAFC !important;
+}
+
+.gen-mobile-picker-bar .picker-step-title {
+    color: #94A3B8 !important;
+}
+
+.gen-mobile-picker-bar .picker-selected-val {
+    color: var(--athletiq-violet) !important;
+}
+
+.btn-ai-unified-cta,
+.btn-ai-create-primary {
+    background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%) !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 28px rgba(139, 92, 246, 0.45) !important;
+    font-weight: 900 !important;
+}
+
+.btn-ai-unified-cta:active,
+.btn-ai-create-primary:active {
+    transform: scale(0.98) !important;
+    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3) !important;
+}
+
+/* Üretilen Antrenman Başlık Kartı (Workout Header Card) */
+.workout-header-card {
+    background: linear-gradient(165deg, #181530 0%, #100E22 100%) !important;
+    border: 1.5px solid rgba(167, 139, 250, 0.25) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.6) !important;
+    color: #F8FAFC !important;
+}
+
+.workout-header-card .workout-main-title {
+    color: #FFFFFF !important;
+}
+
+.wk-btn-primary-compact {
+    background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%) !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    box-shadow: 0 6px 18px rgba(139, 92, 246, 0.4) !important;
+}
+
+.wk-btn-utility-compact {
+    background: rgba(24, 21, 48, 0.8) !important;
+    border: 1px solid rgba(167, 139, 250, 0.2) !important;
+    color: var(--athletiq-violet) !important;
+}
+
+.wk-chip-action {
+    background: rgba(11, 10, 20, 0.7) !important;
+    border: 1px solid rgba(167, 139, 250, 0.15) !important;
+    color: #94A3B8 !important;
+}
+
+.wk-chip-action.highlight-orange,
+.wk-chip-action.highlight-green {
+    border-color: rgba(139, 92, 246, 0.4) !important;
+    color: var(--athletiq-violet) !important;
+    background: rgba(139, 92, 246, 0.12) !important;
+}
+
+/* Zaman Tüneli ve İstasyon Kartları */
+.timeline-station-card {
+    background: linear-gradient(170deg, #181530 0%, rgba(24, 21, 48, 0.7) 100%) !important;
+    border: 1px solid rgba(167, 139, 250, 0.16) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3) !important;
+    color: #F8FAFC !important;
+}
+
+.timeline-station-card.is-superset {
+    border-left: 3.5px solid var(--athletiq-purple) !important;
+    background: linear-gradient(170deg, rgba(30, 26, 60, 0.95) 0%, rgba(24, 21, 48, 0.75) 100%) !important;
+}
+
+.timeline-station-num {
+    background: var(--athletiq-purple) !important;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4) !important;
+    color: #FFFFFF !important;
+}
+
+.wk-ex-row-clean span[style*="color:#0F172A"] {
+    color: #FFFFFF !important;
+}
+
+.timeline-transition-badge {
+    background: rgba(139, 92, 246, 0.2) !important;
+    color: var(--athletiq-violet) !important;
+    border: 1px solid rgba(139, 92, 246, 0.3) !important;
+    border-radius: 10px !important;
+}
+
+.timeline-rest-pill {
+    background: rgba(56, 189, 248, 0.12) !important;
+    color: var(--athletiq-cyan) !important;
+    border: 1px solid rgba(56, 189, 248, 0.25) !important;
+}
+
+/* Dinlenme & Adaptif Grafik Ekranı (Daylight Rest Card) */
+.daylight-rest-card {
+    background: linear-gradient(165deg, #181530 0%, #100E22 100%) !important;
+    border: 1.5px solid rgba(139, 92, 246, 0.3) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.6) !important;
+    color: #F8FAFC !important;
+}
+
+.daylight-rest-timer-val {
+    color: #FFFFFF !important;
+    text-shadow: 0 0 20px rgba(139, 92, 246, 0.4) !important;
+}
+
+.daylight-rest-skip-btn {
+    background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 6px 18px rgba(139, 92, 246, 0.4) !important;
+}
+
+.daylight-chart-card {
+    background: rgba(11, 10, 20, 0.7) !important;
+    border: 1px solid rgba(167, 139, 250, 0.18) !important;
+    border-radius: 18px !important;
+}
+
+.daylight-chart-title {
+    color: #FFFFFF !important;
+}
+
+.daylight-primary-cta {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4) !important;
+    border-radius: 16px !important;
+}
