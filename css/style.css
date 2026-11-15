@@ -12955,15 +12955,10 @@
     color: #FFFFFF !important;
 }
 
-/* Dinlenme Ekranında En Altta Başparmak Hizasına Sabitlenen Buton */
+/* Dinlenme Ekranı: Buton kartın doğal akışında en altta yer alır (içerik üzerine binmez) */
 .daylight-rest-card .daylight-primary-cta {
-    position: fixed !important;
-    bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
-    left: 16px !important;
-    right: 16px !important;
-    width: calc(100% - 32px) !important;
-    max-width: 440px !important;
-    margin: 0 auto !important;
-    z-index: 99 !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(16, 185, 129, 0.4) !important;
+    position: static !important;
+    width: 100% !important;
+    margin-top: 14px !important;
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4) !important;
 }
