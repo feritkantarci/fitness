@@ -552,6 +552,11 @@
 
                 fbDb = firebase.firestore();
 
+                // T24: Tek bir boş (undefined) alan tüm bulut yazımını reddettirmesin
+                try { fbDb.settings({ ignoreUndefinedProperties: true }); } catch (e) {
+                    console.warn("Firestore ayarı uygulanamadı:", e);
+                }
+
                 // Çevrimdışı desteği (Offline-first IndexedDB önbellekleme)
                 fbDb.enablePersistence({ synchronizeTabs: true }).catch(err => {
                     if (err.code === 'failed-precondition') {
@@ -923,6 +928,14 @@
 
             const hasTelemetry = (exList) => Array.isArray(exList) && exList.some(e => e && e.healthTelemetry);
 
+            // T24: Firestore set() 'undefined' alanı reddeder; birleşmede boş kalan alanlar tamamen silinir
+            const dropUndefinedKeys = (obj) => {
+                if (obj && typeof obj === 'object') {
+                    Object.keys(obj).forEach(k => { if (obj[k] === undefined) delete obj[k]; });
+                }
+                return obj;
+            };
+
             const upsertLog = (l) => {
                 if (!l || !l.id) return;
                 const lid = String(l.id);
@@ -940,13 +953,13 @@
                 const nextEd = Number(l.userEditedAt || 0);
                 if (prevEd > nextEd) {
                     const winnerTitle = pickTitle(prev, l);
-                    logMap.set(lid, Object.assign({}, prev, {
+                    logMap.set(lid, dropUndefinedKeys(Object.assign({}, prev, {
                         program: winnerTitle || prev.program,
                         title: winnerTitle || prev.title,
                         garminActivityId: prev.garminActivityId || l.garminActivityId,
                         healthSummary: prev.healthSummary || l.healthSummary,
                         isCardioActivity: Boolean(prev.isCardioActivity || l.isCardioActivity)
-                    }));
+                    })));
                 } else {
                     const winnerTitle = pickTitle(l, prev);
                     const merged = Object.assign({}, prev, l, {
@@ -963,7 +976,7 @@
                     });
                     if (nextEd > prevEd) merged.userEditedAt = nextEd;
                     else if (prevEd > 0 && !merged.userEditedAt) merged.userEditedAt = prevEd;
-                    logMap.set(lid, merged);
+                    logMap.set(lid, dropUndefinedKeys(merged));
                 }
             };
 
@@ -1145,6 +1158,8 @@
                         console.warn("Bulut ön birleştirme atlandı, yerel kayıt yazılıyor:", preMergeErr);
                     }
 
+                    // T24: JSON temizliği — undefined alanlar yazımdan önce düşürülür
+                    try { logsToWrite = JSON.parse(JSON.stringify(logsToWrite)); } catch {}
                     await writeAthleteDocWithSealHeal('workout_logs', uid, (seal) => ({
                         logs: logsToWrite,
                         clientUpdatedAt: Date.now(),

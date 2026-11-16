@@ -1385,6 +1385,35 @@ function runAcademicMathSuite(moduleSources, dbText) {
           actual: `toplamGün=${res.totalDays}, mükerrersiz=${res.hasZeroDuplicates}, overrideTekil=${res.overrideApplied}, başlık="${res.todayTitle}"`
         };
       }
+    },
+    {
+      id: 'T24',
+      owner: 'profile-guard',
+      title: 'Bulut Birleşmesinde Sıfır Boş (undefined) Alan',
+      expected: 'saat/sağlık bilgisi olmayan eski kayıt birleşince undefined alan = 0, telefondaki yeni seans korunur',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const oldLog = { id: 'log_old_1', date: '2026-10-01', timestamp: 1790000000000, program: 'Eski', exercises: [{ id: 'bb_bench_press', name: 'Bench', sets: [{ setNo: 1, weight: 60, reps: 10, completed: true }] }] };
+          const phoneLog = { id: 'log_phone_today', date: '2026-11-16', timestamp: 1795000000000, program: 'Bugün', exercises: [{ id: 'db_rdl', name: 'RDL', sets: [{ setNo: 1, weight: 20, reps: 12, completed: true }] }] };
+          const cloud = [JSON.parse(JSON.stringify(oldLog))];
+          const local = [JSON.parse(JSON.stringify(phoneLog)), JSON.parse(JSON.stringify(oldLog))];
+          const out = mergeWorkoutLogCollections(local, cloud, 'usr_exam').mergedLogs;
+          const undefPaths = [];
+          const walk = (o, p) => {
+            if (o && typeof o === 'object') Object.keys(o).forEach(k => {
+              if (o[k] === undefined) undefPaths.push(p + k); else walk(o[k], p + k + '.');
+            });
+          };
+          walk(out, '');
+          return { undefCount: undefPaths.length, sample: undefPaths.slice(0, 3).join(','), phoneKept: out.some(l => l.id === 'log_phone_today'), total: out.length };
+        })()`, ctx);
+        const ok = res.undefCount === 0 && res.phoneKept && res.total === 2;
+        return {
+          ok,
+          actual: `undefined=${res.undefCount}${res.sample ? ' (' + res.sample + ')' : ''}, telefonSeansıKorundu=${res.phoneKept}, toplam=${res.total}`
+        };
+      }
     }
   ];
 
