@@ -1115,17 +1115,17 @@
                     "proof": "Kendi vücut ağırlığınla tam çömelip kalkmak, ön bacak ve kalça kaslarını doğal hareket açıklığında çalıştırır."
           },
           "bw_jump_squat": {
-                    "primary": "Dış Ön Bacak, Orta Ön Bacak, Ana Kalça, Üst Baldır",
-                    "secondary": "İç Ön Bacak, Alt Baldır, Derin İç Karın",
+                    "primary": "Dış Ön Bacak, Orta Ön Bacak, Ana Kalça",
+                    "secondary": "İç Ön Bacak, Üst Baldır, Alt Baldır, Derin İç Karın",
                     "subKey": "legs_quad",
                     "primarySubKeys": [
                               "legs_quad_outer",
                               "legs_quad_mid",
-                              "legs_glutes_max",
-                              "calves_gastroc"
+                              "legs_glutes_max"
                     ],
                     "secondarySubKeys": [
                               "legs_quad_inner",
+                              "calves_gastroc",
                               "calves_soleus",
                               "core_deep"
                     ],

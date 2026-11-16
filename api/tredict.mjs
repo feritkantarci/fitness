@@ -7,6 +7,8 @@ import { fileURLToPath } from 'node:url';
 const TREDICT_MCP_URL = 'https://www.tredict.com/api/mcp/v2';
 const INTERVALS_BASE_URL = 'https://intervals.icu/api/v1';
 
+const userPushLockMap = new Map();
+
 const EXACT_ALLOWED_ORIGINS = new Set([
   'https://fitness.kantarci.io',
   'https://fitness-4f427.web.app',
@@ -894,27 +896,53 @@ export default async function handler(req, res) {
     if (req.method === 'POST' && action === 'push-workout') {
       const body = await readJsonBody(req);
       const planPayload = body.planPayload;
-      if (tredict && Array.isArray(planPayload?.planTrainings) && planPayload.planTrainings.length > 0) {
-        const createdWorkouts = await addTredictStrengthTrainingsToLiveCalendar(tredict, planPayload.planTrainings, tzOffsetMinutes);
-        return sendJson(res, 200, {
-          ok: true,
-          provider: 'tredict_live_calendar',
-          directCalendarSync: true,
-          count: createdWorkouts.length,
-          workouts: createdWorkouts
-        }, origin);
+      const userLockKey = tredictToken ? `tr_${tredictToken.slice(-12)}` : (intervalsToken ? `icu_${intervalsToken.slice(-12)}` : 'anon');
+      const prevLock = userPushLockMap.get(userLockKey) || Promise.resolve();
+
+      let pushResult = null;
+      const executePush = async () => {
+        if (tredict && Array.isArray(planPayload?.planTrainings) && planPayload.planTrainings.length > 0) {
+          const createdWorkouts = await addTredictStrengthTrainingsToLiveCalendar(tredict, planPayload.planTrainings, tzOffsetMinutes);
+          return {
+            status: 200,
+            body: {
+              ok: true,
+              provider: 'tredict_live_calendar',
+              directCalendarSync: true,
+              count: createdWorkouts.length,
+              workouts: createdWorkouts
+            }
+          };
+        }
+        if (intervalsToken && Array.isArray(body.intervalsEvents) && body.intervalsEvents.length > 0) {
+          const created = await callIntervalsApi('/athlete/0/events/bulk?upsert=true', 'POST', body.intervalsEvents, intervalsToken);
+          return {
+            status: 200,
+            body: {
+              ok: true,
+              provider: 'intervals.icu',
+              directCalendarSync: true,
+              count: Array.isArray(created) ? created.length : 1,
+              events: created
+            }
+          };
+        }
+        return {
+          status: 400,
+          body: { ok: false, error: 'Geçersiz antrenman planı veya eksik Tredict anahtarı.' }
+        };
+      };
+
+      const lockedPushTask = prevLock.then(executePush, executePush);
+      userPushLockMap.set(userLockKey, lockedPushTask);
+      try {
+        pushResult = await lockedPushTask;
+      } finally {
+        if (userPushLockMap.get(userLockKey) === lockedPushTask) {
+          userPushLockMap.delete(userLockKey);
+        }
       }
-      if (intervalsToken && Array.isArray(body.intervalsEvents) && body.intervalsEvents.length > 0) {
-        const created = await callIntervalsApi('/athlete/0/events/bulk?upsert=true', 'POST', body.intervalsEvents, intervalsToken);
-        return sendJson(res, 200, {
-          ok: true,
-          provider: 'intervals.icu',
-          directCalendarSync: true,
-          count: Array.isArray(created) ? created.length : 1,
-          events: created
-        }, origin);
-      }
-      return sendJson(res, 400, { ok: false, error: 'Geçersiz antrenman planı veya eksik Tredict anahtarı.' }, origin);
+      return sendJson(res, pushResult.status, pushResult.body, origin);
     }
 
     if (req.method === 'POST' && action === 'delete-dates') {

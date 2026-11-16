@@ -1266,6 +1266,56 @@ function runAcademicMathSuite(moduleSources, dbText) {
           actual: `erkenPush=${res.prematureCloudPushCount}, eldenÇıkış=${res.handoffKeptTitle}/${res.handoffUpdatedWatchTitle}, pull=${res.pullWon}(${res.pullCount}), push=${res.pushWon}(${res.pushCount}), panel=${res.panelHasNewTitle}/eskiYok=${res.panelDropsOldTitle}`
         };
       }
+    },
+    {
+      id: 'T22',
+      owner: 'garmin-tredict-guard',
+      title: 'Kanonik Takvim Çözümlemesi & Sıfır Mükerrer Saat Gönderimi',
+      expected: 'haftalık+tarih çakışmasında mükerrer gün = 0, override tekil geçerli, her güne tek seans',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const uid = 'usr_exam';
+          localStorage.setItem('celik_garmin_enabled_' + uid, 'true');
+
+          const now = new Date();
+          const todayIso = toIsoDateKeyLocal(now);
+
+          const weeklySched = {
+            '1': { title: 'Pzt: İtiş', exercises: [{ id: 'bb_bench_press', name: 'Bench', sets: 3, reps: 10, weight: 60 }] },
+            '3': { title: 'Çar: Çekiş', exercises: [{ id: 'bw_pullup', name: 'Barfiks', sets: 3, reps: 8, weight: 0 }] },
+            '5': { title: 'Cum: Bacak', exercises: [{ id: 'db_goblet_squat', name: 'Squat', sets: 3, reps: 12, weight: 24 }] }
+          };
+
+          localStorage.setItem('celik_kodu_weekly_schedule_' + uid, JSON.stringify(weeklySched));
+          const dateOverrides = {};
+          dateOverrides[todayIso] = {
+            title: 'Bugün: Özel İtiş',
+            exercises: [{ id: 'bb_bench_press', name: 'Bench', sets: 4, reps: 10, weight: 65 }]
+          };
+          localStorage.setItem('celik_kodu_date_schedule_' + uid, JSON.stringify(dateOverrides));
+
+          const planRes = window.resolveUnifiedScheduleForNextDays(7);
+          const dates = planRes.multiDays.map(d => d.calendarDate);
+          const uniqueDates = new Set(dates);
+          const hasZeroDuplicates = dates.length === uniqueDates.size;
+
+          const todayItem = planRes.multiDays.find(d => d.calendarDate === todayIso);
+          const overrideApplied = Boolean(todayItem && todayItem.title === 'Bugün: Özel İtiş' && todayItem.exercises[0].weight === 65);
+
+          return {
+            totalDays: planRes.multiDays.length,
+            hasZeroDuplicates,
+            overrideApplied,
+            uniqueDateCount: uniqueDates.size
+          };
+        })()`, ctx);
+        const ok = res.totalDays >= 1 && res.hasZeroDuplicates && res.overrideApplied;
+        return {
+          ok,
+          actual: `toplamGün=${res.totalDays}, mükerrersiz=${res.hasZeroDuplicates}, overrideTekil=${res.overrideApplied}`
+        };
+      }
     }
   ];
 

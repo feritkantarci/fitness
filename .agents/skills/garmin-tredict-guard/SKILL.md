@@ -6,7 +6,7 @@ description: Çelik Kodu PWA içindeki 7. Özel Şef (Garmin & Tredict Telemetri
 # ⌚ Çelik Kodu — 7. Oda: Garmin & Tredict Şefi (`garmin-tredict-guard`)
 
 - **Fiziksel Oda Dosyası:** `js/garmin-tredict-bridge.js`
-- **Zorunlu Sınav Maddeleri:** `T16` (Garmin kas doğrulaması, Garmin'de olmayan hareketi isimsiz+notlu gönderme ve saatten dönüşte orijinal hareket kimliği + yalnızca sağlık verisi birleştirmesi)
+- **Zorunlu Sınav Maddeleri:** `T16` (Garmin kas doğrulaması, Garmin'de olmayan hareketi isimsiz+notlu gönderme ve saatten dönüşte orijinal hareket kimliği + yalnızca sağlık verisi birleştirmesi), `T22` (7 günlük tekil kanonik takvim birleştirmesi, tekil debounce zamanlayıcısı, kullanıcı bazlı eşzamanlı istek kilidi ve sıfır mükerrer antrenman garantisi)
 
 Bu şef, **Çelik Kodu PWA** ile **Garmin Forerunner 945 / Tredict** arasındaki tüm veri trafiğinin tek sorumlusudur. Uygulamanın kendi bilimsel egzersiz ve kas mimarisini Garmin'in eksik veya hatalı tahminlerinden korur ve ürettiği geçmiş kayıtlarını `window.CelikBridgeCustoms` gümrüğünden geçirerek teslim eder.
 
@@ -59,6 +59,17 @@ Bu şef, **Çelik Kodu PWA** ile **Garmin Forerunner 945 / Tredict** arasındaki
    - Garmin/Tredict entegrasyonu geliştiricinin veya kullanıcının bilgisayarının açık olmasına (`127.0.0.1`, yerel script veya bilgisayar arka plan servisi) **ASLA bağımlı olamaz**.
    - Her sporcu kendi telefonundan, `Profil` sekmesindeki kendi izole bağlantısıyla 7/24 bulut geçiş kapısı üzerinden doğrudan saatine bağlanır; diğer kullanıcıların verisiyle asla karışmaz ve karşı servisten gerçek onay dönmeden *"saate aktarıldı"* bildirimi gösterilmez.
    - `js/app.js` IIFE içinde çalıştığından `garmin-tredict-bridge.js` aktif kullanıcıyı `window.getActiveUser` yerine doğrudan `localStorage.getItem('celik_kodu_session')` ve `localStorage.getItem('celik_kodu_active_user_id')` üzerinden okur.
+
+### Görev 7: Tekil Kanonik Takvim Eşitlemesi & Mükerrer Antrenman Yasağı (T22)
+1. **Parçalı İstek ve Çifte Tetikleme Yasağı:**
+   - Haftalık plan onaylandığında veya gün bazlı tarih atandığında `weekly_schedule` ve `date_schedule` anahtarları art arda yazılır. Bu iki anahtar için ASLA ayrı ayrı bağımsız debounce/zamanlayıcı çalıştırılamaz.
+   - Tek bir birleşik zamanlayıcı (`unifiedCalendarSyncTimer`) kullanılır; tüm takvim depolama hareketleri tek bir potada toplanıp birleştirilir.
+2. **Kanonik Takvim Çözümlemesi (`resolveUnifiedScheduleForNextDays`):**
+   - Önümüzdeki 7 takvim gününün her biri için önce `date_schedule` (tarihe özel tekil plan) kontrol edilir, yoksa ilgili haftalık gün şablonundan (`weekly_schedule[dayIdx]`) çekilir.
+   - Her takvim günü için liste içinde **en fazla 1 adet antrenman** bulunabilir; aynı tarihe mükerrer/çift antrenman atanması matematiksel olarak engellenir.
+3. **Bulut Ağ Geçidi Eşzamanlılık Kilidi (`userPushLockMap`):**
+   - Kullanıcı aynı anda farklı sekmelerden veya hızlı tıklamalarla istek gönderse dahi, bulut köprüsü (`api/tredict.mjs`) her sporcu için sıralı bir kilit kuyruğu işleterek çakışan paralel Tredict silme/ekleme yarış durumlarını (race condition) önler.
+   - Gönderilen takvimin parmak izi (`v2_unified_...`) son gönderilen imza ile eşleşiyorsa gereksiz mükerrer ağ istekleri susturulur.
 
 ---
 
