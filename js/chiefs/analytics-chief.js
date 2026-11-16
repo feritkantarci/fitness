@@ -1739,7 +1739,21 @@
             'ip atlama': { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false },
             'kürek çekme': { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false },
             'tempolu yürüyüş': { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false },
-            'koşu': { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false }
+            'koşu': { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false },
+
+            // 13. KISA BANT (MINI BAND) & UZUN DİRENÇ BANDI
+            'mini bant yan yürüyüş (monster walk)': { primary: 'Glute', pFactor: 0.85, sec: { 'Ön Bacak': 0.35 }, type: 'ISOLATION', sfr: 'HIGH', lengthened: false },
+            'mini bantlı kalça köprüsü & açış': { primary: 'Glute', pFactor: 0.90, sec: { 'Arka Bacak': 0.35 }, type: 'ISOLATION', sfr: 'HIGH', lengthened: false },
+            'mini bantlı squat (diz açışı)': { primary: 'Ön Bacak', pFactor: 0.80, sec: { 'Glute': 0.50 }, type: 'HYPERTROPHY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'mini bant omuz dış rotasyon': { primary: 'Omuz', pFactor: 0.65, sec: { 'Sırt': 0.25 }, type: 'MOBILITY_STABILITY', sfr: 'HIGH', lengthened: false },
+            'mini bant clamshell (istiridye açışı)': { primary: 'Glute', pFactor: 0.85, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: false },
+            'uzun bant açış (band pull-apart)': { primary: 'Omuz', pFactor: 0.85, sec: { 'Sırt': 0.50 }, type: 'ISOLATION', sfr: 'HIGH', lengthened: false },
+            'uzun bant üstten çekiş (band pulldown)': { primary: 'Sırt', pFactor: 0.90, sec: { 'Biceps': 0.40 }, type: 'HYPERTROPHY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'uzun bant oturarak çekiş (seated row)': { primary: 'Sırt', pFactor: 0.90, sec: { 'Biceps': 0.35, 'Omuz': 0.25 }, type: 'HYPERTROPHY_COMPOUND', sfr: 'HIGH', lengthened: true },
+            'uzun bant göğüs itiş (band chest press)': { primary: 'Göğüs', pFactor: 0.90, sec: { 'Omuz': 0.30, 'Triceps': 0.30 }, type: 'HYPERTROPHY_COMPOUND', sfr: 'HIGH', lengthened: false },
+            'uzun bant biceps curl': { primary: 'Biceps', pFactor: 0.95, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: false },
+            'uzun bant triceps pushdown': { primary: 'Triceps', pFactor: 0.95, sec: {}, type: 'ISOLATION', sfr: 'HIGH', lengthened: false },
+            'uzun bant good morning / rdl': { primary: 'Arka Bacak', pFactor: 0.85, sec: { 'Glute': 0.55 }, type: 'HYPERTROPHY_COMPOUND', sfr: 'HIGH', lengthened: true }
         };
 
         function normSearchText(s) {
@@ -1878,6 +1892,16 @@
                     "type": "BODYWEIGHT_STRENGTH",
                     "sfr": "MODERATE",
                     "lengthened": true
+          },
+          "bw_bench_dips": {
+                    "primary": "Triceps",
+                    "pFactor": 0.75,
+                    "sec": {
+                              "Omuz": 0.25
+                    },
+                    "type": "BODYWEIGHT_STRENGTH",
+                    "sfr": "MODERATE",
+                    "lengthened": false
           },
           "db_overhead_press": {
                     "primary": "Omuz",
@@ -3273,7 +3297,7 @@
         ];
 
         let currentWeeklyMuscleFilter = 'all'; // 'all', 'optimal', 'insufficient', 'unworked'
-        let currentWeeklyMuscleSource = 'week_projected'; // 'week_projected', 'week_done', 'schedule_full'
+        let currentWeeklyMuscleSource = 'week_done'; // 'week_done', 'week_projected', 'schedule_full'
         let currentWeeklyMuscleWeekOffset = 0; // 0 = this week, -1 = last week, +1 = next week
 
         function getWeeklyMuscleBounds(weekOffset = 0) {
@@ -3324,7 +3348,7 @@
             return `${dt.getDate()} ${months[dt.getMonth()]} ${days[dt.getDay()]}`;
         }
 
-        function calculateWeeklyMuscleSufficiency(sourceMode = 'week_projected', weekOffset = 0) {
+        function calculateWeeklyMuscleSufficiency(sourceMode = 'week_done', weekOffset = 0) {
             const bounds = getWeeklyMuscleBounds(weekOffset);
             const allLogs = (typeof getWorkoutLogs === 'function') ? getWorkoutLogs() : [];
             const weekLogs = allLogs.filter(l => {
@@ -3520,6 +3544,40 @@
 
                 if (effectiveDone > 0) summary.workedCount++;
 
+                // Alt bölge kapsamı ve doğrudan çalışma payı (Schoenfeld Bölgesel Hipertrofi & Pelland 2025/2026)
+                const prelimMuscle = {
+                    id: cfg.id,
+                    contributions: data.contributions || [],
+                    plannedExercises: Array.from(data.plannedExercises.values()),
+                    doneExercises: Array.from(data.doneExercises)
+                };
+                const compMap = (typeof computeMuscleCompartmentMap === 'function')
+                    ? computeMuscleCompartmentMap(prelimMuscle, sourceMode)
+                    : null;
+                const diagramCols = (typeof MUSCLE_DIAGRAM_DEFS !== 'undefined' && MUSCLE_DIAGRAM_DEFS[cfg.id])
+                    ? MUSCLE_DIAGRAM_DEFS[cfg.id].columns
+                    : [];
+                const totalSubCount = diagramCols.length;
+                const requiredSubCount = totalSubCount > 0 ? Math.ceil(totalSubCount * 0.6) : 0;
+                const minRequiredDirect = Math.round(Math.max(2, cfg.optimalMin * 0.5) * 10) / 10;
+
+                let coveredSubCount = 0;
+                const missingSubCols = [];
+                if (compMap && diagramCols.length > 0) {
+                    diagramCols.forEach(col => {
+                        const cData = compMap[col.key];
+                        const st = (typeof evaluateCompartmentState === 'function')
+                            ? evaluateCompartmentState(cData, sourceMode)
+                            : { isWorked: !!(cData && cData.earnedSets > 0), isProjectedCovered: !!(cData && cData.earnedSets > 0) };
+                        const covered = (sourceMode === 'week_projected') ? st.isProjectedCovered : st.isWorked;
+                        if (covered) {
+                            coveredSubCount++;
+                        } else {
+                            missingSubCols.push(col);
+                        }
+                    });
+                }
+
                 let status = 'unworked';
                 let statusBadge = '❌ Hiç Çalıştırılmadı';
                 let statusColor = '#ef4444';
@@ -3533,14 +3591,37 @@
                     if (effectiveScheduledTotal > 0 && sourceMode === 'week_done') {
                         statusDesc = `Planda ${effectiveScheduledTotal.toFixed(1)} set var ancak henüz seans yapılmadı.`;
                     }
-                } else if (evalVolume < cfg.optimalMin || evalDirectVolume === 0) {
+                } else if (evalDirectVolume === 0) {
                     status = 'insufficient';
-                    statusBadge = evalDirectVolume === 0 ? '⚠️ Sadece Yardımcı Çalıştı' : '⚠️ Az Çalıştı';
+                    statusBadge = '⚠️ Sadece Yardımcı Çalıştı';
                     statusColor = '#f59e0b';
                     statusBg = 'rgba(245, 158, 11, 0.12)';
-                    statusDesc = evalDirectVolume === 0
-                        ? `Bu kas için doğrudan bir hareket yapılmadı (diğer hareketlerden ${evalVolume.toFixed(1)} set yardımcı etki aldı).`
-                        : `Haftalık hedefin altında kaldı (${evalVolume.toFixed(1)}/${cfg.optimalMin} set).`;
+                    statusDesc = `Bu kas için doğrudan bir hareket yapılmadı (diğer hareketlerden ${evalVolume.toFixed(1)} set yardımcı etki aldı).`;
+                    summary.insufficientCount++;
+                    insufficientNames.push(cfg.name);
+                } else if (evalVolume < cfg.optimalMin) {
+                    status = 'insufficient';
+                    statusBadge = '⚠️ Az Çalıştı';
+                    statusColor = '#f59e0b';
+                    statusBg = 'rgba(245, 158, 11, 0.12)';
+                    statusDesc = `Haftalık hedefin altında kaldı (${evalVolume.toFixed(1)}/${cfg.optimalMin} set).`;
+                    summary.insufficientCount++;
+                    insufficientNames.push(cfg.name);
+                } else if (evalDirectVolume < minRequiredDirect) {
+                    status = 'insufficient';
+                    statusBadge = '⚠️ Doğrudan Set Az';
+                    statusColor = '#f59e0b';
+                    statusBg = 'rgba(245, 158, 11, 0.12)';
+                    statusDesc = `Toplam ${evalVolume.toFixed(1)} setin çoğu yan etkiden geldi; en az ${minRequiredDirect.toFixed(0)} doğrudan set gerekir.`;
+                    summary.insufficientCount++;
+                    insufficientNames.push(cfg.name);
+                } else if (requiredSubCount > 0 && coveredSubCount < requiredSubCount) {
+                    status = 'insufficient';
+                    statusBadge = `⚠️ Eksik Bölge (${coveredSubCount}/${totalSubCount})`;
+                    statusColor = '#f59e0b';
+                    statusBg = 'rgba(245, 158, 11, 0.12)';
+                    const missingLabels = missingSubCols.map(c => c.label.split('(')[0].trim()).slice(0, 2).join(', ');
+                    statusDesc = `Toplam ${evalVolume.toFixed(1)} set var ancak yalnızca ${coveredSubCount}/${totalSubCount} alt bölge doğrudan çalıştı (${missingLabels} eksik).`;
                     summary.insufficientCount++;
                     insufficientNames.push(cfg.name);
                 } else if (evalVolume <= cfg.optimalMax) {
@@ -3548,7 +3629,7 @@
                     statusBadge = '✅ İdeal Seviye';
                     statusColor = '#10b981';
                     statusBg = 'rgba(16, 185, 129, 0.12)';
-                    statusDesc = `İdeal çalışma aralığında (${evalVolume.toFixed(1)} set).`;
+                    statusDesc = `İdeal çalışma aralığında (${evalVolume.toFixed(1)} set • ${coveredSubCount}/${totalSubCount} alt bölge).`;
                     summary.optimalCount++;
                     optimalNames.push(cfg.name);
                 } else {
@@ -3577,6 +3658,12 @@
                     projectedSets: effectiveProjected,
                     scheduledTotalSets: effectiveScheduledTotal,
                     effectiveTotal: evalVolume,
+                    evalDirectVolume: Math.round(evalDirectVolume * 10) / 10,
+                    minRequiredDirect,
+                    coveredSubCount,
+                    totalSubCount,
+                    requiredSubCount,
+                    missingSubCols,
                     status,
                     statusBadge,
                     statusColor,
@@ -4133,7 +4220,7 @@
                 columns: [
                     { key: 'upper', label: 'ÜST GÖĞÜS', subKeys: ['chest_upper'], recId: 'db_incline_press', recName: 'Eğimli Göğüs Presi (Incline)', keywords: ['üst göğüs', 'incline', 'decline pushup', 'decline şınav', 'landmine'] },
                     { key: 'mid', label: 'ORTA GÖĞÜS', subKeys: ['chest_mid'], recId: 'db_bench_press', recName: 'Dambıl Göğüs Presi (Bench)', keywords: ['orta göğüs', 'bench press', 'floor press', 'pushup', 'push-up', 'şınav', 'pec deck', 'crossover', 'fly', 'renegade'] },
-                    { key: 'lower', label: 'ALT GÖĞÜS', subKeys: ['chest_lower'], recId: 'bw_dips', recName: 'Paralel Bar Dips', keywords: ['alt göğüs', 'dips', 'crossover alt', 'pullover'] }
+                    { key: 'lower', label: 'ALT GÖĞÜS', subKeys: ['chest_lower'], recId: 'bw_dips', recName: 'Dips', keywords: ['alt göğüs', 'dips', 'crossover alt', 'pullover'] }
                 ]
             },
             quads: {
@@ -4295,7 +4382,31 @@
             return list.length > 0 ? list[0] : null;
         }
 
-        function computeMuscleCompartmentMap(m) {
+        // Alt bölge yeterlilik eşiği (Schoenfeld Bölgesel Hipertrofi & Pelland 2025/2026: en az ~2 doğrudan set)
+        const SUBREGION_MIN_EFFECTIVE_SETS = 1.5;
+
+        function evaluateCompartmentState(compData, mode = 'week_done') {
+            if (!compData) {
+                return { state: 'unworked', isWorked: false, isPartial: false, isPlanned: false, isProjectedCovered: false };
+            }
+            const direct = Number(compData.directSets) || 0;
+            const earned = Number(compData.earnedSets) || 0;
+            const planDirect = Number(compData.plannedDirectSets) || 0;
+            const planTotal = Number(compData.plannedTotalSets) || 0;
+
+            const isWorked = direct > 0 && earned >= SUBREGION_MIN_EFFECTIVE_SETS;
+            const isPartial = !isWorked && earned > 0;
+            const isPlanned = !isWorked && !isPartial && !!(compData.plannedExs && compData.plannedExs.size > 0);
+            const isProjectedCovered = isWorked || (
+                mode === 'week_projected'
+                && (direct + planDirect) > 0
+                && (earned + planTotal) >= SUBREGION_MIN_EFFECTIVE_SETS
+            );
+            const state = isWorked ? 'worked' : (isPartial ? 'partial' : (isPlanned ? 'planned' : 'unworked'));
+            return { state, isWorked, isPartial, isPlanned, isProjectedCovered };
+        }
+
+        function computeMuscleCompartmentMap(m, sourceModeOverride = null) {
             const def = MUSCLE_DIAGRAM_DEFS[m.id];
             if (!def) return null;
 
@@ -4303,14 +4414,18 @@
             def.columns.forEach(col => {
                 compMap[col.key] = {
                     col,
+                    directSets: 0,
                     earnedSets: 0,
+                    plannedDirectSets: 0,
+                    plannedTotalSets: 0,
                     plannedCount: 0,
                     doneExs: new Set(),
+                    directExs: new Set(),
                     plannedExs: new Set()
                 };
             });
 
-            const mode = (typeof currentWeeklyMuscleSource !== 'undefined') ? currentWeeklyMuscleSource : 'week_projected';
+            const mode = sourceModeOverride || ((typeof currentWeeklyMuscleSource !== 'undefined') ? currentWeeklyMuscleSource : 'week_done');
             const isTemplateMode = (mode === 'schedule_full');
             const includeDone = !isTemplateMode;
             const includePlan = (mode !== 'week_done');
@@ -4320,9 +4435,15 @@
                     const weightedCols = getExerciseCompartmentWeightsForMuscle(m.id, c.exercise, true);
                     weightedCols.forEach(item => {
                         if (compMap[item.key]) {
-                            const factor = (c.role === 'Yardımcı Kas') ? 1.0 : item.weight;
-                            compMap[item.key].earnedSets += (Number(c.earnedSets) || 0) * factor;
+                            const isPrimaryRole = (c.role !== 'Yardımcı Kas');
+                            const factor = isPrimaryRole ? item.weight : 1.0;
+                            const added = (Number(c.earnedSets) || 0) * factor;
+                            compMap[item.key].earnedSets += added;
                             compMap[item.key].doneExs.add(c.exercise);
+                            if (isPrimaryRole && (item.tier === 'primary' || item.tier === 'fallback')) {
+                                compMap[item.key].directSets += added;
+                                compMap[item.key].directExs.add(c.exercise);
+                            }
                         }
                     });
                 });
@@ -4334,6 +4455,10 @@
                             if (compMap[item.key]) {
                                 compMap[item.key].doneExs.add(exName);
                                 if (compMap[item.key].earnedSets === 0) compMap[item.key].earnedSets = item.weight;
+                                if ((item.tier === 'primary' || item.tier === 'fallback') && compMap[item.key].directSets === 0) {
+                                    compMap[item.key].directSets = item.weight;
+                                    compMap[item.key].directExs.add(exName);
+                                }
                             }
                         });
                     });
@@ -4345,11 +4470,21 @@
                     const weightedCols = getExerciseCompartmentWeightsForMuscle(m.id, pe.name, true);
                     weightedCols.forEach(item => {
                         if (compMap[item.key]) {
+                            const isPrimaryRole = (pe.role !== 'Yardımcı Kas');
+                            const factor = isPrimaryRole ? item.weight : 1.0;
+                            const added = (Number(pe.sets) || 3) * factor;
                             if (isTemplateMode) {
-                                const factor = (pe.role === 'Yardımcı Kas') ? 1.0 : item.weight;
-                                compMap[item.key].earnedSets += (Number(pe.sets) || 3) * factor;
+                                compMap[item.key].earnedSets += added;
                                 compMap[item.key].doneExs.add(pe.name);
+                                if (isPrimaryRole && (item.tier === 'primary' || item.tier === 'fallback')) {
+                                    compMap[item.key].directSets += added;
+                                    compMap[item.key].directExs.add(pe.name);
+                                }
                             } else {
+                                compMap[item.key].plannedTotalSets += added;
+                                if (isPrimaryRole && (item.tier === 'primary' || item.tier === 'fallback')) {
+                                    compMap[item.key].plannedDirectSets += added;
+                                }
                                 compMap[item.key].plannedCount += 1;
                                 compMap[item.key].plannedExs.add(pe.name);
                             }
@@ -4369,26 +4504,42 @@
 
             const numBadges = ['①', '②', '③', '④'];
             const headerNumText = def.columns.map((_, i) => numBadges[i] || (i + 1)).join(' ');
+            const mode = (typeof currentWeeklyMuscleSource !== 'undefined') ? currentWeeklyMuscleSource : 'week_done';
 
             const columnsHTML = def.columns.map((col, idx) => {
                 const data = compMap[col.key];
-                const isDone = data.earnedSets > 0;
-                const isPlanned = !isDone && data.plannedExs.size > 0;
-                const numIcon = numBadges[idx] || (idx + 1);
+                const st = evaluateCompartmentState(data, mode);
 
                 let statusBadge = '';
                 let contentHTML = '';
                 let cellBg = 'rgba(255,255,255,0.02)';
                 let cellBorder = '1px solid rgba(255,255,255,0.07)';
 
-                if (isDone) {
+                if (st.isWorked) {
                     cellBg = '#F0FDF4';
                     cellBorder = '1px solid #86EFAC';
                     statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#15803D; background:#DCFCE7; border:1px solid #86EFAC; border-radius:6px; padding:2px 7px;">${data.earnedSets.toFixed(1)} Set</span>`;
                     const exList = Array.from(data.doneExs).map(escapeHTML).join(', ');
                     const planList = data.plannedExs.size > 0 ? `<div style="font-size:11px; color:#B45309; margin-top:3px; font-weight:700;">+ ${Array.from(data.plannedExs).map(escapeHTML).join(', ')} (Planda)</div>` : '';
                     contentHTML = `<div style="font-size:11.5px; color:#1E293B; margin-top:5px; line-height:1.35;"><strong>${exList}</strong>${planList}</div>`;
-                } else if (isPlanned) {
+                } else if (st.isPartial) {
+                    cellBg = '#FFFBEB';
+                    cellBorder = '1px solid #FCD34D';
+                    const partialTag = data.directSets === 0
+                        ? `Yan Etki (${data.earnedSets.toFixed(1)} Set)`
+                        : `Az (${data.earnedSets.toFixed(1)} Set)`;
+                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#B45309; background:#FEF3C7; border:1px solid #FCD34D; border-radius:6px; padding:2px 7px;">${partialTag}</span>`;
+                    const exList = Array.from(data.doneExs).map(escapeHTML).join(', ');
+                    const planList = data.plannedExs.size > 0 ? `<div style="font-size:11px; color:#B45309; margin-top:3px; font-weight:700;">+ ${Array.from(data.plannedExs).map(escapeHTML).join(', ')} (Planda)</div>` : '';
+                    contentHTML = `
+                        <div style="font-size:11px; color:#78350F; margin-top:5px; line-height:1.3;">${exList}${planList}</div>
+                        <div style="margin-top:6px;">
+                            <button class="btn btn-outline" style="font-size:11px; padding:5px 8px; border-radius:6px; color:#B45309; border-color:#FCD34D; width:100%; text-align:center; font-weight:800; background:#FFFFFF;" onclick="openQuickAddToDayModal('${col.recId}')" title="Bu başı doğrudan çalıştırmak için ${col.recName} ekle">
+                                + ${escapeHTML(col.recName)} Ekle
+                            </button>
+                        </div>
+                    `;
+                } else if (st.isPlanned) {
                     cellBg = '#FFFBEB';
                     cellBorder = '1px solid #FCD34D';
                     statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#B45309; background:#FEF3C7; border:1px solid #FCD34D; border-radius:6px; padding:2px 7px;">Planda (${data.plannedCount} Hrk)</span>`;
@@ -4627,9 +4778,8 @@
                         tooltip: `${colLabel}: Veri Yok`
                     };
                 }
-                const isDone = compData.earnedSets > 0;
-                const isPlanned = !isDone && compData.plannedExs && compData.plannedExs.size > 0;
-                if (isDone) {
+                const st = evaluateCompartmentState(compData, currentWeeklyMuscleSource);
+                if (st.isWorked) {
                     return {
                         fill: '#16A34A',
                         stroke: '#14532D',
@@ -4637,7 +4787,16 @@
                         tooltip: `${colLabel}: ${compData.earnedSets.toFixed(1)} Set (${Array.from(compData.doneExs).join(', ')})`
                     };
                 }
-                if (isPlanned) {
+                if (st.isPartial) {
+                    const reason = compData.directSets === 0 ? 'Sadece Yan Etki' : 'Az Set';
+                    return {
+                        fill: '#F59E0B',
+                        stroke: '#B45309',
+                        statusText: `${reason} (${compData.earnedSets.toFixed(1)} Set)`,
+                        tooltip: `${colLabel}: ${reason} — ${compData.earnedSets.toFixed(1)} Set (${Array.from(compData.doneExs).join(', ')})`
+                    };
+                }
+                if (st.isPlanned) {
                     return {
                         fill: '#F59E0B',
                         stroke: '#B45309',
@@ -4700,9 +4859,8 @@
                     if (pStyle.isSel && Array.isArray(subGeom.pins)) {
                         subGeom.pins.forEach(pin => {
                             const cData = compMap[pin.key];
-                            const isDone = cData && cData.earnedSets > 0;
-                            const isPlan = cData && !isDone && cData.plannedExs && cData.plannedExs.size > 0;
-                            const badgeFill = isDone ? '#15803D' : (isPlan ? '#B45309' : '#B91C1C');
+                            const st = evaluateCompartmentState(cData, currentWeeklyMuscleSource);
+                            const badgeFill = st.isWorked ? '#15803D' : ((st.isPartial || st.isPlanned) ? '#B45309' : '#B91C1C');
                             selectedPinsHTML += `
                                 <g transform="translate(${pin.x}, ${pin.y})" style="cursor:pointer;" onclick="selectAnatomyMuscle('${mId}', '${pin.key}', event)">
                                     <circle cx="0" cy="0" r="16" fill="#FFFFFF" stroke="${badgeFill}" stroke-width="3"/>
@@ -4761,23 +4919,25 @@
                 if (!def || !compMap) return;
                 def.columns.forEach((col, idx) => {
                     const cData = compMap[col.key];
-                    const isDone = cData && cData.earnedSets > 0;
-                    const isPlan = cData && !isDone && cData.plannedExs && cData.plannedExs.size > 0;
+                    const st = evaluateCompartmentState(cData, sourceMode);
                     const item = {
                         muscleId: m.id,
                         muscleName: m.name,
                         colKey: col.key,
                         colLabel: col.label,
                         num: idx + 1,
+                        directSets: cData ? cData.directSets : 0,
                         earnedSets: cData ? cData.earnedSets : 0,
                         plannedCount: cData ? cData.plannedCount : 0,
+                        isPartial: st.isPartial,
+                        isPlanned: st.isPlanned,
                         recId: col.recId,
                         recName: col.recName
                     };
-                    if (isDone) {
+                    if (st.isWorked) {
                         subWorkedCount++;
                         subWorkedList.push(item);
-                    } else if (isPlan) {
+                    } else if (st.isPartial || st.isPlanned) {
                         subPlannedCount++;
                         subPlannedList.push(item);
                     } else {
@@ -4799,14 +4959,14 @@
                 currentSelectedAnatomyMuscle = activeId;
             }
 
-            // Quick source buttons (3-column compact segmented bar)
+            // Quick source buttons (3-column compact segmented bar — Yapılan varsayılan ilk sırada)
             const sourceButtons = `
                 <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:5px; margin-top:8px; background:#F8FAFC; padding:4px; border-radius:10px; border:1px solid #E2E8F0;">
-                    <button class="btn btn-outline" style="font-size:11.5px; padding:6px 4px; border-radius:7px; white-space:nowrap; ${sourceMode === 'week_projected' ? 'background:#84CC16 !important; color:#0A0E17 !important; border-color:#65A30D !important; font-weight:800;' : 'border-color:transparent;'}" onclick="setWeeklyMuscleSource('week_projected')">
-                        Yapılan + Plan
-                    </button>
                     <button class="btn btn-outline" style="font-size:11.5px; padding:6px 4px; border-radius:7px; white-space:nowrap; ${sourceMode === 'week_done' ? 'background:#84CC16 !important; color:#0A0E17 !important; border-color:#65A30D !important; font-weight:800;' : 'border-color:transparent;'}" onclick="setWeeklyMuscleSource('week_done')">
                         Yapılan (${analysis.totalDoneSessions})
+                    </button>
+                    <button class="btn btn-outline" style="font-size:11.5px; padding:6px 4px; border-radius:7px; white-space:nowrap; ${sourceMode === 'week_projected' ? 'background:#84CC16 !important; color:#0A0E17 !important; border-color:#65A30D !important; font-weight:800;' : 'border-color:transparent;'}" onclick="setWeeklyMuscleSource('week_projected')">
+                        Yapılan + Plan
                     </button>
                     <button class="btn btn-outline" style="font-size:11.5px; padding:6px 4px; border-radius:7px; white-space:nowrap; ${sourceMode === 'schedule_full' ? 'background:#84CC16 !important; color:#0A0E17 !important; border-color:#65A30D !important; font-weight:800;' : 'border-color:transparent;'}" onclick="setWeeklyMuscleSource('schedule_full')">
                         Şablon
@@ -4841,7 +5001,8 @@
                 const m = activeMuscle;
                 const shownSets = (m.effectiveTotal !== undefined ? m.effectiveTotal : m.effectiveDone);
                 const def = MUSCLE_DIAGRAM_DEFS[m.id];
-                const recCol = def && def.columns && def.columns[0] ? def.columns[0] : null;
+                const recCol = (m.missingSubCols && m.missingSubCols.length > 0 ? m.missingSubCols[0] : null)
+                    || (def && def.columns && def.columns[0] ? def.columns[0] : null);
                 const recExId = recCol ? recCol.recId : 'db_bench_press';
                 const recExName = recCol ? recCol.recName : 'Temel Egzersiz';
 
@@ -4852,7 +5013,8 @@
                     statusBadge = `<span style="background:#DCFCE7; border:1px solid #86EFAC; color:#15803D; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">İdeal Seviye (${shownSets.toFixed(1)} Set)</span>`;
                 } else if (m.status === 'insufficient') {
                     statusClass = 'status-insufficient';
-                    statusBadge = `<span style="background:#FEF3C7; border:1px solid #FCD34D; color:#B45309; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">Az Çalıştı (${shownSets.toFixed(1)} / Hedef: ${m.optimalMin}-${m.optimalMax} Set)</span>`;
+                    const shortLabel = String(m.statusBadge || 'Az Çalıştı').replace(/^⚠️\s*/, '');
+                    statusBadge = `<span style="background:#FEF3C7; border:1px solid #FCD34D; color:#B45309; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">${escapeHTML(shortLabel)} (${shownSets.toFixed(1)} / Hedef: ${m.optimalMin}-${m.optimalMax} Set)</span>`;
                 } else {
                     statusClass = 'status-unworked';
                     statusBadge = `<span style="background:#FEE2E2; border:1px solid #FCA5A5; color:#B91C1C; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">0 Set — Henüz Çalışmadı</span>`;
@@ -4869,17 +5031,23 @@
                 // Quick Action Button
                 let actionBtnHTML = '';
                 if (m.status === 'unworked' || m.status === 'insufficient') {
+                    const reasonLine = (m.status === 'insufficient' && m.statusDesc)
+                        ? `<div style="font-size:11.5px; color:#92400E; font-weight:700; margin-bottom:8px;">${escapeHTML(m.statusDesc)}</div>`
+                        : '';
                     actionBtnHTML = `
-                        <div style="margin-top:12px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-                            <button class="btn btn-gold" style="flex:1; min-width:180px; padding:10px 14px; font-size:13px; font-weight:800; border-radius:8px;" onclick="openQuickAddToDayModal('${recExId}')">
-                                + ${escapeHTML(recExName)} Ekle (${escapeHTML(m.name)} Takviyesi)
-                            </button>
+                        <div style="margin-top:12px;">
+                            ${reasonLine}
+                            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                                <button class="btn btn-gold" style="flex:1; min-width:180px; padding:10px 14px; font-size:13px; font-weight:800; border-radius:8px;" onclick="openQuickAddToDayModal('${recExId}')">
+                                    + ${escapeHTML(recExName)} Ekle (${escapeHTML(m.name)} Takviyesi)
+                                </button>
+                            </div>
                         </div>
                     `;
                 } else {
                     actionBtnHTML = `
                         <div style="margin-top:10px; font-size:12px; color:#15803D; font-weight:700; display:flex; align-items:center; gap:6px;">
-                            <span>Bu bölge bu hafta yeterince çalıştı (${shownSets.toFixed(1)} Set).</span>
+                            <span>Bu bölge dengeli ve yeterince çalıştı (${shownSets.toFixed(1)} Set • ${m.coveredSubCount || 0}/${m.totalSubCount || 0} Alt Bölge).</span>
                         </div>
                     `;
                 }
@@ -4983,10 +5151,10 @@
                             <span class="badge-val">${optimalTotal}</span>
                             <span class="badge-label" style="white-space:nowrap; font-size:11px;">İyi (${subWorkedCount} Alt)</span>
                         </div>
-                        <div class="anatomy-legend-item insufficient" style="cursor:pointer; justify-content:center; padding:6px 4px; ${currentWeeklyMuscleFilter === 'insufficient' ? 'box-shadow: 0 0 0 2.5px #B45309; background:#FEF3C7;' : ''}" onclick="setWeeklyMuscleFilter('insufficient')" title="Az çalışan / planda olan ana kas gruplarını ve alt kasları listele">
+                        <div class="anatomy-legend-item insufficient" style="cursor:pointer; justify-content:center; padding:6px 4px; ${currentWeeklyMuscleFilter === 'insufficient' ? 'box-shadow: 0 0 0 2.5px #B45309; background:#FEF3C7;' : ''}" onclick="setWeeklyMuscleFilter('insufficient')" title="Az çalışan / eksik bölge / planda olan ana kas gruplarını ve alt kasları listele">
                             <div class="badge-dot"></div>
                             <span class="badge-val">${summary.insufficientCount}</span>
-                            <span class="badge-label" style="white-space:nowrap; font-size:11px;">Planda (${subPlannedCount} Alt)</span>
+                            <span class="badge-label" style="white-space:nowrap; font-size:11px;">Az / Plan (${subPlannedCount} Alt)</span>
                         </div>
                         <div class="anatomy-legend-item unworked" style="cursor:pointer; justify-content:center; padding:6px 4px; ${currentWeeklyMuscleFilter === 'unworked' ? 'box-shadow: 0 0 0 2.5px #B91C1C; background:#FEE2E2;' : ''}" onclick="setWeeklyMuscleFilter('unworked')" title="Hiç çalışmayan ana kas gruplarını ve 0 set kalan alt kasları listele">
                             <div class="badge-dot"></div>
@@ -5027,9 +5195,12 @@
 
                         const subHTML = subMatches.length > 0
                             ? subMatches.map(it => {
-                                const meta = isOpt ? `${it.earnedSets.toFixed(1)} Set` : (isIns ? `Planda (${it.plannedCount} Hrk)` : `0 Set`);
-                                const quickAddBtn = (!isOpt && !isIns && it.recId)
-                                    ? `<button type="button" class="btn btn-outline" style="font-size:11px; padding:4px 8px; border-radius:6px; background:#FEF2F2; color:#B91C1C; border-color:#FECACA; font-weight:800;" onclick="openQuickAddToDayModal('${it.recId}')">+ ${escapeHTML(it.recName)} Ekle</button>`
+                                const partialTxt = it.isPartial
+                                    ? `${it.directSets > 0 ? 'Az' : 'Yan Etki'} (${it.earnedSets.toFixed(1)} Set)`
+                                    : `Planda (${it.plannedCount} Hrk)`;
+                                const meta = isOpt ? `${it.earnedSets.toFixed(1)} Set` : (isIns ? partialTxt : `0 Set`);
+                                const quickAddBtn = ((!isOpt && !isIns) || (isIns && it.isPartial)) && it.recId
+                                    ? `<button type="button" class="btn btn-outline" style="font-size:11px; padding:4px 8px; border-radius:6px; background:${isIns ? '#FFFBEB' : '#FEF2F2'}; color:${isIns ? '#B45309' : '#B91C1C'}; border-color:${isIns ? '#FCD34D' : '#FECACA'}; font-weight:800;" onclick="openQuickAddToDayModal('${it.recId}')">+ ${escapeHTML(it.recName)} Ekle</button>`
                                     : '';
                                 return `
                                     <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; padding:7px 10px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px;">
@@ -7884,8 +8055,16 @@
             let muscleScoreProjected = 0;
             const muscleBreakdown = (muscleDoneAnalysis.muscles || []).map((m, idx) => {
                 const projM = (muscleProjAnalysis.muscles && muscleProjAnalysis.muscles[idx]) || m;
-                const doneRatio = Math.min(1, Math.max(0, (m.effectiveDone || 0) / Math.max(1, m.optimalMin || 6)));
-                const projRatio = Math.min(1, Math.max(0, (projM.effectiveTotal || 0) / Math.max(1, m.optimalMin || 6)));
+                let doneRatio = Math.min(1, Math.max(0, (m.effectiveDone || 0) / Math.max(1, m.optimalMin || 6)));
+                let projRatio = Math.min(1, Math.max(0, (projM.effectiveTotal || 0) / Math.max(1, m.optimalMin || 6)));
+                const capIncomplete = (ratio, obj) => {
+                    if (!obj || obj.status !== 'insufficient' || ratio <= 0.6) return ratio;
+                    const covRatio = obj.requiredSubCount > 0 ? ((obj.coveredSubCount || 0) / obj.requiredSubCount) : 1;
+                    const dirRatio = obj.minRequiredDirect > 0 ? ((obj.evalDirectVolume || 0) / obj.minRequiredDirect) : 1;
+                    return Math.min(ratio, Math.max(0.35, Math.min(covRatio, dirRatio) * 0.75));
+                };
+                doneRatio = capIncomplete(doneRatio, m);
+                projRatio = capIncomplete(projRatio, projM);
                 const ptsDone = Math.round(doneRatio * 4.5 * 10) / 10;
                 const ptsProj = Math.round(projRatio * 4.5 * 10) / 10;
                 muscleScoreDone += doneRatio * 4.5;

@@ -2187,6 +2187,8 @@
                 kettlebell: 'Kettlebell',
                 barbell: 'Barbell',
                 machine: 'Makine/Kablo',
+                mini_band: 'Kısa Bant',
+                resistance_band: 'Uzun Bant',
                 bodyweight: 'Vücut Ağırlığı'
             };
 
@@ -4206,7 +4208,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 'pullup': 'bw_pullup', 'pull up': 'bw_pullup', 'pull-up': 'bw_pullup', 'barfiks': 'bw_pullup',
                 'chinup': 'bw_chinup', 'chin up': 'bw_chinup', 'chin-up': 'bw_chinup', 'ters barfiks': 'bw_chinup',
                 'pushup': 'bw_pushup', 'push up': 'bw_pushup', 'push-up': 'bw_pushup', 'sinav': 'bw_pushup', 'şınav': 'bw_pushup',
-                'dips': 'bw_dips', 'dip': 'bw_dips',
+                'dips': 'bw_dips', 'dip': 'bw_dips', 'bench dips': 'bw_bench_dips', 'bench dip': 'bw_bench_dips', 'sehpada dips': 'bw_bench_dips',
                 'burpee': 'bw_burpee',
                 'deadlift': 'bb_deadlift', 'barbell deadlift': 'bb_deadlift',
                 'rdl': 'db_rdl', 'romanian deadlift': 'db_rdl',
@@ -6274,6 +6276,9 @@ KURALLAR:
                     superset_max: 'Maksimum Süperset',
                     complex: 'Birleşik Akış (Kompleks)',
                     emom: 'EMOM Döngüsü',
+                    emom_strength: 'Kuvvet EMOM',
+                    emom_hypertrophy: 'Kas EMOM',
+                    emom_conditioning: 'Kondisyon EMOM',
                     straight: 'Klasik Düz Set',
                     classic: 'Klasik'
                 };
@@ -9118,7 +9123,7 @@ KURALLAR:
             const wrap = document.getElementById('studioOwnedEquipChips');
             if (!wrap) return;
 
-            const eqOrder = ['dumbbell', 'bench', 'kettlebell', 'barbell', 'pullup_bar', 'machine', 'bodyweight'];
+            const eqOrder = ['dumbbell', 'bench', 'kettlebell', 'barbell', 'pullup_bar', 'dips_bar', 'machine', 'mini_band', 'resistance_band', 'bodyweight'];
             wrap.innerHTML = eqOrder.map(eqKey => {
                 const isSelected = selectedEquipments.includes(eqKey);
                 const label = (typeof EQUIPMENT_DISPLAY_NAMES !== 'undefined' && EQUIPMENT_DISPLAY_NAMES[eqKey]) || eqKey;

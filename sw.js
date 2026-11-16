@@ -1,4 +1,4 @@
-const CACHE_NAME = 'celik-kodu-cache-v317';
+const CACHE_NAME = 'celik-kodu-cache-v318';
 const ASSETS = [
   './',
   './index.html',
@@ -205,6 +205,20 @@ const ASSETS = [
   './assets/exercises/db_single_arm_rear_delt_row.webp',
   './assets/exercises/db_high_pull_cuban_rotation.gif',
   './assets/exercises/db_high_pull_cuban_rotation.webp',
+  './assets/exercises/bw_dips.gif',
+  './assets/exercises/bw_dips.webp',
+  './assets/exercises/mb_monster_walk.gif',
+  './assets/exercises/mb_glute_bridge_abduction.gif',
+  './assets/exercises/mb_banded_squat.gif',
+  './assets/exercises/mb_external_rotation.gif',
+  './assets/exercises/mb_clamshell.gif',
+  './assets/exercises/rb_pull_apart.gif',
+  './assets/exercises/rb_lat_pulldown.gif',
+  './assets/exercises/rb_seated_row.gif',
+  './assets/exercises/rb_chest_press.gif',
+  './assets/exercises/rb_bicep_curl.gif',
+  './assets/exercises/rb_triceps_pushdown.gif',
+  './assets/exercises/rb_good_morning.gif',
   './assets/exercises/db_dumbbell_shrug_burnout.webp',
   './assets/exercises/db_quadruped_external_rotation.webp',
   './assets/exercises/bw_jumping_jack.gif',

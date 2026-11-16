@@ -1,6 +1,6 @@
 # 🛡️ ÇELİK KODU — 7 BAĞIMSIZ ŞEF ODASI, KÖPRÜ GÜMRÜĞÜ & HATA HAFIZASI PANELİ (TAB_HEALTH)
 
-> **Son Otomatik Kontrol:** `2026-11-16 21:50:00` | **Bağımsız Oda Dosyası:** `11/11` | **Toplam Hareket:** `285` | **Kırık Bağlantı:** `0` | **Matematik & Gümrük Sınavı:** `24/24`
+> **Son Otomatik Kontrol:** `2026-11-16 22:03:28` | **Bağımsız Oda Dosyası:** `11/11` | **Toplam Hareket:** `301` | **Kırık Bağlantı:** `0` | **Matematik & Gümrük Sınavı:** `28/29`
 
 ---
 
@@ -8,13 +8,13 @@
 
 | Alan & Sorumlu Şef | Fiziksel Odası | Kabiliyeti (Ne Yapar?) | En Çok Nerede Hata Yapar? (Bekçinin Koruduğu Yer) | Ekran Kontrolü | Matematik & Gümrük Sınavı |
 | :--- | :--- | :--- | :--- | :---: | :---: |
-| **1. Üretici Şefi** (`generator-guard`) | `js/chiefs/generator-chief.js` (155 fn) | Sana uygun antrenmanı kurar, ardışık günde doğrudan çalışmayan alt kasları seçer, gizli hareketi asla çıkarmaz | Ardışık günde dünkü alt kası tekrar seçmesi, gizlenen hareketin çıkması, hareket değiştirirken ekranın zıplaması | 🟢 Sorunsuz | 🟢 2/2 Geçti |
-| **2. Antrenman & Stüdyo Şefi** (`workout-guard`) | `js/chiefs/workout-chief.js` (244 fn) | Antrenman sırasında set/kilo/süre/dakika tutar, son ağır seti hatırlar, kendi özel programını kurdurur | Back-off set kilosunu hatırlaması, süreli harekete 8-12 tekrar yazması, kardiyo dakikasını tekrara eklemesi | 🟢 Sorunsuz | 🟢 2/2 Geçti |
-| **3. Kütüphane Şefi** (`library-guard`) | `js/chiefs/library-chief.js` (38 fn) | Tüm hareketlerin form/kas/birim kimliğini korur, istemediğin hareketi tüm sistemden gizler | Süreli/dakikalı hareketi tekrarlı sanması, gizlenen hareketin sayacı bozması | 🟢 Sorunsuz | 🟢 2/2 Geçti |
-| **4. Geçmiş Şefi** (`history-guard`) | `js/chiefs/history-chief.js` (66 fn) | Tamamlanan seansları gümrükten geçirip saklar, bozuk veriyi engeller, düzenleme/silmeyi Analiz ile eşitler | Bozuk/boş kaydın geçmişe sızması, kardiyo dakikasının tonaj şişirmesi, silinen kaydın Analizden düşmemesi | 🟢 Sorunsuz | 🟢 3/3 Geçti |
-| **5. Analiz Şefi** (`analytics-guard`) | `js/chiefs/analytics-chief.js` (91 fn) | Kas yükünü, set dayanıklılığını, Epley zirve rekorunu, haftalık fitness/kardiyo puanını ve güncel kiloyu hesaplar | Piramit/drop-seti güç düşüşü sanmak, çift Zirve Rekor basmak, 30 günlük eski tartı kiloyu sıfırlamak | 🟢 Sorunsuz | 🟢 9/9 Geçti |
-| **6. Profil Şefi** (`profile-guard`) | `js/chiefs/profile-chief.js` (128 fn) | Verilerini güvenle yedekler, şifre/API anahtarlarını buluttan izole eder ve tema okunabilirliğini korur | Açık zeminde açık renk yazı kalması, dışa aktarımda gizli anahtar/şifre sızması | 🟢 Sorunsuz | 🟢 1/1 Geçti |
-| **7. Garmin & Tredict Şefi** (`garmin-tredict-guard`) | `js/garmin-tredict-bridge.js` (96 fn) | Yeni hareketlerin Garmin karşılığını library-guard kaslarıyla kıyaslar, olmayanları isimsiz+notlu gönderir, dönüşte saatin adını değil bizdeki orijinal adı koruyup sağlık verilerini ilgili şefe iletir | Saatten gelen ham hareket adının olduğu gibi alınması, Garmin’de olmayan harekete zorlama isim verilmesi | 🟢 Sorunsuz | 🟢 5/5 Geçti |
+| **1. Üretici Şefi** (`generator-guard`) | `js/chiefs/generator-chief.js` (166 fn) | Sana uygun antrenmanı kurar, ardışık günde doğrudan çalışmayan alt kasları seçer, gizli hareketi asla çıkarmaz | Ardışık günde dünkü alt kası tekrar seçmesi, gizlenen hareketin çıkması, hareket değiştirirken ekranın zıplaması | 🟢 Sorunsuz | 🔴 1/2 HATA |
+| **2. Antrenman & Stüdyo Şefi** (`workout-guard`) | `js/chiefs/workout-chief.js` (277 fn) | Antrenman sırasında set/kilo/süre/dakika tutar, son ağır seti hatırlar, kendi özel programını kurdurur | Back-off set kilosunu hatırlaması, süreli harekete 8-12 tekrar yazması, kardiyo dakikasını tekrara eklemesi | 🟢 Sorunsuz | 🟢 4/4 Geçti |
+| **3. Kütüphane Şefi** (`library-guard`) | `js/chiefs/library-chief.js` (38 fn) | Tüm hareketlerin form/kas/birim kimliğini korur, istemediğin hareketi tüm sistemden gizler | Süreli/dakikalı hareketi tekrarlı sanması, gizlenen hareketin sayacı bozması | 🟢 Sorunsuz | 🟢 3/3 Geçti |
+| **4. Geçmiş Şefi** (`history-guard`) | `js/chiefs/history-chief.js` (66 fn) | Tamamlanan seansları gümrükten geçirip saklar, bozuk veriyi engeller, düzenleme/silmeyi Analiz ile eşitler | Bozuk/boş kaydın geçmişe sızması, kardiyo dakikasının tonaj şişirmesi, silinen kaydın Analizden düşmemesi | 🟢 Sorunsuz | 🟢 2/2 Geçti |
+| **5. Analiz Şefi** (`analytics-guard`) | `js/chiefs/analytics-chief.js` (92 fn) | Kas yükünü, set dayanıklılığını, Epley zirve rekorunu, haftalık fitness/kardiyo puanını ve güncel kiloyu hesaplar | Piramit/drop-seti güç düşüşü sanmak, çift Zirve Rekor basmak, 30 günlük eski tartı kiloyu sıfırlamak | 🟢 Sorunsuz | 🟢 11/11 Geçti |
+| **6. Profil Şefi** (`profile-guard`) | `js/chiefs/profile-chief.js` (128 fn) | Verilerini güvenle yedekler, şifre/API anahtarlarını buluttan izole eder ve tema okunabilirliğini korur | Açık zeminde açık renk yazı kalması, dışa aktarımda gizli anahtar/şifre sızması | 🟢 Sorunsuz | 🟢 2/2 Geçti |
+| **7. Garmin & Tredict Şefi** (`garmin-tredict-guard`) | `js/garmin-tredict-bridge.js` (97 fn) | Yeni hareketlerin Garmin karşılığını library-guard kaslarıyla kıyaslar, olmayanları isimsiz+notlu gönderir, dönüşte saatin adını değil bizdeki orijinal adı koruyup sağlık verilerini ilgili şefe iletir | Saatten gelen ham hareket adının olduğu gibi alınması, Garmin’de olmayan harekete zorlama isim verilmesi | 🟢 Sorunsuz | 🟢 5/5 Geçti |
 
 ---
 
@@ -40,13 +40,13 @@
 - **Tavsiye Edilen Hareketler Sağlam mı?:** 51 tavsiye butonu kontrol edildi -> **✅ Hepsi sağlam (0 hata)**
 - **Sayfa Zıplama (Scroll) Koruması:** ✅ Tüm odalarda ekran sabitleme aktif (0 uyarı)
 - **7. Şef (`garmin-tredict-guard`) Orijinal Ad & Sağlık Telemetrisi Koruması:** ✅ Aktif
-- **Modal & Hareketli Görsel Denetimi (126 Ana Hareket):**
+- **Modal & Hareketli Görsel Denetimi (139 Ana Hareket):**
   - `window.exerciseGuideMap` Global Erişim: **✅ Açık**
   - Diskte Eksik Olan MP4 Dosyası: **✅ 0 Eksik**
 
 ---
 
-## 4. Otomatik Bekçi Raporu — B) 7 Şef Matematik, Gümrük & Hata Hafızası Sınavı (24/24)
+## 4. Otomatik Bekçi Raporu — B) 7 Şef Matematik, Gümrük & Hata Hafızası Sınavı (28/29)
 
 | Test | Sorumlu Şef | Senaryo | Beklenen (Olması Gereken) | Gerçekleşen (Sistem Çıktısı) | Sonuç |
 | :--- | :--- | :--- | :--- | :--- | :---: |
@@ -55,7 +55,7 @@
 | `T3` | `analytics-guard` | Kontrollü Drop-Set (45→40→35 kg × 10) | category=drop_set & "Kontrollü Kilo Düşürme" | drop_set • 🔻 Kontrollü Kilo Düşürme (-10 kg) | ✅ Geçti |
 | `T4` | `analytics-guard` | Willardson Sabit Kilo Normal Yorgunluk (-2 tekrar) | category=normal_fatigue & "Doğal Kas Yorgunluğu (-2 tekrar)" | normal_fatigue • 🔋 Doğal Kas Yorgunluğu (-2 tekrar) | ✅ Geçti |
 | `T5` | `analytics-guard` | Sabit Kilo Hızlı Güç Çöküşü (12→10→7 tekrar, -5) | category=early_drop & "Hızlı Güç Düşüşü (-5 tekrar)" | early_drop • ⚡ Hızlı Güç Düşüşü (-5 tekrar) | ✅ Geçti |
-| `T6` | `library-guard` | 3-Mod DB Denetimi (3 Cardio/6 Time/117 Rep) & Miras Hollow Body | cardio=3, time=6, reps=117; Hollow 12→10→8 normal_fatigue(sn), 40→20 early_drop | DB=3/6/117, H1=normal_fatigue, H2=early_drop(⚡ Süre Düşüşü (-20 sn)) | ✅ Geçti |
+| `T6` | `library-guard` | 3-Mod DB Denetimi (3 Cardio/6 Time/130 Rep) & Miras Hollow Body | cardio=3, time=6, reps=130; Hollow 12→10→8 normal_fatigue(sn), 40→20 early_drop | DB=3/6/130, H1=normal_fatigue, H2=early_drop(⚡ Süre Düşüşü (-20 sn)) | ✅ Geçti |
 | `T7` | `history-guard` | Eşli Set Seçimi (10×12 + 15×8) & Geçmiş Kardiyo 0 Tonaj | latest=15 kg × 8; editDraft cardio vol=0 | latest=15kg×8, editVol=0 | ✅ Geçti |
 | `T8` | `analytics-guard` | Epley Zirve Rekoru (20×10) + Israetel 2 Seans Üst Üste Yorgunluk | peak=20×10, twoSessionFatigue=true, status=dip | peak=20×10, 2s=true, status=dip | ✅ Geçti |
 | `T9` | `workout-guard` | Helms Top-Set Ağırlık Hafızası (35 kg) & Ağırlıksız BW ("") | Incline=35 kg, Şınav="", Kürek="" | Incline=35, Şınav="", Kürek="" | ✅ Geçti |
@@ -63,14 +63,19 @@
 | `T11` | `analytics-guard` | Kardiyo Puanı, 0 Tonaj & TUT Nabız Eşdeğer Dakika | vol=0, strengthSets=0, rawMin=23 (20+3), eqMin=26 (20+6) | cardVol=0, strSets=0, rawMin=23, eqMin=26 | ✅ Geçti |
 | `T12` | `analytics-guard` | 45 Günlük Eski Tartı Kiloyu Aktif Tutma & BW Hacmi | bw=79.2 kg, pullup10=752.4, telemetry=79.2 | bw=79.2, pullupVol=752.4 (beklenen 752.4), tel=79.2 | ✅ Geçti |
 | `T13` | `generator-guard` | Gizli Hareket & Ev Ekipmanı İzolasyonu + 3-Mod Hedef Etiketi | gizli=0, bar/makine=0, Plank="30 sn", Kürek="20 dk" (1 set) | adet=6, gizli=false, yabancıEkip=0, Plank=30 sn, Kürek=1×20 dk | ✅ Geçti |
-| `T14` | `generator-guard` | Ardışık Gün Doğrudan Çalışmayan Alt Kas Seçimi (A3) | Dünkü birincil 31 alt kasla çakışma = 0 (hem günlük hem haftalık ardışık günde) | korunanAltKas=7, günlükÇakışma=0, haftalıkArdışıkÇakışma=0 | ✅ Geçti |
+| `T14` | `generator-guard` | Ardışık Gün Doğrudan Çalışmayan Alt Kas Seçimi (A3) | Dünkü birincil 31 alt kasla çakışma = 0 (hem günlük hem haftalık ardışık günde) | korunanAltKas=7, günlükÇakışma=0, haftalıkArdışıkÇakışma=5, ov=db_front_squat:legs_quad_outer, db_front_squat:legs_quad_inner, mb_glute_bridge_abduction:legs_glutes_max, mb_glute_bridge_abduction:legs_glutes_med, mb_glute_bridge_abduction:legs_ham_hinge | ❌ KALDI |
 | `T15` | `profile-guard` | Şifre/API Anahtarı İzolasyonu & Açık Zemin Kontrast Denetimi | 5 gizli alan sızıntısı = 0, açık zemin soluk yazı ihlali = 0 | sızıntı=0, güvenliAlan=true, kontrastİhlali=0 | ✅ Geçti |
 | `T16` | `garmin-tredict-guard` | İsimsiz+Notlu Saat Gönderimi & Orijinal Hareket Adı + Nabız İadesi | matchType=unmapped_noted, dönen ad="Dambıl Floor Press to Glute Bridge", nabız=148/166 | audit=unmapped_noted, ad="Dambıl Floor Press to Glute Bridge (Göğüs & Kalça Köprüsü)", nabız=148/166 | ✅ Geçti |
 | `T17` | `history-guard` | Köprü Gümrüğü (A2): Eksik Birim/Tarih Onarımı & Bozuk Kayıt Engeli | bozuk/boş kayıt engellendi (>=2), kardiyo sahte tonajı 0 kg onarıldı (>=1) | kayıt=1, tonaj=0kg, tartı=1, onarılan=3, engellenen=2 | ✅ Geçti |
 | `T18` | `analytics-guard` | Hata Hafızası Sicili: Tekil "🏆 Zirve Rekor" & Kardiyo Dakika Tekrar Hariçliği | Kart başına "🏆 Zirve Rekor" = 1 adet, tamamlanan seans tekrarında kardiyo dk = 0 | zirveRekorSayısı=1, toplamTekrar=12 (25 dk kürek hariç) | ✅ Geçti |
 | `T19` | `library-guard` | Bağlantı Alt Şefleri, Kutu Arıza Duvarı, Döngü Kilidi & Ekranda Bildirim | Gizli hareket taslak+takvimden değişir, hatalı kutu karantinaya alınır, döngü=1, bildirim > 0 | taslakTemiz=true, takvimTemiz=true, karantina=true, komşuSağlam=true, bildirim=2 | ✅ Geçti |
-| `T20` | `garmin-tredict-guard` | Merkez Saat Kasası & Aynı Gün Bağımsız Yürüyüş İzolasyonu | mühürlü saat kasası açık, açık metin sızıntısı 0, Defne Yürüyüşü (cond_walking) aynı gün kuvvet kaydını ezmeden bağımsız açıldı | kasa=true/mühür=true, katalog=true, kuvvet=true, kayıt=2, yürüyüş=cond_walking(2212m,123/152bpm,135kcal) | ✅ Geçti |
-| `T21` | `garmin-tredict-guard` | Çoklu Cihaz İsim Düzenleme Koruması & Saat/Geçmiş Senkronu | eski saat önbelleği kullanıcı düzenlemesini ezemez, ilk bulut açılış kapısı erken push engeller, aynı gün kuvvet+yürüyüş korunur, saat paneli güncel başlığı gösterir | erkenPush=0, eldenÇıkış=true/true, pull=true(2), push=true(2), panel=true/eskiYok=true | ✅ Geçti |
-| `T22` | `garmin-tredict-guard` | Kanonik Takvim Çözümlemesi, Tarih Öneki & Sıfır Mükerrer Saat Gönderimi | haftalık+tarih çakışmasında mükerrer gün = 0, override tekil geçerli, başlıkta kısa ay tarih öneki | toplamGün=3, mükerrersiz=true, overrideTekil=true, başlık="16 Kas • Bugün: Özel İtiş" | ✅ Geçti |
-| `T23` | `garmin-tredict-guard` | Fitness Saat Kapsülü, Eşleme & Onay/Silme İzolasyonu | kardiyo doğrudan puanlanır, fitness seansı onaylanana kadar geçmişe/analize giremez, kapsülde hareket eşleme serbesttir, onaylanınca bağımsız seans olarak eklenir, silinen seans tamamen temizlenir | kardiyoDoğrudan=true, erkenTarihYok=true, butonlar=true, seansSayısı=3, eşleme=true(set0=true, set1=true), silmeTemiz=true | ✅ Geçti |
-| `T24` | `history-guard` | Geçmiş Detay Modalı: Yerinde Set Düzenleme & Kompakt Kas Butonu | yerinde edit modu=true; kaydetme=25kg*10tk; modal açık kaldı; menü düzenle yok | kaslarKompakt=true, editModu=true, modalAçık=true, kilo=25, tonaj=250, menüTemiz=true | ✅ Geçti |
+| `T20` | `workout-guard` | Hata Hafızası Sicili: Canlı Odak Dinlenme Ekranı, Çift Gelişim Eğrisi & Süperset Döngüsü | Düz set dinlenme=aktif, çift eğri=kilo+tekrar, A1 bitişi=A2 önizleme, A2 bitişi=A1 tur 2 | dinlenmeKartı=true, çiftEğri=true, A2Önizleme=true, odakA2=true, tur2Önizleme=true, odakA1Tur2=true | ✅ Geçti |
+| `T21` | `garmin-tredict-guard` | Merkez Saat Kasası & Aynı Gün Bağımsız Yürüyüş İzolasyonu | mühürlü saat kasası açık, açık metin sızıntısı 0, Defne Yürüyüşü (cond_walking) aynı gün kuvvet kaydını ezmeden bağımsız açıldı | kasa=true/mühür=true, katalog=true, kuvvet=true, kayıt=2, yürüyüş=cond_walking(2212m,123/152bpm,135kcal) | ✅ Geçti |
+| `T22` | `garmin-tredict-guard` | Çoklu Cihaz İsim Düzenleme Koruması & Saat/Geçmiş Senkronu | eski saat önbelleği kullanıcı düzenlemesini ezemez, ilk bulut açılış kapısı erken push engeller, aynı gün kuvvet+yürüyüş korunur, saat paneli güncel başlığı gösterir | erkenPush=0, eldenÇıkış=true/true, pull=true(2), push=true(2), panel=true/eskiYok=true | ✅ Geçti |
+| `T23` | `garmin-tredict-guard` | Kanonik Takvim Çözümlemesi & Sıfır Mükerrer Saat Gönderimi | haftalık+tarih çakışmasında mükerrer gün = 0, override tekil geçerli, başlıkta kısa ay tarih öneki | toplamGün=4, mükerrersiz=true, overrideTekil=true, başlık="17 Kas • Bugün: Özel İtiş" | ✅ Geçti |
+| `T24` | `profile-guard` | Bulut Birleşmesinde Sıfır Boş (undefined) Alan | saat/sağlık bilgisi olmayan eski kayıt birleşince undefined alan = 0, telefondaki yeni seans korunur | undefined=0, telefonSeansıKorundu=true, toplam=2 | ✅ Geçti |
+| `T25` | `garmin-tredict-guard` | Onay Bekleyen Kapsülde Sıfır Boş / Mükerrer Seans | set verisi olmayan veya geçmişte kaydı olan saat seansı onaya düşmez; gerçek yeni seans düşer | bildirim=1, yeniVar=true, boşVar=false, kayıtlıVar=false | ✅ Geçti |
+| `T26` | `analytics-guard` | Set Arası Plank = Kuvvet, Jumping Jack = Kardiyo | set arası plank kuvvet seti sayılır, jumping jack kuvvet setine girmez ve kardiyo listesinde görünür | temel=3, plankİle=4 (beklenen 4), jackİle=3 (beklenen 3), jackKardiyoda=true | ✅ Geçti |
+| `T27` | `workout-guard` | Süreli Set Arası Sayaç & Odak Ekranı Ekleme | süreli ara hareket otomatik yapıldı sayılmaz, sayaç açılır, süre bitince yapıldı olur; Odak dinlenme ekranında ekle düğmesi var | {"notAutoDone":true,"overlayOpen":true,"doneAfter":true,"overlayClosed":true,"repsDone":true,"noTimerForReps":true,"focusHasAdd":true} | ✅ Geçti |
+| `T28` | `analytics-guard` | Tek Hareketle Sahte İdeal Kas & Yan Etki Alt Kas Koruması (Schoenfeld/Pelland) | varsayılan=week_done; sadece Russian Twist (8 set bile) Karını ideal yapmaz, Ön/Derin Karın yeşil yanmaz; Barda Dize Çekme eklenince ideal olur; Göğüste tek Bench=eksik bölge | {"defaultSource":"week_done","core1Status":"insufficient","core1Covered":1,"chest1Status":"insufficient","obliqWorked":true,"rectusWorked":false,"rectusPartial":true,"transWorked":false,"core2Status":"optimal","core2Covered":2} | ✅ Geçti |
+| `T29` | `library-guard` | Paralel Bar Dips (bw_dips) ve Sehpada Dips (bw_bench_dips) Ayrımı & Medya Bütünlüğü | bw_dips=0251.mp4+chest_lower+dips_bar; bw_bench_dips=1399.mp4+triceps+bench (chest yok) | {"hasDips":true,"hasBenchDips":true,"dipsClipOk":true,"benchClipOk":true,"dipsHasLowerChest":true,"benchNoChest":true,"dipsReqBar":true,"benchReqBench":true,"staleCloudDidNotOverwrite":true} | ✅ Geçti |

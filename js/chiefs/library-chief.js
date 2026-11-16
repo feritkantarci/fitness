@@ -539,7 +539,7 @@
                 clearBtn.style.display = q ? 'block' : 'none';
             }
 
-            const cacheKey = `${currentLibraryExerciseMode}|${excludedIds.join(',')}`;
+            const cacheKey = `${currentLibraryExerciseMode}|${EXERCISES_DB.length}|${excludedIds.join(',')}`;
             if (container._libCatalogCacheKey !== cacheKey || !container.querySelector('[data-lib-ex-id]')) {
                 buildLibraryCatalogDOM(container, excludedIds);
                 container._libCatalogCacheKey = cacheKey;

@@ -489,8 +489,8 @@ function runAcademicMathSuite(moduleSources, dbText) {
     {
       id: 'T6',
       owner: 'library-guard',
-      title: '3-Mod DB Denetimi (3 Cardio/6 Time/117 Rep) & Miras Hollow Body',
-      expected: 'cardio=3, time=6, reps=117; Hollow 12→10→8 normal_fatigue(sn), 40→20 early_drop',
+      title: '3-Mod DB Denetimi (3 Cardio/6 Time/130 Rep) & Miras Hollow Body',
+      expected: 'cardio=3, time=6, reps=130; Hollow 12→10→8 normal_fatigue(sn), 40→20 early_drop',
       run: () => {
         ctx.__seedState();
         const counts = vm.runInContext(`(() => {
@@ -520,7 +520,7 @@ function runAcademicMathSuite(moduleSources, dbText) {
             ]
           }]
         }]).items[0];
-        const ok = counts.cardio_min === 3 && counts.time_sec === 6 && counts.reps === 117
+        const ok = counts.cardio_min === 3 && counts.time_sec === 6 && counts.reps === 130
           && hMode === 'time_sec'
           && Boolean(h1 && h1.category === 'normal_fatigue' && String(h1.setChainText).includes('sn') && !String(h1.adviceText).includes('kiloya'))
           && Boolean(h2 && h2.category === 'early_drop' && String(h2.badgeText).includes('Süre Düşüşü'));
@@ -766,38 +766,53 @@ function runAcademicMathSuite(moduleSources, dbText) {
               if (blocked.has(pk)) overlaps.push(ex.id + ':' + pk);
             }
           }
-          // Haftalık ardışık gün testi (Pazartesi=1 -> Salı=2)
-          window.selectedAiWeeklyDays = [1, 2];
-          window.selectedAiWeeklyTemplate = 'full_body_abc';
-          applyAiWeeklySchedule('bb_hybrid', '');
-          const wkDays = (window.pendingAiWeeklyPlan && window.pendingAiWeeklyPlan.days) || [];
-          const d1Primary = new Set();
-          if (wkDays[0] && wkDays[0].workout) {
-            (wkDays[0].workout.exercises || []).forEach(ex => {
-              const anat = getExerciseAnatomy(ex);
-              ((anat && anat.primarySubKeys) || []).forEach(pk => d1Primary.add(pk));
-            });
+          // Haftalık ardışık gün testi (gerçek 24 saat aralıklı ardışık Cuma -> Cumartesi -> Pazar penceresi)
+          const OrigDate = Date;
+          const FRI_NOW = new OrigDate('2026-11-20T10:00:00+03:00').getTime();
+          class FriMockDate extends OrigDate {
+            constructor(...args) { super(args.length ? args[0] : FRI_NOW, ...(args.slice(1))); }
+            static now() { return FRI_NOW; }
           }
+          let wkDays = [];
           const wkOverlaps = [];
-          if (wkDays[1] && wkDays[1].workout) {
-            (wkDays[1].workout.exercises || []).forEach(ex => {
-              const anat = getExerciseAnatomy(ex);
-              ((anat && anat.primarySubKeys) || []).forEach(pk => {
-                if (d1Primary.has(pk)) wkOverlaps.push(ex.id + ':' + pk);
+          let consecutivePairCount = 0;
+          try {
+            setWorkoutLogs([]);
+            Date = FriMockDate;
+            window.selectedAiWeeklyTemplate = 'full_body_abc';
+            applyAiWeeklySchedule(null);
+            wkDays = (window.pendingAiWeeklyPlan && window.pendingAiWeeklyPlan.days) || [];
+            for (let i = 1; i < wkDays.length; i++) {
+              const prevExs = (wkDays[i - 1] && wkDays[i - 1].workout && wkDays[i - 1].workout.exercises) || [];
+              const curExs = (wkDays[i] && wkDays[i].workout && wkDays[i].workout.exercises) || [];
+              const dPrev = new Set();
+              prevExs.forEach(ex => {
+                const anat = getExerciseAnatomy(ex);
+                ((anat && anat.primarySubKeys) || []).forEach(pk => dPrev.add(pk));
               });
-            });
+              consecutivePairCount++;
+              curExs.forEach(ex => {
+                const anat = getExerciseAnatomy(ex);
+                ((anat && anat.primarySubKeys) || []).forEach(pk => {
+                  if (dPrev.has(pk)) wkOverlaps.push(ex.id + ':' + pk);
+                });
+              });
+            }
+          } finally {
+            Date = OrigDate;
           }
           return {
             blockedSize: blocked.size,
             dailyOverlapCount: overlaps.length,
             weeklyOverlapCount: wkOverlaps.length,
+            consecutivePairCount,
             wkOverlaps: wkOverlaps.join(', '),
             d1: wkDays[0] && wkDays[0].workout ? wkDays[0].workout.exercises.map(e => e.id).join(',') : '',
             d2: wkDays[1] && wkDays[1].workout ? wkDays[1].workout.exercises.map(e => e.id).join(',') : '',
             genCount: ((gen && gen.exercises) || []).length
           };
         })()`, ctx);
-        const ok = res.blockedSize >= 4 && res.genCount >= 4 && res.dailyOverlapCount === 0 && res.weeklyOverlapCount === 0;
+        const ok = res.blockedSize >= 4 && res.genCount >= 4 && res.consecutivePairCount >= 2 && res.dailyOverlapCount === 0 && res.weeklyOverlapCount === 0;
         return { ok, actual: `korunanAltKas=${res.blockedSize}, günlükÇakışma=${res.dailyOverlapCount}, haftalıkArdışıkÇakışma=${res.weeklyOverlapCount}, ov=${res.wkOverlaps}` };
       }
     },
@@ -1502,6 +1517,104 @@ function runAcademicMathSuite(moduleSources, dbText) {
           const focusHasAdd = html.includes('Set arası hareket ekle');
           closeInterSetTimer();
           return { notAutoDone, overlayOpen, doneAfter, overlayClosed, repsDone, noTimerForReps, focusHasAdd };
+        })()`, ctx);
+        const ok = Object.values(res).every(Boolean);
+        return { ok, actual: JSON.stringify(res) };
+      }
+    },
+    {
+      id: 'T28',
+      owner: 'analytics-guard',
+      title: 'Tek Hareketle Sahte İdeal Kas & Yan Etki Alt Kas Koruması (Schoenfeld/Pelland)',
+      expected: 'varsayılan=week_done; sadece Russian Twist (8 set bile) Karını ideal yapmaz, Ön/Derin Karın yeşil yanmaz; Barda Dize Çekme eklenince ideal olur; Göğüste tek Bench=eksik bölge',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const uid = 'usr_exam';
+          const today = toIsoDateKeyLocal(new Date());
+          const defaultSource = currentWeeklyMuscleSource;
+
+          const mkLog = (exs) => ({ id: 'log_t28', date: today, timestamp: Date.now(), program: 'T28', totalVolumeKg: 0, exercises: exs });
+          const rt8 = { id: 'db_russian_twist', name: 'Russian Twist', category: 'core', muscle: 'Yan Karın', equipment: 'dumbbell', completedSetsCount: 8, sets: Array.from({ length: 8 }, (_, i) => ({ setNo: i + 1, weight: 10, reps: 16, completed: true })) };
+          const knee4 = { id: 'bw_hanging_knee_raise', name: 'Barda Dize Çekme', category: 'core', muscle: 'Ön Karın', equipment: 'bodyweight', completedSetsCount: 4, sets: Array.from({ length: 4 }, (_, i) => ({ setNo: i + 1, weight: 0, reps: 12, completed: true })) };
+          const bench9 = { id: 'db_bench_press', name: 'Dambıl Bench Press', category: 'push', muscle: 'Orta Göğüs', equipment: 'dumbbell', completedSetsCount: 9, sets: Array.from({ length: 9 }, (_, i) => ({ setNo: i + 1, weight: 20, reps: 10, completed: true })) };
+
+          // 1) Sadece Russian Twist (8 set) + Göğüs tek Bench (9 set)
+          localStorage.setItem('celik_kodu_history_' + uid, JSON.stringify([mkLog([rt8, bench9])]));
+          const a1 = calculateWeeklyMuscleSufficiency('week_done', 0);
+          const core1 = a1.muscles.find(m => m.id === 'core');
+          const chest1 = a1.muscles.find(m => m.id === 'chest');
+          const coreComp1 = computeMuscleCompartmentMap(core1, 'week_done');
+          const obliqSt = evaluateCompartmentState(coreComp1.obliques, 'week_done');
+          const rectusSt = evaluateCompartmentState(coreComp1.rectus, 'week_done');
+          const transSt = evaluateCompartmentState(coreComp1.transverse, 'week_done');
+
+          // 2) Russian Twist + Barda Dize Çekme (2 farkli alt karin bolgesi)
+          localStorage.setItem('celik_kodu_history_' + uid, JSON.stringify([mkLog([rt8, knee4])]));
+          const a2 = calculateWeeklyMuscleSufficiency('week_done', 0);
+          const core2 = a2.muscles.find(m => m.id === 'core');
+
+          return {
+            defaultSource,
+            core1Status: core1 && core1.status,
+            core1Covered: core1 && core1.coveredSubCount,
+            chest1Status: chest1 && chest1.status,
+            obliqWorked: obliqSt.isWorked,
+            rectusWorked: rectusSt.isWorked,
+            rectusPartial: rectusSt.isPartial,
+            transWorked: transSt.isWorked,
+            core2Status: core2 && core2.status,
+            core2Covered: core2 && core2.coveredSubCount
+          };
+        })()`, ctx);
+        const ok = res.defaultSource === 'week_done'
+          && res.core1Status === 'insufficient'
+          && res.core1Covered === 1
+          && res.chest1Status === 'insufficient'
+          && res.obliqWorked === true
+          && res.rectusWorked === false
+          && res.rectusPartial === true
+          && res.transWorked === false
+          && res.core2Status === 'optimal'
+          && res.core2Covered >= 2;
+        return { ok, actual: JSON.stringify(res) };
+      }
+    },
+    {
+      id: 'T29',
+      owner: 'library-guard',
+      title: 'Paralel Bar Dips (bw_dips) ve Sehpada Dips (bw_bench_dips) Ayrımı & Medya Bütünlüğü',
+      expected: 'bw_dips=0251.mp4+chest_lower+dips_bar; bw_bench_dips=1399.mp4+triceps+bench (chest yok)',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const dips = EXERCISES_DB.find(e => e.id === 'bw_dips');
+          const benchDips = EXERCISES_DB.find(e => e.id === 'bw_bench_dips');
+          const dipsMedia = getExerciseVisualMedia('bw_dips', 'push');
+          const benchMedia = getExerciseVisualMedia('bw_bench_dips', 'push');
+          const dipsReq = getExerciseRequiredEquipments(dips);
+          const benchReq = getExerciseRequiredEquipments(benchDips);
+          const dipsAnat = getExerciseAnatomy(dips);
+          const benchAnat = getExerciseAnatomy(benchDips);
+          // Eski bulut katalogu (bw_bench_dips eksik, bw_dips=1399) gelse bile yerel guncel medya ezilmez
+          const stalePayload = {
+            version: 294,
+            exercises: EXERCISES_DB.filter(e => e.id !== 'bw_bench_dips'),
+            opengymCatalog: { bw_dips: { id: '1399', clip: 'assets/opengym/clips/1399.mp4', still: 'assets/opengym/stills/1399.webp' } }
+          };
+          window.applyCloudMasterCatalogPayload(stalePayload, false);
+          const dipsMediaAfterStale = getExerciseVisualMedia('bw_dips', 'push');
+          return {
+            hasDips: !!dips,
+            hasBenchDips: !!benchDips,
+            dipsClipOk: String(dipsMedia?.clip || '').includes('0251.mp4'),
+            benchClipOk: String(benchMedia?.clip || '').includes('1399.mp4'),
+            dipsHasLowerChest: Array.isArray(dipsAnat?.primarySubKeys) && dipsAnat.primarySubKeys.includes('chest_lower'),
+            benchNoChest: Array.isArray(benchDips?.primaryMuscles) && benchDips.primaryMuscles.includes('triceps') && !benchDips.primaryMuscles.includes('chest') && !benchAnat?.primarySubKeys?.includes('chest_lower'),
+            dipsReqBar: dipsReq.includes('dips_bar'),
+            benchReqBench: benchReq.includes('bench') && !benchReq.includes('dips_bar'),
+            staleCloudDidNotOverwrite: String(dipsMediaAfterStale?.clip || '').includes('0251.mp4')
+          };
         })()`, ctx);
         const ok = Object.values(res).every(Boolean);
         return { ok, actual: JSON.stringify(res) };

@@ -54,7 +54,7 @@
                     <path d="M34 25L26 36H33L30 46L39 34H32L34 25Z" fill="#FFFFFF"/>
                 </svg>
             </div>
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v317</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v318</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -253,7 +253,7 @@
                         <div class="modern-brand-subrow">
                             <span id="headerActiveTabLabel">ÜRETİCİ</span>
                             <span class="modern-brand-subdot" aria-hidden="true">•</span>
-                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v317</span>
+                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v318</span>
                         </div>
                     </div>
                 </div>
@@ -550,10 +550,19 @@
                                     <span class="equip-check-icon">✓</span><span>Bar &amp; Plaka</span>
                                 </div>
                                 <div class="equip-chip" onclick="toggleEquip('pullup_bar')">
-                                    <span class="equip-check-icon">✓</span><span>Barfiks / Dips Barı</span>
+                                    <span class="equip-check-icon">✓</span><span>Barfiks Barı</span>
+                                </div>
+                                <div class="equip-chip" onclick="toggleEquip('dips_bar')">
+                                    <span class="equip-check-icon">✓</span><span>Dips Barı</span>
                                 </div>
                                 <div class="equip-chip" onclick="toggleEquip('machine')">
                                     <span class="equip-check-icon">✓</span><span>Makine</span>
+                                </div>
+                                <div class="equip-chip" onclick="toggleEquip('mini_band')">
+                                    <span class="equip-check-icon">✓</span><span>Kısa Bant (Mini Band)</span>
+                                </div>
+                                <div class="equip-chip" onclick="toggleEquip('resistance_band')">
+                                    <span class="equip-check-icon">✓</span><span>Uzun Direnç Bandı</span>
                                 </div>
                                 <div class="equip-chip selected" onclick="toggleEquip('bodyweight')">
                                     <span class="equip-check-icon">✓</span><span>Vücut Ağırlığı</span>
@@ -586,7 +595,9 @@
                                         <option value="superset_light">Az Süperset</option>
                                         <option value="superset_intense">Yoğun Süperset</option>
                                         <option value="straight">Klasik Düz Set</option>
-                                        <option value="emom">EMOM Döngüsü</option>
+                                        <option value="emom_strength">Kuvvet EMOM</option>
+                                        <option value="emom_hypertrophy">Kas EMOM</option>
+                                        <option value="emom_conditioning">Kondisyon EMOM</option>
                                     </select>
                                 </div>
                                 <div class="param-group">
@@ -936,8 +947,11 @@
                                     <option value="bench">Sehpa</option>
                                     <option value="kettlebell">Kettlebell</option>
                                     <option value="barbell">Bar &amp; Plaka</option>
-                                    <option value="pullup_bar">Barfiks / Dips Barı</option>
+                                    <option value="pullup_bar">Barfiks Barı</option>
+                                    <option value="dips_bar">Dips Barı</option>
                                     <option value="machine">Makine / Kablo</option>
+                                    <option value="mini_band">Kısa Bant (Mini Band)</option>
+                                    <option value="resistance_band">Uzun Direnç Bandı</option>
                                     <option value="bodyweight">Vücut Ağırlığı</option>
                                 </select>
                             </div>
@@ -2355,7 +2369,9 @@
                             <option value="superset_light">🌱 Az Süperset</option>
                             <option value="superset_intense">🔥 Yoğun Süperset</option>
                             <option value="straight">🛡️ Klasik Düz Set</option>
-                            <option value="emom">⏱️ EMOM Döngüsü</option>
+                            <option value="emom_strength">⚡ Kuvvet EMOM</option>
+                            <option value="emom_hypertrophy">💪 Kas EMOM</option>
+                            <option value="emom_conditioning">⏱️ Kondisyon EMOM</option>
                         </select>
                     </div>
                     <div style="margin-bottom:8px;">
@@ -2538,6 +2554,8 @@
                     <button class="btn-quick-equip" style="white-space:nowrap; border-style:solid;" id="pill_seq_kettlebell" onclick="setSameEquipFilter('kettlebell')">Kettlebell</button>
                     <button class="btn-quick-equip" style="white-space:nowrap; border-style:solid;" id="pill_seq_barbell" onclick="setSameEquipFilter('barbell')">Barbell</button>
                     <button class="btn-quick-equip" style="white-space:nowrap; border-style:solid;" id="pill_seq_machine" onclick="setSameEquipFilter('machine')">Makine</button>
+                    <button class="btn-quick-equip" style="white-space:nowrap; border-style:solid;" id="pill_seq_mini_band" onclick="setSameEquipFilter('mini_band')">Kısa Bant</button>
+                    <button class="btn-quick-equip" style="white-space:nowrap; border-style:solid;" id="pill_seq_resistance_band" onclick="setSameEquipFilter('resistance_band')">Uzun Bant</button>
                     <button class="btn-quick-equip" style="white-space:nowrap; border-style:solid;" id="pill_seq_bodyweight" onclick="setSameEquipFilter('bodyweight')">Vücut</button>
                 </div>
             </div>
@@ -3040,16 +3058,16 @@
     </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE (7 BAĞIMSIZ ŞEF ODASI + ORKESTRA) ==================== -->
-    <script src="js/exercises-db.js?v=317"></script>
-    <script src="js/chiefs/shared-core.js?v=317"></script>
+    <script src="js/exercises-db.js?v=317c"></script>
+    <script src="js/chiefs/shared-core.js?v=317c"></script>
     <script src="js/chiefs/bridge-customs.js?v=317"></script>
     <script src="js/chiefs/liaison-subchiefs.js?v=317"></script>
-    <script src="js/chiefs/profile-chief.js?v=317"></script>
+    <script src="js/chiefs/profile-chief.js?v=317c"></script>
     <script src="js/chiefs/library-chief.js?v=317"></script>
     <script src="js/chiefs/history-chief.js?v=317"></script>
-    <script src="js/chiefs/analytics-chief.js?v=317"></script>
-    <script src="js/chiefs/generator-chief.js?v=317"></script>
-    <script src="js/chiefs/workout-chief.js?v=317"></script>
+    <script src="js/chiefs/analytics-chief.js?v=317c"></script>
+    <script src="js/chiefs/generator-chief.js?v=317d"></script>
+    <script src="js/chiefs/workout-chief.js?v=317c"></script>
     <script src="js/app.js?v=317"></script>
     <script>
         function getNotifStorageKey() {

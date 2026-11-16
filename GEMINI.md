@@ -187,6 +187,14 @@ Kullanıcı "canlıya al / push et" dediğinde şu adımlar uygulanır:
 * **Kod (Arayüz) ve Hafıza (Merkez Bulut) Ayrımı Standardı:**
   - Değişmez ana katalog (`EXERCISES_DB`, animasyon haritaları, form rehberleri) ile sporcu hafızası Google Firebase merkez bulutunda yaşar; saat ve yapay zeka dış köprüleri merkez API sunucusunda çalışır; Android, iOS ve Web yalnızca bu merkezden beslenen arayüz katmanı olarak tasarlanır (çevrimdışı önbellek yedekli).
 
+---
+
+## 16. Çok Boyutlu Antrenman Kararı & Tek Pencereden Bakmama Yasası
+* **Tek Boyutlu Katı Eleme Yasağı:**
+  - Hareket seçimi, ekipman önceliği veya program üretimi kurgulanırken yalnızca tek bir kritere (ör. sadece ekipman kademesi veya sadece kas grubu) göre katı eleme yapılamaz.
+* **4 Boyutlu Ortak Tartı Zorunluluğu:**
+  - Her algoritma ve kural değişikliğinde **1. Çeşitlilik**, **2. Biyomekanik Verimlilik**, **3. Eklem Güvenliği** ve **4. İstasyon/Süperset Akışı** birlikte değerlendirilir; önerilen kuralın olası yan etkileri gizlenmeden açıkça analiz edilir.
+
 
 
 

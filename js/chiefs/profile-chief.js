@@ -195,6 +195,9 @@
 
         const CLOUD_MASTER_CATALOG_STORAGE_KEY = 'celik_kodu_cloud_master_catalog_v1';
         const CENTRAL_BRIDGE_URL_KEY = 'celik_kodu_central_bridge_url';
+        const _BUNDLED_EXERCISES_SNAPSHOT = (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB))
+            ? EXERCISES_DB.map(ex => (ex && typeof ex === 'object' ? { ...ex } : ex))
+            : [];
 
         function applyCloudMasterCatalogPayload(payload, persistLocal = true) {
             if (!payload || typeof payload !== 'object') return false;
@@ -209,22 +212,48 @@
                     ? payload.exerciseGuideMap
                     : (typeof payload.exerciseGuideMapJson === 'string' && payload.exerciseGuideMapJson.trim() ? JSON.parse(payload.exerciseGuideMapJson) : null);
 
+                const bundledHasNewerEntries = (typeof _BUNDLED_EXERCISES_SNAPSHOT !== 'undefined' && Array.isArray(_BUNDLED_EXERCISES_SNAPSHOT) && Array.isArray(parsedExercises) && parsedExercises.length > 0)
+                    ? _BUNDLED_EXERCISES_SNAPSHOT.some(ex => ex && ex.id && !new Set(parsedExercises.map(p => p && p.id).filter(Boolean)).has(ex.id))
+                    : false;
+
                 if (Array.isArray(parsedExercises) && parsedExercises.length > 0 && typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB)) {
-                    EXERCISES_DB.splice(0, EXERCISES_DB.length, ...parsedExercises);
+                    const mergedMap = new Map();
+
+                    if (bundledHasNewerEntries) {
+                        // Güncel uygulama paketi eski bulut kopyasından silinemez: yerel paket esas alınır, yalnızca buluttaki ek hareketler eklenir
+                        _BUNDLED_EXERCISES_SNAPSHOT.forEach(ex => { if (ex && ex.id) mergedMap.set(ex.id, ex); });
+                        parsedExercises.forEach(ex => { if (ex && ex.id && !mergedMap.has(ex.id)) mergedMap.set(ex.id, ex); });
+                    } else {
+                        // Bulut kataloğu tüm paket hareketlerini içeriyorsa bulut güncellemelerini uygula, paket dışı kalanları da koru
+                        _BUNDLED_EXERCISES_SNAPSHOT.forEach(ex => { if (ex && ex.id) mergedMap.set(ex.id, ex); });
+                        parsedExercises.forEach(ex => { if (ex && ex.id) mergedMap.set(ex.id, ex); });
+                    }
+
+                    EXERCISES_DB.splice(0, EXERCISES_DB.length, ...Array.from(mergedMap.values()));
                     if (typeof window !== 'undefined') window.EXERCISES_DB = EXERCISES_DB;
                 }
+                const mergeCatalogMap = (target, incoming, preserveExisting) => {
+                    if (!target || !incoming) return;
+                    Object.keys(incoming).forEach(k => {
+                        if (!preserveExisting || !Object.prototype.hasOwnProperty.call(target, k)) {
+                            target[k] = incoming[k];
+                        }
+                    });
+                };
                 if (parsedOpengym && typeof parsedOpengym === 'object' && !Array.isArray(parsedOpengym) && typeof window !== 'undefined') {
                     if (window.OPENGYM_GLOBAL_CATALOG && typeof window.OPENGYM_GLOBAL_CATALOG === 'object') {
-                        Object.assign(window.OPENGYM_GLOBAL_CATALOG, parsedOpengym);
+                        mergeCatalogMap(window.OPENGYM_GLOBAL_CATALOG, parsedOpengym, bundledHasNewerEntries);
                     } else {
-                        window._pendingCloudOpengymCatalog = Object.assign(window._pendingCloudOpengymCatalog || {}, parsedOpengym);
+                        window._pendingCloudOpengymCatalog = window._pendingCloudOpengymCatalog || {};
+                        mergeCatalogMap(window._pendingCloudOpengymCatalog, parsedOpengym, bundledHasNewerEntries);
                     }
                 }
                 if (parsedGuideMap && typeof parsedGuideMap === 'object' && !Array.isArray(parsedGuideMap) && typeof window !== 'undefined') {
                     if (window.exerciseGuideMap && typeof window.exerciseGuideMap === 'object') {
-                        Object.assign(window.exerciseGuideMap, parsedGuideMap);
+                        mergeCatalogMap(window.exerciseGuideMap, parsedGuideMap, bundledHasNewerEntries);
                     } else {
-                        window._pendingCloudGuideMap = Object.assign(window._pendingCloudGuideMap || {}, parsedGuideMap);
+                        window._pendingCloudGuideMap = window._pendingCloudGuideMap || {};
+                        mergeCatalogMap(window._pendingCloudGuideMap, parsedGuideMap, bundledHasNewerEntries);
                     }
                 }
 

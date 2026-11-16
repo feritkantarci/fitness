@@ -278,6 +278,24 @@
                     "isComplex": false,
                     "proof": "Gövdeyi hafif öne eğerek paralel barda kendini yukarı itmek, göğsün alt çizgisini (alt göğüs) ve arka kolun dış/alt kısmını çok yoğun çalıştırır."
           },
+          "bw_bench_dips": {
+                    "primary": "Arka Kol Dış Baş, Arka Kol Alt Baş",
+                    "secondary": "Ön Omuz",
+                    "subKey": "triceps_medial",
+                    "primarySubKeys": [
+                              "triceps_lateral",
+                              "triceps_medial"
+                    ],
+                    "secondarySubKeys": [
+                              "shoulders_front"
+                    ],
+                    "allSubKeys": [
+                              "triceps_lateral",
+                              "triceps_medial"
+                    ],
+                    "isComplex": false,
+                    "proof": "Eller sırt arkasında sehpadayken gövde dik kaldığı için yük alt göğse değil doğrudan arka kolun dış ve alt kısmına biner."
+          },
           "db_renegade_pushup": {
                     "primary": "Orta Göğüs, Kanatlar, Orta Sırt, Yan Karın",
                     "secondary": "Arka Kol Dış Baş, Arka Kol Alt Baş, Ön Omuz, Pazı Dış Baş, Derin İç Karın",
@@ -2867,6 +2885,126 @@
                     ],
                     "isComplex": false,
                     "proof": "Koşu sırasında yere temas ve itiş fazı kalf, arka bacak ve kalçayı yüksek elastik gerilimle yüklerken, tek ayak üzerindeki denge fazı yan kalça ve core kaslarını çalıştırır."
+          },
+          "mb_monster_walk": {
+                    "primary": "Yan Kalça, Küçük Kalça, Dış Ön Bacak",
+                    "secondary": "Ana Kalça, Derin İç Karın",
+                    "subKey": "legs_glutes_med",
+                    "primarySubKeys": ["legs_glutes_med", "legs_glutes_min", "legs_quad_outer"],
+                    "secondarySubKeys": ["legs_glutes_max", "core_deep"],
+                    "allSubKeys": ["legs_glutes", "legs_quad", "legs_glutes_med", "legs_glutes_min", "legs_quad_outer"],
+                    "isComplex": false,
+                    "proof": "Diz üstü veya ayak bileğindeki kısa bandı yan adımlarla germek özellikle yan kalça (gluteus medius) ve dış uyluk stabilizatörlerini izole eder."
+          },
+          "mb_glute_bridge_abduction": {
+                    "primary": "Ana Kalça, Yan Kalça, Arka Bacak",
+                    "secondary": "Alt Bel, Derin İç Karın",
+                    "subKey": "legs_glutes_max",
+                    "primarySubKeys": ["legs_glutes_max", "legs_glutes_med", "legs_ham_hinge"],
+                    "secondarySubKeys": ["back_lower", "core_deep"],
+                    "allSubKeys": ["legs_glutes", "legs_hamstrings", "legs_glutes_max", "legs_glutes_med", "legs_ham_hinge"],
+                    "isComplex": false,
+                    "proof": "Tepe noktada kalça ekstansiyonu ile dizleri dışa açmak hem ana kalça hem yan kalça kas liflerini aynı anda maksimum kasılmaya sokar."
+          },
+          "mb_banded_squat": {
+                    "primary": "Dış Ön Bacak, Orta Ön Bacak, Ana Kalça, Yan Kalça",
+                    "secondary": "İç Ön Bacak, Derin İç Karın",
+                    "subKey": "legs_quad_outer",
+                    "primarySubKeys": ["legs_quad_outer", "legs_quad_mid", "legs_glutes_max", "legs_glutes_med"],
+                    "secondarySubKeys": ["legs_quad_inner", "core_deep"],
+                    "allSubKeys": ["legs_quad", "legs_glutes", "legs_quad_outer", "legs_quad_mid", "legs_glutes_max", "legs_glutes_med"],
+                    "isComplex": false,
+                    "proof": "Diz üstündeki kısa bandı dışa iterek çömelmek; çömelme boyunca diz valgusunu önleyerek ön bacakla birlikte yan kalça aktivasyonunu artırır."
+          },
+          "mb_external_rotation": {
+                    "primary": "Arka Omuz, Yan Omuz",
+                    "secondary": "Orta Sırt",
+                    "subKey": "shoulders_rear",
+                    "primarySubKeys": ["shoulders_rear", "shoulders_side"],
+                    "secondarySubKeys": ["back_mid"],
+                    "allSubKeys": ["shoulders_rear", "shoulders_side", "back_mid"],
+                    "isComplex": false,
+                    "proof": "Bilekteki kısa bandı dirsekler sabitken dışa açmak arka omuz ve rotator manşet dış rotatörlerini eklem dostu şekilde güçlendirir."
+          },
+          "mb_clamshell": {
+                    "primary": "Yan Kalça, Küçük Kalça",
+                    "secondary": "Ana Kalça, Derin İç Karın",
+                    "subKey": "legs_glutes_med",
+                    "primarySubKeys": ["legs_glutes_med", "legs_glutes_min"],
+                    "secondarySubKeys": ["legs_glutes_max", "core_deep"],
+                    "allSubKeys": ["legs_glutes", "legs_glutes_med", "legs_glutes_min"],
+                    "isComplex": false,
+                    "proof": "Yan yatışta kalçayı sabit tutup dizi yukarı açmak doğrudan gluteus medius ve minimus dış rotasyon liflerini hedefler."
+          },
+          "rb_pull_apart": {
+                    "primary": "Arka Omuz, Orta Sırt",
+                    "secondary": "Üst Trapez, Yan Omuz",
+                    "subKey": "shoulders_rear",
+                    "primarySubKeys": ["shoulders_rear", "back_mid"],
+                    "secondarySubKeys": ["traps", "shoulders_side"],
+                    "allSubKeys": ["shoulders_rear", "back_mid", "traps"],
+                    "isComplex": false,
+                    "proof": "Kollar düzken uzun bandı göğüs hizasına açmak yatay omuz abduksiyonu ile arka omuz ve kürek arası (rhomboid) kaslarını doğrudan sıkıştırır."
+          },
+          "rb_lat_pulldown": {
+                    "primary": "Kanat (Latissimus), Orta Sırt",
+                    "secondary": "Pazı (Uzun & Kısa Baş), Arka Omuz",
+                    "subKey": "back_lats",
+                    "primarySubKeys": ["back_lats", "back_mid"],
+                    "secondarySubKeys": ["biceps_long", "biceps_short", "shoulders_rear"],
+                    "allSubKeys": ["back_lats", "back_mid", "biceps_long"],
+                    "isComplex": false,
+                    "proof": "Yukarıdan aşağıya yapılan dirsek çekişi omuz adduksiyonuyla kanat (latissimus) genişliğini ve orta sırt kontrolünü çalıştırır."
+          },
+          "rb_seated_row": {
+                    "primary": "Orta Sırt, Kanat (Latissimus)",
+                    "secondary": "Pazı (Biceps), Arka Omuz, Üst Trapez",
+                    "subKey": "back_mid",
+                    "primarySubKeys": ["back_mid", "back_lats"],
+                    "secondarySubKeys": ["biceps_long", "shoulders_rear", "traps"],
+                    "allSubKeys": ["back_mid", "back_lats", "shoulders_rear"],
+                    "isComplex": false,
+                    "proof": "Yatay çekiş açısıyla kürek kemiklerini geriye toplamak orta sırt kalınlığını ve alt latissimus liflerini yüksek gerilim altında hedefler."
+          },
+          "rb_chest_press": {
+                    "primary": "Orta Göğüs, Üst Göğüs",
+                    "secondary": "Ön Omuz, Arka Kol Yan Baş",
+                    "subKey": "chest_mid",
+                    "primarySubKeys": ["chest_mid", "chest_upper"],
+                    "secondarySubKeys": ["shoulders_front", "triceps_lateral"],
+                    "allSubKeys": ["chest_mid", "chest_upper", "shoulders_front", "triceps_lateral"],
+                    "isComplex": false,
+                    "proof": "Artan bant direnciyle öne itiş yapmak göğüs liflerini tepe kasılma noktasında ekstra yüklerken ön omuz ve triceps sinerji sağlar."
+          },
+          "rb_bicep_curl": {
+                    "primary": "Pazı (Kısa & Uzun Baş), Brachialis",
+                    "secondary": "Ön Kol",
+                    "subKey": "biceps_short",
+                    "primarySubKeys": ["biceps_long", "biceps_short", "brachialis"],
+                    "secondarySubKeys": [],
+                    "allSubKeys": ["biceps_long", "biceps_short", "brachialis"],
+                    "isComplex": false,
+                    "proof": "Dirsekler sabitken bandı yukarı bükmek; tepe noktaya çıkıldıkça artan elastik dirençle pazının iki başını da tam kasılmaya zorlar."
+          },
+          "rb_triceps_pushdown": {
+                    "primary": "Arka Kol (Yan, İç & Uzun Baş)",
+                    "secondary": "Ön Kol",
+                    "subKey": "triceps_lateral",
+                    "primarySubKeys": ["triceps_lateral", "triceps_medial", "triceps_long"],
+                    "secondarySubKeys": [],
+                    "allSubKeys": ["triceps_lateral", "triceps_medial", "triceps_long"],
+                    "isComplex": false,
+                    "proof": "Üstten sabitlenen bandı dirseği açarak aşağı bastırmak arka kolun özellikle yan ve iç başlarında tam kilitlenme gerilimi üretir."
+          },
+          "rb_good_morning": {
+                    "primary": "Arka Bacak (Menteşe), Ana Kalça",
+                    "secondary": "Alt Bel, Derin İç Karın",
+                    "subKey": "legs_ham_hinge",
+                    "primarySubKeys": ["legs_ham_hinge", "legs_glutes_max"],
+                    "secondarySubKeys": ["back_lower", "core_deep"],
+                    "allSubKeys": ["legs_hamstrings", "legs_glutes", "legs_ham_hinge", "legs_glutes_max", "back_lower"],
+                    "isComplex": false,
+                    "proof": "Kalça menteşesi mekaniğiyle arka bacakları esnetip bant gerilimine karşı doğrulmak; posterior zincir (hamstring, glute, alt bel) kuvvetini artırır."
           }
 };
 
@@ -2945,14 +3083,17 @@
         let selectedEquipments = ['dumbbell', 'bench', 'kettlebell', 'bodyweight'];
         let currentGeneratedWorkout = null;
 
-        const ALL_EQUIPMENT_KEYS = ['dumbbell', 'bench', 'kettlebell', 'barbell', 'pullup_bar', 'machine', 'bodyweight'];
+        const ALL_EQUIPMENT_KEYS = ['dumbbell', 'bench', 'kettlebell', 'barbell', 'pullup_bar', 'dips_bar', 'machine', 'mini_band', 'resistance_band', 'bodyweight'];
         const EQUIPMENT_DISPLAY_NAMES = {
             dumbbell: 'Dambıl',
             bench: 'Sehpa',
             kettlebell: 'Kettlebell',
             barbell: 'Bar & Plaka',
-            pullup_bar: 'Barfiks / Dips Barı',
+            pullup_bar: 'Barfiks Barı',
+            dips_bar: 'Dips Barı',
             machine: 'Makine / Kablo',
+            mini_band: 'Kısa Bant (Mini Band)',
+            resistance_band: 'Uzun Direnç Bandı',
             bodyweight: 'Vücut Ağırlığı'
         };
 
@@ -2972,7 +3113,8 @@
             'bb_incline_bench',
             'bb_hip_thrust',
             'bb_close_grip_bench',
-            'bw_decline_pushup'
+            'bw_decline_pushup',
+            'bw_bench_dips'
         ]);
 
         const PULLUP_BAR_REQUIRED_EX_IDS = new Set([
@@ -2980,8 +3122,11 @@
             'bw_chinup',
             'bw_inverted_row',
             'bw_hanging_knee_raise',
-            'bw_dips',
             'bw_hyperextension'
+        ]);
+
+        const DIPS_BAR_REQUIRED_EX_IDS = new Set([
+            'bw_dips'
         ]);
 
         const PLATE_OVERRIDE_EX_IDS = new Set([
@@ -3005,6 +3150,9 @@
             }
             if (PULLUP_BAR_REQUIRED_EX_IDS.has(id) && !reqs.includes('pullup_bar')) {
                 reqs.push('pullup_bar');
+            }
+            if (DIPS_BAR_REQUIRED_EX_IDS.has(id) && !reqs.includes('dips_bar')) {
+                reqs.push('dips_bar');
             }
             return reqs;
         }
@@ -3201,8 +3349,11 @@
             'bw_chinup': 0.95,
             'bw_inverted_row': 0.60,
             'bw_dips': 0.90,
+            'bw_bench_dips': 0.52,
             'barfiks': 0.95,
             'dips': 0.90,
+            'bench dips': 0.52,
+            'sehpada dips': 0.52,
             'bw_air_squat': 0.68,
             'bw_jump_squat': 0.75,
             'bw_sissy_squat': 0.70,
@@ -3305,7 +3456,7 @@
                 if (/^cond_/.test(id)) return true;
                 const cardioKeywords = ['indoor_row', 'indoor row', 'ergometre', 'kürek çekme', 'tempolu yürüyüş', 'doğa yürüyüşü', 'koşu bandı', 'treadmill', 'cardio_bike', 'bisiklet'];
                 if (cardioKeywords.some(kw => id.includes(_normMetricKey(kw)) || name.includes(_normMetricKey(kw)))) return true;
-                const isResistanceOrDyn = /(barbell|dambil|dumbbell|kettlebell|kablo|cable|mach_|db_|bb_|kb_|gorilla|pendlay|saw|renegade|inverted|bent|supported|farmers|lunge)/.test(`${id} ${name}`);
+                const isResistanceOrDyn = /(barbell|dambil|dumbbell|kettlebell|kablo|cable|mach_|db_|bb_|kb_|mb_|rb_|mini.?band|resistance.?band|bant|monster|gorilla|pendlay|saw|renegade|inverted|bent|supported|farmers|lunge)/.test(`${id} ${name}`);
                 if (!isResistanceOrDyn && /(^|\s)(kürek|koşu|yürüyüş|rowing|running|walking|cycling)(\s|\(|$)/.test(`${id} ${name}`)) {
                     return true;
                 }

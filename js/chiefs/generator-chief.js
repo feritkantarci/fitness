@@ -63,8 +63,11 @@
                 bench: 'Sehpa',
                 kettlebell: 'Kettlebell',
                 barbell: 'Bar & Plaka',
-                pullup_bar: 'Barfiks/Dips',
+                pullup_bar: 'Barfiks Barı',
+                dips_bar: 'Dips Barı',
                 machine: 'Makine',
+                mini_band: 'Kısa Bant',
+                resistance_band: 'Uzun Bant',
                 bodyweight: 'Vücut Ağ.'
             };
             const labels = selectedEquipments.map(e => names[e] || e);
@@ -85,12 +88,25 @@
             const styleEl = document.getElementById('paramStyle');
             const goalEl = document.getElementById('paramGoal');
             const durEl = document.getElementById('paramDuration');
+            const goalGroup = goalEl ? goalEl.closest('.param-group') : null;
+            const emomGoalMap = {
+                emom_strength: 'strength',
+                emom_hypertrophy: 'hypertrophy',
+                emom_conditioning: 'endurance'
+            };
+            const isSplitEmom = styleEl && emomGoalMap[styleEl.value];
+            if (isSplitEmom) {
+                if (goalEl) goalEl.value = emomGoalMap[styleEl.value];
+                if (goalGroup) goalGroup.style.display = 'none';
+            } else {
+                if (goalGroup) goalGroup.style.display = '';
+            }
             
             const styleTxt = styleEl ? styleEl.options[styleEl.selectedIndex].text.replace(/^[^\w\sÇĞİÖŞÜçğıöşü]*\s*/, '').split('(')[0].trim() : 'Orta Süperset';
             const goalTxt = goalEl ? goalEl.options[goalEl.selectedIndex].text.replace(/^[^\w\sÇĞİÖŞÜçğıöşü]*\s*/, '').split('(')[0].trim() : 'Kas';
             const durTxt = durEl ? durEl.value + ' Dk' : '45 Dk';
 
-            el.innerText = `⚡ ${styleTxt} • 🛡️ ${goalTxt} • ⏱️ ${durTxt}`;
+            el.innerText = isSplitEmom ? `⚡ ${styleTxt} • ⏱️ ${durTxt}` : `⚡ ${styleTxt} • 🛡️ ${goalTxt} • ⏱️ ${durTxt}`;
         }
 
         function toggleGenSection(sectionId) {
@@ -264,7 +280,64 @@
             updateSelectedEquipLabel();
         }
 
+        window.showEmomInfoModal = function(style) {
+            const infoMap = {
+                emom_strength: {
+                    title: '⚡ Kuvvet EMOM',
+                    items: [
+                        '• Ağırlık: Normalden yüksek (%75–85)',
+                        '• Tekrar: 1–3 patlayıcı tekrar (15 sn iş)',
+                        '• Dinlenme: Kalan ~45 sn tam dinlenme',
+                        '• Amaç: Formu bozmadan maksimum güç üretmek'
+                    ]
+                },
+                emom_hypertrophy: {
+                    title: '💪 Kas EMOM',
+                    items: [
+                        '• Ağırlık: Orta-yüksek (%60–75)',
+                        '• Tekrar: 6–10 kontrollü tekrar (30 sn iş)',
+                        '• Dinlenme: Kalan ~30 sn aktif toparlanma',
+                        '• Amaç: Kas yanmasını ve hacmi yüksek tutmak'
+                    ]
+                },
+                emom_conditioning: {
+                    title: '⏱️ Kondisyon EMOM',
+                    items: [
+                        '• Ağırlık: Vücut ağırlığı veya hafif-orta yük',
+                        '• Tekrar: 10–12 hızlı tekrar (35–40 sn iş)',
+                        '• Dinlenme: Kalan ~20–25 sn kısa dinlenme',
+                        '• Amaç: Nabzı yüksek tutup kondisyon artırmak'
+                    ]
+                }
+            };
+            const data = infoMap[style] || infoMap.emom_conditioning;
+            const existing = document.getElementById('emomInfoModal');
+            if (existing) existing.remove();
+            const overlay = document.createElement('div');
+            overlay.id = 'emomInfoModal';
+            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(2,6,23,0.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
+            overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+            overlay.innerHTML = `
+                <div style="background:#0f172a;color:#f8fafc;border:1px solid rgba(56,189,248,0.4);border-radius:14px;max-width:340px;width:100%;padding:16px;box-shadow:0 16px 40px rgba(0,0,0,0.5);">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                        <strong style="font-size:15px;color:#38bdf8;">${data.title}</strong>
+                        <button type="button" onclick="document.getElementById('emomInfoModal').remove()" style="background:transparent;border:none;color:#94a3b8;font-size:18px;cursor:pointer;line-height:1;">✕</button>
+                    </div>
+                    <div style="font-size:13px;line-height:1.6;color:#e2e8f0;">
+                        ${data.items.map(line => `<div>${line}</div>`).join('')}
+                    </div>
+                </div>`;
+            document.body.appendChild(overlay);
+        };
+
         function getRepAndRestScheme(goal, style) {
+            if (style === 'emom_strength') {
+                return { sets: 4, reps: '1 - 3', rest: 45, straightRest: 45, supersetRest: 45 };
+            } else if (style === 'emom_hypertrophy') {
+                return { sets: 4, reps: '6 - 10', rest: 30, straightRest: 30, supersetRest: 30 };
+            } else if (style === 'emom_conditioning' || style === 'emom') {
+                return { sets: 4, reps: '10 - 12', rest: 25, straightRest: 25, supersetRest: 25 };
+            }
             if (goal === 'strength') {
                 return { sets: 4, reps: '4 - 6', rest: 90, straightRest: 90, supersetRest: 60 };
             } else if (goal === 'endurance') {
@@ -375,7 +448,8 @@
             'bw_pushup': { id: '0662', name: "Klasik Şınav (Push-Up)", clip: 'assets/opengym/clips/0662.mp4', still: 'assets/opengym/stills/0662.webp' },
             'bw_decline_pushup': { id: '0662', name: "Decline Push-Up", clip: 'assets/opengym/clips/0662.mp4', still: 'assets/opengym/stills/0662.webp' },
             'bw_diamond_pushup': { id: '0283', name: "Elmas Şınav (Diamond Push-Up)", clip: 'assets/opengym/clips/0283.mp4', still: 'assets/opengym/stills/0283.webp' },
-            'bw_dips': { id: '1399', name: "Parallel Bar Dips", clip: 'assets/opengym/clips/1399.mp4', still: 'assets/opengym/stills/1399.webp' },
+            'bw_dips': { id: '0251', name: "Dips", clip: 'assets/opengym/clips/0251.mp4', still: 'assets/opengym/stills/0251.webp' },
+            'bw_bench_dips': { id: '1399', name: "Sehpada Dips (Bench Dips)", clip: 'assets/opengym/clips/1399.mp4', still: 'assets/opengym/stills/1399.webp' },
             'bw_pullup': { id: '0652', name: "Barfiks (Pull-Up)", clip: 'assets/opengym/clips/0652.mp4', still: 'assets/opengym/stills/0652.webp' },
             'bw_chinup': { id: '0670', name: "Ters Tutuş Barfiks (Chin-Up)", clip: 'assets/opengym/clips/0670.mp4', still: 'assets/opengym/stills/0670.webp' },
             'bw_inverted_row': { id: '0498', name: "Inverted Row", clip: 'assets/opengym/clips/0498.mp4', still: 'assets/opengym/stills/0498.webp' },
@@ -3098,6 +3172,35 @@ Aşağıdaki JSON şemasında çıktı ver:
         }
         window.startActiveWorkoutSession = startActiveWorkoutSession;
 
+        function getRecentGeneratedIds() {
+            try {
+                const raw = localStorage.getItem('celik_recent_generated_ids');
+                const arr = raw ? JSON.parse(raw) : [];
+                return Array.isArray(arr) ? arr : [];
+            } catch (e) { return []; }
+        }
+        function recordRecentGeneratedIds(ids) {
+            try {
+                if (!Array.isArray(ids) || ids.length === 0) return;
+                const prev = getRecentGeneratedIds().filter(id => !ids.includes(id));
+                const next = [...ids, ...prev].slice(0, 24);
+                localStorage.setItem('celik_recent_generated_ids', JSON.stringify(next));
+            } catch (e) {}
+        }
+        function getLastDoneMapFromHistory() {
+            const map = {};
+            try {
+                const hist = (typeof history !== 'undefined' && Array.isArray(history)) ? history : [];
+                hist.forEach(h => {
+                    const ts = new Date(h.date || h.timestamp || 0).getTime() || 0;
+                    (h.exercises || []).forEach(ex => {
+                        const id = ex.id || ex.exId;
+                        if (id && (!map[id] || ts > map[id])) map[id] = ts;
+                    });
+                });
+            } catch (e) {}
+            return map;
+        }
         function pickRandom(arr) {
             if (!arr || arr.length === 0) return null;
             return arr[Math.floor(Math.random() * arr.length)];
@@ -3153,6 +3256,19 @@ Aşağıdaki JSON şemasında çıktı ver:
             mach_triceps_pushdown: 'triceps_lateral_push',
             bb_close_grip_bench: 'triceps_close_grip_press',
             bw_diamond_pushup: 'triceps_close_grip_press',
+            bw_bench_dips: 'triceps_lateral_push',
+            rb_triceps_pushdown: 'triceps_lateral_push',
+            rb_bicep_curl: 'biceps_straight_curl',
+            rb_chest_press: 'horiz_chest_press',
+            rb_lat_pulldown: 'vertical_lat_pull',
+            rb_seated_row: 'supported_midback_row',
+            rb_pull_apart: 'rear_delt_pull',
+            rb_good_morning: 'hip_hinge_rdl_deadlift',
+            mb_banded_squat: 'bilateral_squat',
+            mb_glute_bridge_abduction: 'glute_bridge_thrust',
+            mb_monster_walk: 'glute_abduction_walk',
+            mb_clamshell: 'glute_abduction_clamshell',
+            mb_external_rotation: 'rotator_cuff_external_rotation',
             // 9. Dikey Kanat Çekiş (Vertical Pull)
             bw_pullup: 'vertical_lat_pull',
             bw_chinup: 'vertical_chinup_pull',
@@ -3904,11 +4020,20 @@ Aşağıdaki JSON şemasında çıktı ver:
                         ex.blockHeader = `🎯 GÜVENLİ DÜZ SET ${idx + 1} (${straightRest} sn Dinlenme)`;
                         ex.customRest = straightRest;
                     }
-                } else if (style === 'emom') {
+                } else if (style === 'emom_strength' || style === 'emom_hypertrophy' || style === 'emom_conditioning' || style === 'emom') {
                     ex.blockType = 'emom';
                     ex.blockLabel = `DK ${idx + 1}`;
-                    ex.blockHeader = idx === 0 ? `⏱️ EMOM İSTASYON DÖNGÜSÜ (Her Dakika Başında 1 İstasyon)` : null;
-                    ex.customRest = 30;
+                    const emomTitleMap = {
+                        emom_strength: '⚡ KUVVET EMOM',
+                        emom_hypertrophy: '💪 KAS EMOM',
+                        emom_conditioning: '⏱️ KONDİSYON EMOM',
+                        emom: '⏱️ EMOM DÖNGÜSÜ'
+                    };
+                    const emomTitle = emomTitleMap[style] || '⏱️ EMOM DÖNGÜSÜ';
+                    ex.blockHeader = idx === 0
+                        ? `${emomTitle} <button type="button" onclick="event.stopPropagation(); showEmomInfoModal('${style}')" title="EMOM Kuralları" style="margin-left:6px;width:20px;height:20px;border-radius:50%;border:1px solid rgba(56,189,248,0.6);background:rgba(56,189,248,0.15);color:#38bdf8;font-size:11px;font-weight:800;cursor:pointer;vertical-align:middle;line-height:1;">i</button>`
+                        : null;
+                    ex.customRest = (baseScheme && baseScheme.rest) || 30;
                 } else if (style === 'complex' || style === 'flow') {
                     ex.blockType = 'complex';
                     ex.blockLabel = `İstasyon ${idx + 1}`;
@@ -4673,7 +4798,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
 
             // 1. Negasyon ve Kısıtlama Kalıpları (Yerel Kural Tabanlı Güvenlik Katmanı)
             const negationRegex = /(istemiyorum|yapamıyorum|yapamam|olmasın|önerme|koyma|çıkar|kaldır|sevmiyorum|uygun değil|yasak|ağrıtıyor|zorluyor|çekemiyorum|yapmıyorum|hariç|dışında|yok)/i;
-            const painRegex = /(ağrı|sakat|fıtık|hassas|incin|problem|menisküs|zorla)/i;
+            const painRegex = /(ağrı|ağrıy|ağrıt|sakat|fıtık|hassas|incin|problem|menisküs|zorla)/i;
             const spatialRegex = /(dar|alan yok|yer yok|salon uygun değil|küçük salon|yürüyüş|yürüme|yürümeli|yer dar|yürümeye yer yok|koridor yok)/i;
 
             const clauses = raw.split(/[,.;\n]|\s+ve\s+|\s+veya\s+|\s+ama\s+|\s+fakat\s+|\s+ayrıca\s+/).map(c => c.trim()).filter(Boolean);
@@ -4758,15 +4883,15 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
 
                     // Bölgesel ağrı ve sakatlık kuralları
                     if (/bel|omurga|fıtık/.test(clause)) {
-                        excludedKeywords.push('deadlift', 'swing', 'snatch', 'good morning', 'bent over', 'clean');
+                        excludedKeywords.push('deadlift', 'rdl', 'romanian', 'swing', 'snatch', 'good morning', 'bent over', 'bent_over', 'pendlay', 'clean', 't-bar', 'hyperextension');
                         appliedFilters.push("Omurga makaslama yükü olan hareketler elendi");
                     }
                     if (/diz|menisküs/.test(clause)) {
-                        excludedKeywords.push('jump', 'sıçra', 'pistol', 'thruster', 'burpee');
+                        excludedKeywords.push('jump', 'sıçra', 'pistol', 'thruster', 'burpee', 'high knees', 'high_knees', 'butt kicks', 'butt_kicks', 'skater', 'squat thrust', 'squat_thrust', 'lunge');
                         appliedFilters.push("Dize patlayıcı yük bindiren hareketler elendi");
                     }
-                    if (/omuz/.test(clause) && hasPain) {
-                        excludedKeywords.push('overhead', 'snatch', 'push press', 'thruster', 'upright row');
+                    if (/(omuz|omz)/.test(clause) && hasPain) {
+                        excludedKeywords.push('overhead', 'arnold', 'snatch', 'push press', 'push_press', 'thruster', 'upright row', 'upright_row', 'omuz pres', 'handstand', 'dips');
                         appliedFilters.push("Omuz sıkışması yaratabilecek dikey presler elendi");
                     }
 
@@ -4917,10 +5042,93 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 s === 'full_body' || s === 'lower' || s === 'iso_legs' || s === 'functional'
             );
 
+            function isAllowedBySelectedSplits(ex) {
+                if (!ex) return false;
+                if (isComplexFlow) return true;
+                if (!Array.isArray(selectedSplits) || selectedSplits.length === 0) return true;
+                if (selectedSplits.some(s => s === 'full_body' || s === 'flow_complex' || s === 'functional')) return true;
+
+                const pk = (typeof getExercisePrimaryMuscleKeys === 'function') ? getExercisePrimaryMuscleKeys(ex) : [];
+                const effCat = (typeof getEffectiveExerciseCategory === 'function') ? getEffectiveExerciseCategory(ex) : ex.category;
+                const isCondAllowed = style === 'emom_conditioning' && (effCat === 'cardio' || ex.isComplex || /burpee|swing|thruster|mountain|jack|rope|skater|thrust/i.test(ex.id || ''));
+                if (isCondAllowed) return true;
+
+                const isCardioJunk = effCat === 'cardio' || /jumping_jack|high_knees|butt_kicks|running|walking|jump_rope|skater|shuffle|squat_thrust/i.test(ex.id || '');
+                if (isCardioJunk) return false;
+
+                const chosenCoreCount = chosenExercises.filter(c => {
+                    const ck = (typeof getExercisePrimaryMuscleKeys === 'function') ? getExercisePrimaryMuscleKeys(c) : [];
+                    return c.category === 'core' || ck.some(k => k.startsWith('core_'));
+                }).length;
+
+                return selectedSplits.some(sp => {
+                    if (sp === 'iso_chest') return pk.some(k => k.startsWith('chest_') || k.startsWith('triceps_'));
+                    if (sp === 'iso_back') return pk.some(k => k.startsWith('back_') || k === 'traps' || k === 'shoulders_rear' || k === 'biceps');
+                    if (sp === 'iso_shoulders') return pk.some(k => k.startsWith('shoulders_') || k === 'traps');
+                    if (sp === 'iso_arms') return pk.some(k => k === 'biceps' || k.startsWith('triceps_'));
+                    if (sp === 'iso_legs' || sp === 'lower') return pk.some(k => k.startsWith('legs_')) || effCat === 'legs_quad' || effCat === 'legs_hinge';
+                    if (sp === 'iso_core' || sp === 'core_functional') return pk.some(k => k.startsWith('core_')) || effCat === 'core';
+                    if (sp === 'upper_push') {
+                        if (effCat === 'core' && !pk.some(k => k.startsWith('chest_') || k.startsWith('shoulders_') || k.startsWith('triceps_'))) return chosenCoreCount < 1 && style !== 'emom_conditioning';
+                        return effCat === 'push' || pk.some(k => k.startsWith('chest_') || k === 'shoulders_front' || k === 'shoulders_side' || k.startsWith('triceps_'));
+                    }
+                    if (sp === 'upper_pull') {
+                        if (effCat === 'core' && !pk.some(k => k.startsWith('back_') || k === 'biceps' || k === 'shoulders_rear')) return chosenCoreCount < 1 && style !== 'emom_conditioning';
+                        return effCat === 'pull' || pk.some(k => k.startsWith('back_') || k === 'shoulders_rear' || k === 'biceps' || k === 'traps');
+                    }
+                    if (sp === 'upper') return effCat === 'push' || effCat === 'pull' || (effCat === 'core' && chosenCoreCount < 1);
+                    return true;
+                });
+            }
+
             function isCandidateBiochemicallyCompatible(ex, allowLowerUpperComplexInSlot = false) {
                 if (!ex || isExerciseExcludedByUser(ex.id)) return false;
                 if (!isExerciseEquipmentAvailable(ex)) return false;
+                if (ex.id === 'db_floor_press' && typeof selectedEquipments !== 'undefined' && selectedEquipments.includes('bench')) return false;
                 if (usedIds.includes(ex.id)) return false;
+                if (!isAllowedBySelectedSplits(ex)) return false;
+
+                // Evrensel Küçük Kas & Mekanik Kotası (İzole Kol/Omuz günleri hariç)
+                const isArmsOrShouldersDay = selectedSplits.some(s => s === 'iso_arms' || s === 'iso_shoulders');
+                if (!isArmsOrShouldersDay) {
+                    const exPKeys = (typeof getExercisePrimaryMuscleKeys === 'function') ? getExercisePrimaryMuscleKeys(ex) : [];
+                    const isTri = exPKeys.some(k => k.includes('triceps')) || ex.id === 'bw_diamond_pushup';
+                    const isBic = exPKeys.some(k => k.includes('biceps'));
+                    const isCalf = exPKeys.some(k => k.includes('calves'));
+
+                    const chosenTriCount = chosenExercises.filter(c => {
+                        const ck = (typeof getExercisePrimaryMuscleKeys === 'function') ? getExercisePrimaryMuscleKeys(c) : [];
+                        return ck.some(k => k.includes('triceps')) || c.id === 'bw_diamond_pushup';
+                    }).length;
+                    const chosenBicCount = chosenExercises.filter(c => {
+                        const ck = (typeof getExercisePrimaryMuscleKeys === 'function') ? getExercisePrimaryMuscleKeys(c) : [];
+                        return ck.some(k => k.includes('biceps'));
+                    }).length;
+                    const chosenCalfCount = chosenExercises.filter(c => {
+                        const ck = (typeof getExercisePrimaryMuscleKeys === 'function') ? getExercisePrimaryMuscleKeys(c) : [];
+                        return ck.some(k => k.includes('calves'));
+                    }).length;
+                    const chosenChestCount = chosenExercises.filter(c => {
+                        const ck = (typeof getExercisePrimaryMuscleKeys === 'function') ? getExercisePrimaryMuscleKeys(c) : [];
+                        return ck.some(k => k.startsWith('chest_'));
+                    }).length;
+                    const chosenBackCount = chosenExercises.filter(c => {
+                        const ck = (typeof getExercisePrimaryMuscleKeys === 'function') ? getExercisePrimaryMuscleKeys(c) : [];
+                        return ck.some(k => k.startsWith('back_'));
+                    }).length;
+
+                    if (isTri) {
+                        if (chosenTriCount >= 2) return false;
+                        if (selectedSplits.includes('upper_push') && chosenTriCount >= Math.max(1, chosenChestCount)) return false;
+                        const hasLongHeadIso = chosenExercises.some(c => c.id === 'db_skullcrusher' || c.id === 'db_triceps_overhead');
+                        if (hasLongHeadIso && (ex.id === 'db_skullcrusher' || ex.id === 'db_triceps_overhead')) return false;
+                    }
+                    if (isBic) {
+                        if (chosenBicCount >= 2) return false;
+                        if (selectedSplits.includes('upper_pull') && chosenBicCount >= Math.max(1, chosenBackCount)) return false;
+                    }
+                    if (isCalf && chosenCalfCount >= 1) return false;
+                }
 
                 // Kullanıcı Özel Notu / Kısıtlama Filtresi (Kullanıcı yapamıyorum/istemiyorum dediyse ASLA seçme)
                 if (wishParsed.excludedIds.has(ex.id)) return false;
@@ -5300,13 +5508,9 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                         );
                     }
                     if (subKeyMatches.length === 0 && strictIso) {
-                        // İzole kas modunda ekipman havuzu dar olsa bile ikiz hareket ailesini ve açı çakışmasını ASLA aynı seansa alma!
+                        // İzole kas modunda ekipman havuzu dar olsa bile sakatlık/bölge/ikiz hareket ailesini ve açı çakışmasını ASLA aynı seansa alma!
                         subKeyMatches = EXERCISES_DB.filter(ex =>
-                            !isExerciseExcludedByUser(ex.id) &&
-                            isExerciseEquipmentAvailable(ex) &&
-                            !usedIds.includes(ex.id) &&
-                            !usedFamilies.has(getExerciseMovementFamily(ex)) &&
-                            !hasBiomechAngleAndMuscleConflict(ex, chosenExercises) &&
+                            isCandidateBiochemicallyCompatible(ex, allowComplex) &&
                             (Array.isArray(cat) ? cat.includes(getEffectiveExerciseCategory(ex)) : getEffectiveExerciseCategory(ex) === cat) &&
                             (matchesPrimaryFor(preferredSubKeys)(ex) || matchesPrimaryMuscleKeysFor(preferredSubKeys)(ex))
                         );
@@ -5399,21 +5603,65 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                     if (complexPreferred.length > 0) finalPool = complexPreferred;
                 }
 
+                if (style === 'emom_conditioning' && Array.isArray(finalPool)) {
+                    const isoExcludeRegex = /curl|extension|fly|raise|kickback|shrug|calf|wrist|face_pull|pullover|concentration|preacher|hammer/i;
+                    const isCondCandidate = (e) => !isoExcludeRegex.test(e.id || '') && !isoExcludeRegex.test(e.name || '') && (
+                        e.equipment === 'bodyweight' || e.category === 'cardio' || e.isComplex ||
+                        /burpee|swing|thruster|snatch|clean|man_maker|manmaker|jump|mountain|jack|rope|row|carry|walk|skater|thrust|lunge|squat|pushup|push_up|plank|twist|bear|step|cardio|conditioning/i.test((e.id || '') + ' ' + (e.name || ''))
+                    );
+                    let condPreferred = finalPool.filter(isCondCandidate);
+                    if (condPreferred.length === 0 && typeof EXERCISES_DB !== 'undefined') {
+                        condPreferred = EXERCISES_DB.filter(e => isCandidateBiochemicallyCompatible(e, true) && isCondCandidate(e));
+                    }
+                    if (condPreferred.length > 0) finalPool = condPreferred;
+                } else if ((style === 'emom_strength' || goal === 'strength') && Array.isArray(finalPool)) {
+                    const compOnly = finalPool.filter(e => e.mechanic === 'compound' || e.isComplex);
+                    if (compOnly.length > 0) finalPool = compOnly;
+                    if (style === 'emom_strength') {
+                        const strRegex = /squat|deadlift|rdl|bench|press|row|pullup|chinup|pulldown|clean|thruster/i;
+                        const strPreferred = finalPool.filter(e => strRegex.test(e.id || '') || strRegex.test(e.name || ''));
+                        if (strPreferred.length > 0) finalPool = strPreferred;
+                    }
+                }
+
+                if (Array.isArray(finalPool) && finalPool.length > 1) {
+                    if (!weeklyContext) {
+                        const recentGenIds = getRecentGeneratedIds();
+                        if (recentGenIds.length > 0) {
+                            const recentGenSet = new Set(recentGenIds);
+                            const notJustGen = finalPool.filter(e => !recentGenSet.has(e.id));
+                            if (notJustGen.length > 0) finalPool = notJustGen;
+                        }
+                    }
+                    if (finalPool.length > 2) {
+                        const lastDoneMap = getLastDoneMapFromHistory();
+                        const sortedByStale = [...finalPool].sort((a, b) => (lastDoneMap[a.id] || 0) - (lastDoneMap[b.id] || 0));
+                        const topCount = Math.max(2, Math.ceil(sortedByStale.length * 0.6));
+                        finalPool = sortedByStale.slice(0, topCount);
+                    }
+                }
+
                 let chosen = pickRandom(finalPool);
                 if (!chosen && !strictIso) {
-                    const modeBase = filterToUnworkedAdjacentSubMuscles(
+                    let modeBase = filterToUnworkedAdjacentSubMuscles(
                         preferWeeklyFreshExercises(applyDoctrineModeFilter(basePool, filterMode)),
                         hasAdjacentDaySubMuscleRule
                     );
+                    if (goal === 'strength' || style === 'emom_strength') {
+                        const modeComp = modeBase.filter(e => e.mechanic === 'compound' || e.isComplex);
+                        if (modeComp.length > 0) modeBase = modeComp;
+                    }
                     chosen = pickRandom(modeBase);
                 }
                 if (!chosen) {
                     let relatedCat = cat;
-                    if (cat === 'push') relatedCat = ['push', 'core'];
-                    else if (cat === 'pull') relatedCat = ['pull', 'core'];
-                    else if (cat === 'legs_quad' || cat === 'legs_hinge') relatedCat = ['legs_quad', 'legs_hinge', 'core'];
+                    if (goal !== 'strength' && style !== 'emom_strength') {
+                        if (cat === 'push') relatedCat = ['push', 'core'];
+                        else if (cat === 'pull') relatedCat = ['pull', 'core'];
+                        else if (cat === 'legs_quad' || cat === 'legs_hinge') relatedCat = ['legs_quad', 'legs_hinge', 'core'];
+                    }
 
-                    const fallbackPool = filterToUnworkedAdjacentSubMuscles(
+                    let fallbackPool = filterToUnworkedAdjacentSubMuscles(
                         preferWeeklyFreshExercises(EXERCISES_DB.filter(ex => {
                             if (!isCandidateBiochemicallyCompatible(ex, allowComplex)) return false;
                             const effCat = getEffectiveExerciseCategory(ex);
@@ -5421,16 +5669,24 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                         })),
                         hasAdjacentDaySubMuscleRule
                     );
+                    if (goal === 'strength' || style === 'emom_strength') {
+                        const fbComp = fallbackPool.filter(e => e.mechanic === 'compound' || e.isComplex);
+                        if (fbComp.length > 0) fallbackPool = fbComp;
+                    }
                     chosen = pickRandom(fallbackPool);
                 }
-                if (!chosen) {
-                    // Son çare: yine de ASLA aynı hareket ailesinden (ikiz) veya aynı medyadan olmayan, en az çakışan hareketi seç
-                    const nonTwinAnyCatPool = filterToUnworkedAdjacentSubMuscles(
+                if (!chosen && (selectedSplits.includes('full_body') || isComplexFlow || style === 'emom_conditioning')) {
+                    // Son çare: bölgesel günlerde başka bölgeye TAŞMA; yalnızca Tüm Vücut/Kompleks/Kondisyon modlarında genişlet
+                    let nonTwinAnyCatPool = filterToUnworkedAdjacentSubMuscles(
                         preferWeeklyFreshExercises(
                             EXERCISES_DB.filter(ex => isCandidateBiochemicallyCompatible(ex, hasLowerOrFullOrFuncSplit))
                         ),
                         hasAdjacentDaySubMuscleRule
                     );
+                    if (goal === 'strength' || style === 'emom_strength') {
+                        const ntComp = nonTwinAnyCatPool.filter(e => e.mechanic === 'compound' || e.isComplex);
+                        if (ntComp.length > 0) nonTwinAnyCatPool = ntComp;
+                    }
                     chosen = pickRandom(nonTwinAnyCatPool) || pickRandom(
                         preferWeeklyFreshExercises(
                             EXERCISES_DB.filter(ex => isCandidateBiochemicallyCompatible(ex, hasLowerOrFullOrFuncSplit))
@@ -5672,16 +5928,16 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 ? activeWeeklyCtx.deficitFocusKeys.slice(0, 2)
                 : [];
             if ((customWish && customWish.trim()) || autoDeficitKeys.length > 0) {
-                const hasPainWord = /ağrı|hassas|sakat|zorla|incin|problem|fıtık/.test(wishLower);
+                const hasPainWord = /ağrı|ağrıy|ağrıt|hassas|sakat|zorla|incin|problem|fıtık/.test(wishLower);
 
                 // 1. Eklem hassasiyeti varsa zorlayıcı hareketleri güvenli ve ikiz olmayan alternatiflerle filtrele
                 if (hasPainWord) {
                     for (let idx = chosenExercises.length - 1; idx >= 0; idx--) {
                         const ex = chosenExercises[idx];
                         const nameCue = `${ex.name || ''} ${ex.muscle || ''} ${ex.cue || ''}`.toLocaleLowerCase('tr-TR');
-                        const kneeStress = /diz/.test(wishLower) && /jump|sıçra|pistol|snatch|thruster|derin squat|burpee/.test(nameCue);
-                        const backStress = /bel|fıtık|omurga/.test(wishLower) && /deadlift|swing|snatch|clean|good morning|bent over/.test(nameCue);
-                        const shoulderStress = /omuz/.test(wishLower) && /overhead|snatch|strict press|push press|thruster|handstand/.test(nameCue);
+                        const kneeStress = /diz/.test(wishLower) && /jump|sıçra|pistol|snatch|thruster|derin squat|burpee|high knees|butt kicks|skater|lunge/.test(nameCue);
+                        const backStress = /bel|fıtık|omurga/.test(wishLower) && /deadlift|rdl|swing|snatch|clean|good morning|bent over|pendlay/.test(nameCue);
+                        const shoulderStress = /(omuz|omz)/.test(wishLower) && /overhead|arnold|snatch|strict press|push press|thruster|handstand|dips/.test(nameCue);
                         if (kneeStress || backStress || shoulderStress) {
                             const safeReplacement = filterToUnworkedAdjacentSubMuscles(
                                 EXERCISES_DB.filter(c =>
@@ -5924,8 +6180,90 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 }
             }
 
-            // KATMAN 4: Seçilen Süperset Yoğunluğuna Göre Akademik Blok Etiketlerini Ata
+            function getLateSessionPrioritySubKeys14d() {
+            const lateStats = {};
+            try {
+                const hist = (typeof history !== 'undefined' && Array.isArray(history)) ? history : [];
+                const cutoff = Date.now() - 14 * 24 * 60 * 60 * 1000;
+                hist.forEach(h => {
+                    const ts = new Date(h.date || h.timestamp || 0).getTime() || 0;
+                    if (ts < cutoff) return;
+                    const exs = Array.isArray(h.exercises) ? h.exercises : [];
+                    if (exs.length < 3) return;
+                    const midIdx = Math.ceil(exs.length / 2);
+                    exs.forEach((item, idx) => {
+                        const itemId = item.id || item.exId;
+                        const dbEx = (typeof EXERCISES_DB !== 'undefined')
+                            ? (EXERCISES_DB.find(e => itemId && e.id === itemId) || EXERCISES_DB.find(e => item.name && e.name === item.name))
+                            : item;
+                        if (!dbEx) return;
+                        const pKeys = (typeof getExercisePrimaryMuscleKeys === 'function') ? getExercisePrimaryMuscleKeys(dbEx) : [];
+                        pKeys.forEach(k => {
+                            if (!lateStats[k]) lateStats[k] = { late: 0, early: 0 };
+                            if (idx >= midIdx) lateStats[k].late += 1;
+                            else lateStats[k].early += 1;
+                        });
+                    });
+                });
+            } catch (e) {}
+            return Object.keys(lateStats)
+                .filter(k => lateStats[k].late > lateStats[k].early)
+                .sort((a, b) => (lateStats[b].late - lateStats[b].early) - (lateStats[a].late - lateStats[a].early));
+        }
+
+        function applySafePriorityOrder(exercises, fatiguedSet) {
+            if (!Array.isArray(exercises) || exercises.length < 2) return exercises;
+            const priorityKeys = getLateSessionPrioritySubKeys14d();
+            if (priorityKeys.length === 0) return exercises;
+
+            const isConflictInSafeMode = (candEx, otherExs) => {
+                const candKeys = (typeof getExercisePrimaryMuscleKeys === 'function') ? getExercisePrimaryMuscleKeys(candEx) : [];
+                if (fatiguedSet && candKeys.some(k => fatiguedSet.has(k))) return true;
+
+                const isCompound = candEx.mechanic === 'compound' || candEx.isComplex;
+                if (isCompound) return false;
+
+                const hasBackCompound = otherExs.some(o => {
+                    const ok = (typeof getExercisePrimaryMuscleKeys === 'function') ? getExercisePrimaryMuscleKeys(o) : [];
+                    return (o.mechanic !== 'isolation') && ok.some(k => k.startsWith('back_'));
+                });
+                const hasChestOrPressCompound = otherExs.some(o => {
+                    const ok = (typeof getExercisePrimaryMuscleKeys === 'function') ? getExercisePrimaryMuscleKeys(o) : [];
+                    return (o.mechanic !== 'isolation') && ok.some(k => k.startsWith('chest_') || k === 'shoulders_front');
+                });
+                const hasHeavyAxial = otherExs.some(o => typeof isSpinalAxialLoadedExercise === 'function' && isSpinalAxialLoadedExercise(o));
+
+                if (candKeys.some(k => k.includes('biceps')) && hasBackCompound) return true;
+                if (candKeys.some(k => k.includes('triceps') || k === 'shoulders_front' || k === 'shoulders_side') && hasChestOrPressCompound) return true;
+                if (candKeys.some(k => k.startsWith('core')) && hasHeavyAxial) return true;
+                return false;
+            };
+
+            for (const pKey of priorityKeys) {
+                const matchIdx = exercises.findIndex((ex, idx) => {
+                    if (idx === 0) return false;
+                    const pKeys = (typeof getExercisePrimaryMuscleKeys === 'function') ? getExercisePrimaryMuscleKeys(ex) : [];
+                    if (!pKeys.includes(pKey)) return false;
+                    const others = exercises.filter((_, i) => i !== idx);
+                    return !isConflictInSafeMode(ex, others);
+                });
+                if (matchIdx > 0) {
+                    const [picked] = exercises.splice(matchIdx, 1);
+                    picked.priorityNote = 'Önceki seanslarda sonda kaldığı için 1. sıraya alındı';
+                    if (!picked.synergyBadge) picked.synergyBadge = 'Öncelik Rotasyonu';
+                    exercises.unshift(picked);
+                    break;
+                }
+            }
+            return exercises;
+        }
+
+        // KATMAN 4: Güvenli Mod Öncelik Rotasyonu (Tüm Vücut dışı çakışmayan bölgesel günlerde) + Blok Etiketleri
+            if (!selectedSplits.includes('full_body')) {
+                applySafePriorityOrder(chosenExercises, fatiguedSubKeys48h);
+            }
             const structuredExercises = assignAcademicBlockStructure(chosenExercises, style, scheme);
+            if (!weeklyContext) recordRecentGeneratedIds(chosenExercises.map(e => e && e.id).filter(Boolean));
 
             // Dynamic Warmups
             const warmups = [
@@ -6005,9 +6343,17 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 generatedSplitTitle = selectedSplits.map(s => splitShortNames[s] || s).join(' + ');
             }
 
+            let equipmentWarning = '';
+            if (structuredExercises.length < 3) {
+                equipmentWarning = `Seçili ekipmanlar "${generatedSplitTitle}" bölgesi için yetersiz (${structuredExercises.length} hareket bulundu). Daha verimli program için ek ekipman seçin.`;
+            } else if (style === 'emom_strength' && structuredExercises.every(e => e.equipment === 'bodyweight')) {
+                equipmentWarning = 'Kuvvet EMOM ağır yük gerektirir; yalnızca vücut ağırlığıyla gerçek kuvvet yüklemesi sınırlıdır.';
+            }
+
             currentGeneratedWorkout = {
                 id: 'gen_' + Date.now(),
                 title: generatedSplitTitle,
+                equipmentWarning,
                 split: selectedSplits.length === 1 ? selectedSplits[0] : 'custom',
                 splits: [...selectedSplits],
                 splitName: generatedSplitTitle,
@@ -6119,7 +6465,10 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 .trim() || 'Tüm Vücut Antrenmanı';
             w.title = cleanWorkoutTitle;
 
-            container.innerHTML = buildWorkoutCardsCarouselHtml(w, 'generated');
+            const warnHtml = w.equipmentWarning
+                ? `<div style="margin:0 0 10px 0;padding:10px 12px;border-radius:10px;background:#FEF3C7;border:1.5px solid #F59E0B;color:#92400E;font-size:12.5px;font-weight:700;line-height:1.4;">⚠️ ${escapeHTML(w.equipmentWarning)}</div>`
+                : '';
+            container.innerHTML = warnHtml + buildWorkoutCardsCarouselHtml(w, 'generated');
 
             // Restore or reset carousel card index
             const preserveIdx = (options && (options.preserveScroll || options.preserveCardIndex) && window.activeWorkoutCarouselIndex !== undefined)
@@ -6805,6 +7154,8 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 kettlebell: 'Kettlebell',
                 barbell: 'Barbell',
                 machine: 'Makine/Kablo',
+                mini_band: 'Kısa Bant',
+                resistance_band: 'Uzun Bant',
                 bodyweight: 'Vücut Ağırlığı'
             };
             const anatomy = getExerciseAnatomy(ex);
@@ -6910,6 +7261,8 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             kettlebell: { label: 'Kettlebell', icon: '🔔' },
             barbell: { label: 'Barbell', icon: '⚡' },
             machine: { label: 'Makine/Kablo', icon: '⚙️' },
+            mini_band: { label: 'Kısa Bant', icon: '🔄' },
+            resistance_band: { label: 'Uzun Bant', icon: '➰' },
             bodyweight: { label: 'Vücut Ağırlığı', icon: '🤸' }
         };
 
@@ -8353,7 +8706,7 @@ KESİN KURALLAR:
         }
 
         function updateSameEquipPills() {
-            const equips = ['all', 'dumbbell', 'kettlebell', 'barbell', 'machine', 'bodyweight'];
+            const equips = ['all', 'dumbbell', 'kettlebell', 'barbell', 'machine', 'mini_band', 'resistance_band', 'bodyweight'];
             equips.forEach(eq => {
                 const el = document.getElementById('pill_seq_' + eq);
                 if (el) {
@@ -8531,10 +8884,15 @@ KESİN KURALLAR:
                     return true;
                 });
 
-                // Biyomekanik Uygunluk Sıralaması
+                // Biyomekanik + Ortam Ekipman + Tazelik Sıralaması
+                const lastDoneMap = getLastDoneMapFromHistory();
+                const recentGenSet = new Set(getRecentGeneratedIds());
                 filtered.sort((a, b) => {
                     let scoreA = 0;
                     let scoreB = 0;
+
+                    if (isExerciseEquipmentAvailable(a)) scoreA += 120;
+                    if (isExerciseEquipmentAvailable(b)) scoreB += 120;
 
                     if (a.category === cat) scoreA += 60;
                     if (b.category === cat) scoreB += 60;
@@ -8543,6 +8901,16 @@ KESİN KURALLAR:
                     const bPriHits = (b.primaryMuscles || []).filter(m => pMuscles.includes(m)).length;
                     scoreA += aPriHits * 30;
                     scoreB += bPriHits * 30;
+
+                    if (!lastDoneMap[a.id]) scoreA += 35;
+                    if (!lastDoneMap[b.id]) scoreB += 35;
+                    if (recentGenSet.has(a.id)) scoreA -= 25;
+                    if (recentGenSet.has(b.id)) scoreB -= 25;
+
+                    if (reason === 'no_equip') {
+                        if (a.equipment === 'bodyweight') scoreA += 80;
+                        if (b.equipment === 'bodyweight') scoreB += 80;
+                    }
 
                     if (reason === 'joint') {
                         const friendly = ['bridge', 'curl', 'cable', 'support', 'seated', 'floor', 'machine', 'thrust'];
@@ -9490,6 +9858,9 @@ KESİN KURALLAR:
             const exIndex = workout.exercises.findIndex(e => e.id === currentExId);
             if (exIndex === -1) return;
 
+            if (!window._sessionSwappedOutIds) window._sessionSwappedOutIds = new Set();
+            window._sessionSwappedOutIds.add(currentExId);
+
             const currentEx = workout.exercises[exIndex];
             const usedIds = workout.exercises.map(e => e.id);
             const otherExercises = workout.exercises.filter((_, i) => i !== exIndex);
@@ -9497,18 +9868,36 @@ KESİN KURALLAR:
                 otherExercises.map(e => getExerciseMovementFamily(e)).filter(Boolean)
             );
             const currentSubKey = getExerciseAnatomy(currentEx)?.subKey;
+            const recentGenSet = new Set(getRecentGeneratedIds());
+            const style = workout.style || '';
 
-            // Pool of alternatives in the same category & available equipments (without movement family twins or >=70% angle+muscle overlap)
+            const filterSwapPool = (basePool) => {
+                let candidates = basePool;
+                if (style === 'emom_conditioning') {
+                    const isoEx = /curl|extension|fly|raise|kickback|shrug|calf|wrist|face_pull|pullover|concentration|preacher|hammer/i;
+                    const condOnly = candidates.filter(e => !isoEx.test(e.id || '') && !isoEx.test(e.name || ''));
+                    if (condOnly.length > 0) candidates = condOnly;
+                } else if (style === 'emom_strength') {
+                    const strRe = /squat|deadlift|rdl|bench|press|row|pullup|chinup|pulldown|clean|thruster/i;
+                    const strOnly = candidates.filter(e => strRe.test(e.id || '') || strRe.test(e.name || ''));
+                    if (strOnly.length > 0) candidates = strOnly;
+                }
+                const notSwappedOut = candidates.filter(e => !window._sessionSwappedOutIds.has(e.id));
+                if (notSwappedOut.length > 0) candidates = notSwappedOut;
+                const notRecent = candidates.filter(e => !recentGenSet.has(e.id));
+                if (notRecent.length > 0) candidates = notRecent;
+                return candidates;
+            };
+
             let pool = filterExercises(currentEx.category, usedIds).filter(e =>
                 !otherFamilies.has(getExerciseMovementFamily(e)) &&
                 !hasBiomechAngleAndMuscleConflict(e, otherExercises)
             );
-            // Önce aynı anatomik alt başı (subKey) vuran alternatifleri tercih et
             if (currentSubKey) {
                 const sameSubPool = pool.filter(e => getExerciseAnatomy(e)?.subKey === currentSubKey);
                 if (sameSubPool.length > 0) pool = sameSubPool;
             }
-            let replacement = pickRandom(pool);
+            let replacement = pickRandom(filterSwapPool(pool));
             if (!replacement) {
                 let relatedCat = currentEx.category;
                 if (currentEx.category === 'push') relatedCat = ['push', 'core'];
@@ -9521,17 +9910,22 @@ KESİN KURALLAR:
                     !usedIds.includes(e.id) &&
                     !otherFamilies.has(getExerciseMovementFamily(e)) &&
                     !hasBiomechAngleAndMuscleConflict(e, otherExercises) &&
-                    (Array.isArray(relatedCat) ? relatedCat.includes(e.category) : e.category === relatedCat)
+                    (style === 'emom_conditioning' || (Array.isArray(relatedCat) ? relatedCat.includes(e.category) : e.category === relatedCat))
                 );
-                replacement = pickRandom(fallback);
+                replacement = pickRandom(filterSwapPool(fallback));
             }
 
             if (replacement) {
                 const newExObj = Object.assign({}, replacement, {
                     targetSets: currentEx.targetSets || 3,
                     targetReps: currentEx.targetReps || '8-12',
-                    logs: currentEx.logs || []
+                    logs: currentEx.logs || [],
+                    blockType: currentEx.blockType,
+                    blockLabel: currentEx.blockLabel,
+                    blockHeader: currentEx.blockHeader,
+                    customRest: currentEx.customRest
                 });
+                recordRecentGeneratedIds([replacement.id]);
                 workout.exercises[exIndex] = newExObj;
                 syncWorkoutPersistenceAfterEdit(workout, scope, currentExId, newExObj);
                 if (scope === 'active') {

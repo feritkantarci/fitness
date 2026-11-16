@@ -6,7 +6,7 @@ description: Çelik Kodu Analiz sekmesini (#analyticsTab, js/chiefs/analytics-ch
 # 📊 5. Oda — Analiz & Bilimsel Metrik Şefi (`analytics-guard`)
 
 - **Fiziksel Oda Dosyası:** `js/chiefs/analytics-chief.js`
-- **Zorunlu Sınav Maddeleri:** `T1..T5`, `T8`, `T11`, `T12`, `T18` (9 akademik & hata hafızası testi)
+- **Zorunlu Sınav Maddeleri:** `T1..T5`, `T8`, `T11`, `T12`, `T18`, `T26`, `T28` (11 akademik & hata hafızası testi)
 
 ## Görev Kapsamı (`#analyticsTab`)
 1. **Anatomik Kas Haritası:** 10 ana kas ve 31 alt kas bölgesinin haftalık set dağılımını, SVG/pin geometrisini ve hızlı ekleme (`recId`) linklerini yönetir.
@@ -25,3 +25,4 @@ description: Çelik Kodu Analiz sekmesini (#analyticsTab, js/chiefs/analytics-ch
 7. **Seanslar Arası Çiftlenmiş Gelişim & Tekil Zirve Etiketi (`T8`, `T18`):** Her seanstan kopuk `maxWeight × maxReps` değil, Epley'e göre en iyi gerçek tek set alınır. `Başlangıç`, `🏆 Zirve Rekor` ve `Son Durum` ayrı tutulur; kartta mükerrer `Zirve Rekor` etiketi basılmaz (`peakCount === 1`). Son 2 seansta üst üste düşüş `2 Seansta Belirgin Yorgunluk`, tek günlük düşüş `Geçici Dalgalanma` olarak ayrılır.
 8. **Haftalık Puan & Kardiyo Dakikası (`T12`):** `totalTimeUnderTensionSec || timeUnderTensionSec` okunur; `cond_*` ve `conditioning` hareketleri gerçek kaydedilmiş dakika (`sets` / `durationMinutes`) üzerinden Kardiyo puanına katılır.
 9. **WCAG Kontrast & Hata Hafızası:** Açık rozetlerde yalnızca yüksek kontrastlı koyu metin kullanılır; kullanıcının yakaladığı her analiz hatası `scripts/tab-watchdog.js` içine kalıcı test olarak işlenir.
+10. **Alt Bölge Kapsama & Tek Hareket Yetersizliği (`T28` — Schoenfeld, Israetel RP & Pelland 2025/2026):** Kas Haritası varsayılan olarak `week_done` ("Yapılan") görünümüyle açılır. 31 alt kasın yeşil ("Çalıştı") sayılması için `directSets > 0 && earnedSets >= 1.5` şarttır; tekil yan etki (`0.35x` / `Yardımcı Kas`) veya `< 1.5` setler kehribar (`Yan Etki` / `Az`) görünür. 10 ana kas grubunun `optimal` ("İdeal Seviye") sayılması için toplam set (`optimalMin`) yanında doğrudan set payı (`>= max(2, optimalMin * 0.5)`) ve alt bölge kapsamı (`>= Math.ceil(columns.length * 0.6)`, yani 3 bölgede en az 2, 4 bölgede en az 3 alt kas) zorunludur.

@@ -3594,7 +3594,7 @@
   {
     "category": "push",
     "cue": "Paralel barlarda gövdeyi 30° öne eğ, dirsekler 90° olana kadar kontrollü in ve tepeye kilitlen.",
-    "diagram": "assets/diagrams/seq_dips.svg",
+    "diagram": "assets/exercises/bw_dips.gif",
     "equipment": "bodyweight",
     "id": "bw_dips",
     "isComplex": false,
@@ -3641,6 +3641,58 @@
     ],
     "garminSecondaryMuscles": [
       "CHEST",
+      "SHOULDERS"
+    ],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "category": "push",
+    "cue": "Eller omuz genişliğinde arkadaki sehpada, bacaklar öne uzatılmış. Sırtı sehpaya yakın tutarak dirsekleri 90° bük ve arka kolla it.",
+    "diagram": "assets/opengym/stills/1399.webp",
+    "equipment": "bodyweight",
+    "id": "bw_bench_dips",
+    "isComplex": false,
+    "mechanic": "compound",
+    "muscle": "Arka Kol Dış Baş, Arka Kol Alt Baş",
+    "name": "Sehpada Dips (Bench Dips)",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Avuç içleri öne bakacak şekilde sehpanın kenarını kavra, topuklar yerde bacaklar düz veya hafif bükülü.",
+        "phase": "1. Sehpa Duruşu"
+      },
+      {
+        "badge": "action",
+        "desc": "Kalçayı sehpanın önüne yakın tutarak dirsekler 90 derece olana dek kontrollü in; omuzları öne düşürme.",
+        "phase": "2. Kontrollü 90° İniş"
+      },
+      {
+        "badge": "finish",
+        "desc": "Avuç içleriyle sehpayı iterek arka kolları sıkıp başlangıca yüksel.",
+        "phase": "3. Arka Kol İtişi"
+      }
+    ],
+    "primaryMuscles": [
+      "triceps"
+    ],
+    "secondaryMuscles": [
+      "shoulders"
+    ],
+    "tags": [
+      "upper_push",
+      "upper"
+    ],
+    "weightKey": "",
+    "primarySubMuscles": "Arka Kol Dış Baş, Arka Kol Alt Baş",
+    "secondarySubMuscles": "Ön Omuz",
+    "biomechanicalProof": "Eller sırt arkasında sehpadayken gövde dik kalır; yük alt göğüs yerine doğrudan arka kol (triceps) ve ön omuz üzerine biner.",
+    "fitCategory": "triceps_extension",
+    "fitName": "bench_dip",
+    "fitNote": "",
+    "garminPrimaryMuscles": [
+      "TRICEPS"
+    ],
+    "garminSecondaryMuscles": [
       "SHOULDERS"
     ],
     "garminMatchType": "exact_verified"
@@ -7222,6 +7274,330 @@
     "garminSecondaryMuscles": [
       "ABS"
     ],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "id": "mb_monster_walk",
+    "name": "Mini Bant Yan Yürüyüş (Monster Walk)",
+    "category": "legs_hinge",
+    "equipment": "mini_band",
+    "mechanic": "isolation",
+    "isComplex": false,
+    "muscle": "Yan Kalça (Gluteus Medius), Dış Ön Bacak",
+    "primaryMuscles": ["glutes", "quads"],
+    "secondaryMuscles": ["core"],
+    "primarySubMuscles": "Yan Kalça, Dış Ön Bacak",
+    "secondarySubMuscles": "Derin İç Karın",
+    "cue": "Mini bandı dizlerin veya bileklerin etrafına geçir, yarım squat pozisyonunda gerginliği bozmadan yana adımla.",
+    "diagram": "assets/exercises/mb_monster_walk.gif",
+    "positions": [
+      { "badge": "setup", "phase": "1. Başlangıç", "desc": "Mini bant diz üstünde gergin, kalça hafif geride yarım atletik çömelme pozisyonunda." },
+      { "badge": "action", "phase": "2. Yana Adım", "desc": "Dizi içe düşürmeden yana kontrollü adım at, ardından diğer ayağı bant gevşemeden yaklaştır." }
+    ],
+    "tags": ["legs", "glutes", "mini_band", "activation"],
+    "weightKey": "",
+    "fitCategory": "squat",
+    "fitName": "lateral_band_walk",
+    "fitNote": "Mini Band Monster Walk",
+    "garminPrimaryMuscles": ["GLUTES", "QUADS"],
+    "garminSecondaryMuscles": ["ABS"],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "id": "mb_glute_bridge_abduction",
+    "name": "Mini Bantlı Kalça Köprüsü & Açış",
+    "category": "legs_hinge",
+    "equipment": "mini_band",
+    "mechanic": "compound",
+    "isComplex": false,
+    "muscle": "Ana Kalça, Yan Kalça, Arka Bacak",
+    "primaryMuscles": ["glutes", "hamstrings"],
+    "secondaryMuscles": ["core"],
+    "primarySubMuscles": "Ana Kalça, Yan Kalça, Arka Bacak",
+    "secondarySubMuscles": "Derin İç Karın",
+    "cue": "Mini bant dizlerin hemen üstünde; kalçayı yukarı sıkarken dizleri kontrollü dışa açıp 1 saniye bekle.",
+    "diagram": "assets/exercises/mb_glute_bridge_abduction.gif",
+    "positions": [
+      { "badge": "setup", "phase": "1. Köprü Kurulumu", "desc": "Sırtüstü yat, ayak tabanları yerde, mini bant diz üstünde hafif gergin." },
+      { "badge": "action", "phase": "2. Zirve Sıkışı", "desc": "Topuklardan itip kalçayı kaldır, zirvede dizleri yana açarak yan kalçayı sık." }
+    ],
+    "tags": ["legs", "glutes", "mini_band"],
+    "weightKey": "",
+    "fitCategory": "hip_raise",
+    "fitName": "glute_bridge",
+    "fitNote": "Mini Band Glute Bridge Abduction",
+    "garminPrimaryMuscles": ["GLUTES", "HAMSTRINGS"],
+    "garminSecondaryMuscles": ["ABS"],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "id": "mb_banded_squat",
+    "name": "Mini Bantlı Squat (Diz Açışı)",
+    "category": "legs_quad",
+    "equipment": "mini_band",
+    "mechanic": "compound",
+    "isComplex": false,
+    "muscle": "Ön Bacak (Quad), Yan Kalça, Ana Kalça",
+    "primaryMuscles": ["quads", "glutes"],
+    "secondaryMuscles": ["core"],
+    "primarySubMuscles": "Dış Ön Bacak, Orta Ön Bacak, Yan Kalça, Ana Kalça",
+    "secondarySubMuscles": "Derin İç Karın",
+    "cue": "Mini bandı dizlerin üzerine tak, çömelirken dizlerini banda karşı dışa doğru iterek hizayı koru.",
+    "diagram": "assets/exercises/mb_banded_squat.gif",
+    "positions": [
+      { "badge": "setup", "phase": "1. Duruş", "desc": "Ayaklar omuz genişliğinde, bant diz üstünde gergin." },
+      { "badge": "action", "phase": "2. Çömelme & İtiş", "desc": "Dizleri dışa iterek paralel seviyeye in ve topuklardan patlayıcı kalk." }
+    ],
+    "tags": ["legs", "quads", "mini_band"],
+    "weightKey": "",
+    "fitCategory": "squat",
+    "fitName": "squat",
+    "fitNote": "Mini Band Squat",
+    "garminPrimaryMuscles": ["QUADS", "GLUTES"],
+    "garminSecondaryMuscles": ["ABS"],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "id": "mb_external_rotation",
+    "name": "Mini Bant Omuz Dış Rotasyon",
+    "category": "pull",
+    "equipment": "mini_band",
+    "mechanic": "isolation",
+    "isComplex": false,
+    "muscle": "Arka Omuz, Yan Omuz, Rotator Cuff",
+    "primaryMuscles": ["shoulders"],
+    "secondaryMuscles": ["back"],
+    "primarySubMuscles": "Arka Omuz, Yan Omuz",
+    "secondarySubMuscles": "Orta Sırt",
+    "cue": "Dirsekleri 90° büküp kaburgaya sabitle; mini bandı ön kollarla dışa doğru açıp omuz dış rotatorlarını sık.",
+    "diagram": "assets/exercises/mb_external_rotation.gif",
+    "positions": [
+      { "badge": "setup", "phase": "1. Sabitleme", "desc": "Mini bant iki elin bilek veya el sırtında, dirsekler gövdeye yapışık." },
+      { "badge": "action", "phase": "2. Dışa Açış", "desc": "Dirsekleri vücuttan ayırmadan elleri dışa doğru aç ve 2 sn tut." }
+    ],
+    "tags": ["shoulders", "rear_delt", "mini_band", "rehab"],
+    "weightKey": "",
+    "fitCategory": "shoulder_raise",
+    "fitName": "external_rotation",
+    "fitNote": "Mini Band External Rotation",
+    "garminPrimaryMuscles": ["SHOULDERS"],
+    "garminSecondaryMuscles": ["BACK"],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "id": "mb_clamshell",
+    "name": "Mini Bant Clamshell (İstiridye Açışı)",
+    "category": "legs_hinge",
+    "equipment": "mini_band",
+    "mechanic": "isolation",
+    "isComplex": false,
+    "muscle": "Yan Kalça (Gluteus Medius)",
+    "primaryMuscles": ["glutes"],
+    "secondaryMuscles": ["core"],
+    "primarySubMuscles": "Yan Kalça",
+    "secondarySubMuscles": "Derin İç Karın",
+    "cue": "Yan yatıp dizleri 45° bük; ayak tabanlarını birleşik tutarak üstteki dizi banda karşı tavana aç.",
+    "diagram": "assets/exercises/mb_clamshell.gif",
+    "positions": [
+      { "badge": "setup", "phase": "1. Yan Yatış", "desc": "Kalça ve omuzlar tek çizgide, bant diz üstünde." },
+      { "badge": "action", "phase": "2. Dizi Açış", "desc": "Beli geriye devirmeden üstteki dizi yukarı aç ve yan kalçada yanmayı hisset." }
+    ],
+    "tags": ["glutes", "mini_band", "isolation"],
+    "weightKey": "",
+    "fitCategory": "hip_raise",
+    "fitName": "clamshell",
+    "fitNote": "Mini Band Clamshell",
+    "garminPrimaryMuscles": ["GLUTES"],
+    "garminSecondaryMuscles": ["ABS"],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "id": "rb_pull_apart",
+    "name": "Uzun Bant Açış (Band Pull-Apart)",
+    "category": "pull",
+    "equipment": "resistance_band",
+    "mechanic": "isolation",
+    "isComplex": false,
+    "muscle": "Arka Omuz, Orta Sırt (Rhomboid)",
+    "primaryMuscles": ["shoulders", "back"],
+    "secondaryMuscles": ["traps"],
+    "primarySubMuscles": "Arka Omuz, Orta Sırt",
+    "secondarySubMuscles": "Üst Trapez",
+    "cue": "Uzun bandı omuz hizasında iki elle tut, kolları düz tutarak kürek kemiklerini birbirine sıkıştır.",
+    "diagram": "assets/exercises/rb_pull_apart.gif",
+    "positions": [
+      { "badge": "setup", "phase": "1. Ön Tutuş", "desc": "Kollar yere paralel ve omuz genişliğinde bandı kavramış." },
+      { "badge": "action", "phase": "2. Göğüse Açış", "desc": "Omuzları yukarı kaldırmadan bandı göğüs hattına doğru iki yana aç." }
+    ],
+    "tags": ["pull", "rear_delt", "resistance_band"],
+    "weightKey": "",
+    "fitCategory": "row",
+    "fitName": "band_pull_apart",
+    "fitNote": "Resistance Band Pull-Apart",
+    "garminPrimaryMuscles": ["SHOULDERS", "BACK"],
+    "garminSecondaryMuscles": ["TRAPS"],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "id": "rb_lat_pulldown",
+    "name": "Uzun Bant Üstten Çekiş (Band Pulldown)",
+    "category": "pull",
+    "equipment": "resistance_band",
+    "mechanic": "compound",
+    "isComplex": false,
+    "muscle": "Kanat (Latissimus), Orta Sırt, Biceps",
+    "primaryMuscles": ["lats", "back"],
+    "secondaryMuscles": ["biceps", "shoulders"],
+    "primarySubMuscles": "Kanat (Lat), Orta Sırt",
+    "secondarySubMuscles": "Pazu (Biceps), Arka Omuz",
+    "cue": "Bandı yüksek bir noktaya sabitle (veya tek diz üstünde çek), dirsekleri kalçana doğru çekerek kanadı sık.",
+    "diagram": "assets/exercises/rb_lat_pulldown.gif",
+    "positions": [
+      { "badge": "setup", "phase": "1. Yüksek Uzatma", "desc": "Kollar baş üstünde gergin, gövde dik." },
+      { "badge": "action", "phase": "2. Dirsek İndirişi", "desc": "Omuzları aşağı bastırıp dirsekleri kaburgaya doğru çek." }
+    ],
+    "tags": ["pull", "lats", "resistance_band"],
+    "weightKey": "",
+    "fitCategory": "pull_up",
+    "fitName": "lat_pulldown",
+    "fitNote": "Resistance Band Lat Pulldown",
+    "garminPrimaryMuscles": ["LATS", "BACK"],
+    "garminSecondaryMuscles": ["BICEPS"],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "id": "rb_seated_row",
+    "name": "Uzun Bant Oturarak Çekiş (Seated Row)",
+    "category": "pull",
+    "equipment": "resistance_band",
+    "mechanic": "compound",
+    "isComplex": false,
+    "muscle": "Orta Sırt, Kanat, Biceps",
+    "primaryMuscles": ["back", "lats"],
+    "secondaryMuscles": ["biceps", "shoulders"],
+    "primarySubMuscles": "Orta Sırt, Kanat (Lat)",
+    "secondarySubMuscles": "Pazu (Biceps), Arka Omuz",
+    "cue": "Yerde oturup bandı ayak tabanlarından geçir; sırtı dik tutup dirsekleri geriye çekerek kürek kemiklerini sık.",
+    "diagram": "assets/exercises/rb_seated_row.gif",
+    "positions": [
+      { "badge": "setup", "phase": "1. Dik Oturuş", "desc": "Bacaklar hafif bükülü, bant ayak tabanında gergin." },
+      { "badge": "action", "phase": "2. Sırt Çekişi", "desc": "Beli yuvarlamadan bandı göbek hizasına çekip 1 sn tut." }
+    ],
+    "tags": ["pull", "back", "resistance_band"],
+    "weightKey": "",
+    "fitCategory": "row",
+    "fitName": "seated_row",
+    "fitNote": "Resistance Band Seated Row",
+    "garminPrimaryMuscles": ["BACK", "LATS"],
+    "garminSecondaryMuscles": ["BICEPS"],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "id": "rb_chest_press",
+    "name": "Uzun Bant Göğüs İtiş (Band Chest Press)",
+    "category": "push",
+    "equipment": "resistance_band",
+    "mechanic": "compound",
+    "isComplex": false,
+    "muscle": "Orta Göğüs, Ön Omuz, Triceps",
+    "primaryMuscles": ["chest"],
+    "secondaryMuscles": ["shoulders", "triceps"],
+    "primarySubMuscles": "Orta Göğüs, Üst Göğüs",
+    "secondarySubMuscles": "Ön Omuz, Arka Kol Yan Baş",
+    "cue": "Bandı sırtının arkasından geçirip iki elinle tut; göğüs hizasından ileri doğru güçlü itiş yap.",
+    "diagram": "assets/exercises/rb_chest_press.gif",
+    "positions": [
+      { "badge": "setup", "phase": "1. Sırt Destekli Kurulum", "desc": "Bant kürek kemiklerinin altından geçer, gövde hafif önde." },
+      { "badge": "action", "phase": "2. İleri İtiş", "desc": "Dirsekleri hafif içeride tutarak kolları öne kilitle ve göğsü sık." }
+    ],
+    "tags": ["push", "chest", "resistance_band"],
+    "weightKey": "",
+    "fitCategory": "bench_press",
+    "fitName": "chest_press",
+    "fitNote": "Resistance Band Chest Press",
+    "garminPrimaryMuscles": ["CHEST"],
+    "garminSecondaryMuscles": ["SHOULDERS", "TRICEPS"],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "id": "rb_bicep_curl",
+    "name": "Uzun Bant Biceps Curl",
+    "category": "pull",
+    "equipment": "resistance_band",
+    "mechanic": "isolation",
+    "isComplex": false,
+    "muscle": "Pazu (Biceps)",
+    "primaryMuscles": ["biceps"],
+    "secondaryMuscles": ["forearms"],
+    "primarySubMuscles": "Pazu (Biceps)",
+    "secondarySubMuscles": "Ön Kol",
+    "cue": "Bandın ortasına iki ayağınla bas, dirsekleri gövde yanında sabit tutup avuç içlerini omuza doğru bük.",
+    "diagram": "assets/exercises/rb_bicep_curl.gif",
+    "positions": [
+      { "badge": "setup", "phase": "1. Ayak Basışı", "desc": "Bant ayak altında gergin, dirsekler yanlarda sabit." },
+      { "badge": "action", "phase": "2. Tepe Kasılma", "desc": "Bant gerilimi arttıkça kontrollü yukarı çek ve yavaşça indir." }
+    ],
+    "tags": ["arms", "biceps", "resistance_band"],
+    "weightKey": "",
+    "fitCategory": "curl",
+    "fitName": "bicep_curl",
+    "fitNote": "Resistance Band Bicep Curl",
+    "garminPrimaryMuscles": ["BICEPS"],
+    "garminSecondaryMuscles": [],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "id": "rb_triceps_pushdown",
+    "name": "Uzun Bant Triceps Pushdown",
+    "category": "push",
+    "equipment": "resistance_band",
+    "mechanic": "isolation",
+    "isComplex": false,
+    "muscle": "Arka Kol (Triceps Yan & Uzun Baş)",
+    "primaryMuscles": ["triceps"],
+    "secondaryMuscles": [],
+    "primarySubMuscles": "Arka Kol Yan Baş, Arka Kol Uzun Baş",
+    "secondarySubMuscles": [],
+    "cue": "Bandı yüksek bir noktaya as, dirsekleri gövdeye kilitleyip ön kolları yere doğru tamamen aç.",
+    "diagram": "assets/exercises/rb_triceps_pushdown.gif",
+    "positions": [
+      { "badge": "setup", "phase": "1. Dirsek Kilidi", "desc": "Dirsekler 90° bükülü, üst kollar yere dik." },
+      { "badge": "action", "phase": "2. Tam Açılış", "desc": "Yalnızca dirsekten hareketle bandı aşağı it ve triceps'i sık." }
+    ],
+    "tags": ["arms", "triceps", "resistance_band"],
+    "weightKey": "",
+    "fitCategory": "triceps_extension",
+    "fitName": "triceps_pushdown",
+    "fitNote": "Resistance Band Triceps Pushdown",
+    "garminPrimaryMuscles": ["TRICEPS"],
+    "garminSecondaryMuscles": [],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "id": "rb_good_morning",
+    "name": "Uzun Bant Good Morning / RDL",
+    "category": "legs_hinge",
+    "equipment": "resistance_band",
+    "mechanic": "compound",
+    "isComplex": false,
+    "muscle": "Arka Bacak (Hamstring), Ana Kalça, Alt Bel",
+    "primaryMuscles": ["hamstrings", "glutes"],
+    "secondaryMuscles": ["lower_back", "core"],
+    "primarySubMuscles": "Arka Bacak, Ana Kalça",
+    "secondarySubMuscles": "Alt Bel, Derin İç Karın",
+    "cue": "Bandın altına iki ayağınla bas, diğer ucunu omuzlarına veya ellerine al; omurgayı düz tutup kalçayı geriye it.",
+    "diagram": "assets/exercises/rb_good_morning.gif",
+    "positions": [
+      { "badge": "setup", "phase": "1. Dik Başlangıç", "desc": "Ayaklar omuz genişliğinde, dizler hafif kırık." },
+      { "badge": "action", "phase": "2. Kalça Menteşesi", "desc": "Kalçayı geriye iterek eğil ve kalçayı sıkıp patlayıcı doğrul." }
+    ],
+    "tags": ["legs", "hamstrings", "glutes", "resistance_band"],
+    "weightKey": "",
+    "fitCategory": "deadlift",
+    "fitName": "good_morning",
+    "fitNote": "Resistance Band Good Morning",
+    "garminPrimaryMuscles": ["HAMSTRINGS", "GLUTES"],
+    "garminSecondaryMuscles": ["LOWER_BACK"],
     "garminMatchType": "exact_verified"
   }
 ];
