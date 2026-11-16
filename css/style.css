@@ -12739,6 +12739,86 @@
     color: #FFFFFF !important;
 }
 
+/* YÜZEN CAM KONTROL KAPSÜLÜ (FLOATING GLASS CAPSULE - TASARIM 4) */
+.daylight-glass-capsule {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 42px;
+    padding: 0 6px;
+    margin-bottom: 10px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(32, 28, 66, 0.72) 0%, rgba(16, 14, 34, 0.88) 100%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(167, 139, 250, 0.36);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    box-sizing: border-box;
+}
+
+.dgc-btn {
+    flex: 1;
+    height: 32px;
+    min-width: 0;
+    padding: 0 2px;
+    background: transparent;
+    border: none;
+    border-radius: 999px;
+    color: #F8FAFC;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease, color 0.15s ease;
+}
+
+.dgc-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
+}
+
+.dgc-btn:hover:not(:disabled),
+.dgc-btn:active:not(:disabled) {
+    background: rgba(139, 92, 246, 0.25);
+    color: #FFFFFF;
+}
+
+.dgc-btn:active:not(:disabled) {
+    transform: scale(0.93);
+}
+
+.dgc-btn:disabled {
+    opacity: 0.28;
+    cursor: default;
+}
+
+.dgc-btn.dgc-hr-live {
+    color: #FB7185;
+}
+
+.dgc-hr-val {
+    font-size: 10px;
+    font-weight: 800;
+    color: #FDA4AF;
+    letter-spacing: -0.2px;
+    line-height: 1;
+}
+
+.dgc-sep {
+    width: 1px;
+    height: 17px;
+    background: rgba(167, 139, 250, 0.18);
+    flex-shrink: 0;
+}
+
 .daylight-media-box {
     background: #0B0A14 !important;
     border: 1.5px solid rgba(167, 139, 250, 0.2) !important;
@@ -12751,6 +12831,114 @@
 
 .daylight-ex-name {
     color: #FFFFFF !important;
+}
+
+/* ==========================================================================
+   SÜPERSET BREADCRUMB STEPPER (Alternatif 7)
+   ========================================================================== */
+.daylight-superset-stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(18, 16, 36, 0.9);
+    border: 1px solid rgba(167, 139, 250, 0.22);
+    border-radius: 999px;
+    padding: 3px 8px;
+    margin-bottom: 6px;
+    max-width: 100%;
+}
+
+.dss-step {
+    background: transparent;
+    border: none;
+    padding: 2px 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    font-family: inherit;
+    border-radius: 999px;
+    transition: all 0.18s ease;
+    max-width: 140px;
+}
+
+.dss-step-active {
+    background: rgba(16, 185, 129, 0.18);
+    border: 1px solid rgba(16, 185, 129, 0.55);
+}
+
+.dss-step-active .dss-dot {
+    background: #10B981;
+    box-shadow: 0 0 8px #10B981;
+}
+
+.dss-step-active .dss-tag {
+    color: #34D399;
+    font-weight: 900;
+}
+
+.dss-step-active .dss-name {
+    color: #FFFFFF;
+    font-weight: 800;
+}
+
+.dss-step-idle {
+    opacity: 0.65;
+}
+
+.dss-step-idle:hover,
+.dss-step-idle:active {
+    opacity: 1;
+}
+
+.dss-step-idle .dss-dot {
+    background: #64748B;
+}
+
+.dss-step-idle .dss-tag {
+    color: #94A3B8;
+    font-weight: 800;
+}
+
+.dss-step-idle .dss-name {
+    color: #94A3B8;
+    font-weight: 600;
+}
+
+.dss-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.dss-tag {
+    font-size: 11px;
+    letter-spacing: 0.3px;
+    flex-shrink: 0;
+}
+
+.dss-name {
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 90px;
+}
+
+.dss-line {
+    display: flex;
+    align-items: center;
+    color: #A78BFA;
+    font-size: 11px;
+    opacity: 0.8;
+    user-select: none;
+    flex-shrink: 0;
+}
+
+.dss-line-arrow {
+    font-size: 11px;
+    line-height: 1;
 }
 
 .daylight-set-chip {
@@ -12925,40 +13113,518 @@
 
 
 /* ==============================================================================
-   DİNLENME & GELİŞİM EKRANI İÇİN ERGONOMİK KAYAN MİMARİ + SABİT DOCK
+   DİNLENME & GELİŞİM EKRANI İÇİN ERGONOMİK KOMPAKT KOKPİT (ZERO-SCROLL FIT)
    ============================================================================== */
 .daylight-rest-card {
-    padding-bottom: 90px !important;
-}
-
-.daylight-next-exercise-card {
     background: linear-gradient(165deg, #181530 0%, #100E22 100%) !important;
-    border: 1.5px solid rgba(167, 139, 250, 0.28) !important;
+    border: 1.5px solid rgba(139, 92, 246, 0.3) !important;
     border-radius: 20px !important;
+    padding: 12px 14px 14px !important;
+    box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.6) !important;
     color: #F8FAFC !important;
+    box-sizing: border-box !important;
 }
 
-.daylight-next-exercise-card .daylight-ex-name,
-.daylight-next-exercise-card h2,
-.daylight-next-exercise-card div[style*="color:#0F172A"] {
+.daylight-rest-timer-box {
+    text-align: center !important;
+    margin-bottom: 8px !important;
+}
+
+.daylight-rest-timer-val {
+    font-size: 34px !important;
+    font-weight: 900 !important;
     color: #FFFFFF !important;
+    font-family: var(--font-mono) !important;
+    letter-spacing: -0.5px !important;
+    line-height: 1 !important;
+    margin-bottom: 6px !important;
+    text-shadow: 0 0 16px rgba(139, 92, 246, 0.35) !important;
 }
 
-.daylight-next-preview {
+.daylight-rest-timer-actions {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 6px !important;
+}
+
+.daylight-rest-adj-btn {
     background: rgba(24, 21, 48, 0.8) !important;
-    border: 1.5px solid rgba(167, 139, 250, 0.25) !important;
-    border-radius: 16px !important;
+    border: 1px solid rgba(167, 139, 250, 0.25) !important;
+    color: #E2E8F0 !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    padding: 6px 11px !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+}
+
+.daylight-rest-skip-btn {
+    background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%) !important;
+    border: none !important;
+    color: #FFFFFF !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    padding: 6px 13px !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35) !important;
+}
+
+.daylight-chart-card {
+    background: rgba(11, 10, 20, 0.7) !important;
+    border: 1px solid rgba(167, 139, 250, 0.18) !important;
+    border-radius: 14px !important;
+    padding: 8px 10px !important;
+    margin-bottom: 8px !important;
+}
+
+.daylight-chart-title {
     color: #FFFFFF !important;
 }
 
-.daylight-next-preview div[style*="color:#0F172A"] {
+.daylight-next-strip {
+    background: rgba(24, 21, 48, 0.7) !important;
+    border: 1.5px solid rgba(167, 139, 250, 0.25) !important;
+    border-radius: 14px !important;
     color: #FFFFFF !important;
+}
+
+.daylight-next-strip div,
+.daylight-next-strip span {
+    color: inherit;
 }
 
 /* Dinlenme Ekranı: Buton kartın doğal akışında en altta yer alır (içerik üzerine binmez) */
 .daylight-rest-card .daylight-primary-cta {
     position: static !important;
     width: 100% !important;
-    margin-top: 14px !important;
+    margin-top: 10px !important;
+    padding: 13px 14px !important;
+    font-size: 14px !important;
+    font-weight: 900 !important;
+    border-radius: 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
     box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4) !important;
+}
+
+/* ==============================================================================
+   WCAG CONTRAST ENFORCEMENT: DARK MODALS & FINISHER MUST NEVER HAVE DARK TEXT
+   ============================================================================== */
+#aiQuickPrecheckModal .modal-box {
+    background: linear-gradient(165deg, #181530 0%, #100E22 100%) !important;
+    border: 1.5px solid rgba(167, 139, 250, 0.3) !important;
+    color: #FFFFFF !important;
+}
+
+#aiQuickPrecheckModal .modal-box span:not(#aiPrecheckScaleStaleBadge),
+#aiQuickPrecheckModal .modal-box strong {
+    color: #FFFFFF !important;
+}
+
+#aiQuickPrecheckModal .modal-box div[style*="uppercase"] {
+    color: #CBD5E1 !important;
+}
+
+#aiQuickPrecheckModal .modal-box button[data-val]:not([style*="linear-gradient"]) {
+    background: rgba(24, 21, 48, 0.8) !important;
+    border: 1px solid rgba(167, 139, 250, 0.25) !important;
+    color: #CBD5E1 !important;
+}
+
+/* Finisher Card Text Contrast (Screenshot 2 Fix) */
+div[style*="linear-gradient"][style*="F43F5E"] strong {
+    color: #FFFFFF !important;
+}
+
+div[style*="linear-gradient"][style*="F43F5E"] div {
+    color: #E2E8F0 !important;
+}
+
+/* ==============================================================================
+   WORKOUT CAROUSEL: HORIZONTAL FULL-SCREEN CARDS (NO DOWNWARD VERTICAL SCROLL)
+   ============================================================================== */
+.wk-carousel-wrap {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    /* Full mobile viewport between top bar (~126px) and bottom nav bar (~64px) with safe margin */
+    height: calc(100dvh - 200px);
+    min-height: 480px;
+    max-height: 650px;
+    margin-bottom: 24px;
+    background: #0E0B1F;
+    border-radius: 20px;
+    border: 1px solid rgba(167, 139, 250, 0.2);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+    overflow: hidden;
+    position: relative;
+    box-sizing: border-box;
+}
+
+/* TOP STORY BARS & HEADER */
+.wk-carousel-topbar {
+    padding: 8px 12px 6px;
+    background: rgba(17, 14, 36, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(167, 139, 250, 0.15);
+    flex-shrink: 0;
+}
+
+.wk-story-bars-wrap {
+    display: flex;
+    gap: 4px;
+    width: 100%;
+    margin-bottom: 6px;
+}
+
+.wk-story-bar {
+    flex: 1;
+    height: 3.5px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    transition: background 0.25s ease;
+    cursor: pointer;
+}
+
+.wk-story-bar.is-passed {
+    background: rgba(167, 139, 250, 0.6);
+}
+
+.wk-story-bar.is-active {
+    background: #8B5CF6;
+    box-shadow: 0 0 6px rgba(139, 92, 246, 0.7);
+}
+
+.wk-carousel-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.wk-carousel-counter-badge {
+    font-size: 11.5px;
+    font-weight: 900;
+    color: #A78BFA;
+    background: rgba(139, 92, 246, 0.18);
+    padding: 2px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+.wk-carousel-title-strip {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #FFFFFF;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    text-align: center;
+}
+
+.wk-carousel-top-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.wk-carousel-close-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #CBD5E1;
+    font-size: 13px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.wk-carousel-close-btn:active {
+    background: rgba(239, 68, 68, 0.3);
+    color: #FFFFFF;
+}
+
+/* HORIZONTAL SCROLL TRACK */
+.wk-carousel-track {
+    display: flex;
+    flex: 1;
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+}
+
+.wk-carousel-track::-webkit-scrollbar {
+    display: none;
+}
+
+/* INDIVIDUAL FULL-SCREEN CARD */
+.wk-carousel-card {
+    flex: 0 0 100%;
+    min-width: 100%;
+    max-width: 100%;
+    height: 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    box-sizing: border-box;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 8px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* CARD INNER ELEMENTS */
+.wk-card-meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 2px;
+}
+
+.wk-card-block-badge {
+    font-size: 11px;
+    font-weight: 800;
+    color: #C4B5FD;
+    background: rgba(139, 92, 246, 0.2);
+    border: 1px solid rgba(139, 92, 246, 0.35);
+    border-radius: 6px;
+    padding: 2px 7px;
+    text-transform: uppercase;
+}
+
+.wk-card-muscle-badge {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #F8FAFC;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 2px 8px;
+}
+
+.wk-card-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.wk-carousel-wrap h3.wk-card-exercise-name,
+.wk-card-title-row h3,
+.wk-card-exercise-name {
+    font-size: 17px !important;
+    font-weight: 900 !important;
+    color: #FFFFFF !important;
+    line-height: 1.25 !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.wk-finisher-card h3.wk-card-exercise-name {
+    color: #FDA4AF !important;
+}
+
+/* VISUAL MEDIA BOX (CENTERPIECE) */
+.wk-card-media-box {
+    width: 100%;
+    height: 155px;
+    max-height: 165px;
+    background: #FFFFFF;
+    border-radius: 14px;
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-bottom: 4px;
+    position: relative;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.wk-card-media-el {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* PARAMETER CHIPS */
+.wk-card-chips-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+
+.wk-card-chip {
+    flex: 1;
+    min-width: 90px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #F8FAFC;
+    font-size: 11.5px;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.wk-card-chip strong {
+    color: #FFFFFF;
+    font-weight: 800;
+}
+
+.wk-card-chip.highlight-gold {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.35);
+    color: #FDE68A;
+}
+
+.wk-card-chip.highlight-gold strong {
+    color: #FBBF24;
+}
+
+/* CARD ACTION BUTTONS */
+.wk-card-actions-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding-top: 6px;
+    margin-top: 2px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.12);
+}
+
+.wk-card-btn-action {
+    flex: 1;
+    min-width: 75px;
+    padding: 6px 8px;
+    font-size: 11.5px;
+    font-weight: 700;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #E2E8F0;
+    cursor: pointer;
+    text-align: center;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+}
+
+.wk-card-btn-action:active {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.wk-card-btn-action.text-danger {
+    color: #FCA5A5;
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* FINISHER CARD SPECIFICS */
+.wk-finisher-card {
+    background: linear-gradient(135deg, rgba(244, 63, 94, 0.12) 0%, rgba(24, 21, 48, 0.95) 100%);
+}
+
+.wk-finisher-badge {
+    color: #FDA4AF;
+    background: rgba(244, 63, 94, 0.2);
+    border: 1px solid rgba(244, 63, 94, 0.4);
+}
+
+.wk-finisher-desc-box {
+    font-size: 12.5px;
+    color: #E2E8F0;
+    line-height: 1.4;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    border-left: 3px solid #F43F5E;
+}
+
+.wk-finisher-calendar-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+/* FIXED BOTTOM DOCK (ALWAYS ACCESSIBLE) */
+.wk-carousel-dock {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px 10px;
+    background: rgba(17, 14, 36, 0.98);
+    border-top: 1px solid rgba(167, 139, 250, 0.15);
+    flex-shrink: 0;
+}
+
+.wk-dock-nav-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+
+.wk-dock-nav-btn:active {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.wk-dock-nav-btn.is-disabled {
+    opacity: 0.25;
+    pointer-events: none;
+}
+
+.wk-dock-start-btn {
+    flex: 1;
+    height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+    border: none;
+    color: #FFFFFF;
+    font-size: 14.5px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-shadow: 0 4px 16px rgba(139, 92, 246, 0.45);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.wk-dock-start-btn:active {
+    transform: scale(0.98);
 }

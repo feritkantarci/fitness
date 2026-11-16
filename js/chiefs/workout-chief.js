@@ -1089,7 +1089,7 @@
                 curReps = 10;
             }
 
-            const W = 320, H = 168, padL = 36, padR = 20;
+            const W = 320, H = 110, padL = 36, padR = 20;
             const isCardio = unitMode === 'cardio_min' || unitMode === 'time_sec';
             const isBw = unitMode === 'bodyweight';
 
@@ -1161,14 +1161,14 @@
                     const disp = `${pt.p.value} ${unit}`;
                     if (pt.p.isToday) {
                         circles += `
-                            <circle cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="5.5" fill="${color}" fill-opacity="0.25" />
-                            <circle cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="3.5" fill="${color}" stroke="#FFFFFF" stroke-width="1.5" />
-                            <text x="${pt.x.toFixed(1)}" y="${(pt.y - 7).toFixed(1)}" text-anchor="middle" font-size="9" font-weight="900" fill="${color}">${disp}</text>
+                            <circle cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="4.5" fill="${color}" fill-opacity="0.25" />
+                            <circle cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="3" fill="${color}" stroke="#FFFFFF" stroke-width="1.2" />
+                            <text x="${pt.x.toFixed(1)}" y="${(pt.y - 5).toFixed(1)}" text-anchor="middle" font-size="8.5" font-weight="900" fill="${color}">${disp}</text>
                         `;
                     } else {
                         circles += `
-                            <circle cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="3" fill="${color}" stroke="#FFFFFF" stroke-width="1" />
-                            <text x="${pt.x.toFixed(1)}" y="${(pt.y - 6).toFixed(1)}" text-anchor="middle" font-size="8.5" font-weight="700" fill="#64748B">${disp}</text>
+                            <circle cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="2.5" fill="${color}" stroke="#FFFFFF" stroke-width="1" />
+                            <text x="${pt.x.toFixed(1)}" y="${(pt.y - 5).toFixed(1)}" text-anchor="middle" font-size="8" font-weight="700" fill="#94A3B8">${disp}</text>
                         `;
                     }
                 });
@@ -1176,14 +1176,14 @@
                 return { pathD, circles, coords, minVal, maxVal };
             }
 
-            const t1 = buildTrack(wPts, 18, 62, color1, unit1);
-            const t2 = buildTrack(rPts, 94, 138, color2, unit2);
+            const t1 = buildTrack(wPts, 16, 46, color1, unit1);
+            const t2 = buildTrack(rPts, 66, 94, color2, unit2);
 
             let xLabels = '';
             t1.coords.forEach(pt => {
                 const fw = pt.p.isToday ? '900' : '700';
-                const fill = pt.p.isToday ? '#0F172A' : '#64748B';
-                xLabels += `<text x="${pt.x.toFixed(1)}" y="160" text-anchor="middle" font-size="9.5" font-weight="${fw}" fill="${fill}">${pt.p.dateLabel}</text>`;
+                const fill = pt.p.isToday ? '#FFFFFF' : '#94A3B8';
+                xLabels += `<text x="${pt.x.toFixed(1)}" y="106" text-anchor="middle" font-size="8.5" font-weight="${fw}" fill="${fill}">${pt.p.dateLabel}</text>`;
             });
 
             return `
@@ -1197,20 +1197,20 @@
                     </div>
                     <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" style="overflow:visible; display:block;">
                         <!-- Track 1: ${label1} -->
-                        <text x="${padL}" y="11" font-size="8.5" font-weight="900" fill="${color1}" letter-spacing="0.5">${label1} (${unit1})</text>
-                        <line x1="${padL}" y1="18" x2="${W - padR}" y2="18" stroke="#F1F5F9" stroke-dasharray="2,2" />
-                        <line x1="${padL}" y1="62" x2="${W - padR}" y2="62" stroke="#E2E8F0" />
-                        <path d="${t1.pathD}" fill="none" stroke="${color1}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                        <text x="${padL}" y="10" font-size="8" font-weight="900" fill="${color1}" letter-spacing="0.5">${label1} (${unit1})</text>
+                        <line x1="${padL}" y1="16" x2="${W - padR}" y2="16" stroke="rgba(255,255,255,0.06)" stroke-dasharray="2,2" />
+                        <line x1="${padL}" y1="46" x2="${W - padR}" y2="46" stroke="rgba(255,255,255,0.12)" />
+                        <path d="${t1.pathD}" fill="none" stroke="${color1}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
                         ${t1.circles}
 
                         <!-- Track Divider -->
-                        <line x1="${padL}" y1="78" x2="${W - padR}" y2="78" stroke="#E2E8F0" stroke-dasharray="3,3" />
+                        <line x1="${padL}" y1="56" x2="${W - padR}" y2="56" stroke="rgba(167,139,250,0.16)" stroke-dasharray="3,3" />
 
                         <!-- Track 2: ${label2} -->
-                        <text x="${padL}" y="87" font-size="8.5" font-weight="900" fill="${color2}" letter-spacing="0.5">${label2} (${unit2})</text>
-                        <line x1="${padL}" y1="94" x2="${W - padR}" y2="94" stroke="#F1F5F9" stroke-dasharray="2,2" />
-                        <line x1="${padL}" y1="138" x2="${W - padR}" y2="138" stroke="#E2E8F0" />
-                        <path d="${t2.pathD}" fill="none" stroke="${color2}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                        <text x="${padL}" y="62" font-size="8" font-weight="900" fill="${color2}" letter-spacing="0.5">${label2} (${unit2})</text>
+                        <line x1="${padL}" y1="66" x2="${W - padR}" y2="66" stroke="rgba(255,255,255,0.06)" stroke-dasharray="2,2" />
+                        <line x1="${padL}" y1="94" x2="${W - padR}" y2="94" stroke="rgba(255,255,255,0.12)" />
+                        <path d="${t2.pathD}" fill="none" stroke="${color2}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
                         ${t2.circles}
 
                         <!-- X Axis Dates -->
@@ -1683,8 +1683,11 @@
             const isLastEx = cardIdx === s.exercises.length - 1;
             let ctaLabel = `SETİ TAMAMLA VE DİNLEN (${activeSetIdx + 1} / ${sets.length})`;
             if (pairObj && cardEx.supersetRole === 1) {
-                const partnerName = pairObj.secondEx ? (pairObj.secondEx.blockLabel || '2. Hareket') : '2. Hareket';
-                ctaLabel = `⚡ SETİ TAMAMLA ➔ ${partnerName}'YE GEÇ (${activeSetIdx + 1} / ${sets.length})`;
+                const partnerName = pairObj.secondEx ? (pairObj.secondEx.name || pairObj.secondEx.blockLabel || '2. Hareket') : '2. Hareket';
+                ctaLabel = `⚡ SETİ BİTİR ➔ ${escapeHTML(partnerName).toUpperCase()}'A GEÇ (${activeSetIdx + 1} / ${sets.length})`;
+            } else if (pairObj && cardEx.supersetRole === 2 && !isLastSet) {
+                const partnerName = pairObj.firstEx ? (pairObj.firstEx.name || pairObj.firstEx.blockLabel || '1. Hareket') : '1. Hareket';
+                ctaLabel = `⚡ SETİ BİTİR ➔ ${escapeHTML(partnerName).toUpperCase()}'A DÖN (${activeSetIdx + 1} / ${sets.length})`;
             } else if (isLastSet && isLastEx) {
                 ctaLabel = `🏁 HAREKETİ TAMAMLA VE BİTİR (${sets.length} / ${sets.length})`;
             } else if (isLastSet) {
@@ -1699,36 +1702,42 @@
                 ? `${curSet.reps || 30} sn`
                 : (isCardio ? `${curSet.reps || 20} dk` : `${curSet.reps || 10} tk`);
 
+            const hrBpm = (cardEx.healthTelemetry && cardEx.healthTelemetry.avgHeartrate) ? cardEx.healthTelemetry.avgHeartrate : null;
+
             return `
                 <div class="daylight-studio-wrap">
                     <div class="daylight-studio-card">
-                        <div class="daylight-studio-header">
-                            <button type="button" class="btn btn-outline" style="font-size:11.5px; font-weight:800; padding:5px 10px; border-color:#CBD5E1; color:#475569;" onclick="cancelActiveWorkout()">
-                                Sekmelere Dön
+                        <div class="daylight-glass-capsule" role="toolbar" aria-label="Antrenman Kontrolleri">
+                            <button type="button" class="dgc-btn" onclick="cancelActiveWorkout()" aria-label="Sekmelere Dön" title="Sekmelere Dön">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
                             </button>
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <button type="button" class="wk-ex-i-btn" onclick="openExerciseQuickInfoModal('${cardEx.id}')" title="Form ve Kas Bilgisi">i</button>
-                                <span style="font-size:11.5px; font-weight:800; color:#EF4444; background:#FEF2F2; border:1px solid #FECACA; padding:3px 8px; border-radius:999px;">
-                                    💓 ${(cardEx.healthTelemetry && cardEx.healthTelemetry.avgHeartrate) ? cardEx.healthTelemetry.avgHeartrate + ' bpm' : 'Nabız'}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="daylight-btn-subnav">
-                            <button type="button" class="daylight-subnav-btn" onclick="goToPrevExercise()" ${cardIdx === 0 ? 'disabled' : ''}>
-                                ⬅️ Önceki
+                            <span class="dgc-sep" aria-hidden="true"></span>
+                            <button type="button" class="dgc-btn" onclick="goToPrevExercise()" ${cardIdx === 0 ? 'disabled' : ''} aria-label="Önceki Hareket" title="Önceki">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
                             </button>
-                            <button type="button" class="daylight-subnav-btn" onclick="goToNextExercise()" ${cardIdx >= s.exercises.length - 1 ? 'disabled' : ''}>
-                                Sonraki ➡️
+                            <span class="dgc-sep" aria-hidden="true"></span>
+                            <button type="button" class="dgc-btn" onclick="goToNextExercise()" ${cardIdx >= s.exercises.length - 1 ? 'disabled' : ''} aria-label="Sonraki Hareket" title="Sonraki">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
                             </button>
-                            <button type="button" class="daylight-subnav-btn" onclick="openAlternativeModal('${cardEx.id}', 'active')">
-                                🔄 Değiştir
+                            <span class="dgc-sep" aria-hidden="true"></span>
+                            <button type="button" class="dgc-btn" onclick="openAlternativeModal('${cardEx.id}', 'active')" aria-label="Hareketi Değiştir" title="Değiştir">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
                             </button>
-                            <button type="button" class="daylight-subnav-btn" onclick="setActiveWorkoutViewMode('list')">
-                                📋 Liste
+                            <span class="dgc-sep" aria-hidden="true"></span>
+                            <button type="button" class="dgc-btn" onclick="setActiveWorkoutViewMode('list')" aria-label="Liste Görünümü" title="Liste">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1" fill="currentColor" stroke="none"/></svg>
                             </button>
-                            <button type="button" class="daylight-subnav-btn danger" onclick="openCompleteModal()">
-                                🏁 Bitir
+                            <span class="dgc-sep" aria-hidden="true"></span>
+                            <button type="button" class="dgc-btn" onclick="openExerciseQuickInfoModal('${cardEx.id}')" aria-label="Form ve Kas Bilgisi" title="Bilgi">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                            </button>
+                            <span class="dgc-sep" aria-hidden="true"></span>
+                            <button type="button" class="dgc-btn ${hrBpm ? 'dgc-hr-live' : ''}" onclick="showToast('${hrBpm ? 'Ortalama Nabız: ' + hrBpm + ' bpm' : 'Saat nabız verisi bekleniyor'}', 'info')" aria-label="Nabız" title="${hrBpm ? hrBpm + ' bpm' : 'Nabız'}">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.5 12.572l-7.5 7.428-7.5-7.428A5 5 0 1 1 12 6.006a5 5 0 1 1 7.5 6.572z"/><path d="M7 12h2.5l1.5-2.5 2 5 1.5-2.5H17"/></svg>${hrBpm ? `<span class="dgc-hr-val">${hrBpm}</span>` : ''}
+                            </button>
+                            <span class="dgc-sep" aria-hidden="true"></span>
+                            <button type="button" class="dgc-btn" onclick="openCompleteModal()" aria-label="Antrenmanı Bitir" title="Bitir">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
                             </button>
                         </div>
 
@@ -1745,6 +1754,23 @@
 
                         <div class="daylight-ex-title-row">
                             <div>
+                                ${pairObj ? `
+                                    <nav class="daylight-superset-stepper" aria-label="Süperset Akışı">
+                                        <button type="button" class="dss-step ${cardEx.supersetRole === 1 ? 'dss-step-active' : 'dss-step-idle'}" onclick="jumpToExercise(${pairObj.firstIdx})" title="${escapeHTML(pairObj.firstEx ? pairObj.firstEx.name : '1. Hareket')}">
+                                            <span class="dss-dot"></span>
+                                            <span class="dss-tag">${escapeHTML(pairObj.firstEx ? (pairObj.firstEx.blockLabel || 'A1') : 'A1')}</span>
+                                            <span class="dss-name">${escapeHTML(pairObj.firstEx ? pairObj.firstEx.name : '1. Hareket')}</span>
+                                        </button>
+                                        <div class="dss-line" aria-hidden="true">
+                                            <span class="dss-line-arrow">➔</span>
+                                        </div>
+                                        <button type="button" class="dss-step ${cardEx.supersetRole === 2 ? 'dss-step-active' : 'dss-step-idle'}" onclick="jumpToExercise(${pairObj.secondIdx})" title="${escapeHTML(pairObj.secondEx ? pairObj.secondEx.name : '2. Hareket')}">
+                                            <span class="dss-dot"></span>
+                                            <span class="dss-tag">${escapeHTML(pairObj.secondEx ? (pairObj.secondEx.blockLabel || 'A2') : 'A2')}</span>
+                                            <span class="dss-name">${escapeHTML(pairObj.secondEx ? pairObj.secondEx.name : '2. Hareket')}</span>
+                                        </button>
+                                    </nav>
+                                ` : ''}
                                 <h2 class="daylight-ex-name">${escapeHTML(cardEx.name)}</h2>
                                 <span class="daylight-badge" style="margin-top:4px; display:inline-block;">
                                     ${getTurkishMuscleBadge(cardEx.muscle || cardEx.primaryMuscle)}
@@ -1855,11 +1881,61 @@
             const secs = timerRemaining % 60;
             const timerStr = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 
+            // Determine Next Step details for the sleek horizontal strip (fits 100% on phone screen)
+            let nextStepTag = '';
+            let nextStepTitle = '';
+            let nextStepMeta = '';
+            let nextStepMedia = null;
+            let nextStepCtaLabel = '';
+            let nextStepCtaAction = '';
+            let isFinishStep = false;
+
+            if (isSupersetPartnerNext && targetNextEx) {
+                nextStepTag = `⚡ SÜPERSET: 2. HAREKETE GEÇ (${escapeHTML(targetNextEx.blockLabel || 'A2')})`;
+                nextStepTitle = escapeHTML(targetNextEx.name);
+                const muscleName = getTurkishMuscleBadge(targetNextEx.muscle || targetNextEx.primaryMuscle);
+                nextStepMeta = `${muscleName} • 🎯 ${targetNextEx.targetSets || 3} Set`;
+                nextStepMedia = targetNextMedia;
+                nextStepCtaLabel = `${escapeHTML(targetNextEx.name)}'ye Başla ➔`;
+                nextStepCtaAction = `dismissDaylightRest()`;
+            } else if (isSupersetRoundNext && targetNextEx) {
+                nextStepTag = `⚡ SÜPERSET: SIRADAKİ TUR (Tur ${nextRoundNo})`;
+                nextStepTitle = escapeHTML(targetNextEx.name);
+                const muscleName = getTurkishMuscleBadge(targetNextEx.muscle || targetNextEx.primaryMuscle);
+                nextStepMeta = `${muscleName} • Tur ${nextRoundNo}'e Hazırlan`;
+                nextStepMedia = targetNextMedia;
+                nextStepCtaLabel = `${escapeHTML(targetNextEx.name)} Tur ${nextRoundNo}'e Başla ➔`;
+                nextStepCtaAction = `dismissDaylightRest()`;
+            } else if (nextIncomplete) {
+                nextStepTag = `⚡ SIRADAKİ SET (${nextIncomplete.setNo} / ${sets.length})`;
+                nextStepTitle = `Set ${nextIncomplete.setNo} • ${escapeHTML(cardEx.name)}`;
+                const muscleName = getTurkishMuscleBadge(cardEx.muscle || cardEx.primaryMuscle);
+                nextStepMeta = `${nextIncomplete.weight ? nextIncomplete.weight + ' kg × ' : ''}${nextIncomplete.reps || 10} tekrar • ${muscleName}`;
+                nextStepMedia = getDaylightExerciseMedia(cardEx);
+                nextStepCtaLabel = `Set ${nextIncomplete.setNo}'e Başla ➔`;
+                nextStepCtaAction = `dismissDaylightRest()`;
+            } else if (nextEx) {
+                nextStepTag = `⚡ SIRADAKİ HAREKET (${cardIdx + 2} / ${s.exercises.length})`;
+                nextStepTitle = escapeHTML(nextEx.name);
+                const muscleName = getTurkishMuscleBadge(nextEx.muscle || nextEx.primaryMuscle);
+                nextStepMeta = `${muscleName} • 🎯 ${nextEx.targetSets || 3} Set • ⏱️ ${nextEx.customRest || 60} sn`;
+                nextStepMedia = nextMedia;
+                nextStepCtaLabel = `Sıradaki Egzersize Geç ➔`;
+                nextStepCtaAction = `goToNextExercise()`;
+            } else {
+                isFinishStep = true;
+                nextStepTag = `🏆 TEBRİKLER!`;
+                nextStepTitle = `Tüm Antrenman Tamamlandı!`;
+                nextStepMeta = `Harika performans! Tüm hareketleri başarıyla bitirdin.`;
+                nextStepCtaLabel = `🏁 Antrenmanı Bitir & Kaydet`;
+                nextStepCtaAction = `openCompleteModal()`;
+            }
+
             return `
                 <div class="daylight-studio-wrap">
                     <div class="daylight-rest-card">
                         <div class="daylight-rest-timer-box">
-                            <div style="font-size:11px; font-weight:900; color:#64748B; letter-spacing:0.6px; text-transform:uppercase; margin-bottom:4px;">
+                            <div style="font-size:10.5px; font-weight:900; color:#94A3B8; letter-spacing:0.6px; text-transform:uppercase; margin-bottom:2px;">
                                 ⏱️ DİNLENME SAYACI
                             </div>
                             <div class="daylight-rest-timer-val" id="daylightTimerDisplay">${timerStr}</div>
@@ -1872,116 +1948,38 @@
 
                         ${renderDaylightAdaptiveChartSvg(historyPoints, curWeight, curReps, unitMode, cardEx.name)}
 
-                        ${isSupersetPartnerNext ? `
-                            <div class="daylight-next-exercise-card" style="margin-top:14px; background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:16px; padding:14px; text-align:center;">
-                                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-                                    <span style="font-size:11px; font-weight:900; color:#EA580C; letter-spacing:0.5px; text-transform:uppercase;">
-                                        ⚡ SÜPERSET: 2. HAREKETE GEÇ (${escapeHTML(targetNextEx.blockLabel || 'A2')})
-                                    </span>
-                                    <span class="daylight-badge" style="font-size:10.5px; padding:2px 8px;">
-                                        ${getTurkishMuscleBadge(targetNextEx.muscle || targetNextEx.primaryMuscle)}
-                                    </span>
-                                </div>
-                                <div style="font-size:15.5px; font-weight:900; color:#0F172A; text-align:left; margin-bottom:8px;">
-                                    ${escapeHTML(targetNextEx.name)}
-                                </div>
-                                <div style="width:100%; height:180px; border-radius:12px; overflow:hidden; background:#FFFFFF; border:1px solid #CBD5E1; margin-bottom:12px; display:flex; align-items:center; justify-content:center; box-shadow:inset 0 1px 3px rgba(0,0,0,0.04);">
-                                    ${targetNextMedia && targetNextMedia.clip ? `
-                                        <video src="${escapeHTML(targetNextMedia.clip)}" poster="${escapeHTML(targetNextMedia.still || '')}" autoplay loop muted playsinline style="width:100%; height:100%; object-fit:contain; display:block;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';"></video>
-                                        <img src="${escapeHTML(targetNextMedia.still || 'assets/icon-512.png')}" alt="${escapeHTML(targetNextEx.name)}" style="width:100%; height:100%; object-fit:contain; display:none;">
-                                    ` : ((targetNextMedia && targetNextMedia.still) ? `
-                                        <img src="${escapeHTML(targetNextMedia.still)}" alt="${escapeHTML(targetNextEx.name)}" style="width:100%; height:100%; object-fit:contain; display:block;">
-                                    ` : `
-                                        <div style="font-size:13px; font-weight:800; color:#64748B;">${escapeHTML(targetNextEx.name)}</div>
-                                    `)}
-                                </div>
-                                <button type="button" class="daylight-primary-cta" onclick="dismissDaylightRest()">
-                                    ${escapeHTML(targetNextEx.name)}'ye Başla ➔
-                                </button>
+                        <!-- SLEEK HORIZONTAL NEXT STEP STRIP -->
+                        <div class="daylight-next-strip" style="display:flex; align-items:center; gap:12px; padding:10px 12px; background:rgba(24,21,48,0.7); border:1.5px solid rgba(167,139,250,0.25); border-radius:14px; margin-top:10px;">
+                            <div style="width:48px; height:48px; border-radius:10px; overflow:hidden; background:#0B0A14; border:1px solid rgba(167,139,250,0.2); flex-shrink:0; display:flex; align-items:center; justify-content:center;">
+                                ${nextStepMedia && nextStepMedia.still ? `
+                                    <img src="${escapeHTML(nextStepMedia.still)}" alt="${escapeHTML(nextStepTitle)}" style="width:100%; height:100%; object-fit:contain; display:block;">
+                                ` : `
+                                    <span style="font-size:20px;">${isFinishStep ? '🏆' : '🏋️'}</span>
+                                `}
                             </div>
-                        ` : (isSupersetRoundNext ? `
-                            <div class="daylight-next-exercise-card" style="margin-top:14px; background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:16px; padding:14px; text-align:center;">
-                                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-                                    <span style="font-size:11px; font-weight:900; color:#EA580C; letter-spacing:0.5px; text-transform:uppercase;">
-                                        ⚡ SÜPERSET: SIRADAKİ TUR (Tur ${nextRoundNo})
-                                    </span>
-                                    <span class="daylight-badge" style="font-size:10.5px; padding:2px 8px;">
-                                        ${getTurkishMuscleBadge(targetNextEx.muscle || targetNextEx.primaryMuscle)}
-                                    </span>
+                            <div style="flex:1; min-width:0; text-align:left;">
+                                <div style="font-size:10px; font-weight:900; color:#38BDF8; letter-spacing:0.4px; text-transform:uppercase; margin-bottom:2px;">
+                                    ${nextStepTag}
                                 </div>
-                                <div style="font-size:15.5px; font-weight:900; color:#0F172A; text-align:left; margin-bottom:8px;">
-                                    ${escapeHTML(targetNextEx.name)}
+                                <div style="font-size:14px; font-weight:800; color:#FFFFFF; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2;">
+                                    ${nextStepTitle}
                                 </div>
-                                <div style="width:100%; height:180px; border-radius:12px; overflow:hidden; background:#FFFFFF; border:1px solid #CBD5E1; margin-bottom:12px; display:flex; align-items:center; justify-content:center; box-shadow:inset 0 1px 3px rgba(0,0,0,0.04);">
-                                    ${targetNextMedia && targetNextMedia.clip ? `
-                                        <video src="${escapeHTML(targetNextMedia.clip)}" poster="${escapeHTML(targetNextMedia.still || '')}" autoplay loop muted playsinline style="width:100%; height:100%; object-fit:contain; display:block;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';"></video>
-                                        <img src="${escapeHTML(targetNextMedia.still || 'assets/icon-512.png')}" alt="${escapeHTML(targetNextEx.name)}" style="width:100%; height:100%; object-fit:contain; display:none;">
-                                    ` : ((targetNextMedia && targetNextMedia.still) ? `
-                                        <img src="${escapeHTML(targetNextMedia.still)}" alt="${escapeHTML(targetNextEx.name)}" style="width:100%; height:100%; object-fit:contain; display:block;">
-                                    ` : `
-                                        <div style="font-size:13px; font-weight:800; color:#64748B;">${escapeHTML(targetNextEx.name)}</div>
-                                    `)}
+                                <div style="font-size:11px; color:#94A3B8; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;">
+                                    ${nextStepMeta}
                                 </div>
-                                <button type="button" class="daylight-primary-cta" onclick="dismissDaylightRest()">
-                                    ${escapeHTML(targetNextEx.name)} Tur ${nextRoundNo}'e Başla ➔
-                                </button>
                             </div>
-                        ` : (nextIncomplete ? `
-                            <div class="daylight-next-preview">
-                                <div>
-                                    <span style="font-size:11px; color:#64748B; font-weight:700;">Sıradaki:</span>
-                                    <div style="font-size:14px; font-weight:900; color:#0F172A;">Set ${nextIncomplete.setNo} • ${nextIncomplete.weight ? nextIncomplete.weight + ' kg × ' : ''}${nextIncomplete.reps || 10} tekrar</div>
-                                </div>
-                                <button type="button" class="btn btn-outline" style="font-size:11px; font-weight:800; padding:6px 10px; border-color:#CBD5E1; color:#0F172A;" onclick="dismissDaylightRest()">
-                                    ✏️ Sete Geç
-                                </button>
-                            </div>
-                        ` : (nextEx ? `
-                            <div class="daylight-next-exercise-card" style="margin-top:14px; background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:16px; padding:14px; text-align:center;">
-                                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-                                    <span style="font-size:11px; font-weight:900; color:#EA580C; letter-spacing:0.5px; text-transform:uppercase;">
-                                        ⚡ SIRADAKİ HAREKET (${cardIdx + 2} / ${s.exercises.length})
-                                    </span>
-                                    <span class="daylight-badge" style="font-size:10.5px; padding:2px 8px;">
-                                        ${getTurkishMuscleBadge(nextEx.muscle || nextEx.primaryMuscle)}
-                                    </span>
-                                </div>
-                                <div style="font-size:15.5px; font-weight:900; color:#0F172A; text-align:left; margin-bottom:8px;">
-                                    ${escapeHTML(nextEx.name)}
-                                </div>
-                                <div style="width:100%; height:180px; border-radius:12px; overflow:hidden; background:#FFFFFF; border:1px solid #CBD5E1; margin-bottom:12px; display:flex; align-items:center; justify-content:center; box-shadow:inset 0 1px 3px rgba(0,0,0,0.04);">
-                                    ${nextMedia && nextMedia.clip ? `
-                                        <video src="${escapeHTML(nextMedia.clip)}" poster="${escapeHTML(nextMedia.still || '')}" autoplay loop muted playsinline style="width:100%; height:100%; object-fit:contain; display:block;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';"></video>
-                                        <img src="${escapeHTML(nextMedia.still || 'assets/icon-512.png')}" alt="${escapeHTML(nextEx.name)}" style="width:100%; height:100%; object-fit:contain; display:none;">
-                                    ` : ((nextMedia && nextMedia.still) ? `
-                                        <img src="${escapeHTML(nextMedia.still)}" alt="${escapeHTML(nextEx.name)}" style="width:100%; height:100%; object-fit:contain; display:block;">
-                                    ` : `
-                                        <div style="font-size:13px; font-weight:800; color:#64748B;">${escapeHTML(nextEx.name)}</div>
-                                    `)}
-                                </div>
-                                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; font-size:12px; color:#475569; font-weight:700;">
-                                    <span>🎯 Hedef: ${nextEx.targetSets || 3} Set</span>
-                                    <span>⏱️ Dinlenme: ${nextEx.customRest || 60} sn</span>
-                                </div>
-                                <button type="button" class="daylight-primary-cta" onclick="goToNextExercise()">
-                                    Sıradaki Egzersize Geç ➔
-                                </button>
-                            </div>
-                        ` : `
-                            <div class="daylight-next-preview" style="background:#F0FDF4; border-color:#86EFAC; margin-top:14px; text-align:center; padding:16px;">
-                                <div style="font-size:24px; margin-bottom:4px;">🏆</div>
-                                <div style="font-size:15px; font-weight:900; color:#166534; margin-bottom:4px;">Tüm Antrenman Tamamlandı!</div>
-                                <div style="font-size:12px; color:#15803D; margin-bottom:12px; font-weight:600;">Harika bir performans! Tüm hareketleri başarıyla bitirdin.</div>
-                                <button type="button" class="daylight-primary-cta" style="background:#16A34A;" onclick="openCompleteModal()">
-                                    🏁 Antrenmanı Bitir & Kaydet
-                                </button>
-                            </div>
-                        `)))}
+                        </div>
+
+                        <!-- PRIMARY ACTION BUTTON: DIRECTLY BELOW IN NATURAL FLOW -->
+                        <button type="button" class="daylight-primary-cta" style="${isFinishStep ? 'background:#16A34A !important;' : ''}" onclick="${nextStepCtaAction}">
+                            ${nextStepCtaLabel}
+                        </button>
                     </div>
                 </div>
             `;
         }
 
+        window.jumpToExercise = jumpToExercise;
         window.selectDaylightHubDay = selectDaylightHubDay;
         window.selectDaylightSet = selectDaylightSet;
         window.openPlateModalForExercise = openPlateModalForExercise;
@@ -2225,25 +2223,7 @@
                     const lblB = focusPair.secondEx.blockLabel || 'A2';
                     navCounterHtml = `🔥 SÜPERSET BLOK ${escapeHTML(focusPair.groupId)} (${escapeHTML(lblA)} + ${escapeHTML(lblB)}) • TUR ${activeRoundNo} / ${totalRounds}`;
 
-                    const stepBannerText = isPairAllDone
-                        ? `✅ Süperset Blok ${escapeHTML(focusPair.groupId)} (${totalRounds} Tur) Tamamlandı!`
-                        : (targetExId === focusPair.firstEx.id
-                            ? `⚡ Sıradaki Adım: Tur ${activeRoundNo} • ${escapeHTML(lblA)} (${escapeHTML(focusPair.firstEx.name)}) ➔ Dinlenmeden ${escapeHTML(lblB)}'ye geç`
-                            : `⚡ Sıradaki Adım: Tur ${activeRoundNo} • ${escapeHTML(lblB)} (${escapeHTML(focusPair.secondEx.name)}) ➔ Tur sonu ${focusPair.roundRest}s dinlenme`);
-
-                    const roundPillsHtml = Array.from({ length: totalRounds }, (_, rIdx) => {
-                        const aDone = setsA[rIdx] ? setsA[rIdx].completed : true;
-                        const bDone = setsB[rIdx] ? setsB[rIdx].completed : true;
-                        const rDone = aDone && bDone;
-                        const rCur = !isPairAllDone && rIdx === activeRoundIdx;
-                        return `<span style="padding:3px 8px; border-radius:6px; font-size:11px; font-weight:800; border:1px solid ${rDone ? '#86EFAC' : (rCur ? '#B45309' : '#CBD5E1')}; background:${rDone ? '#DCFCE7' : (rCur ? '#FEF3C7' : '#FFFFFF')}; color:${rDone ? '#166534' : (rCur ? '#92400E' : '#475569')};">Tur ${rIdx + 1}: ${aDone ? '✓' : lblA} ➔ ${bDone ? '✓' : lblB}</span>`;
-                    }).join('');
-
                     mainFocusBodyHtml = `
-                        <div class="superset-round-tracker" style="margin-bottom:10px;">
-                            <div style="margin-bottom:6px; color:#92400E; font-weight:900;">${stepBannerText}</div>
-                            <div style="display:flex; flex-wrap:wrap; gap:6px;">${roundPillsHtml}</div>
-                        </div>
                         ${isDaylightRestActive
                             ? renderDaylightRestScreenHtml(ex, activeFocusExIndex, s)
                             : renderFocusSingleCardHtml(ex, activeFocusExIndex, true, false, focusPair)}

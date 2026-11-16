@@ -2242,14 +2242,321 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
         }
         window.buildTimelineStationsHtml = buildTimelineStationsHtml;
 
+        // ==================== WORKOUT CARDS CAROUSEL ENGINE (HORIZONTAL SWIPEABLE CARDS) ====================
+        window.activeWorkoutCarouselIndex = 0;
+
+        function stepWorkoutCarousel(delta) {
+            const track = document.getElementById('wkCarouselTrack');
+            if (!track) return;
+            const total = track.children.length;
+            let newIdx = (window.activeWorkoutCarouselIndex || 0) + delta;
+            if (newIdx < 0) newIdx = 0;
+            if (newIdx >= total) newIdx = total - 1;
+            goToWorkoutCarouselCard(newIdx);
+        }
+        window.stepWorkoutCarousel = stepWorkoutCarousel;
+
+        function goToWorkoutCarouselCard(idx, options = {}) {
+            const track = document.getElementById('wkCarouselTrack');
+            if (!track) return;
+            const total = track.children.length;
+            const safeIdx = Math.min(Math.max(0, Number(idx) || 0), Math.max(0, total - 1));
+            window.activeWorkoutCarouselIndex = safeIdx;
+
+            const targetLeft = safeIdx * track.clientWidth;
+            track.scrollTo({
+                left: targetLeft,
+                behavior: options.instant ? 'instant' : 'smooth'
+            });
+            updateWorkoutCarouselIndicators(safeIdx, total);
+        }
+        window.goToWorkoutCarouselCard = goToWorkoutCarouselCard;
+
+        let _carouselScrollRaf = null;
+        function handleWorkoutCarouselScroll() {
+            if (_carouselScrollRaf) cancelAnimationFrame(_carouselScrollRaf);
+            _carouselScrollRaf = requestAnimationFrame(() => {
+                const track = document.getElementById('wkCarouselTrack');
+                if (!track || track.clientWidth === 0) return;
+                const total = track.children.length;
+                const idx = Math.min(Math.max(0, Math.round(track.scrollLeft / track.clientWidth)), Math.max(0, total - 1));
+                if (idx !== window.activeWorkoutCarouselIndex) {
+                    window.activeWorkoutCarouselIndex = idx;
+                    updateWorkoutCarouselIndicators(idx, total);
+                }
+            });
+        }
+        window.handleWorkoutCarouselScroll = handleWorkoutCarouselScroll;
+
+        function updateWorkoutCarouselIndicators(activeIdx, total) {
+            const counterEl = document.getElementById('wkCarouselCounter');
+            if (counterEl) {
+                counterEl.textContent = (activeIdx < total - 1 || total <= 1)
+                    ? `Hareket ${activeIdx + 1} / ${total}`
+                    : `Bitiş • ${total} / ${total}`;
+            }
+
+            const barsWrap = document.getElementById('wkStoryBarsWrap');
+            if (barsWrap) {
+                const bars = barsWrap.querySelectorAll('.wk-story-bar');
+                bars.forEach((b, i) => {
+                    b.classList.remove('is-active', 'is-passed');
+                    if (i < activeIdx) b.classList.add('is-passed');
+                    else if (i === activeIdx) b.classList.add('is-active');
+                });
+            }
+
+            const prevBtn = document.getElementById('wkDockPrevBtn');
+            if (prevBtn) {
+                if (activeIdx <= 0) prevBtn.classList.add('is-disabled');
+                else prevBtn.classList.remove('is-disabled');
+            }
+
+            const nextBtn = document.getElementById('wkDockNextBtn');
+            if (nextBtn) {
+                if (activeIdx >= total - 1) nextBtn.classList.add('is-disabled');
+                else nextBtn.classList.remove('is-disabled');
+            }
+        }
+        window.updateWorkoutCarouselIndicators = updateWorkoutCarouselIndicators;
+
+        function buildWorkoutCardsCarouselHtml(w, mode = 'generated') {
+            if (!w) return '';
+            const list = Array.isArray(w.exercises) ? w.exercises : [];
+            const user = getActiveUser();
+            const weights = user ? (user.weights || {}) : {};
+            const hasFinisher = !!(w.finisher && w.finisher.name);
+            const totalCards = list.length + (hasFinisher ? 1 : 0);
+            const currentIdx = Math.min(Math.max(0, window.activeWorkoutCarouselIndex || 0), Math.max(0, totalCards - 1));
+            window.activeWorkoutCarouselIndex = currentIdx;
+
+            const cleanWorkoutTitle = String(w.title || 'Antrenman')
+                .replace(/^(?:⚔️\s*)?(?:BB-Dominant Hibrit|Saf Bodybuilding|Dengeli Hibrit Atlet|Fonksiyonel-Dominant|Saf Fonksiyonel & Kondisyon)\s*•\s*/i, '')
+                .replace(/\s*\((?:Full Body|Push|Pull|İzole|Biceps & Triceps|%\d+[^)]*|AI Hibrit|Bacak Korumalı|Üst Vücut Korumalı|Sırt\/Bel Korumalı|Ardışık Gün Dengeli)\)/gi, '')
+                .trim() || 'Tüm Vücut Antrenmanı';
+
+            // Story progress bars
+            const storyBarsHtml = Array.from({ length: totalCards }).map((_, i) => {
+                let cls = 'wk-story-bar';
+                if (i < currentIdx) cls += ' is-passed';
+                else if (i === currentIdx) cls += ' is-active';
+                return `<div class="${cls}" data-story-idx="${i}" onclick="goToWorkoutCarouselCard(${i})" title="${i + 1}. Kart"></div>`;
+            }).join('');
+
+            // Cards for each exercise
+            const cardsHtml = list.map((ex, idx) => {
+                const label = ex.blockLabel || String(idx + 1);
+                const exScheme = Object.assign({}, w.scheme || { sets: 3, reps: '8-12', rest: 60 }, {
+                    rest: ex.customRest || (w.scheme ? w.scheme.rest : 60),
+                    sets: ex.targetSets || (w.scheme ? w.scheme.sets : 3),
+                    reps: ex.targetReps || (w.scheme ? w.scheme.reps : '8-12')
+                });
+                const targetW = typeof getExerciseRememberedWeight === 'function' ? getExerciseRememberedWeight(ex) : '';
+                const repsStr = String(exScheme.reps || '8-12');
+                const repsSuffix = /sn|dk|metre|tur|ad[ıi]m|tekrar/i.test(repsStr) ? '' : ' Tekrar';
+
+                // Get visual media
+                let mediaHtml = '';
+                const daylightMedia = (typeof getDaylightExerciseMedia === 'function')
+                    ? getDaylightExerciseMedia(ex)
+                    : null;
+                const visualMedia = (daylightMedia && (daylightMedia.clip || daylightMedia.still))
+                    ? daylightMedia
+                    : ((typeof getExerciseVisualMedia === 'function') ? getExerciseVisualMedia(ex.id, ex.category) : null);
+
+                if (visualMedia && visualMedia.clip) {
+                    mediaHtml = `<video src="${escapeHTML(visualMedia.clip)}" poster="${escapeHTML(visualMedia.still || '')}" autoplay loop muted playsinline class="wk-card-media-el"></video>`;
+                } else if (visualMedia && visualMedia.still) {
+                    mediaHtml = `<img src="${escapeHTML(visualMedia.still)}" alt="${escapeHTML(ex.name)}" class="wk-card-media-el" loading="lazy">`;
+                } else if (ex.diagram) {
+                    mediaHtml = `<img src="${escapeHTML(ex.diagram)}" alt="${escapeHTML(ex.name)}" class="wk-card-media-el" loading="lazy">`;
+                } else {
+                    mediaHtml = `<div style="font-size:46px; opacity:0.6;">🏋️</div>`;
+                }
+
+                const blockBadgeText = ex.blockLabel 
+                    ? `⚔️ ${escapeHTML(ex.blockLabel)} • ${ex.blockType === 'superset' ? 'SÜPERSET' : 'DÜZ SET'}`
+                    : `⚔️ ${idx + 1}. İSTASYON`;
+                const muscleText = ex.primarySubMuscles || ex.muscle || 'Hedef Kas';
+
+                return `
+                    <div class="wk-carousel-card" id="wkCard_${idx}" data-card-index="${idx}">
+                        <div>
+                            <div class="wk-card-meta-row">
+                                <span class="wk-card-block-badge">${blockBadgeText}</span>
+                                <span class="wk-card-muscle-badge">${escapeHTML(muscleText)}</span>
+                            </div>
+
+                            <div class="wk-card-title-row">
+                                <h3 class="wk-card-exercise-name">${escapeHTML(ex.name)}</h3>
+                                <button type="button" class="wk-i-badge" style="border:none; cursor:pointer;" onclick="event.stopPropagation(); openExerciseQuickInfoModal(decodeURIComponent('${encodeURIComponent(ex.id)}'))" title="Ekipman ve Kas Detayı">i</button>
+                            </div>
+
+                            <div class="wk-card-media-box">
+                                ${mediaHtml}
+                            </div>
+
+                            <div class="wk-card-chips-row">
+                                <div class="wk-card-chip">🎯 <strong>${exScheme.sets} Set × ${escapeHTML(repsStr)}${repsSuffix}</strong></div>
+                                <div class="wk-card-chip">⏱️ <strong>${exScheme.rest} sn</strong> Dinlenme</div>
+                                ${targetW ? `<div class="wk-card-chip highlight-gold">🏋️ Son: <strong>${targetW} kg</strong></div>` : ''}
+                            </div>
+                        </div>
+
+                        <div class="wk-card-actions-row">
+                            <button type="button" class="wk-card-btn-action" onclick="openAlternativeModal(decodeURIComponent('${encodeURIComponent(ex.id)}'), '${mode}')" title="Alternatif hareket seç">
+                                🔄 Alternatif
+                            </button>
+                            <button type="button" class="wk-card-btn-action" onclick="swapSingleExercise(decodeURIComponent('${encodeURIComponent(ex.id)}'), '${mode}')" title="Rastgele değiştir">
+                                🎲 Rastgele
+                            </button>
+                            <button type="button" class="wk-card-btn-action" onclick="openExerciseDetailModal(decodeURIComponent('${encodeURIComponent(ex.id)}'))" title="3 Aşamalı Form Rehberi">
+                                📸 Form
+                            </button>
+                            <button type="button" class="wk-card-btn-action text-danger" onclick="removeExerciseFromWorkout(decodeURIComponent('${encodeURIComponent(ex.id)}'), '${mode}')" title="Listeden çıkar">
+                                🗑️ Kaldır
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Finisher Card (Final Card)
+            let finisherCardHtml = '';
+            if (hasFinisher) {
+                const fIdx = list.length;
+                const fName = (w.finisher && w.finisher.name) ? w.finisher.name : 'Balistik Bitiş';
+                const fDesc = (w.finisher && w.finisher.desc) ? w.finisher.desc : '';
+                const fNameLower = fName.toLowerCase();
+                const resolvedId = (w.finisher && w.finisher.exId && EXERCISES_DB.some(e => e.id === w.finisher.exId))
+                    ? w.finisher.exId
+                    : (fNameLower.includes('tabata') || fNameLower.includes('swing')
+                        ? 'db_swing'
+                        : (fNameLower.includes('plank') || fNameLower.includes('hollow') || fNameLower.includes('core')
+                            ? 'bw_plank'
+                            : (fNameLower.includes('burpee') || fNameLower.includes('emom')
+                                ? 'bw_burpee'
+                                : (fNameLower.includes('farmer') || fNameLower.includes('yürüyüş') || fNameLower.includes('taşıma') || fNameLower.includes('carry')
+                                    ? 'db_farmers_walk'
+                                    : null))));
+
+                finisherCardHtml = `
+                    <div class="wk-carousel-card wk-finisher-card" id="wkCard_${fIdx}" data-card-index="${fIdx}">
+                        <div>
+                            <div class="wk-card-meta-row">
+                                <span class="wk-card-block-badge wk-finisher-badge">🔥 BALİSTİK BİTİŞ</span>
+                                <span class="wk-card-muscle-badge">Tüm Vücut / Core</span>
+                            </div>
+
+                            <div class="wk-card-title-row">
+                                <h3 class="wk-card-exercise-name" style="color:#FDA4AF;">${escapeHTML(fName)}</h3>
+                                ${resolvedId ? `<button type="button" class="wk-card-btn-action" style="padding:4px 8px; font-size:11px;" onclick="openExerciseDetailModal(decodeURIComponent('${encodeURIComponent(resolvedId)}'))">📸 Form</button>` : ''}
+                            </div>
+
+                            <div class="wk-finisher-desc-box">
+                                ${escapeHTML(fDesc)}
+                            </div>
+
+                            <div class="wk-card-chips-row">
+                                <div class="wk-card-chip">⏱️ <strong>~${w.duration || 45} Dk</strong> Süre</div>
+                                <div class="wk-card-chip">📊 <strong>${list.length} İstasyon</strong></div>
+                                <div class="wk-card-chip">⚡ <strong>${w.style === 'superset' ? 'Süperset' : (w.style === 'complex' ? 'Kompleks' : 'Düz Set')}</strong></div>
+                            </div>
+
+                            <div class="wk-finisher-calendar-grid">
+                                <button type="button" class="wk-card-btn-action" style="color:#FBBF24; font-weight:800;" onclick="assignGeneratedToToday()">
+                                    ⚡ Bugüne Ata
+                                </button>
+                                <button type="button" class="wk-card-btn-action" onclick="scheduleTomorrowFromGenerated()">
+                                    📅 Yarına Ata
+                                </button>
+                                <button type="button" class="wk-card-btn-action" onclick="promptAssignGeneratedToAnyDay()">
+                                    🗓️ Gün Seç
+                                </button>
+                                <button type="button" class="wk-card-btn-action" onclick="saveGeneratedToLibrary()">
+                                    💾 Kaydet
+                                </button>
+                            </div>
+                        </div>
+
+                        <div style="text-align:center; padding-top:6px; border-top:1px dashed rgba(255,255,255,0.12);">
+                            <button type="button" class="btn btn-outline" style="border:1px dashed rgba(167, 139, 250, 0.4); color:#C4B5FD; font-size:11.5px; padding:7px 12px; border-radius:10px; font-weight:700;" onclick="openAddExerciseModal('${mode}')">
+                                ➕ Listeye Hareket Ekle
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const counterLabel = currentIdx < list.length
+                ? `Hareket ${currentIdx + 1} / ${totalCards}`
+                : `Bitiş • ${totalCards} / ${totalCards}`;
+
+            const backToWeeklyBtn = window.pendingAiWeeklyPlan ? `
+                <button type="button" class="btn-action-secondary" style="padding:4px 8px; font-size:11px; border-color:#15803D; color:#15803D; font-weight:800;" onclick="renderPendingWeeklyPlanPreview()">
+                    ⬅️ Haftalık Plan
+                </button>
+            ` : '';
+
+            return `
+                <div class="wk-carousel-wrap" id="wkCarouselWrap">
+                    <!-- TOP STORY BAR & CONTROLS -->
+                    <div class="wk-carousel-topbar">
+                        <div class="wk-story-bars-wrap" id="wkStoryBarsWrap">
+                            ${storyBarsHtml}
+                        </div>
+                        <div class="wk-carousel-header-row">
+                            <span class="wk-carousel-counter-badge" id="wkCarouselCounter">${counterLabel}</span>
+                            <span class="wk-carousel-title-strip" title="${escapeHTML(cleanWorkoutTitle)}">${escapeHTML(cleanWorkoutTitle)}</span>
+                            <div class="wk-carousel-top-actions">
+                                ${backToWeeklyBtn}
+                                <button type="button" class="wk-i-badge" style="border:none; cursor:pointer;" onclick="openWorkoutInfoModal('coach')" title="Koç Özeti & Isınma">i</button>
+                                <button type="button" class="wk-carousel-close-btn" onclick="dismissGeneratedWorkoutView()" title="Vazgeç / Düzenle" aria-label="Kapat">✕</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HORIZONTAL SWIPEABLE TRACK -->
+                    <div class="wk-carousel-track" id="wkCarouselTrack" onscroll="handleWorkoutCarouselScroll()">
+                        ${cardsHtml}
+                        ${finisherCardHtml}
+                    </div>
+
+                    <!-- FIXED BOTTOM DOCK (ALWAYS IN REACH) -->
+                    <div class="wk-carousel-dock">
+                        <button type="button" class="wk-dock-nav-btn ${currentIdx === 0 ? 'is-disabled' : ''}" id="wkDockPrevBtn" onclick="stepWorkoutCarousel(-1)" aria-label="Önceki Hareket">
+                            ◀
+                        </button>
+                        <button type="button" class="wk-dock-start-btn" onclick="startActiveWorkoutFromGenerated()">
+                            <span>▶️ Seansı Başlat</span>
+                        </button>
+                        <button type="button" class="wk-dock-nav-btn ${currentIdx >= totalCards - 1 ? 'is-disabled' : ''}" id="wkDockNextBtn" onclick="stepWorkoutCarousel(1)" aria-label="Sonraki Hareket">
+                            ▶
+                        </button>
+                    </div>
+
+                    ${buildWorkoutInfoModalsHtml(w, mode)}
+                </div>
+            `;
+        }
+        window.buildWorkoutCardsCarouselHtml = buildWorkoutCardsCarouselHtml;
+
         function dismissGeneratedWorkoutView() {
             if (window.pendingAiWeeklyPlan && window._editingPendingWeeklyDayIdx !== null && window._editingPendingWeeklyDayIdx !== undefined) {
                 renderPendingWeeklyPlanPreview();
                 return;
             }
             window.expandedGeneratedExIndex = null;
+            window.activeWorkoutCarouselIndex = 0;
             const container = document.getElementById('generatedWorkoutOutput');
             if (container) container.innerHTML = '';
+            const heroBanner = document.getElementById('aiHybridHeroBanner');
+            if (heroBanner) {
+                heroBanner.style.display = '';
+                try {
+                    heroBanner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } catch(e) {}
+            }
         }
         window.dismissGeneratedWorkoutView = dismissGeneratedWorkoutView;
 
@@ -5770,12 +6077,12 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             if (!w || !container) return;
             const savedScrollY = window.scrollY;
 
+            // Hide generator parameter banner so the horizontal card carousel takes full screen!
+            const heroBanner = document.getElementById('aiHybridHeroBanner');
+            if (heroBanner) heroBanner.style.display = 'none';
+
             const user = getActiveUser();
             const weights = user ? (user.weights || {}) : {};
-            const todayIdx = new Date().getDay();
-            const todayName = DAY_NAMES_TR[todayIdx] || 'Bugün';
-            const tomorrowIdx = (todayIdx + 1) % 7;
-            const tomorrowName = DAY_NAMES_TR[tomorrowIdx] || 'Yarın';
 
             // Egzersizlerin blok etiketleri yoksa (eski kayıt) dinamik hesapla
             const hasUnupgradedPair = (w.exercises || []).some(ex => ex.blockType === 'superset' && ex.supersetRole === undefined);
@@ -5784,144 +6091,21 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 : assignAcademicBlockStructure(w.exercises || [], w.style || 'superset', w.scheme);
             w.exercises = structuredList;
 
-            const timelineStationsHtml = buildTimelineStationsHtml(structuredList, w.scheme, weights, 'generated');
-
             const cleanWorkoutTitle = String(w.title || 'Antrenman')
                 .replace(/^(?:⚔️\s*)?(?:BB-Dominant Hibrit|Saf Bodybuilding|Dengeli Hibrit Atlet|Fonksiyonel-Dominant|Saf Fonksiyonel & Kondisyon)\s*•\s*/i, '')
                 .replace(/\s*\((?:Full Body|Push|Pull|İzole|Biceps & Triceps|%\d+[^)]*|AI Hibrit|Bacak Korumalı|Üst Vücut Korumalı|Sırt\/Bel Korumalı|Ardışık Gün Dengeli)\)/gi, '')
                 .trim() || 'Tüm Vücut Antrenmanı';
             w.title = cleanWorkoutTitle;
 
-            const wishBadge = w.customWish ? `
-                <div style="font-size:11.5px; color:#475569; background:#F1F5F9; padding:4px 8px; border-radius:6px; margin-top:4px; display:inline-block;">
-                    🎯 <strong>Özel İstek/Not:</strong> "${escapeHTML(w.customWish)}"
-                </div>
-            ` : '';
-            const filterBadge = (w.wishAppliedFilters && w.wishAppliedFilters.length > 0) ? `
-                <div style="font-size:11px; color:#991B1B; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-left:3px solid #EF4444; padding:5px 9px; border-radius:6px; margin-top:5px; display:block;">
-                    🚫 <strong>AI Kısıtlama Filtresi:</strong> ${w.wishAppliedFilters.map(escapeHTML).join(' • ')}
-                </div>
-            ` : '';
+            container.innerHTML = buildWorkoutCardsCarouselHtml(w, 'generated');
 
-            const wkStatus = typeof getWeeklyTrainingStatus === 'function' ? getWeeklyTrainingStatus() : { isThisWeekComplete: false, completedThisWeekCount: 0, todayName };
-
-            const backToWeeklyBtn = window.pendingAiWeeklyPlan ? `
-                <div style="margin-bottom:8px;">
-                    <button type="button" class="btn-action-secondary" style="padding:6px 10px; font-size:11.5px; border-color:#15803D; color:#15803D; font-weight:800;" onclick="renderPendingWeeklyPlanPreview()">
-                        ⬅️ Haftalık Programa Dön
-                    </button>
-                </div>
-            ` : '';
-
-            container.innerHTML = `
-                <div class="workout-header-card">
-                    ${backToWeeklyBtn}
-                    <div style="margin-bottom:4px;">
-                        <h2 class="workout-main-title" style="font-size:18px; line-height:1.25; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(cleanWorkoutTitle)}</h2>
-                        ${wishBadge}
-                        ${filterBadge}
-                    </div>
-
-                    <!-- COMPACT MOBILE ACTION BAR -->
-                    <div class="wk-compact-action-wrap">
-                        <div class="wk-compact-primary-row">
-                            <button type="button" class="wk-btn-primary-compact" onclick="startActiveWorkoutFromGenerated()">
-                                ${CANVA_ICONS.play} <span>Şimdi Başlat</span>
-                            </button>
-                            <button type="button" class="wk-btn-utility-compact" onclick="handleGenerateWorkout()" title="Farklı hareketlerle yeniden üret">
-                                ${CANVA_ICONS.refresh} <span>Yenile</span>
-                            </button>
-                        </div>
-                        <div class="wk-compact-secondary-grid">
-                            ${wkStatus.isThisWeekComplete ? `
-                                <button type="button" class="wk-chip-action highlight-green" onclick="assignGeneratedToNextWeekDay(1)">
-                                    📅 Gelecek Hf.
-                                </button>
-                                <button type="button" class="wk-chip-action" onclick="assignGeneratedToToday()">
-                                    ⚡ Bugüne
-                                </button>
-                                <button type="button" class="wk-chip-action" onclick="promptAssignGeneratedToAnyDay()">
-                                    🗓️ Gün Seç
-                                </button>
-                            ` : `
-                                <button type="button" class="wk-chip-action highlight-orange" onclick="assignGeneratedToToday()">
-                                    ⚡ Bugüne
-                                </button>
-                                <button type="button" class="wk-chip-action" onclick="scheduleTomorrowFromGenerated()">
-                                    📅 Yarına
-                                </button>
-                                <button type="button" class="wk-chip-action" onclick="promptAssignGeneratedToAnyDay()">
-                                    🗓️ Gün Seç
-                                </button>
-                            `}
-                            <button type="button" class="wk-chip-action" onclick="saveGeneratedToLibrary()">
-                                💾 Kaydet
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- COMPACT INFO "i" TRIGGERS (KOÇ ÖZETİ & DİNAMİK ISINMA) -->
-                    <div class="wk-info-triggers-row">
-                        <button type="button" class="wk-info-i-btn" onclick="openWorkoutInfoModal('coach')" title="Koç Özeti ve Eksik Telafisi">
-                            <span class="wk-i-badge">i</span>
-                            <span>Koç Özeti</span>
-                        </button>
-                        <button type="button" class="wk-info-i-btn" onclick="openWorkoutInfoModal('warmup')" title="Dinamik Isınma ve Mobilite">
-                            <span class="wk-i-badge">i</span>
-                            <span>Dinamik Isınma</span>
-                        </button>
-                    </div>
-
-                    ${buildWorkoutInfoModalsHtml(w, 'generated')}
-
-                    <!-- MAIN EXERCISES LIST (TIMELINE FLOW) -->
-                    <div style="margin-top:14px;"></div>
-
-                    ${timelineStationsHtml}
-
-                    <div style="text-align:center; margin:14px 0 20px;">
-                        <button class="btn btn-outline" style="background:rgba(24, 21, 48, 0.7); border:1.5px dashed rgba(167, 139, 250, 0.4); color:var(--athletiq-violet); font-size:12.5px; padding:10px 18px; border-radius:12px; font-weight:800; cursor:pointer;" onclick="openAddExerciseModal('generated')">
-                            ➕ Listeye Hareket Ekle
-                        </button>
-                    </div>
-
-                    <!-- FINISHER -->
-                    <div class="block-header" style="color:#F97316; font-weight:900; letter-spacing:0.04em;">🔥 BALİSTİK BİTİŞ / FINISHER</div>
-                    <div style="background:linear-gradient(135deg, rgba(244, 63, 94, 0.15) 0%, rgba(24, 21, 48, 0.85) 100%); border:1px solid rgba(244, 63, 94, 0.35); border-left:4px solid #F43F5E; border-radius:16px; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; box-shadow:0 4px 16px rgba(0,0,0,0.3);">
-                        <div style="flex:1; min-width:200px;">
-                            <strong style="color:#FFFFFF; font-size:14px; display:block; margin-bottom:3px;">${escapeHTML(w.finisher.name)}</strong>
-                            <div style="font-size:12.5px; color:#CBD5E1; line-height:1.4;">${escapeHTML(w.finisher.desc)}</div>
-                        </div>
-                        ${(() => {
-                            const fName = (w.finisher && w.finisher.name) ? w.finisher.name.toLowerCase() : '';
-                            const resolvedId = (w.finisher && w.finisher.exId && EXERCISES_DB.some(e => e.id === w.finisher.exId))
-                                ? w.finisher.exId
-                                : (fName.includes('tabata') || fName.includes('swing')
-                                    ? 'db_swing'
-                                    : (fName.includes('plank') || fName.includes('hollow') || fName.includes('core')
-                                        ? 'bw_plank'
-                                        : (fName.includes('burpee') || fName.includes('emom')
-                                            ? 'bw_burpee'
-                                            : (fName.includes('farmer') || fName.includes('yürüyüş') || fName.includes('taşıma') || fName.includes('carry')
-                                                ? 'db_farmers_walk'
-                                                : null))));
-                            return resolvedId
-                                ? `<button type="button" class="btn btn-outline" style="padding:6px 10px; font-size:11px; border-color:rgba(244,63,94,0.45); color:#E11D48; white-space:nowrap; font-weight:700;" onclick="openExerciseDetailModal(decodeURIComponent('${encodeURIComponent(resolvedId)}'))">📸 Form Rehberi</button>`
-                                : '';
-                        })()}
-                    </div>
-
-                    <!-- BOTTOM DUAL ACTION HIERARCHY (Vazgeç + Seansı Başlat) -->
-                    <div style="display:flex; align-items:center; gap:10px; margin-top:18px; padding-top:14px; border-top:1px solid rgba(167, 139, 250, 0.16);">
-                        <button type="button" class="btn-action-secondary" style="padding:14px 22px; font-size:14px; font-weight:800; color:#94A3B8; background:rgba(24, 21, 48, 0.8); border:1px solid rgba(167, 139, 250, 0.25); border-radius:16px; justify-content:center; cursor:pointer;" onclick="dismissGeneratedWorkoutView()">
-                            Vazgeç
-                        </button>
-                        <button type="button" class="btn-start-workout" style="flex:1; padding:14px 20px; font-size:14.5px; font-weight:900; background:linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); color:#FFFFFF; border:none; border-radius:16px; display:inline-flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 8px 24px rgba(139, 92, 246, 0.45); cursor:pointer;" onclick="startActiveWorkoutFromGenerated()">
-                            <span>▶️ Seansı Başlat</span>
-                        </button>
-                    </div>
-                </div>
-            `;
+            // Restore or reset carousel card index
+            const preserveIdx = (options && (options.preserveScroll || options.preserveCardIndex) && window.activeWorkoutCarouselIndex !== undefined)
+                ? window.activeWorkoutCarouselIndex
+                : 0;
+            setTimeout(() => {
+                goToWorkoutCarouselCard(preserveIdx, { instant: true });
+            }, 30);
 
             if (w && !w._aiAutoAudited && typeof getGeminiApiKey === 'function' && getGeminiApiKey()) {
                 w._aiAutoAudited = true;

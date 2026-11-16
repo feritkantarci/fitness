@@ -140,6 +140,10 @@ Kullanıcı "canlıya al / push et" dediğinde şu adımlar uygulanır:
   - **Yalınlık & İşlevsellik Filtresi:** Yeni bir özellik, soru akışı veya tavsiye tasarlanırken yalnızca sonucu doğrudan değiştiren en az sayıda adım kullanılır; sistemin geçmiş veriden zaten bildiği bilgiler kullanıcıya tekrar sorulmaz.
   - **Sıfır İkon Kalabalığı:** Seçenekli soru kutularında ve hızlı karar ekranlarında dikkat dağıtan emoji/ikonlar kullanılmaz; yalnızca net, 1–2 kelimelik yüksek kontrastlı butonlar kullanılır.
   - **Ana Ekranı Kalabalıklaştırmayan Pop-up Akışı:** Kullanıcıdan işlem öncesi ek bilgi alınması gerektiğinde ana ekranda sürekli yer kaplayan sabit bloklar yerine, pencereye tam oturan, kaydırma gerektirmeyen ve varsayılanları seçili gelen yalın pop-up ekranı tercih edilir.
+* **Sıfır Açıklama Banner'ı ve Not Defteri Yasağı ("Bu Bir Defter Değil"):**
+  - Antrenman, sayaç ve operasyon ekranlarına sarı, turuncu veya renkli arka planlı yönerge kutuları, "Sıradaki Adım...", "Şimdi şunu yapın..." gibi anlatım ve not banner'ları ASLA eklenemez.
+  - Uygulama bir not defteri değil, saf ve akıcı bir aksiyon arayüzüdür.
+  - Geçiş durumları ve yönlendirmeler yalnızca kart içi kompakt set çipleri ve butonlarla yönetilir; ekranda yer kaplayan açıklama blokları kesinlikle yasaktır.
 * **Mobil Nizamiyet, "i" Bilgi Modalları ve Sıfır İç İçe Çerçeve Standardı:**
   - **Tek Satır Öz Başlıklar:** Antrenman başlıkları, üst bar marka adı ve kullanıcı isimleri asla iki satıra kırılmaz (`white-space: nowrap`); parantez içi gereksiz ekler (`(Full Body)`, `(Admin)` vb.) ve başlığı sıkıştıran süre/set/tekrar rozet yığınları kaldırılarak 2–3 kelimelik net başlıklar kullanılır.
   - **İkincil Bilgileri `"i"` Düğmesi ve Modal Pencereye Taşıma:** Koç özeti, dinamik ısınma ve hareketlerin ekipman/kas/altın kural/bildir gibi ikincil detayları ana ekranda açık bırakılmaz; yan yana kompakt **`i`** butonları veya satır içi küçük **`i`** ikonuyla tetiklenen ve sağ üstten **`✕`** ile kapanan sade modal pencerelerde gösterilir.
