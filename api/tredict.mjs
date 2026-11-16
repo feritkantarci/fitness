@@ -387,6 +387,48 @@ async function confirmAndDeleteCalendarBatch(tredict, deleteIds) {
   return deleted;
 }
 
+const TR_MONTHS_SHORT = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+
+function stripWorkoutTitleDate(title) {
+  if (!title) return '';
+  let t = String(title).trim();
+  const prefixRegex = /^(\d{1,2}\s+(?:Oca|Şub|Mar|Nis|May|Haz|Tem|Ağu|Eyl|Eki|Kas|Ara)|\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?|\d{4}-\d{2}-\d{2})\s*([•\-\–:]\s*)?/i;
+  t = t.replace(prefixRegex, '').trim();
+  t = t.replace(/\s*\(\s*\d{4}-\d{2}-\d{2}\s*\)\s*$/g, '');
+  t = t.replace(/\s*\(\s*\d{1,2}\s+(?:Oca|Şub|Mar|Nis|May|Haz|Tem|Ağu|Eyl|Eki|Kas|Ara)\s*\)\s*$/gi, '');
+  t = t.replace(/\s*\(\s*\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?\s*\)\s*$/g, '');
+  return t.trim();
+}
+
+function formatWorkoutTitleWithDate(rawTitle, dateStr) {
+  let title = String(rawTitle || 'Çelik Kodu Antrenmanı').trim();
+  if (!dateStr) return title;
+
+  let y, m, d;
+  if (typeof dateStr === 'string' && /^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+    const parts = dateStr.slice(0, 10).split('-');
+    y = parseInt(parts[0], 10);
+    m = parseInt(parts[1], 10);
+    d = parseInt(parts[2], 10);
+  } else if (dateStr instanceof Date && !isNaN(dateStr.getTime())) {
+    y = dateStr.getFullYear();
+    m = dateStr.getMonth() + 1;
+    d = dateStr.getDate();
+  } else {
+    return title;
+  }
+
+  const monthName = TR_MONTHS_SHORT[(m || 1) - 1] || '';
+  const datePrefix = `${d} ${monthName}`;
+
+  title = stripWorkoutTitleDate(title);
+  if (!title || title.toLowerCase() === 'çelik kodu') {
+    title = 'Güç Seansı';
+  }
+
+  return `${datePrefix} • ${title}`;
+}
+
 async function addTredictStrengthTrainingsToLiveCalendar(tredict, planTrainings, tzOffsetMinutes) {
   const validItems = (Array.isArray(planTrainings) ? planTrainings : []).filter(t => t && t.structuredWorkout);
   if (!validItems.length) return [];
@@ -424,6 +466,9 @@ async function addTredictStrengthTrainingsToLiveCalendar(tredict, planTrainings,
 
   const pushSingleTraining = async (calDate, sw, deleteIds = [], retryStripExercise = '') => {
     const workoutClone = JSON.parse(JSON.stringify(sw));
+    if (calDate && workoutClone.title) {
+      workoutClone.title = formatWorkoutTitleWithDate(workoutClone.title, calDate);
+    }
     if (retryStripExercise) {
       (workoutClone.steps || []).forEach(grp => {
         (grp.steps || []).forEach(st => {

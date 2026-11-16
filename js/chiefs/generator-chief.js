@@ -4650,6 +4650,24 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 if (!isComplexFlow && (!hasLowerOrFullOrFuncSplit || !allowLowerUpperComplexInSlot)) {
                     if (ex.isComplex || (anat && (anat.isComplex || anat.isLowerUpperComplex || anat.isFullBodyMetcon))) return false;
                 }
+
+                // SPLIT KORUMASI: Saf Üst Vücut'a bacak, Saf Alt Vücut'a üst vücut sızmasını engelle
+                const isOnlyUpperSplit = !hasLowerOrFullOrFuncSplit;
+                const isOnlyLowerSplit = !isComplexFlow && selectedSplits.every(s => s === 'lower' || s === 'iso_legs');
+                const effCat = getEffectiveExerciseCategory(ex);
+                if (isOnlyUpperSplit && (effCat === 'legs_quad' || effCat === 'legs_hinge' || effCat === 'legs_calves')) {
+                    return false;
+                }
+                if (isOnlyLowerSplit && (effCat === 'push' || effCat === 'pull')) {
+                    return false;
+                }
+
+                // ARDIŞIK GÜN 31 ALT KAS KORUMASI (A3 Kuralı):
+                // Dünkü/önceki günkü seansta doğrudan çalışmış birincil 31 alt kası vuran hareketleri hariç tut
+                if (hasAdjacentDaySubMuscleRule && hasAdjacentDayPrimarySubMuscleOverlap(ex)) {
+                    return false;
+                }
+
                 return true;
             }
 
@@ -5065,7 +5083,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 } else {
                     finalPool = filterToUnworkedAdjacentSubMuscles(
                         preferWeeklyFreshExercises(applyDoctrineModeFilter(basePool, filterMode)),
-                        false
+                        hasAdjacentDaySubMuscleRule
                     );
                 }
 
@@ -5078,7 +5096,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 if (!chosen && !strictIso) {
                     const modeBase = filterToUnworkedAdjacentSubMuscles(
                         preferWeeklyFreshExercises(applyDoctrineModeFilter(basePool, filterMode)),
-                        false
+                        hasAdjacentDaySubMuscleRule
                     );
                     chosen = pickRandom(modeBase);
                 }
@@ -5094,7 +5112,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                             const effCat = getEffectiveExerciseCategory(ex);
                             return Array.isArray(relatedCat) ? relatedCat.includes(effCat) : effCat === relatedCat;
                         })),
-                        false
+                        hasAdjacentDaySubMuscleRule
                     );
                     chosen = pickRandom(fallbackPool);
                 }
@@ -5104,9 +5122,13 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                         preferWeeklyFreshExercises(
                             EXERCISES_DB.filter(ex => isCandidateBiochemicallyCompatible(ex, hasLowerOrFullOrFuncSplit))
                         ),
-                        false
+                        hasAdjacentDaySubMuscleRule
                     );
-                    chosen = pickRandom(nonTwinAnyCatPool);
+                    chosen = pickRandom(nonTwinAnyCatPool) || pickRandom(
+                        preferWeeklyFreshExercises(
+                            EXERCISES_DB.filter(ex => isCandidateBiochemicallyCompatible(ex, hasLowerOrFullOrFuncSplit))
+                        )
+                    );
                 }
                 if (chosen) {
                     recordChosenExercise(chosen);

@@ -790,11 +790,14 @@ function runAcademicMathSuite(moduleSources, dbText) {
             blockedSize: blocked.size,
             dailyOverlapCount: overlaps.length,
             weeklyOverlapCount: wkOverlaps.length,
+            wkOverlaps: wkOverlaps.join(', '),
+            d1: wkDays[0] && wkDays[0].workout ? wkDays[0].workout.exercises.map(e => e.id).join(',') : '',
+            d2: wkDays[1] && wkDays[1].workout ? wkDays[1].workout.exercises.map(e => e.id).join(',') : '',
             genCount: ((gen && gen.exercises) || []).length
           };
         })()`, ctx);
         const ok = res.blockedSize >= 4 && res.genCount >= 4 && res.dailyOverlapCount === 0 && res.weeklyOverlapCount === 0;
-        return { ok, actual: `korunanAltKas=${res.blockedSize}, günlükÇakışma=${res.dailyOverlapCount}, haftalıkArdışıkÇakışma=${res.weeklyOverlapCount}` };
+        return { ok, actual: `korunanAltKas=${res.blockedSize}, günlükÇakışma=${res.dailyOverlapCount}, haftalıkArdışıkÇakışma=${res.weeklyOverlapCount}, ov=${res.wkOverlaps}` };
       }
     },
     {
@@ -1271,7 +1274,7 @@ function runAcademicMathSuite(moduleSources, dbText) {
       id: 'T22',
       owner: 'garmin-tredict-guard',
       title: 'Kanonik Takvim Çözümlemesi & Sıfır Mükerrer Saat Gönderimi',
-      expected: 'haftalık+tarih çakışmasında mükerrer gün = 0, override tekil geçerli, her güne tek seans',
+      expected: 'haftalık+tarih çakışmasında mükerrer gün = 0, override tekil geçerli, başlıkta kısa ay tarih öneki',
       run: () => {
         ctx.__seedState();
         const res = vm.runInContext(`(() => {
@@ -1301,19 +1304,22 @@ function runAcademicMathSuite(moduleSources, dbText) {
           const hasZeroDuplicates = dates.length === uniqueDates.size;
 
           const todayItem = planRes.multiDays.find(d => d.calendarDate === todayIso);
-          const overrideApplied = Boolean(todayItem && todayItem.title === 'Bugün: Özel İtiş' && todayItem.exercises[0].weight === 65);
+          const hasDatePrefix = Boolean(todayItem && /^\\d{1,2}\\s+[A-Za-zÇŞĞÖÜıİçşğöü]+\\s+•\\s+/.test(todayItem.title));
+          const overrideApplied = Boolean(todayItem && todayItem.title.includes('Bugün: Özel İtiş') && todayItem.exercises[0].weight === 65 && hasDatePrefix);
 
           return {
             totalDays: planRes.multiDays.length,
             hasZeroDuplicates,
             overrideApplied,
+            hasDatePrefix,
+            todayTitle: todayItem ? todayItem.title : '',
             uniqueDateCount: uniqueDates.size
           };
         })()`, ctx);
-        const ok = res.totalDays >= 1 && res.hasZeroDuplicates && res.overrideApplied;
+        const ok = res.totalDays >= 1 && res.hasZeroDuplicates && res.overrideApplied && res.hasDatePrefix;
         return {
           ok,
-          actual: `toplamGün=${res.totalDays}, mükerrersiz=${res.hasZeroDuplicates}, overrideTekil=${res.overrideApplied}`
+          actual: `toplamGün=${res.totalDays}, mükerrersiz=${res.hasZeroDuplicates}, overrideTekil=${res.overrideApplied}, başlık="${res.todayTitle}"`
         };
       }
     }

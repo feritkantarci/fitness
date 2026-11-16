@@ -71,6 +71,14 @@ Bu şef, **Çelik Kodu PWA** ile **Garmin Forerunner 945 / Tredict** arasındaki
    - Kullanıcı aynı anda farklı sekmelerden veya hızlı tıklamalarla istek gönderse dahi, bulut köprüsü (`api/tredict.mjs`) her sporcu için sıralı bir kilit kuyruğu işleterek çakışan paralel Tredict silme/ekleme yarış durumlarını (race condition) önler.
    - Gönderilen takvimin parmak izi (`v2_unified_...`) son gönderilen imza ile eşleşiyorsa gereksiz mükerrer ağ istekleri susturulur.
 
+### Görev 8: Saat Ekranı İçin Tarih Önekli Başlık Standardı (`DD Ay • [Program Adı]`)
+1. **Dar Ekran & Kolay Seçim Hijyeni:**
+   - Garmin Forerunner 945 gibi saat ekranlarında karakter alanı sınırlıdır. Saatte antrenman listesinde gezinirken sporcunun antrenmanın hangi güne ait olduğunu anında görmesi için başlığın en başına kısa Türkçe ay formatında tarih eklenir: `16 Kas • Göğüs & Sırt`.
+2. **Kapsam ve Çift Yönlü Normalizasyon:**
+   - Hem tekil ("Bugüne Ekle", "Yarına Ekle") hem haftalık birleşik takvim çözümlemesinde (`resolveUnifiedScheduleForNextDays`, `buildTredictPlanPayload`, `buildStandaloneCardioStructuredWorkout`, `pushSingleTraining`) başlık formatı `DD Ay • [Program Adı]` haline getirilir.
+   - Saatten geri dönüşte eşleştirme (`findSentWorkoutManifestForActivity`) ve geçmişe aktarım sırasında tarih öneki ayıklanarak (`stripWorkoutTitleDate`) programın orijinal adı ve kimliği bozulmadan korunur.
+
+
 ---
 
 ## 2. Diğer 6 Şefle İletişim Protokolü

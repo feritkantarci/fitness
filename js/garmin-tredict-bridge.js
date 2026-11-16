@@ -901,6 +901,50 @@
     });
   }
 
+  const TR_MONTHS_SHORT = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+
+  function stripWorkoutTitleDate(title) {
+    if (!title) return '';
+    let t = String(title).trim();
+    const prefixRegex = /^(\d{1,2}\s+(?:Oca|Şub|Mar|Nis|May|Haz|Tem|Ağu|Eyl|Eki|Kas|Ara)|\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?|\d{4}-\d{2}-\d{2})\s*([•\-\–:]\s*)?/i;
+    t = t.replace(prefixRegex, '').trim();
+    t = t.replace(/\s*\(\s*\d{4}-\d{2}-\d{2}\s*\)\s*$/g, '');
+    t = t.replace(/\s*\(\s*\d{1,2}\s+(?:Oca|Şub|Mar|Nis|May|Haz|Tem|Ağu|Eyl|Eki|Kas|Ara)\s*\)\s*$/gi, '');
+    t = t.replace(/\s*\(\s*\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?\s*\)\s*$/g, '');
+    return t.trim();
+  }
+  window.stripWorkoutTitleDate = stripWorkoutTitleDate;
+
+  function formatWorkoutTitleWithDate(rawTitle, dateStr) {
+    let title = String(rawTitle || 'Çelik Kodu Antrenmanı').trim();
+    if (!dateStr) return title;
+
+    let y, m, d;
+    if (typeof dateStr === 'string' && /^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+      const parts = dateStr.slice(0, 10).split('-');
+      y = parseInt(parts[0], 10);
+      m = parseInt(parts[1], 10);
+      d = parseInt(parts[2], 10);
+    } else if (dateStr instanceof Date && !isNaN(dateStr.getTime())) {
+      y = dateStr.getFullYear();
+      m = dateStr.getMonth() + 1;
+      d = dateStr.getDate();
+    } else {
+      return title;
+    }
+
+    const monthName = TR_MONTHS_SHORT[(m || 1) - 1] || '';
+    const datePrefix = `${d} ${monthName}`;
+
+    title = stripWorkoutTitleDate(title);
+    if (!title || title.toLowerCase() === 'çelik kodu') {
+      title = 'Güç Seansı';
+    }
+
+    return `${datePrefix} • ${title}`;
+  }
+  window.formatWorkoutTitleWithDate = formatWorkoutTitleWithDate;
+
   function saveSentWorkoutManifest(workoutTitle, exercisesList, activityOrDateKey) {
     if (!isGarminEnabledForCurrentUser()) return null;
     const manifests = getSentManifestsMap();
@@ -1095,9 +1139,13 @@
     const rawDatePrefix = String(activity.date || '').slice(0, 10);
     if (rawDatePrefix && manifests['date_' + rawDatePrefix]) return manifests['date_' + rawDatePrefix];
     const normTitle = String(activity.title || '').toLowerCase().trim();
+    const cleanActTitle = stripWorkoutTitleDate(normTitle);
     for (const m of Object.values(manifests)) {
-      if (m && m.title && String(m.title).toLowerCase().trim() === normTitle) {
-        return m;
+      if (m && m.title) {
+        const mNorm = String(m.title).toLowerCase().trim();
+        if (mNorm === normTitle) return m;
+        const cleanM = stripWorkoutTitleDate(mNorm);
+        if (cleanActTitle && cleanM && cleanActTitle === cleanM) return m;
       }
     }
     // Takvimde o güne atanmış plan varsa oradan da manifest üret
@@ -2060,7 +2108,10 @@
       subSportType = 'treadmill';
       defaultTitle = 'Koşu & Koşu Bandı (Garmin fr945)';
     }
-    const cleanTitle = String(cItem.name || defaultTitle).slice(0, 120);
+    let cleanTitle = String(cItem.name || defaultTitle).slice(0, 120);
+    if (calDate) {
+      cleanTitle = formatWorkoutTitleWithDate(cleanTitle, calDate);
+    }
     const limitParts = [];
     if (durMin > 0) limitParts.push(`Min. ${durMin} Dk`);
     if (distMeters > 0) limitParts.push(`Min. ${distMeters} m`);
@@ -2099,6 +2150,7 @@
       multiDayItems.forEach((dItem, idx) => {
         if (!dItem) return;
         const calDate = dItem.calendarDate || fallbackDate;
+        const itemTitle = formatWorkoutTitleWithDate(dItem.title || workoutTitle || 'Çelik Kodu Güç Seansı', calDate);
         const dayNum = Math.max(1, Number(dItem.dayNumber || (idx + 1)));
         const rawExercises = Array.isArray(dItem.exercises) ? dItem.exercises : [];
         const strengthExercises = rawExercises.filter(e => !/^cond_/.test(String((e && (e.id || e.exerciseId)) || '')));
@@ -2107,14 +2159,14 @@
         const allCardio = [...inlineCardio, ...extraCardio];
 
         if (!dItem.onlyCardioChanged && strengthExercises.length > 0) {
-          saveSentWorkoutManifest(dItem.title || workoutTitle, strengthExercises, dItem.dateKey || undefined);
+          saveSentWorkoutManifest(itemTitle, strengthExercises, dItem.dateKey || undefined);
           const steps = buildStructuredStepsForExerciseList(strengthExercises);
           if (steps.length > 0) {
             planTrainings.push({
               day: dayNum,
               calendarDate: calDate,
               structuredWorkout: {
-                title: String(dItem.title || workoutTitle || 'Çelik Kodu Güç Seansı').slice(0, 120),
+                title: String(itemTitle).slice(0, 120),
                 trainingType: 'planned',
                 sportType: 'misc',
                 subSportType: 'strength_training',
@@ -2129,23 +2181,24 @@
           planTrainings.push({
             day: dayNum,
             calendarDate: calDate,
-            structuredWorkout: buildStandaloneCardioStructuredWorkout(cItem)
+            structuredWorkout: buildStandaloneCardioStructuredWorkout(cItem, calDate)
           });
         });
       });
     } else {
+      const singleTitle = formatWorkoutTitleWithDate(workoutTitle || 'Çelik Kodu Güç Seansı', fallbackDate);
       const rawExercises = Array.isArray(exercisesList) ? exercisesList : [];
       const strengthExercises = rawExercises.filter(e => !/^cond_/.test(String((e && (e.id || e.exerciseId)) || '')));
       const inlineCardio = rawExercises.filter(e => /^cond_/.test(String((e && (e.id || e.exerciseId)) || '')));
       if (strengthExercises.length > 0) {
-        saveSentWorkoutManifest(workoutTitle, strengthExercises);
+        saveSentWorkoutManifest(singleTitle, strengthExercises);
         const steps = buildStructuredStepsForExerciseList(strengthExercises);
         if (steps.length > 0) {
           planTrainings.push({
             day: 1,
             calendarDate: fallbackDate,
             structuredWorkout: {
-              title: String(workoutTitle || 'Çelik Kodu Güç Seansı').slice(0, 120),
+              title: String(singleTitle).slice(0, 120),
               trainingType: 'planned',
               sportType: 'misc',
               subSportType: 'strength_training',
@@ -2159,7 +2212,7 @@
         planTrainings.push({
           day: 1,
           calendarDate: fallbackDate,
-          structuredWorkout: buildStandaloneCardioStructuredWorkout(cItem)
+          structuredWorkout: buildStandaloneCardioStructuredWorkout(cItem, fallbackDate)
         });
       });
     }
@@ -2216,7 +2269,7 @@
   function syncExtraCardioToGarmin(dayKey, sessionObj) {
     if (!isGarminEnabledForCurrentUser() || !sessionObj) return;
     const dateStr = getIsoDateForWeekday(dayKey, false);
-    const sw = buildStandaloneCardioStructuredWorkout(sessionObj);
+    const sw = buildStandaloneCardioStructuredWorkout(sessionObj, dateStr);
     const payload = {
       llmDescription: 'Celik Kodu PWA — 7. Sef (garmin-tredict-guard)',
       plan: {
@@ -2279,7 +2332,7 @@
       type: 'WeightTraining',
       start_date_local: `${dateStr}T18:00:00`,
       external_id: `celik_kodu_${dateStr}`,
-      name: String(workoutTitle || `Çelik Kodu (${dateStr})`).slice(0, 120),
+      name: String(formatWorkoutTitleWithDate(workoutTitle || 'Çelik Kodu', dateStr)).slice(0, 120),
       description: blocks.join('\n\n')
     };
   }
@@ -2476,7 +2529,8 @@
         } else {
           chosenEx = ovEx;
           chosenCardio = ovCardio;
-          chosenTitle = ovEntry.title || (ovEntry.customWorkout && ovEntry.customWorkout.title) || `Çelik Kodu (${dStr})`;
+          const rawTitle = ovEntry.title || (ovEntry.customWorkout && ovEntry.customWorkout.title) || 'Çelik Kodu';
+          chosenTitle = formatWorkoutTitleWithDate(rawTitle, dStr);
         }
       } else if (wkEntry) {
         // 2. Öncelik: Haftalık genel şablon
@@ -2485,7 +2539,8 @@
         } else {
           chosenEx = wkEx;
           chosenCardio = wkCardio;
-          chosenTitle = wkEntry.title || (wkEntry.customWorkout && wkEntry.customWorkout.title) || `Çelik Kodu Gün ${dNum}`;
+          const rawTitle = wkEntry.title || (wkEntry.customWorkout && wkEntry.customWorkout.title) || `Çelik Kodu Gün ${dNum}`;
+          chosenTitle = formatWorkoutTitleWithDate(rawTitle, dStr);
         }
       }
 
@@ -2499,7 +2554,7 @@
           dayNumber: multiDays.length + 1,
           calendarDate: dStr,
           dateKey: 'date_' + dStr,
-          title: chosenTitle || `Çelik Kodu (${dStr})`,
+          title: chosenTitle || formatWorkoutTitleWithDate('Çelik Kodu', dStr),
           exercises: chosenEx,
           extraCardioSessions: chosenCardio,
           onlyCardioChanged: false
@@ -2574,8 +2629,8 @@
       : window.currentGeneratedWorkout;
     if (activeGen && Array.isArray(activeGen.exercises) && activeGen.exercises.length > 0) {
       const todayStr = formatLocalIsoDate(new Date());
-      const title = activeGen.title || 'Çelik Kodu Güç Seansı';
-      const payload = buildTredictPlanPayload(title, activeGen.exercises);
+      const title = formatWorkoutTitleWithDate(activeGen.title || 'Çelik Kodu Güç Seansı', todayStr);
+      const payload = buildTredictPlanPayload(title, activeGen.exercises, null, todayStr);
       const ev = buildIntervalsWorkoutEvent(todayStr, title, activeGen.exercises);
       await pushPayloadToGarminSilent(payload, ev ? [ev] : []);
     }
@@ -3241,7 +3296,9 @@
     syncGarminActivitiesSilent,
     refreshFromCentralVault,
     buildTredictPlanPayload,
-    buildIntervalsWorkoutEvent
+    buildIntervalsWorkoutEvent,
+    formatWorkoutTitleWithDate,
+    stripWorkoutTitleDate
   };
 
   async function syncGarminActivitiesSilent() {
