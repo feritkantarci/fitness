@@ -1881,6 +1881,19 @@
             const secs = timerRemaining % 60;
             const timerStr = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 
+            // Set arası hareket: son biten setten sonraki boşluk (Odak görünümünde de eklenebilir)
+            let focusInterSetHtml = '';
+            if (!isCardio) {
+                let lastDoneIdx = -1;
+                sets.forEach((st, i) => { if (st && st.completed) lastDoneIdx = i; });
+                if (lastDoneIdx >= 0 && lastDoneIdx < sets.length - 1) {
+                    const encId = encodeURIComponent(cardEx.id);
+                    focusInterSetHtml = sets[lastDoneIdx].interSet
+                        ? `<div class="daylight-interset-wrap">${renderInterSetSlotHtml(cardEx.id, sets[lastDoneIdx], lastDoneIdx, sets.length)}</div>`
+                        : `<button type="button" class="daylight-interset-add-btn" onclick="openInterSetModal(decodeURIComponent('${encId}'), ${lastDoneIdx})">+ Set arası hareket ekle</button>`;
+                }
+            }
+
             // Determine Next Step details for the sleek horizontal strip (fits 100% on phone screen)
             let nextStepTag = '';
             let nextStepTitle = '';
@@ -1945,6 +1958,8 @@
                                 <button type="button" class="daylight-rest-skip-btn" onclick="skipRestTimer()">⏩ Dinlenmeyi Atla</button>
                             </div>
                         </div>
+
+                        ${focusInterSetHtml}
 
                         ${renderDaylightAdaptiveChartSvg(historyPoints, curWeight, curReps, unitMode, cardEx.name)}
 
@@ -2699,8 +2714,8 @@
                         <button type="button"
                                 class="btn-interset-check ${isDone ? 'checked' : ''}"
                                 onclick="toggleInterSetCheck(decodeURIComponent('${safeExId}'), ${sIdx})"
-                                title="${isDone ? 'Tamamlandı (Geri almak için dokunun)' : 'Set arası hareketi tamamla'}">
-                            ${isDone ? '✓' : '○'}
+                                title="${isDone ? 'Yapıldı (geri almak için dokunun)' : 'Yaptıysan dokun: kayda işlenir'}">
+                            ${isDone ? '✓ Yapıldı' : 'Yap'}
                         </button>
                     </div>
                 </div>
@@ -2935,20 +2950,22 @@
                 completed: false
             };
 
+            const isTimedExtra = payload.metricType === 'time';
             if (applyToAllGaps) {
                 for (let i = 0; i < sets.length - 1; i++) {
-                    const prevDone = sets[i].interSet ? !!sets[i].interSet.completed : (i === setIdx);
+                    const prevDone = sets[i].interSet ? !!sets[i].interSet.completed : (i === setIdx && !isTimedExtra);
                     const prevAt = (sets[i].interSet && sets[i].interSet.completedAt) ? sets[i].interSet.completedAt : (prevDone ? Date.now() : null);
                     sets[i].interSet = Object.assign({}, payload, { completed: prevDone, completedAt: prevAt });
                 }
             } else if (sets[setIdx]) {
-                sets[setIdx].interSet = Object.assign({}, payload, { completed: true, completedAt: Date.now() });
+                sets[setIdx].interSet = Object.assign({}, payload, { completed: !isTimedExtra, completedAt: isTimedExtra ? null : Date.now() });
             }
 
             closeInterSetModal();
             isDaylightRestActive = true;
             saveActiveWorkoutStateToStorage();
             renderActiveWorkout();
+            if (isTimedExtra) openInterSetTimer(exId, setIdx);
             if (typeof showToast === 'function') {
                 showToast(applyToAllGaps
                     ? `⚡ "${payload.name}" tüm set aralarına eklendi!`
@@ -2959,6 +2976,10 @@
         function toggleInterSetCheck(exId, setIdx) {
             const sets = activeWorkoutSetsData[exId] || [];
             if (!sets[setIdx] || !sets[setIdx].interSet) return;
+            if (!sets[setIdx].interSet.completed && sets[setIdx].interSet.metricType === 'time') {
+                openInterSetTimer(exId, setIdx);
+                return;
+            }
             sets[setIdx].interSet.completed = !sets[setIdx].interSet.completed;
             sets[setIdx].interSet.completedAt = sets[setIdx].interSet.completed ? Date.now() : null;
             isDaylightRestActive = true;
@@ -2968,6 +2989,130 @@
                 playAlertSound();
             }
         }
+
+        // SÜRELİ SET ARASI HAREKET SAYACI (süre bitince otomatik "yapıldı")
+        let interSetTimerState = null;
+
+        function closeInterSetTimer() {
+            if (interSetTimerState && interSetTimerState.intervalId) clearInterval(interSetTimerState.intervalId);
+            interSetTimerState = null;
+            const el = document.getElementById('interSetTimerOverlay');
+            if (el) el.remove();
+        }
+
+        function getInterSetTimerRemaining() {
+            const st = interSetTimerState;
+            if (!st) return 0;
+            if (st.paused) return st.remaining;
+            return Math.max(0, Math.ceil((st.endAt - Date.now()) / 1000));
+        }
+
+        function updateInterSetTimerDisplay() {
+            const rem = getInterSetTimerRemaining();
+            const el = document.getElementById('interSetTimerValue');
+            if (el) el.textContent = `${String(Math.floor(rem / 60)).padStart(2, '0')}:${String(rem % 60).padStart(2, '0')}`;
+            const bar = document.getElementById('interSetTimerBar');
+            if (bar && interSetTimerState) {
+                const pct = interSetTimerState.total > 0 ? Math.min(100, Math.max(0, ((interSetTimerState.total - rem) / interSetTimerState.total) * 100)) : 100;
+                bar.style.width = pct + '%';
+            }
+            const pauseBtn = document.getElementById('interSetTimerPauseBtn');
+            if (pauseBtn && interSetTimerState) pauseBtn.textContent = interSetTimerState.paused ? (interSetTimerState.started ? 'Devam' : 'Başlat') : 'Duraklat';
+            return rem;
+        }
+
+        function completeInterSetFromTimer() {
+            const st = interSetTimerState;
+            if (!st) return;
+            const sets = activeWorkoutSetsData[st.exId] || [];
+            const slot = sets[st.setIdx];
+            closeInterSetTimer();
+            if (!slot || !slot.interSet) return;
+            slot.interSet.completed = true;
+            slot.interSet.completedAt = Date.now();
+            isDaylightRestActive = true;
+            saveActiveWorkoutStateToStorage();
+            renderActiveWorkout();
+            if (typeof playAlertSound === 'function') playAlertSound();
+            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+        }
+
+        function toggleInterSetTimerPause() {
+            const st = interSetTimerState;
+            if (!st) return;
+            if (st.paused) {
+                st.endAt = Date.now() + st.remaining * 1000;
+                st.paused = false;
+                st.started = true;
+            } else {
+                st.remaining = getInterSetTimerRemaining();
+                st.paused = true;
+            }
+            updateInterSetTimerDisplay();
+        }
+
+        function adjustInterSetTimer(deltaSecs) {
+            const st = interSetTimerState;
+            if (!st) return;
+            if (st.paused) {
+                st.remaining = Math.max(1, st.remaining + deltaSecs);
+            } else {
+                st.endAt += deltaSecs * 1000;
+            }
+            st.total = Math.max(1, st.total + deltaSecs);
+            updateInterSetTimerDisplay();
+        }
+
+        function openInterSetTimer(exId, setIdx) {
+            const sets = activeWorkoutSetsData[exId] || [];
+            const item = sets[setIdx] && sets[setIdx].interSet;
+            if (!item) return;
+            closeInterSetTimer();
+            const total = Math.max(1, parseInt(item.value, 10) || 30);
+            interSetTimerState = {
+                exId, setIdx, total,
+                endAt: Date.now() + total * 1000,
+                paused: true,
+                started: false,
+                remaining: total,
+                intervalId: null
+            };
+            const overlay = document.createElement('div');
+            overlay.id = 'interSetTimerOverlay';
+            overlay.className = 'interset-timer-overlay';
+            overlay.innerHTML = `
+                <div class="interset-timer-card">
+                    <div class="interset-timer-title">${escapeHTML(item.name)}</div>
+                    <div class="interset-timer-sub">Set ${setIdx + 1}-${setIdx + 2} arası • ${total} sn</div>
+                    <div class="interset-timer-value" id="interSetTimerValue">00:00</div>
+                    <div class="interset-timer-track"><div class="interset-timer-bar" id="interSetTimerBar"></div></div>
+                    <div class="interset-timer-row">
+                        <button type="button" class="interset-timer-btn ghost" onclick="adjustInterSetTimer(-10)">−10 sn</button>
+                        <button type="button" class="interset-timer-btn ghost" id="interSetTimerPauseBtn" onclick="toggleInterSetTimerPause()">Başlat</button>
+                        <button type="button" class="interset-timer-btn ghost" onclick="adjustInterSetTimer(10)">+10 sn</button>
+                    </div>
+                    <div class="interset-timer-row">
+                        <button type="button" class="interset-timer-btn close" onclick="closeInterSetTimer()">Kapat</button>
+                        <button type="button" class="interset-timer-btn done" onclick="completeInterSetFromTimer()">Bitir ✓</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(overlay);
+            updateInterSetTimerDisplay();
+            interSetTimerState.intervalId = setInterval(() => {
+                if (!interSetTimerState) return;
+                const rem = updateInterSetTimerDisplay();
+                if (!interSetTimerState.paused) {
+                    if (rem === 3 || rem === 2) playCountdownBeep(520);
+                    else if (rem === 1) playCountdownBeep(660);
+                    if (rem <= 0) completeInterSetFromTimer();
+                }
+            }, 500);
+        }
+        window.openInterSetTimer = openInterSetTimer;
+        window.closeInterSetTimer = closeInterSetTimer;
+        window.completeInterSetFromTimer = completeInterSetFromTimer;
+        window.toggleInterSetTimerPause = toggleInterSetTimerPause;
+        window.adjustInterSetTimer = adjustInterSetTimer;
 
         function removeInterSetExercise(exId, setIdx) {
             const sets = activeWorkoutSetsData[exId] || [];

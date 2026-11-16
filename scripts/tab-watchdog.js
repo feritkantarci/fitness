@@ -1442,6 +1442,70 @@ function runAcademicMathSuite(moduleSources, dbText) {
         const ok = res.count === 1 && res.hasNew && !res.hasEmpty && !res.hasDone;
         return { ok, actual: `bildirim=${res.count}, yeniVar=${res.hasNew}, boşVar=${res.hasEmpty}, kayıtlıVar=${res.hasDone}` };
       }
+    },
+    {
+      id: 'T26',
+      owner: 'analytics-guard',
+      title: 'Set Arası Plank = Kuvvet, Jumping Jack = Kardiyo',
+      expected: 'set arası plank kuvvet seti sayılır, jumping jack kuvvet setine girmez ve kardiyo listesinde görünür',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const uid = 'usr_exam';
+          const today = toIsoDateKeyLocal(new Date());
+          const baseEx = { id: 'db_lateral_raise', name: 'Dambıl Lateral Raise', category: 'push', muscle: 'Yan Omuz', equipment: 'dumbbell', completedSetsCount: 3, sets: [1,2,3].map(n => ({ setNo: n, weight: 7.5, reps: 12, completed: true, volume: 90 })) };
+          const mk = (extras) => ({ id: 'log_t26', date: today, timestamp: Date.now(), program: 'T26', totalVolumeKg: 270, exercises: [baseEx].concat(extras) });
+          const plank = { id: 'bw_plank', name: 'Plank (Set Arası)', category: 'core', muscle: 'Derin İç Karın, Ön Karın', equipment: 'bodyweight', isTimeBased: true, isInterSetExtra: true, completedSetsCount: 1, sets: [{ setNo: 1, weight: 0, reps: 45, completed: true, volume: 0 }] };
+          const jack = { id: 'bw_jumping_jack', name: 'Jumping Jack (Set Arası)', category: 'conditioning', muscle: 'Üst Baldır, Alt Baldır, Yan Omuz', equipment: 'bodyweight', isInterSetExtra: true, completedSetsCount: 2, sets: [{ setNo: 1, weight: 0, reps: 30, completed: true, volume: 0 }, { setNo: 2, weight: 0, reps: 30, completed: true, volume: 0 }] };
+          const run = (logs) => {
+            localStorage.setItem('celik_kodu_history_' + uid, JSON.stringify(logs));
+            const r = calculateWeeklyFitnessAndCardioScores(0);
+            return { sets: r.fitness.totalStrengthSetsDone, cardio: JSON.stringify(r.cardio || {}) };
+          };
+          const base = run([mk([])]);
+          const withPlank = run([mk([plank])]);
+          const withJack = run([mk([jack])]);
+          return { base: base.sets, plank: withPlank.sets, jack: withJack.sets, jackInCardio: withJack.cardio.includes('Jumping Jack') && !base.cardio.includes('Jumping Jack') };
+        })()`, ctx);
+        const ok = res.base === 3 && res.plank === 4 && res.jack === 3 && res.jackInCardio;
+        return { ok, actual: `temel=${res.base}, plankİle=${res.plank} (beklenen 4), jackİle=${res.jack} (beklenen 3), jackKardiyoda=${res.jackInCardio}` };
+      }
+    },
+    {
+      id: 'T27',
+      owner: 'workout-guard',
+      title: 'Süreli Set Arası Sayaç & Odak Ekranı Ekleme',
+      expected: 'süreli ara hareket otomatik yapıldı sayılmaz, sayaç açılır, süre bitince yapıldı olur; Odak dinlenme ekranında ekle düğmesi var',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const ex = { id: 'db_lateral_raise', name: 'Lateral Raise', equipment: 'dumbbell', category: 'push', muscle: 'Yan Omuz' };
+          activeWorkoutSession = { title: 'T27', exercises: [ex], scheme: { sets: 3, reps: '10', rest: 45 } };
+          activeWorkoutSetsData = { db_lateral_raise: [1,2,3].map(n => ({ setNo: n, weight: 5, reps: 10, completed: n === 1, completedAt: null })) };
+          activeInterSetContext = { exId: 'db_lateral_raise', setIdx: 0, selectedExercise: { id: 'bw_plank', name: 'Plank', muscle: 'Karın', category: 'core', equipment: 'bodyweight' }, metricType: 'time', value: 30 };
+          saveInterSetExercise(false);
+          const slot = activeWorkoutSetsData.db_lateral_raise[0].interSet;
+          const notAutoDone = slot && slot.completed === false;
+          const overlayOpen = interSetTimerState !== null && interSetTimerState.total === 30;
+          completeInterSetFromTimer();
+          const doneAfter = activeWorkoutSetsData.db_lateral_raise[0].interSet.completed === true;
+          const overlayClosed = interSetTimerState === null;
+          // tekrar bazlı: eskisi gibi hemen yapıldı
+          activeWorkoutSetsData.db_lateral_raise[1].completed = true;
+          activeInterSetContext = { exId: 'db_lateral_raise', setIdx: 1, selectedExercise: { id: 'bw_jumping_jack', name: 'Jumping Jack', muscle: 'Kondisyon', category: 'conditioning', equipment: 'bodyweight' }, metricType: 'reps', value: 20 };
+          saveInterSetExercise(false);
+          const repsDone = activeWorkoutSetsData.db_lateral_raise[1].interSet.completed === true;
+          const noTimerForReps = interSetTimerState === null;
+          // Odak dinlenme ekranı
+          delete activeWorkoutSetsData.db_lateral_raise[1].interSet;
+          const html = renderDaylightRestScreenHtml(ex, 0, activeWorkoutSession);
+          const focusHasAdd = html.includes('Set arası hareket ekle');
+          closeInterSetTimer();
+          return { notAutoDone, overlayOpen, doneAfter, overlayClosed, repsDone, noTimerForReps, focusHasAdd };
+        })()`, ctx);
+        const ok = Object.values(res).every(Boolean);
+        return { ok, actual: JSON.stringify(res) };
+      }
     }
   ];
 

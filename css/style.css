@@ -9324,29 +9324,27 @@
             color: #0369A1;
             transform: scale(1.12);
         }
+        /* Set arası satırı: yapılmadı = sarı, yapıldı = yeşil (net ayrım, açık zeminde koyu metin) */
         .hevy-interset-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 6px;
-            padding: 2px 8px;
-            min-height: 22px;
-            background: linear-gradient(90deg, #15803D 0%, #16A34A 50%, #22C55E 100%);
-            border-top: 1px solid #15803D;
-            border-bottom: 1px solid #15803D;
-            color: #FFFFFF;
+            gap: 8px;
+            padding: 6px 10px;
+            min-height: 38px;
+            background: #FEF3C7;
+            border-top: 1px solid #B45309;
+            border-bottom: 1px solid #B45309;
+            border-left: 4px solid #B45309;
+            color: #0F172A;
             transition: all 0.15s ease;
         }
         .hevy-interset-row.done {
-            background: linear-gradient(90deg, #15803D 0%, #16A34A 50%, #22C55E 100%);
+            background: #DCFCE7;
             border-top-color: #15803D;
             border-bottom-color: #15803D;
-            color: #FFFFFF;
-        }
-        .hevy-interset-row:not(.done) {
-            background: linear-gradient(90deg, #4D7C0F 0%, #65A30D 50%, #84CC16 100%);
-            border-top-color: #4D7C0F;
-            border-bottom-color: #4D7C0F;
+            border-left-color: #15803D;
+            color: #0F172A;
         }
         .hevy-interset-info {
             display: flex;
@@ -9357,38 +9355,36 @@
             cursor: pointer;
         }
         .hevy-interset-tag {
-            font-size: 9.5px;
+            font-size: 10px;
             font-weight: 900;
-            color: #14532D;
-            background: #DCFCE7;
-            border: 1px solid #86EFAC;
+            color: #78350F;
+            background: #FDE68A;
+            border: 1px solid #B45309;
             padding: 1px 6px;
             border-radius: 999px;
             white-space: nowrap;
             line-height: 1.15;
-            letter-spacing: 0.2px;
         }
         .hevy-interset-row.done .hevy-interset-tag {
             color: #14532D;
-            background: #F0FDF4;
-            border-color: #BBF7D0;
+            background: #BBF7D0;
+            border-color: #15803D;
         }
         .hevy-interset-name {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 800;
-            color: #FFFFFF;
+            color: #0F172A;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             line-height: 1.15;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
         .hevy-interset-metric {
-            font-size: 10px;
+            font-size: 10.5px;
             font-weight: 900;
             color: #0F172A;
-            background: #FEF08A;
-            border: 1px solid #FDE047;
+            background: #FFFFFF;
+            border: 1px solid #94A3B8;
             padding: 1px 6px;
             border-radius: 4px;
             white-space: nowrap;
@@ -9397,17 +9393,17 @@
         .hevy-interset-actions {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
             flex-shrink: 0;
         }
         .btn-interset-del {
-            width: 18px;
-            height: 18px;
-            border-radius: 4px;
-            border: 1px solid rgba(255, 255, 255, 0.45);
-            background: rgba(15, 23, 42, 0.25);
-            color: #FFFFFF;
-            font-size: 9.5px;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 1px solid #94A3B8;
+            background: #FFFFFF;
+            color: #B91C1C;
+            font-size: 12px;
             font-weight: 900;
             line-height: 1;
             padding: 0;
@@ -9417,16 +9413,16 @@
             cursor: pointer;
         }
         .btn-interset-check {
-            width: 22px;
-            height: 18px;
-            border-radius: 4px;
-            border: 1px solid #FFFFFF;
-            background: rgba(255, 255, 255, 0.2);
+            min-width: 64px;
+            height: 28px;
+            border-radius: 6px;
+            border: 1px solid #B45309;
+            background: #B45309;
             color: #FFFFFF;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 900;
             line-height: 1;
-            padding: 0;
+            padding: 0 10px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -9434,9 +9430,9 @@
             transition: all 0.15s;
         }
         .btn-interset-check.checked {
-            background: #FFFFFF;
-            border-color: #FFFFFF;
-            color: #15803D;
+            background: #15803D;
+            border-color: #15803D;
+            color: #FFFFFF;
         }
         .interset-chip-grid {
             display: grid;
@@ -13628,3 +13624,54 @@ div[style*="linear-gradient"][style*="F43F5E"] div {
 .wk-dock-start-btn:active {
     transform: scale(0.98);
 }
+
+        /* Odak dinlenme ekranı: set arası hareket ekle */
+        .daylight-interset-add-btn {
+            width: 100%;
+            margin-top: 10px;
+            min-height: 40px;
+            border-radius: 12px;
+            border: 1.5px dashed #FDE68A;
+            background: rgba(253, 230, 138, 0.12);
+            color: #FDE68A;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+        .daylight-interset-wrap {
+            margin-top: 10px;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        /* Süreli set arası hareket sayacı */
+        .interset-timer-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100000;
+            background: rgba(15, 23, 42, 0.78);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            overscroll-behavior: contain;
+        }
+        .interset-timer-card {
+            width: 100%;
+            max-width: 340px;
+            background: #0F172A;
+            color: #FFFFFF;
+            border: 1.5px solid #FDE68A;
+            border-radius: 18px;
+            padding: 18px 16px;
+            text-align: center;
+        }
+        .interset-timer-title { font-size: 16px; font-weight: 900; color: #FFFFFF; }
+        .interset-timer-sub { font-size: 11.5px; font-weight: 700; color: #CBD5E1; margin-top: 2px; }
+        .interset-timer-value { font-size: 64px; font-weight: 900; color: #FDE68A; line-height: 1.1; margin: 10px 0 8px; font-variant-numeric: tabular-nums; }
+        .interset-timer-track { height: 6px; border-radius: 999px; background: #334155; overflow: hidden; margin-bottom: 14px; }
+        .interset-timer-bar { height: 100%; width: 0; background: #22C55E; transition: width 0.4s linear; }
+        .interset-timer-row { display: flex; gap: 8px; margin-top: 8px; }
+        .interset-timer-btn { flex: 1; min-height: 42px; border-radius: 10px; border: 1px solid #475569; font-size: 13px; font-weight: 900; cursor: pointer; }
+        .interset-timer-btn.ghost { background: #1E293B; color: #FFFFFF; }
+        .interset-timer-btn.close { background: #1E293B; color: #FFFFFF; }
+        .interset-timer-btn.done { background: #16A34A; border-color: #16A34A; color: #FFFFFF; }
