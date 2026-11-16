@@ -91,3 +91,4 @@ Bu şef, **Çelik Kodu PWA** ile **Garmin Forerunner 945 / Tredict** arasındaki
 | **`history-guard`** (4. Sekme) | — | Saatten dönen antrenmanı **bizdeki orijinal hareket adlarıyla + sağlık verileriyle** geçmişe yazar. |
 | **`analytics-guard`** (5. Sekme) | — | Orijinal kas gruplarının setlerini + kardiyak/TUT sağlık analizini teslim eder. |
 | **`profile-guard`** (6. Sekme) | Kullanıcının kendi izole mobil saat bağlantı durumunu kontrol eder (kişisel anahtarlar ortak koleksiyonlara sızmaz). | 7/24 bulut bağlantı durumunu ve doğrulanan hareket sayısını bildirir. |
+- **Onay Kapsülü Hijyeni (T25 — 16 Kas 2026 hatası):** Buluttaki saat kopyasında set verisi yoktur ve onay/silme bilgisi cihaza özeldir. Geçmişte kaydı olan veya hareketi olmayan saat seansı onaya düşmez (`isActivityAlreadyInHistory`, grup sayısı > 0).

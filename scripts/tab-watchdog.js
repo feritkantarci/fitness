@@ -1414,6 +1414,34 @@ function runAcademicMathSuite(moduleSources, dbText) {
           actual: `undefined=${res.undefCount}${res.sample ? ' (' + res.sample + ')' : ''}, telefonSeansıKorundu=${res.phoneKept}, toplam=${res.total}`
         };
       }
+    },
+    {
+      id: 'T25',
+      owner: 'garmin-tredict-guard',
+      title: 'Onay Bekleyen Kapsülde Sıfır Boş / Mükerrer Seans',
+      expected: 'set verisi olmayan veya geçmişte kaydı olan saat seansı onaya düşmez; gerçek yeni seans düşer',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const uid = 'usr_exam';
+          localStorage.setItem('celik_garmin_enabled_' + uid, 'true');
+          localStorage.removeItem('celik_garmin_approved_activities_v1_' + uid);
+          localStorage.removeItem('celik_garmin_dismissed_activities_v1_' + uid);
+          const mk = (id, iso, rounds) => ({ id, date: iso, title: 'Güç', sportType: 'training', subSportType: 'strength_training', summary: { duration: 2400, durationTotal: 2500, calories: 200, heartrate: 120, heartrateMax: 150 }, rounds });
+          const act = (n) => ({ setType: 'active', exerciseCategory: 'chest', exerciseName: 'dumbbell_chest_press', repetitions: 10, weight: 20, duration: 40, heartrate: 120, heartrateMax: 130 });
+          const emptyOld = mk('t25_empty', '2026-10-03T09:11:00.000Z', []);
+          const doneInHistory = mk('t25_done', '2026-10-12T15:55:00.000Z', [act(1), act(2), act(3)]);
+          const brandNew = mk('t25_new', '2026-11-16T17:00:00.000Z', [act(1), act(2), act(3)]);
+          localStorage.setItem('celik_garmin_telemetry_v2_' + uid, JSON.stringify([emptyOld, doneInHistory, brandNew]));
+          localStorage.setItem('celik_kodu_history_' + uid, JSON.stringify([{ id: 'garmin_t25_done', garminActivityId: 't25_done', date: '2026-10-12', timestamp: 1791823667191, program: 'Eski', exercises: [{ id: 'db_bench_press', name: 'Bench', sets: [{ weight: 20, reps: 10, completed: true }] }] }]));
+          window.GarminTredictChief.renderHistoryGarminSyncPanel();
+          const html = String(document.getElementById('garminHistorySyncContainer').innerHTML || '');
+          const m = html.match(/(\\d+) Bildirim/);
+          return { count: m ? Number(m[1]) : 0, hasNew: html.includes('t25_new') || html.includes(encodeURIComponent('t25_new')), hasEmpty: html.includes('t25_empty'), hasDone: html.includes('t25_done') };
+        })()`, ctx);
+        const ok = res.count === 1 && res.hasNew && !res.hasEmpty && !res.hasDone;
+        return { ok, actual: `bildirim=${res.count}, yeniVar=${res.hasNew}, boşVar=${res.hasEmpty}, kayıtlıVar=${res.hasDone}` };
+      }
     }
   ];
 

@@ -3067,6 +3067,20 @@
   };
 
   // ─── 4. SEKME (HISTORY-GUARD): YALNIZCA GARMIN AÇIK KULLANICIDA GÖSTERİLİR ───
+  function isActivityAlreadyInHistory(act, uidOverride) {
+    if (!act || !act.id) return false;
+    const uid = uidOverride || getActiveUidSafe();
+    if (!uid) return false;
+    try {
+      const logs = JSON.parse(localStorage.getItem(`celik_kodu_history_${uid}`) || '[]');
+      if (!Array.isArray(logs)) return false;
+      const aid = String(act.id);
+      return logs.some(l => l && (String(l.garminActivityId || '') === aid || String(l.id || '') === 'garmin_' + aid));
+    } catch {
+      return false;
+    }
+  }
+
   function renderHistoryGarminSyncPanel() {
     const existing = document.getElementById('garminHistorySyncContainer');
     const isLocal = typeof window !== 'undefined' && window.location && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
@@ -3100,7 +3114,14 @@
       const isCardio = isStandaloneCardioActivity(act);
       const isApproved = isGarminActivityApproved(act.id);
       // Kardiyo ve henüz onaylanmamış fitness seansları kapsüle girer
-      return !isApproved || isCardio;
+      if (!(!isApproved || isCardio)) return false;
+      if (isCardio) return true;
+      // T25: Geçmişte zaten kaydı olan seans tekrar onaya düşmez (onay bilgisi cihaza özel)
+      if (isActivityAlreadyInHistory(act)) return false;
+      // T25: Bulut kopyasında set verisi yoktur; onaylanacak hareket yoksa kapsül gösterilmez
+      let groupCount = 0;
+      try { groupCount = analyzeActivityGroups(act).length; } catch {}
+      return groupCount > 0;
     });
 
     const cardsHtml = pendingActivities.map(act => {
