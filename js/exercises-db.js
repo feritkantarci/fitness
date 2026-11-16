@@ -3898,10 +3898,10 @@
     ],
     "primaryMuscles": [
       "quads",
-      "glutes",
-      "calves"
+      "glutes"
     ],
     "secondaryMuscles": [
+      "calves",
       "core"
     ],
     "tags": [

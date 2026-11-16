@@ -1,6 +1,6 @@
 # 🛡️ ÇELİK KODU — 7 BAĞIMSIZ ŞEF ODASI, KÖPRÜ GÜMRÜĞÜ & HATA HAFIZASI PANELİ (TAB_HEALTH)
 
-> **Son Otomatik Kontrol:** `2026-11-14 20:09:32` | **Bağımsız Oda Dosyası:** `11/11` | **Toplam Hareket:** `285` | **Kırık Bağlantı:** `0` | **Matematik & Gümrük Sınavı:** `23/23`
+> **Son Otomatik Kontrol:** `2026-11-16 21:50:00` | **Bağımsız Oda Dosyası:** `11/11` | **Toplam Hareket:** `285` | **Kırık Bağlantı:** `0` | **Matematik & Gümrük Sınavı:** `24/24`
 
 ---
 
@@ -14,7 +14,7 @@
 | **4. Geçmiş Şefi** (`history-guard`) | `js/chiefs/history-chief.js` (66 fn) | Tamamlanan seansları gümrükten geçirip saklar, bozuk veriyi engeller, düzenleme/silmeyi Analiz ile eşitler | Bozuk/boş kaydın geçmişe sızması, kardiyo dakikasının tonaj şişirmesi, silinen kaydın Analizden düşmemesi | 🟢 Sorunsuz | 🟢 3/3 Geçti |
 | **5. Analiz Şefi** (`analytics-guard`) | `js/chiefs/analytics-chief.js` (91 fn) | Kas yükünü, set dayanıklılığını, Epley zirve rekorunu, haftalık fitness/kardiyo puanını ve güncel kiloyu hesaplar | Piramit/drop-seti güç düşüşü sanmak, çift Zirve Rekor basmak, 30 günlük eski tartı kiloyu sıfırlamak | 🟢 Sorunsuz | 🟢 9/9 Geçti |
 | **6. Profil Şefi** (`profile-guard`) | `js/chiefs/profile-chief.js` (128 fn) | Verilerini güvenle yedekler, şifre/API anahtarlarını buluttan izole eder ve tema okunabilirliğini korur | Açık zeminde açık renk yazı kalması, dışa aktarımda gizli anahtar/şifre sızması | 🟢 Sorunsuz | 🟢 1/1 Geçti |
-| **7. Garmin & Tredict Şefi** (`garmin-tredict-guard`) | `js/garmin-tredict-bridge.js` (94 fn) | Yeni hareketlerin Garmin karşılığını library-guard kaslarıyla kıyaslar, olmayanları isimsiz+notlu gönderir, dönüşte saatin adını değil bizdeki orijinal adı koruyup sağlık verilerini ilgili şefe iletir | Saatten gelen ham hareket adının olduğu gibi alınması, Garmin’de olmayan harekete zorlama isim verilmesi | 🟢 Sorunsuz | 🟢 4/4 Geçti |
+| **7. Garmin & Tredict Şefi** (`garmin-tredict-guard`) | `js/garmin-tredict-bridge.js` (96 fn) | Yeni hareketlerin Garmin karşılığını library-guard kaslarıyla kıyaslar, olmayanları isimsiz+notlu gönderir, dönüşte saatin adını değil bizdeki orijinal adı koruyup sağlık verilerini ilgili şefe iletir | Saatten gelen ham hareket adının olduğu gibi alınması, Garmin’de olmayan harekete zorlama isim verilmesi | 🟢 Sorunsuz | 🟢 5/5 Geçti |
 
 ---
 
@@ -46,7 +46,7 @@
 
 ---
 
-## 4. Otomatik Bekçi Raporu — B) 7 Şef Matematik, Gümrük & Hata Hafızası Sınavı (23/23)
+## 4. Otomatik Bekçi Raporu — B) 7 Şef Matematik, Gümrük & Hata Hafızası Sınavı (24/24)
 
 | Test | Sorumlu Şef | Senaryo | Beklenen (Olması Gereken) | Gerçekleşen (Sistem Çıktısı) | Sonuç |
 | :--- | :--- | :--- | :--- | :--- | :---: |
@@ -71,5 +71,6 @@
 | `T19` | `library-guard` | Bağlantı Alt Şefleri, Kutu Arıza Duvarı, Döngü Kilidi & Ekranda Bildirim | Gizli hareket taslak+takvimden değişir, hatalı kutu karantinaya alınır, döngü=1, bildirim > 0 | taslakTemiz=true, takvimTemiz=true, karantina=true, komşuSağlam=true, bildirim=2 | ✅ Geçti |
 | `T20` | `garmin-tredict-guard` | Merkez Saat Kasası & Aynı Gün Bağımsız Yürüyüş İzolasyonu | mühürlü saat kasası açık, açık metin sızıntısı 0, Defne Yürüyüşü (cond_walking) aynı gün kuvvet kaydını ezmeden bağımsız açıldı | kasa=true/mühür=true, katalog=true, kuvvet=true, kayıt=2, yürüyüş=cond_walking(2212m,123/152bpm,135kcal) | ✅ Geçti |
 | `T21` | `garmin-tredict-guard` | Çoklu Cihaz İsim Düzenleme Koruması & Saat/Geçmiş Senkronu | eski saat önbelleği kullanıcı düzenlemesini ezemez, ilk bulut açılış kapısı erken push engeller, aynı gün kuvvet+yürüyüş korunur, saat paneli güncel başlığı gösterir | erkenPush=0, eldenÇıkış=true/true, pull=true(2), push=true(2), panel=true/eskiYok=true | ✅ Geçti |
-| `T22` | `garmin-tredict-guard` | Fitness Saat Kapsülü, Eşleme & Onay/Silme İzolasyonu | kardiyo doğrudan puanlanır, fitness seansı onaylanana kadar geçmişe/analize giremez, kapsülde hareket eşleme serbesttir, onaylanınca bağımsız seans olarak eklenir, silinen seans tamamen temizlenir | kardiyoDoğrudan=true, erkenTarihYok=true, butonlar=true, seansSayısı=3, eşleme=true(set0=true, set1=true), silmeTemiz=true | ✅ Geçti |
-| `T23` | `history-guard` | Geçmiş Detay Modalı: Yerinde Set Düzenleme & Kompakt Kas Butonu | yerinde edit modu=true; kaydetme=25kg*10tk; modal açık kaldı; menü düzenle yok | kaslarKompakt=true, editModu=true, modalAçık=true, kilo=25, tonaj=250, menüTemiz=true | ✅ Geçti |
+| `T22` | `garmin-tredict-guard` | Kanonik Takvim Çözümlemesi, Tarih Öneki & Sıfır Mükerrer Saat Gönderimi | haftalık+tarih çakışmasında mükerrer gün = 0, override tekil geçerli, başlıkta kısa ay tarih öneki | toplamGün=3, mükerrersiz=true, overrideTekil=true, başlık="16 Kas • Bugün: Özel İtiş" | ✅ Geçti |
+| `T23` | `garmin-tredict-guard` | Fitness Saat Kapsülü, Eşleme & Onay/Silme İzolasyonu | kardiyo doğrudan puanlanır, fitness seansı onaylanana kadar geçmişe/analize giremez, kapsülde hareket eşleme serbesttir, onaylanınca bağımsız seans olarak eklenir, silinen seans tamamen temizlenir | kardiyoDoğrudan=true, erkenTarihYok=true, butonlar=true, seansSayısı=3, eşleme=true(set0=true, set1=true), silmeTemiz=true | ✅ Geçti |
+| `T24` | `history-guard` | Geçmiş Detay Modalı: Yerinde Set Düzenleme & Kompakt Kas Butonu | yerinde edit modu=true; kaydetme=25kg*10tk; modal açık kaldı; menü düzenle yok | kaslarKompakt=true, editModu=true, modalAçık=true, kilo=25, tonaj=250, menüTemiz=true | ✅ Geçti |

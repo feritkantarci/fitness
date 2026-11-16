@@ -7,23 +7,26 @@ import { fileURLToPath } from 'node:url';
 const TREDICT_MCP_URL = 'https://www.tredict.com/api/mcp/v2';
 const INTERVALS_BASE_URL = 'https://intervals.icu/api/v1';
 
+const userPushLockMap = new Map();
+
 const EXACT_ALLOWED_ORIGINS = new Set([
   'https://fitness.kantarci.io',
   'https://fitness-4f427.web.app',
   'https://fitness-4f427.firebaseapp.com'
 ]);
 
-const LOCALHOST_ORIGIN_RE = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i;
+const LOCALHOST_ORIGIN_RE = /^(https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?|(capacitor|ionic):\/\/localhost)$/i;
+const VERCEL_PROJECT_ORIGIN_RE = /^https:\/\/celik-kodu(-[a-z0-9-]+)?\.vercel\.app$/i;
 
 function isAllowedOrigin(origin) {
   if (!origin || typeof origin !== 'string') return false;
-  return EXACT_ALLOWED_ORIGINS.has(origin) || LOCALHOST_ORIGIN_RE.test(origin);
+  return EXACT_ALLOWED_ORIGINS.has(origin) || LOCALHOST_ORIGIN_RE.test(origin) || VERCEL_PROJECT_ORIGIN_RE.test(origin);
 }
 
 function applyCorsHeaders(res, origin) {
   res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Tredict-Token, X-Intervals-Token, X-Client-Tz-Offset');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Tredict-Token, X-Intervals-Token, X-Client-Tz-Offset, X-Gemini-Key');
   if (isAllowedOrigin(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
@@ -215,10 +218,13 @@ function createTredictClient(token) {
 
 function parsePlannedWorkoutListResponse(pwList) {
   if (Array.isArray(pwList?.plannedWorkouts)) return pwList.plannedWorkouts;
+  if (Array.isArray(pwList)) return pwList;
+  if (Array.isArray(pwList?.trainings)) return pwList.trainings;
+  if (Array.isArray(pwList?.workouts)) return pwList.workouts;
+  if (Array.isArray(pwList?.items)) return pwList.items;
   const rawText = typeof pwList?.rawText === 'string' ? pwList.rawText : '';
-  if (!rawText.includes('----')) return [];
-  const csvPart = rawText.split('----').pop().trim();
-  const lines = csvPart.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const textToParse = rawText.includes('----') ? rawText.split('----').pop().trim() : rawText.trim();
+  const lines = textToParse.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
   if (lines.length < 2) return [];
   const headers = lines[0].split(',').map(h => h.trim());
   const idxMap = {};
@@ -384,6 +390,74 @@ async function confirmAndDeleteCalendarBatch(tredict, deleteIds) {
   return deleted;
 }
 
+const TR_MONTHS_SHORT = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+
+function stripWorkoutTitleDate(title) {
+  if (!title) return '';
+  let t = String(title).trim();
+  const prefixRegex = /^(\d{1,2}\s+(?:Oca|Şub|Mar|Nis|May|Haz|Tem|Ağu|Eyl|Eki|Kas|Ara)|\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?|\d{4}-\d{2}-\d{2})\s*([•\-\–:]\s*)?/i;
+  t = t.replace(prefixRegex, '').trim();
+  t = t.replace(/\s*\(\s*\d{4}-\d{2}-\d{2}\s*\)\s*$/g, '');
+  t = t.replace(/\s*\(\s*\d{1,2}\s+(?:Oca|Şub|Mar|Nis|May|Haz|Tem|Ağu|Eyl|Eki|Kas|Ara)\s*\)\s*$/gi, '');
+  t = t.replace(/\s*\(\s*\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?\s*\)\s*$/g, '');
+  return t.trim();
+}
+
+function formatWorkoutTitleWithDate(rawTitle, dateStr) {
+  let title = String(rawTitle || 'Çelik Kodu Antrenmanı').trim();
+  if (!dateStr) return title;
+
+  let y, m, d;
+  if (typeof dateStr === 'string' && /^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+    const parts = dateStr.slice(0, 10).split('-');
+    y = parseInt(parts[0], 10);
+    m = parseInt(parts[1], 10);
+    d = parseInt(parts[2], 10);
+  } else if (dateStr instanceof Date && !isNaN(dateStr.getTime())) {
+    y = dateStr.getFullYear();
+    m = dateStr.getMonth() + 1;
+    d = dateStr.getDate();
+  } else {
+    return title;
+  }
+
+  const monthName = TR_MONTHS_SHORT[(m || 1) - 1] || '';
+  const datePrefix = `${d} ${monthName}`;
+
+  title = stripWorkoutTitleDate(title);
+  if (!title || title.toLowerCase() === 'çelik kodu') {
+    title = 'Güç Seansı';
+  }
+
+  return `${datePrefix} • ${title}`;
+}
+
+function getCanonicalSportCategory(sportType, subSportType, title = '', notes = '') {
+  const sp = String(sportType || '').toLowerCase();
+  const sub = String(subSportType || '').toLowerCase();
+  const text = `${title} ${notes}`.toLowerCase();
+  if (sub === 'walking' || sp === 'walking' || /yürüyüş|yuruyus|walk/i.test(text)) return 'walking';
+  if (sub === 'indoor_rowing' || sub === 'rowing' || sp === 'rowing' || /kürek|kurek|row/i.test(text)) return 'indoor_rowing';
+  if (sub === 'treadmill' || sp === 'running' || /koşu|kosu|run|treadmill/i.test(text)) return 'treadmill';
+  return 'strength';
+}
+
+function extractCanonicalDate(pwDate, tzOffsetMinutes = -180) {
+  if (!pwDate) return '';
+  const str = String(pwDate).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+  if (str.includes('T')) {
+    try {
+      const dt = new Date(str);
+      if (!isNaN(dt.getTime())) {
+        const localDt = new Date(dt.getTime() - tzOffsetMinutes * 60000);
+        return localDt.toISOString().slice(0, 10);
+      }
+    } catch {}
+  }
+  return str.slice(0, 10);
+}
+
 async function addTredictStrengthTrainingsToLiveCalendar(tredict, planTrainings, tzOffsetMinutes) {
   const validItems = (Array.isArray(planTrainings) ? planTrainings : []).filter(t => t && t.structuredWorkout);
   if (!validItems.length) return [];
@@ -395,9 +469,15 @@ async function addTredictStrengthTrainingsToLiveCalendar(tredict, planTrainings,
       ? item.calendarDate
       : todayStr;
     if (calDate < todayStr) continue;
-    const subType = item.structuredWorkout?.subSportType || item.structuredWorkout?.sportType || 'strength_training';
-    byDateAndType.set(`${calDate}__${subType}`, {
+    const cat = getCanonicalSportCategory(
+      item.structuredWorkout?.sportType,
+      item.structuredWorkout?.subSportType,
+      item.structuredWorkout?.title,
+      item.structuredWorkout?.notes
+    );
+    byDateAndType.set(`${calDate}__${cat}`, {
       calendarDate: calDate,
+      category: cat,
       structuredWorkout: item.structuredWorkout
     });
   }
@@ -411,8 +491,9 @@ async function addTredictStrengthTrainingsToLiveCalendar(tredict, planTrainings,
     const pwList = await tredict.callTool('planned-workout-list', { startDate: startIso, endDate: endD });
     for (const pw of parsePlannedWorkoutListResponse(pwList)) {
       if (pw && pw.id && pw.date && !pw.activityId) {
-        const dKey = String(pw.date).slice(0, 10);
-        const typeKey = `${dKey}__${pw.subSportType || pw.sportType || 'strength_training'}`;
+        const dKey = extractCanonicalDate(pw.date, tzOffsetMinutes);
+        const cat = getCanonicalSportCategory(pw.sportType, pw.subSportType, pw.title, pw.notes);
+        const typeKey = `${dKey}__${cat}`;
         if (!existingByDate[typeKey]) existingByDate[typeKey] = [];
         existingByDate[typeKey].push(pw.id);
       }
@@ -421,6 +502,9 @@ async function addTredictStrengthTrainingsToLiveCalendar(tredict, planTrainings,
 
   const pushSingleTraining = async (calDate, sw, deleteIds = [], retryStripExercise = '') => {
     const workoutClone = JSON.parse(JSON.stringify(sw));
+    if (calDate && workoutClone.title) {
+      workoutClone.title = formatWorkoutTitleWithDate(workoutClone.title, calDate);
+    }
     if (retryStripExercise) {
       (workoutClone.steps || []).forEach(grp => {
         (grp.steps || []).forEach(st => {
@@ -429,13 +513,18 @@ async function addTredictStrengthTrainingsToLiveCalendar(tredict, planTrainings,
       });
     }
 
-    if (deleteIds.length > 2) {
-      try { await confirmAndDeleteCalendarBatch(tredict, deleteIds.slice(2)); } catch {}
+    // Mükerrerliği kesin önlemek için: o gün ve kategoriye ait tüm eski planlı antrenmanları temizle
+    if (deleteIds.length > 0) {
+      try {
+        await confirmAndDeleteCalendarBatch(tredict, deleteIds);
+      } catch (err) {
+        console.warn('Eski planlı antrenman temizleme uyarısı:', err);
+      }
     }
 
     const uiRes = await tredict.callTool('calendar-change-ui', {
       addTrainings: [{ calendarDate: calDate, title: workoutClone.title }],
-      deleteWorkoutIds: deleteIds.slice(0, 2)
+      deleteWorkoutIds: []
     });
     const sc = uiRes?.structuredContent;
     if (!sc || !sc.decisionUrl || !Array.isArray(sc.changes) || !sc.changes.length) {
@@ -452,17 +541,6 @@ async function addTredictStrengthTrainingsToLiveCalendar(tredict, planTrainings,
       }).then(r => r.json());
       if (decRes?.allowedToken) {
         tokens.push({ action: chg.action, allowedToken: decRes.allowedToken, workoutId: chg.workoutId });
-      }
-    }
-
-    for (const tk of tokens) {
-      if (tk.action === 'delete' && tk.workoutId) {
-        try {
-          await tredict.callTool('delete-calendar-training', {
-            workoutId: tk.workoutId,
-            allowedToken: tk.allowedToken
-          });
-        } catch {}
       }
     }
 
@@ -496,7 +574,7 @@ async function addTredictStrengthTrainingsToLiveCalendar(tredict, planTrainings,
 
   const createdWorkouts = [];
   for (const item of normalizedItems) {
-    const typeKey = `${item.calendarDate}__${item.structuredWorkout?.subSportType || item.structuredWorkout?.sportType || 'strength_training'}`;
+    const typeKey = `${item.calendarDate}__${item.category}`;
     const delIds = existingByDate[typeKey] || [];
     const resItem = await pushSingleTraining(item.calendarDate, item.structuredWorkout, delIds);
     createdWorkouts.push(resItem);
@@ -515,10 +593,10 @@ async function deleteTredictStrengthTrainingsByDates(tredict, dates = [], delete
   const targetWorkoutIds = [];
   for (const pw of parsePlannedWorkoutListResponse(pwList)) {
     if (!pw || !pw.id || !pw.date || pw.activityId) continue;
-    const dKey = String(pw.date).slice(0, 10);
+    const dKey = extractCanonicalDate(pw.date, tzOffsetMinutes);
     const matchesDate = deleteAllFuture ? dKey >= todayStr : dateSet.has(dKey);
-    const pwSub = String(pw.subSportType || 'strength_training').toLowerCase();
-    const matchesSubType = subTypeSet.size === 0 || subTypeSet.has(pwSub);
+    const pwCat = getCanonicalSportCategory(pw.sportType, pw.subSportType, pw.title, pw.notes);
+    const matchesSubType = subTypeSet.size === 0 || subTypeSet.has(pwCat) || subTypeSet.has(String(pw.subSportType || '').toLowerCase());
     if (matchesDate && matchesSubType && dKey >= todayStr) {
       targetWorkoutIds.push(pw.id);
     }
@@ -535,6 +613,73 @@ function resolveAction(req, url) {
   return path.toLowerCase();
 }
 
+function parseFirestoreDocValue(val) {
+  if (!val || typeof val !== 'object') return null;
+  if ('nullValue' in val) return null;
+  if ('booleanValue' in val) return Boolean(val.booleanValue);
+  if ('integerValue' in val) return Number(val.integerValue);
+  if ('doubleValue' in val) return Number(val.doubleValue);
+  if ('stringValue' in val) return String(val.stringValue);
+  if ('timestampValue' in val) return String(val.timestampValue);
+  if ('arrayValue' in val) return (val.arrayValue.values || []).map(parseFirestoreDocValue);
+  if ('mapValue' in val) {
+    const out = {};
+    for (const [k, v] of Object.entries(val.mapValue.fields || {})) {
+      out[k] = parseFirestoreDocValue(v);
+    }
+    return out;
+  }
+  return null;
+}
+
+function unsealSystemVaultKeyServer(sealed) {
+  const raw = String(sealed || '').trim();
+  if (!raw) return '';
+  if (!raw.startsWith('v1:')) return raw;
+  const xBytes = Array.from(Buffer.from(raw.slice(3), 'base64'));
+  const kBytes = Array.from(Buffer.from('fitness-4f427:celik-kodu-sys-vault-v1', 'utf8'));
+  const pBytes = xBytes.map((b, idx) => (b ^ kBytes[idx % kBytes.length] ^ ((idx * 31 + 17) & 0xFF)) & 0xFF);
+  return Buffer.from(pBytes).toString('utf8');
+}
+
+async function fetchCentralMasterCatalogFromFirestore() {
+  const res = await fetch('https://firestore.googleapis.com/v1/projects/fitness-4f427/databases/(default)/documents/app_system/master_catalog');
+  if (!res.ok) {
+    const err = new Error(`Firestore master_catalog HTTP ${res.status}`);
+    err.statusCode = res.status;
+    throw err;
+  }
+  const doc = await res.json();
+  const fields = doc?.fields || {};
+  const parsed = {};
+  for (const [k, v] of Object.entries(fields)) {
+    parsed[k] = parseFirestoreDocValue(v);
+  }
+  return {
+    version: Number(parsed.version || 0),
+    updatedAt: Number(parsed.updatedAt || 0),
+    exerciseCount: Number(parsed.exerciseCount || 0),
+    totalCatalogIds: Number(parsed.totalCatalogIds || 0),
+    opengymCount: Number(parsed.opengymCount || 0),
+    guideCount: Number(parsed.guideCount || 0),
+    exercises: parsed.exercisesJson ? JSON.parse(parsed.exercisesJson) : [],
+    opengymCatalog: parsed.opengymCatalogJson ? JSON.parse(parsed.opengymCatalogJson) : {},
+    exerciseGuideMap: parsed.exerciseGuideMapJson ? JSON.parse(parsed.exerciseGuideMapJson) : {}
+  };
+}
+
+async function resolveCentralGeminiApiKey(req) {
+  const headerKey = getHeader(req, 'x-gemini-key');
+  if (headerKey) return headerKey;
+  if (process.env.GEMINI_API_KEY) return String(process.env.GEMINI_API_KEY).trim();
+  const res = await fetch('https://firestore.googleapis.com/v1/projects/fitness-4f427/databases/(default)/documents/app_system/ai_config');
+  if (!res.ok) return '';
+  const doc = await res.json();
+  const sealed = doc?.fields?.sealedAiKey?.stringValue || '';
+  const plain = doc?.fields?.geminiApiKey?.stringValue || '';
+  return (sealed ? unsealSystemVaultKeyServer(sealed) : plain).trim();
+}
+
 export default async function handler(req, res) {
   const origin = getHeader(req, 'origin');
   if (origin && !isAllowedOrigin(origin)) {
@@ -546,9 +691,68 @@ export default async function handler(req, res) {
     return res.end();
   }
 
-  const host = getHeader(req, 'host') || 'garmin.kantarci.io';
+  const host = getHeader(req, 'host') || 'celik-kodu.vercel.app';
   const url = new URL(req.url || '/', `https://${host}`);
   const action = resolveAction(req, url);
+
+  if (req.method === 'GET' && action === 'master-catalog') {
+    try {
+      const catalog = await fetchCentralMasterCatalogFromFirestore();
+      applyCorsHeaders(res, origin);
+      res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=86400');
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      return res.end(JSON.stringify({ ok: true, ...catalog }));
+    } catch (err) {
+      return sendJson(res, Number(err?.statusCode) || 502, { ok: false, error: String(err?.message || err) }, origin);
+    }
+  }
+
+  if (req.method === 'POST' && action === 'ai-generate') {
+    try {
+      const body = await readJsonBody(req);
+      const prompt = String(body?.prompt || '').trim();
+      const systemInstruction = String(body?.systemInstruction || '').trim();
+      const maxTokens = Math.min(8192, Math.max(64, Number(body?.maxTokens || 3500)));
+      if (!prompt) return sendJson(res, 400, { ok: false, error: 'Prompt gerekli.' }, origin);
+      const apiKey = await resolveCentralGeminiApiKey(req);
+      if (!apiKey) return sendJson(res, 503, { ok: false, error: 'Merkez AI anahtarı tanımlı değil.' }, origin);
+
+      const candidateModels = ['gemini-3-flash-preview', 'gemini-3.1-flash-lite-preview', 'gemini-flash-lite-latest', 'gemini-flash-latest', 'gemini-3.8-flash'];
+      let lastErr = 'Gemini yanıt üretemedi.';
+      for (const model of candidateModels) {
+        const gUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+        const gBody = {
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.35, maxOutputTokens: maxTokens }
+        };
+        if (systemInstruction) {
+          gBody.systemInstruction = { parts: [{ text: systemInstruction }] };
+        }
+        const gResp = await fetch(gUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(gBody)
+        });
+        if (!gResp.ok) {
+          const errJson = await gResp.json().catch(() => ({}));
+          lastErr = errJson?.error?.message || `Gemini HTTP ${gResp.status}`;
+          if (gResp.status === 401 || gResp.status === 403) {
+            return sendJson(res, gResp.status, { ok: false, error: lastErr }, origin);
+          }
+          continue;
+        }
+        const gData = await gResp.json();
+        const text = gData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        if (text) {
+          return sendJson(res, 200, { ok: true, text, model, source: 'central_ai_bridge' }, origin);
+        }
+      }
+      return sendJson(res, 502, { ok: false, error: lastErr }, origin);
+    } catch (err) {
+      return sendJson(res, 500, { ok: false, error: String(err?.message || err) }, origin);
+    }
+  }
 
   const tredictToken = getHeader(req, 'x-tredict-token');
   const intervalsToken = getHeader(req, 'x-intervals-token');
@@ -619,6 +823,10 @@ export default async function handler(req, res) {
               sub === 'rowing' ||
               sub === 'walking' ||
               sub === 'hiking' ||
+              sub === 'casual_walking' ||
+              sub === 'speed_walking' ||
+              sp === 'walking' ||
+              sp === 'hiking' ||
               sp === 'running'
             ) {
               candidateIds.push(id);
@@ -626,7 +834,18 @@ export default async function handler(req, res) {
           }
         } else if (Array.isArray(listRes?.activities)) {
           candidateIds = listRes.activities
-            .filter(a => a.subSportType === 'strength_training' || a.subSportType === 'indoor_rowing' || a.subSportType === 'walking' || a.sportType === 'running')
+            .filter(a => (
+              a.subSportType === 'strength_training' ||
+              a.subSportType === 'indoor_rowing' ||
+              a.subSportType === 'rowing' ||
+              a.subSportType === 'walking' ||
+              a.subSportType === 'hiking' ||
+              a.subSportType === 'casual_walking' ||
+              a.subSportType === 'speed_walking' ||
+              a.sportType === 'walking' ||
+              a.sportType === 'hiking' ||
+              a.sportType === 'running'
+            ))
             .map(a => a.id);
         }
 
@@ -666,11 +885,17 @@ export default async function handler(req, res) {
               } catch {}
             }
 
+            const rawSp = String(detObj.sportType || 'misc').toLowerCase();
+            const rawSub = String(detObj.subSportType || '').toLowerCase();
+            const normSub = (rawSp === 'walking' || rawSp === 'hiking' || /walking|hiking/.test(rawSub))
+              ? 'walking'
+              : (detObj.subSportType || 'strength_training');
+
             detailed.push({
               id: canonicalId,
               plannedWorkoutId: resolvedPlannedId,
               sportType: detObj.sportType || 'misc',
-              subSportType: detObj.subSportType || 'strength_training',
+              subSportType: normSub,
               title: detObj.title || 'Garmin Antrenmanı',
               date: detObj.date || detObj.activityStartDate,
               device: detObj.attribution || detObj.device || 'Garmin Watch',
@@ -746,27 +971,53 @@ export default async function handler(req, res) {
     if (req.method === 'POST' && action === 'push-workout') {
       const body = await readJsonBody(req);
       const planPayload = body.planPayload;
-      if (tredict && Array.isArray(planPayload?.planTrainings) && planPayload.planTrainings.length > 0) {
-        const createdWorkouts = await addTredictStrengthTrainingsToLiveCalendar(tredict, planPayload.planTrainings, tzOffsetMinutes);
-        return sendJson(res, 200, {
-          ok: true,
-          provider: 'tredict_live_calendar',
-          directCalendarSync: true,
-          count: createdWorkouts.length,
-          workouts: createdWorkouts
-        }, origin);
+      const userLockKey = tredictToken ? `tr_${tredictToken.slice(-12)}` : (intervalsToken ? `icu_${intervalsToken.slice(-12)}` : 'anon');
+      const prevLock = userPushLockMap.get(userLockKey) || Promise.resolve();
+
+      let pushResult = null;
+      const executePush = async () => {
+        if (tredict && Array.isArray(planPayload?.planTrainings) && planPayload.planTrainings.length > 0) {
+          const createdWorkouts = await addTredictStrengthTrainingsToLiveCalendar(tredict, planPayload.planTrainings, tzOffsetMinutes);
+          return {
+            status: 200,
+            body: {
+              ok: true,
+              provider: 'tredict_live_calendar',
+              directCalendarSync: true,
+              count: createdWorkouts.length,
+              workouts: createdWorkouts
+            }
+          };
+        }
+        if (intervalsToken && Array.isArray(body.intervalsEvents) && body.intervalsEvents.length > 0) {
+          const created = await callIntervalsApi('/athlete/0/events/bulk?upsert=true', 'POST', body.intervalsEvents, intervalsToken);
+          return {
+            status: 200,
+            body: {
+              ok: true,
+              provider: 'intervals.icu',
+              directCalendarSync: true,
+              count: Array.isArray(created) ? created.length : 1,
+              events: created
+            }
+          };
+        }
+        return {
+          status: 400,
+          body: { ok: false, error: 'Geçersiz antrenman planı veya eksik Tredict anahtarı.' }
+        };
+      };
+
+      const lockedPushTask = prevLock.then(executePush, executePush);
+      userPushLockMap.set(userLockKey, lockedPushTask);
+      try {
+        pushResult = await lockedPushTask;
+      } finally {
+        if (userPushLockMap.get(userLockKey) === lockedPushTask) {
+          userPushLockMap.delete(userLockKey);
+        }
       }
-      if (intervalsToken && Array.isArray(body.intervalsEvents) && body.intervalsEvents.length > 0) {
-        const created = await callIntervalsApi('/athlete/0/events/bulk?upsert=true', 'POST', body.intervalsEvents, intervalsToken);
-        return sendJson(res, 200, {
-          ok: true,
-          provider: 'intervals.icu',
-          directCalendarSync: true,
-          count: Array.isArray(created) ? created.length : 1,
-          events: created
-        }, origin);
-      }
-      return sendJson(res, 400, { ok: false, error: 'Geçersiz antrenman planı veya eksik Tredict anahtarı.' }, origin);
+      return sendJson(res, pushResult.status, pushResult.body, origin);
     }
 
     if (req.method === 'POST' && action === 'delete-dates') {

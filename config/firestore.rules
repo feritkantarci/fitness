@@ -47,10 +47,11 @@ rules_version = '2';
 // Fields: Genuine exercise bug report payload (strictly non-relay; exerciseId != 'garmin_outbox_relay').
 //
 // Collection: app_system/{docId}
-// Document ID: 'users' | 'ai_config'
+// Document ID: 'users' | 'ai_config' | 'master_catalog'
 // Fields:
 //   - 'users': { users: list (1..200 sanitized user profiles, zero plaintext passwords/hashes/salts/API keys), updatedAt }
 //   - 'ai_config': Admin-managed AI configuration (write restricted strictly to isAdmin()).
+//   - 'master_catalog': Non-sensitive static exercise catalog metadata/JSON (version, updatedAt, exerciseCount, totalCatalogIds, opengymCount, guideCount, exercisesJson, opengymCatalogJson, exerciseGuideMapJson; read public/athlete, write restricted strictly to isAdmin() via isValidAdminSystemDoc()).
 //
 // ===============================================================
 
@@ -420,7 +421,9 @@ service cloud.firestore {
     function isValidAdminSystemDoc(data) {
       return data is map
         && data.keys().size() <= 30
-        && !('password' in data);
+        && !('password' in data)
+        && !('passwordHash' in data)
+        && !('salt' in data);
     }
 
     // ===============================================================
@@ -507,9 +510,9 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // Sistem Konfigürasyonu ve Kullanıcı Listesi
+    // Sistem Konfigürasyonu, Ana Katalog ve Kullanıcı Listesi
     match /app_system/{docId} {
-      allow read: if docId == 'users' || docId == 'ai_config' || isAdmin();
+      allow read: if docId == 'users' || docId == 'ai_config' || docId == 'master_catalog' || isAdmin();
       allow create: if (docId == 'users' && isValidUsersSystemPayload(request.resource.data))
         || (isAdmin() && isValidAdminSystemDoc(request.resource.data));
       allow update: if (
